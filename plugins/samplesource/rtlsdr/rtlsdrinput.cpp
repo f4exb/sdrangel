@@ -111,7 +111,7 @@ bool RTLSDRInput::startInput(int device)
 	qDebug("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if((res = rtlsdr_set_sample_rate(m_dev, 2000000)) < 0) {
+	if((res = rtlsdr_set_sample_rate(m_dev, 1536000)) < 0) {
 		qCritical("could not set sample rate: %s", strerror(errno));
 		goto failed;
 	}
@@ -182,7 +182,7 @@ const QString& RTLSDRInput::getDeviceDescription() const
 
 int RTLSDRInput::getSampleRate() const
 {
-	return 2000000 / (1 << m_settings.m_decimation);
+	return 1536000 / (1 << m_settings.m_decimation);
 }
 
 quint64 RTLSDRInput::getCenterFrequency() const
@@ -210,7 +210,8 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 		if(m_dev != NULL) {
-			if(rtlsdr_set_center_freq(m_dev, m_generalSettings.m_centerFrequency) != 0)
+			if(rtlsdr_set_center_freq(m_dev, m_generalSettings.m_centerFrequency
+								+ 384000) != 0)
 				qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
 		}
 	}
