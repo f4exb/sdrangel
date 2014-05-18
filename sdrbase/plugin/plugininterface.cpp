@@ -1,0 +1,1 @@
+#include "plugin/plugininterface.h"

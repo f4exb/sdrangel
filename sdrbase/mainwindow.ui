@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1012</width>
+    <height>706</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SDRangelove</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources/res.qrc">
+    <normaloff>:/appicon.png</normaloff>:/appicon.png</iconset>
+  </property>
+  <property name="animated">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1012</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_Exit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Options">
+    <property name="title">
+     <string>&amp;Options</string>
+    </property>
+    <addaction name="actionOsmoSDR_Firmware_Upgrade"/>
+    <addaction name="separator"/>
+    <addaction name="action_Preferences"/>
+   </widget>
+   <widget class="QMenu" name="menu_Acquisition">
+    <property name="title">
+     <string>&amp;Acquisition</string>
+    </property>
+    <addaction name="action_Start"/>
+    <addaction name="action_Stop"/>
+   </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="action_View_Fullscreen"/>
+    <addaction name="separator"/>
+    <addaction name="action_Oscilloscope"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_Open_Website"/>
+    <addaction name="action_Check_for_Update"/>
+    <addaction name="separator"/>
+    <addaction name="action_Loaded_Plugins"/>
+    <addaction name="separator"/>
+    <addaction name="action_About"/>
+   </widget>
+   <widget class="QMenu" name="menu_Channels">
+    <property name="title">
+     <string>&amp;Channels</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_View"/>
+   <addaction name="menu_Acquisition"/>
+   <addaction name="menu_Channels"/>
+   <addaction name="menu_Options"/>
+   <addaction name="menu_Window"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="presetDock">
+   <property name="windowTitle">
+    <string>Presets</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_6">
+     <property name="margin">
+      <number>2</number>
+     </property>
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="presetSave">
+       <property name="toolTip">
+        <string>Save current settings as preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/preset-save.png</normaloff>:/preset-save.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="5">
+      <widget class="QToolButton" name="presetLoad">
+       <property name="toolTip">
+        <string>Load selected preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="3" colspan="2">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="5" column="2">
+      <widget class="QToolButton" name="presetDelete">
+       <property name="toolTip">
+        <string>Delete selected preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/preset-delete.png</normaloff>:/preset-delete.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" rowspan="4" colspan="5">
+      <widget class="QTreeWidget" name="presetTree">
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Description</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="processingDock">
+   <property name="windowTitle">
+    <string>Processing and Display</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="margin">
+      <number>2</number>
+     </property>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <item>
+        <widget class="ButtonSwitch" name="dcOffset">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Compensate DC offset</string>
+         </property>
+         <property name="text">
+          <string>DC Offset Corr</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ButtonSwitch" name="iqImbalance">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Compensate I/Q imbalance</string>
+         </property>
+         <property name="text">
+          <string>I/Q Imbal. Corr</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="GLSpectrumGUI" name="glSpectrumGUI" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="inputDock">
+   <property name="windowTitle">
+    <string>Sample Source</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="margin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QComboBox" name="sampleSource">
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="channelDock">
+   <property name="windowTitle">
+    <string>Channels</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="ChannelWindow" name="channelWindow">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="margin">
+      <number>2</number>
+     </property>
+    </layout>
+   </widget>
+  </widget>
+  <action name="action_Exit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_Start">
+   <property name="text">
+    <string>&amp;Start</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="action_Stop">
+   <property name="text">
+    <string>&amp;Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="action_View_Fullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="actionOsmoSDR_Firmware_Upgrade">
+   <property name="text">
+    <string>OsmoSDR &amp;Firmware Upgrade...</string>
+   </property>
+  </action>
+  <action name="action_Oscilloscope">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Oscilloscope</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
+  </action>
+  <action name="action_About">
+   <property name="text">
+    <string>&amp;About SDRangelove...</string>
+   </property>
+  </action>
+  <action name="action_Open_Website">
+   <property name="text">
+    <string>&amp;Open Website</string>
+   </property>
+  </action>
+  <action name="action_Check_for_Update">
+   <property name="text">
+    <string>Check for &amp;Update...</string>
+   </property>
+  </action>
+  <action name="action_Preferences">
+   <property name="text">
+    <string>&amp;Preferences...</string>
+   </property>
+  </action>
+  <action name="action_Demod_NFM">
+   <property name="text">
+    <string>N&amp;FM</string>
+   </property>
+  </action>
+  <action name="action_Tetra">
+   <property name="text">
+    <string>&amp;Tetra</string>
+   </property>
+  </action>
+  <action name="action_Loaded_Plugins">
+   <property name="text">
+    <string>Loaded &amp;Plugins...</string>
+   </property>
+  </action>
+  <zorder>presetDock</zorder>
+  <zorder>channelDock</zorder>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChannelWindow</class>
+   <extends>QWidget</extends>
+   <header>gui/channelwindow.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>presetTree</tabstop>
+  <tabstop>presetSave</tabstop>
+  <tabstop>presetDelete</tabstop>
+  <tabstop>presetLoad</tabstop>
+  <tabstop>dcOffset</tabstop>
+  <tabstop>iqImbalance</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>action_Exit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>462</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

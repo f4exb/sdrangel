@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>appicon.png</file>
+        <file>histogram.png</file>
+        <file>waterfall.png</file>
+        <file>preset-load.png</file>
+        <file>preset-save.png</file>
+        <file>preset-delete.png</file>
+        <file>horizontal.png</file>
+        <file>vertical.png</file>
+        <file>logo.png</file>
+        <file>maxhold.png</file>
+        <file>grid.png</file>
+        <file>invertspectrum.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TCPSrcGUI</class>
+ <widget class="RollupWidget" name="TCPSrcGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>443</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TCP Sample Source</string>
+  </property>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>5</y>
+     <width>201</width>
+     <height>142</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>2</number>
+    </property>
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Sample Format</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QComboBox" name="sampleFormat">
+      <item>
+       <property name="text">
+        <string>S8 I/Q</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE I/Q</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="rfBandwidth">
+      <property name="text">
+       <string>20000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>RF Bandwidth (Hz)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Samplerate (Hz)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="sampleRate">
+      <property name="text">
+       <string>25000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>TCP Port</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLineEdit" name="tcpPort">
+      <property name="text">
+       <string>9999</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <widget class="QPushButton" name="applyBtn">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Apply</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="spectrumBox" native="true">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>160</y>
+     <width>231</width>
+     <height>156</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Channel Spectrum</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="margin">
+     <number>2</number>
+    </property>
+    <item>
+     <widget class="GLSpectrum" name="glSpectrum" native="true"/>
+    </item>
+    <item>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="connectedClientsBox" native="true">
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>330</y>
+     <width>274</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Connected Clients (0)</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="margin">
+     <number>2</number>
+    </property>
+    <item>
+     <widget class="QTreeWidget" name="connections">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>false</bool>
+      </property>
+      <attribute name="headerVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>IP:Port</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>sampleFormat</tabstop>
+  <tabstop>tcpPort</tabstop>
+  <tabstop>sampleRate</tabstop>
+  <tabstop>rfBandwidth</tabstop>
+  <tabstop>applyBtn</tabstop>
+  <tabstop>connections</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
