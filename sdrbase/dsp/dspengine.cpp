@@ -196,6 +196,7 @@ void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator e
 		it->m_imag = (it->m_imag * m_imbalance) >> 16;
 }
 
+int drop_frame = 0;
 void DSPEngine::work()
 {
 	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
@@ -209,6 +210,12 @@ void DSPEngine::work()
 		SampleVector::iterator part2end;
 
 		size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+
+		if (m_sampleSource->wfdecimation() & drop_frame++) {
+			sampleFifo->readCommit(count);
+			samplesDone += count;
+			continue;
+		}
 
 		// first part of FIFO data
 		if(part1begin != part1end) {
@@ -239,69 +246,6 @@ void DSPEngine::work()
 		sampleFifo->readCommit(count);
 		samplesDone += count;
 	}
-
-#if 0
-	size_t wus;
-	size_t maxWorkUnitSize = 0;
-	size_t samplesDone = 0;
-
-	wus = m_spectrum.workUnitSize();
-	if(wus > maxWorkUnitSize)
-		maxWorkUnitSize = wus;
-	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++) {
-		wus = (*it)->workUnitSize();
-		if(wus > maxWorkUnitSize)
-			maxWorkUnitSize = wus;
-	}
-
-	while((m_sampleFifo.fill() > maxWorkUnitSize) && (m_commandQueue.countPending() == 0) && (samplesDone < m_sampleRate)) {
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
-
-		size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-		// first part of FIFO data
-		if(part1begin != part1end) {
-			// correct stuff
-			if(m_settings.dcOffsetCorrection())
-				dcOffset(part1begin, part1end);
-			if(m_settings.iqImbalanceCorrection())
-				imbalance(part1begin, part1end);
-			// feed data to handlers
-			m_spectrum.feed(part1begin, part1end);
-			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-				(*it)->feed(part1begin, part1end);
-		}
-		// second part of FIFO data (used when block wraps around)
-		if(part2begin != part2end) {
-			// correct stuff
-			if(m_settings.dcOffsetCorrection())
-				dcOffset(part2begin, part2end);
-			if(m_settings.iqImbalanceCorrection())
-				imbalance(part2begin, part2end);
-			// feed data to handlers
-			m_spectrum.feed(part2begin, part2end);
-			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-				(*it)->feed(part1begin, part1end);
-		}
-
-		// adjust FIFO pointers
-		m_sampleFifo.readCommit(count);
-		samplesDone += count;
-	}
-
-	// check if the center frequency has changed (has to be responsive)
-	if(m_settings.isModifiedCenterFreq())
-		m_sampleSource->setCenterFrequency(m_settings.centerFreq());
-	// check if decimation has changed (needed to be done here, because to high a sample rate can clog the switch)
-	if(m_settings.isModifiedDecimation()) {
-		m_sampleSource->setDecimation(m_settings.decimation());
-		m_sampleRate = 4000000 / (1 << m_settings.decimation());
-		qDebug("New rate: %d", m_sampleRate);
-	}
-#endif
 }
 
 DSPEngine::State DSPEngine::gotoIdle()

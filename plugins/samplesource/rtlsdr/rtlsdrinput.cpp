@@ -185,6 +185,12 @@ int RTLSDRInput::getSampleRate() const
 	return 1536000 / (1 << m_settings.m_decimation);
 }
 
+int RTLSDRInput::wfdecimation() const
+{
+	// decimate waterfall more when downsampling less
+	return (1 << (4 - m_settings.m_decimation) ) -1;
+}
+
 quint64 RTLSDRInput::getCenterFrequency() const
 {
 	return m_generalSettings.m_centerFrequency;
