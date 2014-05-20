@@ -36,9 +36,9 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 
 	m_nco.setFreq(m_frequency, m_sampleRate);
 	m_interpolator.create(16, m_sampleRate, 12500);
-	m_sampleDistanceRemain = (Real)m_sampleRate / 44100.0;
+	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
 
-	m_lowpass.create(21, 44100, 3000);
+	m_lowpass.create(21, 48000, 3000);
 
 	m_audioBuffer.resize(256);
 	m_audioBufferFill = 0;
@@ -96,7 +96,7 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				}
 			}
 
-			m_sampleDistanceRemain += (Real)m_sampleRate / 44100.0;
+			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		}
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
@@ -125,7 +125,7 @@ bool NFMDemod::handleMessage(Message* cmd)
 		m_sampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_rfBandwidth / 2.1);
-		m_sampleDistanceRemain = m_sampleRate / 44100.0;
+		m_sampleDistanceRemain = m_sampleRate / 48000.0;
 		m_squelchState = 0;
 		cmd->completed();
 		return true;
@@ -133,7 +133,7 @@ bool NFMDemod::handleMessage(Message* cmd)
 		MsgConfigureNFMDemod* cfg = (MsgConfigureNFMDemod*)cmd;
 		m_rfBandwidth = cfg->getRFBandwidth();
 		m_interpolator.create(16, m_sampleRate, m_rfBandwidth / 2.1);
-		m_lowpass.create(21, 44100, cfg->getAFBandwidth());
+		m_lowpass.create(21, 48000, cfg->getAFBandwidth());
 		m_squelchLevel = pow(10.0, cfg->getSquelch() / 20.0);
 		m_squelchLevel *= m_squelchLevel;
 		m_volume = cfg->getVolume();

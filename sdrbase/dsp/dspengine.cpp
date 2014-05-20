@@ -301,7 +301,7 @@ DSPEngine::State DSPEngine::gotoRunning()
 		return gotoError("Could not start sample source");
 	m_deviceDescription = m_sampleSource->getDeviceDescription();
 
-	m_audioOutput.start(0, 44100);
+	m_audioOutput.start(0, 48000);
 	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 		(*it)->start();
 	m_sampleRate = 0; // make sure, report is sent
