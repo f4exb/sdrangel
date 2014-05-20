@@ -49,7 +49,7 @@ bool AudioOutput::start(int device, int rate)
 	QAudioFormat format;
 	QAudioDeviceInfo devInfo(QAudioDeviceInfo::defaultOutputDevice());
 
-	format.setSampleRate(41000);
+	format.setSampleRate(48000);
 	format.setChannelCount(2);
 	format.setSampleSize(16);
 	format.setCodec("audio/pcm");
@@ -57,12 +57,12 @@ bool AudioOutput::start(int device, int rate)
 	format.setSampleType(QAudioFormat::SignedInt);
 
 	if(!devInfo.isFormatSupported(format)) {
-		qDebug("default format not supported - try to use nearest");
+		qWarning("48kHz S16_LE audio format not supported");
 		format = devInfo.nearestFormat(format);
 	}
 
 	if(format.sampleSize() != 16) {
-		qDebug("audio device doesn't support 16 bit samples (%s)", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+		qWarning("Audio device ( %s ) failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
 		return false;
 	}
 

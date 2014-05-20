@@ -23,6 +23,7 @@ find_package(FFTW3F)
 ##############################################################################
 
 #include(${QT_USE_FILE})
+set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
 add_definitions(${QT_DEFINITIONS})
 
 if(MSVC)
