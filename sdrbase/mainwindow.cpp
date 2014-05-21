@@ -306,12 +306,12 @@ void MainWindow::handleMessages()
 {
 	Message* message;
 	while((message = m_messageQueue->accept()) != NULL) {
-		//qDebug("Message: %s", message->getIdentifier());
+		qDebug("Message: %s", message->getIdentifier());
 		if(DSPEngineReport::match(message)) {
 			DSPEngineReport* rep = (DSPEngineReport*)message;
 			m_sampleRate = rep->getSampleRate();
 			m_centerFrequency = rep->getCenterFrequency();
-			//qDebug("SampleRate:%d, CenterFrequency:%llu", rep->getSampleRate(), rep->getCenterFrequency());
+			qDebug("SampleRate:%d, CenterFrequency:%llu", rep->getSampleRate(), rep->getCenterFrequency());
 			updateCenterFreqDisplay();
 			updateSampleRate();
 			message->completed();

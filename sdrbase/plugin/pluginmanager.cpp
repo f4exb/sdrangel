@@ -260,7 +260,7 @@ void PluginManager::loadPlugins(const QDir& dir)
 		QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
 		PluginInterface* plugin = qobject_cast<PluginInterface*>(loader->instance());
 		if(loader->isLoaded())
-			qDebug("loaded plugin %s", qPrintable(fileName));
+			qWarning("loaded plugin %s", qPrintable(fileName));
 		if(plugin != NULL) {
 			m_plugins.append(Plugin(fileName, loader, plugin));
 		} else {

@@ -108,7 +108,7 @@ bool RTLSDRInput::startInput(int device)
 		qCritical("error accessing USB device");
 		goto failed;
 	}
-	qDebug("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
+	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
 	if((res = rtlsdr_set_sample_rate(m_dev, 1536000)) < 0) {
