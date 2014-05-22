@@ -65,7 +65,7 @@ void RTLSDRThread::run()
 	m_startWaiter.wakeAll();
 
 	while(m_running) {
-		if((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 16, 2 * BLOCKSIZE)) < 0) {
+		if((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 32, BLOCKSIZE)) < 0) {
 			qCritical("RTLSDRThread: async error: %s", strerror(errno));
 			break;
 		}
