@@ -91,7 +91,7 @@ void SSBDemodGUI::viewChanged()
 void SSBDemodGUI::on_BW_valueChanged(int value)
 {
 	ui->BWText->setText(QString("%1 kHz").arg(value));
-	m_channelMarker->setBandwidth(value * 1000);
+	m_channelMarker->setBandwidth(value * 1000 * 2);
 	applySettings();
 }
 
@@ -138,14 +138,14 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
 	ui->glSpectrum->setCenterFrequency(0);
-	ui->glSpectrum->setSampleRate(48000);
+	ui->glSpectrum->setSampleRate(12000);
 	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
+	ui->glSpectrum->setDisplayMaxHold(false);
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::red);
-	m_channelMarker->setBandwidth(4000);
+	m_channelMarker->setBandwidth(8000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));

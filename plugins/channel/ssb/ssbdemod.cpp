@@ -28,17 +28,17 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
-	m_Bandwidth = 10000;
+	m_Bandwidth = 5000;
 	m_volume = 2.0;
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, 10000);
+	m_interpolator.create(16, m_sampleRate, 5000);
 	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
 
-	m_lowpass.create(21, 48000, 10000);
+	m_lowpass.create(21, 48000, 5000);
 
-	m_audioBuffer.resize(256);
+	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
 }
 
@@ -52,6 +52,7 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 	cmd->submit(messageQueue, this);
 }
 
+int undersamplecount = 0;
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
 {
 	Complex ci;
@@ -65,12 +66,13 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		// could squelch audio if RTL_SDR samplerate is not being fully decimated.
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
 			Real demod = ci.imag() + ci.real();
-			demod = m_lowpass.filter(demod * 0.5);
-			m_sampleBuffer.push_back(Sample(demod * 32768.0, demod * 32768.0));
+			demod = 32768.0 * m_lowpass.filter(demod * 0.7);
 
-			demod *= m_volume;
-			qint16 sample = demod * 16384;
+			// Downsample by 4x for audio display
+			if (!(undersamplecount++ & 3))
+				m_sampleBuffer.push_back(Sample(demod, 0.0));
 
+			qint16 sample = (qint16)(demod * m_volume);
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
 			++m_audioBufferFill;
