@@ -74,66 +74,6 @@ void RTLSDRThread::run()
 	m_running = false;
 }
 
-#if 0
-
-void RTLSDRThread::decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	for(int pos = 0; pos < len; pos += 2) {
-		Sample s((((qint8)buf[pos]) - 128) << 8, (((qint8)buf[pos + 1]) - 128) << 8);
-		if(m_decimator2.workDecimateCenter(&s)) {
-			**it = s;
-			++(*it);
-		}
-	}
-}
-
-void RTLSDRThread::decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	for(int pos = 0; pos < len; pos += 2) {
-		Sample s((((qint8)buf[pos]) - 128) << 8, (((qint8)buf[pos + 1]) - 128) << 8);
-		if(m_decimator2.workDecimateCenter(&s)) {
-			if(m_decimator4.workDecimateCenter(&s)) {
-				**it = s;
-				++(*it);
-			}
-		}
-	}
-}
-
-void RTLSDRThread::decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	for(int pos = 0; pos < len; pos += 2) {
-		Sample s((((qint8)buf[pos]) - 128) << 8, (((qint8)buf[pos + 1]) - 128) << 8);
-		if(m_decimator2.workDecimateCenter(&s)) {
-			if(m_decimator4.workDecimateCenter(&s)) {
-				if(m_decimator8.workDecimateCenter(&s)) {
-					**it = s;
-					++(*it);
-				}
-			}
-		}
-	}
-}
-
-void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	for(int pos = 0; pos < len; pos += 2) {
-		Sample s((((qint8)buf[pos]) - 128) << 8, (((qint8)buf[pos + 1]) - 128) << 8);
-		if(m_decimator2.workDecimateCenter(&s)) {
-			if(m_decimator4.workDecimateCenter(&s)) {
-				if(m_decimator8.workDecimateCenter(&s)) {
-					if(m_decimator16.workDecimateCenter(&s)) {
-						**it = s;
-						++(*it);
-					}
-				}
-			}
-		}
-	}
-}
-
-#else
-
 void RTLSDRThread::decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag;
@@ -194,12 +134,15 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 		(*it)++;
 	}
 }
-#endif
 
+int localdecimation = 0;
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
+
+	if (++localdecimation < (1 << (4 - m_decimation))) return;
+	localdecimation = 0;
 
 	switch(m_decimation) {
 		case 0: // 1:1 = no decimation
@@ -210,7 +153,7 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 				xreal = phase * (buf[pos+0] - 127);
 				yimag = phase * (buf[pos+1] - 127);
 				*it++ = Sample( xreal<<7,yimag<<7);
-				xreal = phase * (128 - buf[pos+3]); 
+				xreal = phase * (127 - buf[pos+3]);
 				yimag = phase * (buf[pos+2] - 127);
 				*it++ = Sample( xreal<<7,yimag<<7);
 			}

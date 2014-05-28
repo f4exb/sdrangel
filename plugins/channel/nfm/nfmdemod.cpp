@@ -56,10 +56,12 @@ void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 	cmd->submit(messageQueue, this);
 }
 
+int framedrop = 0;
 void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
 {
 	Complex ci;
 	bool consumed;
+	qint16 sample;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -67,22 +69,25 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 		consumed = false;
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
-			m_sampleBuffer.push_back(Sample(ci.real() * 32768.0, ci.imag() * 32768.0));
+			if (++framedrop & 1) {
+				m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
+				if(m_movingAverage.average() >= m_squelchLevel)
+					m_squelchState = m_sampleRate / 50;
+			}
+			Complex d = ci * conj(m_lastSample);
+			m_lastSample = ci;
+			Real demod = atan2(d.imag(), d.real()) / M_PI;
+			demod = m_volume * m_lowpass.filter(demod);
+			sample = demod * 32767;
 
-			m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
+			if (!(framedrop & 3))
+				m_sampleBuffer.push_back(Sample(sample, sample));
 
-			if(m_movingAverage.average() >= m_squelchLevel)
-				m_squelchState = m_sampleRate / 50;
-
-			if(m_squelchState > 0) {
+			if(m_squelchState > 0)
 				m_squelchState--;
-				Complex d = ci * conj(m_lastSample);
-				m_lastSample = ci;
-				Real demod = atan2(d.imag(), d.real()) / M_PI;
-				demod = m_lowpass.filter(demod);
-				demod *= m_volume;
-				qint16 sample = demod * 32767;
-
+			else
+				sample = 0;
+			{
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
 				++m_audioBufferFill;

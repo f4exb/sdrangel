@@ -48,11 +48,6 @@ private:
 
 	int m_decimation;
 
-	IntHalfbandFilter m_decimator2;
-	IntHalfbandFilter m_decimator4;
-	IntHalfbandFilter m_decimator8;
-	IntHalfbandFilter m_decimator16;
-
 	void run();
 
 	void decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len);

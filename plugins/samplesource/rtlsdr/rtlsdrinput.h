@@ -87,7 +87,6 @@ public:
 
 	const QString& getDeviceDescription() const;
 	int getSampleRate() const;
-	int wfdecimation() const;
 	quint64 getCenterFrequency() const;
 
 	bool handleMessage(Message* message);

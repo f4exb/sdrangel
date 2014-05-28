@@ -196,7 +196,6 @@ void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator e
 		it->m_imag = (it->m_imag * m_imbalance) >> 16;
 }
 
-int drop_frame = 0;
 void DSPEngine::work()
 {
 	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
@@ -210,12 +209,6 @@ void DSPEngine::work()
 		SampleVector::iterator part2end;
 
 		size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-		if (m_sampleSource->wfdecimation() & drop_frame++) {
-			sampleFifo->readCommit(count);
-			samplesDone += count;
-			continue;
-		}
 
 		// first part of FIFO data
 		if(part1begin != part1end) {

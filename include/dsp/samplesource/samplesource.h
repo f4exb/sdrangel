@@ -45,7 +45,6 @@ public:
 
 	virtual const QString& getDeviceDescription() const = 0;
 	virtual int getSampleRate() const = 0;
-	virtual int wfdecimation() const = 0;
 	virtual quint64 getCenterFrequency() const = 0;
 
 	virtual bool handleMessage(Message* message) = 0;
