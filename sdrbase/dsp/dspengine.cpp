@@ -220,7 +220,6 @@ void DSPEngine::work()
 			// feed data to handlers
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 				(*it)->feed(part1begin, part1end, firstOfBurst);
-			firstOfBurst = false;
 		}
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
@@ -232,8 +231,8 @@ void DSPEngine::work()
 			// feed data to handlers
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 				(*it)->feed(part2begin, part2end, firstOfBurst);
-			firstOfBurst = false;
 		}
+		firstOfBurst = false;
 
 		// adjust FIFO pointers
 		sampleFifo->readCommit(count);
