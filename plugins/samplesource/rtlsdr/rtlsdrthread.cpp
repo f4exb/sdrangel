@@ -80,12 +80,12 @@ void RTLSDRThread::decimate2(SampleVector::iterator* it, const quint8* buf, qint
 	for (int pos = 0; pos < len + 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3];
 		yimag = buf[pos+1] + buf[pos+2] - 255;
-		Sample s( xreal << 6, yimag << 6 );
+		Sample s( xreal << 3, yimag << 3 );
 		**it = s;
 		(*it)++;
 		xreal = buf[pos+7] - buf[pos+4];
 		yimag = 255 - buf[pos+5] - buf[pos+6];
-		Sample t( xreal << 6, yimag << 6 );
+		Sample t( xreal << 3, yimag << 3 );
 		**it = t;
 		(*it)++;
 	}
@@ -96,7 +96,7 @@ void RTLSDRThread::decimate4(SampleVector::iterator* it, const quint8* buf, qint
 		for (int pos = 0; pos < len + 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s( xreal << 5, yimag << 5 );
+		Sample s( xreal << 3, yimag << 3 );
 		**it = s;
 		(*it)++;
 	}
@@ -112,7 +112,7 @@ void RTLSDRThread::decimate8(SampleVector::iterator* it, const quint8* buf, qint
 		xreal += buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag += buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
 
-		Sample s( xreal << 4, yimag << 4 );
+		Sample s( xreal << 3, yimag << 3 );
 		**it = s;
 		(*it)++;
 	}
@@ -140,8 +140,9 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
+	int decimationFactor[] = {16, 8, 4, 2, 1, 0};
 
-	if (++localdecimation < (1 << (4 - m_decimation))) return;
+	if (++localdecimation < decimationFactor[m_decimation]) return;
 	localdecimation = 0;
 
 	switch(m_decimation) {
@@ -152,10 +153,10 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 				phase *= -1;
 				xreal = phase * (buf[pos+0] - 127);
 				yimag = phase * (buf[pos+1] - 127);
-				*it++ = Sample( xreal<<7,yimag<<7);
+				*it++ = Sample( xreal<<3,yimag<<3);
 				xreal = phase * (127 - buf[pos+3]);
 				yimag = phase * (buf[pos+2] - 127);
-				*it++ = Sample( xreal<<7,yimag<<7);
+				*it++ = Sample( xreal<<3,yimag<<3);
 			}
 			break;
 		case 1: // 1:2

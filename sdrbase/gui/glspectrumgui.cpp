@@ -12,7 +12,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_spectrumVis(NULL),
 	m_glSpectrum(NULL),
 	m_fftSize(1024),
-	m_fftOverlap(10),
+	m_fftOverlap(0),
 	m_fftWindow(FFTWindow::Hamming),
 	m_refLevel(0),
 	m_powerRange(100),
@@ -47,7 +47,7 @@ void GLSpectrumGUI::setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrum
 void GLSpectrumGUI::resetToDefaults()
 {
 	m_fftSize = 1024;
-	m_fftOverlap = 10;
+	m_fftOverlap = 0;
 	m_fftWindow = FFTWindow::Hamming;
 	m_refLevel = 0;
 	m_powerRange = 100;
@@ -90,7 +90,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_fftSize, 1024);
-		d.readS32(2, &m_fftOverlap, 10);
+		d.readS32(2, &m_fftOverlap, 0);
 		d.readS32(3, &m_fftWindow, FFTWindow::Hamming);
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);

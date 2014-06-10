@@ -20,7 +20,7 @@ SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
 	m_fftBufferFill(0),
 	m_glSpectrum(glSpectrum)
 {
-	handleConfigure(1024, 10, FFTWindow::BlackmanHarris);
+	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
 }
 
 SpectrumVis::~SpectrumVis()

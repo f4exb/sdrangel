@@ -270,9 +270,7 @@ void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 		quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
 
 		for(int i = 0; i < m_fftSize; i++) {
-			Real vr = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-			int v = (int)vr;
-
+			int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
 			if(v > 239)
 				v = 239;
 			else if(v < 0)
