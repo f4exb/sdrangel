@@ -53,7 +53,7 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 }
 
 int undersamplecount = 0;
-void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
 	bool consumed;
@@ -88,7 +88,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	m_audioBufferFill = 0;
 
 	if(m_sampleSink != NULL)
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), firstOfBurst);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
 }
 

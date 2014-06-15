@@ -43,7 +43,7 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 	cmd->submit(messageQueue, this);
 }
 
-void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
 	bool consumed;
@@ -60,7 +60,7 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	}
 
 	if((m_spectrum != NULL) && (m_spectrumEnabled))
-		m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), firstOfBurst);
+		m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
 
 	for(int i = 0; i < m_s16leSockets.count(); i++)
 		m_s16leSockets[i].socket->write((const char*)&m_sampleBuffer[0], m_sampleBuffer.size() * 4);

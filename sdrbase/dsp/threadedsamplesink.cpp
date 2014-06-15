@@ -27,9 +27,9 @@ ThreadedSampleSink::~ThreadedSampleSink()
 	delete m_thread;
 }
 
-void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	Q_UNUSED(firstOfBurst);
+	Q_UNUSED(positiveOnly);
 	m_sampleFifo.write(begin, end);
 }
 
@@ -54,7 +54,7 @@ bool ThreadedSampleSink::handleMessage(Message* cmd)
 
 void ThreadedSampleSink::handleData()
 {
-	bool firstOfBurst = true;
+	bool positiveOnly = false;
 
 	while((m_sampleFifo.fill() > 0) && (m_messageQueue.countPending() == 0)) {
 		SampleVector::iterator part1begin;
@@ -68,15 +68,14 @@ void ThreadedSampleSink::handleData()
 		if(part1begin != part1end) {
 			// handle data
 			if(m_sampleSink != NULL)
-				m_sampleSink->feed(part1begin, part1end, firstOfBurst);
+				m_sampleSink->feed(part1begin, part1end, positiveOnly);
 		}
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
 			// handle data
 			if(m_sampleSink != NULL)
-				m_sampleSink->feed(part2begin, part2end, firstOfBurst);
+				m_sampleSink->feed(part2begin, part2end, positiveOnly);
 		}
-		firstOfBurst = false;
 
 		// adjust FIFO pointers
 		m_sampleFifo.readCommit(count);

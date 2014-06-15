@@ -26,7 +26,7 @@ public:
 	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst);
+	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);

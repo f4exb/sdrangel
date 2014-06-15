@@ -21,7 +21,7 @@ void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, 
 	cmd->submit(msgQueue, this);
 }
 
-void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	while(begin < end) {
 		if(m_triggerChannel == TriggerChannelI) {

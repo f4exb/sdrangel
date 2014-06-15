@@ -57,7 +57,7 @@ void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 }
 
 int framedrop = 0;
-void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
 	bool consumed;
@@ -109,7 +109,7 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	m_audioBufferFill = 0;
 
 	if(m_sampleSink != NULL)
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), firstOfBurst);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
 }
 

@@ -34,7 +34,7 @@ void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPerc
 	cmd->submit(msgQueue, this);
 }
 
-void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	// if no visualisation is set, send the samples to /dev/null
 	if(m_glSpectrum == NULL)
@@ -60,7 +60,15 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 			Real ofs = 20.0f * log10f(1.0f / m_fftSize);
 			Real mult = (10.0f / log2f(10.0f));
 			const Complex* fftOut = m_fft->out();
-			for(size_t i = 0; i < m_fftSize; i++) {
+			size_t spectrumStart = 0;
+
+			if ( positiveOnly ) {
+				Real logZero = ofs + mult * log2f( 0 );
+				for(size_t i = 0; i < m_fftSize / 2; i++)
+					m_logPowerSpectrum[i] = logZero;
+				spectrumStart = m_fftSize / 2;
+			}
+			for(size_t i = spectrumStart; i < m_fftSize; i++) {
 				Complex c = fftOut[((i + (m_fftSize >> 1)) & (m_fftSize - 1))];
 				Real v = c.real() * c.real() + c.imag() * c.imag();
 				v = mult * log2f(v) + ofs;

@@ -19,7 +19,7 @@ public:
 
 	void configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevelHigh, Real triggerLevelLow);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst);
+	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
 	bool handleMessage(Message* message);

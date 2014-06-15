@@ -44,7 +44,7 @@ void TetraDemod::configure(MessageQueue* messageQueue)
 	cmd->submit(messageQueue, this);
 }
 
-void TetraDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void TetraDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	size_t count = end - begin;
 
@@ -68,7 +68,7 @@ void TetraDemod::feed(SampleVector::const_iterator begin, SampleVector::const_it
 	}
 
 	if(m_sampleSink != NULL)
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), firstOfBurst);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
 	m_sampleBuffer.clear();
 }
 

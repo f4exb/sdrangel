@@ -200,7 +200,7 @@ void DSPEngine::work()
 {
 	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
 	size_t samplesDone = 0;
-	bool firstOfBurst = true;
+	bool positiveOnly = false;
 
 	while((sampleFifo->fill() > 0) && (m_messageQueue.countPending() == 0) && (samplesDone < m_sampleRate)) {
 		SampleVector::iterator part1begin;
@@ -219,7 +219,7 @@ void DSPEngine::work()
 				imbalance(part1begin, part1end);
 			// feed data to handlers
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-				(*it)->feed(part1begin, part1end, firstOfBurst);
+				(*it)->feed(part1begin, part1end, positiveOnly);
 		}
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
@@ -230,9 +230,8 @@ void DSPEngine::work()
 				imbalance(part2begin, part2end);
 			// feed data to handlers
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-				(*it)->feed(part2begin, part2end, firstOfBurst);
+				(*it)->feed(part2begin, part2end, positiveOnly);
 		}
-		firstOfBurst = false;
 
 		// adjust FIFO pointers
 		sampleFifo->readCommit(count);
