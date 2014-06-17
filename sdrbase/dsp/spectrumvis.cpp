@@ -60,19 +60,30 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 			Real ofs = 20.0f * log10f(1.0f / m_fftSize);
 			Real mult = (10.0f / log2f(10.0f));
 			const Complex* fftOut = m_fft->out();
-			size_t spectrumStart = 0;
+			Complex c;
+			Real v;
+			size_t halfSize = m_fftSize / 2;
 
 			if ( positiveOnly ) {
-				Real logZero = ofs + mult * log2f( 0 );
-				for(size_t i = 0; i < m_fftSize / 2; i++)
-					m_logPowerSpectrum[i] = logZero;
-				spectrumStart = m_fftSize / 2;
-			}
-			for(size_t i = spectrumStart; i < m_fftSize; i++) {
-				Complex c = fftOut[((i + (m_fftSize >> 1)) & (m_fftSize - 1))];
-				Real v = c.real() * c.real() + c.imag() * c.imag();
-				v = mult * log2f(v) + ofs;
-				m_logPowerSpectrum[i] = v;
+				for(size_t i = 0; i < halfSize; i++) {
+					c = fftOut[i];
+					v = c.real() * c.real() + c.imag() * c.imag();
+					v = mult * log2f(v) + ofs;
+					m_logPowerSpectrum[i * 2] = v;
+					m_logPowerSpectrum[i * 2 + 1] = v;
+				}
+			} else {
+				for(size_t i = 0; i < halfSize; i++) {
+					c = fftOut[i + halfSize];
+					v = c.real() * c.real() + c.imag() * c.imag();
+					v = mult * log2f(v) + ofs;
+					m_logPowerSpectrum[i] = v;
+
+					c = fftOut[i];
+					v = c.real() * c.real() + c.imag() * c.imag();
+					v = mult * log2f(v) + ofs;
+					m_logPowerSpectrum[i + halfSize] = v;
+				}
 			}
 
 			// send new data to visualisation

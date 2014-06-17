@@ -80,7 +80,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			demod = m_volume * m_lowpass.filter(demod);
 			sample = demod * 32767;
 
-			if (!(framedrop & 3))
+			// Display audio spectrum to 12kHz
+			if (!(framedrop & 1))
 				m_sampleBuffer.push_back(Sample(sample, sample));
 
 			if(m_squelchState > 0)
