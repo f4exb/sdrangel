@@ -49,6 +49,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/dspcommands.cpp
 	sdrbase/dsp/dspengine.cpp
 	sdrbase/dsp/fftengine.cpp
+	sdrbase/dsp/fftfilt.cxx
 	sdrbase/dsp/fftwindow.cpp
 	sdrbase/dsp/interpolator.cpp
 	sdrbase/dsp/inthalfbandfilter.cpp
@@ -107,17 +108,21 @@ set(sdrbase_HEADERS
 
 	include-gpl/dsp/channelizer.h
 	include/dsp/channelmarker.h
+	include-gpl/dsp/complex.h
 	include-gpl/dsp/dspcommands.h
 	include-gpl/dsp/dspengine.h
 	include/dsp/dsptypes.h
 	include-gpl/dsp/fftengine.h
+	include-gpl/dsp/fftfilt.h
 	include-gpl/dsp/fftwengine.h
 	include-gpl/dsp/fftwindow.h
+	include-gpl/dsp/gfft.h
 	include-gpl/dsp/interpolator.h
 	include-gpl/dsp/inthalfbandfilter.h
 	include/dsp/kissfft.h
 	include-gpl/dsp/kissengine.h
 	include-gpl/dsp/lowpass.h
+	include-gpl/dsp/misc.h
 	include-gpl/dsp/movingaverage.h
 	include-gpl/dsp/nco.h
 	sdrbase/dsp/pidcontroller.h
