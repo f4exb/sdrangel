@@ -47,6 +47,7 @@ private:
 	SampleFifo* m_sampleFifo;
 
 	int m_decimation;
+	int m_localdecimation;
 
 	void run();
 

@@ -72,6 +72,7 @@ private:
 
 	Real m_Bandwidth;
 	Real m_volume;
+	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
 

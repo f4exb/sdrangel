@@ -30,6 +30,7 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* p
 	m_sampleFifo(sampleFifo),
 	m_decimation(2)
 {
+	m_localdecimation = 0;
 }
 
 RTLSDRThread::~RTLSDRThread()
@@ -135,15 +136,14 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 	}
 }
 
-int localdecimation = 0;
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
 	int decimationFactor[] = {16, 8, 4, 2, 1, 0};
 
-	if (++localdecimation < decimationFactor[m_decimation]) return;
-	localdecimation = 0;
+	if (++m_localdecimation < decimationFactor[m_decimation]) return;
+	m_localdecimation = 0;
 
 	switch(m_decimation) {
 		case 0: // 1:1 = no decimation

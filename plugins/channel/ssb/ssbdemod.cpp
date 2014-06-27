@@ -40,6 +40,7 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 
 	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
+	m_undersampleCount = 0;
 }
 
 SSBDemod::~SSBDemod()
@@ -52,7 +53,6 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 	cmd->submit(messageQueue, this);
 }
 
-int undersamplecount = 0;
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
@@ -69,7 +69,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			demod = 32768.0 * m_lowpass.filter(demod * 0.7);
 
 			// Downsample by 4x for audio display
-			if (!(undersamplecount++ & 3))
+			if (!(m_undersampleCount++ & 3))
 				m_sampleBuffer.push_back(Sample(demod, 0.0));
 
 			qint16 sample = (qint16)(demod * m_volume);
