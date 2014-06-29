@@ -155,8 +155,11 @@ int fftfilt::run(const cmplx & in, cmplx **out)
 	memcpy(freqdata, timedata, flen * sizeof(cmplx));
 	fft->ComplexFFT(freqdata);
 
-	for (int i = 0; i < flen; i++)
+	// Discard negative frequencies for ssb
+	for (int i = 0; i < flen2; i++) {
 		freqdata[i] *= filter[i];
+		freqdata[flen2 + i] = 0;
+	}
 
 	fft->InverseComplexFFT(freqdata);
 

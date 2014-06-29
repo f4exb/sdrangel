@@ -32,19 +32,19 @@ USBDemod::USBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_volume = 2.0;
 	m_sampleRate = 96000;
 	m_frequency = 0;
-	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, 5000);
 	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
-
-	m_lowpass.create(21, 48000, 5000);
 
 	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
+
+	USBFilter = new fftfilt(0.01, m_Bandwidth / 48000.0, usbFftLen);
+	// if (!USBFilter) segfault;
 }
 
 USBDemod::~USBDemod()
 {
+	if (USBFilter) delete USBFilter;
 }
 
 void USBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume)
@@ -55,18 +55,23 @@ void USBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 
 void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	Complex ci;
+	Real a, b;
+	Complex c;
+	int n_out;
+	cmplx *sideband;
 	bool consumed;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
-		c *= m_nco.nextIQ();
+		a = it->real();
+		b = it->imag();
+		it++;	// TODO: Assumes 96kHz; Expect breakage.
+		a += it->real();
+		b += it->imag();
+		c = Complex(a / 32678.0, b / 32768.0);
 
-		consumed = false;
-		// could squelch audio if RTL_SDR samplerate is not being fully decimated.
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
-			Real demod = ci.imag() + ci.real();
-			demod = 32768.0 * m_lowpass.filter(demod * 0.7);
+		n_out = USBFilter->run(c, &sideband);
+		for (int i = 0; i < n_out; i++) {
+			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
 
 			// Downsample by 4x for audio display
 			if (!(m_undersampleCount++ & 3))
@@ -80,7 +85,7 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 				m_audioBufferFill = 0;
 			}
-			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
+			m_sampleDistanceRemain += 2; // 96k in / 48k out
 		}
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
@@ -104,18 +109,14 @@ bool USBDemod::handleMessage(Message* cmd)
 {
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		qDebug("%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
-		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_sampleDistanceRemain = m_sampleRate / 48000.0;
+		m_sampleDistanceRemain = 0.0;
 		cmd->completed();
 		return true;
 	} else if(MsgConfigureUSBDemod::match(cmd)) {
 		MsgConfigureUSBDemod* cfg = (MsgConfigureUSBDemod*)cmd;
 		m_Bandwidth = cfg->getBandwidth();
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_lowpass.create(21, 48000, cfg->getBandwidth());
+		USBFilter->create_filter(0.01, m_Bandwidth / 48000.0);
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;
 		cmd->completed();

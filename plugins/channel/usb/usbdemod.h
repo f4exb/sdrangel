@@ -23,8 +23,11 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
+#include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+
+#define usbFftLen 1024
 
 class AudioFifo;
 
@@ -84,6 +87,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 	AudioFifo* m_audioFifo;
+	fftfilt* USBFilter;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
