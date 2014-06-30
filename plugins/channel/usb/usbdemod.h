@@ -79,11 +79,6 @@ private:
 	int m_sampleRate;
 	int m_frequency;
 
-	NCO m_nco;
-	Interpolator m_interpolator;
-	Real m_sampleDistanceRemain;
-	Lowpass<Real> m_lowpass;
-
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 	AudioFifo* m_audioFifo;

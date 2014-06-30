@@ -143,7 +143,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayMaxHold(true);
 
 	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setColor(Qt::red);
+	m_channelMarker->setColor(Qt::green);
 	m_channelMarker->setBandwidth(8000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);

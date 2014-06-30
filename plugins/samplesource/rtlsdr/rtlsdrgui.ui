@@ -130,7 +130,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Decimation</string>
+        <string>Zoom Out</string>
        </property>
       </widget>
      </item>

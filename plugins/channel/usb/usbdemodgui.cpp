@@ -89,7 +89,8 @@ void USBDemodGUI::viewChanged()
 void USBDemodGUI::on_BW_valueChanged(int value)
 {
 	ui->BWText->setText(QString("%1 kHz").arg(value));
-	m_channelMarker->setBandwidth(value * 1000 * 2);
+	m_channelMarker->setBandwidth(value * 1000);
+	m_channelMarker->setCenterFrequency(value * 500);
 	applySettings();
 }
 
@@ -142,9 +143,9 @@ USBDemodGUI::USBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::blue);
-	m_channelMarker->setBandwidth(8000);
-	m_channelMarker->setCenterFrequency(0);
-	m_channelMarker->setVisible(true);
+	m_channelMarker->setBandwidth(5000);
+	m_channelMarker->setCenterFrequency(2500);
+	m_channelMarker->setVisible(false);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 

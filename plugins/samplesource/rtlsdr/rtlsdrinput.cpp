@@ -182,7 +182,7 @@ const QString& RTLSDRInput::getDeviceDescription() const
 
 int RTLSDRInput::getSampleRate() const
 {
-	return 1536000 / (1 << m_settings.m_decimation);
+	return 96000 * (1 <<  m_settings.m_decimation);
 }
 
 quint64 RTLSDRInput::getCenterFrequency() const

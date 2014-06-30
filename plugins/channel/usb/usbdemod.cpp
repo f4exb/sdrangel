@@ -32,7 +32,6 @@ USBDemod::USBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_volume = 2.0;
 	m_sampleRate = 96000;
 	m_frequency = 0;
-	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
 
 	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
@@ -67,7 +66,7 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		it++;	// TODO: Assumes 96kHz; Expect breakage.
 		a += it->real();
 		b += it->imag();
-		c = Complex(a / 32678.0, b / 32768.0);
+		c = Complex(a / 65536.0, b / 65536.0);
 
 		n_out = USBFilter->run(c, &sideband);
 		for (int i = 0; i < n_out; i++) {
@@ -85,7 +84,6 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 				m_audioBufferFill = 0;
 			}
-			m_sampleDistanceRemain += 2; // 96k in / 48k out
 		}
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
@@ -110,7 +108,6 @@ bool USBDemod::handleMessage(Message* cmd)
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
 		m_sampleRate = signal->getSampleRate();
-		m_sampleDistanceRemain = 0.0;
 		cmd->completed();
 		return true;
 	} else if(MsgConfigureUSBDemod::match(cmd)) {

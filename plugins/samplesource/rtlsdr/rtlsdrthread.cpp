@@ -140,12 +140,12 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
-	int decimationFactor[] = {16, 8, 4, 2, 1, 0};
+	int decimationFactor[] = {1, 2, 4, 8, 16, 0};
 
 	if (++m_localdecimation < decimationFactor[m_decimation]) return;
 	m_localdecimation = 0;
 
-	switch(m_decimation) {
+	switch(4 - m_decimation) {
 		case 0: // 1:1 = no decimation
 			// just rotation
 			phase = -1;
@@ -171,6 +171,7 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 			decimate8(&it, buf, len);
 			break;
 
+		default:
 		case 4: // 1:16
 			decimate16(&it, buf, len);
 			break;

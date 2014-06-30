@@ -17,12 +17,12 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_refLevel(0),
 	m_powerRange(100),
 	m_decay(0),
-	m_displayWaterfall(false),
+	m_displayWaterfall(true),
 	m_invertedWaterfall(false),
-	m_displayMaxHold(true),
-	m_displayHistogram(true),
-	m_displayGrid(true),
-	m_invert(false)
+	m_displayMaxHold(false),
+	m_displayHistogram(false),
+	m_displayGrid(false),
+	m_invert(true)
 {
 	ui->setupUi(this);
 	for(int ref = 0; ref >= -95; ref -= 5)
@@ -52,12 +52,12 @@ void GLSpectrumGUI::resetToDefaults()
 	m_refLevel = 0;
 	m_powerRange = 100;
 	m_decay = 0;
-	m_displayWaterfall = false;
+	m_displayWaterfall = true;
 	m_invertedWaterfall = false;
-	m_displayMaxHold = true;
-	m_displayHistogram = true;
-	m_displayGrid = true;
-	m_invert = false;
+	m_displayMaxHold = false;
+	m_displayHistogram = false;
+	m_displayGrid = false;
+	m_invert = true;
 	applySettings();
 }
 
@@ -97,10 +97,10 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readBool(6, &m_displayWaterfall, true);
 		d.readBool(7, &m_invertedWaterfall, false);
 		d.readBool(8, &m_displayMaxHold, false);
-		d.readBool(9, &m_displayHistogram, true);
+		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 0);
-		d.readBool(11, &m_displayGrid, true);
-		d.readBool(12, &m_invert, false);
+		d.readBool(11, &m_displayGrid, false);
+		d.readBool(12, &m_invert, true);
 		applySettings();
 		return true;
 	} else {
