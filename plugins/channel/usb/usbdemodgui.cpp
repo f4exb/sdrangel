@@ -145,7 +145,7 @@ USBDemodGUI::USBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker->setColor(Qt::blue);
 	m_channelMarker->setBandwidth(5000);
 	m_channelMarker->setCenterFrequency(2500);
-	m_channelMarker->setVisible(false);
+	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
