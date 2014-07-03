@@ -69,16 +69,15 @@ void ThreadedSampleSink::handleData()
 			// handle data
 			if(m_sampleSink != NULL)
 				m_sampleSink->feed(part1begin, part1end, positiveOnly);
+			m_sampleFifo.readCommit(part1end - part1begin);
 		}
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
 			// handle data
 			if(m_sampleSink != NULL)
 				m_sampleSink->feed(part2begin, part2end, positiveOnly);
+			m_sampleFifo.readCommit(part2end - part2begin);
 		}
-
-		// adjust FIFO pointers
-		m_sampleFifo.readCommit(count);
 	}
 }
 
