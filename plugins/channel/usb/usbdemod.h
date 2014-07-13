@@ -22,7 +22,6 @@
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"

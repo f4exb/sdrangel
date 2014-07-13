@@ -68,7 +68,7 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		b += it->imag();
 		c = Complex(a / 65536.0, b / 65536.0);
 
-		n_out = USBFilter->run(c, &sideband);
+		n_out = USBFilter->run(c, &sideband, true);
 		for (int i = 0; i < n_out; i++) {
 			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
 
@@ -113,7 +113,7 @@ bool USBDemod::handleMessage(Message* cmd)
 	} else if(MsgConfigureUSBDemod::match(cmd)) {
 		MsgConfigureUSBDemod* cfg = (MsgConfigureUSBDemod*)cmd;
 		m_Bandwidth = cfg->getBandwidth();
-		USBFilter->create_filter(0.01, m_Bandwidth / 48000.0);
+		USBFilter->create_filter(0.3 / 48.0, m_Bandwidth / 48000.0);
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;
 		cmd->completed();

@@ -22,9 +22,11 @@
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
+#include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+
+#define ssbFftLen 1024
 
 class AudioFifo;
 
@@ -75,11 +77,12 @@ private:
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
+	bool m_usb;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
-	Lowpass<Real> m_lowpass;
+	fftfilt* SSBFilter;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

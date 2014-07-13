@@ -36,15 +36,18 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_interpolator.create(16, m_sampleRate, 5000);
 	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
 
-	m_lowpass.create(21, 48000, 5000);
-
 	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
+
+	m_usb = true;
+	SSBFilter = new fftfilt(0.01, m_Bandwidth / 48000.0, ssbFftLen);
+	// if (!USBFilter) segfault;
 }
 
 SSBDemod::~SSBDemod()
 {
+	if (SSBFilter) delete SSBFilter;
 }
 
 void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume)
@@ -56,6 +59,8 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
+	cmplx *sideband;
+	int n_out;
 	bool consumed;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
@@ -63,10 +68,14 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		c *= m_nco.nextIQ();
 
 		consumed = false;
-		// could squelch audio if RTL_SDR samplerate is not being fully decimated.
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
-			Real demod = ci.imag() + ci.real();
-			demod = 32768.0 * m_lowpass.filter(demod * 0.7);
+			n_out = SSBFilter->run(ci, &sideband, m_usb);
+			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
+		} else
+			n_out = 0;
+
+		for (int i = 0; i < n_out; i++) {
+			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
 
 			// Downsample by 4x for audio display
 			if (!(m_undersampleCount++ & 3))
@@ -80,7 +89,6 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 				m_audioBufferFill = 0;
 			}
-			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		}
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
@@ -102,6 +110,8 @@ void SSBDemod::stop()
 
 bool SSBDemod::handleMessage(Message* cmd)
 {
+	float band;
+
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
 		qDebug("%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
@@ -113,9 +123,20 @@ bool SSBDemod::handleMessage(Message* cmd)
 		return true;
 	} else if(MsgConfigureSSBDemod::match(cmd)) {
 		MsgConfigureSSBDemod* cfg = (MsgConfigureSSBDemod*)cmd;
-		m_Bandwidth = cfg->getBandwidth();
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_lowpass.create(21, 48000, cfg->getBandwidth());
+
+		band = cfg->getBandwidth();
+		if (band < 0) {
+			band = -band;
+			m_usb = false;
+		} else
+			m_usb = true;
+		if (band < 500.0f)
+			band = 500.0f;
+		m_Bandwidth = band;
+
+		m_interpolator.create(16, m_sampleRate, band * 2.0f);
+		SSBFilter->create_filter(0.3f / 48.0f, m_Bandwidth / 48000.0f);
+
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;
 		cmd->completed();
