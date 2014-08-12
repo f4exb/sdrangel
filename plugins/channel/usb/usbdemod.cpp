@@ -52,6 +52,7 @@ void USBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 	cmd->submit(messageQueue, this);
 }
 
+/* Expects samplerate as multiples of 96kHz. */
 void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Real a, b;
@@ -59,11 +60,13 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int n_out;
 	cmplx *sideband;
 	bool consumed;
+	int samplestep = m_sampleRate / 96000;
 
-	for(SampleVector::const_iterator it = begin; it < end; ++it) {
+	if (samplestep < 1 )
+		samplestep = 1;
+	for(SampleVector::const_iterator it = begin; it < end; it += samplestep) {
 		a = it->real();
 		b = it->imag();
-		// TODO: Assumes 96kHz; Expect breakage.
 		c = Complex(a / 65536.0, b / 65536.0);
 
 		n_out = USBFilter->run(c, &sideband, true);
