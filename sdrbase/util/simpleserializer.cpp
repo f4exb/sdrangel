@@ -588,13 +588,13 @@ void SimpleDeserializer::dump() const
 			case TSigned64: {
 				qint64 tmp;
 				readS64(it.key(), &tmp);
-				qDebug("id %d, S64, len %d: " PRINTF_FORMAT_S64, it.key(), it->length, (int)tmp);
+//				qDebug("id %d, S64, len %d: " PRINTF_FORMAT_S64, it.key(), it->length, (int)tmp);
 				break;
 			}
 			case TUnsigned64: {
 				quint64 tmp;
 				readU64(it.key(), &tmp);
-				qDebug("id %d, U64, len %d: " PRINTF_FORMAT_U64, it.key(), it->length, (uint)tmp);
+//				qDebug("id %d, U64, len %d: " PRINTF_FORMAT_U64, it.key(), it->length, (uint)tmp);
 				break;
 			}
 			case TFloat: {
