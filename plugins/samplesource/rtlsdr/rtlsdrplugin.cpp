@@ -45,7 +45,7 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 		product[0] = '\0';
 		serial[0] = '\0';
 
-		if(rtlsdr_get_device_usb_strings(i, vendor, product, serial) != 0)
+		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
 			continue;
 		QString displayedName(QString("RTL-SDR #%1 (%2 #%3)").arg(i + 1).arg(product).arg(serial));
 		SimpleSerializer s(1);
