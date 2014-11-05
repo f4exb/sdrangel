@@ -5,5 +5,5 @@ For Ubuntu:
 
 "librtlsdr-dev" is in the "universe" repo. (utopic 14.10 amd64.)
 
-Use "cmake ../ -DKERNEL=ON" to build the Linux kernel driver. May support Airspy and Hackrf.
+Use "cmake ../ -DKERNEL=ON" to build the Linux kernel driver (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support Airspy and Hackrf.
 

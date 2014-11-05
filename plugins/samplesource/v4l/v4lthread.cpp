@@ -22,10 +22,10 @@
 
 #define BLOCKSIZE 16384
 
-V4LThread::V4LThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* parent) :
+V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
-	m_dev(dev),
+	m_dev(1),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_decimation(2)
@@ -64,14 +64,14 @@ void V4LThread::run()
 
 	m_running = true;
 	m_startWaiter.wakeAll();
-
+/*
 	while(m_running) {
 		if((res = rtlsdr_read_async(m_dev, &V4LThread::callbackHelper, this, 32, BLOCKSIZE)) < 0) {
 			qCritical("V4LThread: async error: %s", strerror(errno));
 			break;
 		}
 	}
-
+*/
 	m_running = false;
 }
 
@@ -178,12 +178,13 @@ void V4LThread::callback(const quint8* buf, qint32 len)
 	}
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
-
+/*
 	if(!m_running)
 		rtlsdr_cancel_async(m_dev);
+*/
 }
 
-void V4LThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
+void V4LThread::callbackHelper(unsigned char* buf, quint32 len, void* ctx)
 {
 	V4LThread* thread = (V4LThread*)ctx;
 	thread->callback(buf, len);

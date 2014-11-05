@@ -30,45 +30,11 @@
 #include "fcntl.h"
 #include <sys/mman.h>
 
-namespace kernel {
-	// v4l2_mmap
-	struct buffer {
-		void *start;
-		size_t length;
-	};
+struct v4l_buffer {
+	void *start;
+	size_t length;
+};
 
-	class v4l //: public v4l
-	{
-	private:
-		// v4l2 device file handle
-		int fd;
-
-		// stream / sample format
-		uint32_t pixelformat;
-
-		struct buffer *buffers;
-		unsigned int n_buffers;
-
-		// for processing mmap buffer
-		void *recebuf_ptr;
-		unsigned int recebuf_len;
-		unsigned int recebuf_mmap_index;
-
-	public:
-		v4l(const char *filename);
-		~v4l();
-
-		void set_samp_rate(double samp_rate);
-		void set_center_freq(double freq);
-		void set_bandwidth(double bandwidth);
-		void set_tuner_gain(double gain);
-
-		// Where all the action really happens
-		int work(int noutput_items,
-				void* input_items,
-				void* output_items);
-	};
-} // namespace kernel
 
 #endif /* INCLUDED_KERNEL_LIBV4L2_X_IMPL_H */
 

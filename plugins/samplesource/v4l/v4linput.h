@@ -19,8 +19,8 @@
 #define INCLUDE_V4LINPUT_H
 
 #include "dsp/samplesource/samplesource.h"
-#include <rtl-sdr.h>
 #include <QString>
+#include "v4lsource.h"
 
 class V4LThread;
 
@@ -88,13 +88,29 @@ public:
 	const QString& getDeviceDescription() const;
 	int getSampleRate() const;
 	quint64 getCenterFrequency() const;
-
 	bool handleMessage(Message* message);
 
+	void OpenSource(const char *filename);
+	void CloseSource();
+	void set_sample_rate(double samp_rate);
+	void set_center_freq(double freq);
+	void set_bandwidth(double bandwidth);
+	void set_tuner_gain(double gain);
+	int work(int noutput_items,
+			void* input_items,
+			void* output_items);
 private:
+	int fd;
+	quint32 pixelformat;
+	struct v4l_buffer *buffers;
+	unsigned int n_buffers;
+	void *recebuf_ptr;
+	unsigned int recebuf_len;
+	unsigned int recebuf_mmap_index;
+
 	QMutex m_mutex;
 	Settings m_settings;
-	rtlsdr_dev_t* m_dev;
+	int m_dev;
 	V4LThread* m_V4LThread;
 	QString m_deviceDescription;
 	std::vector<int> m_gains;

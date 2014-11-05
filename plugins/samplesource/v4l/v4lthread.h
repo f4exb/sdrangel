@@ -21,7 +21,6 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include <rtl-sdr.h>
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
 
@@ -29,7 +28,7 @@ class V4LThread : public QThread {
 	Q_OBJECT
 
 public:
-	V4LThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	V4LThread(SampleFifo* sampleFifo, QObject* parent = NULL);
 	~V4LThread();
 
 	void startWork();
@@ -42,7 +41,7 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	rtlsdr_dev_t* m_dev;
+	int m_dev;
 	SampleVector m_convertBuffer;
 	SampleFifo* m_sampleFifo;
 
@@ -57,7 +56,7 @@ private:
 	void decimate16(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void callback(const quint8* buf, qint32 len);
 
-	static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
+	static void callbackHelper(unsigned char* buf, quint32 len, void* ctx);
 };
 
 #endif // INCLUDE_V4LTHREAD_H

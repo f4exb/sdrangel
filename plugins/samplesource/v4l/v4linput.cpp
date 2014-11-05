@@ -19,6 +19,7 @@
 #include <errno.h>
 #include "v4linput.h"
 #include "v4lthread.h"
+#include "v4lsource.h"
 #include "v4lgui.h"
 #include "util/simpleserializer.h"
 
@@ -67,7 +68,7 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 V4LInput::V4LInput(MessageQueue* msgQueueToGUI) :
 	SampleSource(msgQueueToGUI),
 	m_settings(),
-	m_dev(NULL),
+	m_dev(0),
 	m_V4LThread(NULL),
 	m_deviceDescription()
 {
@@ -82,7 +83,7 @@ bool V4LInput::startInput(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_dev != NULL)
+	if(m_dev > 0)
 		stopInput();
 
 	char vendor[256];
@@ -91,19 +92,23 @@ bool V4LInput::startInput(int device)
 	int res;
 	int numberOfGains;
 
-	if(!m_sampleFifo.setSize(524288)) {
+	vendor[0] = '\0';
+	product[0] = '\0';
+	serial[0] = '\0';
+
+
+	if(!m_sampleFifo.setSize(524288)) { // fraction of samplerate
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	if((res = rtlsdr_open(&m_dev, device)) < 0) {
-		qCritical("could not open RTLSDR #%d: %s", device, strerror(errno));
+	OpenSource("/dev/swradio0");
+	if (m_dev == 0) {
+		qCritical("could not open SDR");
 		return false;
 	}
-
-	vendor[0] = '\0';
-	product[0] = '\0';
-	serial[0] = '\0';
+	m_dev = device;
+/*
 	if((res = rtlsdr_get_usb_strings(m_dev, vendor, product, serial)) < 0) {
 		qCritical("error accessing USB device");
 		goto failed;
@@ -139,8 +144,8 @@ bool V4LInput::startInput(int device)
 		qCritical("could not reset USB EP buffers: %s", strerror(errno));
 		goto failed;
 	}
-
-	if((m_V4LThread = new V4LThread(m_dev, &m_sampleFifo)) == NULL) {
+*/
+	if((m_V4LThread = new V4LThread(&m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
 		goto failed;
 	}
@@ -149,7 +154,7 @@ bool V4LInput::startInput(int device)
 	mutexLocker.unlock();
 	applySettings(m_generalSettings, m_settings, true);
 
-	qDebug("RTLSDRInput: start");
+	qDebug("V4LInput: start");
 	MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
 
 	return true;
@@ -168,9 +173,9 @@ void V4LInput::stopInput()
 		delete m_V4LThread;
 		m_V4LThread = NULL;
 	}
-	if(m_dev != NULL) {
-		rtlsdr_close(m_dev);
-		m_dev = NULL;
+	if(m_dev > 0) {
+		CloseSource();
+		m_dev = 0;
 	}
 	m_deviceDescription.clear();
 }
@@ -209,22 +214,18 @@ bool V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		if(m_dev != NULL) {
-			if(rtlsdr_set_center_freq(m_dev, m_generalSettings.m_centerFrequency
-								+ 384000) != 0)
-				qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
-		}
+		if(m_dev > 0)
+			V4LInput::set_center_freq( (double)(m_generalSettings.m_centerFrequency
+								+ 384000) ); // samplerate/4
 	}
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
-		if(m_dev != NULL) {
-			if(rtlsdr_set_tuner_gain(m_dev, m_settings.m_gain) != 0)
-				qDebug("rtlsdr_set_tuner_gain() failed");
-		}
+		if(m_dev > 0)
+			V4LInput::set_tuner_gain((double)m_settings.m_gain);
 	}
 	if((m_settings.m_decimation != settings.m_decimation) || force) {
 		m_settings.m_decimation = settings.m_decimation;
-		if(m_dev != NULL)
+		if(m_dev > 0)
 			m_V4LThread->setDecimation(m_settings.m_decimation);
 	}
 	return true;

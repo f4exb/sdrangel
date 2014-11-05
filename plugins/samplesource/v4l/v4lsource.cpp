@@ -18,6 +18,7 @@
  */
 
 #include "v4lsource.h"
+#include "v4linput.h"
 
 /* Control classes */
 #define V4L2_CTRL_CLASS_USER          0x00980000 /* Old-style 'user' controls */
@@ -33,8 +34,8 @@
 #define CID_TUNER_IF                  ((V4L2_CID_USER_BASE | 0xf000) + 12)
 #define CID_TUNER_GAIN                ((V4L2_CID_USER_BASE | 0xf000) + 13)
 
-#define V4L2_PIX_FMT_SDR_U8     v4l2_fourcc('D', 'U', '0', '8') /* unsigned 8-bit */
-#define V4L2_PIX_FMT_SDR_U16LE  v4l2_fourcc('D', 'U', '1', '6') /* unsigned 16-bit LE */
+#define V4L2_PIX_FMT_SDR_U8     v4l2_fourcc('C', 'U', '0', '8') /* unsigned 8-bit Complex*/
+#define V4L2_PIX_FMT_SDR_U16LE  v4l2_fourcc('C', 'U', '1', '6') /* unsigned 16-bit Complex*/
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -50,9 +51,8 @@ static void xioctl(int fh, unsigned long int request, void *arg)
 	}
 }
 
-namespace kernel{
-
-	v4l::v4l(const char *filename)
+void
+V4LInput::OpenSource(const char *filename)
 	{
 		struct v4l2_format fmt;
 		struct v4l2_buffer buf;
@@ -89,7 +89,7 @@ namespace kernel{
 		req.memory = V4L2_MEMORY_MMAP;
 		xioctl(fd, VIDIOC_REQBUFS, &req);
 
-		buffers = (struct buffer*) calloc(req.count, sizeof(*buffers));
+		buffers = (struct v4l_buffer*) calloc(req.count, sizeof(*buffers));
 		for (n_buffers = 0; n_buffers < req.count; n_buffers++) {
 			CLEAR(buf);
 			buf.type = V4L2_BUF_TYPE_SDR_CAPTURE;
@@ -120,10 +120,8 @@ namespace kernel{
 		xioctl(fd, VIDIOC_STREAMON, &type);
 	}
 
-	/*
-	 * Our virtual destructor.
-	 */
-	v4l::~v4l()
+void
+V4LInput::CloseSource()
 	{
 		unsigned int i;
 		enum v4l2_buf_type type;
@@ -138,8 +136,8 @@ namespace kernel{
 		v4l2_close(fd);
 	}
 
-	void
-	v4l::set_samp_rate(double samp_rate)
+void
+V4LInput::set_sample_rate(double samp_rate)
 	{
 		struct v4l2_frequency frequency;
 
@@ -154,8 +152,8 @@ namespace kernel{
 		return;
 	}
 
-	void
-	v4l::set_center_freq(double freq)
+void
+V4LInput::set_center_freq(double freq)
 	{
 		struct v4l2_frequency frequency;
 
@@ -170,8 +168,8 @@ namespace kernel{
 		return;
 	}
 
-	void
-	v4l::set_bandwidth(double bandwidth)
+void
+V4LInput::set_bandwidth(double bandwidth)
 	{
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
@@ -191,8 +189,8 @@ namespace kernel{
 		return;
 	}
 
-	void
-	v4l::set_tuner_gain(double gain)
+void
+V4LInput::set_tuner_gain(double gain)
 	{
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
@@ -212,8 +210,8 @@ namespace kernel{
 		return;
 	}
 
-	int
-	v4l::work(int noutput_items,
+int
+V4LInput::work(int noutput_items,
 			void* input_items,
 			void* output_items)
 	{
@@ -296,6 +294,4 @@ process_buf:
 		// Tell runtime system how many output items we produced.
 		return 0;
 	}
-
-} /* namespace kernel */
 
