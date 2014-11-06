@@ -25,7 +25,7 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/include
 	${CMAKE_SOURCE_DIR}/include-gpl
-#	${LIBRTLSDR_INCLUDE_DIR}
+	${LIBV4L2H}
 )
 
 #include(${QT_USE_FILE})
@@ -44,8 +44,7 @@ add_library(inputv4l SHARED
 
 target_link_libraries(inputv4l
 	${QT_LIBRARIES}
-# 	${LIBRTLSDR_LIBRARIES}
-# 	${LIBUSB_LIBRARIES}
+ 	${LIBV4L2}
 	sdrbase
 )
 

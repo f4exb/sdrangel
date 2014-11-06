@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <uapi/linux/videodev2.h>
-#include "/usr/local/include/libv4l2.h"
+#include "libv4l2.h"
 #include <fcntl.h>
 #include <sys/mman.h>
 
