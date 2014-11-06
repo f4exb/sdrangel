@@ -55,7 +55,7 @@ static void xioctl(int fh, unsigned long int request, void *arg)
 		ret = v4l2_ioctl(fh, request, arg);
 	} while (ret == -1 && ((errno == EINTR) || (errno == EAGAIN)));
 	if (ret == -1) {
-		qCritical("error %d\n", errno);
+		qCritical("V4L2 ioctl error: %d", errno);
 	}
 }
 
@@ -70,26 +70,21 @@ V4LInput::OpenSource(const char *filename)
 
 		recebuf_len = 0;
 
-		// libv4l2 does not know SDR yet
 		// fd = v4l2_open(filename, O_RDWR | O_NONBLOCK, 0);
 		fd = open(filename, O_RDWR | O_NONBLOCK, 0);
 		if (fd < 0) {
-			perror("Cannot open device");
+			qCritical("Cannot open /dev/swradio0 :%d", fd);
+			return;
 		}
 
 		pixelformat = V4L2_PIX_FMT_SDR_U8;
-		//pixelformat = V4L2_PIX_FMT_SDR_U16LE;
-
+		// RTLSDR has limited ioctls in 3.18, expect fail.
+		qCritical("Want Pixelformat : CU08");
 		CLEAR(fmt);
 		fmt.type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		fmt.fmt.sdr.pixelformat = pixelformat;
 		xioctl(fd, VIDIOC_S_FMT, &fmt);
-		if (fmt.fmt.sdr.pixelformat != pixelformat) {
-			qCritical("Libv4l didn't accept FLOAT format. Cannot proceed. Pixelformat %4.4s\n",
-					(char *)&fmt.fmt.sdr.pixelformat);
-		}
-
-		printf("Selected stream format: %4.4s\n", (char *)&fmt.fmt.sdr.pixelformat);
+		qCritical("Got Pixelformat : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
 
 		CLEAR(req);
 		req.count = 8;
@@ -111,7 +106,7 @@ V4LInput::OpenSource(const char *filename)
 					fd, buf.m.offset);
 
 			if (buffers[n_buffers].start == MAP_FAILED) {
-				perror("mmap");
+				qCritical("V4L2 buffer mmap failed");
 			}
 		}
 

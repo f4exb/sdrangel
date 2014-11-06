@@ -102,7 +102,7 @@ bool V4LInput::startInput(int device)
 	}
 
 	OpenSource("/dev/swradio0");
-	if (m_dev == 0) {
+	if (fd < 0) {
 		qCritical("could not open SDR");
 		return false;
 	}
