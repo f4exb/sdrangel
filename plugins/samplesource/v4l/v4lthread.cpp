@@ -27,10 +27,9 @@ V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
 	m_running(false),
 	m_dev(1),
 	m_convertBuffer(BLOCKSIZE),
-	m_sampleFifo(sampleFifo),
-	m_decimation(2)
+	m_sampleFifo(sampleFifo)
 {
-	m_localdecimation = 0;
+	m_samplerate = 2500000;
 }
 
 V4LThread::~V4LThread()
@@ -53,9 +52,9 @@ void V4LThread::stopWork()
 	wait();
 }
 
-void V4LThread::setDecimation(int decimation)
+void V4LThread::setSamplerate(int samplerate)
 {
-	m_decimation = decimation;
+	m_samplerate = samplerate;
 }
 
 void V4LThread::run()
@@ -140,12 +139,8 @@ void V4LThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
-	int decimationFactor[] = {1, 1, 1, 2, 4, 0};
 
-	if (++m_localdecimation < decimationFactor[m_decimation]) return;
-	m_localdecimation = 0;
-
-	switch(4 - m_decimation) {
+	switch(4) {
 		case 0: // 1:1 = no decimation
 			// just rotation
 			phase = -(1<<2);

@@ -106,9 +106,9 @@
       <number>3</number>
      </property>
      <item row="0" column="1">
-      <widget class="QSlider" name="decimation">
+      <widget class="QSlider" name="samplerate">
        <property name="toolTip">
-        <string>Signal decimation factor</string>
+        <string>Device Samplerate</string>
        </property>
        <property name="maximum">
         <number>4</number>
@@ -130,12 +130,12 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Zoom Out</string>
+        <string>Samplerate</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="decimationText">
+      <widget class="QLabel" name="samplerateText">
        <property name="minimumSize">
         <size>
          <width>40</width>

@@ -19,7 +19,6 @@
 #include <errno.h>
 #include "v4linput.h"
 #include "v4lthread.h"
-#include "v4lsource.h"
 #include "v4lgui.h"
 #include "util/simpleserializer.h"
 
@@ -28,21 +27,21 @@ MESSAGE_CLASS_DEFINITION(V4LInput::MsgReportV4L, Message)
 
 V4LInput::Settings::Settings() :
 	m_gain(0),
-	m_decimation(0)
+	m_samplerate(2500000)
 {
 }
 
 void V4LInput::Settings::resetToDefaults()
 {
 	m_gain = 0;
-	m_decimation = 0;
+	m_samplerate = 2500000;
 }
 
 QByteArray V4LInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_gain);
-	s.writeS32(2, m_decimation);
+	s.writeS32(2, m_samplerate);
 	return s.final();
 }
 
@@ -57,7 +56,7 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
-		d.readS32(2, &m_decimation, 0);
+		d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
 		resetToDefaults();
@@ -187,7 +186,9 @@ const QString& V4LInput::getDeviceDescription() const
 
 int V4LInput::getSampleRate() const
 {
-	return 96000 * (1 <<  m_settings.m_decimation);
+	int result = m_settings.m_samplerate / 4;
+	if (result > 200000) result /= 4;
+	return result;
 }
 
 quint64 V4LInput::getCenterFrequency() const
@@ -215,18 +216,18 @@ bool V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 		if(m_dev > 0)
-			V4LInput::set_center_freq( (double)(m_generalSettings.m_centerFrequency
-								+ 384000) ); // samplerate/4
+			V4LInput::set_center_freq( (double)(generalSettings.m_centerFrequency
+								+ (settings.m_samplerate / 4) ));
 	}
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
 		if(m_dev > 0)
 			V4LInput::set_tuner_gain((double)m_settings.m_gain);
 	}
-	if((m_settings.m_decimation != settings.m_decimation) || force) {
-		m_settings.m_decimation = settings.m_decimation;
+	if((m_settings.m_samplerate != settings.m_samplerate) || force) {
+		m_settings.m_samplerate = settings.m_samplerate;
 		if(m_dev > 0)
-			m_V4LThread->setDecimation(m_settings.m_decimation);
+			m_V4LThread->setSamplerate((double)settings.m_samplerate);
 	}
 	return true;
 }

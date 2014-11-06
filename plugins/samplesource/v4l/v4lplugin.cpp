@@ -35,7 +35,7 @@ void V4LPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SampleSourceDevices V4LPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
-	int count = rtlsdr_get_device_count();
+	int count = 1; //rtlsdr_get_device_count();
 	char vendor[256];
 	char product[256];
 	char serial[256];
@@ -45,9 +45,9 @@ PluginInterface::SampleSourceDevices V4LPlugin::enumSampleSources()
 		product[0] = '\0';
 		serial[0] = '\0';
 
-		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
-			continue;
-		QString displayedName(QString("SDR #%1 (%2 #%3)").arg(i + 1).arg(product).arg(serial));
+//		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
+//			continue;
+		QString displayedName(QString("SDR #%1").arg(i + 1));
 		SimpleSerializer s(1);
 		s.writeS32(1, i);
 		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.v4l", s.final()));

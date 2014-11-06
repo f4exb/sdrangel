@@ -45,7 +45,7 @@ private:
 private slots:
 	void on_centerFrequency_changed(quint64 value);
 	void on_gain_valueChanged(int value);
-	void on_decimation_valueChanged(int value);
+	void on_samplerate_valueChanged(int value);
 
 	void updateHardware();
 };

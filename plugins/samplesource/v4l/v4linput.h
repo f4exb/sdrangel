@@ -20,7 +20,11 @@
 
 #include "dsp/samplesource/samplesource.h"
 #include <QString>
-#include "v4lsource.h"
+
+struct v4l_buffer {
+	void *start;
+	size_t length;
+};
 
 class V4LThread;
 
@@ -28,7 +32,7 @@ class V4LInput : public SampleSource {
 public:
 	struct Settings {
 		qint32 m_gain;
-		qint32 m_decimation;
+		qint32 m_samplerate;
 
 		Settings();
 		void resetToDefaults();
@@ -96,9 +100,7 @@ public:
 	void set_center_freq(double freq);
 	void set_bandwidth(double bandwidth);
 	void set_tuner_gain(double gain);
-	int work(int noutput_items,
-			void* input_items,
-			void* output_items);
+	int work(int noutput_items, qint16* output_items);
 private:
 	int fd;
 	quint32 pixelformat;

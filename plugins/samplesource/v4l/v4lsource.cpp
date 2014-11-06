@@ -17,8 +17,16 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "v4lsource.h"
 #include "v4linput.h"
+#include <string.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <uapi/linux/videodev2.h>
+#include "/usr/local/include/libv4l2.h"
+#include <fcntl.h>
+#include <sys/mman.h>
 
 /* Control classes */
 #define V4L2_CTRL_CLASS_USER          0x00980000 /* Old-style 'user' controls */
@@ -47,7 +55,7 @@ static void xioctl(int fh, unsigned long int request, void *arg)
 		ret = v4l2_ioctl(fh, request, arg);
 	} while (ret == -1 && ((errno == EINTR) || (errno == EAGAIN)));
 	if (ret == -1) {
-		fprintf(stderr, "error %d\n", errno);
+		qCritical("error %d\n", errno);
 	}
 }
 
@@ -77,7 +85,7 @@ V4LInput::OpenSource(const char *filename)
 		fmt.fmt.sdr.pixelformat = pixelformat;
 		xioctl(fd, VIDIOC_S_FMT, &fmt);
 		if (fmt.fmt.sdr.pixelformat != pixelformat) {
-			printf("Libv4l didn't accept FLOAT format. Cannot proceed. Pixelformat %4.4s\n",
+			qCritical("Libv4l didn't accept FLOAT format. Cannot proceed. Pixelformat %4.4s\n",
 					(char *)&fmt.fmt.sdr.pixelformat);
 		}
 
@@ -211,9 +219,7 @@ V4LInput::set_tuner_gain(double gain)
 	}
 
 int
-V4LInput::work(int noutput_items,
-			void* input_items,
-			void* output_items)
+V4LInput::work(int noutput_items, int16_t* output_items)
 	{
 		//complex *out = (complex *) output_items;
 		int ret;
