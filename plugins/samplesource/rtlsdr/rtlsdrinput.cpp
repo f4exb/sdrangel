@@ -229,3 +229,8 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 	}
 	return true;
 }
+
+
+void RTLSDRInput::set_ds_mode(int on){
+	rtlsdr_set_direct_sampling(m_dev, on);
+}

@@ -152,3 +152,34 @@ void RTLSDRGui::updateHardware()
 	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 	m_updateTimer.stop();
 }
+
+void RTLSDRGui::on_checkBox_stateChanged(int state) {
+	if (state == Qt::Checked){
+		((RTLSDRInput*)m_sampleSource)->set_ds_mode((ui->radioButton->isChecked()) ? true : false);
+		ui->radioButton->setEnabled(true);
+		ui->radioButton_2->setEnabled(true);
+		ui->gain->setEnabled(false);
+		//ui->decimation->setMaximum(6);
+
+		ui->centerFrequency->setValueRange(5, 0U, 30000U);
+		ui->centerFrequency->setValue(0);
+	}
+	else {
+		((RTLSDRInput*)m_sampleSource)->set_ds_mode(0);
+		ui->radioButton->setEnabled(false);
+		ui->radioButton_2->setEnabled(false);
+		ui->gain->setEnabled(true);
+		//ui->decimation->setMaximum(4);
+
+		ui->centerFrequency->setValueRange(7, 20000U, 2200000U);
+	}
+}
+
+void RTLSDRGui::on_radioButton_toggled(bool checked){
+	if (checked)
+		((RTLSDRInput*)m_sampleSource)->set_ds_mode(1);
+}
+void RTLSDRGui::on_radioButton_2_toggled(bool checked){
+	if (checked)
+		((RTLSDRInput*)m_sampleSource)->set_ds_mode(2);
+}

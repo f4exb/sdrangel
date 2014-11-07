@@ -91,6 +91,9 @@ public:
 
 	bool handleMessage(Message* message);
 
+
+	void set_ds_mode(int on);
+
 private:
 	QMutex m_mutex;
 	Settings m_settings;
