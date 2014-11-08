@@ -35,7 +35,7 @@ public:
 	void startWork();
 	void stopWork();
 
-	void setDecimation(int decimation);
+	void setSamplerate(int sanplerate);
 
 private:
 	QMutex m_startWaitMutex;
@@ -46,8 +46,7 @@ private:
 	SampleVector m_convertBuffer;
 	SampleFifo* m_sampleFifo;
 
-	int m_decimation;
-	int m_localdecimation;
+	int m_samplerate;
 
 	void run();
 

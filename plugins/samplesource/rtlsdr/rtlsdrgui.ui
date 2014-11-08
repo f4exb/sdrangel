@@ -106,12 +106,12 @@
       <number>3</number>
      </property>
      <item row="0" column="1">
-      <widget class="QSlider" name="decimation">
+      <widget class="QSlider" name="samplerate">
        <property name="toolTip">
-        <string>Signal decimation factor</string>
+        <string>Device Samplerate</string>
        </property>
        <property name="maximum">
-        <number>4</number>
+        <number>2</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -130,12 +130,12 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Zoom Out</string>
+        <string>Rate</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="decimationText">
+      <widget class="QLabel" name="samplerateText">
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -143,7 +143,7 @@
         </size>
        </property>
        <property name="text">
-        <string>1:1</string>
+        <string>288k</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -226,7 +226,7 @@
      <item>
       <widget class="QCheckBox" name="checkBox">
        <property name="text">
-        <string>ds</string>
+        <string>Direct Sampling: </string>
        </property>
       </widget>
      </item>
@@ -236,7 +236,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>i</string>
+        <string>I</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -252,7 +252,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>q</string>
+        <string>Q</string>
        </property>
       </widget>
      </item>

@@ -28,9 +28,8 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* p
 	m_dev(dev),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
-	m_decimation(2)
+	m_samplerate(288000)
 {
-	m_localdecimation = 0;
 }
 
 RTLSDRThread::~RTLSDRThread()
@@ -53,9 +52,9 @@ void RTLSDRThread::stopWork()
 	wait();
 }
 
-void RTLSDRThread::setDecimation(int decimation)
+void RTLSDRThread::setSamplerate(int samplerate)
 {
-	m_decimation = decimation;
+	m_samplerate = samplerate;
 }
 
 void RTLSDRThread::run()
@@ -136,43 +135,39 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 	}
 }
 
+
+/*
+  Decimate everything by 16x, except 288kHz
+  TODO : no offset tuning for direct sampling
+*/
+
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
-	int decimationFactor[] = {1, 1, 1, 2, 4, 0};
 
-	if (++m_localdecimation < decimationFactor[m_decimation]) return;
-	m_localdecimation = 0;
+	int mode = 0;
+	if (m_samplerate < 800000)
+		mode = 2;
+	// if (directsampling) mode++;
 
-	switch(4 - m_decimation) {
-		case 0: // 1:1 = no decimation
-			// just rotation
-			phase = -(1<<2);
-			for (int pos = 0; pos < len + 3; pos += 4) {
-				phase *= -1;
-				xreal = phase * (2 * buf[pos+0] - 255);
-				yimag = phase * (2 * buf[pos+1] - 255);
-				*it++ = Sample(xreal, yimag);
-				xreal = phase * (255 - 2 * buf[pos+3]);
-				yimag = phase * (2 * buf[pos+2] - 255);
-				*it++ = Sample(xreal, yimag);
-			}
+	switch(mode) {
+		case 0:
+			decimate16(&it, buf, len);
 			break;
-		case 1: // 1:2
-			decimate2(&it, buf, len);
+		case 1:
+			// no_rotate16(&it, buf, len);
 			break;
 
-		case 2: // 1:4
+		case 2:
 			decimate4(&it, buf, len);
 			break;
 
-		case 3: // 1:8
-			decimate8(&it, buf, len);
+		case 3:
+			// norotate4(&it, buf, len);
 			break;
 
 		default:
-		case 4: // 1:16
 			decimate16(&it, buf, len);
 			break;
 	}

@@ -10,7 +10,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, 20000U, 2200000U);
+	ui->centerFrequency->setValueRange(7, 28900U, 1700000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -95,7 +95,7 @@ bool RTLSDRGui::handleMessage(Message* message)
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	ui->decimation->setValue(m_settings.m_decimation);
+	ui->samplerate->setValue(m_settings.m_samplerate);
 
 	if(m_gains.size() > 0) {
 		int dist = abs(m_settings.m_gain - m_gains[0]);
@@ -139,10 +139,12 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 	sendSettings();
 }
 
-void RTLSDRGui::on_decimation_valueChanged(int value)
+void RTLSDRGui::on_samplerate_valueChanged(int value)
 {
-	ui->decimationText->setText(tr("1:%1").arg(1 << value));
-	m_settings.m_decimation = value;
+	int Rates[] = {288, 1024, 1536, 0};
+	int newrate = Rates[value];
+	ui->samplerateText->setText(tr("%1k").arg(newrate));
+	m_settings.m_samplerate = newrate * 1000;
 	sendSettings();
 }
 
@@ -159,19 +161,16 @@ void RTLSDRGui::on_checkBox_stateChanged(int state) {
 		ui->radioButton->setEnabled(true);
 		ui->radioButton_2->setEnabled(true);
 		ui->gain->setEnabled(false);
-		//ui->decimation->setMaximum(6);
-
-		ui->centerFrequency->setValueRange(5, 0U, 30000U);
-		ui->centerFrequency->setValue(0);
+		ui->centerFrequency->setValueRange(7, 1000U, 28700U);
+		ui->centerFrequency->setValue(27000);
 	}
 	else {
 		((RTLSDRInput*)m_sampleSource)->set_ds_mode(0);
 		ui->radioButton->setEnabled(false);
 		ui->radioButton_2->setEnabled(false);
 		ui->gain->setEnabled(true);
-		//ui->decimation->setMaximum(4);
-
-		ui->centerFrequency->setValueRange(7, 20000U, 2200000U);
+		ui->centerFrequency->setValueRange(7, 28900U, 1700000U);
+		ui->centerFrequency->setValue(29000);
 	}
 }
 

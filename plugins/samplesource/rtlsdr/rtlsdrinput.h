@@ -28,7 +28,7 @@ class RTLSDRInput : public SampleSource {
 public:
 	struct Settings {
 		qint32 m_gain;
-		qint32 m_decimation;
+		qint32 m_samplerate;
 
 		Settings();
 		void resetToDefaults();

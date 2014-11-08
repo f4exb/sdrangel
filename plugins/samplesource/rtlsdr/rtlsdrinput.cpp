@@ -27,21 +27,21 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
 RTLSDRInput::Settings::Settings() :
 	m_gain(0),
-	m_decimation(0)
+	m_samplerate(288000)
 {
 }
 
 void RTLSDRInput::Settings::resetToDefaults()
 {
 	m_gain = 0;
-	m_decimation = 0;
+	m_samplerate = 288000;
 }
 
 QByteArray RTLSDRInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_gain);
-	s.writeS32(2, m_decimation);
+	s.writeS32(2, m_samplerate);
 	return s.final();
 }
 
@@ -56,7 +56,7 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
-		d.readS32(2, &m_decimation, 0);
+		d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
 		resetToDefaults();
@@ -91,7 +91,7 @@ bool RTLSDRInput::startInput(int device)
 	int res;
 	int numberOfGains;
 
-	if(!m_sampleFifo.setSize(524288)) {
+	if(!m_sampleFifo.setSize(96000 * 4)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
@@ -111,8 +111,8 @@ bool RTLSDRInput::startInput(int device)
 	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if((res = rtlsdr_set_sample_rate(m_dev, 1536000)) < 0) {
-		qCritical("could not set sample rate: %s", strerror(errno));
+	if((res = rtlsdr_set_sample_rate(m_dev, 288000)) < 0) {
+		qCritical("could not set sample rate: 288k S/s");
 		goto failed;
 	}
 
@@ -182,7 +182,10 @@ const QString& RTLSDRInput::getDeviceDescription() const
 
 int RTLSDRInput::getSampleRate() const
 {
-	return 96000 * (1 <<  m_settings.m_decimation);
+	int rate = m_settings.m_samplerate / 4;
+	if (rate < 200000)
+		return rate;
+	return (rate / 4);
 }
 
 quint64 RTLSDRInput::getCenterFrequency() const
@@ -207,14 +210,6 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
-		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		if(m_dev != NULL) {
-			if(rtlsdr_set_center_freq(m_dev, m_generalSettings.m_centerFrequency
-								+ 384000) != 0)
-				qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
-		}
-	}
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
 		if(m_dev != NULL) {
@@ -222,15 +217,30 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 				qDebug("rtlsdr_set_tuner_gain() failed");
 		}
 	}
-	if((m_settings.m_decimation != settings.m_decimation) || force) {
-		m_settings.m_decimation = settings.m_decimation;
-		if(m_dev != NULL)
-			m_rtlSDRThread->setDecimation(m_settings.m_decimation);
+
+	if((m_settings.m_samplerate != settings.m_samplerate) || force) {
+		if(m_dev != NULL) {
+			if( rtlsdr_set_sample_rate(m_dev, settings.m_samplerate) < 0)
+				qCritical("could not set sample rate: %d", settings.m_samplerate);
+			else {
+				m_settings.m_samplerate = settings.m_samplerate;
+				m_rtlSDRThread->setSamplerate(settings.m_samplerate);
+			}
+		}
 	}
+
+	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
+	if(m_dev != NULL) {
+		if(rtlsdr_set_center_freq( m_dev, m_generalSettings.m_centerFrequency
+						+ (m_settings.m_samplerate / 4) ) != 0)
+			qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
+	}
+
 	return true;
 }
 
-
-void RTLSDRInput::set_ds_mode(int on){
+void RTLSDRInput::set_ds_mode(int on)
+{
 	rtlsdr_set_direct_sampling(m_dev, on);
 }
+
