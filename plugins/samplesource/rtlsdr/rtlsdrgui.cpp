@@ -10,7 +10,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, 28900U, 1700000U);
+	ui->centerFrequency->setValueRange(7, 28500U, 1700000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -157,28 +157,21 @@ void RTLSDRGui::updateHardware()
 
 void RTLSDRGui::on_checkBox_stateChanged(int state) {
 	if (state == Qt::Checked){
-		((RTLSDRInput*)m_sampleSource)->set_ds_mode((ui->radioButton->isChecked()) ? true : false);
-		ui->radioButton->setEnabled(true);
-		ui->radioButton_2->setEnabled(true);
+		// Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
+		((RTLSDRInput*)m_sampleSource)->set_ds_mode(3);
 		ui->gain->setEnabled(false);
-		ui->centerFrequency->setValueRange(7, 1000U, 28700U);
-		ui->centerFrequency->setValue(27000);
+		ui->centerFrequency->setValueRange(7, 1000U, 275000U);
+		ui->centerFrequency->setValue(7000);
+		m_generalSettings.m_centerFrequency = 7000 * 1000;
 	}
 	else {
 		((RTLSDRInput*)m_sampleSource)->set_ds_mode(0);
-		ui->radioButton->setEnabled(false);
-		ui->radioButton_2->setEnabled(false);
 		ui->gain->setEnabled(true);
-		ui->centerFrequency->setValueRange(7, 28900U, 1700000U);
-		ui->centerFrequency->setValue(29000);
+		ui->centerFrequency->setValueRange(7, 28500U, 1700000U);
+		ui->centerFrequency->setValue(434000);
+		ui->gain->setValue(0);
+		m_generalSettings.m_centerFrequency = 434000 * 1000;
 	}
+	sendSettings();
 }
 
-void RTLSDRGui::on_radioButton_toggled(bool checked){
-	if (checked)
-		((RTLSDRInput*)m_sampleSource)->set_ds_mode(1);
-}
-void RTLSDRGui::on_radioButton_2_toggled(bool checked){
-	if (checked)
-		((RTLSDRInput*)m_sampleSource)->set_ds_mode(2);
-}

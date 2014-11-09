@@ -23,7 +23,6 @@
 #include <QWaitCondition>
 #include <rtl-sdr.h>
 #include "dsp/samplefifo.h"
-#include "dsp/inthalfbandfilter.h"
 
 class RTLSDRThread : public QThread {
 	Q_OBJECT
@@ -34,8 +33,7 @@ public:
 
 	void startWork();
 	void stopWork();
-
-	void setSamplerate(int sanplerate);
+	void setSamplerate(int samplerate);
 
 private:
 	QMutex m_startWaitMutex;
@@ -49,7 +47,6 @@ private:
 	int m_samplerate;
 
 	void run();
-
 	void decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len);

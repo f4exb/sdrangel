@@ -226,33 +226,7 @@
      <item>
       <widget class="QCheckBox" name="checkBox">
        <property name="text">
-        <string>Direct Sampling: </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radioButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>I</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radioButton_2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Q</string>
+        <string>No-mod Direct Sampling</string>
        </property>
       </widget>
      </item>
