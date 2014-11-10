@@ -37,7 +37,7 @@ USBDemod::USBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 
-	USBFilter = new fftfilt(0.01, m_Bandwidth / 96000.0, usbFftLen);
+	USBFilter = new fftfilt(0.01, m_Bandwidth / 96000.0, USBFFTLEN);
 	// if (!USBFilter) segfault;
 }
 
@@ -52,7 +52,24 @@ void USBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 	cmd->submit(messageQueue, this);
 }
 
-/* Expects samplerate as multiples of 96kHz. */
+/* Fractional Downsample to 48 kHz.
+ * 192  1:4 (3072 / 16)
+ * 144  1:3 (2304 / 16)
+ * 96   1:2 (1536 / 16)
+ * 72   2:3 ( 288 /  4)
+ * 64   3:4 (1024 / 16)
+ * For Arbritrary resample use ssb demodulator */
+double rerate(int rate)
+{
+	switch (rate)
+	{
+		case 64000 : return (3.0 * 64000); break;
+		case 72000 : return (2.0 * 72000); break;
+		case     0 : return (1.0 ) ; break;
+		default    : return (1.0 * rate ); break;
+	}
+}
+
 void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Real a, b;
@@ -60,17 +77,24 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int n_out;
 	cmplx *sideband;
 	bool consumed;
-	int samplestep = m_sampleRate / 96000;
+	int samplestep = 2;
 
-	if (samplestep < 1 )
-		samplestep = 1;
-	for(SampleVector::const_iterator it = begin; it < end; it += samplestep) {
+	if ((m_sampleRate == 72000)||(m_sampleRate == 144000))
+		samplestep = 3; // !! FFT buffer length is a power of two
+	if ((m_sampleRate == 64000)||(m_sampleRate == 192000))
+		samplestep = 4; // buffer length should be good
+
+	for(SampleVector::const_iterator it = begin; it < end; it ++) {
 		a = it->real();
 		b = it->imag();
 		c = Complex(a / 65536.0, b / 65536.0);
 
 		n_out = USBFilter->run(c, &sideband, true);
-		for (int i = 0; i < n_out; i+=2) {
+		if (m_sampleRate <= 72000)
+			n_out += USBFilter->run(c, &sideband, true);
+		if (m_sampleRate == 64000)
+			n_out += USBFilter->run(c, &sideband, true);
+		for (int i = 0; i < n_out; i += samplestep) {
 			Real demod = (sideband[i].real() + sideband[i].imag()) * 32768.0;
 
 			// Downsample by 4x for audio display
@@ -106,15 +130,19 @@ void USBDemod::stop()
 
 bool USBDemod::handleMessage(Message* cmd)
 {
+	double rate;
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
 		m_sampleRate = signal->getSampleRate();
+		rate = rerate(m_sampleRate);
+		USBFilter->create_filter(300.0 / rate, (double)m_Bandwidth / rate);
 		cmd->completed();
 		return true;
 	} else if(MsgConfigureUSBDemod::match(cmd)) {
 		MsgConfigureUSBDemod* cfg = (MsgConfigureUSBDemod*)cmd;
 		m_Bandwidth = cfg->getBandwidth();
-		USBFilter->create_filter(0.3 / 96.0, m_Bandwidth / 96000.0);
+		rate = rerate(m_sampleRate);
+		USBFilter->create_filter(300.0 / rate, (double)m_Bandwidth / rate);
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;
 		cmd->completed();

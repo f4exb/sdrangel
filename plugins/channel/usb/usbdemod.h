@@ -26,7 +26,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
-#define usbFftLen 1024
+#define USBFFTLEN 2048
 
 class AudioFifo;
 

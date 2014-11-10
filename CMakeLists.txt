@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 option(KERNEL "Use Linux Kernel Video4Linux Source." OFF)
-option(IS96KHZ "Upper SideBand decoder needs 96kHz" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
