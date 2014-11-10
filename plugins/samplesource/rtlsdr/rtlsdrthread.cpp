@@ -96,7 +96,7 @@ void RTLSDRThread::decimate4(SampleVector::iterator* it, const quint8* buf, qint
 		for (int pos = 0; pos < len + 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s( xreal << 3, yimag << 3 );
+		Sample s( xreal << 4, yimag << 4 );
 		**it = s;
 		(*it)++;
 	}

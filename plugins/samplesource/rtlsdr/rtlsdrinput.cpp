@@ -56,7 +56,7 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
-		d.readS32(2, &m_samplerate, 0);
+		//d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
 		resetToDefaults();

@@ -95,7 +95,7 @@ bool RTLSDRGui::handleMessage(Message* message)
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	ui->samplerate->setValue(m_settings.m_samplerate);
+	ui->samplerate->setValue(0);
 
 	if(m_gains.size() > 0) {
 		int dist = abs(m_settings.m_gain - m_gains[0]);
@@ -141,7 +141,7 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 
 void RTLSDRGui::on_samplerate_valueChanged(int value)
 {
-	int Rates[] = {288, 1024, 1536, 0};
+	int Rates[] = {288, 1024, 1536, 2048, 2304, 2500 };
 	int newrate = Rates[value];
 	ui->samplerateText->setText(tr("%1k").arg(newrate));
 	m_settings.m_samplerate = newrate * 1000;

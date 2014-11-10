@@ -111,7 +111,7 @@
         <string>Device Samplerate</string>
        </property>
        <property name="maximum">
-        <number>2</number>
+        <number>4</number>
        </property>
        <property name="pageStep">
         <number>1</number>
