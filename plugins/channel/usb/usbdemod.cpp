@@ -36,6 +36,7 @@ USBDemod::USBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioBuffer.resize(512);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
+	m_i = 0;
 
 	USBFilter = new fftfilt(0.01, m_Bandwidth / 96000.0, USBFFTLEN);
 	// if (!USBFilter) segfault;
@@ -98,8 +99,8 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			n_out += USBFilter->run(c, &sideband, true);
 		if (m_sampleRate == 64000)
 			n_out += USBFilter->run(c, &sideband, true);
-		for (int i = 0; i < n_out; i += samplestep) {
-			Real demod = (sideband[i].real() + sideband[i].imag()) * 32768.0;
+		for (m_i; m_i < n_out; m_i += samplestep) {
+			Real demod = (sideband[m_i].real() + sideband[m_i].imag()) * 32768.0;
 
 			// Downsample by 4x for audio display
 			if (!(m_undersampleCount++ & 3))
@@ -114,6 +115,7 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				m_audioBufferFill = 0;
 			}
 		}
+		m_i -= n_out;
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
 		;//qDebug("lost samples");

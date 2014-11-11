@@ -77,6 +77,7 @@ private:
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
+	int m_i;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
