@@ -94,22 +94,7 @@ public:
 	quint64 getCenterFrequency() const;
 	bool handleMessage(Message* message);
 
-	void OpenSource(const char *filename);
-	void CloseSource();
-	void set_sample_rate(double samp_rate);
-	void set_center_freq(double freq);
-	void set_bandwidth(double bandwidth);
-	void set_tuner_gain(double gain);
-	int work(int noutput_items, qint16* output_items);
 private:
-	int fd;
-	quint32 pixelformat;
-	struct v4l_buffer *buffers;
-	unsigned int n_buffers;
-	void *recebuf_ptr;
-	unsigned int recebuf_len;
-	unsigned int recebuf_mmap_index;
-
 	QMutex m_mutex;
 	Settings m_settings;
 	int m_dev;

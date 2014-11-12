@@ -18,6 +18,7 @@
  */
 
 #include "v4linput.h"
+#include "v4lthread.h"
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
@@ -60,7 +61,7 @@ static void xioctl(int fh, unsigned long int request, void *arg)
 }
 
 void
-V4LInput::OpenSource(const char *filename)
+V4LThread::OpenSource(const char *filename)
 	{
 		struct v4l2_format fmt;
 		struct v4l2_buffer buf;
@@ -124,7 +125,7 @@ V4LInput::OpenSource(const char *filename)
 	}
 
 void
-V4LInput::CloseSource()
+V4LThread::CloseSource()
 	{
 		unsigned int i;
 		enum v4l2_buf_type type;
@@ -140,7 +141,7 @@ V4LInput::CloseSource()
 	}
 
 void
-V4LInput::set_sample_rate(double samp_rate)
+V4LThread::set_sample_rate(double samp_rate)
 	{
 		struct v4l2_frequency frequency;
 
@@ -156,7 +157,7 @@ V4LInput::set_sample_rate(double samp_rate)
 	}
 
 void
-V4LInput::set_center_freq(double freq)
+V4LThread::set_center_freq(double freq)
 	{
 		struct v4l2_frequency frequency;
 
@@ -172,7 +173,7 @@ V4LInput::set_center_freq(double freq)
 	}
 
 void
-V4LInput::set_bandwidth(double bandwidth)
+V4LThread::set_bandwidth(double bandwidth)
 	{
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
@@ -193,7 +194,7 @@ V4LInput::set_bandwidth(double bandwidth)
 	}
 
 void
-V4LInput::set_tuner_gain(double gain)
+V4LThread::set_tuner_gain(double gain)
 	{
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
@@ -214,54 +215,47 @@ V4LInput::set_tuner_gain(double gain)
 	}
 
 int
-V4LInput::work(int noutput_items, int16_t* output_items)
-	{
-		//complex *out = (complex *) output_items;
-		int ret;
-		struct timeval tv;
-		struct v4l2_buffer buf;
-		fd_set fds;
-		unsigned int i, items = 0;
-		float *fptr = (float *) output_items;
+V4LThread::work(int noutput_items)
+{
+	int ret;
+	struct timeval tv;
+	struct v4l2_buffer buf;
+	fd_set fds;
+	unsigned int i, items = 0;
+	qint16 xreal, yimag;
+	uint8_t* b;
+	SampleVector::iterator it;
 
-process_buf:
-		/* process received mmap buffer */
-		uint8_t *u8src = (uint8_t *) recebuf_ptr;
-		uint16_t *u16src = (uint16_t *) recebuf_ptr;
-
-		while (recebuf_len) {
-			if (pixelformat == V4L2_PIX_FMT_SDR_U8) {
-				*fptr++ = (*u8src++ - 127.5f) / 127.5f;
-				*fptr++ = (*u8src++ - 127.5f) / 127.5f;
-				recebuf_len -= 2;
-				items++;
-				recebuf_ptr = u8src;
-			} else if (pixelformat == V4L2_PIX_FMT_SDR_U16LE) {
-				*fptr++ = (*u16src++ - 32767.5f) / 32767.5f;
-				*fptr++ = (*u16src++ - 32767.5f) / 32767.5f;
-				recebuf_len -= 4;
-				items++;
-				recebuf_ptr = u16src;
-			} else {
-				recebuf_len = 0;
-			}
-
-			if (items == noutput_items)
-				break;
+	int pos = 0;
+	// in is 4*8bit*2(IQ), 8 bytes; out is 1*16bit*2(IQ) , 4bytes
+	it = m_convertBuffer.begin();
+	if (recebuf_len > 0) {
+		b = (uint8_t *) recebuf_ptr;
+		int len = noutput_items * 8;
+		if (len > recebuf_len)
+			len = recebuf_len;
+		for (pos = 0; pos < len - 7; pos += 8) {
+			xreal = b[pos+0] - b[pos+3] + b[pos+7] - b[pos+4];
+			yimag = b[pos+1] - b[pos+5] + b[pos+2] - b[pos+6];
+			Sample s( xreal << 3, yimag << 3 );
+			*it = s;
+			it++;
 		}
-
-		/* enqueue mmap buf after it is processed */
-		if (recebuf_len == 0 && items != 0) {
+		m_sampleFifo->write(m_convertBuffer.begin(), it);
+		recebuf_len -= pos;
+		recebuf_ptr = (void*)(b + pos);
+	}
+	// return now if there is still data in buffer, else free buffer and get another.
+	if (recebuf_len >= 8)
+		return pos / 8;
+	{	// frre buffer, if there was one.
+		if (pos > 0) { 
 			CLEAR(buf);
 			buf.type = V4L2_BUF_TYPE_SDR_CAPTURE;
 			buf.memory = V4L2_MEMORY_MMAP;
 			buf.index = recebuf_mmap_index;
 			xioctl(fd, VIDIOC_QBUF, &buf);
 		}
-
-		/* signal DSP we have some samples to offer */
-		if (items)
-			return items;
 
 		/* Read data from device */
 		do {
@@ -289,10 +283,6 @@ process_buf:
 		recebuf_ptr = buffers[buf.index].start;
 		recebuf_len = buf.bytesused;
 		recebuf_mmap_index = buf.index;
-		/* FIXME: */
-		goto process_buf;
-
-		// Tell runtime system how many output items we produced.
-		return 0;
 	}
-
+	return pos / 8;
+}

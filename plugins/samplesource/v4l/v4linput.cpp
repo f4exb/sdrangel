@@ -26,15 +26,13 @@ MESSAGE_CLASS_DEFINITION(V4LInput::MsgConfigureV4L, Message)
 MESSAGE_CLASS_DEFINITION(V4LInput::MsgReportV4L, Message)
 
 V4LInput::Settings::Settings() :
-	m_gain(0),
-	m_samplerate(2500000)
+	m_gain(0)
 {
 }
 
 void V4LInput::Settings::resetToDefaults()
 {
 	m_gain = 0;
-	m_samplerate = 2500000;
 }
 
 QByteArray V4LInput::Settings::serialize() const
@@ -73,6 +71,16 @@ V4LInput::V4LInput(MessageQueue* msgQueueToGUI) :
 {
 }
 
+bool V4LThread::Init()
+{
+	OpenSource("/dev/swradio0");
+	if (fd < 0) {
+		qCritical("could not open SDR");
+		return false;
+	}
+	return true;
+}
+
 V4LInput::~V4LInput()
 {
 	stopInput();
@@ -96,62 +104,18 @@ bool V4LInput::startInput(int device)
 	serial[0] = '\0';
 
 
-	if(!m_sampleFifo.setSize(524288)) { // fraction of samplerate
+	if(!m_sampleFifo.setSize(4096*16)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	OpenSource("/dev/swradio0");
-	if (fd < 0) {
-		qCritical("could not open SDR");
-		return false;
-	}
-	m_dev = device;
-/*
-	if((res = rtlsdr_get_usb_strings(m_dev, vendor, product, serial)) < 0) {
-		qCritical("error accessing USB device");
-		goto failed;
-	}
-	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
-	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
-
-	if((res = rtlsdr_set_sample_rate(m_dev, 1536000)) < 0) {
-		qCritical("could not set sample rate: %s", strerror(errno));
-		goto failed;
-	}
-
-	if((res = rtlsdr_set_tuner_gain_mode(m_dev, 1)) < 0) {
-		qCritical("error setting tuner gain mode");
-		goto failed;
-	}
-	if((res = rtlsdr_set_agc_mode(m_dev, 0)) < 0) {
-		qCritical("error setting agc mode");
-		goto failed;
-	}
-
-	numberOfGains = rtlsdr_get_tuner_gains(m_dev, NULL);
-	if(numberOfGains < 0) {
-		qCritical("error getting number of gain values supported");
-		goto failed;
-	}
-	m_gains.resize(numberOfGains);
-	if(rtlsdr_get_tuner_gains(m_dev, &m_gains[0]) < 0) {
-		qCritical("error getting gain values");
-		goto failed;
-	}
-	if((res = rtlsdr_reset_buffer(m_dev)) < 0) {
-		qCritical("could not reset USB EP buffers: %s", strerror(errno));
-		goto failed;
-	}
-*/
 	if((m_V4LThread = new V4LThread(&m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
 		goto failed;
 	}
-	m_V4LThread->startWork();
 
 	mutexLocker.unlock();
-	applySettings(m_generalSettings, m_settings, true);
+	//applySettings(m_generalSettings, m_settings, true);
 
 	qDebug("V4LInput: start");
 	MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
@@ -159,7 +123,6 @@ bool V4LInput::startInput(int device)
 	return true;
 
 failed:
-	stopInput();
 	return false;
 }
 
@@ -172,10 +135,6 @@ void V4LInput::stopInput()
 		delete m_V4LThread;
 		m_V4LThread = NULL;
 	}
-	if(m_dev > 0) {
-		CloseSource();
-		m_dev = 0;
-	}
 	m_deviceDescription.clear();
 }
 
@@ -187,7 +146,6 @@ const QString& V4LInput::getDeviceDescription() const
 int V4LInput::getSampleRate() const
 {
 	int result = m_settings.m_samplerate / 4;
-	if (result > 200000) result /= 4;
 	return result;
 }
 
@@ -216,18 +174,13 @@ bool V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 		if(m_dev > 0)
-			V4LInput::set_center_freq( (double)(generalSettings.m_centerFrequency
+			m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
 								+ (settings.m_samplerate / 4) ));
 	}
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
 		if(m_dev > 0)
-			V4LInput::set_tuner_gain((double)m_settings.m_gain);
-	}
-	if((m_settings.m_samplerate != settings.m_samplerate) || force) {
-		m_settings.m_samplerate = settings.m_samplerate;
-		if(m_dev > 0)
-			m_V4LThread->setSamplerate((double)settings.m_samplerate);
+			m_V4LThread->set_tuner_gain((double)m_settings.m_gain);
 	}
 	return true;
 }

@@ -24,6 +24,9 @@
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
 
+#define SAMPLERATE 1024000
+#define BLOCKSIZE 4096
+
 class V4LThread : public QThread {
 	Q_OBJECT
 
@@ -31,12 +34,25 @@ public:
 	V4LThread(SampleFifo* sampleFifo, QObject* parent = NULL);
 	~V4LThread();
 
-	void startWork();
+	bool Init();
 	void stopWork();
-
 	void setSamplerate(int samplerate);
-
+	void OpenSource(const char *filename);
+	void CloseSource();
+	void set_sample_rate(double samp_rate);
+	void set_center_freq(double freq);
+	void set_bandwidth(double bandwidth);
+	void set_tuner_gain(double gain);
+	int  work(int n_items);
 private:
+	int fd;
+	quint32 pixelformat;
+	struct v4l_buffer *buffers;
+	unsigned int n_buffers;
+	void *recebuf_ptr;
+	unsigned int recebuf_len;
+	unsigned int recebuf_mmap_index;
+
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	bool m_running;
@@ -48,13 +64,5 @@ private:
 
 	void run();
 
-	void decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate16(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void callback(const quint8* buf, qint32 len);
-
-	static void callbackHelper(unsigned char* buf, quint32 len, void* ctx);
 };
-
 #endif // INCLUDE_V4LTHREAD_H
