@@ -119,6 +119,7 @@ V4LThread::OpenSource(const char *filename)
 			xioctl(fd, VIDIOC_QBUF, &buf);
 		}
 
+		set_sample_rate((double)SAMPLERATE);
 		// start streaming
 		type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		xioctl(fd, VIDIOC_STREAMON, &type);

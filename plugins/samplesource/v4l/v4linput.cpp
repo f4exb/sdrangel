@@ -70,16 +70,6 @@ V4LInput::V4LInput(MessageQueue* msgQueueToGUI) :
 {
 }
 
-bool V4LThread::Init()
-{
-	OpenSource("/dev/swradio0");
-	if (fd < 0) {
-		qCritical("could not open SDR");
-		return false;
-	}
-	return true;
-}
-
 V4LInput::~V4LInput()
 {
 	stopInput();

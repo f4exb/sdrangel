@@ -34,7 +34,6 @@ public:
 	V4LThread(SampleFifo* sampleFifo, QObject* parent = NULL);
 	~V4LThread();
 
-	bool Init();
 	void stopWork();
 	void OpenSource(const char *filename);
 	void CloseSource();

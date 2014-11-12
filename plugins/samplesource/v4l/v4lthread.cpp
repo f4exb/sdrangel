@@ -26,6 +26,7 @@ V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo)
 {
+	start();
 }
 
 V4LThread::~V4LThread()
@@ -35,12 +36,14 @@ V4LThread::~V4LThread()
 void V4LThread::stopWork()
 {
 	m_running = false;
+	wait();
 }
 
 void V4LThread::run()
 {
 	m_running = true;
-	if (! Init() )
+	OpenSource("/dev/swradio0");
+	if (fd < 0)
                 return;
 
 	while(m_running) {
