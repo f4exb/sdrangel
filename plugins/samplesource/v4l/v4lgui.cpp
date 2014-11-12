@@ -95,8 +95,6 @@ bool V4LGui::handleMessage(Message* message)
 void V4LGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	ui->samplerate->setValue(m_settings.m_samplerate);
-
 	if(m_gains.size() > 0) {
 		int dist = abs(m_settings.m_gain - m_gains[0]);
 		int pos = 0;
@@ -136,15 +134,6 @@ void V4LGui::on_gain_valueChanged(int value)
 	int gain = m_gains[value];
 	ui->gainText->setText(tr("%1.%2").arg(gain / 10).arg(abs(gain % 10)));
 	m_settings.m_gain = gain;
-	sendSettings();
-}
-
-void V4LGui::on_samplerate_valueChanged(int value)
-{
-	int Rates[] = { 2500, 1536, 3072, 288, 1000, 0};
-	int newrate = Rates[value];
-	ui->samplerateText->setText(tr("%1kHz").arg(newrate));
-	m_settings.m_samplerate = 1000 * newrate;
 	sendSettings();
 }
 

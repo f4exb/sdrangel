@@ -36,7 +36,6 @@ public:
 
 	bool Init();
 	void stopWork();
-	void setSamplerate(int samplerate);
 	void OpenSource(const char *filename);
 	void CloseSource();
 	void set_sample_rate(double samp_rate);
@@ -57,10 +56,8 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	int m_dev;
 	SampleVector m_convertBuffer;
 	SampleFifo* m_sampleFifo;
-	int m_samplerate;
 
 	void run();
 

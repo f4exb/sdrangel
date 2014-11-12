@@ -32,7 +32,6 @@ class V4LInput : public SampleSource {
 public:
 	struct Settings {
 		qint32 m_gain;
-		qint32 m_samplerate;
 
 		Settings();
 		void resetToDefaults();
@@ -97,7 +96,6 @@ public:
 private:
 	QMutex m_mutex;
 	Settings m_settings;
-	int m_dev;
 	V4LThread* m_V4LThread;
 	QString m_deviceDescription;
 	std::vector<int> m_gains;

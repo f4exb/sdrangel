@@ -23,7 +23,6 @@
 V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
-	m_dev(1),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo)
 {
@@ -31,21 +30,22 @@ V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
 
 V4LThread::~V4LThread()
 {
+}
+
+void V4LThread::stopWork()
+{
 	m_running = false;
 }
 
 void V4LThread::run()
 {
+	m_running = true;
 	if (! Init() )
                 return;
-
-	m_running = true;
 
 	while(m_running) {
 		work(BLOCKSIZE);
 	}
-
-	m_running = false;
 	CloseSource();
 }
 

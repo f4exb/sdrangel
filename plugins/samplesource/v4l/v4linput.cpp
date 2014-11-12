@@ -39,7 +39,7 @@ QByteArray V4LInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_gain);
-	s.writeS32(2, m_samplerate);
+	s.writeS32(2, SAMPLERATE);
 	return s.final();
 }
 
@@ -54,7 +54,7 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
-		d.readS32(2, &m_samplerate, 0);
+		//d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
 		resetToDefaults();
@@ -65,7 +65,6 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 V4LInput::V4LInput(MessageQueue* msgQueueToGUI) :
 	SampleSource(msgQueueToGUI),
 	m_settings(),
-	m_dev(0),
 	m_V4LThread(NULL),
 	m_deviceDescription()
 {
@@ -90,19 +89,8 @@ bool V4LInput::startInput(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_dev > 0)
-		stopInput();
-
-	char vendor[256];
-	char product[256];
-	char serial[256];
-	int res;
-	int numberOfGains;
-
-	vendor[0] = '\0';
-	product[0] = '\0';
-	serial[0] = '\0';
-
+	if(m_V4LThread)
+		return false;
 
 	if(!m_sampleFifo.setSize(4096*16)) {
 		qCritical("Could not allocate SampleFifo");
@@ -111,27 +99,24 @@ bool V4LInput::startInput(int device)
 
 	if((m_V4LThread = new V4LThread(&m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
-		goto failed;
+		return false;
 	}
 
-	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
+	m_deviceDescription = QString("RTL-SDR /dev/swradio0");
 
 	qDebug("V4LInput: start");
 	MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
 
 	return true;
-
-failed:
-	return false;
 }
 
 void V4LInput::stopInput()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_V4LThread != NULL) {
+	if(m_V4LThread) {
 		m_V4LThread->stopWork();
+		// wait for thread to quit ?
 		delete m_V4LThread;
 		m_V4LThread = NULL;
 	}
@@ -145,7 +130,7 @@ const QString& V4LInput::getDeviceDescription() const
 
 int V4LInput::getSampleRate() const
 {
-	int result = m_settings.m_samplerate / 4;
+	int result = SAMPLERATE / 4;
 	return result;
 }
 
@@ -173,13 +158,13 @@ bool V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		if(m_dev > 0)
+		if(m_V4LThread)
 			m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
-								+ (settings.m_samplerate / 4) ));
+								+ (SAMPLERATE / 4) ));
 	}
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
-		if(m_dev > 0)
+		if(m_V4LThread)
 			m_V4LThread->set_tuner_gain((double)m_settings.m_gain);
 	}
 	return true;
