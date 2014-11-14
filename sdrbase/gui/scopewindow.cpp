@@ -53,16 +53,19 @@ void ScopeWindow::resetToDefaults()
 QByteArray ScopeWindow::serialize() const
 {
 	SimpleSerializer s(1);
+#if 0
 	s.writeS32(1, m_displayData);
 	s.writeS32(2, m_displayOrientation);
 	s.writeS32(3, m_timeBase);
 	s.writeS32(4, m_timeOffset);
 	s.writeS32(5, m_amplification);
+#endif
 	return s.final();
 }
 
 bool ScopeWindow::deserialize(const QByteArray& data)
 {
+#if 0
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
@@ -84,6 +87,10 @@ bool ScopeWindow::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+#else
+	resetToDefaults();
+	return false;
+#endif
 }
 
 void ScopeWindow::on_amp_valueChanged(int value)

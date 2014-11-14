@@ -13,8 +13,8 @@ void Preset::resetToDefaults()
 	m_centerFrequency = 0;
 	m_spectrumConfig.clear();
 	m_scopeConfig.clear();
-	m_dcOffsetCorrection = true;
-	m_iqImbalanceCorrection = true;
+	m_dcOffsetCorrection = false;
+	m_iqImbalanceCorrection = false;
 	m_showScope = true;
 	m_layout.clear();
 	m_spectrumConfig.clear();
@@ -64,8 +64,8 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readBool(4, &m_showScope, true);
 		d.readBlob(5, &m_layout);
 		d.readBlob(6, &m_spectrumConfig);
-		d.readBool(7, &m_dcOffsetCorrection, true);
-		d.readBool(8, &m_iqImbalanceCorrection, true);
+		d.readBool(7, &m_dcOffsetCorrection, false);
+		d.readBool(8, &m_iqImbalanceCorrection, false);
 		d.readBlob(9, &m_scopeConfig);
 		d.readString(10, &m_source);
 		d.readBlob(11, &m_sourceGeneralConfig);
