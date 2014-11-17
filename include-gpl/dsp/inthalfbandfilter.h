@@ -223,9 +223,23 @@ public:
 			}
 	}
 
+	void myDecimate(Sample* sample1, Sample* sample2)
+        {
+		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2} ;
+		m_samples[m_ptr][0] = sample1->real();
+		m_samples[m_ptr][1] = sample1->imag();
+		m_ptr = mod33[m_ptr + 2 - 1];
+
+		m_samples[m_ptr][0] = sample2->real();
+		m_samples[m_ptr][1] = sample2->imag();
+		doFIR(sample2);
+		m_ptr = mod33[m_ptr + 2 - 1];
+	}
+
 protected:
 	qint16 m_samples[HB_FILTERORDER + 1][2];
-	int m_ptr;
+	qint16 m_ptr;
 	int m_state;
 
 	void doFIR(Sample* sample)
@@ -267,15 +281,17 @@ protected:
 			0.317491986549921390015072120149852707982 * (1 << HB_SHIFT)
 		};
 #elif HB_FILTERORDER == 32
+		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2} ;
 		static const qint32 COEFF[8] = {
-		   -0.015956912844043127236437484839370881673 * (1 << HB_SHIFT),
-			0.013023031678944928940522274274371739011 * (1 << HB_SHIFT),
-		   -0.01866942273717486777684371190844103694  * (1 << HB_SHIFT),
-			0.026550887571157304190005987720724078827 * (1 << HB_SHIFT),
-		   -0.038350314277854319344740474662103224546 * (1 << HB_SHIFT),
-			0.058429248652825838128421764849917963147 * (1 << HB_SHIFT),
-		   -0.102889802028955756885153505209018476307 * (1 << HB_SHIFT),
-			0.317237706405931241260276465254719369113 * (1 << HB_SHIFT)
+			(qint32)(-0.015956912844043127236437484839370881673 * (1 << HB_SHIFT)),
+			(qint32)( 0.013023031678944928940522274274371739011 * (1 << HB_SHIFT)),
+			(qint32)(-0.01866942273717486777684371190844103694  * (1 << HB_SHIFT)),
+			(qint32)( 0.026550887571157304190005987720724078827 * (1 << HB_SHIFT)),
+			(qint32)(-0.038350314277854319344740474662103224546 * (1 << HB_SHIFT)),
+			(qint32)( 0.058429248652825838128421764849917963147 * (1 << HB_SHIFT)),
+			(qint32)(-0.102889802028955756885153505209018476307 * (1 << HB_SHIFT)),
+			(qint32)( 0.317237706405931241260276465254719369113 * (1 << HB_SHIFT))
 		};
 #else
 #error unsupported filter order
@@ -283,8 +299,8 @@ protected:
 
 
 		// init read-pointer
-		int a = (m_ptr + 1) % (HB_FILTERORDER + 1);
-		int b = (m_ptr + (HB_FILTERORDER - 1)) % (HB_FILTERORDER + 1);
+		int a = mod33[m_ptr + 2 + 1]; // 0 + 1
+		int b = mod33[m_ptr + 2 - 2]; //-1 - 1
 
 		// go through samples in buffer
 		qint32 iAcc = 0;
@@ -297,17 +313,16 @@ protected:
 			qAcc += qTmp * COEFF[i];
 
 			// update read-pointer
-			a = (a + 2) % (HB_FILTERORDER + 1);
-			b = (b + (HB_FILTERORDER - 1)) % (HB_FILTERORDER + 1);
+			a = mod33[a + 2 + 2];
+			b = mod33[b + 2 - 2];
 		}
 
-		a = (a + HB_FILTERORDER) % (HB_FILTERORDER + 1);
-		iAcc += m_samples[a][0] * (qint32)(0.5 * (1 << HB_SHIFT));
-		qAcc += m_samples[a][1] * (qint32)(0.5 * (1 << HB_SHIFT));
+		a = mod33[a + 2 - 1];
+		iAcc += ((qint32)m_samples[a][0] + 1) << (HB_SHIFT - 1);
+		qAcc += ((qint32)m_samples[a][1] + 1) << (HB_SHIFT - 1);
 
-		// done, save result
-		sample->setReal((iAcc + (qint32)(0.5 * (1 << HB_SHIFT))) >> HB_SHIFT);
-		sample->setImag((qAcc + (qint32)(0.5 * (1 << HB_SHIFT))) >> HB_SHIFT);
+		sample->setReal(iAcc >> HB_SHIFT);
+		sample->setImag(qAcc >> HB_SHIFT);
 	}
 };
 

@@ -96,7 +96,7 @@ void RTLSDRThread::decimate4(SampleVector::iterator* it, const quint8* buf, qint
 		for (int pos = 0; pos < len - 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s( xreal << 4, yimag << 4 );
+		Sample s( xreal << 3, yimag << 3 );
 		**it = s;
 		(*it)++;
 	}
@@ -122,25 +122,29 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 {
 	// Offset tuning: 4x downsample and rotate, then
 	// downsample 4x more. [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-	qint16 xreal, yimag;
-	for (int step = 0; step < len - 31; step +=32) {
-		xreal = yimag = 0;
-		for (int pos = step; pos < step + 32; pos += 8) {
-			xreal += buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
-			yimag += buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
+	qint16 xreal[4], yimag[4];
+	bool b;
+	for (int pos = 0; pos < len - 31; ) {
+		for (int i = 0; i < 4; i++) {
+			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 4;
+			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 4;
+			pos += 8;
 		}
-		Sample s( xreal << 3, yimag << 3 );
-		**it = s;
+		Sample s1( xreal[0], yimag[0] );
+		Sample s2( xreal[1], yimag[1] );
+		Sample s3( xreal[2], yimag[2] );
+		Sample s4( xreal[3], yimag[3] );
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator4.myDecimate(&s2, &s4);
+		**it = s4;
 		(*it)++;
 	}
 }
 
 
-/*
-  Decimate everything by 16x, except 288kHz
-  TODO : no offset tuning for direct sampling
-*/
 
+//  Decimate everything by 16x, except 288kHz
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	qint16 xreal, yimag, phase;
@@ -149,14 +153,12 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 	int mode = 0;
 	if (m_samplerate < 800000)
 		mode = 2;
-	// if (directsampling) mode++;
 
 	switch(mode) {
 		case 0:
 			decimate16(&it, buf, len);
 			break;
 		case 1:
-			// no_rotate16(&it, buf, len);
 			break;
 
 		case 2:
@@ -164,7 +166,6 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 			break;
 
 		case 3:
-			// norotate4(&it, buf, len);
 			break;
 
 		default:
@@ -183,3 +184,4 @@ void RTLSDRThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
 	RTLSDRThread* thread = (RTLSDRThread*)ctx;
 	thread->callback(buf, len);
 }
+
