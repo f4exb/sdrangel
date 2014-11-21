@@ -90,18 +90,18 @@ void Interpolator::create(int phaseSteps, double sampleRate, double cutoff)
 
 	// move taps around to match sse storage requirements
 	m_taps = new float[2 * taps.size() + 8];
-	for(int i = 0; i < 2 * taps.size() + 8; ++i)
+	for(uint i = 0; i < 2 * taps.size() + 8; ++i)
 		m_taps[i] = 0;
 	m_alignedTaps = (float*)((((quint64)m_taps) + 15) & ~15);
-	for(int i = 0; i < taps.size(); ++i) {
+	for(uint i = 0; i < taps.size(); ++i) {
 		m_alignedTaps[2 * i + 0] = polyphase[i];
 		m_alignedTaps[2 * i + 1] = polyphase[i];
 	}
 	m_taps2 = new float[2 * taps.size() + 8];
-	for(int i = 0; i < 2 * taps.size() + 8; ++i)
+	for(uint i = 0; i < 2 * taps.size() + 8; ++i)
 		m_taps2[i] = 0;
 	m_alignedTaps2 = (float*)((((quint64)m_taps2) + 15) & ~15);
-	for(int i = 1; i < taps.size(); ++i) {
+	for(uint i = 1; i < taps.size(); ++i) {
 		m_alignedTaps2[2 * (i - 1) + 0] = polyphase[i];
 		m_alignedTaps2[2 * (i - 1) + 1] = polyphase[i];
 	}

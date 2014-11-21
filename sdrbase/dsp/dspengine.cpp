@@ -323,7 +323,7 @@ void DSPEngine::handleSetSource(SampleSource* source)
 void DSPEngine::generateReport()
 {
 	bool needReport = false;
-	int sampleRate;
+	unsigned int sampleRate;
 	quint64 centerFrequency;
 
 	if(m_sampleSource != NULL) {

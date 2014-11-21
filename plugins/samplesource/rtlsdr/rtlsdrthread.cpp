@@ -123,7 +123,7 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 	// Offset tuning: 4x downsample and rotate, then
 	// downsample 4x more. [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
 	qint16 xreal[4], yimag[4];
-	bool b;
+
 	for (int pos = 0; pos < len - 31; ) {
 		for (int i = 0; i < 4; i++) {
 			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 4;
@@ -147,7 +147,6 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 //  Decimate everything by 16x, except 288kHz
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
-	qint16 xreal, yimag, phase;
 	SampleVector::iterator it = m_convertBuffer.begin();
 
 	int mode = 0;

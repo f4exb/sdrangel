@@ -65,7 +65,7 @@ void ThreadedSampleSink::handleData()
 		size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
 
 		// first part of FIFO data
-		if(part1begin != part1end) {
+		if(count > 0) {
 			// handle data
 			if(m_sampleSink != NULL)
 				m_sampleSink->feed(part1begin, part1end, positiveOnly);

@@ -77,9 +77,8 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 {
 	Real a, b;
 	Complex c;
-	int n_out;
+	int i, n_out;
 	cmplx *sideband;
-	bool consumed;
 	int samplestep = 2;
 
 	if ((m_sampleRate == 72000)||(m_sampleRate == 144000))
@@ -99,8 +98,8 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			n_out += USBFilter->run(c, &sideband, true);
 		if (m_sampleRate == 64000)
 			n_out += USBFilter->run(c, &sideband, true);
-		for (m_i; m_i < n_out; m_i += samplestep) {
-			Real demod = (sideband[m_i].real() + sideband[m_i].imag()) * 32768.0;
+		for (i = m_i ; i < n_out; i += samplestep) {
+			Real demod = (sideband[i].real() + sideband[i].imag()) * 32768.0;
 
 			// Downsample by 4x for audio display
 			if (!(m_undersampleCount++ & 3))
@@ -112,10 +111,12 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			++m_audioBufferFill;
 			if(m_audioBufferFill >= m_audioBuffer.size()) {
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+				if (res != m_audioBufferFill)
+					qDebug("lost %u samples", m_audioBufferFill - res);
 				m_audioBufferFill = 0;
 			}
 		}
-		m_i -= n_out;
+		m_i = i - n_out;
 	}
 	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
 		;//qDebug("lost samples");

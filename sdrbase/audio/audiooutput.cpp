@@ -110,15 +110,13 @@ bool AudioOutput::open(OpenMode mode)
 
 qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {
-	if(maxLen == 0)
-		return 0;
-
 	QMutexLocker mutexLocker(&m_mutex);
 
-	maxLen -= maxLen % 4;
-	int framesPerBuffer = maxLen / 4;
+	unsigned int framesPerBuffer = maxLen / 4;
+	if(framesPerBuffer == 0)
+		return 0;
 
-	if((int)m_mixBuffer.size() < framesPerBuffer * 2) {
+	if(m_mixBuffer.size() < framesPerBuffer * 2) {
 		m_mixBuffer.resize(framesPerBuffer * 2); // allocate 2 qint32 per frame (stereo)
 		if(m_mixBuffer.size() != framesPerBuffer * 2)
 			return 0;
@@ -144,7 +142,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 	// convert to int16
 	std::vector<qint32>::const_iterator src = m_mixBuffer.begin();
 	qint16* dst = (qint16*)data;
-	for(int i = 0; i < framesPerBuffer; ++i) {
+	for(uint i = 0; i < framesPerBuffer; i++) {
 		// left channel
 		qint32 s = *src++;
 		if(s < -32768)

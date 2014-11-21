@@ -118,7 +118,7 @@ void GLScope::paintGL()
 
 	handleMode();
 
-	if(m_displayTrace->size() != m_oldTraceSize) {
+	if(m_displayTrace->size() - m_oldTraceSize != 0) {
 		m_oldTraceSize = m_displayTrace->size();
 		emit traceSizeChanged(m_displayTrace->size());
 	}

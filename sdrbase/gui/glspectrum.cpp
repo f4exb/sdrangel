@@ -663,7 +663,7 @@ void GLSpectrum::paintGL()
 
 	// paint max hold lines on top of histogram
 	if(m_displayMaxHold) {
-		if(m_maxHold.size() < m_fftSize)
+		if(m_maxHold.size() < (uint)m_fftSize)
 			m_maxHold.resize(m_fftSize);
 		for(int i = 0; i < m_fftSize; i++) {
 			int j;
@@ -818,12 +818,12 @@ void GLSpectrum::applyChanges()
 	int topMargin = fm.ascent() * 1.5;
 	int bottomMargin = fm.ascent() * 1.5;
 
-	int waterfallHeight;
-	int waterfallTop;
+	int waterfallHeight = 0;
+	int waterfallTop = 0;
 	int frequencyScaleHeight = fm.height() * 2;
 	int frequencyScaleTop;
-	int histogramTop;
-	int histogramHeight;
+	int histogramTop = 0;
+	int histogramHeight = 20;
 	int leftMargin;
 	int rightMargin = fm.width("000");
 

@@ -144,8 +144,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setColor(Qt::red);
-	m_channelMarker->setBandwidth(16000);
+	m_channelMarker->setColor(Qt::blue);
+	m_channelMarker->setBandwidth(32000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));

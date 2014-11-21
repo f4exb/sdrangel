@@ -94,10 +94,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				++m_audioBufferFill;
 				if(m_audioBufferFill >= m_audioBuffer.size()) {
 					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-					/*
 					if(res != m_audioBufferFill)
 						qDebug("lost %u samples", m_audioBufferFill - res);
-					*/
 					m_audioBufferFill = 0;
 				}
 			}
