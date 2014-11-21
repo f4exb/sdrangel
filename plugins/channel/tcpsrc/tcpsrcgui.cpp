@@ -269,7 +269,7 @@ void TCPSrcGUI::addConnection(quint32 id, const QHostAddress& peerAddress, int p
 void TCPSrcGUI::delConnection(quint32 id)
 {
 	for(int i = 0; i < ui->connections->topLevelItemCount(); i++) {
-		if(ui->connections->topLevelItem(i)->type() == id) {
+		if(ui->connections->topLevelItem(i)->type() == (int)id) {
 			delete ui->connections->topLevelItem(i);
 			ui->connectedClientsBox->setWindowTitle(tr("Connected Clients (%1)").arg(ui->connections->topLevelItemCount()));
 			return;

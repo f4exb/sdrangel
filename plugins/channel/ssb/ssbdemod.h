@@ -84,12 +84,12 @@ private:
 	Real m_sampleDistanceRemain;
 	fftfilt* SSBFilter;
 
+	SampleSink* m_sampleSink;
+	SampleVector m_sampleBuffer;
+
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 	AudioFifo* m_audioFifo;
-
-	SampleSink* m_sampleSink;
-	SampleVector m_sampleBuffer;
 };
 
 #endif // INCLUDE_SSBDEMOD_H

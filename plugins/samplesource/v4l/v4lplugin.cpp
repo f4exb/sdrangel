@@ -35,23 +35,12 @@ void V4LPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SampleSourceDevices V4LPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
-	int count = 1; //rtlsdr_get_device_count();
-	char vendor[256];
-	char product[256];
-	char serial[256];
 
-	for(int i = 0; i < count; i++) {
-		vendor[0] = '\0';
-		product[0] = '\0';
-		serial[0] = '\0';
+	QString displayedName(QString("Kernel Source #1"));
+	SimpleSerializer s(1);
+	s.writeS32(1, 0);
+	result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.v4l", s.final()));
 
-//		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
-//			continue;
-		QString displayedName(QString("SDR #%1").arg(i + 1));
-		SimpleSerializer s(1);
-		s.writeS32(1, i);
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.v4l", s.final()));
-	}
 	return result;
 }
 

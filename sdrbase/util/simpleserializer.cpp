@@ -669,7 +669,7 @@ bool SimpleDeserializer::parseAll()
 
 		readOfs += length;
 
-		if(readOfs == m_data.size())
+		if(readOfs == (uint)m_data.size())
 			return true;
 	}
 	return false;

@@ -78,15 +78,15 @@ private:
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
-
 	Complex m_lastSample;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-	AudioFifo* m_audioFifo;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
+
+	AudioFifo* m_audioFifo;
 };
 
 #endif // INCLUDE_WFMDEMOD_H

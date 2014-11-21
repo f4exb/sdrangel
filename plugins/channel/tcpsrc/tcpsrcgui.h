@@ -45,6 +45,7 @@ private slots:
 private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
+	TCPSrc* m_tcpSrc;
 	ChannelMarker* m_channelMarker;
 
 	// settings
@@ -57,7 +58,6 @@ private:
 	// RF path
 	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
-	TCPSrc* m_tcpSrc;
 	SpectrumVis* m_spectrumVis;
 
 	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);

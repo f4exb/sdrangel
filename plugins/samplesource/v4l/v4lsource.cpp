@@ -222,17 +222,16 @@ V4LThread::work(int noutput_items)
 	struct timeval tv;
 	struct v4l2_buffer buf;
 	fd_set fds;
-	unsigned int i, items = 0;
 	qint16 xreal, yimag;
 	uint8_t* b;
 	SampleVector::iterator it;
 
-	int pos = 0;
+	unsigned int pos = 0;
 	// in is 4*8bit*2(IQ), 8 bytes; out is 1*16bit*2(IQ) , 4bytes
 	it = m_convertBuffer.begin();
 	if (recebuf_len > 0) {
 		b = (uint8_t *) recebuf_ptr;
-		int len = noutput_items * 8;
+		unsigned int len = noutput_items * 8;
 		if (len > recebuf_len)
 			len = recebuf_len;
 		for (pos = 0; pos < len - 7; pos += 8) {

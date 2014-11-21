@@ -81,11 +81,11 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-	AudioFifo* m_audioFifo;
 	fftfilt* USBFilter;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
+	AudioFifo* m_audioFifo;
 };
 
 #endif // INCLUDE_USBDEMOD_H

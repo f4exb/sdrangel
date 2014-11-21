@@ -9,7 +9,7 @@ project(sdrangelove)
 set(CMAKE_BUILD_TYPE "Release")
 #set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
 #set(CMAKE_BUILD_TYPE "Debug")
-#add_definitions(-Wall -fno-strict-aliasing)
+add_definitions(-Wall -fno-strict-aliasing)
 
 
 set(QT_USE_QTOPENGL TRUE)
