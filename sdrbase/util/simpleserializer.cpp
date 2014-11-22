@@ -165,8 +165,14 @@ void SimpleSerializer::writeU64(quint32 id, quint64 value)
 		m_data.push_back((char)((value >> (i * 8)) & 0xff));
 }
 
+union floatasint {
+	quint32 u;
+	float f;
+};
+
 void SimpleSerializer::writeFloat(quint32 id, float value)
 {
+	union floatasint tmp;
 	if(id == 0) {
 		qCritical("SimpleSerializer: ID 0 is not allowed");
 		return;
@@ -175,15 +181,21 @@ void SimpleSerializer::writeFloat(quint32 id, float value)
 	if(!writeTag(TFloat, id, 4))
 		return;
 
-	quint32 tmp = *((quint32*)&value);
-	m_data.push_back((char)((tmp >> 24) & 0xff));
-	m_data.push_back((char)((tmp >> 16) & 0xff));
-	m_data.push_back((char)((tmp >> 8) & 0xff));
-	m_data.push_back((char)(tmp & 0xff));
+	tmp.f = value;
+	m_data.push_back((char)((tmp.u >> 24) & 0xff));
+	m_data.push_back((char)((tmp.u >> 16) & 0xff));
+	m_data.push_back((char)((tmp.u >> 8) & 0xff));
+	m_data.push_back((char)(tmp.u & 0xff));
 }
+
+union doubleasint {
+	quint64 u;
+	double d;
+};
 
 void SimpleSerializer::writeDouble(quint32 id, double value)
 {
+	union doubleasint tmp;
 	if(id == 0) {
 		qCritical("SimpleSerializer: ID 0 is not allowed");
 		return;
@@ -192,15 +204,15 @@ void SimpleSerializer::writeDouble(quint32 id, double value)
 	if(!writeTag(TDouble, id, 8))
 		return;
 
-	quint64 tmp = *((quint64*)&value);
-	m_data.push_back((char)((tmp >> 56) & 0xff));
-	m_data.push_back((char)((tmp >> 48) & 0xff));
-	m_data.push_back((char)((tmp >> 40) & 0xff));
-	m_data.push_back((char)((tmp >> 32) & 0xff));
-	m_data.push_back((char)((tmp >> 24) & 0xff));
-	m_data.push_back((char)((tmp >> 16) & 0xff));
-	m_data.push_back((char)((tmp >> 8) & 0xff));
-	m_data.push_back((char)(tmp & 0xff));
+	tmp.d = value;
+	m_data.push_back((char)((tmp.u >> 56) & 0xff));
+	m_data.push_back((char)((tmp.u >> 48) & 0xff));
+	m_data.push_back((char)((tmp.u >> 40) & 0xff));
+	m_data.push_back((char)((tmp.u >> 32) & 0xff));
+	m_data.push_back((char)((tmp.u >> 24) & 0xff));
+	m_data.push_back((char)((tmp.u >> 16) & 0xff));
+	m_data.push_back((char)((tmp.u >> 8) & 0xff));
+	m_data.push_back((char)(tmp.u & 0xff));
 }
 
 void SimpleSerializer::writeBool(quint32 id, bool value)
@@ -414,7 +426,7 @@ returnDefault:
 bool SimpleDeserializer::readFloat(quint32 id, float* result, float def) const
 {
 	uint readOfs;
-	quint32 tmp;
+	union floatasint tmp;
 	Elements::const_iterator it = m_elements.constFind(id);
 	if(it == m_elements.constEnd())
 		goto returnDefault;
@@ -424,10 +436,10 @@ bool SimpleDeserializer::readFloat(quint32 id, float* result, float def) const
 		goto returnDefault;
 
 	readOfs = it->ofs;
-	tmp = 0;
+	tmp.u = 0;
 	for(int i = 0; i < 4; i++)
-		tmp = (tmp << 8) | readByte(&readOfs);
-	*result = *((float*)&tmp);
+		tmp.u = (tmp.u << 8) | readByte(&readOfs);
+	*result = tmp.f;
 	return true;
 
 returnDefault:
@@ -438,7 +450,7 @@ returnDefault:
 bool SimpleDeserializer::readDouble(quint32 id, double* result, double def) const
 {
 	uint readOfs;
-	quint64 tmp;
+	union doubleasint tmp;
 	Elements::const_iterator it = m_elements.constFind(id);
 	if(it == m_elements.constEnd())
 		goto returnDefault;
@@ -448,10 +460,10 @@ bool SimpleDeserializer::readDouble(quint32 id, double* result, double def) cons
 		goto returnDefault;
 
 	readOfs = it->ofs;
-	tmp = 0;
+	tmp.u = 0;
 	for(int i = 0; i < 8; i++)
-		tmp = (tmp << 8) | readByte(&readOfs);
-	*result = *((double*)&tmp);
+		tmp.u = (tmp.u << 8) | readByte(&readOfs);
+	*result = tmp.d;
 	return true;
 
 returnDefault:
@@ -459,11 +471,21 @@ returnDefault:
 	return false;
 }
 
+union real4asint {
+	quint32 u;
+	Real r;
+};
+
+union real8asint {
+	quint64 u;
+	Real r;
+};
+
 bool SimpleDeserializer::readReal(quint32 id, Real* result, Real def) const
 {
 	if(sizeof(Real) == 4) {
 		uint readOfs;
-		quint32 tmp;
+		union real4asint tmp;
 		Elements::const_iterator it = m_elements.constFind(id);
 		if(it == m_elements.constEnd())
 			goto returnDefault32;
@@ -473,10 +495,10 @@ bool SimpleDeserializer::readReal(quint32 id, Real* result, Real def) const
 			goto returnDefault32;
 
 		readOfs = it->ofs;
-		tmp = 0;
+		tmp.u = 0;
 		for(int i = 0; i < 4; i++)
-			tmp = (tmp << 8) | readByte(&readOfs);
-		*result = *((Real*)&tmp);
+			tmp.u = (tmp.u << 8) | readByte(&readOfs);
+		*result = tmp.r;
 		return true;
 
 	returnDefault32:
@@ -484,7 +506,7 @@ bool SimpleDeserializer::readReal(quint32 id, Real* result, Real def) const
 		return false;
 	} else {
 		uint readOfs;
-		quint64 tmp;
+		union real8asint tmp;
 		Elements::const_iterator it = m_elements.constFind(id);
 		if(it == m_elements.constEnd())
 			goto returnDefault64;
@@ -494,10 +516,10 @@ bool SimpleDeserializer::readReal(quint32 id, Real* result, Real def) const
 			goto returnDefault64;
 
 		readOfs = it->ofs;
-		tmp = 0;
+		tmp.u = 0;
 		for(int i = 0; i < 8; i++)
-			tmp = (tmp << 8) | readByte(&readOfs);
-		*result = *((Real*)&tmp);
+			tmp.u = (tmp.u << 8) | readByte(&readOfs);
+		*result = tmp.r;
 		return true;
 
 	returnDefault64:

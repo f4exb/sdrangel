@@ -9,8 +9,6 @@ project(sdrangelove)
 set(CMAKE_BUILD_TYPE "Release")
 #set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
 #set(CMAKE_BUILD_TYPE "Debug")
-add_definitions(-Wall -fno-strict-aliasing)
-
 
 set(QT_USE_QTOPENGL TRUE)
 set(CMAKE_AUTOMOC ON)
@@ -99,7 +97,7 @@ set(sdrbase_SOURCES
 
 	sdrbase/util/message.cpp
 	sdrbase/util/messagequeue.cpp
-	sdrbase/util/miniz.cpp
+	#sdrbase/util/miniz.cpp
 	sdrbase/util/simpleserializer.cpp
 	sdrbase/util/spinlock.cpp
 )
@@ -170,7 +168,7 @@ set(sdrbase_HEADERS
 	include/util/export.h
 	include/util/message.h
 	include/util/messagequeue.h
-	include/util/miniz.h
+	#include/util/miniz.h
 	include/util/simpleserializer.h
 	include/util/spinlock.h
 )
@@ -265,8 +263,9 @@ if(MSVC)
 	set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
 	add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
 else()
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse2" )
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse2" )
+	#set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse2" )
+	#set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse2" )
+	add_definitions(-msse2 -Wall)
 endif()
 
 ##############################################################################

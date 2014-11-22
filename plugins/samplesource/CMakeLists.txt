@@ -1,7 +1,7 @@
 project(samplesource)
 
 find_package(LibUSB)
-find_package(LibOsmoSDR)
+#find_package(LibOsmoSDR)
 
 add_subdirectory(gnuradio)
 
