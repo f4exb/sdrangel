@@ -339,8 +339,6 @@ void MainWindow::updateStatus()
 				m_engineRunning->setColor(Qt::gray);
 				m_engineError->setColor(Qt::gray);
 				statusBar()->clearMessage();
-				//if(m_startOsmoSDRUpdateAfterStop)
-				//	on_actionOsmoSDR_Firmware_Upgrade_triggered();
 				break;
 
 			case DSPEngine::StRunning:
@@ -355,8 +353,6 @@ void MainWindow::updateStatus()
 				m_engineRunning->setColor(Qt::gray);
 				m_engineError->setColor(Qt::red);
 				statusBar()->showMessage(tr("Error: %1").arg(m_dspEngine->errorMessage()));
-				//if(m_startOsmoSDRUpdateAfterStop)
-				//	on_actionOsmoSDR_Firmware_Upgrade_triggered();
 				break;
 		}
 		m_lastEngineState = state;
@@ -397,23 +393,6 @@ void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 	if(checked)
 		showFullScreen();
 	else showNormal();
-}
-
-void MainWindow::on_actionOsmoSDR_Firmware_Upgrade_triggered()
-{
-#if 0
-	DSPEngine::State engineState = m_dspEngine->state();
-	if((engineState != DSPEngine::StIdle) && (engineState != DSPEngine::StError)) {
-		m_startOsmoSDRUpdateAfterStop = true;
-		m_dspEngine->stopAcquistion();
-		return;
-	}
-	m_startOsmoSDRUpdateAfterStop = false;
-/* TODO: osmosdr upgrade
-	OsmoSDRUpgrade osmoSDRUpgrade;
-	osmoSDRUpgrade.exec();
-	*/
-#endif
 }
 
 void MainWindow::on_presetSave_clicked()

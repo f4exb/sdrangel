@@ -120,7 +120,6 @@ private slots:
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
 	void on_action_View_Fullscreen_toggled(bool checked);
-	void on_actionOsmoSDR_Firmware_Upgrade_triggered();
 	void on_presetSave_clicked();
 	void on_presetLoad_clicked();
 	void on_presetDelete_clicked();

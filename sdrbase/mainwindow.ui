@@ -73,9 +73,6 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <!--addaction name="action_Open_Website"/>
-    <addaction name="action_Check_for_Update"/>
-    <addaction name="separator"/-->
     <addaction name="action_Loaded_Plugins"/>
     <addaction name="separator"/>
     <addaction name="action_About"/>
@@ -94,7 +91,6 @@
    <addaction name="menu_View"/>
    <addaction name="menu_Acquisition"/>
    <addaction name="menu_Channels"/>
-   <!--addaction name="menu_Options"/-->
    <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -365,11 +361,6 @@
     <string>F11</string>
    </property>
   </action>
-  <!--action name="actionOsmoSDR_Firmware_Upgrade">
-   <property name="text">
-    <string>OsmoSDR &amp;Firmware Upgrade...</string>
-   </property>
-  </action-->
   <action name="action_Oscilloscope">
    <property name="checkable">
     <bool>true</bool>
@@ -386,31 +377,11 @@
     <string>&amp;About SDRangelove...</string>
    </property>
   </action>
-  <action name="action_Open_Website">
-   <property name="text">
-    <string>&amp;Open Website</string>
-   </property>
-  </action>
-  <action name="action_Check_for_Update">
-   <property name="text">
-    <string>Check for &amp;Update...</string>
-   </property>
-  </action>
   <action name="action_Preferences">
    <property name="text">
     <string>&amp;Preferences...</string>
    </property>
   </action>
-  <!--action name="action_Demod_NFM">
-   <property name="text">
-    <string>N&amp;FM</string>
-   </property>
-  </action>
-  <action name="action_Demod_SSB">
-   <property name="text">
-    <string>&amp;SSB</string>
-   </property>
-  </action-->
   <action name="action_Loaded_Plugins">
    <property name="text">
     <string>Loaded &amp;Plugins...</string>
