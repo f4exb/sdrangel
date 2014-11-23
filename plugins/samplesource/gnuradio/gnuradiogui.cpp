@@ -137,7 +137,7 @@ void GNURadioGui::displaySettings()
 
 	osmosdr::devices_t devices = osmosdr::device::find();
 
-	for ( int i = 0; i < devices.size(); i++ )
+	for ( uint i = 0; i < devices.size(); i++ )
 	{
 		osmosdr::device_t dev = devices[i];
 
@@ -199,7 +199,7 @@ void GNURadioGui::displaySettings()
 		delete layout;
 	}
 
-	for ( int i = 0; i < m_namedGains.size(); i++ )
+	for ( uint i = 0; i < m_namedGains.size(); i++ )
 	{
 		std::pair< QString, std::vector<double> > pair = m_namedGains[i];
 
@@ -236,7 +236,7 @@ void GNURadioGui::displaySettings()
 	oldIndex = ui->cboSampleRate->currentIndex();
 	ui->cboSampleRate->clear();
 
-	for ( int i = 0; i < m_sampRates.size(); i++ )
+	for ( uint i = 0; i < m_sampRates.size(); i++ )
 		ui->cboSampleRate->addItem( QString::number(m_sampRates[i] / 1e6) );
 
 	if ( oldIndex > ui->cboSampleRate->count() - 1 )
@@ -255,7 +255,7 @@ void GNURadioGui::displaySettings()
 	ui->cboAntennas->clear();
 
 	if ( m_antennas.size() ) {
-		for ( int i = 0; i < m_antennas.size(); i++ )
+		for ( uint i = 0; i < m_antennas.size(); i++ )
 			ui->cboAntennas->addItem( m_antennas[i] );
 
 		if ( oldIndex > ui->cboAntennas->count() - 1 )
@@ -273,7 +273,7 @@ void GNURadioGui::displaySettings()
 	ui->cboDCOffset->clear();
 
 	if ( m_dcoffs.size() ) {
-		for ( int i = 0; i < m_dcoffs.size(); i++ )
+		for ( uint i = 0; i < m_dcoffs.size(); i++ )
 			ui->cboDCOffset->addItem( m_dcoffs[i] );
 
 		if ( ui->cboDCOffset->count() && oldIndex >= 0 )
@@ -288,7 +288,7 @@ void GNURadioGui::displaySettings()
 	ui->cboIQBalance->clear();
 
 	if ( m_iqbals.size() ) {
-		for ( int i = 0; i < m_iqbals.size(); i++ )
+		for ( uint i = 0; i < m_iqbals.size(); i++ )
 			ui->cboIQBalance->addItem( m_iqbals[i] );
 
 		if ( ui->cboIQBalance->count() && oldIndex >= 0 )
@@ -302,7 +302,7 @@ void GNURadioGui::displaySettings()
 	oldIndex = ui->cboBandwidth->currentIndex();
 	ui->cboBandwidth->clear();
 
-	for ( int i = 0; i < m_bandwidths.size(); i++ )
+	for ( uint i = 0; i < m_bandwidths.size(); i++ )
 		if ( 0.0 == m_bandwidths[i] )
 			ui->cboBandwidth->addItem( "Auto" );
 		else
@@ -387,7 +387,7 @@ void GNURadioGui::on_sldGain_valueChanged(int value)
 
 void GNURadioGui::on_cboSampleRate_currentIndexChanged(int index)
 {
-	if ( index < 0 || index >= m_sampRates.size() )
+	if ( index < 0 || (uint)index >= m_sampRates.size() )
 		return;
 
 	m_settings.m_sampRate = m_sampRates[index];
@@ -414,7 +414,7 @@ void GNURadioGui::on_cboIQBalance_currentIndexChanged(const QString &arg1)
 
 void GNURadioGui::on_cboBandwidth_currentIndexChanged(int index)
 {
-	if ( index < 0 || index >= m_bandwidths.size() )
+	if ( index < 0 || (uint)index >= m_bandwidths.size() )
 		return;
 
 	m_settings.m_bandwidth = m_bandwidths[index];

@@ -143,7 +143,7 @@ bool GNURadioInput::startInput(int device)
 		namedGains.clear();
 		m_settings.m_namedGains.clear();
 		std::vector< std::string > gain_names = radio->get_gain_names();
-		for ( int i = 0; i < gain_names.size(); i++ )
+		for ( uint i = 0; i < gain_names.size(); i++ )
 		{
 			std::string gain_name = gain_names[i];
 
@@ -172,7 +172,7 @@ bool GNURadioInput::startInput(int device)
 
 		antennas.clear();
 		std::vector< std::string > ant = radio->get_antennas();
-		for ( int i = 0; i < ant.size(); i++ )
+		for ( uint i = 0; i < ant.size(); i++ )
 			antennas.push_back( QString( ant[i].c_str() ) );
 
 		m_dcoffs.clear();
@@ -292,7 +292,7 @@ bool GNURadioInput::applySettings(const GeneralSettings& generalSettings,
 		if((m_settings.m_dcoff != settings.m_dcoff) || force) {
 			m_settings.m_dcoff = settings.m_dcoff;
 
-			for ( int i = 0; i < m_dcoffs.size(); i++ )
+			for ( uint i = 0; i < m_dcoffs.size(); i++ )
 			{
 				if ( m_dcoffs[i] !=  m_settings.m_dcoff )
 					continue;
@@ -305,7 +305,7 @@ bool GNURadioInput::applySettings(const GeneralSettings& generalSettings,
 		if((m_settings.m_iqbal != settings.m_iqbal) || force) {
 			m_settings.m_iqbal = settings.m_iqbal;
 
-			for ( int i = 0; i < m_iqbals.size(); i++ )
+			for ( uint i = 0; i < m_iqbals.size(); i++ )
 			{
 				if ( m_iqbals[i] !=  m_settings.m_iqbal )
 					continue;

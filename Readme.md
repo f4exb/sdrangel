@@ -7,3 +7,5 @@ For Ubuntu:
 
 Use "cmake ../ -DKERNEL=ON" to build the Linux kernel driver (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support Airspy and Hackrf.
 
+The Gnuradio plugin source needs extra packages, including "liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev"
+

@@ -55,7 +55,6 @@ public:
 private:
 	Ui::GNURadioGui* ui;
 	PluginAPI* m_pluginAPI;
-	SampleSource* m_sampleSource;
 	QList< QPair<QString, QString> > m_devs;
 	std::vector< std::pair< QString, std::vector<double> > > m_namedGains;
 	double m_freqMin;
@@ -72,8 +71,9 @@ private:
 
 	QList< QPair< QSlider*, QLabel* > > m_gainControls;
 
-	SampleSource::GeneralSettings m_generalSettings;
 	GNURadioInput::Settings m_settings;
+	SampleSource* m_sampleSource;
+	SampleSource::GeneralSettings m_generalSettings;
 	QTimer m_updateTimer;
 
 	void displaySettings();
