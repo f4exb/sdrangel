@@ -108,12 +108,14 @@ void RTLSDRThread::decimate8(SampleVector::iterator* it, const quint8* buf, qint
 	for (int pos = 0; pos < len - 15; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
+		Sample s1( xreal << 3, yimag << 3 );
 		pos += 8;
-		xreal += buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
-		yimag += buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
+		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
+		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
+		Sample s2( xreal << 3, yimag << 3 );
 
-		Sample s( xreal << 3, yimag << 3 );
-		**it = s;
+		m_decimator2.myDecimate(&s1, &s2);
+		**it = s2;
 		(*it)++;
 	}
 }
@@ -144,33 +146,18 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 
 
 
-//  Decimate everything by 16x, except 288kHz
+//  Decimate everything by 16x, except 288kHz by 4x
+//  and 1152kHz, 2048kHz by 8x
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-	int mode = 0;
 	if (m_samplerate < 800000)
-		mode = 2;
-
-	switch(mode) {
-		case 0:
-			decimate16(&it, buf, len);
-			break;
-		case 1:
-			break;
-
-		case 2:
-			decimate4(&it, buf, len);
-			break;
-
-		case 3:
-			break;
-
-		default:
-			decimate16(&it, buf, len);
-			break;
-	}
+		decimate4(&it, buf, len);
+	else if ((m_samplerate == 1152000)||(m_samplerate == 2048000))
+		decimate8(&it, buf, len);
+	else
+		decimate16(&it, buf, len);
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 

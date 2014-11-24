@@ -60,12 +60,12 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		Complex c(it->real() , it->imag());
 		Complex d = c * conj(m_lastSample);
 		m_lastSample = c;
-		demod = atan2(d.imag(), d.real()) * (1 /M_PI);
-		Complex e(demod, 0);
+		demod = atan2(d.imag(), d.real());
+		Complex e(demod * 3000 / M_PI, 0);
 
 		consumed = false;
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &consumed, &ci)) {
-			sample = (qint16)(3000.0 * ci.real() * m_volume);
+			sample = (qint16)(ci.real() * m_volume);
 			m_sampleBuffer.push_back(Sample(sample, sample));
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;

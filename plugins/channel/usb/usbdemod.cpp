@@ -55,8 +55,7 @@ void USBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume
 
 /* Fractional Downsample to 48 kHz.
  * 192  1:4 (3072 / 16)
- * 144  1:3 (2304 / 16)
- * 120  2:5 (1920 / 16)
+ * 144  1:3 (1152 /  8)
  * 96   1:2 (1536 / 16)
  * 72   2:3 ( 288 /  4)
  * 64   3:4 (1024 / 16)
@@ -66,8 +65,7 @@ double rerate(int rate)
 	switch (rate)
 	{
 		case 64000 : return (3.0 * 64000); break;
-		case 72000 : 
-		case 120000: return (2.0 * rate); break;
+		case 72000 : return (2.0 * 72000); break;
 		case     0 : return (1.0 ) ; break;
 		default    : return (1.0 * rate ); break;
 	}
@@ -82,11 +80,9 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int samplestep = 2;
 
 	if ((m_sampleRate == 72000)||(m_sampleRate == 144000))
-		samplestep = 3; // !! FFT buffer length is a power of two
+		samplestep = 3;
 	if ((m_sampleRate == 64000)||(m_sampleRate == 192000))
-		samplestep = 4; // buffer length should be good
-	if (m_sampleRate == 120000)
-		samplestep = 5;
+		samplestep = 4;
 
 	for(SampleVector::const_iterator it = begin; it < end; it ++) {
 		a = it->real();
@@ -94,7 +90,7 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		c = Complex(a / 65536.0, b / 65536.0);
 
 		n_out = USBFilter->run(c, &sideband, true);
-		if ((m_sampleRate <= 72000)||(m_sampleRate == 120000))
+		if (m_sampleRate <= 72000)
 			n_out += USBFilter->run(c, &sideband, true);
 		if (m_sampleRate == 64000)
 			n_out += USBFilter->run(c, &sideband, true);
