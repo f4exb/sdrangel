@@ -51,6 +51,8 @@ private:
 
 	void doInterpolate(int phase, Complex* result)
 	{
+		if (phase < 0)
+			phase = 0;
 #if 1
 		// beware of the ringbuffer
 		if(m_ptr == 0) {

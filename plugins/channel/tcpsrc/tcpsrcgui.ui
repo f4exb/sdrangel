@@ -56,7 +56,7 @@
     <item row="3" column="1">
      <widget class="QLineEdit" name="rfBandwidth">
       <property name="text">
-       <string>20000</string>
+       <string>40000</string>
       </property>
      </widget>
     </item>
@@ -77,7 +77,7 @@
     <item row="1" column="1">
      <widget class="QLineEdit" name="sampleRate">
       <property name="text">
-       <string>25000</string>
+       <string>48000</string>
       </property>
      </widget>
     </item>

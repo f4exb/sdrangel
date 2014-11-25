@@ -27,8 +27,8 @@ void TCPSrcGUI::setName(const QString& name)
 void TCPSrcGUI::resetToDefaults()
 {
 	ui->sampleFormat->setCurrentIndex(0);
-	ui->sampleRate->setText("25000");
-	ui->rfBandwidth->setText("20000");
+	ui->sampleRate->setText("48000");
+	ui->rfBandwidth->setText("40000");
 	ui->tcpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	applySettings();
@@ -78,9 +78,9 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 				ui->sampleFormat->setCurrentIndex(0);
 				break;
 		}
-		d.readReal(4, &realtmp, 25000);
+		d.readReal(4, &realtmp, 48000);
 		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
-		d.readReal(5, &realtmp, 20000);
+		d.readReal(5, &realtmp, 40000);
 		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
 		d.readS32(6, &s32tmp, 9999);
 		ui->tcpPort->setText(QString("%1").arg(s32tmp));
@@ -141,7 +141,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setBandwidth(25000);
+	m_channelMarker->setBandwidth(40000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -170,7 +170,7 @@ void TCPSrcGUI::applySettings()
 
 	Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
 	if((!ok) || (outputSampleRate < 100))
-		outputSampleRate = 25000;
+		outputSampleRate = 48000;
 	Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 	if((!ok) || (rfBandwidth > outputSampleRate))
 		rfBandwidth = outputSampleRate;
