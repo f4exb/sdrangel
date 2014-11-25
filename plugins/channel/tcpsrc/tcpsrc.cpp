@@ -13,8 +13,8 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 {
 	m_inputSampleRate = 100000;
 	m_sampleFormat = FormatS8;
-	m_outputSampleRate = 50000;
-	m_rfBandwidth = 50000;
+	m_outputSampleRate = 48000;
+	m_rfBandwidth = 40000;
 	m_tcpPort = 9999;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
@@ -46,14 +46,11 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	bool consumed;
-
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		consumed = false;
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
 			m_sampleBuffer.push_back(Sample(ci.real() * 32768.0, ci.imag() * 32768.0));
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 		}

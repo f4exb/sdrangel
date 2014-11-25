@@ -60,15 +60,13 @@ int framedrop = 0;
 void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	bool consumed;
 	qint16 sample;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		consumed = false;
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
 			if (++framedrop & 1) {
 				m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
 				if(m_movingAverage.average() >= m_squelchLevel)

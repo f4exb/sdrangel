@@ -17,17 +17,13 @@ public:
 	void create(int phaseSteps, double sampleRate, double cutoff);
 	void free();
 
-	bool interpolate(Real* distance, const Complex& next, bool* consumed, Complex* result)
+	// Original code allowed for upsampling, but was never used that way
+	bool interpolate(Real* distance, const Complex& next, Complex* result)
 	{
-		while(*distance >= 1.0) {
-			if(!(*consumed)) {
-				advanceFilter(next);
-				*distance -= 1.0;
-				*consumed = true;
-			} else {
-				return false;
-			}
-		}
+		advanceFilter(next);
+		*distance -= 1.0;
+		if (*distance >= 1.0)
+			return false;
 		doInterpolate((int)floor(*distance * (Real)m_phaseSteps), result);
 		return true;
 	}

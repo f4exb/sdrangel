@@ -20,9 +20,7 @@
 
 #include <vector>
 #include "dsp/samplesink.h"
-#include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -75,7 +73,6 @@ private:
 	int m_sampleRate;
 	int m_frequency;
 
-	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 	Complex m_lastSample;

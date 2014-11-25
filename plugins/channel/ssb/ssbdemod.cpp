@@ -61,14 +61,12 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	Complex ci;
 	cmplx *sideband;
 	int n_out;
-	bool consumed;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		consumed = false;
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &consumed, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
 			n_out = SSBFilter->run(ci, &sideband, m_usb);
 			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		} else

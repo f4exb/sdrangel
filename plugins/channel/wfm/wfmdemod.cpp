@@ -31,7 +31,6 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleRate = 250000;
 	m_frequency = 0;
 
-	m_nco.setFreq(m_frequency, m_sampleRate);
 	m_interpolator.create(16, m_sampleRate, 16000);
 	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
 
@@ -51,21 +50,16 @@ void WFMDemod::configure(MessageQueue* messageQueue, Real afBandwidth, Real volu
 
 void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	Complex ci;
-	bool consumed;
 	qint16 sample;
-	Real demod;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Complex c(it->real() , it->imag());
+		Complex c(it->real(), it->imag());
 		Complex d = c * conj(m_lastSample);
 		m_lastSample = c;
-		demod = atan2(d.imag(), d.real());
-		Complex e(demod * 3000 / M_PI, 0);
+		Complex e(atan2(d.imag(), d.real()), 0);
 
-		consumed = false;
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &consumed, &ci)) {
-			sample = (qint16)(ci.real() * m_volume);
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &c)) {
+			sample = (qint16)(c.real() * m_volume * 800.0);
 			m_sampleBuffer.push_back(Sample(sample, sample));
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
@@ -76,7 +70,6 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					qDebug("lost %u samples", m_audioBufferFill - res);
 				m_audioBufferFill = 0;
 			}
-
 			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		}
 	}
