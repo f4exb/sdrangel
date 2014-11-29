@@ -17,6 +17,10 @@ else()
 	find_package(LibRTLSDR)
 endif()
 
+if(LIBUSB_FOUND AND UNIX)
+	add_subdirectory(fcd)
+endif()
+
 if(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 	add_subdirectory(rtlsdr)
 endif(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
