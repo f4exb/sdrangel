@@ -18,6 +18,10 @@ else()
 endif()
 
 if(LIBUSB_FOUND AND UNIX)
+	FIND_PATH (ASOUNDH alsa/asoundlib.h)
+	FIND_LIBRARY (LIBASOUND asound)
+endif()
+if(LIBASOUND AND ASOUNDH)
 	add_subdirectory(fcd)
 endif()
 

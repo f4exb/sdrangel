@@ -13,7 +13,6 @@ set(rtlsdr_HEADERS
 	fcdinput.h
 	fcdplugin.h
 	fcdthread.h
-	fcdsource.h
 )
 
 set(fcd_FORMS
@@ -43,6 +42,7 @@ add_library(inputfcd SHARED
 
 target_link_libraries(inputfcd
 	${QT_LIBRARIES}
+	asound
 	sdrbase
 )
 

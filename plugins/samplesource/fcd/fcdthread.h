@@ -23,8 +23,9 @@
 #include <QWaitCondition>
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
+#include <alsa/asoundlib.h>
 
-#define SAMPLERATE 192000
+#define FCDPP_RATE 192000
 #define BLOCKSIZE 8192
 
 class FCDThread : public QThread {
@@ -35,17 +36,14 @@ public:
 	~FCDThread();
 
 	void stopWork();
-	void OpenSource(const char *filename);
+	bool OpenSource(const char *filename);
 	void CloseSource();
 	void set_center_freq(double freq);
-	int  work(int n_items);
+	void work(int n_items);
 private:
-	int fd;
-	struct fcd_buffer *buffers;
-	unsigned int n_buffers;
-	void *recebuf_ptr;
-	unsigned int recebuf_len;
-	unsigned int recebuf_mmap_index;
+	snd_pcm_format_t fcd_format;
+	snd_pcm_t* fcd_handle = NULL;
+	snd_pcm_stream_t fcd_stream;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;

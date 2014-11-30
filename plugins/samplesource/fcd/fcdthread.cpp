@@ -42,8 +42,7 @@ void FCDThread::stopWork()
 void FCDThread::run()
 {
 	m_running = true;
-	OpenSource("/dev/dsp");
-	if (fd < 0)
+	if ( !OpenSource("hw:CARD=V20") )
                 return;
 
 	while(m_running) {

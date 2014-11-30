@@ -13,7 +13,6 @@ set(rtlsdr_HEADERS
 	v4linput.h
 	v4lplugin.h
 	v4lthread.h
-	v4lsource.h
 )
 
 set(v4l_FORMS
