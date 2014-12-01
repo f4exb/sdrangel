@@ -1,9 +1,17 @@
 /* (C)2015 John Greb
+ *
+ * Funcube Dongle command line interface
+ * Copyright 2011 David Pello EA1IDZ
+ * Copyright 2011 Pieter-Tjerk de Boer PA3FWM
+ * Copyright 2012-2014 Alexandru Csete OZ9AEC
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public Licence version 3.
  */
 
 #include "fcdthread.h"
+#include "hid-libusb.h"
+#include "qthid.h"
 
 bool FCDThread::OpenSource(const char* cardname)
 {
@@ -40,7 +48,8 @@ void FCDThread::CloseSource()
 
 void FCDThread::set_center_freq(double freq)
 {
-	//TODO
+        if (fcdAppSetFreq(freq) == FCD_MODE_NONE)
+		qCritical("No FCD HID found for frquency change");
 }
 
 int FCDThread::work(int n_items)

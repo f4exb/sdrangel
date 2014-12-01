@@ -8,11 +8,13 @@ set(fcd_SOURCES
 	fcdsource.cpp
 )
 
-set(rtlsdr_HEADERS
+set(fcd_HEADERS
 	fcdgui.h
 	fcdinput.h
 	fcdplugin.h
 	fcdthread.h
+	qthid.h
+	hid-libusb.h
 )
 
 set(fcd_FORMS
@@ -43,6 +45,7 @@ add_library(inputfcd SHARED
 target_link_libraries(inputfcd
 	${QT_LIBRARIES}
 	asound
+	hidapi-libusb
 	sdrbase
 )
 

@@ -8,7 +8,7 @@ set(v4l_SOURCES
 	v4lsource.cpp
 )
 
-set(rtlsdr_HEADERS
+set(v4l_HEADERS
 	v4lgui.h
 	v4linput.h
 	v4lplugin.h
