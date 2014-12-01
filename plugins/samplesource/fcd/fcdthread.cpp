@@ -44,9 +44,11 @@ void FCDThread::run()
 	m_running = true;
 	if ( !OpenSource("hw:CARD=V20") )
                 return;
+	// TODO: fallback to original fcd
 
 	while(m_running) {
-		work(BLOCKSIZE);
+		if ( work(BLOCKSIZE) < 0)
+			break;
 	}
 	CloseSource();
 }

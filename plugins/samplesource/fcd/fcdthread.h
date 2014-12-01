@@ -39,11 +39,10 @@ public:
 	bool OpenSource(const char *filename);
 	void CloseSource();
 	void set_center_freq(double freq);
-	void work(int n_items);
+	int work(int n_items);
 private:
 	snd_pcm_format_t fcd_format;
 	snd_pcm_t* fcd_handle = NULL;
-	snd_pcm_stream_t fcd_stream;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
