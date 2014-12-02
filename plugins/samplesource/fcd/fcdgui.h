@@ -44,9 +44,9 @@ private:
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
-	//void on_gain_valueChanged(int value);
-	//void on_samplerate_valueChanged(int value);
-	void on_checkBox_stateChanged(int state);
+	void on_checkBoxR_stateChanged(int state);
+	void on_checkBoxG_stateChanged(int state);
+	void on_checkBoxB_stateChanged(int state);
 	void updateHardware();
 };
 

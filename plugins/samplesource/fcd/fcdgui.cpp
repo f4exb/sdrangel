@@ -88,6 +88,9 @@ bool FCDGui::handleMessage(Message* message)
 void FCDGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
+	ui->checkBoxR->setChecked(m_settings.range);
+	ui->checkBoxG->setChecked(m_settings.gain);
+	ui->checkBoxB->setChecked(m_settings.bias);
 }
 
 void FCDGui::sendSettings()
@@ -102,18 +105,6 @@ void FCDGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-#if 0
-void FCDGui::on_gain_valueChanged(int value)
-{
-	if(value > (int)m_gains.size())
-		return;
-	int gain = m_gains[value];
-	ui->gainText->setText(tr("%1.%2").arg(gain / 10).arg(abs(gain % 10)));
-	m_settings.m_gain = gain;
-	sendSettings();
-}
-#endif
-
 void FCDGui::updateHardware()
 {
 	FCDInput::MsgConfigureFCD* message = FCDInput::MsgConfigureFCD::create(m_generalSettings, m_settings);
@@ -121,17 +112,38 @@ void FCDGui::updateHardware()
 	m_updateTimer.stop();
 }
 
-void FCDGui::on_checkBox_stateChanged(int state) {
-	if (state == Qt::Checked){
+void FCDGui::on_checkBoxR_stateChanged(int state)
+{
+	if (state == Qt::Checked) {
 		ui->centerFrequency->setValueRange(7, 150U, 240000U);
 		ui->centerFrequency->setValue(7000);
 		m_generalSettings.m_centerFrequency = 7000 * 1000;
+		m_settings.range = 1;
 	}
 	else {
 		ui->centerFrequency->setValueRange(7, 420000U, 1900000U);
 		ui->centerFrequency->setValue(434450);
 		m_generalSettings.m_centerFrequency = 434450 * 1000;
+		m_settings.range = 0;
 	}
 	sendSettings();
 }
 
+void FCDGui::on_checkBoxG_stateChanged(int state)
+{
+	if (state == Qt::Checked) {
+		m_settings.gain = 1;
+	} else {
+		m_settings.gain = 0;
+	}
+	sendSettings();
+}
+void FCDGui::on_checkBoxB_stateChanged(int state)
+{
+	if (state == Qt::Checked) {
+		m_settings.bias = 1;
+	} else {
+		m_settings.bias = 0;
+	}
+	sendSettings();
+}

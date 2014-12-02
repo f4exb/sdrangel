@@ -32,6 +32,9 @@ class FCDInput : public SampleSource {
 public:
 	struct Settings {
 		Settings();
+		qint32 range;
+		qint32 gain;
+		qint32 bias;
 		void resetToDefaults();
 		QByteArray serialize() const;
 		bool deserialize(const QByteArray& data);

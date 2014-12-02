@@ -39,6 +39,8 @@ public:
 	bool OpenSource(const char *filename);
 	void CloseSource();
 	void set_center_freq(double freq);
+	void set_bias_t(bool on);
+	void set_lna_gain(bool on);
 	int work(int n_items);
 private:
 	snd_pcm_format_t fcd_format;

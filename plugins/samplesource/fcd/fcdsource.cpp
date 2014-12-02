@@ -49,7 +49,21 @@ void FCDThread::CloseSource()
 void FCDThread::set_center_freq(double freq)
 {
         if (fcdAppSetFreq(freq) == FCD_MODE_NONE)
-		qCritical("No FCD HID found for frquency change");
+		qDebug("No FCD HID found for frquency change");
+}
+
+void FCDThread::set_bias_t(bool on)
+{
+	quint8 cmd = on ? 1 : 0;
+
+	fcdAppSetParam(FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
+}
+
+void FCDThread::set_lna_gain(bool on)
+{
+	quint8 cmd = on ? 1 : 0;
+
+	fcdAppSetParam(FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
 }
 
 int FCDThread::work(int n_items)
@@ -63,6 +77,10 @@ int FCDThread::work(int n_items)
 	l = snd_pcm_mmap_readi(fcd_handle, out, (snd_pcm_uframes_t)n_items);
 	if (l > 0)
 		m_sampleFifo->write(it, it + l);
+	if (l == -EPIPE) {
+		qDebug("FCD: Overrun detected");
+		return 0;
+	}
 	return l;
 }
 

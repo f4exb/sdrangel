@@ -25,22 +25,38 @@
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
 
-FCDInput::Settings::Settings()
+FCDInput::Settings::Settings() :
+	range(0),
+	gain(0),
+	bias(0)
 {
 }
 
 void FCDInput::Settings::resetToDefaults()
 {
+	range = 0;
+	gain = 0;
+	bias = 0;
 }
 
 QByteArray FCDInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
+	s.writeS32(1, range);
+	s.writeS32(2, gain);
+	s.writeS32(3, bias);
 	return s.final();
 }
 
 bool FCDInput::Settings::deserialize(const QByteArray& data)
 {
+	SimpleDeserializer d(data);
+	if(d.isValid() && d.getVersion() == 1) {
+                d.readS32(1, &range, 0);
+		d.readS32(2, &gain, 0);
+		d.readS32(3, &bias, 0);
+		return true;
+	}
 	resetToDefaults();
 	return true;
 }
@@ -126,10 +142,17 @@ bool FCDInput::applySettings(const GeneralSettings& generalSettings, const Setti
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
+	if(!m_FCDThread)
+		return false;
+
+	// TODO: Only call when changed
+	m_FCDThread->set_lna_gain(settings.gain);
+	m_FCDThread->set_bias_t(settings.bias);
+
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		if(m_FCDThread)
-			m_FCDThread->set_center_freq( (double)(generalSettings.m_centerFrequency) );
+		m_FCDThread->set_center_freq( (double)(generalSettings.m_centerFrequency) );
 	}	
 	return true;
 }
+

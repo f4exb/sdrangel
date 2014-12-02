@@ -7,11 +7,11 @@
 
 const PluginDescriptor FCDPlugin::m_pluginDescriptor = {
 	QString("FunCube Input"),
-	QString("---"),
+	QString("V20"),
 	QString("(c) John Greb"),
 	QString("http://funcubedongle.com"),
 	true,
-	QString("___________")
+	QString("http://www.oz9aec.net/index.php/funcube-dongle")
 };
 
 FCDPlugin::FCDPlugin(QObject* parent) :
