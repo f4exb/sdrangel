@@ -44,7 +44,7 @@ public:
 	int work(int n_items);
 private:
 	snd_pcm_format_t fcd_format;
-	snd_pcm_t* fcd_handle = NULL;
+	snd_pcm_t* fcd_handle;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;

@@ -93,8 +93,8 @@ bool FCDInput::startInput(int device)
 
 	m_deviceDescription = QString("Funcube Dongle");
 
-	if (!applySettings(m_generalSettings, m_settings, true))
-		qCritical("FCD: Unable to set config at start");
+//	if (!applySettings(m_generalSettings, m_settings, true))
+//		qCritical("FCD: Unable to set config at start");
 
 	qDebug("FCDInput: start");
 	return true;

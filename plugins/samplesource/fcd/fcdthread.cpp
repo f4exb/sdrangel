@@ -22,6 +22,7 @@
 
 FCDThread::FCDThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
+	fcd_handle(NULL),
 	m_running(false),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo)

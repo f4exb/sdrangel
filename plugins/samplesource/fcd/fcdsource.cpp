@@ -15,6 +15,7 @@
 
 bool FCDThread::OpenSource(const char* cardname)
 {
+	bool fail = false;
 	snd_pcm_hw_params_t* params;
 	//fcd_rate = FCDPP_RATE;
 	//fcd_channels =2;
@@ -28,14 +29,21 @@ bool FCDThread::OpenSource(const char* cardname)
 
 	snd_pcm_hw_params_alloca(&params);
 	if ( snd_pcm_hw_params_any(fcd_handle, params) < 0 )
-		qCritical("Funcube Dongle read settings failed");
-	else if ( snd_pcm_hw_params(fcd_handle, params) < 0 )
-		qCritical("Funcube Dongle write settings failed");
-	// TODO: check actual samplerate, may be crippled firmware
-
-	if ( snd_pcm_start(fcd_handle) < 0 )
+		fail = true;
+	else 	if ( snd_pcm_hw_params(fcd_handle, params) < 0 ) {
+			fail = true;
+			// TODO: check actual samplerate, may be crippled firmware
+		} else {
+			if ( snd_pcm_start(fcd_handle) < 0 )
+				fail = true;
+		}
+	if (fail) {
 		qCritical("Funcube Dongle stream start failed");
-	else	qDebug("Funcube stream started");
+		snd_pcm_close( fcd_handle );
+		return false;
+	} else {
+		qDebug("Funcube stream started");
+	}
 	return true;
 }
 
