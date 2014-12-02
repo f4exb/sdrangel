@@ -93,6 +93,9 @@ bool FCDInput::startInput(int device)
 
 	m_deviceDescription = QString("Funcube Dongle");
 
+	if (!applySettings(m_generalSettings, m_settings, true))
+		qCritical("FCD: Unable to set config at start");
+
 	qDebug("FCDInput: start");
 	return true;
 }
@@ -141,17 +144,24 @@ bool FCDInput::handleMessage(Message* message)
 bool FCDInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+	bool freqChange;
 
 	if(!m_FCDThread)
 		return false;
 
-	// TODO: Only call when changed
-	m_FCDThread->set_lna_gain(settings.gain);
-	m_FCDThread->set_bias_t(settings.bias);
+	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency))
+		freqChange = true;
+	else
+		freqChange = false;
 
-	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
+	if(freqChange || force) {
 		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 		m_FCDThread->set_center_freq( (double)(generalSettings.m_centerFrequency) );
+	}
+
+	if(!freqChange || force) {
+		m_FCDThread->set_lna_gain(settings.gain);
+		m_FCDThread->set_bias_t(settings.bias);
 	}	
 	return true;
 }

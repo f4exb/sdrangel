@@ -96,6 +96,7 @@ bool V4LInput::startInput(int device)
 
 	qDebug("V4LInput: start");
 	MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
+	applySettings(m_generalSettings, m_settings, true);
 
 	return true;
 }
