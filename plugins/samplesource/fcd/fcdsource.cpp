@@ -9,6 +9,7 @@
  * it under the terms of the GNU General Public Licence version 3.
  */
 
+#include "fcdinput.h"
 #include "fcdthread.h"
 #include "hid-libusb.h"
 #include "qthid.h"
@@ -54,20 +55,20 @@ void FCDThread::CloseSource()
 	fcd_handle = NULL;
 }
 
-void FCDThread::set_center_freq(double freq)
+void FCDInput::set_center_freq(double freq)
 {
         if (fcdAppSetFreq(freq) == FCD_MODE_NONE)
 		qDebug("No FCD HID found for frquency change");
 }
 
-void FCDThread::set_bias_t(bool on)
+void FCDInput::set_bias_t(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
 	fcdAppSetParam(FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
 }
 
-void FCDThread::set_lna_gain(bool on)
+void FCDInput::set_lna_gain(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 

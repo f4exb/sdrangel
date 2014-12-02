@@ -72,6 +72,9 @@ public:
 
 	const QString& getDeviceDescription() const;
 	int getSampleRate() const;
+	void set_center_freq(double freq);
+	void set_bias_t(bool on);
+	void set_lna_gain(bool on);
 	quint64 getCenterFrequency() const;
 	bool handleMessage(Message* message);
 
@@ -80,7 +83,7 @@ private:
 	Settings m_settings;
 	FCDThread* m_FCDThread;
 	QString m_deviceDescription;
-	bool applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
+	void applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
 };
 
 #endif // INCLUDE_FCD_H
