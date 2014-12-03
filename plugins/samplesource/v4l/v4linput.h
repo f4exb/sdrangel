@@ -100,7 +100,7 @@ private:
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
 
-	bool applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
+	void applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
 };
 
 #endif // INCLUDE_V4L_H

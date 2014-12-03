@@ -31,7 +31,7 @@ class V4LThread : public QThread {
 	Q_OBJECT
 
 public:
-	V4LThread(SampleFifo* sampleFifo, QObject* parent = NULL);
+	V4LThread(SampleFifo* sampleFifo, double frequency, QObject* parent = NULL);
 	~V4LThread();
 
 	void stopWork();
@@ -50,6 +50,8 @@ private:
 	void *recebuf_ptr;
 	unsigned int recebuf_len;
 	unsigned int recebuf_mmap_index;
+
+	double centerFreq;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;

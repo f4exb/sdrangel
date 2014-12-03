@@ -20,12 +20,13 @@
 #include "v4lthread.h"
 #include "dsp/samplefifo.h"
 
-V4LThread::V4LThread(SampleFifo* sampleFifo, QObject* parent) :
+V4LThread::V4LThread(SampleFifo* sampleFifo, double frequency, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo)
 {
+	centerFreq = frequency;
 	start();
 }
 

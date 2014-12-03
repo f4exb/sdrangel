@@ -78,6 +78,7 @@ V4LInput::~V4LInput()
 bool V4LInput::startInput(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+	double freq;
 
 	if(m_V4LThread)
 		return false;
@@ -87,7 +88,8 @@ bool V4LInput::startInput(int device)
 		return false;
 	}
 
-	if((m_V4LThread = new V4LThread(&m_sampleFifo)) == NULL) {
+	freq = (double)getCenterFrequency();
+	if((m_V4LThread = new V4LThread(&m_sampleFifo, freq)) == NULL) {
 		qFatal("out of memory");
 		return false;
 	}
@@ -95,8 +97,7 @@ bool V4LInput::startInput(int device)
 	m_deviceDescription = QString("RTL-SDR /dev/swradio0");
 
 	qDebug("V4LInput: start");
-	MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
-//	applySettings(m_generalSettings, m_settings, true);
+	//MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
 
 	return true;
 }
@@ -134,8 +135,7 @@ bool V4LInput::handleMessage(Message* message)
 {
 	if(MsgConfigureV4L::match(message)) {
 		MsgConfigureV4L* conf = (MsgConfigureV4L*)message;
-		if(!applySettings(conf->getGeneralSettings(), conf->getSettings(), false))
-			qDebug("V4L config error");
+		applySettings(conf->getGeneralSettings(), conf->getSettings(), false);
 		message->completed();
 		return true;
 	} else {
@@ -143,20 +143,25 @@ bool V4LInput::handleMessage(Message* message)
 	}
 }
 
-bool V4LInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
+void V4LInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
+	if (!m_V4LThread) {
+			m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
+			return;
+	}
+
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
-		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		if(m_V4LThread)
-			m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
+		m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
 								+ (SAMPLERATE / 4) ));
 	}
+	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
+#if 0
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
-		if(m_V4LThread)
-			m_V4LThread->set_tuner_gain((double)m_settings.m_gain);
+		m_V4LThread->set_tuner_gain((double)m_settings.m_gain);
 	}
-	return true;
+#endif
 }
+
