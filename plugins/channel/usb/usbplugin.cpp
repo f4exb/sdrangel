@@ -6,11 +6,11 @@
 
 const PluginDescriptor USBPlugin::m_pluginDescriptor = {
 	QString("USB Demodulator"),
-	QString("---"),
-	QString("(c) maintech GmbH (rewritten by John Greb)"),
+	QString("0.1"),
+	QString("(c) 2014 John Greb"),
 	QString("http://www.maintech.de"),
 	true,
-	QString("http://www.maintech.de")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 USBPlugin::USBPlugin(QObject* parent) :

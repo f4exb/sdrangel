@@ -11,7 +11,7 @@ const PluginDescriptor FCDPlugin::m_pluginDescriptor = {
 	QString("(c) John Greb"),
 	QString("http://funcubedongle.com"),
 	true,
-	QString("http://www.oz9aec.net/index.php/funcube-dongle")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 FCDPlugin::FCDPlugin(QObject* parent) :

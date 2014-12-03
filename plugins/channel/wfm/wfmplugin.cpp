@@ -6,11 +6,11 @@
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("---"),
-	QString("(c) maintech GmbH (written by Christian Daniel)"),
+	QString("1.0"),
+	QString("(c) 2014 JohnGreb"),
 	QString("http://www.maintech.de"),
 	true,
-	QString("http://www.maintech.de")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 WFMPlugin::WFMPlugin(QObject* parent) :

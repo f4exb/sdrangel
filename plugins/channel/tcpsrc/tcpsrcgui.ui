@@ -43,7 +43,7 @@
      <widget class="QComboBox" name="sampleFormat">
       <item>
        <property name="text">
-        <string>S8 I/Q</string>
+        <string>S16LE SSB</string>
        </property>
       </item>
       <item>
@@ -56,7 +56,7 @@
     <item row="3" column="1">
      <widget class="QLineEdit" name="rfBandwidth">
       <property name="text">
-       <string>40000</string>
+       <string>32000</string>
       </property>
      </widget>
     </item>

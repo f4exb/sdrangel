@@ -6,11 +6,11 @@
 
 const PluginDescriptor TCPSrcPlugin::m_pluginDescriptor = {
 	QString("TCP Channel Source"),
-	QString("---"),
+	QString("ssb"),
 	QString("(c) maintech GmbH (written by Christian Daniel)"),
 	QString("http://www.maintech.de"),
 	true,
-	QString("http://www.maintech.de")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 TCPSrcPlugin::TCPSrcPlugin(QObject* parent) :

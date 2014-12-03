@@ -6,11 +6,11 @@
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 	QString("SSB Demodulator"),
-	QString("---"),
-	QString("(c) maintech GmbH (rewritten by John Greb)"),
+	QString("1.0"),
+	QString("(c) 2014 John Greb"),
 	QString("http://www.maintech.de"),
 	true,
-	QString("http://www.maintech.de")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 SSBPlugin::SSBPlugin(QObject* parent) :

@@ -11,10 +11,10 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
 TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum)
 {
-	m_inputSampleRate = 100000;
-	m_sampleFormat = FormatS8;
+	m_inputSampleRate = 96000;
+	m_sampleFormat = FormatSSB;
 	m_outputSampleRate = 48000;
-	m_rfBandwidth = 40000;
+	m_rfBandwidth = 32000;
 	m_tcpPort = 9999;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
@@ -23,7 +23,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_tcpSrcGUI = tcpSrcGUI;
 	m_spectrum = spectrum;
 	m_spectrumEnabled = false;
-	m_nextS8Id = 0;
+	m_nextSSBId = 0;
 	m_nextS16leId = 0;
 }
 
@@ -51,7 +51,7 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
-			m_sampleBuffer.push_back(Sample(ci.real() * 32768.0, ci.imag() * 32768.0));
+			m_sampleBuffer.push_back(Sample(ci.real() * 20000.0, ci.imag() * 20000.0));
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 		}
 	}
@@ -62,17 +62,17 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	for(int i = 0; i < m_s16leSockets.count(); i++)
 		m_s16leSockets[i].socket->write((const char*)&m_sampleBuffer[0], m_sampleBuffer.size() * 4);
 
-	if(m_s8Sockets.count() > 0) {
+	if(m_ssbSockets.count() > 0) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
-			m_sampleBufferS8.push_back(it->real() >> 8);
-			m_sampleBufferS8.push_back(it->imag() >> 8);
+			// TODO: fft filter
+			m_sampleBufferSSB.push_back(it->real() + it->imag());
 		}
-		for(int i = 0; i < m_s8Sockets.count(); i++)
-			m_s8Sockets[i].socket->write((const char*)&m_sampleBufferS8[0], m_sampleBufferS8.size());
+		for(int i = 0; i < m_ssbSockets.count(); i++)
+			m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], m_sampleBufferSSB.size());
 	}
 
 	m_sampleBuffer.clear();
-	m_sampleBufferS8.clear();
+	m_sampleBufferSSB.clear();
 }
 
 void TCPSrc::start()
@@ -84,7 +84,7 @@ void TCPSrc::start()
 
 void TCPSrc::stop()
 {
-	closeAllSockets(&m_s8Sockets);
+	closeAllSockets(&m_ssbSockets);
 	closeAllSockets(&m_s16leSockets);
 
 	if(m_tcpServer->isListening())
@@ -146,11 +146,11 @@ void TCPSrc::onNewConnection()
 		connect(connection, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
 
 		switch(m_sampleFormat) {
-			case FormatS8: {
-				quint32 id = (FormatS8 << 24) | m_nextS8Id;
+			case FormatSSB: {
+				quint32 id = (FormatSSB << 24) | m_nextSSBId;
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
-				m_nextS8Id = (m_nextS8Id + 1) & 0xffffff;
-				m_s8Sockets.push_back(Socket(id, connection));
+				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
+				m_ssbSockets.push_back(Socket(id, connection));
 				msg->submit(m_uiMessageQueue, (PluginGUI*)m_tcpSrcGUI);
 				break;
 			}
@@ -176,11 +176,11 @@ void TCPSrc::onDisconnected()
 	quint32 id;
 	QTcpSocket* socket = NULL;
 
-	for(int i = 0; i < m_s8Sockets.count(); i++) {
-		if(m_s8Sockets[i].socket == sender()) {
-			id = m_s8Sockets[i].id;
-			socket = m_s8Sockets[i].socket;
-			m_s8Sockets.removeAt(i);
+	for(int i = 0; i < m_ssbSockets.count(); i++) {
+		if(m_ssbSockets[i].socket == sender()) {
+			id = m_ssbSockets[i].id;
+			socket = m_ssbSockets[i].socket;
+			m_ssbSockets.removeAt(i);
 			break;
 		}
 	}

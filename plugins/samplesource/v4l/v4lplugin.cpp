@@ -8,11 +8,11 @@
 
 const PluginDescriptor V4LPlugin::m_pluginDescriptor = {
 	QString("V4L Input"),
-	QString("---"),
-	QString("(c) librtlsdr authors"),
-	QString("http://sdr.osmocom.org/trac/wiki/rtl-sdr"),
+	QString("3.18"),
+	QString("(c) 2014 John Greb"),
+	QString("http://palosaari.fi/linux/"),
 	true,
-	QString("http://cgit.osmocom.org/cgit/rtl-sdr")
+	QString("github.com/hexameron/rtl-sdrangelove")
 };
 
 V4LPlugin::V4LPlugin(QObject* parent) :

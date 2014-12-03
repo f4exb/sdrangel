@@ -28,10 +28,11 @@ void TCPSrcGUI::resetToDefaults()
 {
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
-	ui->rfBandwidth->setText("40000");
+	ui->rfBandwidth->setText("32000");
 	ui->tcpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	applySettings();
+
 }
 
 QByteArray TCPSrcGUI::serialize() const
@@ -44,7 +45,6 @@ QByteArray TCPSrcGUI::serialize() const
 	s.writeReal(5, m_rfBandwidth);
 	s.writeS32(6, m_tcpPort);
 	s.writeBlob(7, ui->spectrumGUI->serialize());
-	s.writeU32(8, m_channelMarker->getColor().rgb());
 	return s.final();
 }
 
@@ -60,15 +60,14 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 	if(d.getVersion() == 1) {
 		QByteArray bytetmp;
 		qint32 s32tmp;
-		quint32 u32tmp;
 		Real realtmp;
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
 		m_channelMarker->setCenterFrequency(s32tmp);
-		d.readS32(3, &s32tmp, TCPSrc::FormatS8);
+		d.readS32(3, &s32tmp, TCPSrc::FormatSSB);
 		switch(s32tmp) {
-			case TCPSrc::FormatS8:
+			case TCPSrc::FormatSSB:
 				ui->sampleFormat->setCurrentIndex(0);
 				break;
 			case TCPSrc::FormatS16LE:
@@ -80,14 +79,12 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		}
 		d.readReal(4, &realtmp, 48000);
 		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
-		d.readReal(5, &realtmp, 40000);
+		d.readReal(5, &realtmp, 32000);
 		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
 		d.readS32(6, &s32tmp, 9999);
 		ui->tcpPort->setText(QString("%1").arg(s32tmp));
 		d.readBlob(7, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
-		if(d.readU32(8, &u32tmp))
-			m_channelMarker->setColor(u32tmp);
 		applySettings();
 		return true;
 	} else {
@@ -141,8 +138,9 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setBandwidth(40000);
+	m_channelMarker->setBandwidth(16000);
 	m_channelMarker->setCenterFrequency(0);
+	m_channelMarker->setColor(Qt::green);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
@@ -194,13 +192,13 @@ void TCPSrcGUI::applySettings()
 	TCPSrc::SampleFormat sampleFormat;
 	switch(ui->sampleFormat->currentIndex()) {
 		case 0:
-			sampleFormat = TCPSrc::FormatS8;
+			sampleFormat = TCPSrc::FormatSSB;
 			break;
 		case 1:
 			sampleFormat = TCPSrc::FormatS16LE;
 			break;
 		default:
-			sampleFormat = TCPSrc::FormatS8;
+			sampleFormat = TCPSrc::FormatSSB;
 			break;
 	}
 

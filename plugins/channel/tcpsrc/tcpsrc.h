@@ -16,7 +16,7 @@ class TCPSrc : public SampleSink {
 
 public:
 	enum SampleFormat {
-		FormatS8,
+		FormatSSB,
 		FormatS16LE
 	};
 
@@ -124,7 +124,7 @@ protected:
 	Real m_sampleDistanceRemain;
 
 	SampleVector m_sampleBuffer;
-	std::vector<qint8> m_sampleBufferS8;
+	std::vector<qint16> m_sampleBufferSSB;
 	SampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 
@@ -138,9 +138,9 @@ protected:
 		{ }
 	};
 	typedef QList<Socket> Sockets;
-	Sockets m_s8Sockets;
+	Sockets m_ssbSockets;
 	Sockets m_s16leSockets;
-	quint32 m_nextS8Id;
+	quint32 m_nextSSBId;
 	quint32 m_nextS16leId;
 
 	void closeAllSockets(Sockets* sockets);
