@@ -120,10 +120,6 @@
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutB">
      <item>
       <widget class="QCheckBox" name="checkBoxB">
        <property name="text">
