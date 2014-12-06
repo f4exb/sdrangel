@@ -91,8 +91,7 @@ private:
 
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;
-	qint32 m_iOffset;
-	qint32 m_qOffset;
+	double m_iOffset, m_qOffset;
 	qint32 m_iRange;
 	qint32 m_qRange;
 	qint32 m_imbalance;

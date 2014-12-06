@@ -71,6 +71,8 @@ void DSPEngine::stopAcquistion()
 {
 	DSPAcquisitionStop cmd;
 	cmd.execute(&m_messageQueue);
+	if(m_dcOffsetCorrection)
+		qDebug("DC offset:%f,%f", m_iOffset, m_qOffset);
 }
 
 void DSPEngine::setSource(SampleSource* source)
@@ -135,24 +137,22 @@ void DSPEngine::run()
 
 void DSPEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
 {
-	int count = end - begin;
+	double count;
 	int io = 0;
 	int qo = 0;
+	Sample corr((qint16)m_iOffset, (qint16)m_qOffset);
 
-	// sum all sample components
+	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++) {
 		io += it->real();
 		qo += it->imag();
+		*it -= corr;
 	}
 
-	// build a sliding average (el cheapo style)
-	m_iOffset = (m_iOffset * 3 + io / count) >> 2;
-	m_qOffset = (m_qOffset * 3 + qo / count) >> 2;
-
-	// correct samples
-	Sample corr(m_iOffset, m_qOffset);
-	for(SampleVector::iterator it = begin; it < end; it++)
-		*it -= corr;
+	// moving average
+	count = end - begin;
+	m_iOffset = (15.0 * m_iOffset + (double)io / count) / 16.0;
+	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
 }
 
 void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
