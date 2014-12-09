@@ -23,7 +23,7 @@
 #define FCD
 #include <string.h>
 #include <stdlib.h>
-#include <hidapi/hidapi.h>
+#include "hidapi.h"
 #include "fcd.h"
 #include "fcdhidcmd.h"
 #include <stdio.h>

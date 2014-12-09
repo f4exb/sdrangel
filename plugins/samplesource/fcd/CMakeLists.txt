@@ -6,6 +6,7 @@ set(fcd_SOURCES
 	fcdplugin.cpp
 	fcdthread.cpp
 	fcdsource.cpp
+	hid-libusb.c
 )
 
 set(fcd_HEADERS
@@ -15,6 +16,7 @@ set(fcd_HEADERS
 	fcdthread.h
 	qthid.h
 	hid-libusb.h
+	hidapi.h
 )
 
 set(fcd_FORMS
@@ -45,7 +47,6 @@ add_library(inputfcd SHARED
 target_link_libraries(inputfcd
 	${QT_LIBRARIES}
 	asound
-	hidapi-libusb
 	sdrbase
 )
 

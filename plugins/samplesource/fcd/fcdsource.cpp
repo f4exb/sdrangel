@@ -11,7 +11,6 @@
 
 #include "fcdinput.h"
 #include "fcdthread.h"
-#include "hid-libusb.h"
 #include "qthid.h"
 
 bool FCDThread::OpenSource(const char* cardname)
