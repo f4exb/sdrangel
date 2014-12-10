@@ -4,8 +4,7 @@ Funcube Dongle
 
 Funcube Dongle Pro+ support will need "libasound2-dev" installed. ("libhid" is now built from source). Install the rules file "fcdpp.rules" in "/etc/udev/rules.d" to gain the "root access" needed to control the dongle.
 
-Funcube Dongle ProPlus support is broken on recent hardware / kernels. It only works well for me with an Atom Chipset. On Desktop with Debian 6 "wheezy" it works if I un-install th
-e udev rules file, so that Sdrangelove cannot contol the dongle, then change frequency with "fcdctl" (The same software built-in to the fcd plug-in). WORK IN PROGRESS.
+Funcube Dongle ProPlus support is broken on recent hardware / kernels. It only works well for me with an Atom Chipset, wich has Full speed USB ports. On a Desktop Intel chipset it needs Debian 6 "wheezy" (kernel 3.2).
 
 
 ==========

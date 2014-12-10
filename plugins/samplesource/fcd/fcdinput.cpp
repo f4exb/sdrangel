@@ -80,6 +80,10 @@ bool FCDInput::startInput(int device)
 
 	if(m_FCDThread)
 		return false;
+	/* Apply settings before streaming to avoid bus contention;
+	 * there is very little spare bandwidth on a full speed USB device.
+	 * Failure is harmless if no device is found */
+	applySettings(m_generalSettings, m_settings, true);
 
 	if(!m_sampleFifo.setSize(4096*16)) {
 		qCritical("Could not allocate SampleFifo");
@@ -92,8 +96,6 @@ bool FCDInput::startInput(int device)
 	}
 
 	m_deviceDescription = QString("Funcube Dongle");
-
-	applySettings(m_generalSettings, m_settings, true);
 
 	qDebug("FCDInput: start");
 	return true;
