@@ -4,8 +4,11 @@
 #include <QHostAddress>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
+#include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
+
+#define ssbFftLen 1024
 
 class QTcpServer;
 class QTcpSocket;
@@ -122,9 +125,10 @@ protected:
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
+	fftfilt* TCPFilter;
 
 	SampleVector m_sampleBuffer;
-	std::vector<qint16> m_sampleBufferSSB;
+	SampleVector m_sampleBufferSSB;
 	SampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 

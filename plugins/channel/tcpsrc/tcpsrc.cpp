@@ -25,6 +25,9 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
+
+	TCPFilter = new fftfilt(0.01, 16.0 / 48.0, ssbFftLen);
+	// if (!TCPFilter) segfault;
 }
 
 TCPSrc::~TCPSrc()
@@ -46,6 +49,11 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
+	Complex* sideband;
+
+	m_sampleBuffer.clear();
+	m_sampleBufferSSB.clear();
+
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
@@ -64,15 +72,17 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 
 	if(m_ssbSockets.count() > 0) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
-			// TODO: fft filter
-			m_sampleBufferSSB.push_back(it->real() + it->imag());
+			Complex cj(it->real() / 20000.0, it->imag() / 20000.0);
+			int n_out = TCPFilter->run(cj, &sideband, true);
+			for (int i = 0; i < n_out; i+=2) {
+				Real one = (sideband[i].real() + sideband[i].imag()) * 0.7 * 20000.0;
+				Real two = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 20000.0;
+				m_sampleBufferSSB.push_back(Sample(one, two));
+			}
+			for(int i = 0; (n_out > 0) && (i < m_ssbSockets.count()); i++)
+				m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
 		}
-		for(int i = 0; i < m_ssbSockets.count(); i++)
-			m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], m_sampleBufferSSB.size());
 	}
-
-	m_sampleBuffer.clear();
-	m_sampleBufferSSB.clear();
 }
 
 void TCPSrc::start()
@@ -116,6 +126,7 @@ bool TCPSrc::handleMessage(Message* cmd)
 		}
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
+		TCPFilter->create_filter(0.3f / 48.0f, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		cmd->completed();
 		return true;
 	} else if(MsgTCPSrcSpectrum::match(cmd)) {
