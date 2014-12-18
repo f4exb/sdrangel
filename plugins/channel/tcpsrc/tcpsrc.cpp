@@ -26,6 +26,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
 
+	m_sampleBufferSSB.resize(ssbFftLen);
 	TCPFilter = new fftfilt(0.01, 16.0 / 48.0, ssbFftLen);
 	// if (!TCPFilter) segfault;
 }
@@ -49,10 +50,9 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	Complex* sideband;
+	cmplx* sideband;
 
 	m_sampleBuffer.clear();
-	m_sampleBufferSSB.clear();
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -74,13 +74,16 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			Complex cj(it->real() / 20000.0, it->imag() / 20000.0);
 			int n_out = TCPFilter->run(cj, &sideband, true);
-			for (int i = 0; i < n_out; i+=2) {
-				Real one = (sideband[i].real() + sideband[i].imag()) * 0.7 * 20000.0;
-				Real two = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 20000.0;
-				m_sampleBufferSSB.push_back(Sample(one, two));
+			if (n_out) {
+				for (int i = 0; i < n_out; i+=2) {
+					Real one = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
+					Real two = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 32000.0;
+					m_sampleBufferSSB.push_back(Sample(one, two));
+				}
+				for(int i = 0; i < m_ssbSockets.count(); i++)
+					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
+				m_sampleBufferSSB.clear();
 			}
-			for(int i = 0; (n_out > 0) && (i < m_ssbSockets.count()); i++)
-				m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
 		}
 	}
 }
