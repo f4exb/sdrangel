@@ -8,7 +8,7 @@
 #include "dsp/interpolator.h"
 #include "util/message.h"
 
-#define ssbFftLen 1024
+#define ssbFftLen 2048
 
 class QTcpServer;
 class QTcpSocket;

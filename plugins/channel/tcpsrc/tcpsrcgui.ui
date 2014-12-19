@@ -157,7 +157,7 @@
      <widget class="QTreeWidget" name="connections">
       <property name="maximumSize">
        <size>
-        <width>16777215</width>
+        <width>400</width>
         <height>100</height>
        </size>
       </property>

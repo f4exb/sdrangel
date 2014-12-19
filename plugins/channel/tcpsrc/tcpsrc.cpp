@@ -116,7 +116,7 @@ bool TCPSrc::handleMessage(Message* cmd)
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 		cmd->completed();
 		return true;
-	} else if(DSPSignalNotification::match(cmd)) {
+	} else if(MsgTCPSrcConfigure::match(cmd)) {
 		MsgTCPSrcConfigure* cfg = (MsgTCPSrcConfigure*)cmd;
 		m_sampleFormat = cfg->getSampleFormat();
 		m_outputSampleRate = cfg->getOutputSampleRate();

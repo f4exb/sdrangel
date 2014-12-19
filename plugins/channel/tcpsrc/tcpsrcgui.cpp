@@ -167,7 +167,7 @@ void TCPSrcGUI::applySettings()
 	bool ok;
 
 	Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
-	if((!ok) || (outputSampleRate < 100))
+	if((!ok) || (outputSampleRate < 1000))
 		outputSampleRate = 48000;
 	Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 	if((!ok) || (rfBandwidth > outputSampleRate))
