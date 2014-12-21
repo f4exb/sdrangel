@@ -53,13 +53,16 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	qint16 sample;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Complex c(it->real(), it->imag());
-		Complex d = c * conj(m_lastSample);
-		m_lastSample = c;
-		Complex e(atan2(d.imag(), d.real()), 0);
+		Real a = (0.005) * m_this.real() * (m_last.imag() - it->imag());
+		Real b = (0.005) * m_this.imag() * (m_last.real() - it->real());
+		m_last = m_this;
+		m_this = Complex(it->real(), it->imag());
+		Complex e(b - a, 0);
+		Complex c;
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &c)) {
-			sample = (qint16)(c.real() * m_volume * 800.0);
+			// TODO: Volume is a function of bandwidth
+			sample = (qint16)(c.real() * m_volume * m_volume);
 			m_sampleBuffer.push_back(Sample(sample, sample));
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;

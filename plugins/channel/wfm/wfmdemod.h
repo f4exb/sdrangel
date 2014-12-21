@@ -75,7 +75,7 @@ private:
 
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
-	Complex m_lastSample;
+	Complex m_last, m_this;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
