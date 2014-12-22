@@ -48,7 +48,8 @@ public:
 	void create_filter(float f1, float f2);
 	void rtty_filter(float);
 
-	int run(const cmplx& in, cmplx **out, bool usb);
+	int runFilt(const cmplx& in, cmplx **out);
+	int runSSB(const cmplx& in, cmplx **out, bool usb);
 };
 
 #endif

@@ -67,7 +67,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
-			n_out = SSBFilter->run(ci, &sideband, m_usb);
+			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
 			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		} else
 			n_out = 0;

@@ -144,7 +144,31 @@ void fftfilt::create_filter(float f1, float f2)
 }
 
 // Filter with fast convolution (overlap-add algorithm).
-int fftfilt::run(const cmplx & in, cmplx **out, bool usb)
+int fftfilt::runFilt(const cmplx & in, cmplx **out)
+{
+	timedata[inptr++] = in;
+	if (inptr < flen2)
+		return 0;
+	inptr = 0;
+
+	memcpy(freqdata, timedata, flen * sizeof(cmplx));
+	fft->ComplexFFT(freqdata);
+	for (int i = 0; i < flen; i++)
+		freqdata[i] *= filter[i];
+
+	fft->InverseComplexFFT(freqdata);
+
+	for (int i = 0; i < flen2; i++) {
+		output[i] = ovlbuf[i] + freqdata[i];
+		ovlbuf[i] = freqdata[flen2 + i];
+	}
+
+	*out = output;
+	return flen2;
+}
+
+// Second version for single sideband
+int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
 {
 	timedata[inptr++] = in;
 

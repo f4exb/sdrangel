@@ -73,7 +73,7 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	if(m_ssbSockets.count() > 0) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			Complex cj(it->real() / 20000.0, it->imag() / 20000.0);
-			int n_out = TCPFilter->run(cj, &sideband, true);
+			int n_out = TCPFilter->runSSB(cj, &sideband, true);
 			if (n_out) {
 				for (int i = 0; i < n_out; i+=2) {
 					Real one = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;

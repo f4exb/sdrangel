@@ -89,11 +89,11 @@ void USBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		b = it->imag();
 		c = Complex(a / 65536.0, b / 65536.0);
 
-		n_out = USBFilter->run(c, &sideband, true);
+		n_out = USBFilter->runSSB(c, &sideband, true);
 		if (m_sampleRate <= 72000)
-			n_out += USBFilter->run(c, &sideband, true);
+			n_out += USBFilter->runSSB(c, &sideband, true);
 		if (m_sampleRate == 64000)
-			n_out += USBFilter->run(c, &sideband, true);
+			n_out += USBFilter->runSSB(c, &sideband, true);
 		for (i = m_i ; i < n_out; i += samplestep) {
 			Real demod = (sideband[i].real() + sideband[i].imag()) * 32768.0;
 
