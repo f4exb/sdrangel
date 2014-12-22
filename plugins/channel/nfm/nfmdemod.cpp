@@ -84,7 +84,7 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			sample = demod * 30000;
 
 			// Display audio spectrum to 12kHz
-			if (!(m_framedrop & 1))
+			if (++m_framedrop & 1)
 				m_sampleBuffer.push_back(Sample(sample, sample));
 
 			if(m_squelchState > 0)
