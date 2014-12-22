@@ -89,8 +89,10 @@ private:
 	Lowpass<Real> m_lowpass;
 
 	int m_squelchState;
+	int m_framedrop;
 
-	Complex m_lastSample;
+	double m_scale;
+	Complex m_last, m_this;
 	MovingAverage m_movingAverage;
 
 	AudioVector m_audioBuffer;

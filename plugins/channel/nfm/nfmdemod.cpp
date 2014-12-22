@@ -29,10 +29,11 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 {
 	m_rfBandwidth = 12500;
 	m_volume = 2.0;
-	m_squelchLevel = pow(10.0, -40.0 / 20.0);
+	m_squelchLevel = pow(10.0, -40.0 / 10.0);
 	m_sampleRate = 500000;
 	m_frequency = 0;
-	m_squelchLevel *= m_squelchLevel;
+	m_scale = 0;
+	m_framedrop = 0;
 
 	m_nco.setFreq(m_frequency, m_sampleRate);
 	m_interpolator.create(16, m_sampleRate, 12500);
@@ -56,30 +57,34 @@ void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 	cmd->submit(messageQueue, this);
 }
 
-int framedrop = 0;
 void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
 	qint16 sample;
+	Real a, b, s, demod;
+	double meansqr = 1.0;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
-			if (++framedrop & 1) {
-				m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
-				if(m_movingAverage.average() >= m_squelchLevel)
-					m_squelchState = m_sampleRate / 50;
-			}
-			Complex d = ci * conj(m_lastSample);
-			m_lastSample = ci;
-			Real demod = atan2(d.imag(), d.real()) / M_PI;
-			demod = m_volume * m_lowpass.filter(demod);
-			sample = demod * 32767;
+			s = ci.real() * ci.real() + ci.imag() * ci.imag();
+			meansqr += s;
+			m_movingAverage.feed(s);
+			if(m_movingAverage.average() >= m_squelchLevel)
+				m_squelchState = m_sampleRate / 50;
+
+			a = m_scale * m_this.real() * (m_last.imag() - ci.imag());
+			b = m_scale * m_this.imag() * (m_last.real() - ci.real());
+			m_last = m_this;
+			m_this = Complex(ci.real(), ci.imag());
+
+			demod = m_volume * m_lowpass.filter(b - a);
+			sample = demod * 30000;
 
 			// Display audio spectrum to 12kHz
-			if (!(framedrop & 1))
+			if (!(m_framedrop & 1))
 				m_sampleBuffer.push_back(Sample(sample, sample));
 
 			if(m_squelchState > 0)
@@ -108,6 +113,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	if(m_sampleSink != NULL)
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
+
+	m_scale = 0.8 * m_scale + 0.2 * ( end - begin) * m_sampleRate / 48000 / meansqr;
 }
 
 void NFMDemod::start()
@@ -136,8 +143,7 @@ bool NFMDemod::handleMessage(Message* cmd)
 		m_rfBandwidth = cfg->getRFBandwidth();
 		m_interpolator.create(16, m_sampleRate, m_rfBandwidth / 2.1);
 		m_lowpass.create(21, 48000, cfg->getAFBandwidth());
-		m_squelchLevel = pow(10.0, cfg->getSquelch() / 20.0);
-		m_squelchLevel *= m_squelchLevel;
+		m_squelchLevel = pow(10.0, cfg->getSquelch() / 10.0);
 		m_volume = cfg->getVolume();
 		cmd->completed();
 		return true;
