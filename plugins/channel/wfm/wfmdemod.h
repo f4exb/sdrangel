@@ -73,6 +73,8 @@ private:
 	int m_sampleRate;
 	int m_frequency;
 
+	double m_scale;
+
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 	Complex m_last, m_this;

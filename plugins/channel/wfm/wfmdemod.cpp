@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// (c) 2014 John Greb                                                            //
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 //                                                                               //
@@ -36,6 +37,8 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 
 	m_audioBuffer.resize(256);
 	m_audioBufferFill = 0;
+
+	m_scale = 0;
 }
 
 WFMDemod::~WFMDemod()
@@ -48,17 +51,22 @@ void WFMDemod::configure(MessageQueue* messageQueue, Real afBandwidth, Real volu
 	cmd->submit(messageQueue, this);
 }
 
+/*
+ * Experimental. Code taken from RTL_FM does not work as well here as it does there.
+ */
 void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	qint16 sample;
+	double meansqr = 1.0;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Real a = (0.005) * m_this.real() * (m_last.imag() - it->imag());
-		Real b = (0.005) * m_this.imag() * (m_last.real() - it->real());
+		Real a = m_scale * m_this.real() * (m_last.imag() - it->imag());
+		Real b = m_scale * m_this.imag() * (m_last.real() - it->real());
 		m_last = m_this;
 		m_this = Complex(it->real(), it->imag());
 		Complex e(b - a, 0);
 		Complex c;
+		meansqr += it->real() * it->real() + it->imag() * it->imag();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &c)) {
 			// TODO: Volume is a function of bandwidth
@@ -83,6 +91,9 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	if(m_sampleSink != NULL)
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
+
+	// moving average auto-gain
+	m_scale = 0.8 * m_scale + 0.2 * ( end - begin) * 20.0 / meansqr;
 }
 
 void WFMDemod::start() {}
