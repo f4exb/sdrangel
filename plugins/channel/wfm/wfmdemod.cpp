@@ -51,26 +51,21 @@ void WFMDemod::configure(MessageQueue* messageQueue, Real afBandwidth, Real volu
 	cmd->submit(messageQueue, this);
 }
 
-/*
- * Experimental. Code taken from RTL_FM does not work as well here as it does there.
- */
 void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	qint16 sample;
-	double meansqr = 1.0;
+	Real x, y, demod;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Real a = m_scale * m_this.real() * (m_last.imag() - it->imag());
-		Real b = m_scale * m_this.imag() * (m_last.real() - it->real());
-		m_last = m_this;
-		m_this = Complex(it->real(), it->imag());
-		Complex e(b - a, 0);
-		Complex c;
-		meansqr += it->real() * it->real() + it->imag() * it->imag();
+		x = it->real() * m_last.real() + it->imag() * m_last.imag();
+		y = it->real() * m_last.imag() - it->imag() * m_last.real();
+		m_last = Complex(it->real(), it->imag());
+		demod = atan2(y, x);
 
+		Complex e(demod, 0);
+		Complex c;
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, e, &c)) {
-			// TODO: Volume is a function of bandwidth
-			sample = (qint16)(c.real() * m_volume * m_volume);
+			sample = (qint16)(c.real() * 100 * m_volume * m_volume);
 			m_sampleBuffer.push_back(Sample(sample, sample));
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
@@ -91,9 +86,6 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	if(m_sampleSink != NULL)
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
-
-	// moving average auto-gain
-	m_scale = 0.8 * m_scale + 0.2 * ( end - begin) * 20.0 / meansqr;
 }
 
 void WFMDemod::start() {}
