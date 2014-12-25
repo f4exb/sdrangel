@@ -18,10 +18,8 @@ protected:
 	int flen2;
 	g_fft<float> *fft;
 	g_fft<float> *ift;
-	cmplx *ht;
 	cmplx *filter;
-	cmplx *timedata;
-	cmplx *freqdata;
+	cmplx *data;
 	cmplx *ovlbuf;
 	cmplx *output;
 	int inptr;

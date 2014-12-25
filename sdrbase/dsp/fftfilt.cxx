@@ -54,18 +54,14 @@ void fftfilt::init_filter()
 	fft	= new g_fft<float>(flen);
 
 	filter		= new cmplx[flen];
-	timedata	= new cmplx[flen];
-	freqdata	= new cmplx[flen];
-	output		= new cmplx[flen];
+	data		= new cmplx[flen];
+	output		= new cmplx[flen2];
 	ovlbuf		= new cmplx[flen2];
-	ht		= new cmplx[flen];
 
 	memset(filter, 0, flen * sizeof(cmplx));
-	memset(timedata, 0, flen * sizeof(cmplx));
-	memset(freqdata, 0, flen * sizeof(cmplx));
-	memset(output, 0, flen * sizeof(cmplx));
+	memset(data, 0, flen * sizeof(cmplx));
+	memset(output, 0, flen2 * sizeof(cmplx));
 	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
-	memset(ht, 0, flen * sizeof(cmplx));
 
 	inptr = 0;
 }
@@ -89,49 +85,40 @@ fftfilt::~fftfilt()
 	if (fft) delete fft;
 
 	if (filter) delete [] filter;
-	if (timedata) delete [] timedata;
-	if (freqdata) delete [] freqdata;
+	if (data) delete [] data;
 	if (output) delete [] output;
 	if (ovlbuf) delete [] ovlbuf;
-	if (ht) delete [] ht;
 }
 
 void fftfilt::create_filter(float f1, float f2)
 {
-// initialize the filter to zero
-	memset(ht, 0, flen * sizeof(cmplx));
+	// initialize the filter to zero
+	memset(filter, 0, flen * sizeof(cmplx));
 
-// create the filter shape coefficients by fft
-// filter values initialized to the ht response h(t)
-	bool b_lowpass, b_highpass;//, window;
+	// create the filter shape coefficients by fft
+	bool b_lowpass, b_highpass;
 	b_lowpass = (f2 != 0);
 	b_highpass = (f1 != 0);
 
 	for (int i = 0; i < flen2; i++) {
-		ht[i] = 0;
-//combine lowpass / highpass
-// lowpass @ f2
-		if (b_lowpass) ht[i] += fsinc(f2, i, flen2);
-// highighpass @ f1
-		if (b_highpass) ht[i] -= fsinc(f1, i, flen2);
+		filter[i] = 0;
+	// lowpass @ f2
+		if (b_lowpass)
+			filter[i] += fsinc(f2, i, flen2);
+	// highighpass @ f1
+		if (b_highpass)
+			filter[i] -= fsinc(f1, i, flen2);
 	}
-// highpass is delta[flen2/2] - h(t)
-	if (b_highpass && f2 < f1) ht[flen2 / 2] += 1;
+	// highpass is delta[flen2/2] - h(t)
+	if (b_highpass && f2 < f1)
+		filter[flen2 / 2] += 1;
 
 	for (int i = 0; i < flen2; i++)
-		ht[i] *= _blackman(i, flen2);
-
-// this may change since green fft is in place fft
-	memcpy(filter, ht, flen * sizeof(cmplx));
-
-// ht is flen complex points with imaginary all zero
-// first half describes h(t), second half all zeros
-// perform the cmplx forward fft to obtain H(w)
-// filter is flen/2 complex values
+		filter[i] *= _blackman(i, flen2);
 
 	fft->ComplexFFT(filter);
 
-// normalize the output filter for unity gain
+	// normalize the output filter for unity gain
 	float scale = 0, mag;
 	for (int i = 0; i < flen2; i++) {
 		mag = abs(filter[i]);
@@ -146,22 +133,22 @@ void fftfilt::create_filter(float f1, float f2)
 // Filter with fast convolution (overlap-add algorithm).
 int fftfilt::runFilt(const cmplx & in, cmplx **out)
 {
-	timedata[inptr++] = in;
+	data[inptr++] = in;
 	if (inptr < flen2)
 		return 0;
 	inptr = 0;
 
-	memcpy(freqdata, timedata, flen * sizeof(cmplx));
-	fft->ComplexFFT(freqdata);
+	fft->ComplexFFT(data);
 	for (int i = 0; i < flen; i++)
-		freqdata[i] *= filter[i];
+		data[i] *= filter[i];
 
-	fft->InverseComplexFFT(freqdata);
+	fft->InverseComplexFFT(data);
 
 	for (int i = 0; i < flen2; i++) {
-		output[i] = ovlbuf[i] + freqdata[i];
-		ovlbuf[i] = freqdata[flen2 + i];
+		output[i] = ovlbuf[i] + data[i];
+		ovlbuf[i] = data[flen2 + i];
 	}
+	memset (data, 0, flen * sizeof(cmplx));
 
 	*out = output;
 	return flen2;
@@ -170,35 +157,34 @@ int fftfilt::runFilt(const cmplx & in, cmplx **out)
 // Second version for single sideband
 int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
 {
-	timedata[inptr++] = in;
-
+	data[inptr++] = in;
 	if (inptr < flen2)
 		return 0;
 	inptr = 0;
 
-	memcpy(freqdata, timedata, flen * sizeof(cmplx));
-	fft->ComplexFFT(freqdata);
+	fft->ComplexFFT(data);
 
 	// Discard frequencies for ssb
 	if ( usb )
 		for (int i = 0; i < flen2; i++) {
-			freqdata[i] *= filter[i];
-			freqdata[flen2 + i] = 0;
+			data[i] *= filter[i];
+			data[flen2 + i] = 0;
 		}
 	else
 		for (int i = 0; i < flen2; i++) {
-			freqdata[i] = 0;
-			freqdata[flen2 + i] *= filter[flen2 + i];
+			data[i] = 0;
+			data[flen2 + i] *= filter[flen2 + i];
 		}
 
 	// in-place FFT: freqdata overwritten with filtered timedata
-	fft->InverseComplexFFT(freqdata);
+	fft->InverseComplexFFT(data);
 
 	// overlap and add
 	for (int i = 0; i < flen2; i++) {
-		output[i] = ovlbuf[i] + freqdata[i];
-		ovlbuf[i] = freqdata[i+flen2];
+		output[i] = ovlbuf[i] + data[i];
+		ovlbuf[i] = data[i+flen2];
 	}
+	memset (data, 0, flen * sizeof(cmplx));
 
 	*out = output;
 	return flen2;
