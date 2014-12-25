@@ -48,6 +48,11 @@
       </item>
       <item>
        <property name="text">
+        <string>S16LE NFM</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>S16LE I/Q</string>
        </property>
       </item>

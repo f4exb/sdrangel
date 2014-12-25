@@ -8,7 +8,7 @@
 #include "dsp/interpolator.h"
 #include "util/message.h"
 
-#define ssbFftLen 2048
+#define tcpFftLen 2048
 
 class QTcpServer;
 class QTcpSocket;
@@ -20,7 +20,9 @@ class TCPSrc : public SampleSink {
 public:
 	enum SampleFormat {
 		FormatSSB,
-		FormatS16LE
+		FormatNFM,
+		FormatS16LE,
+		FormatNone
 	};
 
 	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum);
@@ -121,6 +123,9 @@ protected:
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_tcpPort;
+
+	Real m_scale;
+	Complex m_last, m_this;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

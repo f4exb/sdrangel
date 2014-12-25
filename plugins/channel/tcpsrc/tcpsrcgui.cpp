@@ -70,8 +70,11 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 			case TCPSrc::FormatSSB:
 				ui->sampleFormat->setCurrentIndex(0);
 				break;
-			case TCPSrc::FormatS16LE:
+			case TCPSrc::FormatNFM:
 				ui->sampleFormat->setCurrentIndex(1);
+				break;
+			case TCPSrc::FormatS16LE:
+				ui->sampleFormat->setCurrentIndex(2);
 				break;
 			default:
 				ui->sampleFormat->setCurrentIndex(0);
@@ -195,6 +198,9 @@ void TCPSrcGUI::applySettings()
 			sampleFormat = TCPSrc::FormatSSB;
 			break;
 		case 1:
+			sampleFormat = TCPSrc::FormatNFM;
+			break;
+		case 2:
 			sampleFormat = TCPSrc::FormatS16LE;
 			break;
 		default:
