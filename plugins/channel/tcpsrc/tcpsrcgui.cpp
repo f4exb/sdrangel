@@ -31,6 +31,7 @@ void TCPSrcGUI::resetToDefaults()
 	ui->rfBandwidth->setText("32000");
 	ui->tcpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
+	ui->boost->setValue(1);
 	applySettings();
 
 }
@@ -45,6 +46,7 @@ QByteArray TCPSrcGUI::serialize() const
 	s.writeReal(5, m_rfBandwidth);
 	s.writeS32(6, m_tcpPort);
 	s.writeBlob(7, ui->spectrumGUI->serialize());
+	s.writeS32(8, (qint32)m_boost);
 	return s.final();
 }
 
@@ -88,6 +90,8 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->tcpPort->setText(QString("%1").arg(s32tmp));
 		d.readBlob(7, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
+		d.readS32(8, &s32tmp, 1);
+		ui->boost->setValue(s32tmp);
 		applySettings();
 		return true;
 	} else {
@@ -178,11 +182,13 @@ void TCPSrcGUI::applySettings()
 	int tcpPort = ui->tcpPort->text().toInt(&ok);
 	if((!ok) || (tcpPort < 1) || (tcpPort > 65535))
 		tcpPort = 9999;
+	int boost = ui->boost->value();
 
 	setTitleColor(m_channelMarker->getColor());
 	ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 	ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
 	ui->tcpPort->setText(QString("%1").arg(tcpPort));
+	ui->boost->setValue(boost);
 	m_channelMarker->disconnect(this, SLOT(channelMarkerChanged()));
 	m_channelMarker->setBandwidth((int)rfBandwidth);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -212,12 +218,14 @@ void TCPSrcGUI::applySettings()
 	m_outputSampleRate = outputSampleRate;
 	m_rfBandwidth = rfBandwidth;
 	m_tcpPort = tcpPort;
+	m_boost = boost;
 
 	m_tcpSrc->configure(m_threadedSampleSink->getMessageQueue(),
 		sampleFormat,
 		outputSampleRate,
 		rfBandwidth,
-		tcpPort);
+		tcpPort,
+		boost);
 
 	ui->applyBtn->setEnabled(false);
 }
@@ -245,6 +253,12 @@ void TCPSrcGUI::on_tcpPort_textEdited(const QString& arg1)
 void TCPSrcGUI::on_applyBtn_clicked()
 {
 	applySettings();
+}
+
+void TCPSrcGUI::on_boost_valueChanged(int value)
+{
+	ui->boost->setValue(value);
+	ui->applyBtn->setEnabled(true);
 }
 
 void TCPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)
