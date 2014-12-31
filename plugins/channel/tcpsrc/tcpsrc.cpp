@@ -28,9 +28,9 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 
 	m_last = 0;
 	m_this = 0;
-	m_scale = 20000;
+	m_scale = 0;
 	m_sampleBufferSSB.resize(tcpFftLen);
-	TCPFilter = new fftfilt(0.001, 16.0 / 48.0, tcpFftLen);
+	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
 	// if (!TCPFilter) segfault;
 }
 
@@ -59,7 +59,7 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	m_sampleBuffer.clear();
 
 	// Rtl-Sdr uses full 16-bit scale; FCDPP does not
-	int rescale = 20000 * m_boost * m_boost;
+	int rescale = 30000 * (1 << m_boost);
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -97,6 +97,7 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	if((m_sampleFormat == FormatNFM) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
+			// An FFT filter here is overkill, but was already set up for SSB
 			int n_out = TCPFilter->runFilt(cj, &sideband);
 			if (n_out) {
 				Real sum = 1.0;
@@ -110,7 +111,8 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 					m_sampleBufferSSB.push_back(Sample(l * m_scale, r * m_scale));
 					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag(); 
 				}
-				m_scale = 0.8 * m_scale + 0.2 * 20000 * tcpFftLen / sum;
+				// TODO: correct levels
+				m_scale = 24000 * tcpFftLen / sum;
 				for(int i = 0; i < m_ssbSockets.count(); i++)
 					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
 				m_sampleBufferSSB.clear();
@@ -161,7 +163,10 @@ bool TCPSrc::handleMessage(Message* cmd)
 		m_boost = cfg->getBoost();
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
-		TCPFilter->create_filter(0.048f / 48.0f, m_rfBandwidth / 2.0 / m_outputSampleRate);
+		if (m_sampleFormat == FormatSSB)
+			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+		else
+			TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		cmd->completed();
 		return true;
 	} else if(MsgTCPSrcSpectrum::match(cmd)) {

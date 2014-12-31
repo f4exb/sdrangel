@@ -114,7 +114,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	m_sampleBuffer.clear();
 
-	m_scale = 0.8 * m_scale + 0.2 * ( end - begin) * m_sampleRate / 48000 / meansqr;
+	// TODO: correct levels
+	m_scale = ( end - begin) * m_sampleRate / 48000 / meansqr;
 }
 
 void NFMDemod::start()
