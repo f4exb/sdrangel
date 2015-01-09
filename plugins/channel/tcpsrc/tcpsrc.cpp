@@ -1,3 +1,19 @@
+// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
+// (C) 2015 John Greb                                                            //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
@@ -17,7 +33,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_rfBandwidth = 32000;
 	m_tcpPort = 9999;
 	m_nco.setFreq(0, m_inputSampleRate);
-	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
+	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 	m_uiMessageQueue = uiMessageQueue;
 	m_tcpSrcGUI = tcpSrcGUI;
@@ -36,6 +52,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 
 TCPSrc::~TCPSrc()
 {
+	if (TCPFilter) delete TCPFilter;
 }
 
 void TCPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
@@ -145,7 +162,7 @@ bool TCPSrc::handleMessage(Message* cmd)
 		qDebug("%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_inputSampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_inputSampleRate);
-		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
+		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 		cmd->completed();
 		return true;
@@ -161,7 +178,7 @@ bool TCPSrc::handleMessage(Message* cmd)
 			m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
 		}
 		m_boost = cfg->getBoost();
-		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.1);
+		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 		if (m_sampleFormat == FormatSSB)
 			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
