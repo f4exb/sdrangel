@@ -24,6 +24,8 @@
 #include "dsp/interpolator.h"
 #include "util/message.h"
 
+#define SPREADFACTOR (1<<8)
+
 class LoRaDemod : public SampleSink {
 public:
 	LoRaDemod(SampleSink* sampleSink);
@@ -61,7 +63,7 @@ private:
 	Real m_Bandwidth;
 	int m_sampleRate;
 	int m_frequency;
-	int m_freq;
+	int m_chirp;
 	int m_angle;
 
 	NCO m_nco;

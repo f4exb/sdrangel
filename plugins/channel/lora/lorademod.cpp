@@ -30,10 +30,10 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, m_Bandwidth/2.0);
+	m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 	m_sampleDistanceRemain = (Real)m_sampleRate / m_Bandwidth;
 
-	m_freq = 0;
+	m_chirp = 0;
 	m_angle = 0;
 }
 
@@ -57,9 +57,9 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
-			m_freq = (m_freq + 1) & 255;
-                        m_angle = (m_angle + m_freq) & 255;
-			Complex cangle(cos(M_PI*m_angle/128),-sin(M_PI*m_angle/128));
+			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
+                        m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
+			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
 			ci *= cangle;
 			m_sampleBuffer.push_back(Sample(ci.real() * 32000, ci.imag() * 32000));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
@@ -83,14 +83,14 @@ bool LoRaDemod::handleMessage(Message* cmd)
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
 		m_sampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth/2.0);
+		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 		m_sampleDistanceRemain = m_sampleRate / m_Bandwidth;
 		cmd->completed();
 		return true;
 	} else if(MsgConfigureLoRaDemod::match(cmd)) {
 		MsgConfigureLoRaDemod* cfg = (MsgConfigureLoRaDemod*)cmd;
 		m_Bandwidth = cfg->getBandwidth();
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth/2.0);
+		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 		cmd->completed();
 		return true;
 	} else {
