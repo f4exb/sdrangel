@@ -23,8 +23,12 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
+#include "dsp/fftfilt.h"
 
 #define SPREADFACTOR (1<<8)
+
+/* It takes a lot of CPU to run the sliding FFT */
+#define LORA_SFFT_LEN (128)
 
 class LoRaDemod : public SampleSink {
 public:
@@ -65,6 +69,8 @@ private:
 	int m_frequency;
 	int m_chirp;
 	int m_angle;
+
+	sfft* loraFilter;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

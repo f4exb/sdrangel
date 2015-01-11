@@ -35,10 +35,14 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 
 	m_chirp = 0;
 	m_angle = 0;
+
+	loraFilter = new sfft(LORA_SFFT_LEN);
 }
 
 LoRaDemod::~LoRaDemod()
 {
+	if (loraFilter)
+		delete loraFilter;
 }
 
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
@@ -50,7 +54,7 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO)
 {
 	Complex ci;
-
+	cmplx bins[LORA_SFFT_LEN];
 	m_sampleBuffer.clear();
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -61,6 +65,7 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
                         m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
 			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
 			ci *= cangle;
+			loraFilter->run(ci, bins);
 			m_sampleBuffer.push_back(Sample(ci.real() * 32000, ci.imag() * 32000));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}

@@ -190,3 +190,56 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
 	return flen2;
 }
 
+/* Sliding FFT from Fldigi */
+
+struct sfft::vrot_bins_pair {
+	cmplx vrot;
+	cmplx bins;
+} ;
+
+sfft::sfft(int len)
+{
+	vrot_bins = new vrot_bins_pair[len];
+	delay  = new cmplx[len];
+	fftlen = len;
+	first = 0;
+	last = len - 1;
+	ptr = 0;
+	double phi = 0.0, tau = 2.0 * M_PI/ len;
+	k2 = 1.0;
+	for (int i = 0; i < len; i++) {
+		vrot_bins[i].vrot = cmplx( K1 * cos (phi), K1 * sin (phi) );
+		phi += tau;
+		delay[i] = vrot_bins[i].bins = 0.0;
+		k2 *= K1;
+	}
+}
+
+sfft::~sfft()
+{
+	delete [] vrot_bins;
+	delete [] delay;
+}
+
+// Sliding FFT, cmplx input, cmplx output
+// FFT is computed for each value from first to last
+// Values are not stable until more than "len" samples have been processed.
+// Copies the frequencies to a pointer.
+void sfft::run(const cmplx& input, cmplx *result)
+{
+	cmplx & de = delay[ptr];
+	const cmplx z( input.real() - k2 * de.real(), input.imag() - k2 * de.imag());
+	de = input;
+
+	++ptr ;
+	if( ptr >= fftlen ) ptr = 0 ;
+
+	// It is more efficient to have vrot and bins very close to each other.
+	for(	vrot_bins_pair
+			*itr = vrot_bins + first,
+			*end = vrot_bins + last ;
+		itr != end ;
+		++itr, result++ ) {
+		*result = itr->bins = itr->bins * itr->vrot + z * itr->vrot;
+	}
+}

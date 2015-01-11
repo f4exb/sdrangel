@@ -1,5 +1,5 @@
 /*
- *    fftfilt.h  --  Fast convolution FIR filter
+ * Filters from Fldigi. 
 */
 
 #ifndef	_FFTFILT_H
@@ -48,6 +48,26 @@ public:
 
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb);
+};
+
+
+
+/* Sliding FFT filter from Fldigi */
+class sfft {
+#define K1 0.99999
+private:
+	int fftlen;
+	int first;
+	int last;
+	int ptr;
+	struct vrot_bins_pair;
+	vrot_bins_pair *vrot_bins;
+	cmplx *delay;
+	float k2;
+public:
+	sfft(int len);
+	~sfft();
+	void run(const cmplx& input, cmplx *result);
 };
 
 #endif
