@@ -35,6 +35,7 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 
 	m_chirp = 0;
 	m_angle = 0;
+	m_bin = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 }
@@ -51,10 +52,32 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 	cmd->submit(messageQueue, this);
 }
 
+int  LoRaDemod::detect(Complex c)
+{
+	int i, result;
+	Real peak, mag;
+	cmplx bins[LORA_SFFT_LEN];
+
+	// TODO: don`t need per-sample sliding FFT time resolution
+	loraFilter->run(c, bins);
+	peak = mag = 0;
+	result = 0;
+	for (i = 0; i < LORA_SFFT_LEN; i++) {
+		mag = bins[i].real() * bins[i].real()
+			+ bins[i].imag() * bins[i].imag();
+		if (mag > peak) {
+			peak = mag;
+			result = i;
+		}
+	}
+	return result;
+}
+
 void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO)
 {
+	int newangle;
 	Complex ci;
-	cmplx bins[LORA_SFFT_LEN];
+
 	m_sampleBuffer.clear();
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -64,9 +87,11 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
                         m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
 			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
-			ci *= cangle;
-			loraFilter->run(ci, bins);
-			m_sampleBuffer.push_back(Sample(ci.real() * 32000, ci.imag() * 32000));
+			newangle = detect(ci * cangle);
+
+			m_bin = (m_bin + newangle) & (LORA_SFFT_LEN - 1);
+			Complex nangle(cos(M_PI*2*m_bin/LORA_SFFT_LEN),sin(M_PI*2*m_bin/LORA_SFFT_LEN));
+			m_sampleBuffer.push_back(Sample(nangle.real() * 1000, nangle.imag() * 1000));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}
 	}

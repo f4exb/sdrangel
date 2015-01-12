@@ -38,6 +38,7 @@ public:
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
+	int  detect(Complex c);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
@@ -69,6 +70,7 @@ private:
 	int m_frequency;
 	int m_chirp;
 	int m_angle;
+	int m_bin;
 
 	sfft* loraFilter;
 

@@ -240,6 +240,6 @@ void sfft::run(const cmplx& input, cmplx *result)
 			*end = vrot_bins + last ;
 		itr != end ;
 		++itr, result++ ) {
-		*result = itr->bins = itr->bins * itr->vrot + z * itr->vrot;
+		*result = itr->bins = (itr->bins + z) * itr->vrot;
 	}
 }
