@@ -32,6 +32,7 @@ void LoRaDemodGUI::setName(const QString& name)
 void LoRaDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(0);
+	ui->Spread->setValue(0);
 	applySettings();
 }
 
@@ -40,8 +41,8 @@ QByteArray LoRaDemodGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker->getCenterFrequency());
 	s.writeS32(2, ui->BW->value());
-	s.writeBlob(3, ui->spectrumGUI->serialize());
-	s.writeU32(4, m_channelMarker->getColor().rgb());
+	s.writeS32(3, ui->Spread->value());
+	s.writeBlob(4, ui->spectrumGUI->serialize());
 	return s.final();
 }
 
@@ -56,16 +57,15 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		QByteArray bytetmp;
-		quint32 u32tmp;
 		qint32 tmp;
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 0);
 		ui->BW->setValue(tmp);
-		d.readBlob(3, &bytetmp);
+		d.readS32(3, &tmp, 0);
+		ui->Spread->setValue(tmp);
+		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
-		if(d.readU32(4, &u32tmp))
-			m_channelMarker->setColor(u32tmp);
 		applySettings();
 		return true;
 	} else {
@@ -86,10 +86,15 @@ void LoRaDemodGUI::viewChanged()
 
 void LoRaDemodGUI::on_BW_valueChanged(int value)
 {
-	value = 7813;
-	ui->BWText->setText(QString("%1 Hz").arg(value));
-	m_channelMarker->setBandwidth(value);
+	const int loraBW[] = {7813, 15625, 10417, 20833};
+	int thisBW = loraBW[value];
+	ui->BWText->setText(QString("%1 Hz").arg(thisBW));
+	m_channelMarker->setBandwidth(thisBW);
 	applySettings();
+}
+
+void LoRaDemodGUI::on_Spread_valueChanged(int value)
+{
 }
 
 void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -126,8 +131,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
-	ui->glSpectrum->setCenterFrequency(0);
-	ui->glSpectrum->setSampleRate(7813);
+	ui->glSpectrum->setCenterFrequency(16000);
+	ui->glSpectrum->setSampleRate(32000);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
@@ -158,9 +163,8 @@ LoRaDemodGUI::~LoRaDemodGUI()
 
 void LoRaDemodGUI::applySettings()
 {
-	const int  loraBW[] = {7813, 7813, 10417, 20833 };
+	const int  loraBW[] = {7813, 15625, 10417, 20833};
 	int thisBW = loraBW[ui->BW->value()];
-	setTitleColor(m_channelMarker->getColor());
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		thisBW,
 		m_channelMarker->getCenterFrequency());

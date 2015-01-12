@@ -33,6 +33,7 @@ public:
 private slots:
 	void viewChanged();
 	void on_BW_valueChanged(int value);
+	void on_Spread_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 
