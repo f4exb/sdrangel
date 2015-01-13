@@ -36,6 +36,8 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_chirp = 0;
 	m_angle = 0;
 	m_bin = 0;
+	m_result = 0;
+	m_count = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 }
@@ -52,25 +54,28 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 	cmd->submit(messageQueue, this);
 }
 
+// Detecting the header needs an sfft with the opposite rotation
 int  LoRaDemod::detect(Complex c)
 {
-	int i, result;
-	Real peak, mag;
-	cmplx bins[LORA_SFFT_LEN];
+	int i;
+	float peak;
+	float mag[LORA_SFFT_LEN];
 
-	// TODO: don`t need per-sample sliding FFT time resolution
-	loraFilter->run(c, bins);
-	peak = mag = 0;
-	result = 0;
+	loraFilter->run(c);
+	if (++m_count & 31)
+		return m_result;
+
+	// process spectrum every 32 samples
+	loraFilter->fetch(mag);
+	peak = 0.0f;
+	m_result = 0;
 	for (i = 0; i < LORA_SFFT_LEN; i++) {
-		mag = bins[i].real() * bins[i].real()
-			+ bins[i].imag() * bins[i].imag();
-		if (mag > peak) {
-			peak = mag;
-			result = i;
+		if (mag[i] > peak) {
+			peak = mag[i];
+			m_result = i;
 		}
 	}
-	return result;
+	return m_result;
 }
 
 void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO)
@@ -91,7 +96,7 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 
 			m_bin = (m_bin + newangle) & (LORA_SFFT_LEN - 1);
 			Complex nangle(cos(M_PI*2*m_bin/LORA_SFFT_LEN),sin(M_PI*2*m_bin/LORA_SFFT_LEN));
-			m_sampleBuffer.push_back(Sample(nangle.real() * 1000, nangle.imag() * 1000));
+			m_sampleBuffer.push_back(Sample(nangle.real() * 500, nangle.imag() * 500));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}
 	}

@@ -224,22 +224,24 @@ sfft::~sfft()
 // Sliding FFT, cmplx input, cmplx output
 // FFT is computed for each value from first to last
 // Values are not stable until more than "len" samples have been processed.
-// Copies the frequencies to a pointer.
-void sfft::run(const cmplx& input, cmplx *result)
+void sfft::run(const cmplx& input)
 {
 	cmplx & de = delay[ptr];
 	const cmplx z( input.real() - k2 * de.real(), input.imag() - k2 * de.imag());
 	de = input;
 
-	++ptr ;
-	if( ptr >= fftlen ) ptr = 0 ;
+	if (++ptr >= fftlen)
+		ptr = 0;
 
-	// It is more efficient to have vrot and bins very close to each other.
-	for(	vrot_bins_pair
-			*itr = vrot_bins + first,
-			*end = vrot_bins + last ;
-		itr != end ;
-		++itr, result++ ) {
-		*result = itr->bins = (itr->bins + z) * itr->vrot;
-	}
+	for (vrot_bins_pair *itr = vrot_bins + first, *end = vrot_bins + last; itr != end ; ++itr)
+		itr->bins = (itr->bins + z) * itr->vrot;
 }
+
+// Copies the frequencies to a pointer.
+void sfft::fetch(float *result)
+{
+	for (vrot_bins_pair *itr = vrot_bins, *end = vrot_bins + last;  itr != end; ++itr, ++result)
+		*result = itr->bins.real() * itr->bins.real()
+                        + itr->bins.imag() * itr->bins.imag();
+}
+

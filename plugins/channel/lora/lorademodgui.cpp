@@ -136,6 +136,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
+	setTitleColor(Qt::magenta);
+
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::magenta);
 	m_channelMarker->setBandwidth(7813);

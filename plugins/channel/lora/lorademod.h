@@ -71,6 +71,8 @@ private:
 	int m_chirp;
 	int m_angle;
 	int m_bin;
+	int m_result;
+	int m_count;
 
 	sfft* loraFilter;
 

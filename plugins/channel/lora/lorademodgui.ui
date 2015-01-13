@@ -40,7 +40,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="mabel">
       <property name="text">
        <string>Spreading</string>
       </property>

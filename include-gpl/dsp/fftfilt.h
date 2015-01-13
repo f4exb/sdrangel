@@ -67,7 +67,8 @@ private:
 public:
 	sfft(int len);
 	~sfft();
-	void run(const cmplx& input, cmplx *result);
+	void run(const cmplx& input);
+	void fetch(float *result);
 };
 
 #endif
