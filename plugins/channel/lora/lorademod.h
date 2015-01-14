@@ -27,7 +27,7 @@
 
 #define SPREADFACTOR (1<<8)
 
-/* It takes a lot of CPU to run the sliding FFT */
+/* Chosen for number of bins, not symbol length */
 #define LORA_SFFT_LEN (128)
 
 class LoRaDemod : public SampleSink {
@@ -38,7 +38,7 @@ public:
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
-	int  detect(Complex c);
+	int  detect(Complex sample, Complex angle);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
@@ -75,6 +75,7 @@ private:
 	int m_count;
 
 	sfft* loraFilter;
+	sfft* negaFilter;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

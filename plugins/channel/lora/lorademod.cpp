@@ -40,12 +40,15 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_count = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
+	negaFilter = new sfft(LORA_SFFT_LEN);
 }
 
 LoRaDemod::~LoRaDemod()
 {
 	if (loraFilter)
 		delete loraFilter;
+	if (negaFilter)
+		delete negaFilter;
 }
 
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
@@ -54,22 +57,29 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 	cmd->submit(messageQueue, this);
 }
 
-// Detecting the header needs an sfft with the opposite rotation
-int  LoRaDemod::detect(Complex c)
+
+int  LoRaDemod::detect(Complex c, Complex a)
 {
 	int i;
 	float peak;
 	float mag[LORA_SFFT_LEN];
+	float rev[LORA_SFFT_LEN];
 
-	loraFilter->run(c);
+	loraFilter->run(c * a);
+	negaFilter->run(c * conj(a));
 	if (++m_count & 31)
 		return m_result;
 
 	// process spectrum every 32 samples
 	loraFilter->fetch(mag);
+	negaFilter->fetch(rev);
 	peak = 0.0f;
 	m_result = 0;
 	for (i = 0; i < LORA_SFFT_LEN; i++) {
+		if (rev[i]/3 > peak) {
+			peak = rev[i]/3;
+			m_result = i;
+		}
 		if (mag[i] > peak) {
 			peak = mag[i];
 			m_result = i;
@@ -92,11 +102,11 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
                         m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
 			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
-			newangle = detect(ci * cangle);
+			newangle = detect(ci, cangle);
 
-			m_bin = (m_bin + newangle) & (LORA_SFFT_LEN - 1);
-			Complex nangle(cos(M_PI*2*m_bin/LORA_SFFT_LEN),sin(M_PI*2*m_bin/LORA_SFFT_LEN));
-			m_sampleBuffer.push_back(Sample(nangle.real() * 500, nangle.imag() * 500));
+			m_bin = (m_bin + newangle) & (2*LORA_SFFT_LEN - 1);
+			Complex nangle(cos(M_PI*m_bin/LORA_SFFT_LEN),sin(M_PI*m_bin/LORA_SFFT_LEN));
+			m_sampleBuffer.push_back(Sample(nangle.real() * 100, nangle.imag() * 100));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}
 	}
