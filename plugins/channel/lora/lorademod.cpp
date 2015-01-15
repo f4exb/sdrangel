@@ -21,6 +21,8 @@
 #include "lorademod.h"
 #include "dsp/dspcommands.h"
 
+//#include "lorabits.h"
+
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 
 LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
@@ -41,6 +43,8 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
+
+	//make_gray();
 }
 
 LoRaDemod::~LoRaDemod()
@@ -104,14 +108,14 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
 			newangle = detect(ci, cangle);
 
-			m_bin = (m_bin + newangle) & (2*LORA_SFFT_LEN - 1);
-			Complex nangle(cos(M_PI*m_bin/LORA_SFFT_LEN),sin(M_PI*m_bin/LORA_SFFT_LEN));
+			m_bin = (m_bin + newangle) & (LORA_SFFT_LEN - 1);
+			Complex nangle(cos(M_PI*2*m_bin/LORA_SFFT_LEN),sin(M_PI*2*m_bin/LORA_SFFT_LEN));
 			m_sampleBuffer.push_back(Sample(nangle.real() * 100, nangle.imag() * 100));
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}
 	}
 	if(m_sampleSink != NULL)
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
 }
 
 void LoRaDemod::start()

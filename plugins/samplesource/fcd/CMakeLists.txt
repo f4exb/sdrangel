@@ -46,6 +46,7 @@ add_library(inputfcd SHARED
 
 target_link_libraries(inputfcd
 	${QT_LIBRARIES}
+	${LIBUSB_LIBRARIES}
 	asound
 	sdrbase
 )
