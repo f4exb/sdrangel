@@ -27,14 +27,14 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
 RTLSDRInput::Settings::Settings() :
 	m_gain(0),
-	m_samplerate(288000)
+	m_samplerate(1024000)
 {
 }
 
 void RTLSDRInput::Settings::resetToDefaults()
 {
 	m_gain = 0;
-	m_samplerate = 288000;
+	m_samplerate = 1024000;
 }
 
 QByteArray RTLSDRInput::Settings::serialize() const
@@ -111,8 +111,8 @@ bool RTLSDRInput::startInput(int device)
 	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if((res = rtlsdr_set_sample_rate(m_dev, 288000)) < 0) {
-		qCritical("could not set sample rate: 288k S/s");
+	if((res = rtlsdr_set_sample_rate(m_dev, 1024000)) < 0) {
+		qCritical("could not set sample rate: 1024k S/s");
 		goto failed;
 	}
 

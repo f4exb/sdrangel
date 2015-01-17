@@ -143,7 +143,7 @@
         </size>
        </property>
        <property name="text">
-        <string>288k</string>
+        <string>1024k</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

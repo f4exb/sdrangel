@@ -95,7 +95,7 @@ bool RTLSDRGui::handleMessage(Message* message)
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	ui->samplerate->setValue(0);
+	ui->samplerate->setValue(1);
 
 	if(m_gains.size() > 0) {
 		int dist = abs(m_settings.m_gain - m_gains[0]);
