@@ -40,6 +40,7 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_bin = 0;
 	m_result = 0;
 	m_count = 0;
+	m_header = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
@@ -64,8 +65,8 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 
 int  LoRaDemod::detect(Complex c, Complex a)
 {
-	int i;
-	float peak;
+	int i, result, negresult;
+	float peak, negpeak;
 	float mag[LORA_SFFT_LEN];
 	float rev[LORA_SFFT_LEN];
 
@@ -77,17 +78,20 @@ int  LoRaDemod::detect(Complex c, Complex a)
 	// process spectrum every 32 samples
 	loraFilter->fetch(mag);
 	negaFilter->fetch(rev);
-	peak = 0.0f;
-	m_result = 0;
+	peak = negpeak = 0.0f;
+	result = negresult = 0;
 	for (i = 0; i < LORA_SFFT_LEN; i++) {
-		if (rev[i]/3 > peak) {
-			peak = rev[i]/3;
-			m_result = i;
+		if (rev[i] > negpeak) {
+			negpeak = rev[i];
+			negresult = i;
 		}
 		if (mag[i] > peak) {
 			peak = mag[i];
-			m_result = i;
+			result = i;
 		}
+	}
+	if (peak > negpeak) {
+		m_result = result;
 	}
 	return m_result;
 }

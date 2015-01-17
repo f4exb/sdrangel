@@ -25,10 +25,10 @@
 #include "util/message.h"
 #include "dsp/fftfilt.h"
 
-#define SPREADFACTOR (1<<8)
-
-/* Chosen for number of bins, not symbol length */
-#define LORA_SFFT_LEN (128)
+#define DATA_BITS (6)
+#define SAMPLEBITS (DATA_BITS + 2)
+#define SPREADFACTOR (1 << SAMPLEBITS)
+#define LORA_SFFT_LEN (SPREADFACTOR / 2)
 
 class LoRaDemod : public SampleSink {
 public:
@@ -73,6 +73,7 @@ private:
 	int m_bin;
 	int m_result;
 	int m_count;
+	int m_header;
 
 	sfft* loraFilter;
 	sfft* negaFilter;
