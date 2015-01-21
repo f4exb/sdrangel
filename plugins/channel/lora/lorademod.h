@@ -38,12 +38,14 @@ public:
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
-	int  detect(Complex sample, Complex angle);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
 
 private:
+	int  detect(Complex sample, Complex angle);
+	void interleave(short* inout);
+	void make_gray();
 	class MsgConfigureLoRaDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -77,6 +79,8 @@ private:
 
 	sfft* loraFilter;
 	sfft* negaFilter;
+	float* mov;
+	short* gray;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

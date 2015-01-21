@@ -21,7 +21,7 @@
 #include "lorademod.h"
 #include "dsp/dspcommands.h"
 
-//#include "lorabits.h"
+#include "lorabits.h"
 
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 
@@ -45,7 +45,9 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
 
-	//make_gray();
+	mov = new float[4*LORA_SFFT_LEN];
+	gray = new short[1<<8];
+	make_gray();
 }
 
 LoRaDemod::~LoRaDemod()
@@ -54,6 +56,10 @@ LoRaDemod::~LoRaDemod()
 		delete loraFilter;
 	if (negaFilter)
 		delete negaFilter;
+	if (mov)
+		delete [] mov;
+	if (gray)
+		delete [] gray;
 }
 
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
@@ -63,19 +69,21 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 }
 
 
-int  LoRaDemod::detect(Complex c, Complex a)
+int LoRaDemod::detect(Complex c, Complex a)
 {
-	int i, result, negresult;
-	float peak, negpeak;
+	int i, result, negresult, movpoint;
+	float peak, negpeak, tfloat;
 	float mag[LORA_SFFT_LEN];
 	float rev[LORA_SFFT_LEN];
 
 	loraFilter->run(c * a);
 	negaFilter->run(c * conj(a));
-	if (++m_count & 31)
-		return m_result;
 
-	// process spectrum every 32 samples
+	// process spectrum twice in FFTLEN
+	if (++m_count & ((1 << DATA_BITS) - 1))
+		return m_result;
+	movpoint = 3 & (m_count >> DATA_BITS);
+
 	loraFilter->fetch(mag);
 	negaFilter->fetch(rev);
 	peak = negpeak = 0.0f;
@@ -85,10 +93,13 @@ int  LoRaDemod::detect(Complex c, Complex a)
 			negpeak = rev[i];
 			negresult = i;
 		}
-		if (mag[i] > peak) {
-			peak = mag[i];
+		tfloat = mov[i] + mov[LORA_SFFT_LEN + i] +mov[2 * LORA_SFFT_LEN + i]
+				+ mov[3 * LORA_SFFT_LEN + i] + mag[i];
+		if (tfloat > peak) {
+			peak = tfloat;
 			result = i;
 		}
+		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
 	}
 	if (peak > negpeak) {
 		m_result = result;

@@ -4,7 +4,7 @@
 */
 
 // Needs adjusting for different sizes
-void interleave(short* inout)
+void LoRaDemod::interleave(short* inout)
 {
 	int i, index = 6;
 	short in[index * 2];
@@ -18,10 +18,8 @@ void interleave(short* inout)
 }
 
 // Same sequence for any size
-void make_gray(void)
+void LoRaDemod::make_gray()
 {
-	short gray[1<<8];
-//	short ungray[1<<8];
 	short k = 0;
 	for (short i = 0; i < 1<<8; i++) {
 		gray[i] = k;
