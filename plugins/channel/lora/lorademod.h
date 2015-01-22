@@ -45,7 +45,8 @@ public:
 private:
 	int  detect(Complex sample, Complex angle);
 	void interleave(short* inout);
-	void make_gray();
+	short synch (short bin);
+	short toGray(short bin);
 	class MsgConfigureLoRaDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -76,11 +77,13 @@ private:
 	int m_result;
 	int m_count;
 	int m_header;
+	int m_time;
+	short m_tune;
 
 	sfft* loraFilter;
 	sfft* negaFilter;
 	float* mov;
-	short* gray;
+	short* history;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

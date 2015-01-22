@@ -41,13 +41,13 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_result = 0;
 	m_count = 0;
 	m_header = 0;
+	m_time = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
 
 	mov = new float[4*LORA_SFFT_LEN];
-	gray = new short[1<<8];
-	make_gray();
+	history = new short[256];
 }
 
 LoRaDemod::~LoRaDemod()
@@ -58,8 +58,8 @@ LoRaDemod::~LoRaDemod()
 		delete negaFilter;
 	if (mov)
 		delete [] mov;
-	if (gray)
-		delete [] gray;
+	if (history)
+		delete [] history;
 }
 
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
@@ -68,10 +68,31 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 	cmd->submit(messageQueue, this);
 }
 
+short LoRaDemod::synch(short bin)
+{
+	if (bin < 0) {
+		m_time = 0;
+		return 0;
+	}
+	history[m_time] = bin;
+	if (m_time > 12)
+		if (history[m_time] == history[m_time - 6])
+			if (history[m_time] == history[m_time - 12]) {
+				m_time = 0;
+				m_tune = bin;
+				return 0;
+			}
+
+	m_time++;
+	m_time &= 255;
+	if (m_time < 4)
+		return 0;
+	return (LORA_SFFT_LEN + bin - m_tune) & (LORA_SFFT_LEN - 1);
+}
 
 int LoRaDemod::detect(Complex c, Complex a)
 {
-	int i, result, negresult, movpoint;
+	short i, result, negresult, movpoint;
 	float peak, negpeak, tfloat;
 	float mag[LORA_SFFT_LEN];
 	float rev[LORA_SFFT_LEN];
@@ -101,8 +122,10 @@ int LoRaDemod::detect(Complex c, Complex a)
 		}
 		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
 	}
-	if (peak > negpeak) {
-		m_result = result;
+	if (peak > negpeak * 4) {
+		m_result = synch(result);
+	} else {
+		synch(-1);
 	}
 	return m_result;
 }

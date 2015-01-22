@@ -17,18 +17,8 @@ void LoRaDemod::interleave(short* inout)
 	}
 }
 
-// Same sequence for any size
-void LoRaDemod::make_gray()
+short LoRaDemod::toGray(short num)
 {
-	short k = 0;
-	for (short i = 0; i < 1<<8; i++) {
-		gray[i] = k;
-//		ungray[k] = i;
-		short r = (i+1) & ~i;
-		k ^= r;
-	}
-//	for (short i = 0; i < 1<<5; i++)
-//		printf("%x:%x:%x.\n", i, gray[i], ungray[gray[i]]);
+        return (num >> 1) ^ num;
 }
-
 
