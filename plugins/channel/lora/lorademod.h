@@ -45,6 +45,7 @@ public:
 private:
 	int  detect(Complex sample, Complex angle);
 	void interleave(short* inout);
+	void dumpRaw(void);
 	short synch (short bin);
 	short toGray(short bin);
 	class MsgConfigureLoRaDemod : public Message {

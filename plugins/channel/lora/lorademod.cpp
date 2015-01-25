@@ -47,7 +47,7 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	negaFilter = new sfft(LORA_SFFT_LEN);
 
 	mov = new float[4*LORA_SFFT_LEN];
-	history = new short[256];
+	history = new short[1024];
 }
 
 LoRaDemod::~LoRaDemod()
@@ -68,26 +68,43 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 	cmd->submit(messageQueue, this);
 }
 
+void LoRaDemod::dumpRaw()
+{
+	int i, j, max;
+	max = m_time - 4;
+	if (max > 32 * 4)
+		max = 32 * 4;
+	char text[256];
+	for ( i=0; i < max; i+=4) {
+		j = i / 4;
+		text[j] = 32 + (toGray(127 & history[i + 4]) >> 1);
+	}
+	text[i / 4] = 0;
+	printf(">%s..(%d)\n", text, m_time / 4);
+}
+
 short LoRaDemod::synch(short bin)
 {
 	if (bin < 0) {
+		if (m_time > 70)
+			dumpRaw();
 		m_time = 0;
-		return 0;
+		return -1;
 	}
-	history[m_time] = bin;
+	history[m_time] = (bin + m_tune) & (LORA_SFFT_LEN - 1);
 	if (m_time > 12)
 		if (history[m_time] == history[m_time - 6])
 			if (history[m_time] == history[m_time - 12]) {
 				m_time = 0;
-				m_tune = bin;
-				return 0;
+				m_tune = LORA_SFFT_LEN - bin;
+				return -1;
 			}
 
 	m_time++;
-	m_time &= 255;
-	if (m_time < 4)
-		return 0;
-	return (LORA_SFFT_LEN + bin - m_tune) & (LORA_SFFT_LEN - 1);
+	m_time &= 1023;
+	if (m_time & 3)
+		return -1;
+	return (bin + m_tune) & (LORA_SFFT_LEN - 1);
 }
 
 int LoRaDemod::detect(Complex c, Complex a)
@@ -123,10 +140,12 @@ int LoRaDemod::detect(Complex c, Complex a)
 		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
 	}
 	if (peak > negpeak * 4) {
-		m_result = synch(result);
+		result = synch(result);
 	} else {
-		synch(-1);
+		result = synch(-1);
 	}
+	if (result >= 0)
+		m_result = result;
 	return m_result;
 }
 
