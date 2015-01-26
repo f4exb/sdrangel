@@ -36,7 +36,7 @@ public:
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool po);
+	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
@@ -77,56 +77,30 @@ private:
 	};
 	typedef std::vector<AudioSample> AudioVector;
 
-	enum RateState {
-		RSInitialFill,
-		RSRunning
-	};
-
-	struct Config {
-		int m_inputSampleRate;
-		qint64 m_inputFrequencyOffset;
-		Real m_rfBandwidth;
-		Real m_afBandwidth;
-		Real m_squelch;
-		Real m_volume;
-		quint32 m_audioSampleRate;
-
-		Config() :
-			m_inputSampleRate(-1),
-			m_inputFrequencyOffset(0),
-			m_rfBandwidth(-1),
-			m_afBandwidth(-1),
-			m_squelch(0),
-			m_volume(0),
-			m_audioSampleRate(0)
-		{ }
-	};
-
-	Config m_config;
-	Config m_running;
+	Real m_rfBandwidth;
+	Real m_volume;
+	Real m_squelchLevel;
+	int m_sampleRate;
+	int m_frequency;
 
 	NCO m_nco;
-	Real m_interpolatorRegulation;
 	Interpolator m_interpolator;
-	Real m_interpolatorDistance;
-	Real m_interpolatorDistanceRemain;
+	Real m_sampleDistanceRemain;
 	Lowpass<Real> m_lowpass;
 
-	Real m_squelchLevel;
 	int m_squelchState;
+	int m_framedrop;
 
-	Real m_lastArgument;
-	Complex m_lastSample;
+	double m_scale;
+	Complex m_last, m_this;
 	MovingAverage m_movingAverage;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
 	SampleSink* m_sampleSink;
-	AudioFifo* m_audioFifo;
 	SampleVector m_sampleBuffer;
-
-	void apply();
+	AudioFifo* m_audioFifo;
 };
 
 #endif // INCLUDE_NFMDEMOD_H

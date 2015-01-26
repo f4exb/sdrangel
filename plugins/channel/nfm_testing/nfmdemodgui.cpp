@@ -155,7 +155,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 48000);
+	m_audioFifo = new AudioFifo(4, 48000 / 4);
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_nfmDemod = new NFMDemod(m_audioFifo, m_spectrumVis);
 	m_channelizer = new Channelizer(m_nfmDemod);
@@ -163,8 +163,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addAudioSource(m_audioFifo);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
-	ui->glSpectrum->setCenterFrequency(0);
-	ui->glSpectrum->setSampleRate(48000);
+	ui->glSpectrum->setCenterFrequency(6000);
+	ui->glSpectrum->setSampleRate(12000);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
