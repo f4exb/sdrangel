@@ -48,6 +48,7 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 
 	mov = new float[4*LORA_SFFT_LEN];
 	history = new short[1024];
+	finetune = new short[16];
 }
 
 LoRaDemod::~LoRaDemod()
@@ -60,6 +61,8 @@ LoRaDemod::~LoRaDemod()
 		delete [] mov;
 	if (history)
 		delete [] history;
+	if (finetune)
+		delete [] finetune;
 }
 
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
@@ -70,33 +73,40 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 
 void LoRaDemod::dumpRaw()
 {
-	int i, j, max;
-	max = m_time - 4;
-	if (max > 32 * 4)
-		max = 32 * 4;
+	short bin, j, max;
+	max = m_time / 4 - 1;
+	if (max > 32)
+		max = 32;
 	char text[256];
-	for ( i=0; i < max; i+=4) {
-		j = i / 4;
-		text[j] = 32 + (toGray(127 & history[i + 4]) >> 1);
+	for ( j=0; j < max; j++) {
+		bin = (history[j * 4 + 4] + m_tune) & (LORA_SFFT_LEN - 1);
+		text[j] = 32 + (toGray(bin) >> 1);
 	}
-	text[i / 4] = 0;
+	text[j] = 0;
 	printf(">%s..(%d)\n", text, m_time / 4);
 }
 
 short LoRaDemod::synch(short bin)
 {
+	short i, j;
 	if (bin < 0) {
 		if (m_time > 70)
 			dumpRaw();
 		m_time = 0;
 		return -1;
 	}
-	history[m_time] = (bin + m_tune) & (LORA_SFFT_LEN - 1);
+	history[m_time] = bin;
 	if (m_time > 12)
-		if (history[m_time] == history[m_time - 6])
-			if (history[m_time] == history[m_time - 12]) {
-				m_time = 0;
+		if (bin == history[m_time - 6])
+			if (bin == history[m_time - 12]) {
 				m_tune = LORA_SFFT_LEN - bin;
+				j = 0;
+				for (i=0; i<12; i++)
+					j += finetune[15 & (m_time - i)];
+				if (j < 0)
+					m_tune += 1;
+				m_tune &= (LORA_SFFT_LEN - 1);
+				m_time = 0;
 				return -1;
 			}
 
@@ -109,6 +119,7 @@ short LoRaDemod::synch(short bin)
 
 int LoRaDemod::detect(Complex c, Complex a)
 {
+	int p, q;
 	short i, result, negresult, movpoint;
 	float peak, negpeak, tfloat;
 	float mag[LORA_SFFT_LEN];
@@ -139,11 +150,14 @@ int LoRaDemod::detect(Complex c, Complex a)
 		}
 		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
 	}
-	if (peak > negpeak * 4) {
-		result = synch(result);
-	} else {
-		result = synch(-1);
-	}
+
+	p = (result - 1 + LORA_SFFT_LEN) & (LORA_SFFT_LEN -1);
+	q = (result + 1) & (LORA_SFFT_LEN -1);
+	finetune[15 & m_time] = (mag[p] > mag[q]) ? -1 : 1;
+
+	if (peak < negpeak * 4)
+		result = -1;
+	result = synch(result);
 	if (result >= 0)
 		m_result = result;
 	return m_result;

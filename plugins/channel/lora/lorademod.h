@@ -85,6 +85,7 @@ private:
 	sfft* negaFilter;
 	float* mov;
 	short* history;
+	short* finetune;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
