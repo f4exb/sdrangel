@@ -74,16 +74,20 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 void LoRaDemod::dumpRaw()
 {
 	short bin, j, max;
-	max = m_time / 4 - 1;
-	if (max > 32)
-		max = 32;
+	max = m_time / 4 - 3;
+	if (max > 36)
+		max = 36;
 	char text[256];
 	for ( j=0; j < max; j++) {
-		bin = (history[j * 4 + 4] + m_tune) & (LORA_SFFT_LEN - 1);
-		text[j] = 32 + (toGray(bin) >> 1);
+		bin = (history[j * 4 + 12] + m_tune ) & (LORA_SFFT_LEN - 1);
+		text[j] = toGray(bin >> 1);
 	}
+	for ( j=0; j < max; j+=6)
+		interleave(&text[j]);
+	for ( j=0; j < max; j++)
+		text[j] += 32;
 	text[j] = 0;
-	printf(">%s..(%d)\n", text, m_time / 4);
+	printf(">%s..(%d)\n", text, m_time / 4 - 2);
 }
 
 short LoRaDemod::synch(short bin)
