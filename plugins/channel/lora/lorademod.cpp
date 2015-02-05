@@ -75,8 +75,8 @@ void LoRaDemod::dumpRaw()
 {
 	short bin, j, max;
 	max = m_time / 4 - 3;
-	if (max > 36)
-		max = 36;
+	if (max > 80)
+		max = 80; // 80 symbols is  about 40 chars
 	char text[256];
 	for ( j=0; j < max; j++) {
 		bin = (history[j * 4 + 12] + m_tune ) & (LORA_SFFT_LEN - 1);
@@ -84,10 +84,12 @@ void LoRaDemod::dumpRaw()
 	}
 	for ( j=0; j < max; j+=6)
 		interleave(&text[j]);
+	prng(text, max); // ??
+	hamming(text, max);
 	for ( j=0; j < max; j++)
-		text[j] += 32;
+		text[j] += 64; // 4 bits per symbol
 	text[j] = 0;
-	printf(">%s..(%d)\n", text, m_time / 4 - 2);
+	printf(">%s<\n", text);
 }
 
 short LoRaDemod::synch(short bin)

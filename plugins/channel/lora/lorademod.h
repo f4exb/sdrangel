@@ -48,6 +48,9 @@ private:
 	void dumpRaw(void);
 	short synch (short bin);
 	short toGray(short bin);
+	void hamming(char* inout, int size);
+	void prng(char* inout, int size);
+
 	class MsgConfigureLoRaDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
 

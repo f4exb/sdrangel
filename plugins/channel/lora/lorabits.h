@@ -23,3 +23,31 @@ short LoRaDemod::toGray(short num)
         return (num >> 1) ^ num;
 }
 
+// ignore FEC, data in lsb
+void LoRaDemod::hamming(char* inout, int size)
+{
+	int i;
+	char c;
+	for (i = 0; i < size; i++) {
+		c = inout[i];
+		c = ((c&1)<<3) | ((c&2)<<1) | ((c&4)>>1) | ((c&8)>>3);
+		inout[i] = c;
+	}
+	inout[i] = 0;
+}
+
+// data whitening
+void LoRaDemod::prng(char* inout, int size)
+{
+	const char otp[] = {
+	"                                                                                                                                                                              "
+	};
+	int i, maxchars;
+
+	maxchars = sizeof( otp );
+	if (size < maxchars)
+		maxchars = size;
+	for (i = 0; i < maxchars; i++)
+		inout[i] ^= otp[i] - 32;
+}
+

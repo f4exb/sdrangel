@@ -71,7 +71,7 @@
        <number>0</number>
       </property>
       <property name="maximum">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="pageStep">
        <number>1</number>
@@ -109,7 +109,7 @@
        </size>
       </property>
       <property name="text">
-       <string>2^8</string>
+       <string>6:4 2^8</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
