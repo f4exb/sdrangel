@@ -9,12 +9,11 @@ void LoRaDemod::interleave(char* inout)
 	int i, index = 6;
 	char in[index * 2];
 	for (i = 0; i < index; i++)
-		in[i] = inout[i];
+		in[i] = in[i + index] = inout[i];
 	// top bits are swapped ?
 	for (i = 0; i < index; i++) {
-		inout[i] = (32 & in[1 + i]) | (16 & in[0 + i]) | (8 & in[2 + i])
-				| (4 & in[3 + i]) | (2 & in[4 + i]) | (1 & in[5 + i]);
-		in[i + index] = in[i];
+		inout[i] = (32 & in[2 + i]) | (16 & in[1 + i]) | (8 & in[3 + i])
+				| (4 & in[4 + i]) | (2 & in[5 + i]) | (1 & in[6 + i]);
 	}
 }
 
