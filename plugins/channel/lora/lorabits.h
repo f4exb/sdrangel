@@ -22,7 +22,7 @@ short LoRaDemod::toGray(short num)
         return (num >> 1) ^ num;
 }
 
-// ignore FEC, data in lsb
+// ignore FEC, try data in lsb, bigendian
 void LoRaDemod::hamming(char* inout, int size)
 {
 	int i;
@@ -35,11 +35,11 @@ void LoRaDemod::hamming(char* inout, int size)
 	inout[i] = 0;
 }
 
-// data whitening
+// example data whitening (4 bit only - needs 6 bit for FEC)
 void LoRaDemod::prng(char* inout, int size)
 {
 	const char otp[] = {
-	"                                                                                                                                                                              "
+	"EHFGKHGMGKGMGHG@FKDN@EHBMGBOLFALO@GIBIICJNMDFIDHAHJHMHBBHLHCHLH@IINCAOJFMLF@EKBDIAJKMNBEMBGMBKLMAHOHFHDB@DH@H@HAIKKDKAOKGDBAMIGIBCMLGCFODFAFNLECBLIHKHNBALJA"
 	};
 	int i, maxchars;
 
@@ -47,6 +47,6 @@ void LoRaDemod::prng(char* inout, int size)
 	if (size < maxchars)
 		maxchars = size;
 	for (i = 0; i < maxchars; i++)
-		inout[i] ^= otp[i] - 32;
+		inout[i] ^= otp[i];
 }
 
