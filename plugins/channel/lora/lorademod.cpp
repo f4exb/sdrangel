@@ -73,27 +73,27 @@ void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 
 void LoRaDemod::dumpRaw()
 {
-	char hex[] = {"0123456789ABCDEFXXXX"};
 	short bin, j, max;
-	max = m_time / 4 - 3;
-	if (max > 80)
-		max = 80; // 80 symbols is  about 40 chars
 	char text[256];
+
+	max = m_time / 4 - 3;
+	if (max > 100)
+		max = 100; // about 2 symbols to each char
+
 	for ( j=0; j < max; j++) {
 		bin = (history[j * 4 + 12] + m_tune ) & (LORA_SFFT_LEN - 1);
 		text[j] = toGray(bin >> 1);
 	}
-	for ( j=0; j < max; j+=6)
-		interleave(&text[j]);
+	interleave(text, max);
 	prng(text, max);
 	hamming(text, max);
-	for ( j=0; j < max; j++) {
-		text[j] = hex[ (0xf & text[j]) ];
+
+	for ( j=0; j < max / 2; j++) {
+		text[j] = (text[j * 2 + 2] << 4) | (0xf & text[j * 2 + 1]);
+		if ((text[j] < 32 )||( text[j] > 126))
+			text[j] = 0x5f;
 	}
-//	for ( j=0; j < max / 2; j++) {
-//		if ((text[j] < 32 )||( text[j] > 126))
-//			text[j] = 0x5f;
-//	}
+
 	text[j] = 0;
 	printf("%s\n", text);
 }
