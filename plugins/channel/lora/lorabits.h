@@ -41,22 +41,22 @@ void LoRaDemod::hamming(char* c, int size)
 		i++;
 		c[i] = ((c[i] & 1)<<2) | ((c[i] & 2)<<2) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
 		i++;
-		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
+		c[i] = ((c[i] & 32)>>2) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
 		i++;
 		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
 		i++;
-		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
+		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 16)>>4);
 		i++;
 		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>2) | ((c[i] & 8)>>2);
 	}
 	c[i] = 0;
 }
 
-// example data whitening (4 bit only - needs 6 bit for FEC)
+// data whitening (6 bit)
 void LoRaDemod::prng(char* inout, int size)
 {
 	const char otp[] = {
-	"LBMGEJJENKKKJBN@KB@KAEDDMMDONIN@N@KFBGBCMCMCMIBJHBDHNJDJALDHE@A@DFGOBOMIM@M@BBBCBAMBMKDENDLEDKNKNBNHKJ@JADD@EAAADBOCGAGBLCDANFLGDCNGLOMOBIHHMLBHB@BHMJGJBLMLED@B"
+	"5^ZSm0=cOGMgUB=bNcb<@a^T;_f=6DEB]2ImPIKg:j]RlYT4YZ<`9hZ\\PPb;@8X8i]Zmc_6B52\\8oUPHIcBOc>dY?d9[n5Lg]b]R8hR<0`T008h9c9QJm[c?a:lQEGa;nU=b_UbTW3=W5Aa<9i;F;ondS[LBA;[4S9]kkh]Vc2j>kX"
 	};
 	int i, maxchars;
 
@@ -64,6 +64,6 @@ void LoRaDemod::prng(char* inout, int size)
 	if (size < maxchars)
 		maxchars = size;
 	for (i = 0; i < maxchars; i++)
-		inout[i] ^= 0xf & otp[i];
+		inout[i] ^= (otp[i] - 48);
 }
 

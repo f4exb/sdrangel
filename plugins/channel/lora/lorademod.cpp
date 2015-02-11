@@ -84,8 +84,9 @@ void LoRaDemod::dumpRaw()
 		bin = (history[j * 4 + 12] + m_tune ) & (LORA_SFFT_LEN - 1);
 		text[j] = toGray(bin >> 1);
 	}
-	interleave(text, max);
+
 	prng(text, max);
+	interleave(text, max);
 	hamming(text, max);
 
 	for ( j=0; j < max / 2; j++) {
@@ -93,7 +94,6 @@ void LoRaDemod::dumpRaw()
 		if ((text[j] < 32 )||( text[j] > 126))
 			text[j] = 0x5f;
 	}
-
 	text[j] = 0;
 	printf("%s\n", text);
 }
