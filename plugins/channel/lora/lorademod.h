@@ -29,6 +29,7 @@
 #define SAMPLEBITS (DATA_BITS + 2)
 #define SPREADFACTOR (1 << SAMPLEBITS)
 #define LORA_SFFT_LEN (SPREADFACTOR / 2)
+#define LORA_SQUELCH (3)
 
 class LoRaDemod : public SampleSink {
 public:
@@ -44,12 +45,12 @@ public:
 
 private:
 	int  detect(Complex sample, Complex angle);
-	void interleave(char* inout, int size);
 	void dumpRaw(void);
 	short synch (short bin);
 	short toGray(short bin);
-	void hamming(char* inout, int size);
-	void prng(char* inout, int size);
+	void interleave6(char* inout, int size);
+	void hamming6(char* inout, int size);
+	void prng6(char* inout, int size);
 
 	class MsgConfigureLoRaDemod : public Message {
 		MESSAGE_CLASS_DECLARATION

@@ -86,7 +86,7 @@ void LoRaDemodGUI::viewChanged()
 
 void LoRaDemodGUI::on_BW_valueChanged(int value)
 {
-	const int loraBW[] = {7813, 15625, 10417, 20833};
+	const int loraBW[] = {7813, 15625, 31250, 62500};
 	int thisBW = loraBW[value];
 	ui->BWText->setText(QString("%1 Hz").arg(thisBW));
 	m_channelMarker->setBandwidth(thisBW);
@@ -165,7 +165,7 @@ LoRaDemodGUI::~LoRaDemodGUI()
 
 void LoRaDemodGUI::applySettings()
 {
-	const int  loraBW[] = {7813, 15625, 10417, 20833};
+	const int  loraBW[] = {7813, 15625, 31250, 62500};
 	int thisBW = loraBW[ui->BW->value()];
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		thisBW,

@@ -85,9 +85,9 @@ void LoRaDemod::dumpRaw()
 		text[j] = toGray(bin >> 1);
 	}
 
-	prng(text, max);
-	interleave(text, max);
-	hamming(text, max);
+	prng6(text, max);
+	interleave6(text, max);
+	hamming6(text, max);
 
 	for ( j=0; j < max / 2; j++) {
 		text[j] = (text[j * 2 + 2] << 4) | (0xf & text[j * 2 + 1]);
@@ -167,7 +167,7 @@ int LoRaDemod::detect(Complex c, Complex a)
 	q = (result + 1) & (LORA_SFFT_LEN -1);
 	finetune[15 & m_time] = (mag[p] > mag[q]) ? -1 : 1;
 
-	if (peak < negpeak * 4)
+	if (peak < negpeak * LORA_SQUELCH)
 		result = -1;
 	result = synch(result);
 	if (result >= 0)

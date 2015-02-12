@@ -1,10 +1,15 @@
 /*
  Interleaving is "easiest" if the same number of bits is used per symbol as for FEC
  Chosen mode "spreading 8, low rate" has 6 bits per symbol, so use 4:6 FEC
+
+ More spreading needs higher frequency resolution and longer time on air, increasing drift errors.
+ Want higher bandwidth when using more spreading, which needs more CPU.
+
+ Six bit Hamming can only correct drift errors. Want 7 or 8 bit FEC for QRM
 */
 
 // Needs adjusting for different sizes
-void LoRaDemod::interleave(char* inout, int size)
+void LoRaDemod::interleave6(char* inout, int size)
 {
 	int i, j;
 	char in[6 * 2];
@@ -32,7 +37,7 @@ short LoRaDemod::toGray(short num)
 }
 
 // ignore FEC, try to extract raw bits
-void LoRaDemod::hamming(char* c, int size)
+void LoRaDemod::hamming6(char* c, int size)
 {
 	int i;
 
@@ -53,7 +58,7 @@ void LoRaDemod::hamming(char* c, int size)
 }
 
 // data whitening (6 bit)
-void LoRaDemod::prng(char* inout, int size)
+void LoRaDemod::prng6(char* inout, int size)
 {
 	const char otp[] = {
 	"5^ZSm0=cOGMgUB=bNcb<@a^T;_f=6DEB]2ImPIKg:j]RlYT4YZ<`9hZ\\PPb;@8X8i]Zmc_6B52\\8oUPHIcBOc>dY?d9[n5Lg]b]R8hR<0`T008h9c9QJm[c?a:lQEGa;nU=b_UbTW3=W5Aa<9i;F;ondS[LBA;[4S9]kkh]Vc2j>kX"
