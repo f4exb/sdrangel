@@ -32,3 +32,13 @@ Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, b
 
 "mkdir out && cd out && cmake ../ && make"
 
+============
+Known Issues
+============
+
+Possible compiler/linker  bug when building with "make -j2"
+
+FM is mostly untested.
+
+RTL frontend will have bad aliasing in noisy environments.
+
