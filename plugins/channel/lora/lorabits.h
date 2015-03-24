@@ -5,10 +5,9 @@
  More spreading needs higher frequency resolution and longer time on air, increasing drift errors.
  Want higher bandwidth when using more spreading, which needs more CPU and a better FFT.
 
- Six bit Hamming can only correct drift errors. Need 7 or 8 bit FEC for QRM
- Easier to use 5:4 FEC with Reed-Soloman messages.
+ Six bit Hamming can only correct long runs of drift errors when not using interleaving. Interleaving defeats the point of using Gray code and puts multiple bit errors into single FEC blocks. Hardware decoding uses RSSI to detect the symbols most likely to be damaged, so that individual bits can be repaired after de-interleaving. 
 
- Implicit Mode: explicit starts with a 4:8 block and has different whitening
+ Using Implicit Mode: explicit starts with a 4:8 block and seems to have a different whitening sequence.
 */
 
 // Six bits per symbol, six chars per block
@@ -39,7 +38,7 @@ short LoRaDemod::toGray(short num)
         return (num >> 1) ^ num;
 }
 
-// ignore FEC, try to extract raw bits
+// Ignore the FEC bits, just extract the data bits
 void LoRaDemod::hamming6(char* c, int size)
 {
 	int i;
