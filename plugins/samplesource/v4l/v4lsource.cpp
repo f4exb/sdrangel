@@ -140,6 +140,7 @@ V4LThread::CloseSource()
 			v4l2_munmap(buffers[i].start, buffers[i].length);
 
 		v4l2_close(fd);
+		fd = -1;
 	}
 
 void
@@ -152,24 +153,25 @@ V4LThread::set_sample_rate(double samp_rate)
 		frequency.type = V4L2_TUNER_ADC;
 		frequency.frequency = samp_rate / 1;
 
-		if (v4l2_ioctl(fd, VIDIOC_S_FREQUENCY, &frequency) == -1)
-			perror("VIDIOC_S_FREQUENCY");
+		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
 
 		return;
 	}
 
+// Cannot change freq while streaming in Linux 4.0
 void
 V4LThread::set_center_freq(double freq)
 	{
 		struct v4l2_frequency frequency;
 
+		if (fd <= 0)
+			return;
 		memset (&frequency, 0, sizeof(frequency));
 		frequency.tuner = 1;
 		frequency.type = V4L2_TUNER_RF;
 		frequency.frequency = freq;
 
-		if (v4l2_ioctl(fd, VIDIOC_S_FREQUENCY, &frequency) == -1)
-			perror("VIDIOC_S_FREQUENCY");
+		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
 
 		return;
 	}
@@ -189,8 +191,7 @@ V4LThread::set_bandwidth(double bandwidth)
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
 
-		if (v4l2_ioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls) == -1)
-			perror("VIDIOC_S_EXT_CTRLS");
+		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
 
 		return;
 	}
@@ -201,6 +202,8 @@ V4LThread::set_tuner_gain(double gain)
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
 
+		if (fd <= 0)
+			return;
 		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
 		ext_ctrl.id = CID_TUNER_GAIN;
 		ext_ctrl.value = gain;
@@ -210,8 +213,7 @@ V4LThread::set_tuner_gain(double gain)
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
 
-		if (v4l2_ioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls) == -1)
-			perror("VIDIOC_S_EXT_CTRLS");
+		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
 
 		return;
 	}
