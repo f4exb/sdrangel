@@ -157,6 +157,10 @@
       </widget>
      </item>
      <item>
+      <widget class="QSlider" name="sldGain">
+      </widget>
+     </item>
+     <item>
       <widget class="QSlider" name="sldFreqCorr">
        <property name="minimum">
         <number>-100</number>
