@@ -35,6 +35,7 @@ void RTLSDRInput::Settings::resetToDefaults()
 {
 	m_gain = 0;
 	m_samplerate = 1024000;
+	m_loPpmCorrection = 0;
 }
 
 QByteArray RTLSDRInput::Settings::serialize() const
@@ -42,6 +43,7 @@ QByteArray RTLSDRInput::Settings::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_gain);
 	s.writeS32(2, m_samplerate);
+	s.writeS32(3, m_loPpmCorrection);
 	return s.final();
 }
 
@@ -57,6 +59,7 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
 		//d.readS32(2, &m_samplerate, 0);
+		d.readS32(3, &m_loPpmCorrection, 0);
 		return true;
 	} else {
 		resetToDefaults();
@@ -227,6 +230,17 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 			else {
 				m_settings.m_samplerate = settings.m_samplerate;
 				m_rtlSDRThread->setSamplerate(settings.m_samplerate);
+			}
+		}
+	}
+
+	if((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force) {
+		if(m_dev != NULL) {
+			if( rtlsdr_set_freq_correction(m_dev, settings.m_loPpmCorrection) < 0)
+				qCritical("could not set LO ppm correction: %d", settings.m_loPpmCorrection);
+			else {
+				m_settings.m_loPpmCorrection = settings.m_loPpmCorrection;
+				//m_rtlSDRThread->setSamplerate(settings.m_samplerate);
 			}
 		}
 	}

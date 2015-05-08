@@ -29,6 +29,7 @@ public:
 	struct Settings {
 		qint32 m_gain;
 		qint32 m_samplerate;
+		qint32 m_loPpmCorrection;
 
 		Settings();
 		void resetToDefaults();

@@ -129,6 +129,15 @@ void RTLSDRGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
+void RTLSDRGui::on_ppm_valueChanged(int value)
+{
+	if((value > 99) || (value < -99))
+		return;
+	ui->ppmText->setText(tr("%1").arg(value));
+	m_settings.m_loPpmCorrection = value;
+	sendSettings();
+}
+
 void RTLSDRGui::on_gain_valueChanged(int value)
 {
 	if(value > (int)m_gains.size())
