@@ -28,7 +28,8 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* p
 	m_dev(dev),
 	m_convertBuffer(BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
-	m_samplerate(288000)
+	m_samplerate(288000),
+	m_log2Decim(4)
 {
 }
 
@@ -57,6 +58,11 @@ void RTLSDRThread::setSamplerate(int samplerate)
 	m_samplerate = samplerate;
 }
 
+void RTLSDRThread::setLog2Decimation(unsigned int log2_decim)
+{
+	m_log2Decim = log2_decim;
+}
+
 void RTLSDRThread::run()
 {
 	int res;
@@ -72,6 +78,18 @@ void RTLSDRThread::run()
 	}
 
 	m_running = false;
+}
+
+void RTLSDRThread::decimate1(SampleVector::iterator* it, const quint8* buf, qint32 len)
+{
+	qint16 xreal, yimag;
+	for (int pos = 0; pos < len; pos += 2) {
+		xreal = buf[pos+0];
+		yimag = buf[pos+1];
+		Sample s( xreal << 3, yimag << 3 );
+		**it = s;
+		(*it)++;
+	}
 }
 
 void RTLSDRThread::decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len)
@@ -146,18 +164,40 @@ void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qin
 
 
 
-//  Decimate everything by 16x, except 288kHz by 4x
-//  and 1152kHz, 2048kHz by 8x
+//  Decimate according to specified log2 (ex: log2=4 => decim=16)
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
+	switch (m_log2Decim)
+	{
+	case 0:
+		decimate1(&it, buf, len);
+		break;
+	case 1:
+		decimate2(&it, buf, len);
+		break;
+	case 2:
+		decimate4(&it, buf, len);
+		break;
+	case 3:
+		decimate8(&it, buf, len);
+		break;
+	case 4:
+		decimate16(&it, buf, len);
+		break;
+	default:
+		break;
+	}
+
+	/*
 	if (m_samplerate < 800000)
 		decimate4(&it, buf, len);
 	else if ((m_samplerate == 1152000)||(m_samplerate == 2048000))
 		decimate8(&it, buf, len);
 	else
 		decimate16(&it, buf, len);
+	*/
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 

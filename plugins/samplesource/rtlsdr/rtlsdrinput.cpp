@@ -36,6 +36,7 @@ void RTLSDRInput::Settings::resetToDefaults()
 	m_gain = 0;
 	m_samplerate = 1024000;
 	m_loPpmCorrection = 0;
+	m_log2Decim = 4;
 }
 
 QByteArray RTLSDRInput::Settings::serialize() const
@@ -44,6 +45,7 @@ QByteArray RTLSDRInput::Settings::serialize() const
 	s.writeS32(1, m_gain);
 	s.writeS32(2, m_samplerate);
 	s.writeS32(3, m_loPpmCorrection);
+	s.writeU32(4, m_log2Decim);
 	return s.final();
 }
 
@@ -60,6 +62,7 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 		d.readS32(1, &m_gain, 0);
 		//d.readS32(2, &m_samplerate, 0);
 		d.readS32(3, &m_loPpmCorrection, 0);
+		d.readU32(4, &m_log2Decim, 4);
 		return true;
 	} else {
 		resetToDefaults();
@@ -186,16 +189,26 @@ const QString& RTLSDRInput::getDeviceDescription() const
 int RTLSDRInput::getSampleRate() const
 {
 	int rate = m_settings.m_samplerate;
+	return (rate / (1<<m_settings.m_log2Decim));
+	/*
 	if (rate < 800000)
 		return (rate / 4);
 	if ((rate == 1152000) || (rate == 2048000))
 		return (rate / 8);
 	return (rate / 16);
+	*/
 }
 
 quint64 RTLSDRInput::getCenterFrequency() const
 {
-	return m_generalSettings.m_centerFrequency;
+	if (m_settings.m_log2Decim == 0) // Little wooby-doop if no decimation
+	{
+		return m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+	}
+	else
+	{
+		return m_generalSettings.m_centerFrequency;
+	}
 }
 
 bool RTLSDRInput::handleMessage(Message* message)
@@ -242,6 +255,13 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 				m_settings.m_loPpmCorrection = settings.m_loPpmCorrection;
 				//m_rtlSDRThread->setSamplerate(settings.m_samplerate);
 			}
+		}
+	}
+
+	if((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
+		if(m_dev != NULL) {
+			m_settings.m_log2Decim = settings.m_log2Decim;
+			m_rtlSDRThread->setLog2Decimation(settings.m_log2Decim);
 		}
 	}
 

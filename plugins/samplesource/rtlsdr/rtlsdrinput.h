@@ -30,6 +30,7 @@ public:
 		qint32 m_gain;
 		qint32 m_samplerate;
 		qint32 m_loPpmCorrection;
+		quint32 m_log2Decim;
 
 		Settings();
 		void resetToDefaults();

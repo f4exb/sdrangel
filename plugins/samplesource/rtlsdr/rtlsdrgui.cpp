@@ -129,6 +129,15 @@ void RTLSDRGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
+void RTLSDRGui::on_decim_valueChanged(int value)
+{
+	if ((value <0) || (value > 4))
+		return;
+	ui->decimText->setText(tr("%1").arg(1<<value));
+	m_settings.m_log2Decim = value;
+	sendSettings();
+}
+
 void RTLSDRGui::on_ppm_valueChanged(int value)
 {
 	if((value > 99) || (value < -99))

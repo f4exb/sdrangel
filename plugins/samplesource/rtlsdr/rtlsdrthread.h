@@ -35,6 +35,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
+	void setLog2Decimation(unsigned int log2_decim);
 
 private:
 	QMutex m_startWaitMutex;
@@ -46,11 +47,13 @@ private:
 	SampleFifo* m_sampleFifo;
 
 	int m_samplerate;
+	unsigned int m_log2Decim;
 
 	IntHalfbandFilter m_decimator2;
 	IntHalfbandFilter m_decimator4;
 
 	void run();
+	void decimate1(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len);
