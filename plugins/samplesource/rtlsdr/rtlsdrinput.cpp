@@ -201,14 +201,7 @@ int RTLSDRInput::getSampleRate() const
 
 quint64 RTLSDRInput::getCenterFrequency() const
 {
-	if (m_settings.m_log2Decim == 0) // Little wooby-doop if no decimation
-	{
-		return m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
-	}
-	else
-	{
-		return m_generalSettings.m_centerFrequency;
-	}
+	return m_generalSettings.m_centerFrequency;
 }
 
 bool RTLSDRInput::handleMessage(Message* message)
@@ -267,8 +260,15 @@ bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Se
 
 	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 	if(m_dev != NULL) {
-		if(rtlsdr_set_center_freq( m_dev, m_generalSettings.m_centerFrequency
-						+ (m_settings.m_samplerate / 4) ) != 0)
+		qint64 centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+
+		if (m_settings.m_log2Decim == 0) { // Little wooby-doop if no decimation
+			centerFrequency = m_generalSettings.m_centerFrequency;
+		} else {
+			centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+		}
+
+		if(rtlsdr_set_center_freq( m_dev, centerFrequency ) != 0)
 			qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
 	}
 
