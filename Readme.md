@@ -1,3 +1,10 @@
+======================
+Cloning the repository
+======================
+
+- Clone as usual
+- Checkout the f4exb branch: `git checkout f4exb`
+
 ==============
 Funcube Dongle
 ==============
@@ -11,16 +18,29 @@ Funcube Dongle Pro+ USB drivers are broken on some hardware with recent kernels.
 For Ubuntu
 ==========
 
-"sudo apt-get install libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev"
+`sudo apt-get install libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev`
 
-"mkdir out && cd out && cmake ../ && make"
+`mkdir build && cd build && cmake ../ && make`
 
-"librtlsdr-dev" is in the "universe" repo. (utopic 14.10 amd64.)
+`librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
 
-Use "cmake ../ -DV4L-RTL=ON" to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs "cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/" and "cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/" and package "libv4l-dev".
+Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
 
-The Gnuradio plugin source needs extra packages, including "liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev"
+The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
 
+For non standard installations of RTL-SDR library, the GNU Radio runtime and gr.osmocom drivers use the following variables in the cmake command line. The paths specified are just examples:
+
+  - For GNU Radio runtime:
+    - Includes: `-DGNURADIO_RUNTIME_INCLUDE_DIRS=/opt/install/gnuradio-3.7.5.1/include`
+    - Library: `-DGNURADIO_RUNTIME_LIBRARIES=/opt/install/gnuradio-3.7.5.1/lib/libgnuradio-runtime.so`
+  - For gr.osmocom:
+    - Includes: `-DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
+    - Library: `-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so`
+  - For RTL-SDR library:
+    - Includes: `-DLIBRTLSDR_INCLUDE_DIR=/opt/install/rtlsdr/include`
+    - Library: `-DLIBRTLSDR_LIBRARIES=/opt/install/rtlsdr/lib/librtlsdr.so`
+    
+There is no installation procedure the executable is at the root of the build directory
 
 ============
 For Debian 8
@@ -28,15 +48,38 @@ For Debian 8
 
 Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4.
 
-"sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev"
+`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev`
 
-"mkdir out && cd out && cmake ../ && make"
+`mkdir out && cd out && cmake ../ && make`
+
+The same remarks as for Ubuntu apply...
 
 ============
 Known Issues
 ============
 
-FM is mostly untested.
+  - Actually NFM seems to be working pretty well
+  - WFM does not work for broadcast
+  - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
 
-RTL frontend will have bad aliasing in noisy environments.
+===================
+Done since the fork
+===================
 
+  - Added ppm correction for the LO of RTL-SDR. This uses the corresponding function in the librtlsdr interface (range -99..99 ppm)
+  - Added a preset update button (the diskette with the yellow corner) to be able to save the current settings on an existing preset
+  - Added variable decimation in log2 increments from 2^0=1 to 2^4=16 allowing to see the full 2048 kHz of spectrum if so you wish
+  - Better handling of rtlsdr GUI display when settings change (initial load, load of presets)
+
+=====
+To Do
+=====
+
+  - Display center frequency of the receiver in scope. Presently there is no way to set the frequency precisely
+  - AM demod. What about the air band?!
+  - Add the possibility to change the brightness and/or color of the grid. Sometimes it is barely visible yet useful
+  - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
+  - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)
+  - Even more demods ... 
+  - Triggering capability like on expensive spectrum analyzers to trap burst signals
+  - recording capability

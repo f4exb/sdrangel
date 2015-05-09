@@ -27,7 +27,9 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
 RTLSDRInput::Settings::Settings() :
 	m_gain(0),
-	m_samplerate(1024000)
+	m_samplerate(1024000),
+	m_loPpmCorrection(0),
+	m_log2Decim(4)
 {
 }
 
@@ -60,7 +62,7 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_gain, 0);
-		//d.readS32(2, &m_samplerate, 0);
+		d.readS32(2, &m_samplerate, 0);
 		d.readS32(3, &m_loPpmCorrection, 0);
 		d.readU32(4, &m_log2Decim, 4);
 		return true;

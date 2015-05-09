@@ -9,6 +9,7 @@ class PluginAPI;
 
 namespace Ui {
 	class RTLSDRGui;
+	class RTLSDRSampleRates;
 }
 
 class RTLSDRGui : public QWidget, public PluginGUI {
@@ -50,6 +51,15 @@ private slots:
 	void on_samplerate_valueChanged(int value);
 	void on_checkBox_stateChanged(int state);
 	void updateHardware();
+};
+
+class RTLSDRSampleRates {
+public:
+	static unsigned int getRate(unsigned int rate_index);
+	static unsigned int getRateIndex(unsigned int rate);
+private:
+	static unsigned int m_rates[6];
+	static unsigned int m_nb_rates;
 };
 
 #endif // INCLUDE_RTLSDRGUI_H

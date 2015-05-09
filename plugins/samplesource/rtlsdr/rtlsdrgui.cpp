@@ -1,3 +1,4 @@
+#include <iostream>
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"
@@ -95,7 +96,13 @@ bool RTLSDRGui::handleMessage(Message* message)
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	ui->samplerate->setValue(1);
+	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_samplerate / 1000));
+	unsigned int sampleRateIndex = RTLSDRSampleRates::getRateIndex(m_settings.m_samplerate);
+	ui->samplerate->setValue(sampleRateIndex);
+	ui->ppm->setValue(m_settings.m_loPpmCorrection);
+	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
+	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
+	ui->decim->setValue(m_settings.m_log2Decim);
 
 	if(m_gains.size() > 0) {
 		int dist = abs(m_settings.m_gain - m_gains[0]);
@@ -159,8 +166,7 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 
 void RTLSDRGui::on_samplerate_valueChanged(int value)
 {
-	int Rates[] = {288, 1024, 1536, 1152, 2048, 2500 };
-	int newrate = Rates[value];
+	int newrate = RTLSDRSampleRates::getRate(value);
 	ui->samplerateText->setText(tr("%1k").arg(newrate));
 	m_settings.m_samplerate = newrate * 1000;
 	sendSettings();
@@ -193,3 +199,30 @@ void RTLSDRGui::on_checkBox_stateChanged(int state) {
 	sendSettings();
 }
 
+unsigned int RTLSDRSampleRates::m_rates[] = {288, 1024, 1536, 1152, 2048, 2500 };
+unsigned int RTLSDRSampleRates::m_nb_rates = 6;
+
+unsigned int RTLSDRSampleRates::getRate(unsigned int rate_index)
+{
+	if (rate_index < m_nb_rates)
+	{
+		return m_rates[rate_index];
+	}
+	else
+	{
+		return m_rates[0];
+	}
+}
+
+unsigned int RTLSDRSampleRates::getRateIndex(unsigned int rate)
+{
+	for (unsigned int i=0; i < m_nb_rates; i++)
+	{
+		if (rate/1000 == m_rates[i])
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
