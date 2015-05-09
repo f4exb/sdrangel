@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_dspEngine(new DSPEngine(m_messageQueue)),
 	m_lastEngineState((DSPEngine::State)-1),
 	m_startOsmoSDRUpdateAfterStop(false),
-	m_scopeWindow(NULL),
-	m_inputGUI(NULL),
+	m_scopeWindow(0),
+	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_pluginManager(new PluginManager(this, m_dspEngine))
@@ -122,9 +122,9 @@ MainWindow::~MainWindow()
 	m_dspEngine->removeSink(m_spectrumVis);
 	delete m_spectrumVis;
 
-	if(m_scopeWindow != NULL) {
+	if(m_scopeWindow != 0) {
 		delete m_scopeWindow;
-		m_scopeWindow = NULL;
+		m_scopeWindow = 0;
 	}
 
 	delete m_pluginManager;
@@ -165,9 +165,9 @@ void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 
 void MainWindow::setInputGUI(QWidget* gui)
 {
-	if(m_inputGUI != NULL)
+	if(m_inputGUI != 0)
 		ui->inputDock->widget()->layout()->removeWidget(m_inputGUI);
-	if(gui != NULL)
+	if(gui != 0)
 		ui->inputDock->widget()->layout()->addWidget(gui);
 	m_inputGUI = gui;
 }
@@ -251,14 +251,14 @@ void MainWindow::updateSampleRate()
 {
 	ui->glSpectrum->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
-	if(m_scopeWindow != NULL)
+	if(m_scopeWindow != 0)
 		m_scopeWindow->setSampleRate(m_sampleRate);
 }
 
 void MainWindow::updatePresets()
 {
 	ui->presetTree->resizeColumnToContents(0);
-	if(ui->presetTree->currentItem() != NULL) {
+	if(ui->presetTree->currentItem() != 0) {
 		ui->presetDelete->setEnabled(true);
 		ui->presetLoad->setEnabled(true);
 	} else {
@@ -269,14 +269,14 @@ void MainWindow::updatePresets()
 
 QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 {
-	QTreeWidgetItem* group = NULL;
+	QTreeWidgetItem* group = 0;
 	for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
 		if(ui->presetTree->topLevelItem(i)->text(0) == preset->getGroup()) {
 			group = ui->presetTree->topLevelItem(i);
 			break;
 		}
 	}
-	if(group == NULL) {
+	if(group == 0) {
 		QStringList sl;
 		sl.append(preset->getGroup());
 		group = new QTreeWidgetItem(ui->presetTree, sl, PGroup);
@@ -305,7 +305,7 @@ void MainWindow::applySettings()
 void MainWindow::handleMessages()
 {
 	Message* message;
-	while((message = m_messageQueue->accept()) != NULL) {
+	while((message = m_messageQueue->accept()) != 0) {
 		qDebug("Message: %s", message->getIdentifier());
 		if(DSPEngineReport::match(message)) {
 			DSPEngineReport* rep = (DSPEngineReport*)message;
@@ -363,7 +363,7 @@ void MainWindow::scopeWindowDestroyed()
 {
 	ui->action_Oscilloscope->setChecked(false);
 	m_settings.getCurrent()->setShowScope(false);
-	m_scopeWindow = NULL;
+	m_scopeWindow = 0;
 }
 
 void MainWindow::on_action_Start_triggered()
@@ -399,18 +399,25 @@ void MainWindow::on_presetSave_clicked()
 {
 	QStringList groups;
 	QString group;
+	QString description = "";
 	for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
 		groups.append(ui->presetTree->topLevelItem(i)->text(0));
 
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item != NULL) {
+	if(item != 0) {
 		if(item->type() == PGroup)
 			group = item->text(0);
-		else if(item->type() == PItem)
+		else if(item->type() == PItem) {
 			group = item->parent()->text(0);
+			description = item->text(0);
+		}
 	}
 
 	AddPresetDialog dlg(groups, group, this);
+
+	if (description.length() > 0) {
+		dlg.setDescription(description);
+	}
 
 	if(dlg.exec() == QDialog::Accepted) {
 		Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
@@ -420,16 +427,32 @@ void MainWindow::on_presetSave_clicked()
 	}
 }
 
+void MainWindow::on_presetUpdate_clicked()
+{
+	QTreeWidgetItem* item = ui->presetTree->currentItem();
+	
+	if(item != 0) {
+		if(item->type() == PItem) {
+			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
+			if (preset != 0) {
+				Preset* preset_mod = const_cast<Preset*>(preset);
+				saveSettings(preset_mod);
+			}
+		}
+	}
+}
+
 void MainWindow::on_presetLoad_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item == NULL) {
+	if(item == 0) {
 		updatePresets();
 		return;
 	}
 	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-	if(preset == NULL)
+	if(preset == 0) {
 		return;
+	}
 
 	loadSettings(preset);
 	applySettings();
@@ -438,12 +461,12 @@ void MainWindow::on_presetLoad_clicked()
 void MainWindow::on_presetDelete_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item == NULL) {
+	if(item == 0) {
 		updatePresets();
 		return;
 	}
 	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-	if(preset == NULL)
+	if(preset == 0)
 		return;
 
 	if(QMessageBox::question(this, tr("Delete Preset"), tr("Do you want to delete preset '%1'?").arg(preset->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
@@ -464,7 +487,7 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 
 void MainWindow::on_action_Oscilloscope_triggered()
 {
-	if(m_scopeWindow != NULL) {
+	if(m_scopeWindow != 0) {
 		((QWidget*)m_scopeWindow->parent())->raise();
 		return;
 	}

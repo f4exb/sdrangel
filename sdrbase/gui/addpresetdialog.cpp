@@ -24,3 +24,13 @@ QString AddPresetDialog::description() const
 {
 	return ui->description->text();
 }
+
+void AddPresetDialog::setGroup(QString& group)
+{
+    ui->group->lineEdit()->setText(group);
+}
+
+void AddPresetDialog::setDescription(QString& description)
+{
+    ui->description->setText(description);
+}

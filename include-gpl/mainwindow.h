@@ -48,7 +48,7 @@ class SDRANGELOVE_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget* parent = NULL);
+	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
 
 	MessageQueue* getMessageQueue() { return m_messageQueue; }
@@ -121,6 +121,7 @@ private slots:
 	void on_iqImbalance_toggled(bool checked);
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
+	void on_presetUpdate_clicked();
 	void on_presetLoad_clicked();
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);

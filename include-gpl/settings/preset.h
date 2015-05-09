@@ -93,6 +93,7 @@ protected:
 	QByteArray m_layout;
 };
 
-Q_DECLARE_METATYPE(const Preset*)
+Q_DECLARE_METATYPE(const Preset*);
+Q_DECLARE_METATYPE(Preset*);
 
 #endif // INCLUDE_PRESET_H

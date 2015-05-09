@@ -1,3 +1,5 @@
 CMakeLists.txt.user*
 build/*
 LOCAL/*
+.cproject
+.project
