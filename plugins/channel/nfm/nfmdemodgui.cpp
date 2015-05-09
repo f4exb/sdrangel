@@ -39,6 +39,7 @@ void NFMDemodGUI::resetToDefaults()
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
+	ui->fcenter->display(0);
 	ui->spectrumGUI->resetToDefaults();
 	applySettings();
 }
@@ -202,6 +203,7 @@ void NFMDemodGUI::applySettings()
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
+	ui->fcenter->display(m_channelMarker->getCenterFrequency());
 	m_nfmDemod->configure(m_threadedSampleSink->getMessageQueue(),
 		m_rfBW[ui->rfBW->value()],
 		ui->afBW->value() * 1000.0,
