@@ -34,6 +34,8 @@ public:
 
 private slots:
 	void viewChanged();
+	void on_deltaFrequency_changed(quint64 value);
+	void on_deltaMinus_clicked(bool minus);
 	void on_BW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);

@@ -33,6 +33,7 @@ void SSBDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(3);
 	ui->volume->setValue(4);
+	ui->deltaFrequency->setValue(0);
 	applySettings();
 }
 
@@ -86,6 +87,26 @@ bool SSBDemodGUI::handleMessage(Message* message)
 void SSBDemodGUI::viewChanged()
 {
 	applySettings();
+}
+
+void SSBDemodGUI::on_deltaMinus_clicked(bool minus)
+{
+	int deltaFrequency = m_channelMarker->getCenterFrequency();
+	bool minusDelta = (deltaFrequency < 0);
+
+	if (minus ^ minusDelta) // sign change
+	{
+		m_channelMarker->setCenterFrequency(-deltaFrequency);
+	}
+}
+
+void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
+{
+	if (ui->deltaMinus->isChecked()) {
+		m_channelMarker->setCenterFrequency(-value);
+	} else {
+		m_channelMarker->setCenterFrequency(value);
+	}
 }
 
 void SSBDemodGUI::on_BW_valueChanged(int value)
@@ -172,6 +193,8 @@ SSBDemodGUI::~SSBDemodGUI()
 void SSBDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
+	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
