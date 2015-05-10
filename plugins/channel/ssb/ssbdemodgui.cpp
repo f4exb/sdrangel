@@ -31,8 +31,8 @@ void SSBDemodGUI::setName(const QString& name)
 
 void SSBDemodGUI::resetToDefaults()
 {
-	ui->BW->setValue(3);
-	ui->volume->setValue(4);
+	ui->BW->setValue(30);
+	ui->volume->setValue(40);
 	ui->deltaFrequency->setValue(0);
 	applySettings();
 }
@@ -111,8 +111,9 @@ void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
 
 void SSBDemodGUI::on_BW_valueChanged(int value)
 {
-	ui->BWText->setText(QString("%1 kHz").arg(value));
-	m_channelMarker->setBandwidth(value * 1000 * 2);
+	QString s = QString::number(value/10.0, 'f', 1);
+	ui->BWText->setText(s);
+	m_channelMarker->setBandwidth(value * 100 * 2);
 	applySettings();
 }
 
@@ -165,7 +166,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::green);
-	m_channelMarker->setBandwidth(8000);
+	m_channelMarker->setBandwidth(6000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
@@ -199,6 +200,6 @@ void SSBDemodGUI::applySettings()
 		48000,
 		m_channelMarker->getCenterFrequency());
 	m_ssbDemod->configure(m_threadedSampleSink->getMessageQueue(),
-		ui->BW->value() * 1000.0,
+		ui->BW->value() * 100.0,
 		ui->volume->value() / 10.0 );
 }

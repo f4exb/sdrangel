@@ -73,16 +73,16 @@
     <item row="1" column="1">
      <widget class="QSlider" name="BW">
       <property name="minimum">
-       <number>-8</number>
+       <number>-60</number>
       </property>
       <property name="maximum">
-       <number>8</number>
+       <number>60</number>
       </property>
       <property name="pageStep">
-       <number>1</number>
+       <number>10</number>
       </property>
       <property name="value">
-       <number>3</number>
+       <number>30</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -149,6 +149,9 @@
         <pointsize>12</pointsize>
        </font>
       </property>
+      <property name="cursor">
+       <cursorShape>SizeVerCursor</cursorShape>
+      </property>
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
@@ -163,7 +166,7 @@
        <string>Hz</string>
       </property>
      </widget>
-    </item>   
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="spectrumContainer" native="true">
@@ -227,6 +230,12 @@
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

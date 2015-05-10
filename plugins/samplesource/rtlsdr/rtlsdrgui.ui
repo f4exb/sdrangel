@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>198</width>
-    <height>155</height>
+    <height>173</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,6 +69,9 @@
          <family>Monospace</family>
          <pointsize>20</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>SizeVerCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
