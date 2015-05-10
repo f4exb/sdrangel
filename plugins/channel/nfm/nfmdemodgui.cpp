@@ -2,8 +2,6 @@
 #include <QMainWindow>
 #include "nfmdemodgui.h"
 #include "ui_nfmdemodgui.h"
-#include "nfmdemodgui.h"
-#include "ui_nfmdemodgui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "nfmdemod.h"
@@ -12,6 +10,8 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+
+#include <iostream>
 
 const int NFMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
@@ -39,7 +39,7 @@ void NFMDemodGUI::resetToDefaults()
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
-	ui->fcenter->display(0);
+	ui->deltaFrequency->setValue(0);
 	ui->spectrumGUI->resetToDefaults();
 	applySettings();
 }
@@ -100,6 +100,26 @@ bool NFMDemodGUI::handleMessage(Message* message)
 void NFMDemodGUI::viewChanged()
 {
 	applySettings();
+}
+
+void NFMDemodGUI::on_deltaMinus_clicked(bool minus)
+{
+	int deltaFrequency = m_channelMarker->getCenterFrequency();
+	bool minusDelta = (deltaFrequency < 0);
+
+	if (minus ^ minusDelta) // sign change
+	{
+		m_channelMarker->setCenterFrequency(-deltaFrequency);
+	}
+}
+
+void NFMDemodGUI::on_deltaFrequency_changed(quint64 value)
+{
+	if (ui->deltaMinus->isChecked()) {
+		m_channelMarker->setCenterFrequency(-value);
+	} else {
+		m_channelMarker->setCenterFrequency(value);
+	}
 }
 
 void NFMDemodGUI::on_rfBW_valueChanged(int value)
@@ -203,7 +223,8 @@ void NFMDemodGUI::applySettings()
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
-	ui->fcenter->display(m_channelMarker->getCenterFrequency());
+	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 	m_nfmDemod->configure(m_threadedSampleSink->getMessageQueue(),
 		m_rfBW[ui->rfBW->value()],
 		ui->afBW->value() * 1000.0,

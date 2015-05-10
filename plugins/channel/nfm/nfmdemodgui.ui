@@ -41,10 +41,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>RF Bandwidth</string>
+    <item row="3" column="1">
+     <widget class="QSlider" name="volume">
+      <property name="maximum">
+       <number>100</number>
+      </property>
+      <property name="value">
+       <number>20</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -58,6 +64,46 @@
       </property>
       <property name="value">
        <number>4</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QRadioButton" name="deltaMinus">
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Minus</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Squelch</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>AF Bandwidth</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QSlider" name="squelch">
+      <property name="minimum">
+       <number>-100</number>
+      </property>
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="value">
+       <number>-40</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -80,10 +126,26 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_2">
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>AF Bandwidth</string>
+       <string>RF Bandwidth</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLabel" name="afBWText">
+      <property name="minimumSize">
+       <size>
+        <width>50</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>3 kHz</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
@@ -106,15 +168,8 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Volume</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLabel" name="afBWText">
+    <item row="4" column="2">
+     <widget class="QLabel" name="squelchText">
       <property name="minimumSize">
        <size>
         <width>50</width>
@@ -122,30 +177,17 @@
        </size>
       </property>
       <property name="text">
-       <string>3 kHz</string>
+       <string>-40dB</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_4">
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_3">
       <property name="text">
-       <string>Squelch</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QSlider" name="volume">
-      <property name="maximum">
-       <number>100</number>
-      </property>
-      <property name="value">
-       <number>20</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <string>Volume</string>
       </property>
      </widget>
     </item>
@@ -165,58 +207,38 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QSlider" name="squelch">
-      <property name="minimum">
-       <number>-100</number>
+    <item row="0" column="1">
+     <widget class="ValueDial" name="deltaFrequency" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="maximum">
-       <number>0</number>
-      </property>
-      <property name="value">
-       <number>-40</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="2">
-     <widget class="QLabel" name="squelchText">
       <property name="minimumSize">
        <size>
-        <width>50</width>
-        <height>0</height>
+        <width>32</width>
+        <height>16</height>
        </size>
       </property>
-      <property name="text">
-       <string>-40dB</string>
+      <property name="font">
+       <font>
+        <family>Monospace</family>
+        <pointsize>12</pointsize>
+       </font>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
       </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="flabel">
-      <property name="text">
-       <string>df (Hz)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLCDNumber" name="fcenter">
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Frequency shift from center frequency&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>Demod shift frequency from center in Hz</string>
       </property>
-      <property name="smallDecimalPoint">
-       <bool>true</bool>
-      </property>
-      <property name="digitCount">
-       <number>7</number>
-      </property>
-      <property name="segmentStyle">
-       <enum>QLCDNumber::Flat</enum>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="deltaUnits">
+      <property name="text">
+       <string>Hz</string>
       </property>
      </widget>
     </item>
@@ -290,6 +312,12 @@
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
