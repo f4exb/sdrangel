@@ -11,7 +11,7 @@ class AudioFifo;
 class ThreadedSampleSink;
 class Channelizer;
 class NFMDemod;
-class SpectrumVis;
+class NullSink;
 
 namespace Ui {
 	class NFMDemodGUI;
@@ -53,7 +53,7 @@ private:
 	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
-	SpectrumVis* m_spectrumVis;
+	NullSink *m_nullSink;
 
 	static const int m_rfBW[];
 

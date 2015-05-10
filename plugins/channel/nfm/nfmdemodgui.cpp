@@ -5,7 +5,7 @@
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "nfmdemod.h"
-#include "dsp/spectrumvis.h"
+#include "dsp/nullsink.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -40,7 +40,6 @@ void NFMDemodGUI::resetToDefaults()
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
-	ui->spectrumGUI->resetToDefaults();
 	applySettings();
 }
 
@@ -52,7 +51,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
-	s.writeBlob(6, ui->spectrumGUI->serialize());
+	//s.writeBlob(6, ui->spectrumGUI->serialize());
 	s.writeU32(7, m_channelMarker->getColor().rgb());
 	return s.final();
 }
@@ -80,8 +79,8 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-		d.readBlob(6, &bytetmp);
-		ui->spectrumGUI->deserialize(bytetmp);
+		//d.readBlob(6, &bytetmp);
+		//ui->spectrumGUI->deserialize(bytetmp);
 		if(d.readU32(7, &u32tmp))
 			m_channelMarker->setColor(u32tmp);
 		applySettings();
@@ -177,18 +176,12 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_audioFifo = new AudioFifo(4, 48000);
-	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_nfmDemod = new NFMDemod(m_audioFifo, m_spectrumVis);
+	m_nullSink = new NullSink();
+	m_nfmDemod = new NFMDemod(m_audioFifo, m_nullSink);
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addAudioSource(m_audioFifo);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
-
-	ui->glSpectrum->setCenterFrequency(0);
-	ui->glSpectrum->setSampleRate(48000);
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
-	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::red);
@@ -197,8 +190,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
-
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
 }
@@ -211,7 +202,7 @@ NFMDemodGUI::~NFMDemodGUI()
 	delete m_threadedSampleSink;
 	delete m_channelizer;
 	delete m_nfmDemod;
-	delete m_spectrumVis;
+	delete m_nullSink;
 	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>410</height>
+    <height>138</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -244,70 +244,8 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="spectrumContainer" native="true">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>140</y>
-     <width>218</width>
-     <height>184</height>
-    </rect>
-   </property>
-   <property name="windowTitle">
-    <string>Channel Spectrum</string>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>2</number>
-    </property>
-    <property name="leftMargin">
-     <number>3</number>
-    </property>
-    <property name="topMargin">
-     <number>3</number>
-    </property>
-    <property name="rightMargin">
-     <number>3</number>
-    </property>
-    <property name="bottomMargin">
-     <number>3</number>
-    </property>
-    <item>
-     <widget class="GLSpectrum" name="glSpectrum" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>150</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>GLSpectrum</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrum.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrumGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrumgui.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>

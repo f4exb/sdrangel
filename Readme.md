@@ -46,11 +46,11 @@ There is no installation procedure the executable is at the root of the build di
 For Debian 8
 ============
 
-Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4.
+Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5.
 
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev`
 
-`mkdir out && cd out && cmake ../ && make`
+`mkdir build && cd build && cmake ../ && make`
 
 The same remarks as for Ubuntu apply...
 
@@ -70,12 +70,15 @@ Done since the fork
   - Added a preset update button (the diskette with the yellow corner) to be able to save the current settings on an existing preset
   - Added variable decimation in log2 increments from 2^0=1 to 2^4=16 allowing to see the full 2048 kHz of spectrum if so you wish
   - Better handling of rtlsdr GUI display when settings change (initial load, load of presets)
-
+  - Added display and precise control of the shift frequency from center frequency of the NFM receivers.
+  - Removed useless spectrum visualizer in NFM receivers. Created a null sink class to fit corresponding parameter in NFMDemod class constructor.
+  
+  
 =====
 To Do
 =====
 
-  - Display center frequency of the receiver in scope. Presently there is no way to set the frequency precisely
+
   - AM demod. What about the air band?!
   - Add the possibility to change the brightness and/or color of the grid. Sometimes it is barely visible yet useful
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers

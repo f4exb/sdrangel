@@ -63,6 +63,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/pidcontroller.cpp
 	sdrbase/dsp/samplefifo.cpp
 	sdrbase/dsp/samplesink.cpp
+	sdrbase/dsp/nullsink.cpp
 	sdrbase/dsp/scopevis.cpp
 	sdrbase/dsp/spectrumvis.cpp
 	sdrbase/dsp/threadedsamplesink.cpp
@@ -132,6 +133,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/pidcontroller.h
 	include/dsp/samplefifo.h
 	include/dsp/samplesink.h
+	include-gpl/dsp/nullsink.h
 	include-gpl/dsp/scopevis.h
 	include-gpl/dsp/spectrumvis.h
 	include/dsp/threadedsamplesink.h
