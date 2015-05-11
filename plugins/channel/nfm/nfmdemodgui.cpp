@@ -222,3 +222,14 @@ void NFMDemodGUI::applySettings()
 		ui->volume->value() / 10.0,
 		ui->squelch->value());
 }
+
+void NFMDemodGUI::leaveEvent(QEvent*)
+{
+	m_channelMarker->setHighlighted(false);
+}
+
+void NFMDemodGUI::enterEvent(QEvent*)
+{
+	m_channelMarker->setHighlighted(true);
+}
+

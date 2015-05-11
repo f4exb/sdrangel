@@ -31,6 +31,7 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_bandwidth(0),
 	m_sidebands(dsb),
 	m_visible(false),
+	m_highlighted(false),
 	m_color(m_colorTable[m_nextColor])
 {
 	++m_nextColor;
@@ -65,6 +66,12 @@ void ChannelMarker::setSidebands(sidebands_t sidebands)
 void ChannelMarker::setVisible(bool visible)
 {
 	m_visible = visible;
+	emit changed();
+}
+
+void ChannelMarker::setHighlighted(bool highlighted)
+{
+	m_highlighted = highlighted;
 	emit changed();
 }
 

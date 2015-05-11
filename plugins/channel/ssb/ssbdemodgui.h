@@ -57,6 +57,9 @@ private:
 	~SSBDemodGUI();
 
 	void applySettings();
+
+	void leaveEvent(QEvent*);
+	void enterEvent(QEvent*);
 };
 
 #endif // INCLUDE_SSBDEMODGUI_H

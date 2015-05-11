@@ -33,6 +33,9 @@ public:
 	void setVisible(bool visible);
 	bool getVisible() const { return m_visible; }
 
+	void setHighlighted(bool highlighted);
+	bool getHighlighted() const { return m_highlighted; }
+
 	void setColor(const QColor& color);
 	const QColor& getColor() const { return m_color; }
 
@@ -45,6 +48,7 @@ protected:
 	int m_bandwidth;
 	sidebands_t m_sidebands;
 	bool m_visible;
+	bool m_highlighted;
 	QColor m_color;
 
 signals:

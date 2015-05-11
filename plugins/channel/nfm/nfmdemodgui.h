@@ -61,6 +61,9 @@ private:
 	~NFMDemodGUI();
 
 	void applySettings();
+
+	void leaveEvent(QEvent*);
+	void enterEvent(QEvent*);
 };
 
 #endif // INCLUDE_NFMDEMODGUI_H

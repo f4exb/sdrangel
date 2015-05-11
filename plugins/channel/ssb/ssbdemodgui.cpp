@@ -209,3 +209,14 @@ void SSBDemodGUI::applySettings()
 		ui->BW->value() * 100.0,
 		ui->volume->value() / 10.0 );
 }
+
+void SSBDemodGUI::leaveEvent(QEvent*)
+{
+	m_channelMarker->setHighlighted(false);
+}
+
+void SSBDemodGUI::enterEvent(QEvent*)
+{
+	m_channelMarker->setHighlighted(true);
+}
+

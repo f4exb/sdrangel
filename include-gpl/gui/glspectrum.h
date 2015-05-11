@@ -148,6 +148,8 @@ private:
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
 
+	float getCenterFreqLineRelPos(ChannelMarker *channelMarker);
+
 private slots:
 	void tick();
 	void channelMarkerChanged();

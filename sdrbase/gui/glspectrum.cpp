@@ -544,7 +544,7 @@ void GLSpectrum::paintGL()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
-
+					/*
 					ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
 					float fcLineRelativePos;
 					if (sidebands == ChannelMarker::usb) {
@@ -554,7 +554,7 @@ void GLSpectrum::paintGL()
 					} else {
 						fcLineRelativePos = 0.5;
 					}
-
+					*/
 					glEnable(GL_BLEND);
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
@@ -570,8 +570,8 @@ void GLSpectrum::paintGL()
 					glDisable(GL_BLEND);
 					glColor3f(0.8f, 0.8f, 0.6f);
 					glBegin(GL_LINE_LOOP);
-					glVertex2f(fcLineRelativePos, 0);
-					glVertex2f(fcLineRelativePos, 1);
+					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 0);
+					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 1);
 					glEnd();
 					glPopMatrix();
 				}
@@ -667,6 +667,15 @@ void GLSpectrum::paintGL()
 				glVertex2f(1, 1);
 				glVertex2f(0, 1);
 				glEnd();
+
+				if (dv->m_channelMarker->getHighlighted()) {
+					glColor3f(0.8f, 0.8f, 0.6f);
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 0);
+					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 1);
+					glEnd();
+				}
+
 				glDisable(GL_BLEND);
 				glPopMatrix();
 			}
@@ -1324,4 +1333,17 @@ void GLSpectrum::channelMarkerChanged()
 void GLSpectrum::channelMarkerDestroyed(QObject* object)
 {
 	removeChannelMarker((ChannelMarker*)object);
+}
+
+float GLSpectrum::getCenterFreqLineRelPos(ChannelMarker *channelMarker)
+{
+	ChannelMarker::sidebands_t sidebands = channelMarker->getSidebands();
+
+	if (sidebands == ChannelMarker::usb) {
+		return 0.0;
+	} else if (sidebands == ChannelMarker::lsb) {
+		return 1.0;
+	} else {
+		return 0.5;
+	}
 }
