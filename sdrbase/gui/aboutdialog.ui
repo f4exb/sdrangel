@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>484</width>
-    <height>503</height>
+    <height>602</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -80,6 +80,7 @@
      <property name="text">
       <string>&lt;p&gt;Copyright (C) 2013 maintech GmbH, Otto-Hahn-Str. 15, 97204 Höchberg, Germany&lt;br&gt;
 Written by Christian Daniel.&lt;/p&gt;
+&lt;p&gt;Copyright (C) 2015 Edouard Griffiths, F4EXB. Code branch at: &lt;a href=&quot;https://github.com/f4exb/rtl-sdrangelove/tree/f4exb&quot;&gt;https://github.com/f4exb/rtl-sdrangelove/tree/f4exb&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Many thanks to the osmocom developer team - especially horizon, Hoernchen &amp;amp; tnt.&lt;/p&gt;
 &lt;p&gt;SDRangelove itself is licensed as &quot;GPL2+&quot; with the added exception, that plugins using only header files from the &quot;include&quot;-subdirectory and not from the &quot;include-gpl&quot;-subdirectory do not count as derived works.&lt;/p&gt;
 &lt;p&gt;The following rules apply to the SDRangelove main application and libsdrbase:&lt;br&gt;
