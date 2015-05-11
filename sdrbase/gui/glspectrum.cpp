@@ -664,8 +664,8 @@ void GLSpectrum::paintGL()
 				glBegin(GL_QUADS);
 				glVertex2f(0, 0);
 				glVertex2f(1, 0);
-				glVertex2f(1, 1);
-				glVertex2f(0, 1);
+				glVertex2f(1, 0.5);
+				glVertex2f(0, 0.5);
 				glEnd();
 
 				if (dv->m_channelMarker->getHighlighted()) {
@@ -1129,10 +1129,18 @@ void GLSpectrum::applyChanges()
 				if (dv->m_channelMarker->getHighlighted())
 				{
 					qreal xc;
+					int shift;
 					//ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
 					xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
 					QString ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
-					painter.drawText(QPointF(leftMargin + m_frequencyScale.getPosFromValue(xc), 2*fm.height() + fm.ascent() / 2 - 1), ftext);
+					if (dv->m_channelMarker->getCenterFrequency() < 0) { // left half of scale
+						ftext = " " + ftext;
+						shift = 0;
+					} else { // right half of scale
+						ftext = ftext + " ";
+						shift = - fm.width(ftext);
+					}
+					painter.drawText(QPointF(leftMargin + m_frequencyScale.getPosFromValue(xc) + shift, 2*fm.height() + fm.ascent() / 2 - 1), ftext);
 				}
 			}
 
