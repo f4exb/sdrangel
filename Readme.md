@@ -60,6 +60,7 @@ Known Issues
 
   - Actually NFM seems to be working pretty well
   - WFM does not work for broadcast
+  - NFM audio seems wrong (too slow) for RTL-SDR rates other than 1536 kHz. Maybe in SSB too.
   - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
 
 ===================
@@ -72,6 +73,9 @@ Done since the fork
   - Better handling of rtlsdr GUI display when settings change (initial load, load of presets)
   - Added display and precise control of the shift frequency from center frequency of the NFM receivers.
   - Removed useless spectrum visualizer in NFM receivers. Created a null sink class to fit corresponding parameter in NFMDemod class constructor.
+  - Added display and precise control of the shift frequency from center frequency of the SSB receivers.
+  - Make the sidebands appear correctly on SSB channel overlay. Limit to +/- 6 kHz to fit channel spectrum analyzer window
+  - SSB bandwidth can now be tuned in steps of 100 Hz
   
   
 =====
