@@ -842,7 +842,7 @@ void GLSpectrum::applyChanges()
 
 	int waterfallHeight = 0;
 	int waterfallTop = 0;
-	int frequencyScaleHeight = fm.height() * 2;
+	int frequencyScaleHeight = fm.height() * 3; // +1 line for marker frequency scale
 	int frequencyScaleTop;
 	int histogramTop = 0;
 	int histogramHeight = 20;
@@ -1120,6 +1120,19 @@ void GLSpectrum::applyChanges()
 				if(tick->major) {
 					if(tick->textSize > 0)
 						painter.drawText(QPointF(leftMargin + tick->textPos, fm.height() + fm.ascent() / 2 - 1), tick->text);
+				}
+			}
+
+			// Frequency overlay on highlighted marker
+			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+				ChannelMarkerState* dv = m_channelMarkerStates[i];
+				if (dv->m_channelMarker->getHighlighted())
+				{
+					qreal xc;
+					//ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
+					xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
+					QString ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
+					painter.drawText(QPointF(leftMargin + m_frequencyScale.getPosFromValue(xc), 2*fm.height() + fm.ascent() / 2 - 1), ftext);
 				}
 			}
 
