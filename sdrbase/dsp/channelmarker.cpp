@@ -29,6 +29,7 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	QObject(parent),
 	m_centerFrequency(0),
 	m_bandwidth(0),
+	m_sidebands(dsb),
 	m_visible(false),
 	m_color(m_colorTable[m_nextColor])
 {
@@ -52,6 +53,12 @@ void ChannelMarker::setCenterFrequency(int centerFrequency)
 void ChannelMarker::setBandwidth(int bandwidth)
 {
 	m_bandwidth = bandwidth;
+	emit changed();
+}
+
+void ChannelMarker::setSidebands(sidebands_t sidebands)
+{
+	m_sidebands = sidebands;
 	emit changed();
 }
 

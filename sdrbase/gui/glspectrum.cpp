@@ -19,6 +19,8 @@
 #include <QMouseEvent>
 #include "gui/glspectrum.h"
 
+#include <iostream>
+
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
@@ -542,6 +544,17 @@ void GLSpectrum::paintGL()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
+
+					ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
+					float fcLineRelativePos;
+					if (sidebands == ChannelMarker::usb) {
+						fcLineRelativePos = 0.0;
+					} else if (sidebands == ChannelMarker::lsb) {
+						fcLineRelativePos = 1.0;
+					} else {
+						fcLineRelativePos = 0.5;
+					}
+
 					glEnable(GL_BLEND);
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
@@ -557,8 +570,8 @@ void GLSpectrum::paintGL()
 					glDisable(GL_BLEND);
 					glColor3f(0.8f, 0.8f, 0.6f);
 					glBegin(GL_LINE_LOOP);
-					glVertex2f(0.5, 0);
-					glVertex2f(0.5, 1);
+					glVertex2f(fcLineRelativePos, 0);
+					glVertex2f(fcLineRelativePos, 1);
 					glEnd();
 					glPopMatrix();
 				}
@@ -992,17 +1005,53 @@ void GLSpectrum::applyChanges()
 	// channel overlays
 	for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 		ChannelMarkerState* dv = m_channelMarkerStates[i];
+
+		qreal xc, pw, nw;
+		ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
+		xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
+
+		if (sidebands == ChannelMarker::usb) {
+			nw = 0;                                       // negative bandwidth
+			pw = dv->m_channelMarker->getBandwidth() / 2; // positive bandwidth
+		} else if (sidebands == ChannelMarker::lsb) {
+			pw = 0;
+			nw = dv->m_channelMarker->getBandwidth() / 2;
+		} else {
+			pw = dv->m_channelMarker->getBandwidth() / 2;
+			nw = -pw;
+		}
+
+		//std::cerr << xc << "; " << nw << "; " << pw << std::endl;
+
+		dv->m_glRect.setRect(
+			m_frequencyScale.getPosFromValue(xc + nw) / (float)(width() - leftMargin - rightMargin),
+			0,
+			(pw-nw) / (float)m_sampleRate,
+			1);
+
+		/*
 		dv->m_glRect.setRect(
 			m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency() - dv->m_channelMarker->getBandwidth() / 2) / (float)(width() - leftMargin - rightMargin),
 			0,
 			(dv->m_channelMarker->getBandwidth() / (float)m_sampleRate),
 			1);
+		*/
+
+		if(m_displayHistogram || m_displayMaxHold || m_displayWaterfall) {
+			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(xc) + leftMargin - 1,
+			topMargin,
+			5,
+			height() - topMargin - bottomMargin);
+		}
+
+		/*
 		if(m_displayHistogram || m_displayMaxHold || m_displayWaterfall) {
 			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency()) + leftMargin - 1,
 			topMargin,
 			5,
 			height() - topMargin - bottomMargin);
 		}
+		*/
 	}
 
 	// prepare left scales (time and power)

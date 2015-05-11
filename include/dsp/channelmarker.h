@@ -9,6 +9,13 @@ class SDRANGELOVE_API ChannelMarker : public QObject {
 	Q_OBJECT
 
 public:
+	typedef enum sidebands_e
+	{
+		dsb,
+		lsb,
+		usb
+	} sidebands_t;
+
 	ChannelMarker(QObject* parent = NULL);
 
 	void setTitle(const QString& title);
@@ -19,6 +26,9 @@ public:
 
 	void setBandwidth(int bandwidth);
 	int getBandwidth() const { return m_bandwidth; }
+
+	void setSidebands(sidebands_t sidebands);
+	sidebands_t getSidebands() const { return m_sidebands; }
 
 	void setVisible(bool visible);
 	bool getVisible() const { return m_visible; }
@@ -33,6 +43,7 @@ protected:
 	QString m_title;
 	int m_centerFrequency;
 	int m_bandwidth;
+	sidebands_t m_sidebands;
 	bool m_visible;
 	QColor m_color;
 

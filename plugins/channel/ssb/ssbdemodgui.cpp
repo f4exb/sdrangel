@@ -114,6 +114,11 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 	QString s = QString::number(value/10.0, 'f', 1);
 	ui->BWText->setText(s);
 	m_channelMarker->setBandwidth(value * 100 * 2);
+	if (value < 0) {
+		m_channelMarker->setSidebands(ChannelMarker::lsb);
+	} else {
+		m_channelMarker->setSidebands(ChannelMarker::usb);
+	}
 	applySettings();
 }
 
@@ -167,6 +172,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::green);
 	m_channelMarker->setBandwidth(6000);
+	m_channelMarker->setSidebands(ChannelMarker::usb);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
