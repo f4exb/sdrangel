@@ -39,6 +39,13 @@ public:
 			m_ptr = 0;
 	}
 
+	void fill(Real value)
+	{
+		for(size_t i = 0; i < m_history.size(); i++)
+			m_history[i] = value;
+		m_sum = m_history.size() * value;
+	}
+
 	Real average() const
 	{
 		return m_sum / (Real)m_history.size();

@@ -84,6 +84,8 @@ To Do
 =====
 
   - Add the possibility to change the brightness and/or color of the grid. Sometimes it is barely visible yet useful
+  - Fix and possibly enhance (stereo, RDS?) WFM. Maybe into two plugins one for plain WFM and the other for Broadcast FM
+  - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
   - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)
   - Even more demods ... 

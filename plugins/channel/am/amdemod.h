@@ -23,6 +23,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
+#include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -117,6 +118,7 @@ private:
 	Real m_lastArgument;
 	Complex m_lastSample;
 	MovingAverage m_movingAverage;
+	SimpleAGC m_volumeAGC;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

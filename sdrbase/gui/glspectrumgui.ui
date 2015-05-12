@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>215</width>
+    <width>234</width>
     <height>94</height>
    </rect>
   </property>
@@ -14,7 +14,16 @@
    <string>Oscilloscope</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1,1">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <property name="spacing">
@@ -259,19 +268,6 @@
       <number>3</number>
      </property>
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="ButtonSwitch" name="waterfall">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -443,6 +439,31 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="gridIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Grid intensity</string>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="pageStep">
+        <number>16</number>
+       </property>
+       <property name="value">
+        <number>64</number>
        </property>
       </widget>
      </item>

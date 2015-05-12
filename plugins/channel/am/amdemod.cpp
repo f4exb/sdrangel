@@ -23,6 +23,8 @@
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
 
+#include <iostream>
+
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
 AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
@@ -43,6 +45,7 @@ AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
+	m_volumeAGC.resize(4096, 0.003, 0);
 }
 
 AMDemod::~AMDemod()
@@ -55,6 +58,7 @@ void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBan
 	cmd->submit(messageQueue, this);
 }
 
+/*
 float arctan2(Real y, Real x)
 {
 	Real coeff_1 = M_PI / 4;
@@ -84,6 +88,7 @@ Real angleDist(Real a, Real b)
 
 	return dist;
 }
+*/
 
 void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
 {
@@ -138,10 +143,14 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 					else if(demod > 1)
 						demod = 1;
 
+					m_volumeAGC.feed(demod);
+
+					demod *= (0.003 / m_volumeAGC.getValue());
 					demod *= m_running.m_volume;
-					sample = demod * 32700;
+					sample = demod * 32700 * 16;
 
 				} else {
+					m_volumeAGC.close();
 					sample = 0;
 				}
 
