@@ -22,6 +22,8 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 
+#include <iostream>
+
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
 SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
@@ -29,6 +31,7 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioFifo(audioFifo)
 {
 	m_Bandwidth = 5000;
+	m_LowCutoff = 300;
 	m_volume = 2.0;
 	m_sampleRate = 96000;
 	m_frequency = 0;
@@ -41,7 +44,7 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_undersampleCount = 0;
 
 	m_usb = true;
-	SSBFilter = new fftfilt(0.01, m_Bandwidth / 48000.0, ssbFftLen);
+	SSBFilter = new fftfilt(m_LowCutoff / 48000.0, m_Bandwidth / 48000.0, ssbFftLen);
 	// if (!USBFilter) segfault;
 }
 
@@ -50,9 +53,9 @@ SSBDemod::~SSBDemod()
 	if (SSBFilter) delete SSBFilter;
 }
 
-void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real volume)
+void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, volume);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume);
 	cmd->submit(messageQueue, this);
 }
 
@@ -110,7 +113,7 @@ void SSBDemod::stop()
 
 bool SSBDemod::handleMessage(Message* cmd)
 {
-	float band;
+	float band, lowCutoff;
 
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
@@ -125,17 +128,26 @@ bool SSBDemod::handleMessage(Message* cmd)
 		MsgConfigureSSBDemod* cfg = (MsgConfigureSSBDemod*)cmd;
 
 		band = cfg->getBandwidth();
+		lowCutoff = cfg->getLoCutoff();
+
 		if (band < 0) {
 			band = -band;
+			lowCutoff = -lowCutoff;
 			m_usb = false;
 		} else
 			m_usb = true;
-		if (band < 500.0f)
-			band = 500.0f;
+
+		if (band < 100.0f)
+		{
+			band = 100.0f;
+			lowCutoff = 0;
+		}
+
 		m_Bandwidth = band;
+		m_LowCutoff = lowCutoff;
 
 		m_interpolator.create(16, m_sampleRate, band * 2.0f);
-		SSBFilter->create_filter(0.3f / 48.0f, m_Bandwidth / 48000.0f);
+		SSBFilter->create_filter(m_LowCutoff / 48000.0f, m_Bandwidth / 48000.0f);
 
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;

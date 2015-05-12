@@ -1,5 +1,7 @@
 #include "dsp/channelmarker.h"
 
+#include <iostream>
+
 QRgb ChannelMarker::m_colorTable[] = {
 	qRgb(0xc0, 0x00, 0x00),
 	qRgb(0x00, 0xc0, 0x00),
@@ -29,6 +31,7 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	QObject(parent),
 	m_centerFrequency(0),
 	m_bandwidth(0),
+	m_lowCutoff(0),
 	m_sidebands(dsb),
 	m_visible(false),
 	m_highlighted(false),
@@ -54,6 +57,12 @@ void ChannelMarker::setCenterFrequency(int centerFrequency)
 void ChannelMarker::setBandwidth(int bandwidth)
 {
 	m_bandwidth = bandwidth;
+	emit changed();
+}
+
+void ChannelMarker::setLowCutoff(int lowCutoff)
+{
+	m_lowCutoff = lowCutoff;
 	emit changed();
 }
 

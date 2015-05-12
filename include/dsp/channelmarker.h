@@ -27,6 +27,9 @@ public:
 	void setBandwidth(int bandwidth);
 	int getBandwidth() const { return m_bandwidth; }
 
+	void setLowCutoff(int lowCutoff);
+	int getLowCutoff() const { return m_lowCutoff; }
+
 	void setSidebands(sidebands_t sidebands);
 	sidebands_t getSidebands() const { return m_sidebands; }
 
@@ -46,6 +49,7 @@ protected:
 	QString m_title;
 	int m_centerFrequency;
 	int m_bandwidth;
+	int m_lowCutoff;
 	sidebands_t m_sidebands;
 	bool m_visible;
 	bool m_highlighted;

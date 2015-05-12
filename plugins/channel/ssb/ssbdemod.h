@@ -35,7 +35,7 @@ public:
 	SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
 	~SSBDemod();
 
-	void configure(MessageQueue* messageQueue, Real Bandwidth, Real volume);
+	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
@@ -48,20 +48,23 @@ private:
 
 	public:
 		Real getBandwidth() const { return m_Bandwidth; }
+		Real getLoCutoff() const { return m_LowCutoff; }
 		Real getVolume() const { return m_volume; }
 
-		static MsgConfigureSSBDemod* create(Real Bandwidth, Real volume)
+		static MsgConfigureSSBDemod* create(Real Bandwidth, Real LowCutoff, Real volume)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, volume);
+			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume);
 		}
 
 	private:
 		Real m_Bandwidth;
+		Real m_LowCutoff;
 		Real m_volume;
 
-		MsgConfigureSSBDemod(Real Bandwidth, Real volume) :
+		MsgConfigureSSBDemod(Real Bandwidth, Real LowCutoff, Real volume) :
 			Message(),
 			m_Bandwidth(Bandwidth),
+			m_LowCutoff(LowCutoff),
 			m_volume(volume)
 		{ }
 	};
@@ -73,6 +76,7 @@ private:
 	typedef std::vector<AudioSample> AudioVector;
 
 	Real m_Bandwidth;
+	Real m_LowCutoff;
 	Real m_volume;
 	int m_undersampleCount;
 	int m_sampleRate;

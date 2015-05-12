@@ -13,6 +13,8 @@
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 
+#include <iostream>
+
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI)
 {
 	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI);
@@ -42,6 +44,7 @@ QByteArray SSBDemodGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker->getCenterFrequency());
 	s.writeS32(2, ui->BW->value());
+	s.writeS32(6, ui->lowCut->value());
 	s.writeS32(3, ui->volume->value());
 	s.writeBlob(4, ui->spectrumGUI->serialize());
 	s.writeU32(5, m_channelMarker->getColor().rgb());
@@ -63,8 +66,10 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		qint32 tmp;
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 3);
+		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
+		d.readS32(6, &tmp, 3);
+		ui->lowCut->setValue(tmp);
 		d.readS32(3, &tmp, 20);
 		ui->volume->setValue(tmp);
 		d.readBlob(4, &bytetmp);
@@ -114,11 +119,48 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 	QString s = QString::number(value/10.0, 'f', 1);
 	ui->BWText->setText(s);
 	m_channelMarker->setBandwidth(value * 100 * 2);
+
 	if (value < 0) {
 		m_channelMarker->setSidebands(ChannelMarker::lsb);
 	} else {
 		m_channelMarker->setSidebands(ChannelMarker::usb);
 	}
+
+	on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
+}
+
+int SSBDemodGUI::getEffectiveLowCutoff(int lowCutoff)
+{
+	int ssbBW = m_channelMarker->getBandwidth() / 2;
+	int effectiveLowCutoff = lowCutoff;
+	const int guard = 100;
+
+	if (ssbBW < 0) {
+		if (effectiveLowCutoff < ssbBW + guard) {
+			effectiveLowCutoff = ssbBW + guard;
+		}
+		if (effectiveLowCutoff > 0)	{
+			effectiveLowCutoff = 0;
+		}
+	} else {
+		if (effectiveLowCutoff > ssbBW - guard)	{
+			effectiveLowCutoff = ssbBW - guard;
+		}
+		if (effectiveLowCutoff < 0)	{
+			effectiveLowCutoff = 0;
+		}
+	}
+
+	return effectiveLowCutoff;
+}
+
+void SSBDemodGUI::on_lowCut_valueChanged(int value)
+{
+	int lowCutoff = getEffectiveLowCutoff(value * 100);
+	m_channelMarker->setLowCutoff(lowCutoff);
+	QString s = QString::number(lowCutoff/1000.0, 'f', 1);
+	ui->lowCutText->setText(s);
+	ui->lowCut->setValue(lowCutoff/100);
 	applySettings();
 }
 
@@ -207,6 +249,7 @@ void SSBDemodGUI::applySettings()
 		m_channelMarker->getCenterFrequency());
 	m_ssbDemod->configure(m_threadedSampleSink->getMessageQueue(),
 		ui->BW->value() * 100.0,
+		ui->lowCut->value() * 100.0,
 		ui->volume->value() / 10.0 );
 }
 

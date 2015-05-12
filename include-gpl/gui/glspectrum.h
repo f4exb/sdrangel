@@ -54,11 +54,13 @@ private:
 	struct ChannelMarkerState {
 		ChannelMarker* m_channelMarker;
 		QRectF m_glRect;
+		QRectF m_glRectDsb;
 		QRect m_rect;
 
 		ChannelMarkerState(ChannelMarker* channelMarker) :
 			m_channelMarker(channelMarker),
-			m_glRect()
+			m_glRect(),
+			m_glRectDsb()
 		{ }
 	};
 	QList<ChannelMarkerState*> m_channelMarkerStates;
@@ -149,8 +151,6 @@ private:
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
-
-	float getCenterFreqLineRelPos(ChannelMarker *channelMarker);
 
 private slots:
 	void tick();

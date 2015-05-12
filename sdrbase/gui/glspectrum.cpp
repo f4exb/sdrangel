@@ -551,20 +551,10 @@ void GLSpectrum::paintGL()
 
 		// paint channels
 		if(m_mouseInside) {
+			// Effective BW overlays
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
-					/*
-					ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
-					float fcLineRelativePos;
-					if (sidebands == ChannelMarker::usb) {
-						fcLineRelativePos = 0.0;
-					} else if (sidebands == ChannelMarker::lsb) {
-						fcLineRelativePos = 1.0;
-					} else {
-						fcLineRelativePos = 0.5;
-					}
-					*/
 					glEnable(GL_BLEND);
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
@@ -577,11 +567,22 @@ void GLSpectrum::paintGL()
 					glVertex2f(1, 1);
 					glVertex2f(0, 1);
 					glEnd();
+					glPopMatrix();
+				}
+			}
+
+			// Center line overlays based on DSB enveloppe
+			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+				ChannelMarkerState* dv = m_channelMarkerStates[i];
+				if(dv->m_channelMarker->getVisible()) {
 					glDisable(GL_BLEND);
 					glColor3f(0.8f, 0.8f, 0.6f);
+					glPushMatrix();
+					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
+					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
 					glBegin(GL_LINE_LOOP);
-					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 0);
-					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 1);
+					glVertex2f(0.5, 0);
+					glVertex2f(0.5, 1);
 					glEnd();
 					glPopMatrix();
 				}
@@ -662,6 +663,8 @@ void GLSpectrum::paintGL()
 		glPushMatrix();
 		glTranslatef(m_glWaterfallRect.x(), m_glFrequencyScaleRect.y(), 0);
 		glScalef(m_glWaterfallRect.width(), m_glFrequencyScaleRect.height(), 1);
+
+		// Effective bandwidth overlays
 		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
 			if(dv->m_channelMarker->getVisible()) {
@@ -677,19 +680,29 @@ void GLSpectrum::paintGL()
 				glVertex2f(1, 0.5);
 				glVertex2f(0, 0.5);
 				glEnd();
-
-				if (dv->m_channelMarker->getHighlighted()) {
-					glColor3f(0.8f, 0.8f, 0.6f);
-					glBegin(GL_LINE_LOOP);
-					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 0);
-					glVertex2f(getCenterFreqLineRelPos(dv->m_channelMarker), 1);
-					glEnd();
-				}
-
 				glDisable(GL_BLEND);
 				glPopMatrix();
 			}
 		}
+
+		// Center frequency mark on highlighted channels based on DSB enveloppe
+		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+			ChannelMarkerState* dv = m_channelMarkerStates[i];
+			if(dv->m_channelMarker->getVisible()) {
+				if (dv->m_channelMarker->getHighlighted()) {
+					glColor3f(0.8f, 0.8f, 0.6f);
+					glPushMatrix();
+					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
+					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(0.5, 0);
+					glVertex2f(0.5, 1);
+					glEnd();
+					glPopMatrix();
+				}
+			}
+		}
+
 		glPopMatrix();
 	}
 
@@ -1026,23 +1039,31 @@ void GLSpectrum::applyChanges()
 	for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 		ChannelMarkerState* dv = m_channelMarkerStates[i];
 
-		qreal xc, pw, nw;
+		qreal xc, pw, nw, dsbw;
 		ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
 		xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
+		dsbw = dv->m_channelMarker->getBandwidth();
 
 		if (sidebands == ChannelMarker::usb) {
-			nw = 0;                                       // negative bandwidth
+			nw = dv->m_channelMarker->getLowCutoff();     // negative bandwidth
 			pw = dv->m_channelMarker->getBandwidth() / 2; // positive bandwidth
 		} else if (sidebands == ChannelMarker::lsb) {
-			pw = 0;
+			pw = dv->m_channelMarker->getLowCutoff();
 			nw = dv->m_channelMarker->getBandwidth() / 2;
 		} else {
-			pw = dv->m_channelMarker->getBandwidth() / 2;
+			pw = dsbw / 2;
 			nw = -pw;
 		}
 
-		//std::cerr << xc << "; " << nw << "; " << pw << std::endl;
 
+		// draw the DSB rectangle
+		dv->m_glRectDsb.setRect(
+			m_frequencyScale.getPosFromValue(xc - (dsbw/2)) / (float)(width() - leftMargin - rightMargin),
+			0,
+			dsbw / (float)m_sampleRate,
+			1);
+
+		// draw the effective BW rectangle
 		dv->m_glRect.setRect(
 			m_frequencyScale.getPosFromValue(xc + nw) / (float)(width() - leftMargin - rightMargin),
 			0,
@@ -1365,17 +1386,4 @@ void GLSpectrum::channelMarkerChanged()
 void GLSpectrum::channelMarkerDestroyed(QObject* object)
 {
 	removeChannelMarker((ChannelMarker*)object);
-}
-
-float GLSpectrum::getCenterFreqLineRelPos(ChannelMarker *channelMarker)
-{
-	ChannelMarker::sidebands_t sidebands = channelMarker->getSidebands();
-
-	if (sidebands == ChannelMarker::usb) {
-		return 0.0;
-	} else if (sidebands == ChannelMarker::lsb) {
-		return 1.0;
-	} else {
-		return 0.5;
-	}
 }
