@@ -39,6 +39,7 @@ private:
 	Real m_refLevel;
 	Real m_powerRange;
 	int m_decay;
+	int m_displayGridIntensity;
 	bool m_displayWaterfall;
 	bool m_invertedWaterfall;
 	bool m_displayMaxHold;
@@ -54,6 +55,7 @@ private slots:
 	void on_refLevel_currentIndexChanged(int index);
 	void on_levelRange_currentIndexChanged(int index);
 	void on_decay_currentIndexChanged(int index);
+	void on_gridIntensity_valueChanged(int index);
 
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);

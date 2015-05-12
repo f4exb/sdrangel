@@ -43,6 +43,7 @@ public:
 	void setDisplayMaxHold(bool display);
 	void setDisplayHistogram(bool display);
 	void setDisplayGrid(bool display);
+	void setDisplayGridIntensity(int intensity);
 
 	void addChannelMarker(ChannelMarker* channelMarker);
 	void removeChannelMarker(ChannelMarker* channelMarker);
@@ -87,6 +88,7 @@ private:
 	int m_fftSize;
 
 	bool m_displayGrid;
+	int m_displayGridIntensity;
 	bool m_invertedWaterfall;
 
 	std::vector<Real> m_maxHold;

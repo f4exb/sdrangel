@@ -17,6 +17,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_refLevel(0),
 	m_powerRange(100),
 	m_decay(0),
+	m_displayGridIntensity(1),
 	m_displayWaterfall(true),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
@@ -52,6 +53,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_refLevel = 0;
 	m_powerRange = 100;
 	m_decay = 0;
+	m_displayGridIntensity = 5,
 	m_displayWaterfall = true;
 	m_invertedWaterfall = false;
 	m_displayMaxHold = false;
@@ -74,6 +76,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeBool(8, m_displayMaxHold);
 	s.writeBool(9, m_displayHistogram);
 	s.writeS32(10, m_decay);
+	s.writeS32(13, m_displayGridIntensity);
 	s.writeBool(11, m_displayGrid);
 	s.writeBool(12, m_invert);
 	return s.final();
@@ -99,6 +102,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readBool(8, &m_displayMaxHold, false);
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 0);
+		d.readS32(13, &m_displayGridIntensity, 0);
 		d.readBool(11, &m_displayGrid, false);
 		d.readBool(12, &m_invert, true);
 		applySettings();
@@ -126,6 +130,7 @@ void GLSpectrumGUI::applySettings()
 	ui->histogram->setChecked(m_displayHistogram);
 	ui->invert->setChecked(m_invert);
 	ui->grid->setChecked(m_displayGrid);
+	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 
 	m_glSpectrum->setDisplayWaterfall(m_displayWaterfall);
 	m_glSpectrum->setInvertedWaterfall(m_invertedWaterfall);
@@ -134,6 +139,7 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDecay(m_decay);
 	m_glSpectrum->setInvertedWaterfall(m_invert);
 	m_glSpectrum->setDisplayGrid(m_displayGrid);
+	m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 
 	m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, (FFTWindow::Function)m_fftWindow);
 }
@@ -207,4 +213,11 @@ void GLSpectrumGUI::on_grid_toggled(bool checked)
 	m_displayGrid = checked;
 	if(m_glSpectrum != NULL)
 		m_glSpectrum->setDisplayGrid(m_displayGrid);
+}
+
+void GLSpectrumGUI::on_gridIntensity_valueChanged(int index)
+{
+	m_displayGridIntensity = index;
+	if(m_glSpectrum != NULL)
+		m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 }

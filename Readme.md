@@ -78,12 +78,12 @@ Done since the fork
   - SSB bandwidth can now be tuned in steps of 100 Hz
   - NFM and SSB receiver in focus trigger the display of the central frequency line on the spectrum frequency scale thus facilitating its identification
   - Added AM demod so now you can listen to air traffic!
-  
+  - Added the possibility to change the brightness and/or color of the grid. 
+    
 =====
 To Do
 =====
 
-  - Add the possibility to change the brightness and/or color of the grid. Sometimes it is barely visible yet useful
   - Fix and possibly enhance (stereo, RDS?) WFM. Maybe into two plugins one for plain WFM and the other for Broadcast FM
   - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers

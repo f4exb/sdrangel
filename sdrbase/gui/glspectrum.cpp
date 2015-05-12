@@ -33,6 +33,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_sampleRate(500000),
 	m_fftSize(512),
 	m_displayGrid(true),
+	m_displayGridIntensity(5),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
 	m_leftMarginTextureAllocated(false),
@@ -214,6 +215,15 @@ void GLSpectrum::setDisplayHistogram(bool display)
 void GLSpectrum::setDisplayGrid(bool display)
 {
 	m_displayGrid = display;
+	update();
+}
+
+void GLSpectrum::setDisplayGridIntensity(int intensity)
+{
+	m_displayGridIntensity = intensity;
+	if (m_displayGridIntensity > 100) {
+		m_displayGridIntensity = 100;
+	}
 	update();
 }
 
@@ -727,7 +737,8 @@ void GLSpectrum::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, 0.05f);
+		//glColor4f(1, 1, 1, 0.05f);
+		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 
 		glPushMatrix();
 		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
@@ -772,7 +783,7 @@ void GLSpectrum::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, 0.05f);
+		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
