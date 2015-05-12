@@ -77,14 +77,12 @@ Done since the fork
   - Make the sidebands appear correctly on SSB channel overlay. Limit to +/- 6 kHz to fit channel spectrum analyzer window
   - SSB bandwidth can now be tuned in steps of 100 Hz
   - NFM and SSB receiver in focus trigger the display of the central frequency line on the spectrum frequency scale thus facilitating its identification
-  
+  - Added AM demod so now you can listen to air traffic!
   
 =====
 To Do
 =====
 
-
-  - AM demod. What about the air band?!
   - Add the possibility to change the brightness and/or color of the grid. Sometimes it is barely visible yet useful
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
   - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)
