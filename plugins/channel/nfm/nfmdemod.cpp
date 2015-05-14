@@ -107,6 +107,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				qint16 sample;
 				if(m_squelchState > 0) {
 					m_squelchState--;
+
+					// demod
 					/*
 					Real argument = arg(ci);
 					Real demod = argument - m_lastArgument;
@@ -114,19 +116,20 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					*/
 
 					Complex d = conj(m_m1Sample) * ci;
-					m_m2Sample = m_m1Sample;
-					m_m1Sample = ci;
 					Real demod = atan2(d.imag(), d.real());
-					//Real demod = arctan2(d.imag(), d.real());
-/*
+					demod /= M_PI;
+
+					/*
 					Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
 					Real argument2 = m_lastSample.real();
 					Real demod = angleDist(argument2, argument1);
 					m_lastSample = Complex(argument1, 0);
-*/
+					*/
 
+					m_m2Sample = m_m1Sample;
+					m_m1Sample = ci;
 
-					demod /= M_PI;
+					// AF processing
 
 					demod = m_lowpass.filter(demod);
 
