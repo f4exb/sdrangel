@@ -113,8 +113,9 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					m_lastArgument = argument;
 					*/
 
-					Complex d = conj(m_lastSample) * ci;
-					m_lastSample = ci;
+					Complex d = conj(m_m1Sample) * ci;
+					m_m2Sample = m_m1Sample;
+					m_m1Sample = ci;
 					Real demod = atan2(d.imag(), d.real());
 					//Real demod = arctan2(d.imag(), d.real());
 /*
@@ -174,7 +175,7 @@ void NFMDemod::start()
 	m_interpolatorRegulation = 0.9999;
 	m_interpolatorDistance = 1.0;
 	m_interpolatorDistanceRemain = 0.0;
-	m_lastSample = 0;
+	m_m1Sample = 0;
 }
 
 void NFMDemod::stop()
