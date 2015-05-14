@@ -80,6 +80,7 @@ Done since the fork
   - Added AM demod so now you can listen to air traffic!
   - Added the possibility to change the brightness and/or color of the grid.
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
+  - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
     
 =====
 To Do

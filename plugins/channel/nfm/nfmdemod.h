@@ -24,6 +24,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
+#include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -119,6 +120,9 @@ private:
 	Complex m_m1Sample;
 	Complex m_m2Sample;
 	MovingAverage m_movingAverage;
+	SimpleAGC m_AGC;
+	Real m_agcLevel; // AGC will aim to  this level
+	Real m_agcFloor; // AGC will not go below this level
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

@@ -43,6 +43,8 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
+	m_agcLevel = 0.003;
+	m_AGC.resize(4096, m_agcLevel, 0, 0.1*m_agcLevel);
 }
 
 NFMDemod::~NFMDemod()
@@ -108,6 +110,9 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				if(m_squelchState > 0) {
 					m_squelchState--;
 
+					m_AGC.feed(abs(ci));
+					ci *= (m_agcLevel / m_AGC.getValue());
+
 					// demod
 					/*
 					Real argument = arg(ci);
@@ -115,9 +120,12 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					m_lastArgument = argument;
 					*/
 
+					/*
+					// Original NFM
 					Complex d = conj(m_m1Sample) * ci;
 					Real demod = atan2(d.imag(), d.real());
 					demod /= M_PI;
+					*/
 
 					/*
 					Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
@@ -126,6 +134,14 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					m_lastSample = Complex(argument1, 0);
 					*/
 
+					// Alternative without atan - needs AGC
+					// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+					Real ip = ci.real() - m_m2Sample.real();
+					Real qp = ci.imag() - m_m2Sample.imag();
+					Real h1 = m_m1Sample.real() * qp;
+					Real h2 = m_m1Sample.imag() * ip;
+					Real demod = (h1 - h2) * 10000;
+
 					m_m2Sample = m_m1Sample;
 					m_m1Sample = ci;
 
@@ -133,15 +149,18 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 					demod = m_lowpass.filter(demod);
 
+					/*
 					if(demod < -1)
 						demod = -1;
 					else if(demod > 1)
 						demod = 1;
+					*/
 
 					demod *= m_running.m_volume;
 					sample = demod * 32700;
 
 				} else {
+					m_AGC.close();
 					sample = 0;
 				}
 
