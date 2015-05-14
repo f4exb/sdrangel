@@ -29,7 +29,7 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt5_wrap_cpp(wfm_HEADERS_MOC ${wfm_HEADERS})
+#qt5_wrap_cpp(nfm_HEADERS_MOC ${nfm_HEADERS})
 qt5_wrap_ui(wfm_FORMS_HEADERS ${wfm_FORMS})
 
 add_library(demodwfm SHARED

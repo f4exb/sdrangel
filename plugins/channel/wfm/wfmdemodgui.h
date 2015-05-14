@@ -11,7 +11,7 @@ class AudioFifo;
 class ThreadedSampleSink;
 class Channelizer;
 class WFMDemod;
-class SpectrumVis;
+class NullSink;
 
 namespace Ui {
 	class WFMDemodGUI;
@@ -34,8 +34,12 @@ public:
 
 private slots:
 	void viewChanged();
+	void on_deltaFrequency_changed(quint64 value);
+	void on_deltaMinus_clicked(bool minus);
+	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 
@@ -49,12 +53,17 @@ private:
 	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
-	SpectrumVis* m_spectrumVis;
+	NullSink *m_nullSink;
+
+	static const int m_rfBW[];
 
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
 	~WFMDemodGUI();
 
 	void applySettings();
+
+	void leaveEvent(QEvent*);
+	void enterEvent(QEvent*);
 };
 
 #endif // INCLUDE_WFMDEMODGUI_H

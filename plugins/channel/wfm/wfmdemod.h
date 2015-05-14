@@ -20,7 +20,10 @@
 
 #include <vector>
 #include "dsp/samplesink.h"
+#include "dsp/nco.h"
 #include "dsp/interpolator.h"
+#include "dsp/lowpass.h"
+#include "dsp/movingaverage.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -31,9 +34,9 @@ public:
 	WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
 	~WFMDemod();
 
-	void configure(MessageQueue* messageQueue, Real afBandwidth, Real volume);
+	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool po);
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
@@ -43,22 +46,28 @@ private:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
+		Real getRFBandwidth() const { return m_rfBandwidth; }
 		Real getAFBandwidth() const { return m_afBandwidth; }
 		Real getVolume() const { return m_volume; }
+		Real getSquelch() const { return m_squelch; }
 
-		static MsgConfigureWFMDemod* create(Real afBandwidth, Real volume)
+		static MsgConfigureWFMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
 		{
-			return new MsgConfigureWFMDemod(afBandwidth, volume);
+			return new MsgConfigureWFMDemod(rfBandwidth, afBandwidth, volume, squelch);
 		}
 
 	private:
+		Real m_rfBandwidth;
 		Real m_afBandwidth;
 		Real m_volume;
+		Real m_squelch;
 
-		MsgConfigureWFMDemod(Real afBandwidth, Real volume) :
+		MsgConfigureWFMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch) :
 			Message(),
+			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
-			m_volume(volume)
+			m_volume(volume),
+			m_squelch(squelch)
 		{ }
 	};
 
@@ -68,24 +77,56 @@ private:
 	};
 	typedef std::vector<AudioSample> AudioVector;
 
-	Real m_afBandwidth;
-	Real m_volume;
-	int m_sampleRate;
-	int m_frequency;
+	enum RateState {
+		RSInitialFill,
+		RSRunning
+	};
 
-	double m_scale;
+	struct Config {
+		int m_inputSampleRate;
+		qint64 m_inputFrequencyOffset;
+		Real m_rfBandwidth;
+		Real m_afBandwidth;
+		Real m_squelch;
+		Real m_volume;
+		quint32 m_audioSampleRate;
 
-	Interpolator m_interpolator;
-	Real m_sampleDistanceRemain;
-	Complex m_last, m_this;
+		Config() :
+			m_inputSampleRate(-1),
+			m_inputFrequencyOffset(0),
+			m_rfBandwidth(-1),
+			m_afBandwidth(-1),
+			m_squelch(0),
+			m_volume(0),
+			m_audioSampleRate(0)
+		{ }
+	};
+
+	Config m_config;
+	Config m_running;
+
+	NCO m_nco;
+	Real m_interpolatorRegulation;
+	Interpolator m_interpolator; // Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
+	Real m_interpolatorDistance;
+	Real m_interpolatorDistanceRemain;
+	Lowpass<Real> m_lowpass;
+
+	Real m_squelchLevel;
+	int m_squelchState;
+
+	Real m_lastArgument;
+	Complex m_lastSample;
+	MovingAverage m_movingAverage;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
 	SampleSink* m_sampleSink;
+	AudioFifo* m_audioFifo;
 	SampleVector m_sampleBuffer;
 
-	AudioFifo* m_audioFifo;
+	void apply();
 };
 
 #endif // INCLUDE_WFMDEMOD_H

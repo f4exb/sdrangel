@@ -1,16 +1,17 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
-#include "wfmplugin.h"
+
 #include "wfmdemodgui.h"
+#include "wfmplugin.h"
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("1.0"),
-	QString("(c) 2014 JohnGreb"),
-	QString("http://www.maintech.de"),
+	QString("---"),
+	QString("(c) Edouard Griffiths, F4EXB"),
+	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb"),
 	true,
-	QString("github.com/hexameron/rtl-sdrangelove")
+	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb")
 };
 
 WFMPlugin::WFMPlugin(QObject* parent) :
