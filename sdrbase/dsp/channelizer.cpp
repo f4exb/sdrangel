@@ -2,6 +2,9 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
 
+//#include <cstdio>
+//#include <iostream>
+
 Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_inputSampleRate(100000),
@@ -93,6 +96,7 @@ bool Channelizer::handleMessage(Message* cmd)
 void Channelizer::applyConfiguration()
 {
 	freeFilterChain();
+	//std::cerr << "Channelizer::applyConfiguration in=" << m_inputSampleRate << ", req=" << m_requestedOutputSampleRate << std::endl;
 	m_currentCenterFrequency = createFilterChain(
 		m_inputSampleRate / -2, m_inputSampleRate / 2,
 		m_requestedCenterFrequency - m_requestedOutputSampleRate / 2, m_requestedCenterFrequency + m_requestedOutputSampleRate / 2);
@@ -141,31 +145,34 @@ Real Channelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, 
 
 	safetyMargin = 0;
 
-	//qDebug("Signal [%f, %f] (BW %f), Channel [%f, %f], Rot %f, Safety %f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot, safetyMargin);
+	//fprintf(stderr, "Channelizer::createFilterChain: ");
+	//fprintf(stderr, "Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f, Safety %.1f\n", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot, safetyMargin);
 #if 1
 	// check if it fits into the left half
 	if(signalContainsChannel(sigStart + safetyMargin, sigStart + sigBw / 2.0 - safetyMargin, chanStart, chanEnd)) {
-		//qDebug("-> take left half (rotate by +1/4 and decimate by 2)");
+		//fprintf(stderr, "-> take left half (rotate by +1/4 and decimate by 2)\n");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
 		return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
 	}
 
 	// check if it fits into the right half
 	if(signalContainsChannel(sigEnd - sigBw / 2.0f + safetyMargin, sigEnd - safetyMargin, chanStart, chanEnd)) {
-		//qDebug("-> take right half (rotate by -1/4 and decimate by 2)");
+		//fprintf(stderr, "-> take right half (rotate by -1/4 and decimate by 2)\n");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
 		return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
 	}
 
 	// check if it fits into the center
-	if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
-		//qDebug("-> take center half (decimate by 2)");
+	// Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
+	if(signalContainsChannel(sigStart + rot + safetyMargin, sigEnd - rot - safetyMargin, chanStart, chanEnd)) {
+		//fprintf(stderr, "-> take center half (decimate by 2)\n");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
-		return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
+		// Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
+		return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
 	}
 #endif
 	Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
-	qDebug("-> complete (final BW %f, frequency offset %f)", sigBw, ofs);
+	//fprintf(stderr, "-> complete (final BW %.1f, frequency offset %.1f)\n", sigBw, ofs);
 	return ofs;
 }
 
