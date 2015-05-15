@@ -60,43 +60,12 @@ void WFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 	cmd->submit(messageQueue, this);
 }
 
-/*
-float arctan2(Real y, Real x)
-{
-	Real coeff_1 = M_PI / 4;
-	Real coeff_2 = 3 * coeff_1;
-	Real abs_y = fabs(y) + 1e-10;      // kludge to prevent 0/0 condition
-	Real angle;
-	if( x>= 0) {
-		Real r = (x - abs_y) / (x + abs_y);
-		angle = coeff_1 - coeff_1 * r;
-	} else {
-		Real r = (x + abs_y) / (abs_y - x);
-		angle = coeff_2 - coeff_1 * r;
-	}
-	if(y < 0)
-		return(-angle);
-	else return(angle);
-}
-
-Real angleDist(Real a, Real b)
-{
-	Real dist = b - a;
-
-	while(dist <= M_PI)
-		dist += 2 * M_PI;
-	while(dist >= M_PI)
-		dist -= 2 * M_PI;
-
-	return dist;
-}
-*/
-
 void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
 {
 	Complex ci;
 	fftfilt::cmplx *rf;
 	int rf_out;
+	Real msq, demod;
 
 	if (m_audioFifo->size() <= 0)
 		return;
@@ -110,10 +79,40 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 		for (int i =0 ; i  <rf_out; i++)
 		{
+			/*
+			// atan2 version
 			Real x = rf[i].real() * m_lastSample.real() + rf[i].imag() * m_lastSample.imag();
-			Real y = rf[i].real() * m_lastSample.imag() - rf[i].imag() * m_lastSample.real();
+			Real y = rf[i].real() * m_m1Sample.imag() - rf[i].imag() * m_m1Sample.real();
 			Real demod = atan2(x,y) / M_PI;
-			m_lastSample = rf[i];
+			*/
+
+			msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
+
+			m_movingAverage.feed(msq);
+
+			if(m_movingAverage.average() >= m_squelchLevel)
+				m_squelchState = m_running.m_rfBandwidth / 20; // decay rate
+
+			if(m_squelchState > 0)
+			{
+				m_squelchState--;
+
+				// Alternative without atan
+				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+				// in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
+				Real ip = rf[i].real() - m_m2Sample.real();
+				Real qp = rf[i].imag() - m_m2Sample.imag();
+				Real h1 = m_m1Sample.real() * qp;
+				Real h2 = m_m1Sample.imag() * ip;
+				demod = (h1 - h2) / (msq * 10.0);
+			}
+			else
+			{
+				demod = 0;
+			}
+
+			m_m2Sample = m_m1Sample;
+			m_m1Sample = rf[i];
 
 			Complex e(demod, 0);
 
@@ -241,7 +240,7 @@ void WFMDemod::start()
 	m_interpolatorRegulation = 0.9999;
 	m_interpolatorDistance = 1.0;
 	m_interpolatorDistanceRemain = 0.0;
-	m_lastSample = 0;
+	m_m1Sample = 0;
 }
 
 void WFMDemod::stop()

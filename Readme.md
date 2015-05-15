@@ -59,9 +59,9 @@ Known Issues
 ============
 
   - Actually NFM seems to be working pretty well
-  - WFM does not work for broadcast
-  - NFM audio seems wrong (too slow) for RTL-SDR rates other than 1536 kHz. Maybe in SSB too.
+  - Does not work properly for RTL-SDR sampling rates not multiple of AF sampling rate (48000 Hz). This is because the interpolator/decimator is not a rational resampler actually (just does one or the other). For now please use 288, 1152 or 1536 kHz sampling rates,
   - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
+  - Aliasing can be annoying for broadcast FM. In this case try to shift the signal until you find a clear background for your station. This is a limitation of the RTL hardware so just use this workaround.
 
 ===================
 Done since the fork
@@ -81,12 +81,14 @@ Done since the fork
   - Added the possibility to change the brightness and/or color of the grid.
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
   - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
+  - Added working WFM demodulation.
     
 =====
 To Do
 =====
 
-  - Fix and possibly enhance (stereo, RDS?) WFM. Maybe into two plugins one for plain WFM and the other for Broadcast FM
+  - Missing de-accentuation on WFM
+  - Optimize (no atan2) and enhance (stereo, RDS?) WFM.
   - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
   - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)

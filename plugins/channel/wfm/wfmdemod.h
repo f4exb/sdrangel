@@ -120,7 +120,8 @@ private:
 	int m_squelchState;
 
 	Real m_lastArgument;
-	Complex m_lastSample;
+	Complex m_m1Sample; // x^-1 sample
+	Complex m_m2Sample; // x^-1 sample
 	MovingAverage m_movingAverage;
 
 	AudioVector m_audioBuffer;
