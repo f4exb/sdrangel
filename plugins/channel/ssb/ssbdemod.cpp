@@ -82,7 +82,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			if (!(m_undersampleCount++ & 3))
 				m_sampleBuffer.push_back(Sample(demod, 0.0));
 
-			qint16 sample = (qint16)(demod * m_volume);
+			qint16 sample = (qint16)(demod * m_volume * 10);
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
 			++m_audioBufferFill;
