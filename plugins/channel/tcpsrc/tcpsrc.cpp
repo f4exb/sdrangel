@@ -70,7 +70,7 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	cmplx* sideband;
+	fftfilt::cmplx* sideband;
 	Real l, r;
 
 	m_sampleBuffer.clear();

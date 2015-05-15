@@ -62,7 +62,7 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCut
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	cmplx *sideband;
+	fftfilt::cmplx *sideband;
 	int n_out;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {

@@ -17,6 +17,16 @@ const int WFMDemodGUI::m_rfBW[] = {
 	48000, 80000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
 
+int requiredBW(int rfBW)
+{
+	if (rfBW <= 48000)
+		return 48000;
+	else if (rfBW < 100000)
+		return 96000;
+	else
+		return 384000;
+}
+
 WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI)
 {
 	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI);
@@ -208,7 +218,7 @@ void WFMDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
-		256000, // TODO: this is where requested sample rate is specified
+		requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
 		m_channelMarker->getCenterFrequency());
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);

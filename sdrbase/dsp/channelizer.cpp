@@ -96,11 +96,17 @@ bool Channelizer::handleMessage(Message* cmd)
 void Channelizer::applyConfiguration()
 {
 	freeFilterChain();
-	//std::cerr << "Channelizer::applyConfiguration in=" << m_inputSampleRate << ", req=" << m_requestedOutputSampleRate << std::endl;
 	m_currentCenterFrequency = createFilterChain(
 		m_inputSampleRate / -2, m_inputSampleRate / 2,
 		m_requestedCenterFrequency - m_requestedOutputSampleRate / 2, m_requestedCenterFrequency + m_requestedOutputSampleRate / 2);
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
+	/*
+	std::cerr << "Channelizer::applyConfiguration in=" << m_inputSampleRate
+			<< ", req=" << m_requestedOutputSampleRate
+			<< ", out=" << m_currentOutputSampleRate
+			<< ", fc=" << m_currentCenterFrequency
+			<< std::endl;
+	*/
 }
 
 Channelizer::FilterStage::FilterStage(Mode mode) :

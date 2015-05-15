@@ -5,13 +5,27 @@
 #ifndef	_FFTFILT_H
 #define	_FFTFILT_H
 
-#include "complex.h"
+#include <complex>
 #include "gfft.h"
 
 //----------------------------------------------------------------------
 
 class fftfilt {
 enum {NONE, BLACKMAN, HAMMING, HANNING};
+
+public:
+	typedef std::complex<float> cmplx;
+
+	fftfilt(float f1, float f2, int len);
+	fftfilt(float f, int len);
+	~fftfilt();
+// f1 < f2 ==> bandpass
+// f1 > f2 ==> band reject
+	void create_filter(float f1, float f2);
+	void rtty_filter(float);
+
+	int runFilt(const cmplx& in, cmplx **out);
+	int runSSB(const cmplx& in, cmplx **out, bool usb);
 
 protected:
 	int flen;
@@ -36,18 +50,6 @@ protected:
 				 0.08 * cos(4.0 * M_PI * i / len));
 	}
 	void init_filter();
-
-public:
-	fftfilt(float f1, float f2, int len);
-	fftfilt(float f, int len);
-	~fftfilt();
-// f1 < f2 ==> bandpass
-// f1 > f2 ==> band reject
-	void create_filter(float f1, float f2);
-	void rtty_filter(float);
-
-	int runFilt(const cmplx& in, cmplx **out);
-	int runSSB(const cmplx& in, cmplx **out, bool usb);
 };
 
 
@@ -55,6 +57,12 @@ public:
 /* Sliding FFT filter from Fldigi */
 class sfft {
 #define K1 0.99999
+public:
+	typedef std::complex<float> cmplx;
+	sfft(int len);
+	~sfft();
+	void run(const cmplx& input);
+	void fetch(float *result);
 private:
 	int fftlen;
 	int first;
@@ -64,11 +72,6 @@ private:
 	vrot_bins_pair *vrot_bins;
 	cmplx *delay;
 	float k2;
-public:
-	sfft(int len);
-	~sfft();
-	void run(const cmplx& input);
-	void fetch(float *result);
 };
 
 #endif

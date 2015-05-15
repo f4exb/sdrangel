@@ -24,8 +24,11 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
+#include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+
+#define rfFilterFftLength 1024
 
 class AudioFifo;
 
@@ -111,6 +114,7 @@ private:
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
 	Lowpass<Real> m_lowpass;
+	fftfilt* m_rfFilter;
 
 	Real m_squelchLevel;
 	int m_squelchState;
