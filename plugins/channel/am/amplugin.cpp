@@ -7,7 +7,7 @@
 
 const PluginDescriptor AMPlugin::m_pluginDescriptor = {
 	QString("AM Demodulator"),
-	QString("---"),
+	QString("1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb"),
 	true,

@@ -13,6 +13,11 @@ Funcube Dongle Pro+ support will need "libasound2-dev" installed. ("libhid" is b
 
 Funcube Dongle Pro+ USB drivers are broken on some hardware with recent kernels. It works well for me with an Atom Chipset, which has Full Speed USB ports, or a "Valleyview" Chromebook (kernel 3.10). A Desktop with the "same" chipset needs kernel 3.2, available with Debian 7 "wheezy". YMMV.
 
+=======
+BladeRF
+=======
+
+No support. Ends up with: `Hierarchical blocks do not yet support arbitrary or variable numbers of inputs or outputs`
 
 ==========
 For Ubuntu
@@ -81,14 +86,14 @@ Done since the fork
   - Added the possibility to change the brightness and/or color of the grid.
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
   - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
-  - Added working WFM demodulation.
+  - Added working WFM demodulation. Optimized for no atan2.
     
 =====
 To Do
 =====
 
-  - Missing de-accentuation on WFM
-  - Optimize (no atan2) and enhance (stereo, RDS?) WFM.
+  - Missing de-emphasis on WFM
+  - Enhance WFM (stereo, RDS?)
   - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
   - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)
