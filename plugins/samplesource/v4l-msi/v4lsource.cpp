@@ -45,6 +45,7 @@
 
 #define V4L2_PIX_FMT_SDR_U8     v4l2_fourcc('C', 'U', '0', '8') /* unsigned 8-bit Complex*/
 #define V4L2_PIX_FMT_SDR_U16LE  v4l2_fourcc('C', 'U', '1', '6') /* unsigned 16-bit Complex*/
+#define V4L2_PIX_FMT_SDR_CS14LE	v4l2_fourcc('C', 'S', '1', '4') /*  signed  14-bit Complex*/
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -78,9 +79,8 @@ V4LThread::OpenSource(const char *filename)
 			return;
 		}
 
-		pixelformat = V4L2_PIX_FMT_SDR_U8;
-		// RTLSDR has limited ioctls in 3.18, expect fail.
-		qCritical("Want Pixelformat : CU08");
+		pixelformat = V4L2_PIX_FMT_SDR_CS14LE;
+		qCritical("Want Pixelformat : S14");
 		CLEAR(fmt);
 		fmt.type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		fmt.fmt.sdr.pixelformat = pixelformat;
@@ -120,7 +120,7 @@ V4LThread::OpenSource(const char *filename)
 		}
 
 		set_sample_rate((double)SAMPLERATE);
-		set_center_freq( centerFreq + (SAMPLERATE / 4) );
+		set_center_freq( (double)centerFreq );
 		// start streaming
 		type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		xioctl(fd, VIDIOC_STREAMON, &type);
@@ -151,7 +151,7 @@ V4LThread::set_sample_rate(double samp_rate)
 		memset (&frequency, 0, sizeof(frequency));
 		frequency.tuner = 0;
 		frequency.type = V4L2_TUNER_ADC;
-		frequency.frequency = samp_rate / 1;
+		frequency.frequency = samp_rate;
 
 		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
 
@@ -225,33 +225,36 @@ V4LThread::work(int noutput_items)
 	struct timeval tv;
 	struct v4l2_buffer buf;
 	fd_set fds;
-	qint16 xreal, yimag;
-	uint8_t* b;
+	int xreal, yimag;
+	uint16_t* b;
 	SampleVector::iterator it;
 
 	unsigned int pos = 0;
-	// in is 4*8bit*2(IQ), 8 bytes; out is 1*16bit*2(IQ) , 4bytes
+	// MSI format is 252 sample pairs : 63 * 4
 	it = m_convertBuffer.begin();
-	if (recebuf_len > 0) {
-		b = (uint8_t *) recebuf_ptr;
-		unsigned int len = noutput_items * 8;
-		if (len > recebuf_len)
-			len = recebuf_len;
-		for (pos = 0; pos < len - 7; pos += 8) {
-			xreal = b[pos+0] - b[pos+3] + b[pos+7] - b[pos+4];
-			yimag = b[pos+1] - b[pos+5] + b[pos+2] - b[pos+6];
-			Sample s( xreal << 3, yimag << 3 );
+	if (recebuf_len >= 8) { // in bytes
+		b = (uint16_t *) recebuf_ptr;
+		unsigned int len = 4 * noutput_items; // decimation (i+q * 2 : cmplx)
+		if (len * 2 > recebuf_len)
+			len = recebuf_len / 2;
+		// Decimate by two for lower cpu usage
+		for (pos = 0; pos < len - 3; pos += 4) {
+			xreal = (qint16)(b[pos+0]<<2) + (qint16)(b[pos+2]<<2);
+				// + (qint16)(b[pos+4]<<2) + (qint16)(b[pos+6]<<2);
+			yimag = (qint16)(b[pos+1]<<2) + (qint16)(b[pos+3]<<2);
+				// + (int)(b[pos+5]<<2) + (int)(b[pos+7]<<2);
+			Sample s( (qint16)(xreal >> 2) , (qint16)(yimag>>2) );
 			*it = s;
 			it++;
 		}
 		m_sampleFifo->write(m_convertBuffer.begin(), it);
-		recebuf_len -= pos;
-		recebuf_ptr = (void*)(b + pos);
+		recebuf_len -= pos * 2; // size of int16
+		recebuf_ptr = (void*)(b + pos);	
 	}
 	// return now if there is still data in buffer, else free buffer and get another.
 	if (recebuf_len >= 8)
-		return pos / 8;
-	{	// frre buffer, if there was one.
+		return pos / 4;
+	{	// free buffer, if there was one.
 		if (pos > 0) { 
 			CLEAR(buf);
 			buf.type = V4L2_BUF_TYPE_SDR_CAPTURE;
@@ -287,5 +290,5 @@ V4LThread::work(int noutput_items)
 		recebuf_len = buf.bytesused;
 		recebuf_mmap_index = buf.index;
 	}
-	return pos / 8;
+	return pos / 4;
 }

@@ -122,7 +122,8 @@ const QString& V4LInput::getDeviceDescription() const
 
 int V4LInput::getSampleRate() const
 {
-	int result = SAMPLERATE / 4;
+	// The output rate is lower than the device rate
+	int result = SAMPLERATE / 2;
 	return result;
 }
 
@@ -153,8 +154,7 @@ void V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 	}
 
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
-		m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
-								+ (SAMPLERATE / 4) ));
+		m_V4LThread->set_center_freq( (double)generalSettings.m_centerFrequency );
 	}
 	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 #if 0
