@@ -78,14 +78,16 @@ V4LThread::OpenSource(const char *filename)
 			qCritical("Cannot open /dev/swradio0 :%d", fd);
 			return;
 		}
+		// sampletype depends on samplerate. Set that first
+		set_sample_rate((double)SAMPLERATE);
+		set_center_freq( (double)centerFreq );
 
 		pixelformat = V4L2_PIX_FMT_SDR_CS14LE;
-		qCritical("Want Pixelformat : S14");
 		CLEAR(fmt);
 		fmt.type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		fmt.fmt.sdr.pixelformat = pixelformat;
-		xioctl(fd, VIDIOC_S_FMT, &fmt);
-		qCritical("Got Pixelformat : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
+		xioctl(fd, VIDIOC_G_FMT, &fmt);
+		qCritical(" Expecting format CS14LE, got : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
 
 		CLEAR(req);
 		req.count = 8;
@@ -118,9 +120,6 @@ V4LThread::OpenSource(const char *filename)
 			buf.index = i;
 			xioctl(fd, VIDIOC_QBUF, &buf);
 		}
-
-		set_sample_rate((double)SAMPLERATE);
-		set_center_freq( (double)centerFreq );
 		// start streaming
 		type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		xioctl(fd, VIDIOC_STREAMON, &type);
@@ -233,17 +232,19 @@ V4LThread::work(int noutput_items)
 	unsigned int pos = 0;
 	// MSI format is 252 sample pairs :( 63 * 4) * 4bytes
 	it = m_convertBuffer.begin();
-	if (recebuf_len >= 16) { // in bytes
+	if (recebuf_len >= 8) { // in bytes
 		b = (uint16_t *) recebuf_ptr;
 		unsigned int len = 8 * noutput_items; // decimation (i+q * 4 : cmplx)
 		if (len * 2 > recebuf_len)
 			len = recebuf_len / 2;
-		// Decimate by two for lower cpu usage
-		for (pos = 0; pos < len - 7; pos += 8) {
-			xreal = CASTUP(b[pos+0]<<2) + CASTUP(b[pos+2]<<2)
-				+ CASTUP(b[pos+4]<<2) + CASTUP(b[pos+6]<<2);
-			yimag = CASTUP(b[pos+1]<<2) + CASTUP(b[pos+3]<<2)
-				+ CASTUP(b[pos+5]<<2) + CASTUP(b[pos+7]<<2);
+		// Decimate by four for lower cpu usage
+		// ??? seems to have gone a bit wrong.
+		for (pos = 0; pos < len - 3; pos += 4) {
+			xreal = CASTUP(b[pos+0]<<2) + CASTUP(b[pos+1]<<2)
+				+ CASTUP(b[pos+2]<<2) + CASTUP(b[pos+3]<<2);
+			yimag = 0;
+				//CASTUP(b[pos+1]<<2) + CASTUP(b[pos+3]<<2)
+				//+ CASTUP(b[pos+5]<<2) + CASTUP(b[pos+7]<<2);
 			Sample s( (qint16)(xreal >> 2) , (qint16)(yimag >> 2) );
 			*it = s;
 			it++;
@@ -253,8 +254,8 @@ V4LThread::work(int noutput_items)
 		recebuf_ptr = (void*)(b + pos);	
 	}
 	// return now if there is still data in buffer, else free buffer and get another.
-	if (recebuf_len >= 16)
-		return pos / 8;
+	if (recebuf_len >= 8)
+		return pos / 4;
 	{	// free buffer, if there was one.
 		if (pos > 0) { 
 			CLEAR(buf);
@@ -291,5 +292,5 @@ V4LThread::work(int noutput_items)
 		recebuf_len = buf.bytesused;
 		recebuf_mmap_index = buf.index;
 	}
-	return pos / 8;
+	return pos / 4;
 }

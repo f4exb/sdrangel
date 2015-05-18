@@ -26,7 +26,6 @@
 
 // lowest samplerate in the kernel is 1.2M, but this works better
 #define SAMPLERATE 1536000
-//#define SAMPLERATE 768000
 #define BLOCKSIZE 8192
 
 class V4LThread : public QThread {
