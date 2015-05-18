@@ -6,9 +6,9 @@ find_package(LibUSB)
 add_subdirectory(gnuradio)
 #add_subdirectory(remote)
 
-if(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
-	add_subdirectory(osmosdr)
-endif(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
+#if(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
+#	add_subdirectory(osmosdr)
+#endif(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
 
 if(V4L-RTL)
 	FIND_LIBRARY (LIBV4L2 v4l2)

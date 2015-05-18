@@ -36,7 +36,8 @@ GNURadioGui::GNURadioGui(PluginAPI* pluginAPI, QWidget* parent) :
 {
 	ui->setupUi(this);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
-	displaySettings();
+	//displaySettings();
+	updateDisplayDevices();
 
 	m_sampleSource = new GNURadioInput(m_pluginAPI->getMainWindowMessageQueue());
 	m_pluginAPI->setSampleSource(m_sampleSource);
@@ -119,32 +120,24 @@ bool GNURadioGui::handleMessage(Message* message)
 		m_bandwidths = rep->getBandwidths();
 		/* insert 0 which will become "Auto" in the combo box */
 		m_bandwidths.insert(m_bandwidths.begin(), 0);
-		displaySettings();
+		//displaySettings();
+		updateDisplayConstants();
 		return true;
 	} else {
 		return false;
 	}
 }
 
-void GNURadioGui::displaySettings()
+void GNURadioGui::updateDisplayDevices()
 {
-	int oldIndex = 0;
-
-	oldIndex = ui->cboDevices->currentIndex();
-	ui->cboDevices->clear();
-
-	QString oldArgs = ui->txtDeviceArgs->text();
-
+	// Device list
 	osmosdr::devices_t devices = osmosdr::device::find();
 
-	for ( uint i = 0; i < devices.size(); i++ )
-	{
+	for ( uint i = 0; i < devices.size(); i++ )	{
 		osmosdr::device_t dev = devices[i];
-
 		QString label;
 
-		if ( dev.count( "label" ) )
-		{
+		if ( dev.count( "label" ) )	{
 			label = QString(dev[ "label" ].c_str());
 			dev.erase("label");
 		}
@@ -155,29 +148,16 @@ void GNURadioGui::displaySettings()
 		ui->cboDevices->addItem(label);
 	}
 
-	if ( ui->cboDevices->count() && oldIndex >= 0 )
-	{
-		if ( oldIndex > ui->cboDevices->count() - 1 )
-			oldIndex = 0;
-
-		ui->cboDevices->setCurrentIndex(oldIndex);
-
-		if ( oldArgs.length() == 0 )
-			ui->txtDeviceArgs->setText( m_devs[oldIndex].second );
+	if ( ui->cboDevices->count() ) {
+		ui->cboDevices->setEnabled(true);
+	} else {
+		ui->cboDevices->setEnabled(false);
 	}
+}
 
-	if ( oldArgs.length() )
-		ui->txtDeviceArgs->setText( oldArgs );
-
-	ui->centerFrequency->setValueRange(7,
-					   unsigned(m_freqMin / 1000.0),
-					   unsigned(m_freqMax / 1000.0));
-
-	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-
-	ui->sldFreqCorr->setRange(-100, +100);
-	ui->sldFreqCorr->setValue( m_freqCorr );
-	ui->lblFreqCorr->setText(tr("%1").arg(ui->sldFreqCorr->value()));
+void GNURadioGui::updateDisplayConstants()
+{
+	// Device specific gain controls
 
 	m_gainControls.clear();
 	QVBoxLayout *layoutGains = ui->verticalLayoutGains;
@@ -213,16 +193,19 @@ void GNURadioGui::displaySettings()
 		QPair< QSlider*, QLabel* > pair2( gainSlider, gainLabel );
 		m_gainControls.push_back( pair2 );
 
-		connect(gainSlider, SIGNAL(valueChanged(int)),
-			this, SLOT(on_sldGain_valueChanged(int)));
-
 		layout->addWidget(gainName);
 		layout->addWidget(gainSlider);
 		layout->addWidget(gainLabel);
 
+		m_gainSliders.push_back(gainSlider);
+		m_gainLabels.push_back(gainLabel);
+
 		layoutGains->addLayout(layout);
 
 		std::vector<double> gain_values = pair.second;
+
+		connect(gainSlider, SIGNAL(valueChanged(int)),
+			this, SLOT(on_sldGain_valueChanged(int)));
 
 		if ( gain_values.size() ) {
 			gainSlider->setRange(0, gain_values.size() - 1);
@@ -233,17 +216,12 @@ void GNURadioGui::displaySettings()
 		}
 	}
 
-	oldIndex = ui->cboSampleRate->currentIndex();
-	ui->cboSampleRate->clear();
+	// Sample rate
 
-	for ( uint i = 0; i < m_sampRates.size(); i++ )
-		ui->cboSampleRate->addItem( QString::number(m_sampRates[i] / 1e6) );
-
-	if ( oldIndex > ui->cboSampleRate->count() - 1 )
-		oldIndex = 0;
-
-	if ( ui->cboSampleRate->count() && oldIndex >= 0 )
-		ui->cboSampleRate->setCurrentIndex(oldIndex);
+	if (m_sampRates.size()) {
+		for ( uint i = 0; i < m_sampRates.size(); i++ )
+			ui->cboSampleRate->addItem( QString::number(m_sampRates[i] / 1e6) );
+	}
 
 	if ( ui->cboSampleRate->count() ) {
 		ui->cboSampleRate->setEnabled(true);
@@ -251,74 +229,194 @@ void GNURadioGui::displaySettings()
 		ui->cboSampleRate->setEnabled(false);
 	}
 
-	oldIndex = ui->cboAntennas->currentIndex();
-	ui->cboAntennas->clear();
+	// Antenna
 
 	if ( m_antennas.size() ) {
 		for ( uint i = 0; i < m_antennas.size(); i++ )
 			ui->cboAntennas->addItem( m_antennas[i] );
+	}
 
-		if ( oldIndex > ui->cboAntennas->count() - 1 )
-			oldIndex = 0;
-
-		if ( ui->cboAntennas->count() && oldIndex >= 0 )
-			ui->cboAntennas->setCurrentIndex(oldIndex);
-
+	if (ui->cboAntennas->count()) {
 		ui->cboAntennas->setEnabled(true);
 	} else {
 		ui->cboAntennas->setEnabled(false);
 	}
 
-	oldIndex = ui->cboDCOffset->currentIndex();
-	ui->cboDCOffset->clear();
+	// DC offset policy
 
 	if ( m_dcoffs.size() ) {
 		for ( uint i = 0; i < m_dcoffs.size(); i++ )
 			ui->cboDCOffset->addItem( m_dcoffs[i] );
+	}
 
-		if ( ui->cboDCOffset->count() && oldIndex >= 0 )
-			ui->cboDCOffset->setCurrentIndex(oldIndex);
-
+	if (ui->cboDCOffset->count()) {
 		ui->cboDCOffset->setEnabled(true);
 	} else {
 		ui->cboDCOffset->setEnabled(false);
 	}
 
-	oldIndex = ui->cboIQBalance->currentIndex();
-	ui->cboIQBalance->clear();
+	// I/Q balance policy
 
 	if ( m_iqbals.size() ) {
 		for ( uint i = 0; i < m_iqbals.size(); i++ )
 			ui->cboIQBalance->addItem( m_iqbals[i] );
+	}
 
-		if ( ui->cboIQBalance->count() && oldIndex >= 0 )
-			ui->cboIQBalance->setCurrentIndex(oldIndex);
-
+	if (ui->cboIQBalance->count()) {
 		ui->cboIQBalance->setEnabled(true);
 	} else {
 		ui->cboIQBalance->setEnabled(false);
 	}
 
-	oldIndex = ui->cboBandwidth->currentIndex();
-	ui->cboBandwidth->clear();
+	// Bandwidths
 
-	for ( uint i = 0; i < m_bandwidths.size(); i++ )
+	for ( uint i = 0; i < m_bandwidths.size(); i++ ) {
 		if ( 0.0 == m_bandwidths[i] )
 			ui->cboBandwidth->addItem( "Auto" );
 		else
 			ui->cboBandwidth->addItem( QString::number(m_bandwidths[i] / 1e6) );
-
-	if ( oldIndex > ui->cboBandwidth->count() - 1 )
-		oldIndex = 0;
-
-	if ( ui->cboBandwidth->count() && oldIndex >= 0 )
-		ui->cboBandwidth->setCurrentIndex(oldIndex);
+	}
 
 	if ( ui->cboBandwidth->count() ) {
 		ui->cboBandwidth->setEnabled(true);
 	} else {
 		ui->cboBandwidth->setEnabled(false);
 	}
+}
+
+void GNURadioGui::displaySettings()
+{
+	int oldIndex = 0;
+
+	// Device list
+
+	oldIndex = ui->cboDevices->currentIndex();
+	QString oldArgs = ui->txtDeviceArgs->text();
+
+	if ( ui->cboDevices->count() && oldIndex >= 0 )
+	{
+		if ( oldIndex > ui->cboDevices->count() - 1 )
+			oldIndex = 0;
+
+		ui->cboDevices->setCurrentIndex(oldIndex);
+
+		if ( oldArgs.length() == 0 )
+			ui->txtDeviceArgs->setText( m_devs[oldIndex].second );
+	}
+
+	if ( oldArgs.length() )
+		ui->txtDeviceArgs->setText( oldArgs );
+
+	// Center frequency
+
+	ui->centerFrequency->setValueRange(7,
+					   unsigned(m_freqMin / 1000.0),
+					   unsigned(m_freqMax / 1000.0));
+
+	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
+
+	// Device specific gain controls
+
+	for ( uint i = 0; i < m_namedGains.size(); i++ )
+	{
+		double gain = m_settings.m_namedGains[i].second;
+		int sliderIndex = getGainIndex(m_namedGains[i].second, gain);
+		m_gainSliders[i]->setValue(sliderIndex);
+		m_gainLabels[i]->setText(tr("%1").arg(gain));
+	}
+
+	// Frequency correction
+
+	ui->sldFreqCorr->setRange(-100, +100);
+	ui->sldFreqCorr->setValue( m_freqCorr );
+	ui->lblFreqCorr->setText(tr("%1").arg(ui->sldFreqCorr->value()));
+
+	// Sample rate
+	ui->cboSampleRate->setCurrentIndex(getSampleRateIndex(m_settings.m_sampRate));
+
+	// Antenna
+	ui->cboAntennas->setCurrentIndex(getAntennaIndex(m_settings.m_antenna));
+
+	// DC offset policy
+	ui->cboDCOffset->setCurrentIndex(getDCOffsetIndex(m_settings.m_dcoff));
+
+	// I/Q balance policy
+	ui->cboIQBalance->setCurrentIndex(getIQBalanceIndex(m_settings.m_iqbal));
+
+	// Bandwidth
+	ui->cboBandwidth->setCurrentIndex(getBandwidthIndex(m_settings.m_bandwidth));
+}
+
+int GNURadioGui::getSampleRateIndex(double sampleRate)
+{
+	int index = m_sampRates.size() - 1;
+
+	for ( uint i = 0; i < m_sampRates.size(); i++ )	{
+		if (sampleRate >= m_sampRates[i]) {
+			index = i;
+		}
+	}
+
+	return index;
+}
+
+int GNURadioGui::getGainIndex(std::vector<double> steps, double gain)
+{
+	int index = 0;
+
+	for (std::vector<double>::const_iterator it = steps.begin(); it != steps.end(); ++it, index++) {
+		if (gain <= *it) {
+			break;
+		}
+	}
+
+	return index;
+}
+
+int GNURadioGui::getBandwidthIndex(double bandwidth)
+{
+	int index = 0;
+
+	for ( uint i = 0; i < m_bandwidths.size(); index++ ) {
+		if (bandwidth <= m_bandwidths[i]) {
+			break;
+		}
+	}
+
+	return index;
+}
+
+int GNURadioGui::getDCOffsetIndex(QString offsetStr)
+{
+	for ( uint i = 0; i < m_dcoffs.size(); i++ ) {
+		if (offsetStr == m_dcoffs[i]) {
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+int GNURadioGui::getIQBalanceIndex(QString iqBalanceStr)
+{
+	for ( uint i = 0; i < m_iqbals.size(); i++ ) {
+		if (iqBalanceStr == m_iqbals[i]) {
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+int GNURadioGui::getAntennaIndex(QString antennaStr)
+{
+	for ( uint i = 0; i < m_antennas.size(); i++ ) {
+		if (antennaStr == m_antennas[i]) {
+			return i;
+		}
+	}
+
+	return 0;
 }
 
 void GNURadioGui::sendSettings()

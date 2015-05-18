@@ -17,7 +17,7 @@ Funcube Dongle Pro+ USB drivers are broken on some hardware with recent kernels.
 BladeRF
 =======
 
-No support. Ends up with: `Hierarchical blocks do not yet support arbitrary or variable numbers of inputs or outputs`
+You need a very recent (May 2015) version of gr-osmosdr. 0.1.1 does not work but 0.1.5 does. Check to which library points the symbolic link `libgnuradio-osmosdr.so`. It should be something like: `libgnuradio-osmosdr-0.1.5git.so.0.0.`
 
 ==========
 For Ubuntu
@@ -67,6 +67,10 @@ Known Issues
   - Does not work properly for RTL-SDR sampling rates not multiple of AF sampling rate (48000 Hz). This is because the interpolator/decimator is not a rational resampler actually (just does one or the other). For now please use 288, 1152 or 1536 kHz sampling rates,
   - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
   - Aliasing can be annoying for broadcast FM. In this case try to shift the signal until you find a clear background for your station. This is a limitation of the RTL hardware so just use this workaround.
+  - GNU Radio plugin is still not fully functional:
+    - Current settings are not saved and retrieved on the next session
+    - DC offset and I/Q policy is not working properly and has been disabled (effectively enforces the 
+      "keep" mode always)
 
 ===================
 Done since the fork
@@ -87,12 +91,12 @@ Done since the fork
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
   - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
   - Added working WFM demodulation. Optimized for no atan2.
+  - Improved GNU Radio plugin usability with most settings saved on a preset
     
 =====
 To Do
 =====
 
-  - Missing de-emphasis on WFM
   - Enhance WFM (stereo, RDS?)
   - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers

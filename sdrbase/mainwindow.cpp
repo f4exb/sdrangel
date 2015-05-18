@@ -442,6 +442,12 @@ void MainWindow::on_presetUpdate_clicked()
 	}
 }
 
+void MainWindow::on_presetLastLoad_clicked()
+{
+	m_settings.load();
+	applySettings();
+}
+
 void MainWindow::on_presetLoad_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();

@@ -24,8 +24,6 @@
 #include <gnuradio/sync_block.h>
 #include <gnuradio/io_signature.h>
 
-#include <iostream>
-
 ////////////////////////////////////////////////////////////////////////////////
 class gr_adaptor;
 
@@ -130,7 +128,6 @@ void GnuradioThread::stopWork()
 void GnuradioThread::run()
 {
 	m_top = gr::make_top_block( "flowgraph" );
-	std::cerr << "GnuradioThread::run: " << m_args.toStdString() << std::endl;
 	m_src = osmosdr::source::make( m_args.toStdString() );
 
 	/* now since we've constructed our shared objects, we allow the calling

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>186</width>
-    <height>261</height>
+    <width>201</width>
+    <height>276</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -154,10 +154,6 @@
        <property name="text">
         <string>Freq. Corr.</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="sldGain">
       </widget>
      </item>
      <item>

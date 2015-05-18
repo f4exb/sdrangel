@@ -8,10 +8,10 @@
 const PluginDescriptor GNURadioPlugin::m_pluginDescriptor = {
 	QString("GR-OsmoSDR Input"),
 	QString("1.0"),
-	QString("(c) Dimitri Stolnikov <horiz0n@gmx.net>"),
-	QString("http://sdr.osmocom.org/trac/wiki/GrOsmoSDR"),
+	QString("(c) Edouard Griffiths, F4EXB"),
+	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb"),
 	true,
-	QString("http://cgit.osmocom.org/cgit/gr-osmosdr")
+	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb")
 };
 
 GNURadioPlugin::GNURadioPlugin(QObject* parent) :

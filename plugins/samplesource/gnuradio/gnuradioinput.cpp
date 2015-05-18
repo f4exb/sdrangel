@@ -31,8 +31,8 @@ GNURadioInput::Settings::Settings() :
 	m_freqCorr(0),
 	m_sampRate(0),
 	m_antenna(""),
-	m_dcoff(""),
-	m_iqbal(""),
+	m_dcoff("Keep"),
+	m_iqbal("Keep"),
 	m_bandwidth(0)
 {
 }
@@ -43,20 +43,27 @@ void GNURadioInput::Settings::resetToDefaults()
 	m_sampRate = 0;
 	m_freqCorr = 0;
 	m_antenna = "";
-	m_dcoff = "";
-	m_iqbal = "";
+	m_dcoff = "Keep";
+	m_iqbal = "Keep";
 	m_bandwidth = 0;
 }
 
 QByteArray GNURadioInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
-//	s.writeString(1, m_args);
-//	s.writeDouble(2, m_freqCorr);
-//	s.writeDouble(3, m_sampRate);
-//	s.writeString(4, m_antenna);
-//	s.writeString(5, m_dcoff);
-//	s.writeString(5, m_iqbal);
+	s.writeString(1, m_args);
+	s.writeDouble(2, m_freqCorr);
+	s.writeDouble(3, m_sampRate);
+	s.writeString(4, m_antenna);
+	s.writeString(5, m_dcoff);
+	s.writeString(6, m_iqbal);
+	s.writeDouble(7, m_bandwidth);
+
+	for (int i=0; i < m_namedGains.size(); i++)
+	{
+		s.writeDouble(100+i, m_namedGains[i].second);
+	}
+
 	return s.final();
 }
 
@@ -70,12 +77,21 @@ bool GNURadioInput::Settings::deserialize(const QByteArray& data)
 	}
 
 	if(d.getVersion() == 1) {
-//		d.readString(1, &m_args, "");
-//		d.readDouble(2, &m_freqCorr, 0);
-//		d.readDouble(3, &m_sampRate, 0);
-//		d.readString(4, &m_antenna, "");
-//		d.readString(5, &m_dcoff, "");
-//		d.readString(5, &m_iqbal, "");
+		d.readString(1, &m_args, "");
+		d.readDouble(2, &m_freqCorr, 0);
+		d.readDouble(3, &m_sampRate, 0);
+		d.readString(4, &m_antenna, "");
+		d.readString(5, &m_dcoff, "Keep");
+		d.readString(6, &m_iqbal, "Keep");
+		d.readDouble(7, &m_bandwidth, 0);
+
+		for (int i = 0; i < m_namedGains.size(); i++)
+		{
+			double value;
+			d.readDouble(100+i, &value, 0);
+			m_namedGains[i].second = value;
+		}
+
 		return true;
 	} else {
 		resetToDefaults();
@@ -125,7 +141,7 @@ bool GNURadioInput::startInput(int device)
 	m_GnuradioThread->startWork();
 
 	mutexLocker.unlock();
-	applySettings(m_generalSettings, m_settings, true);
+	//applySettings(m_generalSettings, m_settings, true);
 
 	if(m_GnuradioThread != NULL) {
 		osmosdr::source::sptr radio = m_GnuradioThread->radio();
@@ -289,6 +305,8 @@ bool GNURadioInput::applySettings(const GeneralSettings& generalSettings,
 			radio->set_antenna( m_settings.m_antenna.toStdString() );
 		}
 
+		/* Removed as it is incapable of handling it correctly (initialize at "Keep").
+		 * For BladeRF it must be done via bladerRF-cli */
 		if((m_settings.m_dcoff != settings.m_dcoff) || force) {
 			m_settings.m_dcoff = settings.m_dcoff;
 
@@ -297,7 +315,7 @@ bool GNURadioInput::applySettings(const GeneralSettings& generalSettings,
 				if ( m_dcoffs[i] !=  m_settings.m_dcoff )
 					continue;
 
-				radio->set_dc_offset_mode( i );
+				//radio->set_dc_offset_mode( i );
 				break;
 			}
 		}
@@ -310,7 +328,7 @@ bool GNURadioInput::applySettings(const GeneralSettings& generalSettings,
 				if ( m_iqbals[i] !=  m_settings.m_iqbal )
 					continue;
 
-				radio->set_iq_balance_mode( i );
+				//radio->set_iq_balance_mode( i );
 				break;
 			}
 		}

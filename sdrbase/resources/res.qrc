@@ -13,5 +13,6 @@
         <file>maxhold.png</file>
         <file>grid.png</file>
         <file>invertspectrum.png</file>
+        <file>preset-last.png</file>
     </qresource>
 </RCC>

@@ -76,11 +76,19 @@ private:
 	SampleSource::GeneralSettings m_generalSettings;
 	QTimer m_updateTimer;
 
+	void updateDisplayDevices();
+	void updateDisplayConstants();
 	void displaySettings();
 	void sendSettings();
 
 private slots:
 	void updateHardware();
+	int getSampleRateIndex(double sampleRate);
+	int getDCOffsetIndex(QString offsetStr);
+	int getIQBalanceIndex(QString iqBalanceStr);
+	int getAntennaIndex(QString antennaStr);
+	int getBandwidthIndex(double bandwidth);
+	int getGainIndex(std::vector<double> steps, double gain);
 
 	void on_cboDevices_currentIndexChanged(int index);
 	void on_txtDeviceArgs_textChanged(const QString &arg1);
