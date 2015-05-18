@@ -94,7 +94,7 @@ bool V4LInput::startInput(int device)
 		return false;
 	}
 
-	m_deviceDescription = QString("RTL-SDR /dev/swradio0");
+	m_deviceDescription = QString("SDRplay /dev/swradio0");
 
 	qDebug("V4LInput: start");
 	//MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
@@ -123,7 +123,7 @@ const QString& V4LInput::getDeviceDescription() const
 int V4LInput::getSampleRate() const
 {
 	// The output rate is lower than the device rate
-	int result = SAMPLERATE / 2;
+	int result = SAMPLERATE / 4;
 	return result;
 }
 

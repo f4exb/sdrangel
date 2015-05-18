@@ -218,6 +218,7 @@ V4LThread::set_tuner_gain(double gain)
 		return;
 	}
 
+#define CASTUP (int)(qint16)
 int
 V4LThread::work(int noutput_items)
 {
@@ -230,20 +231,20 @@ V4LThread::work(int noutput_items)
 	SampleVector::iterator it;
 
 	unsigned int pos = 0;
-	// MSI format is 252 sample pairs : 63 * 4
+	// MSI format is 252 sample pairs :( 63 * 4) * 4bytes
 	it = m_convertBuffer.begin();
-	if (recebuf_len >= 8) { // in bytes
+	if (recebuf_len >= 16) { // in bytes
 		b = (uint16_t *) recebuf_ptr;
-		unsigned int len = 4 * noutput_items; // decimation (i+q * 2 : cmplx)
+		unsigned int len = 8 * noutput_items; // decimation (i+q * 4 : cmplx)
 		if (len * 2 > recebuf_len)
 			len = recebuf_len / 2;
 		// Decimate by two for lower cpu usage
-		for (pos = 0; pos < len - 3; pos += 4) {
-			xreal = (qint16)(b[pos+0]<<2) + (qint16)(b[pos+2]<<2);
-				// + (qint16)(b[pos+4]<<2) + (qint16)(b[pos+6]<<2);
-			yimag = (qint16)(b[pos+1]<<2) + (qint16)(b[pos+3]<<2);
-				// + (int)(b[pos+5]<<2) + (int)(b[pos+7]<<2);
-			Sample s( (qint16)(xreal >> 2) , (qint16)(yimag>>2) );
+		for (pos = 0; pos < len - 7; pos += 8) {
+			xreal = CASTUP(b[pos+0]<<2) + CASTUP(b[pos+2]<<2)
+				+ CASTUP(b[pos+4]<<2) + CASTUP(b[pos+6]<<2);
+			yimag = CASTUP(b[pos+1]<<2) + CASTUP(b[pos+3]<<2)
+				+ CASTUP(b[pos+5]<<2) + CASTUP(b[pos+7]<<2);
+			Sample s( (qint16)(xreal >> 2) , (qint16)(yimag >> 2) );
 			*it = s;
 			it++;
 		}
@@ -252,8 +253,8 @@ V4LThread::work(int noutput_items)
 		recebuf_ptr = (void*)(b + pos);	
 	}
 	// return now if there is still data in buffer, else free buffer and get another.
-	if (recebuf_len >= 8)
-		return pos / 4;
+	if (recebuf_len >= 16)
+		return pos / 8;
 	{	// free buffer, if there was one.
 		if (pos > 0) { 
 			CLEAR(buf);
@@ -290,5 +291,5 @@ V4LThread::work(int noutput_items)
 		recebuf_len = buf.bytesused;
 		recebuf_mmap_index = buf.index;
 	}
-	return pos / 4;
+	return pos / 8;
 }

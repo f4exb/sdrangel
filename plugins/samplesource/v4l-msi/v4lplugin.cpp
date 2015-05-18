@@ -1,6 +1,5 @@
 #include <QtPlugin>
 #include <QAction>
-#include <rtl-sdr.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "v4lplugin.h"
@@ -8,7 +7,7 @@
 
 const PluginDescriptor V4LPlugin::m_pluginDescriptor = {
 	QString("V4L Input"),
-	QString("3.18"),
+	QString("4.0"),
 	QString("(c) 2014 John Greb"),
 	QString("http://palosaari.fi/linux/"),
 	true,
@@ -36,7 +35,7 @@ PluginInterface::SampleSourceDevices V4LPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
 
-	QString displayedName(QString("Kernel Source #1"));
+	QString displayedName(QString("Linux V4L (SDRplay)"));
 	SimpleSerializer s(1);
 	s.writeS32(1, 0);
 	result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.v4l", s.final()));
