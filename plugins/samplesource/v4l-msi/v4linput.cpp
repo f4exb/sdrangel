@@ -26,13 +26,13 @@ MESSAGE_CLASS_DEFINITION(V4LInput::MsgConfigureV4L, Message)
 MESSAGE_CLASS_DEFINITION(V4LInput::MsgReportV4L, Message)
 
 V4LInput::Settings::Settings() :
-	m_gain(0)
+	m_gain(6)
 {
 }
 
 void V4LInput::Settings::resetToDefaults()
 {
-	m_gain = 0;
+	m_gain = 6;
 }
 
 QByteArray V4LInput::Settings::serialize() const
@@ -53,7 +53,7 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 	}
 
 	if(d.getVersion() == 1) {
-		d.readS32(1, &m_gain, 0);
+		d.readS32(1, &m_gain, 6);
 		//d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
