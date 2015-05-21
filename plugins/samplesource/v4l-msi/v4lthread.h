@@ -43,6 +43,7 @@ public:
 	void set_center_freq(double freq);
 	void set_bandwidth(double bandwidth);
 	void set_tuner_gain(double gain);
+	void set_amps(bool lna, bool on);
 	int  work(int n_items);
 private:
 	int fd;

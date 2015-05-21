@@ -146,10 +146,7 @@ V4LThread::set_sample_rate(double samp_rate)
 		frequency.tuner = 0;
 		frequency.type = V4L2_TUNER_ADC;
 		frequency.frequency = samp_rate;
-
 		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
-
-		return;
 	}
 
 // Cannot change freq while streaming
@@ -164,10 +161,7 @@ V4LThread::set_center_freq(double freq)
 		frequency.tuner = 1;
 		frequency.type = V4L2_TUNER_RF;
 		frequency.frequency = freq;
-
 		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
-
-		return;
 	}
 
 void
@@ -196,8 +190,6 @@ V4LThread::set_bandwidth(double bandwidth)
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
-
-		return;
 	}
 
 void
@@ -216,7 +208,29 @@ V4LThread::set_tuner_gain(double gain)
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
+	}
+
+
+void
+V4LThread::set_amps(bool lna, bool on)
+	{
+		struct v4l2_ext_controls ext_ctrls;
+		struct v4l2_ext_control ext_ctrl;
+
+	if (fd <= 0)
 		return;
+
+	memset (&ext_ctrl, 0, sizeof(ext_ctrl));
+	memset (&ext_ctrls, 0, sizeof(ext_ctrls));
+	if (lna)
+		ext_ctrl.id = CID_TUNER_LNA_GAIN;
+	else
+		ext_ctrl.id = CID_TUNER_MIXER_GAIN;
+	ext_ctrl.value = on;
+	ext_ctrls.ctrl_class = CID_CLASS_RF;
+	ext_ctrls.count = 1;
+	ext_ctrls.controls = &ext_ctrl;
+	xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
 	}
 
 #define CASTUP (int)(qint16)

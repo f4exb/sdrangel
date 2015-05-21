@@ -6,9 +6,9 @@
 #include "v4lgui.h"
 
 const PluginDescriptor V4LPlugin::m_pluginDescriptor = {
-	QString("V4L Input"),
+	QString("V4L SDRplay Input"),
 	QString("4.0"),
-	QString("(c) 2014 John Greb"),
+	QString("(c) 2015 John Greb"),
 	QString("http://palosaari.fi/linux/"),
 	true,
 	QString("github.com/hexameron/rtl-sdrangelove")
