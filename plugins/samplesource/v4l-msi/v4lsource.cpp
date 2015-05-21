@@ -29,19 +29,13 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-/* Control classes */
-#define V4L2_CTRL_CLASS_USER          0x00980000 /* Old-style 'user' controls */
-/* User-class control IDs */
-#define V4L2_CID_BASE                 (V4L2_CTRL_CLASS_USER | 0x900)
-#define V4L2_CID_USER_BASE            V4L2_CID_BASE
-
-#define CID_SAMPLING_MODE             ((V4L2_CID_USER_BASE | 0xf000) +  0)
-#define CID_SAMPLING_RATE             ((V4L2_CID_USER_BASE | 0xf000) +  1)
-#define CID_SAMPLING_RESOLUTION       ((V4L2_CID_USER_BASE | 0xf000) +  2)
-#define CID_TUNER_RF                  ((V4L2_CID_USER_BASE | 0xf000) + 10)
-#define CID_TUNER_BW                  ((V4L2_CID_USER_BASE | 0xf000) + 11)
-#define CID_TUNER_IF                  ((V4L2_CID_USER_BASE | 0xf000) + 12)
-#define CID_TUNER_GAIN                ((V4L2_CID_USER_BASE | 0xf000) + 13)
+#define CID_CLASS_RF		(0x00a20000)
+#define CID_RF_TUNER_CLASS_BASE	(0x00a20900)
+#define CID_TUNER_BW_AUTO	(CID_RF_TUNER_CLASS_BASE + 11)
+#define CID_TUNER_BW		(CID_RF_TUNER_CLASS_BASE + 12)
+#define CID_TUNER_LNA_GAIN	(CID_RF_TUNER_CLASS_BASE + 42)
+#define CID_TUNER_MIXER_GAIN	(CID_RF_TUNER_CLASS_BASE + 52)
+#define CID_TUNER_IF_GAIN	(CID_RF_TUNER_CLASS_BASE + 62)
 
 #define V4L2_PIX_FMT_SDR_U8     v4l2_fourcc('C', 'U', '0', '8') /* unsigned 8-bit Complex*/
 #define V4L2_PIX_FMT_SDR_U16LE  v4l2_fourcc('C', 'U', '1', '6') /* unsigned 16-bit Complex*/
@@ -77,12 +71,11 @@ V4LThread::OpenSource(const char *filename)
 			qCritical("Cannot open /dev/swradio0 :%d", fd);
 			return;
 		}
-		// sampletype depends on samplerate. Set that first
 		set_sample_rate( (double)SAMPLERATE );
 		set_center_freq( (double)centerFreq );
 		set_bandwidth( (double)IF_BANDWIDTH );
 		set_tuner_gain( (double) 6.0);
-#if 0
+
 		struct v4l2_format fmt;
 		pixelformat = V4L2_PIX_FMT_SDR_CS14LE;
 		CLEAR(fmt);
@@ -90,7 +83,7 @@ V4LThread::OpenSource(const char *filename)
 		fmt.fmt.sdr.pixelformat = pixelformat;
 		xioctl(fd, VIDIOC_S_FMT, &fmt);
 		qCritical(" Expecting format CS14LE, got : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
-#endif
+
 		CLEAR(req);
 		req.count = 8;
 		req.type = V4L2_BUF_TYPE_SDR_CAPTURE;
@@ -159,7 +152,7 @@ V4LThread::set_sample_rate(double samp_rate)
 		return;
 	}
 
-// Cannot change freq while streaming in Linux 4.0
+// Cannot change freq while streaming
 void
 V4LThread::set_center_freq(double freq)
 	{
@@ -183,15 +176,25 @@ V4LThread::set_bandwidth(double bandwidth)
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
 
+		if (fd <= 0)
+			return;
+
+		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
+		ext_ctrl.id = CID_TUNER_BW_AUTO;
+		ext_ctrl.value = 0;
+		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
+		ext_ctrls.count = 1;
+		ext_ctrls.controls = &ext_ctrl;
+		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
+
 		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
 		ext_ctrl.id = CID_TUNER_BW;
 		ext_ctrl.value = bandwidth;
-
 		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
-		ext_ctrls.ctrl_class = V4L2_CTRL_CLASS_USER;
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
-
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
 
 		return;
@@ -206,16 +209,13 @@ V4LThread::set_tuner_gain(double gain)
 		if (fd <= 0)
 			return;
 		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
-		ext_ctrl.id = CID_TUNER_GAIN;
+		ext_ctrl.id = CID_TUNER_IF_GAIN;
 		ext_ctrl.value = gain;
-
 		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
-		ext_ctrls.ctrl_class = V4L2_CTRL_CLASS_USER;
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
-
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
-
 		return;
 	}
 
