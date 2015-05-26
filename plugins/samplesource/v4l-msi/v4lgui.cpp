@@ -10,7 +10,7 @@ V4LGui::V4LGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, 20000U, 2200000U);
+	ui->centerFrequency->setValueRange(7, 50000U, 1999000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -82,37 +82,15 @@ bool V4LGui::deserialize(const QByteArray& data)
 
 bool V4LGui::handleMessage(Message* message)
 {
-	if(V4LInput::MsgReportV4L::match(message)) {
-		m_gains = ((V4LInput::MsgReportV4L*)message)->getGains();
-		displaySettings();
-		message->completed();
-		return true;
-	} else {
-		return false;
-	}
+	return false;
 }
 
 void V4LGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
-	if(m_gains.size() > 0) {
-		int dist = abs(m_settings.m_gain - m_gains[0]);
-		int pos = 0;
-		for(uint i = 1; i < m_gains.size(); i++) {
-			if(abs(m_settings.m_gain - m_gains[i]) < dist) {
-				dist = abs(m_settings.m_gain - m_gains[i]);
-				pos = i;
-			}
-		}
-		ui->gainText->setText(tr("%1.%2").arg(m_gains[pos] / 10).arg(abs(m_gains[pos] % 10)));
-		ui->gain->setMaximum(m_gains.size() - 1);
-		ui->gain->setEnabled(true);
-		ui->gain->setValue(pos);
-	} else {
-		ui->gain->setMaximum(0);
-		ui->gain->setEnabled(false);
-		ui->gain->setValue(0);
-	}
+	ui->ifgain->setValue(1);
+	ui->checkBoxL->setChecked(m_settings.m_lna);
+        ui->checkBoxM->setChecked(m_settings.m_mix);
 }
 
 void V4LGui::sendSettings()
@@ -127,12 +105,12 @@ void V4LGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void V4LGui::on_gain_valueChanged(int value)
+void V4LGui::on_ifgain_valueChanged(int value)
 {
-	if(value > (int)m_gains.size())
+	if(value > 8)
 		return;
-	int gain = m_gains[value];
-	ui->gainText->setText(tr("%1.%2").arg(gain / 10).arg(abs(gain % 10)));
+	int gain = value * 6;
+	ui->gainText->setText( tr("%1").arg(gain) );
 	m_settings.m_gain = gain;
 	sendSettings();
 }
@@ -142,4 +120,22 @@ void V4LGui::updateHardware()
 	V4LInput::MsgConfigureV4L* message = V4LInput::MsgConfigureV4L::create(m_generalSettings, m_settings);
 	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 	m_updateTimer.stop();
+}
+
+void V4LGui::on_checkBoxL_stateChanged(int state)
+{
+	if (state == Qt::Checked)
+		m_settings.m_lna = 1;
+	else
+		m_settings.m_lna = 0;
+	sendSettings();
+}
+
+void V4LGui::on_checkBoxM_stateChanged(int state)
+{
+	if (state == Qt::Checked)
+		m_settings.m_mix = 1;
+	else
+		m_settings.m_mix = 0;
+	sendSettings();
 }

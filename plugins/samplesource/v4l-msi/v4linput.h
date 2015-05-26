@@ -31,7 +31,7 @@ class V4LThread;
 class V4LInput : public SampleSource {
 public:
 	struct Settings {
-		qint32 m_gain;
+		qint32 m_gain, m_lna, m_mix;
 
 		Settings();
 		void resetToDefaults();
@@ -62,26 +62,6 @@ public:
 		{ }
 	};
 
-	class MsgReportV4L : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const std::vector<int>& getGains() const { return m_gains; }
-
-		static MsgReportV4L* create(const std::vector<int>& gains)
-		{
-			return new MsgReportV4L(gains);
-		}
-
-	protected:
-		std::vector<int> m_gains;
-
-		MsgReportV4L(const std::vector<int>& gains) :
-			Message(),
-			m_gains(gains)
-		{ }
-	};
-
 	V4LInput(MessageQueue* msgQueueToGUI);
 	~V4LInput();
 
@@ -98,7 +78,6 @@ private:
 	Settings m_settings;
 	V4LThread* m_V4LThread;
 	QString m_deviceDescription;
-	std::vector<int> m_gains;
 
 	void applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
 };

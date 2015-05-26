@@ -29,22 +29,17 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-/* Control classes */
-#define V4L2_CTRL_CLASS_USER          0x00980000 /* Old-style 'user' controls */
-/* User-class control IDs */
-#define V4L2_CID_BASE                 (V4L2_CTRL_CLASS_USER | 0x900)
-#define V4L2_CID_USER_BASE            V4L2_CID_BASE
-
-#define CID_SAMPLING_MODE             ((V4L2_CID_USER_BASE | 0xf000) +  0)
-#define CID_SAMPLING_RATE             ((V4L2_CID_USER_BASE | 0xf000) +  1)
-#define CID_SAMPLING_RESOLUTION       ((V4L2_CID_USER_BASE | 0xf000) +  2)
-#define CID_TUNER_RF                  ((V4L2_CID_USER_BASE | 0xf000) + 10)
-#define CID_TUNER_BW                  ((V4L2_CID_USER_BASE | 0xf000) + 11)
-#define CID_TUNER_IF                  ((V4L2_CID_USER_BASE | 0xf000) + 12)
-#define CID_TUNER_GAIN                ((V4L2_CID_USER_BASE | 0xf000) + 13)
+#define CID_CLASS_RF		(0x00a20000)
+#define CID_RF_TUNER_CLASS_BASE	(0x00a20900)
+#define CID_TUNER_BW_AUTO	(CID_RF_TUNER_CLASS_BASE + 11)
+#define CID_TUNER_BW		(CID_RF_TUNER_CLASS_BASE + 12)
+#define CID_TUNER_LNA_GAIN	(CID_RF_TUNER_CLASS_BASE + 42)
+#define CID_TUNER_MIXER_GAIN	(CID_RF_TUNER_CLASS_BASE + 52)
+#define CID_TUNER_IF_GAIN	(CID_RF_TUNER_CLASS_BASE + 62)
 
 #define V4L2_PIX_FMT_SDR_U8     v4l2_fourcc('C', 'U', '0', '8') /* unsigned 8-bit Complex*/
 #define V4L2_PIX_FMT_SDR_U16LE  v4l2_fourcc('C', 'U', '1', '6') /* unsigned 16-bit Complex*/
+#define V4L2_PIX_FMT_SDR_CS14LE	v4l2_fourcc('C', 'S', '1', '4') /*  signed  14-bit Complex*/
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -63,7 +58,6 @@ static void xioctl(int fh, unsigned long int request, void *arg)
 void
 V4LThread::OpenSource(const char *filename)
 	{
-		struct v4l2_format fmt;
 		struct v4l2_buffer buf;
 		struct v4l2_requestbuffers req;
 		enum v4l2_buf_type type;
@@ -77,15 +71,18 @@ V4LThread::OpenSource(const char *filename)
 			qCritical("Cannot open /dev/swradio0 :%d", fd);
 			return;
 		}
+		set_sample_rate( (double)SAMPLERATE );
+		set_center_freq( (double)centerFreq );
+		set_bandwidth( (double)IF_BANDWIDTH );
+		set_tuner_gain( (double) 6.0);
 
-		pixelformat = V4L2_PIX_FMT_SDR_U8;
-		// RTLSDR has limited ioctls in 3.18, expect fail.
-		qCritical("Want Pixelformat : CU08");
+		struct v4l2_format fmt;
+		pixelformat = V4L2_PIX_FMT_SDR_CS14LE;
 		CLEAR(fmt);
 		fmt.type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		fmt.fmt.sdr.pixelformat = pixelformat;
 		xioctl(fd, VIDIOC_S_FMT, &fmt);
-		qCritical("Got Pixelformat : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
+		qCritical(" Expecting format CS14LE, got : %4.4s", (char *)&fmt.fmt.sdr.pixelformat);
 
 		CLEAR(req);
 		req.count = 8;
@@ -118,9 +115,6 @@ V4LThread::OpenSource(const char *filename)
 			buf.index = i;
 			xioctl(fd, VIDIOC_QBUF, &buf);
 		}
-
-		set_sample_rate((double)SAMPLERATE);
-		set_center_freq( centerFreq + (SAMPLERATE / 4) );
 		// start streaming
 		type = V4L2_BUF_TYPE_SDR_CAPTURE;
 		xioctl(fd, VIDIOC_STREAMON, &type);
@@ -151,14 +145,11 @@ V4LThread::set_sample_rate(double samp_rate)
 		memset (&frequency, 0, sizeof(frequency));
 		frequency.tuner = 0;
 		frequency.type = V4L2_TUNER_ADC;
-		frequency.frequency = samp_rate / 1;
-
+		frequency.frequency = samp_rate;
 		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
-
-		return;
 	}
 
-// Cannot change freq while streaming in Linux 4.0
+// Cannot change freq while streaming
 void
 V4LThread::set_center_freq(double freq)
 	{
@@ -170,10 +161,7 @@ V4LThread::set_center_freq(double freq)
 		frequency.tuner = 1;
 		frequency.type = V4L2_TUNER_RF;
 		frequency.frequency = freq;
-
 		xioctl(fd, VIDIOC_S_FREQUENCY, &frequency);
-
-		return;
 	}
 
 void
@@ -182,18 +170,26 @@ V4LThread::set_bandwidth(double bandwidth)
 		struct v4l2_ext_controls ext_ctrls;
 		struct v4l2_ext_control ext_ctrl;
 
+		if (fd <= 0)
+			return;
+
+		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
+		ext_ctrl.id = CID_TUNER_BW_AUTO;
+		ext_ctrl.value = 0;
+		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
+		ext_ctrls.count = 1;
+		ext_ctrls.controls = &ext_ctrl;
+		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
+
 		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
 		ext_ctrl.id = CID_TUNER_BW;
 		ext_ctrl.value = bandwidth;
-
 		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
-		ext_ctrls.ctrl_class = V4L2_CTRL_CLASS_USER;
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
-
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
-
-		return;
 	}
 
 void
@@ -205,19 +201,39 @@ V4LThread::set_tuner_gain(double gain)
 		if (fd <= 0)
 			return;
 		memset (&ext_ctrl, 0, sizeof(ext_ctrl));
-		ext_ctrl.id = CID_TUNER_GAIN;
+		ext_ctrl.id = CID_TUNER_IF_GAIN;
 		ext_ctrl.value = gain;
-
 		memset (&ext_ctrls, 0, sizeof(ext_ctrls));
-		ext_ctrls.ctrl_class = V4L2_CTRL_CLASS_USER;
+		ext_ctrls.ctrl_class = CID_CLASS_RF;
 		ext_ctrls.count = 1;
 		ext_ctrls.controls = &ext_ctrl;
-
 		xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
-
-		return;
 	}
 
+
+void
+V4LThread::set_amps(bool lna, bool on)
+	{
+		struct v4l2_ext_controls ext_ctrls;
+		struct v4l2_ext_control ext_ctrl;
+
+	if (fd <= 0)
+		return;
+
+	memset (&ext_ctrl, 0, sizeof(ext_ctrl));
+	memset (&ext_ctrls, 0, sizeof(ext_ctrls));
+	if (lna)
+		ext_ctrl.id = CID_TUNER_LNA_GAIN;
+	else
+		ext_ctrl.id = CID_TUNER_MIXER_GAIN;
+	ext_ctrl.value = on;
+	ext_ctrls.ctrl_class = CID_CLASS_RF;
+	ext_ctrls.count = 1;
+	ext_ctrls.controls = &ext_ctrl;
+	xioctl(fd, VIDIOC_S_EXT_CTRLS, &ext_ctrls);
+	}
+
+#define CASTUP (int)(qint16)
 int
 V4LThread::work(int noutput_items)
 {
@@ -225,33 +241,36 @@ V4LThread::work(int noutput_items)
 	struct timeval tv;
 	struct v4l2_buffer buf;
 	fd_set fds;
-	qint16 xreal, yimag;
-	uint8_t* b;
+	int xreal, yimag;
+	uint16_t* b;
 	SampleVector::iterator it;
 
 	unsigned int pos = 0;
-	// in is 4*8bit*2(IQ), 8 bytes; out is 1*16bit*2(IQ) , 4bytes
+	// MSI format is 252 sample pairs :( 63 * 4) * 4bytes
 	it = m_convertBuffer.begin();
-	if (recebuf_len > 0) {
-		b = (uint8_t *) recebuf_ptr;
-		unsigned int len = noutput_items * 8;
-		if (len > recebuf_len)
-			len = recebuf_len;
+	if (recebuf_len >= 16) { // in bytes
+		b = (uint16_t *) recebuf_ptr;
+		unsigned int len = 8 * noutput_items; // decimation (i+q * 4 : cmplx)
+		if (len * 2 > recebuf_len)
+			len = recebuf_len / 2;
+		// Decimate by four for lower cpu usage
 		for (pos = 0; pos < len - 7; pos += 8) {
-			xreal = b[pos+0] - b[pos+3] + b[pos+7] - b[pos+4];
-			yimag = b[pos+1] - b[pos+5] + b[pos+2] - b[pos+6];
-			Sample s( xreal << 3, yimag << 3 );
+			xreal = CASTUP(b[pos+0]<<2) + CASTUP(b[pos+2]<<2)
+				+ CASTUP(b[pos+4]<<2) + CASTUP(b[pos+6]<<2);
+			yimag = CASTUP(b[pos+1]<<2) + CASTUP(b[pos+3]<<2)
+				+ CASTUP(b[pos+5]<<2) + CASTUP(b[pos+7]<<2);
+			Sample s( (qint16)(xreal >> 2) , (qint16)(yimag >> 2) );
 			*it = s;
 			it++;
 		}
 		m_sampleFifo->write(m_convertBuffer.begin(), it);
-		recebuf_len -= pos;
-		recebuf_ptr = (void*)(b + pos);
+		recebuf_len -= pos * 2; // size of int16
+		recebuf_ptr = &b[pos];
 	}
 	// return now if there is still data in buffer, else free buffer and get another.
-	if (recebuf_len >= 8)
+	if (recebuf_len >= 16)
 		return pos / 8;
-	{	// frre buffer, if there was one.
+	{	// free buffer, if there was one.
 		if (pos > 0) { 
 			CLEAR(buf);
 			buf.type = V4L2_BUF_TYPE_SDR_CAPTURE;

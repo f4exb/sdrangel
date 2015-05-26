@@ -24,8 +24,10 @@
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
 
-#define SAMPLERATE 1024000
-#define BLOCKSIZE 4096
+// lowest samplerate in the kernel is 1.2M, but this works better
+#define SAMPLERATE 1536000
+#define IF_BANDWIDTH 300000
+#define BLOCKSIZE 8192
 
 class V4LThread : public QThread {
 	Q_OBJECT
@@ -41,6 +43,7 @@ public:
 	void set_center_freq(double freq);
 	void set_bandwidth(double bandwidth);
 	void set_tuner_gain(double gain);
+	void set_amps(bool lna, bool on);
 	int  work(int n_items);
 private:
 	int fd;

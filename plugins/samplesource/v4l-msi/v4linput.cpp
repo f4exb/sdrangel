@@ -23,16 +23,19 @@
 #include "util/simpleserializer.h"
 
 MESSAGE_CLASS_DEFINITION(V4LInput::MsgConfigureV4L, Message)
-MESSAGE_CLASS_DEFINITION(V4LInput::MsgReportV4L, Message)
 
 V4LInput::Settings::Settings() :
-	m_gain(0)
+	m_gain(1),
+	m_lna(0),
+	m_mix(0)
 {
 }
 
 void V4LInput::Settings::resetToDefaults()
 {
-	m_gain = 0;
+	m_gain = 1;
+	m_lna = 0;
+	m_mix = 0;
 }
 
 QByteArray V4LInput::Settings::serialize() const
@@ -53,7 +56,7 @@ bool V4LInput::Settings::deserialize(const QByteArray& data)
 	}
 
 	if(d.getVersion() == 1) {
-		d.readS32(1, &m_gain, 0);
+		d.readS32(1, &m_gain, 1);
 		//d.readS32(2, &m_samplerate, 0);
 		return true;
 	} else {
@@ -94,7 +97,7 @@ bool V4LInput::startInput(int device)
 		return false;
 	}
 
-	m_deviceDescription = QString("RTL-SDR /dev/swradio0");
+	m_deviceDescription = QString("SDRplay /dev/swradio0");
 
 	qDebug("V4LInput: start");
 	//MsgReportV4L::create(m_gains)->submit(m_guiMessageQueue);
@@ -122,6 +125,7 @@ const QString& V4LInput::getDeviceDescription() const
 
 int V4LInput::getSampleRate() const
 {
+	// The output rate is lower than the device rate
 	int result = SAMPLERATE / 4;
 	return result;
 }
@@ -153,15 +157,20 @@ void V4LInput::applySettings(const GeneralSettings& generalSettings, const Setti
 	}
 
 	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency) || force) {
-		m_V4LThread->set_center_freq( (double)(generalSettings.m_centerFrequency
-								+ (SAMPLERATE / 4) ));
+		m_V4LThread->set_center_freq( (double)generalSettings.m_centerFrequency );
+		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 	}
-	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-#if 0
+
 	if((m_settings.m_gain != settings.m_gain) || force) {
 		m_settings.m_gain = settings.m_gain;
 		m_V4LThread->set_tuner_gain((double)m_settings.m_gain);
 	}
-#endif
+
+	if((m_settings.m_lna != settings.m_lna) || (m_settings.m_mix != settings.m_mix) || force) {
+		m_settings.m_lna = settings.m_lna;
+		m_settings.m_mix = settings.m_mix;
+		m_V4LThread->set_amps(1, m_settings.m_lna);
+		m_V4LThread->set_amps(0, m_settings.m_mix);
+	}
 }
 
