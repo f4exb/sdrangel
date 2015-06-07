@@ -231,7 +231,6 @@ bool NFMDemod::handleMessage(Message* cmd)
 
 void NFMDemod::apply()
 {
-
 	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 		(m_config.m_inputSampleRate != m_running.m_inputSampleRate)) {
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
@@ -241,7 +240,7 @@ void NFMDemod::apply()
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth)) {
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
-		m_interpolatorDistance =  m_config.m_inputSampleRate / m_config.m_audioSampleRate;
+		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
