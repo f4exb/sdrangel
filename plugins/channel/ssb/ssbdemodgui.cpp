@@ -31,6 +31,11 @@ void SSBDemodGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString SSBDemodGUI::getName() const
+{
+	return objectName();
+}
+
 void SSBDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(30);

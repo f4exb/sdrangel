@@ -21,6 +21,7 @@ public:
 	void destroy();
 
 	void setName(const QString& name);
+	QString getName() const;
 
 	void resetToDefaults();
 	QByteArray serializeGeneral() const;

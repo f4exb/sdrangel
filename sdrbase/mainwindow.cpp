@@ -36,6 +36,8 @@
 #include "plugin/pluginapi.h"
 #include "plugin/plugingui.h"
 
+#include <iostream>
+
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
@@ -174,22 +176,29 @@ void MainWindow::setInputGUI(QWidget* gui)
 
 void MainWindow::loadSettings()
 {
-	m_settings.load();
+	std::cerr << "MainWindow::loadSettings" << std::endl;
+    m_settings.load();
 
-	for(int i = 0; i < m_settings.getPresetCount(); ++i)
-		addPresetToTree(m_settings.getPreset(i));
+    for(int i = 0; i < m_settings.getPresetCount(); ++i)
+    {
+    	addPresetToTree(m_settings.getPreset(i));
+    }
 
-	Preset* current = m_settings.getCurrent();
+    Preset* current = m_settings.getCurrent();
 
-	loadSettings(current);
+    loadSettings(current);
 }
 
 void MainWindow::loadSettings(const Preset* preset)
 {
-	if(preset->getShowScope()) {
+	std::cerr << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString() << std::endl;
+
+	if(preset->getShowScope())
+	{
 		on_action_Oscilloscope_triggered();
 		m_scopeWindow->deserialize(preset->getScopeConfig());
-	}
+    }
+
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
 	ui->iqImbalance->setChecked(preset->getIQImbalanceCorrection());
@@ -202,21 +211,32 @@ void MainWindow::loadSettings(const Preset* preset)
 
 void MainWindow::saveSettings()
 {
+	std::cerr << "MainWindow::saveSettings" << std::endl;
+
 	saveSettings(m_settings.getCurrent());
 	m_settings.save();
+
 }
 
 void MainWindow::saveSettings(Preset* preset)
 {
+	std::cerr << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString() << std::endl;
+
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
+
 	if(preset->getShowScope())
+	{
 		preset->setScopeConfig(m_scopeWindow->serialize());
-	else preset->setScopeConfig(QByteArray());
+	}
+    else
+    {
+    	preset->setScopeConfig(QByteArray());
+    }
 
-	preset->clearChannels();
-	m_pluginManager->saveSettings(preset);
+    preset->clearChannels();
+    m_pluginManager->saveSettings(preset);
 
-	preset->setLayout(saveState());
+    preset->setLayout(saveState());
 }
 
 void MainWindow::createStatusBar()

@@ -33,6 +33,11 @@ void FCDGui::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString FCDGui::getName() const
+{
+	return objectName();
+}
+
 void FCDGui::resetToDefaults()
 {
 	m_generalSettings.resetToDefaults();

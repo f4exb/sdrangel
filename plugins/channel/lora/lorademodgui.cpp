@@ -29,6 +29,11 @@ void LoRaDemodGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString LoRaDemodGUI::getName() const
+{
+	return objectName();
+}
+
 void LoRaDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(0);

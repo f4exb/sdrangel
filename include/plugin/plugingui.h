@@ -12,6 +12,7 @@ public:
 	virtual void destroy() = 0;
 
 	virtual void setName(const QString& name) = 0;
+	virtual QString getName() const = 0;
 
 	virtual void resetToDefaults() = 0;
 

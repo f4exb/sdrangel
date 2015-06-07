@@ -18,6 +18,8 @@
 #include "dsp/samplesource/samplesource.h"
 #include "util/simpleserializer.h"
 
+#include <iostream>
+
 SampleSource::GeneralSettings::GeneralSettings() :
 	m_centerFrequency(100000000)
 {
@@ -40,12 +42,15 @@ bool SampleSource::GeneralSettings::deserialize(const QByteArray& data)
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
+		std::cerr << "SampleSource::GeneralSettings::deserialize: invalid deserializer" << std::endl;
 		resetToDefaults();
 		return false;
 	}
 
 	if(d.getVersion() == 1) {
 		d.readU64(1, &m_centerFrequency, 100000000);
+		std::cerr << "SampleSource::GeneralSettings::deserialize: center frequency = "
+				<< m_centerFrequency << std::endl;
 		return true;
 	} else {
 		resetToDefaults();

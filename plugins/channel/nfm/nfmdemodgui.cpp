@@ -33,6 +33,11 @@ void NFMDemodGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString NFMDemodGUI::getName() const
+{
+	return objectName();
+}
+
 void NFMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

@@ -24,6 +24,11 @@ void TCPSrcGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString TCPSrcGUI::getName() const
+{
+	return objectName();
+}
+
 void TCPSrcGUI::resetToDefaults()
 {
 	ui->sampleFormat->setCurrentIndex(0);

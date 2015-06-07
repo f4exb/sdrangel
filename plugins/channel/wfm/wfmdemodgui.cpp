@@ -43,6 +43,11 @@ void WFMDemodGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString WFMDemodGUI::getName() const
+{
+	return objectName();
+}
+
 void WFMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

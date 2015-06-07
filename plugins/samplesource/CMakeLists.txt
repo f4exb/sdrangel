@@ -1,14 +1,6 @@
 project(samplesource)
 
 find_package(LibUSB)
-#find_package(LibOsmoSDR)
-
-add_subdirectory(gnuradio)
-#add_subdirectory(remote)
-
-#if(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
-#	add_subdirectory(osmosdr)
-#endif(LIBUSB_FOUND AND LIBOSMOSDR_FOUND)
 
 if(V4L-RTL)
 	FIND_LIBRARY (LIBV4L2 v4l2)
@@ -33,4 +25,9 @@ find_package(LibRTLSDR)
 if(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 	add_subdirectory(rtlsdr)
 endif(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
+
+find_package(LibBLADERF)
+if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
+	add_subdirectory(bladerf)
+endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 

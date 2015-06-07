@@ -34,6 +34,11 @@ void AMDemodGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString AMDemodGUI::getName() const
+{
+	return objectName();
+}
+
 void AMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

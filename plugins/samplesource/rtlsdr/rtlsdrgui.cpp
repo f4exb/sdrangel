@@ -34,6 +34,11 @@ void RTLSDRGui::setName(const QString& name)
 	setObjectName(name);
 }
 
+QString RTLSDRGui::getName() const
+{
+	return objectName();
+}
+
 void RTLSDRGui::resetToDefaults()
 {
 	m_generalSettings.resetToDefaults();

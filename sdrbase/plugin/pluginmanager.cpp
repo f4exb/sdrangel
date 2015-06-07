@@ -8,6 +8,10 @@
 #include "dsp/dspengine.h"
 #include "dsp/samplesource/samplesource.h"
 
+#include <iostream>
+#include <cstdio>
+#include "util/stacktrace.h"
+
 PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow, dspEngine),
@@ -67,12 +71,18 @@ void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
 
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
+	std::cerr << "PluginManager::registerSampleSource "
+			<< plugin->getPluginDescriptor().displayedName.toStdString()
+			<< " with source name " << sourceName.toStdString() << std::endl;
+
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
 void PluginManager::loadSettings(const Preset* preset)
 {
-	qDebug("-------- [%s | %s] --------", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+	std::cerr << "PluginManager::loadSettings" << std::endl;
+
+	fprintf(stderr, "-------- [%s | %s] --------\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
 	// copy currently open channels and clear list
 	ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
@@ -114,8 +124,10 @@ void PluginManager::loadSettings(const Preset* preset)
 	renameChannelInstances();
 
 	if(m_sampleSourceInstance != NULL) {
+		std::cerr << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString() << ")" << std::endl;
 		m_sampleSourceInstance->deserializeGeneral(preset->getSourceGeneralConfig());
 		if(m_sampleSource == preset->getSource()) {
+			std::cerr << "m_sampleSourceInstance->deserialize" << std::endl;
 			m_sampleSourceInstance->deserialize(preset->getSourceConfig());
 		}
 	}
@@ -187,6 +199,8 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 
 int PluginManager::selectSampleSource(int index)
 {
+	std::cout << "PluginManager::selectSampleSource by index" << std::endl;
+
 	m_dspEngine->stopAcquistion();
 
 	if(m_sampleSourceInstance != NULL) {
@@ -215,12 +229,15 @@ int PluginManager::selectSampleSource(int index)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
+	std::cerr << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString() << std::endl;
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }
 
 int PluginManager::selectSampleSource(const QString& source)
 {
+	std::cout << "PluginManager::selectSampleSource by name: " << source.toStdString() << std::endl;
+
 	int index = -1;
 
 	m_dspEngine->stopAcquistion();
@@ -249,6 +266,7 @@ int PluginManager::selectSampleSource(const QString& source)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
+	std::cerr << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString() << std::endl;
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }
