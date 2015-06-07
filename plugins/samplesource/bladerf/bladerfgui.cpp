@@ -259,6 +259,15 @@ void BladerfGui::on_xb200_currentIndexChanged(int index)
 		m_settings.m_xb200 = false;
 	}
 
+	if (m_settings.m_xb200)
+	{
+		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
+	}
+	else
+	{
+		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
+	}
+
 	sendSettings();
 }
 
@@ -315,8 +324,8 @@ unsigned int BladerfGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path
 	}
 }
 
-unsigned int BladerfSampleRates::m_rates[] = {384, 768, 1536, 2304, 3072, 6144, 12288, 24576, 30720, 39936};
-unsigned int BladerfSampleRates::m_nb_rates = 10;
+unsigned int BladerfSampleRates::m_rates[] = {384, 768, 1536, 2304, 3072, 4608, 6144, 9216, 12288, 18432, 24576, 30720, 36864, 39936};
+unsigned int BladerfSampleRates::m_nb_rates = 14;
 
 unsigned int BladerfSampleRates::getRate(unsigned int rate_index)
 {

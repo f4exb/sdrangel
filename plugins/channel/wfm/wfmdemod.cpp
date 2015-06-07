@@ -286,7 +286,7 @@ void WFMDemod::apply()
 	{
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
-		m_interpolatorDistance =  m_config.m_inputSampleRate / m_config.m_audioSampleRate;
+		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
