@@ -62,6 +62,7 @@ private:
 	void decimate4(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void decimate8(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void decimate16(SampleVector::iterator* it, const qint16* buf, qint32 len);
+	void decimate32(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void callback(const qint16* buf, qint32 len);
 };
 

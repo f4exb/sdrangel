@@ -171,14 +171,53 @@ void BladerfThread::decimate16(SampleVector::iterator* it, const qint16* buf, qi
 			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 2; // was shift 4
 			pos += 8;
 		}
+
 		Sample s1( xreal[0], yimag[0] );
 		Sample s2( xreal[1], yimag[1] );
 		Sample s3( xreal[2], yimag[2] );
 		Sample s4( xreal[3], yimag[3] );
+
 		m_decimator2.myDecimate(&s1, &s2);
 		m_decimator2.myDecimate(&s3, &s4);
+
 		m_decimator4.myDecimate(&s2, &s4);
+
 		**it = s4;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate32(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	qint16 xreal[8], yimag[8];
+
+	for (int pos = 0; pos < len - 63; ) {
+		for (int i = 0; i < 8; i++) {
+			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 2; // was shift 4
+			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 2; // was shift 4
+			pos += 8;
+		}
+
+		Sample s1( xreal[0], yimag[0] );
+		Sample s2( xreal[1], yimag[1] );
+		Sample s3( xreal[2], yimag[2] );
+		Sample s4( xreal[3], yimag[3] );
+		Sample s5( xreal[4], yimag[4] );
+		Sample s6( xreal[5], yimag[5] );
+		Sample s7( xreal[6], yimag[6] );
+		Sample s8( xreal[7], yimag[7] );
+
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator2.myDecimate(&s5, &s6);
+		m_decimator2.myDecimate(&s7, &s8);
+
+		m_decimator2.myDecimate(&s2, &s4);
+		m_decimator2.myDecimate(&s6, &s8);
+
+		m_decimator4.myDecimate(&s4, &s8);
+
+		**it = s8;
 		(*it)++;
 	}
 }
@@ -204,6 +243,9 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 		break;
 	case 4:
 		decimate16(&it, buf, len);
+		break;
+	case 5:
+		decimate32(&it, buf, len);
 		break;
 	default:
 		break;

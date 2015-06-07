@@ -156,7 +156,7 @@ void BladerfGui::on_bandwidth_valueChanged(int value)
 
 void BladerfGui::on_decim_valueChanged(int value)
 {
-	if ((value <0) || (value > 4))
+	if ((value <0) || (value > 5))
 		return;
 	ui->decimText->setText(tr("%1").arg(1<<value));
 	m_settings.m_log2Decim = value;
