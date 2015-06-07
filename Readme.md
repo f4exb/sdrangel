@@ -5,6 +5,15 @@ Cloning the repository
 - Clone as usual
 - Checkout the f4exb branch: `git checkout f4exb`
 
+=======================
+GNURadio and libosmosdr
+=======================
+
+These plugins have a lot of bugs and they have been removed trom the build. Original sources still exist in the tree. So current version only supports the following hardware:
+  - RTL-SDR
+  - Funcube
+  - BladeRF (standard and with XB-200 transverter) 
+
 ==============
 Funcube Dongle
 ==============
@@ -17,7 +26,11 @@ Funcube Dongle Pro+ USB drivers are broken on some hardware with recent kernels.
 BladeRF
 =======
 
-You need a very recent (May 2015) version of gr-osmosdr. 0.1.1 does not work but 0.1.5 does. Check to which library points the symbolic link `libgnuradio-osmosdr.so`. It should be something like: `libgnuradio-osmosdr-0.1.5git.so.0.0.`
+A complete new plugin has been written for the BladeRF that interfaces libbladeRF directly. Osmosdr/GnuRadio interface is not implemented correctly and has a lot of bugs as mentioned previously and was not reasonably usable with the BladeRF.
+
+If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `opt/install/libbladerf` with the following defines on `cmake` command line:
+
+`-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
 
 ==========
 For Ubuntu
@@ -64,13 +77,9 @@ Known Issues
 ============
 
   - Actually NFM seems to be working pretty well
-  - Does not work properly for RTL-SDR sampling rates not multiple of AF sampling rate (48000 Hz). This is because the interpolator/decimator is not a rational resampler actually (just does one or the other). For now please use 288, 1152 or 1536 kHz sampling rates,
   - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
   - Aliasing can be annoying for broadcast FM. In this case try to shift the signal until you find a clear background for your station. This is a limitation of the RTL hardware so just use this workaround.
-  - GNU Radio plugin is still not fully functional:
-    - Current settings are not saved and retrieved on the next session
-    - DC offset and I/Q policy is not working properly and has been disabled (effectively enforces the 
-      "keep" mode always)
+  - GNU Radio plugin is not fully functional and has serious bugs (frequent segfaults). Trying to repair it is abandonned. 
 
 ===================
 Done since the fork
@@ -83,6 +92,7 @@ Done since the fork
   - Added display and precise control of the shift frequency from center frequency of the NFM receivers.
   - Removed useless spectrum visualizer in NFM receivers. Created a null sink class to fit corresponding parameter in NFMDemod class constructor.
   - Added display and precise control of the shift frequency from center frequency of the SSB receivers.
+  - SSB filter bounds are tunable so that filter can be set off from center frequency allowing aural decoding of CW
   - Make the sidebands appear correctly on SSB channel overlay. Limit to +/- 6 kHz to fit channel spectrum analyzer window
   - SSB bandwidth can now be tuned in steps of 100 Hz
   - NFM and SSB receiver in focus trigger the display of the central frequency line on the spectrum frequency scale thus facilitating its identification
@@ -91,16 +101,18 @@ Done since the fork
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
   - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
   - Added working WFM demodulation. Optimized for no atan2.
-  - Improved GNU Radio plugin usability with most settings saved on a preset
+  - OsmoSDR and GNURAdio plugins removed from the build as they have too many bugs that are too difficult to correct
+  - New plugin for BladeRF interfacing libbladeRF directly
+  - Corrected the nasty audio band resampling bug preventing use of sample rates that are not power of 2 multiples of 48kHz. This was because the resampling ratio was calculated with an integer division instead of a float division. 
+  - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
     
 =====
 To Do
 =====
 
   - Enhance WFM (stereo, RDS?)
-  - Make the the SSB filter frequency bounds tunable so that it can be used for CW. Change marker overlay accordingly.
   - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
-  - Larger decimation capability for narrowband and very narrowband work (32, 64, ...)
+  - Even larger decimation capability for narrowband and very narrowband work? (64, ...)
   - Even more demods ... 
   - Triggering capability like on expensive spectrum analyzers to trap burst signals
   - recording capability
