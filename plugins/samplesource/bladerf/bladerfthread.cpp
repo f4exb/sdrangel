@@ -28,7 +28,7 @@ BladerfThread::BladerfThread(struct bladerf* dev, SampleFifo* sampleFifo, QObjec
 	m_dev(dev),
 	m_convertBuffer(BLADERF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
-	m_samplerate(2400000),
+	m_samplerate(3072000),
 	m_log2Decim(0)
 {
 }
@@ -193,8 +193,8 @@ void BladerfThread::decimate32(SampleVector::iterator* it, const qint16* buf, qi
 
 	for (int pos = 0; pos < len - 63; ) {
 		for (int i = 0; i < 8; i++) {
-			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 2; // was shift 4
-			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 2; // was shift 4
+			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 1;
+			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 1;
 			pos += 8;
 		}
 
@@ -212,10 +212,10 @@ void BladerfThread::decimate32(SampleVector::iterator* it, const qint16* buf, qi
 		m_decimator2.myDecimate(&s5, &s6);
 		m_decimator2.myDecimate(&s7, &s8);
 
-		m_decimator2.myDecimate(&s2, &s4);
-		m_decimator2.myDecimate(&s6, &s8);
+		m_decimator4.myDecimate(&s2, &s4);
+		m_decimator4.myDecimate(&s6, &s8);
 
-		m_decimator4.myDecimate(&s4, &s8);
+		m_decimator8.myDecimate(&s4, &s8);
 
 		**it = s8;
 		(*it)++;

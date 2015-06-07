@@ -52,8 +52,9 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 
-	IntHalfbandFilter m_decimator2;
-	IntHalfbandFilter m_decimator4;
+	IntHalfbandFilter m_decimator2; // 1st stages
+	IntHalfbandFilter m_decimator4; // 2nd stages
+	IntHalfbandFilter m_decimator8; // 3rd stages
 
 	void run();
 	void decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len);
