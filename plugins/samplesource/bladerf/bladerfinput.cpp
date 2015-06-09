@@ -31,7 +31,7 @@ BladerfInput::Settings::Settings() :
 	m_lnaGain(0),
 	m_vga1(20),
 	m_vga2(9),
-	m_samplerate(2400000),
+	m_samplerate(3072000),
 	m_bandwidth(1500000),
 	m_log2Decim(0),
 	m_xb200(false),
@@ -45,7 +45,8 @@ void BladerfInput::Settings::resetToDefaults()
 	m_lnaGain = 0;
 	m_vga1 = 20;
 	m_vga2 = 9;
-	m_samplerate = 2400000;
+	m_samplerate = 3072000;
+	m_bandwidth = 1500000;
 	m_log2Decim = 0;
 	m_xb200 = false;
 	m_xb200Path = BLADERF_XB200_MIX;
@@ -63,6 +64,7 @@ QByteArray BladerfInput::Settings::serialize() const
 	s.writeBool(6, m_xb200);
 	s.writeS32(7, (int) m_xb200Path);
 	s.writeS32(8, (int) m_xb200Filter);
+	s.writeS32(9, m_bandwidth);
 	return s.final();
 }
 
@@ -81,12 +83,13 @@ bool BladerfInput::Settings::deserialize(const QByteArray& data)
 		d.readS32(2, &m_vga1, 20);
 		d.readS32(3, &m_vga2, 9);
 		d.readS32(4, &m_samplerate, 0);
-		d.readU32(5, &m_log2Decim, 4);
+		d.readU32(5, &m_log2Decim, 0);
 		d.readBool(6, &m_xb200);
 		d.readS32(7, &intval);
 		m_xb200Path = (bladerf_xb200_path) intval;
 		d.readS32(8, &intval);
 		m_xb200Filter = (bladerf_xb200_filter) intval;
+		d.readS32(9, &m_bandwidth, 0);
 		return true;
 	} else {
 		resetToDefaults();
@@ -325,6 +328,7 @@ bool BladerfInput::applySettings(const GeneralSettings& generalSettings, const S
 		if(m_dev != NULL) {
 			m_settings.m_log2Decim = settings.m_log2Decim;
 			m_bladerfThread->setLog2Decimation(settings.m_log2Decim);
+			std::cerr << "BladerfInput: set decimation to " << (1<<settings.m_log2Decim) << std::endl;
 		}
 	}
 

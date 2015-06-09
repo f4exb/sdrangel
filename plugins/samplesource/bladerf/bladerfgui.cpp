@@ -29,7 +29,7 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
+	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -371,7 +371,7 @@ unsigned int BladerfBandwidths::getBandwidthIndex(unsigned int bandwidth)
 {
 	for (unsigned int i=0; i < m_nb_halfbw; i++)
 	{
-		if (bandwidth/2 == m_halfbw[i])
+		if (bandwidth/2000 == m_halfbw[i])
 		{
 			return i;
 		}
