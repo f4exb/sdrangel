@@ -24,7 +24,7 @@
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
 
-#define BLADERF_BLOCKSIZE 16384
+#define BLADERF_BLOCKSIZE (1<<14)
 
 class BladerfThread : public QThread {
 	Q_OBJECT

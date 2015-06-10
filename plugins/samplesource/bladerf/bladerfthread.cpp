@@ -192,8 +192,8 @@ void BladerfThread::decimate32(SampleVector::iterator* it, const qint16* buf, qi
 
 	for (int pos = 0; pos < len - 63; ) {
 		for (int i = 0; i < 8; i++) {
-			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 1;
-			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 1;
+			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 2;
+			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 2;
 			pos += 8;
 		}
 
