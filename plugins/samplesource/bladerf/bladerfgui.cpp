@@ -324,7 +324,7 @@ unsigned int BladerfGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path
 	}
 }
 
-unsigned int BladerfSampleRates::m_rates[] = {384, 768, 1536, 2304, 3072, 4608, 6144, 9216, 12288, 18432, 24576, 30720, 36864, 39936};
+unsigned int BladerfSampleRates::m_rates[] = {1536, 2304, 3072, 4608, 6144, 7680, 9216, 10752, 12288, 18432, 24576, 30720, 36864, 39936};
 unsigned int BladerfSampleRates::m_nb_rates = 14;
 
 unsigned int BladerfSampleRates::getRate(unsigned int rate_index)
