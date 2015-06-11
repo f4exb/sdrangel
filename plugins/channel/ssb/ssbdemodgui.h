@@ -50,6 +50,7 @@ private:
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
 	int m_rate;
+	int m_spanLog2;
 
 	AudioFifo* m_audioFifo;
 	ThreadedSampleSink* m_threadedSampleSink;

@@ -210,7 +210,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_basicSettingsShown(false),
-	m_rate(6000)
+	m_rate(6000),
+	m_spanLog2(3)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -264,18 +265,23 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 		return false;
 	}
 
+	m_spanLog2 = spanLog2;
 	m_rate = 48000 / (1<<spanLog2);
 
 	if (ui->BW->value() < -m_rate/100) {
 		ui->BW->setValue(-m_rate/100);
+		m_channelMarker->setBandwidth(-m_rate*2);
 	} else if (ui->BW->value() > m_rate/100) {
 		ui->BW->setValue(m_rate/100);
+		m_channelMarker->setBandwidth(m_rate*2);
 	}
 
 	if (ui->lowCut->value() < -m_rate/100) {
 		ui->lowCut->setValue(-m_rate/100);
+		m_channelMarker->setLowCutoff(-m_rate);
 	} else if (ui->lowCut->value() > m_rate/100) {
 		ui->lowCut->setValue(m_rate/100);
+		m_channelMarker->setLowCutoff(m_rate);
 	}
 
 	ui->BW->setMinimum(-m_rate/100);
@@ -285,6 +291,9 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1k").arg(s));
+
+	ui->glSpectrum->setCenterFrequency(m_rate/2);
+	ui->glSpectrum->setSampleRate(m_rate);
 
 	return true;
 }
@@ -300,7 +309,8 @@ void SSBDemodGUI::applySettings()
 	m_ssbDemod->configure(m_threadedSampleSink->getMessageQueue(),
 		ui->BW->value() * 100.0,
 		ui->lowCut->value() * 100.0,
-		ui->volume->value() / 10.0 );
+		ui->volume->value() / 10.0,
+		m_spanLog2);
 }
 
 void SSBDemodGUI::leaveEvent(QEvent*)

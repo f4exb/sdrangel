@@ -33,6 +33,7 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
 	m_volume = 2.0;
+	m_spanLog2 = 3;
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
@@ -53,9 +54,9 @@ SSBDemod::~SSBDemod()
 	if (SSBFilter) delete SSBFilter;
 }
 
-void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume)
+void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2);
 	cmd->submit(messageQueue, this);
 }
 
@@ -117,7 +118,7 @@ bool SSBDemod::handleMessage(Message* cmd)
 
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		qDebug("%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
+		//fprintf(stderr, "%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
@@ -151,6 +152,9 @@ bool SSBDemod::handleMessage(Message* cmd)
 
 		m_volume = cfg->getVolume();
 		m_volume *= m_volume * 0.1;
+
+		m_spanLog2 = cfg->getSpanLog2();
+
 		cmd->completed();
 		return true;
 	} else {

@@ -35,7 +35,7 @@ public:
 	SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
 	~SSBDemod();
 
-	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume);
+	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
@@ -50,22 +50,25 @@ private:
 		Real getBandwidth() const { return m_Bandwidth; }
 		Real getLoCutoff() const { return m_LowCutoff; }
 		Real getVolume() const { return m_volume; }
+		int  getSpanLog2() const { return m_spanLog2; }
 
-		static MsgConfigureSSBDemod* create(Real Bandwidth, Real LowCutoff, Real volume)
+		static MsgConfigureSSBDemod* create(Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume);
+			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2);
 		}
 
 	private:
 		Real m_Bandwidth;
 		Real m_LowCutoff;
 		Real m_volume;
+		int  m_spanLog2;
 
-		MsgConfigureSSBDemod(Real Bandwidth, Real LowCutoff, Real volume) :
+		MsgConfigureSSBDemod(Real Bandwidth, Real LowCutoff, Real volume, int spanLog2) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
-			m_volume(volume)
+			m_volume(volume),
+			m_spanLog2(spanLog2)
 		{ }
 	};
 
@@ -78,6 +81,7 @@ private:
 	Real m_Bandwidth;
 	Real m_LowCutoff;
 	Real m_volume;
+	int m_spanLog2;
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
