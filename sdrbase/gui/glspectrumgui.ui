@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Oscilloscope</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1,1">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0,0">
    <property name="leftMargin">
     <number>2</number>
    </property>
@@ -29,19 +29,6 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_17">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Window</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QLabel" name="label_18">
      <property name="sizePolicy">
@@ -52,6 +39,78 @@
      </property>
      <property name="text">
       <string>FFT Size</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="fftSize">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>FFT window function</string>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QComboBox::AdjustToContents</enum>
+     </property>
+     <item>
+      <property name="text">
+       <string>128</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>256</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>512</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1k</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2k</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>4k</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QLabel" name="label_20">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Range (dB)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_17">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Window</string>
      </property>
     </widget>
    </item>
@@ -68,26 +127,25 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="QLabel" name="label_20">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Range (dB)</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0">
     <widget class="QComboBox" name="fftWindow">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="toolTip">
       <string>FFT window function</string>
@@ -127,52 +185,6 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="fftSize">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>FFT window function</string>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QComboBox::AdjustToContents</enum>
-     </property>
-     <item>
-      <property name="text">
-       <string>128</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>256</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>512</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>1024</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>2048</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>4096</string>
-      </property>
-     </item>
-    </widget>
-   </item>
    <item row="1" column="2">
     <widget class="QComboBox" name="refLevel">
      <property name="sizePolicy">
@@ -206,28 +218,27 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_8">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Decay</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
     <widget class="QComboBox" name="decay">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="toolTip">
-      <string>FFT window function</string>
+      <string>Decay adjust</string>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -247,7 +258,7 @@
      </item>
      <item>
       <property name="text">
-       <string>normal</string>
+       <string>0</string>
       </property>
      </item>
      <item>
@@ -262,7 +273,7 @@
      </item>
     </widget>
    </item>
-   <item row="3" column="1" colspan="3">
+   <item row="2" column="1" colspan="3">
     <layout class="QHBoxLayout" name="controlBtns">
      <property name="spacing">
       <number>3</number>
