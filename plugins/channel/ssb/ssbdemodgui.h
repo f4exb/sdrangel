@@ -40,6 +40,7 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
+	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 
@@ -48,6 +49,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	int m_rate;
 
 	AudioFifo* m_audioFifo;
 	ThreadedSampleSink* m_threadedSampleSink;
@@ -59,6 +61,7 @@ private:
 	~SSBDemodGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);
+	bool setNewRate(int spanLog2);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

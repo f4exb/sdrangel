@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>410</height>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,7 +41,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="1" column="1">
+    <item row="2" column="1">
      <widget class="QSlider" name="BW">
       <property name="minimum">
        <number>-60</number>
@@ -60,7 +60,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
+    <item row="4" column="2">
      <widget class="QLabel" name="volumeText">
       <property name="minimumSize">
        <size>
@@ -76,7 +76,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
+    <item row="2" column="2">
      <widget class="QLabel" name="BWText">
       <property name="minimumSize">
        <size>
@@ -85,14 +85,14 @@
        </size>
       </property>
       <property name="text">
-       <string>3.0</string>
+       <string>3.0k</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
+    <item row="4" column="1">
      <widget class="QSlider" name="volume">
       <property name="maximum">
        <number>100</number>
@@ -136,24 +136,38 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="BWLabel">
+    <item row="0" column="2">
+     <widget class="QLabel" name="deltaUnits">
       <property name="text">
-       <string>Bandwidth</string>
+       <string>Hz</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <widget class="QLabel" name="volumeLabel">
       <property name="text">
        <string>Volume</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="deltaUnits">
+    <item row="2" column="0">
+     <widget class="QLabel" name="BWLabel">
       <property name="text">
-       <string>Hz</string>
+       <string>Bandwidth</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="spanLabel">
+      <property name="text">
+       <string>Span</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="lowCutLabel">
+      <property name="text">
+       <string>Low cutoff</string>
       </property>
      </widget>
     </item>
@@ -167,14 +181,7 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="lowCutLabel">
-      <property name="text">
-       <string>Low cutoff</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
+    <item row="3" column="1">
      <widget class="QSlider" name="lowCut">
       <property name="minimum">
        <number>-60</number>
@@ -193,7 +200,7 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
+    <item row="3" column="2">
      <widget class="QLabel" name="lowCutText">
       <property name="minimumSize">
        <size>
@@ -202,10 +209,48 @@
        </size>
       </property>
       <property name="text">
-       <string>0.3</string>
+       <string>0.3k</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="spanText">
+      <property name="text">
+       <string>6.0k</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QSlider" name="spanLog2">
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>5</number>
+      </property>
+      <property name="pageStep">
+       <number>1</number>
+      </property>
+      <property name="value">
+       <number>3</number>
+      </property>
+      <property name="sliderPosition">
+       <number>3</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="invertedAppearance">
+       <bool>true</bool>
+      </property>
+      <property name="invertedControls">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -217,7 +262,7 @@
      <x>40</x>
      <y>140</y>
      <width>218</width>
-     <height>184</height>
+     <height>284</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -244,7 +289,7 @@
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>150</height>
+        <height>250</height>
        </size>
       </property>
      </widget>

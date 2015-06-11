@@ -41,6 +41,7 @@ void SSBDemodGUI::resetToDefaults()
 	ui->BW->setValue(30);
 	ui->volume->setValue(40);
 	ui->deltaFrequency->setValue(0);
+	ui->spanLog2->setValue(3);
 	applySettings();
 }
 
@@ -53,6 +54,7 @@ QByteArray SSBDemodGUI::serialize() const
 	s.writeS32(3, ui->volume->value());
 	s.writeBlob(4, ui->spectrumGUI->serialize());
 	s.writeU32(5, m_channelMarker->getColor().rgb());
+	s.writeS32(6, ui->spanLog2->value());
 	return s.final();
 }
 
@@ -81,6 +83,9 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		ui->spectrumGUI->deserialize(bytetmp);
 		if(d.readU32(5, &u32tmp))
 			m_channelMarker->setColor(u32tmp);
+		d.readS32(6, &tmp, 20);
+		ui->spanLog2->setValue(tmp);
+		setNewRate(tmp);
 		applySettings();
 		return true;
 	} else {
@@ -122,7 +127,7 @@ void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
 void SSBDemodGUI::on_BW_valueChanged(int value)
 {
 	QString s = QString::number(value/10.0, 'f', 1);
-	ui->BWText->setText(s);
+	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker->setBandwidth(value * 100 * 2);
 
 	if (value < 0) {
@@ -164,7 +169,7 @@ void SSBDemodGUI::on_lowCut_valueChanged(int value)
 	int lowCutoff = getEffectiveLowCutoff(value * 100);
 	m_channelMarker->setLowCutoff(lowCutoff);
 	QString s = QString::number(lowCutoff/1000.0, 'f', 1);
-	ui->lowCutText->setText(s);
+	ui->lowCutText->setText(tr("%1k").arg(s));
 	ui->lowCut->setValue(lowCutoff/100);
 	applySettings();
 }
@@ -173,6 +178,14 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
+}
+
+void SSBDemodGUI::on_spanLog2_valueChanged(int value)
+{
+	if (setNewRate(value)) {
+		applySettings();
+	}
+
 }
 
 void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -196,7 +209,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_rate(6000)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -211,14 +225,14 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addAudioSource(m_audioFifo);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
-	ui->glSpectrum->setCenterFrequency(3000);
-	ui->glSpectrum->setSampleRate(6000);
+	ui->glSpectrum->setCenterFrequency(m_rate/2);
+	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::green);
-	m_channelMarker->setBandwidth(6000);
+	m_channelMarker->setBandwidth(m_rate);
 	m_channelMarker->setSidebands(ChannelMarker::usb);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
@@ -242,6 +256,37 @@ SSBDemodGUI::~SSBDemodGUI()
 	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
+}
+
+bool SSBDemodGUI::setNewRate(int spanLog2)
+{
+	if ((spanLog2 < 0) || (spanLog2 > 5)) {
+		return false;
+	}
+
+	m_rate = 48000 / (1<<spanLog2);
+
+	if (ui->BW->value() < -m_rate/100) {
+		ui->BW->setValue(-m_rate/100);
+	} else if (ui->BW->value() > m_rate/100) {
+		ui->BW->setValue(m_rate/100);
+	}
+
+	if (ui->lowCut->value() < -m_rate/100) {
+		ui->lowCut->setValue(-m_rate/100);
+	} else if (ui->lowCut->value() > m_rate/100) {
+		ui->lowCut->setValue(m_rate/100);
+	}
+
+	ui->BW->setMinimum(-m_rate/100);
+	ui->lowCut->setMinimum(-m_rate/100);
+	ui->BW->setMaximum(m_rate/100);
+	ui->lowCut->setMaximum(m_rate/100);
+
+	QString s = QString::number(m_rate/1000.0, 'f', 1);
+	ui->spanText->setText(tr("%1k").arg(s));
+
+	return true;
 }
 
 void SSBDemodGUI::applySettings()
