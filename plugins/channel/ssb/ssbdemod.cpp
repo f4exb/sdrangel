@@ -63,8 +63,11 @@ void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCut
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	Complex ci;
-	fftfilt::cmplx *sideband;
+	fftfilt::cmplx *sideband, sum;
+	Real avg;
 	int n_out;
+	int decim = 1<<(m_spanLog2 - 1);
+	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -79,9 +82,17 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		for (int i = 0; i < n_out; i++) {
 			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
 
-			// Downsample by 4x for audio display
-			if (!(m_undersampleCount++ & 3))
-				m_sampleBuffer.push_back(Sample(demod, 0.0));
+			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+			// smart decimation with bit gain using float arithmetic (23 bits significand)
+
+			sum += sideband[i];
+
+			if (!(m_undersampleCount++ & decim_mask)) {
+				avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
+				m_sampleBuffer.push_back(Sample(avg, 0.0));
+				sum.real() = 0.0;
+				sum.imag() = 0.0;
+			}
 
 			qint16 sample = (qint16)(demod * m_volume * 10);
 			m_audioBuffer[m_audioBufferFill].l = sample;

@@ -261,7 +261,7 @@ SSBDemodGUI::~SSBDemodGUI()
 
 bool SSBDemodGUI::setNewRate(int spanLog2)
 {
-	if ((spanLog2 < 0) || (spanLog2 > 5)) {
+	if ((spanLog2 < 1) || (spanLog2 > 5)) {
 		return false;
 	}
 
