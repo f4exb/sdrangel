@@ -230,6 +230,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
+	ui->glSpectrum->setSsbSpectrum(true);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::green);

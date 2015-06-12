@@ -42,6 +42,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_waterfallTextureAllocated(false),
 	m_waterfallTextureHeight(-1),
 	m_displayWaterfall(true),
+	m_ssbSpectrum(false),
 	m_histogramBuffer(NULL),
 	m_histogram(NULL),
 	m_histogramHoldoff(NULL),
@@ -185,6 +186,12 @@ void GLSpectrum::setDisplayWaterfall(bool display)
 	m_displayWaterfall = display;
 	m_changesPending = true;
 	stopDrag();
+	update();
+}
+
+void GLSpectrum::setSsbSpectrum(bool ssbSpectrum)
+{
+	m_ssbSpectrum = ssbSpectrum;
 	update();
 }
 
@@ -873,16 +880,24 @@ void GLSpectrum::applyChanges()
 	int leftMargin;
 	int rightMargin = fm.width("000");
 
-	if(m_displayWaterfall && (m_displayHistogram | m_displayMaxHold)) {
+	if(m_displayWaterfall && (m_displayHistogram | m_displayMaxHold))
+	{
 		waterfallHeight = height() * m_waterfallShare - 1;
+
 		if(waterfallHeight < 0)
+		{
 			waterfallHeight = 0;
-		if(!m_invertedWaterfall) {
+		}
+
+		if(!m_invertedWaterfall)
+		{
 			waterfallTop = topMargin;
 			frequencyScaleTop = waterfallTop + waterfallHeight + 1;
 			histogramTop = waterfallTop + waterfallHeight + frequencyScaleHeight + 1;
 			histogramHeight = height() - topMargin - waterfallHeight - frequencyScaleHeight - bottomMargin;
-		} else {
+		}
+		else
+		{
 			histogramTop = topMargin;
 			histogramHeight = height() - topMargin - waterfallHeight - frequencyScaleHeight - bottomMargin;
 			waterfallTop = histogramTop + histogramHeight + frequencyScaleHeight + 1;
@@ -890,18 +905,34 @@ void GLSpectrum::applyChanges()
 		}
 
 		m_timeScale.setSize(waterfallHeight);
-		if(m_sampleRate > 0) {
+
+		if(m_sampleRate > 0)
+		{
+			float scaleDiv = (float)m_sampleRate * (m_ssbSpectrum ? 2 : 1);
+
 			if(!m_invertedWaterfall)
-				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / (float)m_sampleRate, 0);
-			else m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / (float)m_sampleRate);
-		} else {
+			{
+				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
+			}
+			else
+			{
+				m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
+			}
+		}
+		else
+		{
 			m_timeScale.setRange(Unit::Time, 0, 1);
 		}
+
 		m_powerScale.setSize(histogramHeight);
 		m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
 		leftMargin = m_timeScale.getScaleWidth();
+
 		if(m_powerScale.getScaleWidth() > leftMargin)
+		{
 			leftMargin = m_powerScale.getScaleWidth();
+		}
+
 		leftMargin += 2 * M;
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
@@ -940,7 +971,9 @@ void GLSpectrum::applyChanges()
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
-	} else if(m_displayWaterfall) {
+	}
+	else if(m_displayWaterfall)
+	{
 		bottomMargin = frequencyScaleHeight;
 		waterfallTop = topMargin;
 		waterfallHeight = height() - topMargin - frequencyScaleHeight;
@@ -948,15 +981,32 @@ void GLSpectrum::applyChanges()
 		histogramTop = 0;
 
 		m_timeScale.setSize(waterfallHeight);
-		if(m_sampleRate > 0) {
+
+		if(m_sampleRate > 0)
+		{
+			float scaleDiv = (float)m_sampleRate * (m_ssbSpectrum ? 2 : 1);
+
 			if(!m_invertedWaterfall)
-				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / (float)m_sampleRate, 0);
-			else m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / (float)m_sampleRate);
-		} else {
-			if(!m_invertedWaterfall)
-				m_timeScale.setRange(Unit::Time, 10, 0);
-			else m_timeScale.setRange(Unit::Time, 0, 10);
+			{
+				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
+			}
+			else
+			{
+				m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
+			}
 		}
+		else
+		{
+			if(!m_invertedWaterfall)
+			{
+				m_timeScale.setRange(Unit::Time, 10, 0);
+			}
+			else
+			{
+				m_timeScale.setRange(Unit::Time, 0, 10);
+			}
+		}
+
 		leftMargin = m_timeScale.getScaleWidth();
 		leftMargin += 2 * M;
 
@@ -989,7 +1039,9 @@ void GLSpectrum::applyChanges()
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
-	} else if(m_displayHistogram || m_displayMaxHold) {
+	}
+	else if(m_displayHistogram || m_displayMaxHold)
+	{
 		bottomMargin = frequencyScaleHeight;
 		frequencyScaleTop = height() - bottomMargin;
 		histogramTop = topMargin - 1;
@@ -1030,7 +1082,9 @@ void GLSpectrum::applyChanges()
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
-	} else {
+	}
+	else
+	{
 		leftMargin = 2;
 		waterfallHeight = 0;
 	}

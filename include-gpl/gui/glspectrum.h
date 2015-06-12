@@ -39,6 +39,7 @@ public:
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
 	void setDisplayWaterfall(bool display);
+	void setSsbSpectrum(bool ssbSpectrum);
 	void setInvertedWaterfall(bool inv);
 	void setDisplayMaxHold(bool display);
 	void setDisplayHistogram(bool display);
@@ -120,6 +121,7 @@ private:
 	int m_waterfallTexturePos;
 	QRectF m_glWaterfallRect;
 	bool m_displayWaterfall;
+	bool m_ssbSpectrum;
 
 	QRgb m_histogramPalette[240];
 	QImage* m_histogramBuffer;
