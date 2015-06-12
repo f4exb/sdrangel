@@ -170,8 +170,8 @@ void GLSpectrum::setDecay(int decay)
 	m_decay = decay;
 	if(m_decay < -2)
 		m_decay = -2;
-	else if(m_decay > 2)
-		m_decay = 2;
+	else if(m_decay > 10)
+		m_decay = 10;
 }
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)
