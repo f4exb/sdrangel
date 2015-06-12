@@ -50,11 +50,11 @@ QByteArray SSBDemodGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker->getCenterFrequency());
 	s.writeS32(2, ui->BW->value());
-	s.writeS32(6, ui->lowCut->value());
 	s.writeS32(3, ui->volume->value());
 	s.writeBlob(4, ui->spectrumGUI->serialize());
 	s.writeU32(5, m_channelMarker->getColor().rgb());
-	s.writeS32(6, ui->spanLog2->value());
+	s.writeS32(6, ui->lowCut->value());
+	s.writeS32(7, ui->spanLog2->value());
 	return s.final();
 }
 
@@ -75,15 +75,15 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
-		d.readS32(6, &tmp, 3);
-		ui->lowCut->setValue(tmp);
 		d.readS32(3, &tmp, 20);
 		ui->volume->setValue(tmp);
 		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
 		if(d.readU32(5, &u32tmp))
 			m_channelMarker->setColor(u32tmp);
-		d.readS32(6, &tmp, 20);
+		d.readS32(6, &tmp, 3);
+		ui->lowCut->setValue(tmp);
+		d.readS32(7, &tmp, 20);
 		ui->spanLog2->setValue(tmp);
 		setNewRate(tmp);
 		applySettings();
