@@ -147,17 +147,11 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 					// AF processing
 
-					demod = m_lowpass.filter(demod);
-
-					/*
-					if(demod < -1)
-						demod = -1;
-					else if(demod > 1)
-						demod = 1;
-					*/
-
+					//demod = m_lowpass.filter(demod);
+					demod = m_bandpass.filter(demod);
 					demod *= m_running.m_volume;
-					sample = demod * 32700;
+					//sample = demod * 32700;
+					sample = demod * ((1<<16)/301); // denominator = bandpass filter number of taps
 
 				} else {
 					m_AGC.close();
@@ -245,7 +239,8 @@ void NFMDemod::apply()
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate)) {
-		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		//m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch) {

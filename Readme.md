@@ -105,14 +105,15 @@ Done since the fork
   - New plugin for BladeRF interfacing libbladeRF directly
   - Corrected the nasty audio band resampling bug preventing use of sample rates that are not power of 2 multiples of 48kHz. This was because the resampling ratio was calculated with an integer division instead of a float division. 
   - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
+  - Variable span for the SSB demod down to 1.5 kHz
+  - Filter out CTCSS tones in NFMDemod
     
 =====
 To Do
 =====
 
   - Enhance WFM (stereo, RDS?)
-  - Possibility to completely undock the receiver in a separate window. Useful when there are many receivers
-  - Even larger decimation capability for narrowband and very narrowband work? (64, ...)
   - Even more demods ... 
   - Triggering capability like on expensive spectrum analyzers to trap burst signals
   - recording capability
+  - Tx channels for Rx/Tx boards like BladeRF
