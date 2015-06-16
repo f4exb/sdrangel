@@ -26,6 +26,7 @@
 #include "dsp/bandpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/ctcssdetector.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -112,8 +113,10 @@ private:
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
-	//Lowpass<Real> m_lowpass;
+	Lowpass<Real> m_lowpass;
 	Bandpass<Real> m_bandpass;
+	CTCSSDetector m_ctcssDetector;
+	int m_sampleCount;
 
 	Real m_squelchLevel;
 	int m_squelchState;

@@ -23,9 +23,12 @@
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
 
+#include <iostream>
+
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
 NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+	m_sampleCount(0),
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
@@ -45,6 +48,8 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_movingAverage.resize(16, 0);
 	m_agcLevel = 0.003;
 	m_AGC.resize(4096, m_agcLevel, 0, 0.1*m_agcLevel);
+
+	m_ctcssDetector.setCoefficients(1200, 6000.0); // 0.2s detection rate
 }
 
 NFMDemod::~NFMDemod()
@@ -144,13 +149,30 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 					m_m2Sample = m_m1Sample;
 					m_m1Sample = ci;
+					m_sampleCount++;
 
 					// AF processing
 
 					//demod = m_lowpass.filter(demod);
+					//sample = demod * 32700;
+
+					Real ctcss_sample = m_lowpass.filter(demod);
+
+					if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+					{
+						if (m_ctcssDetector.analyze(&ctcss_sample))
+						{
+							int maxToneIndex;
+
+							if (m_ctcssDetector.getDetectedTone(maxToneIndex))
+							{
+								std::cerr << "CTCSS tone detected: " << m_ctcssDetector.getToneSet()[maxToneIndex] << std::endl;
+							}
+						}
+					}
+
 					demod = m_bandpass.filter(demod);
 					demod *= m_running.m_volume;
-					//sample = demod * 32700;
 					sample = demod * ((1<<16)/301); // denominator = bandpass filter number of taps
 
 				} else {
@@ -239,7 +261,7 @@ void NFMDemod::apply()
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate)) {
-		//m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 	}
 
