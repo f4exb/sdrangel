@@ -51,6 +51,7 @@ set(sdrbase_SOURCES
 
 	sdrbase/dsp/channelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
+	sdrbase/dsp/ctcssdetector.cpp
 	sdrbase/dsp/dspcommands.cpp
 	sdrbase/dsp/dspengine.cpp
 	sdrbase/dsp/fftengine.cpp
