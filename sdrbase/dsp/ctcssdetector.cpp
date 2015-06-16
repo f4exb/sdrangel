@@ -186,7 +186,7 @@ void CTCSSDetector::initializePower()
 void CTCSSDetector::evaluatePower()
 {
 	Real sumPower = 0.0;
-	Real aboveAvg = 10.0; // Arbitrary max power above average threshold
+	Real aboveAvg = 2.0; // Arbitrary max power above average threshold
 	maxPower = 0.0;
 
 	for (int j = 0; j < nTones; ++j)
