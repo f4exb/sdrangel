@@ -3,6 +3,7 @@
 
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/dsptypes.h"
 
 class PluginAPI;
 class ChannelMarker;
@@ -32,6 +33,7 @@ public:
 	bool deserialize(const QByteArray& data);
 
 	bool handleMessage(Message* message);
+	void setCtcssFreq(Real ctcssFreq);
 
 private slots:
 	void viewChanged();
@@ -41,6 +43,7 @@ private slots:
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+	void on_ctcss_currentIndexChanged(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 

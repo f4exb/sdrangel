@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>138</height>
+    <height>151</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>35</x>
      <y>35</y>
      <width>242</width>
-     <height>96</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -81,16 +81,23 @@
      </widget>
     </item>
     <item row="4" column="0">
-     <widget class="QLabel" name="label_4">
+     <widget class="QLabel" name="squelchLabel">
       <property name="text">
        <string>Squelch</string>
       </property>
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="afLabel">
       <property name="text">
        <string>AF Bandwidth</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="rfBWLabel">
+      <property name="text">
+       <string>RF Bandwidth</string>
       </property>
      </widget>
     </item>
@@ -126,13 +133,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>RF Bandwidth</string>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="2">
      <widget class="QLabel" name="afBWText">
       <property name="minimumSize">
@@ -146,6 +146,13 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="volumeLabel">
+      <property name="text">
+       <string>Volume</string>
       </property>
      </widget>
     </item>
@@ -184,13 +191,6 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Volume</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="2">
      <widget class="QLabel" name="volumeText">
       <property name="minimumSize">
@@ -204,6 +204,13 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="deltaUnits">
+      <property name="text">
+       <string>Hz</string>
       </property>
      </widget>
     </item>
@@ -238,10 +245,23 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="deltaUnits">
+    <item row="5" column="0">
+     <widget class="QLabel" name="ctcssLabel">
       <property name="text">
-       <string>Hz</string>
+       <string>CTCSS</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="ctcss"/>
+    </item>
+    <item row="5" column="2">
+     <widget class="QLabel" name="ctcssText">
+      <property name="text">
+       <string>--</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>

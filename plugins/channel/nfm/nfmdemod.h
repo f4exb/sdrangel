@@ -31,6 +31,7 @@
 #include "util/message.h"
 
 class AudioFifo;
+class NFMDemodGUI;
 
 class NFMDemod : public SampleSink {
 public:
@@ -43,6 +44,19 @@ public:
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
+
+	void registerGUI(NFMDemodGUI *nfmDemodGUI) {
+		m_nfmDemodGUI = nfmDemodGUI;
+	}
+
+	const Real *getCtcssToneSet(int& nbTones) const {
+		nbTones = m_ctcssDetector.getNTones();
+		return m_ctcssDetector.getToneSet();
+	}
+
+	void setSelectedCtcssIndex(int selectedCtcssIndex) {
+		m_ctcssIndexSelected = selectedCtcssIndex;
+	}
 
 private:
 	class MsgConfigureNFMDemod : public Message {
@@ -92,6 +106,7 @@ private:
 		Real m_afBandwidth;
 		Real m_squelch;
 		Real m_volume;
+		int  m_ctcssIndex;
 		quint32 m_audioSampleRate;
 
 		Config() :
@@ -101,6 +116,7 @@ private:
 			m_afBandwidth(-1),
 			m_squelch(0),
 			m_volume(0),
+			m_ctcssIndex(0),
 			m_audioSampleRate(0)
 		{ }
 	};
@@ -116,6 +132,8 @@ private:
 	Lowpass<Real> m_lowpass;
 	Bandpass<Real> m_bandpass;
 	CTCSSDetector m_ctcssDetector;
+	int m_ctcssIndex; // 0 for nothing detected
+	int m_ctcssIndexSelected;
 	int m_sampleCount;
 
 	Real m_squelchLevel;
@@ -135,6 +153,8 @@ private:
 	SampleSink* m_sampleSink;
 	AudioFifo* m_audioFifo;
 	SampleVector m_sampleBuffer;
+
+	NFMDemodGUI *m_nfmDemodGUI;
 
 	void apply();
 };

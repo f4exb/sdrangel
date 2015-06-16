@@ -151,6 +151,12 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
+{
+	if (m_nfmDemod != NULL) {
+		m_nfmDemod->setSelectedCtcssIndex(index);
+	}
+}
 
 void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
@@ -182,7 +188,19 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_audioFifo = new AudioFifo(4, 48000);
 	m_nullSink = new NullSink();
+
 	m_nfmDemod = new NFMDemod(m_audioFifo, m_nullSink);
+	m_nfmDemod->registerGUI(this);
+
+	int ctcss_nbTones;
+	const Real *ctcss_tones = m_nfmDemod->getCtcssToneSet(ctcss_nbTones);
+
+	ui->ctcss->addItem("--");
+
+	for (int i=0; i<ctcss_nbTones; i++) {
+		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
+	}
+
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addAudioSource(m_audioFifo);
@@ -236,5 +254,17 @@ void NFMDemodGUI::leaveEvent(QEvent*)
 void NFMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker->setHighlighted(true);
+}
+
+void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)
+{
+	if (ctcssFreq == 0)
+	{
+		ui->ctcssText->setText("--");
+	}
+	else
+	{
+		ui->ctcssText->setText(QString("%1").arg(ctcssFreq));
+	}
 }
 

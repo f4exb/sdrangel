@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <complex.h>
 #include "nfmdemod.h"
+#include "nfmdemodgui.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
@@ -28,6 +29,7 @@
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
 NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
@@ -49,7 +51,7 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_agcLevel = 0.003;
 	m_AGC.resize(4096, m_agcLevel, 0, 0.1*m_agcLevel);
 
-	m_ctcssDetector.setCoefficients(1200, 6000.0); // 0.2s detection rate
+	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 }
 
 NFMDemod::~NFMDemod()
@@ -112,7 +114,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					m_squelchState = m_running.m_audioSampleRate/ 20;
 
 				qint16 sample;
-				if(m_squelchState > 0) {
+				if(m_squelchState > 0)
+				{
 					m_squelchState--;
 
 					m_AGC.feed(abs(ci));
@@ -166,16 +169,39 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 							if (m_ctcssDetector.getDetectedTone(maxToneIndex))
 							{
-								std::cerr << "CTCSS tone detected: " << m_ctcssDetector.getToneSet()[maxToneIndex] << std::endl;
+								if (maxToneIndex+1 != m_ctcssIndex) {
+									m_nfmDemodGUI->setCtcssFreq(m_ctcssDetector.getToneSet()[maxToneIndex]);
+									m_ctcssIndex = maxToneIndex+1;
+								}
+							}
+							else
+							{
+								if (m_ctcssIndex != 0) {
+									m_nfmDemodGUI->setCtcssFreq(0);
+									m_ctcssIndex = 0;
+								}
 							}
 						}
 					}
 
-					demod = m_bandpass.filter(demod);
-					demod *= m_running.m_volume;
-					sample = demod * ((1<<16)/301); // denominator = bandpass filter number of taps
+					if (m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
+					{
+						sample = 0.0;
+					}
+					else
+					{
+						demod = m_bandpass.filter(demod);
+						demod *= m_running.m_volume;
+						sample = demod * ((1<<15)/301); // denominator = bandpass filter number of taps
+					}
+				}
+				else
+				{
+					if (m_ctcssIndex != 0) {
+						m_nfmDemodGUI->setCtcssFreq(0);
+						m_ctcssIndex = 0;
+					}
 
-				} else {
 					m_AGC.close();
 					sample = 0;
 				}
