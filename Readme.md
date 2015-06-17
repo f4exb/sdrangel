@@ -106,7 +106,7 @@ Done since the fork
   - Corrected the nasty audio band resampling bug preventing use of sample rates that are not power of 2 multiples of 48kHz. This was because the resampling ratio was calculated with an integer division instead of a float division. 
   - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
   - Variable span for the SSB demod down to 1.5 kHz
-  - Filter out CTCSS tones in NFMDemod
+  - Filter out CTCSS tones for audio and full CTCSS support in NFMDemod
     
 =====
 To Do

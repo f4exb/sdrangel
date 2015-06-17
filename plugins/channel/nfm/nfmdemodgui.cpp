@@ -58,6 +58,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeS32(5, ui->squelch->value());
 	//s.writeBlob(6, ui->spectrumGUI->serialize());
 	s.writeU32(7, m_channelMarker->getColor().rgb());
+	s.writeS32(8, ui->ctcss->currentIndex());
 	return s.final();
 }
 
@@ -88,6 +89,8 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		//ui->spectrumGUI->deserialize(bytetmp);
 		if(d.readU32(7, &u32tmp))
 			m_channelMarker->setColor(u32tmp);
+		d.readS32(8, &tmp, 0);
+		ui->ctcss->setCurrentIndex(tmp);
 		applySettings();
 		return true;
 	} else {
