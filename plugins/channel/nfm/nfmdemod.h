@@ -27,6 +27,7 @@
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
+#include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -136,8 +137,10 @@ private:
 	int m_ctcssIndexSelected;
 	int m_sampleCount;
 
-	Real m_squelchLevel;
-	int m_squelchState;
+	double m_squelchLevel;
+	//int m_squelchState;
+	AFSquelch m_afSquelch;
+	bool m_squelchOpen;
 
 	Real m_lastArgument;
 	Complex m_m1Sample;

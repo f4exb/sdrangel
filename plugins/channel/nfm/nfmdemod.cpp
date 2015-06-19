@@ -26,11 +26,15 @@
 
 #include <iostream>
 
+static const Real afSqTones[2] = {2000.0, 8000.0};
+
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
 NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
+	m_afSquelch(2, afSqTones),
+	m_squelchOpen(false),
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
@@ -38,7 +42,7 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
-	m_config.m_squelch = -40.0;
+	m_config.m_squelch = -30.0;
 	m_config.m_volume = 2.0;
 	m_config.m_audioSampleRate = 48000;
 
@@ -52,6 +56,8 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_AGC.resize(4096, m_agcLevel, 0, 0.1*m_agcLevel);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
+	m_afSquelch.setCoefficients(24, 48000.0, 1, 1); // 4000 Hz span, 250us
+	m_afSquelch.setThreshold(0.001);
 }
 
 NFMDemod::~NFMDemod()
@@ -109,56 +115,52 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci)) {
 				m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
 
-				m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
-				if(m_movingAverage.average() >= m_squelchLevel)
-					m_squelchState = m_running.m_audioSampleRate/ 20;
-
 				qint16 sample;
-				if(m_squelchState > 0)
+
+				m_AGC.feed(abs(ci));
+				ci *= (m_agcLevel / m_AGC.getValue());
+
+				// demod
+				/*
+				Real argument = arg(ci);
+				Real demod = argument - m_lastArgument;
+				m_lastArgument = argument;
+				*/
+
+				/*
+				// Original NFM
+				Complex d = conj(m_m1Sample) * ci;
+				Real demod = atan2(d.imag(), d.real());
+				demod /= M_PI;
+				*/
+
+				/*
+				Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
+				Real argument2 = m_lastSample.real();
+				Real demod = angleDist(argument2, argument1);
+				m_lastSample = Complex(argument1, 0);
+				*/
+
+				// Alternative without atan - needs AGC
+				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+				Real ip = ci.real() - m_m2Sample.real();
+				Real qp = ci.imag() - m_m2Sample.imag();
+				Real h1 = m_m1Sample.real() * qp;
+				Real h2 = m_m1Sample.imag() * ip;
+				Real demod = (h1 - h2) * 10000;
+
+				m_m2Sample = m_m1Sample;
+				m_m1Sample = ci;
+				m_sampleCount++;
+
+				// AF processing
+
+				if(m_afSquelch.analyze(&demod)) {
+					m_squelchOpen = m_afSquelch.open();
+				}
+
+				if (m_squelchOpen)
 				{
-					m_squelchState--;
-
-					m_AGC.feed(abs(ci));
-					ci *= (m_agcLevel / m_AGC.getValue());
-
-					// demod
-					/*
-					Real argument = arg(ci);
-					Real demod = argument - m_lastArgument;
-					m_lastArgument = argument;
-					*/
-
-					/*
-					// Original NFM
-					Complex d = conj(m_m1Sample) * ci;
-					Real demod = atan2(d.imag(), d.real());
-					demod /= M_PI;
-					*/
-
-					/*
-					Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
-					Real argument2 = m_lastSample.real();
-					Real demod = angleDist(argument2, argument1);
-					m_lastSample = Complex(argument1, 0);
-					*/
-
-					// Alternative without atan - needs AGC
-					// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
-					Real ip = ci.real() - m_m2Sample.real();
-					Real qp = ci.imag() - m_m2Sample.imag();
-					Real h1 = m_m1Sample.real() * qp;
-					Real h2 = m_m1Sample.imag() * ip;
-					Real demod = (h1 - h2) * 10000;
-
-					m_m2Sample = m_m1Sample;
-					m_m1Sample = ci;
-					m_sampleCount++;
-
-					// AF processing
-
-					//demod = m_lowpass.filter(demod);
-					//sample = demod * 32700;
-
 					Real ctcss_sample = m_lowpass.filter(demod);
 
 					if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
@@ -186,7 +188,7 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 					if (m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
 					{
-						sample = 0.0;
+						sample = 0;
 					}
 					else
 					{
@@ -234,7 +236,6 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 void NFMDemod::start()
 {
-	m_squelchState = 0;
 	m_audioFifo->clear();
 	m_interpolatorRegulation = 0.9999;
 	m_interpolatorDistance = 1.0;
@@ -292,8 +293,10 @@ void NFMDemod::apply()
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch) {
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
+		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
 		m_squelchLevel *= m_squelchLevel;
+		m_afSquelch.setThreshold(m_squelchLevel);
+		m_afSquelch.reset();
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
