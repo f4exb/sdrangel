@@ -1359,10 +1359,13 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 					setCursor(Qt::SizeHorCursor);
 					m_cursorState = CSChannel;
 					m_cursorChannel = i;
+					m_channelMarkerStates[i]->m_channelMarker->setHighlighted(true);
 					return;
 				} else if(m_cursorState == CSChannel) {
 					return;
 				}
+			} else if (m_channelMarkerStates[i]->m_channelMarker->getHighlighted()) {
+				m_channelMarkerStates[i]->m_channelMarker->setHighlighted(false);
 			}
 		}
 	}
