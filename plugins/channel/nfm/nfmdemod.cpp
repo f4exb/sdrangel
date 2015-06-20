@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-static const Real afSqTones[2] = {2000.0, 8000.0};
+static const Real afSqTones[2] = {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
@@ -53,10 +53,11 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 
 	m_movingAverage.resize(16, 0);
 	m_agcLevel = 0.003;
-	m_AGC.resize(4096, m_agcLevel, 0, 0.1*m_agcLevel);
+	//m_AGC.resize(480, m_agcLevel, 0, 0.1*m_agcLevel);
+	m_AGC.resize(240, m_agcLevel*m_agcLevel, 0.1);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 48000.0, 1, 1); // 4000 Hz span, 250us
+	m_afSquelch.setCoefficients(24, 48000.0, 5, 1); // 4000 Hz span, 250us
 	m_afSquelch.setThreshold(0.001);
 }
 
@@ -117,8 +118,10 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 				qint16 sample;
 
-				m_AGC.feed(abs(ci));
-				ci *= (m_agcLevel / m_AGC.getValue());
+				//m_AGC.feed(abs(ci));
+				//ci *= (m_agcLevel / m_AGC.getValue());
+
+				m_AGC.feed(ci);
 
 				// demod
 				/*

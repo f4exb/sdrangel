@@ -117,7 +117,7 @@ private:
 
 	Real m_lastArgument;
 	Complex m_lastSample;
-	MovingAverage m_movingAverage;
+	MovingAverage<Real> m_movingAverage;
 	SimpleAGC m_volumeAGC;
 
 	AudioVector m_audioBuffer;

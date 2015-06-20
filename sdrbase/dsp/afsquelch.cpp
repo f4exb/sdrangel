@@ -189,7 +189,7 @@ void AFSquelch::evaluate()
 
 	if (open)
 	{
-		if (attackCount < samplesAttack)
+		if (samplesAttack && (attackCount < samplesAttack))
 		{
 			attackCount++;
 		}
@@ -201,7 +201,7 @@ void AFSquelch::evaluate()
 	}
 	else
 	{
-		if (decayCount < samplesDecay)
+		if (samplesDecay && (decayCount < samplesDecay))
 		{
 			decayCount++;
 		}

@@ -71,7 +71,121 @@ private:
 	Real m_fill;    // refill average at this level
 	Real m_cutoff;  // consider samples only above this level
 	Real m_clip;    // never go below this level
-	MovingAverage m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+};
+
+
+class EvenSimplerAGC
+{
+public:
+
+	EvenSimplerAGC() :
+		m_u0(1.0),
+		m_R(1.0),
+		m_moving_average()
+	{}
+
+	EvenSimplerAGC(int historySize, Real R) :
+		m_u0(1.0),
+		m_R(R),
+		m_moving_average(historySize, m_R)
+	{}
+
+	void resize(int historySize, Real R)
+	{
+		m_R = R;
+		m_moving_average.resize(historySize, R);
+	}
+
+	Real getValue()
+	{
+		return m_u0;
+	}
+
+	void feed(Complex& ci)
+	{
+		ci *= m_u0;
+		Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
+		m_moving_average.feed(magsq);
+		m_u0 = m_R / m_moving_average.average();
+	}
+
+	void close()
+	{
+		m_moving_average.fill(m_R);
+		m_u0 = 1.0;
+	}
+
+private:
+	Real m_u0;
+	Real m_R;       // objective magsq
+	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+};
+
+class AlphaAGC
+{
+public:
+
+	AlphaAGC() :
+		m_u0(1.0),
+		m_R(1.0),
+		m_alpha(0.1),
+		m_squelch(false),
+		m_moving_average()
+	{}
+
+	AlphaAGC(int historySize, Real R, Real alpha) :
+		m_u0(1.0),
+		m_R(R),
+		m_alpha(alpha),
+		m_squelch(false),
+		m_moving_average(historySize, m_R)
+	{}
+
+	void resize(int historySize, Real R, Real alpha)
+	{
+		m_R = R;
+		m_alpha = alpha;
+		m_squelch = false;
+		m_moving_average.resize(historySize, R);
+	}
+
+	Real getValue()
+	{
+		return m_u0;
+	}
+
+	void feed(Complex& ci)
+	{
+		ci *= m_u0;
+		Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
+
+		if (m_squelch && (magsq < m_moving_average.average()))
+		{
+			m_moving_average.feed(m_moving_average.average() - m_alpha*(m_moving_average.average() - magsq));
+		}
+		else
+		{
+			m_squelch = true;
+			m_moving_average.feed(magsq);
+		}
+
+		m_u0 = m_R / m_moving_average.average();
+	}
+
+	void close()
+	{
+		m_moving_average.fill(m_R);
+		m_u0 = 1.0;
+		m_squelch = false;
+	}
+
+private:
+	Real m_u0;
+	Real m_R;       // objective magsq
+	Real m_alpha;
+	bool m_squelch;
+	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
 };
 
 

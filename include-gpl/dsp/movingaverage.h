@@ -4,7 +4,7 @@
 #include <vector>
 #include "dsp/dsptypes.h"
 
-class MovingAverage {
+template<class Type> class MovingAverage {
 public:
 	MovingAverage() :
 		m_history(),
@@ -13,23 +13,23 @@ public:
 	{
 	}
 
-	MovingAverage(int historySize, Real initial) :
+	MovingAverage(int historySize, Type initial) :
 		m_history(historySize, initial),
-		m_sum(historySize * initial),
+		m_sum((float) historySize * initial),
 		m_ptr(0)
 	{
 	}
 
-	void resize(int historySize, Real initial)
+	void resize(int historySize, Type initial)
 	{
 		m_history.resize(historySize);
 		for(size_t i = 0; i < m_history.size(); i++)
 			m_history[i] = initial;
-		m_sum = m_history.size() * initial;
+		m_sum = (float) m_history.size() * initial;
 		m_ptr = 0;
 	}
 
-	void feed(Real value)
+	void feed(Type value)
 	{
 		m_sum -= m_history[m_ptr];
 		m_history[m_ptr] = value;
@@ -39,21 +39,21 @@ public:
 			m_ptr = 0;
 	}
 
-	void fill(Real value)
+	void fill(Type value)
 	{
 		for(size_t i = 0; i < m_history.size(); i++)
 			m_history[i] = value;
-		m_sum = m_history.size() * value;
+		m_sum = (float) m_history.size() * value;
 	}
 
-	Real average() const
+	Type average() const
 	{
-		return m_sum / (Real)m_history.size();
+		return m_sum / (float) m_history.size();
 	}
 
 protected:
-	std::vector<Real> m_history;
-	Real m_sum;
+	std::vector<Type> m_history;
+	Type m_sum;
 	uint m_ptr;
 };
 
