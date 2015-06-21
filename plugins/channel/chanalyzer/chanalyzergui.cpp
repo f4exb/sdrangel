@@ -128,10 +128,17 @@ void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
 	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker->setBandwidth(value * 100 * 2);
 
-	if (value < 0) {
-		m_channelMarker->setSidebands(ChannelMarker::lsb);
-	} else {
-		m_channelMarker->setSidebands(ChannelMarker::usb);
+	if (ui->ssb->isChecked())
+	{
+		if (value < 0) {
+			m_channelMarker->setSidebands(ChannelMarker::lsb);
+		} else {
+			m_channelMarker->setSidebands(ChannelMarker::usb);
+		}
+	}
+	else
+	{
+		m_channelMarker->setSidebands(ChannelMarker::dsb);
 	}
 
 	on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
@@ -282,12 +289,13 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 
 bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 {
-	if ((spanLog2 < 1) || (spanLog2 > 5)) {
+	if ((spanLog2 < 1) || (spanLog2 > 6)) {
 		return false;
 	}
 
 	m_spanLog2 = spanLog2;
-	m_rate = 48000 / (1<<spanLog2);
+	//m_rate = 48000 / (1<<spanLog2);
+	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
 
 	if (ui->BW->value() < -m_rate/100) {
 		ui->BW->setValue(-m_rate/100);

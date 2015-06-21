@@ -41,6 +41,10 @@ public:
 			int spanLog2,
 			bool ssb);
 
+	int getSampleRate() const {
+		return m_sampleRate;
+	}
+
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
@@ -82,12 +86,6 @@ private:
 		{ }
 	};
 
-	//struct AudioSample {
-	//	qint16 l;
-	//	qint16 r;
-	//};
-	//typedef std::vector<AudioSample> AudioVector;
-
 	Real m_Bandwidth;
 	Real m_LowCutoff;
 	int m_spanLog2;
@@ -99,17 +97,11 @@ private:
 
 	NCO m_nco;
 	NCO m_nco_test;
-	Interpolator m_interpolator;
-	Real m_sampleDistanceRemain;
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
-
-	//AudioVector m_audioBuffer;
-	//uint m_audioBufferFill;
-	//AudioFifo* m_audioFifo;
 };
 
 #endif // INCLUDE_CHANALYZER_H

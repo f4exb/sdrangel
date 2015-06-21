@@ -31,24 +31,16 @@ ChannelAnalyzer::ChannelAnalyzer(SampleSink* sampleSink) :
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
-	//m_volume = 2.0;
 	m_spanLog2 = 3;
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
 	m_nco_test.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, 5000);
-	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
-
-	//m_audioBuffer.resize(512);
-	//m_audioBufferFill = 0;
 	m_undersampleCount = 0;
-
 	m_usb = true;
 	m_ssb = true;
-	SSBFilter = new fftfilt(m_LowCutoff / 48000.0, m_Bandwidth / 48000.0, ssbFftLen);
-	DSBFilter = new fftfilt(m_Bandwidth / 48000.0, 2*ssbFftLen);
-	// if (!USBFilter) segfault;
+	SSBFilter = new fftfilt(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate, ssbFftLen);
+	DSBFilter = new fftfilt(m_Bandwidth / m_sampleRate, 2*ssbFftLen);
 }
 
 ChannelAnalyzer::~ChannelAnalyzer()
@@ -69,7 +61,6 @@ void ChannelAnalyzer::configure(MessageQueue* messageQueue,
 
 void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	Complex ci;
 	fftfilt::cmplx *sideband, sum;
 	int n_out;
 	int decim = 1<<(m_spanLog2 - 1);
@@ -79,30 +70,10 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		/*
-		ci = c;
 		if (m_ssb) {
-			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+			n_out = SSBFilter->runSSB(c, &sideband, m_usb);
 		} else {
-			n_out = DSBFilter->noFilt(ci, &sideband);
-		}
-		*/
-
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
-		{
-			if (m_ssb)
-			{
-				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-			}
-			else
-			{
-				n_out = DSBFilter->runDSB(ci, &sideband);
-			}
-			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
-		}
-		else
-		{
-			n_out = 0;
+			n_out = DSBFilter->runDSB(c, &sideband);
 		}
 
 		for (int i = 0; i < n_out; i++)
@@ -115,14 +86,18 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 			if (!(m_undersampleCount++ & decim_mask))
 			{
 				sum /= decim;
-				if (m_ssb & !m_usb) { // invert spectrum for LSB
+
+				if (m_ssb & !m_usb)
+				{ // invert spectrum for LSB
 					m_sampleBuffer.push_back(Sample(sum.imag() * 32768.0, sum.real() * 32768.0));
-				} else {
+				}
+				else
+				{
 					m_sampleBuffer.push_back(Sample(sum.real() * 32768.0, sum.imag() * 32768.0));
 				}
+
 				sum = 0;
 			}
-
 		}
 	}
 
@@ -151,8 +126,6 @@ bool ChannelAnalyzer::handleMessage(Message* cmd)
 		//fprintf(stderr, "%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_sampleDistanceRemain = m_sampleRate / 48000.0;
 		cmd->completed();
 		return true;
 	} else if(MsgConfigureChannelAnalyzer::match(cmd)) {
@@ -177,12 +150,9 @@ bool ChannelAnalyzer::handleMessage(Message* cmd)
 		m_Bandwidth = band;
 		m_LowCutoff = lowCutoff;
 
-		m_interpolator.create(16, m_sampleRate, band * 2.0f);
-		SSBFilter->create_filter(m_LowCutoff / 48000.0f, m_Bandwidth / 48000.0f);
-		DSBFilter->create_dsb_filter(m_Bandwidth / 48000.0f);
-
-		//m_volume = cfg->getVolume();
-		//m_volume *= m_volume * 0.1;
+		//m_interpolator.create(16, m_sampleRate, band * 2.0f);
+		SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
+		DSBFilter->create_dsb_filter(m_Bandwidth / m_sampleRate);
 
 		m_spanLog2 = cfg->getSpanLog2();
 		m_ssb = cfg->getSSB();
