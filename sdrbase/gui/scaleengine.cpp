@@ -89,9 +89,11 @@ void ScaleEngine::calcCharSize()
 
 void ScaleEngine::calcScaleFactor()
 {
-	double median;
+	double median, range, freqBase;
 
 	median = ((m_rangeMax - m_rangeMin) / 2.0) + m_rangeMin;
+	range = (m_rangeMax - m_rangeMin);
+	freqBase = (median == 0 ? range : median);
 	m_scale = 1.0;
 
 	switch(m_physicalUnit) {
@@ -100,15 +102,15 @@ void ScaleEngine::calcScaleFactor()
 			break;
 
 		case Unit::Frequency:
-			if(median < 1000.0) {
+			if(freqBase < 1000.0) {
 				m_unitStr = QObject::tr("Hz");
-			} else if(median < 1000000.0) {
+			} else if(freqBase < 1000000.0) {
 				m_unitStr = QObject::tr("kHz");
 				m_scale = 1000.0;
-			} else if(median < 1000000000.0) {
+			} else if(freqBase < 1000000000.0) {
 				m_unitStr = QObject::tr("MHz");
 				m_scale = 1000000.0;
-			} else if(median < 1000000000000.0){
+			} else if(freqBase < 1000000000000.0){
 				m_unitStr = QObject::tr("GHz");
 				m_scale = 1000000000.0;
 			} else {

@@ -17,15 +17,17 @@ public:
 	typedef std::complex<float> cmplx;
 
 	fftfilt(float f1, float f2, int len);
-	fftfilt(float f, int len);
+	fftfilt(float f2, int len);
 	~fftfilt();
 // f1 < f2 ==> bandpass
 // f1 > f2 ==> band reject
 	void create_filter(float f1, float f2);
-	void rtty_filter(float);
+	void create_dsb_filter(float f2);
 
+	int noFilt(const cmplx& in, cmplx **out);
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb);
+	int runDSB(const cmplx& in, cmplx **out);
 
 protected:
 	int flen;
@@ -44,12 +46,15 @@ protected:
 		return (i == len/2) ? 2.0 * fc: 
 				sin(2 * M_PI * fc * (i - len/2)) / (M_PI * (i - len/2));
 	}
+
 	inline float _blackman(int i, int len) {
 		return (0.42 - 
 				 0.50 * cos(2.0 * M_PI * i / len) + 
 				 0.08 * cos(4.0 * M_PI * i / len));
 	}
+
 	void init_filter();
+	void init_dsb_filter();
 };
 
 

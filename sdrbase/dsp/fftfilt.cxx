@@ -80,6 +80,13 @@ fftfilt::fftfilt(float f1, float f2, int len)
 	create_filter(f1, f2);
 }
 
+fftfilt::fftfilt(float f2, int len)
+{
+	flen	= len;
+	init_filter();
+	create_dsb_filter(f2);
+}
+
 fftfilt::~fftfilt()
 {
 	if (fft) delete fft;
@@ -128,6 +135,43 @@ void fftfilt::create_filter(float f1, float f2)
 		for (int i = 0; i < flen; i++)
 			filter[i] /= scale;
 	}
+}
+
+// Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB
+void fftfilt::create_dsb_filter(float f2)
+{
+	// initialize the filter to zero
+	memset(filter, 0, flen * sizeof(cmplx));
+
+	for (int i = 0; i < flen2; i++) {
+		filter[i] = fsinc(f2, i, flen2);
+		filter[i] *= _blackman(i, flen2);
+	}
+
+	fft->ComplexFFT(filter);
+
+	// normalize the output filter for unity gain
+	float scale = 0, mag;
+	for (int i = 0; i < flen2; i++) {
+		mag = abs(filter[i]);
+		if (mag > scale) scale = mag;
+	}
+	if (scale != 0) {
+		for (int i = 0; i < flen; i++)
+			filter[i] /= scale;
+	}
+}
+
+// test bypass
+int fftfilt::noFilt(const cmplx & in, cmplx **out)
+{
+	data[inptr++] = in;
+	if (inptr < flen2)
+		return 0;
+	inptr = 0;
+
+	*out = data;
+	return flen2;
 }
 
 // Filter with fast convolution (overlap-add algorithm).
@@ -184,6 +228,36 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
 		output[i] = ovlbuf[i] + data[i];
 		ovlbuf[i] = data[i+flen2];
 	}
+	memset (data, 0, flen * sizeof(cmplx));
+
+	*out = output;
+	return flen2;
+}
+
+// Version for double sideband. You have to double the FFT size used for SSB.
+int fftfilt::runDSB(const cmplx & in, cmplx **out)
+{
+	data[inptr++] = in;
+	if (inptr < flen2)
+		return 0;
+	inptr = 0;
+
+	fft->ComplexFFT(data);
+
+	for (int i = 0; i < flen2; i++) {
+		data[i] *= filter[i];
+		data[flen2 + i] *= filter[flen2 + i];
+	}
+
+	// in-place FFT: freqdata overwritten with filtered timedata
+	fft->InverseComplexFFT(data);
+
+	// overlap and add
+	for (int i = 0; i < flen2; i++) {
+		output[i] = ovlbuf[i] + data[i];
+		ovlbuf[i] = data[i+flen2];
+	}
+
 	memset (data, 0, flen * sizeof(cmplx));
 
 	*out = output;
