@@ -107,6 +107,8 @@ Done since the fork
   - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
   - Variable span for the SSB demod down to 1.5 kHz
   - Filter out CTCSS tones for audio and full CTCSS support in NFMDemod
+  - Enhancement of the NFM squelch
+  - Added a channel analyzer plugin focusing on measurement (DSA/DSO functionnality). Basic functions.
     
 =====
 To Do

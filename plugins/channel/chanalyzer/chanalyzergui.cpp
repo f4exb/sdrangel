@@ -51,6 +51,7 @@ QByteArray ChannelAnalyzerGUI::serialize() const
 	s.writeU32(4, m_channelMarker->getColor().rgb());
 	s.writeS32(5, ui->lowCut->value());
 	s.writeS32(6, ui->spanLog2->value());
+	s.writeBool(7, ui->ssb->isChecked());
 	return s.final();
 }
 
@@ -67,6 +68,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool tmpBool;
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
@@ -80,6 +82,8 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		d.readS32(6, &tmp, 20);
 		ui->spanLog2->setValue(tmp);
 		setNewRate(tmp);
+		d.readBool(7, &tmpBool, false);
+		ui->ssb->setChecked(tmpBool);
 		applySettings();
 		return true;
 	} else {

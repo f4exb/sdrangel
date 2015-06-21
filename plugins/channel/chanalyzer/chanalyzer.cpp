@@ -115,7 +115,11 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 			if (!(m_undersampleCount++ & decim_mask))
 			{
 				sum /= decim;
-				m_sampleBuffer.push_back(Sample(sum.real() * 32768.0, sum.imag() * 32768.0));
+				if (m_ssb & !m_usb) { // invert spectrum for LSB
+					m_sampleBuffer.push_back(Sample(sum.imag() * 32768.0, sum.real() * 32768.0));
+				} else {
+					m_sampleBuffer.push_back(Sample(sum.real() * 32768.0, sum.imag() * 32768.0));
+				}
 				sum = 0;
 			}
 
