@@ -133,7 +133,7 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
 	m_glScope->setTimeOfsProMill(value);
 }
 
-void GLScopeGUI::on_displayMode_currentIndexChanged(int index)
+void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 {
 	m_displayData = index;
 	switch(index) {
