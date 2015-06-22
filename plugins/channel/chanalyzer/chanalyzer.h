@@ -32,7 +32,7 @@
 
 class ChannelAnalyzer : public SampleSink {
 public:
-	ChannelAnalyzer(SampleSink* sampleSink);
+	ChannelAnalyzer(SampleSink* spectrumSink, SampleSink* scopeSink);
 	~ChannelAnalyzer();
 
 	void configure(MessageQueue* messageQueue,
@@ -100,7 +100,8 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
-	SampleSink* m_sampleSink;
+	SampleSink* m_spectrumSink;
+	SampleSink* m_scopeSink;
 	SampleVector m_sampleBuffer;
 };
 

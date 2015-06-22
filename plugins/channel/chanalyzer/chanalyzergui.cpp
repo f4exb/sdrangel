@@ -4,7 +4,9 @@
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/scopevis.h"
 #include "gui/glspectrum.h"
+#include "gui/glscope.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -245,13 +247,12 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	//m_audioFifo = new AudioFifo(4, 48000 / 4);
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumVis);
+	m_scopeVis = new ScopeVis(ui->glScope);
+	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumVis, m_scopeVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	//m_pluginAPI->addAudioSource(m_audioFifo);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	m_threadedSpectrumSampleSink = new ThreadedSampleSink(m_channelizer);
+	m_pluginAPI->addSampleSink(m_threadedSpectrumSampleSink);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
@@ -268,7 +269,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->spectrumGUI->setBuddies(m_threadedSpectrumSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->scopeGUI->setBuddies(m_threadedScopeSampleSink->getMessageQueue(), m_scopeVis, ui->glScope);
 
 	applySettings();
 }
@@ -276,13 +278,14 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	//m_pluginAPI->removeAudioSource(m_audioFifo);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	m_pluginAPI->removeSampleSink(m_threadedSpectrumSampleSink);
+	m_pluginAPI->removeSampleSink(m_threadedScopeSampleSink);
+	delete m_threadedSpectrumSampleSink;
+	delete m_threadedScopeSampleSink;
 	delete m_channelizer;
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;
-	//delete m_audioFifo;
+	delete m_scopeVis;
 	delete m_channelMarker;
 	delete ui;
 }
@@ -348,10 +351,10 @@ void ChannelAnalyzerGUI::applySettings()
 	setTitleColor(m_channelMarker->getColor());
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+	m_channelizer->configure(m_threadedSpectrumSampleSink->getMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
-	m_channelAnalyzer->configure(m_threadedSampleSink->getMessageQueue(),
+	m_channelAnalyzer->configure(m_threadedSpectrumSampleSink->getMessageQueue(),
 		ui->BW->value() * 100.0,
 		ui->lowCut->value() * 100.0,
 		m_spanLog2,

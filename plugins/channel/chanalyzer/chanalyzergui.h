@@ -12,6 +12,7 @@ class ThreadedSampleSink;
 class Channelizer;
 class ChannelAnalyzer;
 class SpectrumVis;
+class ScopeVis;
 
 namespace Ui {
 	class ChannelAnalyzerGUI;
@@ -52,11 +53,12 @@ private:
 	int m_rate;
 	int m_spanLog2;
 
-	//AudioFifo* m_audioFifo;
-	ThreadedSampleSink* m_threadedSampleSink;
+	ThreadedSampleSink* m_threadedSpectrumSampleSink;
+	ThreadedSampleSink* m_threadedScopeSampleSink;
 	Channelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumVis* m_spectrumVis;
+	ScopeVis* m_scopeVis;
 
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
 	~ChannelAnalyzerGUI();

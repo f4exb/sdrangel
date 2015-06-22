@@ -26,8 +26,9 @@
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 
-ChannelAnalyzer::ChannelAnalyzer(SampleSink* sampleSink) :
-	m_sampleSink(sampleSink)
+ChannelAnalyzer::ChannelAnalyzer(SampleSink* spectrumSink, SampleSink* scopeSink) :
+	m_spectrumSink(spectrumSink),
+	m_scopeSink(scopeSink)
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
@@ -101,9 +102,14 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 		}
 	}
 
-	if(m_sampleSink != NULL)
+	if(m_spectrumSink != NULL)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_ssb); // m_ssb = positive only
+		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_ssb); // m_ssb = positive only
+	}
+
+	if(m_scopeSink != NULL)
+	{
+		m_scopeSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false); // positive only is unused
 	}
 
 	m_sampleBuffer.clear();
@@ -160,8 +166,8 @@ bool ChannelAnalyzer::handleMessage(Message* cmd)
 		cmd->completed();
 		return true;
 	} else {
-		if(m_sampleSink != NULL)
-		   return m_sampleSink->handleMessage(cmd);
+		if(m_spectrumSink != NULL)
+		   return m_spectrumSink->handleMessage(cmd);
 		else return false;
 	}
 }

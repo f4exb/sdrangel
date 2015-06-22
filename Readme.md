@@ -109,6 +109,7 @@ Done since the fork
   - Filter out CTCSS tones for audio and full CTCSS support in NFMDemod
   - Enhancement of the NFM squelch
   - Added a channel analyzer plugin focusing on measurement (DSA/DSO functionnality). Basic functions.
+  - Added a scope widget in the channel analyzer plugin
     
 =====
 To Do
