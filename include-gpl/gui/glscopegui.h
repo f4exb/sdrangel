@@ -23,6 +23,7 @@ public:
 
 	void setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLScope* glScope);
 
+	void setSampleRate(int sampleRate);
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);

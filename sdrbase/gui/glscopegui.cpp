@@ -37,6 +37,12 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 	applySettings();
 }
 
+void GLScopeGUI::setSampleRate(int sampleRate)
+{
+	m_sampleRate = sampleRate;
+	on_scope_traceSizeChanged(0);
+}
+
 void GLScopeGUI::resetToDefaults()
 {
 	m_displayData = GLScope::ModeIQ;
