@@ -253,6 +253,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelizer = new Channelizer(m_channelAnalyzer);
 	m_threadedSpectrumSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addSampleSink(m_threadedSpectrumSampleSink);
+	m_threadedScopeSampleSink = new ThreadedSampleSink(m_channelizer);
+	m_pluginAPI->addSampleSink(m_threadedScopeSampleSink);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
