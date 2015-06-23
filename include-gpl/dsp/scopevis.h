@@ -22,6 +22,7 @@ public:
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
+	bool handleMessageKeep(Message* message);
 	bool handleMessage(Message* message);
 
 private:

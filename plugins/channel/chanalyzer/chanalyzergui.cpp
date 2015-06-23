@@ -3,6 +3,7 @@
 #include "ui_chanalyzergui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
+#include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
 #include "gui/glspectrum.h"
@@ -249,7 +250,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
-	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumVis);
+	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
+	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
@@ -284,6 +286,7 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;
 	delete m_scopeVis;
+	delete m_spectrumScopeComboVis;
 	delete m_channelMarker;
 	delete ui;
 }

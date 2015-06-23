@@ -120,12 +120,11 @@ void ScopeVis::stop()
 {
 }
 
-bool ScopeVis::handleMessage(Message* message)
+bool ScopeVis::handleMessageKeep(Message* message)
 {
 	if(DSPSignalNotification::match(message)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)message;
 		m_sampleRate = signal->getSampleRate();
-		message->completed();
 		return true;
 	} else if(DSPConfigureScopeVis::match(message)) {
 		DSPConfigureScopeVis* conf = (DSPConfigureScopeVis*)message;
@@ -133,9 +132,20 @@ bool ScopeVis::handleMessage(Message* message)
 		m_triggerChannel = (TriggerChannel)conf->getTriggerChannel();
 		m_triggerLevelHigh = conf->getTriggerLevelHigh() * 32767;
 		m_triggerLevelLow = conf->getTriggerLevelLow() * 32767;
-		message->completed();
 		return true;
 	} else {
 		return false;
 	}
+}
+
+bool ScopeVis::handleMessage(Message* message)
+{
+	bool done = handleMessageKeep(message);
+
+	if (done)
+	{
+		message->completed();
+	}
+
+	return done;
 }

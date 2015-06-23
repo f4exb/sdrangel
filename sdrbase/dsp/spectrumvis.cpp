@@ -111,16 +111,27 @@ void SpectrumVis::stop()
 {
 }
 
-bool SpectrumVis::handleMessage(Message* message)
+bool SpectrumVis::handleMessageKeep(Message* message)
 {
 	if(DSPConfigureSpectrumVis::match(message)) {
 		DSPConfigureSpectrumVis* conf = (DSPConfigureSpectrumVis*)message;
 		handleConfigure(conf->getFFTSize(), conf->getOverlapPercent(), conf->getWindow());
-		message->completed();
 		return true;
 	} else {
 		return false;
 	}
+}
+
+bool SpectrumVis::handleMessage(Message* message)
+{
+	bool done = handleMessageKeep(message);
+
+	if (done)
+	{
+		message->completed();
+	}
+
+	return done;
 }
 
 void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window)

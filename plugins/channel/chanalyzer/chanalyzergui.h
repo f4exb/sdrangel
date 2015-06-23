@@ -11,6 +11,7 @@ class ChannelMarker;
 class ThreadedSampleSink;
 class Channelizer;
 class ChannelAnalyzer;
+class SpectrumScopeComboVis;
 class SpectrumVis;
 class ScopeVis;
 
@@ -56,6 +57,7 @@ private:
 	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
+	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 

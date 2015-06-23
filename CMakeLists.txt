@@ -67,6 +67,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/samplefifo.cpp
 	sdrbase/dsp/samplesink.cpp
 	sdrbase/dsp/nullsink.cpp
+	sdrbase/dsp/spectrumscopecombovis.cpp
 	sdrbase/dsp/scopevis.cpp
 	sdrbase/dsp/spectrumvis.cpp
 	sdrbase/dsp/threadedsamplesink.cpp
