@@ -249,12 +249,10 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
-	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumVis, m_scopeVis);
+	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
-	m_threadedSpectrumSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addSampleSink(m_threadedSpectrumSampleSink);
-	m_threadedScopeSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addSampleSink(m_threadedScopeSampleSink);
+	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
+	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
@@ -271,8 +269,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSpectrumSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
-	ui->scopeGUI->setBuddies(m_threadedScopeSampleSink->getMessageQueue(), m_scopeVis, ui->glScope);
+	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->scopeGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_scopeVis, ui->glScope);
 
 	applySettings();
 }
@@ -280,10 +278,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeSampleSink(m_threadedSpectrumSampleSink);
-	m_pluginAPI->removeSampleSink(m_threadedScopeSampleSink);
-	delete m_threadedSpectrumSampleSink;
-	delete m_threadedScopeSampleSink;
+	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
+	delete m_threadedSampleSink;
 	delete m_channelizer;
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;
@@ -353,10 +349,10 @@ void ChannelAnalyzerGUI::applySettings()
 	setTitleColor(m_channelMarker->getColor());
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_channelizer->configure(m_threadedSpectrumSampleSink->getMessageQueue(),
+	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
-	m_channelAnalyzer->configure(m_threadedSpectrumSampleSink->getMessageQueue(),
+	m_channelAnalyzer->configure(m_threadedSampleSink->getMessageQueue(),
 		ui->BW->value() * 100.0,
 		ui->lowCut->value() * 100.0,
 		m_spanLog2,

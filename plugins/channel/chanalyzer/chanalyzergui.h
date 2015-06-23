@@ -53,8 +53,7 @@ private:
 	int m_rate;
 	int m_spanLog2;
 
-	ThreadedSampleSink* m_threadedSpectrumSampleSink;
-	ThreadedSampleSink* m_threadedScopeSampleSink;
+	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumVis* m_spectrumVis;
