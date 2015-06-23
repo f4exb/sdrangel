@@ -452,31 +452,38 @@ void GLScope::applyConfig()
 {
 	m_configChanged = false;
 
+	int topMargin = 5;
+	int botMargin = 20;
+	int leftMargin = 20;
+	int rightMargin = 5;
+
+	// QRectF(x, y, w, h); (x, y) = top left corner
+
 	if(m_orientation == Qt::Vertical) {
 		m_glScopeRect1 = QRectF(
-			(float)10 / (float)width(),
-			(float)10 / (float)height(),
-			(float)(width() - 10 - 10) / (float)width(),
-			(float)((height() - 10 - 10 - 10) / 2) / (float)height()
+			(float)leftMargin / (float)width(),
+			(float)topMargin / (float)height(),
+			(float)(width() - leftMargin - rightMargin) / (float)width(),
+			(float)((height() - botMargin - botMargin - topMargin) / 2) / (float)height()
 		);
 		m_glScopeRect2 = QRectF(
-			(float)10 / (float)width(),
-			(float)(10 + 10 + (height() - 10 - 10 - 10) / 2) / (float)height(),
-			(float)(width() - 10 - 10) / (float)width(),
-			(float)((height() - 10 - 10 - 10) / 2) / (float)height()
+			(float)leftMargin / (float)width(),
+			(float)(botMargin + topMargin + (height() - botMargin - botMargin - topMargin) / 2) / (float)height(),
+			(float)(width() - leftMargin - rightMargin) / (float)width(),
+			(float)((height() - botMargin - botMargin - topMargin) / 2) / (float)height()
 		);
 	} else {
 		m_glScopeRect1 = QRectF(
-			(float)10 / (float)width(),
-			(float)10 / (float)height(),
-			(float)((width() - 10 - 10 - 10) / 2) / (float)width(),
-			(float)(height() - 10 - 10) / (float)height()
+			(float)leftMargin / (float)width(),
+			(float)topMargin / (float)height(),
+			(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
+			(float)(height() - topMargin - botMargin) / (float)height()
 		);
 		m_glScopeRect2 = QRectF(
-			(float)(10 + 10 + ((width() - 10 - 10 - 10) / 2)) / (float)width(),
-			(float)10 / (float)height(),
-			(float)((width() - 10 - 10 - 10) / 2) / (float)width(),
-			(float)(height() - 10 - 10) / (float)height()
+			(float)(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float)width(),
+			(float)topMargin / (float)height(),
+			(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
+			(float)(height() - topMargin - botMargin) / (float)height()
 		);
 	}
 }
