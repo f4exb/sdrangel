@@ -5,6 +5,7 @@
 #include "util/simpleserializer.h"
 #include "ui_glscopegui.h"
 
+#include <iostream>
 
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	QWidget(parent),
@@ -17,7 +18,8 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_displayOrientation(Qt::Horizontal),
 	m_timeBase(1),
 	m_timeOffset(0),
-	m_amplification(0)
+	m_amplification(0),
+	m_displayGridIntensity(1)
 {
 	ui->setupUi(this);
 }
@@ -42,6 +44,7 @@ void GLScopeGUI::resetToDefaults()
 	m_timeBase = 1;
 	m_timeOffset = 0;
 	m_amplification = 0;
+	m_displayGridIntensity = 5;
 	applySettings();
 }
 
@@ -54,6 +57,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(3, m_timeBase);
 	s.writeS32(4, m_timeOffset);
 	s.writeS32(5, m_amplification);
+	s.writeS32(6, m_displayGridIntensity);
 
 	return s.final();
 }
@@ -73,6 +77,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(3, &m_timeBase, 1);
 		d.readS32(4, &m_timeOffset, 0);
 		d.readS32(5, &m_amplification, 0);
+		d.readS32(6, &m_displayGridIntensity, 5);
 		if(m_timeBase < 0)
 			m_timeBase = 1;
 		applySettings();
@@ -98,6 +103,7 @@ void GLScopeGUI::applySettings()
 	ui->time->setValue(m_timeBase);
 	ui->timeOfs->setValue(m_timeOffset);
 	ui->amp->setValue(m_amplification);
+	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 }
 
 void GLScopeGUI::on_amp_valueChanged(int value)
@@ -179,6 +185,13 @@ void GLScopeGUI::on_vertView_clicked()
 		ui->vertView->setChecked(true);
 		m_glScope->setOrientation(Qt::Vertical);
 	}
+}
+
+void GLScopeGUI::on_gridIntensity_valueChanged(int index)
+{
+	m_displayGridIntensity = index;
+	if(m_glScope != NULL)
+		m_glScope->setDisplayGridIntensity(m_displayGridIntensity);
 }
 
 bool GLScopeGUI::handleMessage(Message* cmd)

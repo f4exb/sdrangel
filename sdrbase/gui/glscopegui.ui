@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>798</width>
-    <height>40</height>
+    <width>807</width>
+    <height>34</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,27 +61,30 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Grid intensity</string>
+       </property>
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
        </property>
        <item>
         <property name="text">
-         <string>I+Q Level (linear)</string>
+         <string>I+Q (linear)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Magnitude (linear) + Phase</string>
+         <string>Mag (linear) + Phi</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Magnitude (dB) + Phase</string>
+         <string>Mag (dB) + Phi</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Derived 1st + 2nd order</string>
+         <string>Derived 1+2nd </string>
         </property>
        </item>
        <item>
@@ -307,6 +310,29 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="ampLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="gridIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>

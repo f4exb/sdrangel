@@ -55,6 +55,7 @@ QByteArray ChannelAnalyzerGUI::serialize() const
 	s.writeS32(5, ui->lowCut->value());
 	s.writeS32(6, ui->spanLog2->value());
 	s.writeBool(7, ui->ssb->isChecked());
+	s.writeBlob(8, ui->scopeGUI->serialize());
 	return s.final();
 }
 
@@ -87,6 +88,8 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		setNewRate(tmp);
 		d.readBool(7, &tmpBool, false);
 		ui->ssb->setChecked(tmpBool);
+		d.readBlob(8, &bytetmp);
+		ui->scopeGUI->deserialize(bytetmp);
 		applySettings();
 		return true;
 	} else {

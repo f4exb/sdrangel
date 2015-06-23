@@ -24,7 +24,8 @@ GLScope::GLScope(QWidget* parent) :
 	m_amp(1.0),
 	m_timeBase(1),
 	m_timeOfsProMill(0),
-	m_triggerChannel(ScopeVis::TriggerFreeRun)
+	m_triggerChannel(ScopeVis::TriggerFreeRun),
+	m_displayGridIntensity(5)
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -77,6 +78,15 @@ void GLScope::setOrientation(Qt::Orientation orientation)
 {
 	m_orientation = orientation;
 	m_configChanged = true;
+	update();
+}
+
+void GLScope::setDisplayGridIntensity(int intensity)
+{
+	m_displayGridIntensity = intensity;
+	if (m_displayGridIntensity > 100) {
+		m_displayGridIntensity = 100;
+	}
 	update();
 }
 
@@ -151,7 +161,7 @@ void GLScope::paintGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glLineWidth(1.0f);
-	glColor4f(1, 1, 1, 0.05f);
+	glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 	for(int i = 1; i < 10; i++) {
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(0, i * 0.1);
@@ -238,7 +248,7 @@ void GLScope::paintGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glLineWidth(1.0f);
-	glColor4f(1, 1, 1, 0.05f);
+	glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 	for(int i = 1; i < 10; i++) {
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(0, i * 0.1);

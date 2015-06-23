@@ -43,6 +43,7 @@ private:
 	qint32 m_timeBase;
 	qint32 m_timeOffset;
 	qint32 m_amplification;
+	int m_displayGridIntensity;
 
 	void applySettings();
 
@@ -52,6 +53,7 @@ private slots:
 	void on_time_valueChanged(int value);
 	void on_timeOfs_valueChanged(int value);
 	void on_dataMode_currentIndexChanged(int index);
+	void on_gridIntensity_valueChanged(int index);
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();

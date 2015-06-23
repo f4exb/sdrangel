@@ -50,6 +50,7 @@ public:
 	void setTimeOfsProMill(int timeOfsProMill);
 	void setMode(Mode mode);
 	void setOrientation(Qt::Orientation orientation);
+	void setDisplayGridIntensity(int intensity);
 
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
 
@@ -93,6 +94,7 @@ private:
 	// graphics stuff
 	QRectF m_glScopeRect1;
 	QRectF m_glScopeRect2;
+	int m_displayGridIntensity;
 
 	void initializeGL();
 	void resizeGL(int width, int height);
