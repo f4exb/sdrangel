@@ -130,6 +130,8 @@ void BladerfGui::displaySettings()
 	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
 	ui->decim->setValue(m_settings.m_log2Decim);
 
+	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
+
 	ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
 
@@ -177,6 +179,17 @@ void BladerfGui::on_decim_valueChanged(int value)
 	ui->decimText->setText(tr("%1").arg(1<<value));
 	m_settings.m_log2Decim = value;
 	sendSettings();
+}
+
+void BladerfGui::on_fcPos_currentIndexChanged(int index)
+{
+	if (index == 0) {
+		m_settings.m_fcPos = BladerfInput::FC_POS_INFRA;
+		sendSettings();
+	} else if (index == 1) {
+		m_settings.m_fcPos = BladerfInput::FC_POS_SUPRA;
+		sendSettings();
+	}
 }
 
 void BladerfGui::on_lna_valueChanged(int value)

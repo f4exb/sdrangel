@@ -28,7 +28,8 @@ BladerfThread::BladerfThread(struct bladerf* dev, SampleFifo* sampleFifo, QObjec
 	m_convertBuffer(BLADERF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(3072000),
-	m_log2Decim(0)
+	m_log2Decim(0),
+	m_fcPos(0)
 {
 }
 
@@ -60,6 +61,11 @@ void BladerfThread::setSamplerate(int samplerate)
 void BladerfThread::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
+}
+
+void BladerfThread::setFcPos(int fcPos)
+{
+	m_fcPos = fcPos;
 }
 
 void BladerfThread::run()
@@ -128,12 +134,49 @@ void BladerfThread::decimate2(SampleVector::iterator* it, const qint16* buf, qin
 	}
 }
 
+void BladerfThread::decimate2_sup(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	qint16 xreal, yimag;
+	for (int pos = 0; pos < len - 7; pos += 8) {
+		xreal = buf[pos+1] - buf[pos+2];
+		yimag = - buf[pos+0] - buf[pos+3];
+		Sample s( xreal << 3, yimag << 3 );
+		**it = s;
+		(*it)++;
+		xreal = buf[pos+6] - buf[pos+5];
+		yimag = buf[pos+4] + buf[pos+7];
+		Sample t( xreal << 3, yimag << 3 );
+		**it = t;
+		(*it)++;
+	}
+}
+
 void BladerfThread::decimate4(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	qint16 xreal, yimag;
 		for (int pos = 0; pos < len - 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
+		Sample s( xreal << 2, yimag << 2 ); // was shift 3
+		**it = s;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate4_sup(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	// Sup (USB):
+	//            x  y   x  y   x   y  x   y  / x -> 1,-2,-5,6 / y -> -0,-3,4,7
+	// [ rotate:  1, 0, -2, 3, -5, -4, 6, -7]
+	// Inf (LSB):
+	//            x  y   x  y   x   y  x   y  / x -> 0,-3,-4,7 / y -> 1,2,-5,-6
+	// [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
+	qint16 xreal, yimag;
+	for (int pos = 0; pos < len - 7; pos += 8) {
+		xreal = buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6];
+		yimag = - buf[pos+0] - buf[pos+3] + buf[pos+4] + buf[pos+7];
+		//xreal = buf[pos+0] - buf[pos+3] - buf[pos+4] + buf[pos+7];
+		//yimag = buf[pos+1] + buf[pos+2] - buf[pos+5] - buf[pos+6];
 		Sample s( xreal << 2, yimag << 2 ); // was shift 3
 		**it = s;
 		(*it)++;
@@ -158,6 +201,24 @@ void BladerfThread::decimate8(SampleVector::iterator* it, const qint16* buf, qin
 	}
 }
 
+void BladerfThread::decimate8_sup(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	qint16 xreal, yimag;
+	for (int pos = 0; pos < len - 15; pos += 8) {
+		xreal = buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6];
+		yimag = - buf[pos+0] - buf[pos+3] + buf[pos+4] + buf[pos+7];
+		Sample s1( xreal << 2, yimag << 2 ); // was shift 3
+		pos += 8;
+		xreal = buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6];
+		yimag = - buf[pos+0] - buf[pos+3] + buf[pos+4] + buf[pos+7];
+		Sample s2( xreal << 2, yimag << 2 ); // was shift 3
+
+		m_decimator2.myDecimate(&s1, &s2);
+		**it = s2;
+		(*it)++;
+	}
+}
+
 void BladerfThread::decimate16(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	// Offset tuning: 4x downsample and rotate, then
@@ -168,6 +229,34 @@ void BladerfThread::decimate16(SampleVector::iterator* it, const qint16* buf, qi
 		for (int i = 0; i < 4; i++) {
 			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 2; // was shift 4
 			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 2; // was shift 4
+			pos += 8;
+		}
+
+		Sample s1( xreal[0], yimag[0] );
+		Sample s2( xreal[1], yimag[1] );
+		Sample s3( xreal[2], yimag[2] );
+		Sample s4( xreal[3], yimag[3] );
+
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+
+		m_decimator4.myDecimate(&s2, &s4);
+
+		**it = s4;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate16_sup(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	// Offset tuning: 4x downsample and rotate, then
+	// downsample 4x more. [ rotate:  1, 0, -2, 3, -5, -4, 6, -7]
+	qint16 xreal[4], yimag[4];
+
+	for (int pos = 0; pos < len - 31; ) {
+		for (int i = 0; i < 4; i++) {
+			xreal[i] = (buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6]) << 2; // was shift 4
+			yimag[i] = (buf[pos+4] + buf[pos+7] - buf[pos+0] - buf[pos+3]) << 2; // was shift 4
 			pos += 8;
 		}
 
@@ -221,34 +310,100 @@ void BladerfThread::decimate32(SampleVector::iterator* it, const qint16* buf, qi
 	}
 }
 
+void BladerfThread::decimate32_sup(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	qint16 xreal[8], yimag[8];
+
+	for (int pos = 0; pos < len - 63; ) {
+		for (int i = 0; i < 8; i++) {
+			xreal[i] = (buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6]) << 2;
+			yimag[i] = (buf[pos+4] + buf[pos+7] - buf[pos+0] - buf[pos+3]) << 2;
+			pos += 8;
+		}
+
+		Sample s1( xreal[0], yimag[0] );
+		Sample s2( xreal[1], yimag[1] );
+		Sample s3( xreal[2], yimag[2] );
+		Sample s4( xreal[3], yimag[3] );
+		Sample s5( xreal[4], yimag[4] );
+		Sample s6( xreal[5], yimag[5] );
+		Sample s7( xreal[6], yimag[6] );
+		Sample s8( xreal[7], yimag[7] );
+
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator2.myDecimate(&s5, &s6);
+		m_decimator2.myDecimate(&s7, &s8);
+
+		m_decimator4.myDecimate(&s2, &s4);
+		m_decimator4.myDecimate(&s6, &s8);
+
+		m_decimator8.myDecimate(&s4, &s8);
+
+		**it = s8;
+		(*it)++;
+	}
+}
+
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
 void BladerfThread::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-	switch (m_log2Decim)
+	if (m_log2Decim == 0)
 	{
-	case 0:
 		decimate1(&it, buf, len);
-		break;
-	case 1:
-		decimate2(&it, buf, len);
-		break;
-	case 2:
-		decimate4(&it, buf, len);
-		break;
-	case 3:
-		decimate8(&it, buf, len);
-		break;
-	case 4:
-		decimate16(&it, buf, len);
-		break;
-	case 5:
-		decimate32(&it, buf, len);
-		break;
-	default:
-		break;
 	}
+	else
+	{
+		if (m_fcPos == 0) // Infra
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				decimate2(&it, buf, len);
+				break;
+			case 2:
+				decimate4(&it, buf, len);
+				break;
+			case 3:
+				decimate8(&it, buf, len);
+				break;
+			case 4:
+				decimate16(&it, buf, len);
+				break;
+			case 5:
+				decimate32(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
+		else if (m_fcPos == 1) // Supra
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				decimate2_sup(&it, buf, len);
+				break;
+			case 2:
+				decimate4_sup(&it, buf, len);
+				break;
+			case 3:
+				decimate8_sup(&it, buf, len);
+				break;
+			case 4:
+				decimate16_sup(&it, buf, len);
+				break;
+			case 5:
+				decimate32_sup(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }

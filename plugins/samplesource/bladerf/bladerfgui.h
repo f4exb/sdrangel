@@ -71,6 +71,7 @@ private slots:
 	void on_vga1_valueChanged(int value);
 	void on_vga2_valueChanged(int value);
 	void on_xb200_currentIndexChanged(int index);
+	void on_fcPos_currentIndexChanged(int index);
 	void updateHardware();
 };
 

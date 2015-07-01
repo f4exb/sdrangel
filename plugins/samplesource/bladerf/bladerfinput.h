@@ -25,6 +25,11 @@ class BladerfThread;
 
 class BladerfInput : public SampleSource {
 public:
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA
+	} fcPos_t;
+
 	struct Settings {
 		qint32 m_lnaGain;
 		qint32 m_vga1;
@@ -32,6 +37,7 @@ public:
 		qint32 m_samplerate;
 		qint32 m_bandwidth;
 		quint32 m_log2Decim;
+		fcPos_t m_fcPos;
 		bool m_xb200;
 		bladerf_xb200_path m_xb200Path;
 		bladerf_xb200_filter m_xb200Filter;

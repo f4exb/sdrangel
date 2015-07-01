@@ -34,6 +34,7 @@ BladerfInput::Settings::Settings() :
 	m_samplerate(3072000),
 	m_bandwidth(1500000),
 	m_log2Decim(0),
+	m_fcPos(FC_POS_INFRA),
 	m_xb200(false),
 	m_xb200Path(BLADERF_XB200_MIX),
 	m_xb200Filter(BLADERF_XB200_AUTO_1DB)
@@ -48,6 +49,7 @@ void BladerfInput::Settings::resetToDefaults()
 	m_samplerate = 3072000;
 	m_bandwidth = 1500000;
 	m_log2Decim = 0;
+	m_fcPos = FC_POS_INFRA;
 	m_xb200 = false;
 	m_xb200Path = BLADERF_XB200_MIX;
 	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
@@ -65,6 +67,7 @@ QByteArray BladerfInput::Settings::serialize() const
 	s.writeS32(7, (int) m_xb200Path);
 	s.writeS32(8, (int) m_xb200Filter);
 	s.writeS32(9, m_bandwidth);
+	s.writeS32(10, (int) m_fcPos);
 	return s.final();
 }
 
@@ -90,6 +93,8 @@ bool BladerfInput::Settings::deserialize(const QByteArray& data)
 		d.readS32(8, &intval);
 		m_xb200Filter = (bladerf_xb200_filter) intval;
 		d.readS32(9, &m_bandwidth, 0);
+		d.readS32(10, &intval, 0);
+		m_fcPos = (fcPos_t) intval;
 		return true;
 	} else {
 		resetToDefaults();
@@ -332,19 +337,50 @@ bool BladerfInput::applySettings(const GeneralSettings& generalSettings, const S
 		}
 	}
 
+	if((m_settings.m_fcPos != settings.m_fcPos) || force) {
+		if(m_dev != NULL) {
+			m_settings.m_fcPos = settings.m_fcPos;
+			m_bladerfThread->setFcPos((int) settings.m_fcPos);
+			std::cerr << "BladerfInput: set fc pos (enum) to " << (int) m_settings.m_fcPos << std::endl;
+		}
+	}
+
 	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
 	if(m_dev != NULL) {
-		qint64 centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+		qint64 centerFrequency = m_generalSettings.m_centerFrequency;
+		qint64 f_img = centerFrequency;
+		qint64 f_cut = centerFrequency + m_settings.m_bandwidth/2;
 
-		if (m_settings.m_log2Decim == 0) { // Little wooby-doop if no decimation
+		if (m_settings.m_log2Decim == 0)
+		{ // Little wooby-doop if no decimation
 			centerFrequency = m_generalSettings.m_centerFrequency;
-		} else {
-			centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+			f_img = centerFrequency;
+			f_cut = centerFrequency + m_settings.m_bandwidth/2;
+		}
+		else
+		{
+			if (m_settings.m_fcPos == FC_POS_INFRA) {
+				centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+				f_img = centerFrequency + m_settings.m_samplerate/2;
+				f_cut = centerFrequency + m_settings.m_bandwidth/2;
+			} else if (m_settings.m_fcPos == FC_POS_SUPRA) {
+				centerFrequency = m_generalSettings.m_centerFrequency - (m_settings.m_samplerate / 4);
+				f_img = centerFrequency - m_settings.m_samplerate/2;
+				f_cut = centerFrequency - m_settings.m_bandwidth/2;
+			}
 		}
 
 		if(bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, centerFrequency ) != 0) {
 			qDebug("bladerf_set_frequency(%lld) failed", m_generalSettings.m_centerFrequency);
 		}
+
+		std::cerr << "BladerfInput: center freq: " << m_generalSettings.m_centerFrequency << " Hz"
+				<< " RF center freq: " << centerFrequency << " Hz"
+				<< " sample rate / 2 : " << m_settings.m_samplerate/2 << "Hz"
+				<< " BW: " << m_settings.m_bandwidth << "Hz"
+				<< " img: " << f_img << "Hz"
+				<< " cut: " << f_cut << "Hz"
+				<< " img - cut: " << f_img - f_cut << std::endl;
 	}
 
 	return true;
