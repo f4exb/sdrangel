@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>198</width>
-    <height>274</height>
+    <height>280</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -365,7 +365,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -399,6 +399,11 @@
        <item>
         <property name="text">
          <string>Sup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cent</string>
         </property>
        </item>
       </widget>

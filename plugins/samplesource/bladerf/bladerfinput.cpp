@@ -351,8 +351,8 @@ bool BladerfInput::applySettings(const GeneralSettings& generalSettings, const S
 		qint64 f_img = centerFrequency;
 		qint64 f_cut = centerFrequency + m_settings.m_bandwidth/2;
 
-		if (m_settings.m_log2Decim == 0)
-		{ // Little wooby-doop if no decimation
+		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+		{
 			centerFrequency = m_generalSettings.m_centerFrequency;
 			f_img = centerFrequency;
 			f_cut = centerFrequency + m_settings.m_bandwidth/2;

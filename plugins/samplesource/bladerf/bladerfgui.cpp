@@ -189,6 +189,9 @@ void BladerfGui::on_fcPos_currentIndexChanged(int index)
 	} else if (index == 1) {
 		m_settings.m_fcPos = BladerfInput::FC_POS_SUPRA;
 		sendSettings();
+	} else if (index == 2) {
+		m_settings.m_fcPos = BladerfInput::FC_POS_CENTER;
+		sendSettings();
 	}
 }
 

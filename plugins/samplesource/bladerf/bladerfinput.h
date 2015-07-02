@@ -27,7 +27,8 @@ class BladerfInput : public SampleSource {
 public:
 	typedef enum {
 		FC_POS_INFRA = 0,
-		FC_POS_SUPRA
+		FC_POS_SUPRA,
+		FC_POS_CENTER
 	} fcPos_t;
 
 	struct Settings {

@@ -151,10 +151,180 @@ void BladerfThread::decimate2_sup(SampleVector::iterator* it, const qint16* buf,
 	}
 }
 
+void BladerfThread::decimate2_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 3; pos += 4) {
+		Sample s1(buf[pos+0] << 3, buf[pos+1] << 3);
+		Sample s2(buf[pos+2] << 3, buf[pos+3] << 3);
+		m_decimator2.myDecimate(&s1, &s2);
+		**it = s2;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate4_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 7; pos += 8) {
+		Sample s1(buf[pos+0] << 4, buf[pos+1] << 4);
+		Sample s2(buf[pos+2] << 4, buf[pos+3] << 4);
+		Sample s3(buf[pos+4] << 4, buf[pos+5] << 4);
+		Sample s4(buf[pos+6] << 4, buf[pos+7] << 4);
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator4.myDecimate(&s2, &s4);
+		**it = s4;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate8_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 15; pos += 16) {
+		Sample s1(buf[pos+0] << 4, buf[pos+1] << 4);
+		Sample s2(buf[pos+2] << 4, buf[pos+3] << 4);
+		Sample s3(buf[pos+4] << 4, buf[pos+5] << 4);
+		Sample s4(buf[pos+6] << 4, buf[pos+7] << 4);
+		Sample s5(buf[pos+8] << 4, buf[pos+9] << 4);
+		Sample s6(buf[pos+10] << 4, buf[pos+11] << 4);
+		Sample s7(buf[pos+12] << 4, buf[pos+13] << 4);
+		Sample s8(buf[pos+14] << 4, buf[pos+15] << 4);
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator2.myDecimate(&s5, &s6);
+		m_decimator2.myDecimate(&s7, &s8);
+		m_decimator4.myDecimate(&s2, &s4);
+		m_decimator4.myDecimate(&s6, &s8);
+		m_decimator8.myDecimate(&s4, &s8);
+		**it = s8;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate16_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 31; pos += 32) {
+		Sample s1(buf[pos+0] << 4, buf[pos+1] << 4);
+		Sample s2(buf[pos+2] << 4, buf[pos+3] << 4);
+		Sample s3(buf[pos+4] << 4, buf[pos+5] << 4);
+		Sample s4(buf[pos+6] << 4, buf[pos+7] << 4);
+		Sample s5(buf[pos+8] << 4, buf[pos+9] << 4);
+		Sample s6(buf[pos+10] << 4, buf[pos+11] << 4);
+		Sample s7(buf[pos+12] << 4, buf[pos+13] << 4);
+		Sample s8(buf[pos+14] << 4, buf[pos+15] << 4);
+		Sample s9(buf[pos+16] << 4, buf[pos+17] << 4);
+		Sample s10(buf[pos+18] << 4, buf[pos+19] << 4);
+		Sample s11(buf[pos+20] << 4, buf[pos+21] << 4);
+		Sample s12(buf[pos+22] << 4, buf[pos+23] << 4);
+		Sample s13(buf[pos+24] << 4, buf[pos+25] << 4);
+		Sample s14(buf[pos+26] << 4, buf[pos+27] << 4);
+		Sample s15(buf[pos+28] << 4, buf[pos+29] << 4);
+		Sample s16(buf[pos+30] << 4, buf[pos+31] << 4);
+
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator2.myDecimate(&s5, &s6);
+		m_decimator2.myDecimate(&s7, &s8);
+		m_decimator2.myDecimate(&s9, &s10);
+		m_decimator2.myDecimate(&s11, &s12);
+		m_decimator2.myDecimate(&s13, &s14);
+		m_decimator2.myDecimate(&s15, &s16);
+
+		m_decimator4.myDecimate(&s2, &s4);
+		m_decimator4.myDecimate(&s6, &s8);
+		m_decimator4.myDecimate(&s10, &s12);
+		m_decimator4.myDecimate(&s14, &s16);
+
+		m_decimator8.myDecimate(&s4, &s8);
+		m_decimator8.myDecimate(&s12, &s16);
+
+		m_decimator16.myDecimate(&s8, &s16);
+
+		**it = s16;
+		(*it)++;
+	}
+}
+
+void BladerfThread::decimate32_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 63; pos += 64) {
+		Sample s1(buf[pos+0] << 4, buf[pos+1] << 4);
+		Sample s2(buf[pos+2] << 4, buf[pos+3] << 4);
+		Sample s3(buf[pos+4] << 4, buf[pos+5] << 4);
+		Sample s4(buf[pos+6] << 4, buf[pos+7] << 4);
+		Sample s5(buf[pos+8] << 4, buf[pos+9] << 4);
+		Sample s6(buf[pos+10] << 4, buf[pos+11] << 4);
+		Sample s7(buf[pos+12] << 4, buf[pos+13] << 4);
+		Sample s8(buf[pos+14] << 4, buf[pos+15] << 4);
+		Sample s9(buf[pos+16] << 4, buf[pos+17] << 4);
+		Sample s10(buf[pos+18] << 4, buf[pos+19] << 4);
+		Sample s11(buf[pos+20] << 4, buf[pos+21] << 4);
+		Sample s12(buf[pos+22] << 4, buf[pos+23] << 4);
+		Sample s13(buf[pos+24] << 4, buf[pos+25] << 4);
+		Sample s14(buf[pos+26] << 4, buf[pos+27] << 4);
+		Sample s15(buf[pos+28] << 4, buf[pos+29] << 4);
+		Sample s16(buf[pos+30] << 4, buf[pos+31] << 4);
+		Sample s17(buf[pos+32] << 4, buf[pos+33] << 4);
+		Sample s18(buf[pos+34] << 4, buf[pos+35] << 4);
+		Sample s19(buf[pos+36] << 4, buf[pos+37] << 4);
+		Sample s20(buf[pos+38] << 4, buf[pos+39] << 4);
+		Sample s21(buf[pos+40] << 4, buf[pos+41] << 4);
+		Sample s22(buf[pos+42] << 4, buf[pos+43] << 4);
+		Sample s23(buf[pos+44] << 4, buf[pos+45] << 4);
+		Sample s24(buf[pos+46] << 4, buf[pos+47] << 4);
+		Sample s25(buf[pos+48] << 4, buf[pos+49] << 4);
+		Sample s26(buf[pos+50] << 4, buf[pos+51] << 4);
+		Sample s27(buf[pos+52] << 4, buf[pos+53] << 4);
+		Sample s28(buf[pos+54] << 4, buf[pos+55] << 4);
+		Sample s29(buf[pos+56] << 4, buf[pos+57] << 4);
+		Sample s30(buf[pos+58] << 4, buf[pos+59] << 4);
+		Sample s31(buf[pos+60] << 4, buf[pos+61] << 4);
+		Sample s32(buf[pos+62] << 4, buf[pos+63] << 4);
+
+		m_decimator2.myDecimate(&s1, &s2);
+		m_decimator2.myDecimate(&s3, &s4);
+		m_decimator2.myDecimate(&s5, &s6);
+		m_decimator2.myDecimate(&s7, &s8);
+		m_decimator2.myDecimate(&s9, &s10);
+		m_decimator2.myDecimate(&s11, &s12);
+		m_decimator2.myDecimate(&s13, &s14);
+		m_decimator2.myDecimate(&s15, &s16);
+		m_decimator2.myDecimate(&s17, &s18);
+		m_decimator2.myDecimate(&s19, &s20);
+		m_decimator2.myDecimate(&s21, &s22);
+		m_decimator2.myDecimate(&s23, &s24);
+		m_decimator2.myDecimate(&s25, &s26);
+		m_decimator2.myDecimate(&s27, &s28);
+		m_decimator2.myDecimate(&s29, &s30);
+		m_decimator2.myDecimate(&s31, &s32);
+
+		m_decimator4.myDecimate(&s2, &s4);
+		m_decimator4.myDecimate(&s6, &s8);
+		m_decimator4.myDecimate(&s10, &s12);
+		m_decimator4.myDecimate(&s14, &s16);
+		m_decimator4.myDecimate(&s18, &s20);
+		m_decimator4.myDecimate(&s22, &s24);
+		m_decimator4.myDecimate(&s26, &s28);
+		m_decimator4.myDecimate(&s30, &s32);
+
+		m_decimator8.myDecimate(&s4, &s8);
+		m_decimator8.myDecimate(&s12, &s16);
+		m_decimator8.myDecimate(&s20, &s24);
+		m_decimator8.myDecimate(&s28, &s32);
+
+		m_decimator16.myDecimate(&s8, &s16);
+		m_decimator16.myDecimate(&s24, &s32);
+
+		m_decimator32.myDecimate(&s16, &s32);
+
+		**it = s32;
+		(*it)++;
+	}
+}
+
 void BladerfThread::decimate4(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	qint16 xreal, yimag;
-		for (int pos = 0; pos < len - 7; pos += 8) {
+	for (int pos = 0; pos < len - 7; pos += 8) {
 		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
 		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
 		Sample s( xreal << 2, yimag << 2 ); // was shift 3
@@ -397,6 +567,29 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 				break;
 			case 5:
 				decimate32_sup(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
+		else if (m_fcPos == 2) // Center
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				decimate2_cen(&it, buf, len);
+				break;
+			case 2:
+				decimate4_cen(&it, buf, len);
+				break;
+			case 3:
+				decimate8_cen(&it, buf, len);
+				break;
+			case 4:
+				decimate16_cen(&it, buf, len);
+				break;
+			case 5:
+				decimate32_cen(&it, buf, len);
 				break;
 			default:
 				break;
