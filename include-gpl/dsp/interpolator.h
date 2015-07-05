@@ -1,7 +1,9 @@
 #ifndef INCLUDE_INTERPOLATOR_H
 #define INCLUDE_INTERPOLATOR_H
 
+#ifdef USE_SIMD
 #include <immintrin.h>
+#endif
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 #include <stdio.h>
