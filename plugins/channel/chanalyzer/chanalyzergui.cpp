@@ -276,7 +276,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_scopeVis, ui->glScope);
-	std::cerr << "ui->glScope: " << ui->glScope->getSampleRate() << std::endl;
 
 	applySettings();
 }
@@ -304,8 +303,6 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
-
-	std::cerr << "ChannelAnalyzerGUI::setNewRate: " << m_rate << std::endl;
 
 	if (ui->BW->value() < -m_rate/100) {
 		ui->BW->setValue(-m_rate/100);
@@ -343,6 +340,7 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 		ui->glSpectrum->setSampleRate(m_rate);
 		ui->glSpectrum->setSsbSpectrum(true);
 		ui->glScope->setSampleRate(m_rate);
+		m_scopeVis->setSampleRate(m_rate);
 	} else {
 		m_channelMarker->setSidebands(ChannelMarker::dsb);
 
@@ -350,6 +348,7 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 		ui->glSpectrum->setSampleRate(2*m_rate);
 		ui->glSpectrum->setSsbSpectrum(false);
 		ui->glScope->setSampleRate(2*m_rate);
+		m_scopeVis->setSampleRate(2*m_rate);
 	}
 
 	return true;

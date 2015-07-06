@@ -48,11 +48,13 @@ private:
 	int m_displayGridIntensity;
 
 	void applySettings();
+	void setTimeScaleDisplay();
 
 private slots:
 	void on_amp_valueChanged(int value);
 	void on_ampOfs_valueChanged(int value);
 	void on_scope_traceSizeChanged(int value);
+	void on_scope_sampleRateChanged(int value);
 	void on_time_valueChanged(int value);
 	void on_timeOfs_valueChanged(int value);
 	void on_dataMode_currentIndexChanged(int index);

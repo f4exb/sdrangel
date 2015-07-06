@@ -54,6 +54,11 @@ void GLScope::setDSPEngine(DSPEngine* dspEngine)
 	}
 }
 
+void GLScope::setSampleRate(int sampleRate) {
+	m_sampleRate = sampleRate;
+	emit sampleRateChanged(m_sampleRate);
+}
+
 void GLScope::setAmp(Real amp)
 {
 	m_amp = amp;
@@ -114,7 +119,7 @@ void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 
 	m_rawTrace = trace;
 
-	m_sampleRate = sampleRate;
+	m_sampleRate = sampleRate; // sampleRate comes from scopeVis
 	m_dataChanged = true;
 
 	m_mutex.unlock();
@@ -523,7 +528,7 @@ void GLScope::applyConfig()
 			m_powerScale.setSize(scopeHeight);
 			m_powerScale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
 
-			std::cerr << "Vertical: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
+			//std::cerr << "Vertical: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 
 			m_left1ScalePixmap = QPixmap(
 				leftMargin - 1,
@@ -541,7 +546,7 @@ void GLScope::applyConfig()
 				tick = &(*tickList)[i];
 				if(tick->major) {
 					if(tick->textSize > 0) {
-						std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
+						//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 					}
 				}
@@ -582,7 +587,7 @@ void GLScope::applyConfig()
 			(float) scopeHeight / (float) height()
 		);
 		{ // Scales
-			std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
+			//std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 
 			float pow_floor = -100.0 + m_ofs * 100.0;
 			float pow_range = 100.0 / m_amp;
@@ -607,7 +612,7 @@ void GLScope::applyConfig()
 				tick = &(*tickList)[i];
 				if(tick->major) {
 					if(tick->textSize > 0) {
-						std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
+						//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 					}
 				}

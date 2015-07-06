@@ -55,19 +55,14 @@ public:
 	void setDisplayGridIntensity(int intensity);
 
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
-
 	int getTraceSize() const { return m_rawTrace.size(); }
 
-	void setSampleRate(int sampleRate) {
-		m_sampleRate = sampleRate;
-	}
-
-	int getSampleRate() const {
-		return m_sampleRate;
-	}
+	void setSampleRate(int sampleRate);
+	int getSampleRate() const {	return m_sampleRate; }
 
 signals:
 	void traceSizeChanged(int);
+	void sampleRateChanged(int);
 
 private:
 	// state

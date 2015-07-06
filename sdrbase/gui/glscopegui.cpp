@@ -33,17 +33,18 @@ GLScopeGUI::~GLScopeGUI()
 
 void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLScope* glScope)
 {
-	std::cerr << "GLScopeGUI::setBuddies: scopeVis @" << scopeVis << std::endl;
 	m_messageQueue = messageQueue;
 	m_scopeVis = scopeVis;
 	m_glScope = glScope;
+	connect(m_glScope, SIGNAL(traceSizeChanged(int)), this, SLOT(on_scope_traceSizeChanged(int)));
+	connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
 	applySettings();
 }
 
 void GLScopeGUI::setSampleRate(int sampleRate)
 {
 	m_sampleRate = sampleRate;
-	on_scope_traceSizeChanged(0);
+	setTimeScaleDisplay();
 }
 
 void GLScopeGUI::resetToDefaults()
@@ -134,9 +135,25 @@ void GLScopeGUI::on_ampOfs_valueChanged(int value)
 
 void GLScopeGUI::on_scope_traceSizeChanged(int)
 {
-	std::cerr << "GLScopeGUI::on_scope_traceSizeChanged: sample rate: " << m_glScope->getSampleRate() << std::endl;
+	setTimeScaleDisplay();
+}
+
+void GLScopeGUI::on_scope_sampleRateChanged(int)
+{
+	setTimeScaleDisplay();
+}
+
+void GLScopeGUI::setTimeScaleDisplay()
+{
 	m_sampleRate = m_glScope->getSampleRate();
 	qreal t = (m_glScope->getTraceSize() * 0.1 / m_sampleRate) / (qreal)m_timeBase;
+	/*
+	std::cerr << "GLScopeGUI::setTimeScaleDisplay: sample rate: "
+			<< m_glScope->getSampleRate()
+			<< " traceSize: " << m_glScope->getTraceSize()
+			<< " timeBase: " << m_timeBase
+			<< " glScope @" << m_glScope << std::endl;
+			*/
 	if(t < 0.000001)
 		ui->timeText->setText(tr("%1\nns/div").arg(t * 1000000000.0));
 	else if(t < 0.001)
@@ -149,7 +166,7 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 void GLScopeGUI::on_time_valueChanged(int value)
 {
 	m_timeBase = value;
-	on_scope_traceSizeChanged(0);
+	setTimeScaleDisplay();
 	m_glScope->setTimeBase(m_timeBase);
 }
 

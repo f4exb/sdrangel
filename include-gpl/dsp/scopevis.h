@@ -25,6 +25,9 @@ public:
 	bool handleMessageKeep(Message* message);
 	bool handleMessage(Message* message);
 
+	void setSampleRate(int sampleRate);
+	int getSampleRate() const { return m_sampleRate; }
+
 private:
 	enum TriggerState {
 		Untriggered,
