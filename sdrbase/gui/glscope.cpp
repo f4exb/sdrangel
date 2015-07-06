@@ -3,6 +3,8 @@
 #include "gui/glscope.h"
 #include "dsp/dspengine.h"
 
+#include <iostream>
+
 #ifdef _WIN32
 static double log2f(double n)
 {
@@ -22,6 +24,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_dspEngine(NULL),
 	m_scopeVis(NULL),
 	m_amp(1.0),
+	m_ofs(0.0),
 	m_timeBase(1),
 	m_timeOfsProMill(0),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
@@ -30,6 +33,8 @@ GLScope::GLScope(QWidget* parent) :
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.start(50);
+	m_powerScale.setFont(font());
+	m_powerScale.setOrientation(Qt::Vertical);
 }
 
 GLScope::~GLScope()
@@ -52,6 +57,14 @@ void GLScope::setDSPEngine(DSPEngine* dspEngine)
 void GLScope::setAmp(Real amp)
 {
 	m_amp = amp;
+	m_configChanged = true;
+	update();
+}
+
+void GLScope::setAmpOfs(Real ampOfs)
+{
+	m_ofs = ampOfs;
+	m_configChanged = true;
 	update();
 }
 
@@ -157,6 +170,7 @@ void GLScope::paintGL()
 	glVertex2f(1, 0);
 	glEnd();
 	glDisable(GL_BLEND);
+
 	// paint grid
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -174,6 +188,31 @@ void GLScope::paintGL()
 		glVertex2f(i * 0.1, 1);
 		glEnd();
 	}
+	glPopMatrix();
+
+	// paint left scale
+	glBindTexture(GL_TEXTURE_2D, m_leftScaleTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glPushMatrix();
+	glTranslatef(m_glLeft1ScaleRect.x(), m_glLeft1ScaleRect.y(), 0);
+	glScalef(m_glLeft1ScaleRect.width(), m_glLeft1ScaleRect.height(), 1);
+
+	glEnable(GL_TEXTURE_2D);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 1);
+	glVertex2f(0, 1);
+	glTexCoord2f(1, 1);
+	glVertex2f(1, 1);
+	glTexCoord2f(1, 0);
+	glVertex2f(1, 0);
+	glTexCoord2f(0, 0);
+	glVertex2f(0, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 
 	if(m_triggerChannel == ScopeVis::TriggerChannelI) {
@@ -401,7 +440,7 @@ void GLScope::handleMode()
 			Real mult = (10.0f / log2f(10.0f));
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
 				Real v = src->real() * src->real() + src->imag() * src->imag();
-				v = (96.0 + (mult * log2f(v))) / 96.0;
+				v = (100.0 - m_ofs*100.0 + (mult * log2f(v))) / 100.0; // TODO: first term is the offset
 				*dst++ = Complex(v, arg(*src) / M_PI);
 			}
 			m_displayTrace = &m_mathTrace;
@@ -452,33 +491,140 @@ void GLScope::applyConfig()
 {
 	m_configChanged = false;
 
+	QFontMetrics fm(font());
+	int M = fm.width("-");
+
 	int topMargin = 5;
 	int botMargin = 20;
-	int leftMargin = 20;
+	int leftMargin = 35;
 	int rightMargin = 5;
 
 	// QRectF(x, y, w, h); (x, y) = top left corner
 
 	if(m_orientation == Qt::Vertical) {
+		int scopeHeight = (height() - botMargin - botMargin - topMargin) / 2;
 		m_glScopeRect1 = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)topMargin / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
-			(float)((height() - botMargin - botMargin - topMargin) / 2) / (float)height()
+			(float) scopeHeight / (float) height()
 		);
+		m_glLeft1ScaleRect = QRectF(
+			0,
+			(float)topMargin / (float)height(),
+			(float)(leftMargin-1) / (float)width(),
+			(float) scopeHeight / (float) height()
+		);
+		{ // Scales
+			float pow_floor = -100.0 + m_ofs * 100.0;
+			float pow_range = 100.0 / m_amp;
+			float amp_range = 2.0 / m_amp;
+
+			m_powerScale.setSize(scopeHeight);
+			m_powerScale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
+
+			std::cerr << "Vertical: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
+
+			m_left1ScalePixmap = QPixmap(
+				leftMargin - 1,
+				scopeHeight
+			);
+
+			m_left1ScalePixmap.fill(Qt::black);
+			QPainter painter(&m_left1ScalePixmap);
+			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+			tickList = &m_powerScale.getTickList();
+
+			for(int i = 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
+						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
+					}
+				}
+			}
+
+			//painter.drawText(QPointF(2, 2), "0");
+
+			if (m_left1ScaleTextureAllocated)
+				deleteTexture(m_left1ScaleTextureAllocated);
+			m_leftScaleTexture = bindTexture(m_left1ScalePixmap,
+				GL_TEXTURE_2D,
+				GL_RGBA,
+				QGLContext::LinearFilteringBindOption |
+				QGLContext::MipmapBindOption);
+			m_left1ScaleTextureAllocated = true;
+		}
+
 		m_glScopeRect2 = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)(botMargin + topMargin + (height() - botMargin - botMargin - topMargin) / 2) / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)((height() - botMargin - botMargin - topMargin) / 2) / (float)height()
 		);
-	} else {
+	}
+	else // Horizontal
+	{
+		int scopeHeight = height() - topMargin - botMargin;
 		m_glScopeRect1 = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)topMargin / (float)height(),
 			(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
-			(float)(height() - topMargin - botMargin) / (float)height()
+			(float) scopeHeight / (float) height()
 		);
+		m_glLeft1ScaleRect = QRectF(
+			0,
+			(float)topMargin / (float)height(),
+			(float)(leftMargin-1) / (float)width(),
+			(float) scopeHeight / (float) height()
+		);
+		{ // Scales
+			std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
+
+			float pow_floor = -100.0 + m_ofs * 100.0;
+			float pow_range = 100.0 / m_amp;
+			float amp_range = 2.0 / m_amp;
+
+			m_powerScale.setSize(scopeHeight);
+			m_powerScale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
+
+			m_left1ScalePixmap = QPixmap(
+				leftMargin - 1,
+				scopeHeight
+			);
+
+			m_left1ScalePixmap.fill(Qt::black);
+			QPainter painter(&m_left1ScalePixmap);
+			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+			tickList = &m_powerScale.getTickList();
+
+			for(int i = 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
+						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
+					}
+				}
+			}
+
+			//painter.drawText(QPointF(2, 2), "0");
+
+			if (m_left1ScaleTextureAllocated)
+				deleteTexture(m_left1ScaleTextureAllocated);
+			m_leftScaleTexture = bindTexture(m_left1ScalePixmap,
+				GL_TEXTURE_2D,
+				GL_RGBA,
+				QGLContext::LinearFilteringBindOption |
+				QGLContext::MipmapBindOption);
+			m_left1ScaleTextureAllocated = true;
+		}
+
 		m_glScopeRect2 = QRectF(
 			(float)(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float)width(),
 			(float)topMargin / (float)height(),

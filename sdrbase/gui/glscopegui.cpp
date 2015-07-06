@@ -6,6 +6,7 @@
 #include "ui_glscopegui.h"
 
 #include <iostream>
+#include <cstdio>
 
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	QWidget(parent),
@@ -13,12 +14,13 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_messageQueue(NULL),
 	m_scopeVis(NULL),
 	m_glScope(NULL),
-	m_sampleRate(0),
+	m_sampleRate(1),
 	m_displayData(GLScope::ModeIQ),
 	m_displayOrientation(Qt::Horizontal),
 	m_timeBase(1),
 	m_timeOffset(0),
 	m_amplification(0),
+	m_ampOffset(0),
 	m_displayGridIntensity(1)
 {
 	ui->setupUi(this);
@@ -31,6 +33,7 @@ GLScopeGUI::~GLScopeGUI()
 
 void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLScope* glScope)
 {
+	std::cerr << "GLScopeGUI::setBuddies: scopeVis @" << scopeVis << std::endl;
 	m_messageQueue = messageQueue;
 	m_scopeVis = scopeVis;
 	m_glScope = glScope;
@@ -64,6 +67,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(4, m_timeOffset);
 	s.writeS32(5, m_amplification);
 	s.writeS32(6, m_displayGridIntensity);
+	s.writeS32(7, m_ampOffset);
 
 	return s.final();
 }
@@ -86,6 +90,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(6, &m_displayGridIntensity, 5);
 		if(m_timeBase < 0)
 			m_timeBase = 1;
+		d.readS32(7, &m_ampOffset, 0);
 		applySettings();
 		return true;
 	} else {
@@ -120,8 +125,17 @@ void GLScopeGUI::on_amp_valueChanged(int value)
 	m_amplification = value;
 }
 
+void GLScopeGUI::on_ampOfs_valueChanged(int value)
+{
+	m_ampOffset = value;
+	ui->ampOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
+	m_glScope->setAmpOfs(value/100.0); // scale to [-1.0,1.0]
+}
+
 void GLScopeGUI::on_scope_traceSizeChanged(int)
 {
+	std::cerr << "GLScopeGUI::on_scope_traceSizeChanged: sample rate: " << m_glScope->getSampleRate() << std::endl;
+	m_sampleRate = m_glScope->getSampleRate();
 	qreal t = (m_glScope->getTraceSize() * 0.1 / m_sampleRate) / (qreal)m_timeBase;
 	if(t < 0.000001)
 		ui->timeText->setText(tr("%1\nns/div").arg(t * 1000000000.0));
@@ -142,6 +156,7 @@ void GLScopeGUI::on_time_valueChanged(int value)
 void GLScopeGUI::on_timeOfs_valueChanged(int value)
 {
 	m_timeOffset = value;
+	ui->timeOfsText->setText(tr("%1").arg(value/1000.0, 0, 'f', 3));
 	m_glScope->setTimeOfsProMill(value);
 }
 
@@ -202,10 +217,12 @@ void GLScopeGUI::on_gridIntensity_valueChanged(int index)
 
 bool GLScopeGUI::handleMessage(Message* cmd)
 {
+	return false;
+	/*
 	if(DSPSignalNotification::match(cmd))
 	{
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		//fprintf(stderr, "%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
+		//fprintf(stderr, "GLScopeGUI::handleMessage: %d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
 		cmd->completed();
 		return true;
@@ -214,4 +231,5 @@ bool GLScopeGUI::handleMessage(Message* cmd)
 	{
 		return false;
 	}
+	*/
 }

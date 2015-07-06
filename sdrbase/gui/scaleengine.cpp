@@ -158,6 +158,7 @@ void ScaleEngine::calcScaleFactor()
 
 		case Unit::AngleDegrees:
 			m_unitStr = QString("°");
+			break;
 
 		case Unit::Time:
 			if(median < 0.001) {
@@ -168,6 +169,24 @@ void ScaleEngine::calcScaleFactor()
 				m_scale = 0.001;
 			} else {
 				m_unitStr = QString("s");
+			}
+			break;
+
+		case Unit::Volt:
+			if (median < 1e-9) {
+				m_unitStr = QString("pV");
+				m_scale = 1e-12;
+			} else if (median < 1e-6) {
+				m_unitStr = QString("nV");
+				m_scale = 1e-9;
+			} else if (median < 1e-3) {
+				m_unitStr = QString("µV");
+				m_scale = 1e-6;
+			} else if (median < 1.0) {
+				m_unitStr = QString("mV");
+				m_scale = 1e-3;
+			} else {
+				m_unitStr = QString("V");
 			}
 			break;
 	}

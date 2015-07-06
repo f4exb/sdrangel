@@ -48,6 +48,11 @@
      </property>
      <item>
       <widget class="QLabel" name="dataLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Data</string>
        </property>
@@ -60,6 +65,11 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
        </property>
        <property name="toolTip">
         <string>Grid intensity</string>
@@ -166,6 +176,11 @@
      </item>
      <item>
       <widget class="QLabel" name="timeLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Time</string>
        </property>
@@ -207,6 +222,11 @@
          <height>0</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.1000
 /div</string>
@@ -224,6 +244,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Time offset</string>
+       </property>
        <property name="minimum">
         <number>0</number>
        </property>
@@ -240,12 +263,17 @@
         <enum>QSlider::NoTicks</enum>
        </property>
        <property name="tickInterval">
-        <number>50</number>
+        <number>1</number>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="timeOfsLabel">
+      <widget class="QLabel" name="timeOfsText">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -260,6 +288,11 @@
      </item>
      <item>
       <widget class="QLabel" name="ampLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Amp</string>
        </property>
@@ -304,12 +337,54 @@
          <height>0</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.2000
 /div</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="ampOfs">
+       <property name="toolTip">
+        <string>Y offset</string>
+       </property>
+       <property name="minimum">
+        <number>-100</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+       <property name="tickInterval">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ampOfsText">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </item>

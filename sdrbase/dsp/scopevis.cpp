@@ -3,6 +3,8 @@
 #include "dsp/dspcommands.h"
 #include "util/messagequeue.h"
 
+#include <cstdio>
+
 ScopeVis::ScopeVis(GLScope* glScope) :
 	m_glScope(glScope),
 	m_trace(100000),
@@ -124,6 +126,7 @@ bool ScopeVis::handleMessageKeep(Message* message)
 {
 	if(DSPSignalNotification::match(message)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)message;
+		//fprintf(stderr, "ScopeVis::handleMessage @%x : %d samples/sec, %lld Hz offset\n", this, signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
 		return true;
 	} else if(DSPConfigureScopeVis::match(message)) {

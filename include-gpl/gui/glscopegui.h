@@ -44,12 +44,14 @@ private:
 	qint32 m_timeBase;
 	qint32 m_timeOffset;
 	qint32 m_amplification;
+	qint32 m_ampOffset;
 	int m_displayGridIntensity;
 
 	void applySettings();
 
 private slots:
 	void on_amp_valueChanged(int value);
+	void on_ampOfs_valueChanged(int value);
 	void on_scope_traceSizeChanged(int value);
 	void on_time_valueChanged(int value);
 	void on_timeOfs_valueChanged(int value);

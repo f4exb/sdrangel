@@ -151,6 +151,83 @@ void BladerfThread::decimate2_sup(SampleVector::iterator* it, const qint16* buf,
 	}
 }
 
+/*
+void BladerfThread::decimate2_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 1; pos += 2) {
+		Sample s(buf[pos+0] << 3, buf[pos+1] << 3);
+		if (m_decimator2.workDecimateCenter(&s)) {
+			**it = s;
+			(*it)++;
+		}
+	}
+}
+
+void BladerfThread::decimate4_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 1; pos += 2) {
+		Sample s(buf[pos+0] << 4, buf[pos+1] << 4);
+		if (m_decimator2.workDecimateCenter(&s)) {
+			if (m_decimator4.workDecimateCenter(&s)) {
+				**it = s;
+				(*it)++;
+			}
+		}
+	}
+}
+
+void BladerfThread::decimate8_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 1; pos += 2) {
+		Sample s(buf[pos+0] << 4, buf[pos+1] << 4);
+		if (m_decimator2.workDecimateCenter(&s)) {
+			if (m_decimator4.workDecimateCenter(&s)) {
+				if (m_decimator8.workDecimateCenter(&s)) {
+					**it = s;
+					(*it)++;
+				}
+			}
+		}
+	}
+}
+
+void BladerfThread::decimate16_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 11; pos += 2) {
+		Sample s(buf[pos+0] << 4, buf[pos+1] << 4);
+		if (m_decimator2.workDecimateCenter(&s)) {
+			if (m_decimator4.workDecimateCenter(&s)) {
+				if (m_decimator8.workDecimateCenter(&s)) {
+					if (m_decimator16.workDecimateCenter(&s)) {
+						**it = s;
+						(*it)++;
+					}
+				}
+			}
+		}
+	}
+}
+
+void BladerfThread::decimate32_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
+{
+	for (int pos = 0; pos < len - 11; pos += 2) {
+		Sample s(buf[pos+0] << 4, buf[pos+1] << 4);
+		if (m_decimator2.workDecimateCenter(&s)) {
+			if (m_decimator4.workDecimateCenter(&s)) {
+				if (m_decimator8.workDecimateCenter(&s)) {
+					if (m_decimator16.workDecimateCenter(&s)) {
+						if (m_decimator32.workDecimateCenter(&s)) {
+							**it = s;
+							(*it)++;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+*/
+
 void BladerfThread::decimate2_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	for (int pos = 0; pos < len - 3; pos += 4) {

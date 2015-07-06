@@ -28,7 +28,8 @@ namespace Unit {
 		DecibelMilliWatt,
 		DecibelMicroVolt,
 		AngleDegrees,
-		Time
+		Time,
+		Volt
 	};
 };
 

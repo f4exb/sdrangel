@@ -24,6 +24,7 @@
 #include <QMutex>
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
+#include "gui/scaleengine.h"
 #include "util/export.h"
 
 class DSPEngine;
@@ -46,6 +47,7 @@ public:
 
 	void setDSPEngine(DSPEngine* dspEngine);
 	void setAmp(Real amp);
+	void setAmpOfs(Real ampOfs);
 	void setTimeBase(int timeBase);
 	void setTimeOfsProMill(int timeOfsProMill);
 	void setMode(Mode mode);
@@ -55,6 +57,14 @@ public:
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
 
 	int getTraceSize() const { return m_rawTrace.size(); }
+
+	void setSampleRate(int sampleRate) {
+		m_sampleRate = sampleRate;
+	}
+
+	int getSampleRate() const {
+		return m_sampleRate;
+	}
 
 signals:
 	void traceSizeChanged(int);
@@ -85,6 +95,7 @@ private:
 
 	// config
 	Real m_amp;
+	Real m_ofs;
 	int m_timeBase;
 	int m_timeOfsProMill;
 	ScopeVis::TriggerChannel m_triggerChannel;
@@ -95,6 +106,16 @@ private:
 	QRectF m_glScopeRect1;
 	QRectF m_glScopeRect2;
 	int m_displayGridIntensity;
+	QRectF m_glLeft1ScaleRect;
+	QRectF m_glLeft2ScaleRect;
+	QRectF m_glBot1ScaleRect;
+	QRectF m_glBot2ScaleRect;
+	QPixmap m_left1ScalePixmap;
+	bool m_left1ScaleTextureAllocated;
+	GLuint m_leftScaleTexture;
+	ScaleEngine m_timeScale;
+	ScaleEngine m_powerScale;
+	ScaleEngine m_amplitudeScale;
 
 	void initializeGL();
 	void resizeGL(int width, int height);
