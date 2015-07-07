@@ -298,6 +298,12 @@
         <height>250</height>
        </size>
       </property>
+      <property name="font">
+       <font>
+        <family>Monospace</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
      </widget>
     </item>
     <item>

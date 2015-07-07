@@ -201,7 +201,7 @@
         <number>100</number>
        </property>
        <property name="pageStep">
-        <number>5</number>
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -251,10 +251,10 @@
         <number>0</number>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <number>100</number>
        </property>
        <property name="pageStep">
-        <number>10</number>
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -369,10 +369,10 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="tickPosition">
-        <enum>QSlider::TicksBelow</enum>
+        <enum>QSlider::NoTicks</enum>
        </property>
        <property name="tickInterval">
-        <number>1</number>
+        <number>10</number>
        </property>
       </widget>
      </item>

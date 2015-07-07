@@ -1156,6 +1156,7 @@ void GLSpectrum::applyChanges()
 		{
 			QPainter painter(&m_leftMarginPixmap);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
 			const ScaleEngine::TickList* tickList;
 			const ScaleEngine::Tick* tick;
 			if(m_displayWaterfall) {
@@ -1199,6 +1200,7 @@ void GLSpectrum::applyChanges()
 			painter.setBrush(Qt::transparent);
 			painter.drawRect(leftMargin, 0, width() - leftMargin, frequencyScaleHeight);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
 			const ScaleEngine::TickList* tickList = &m_frequencyScale.getTickList();
 			const ScaleEngine::Tick* tick;
 			for(int i = 0; i < tickList->count(); i++) {

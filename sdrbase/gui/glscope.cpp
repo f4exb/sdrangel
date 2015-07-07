@@ -538,6 +538,7 @@ void GLScope::applyConfig()
 			m_left1ScalePixmap.fill(Qt::black);
 			QPainter painter(&m_left1ScalePixmap);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
 			const ScaleEngine::TickList* tickList;
 			const ScaleEngine::Tick* tick;
 			tickList = &m_powerScale.getTickList();
@@ -604,6 +605,7 @@ void GLScope::applyConfig()
 			m_left1ScalePixmap.fill(Qt::black);
 			QPainter painter(&m_left1ScalePixmap);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
 			const ScaleEngine::TickList* tickList;
 			const ScaleEngine::Tick* tick;
 			tickList = &m_powerScale.getTickList();

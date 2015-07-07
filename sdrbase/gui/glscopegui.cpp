@@ -173,8 +173,8 @@ void GLScopeGUI::on_time_valueChanged(int value)
 void GLScopeGUI::on_timeOfs_valueChanged(int value)
 {
 	m_timeOffset = value;
-	ui->timeOfsText->setText(tr("%1").arg(value/1000.0, 0, 'f', 3));
-	m_glScope->setTimeOfsProMill(value);
+	ui->timeOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
+	m_glScope->setTimeOfsProMill(value*10);
 }
 
 void GLScopeGUI::on_dataMode_currentIndexChanged(int index)

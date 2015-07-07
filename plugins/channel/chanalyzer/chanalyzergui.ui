@@ -373,7 +373,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Courier</family>
+        <family>Monospace</family>
         <pointsize>8</pointsize>
        </font>
       </property>
@@ -422,7 +422,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Courier</family>
+        <family>Monospace</family>
         <pointsize>8</pointsize>
        </font>
       </property>
@@ -435,6 +435,12 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>GLScope</class>
+   <extends>QWidget</extends>
+   <header>gui/glscope.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
@@ -457,12 +463,6 @@
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLScope</class>
-   <extends>QWidget</extends>
-   <header>gui/glscope.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
