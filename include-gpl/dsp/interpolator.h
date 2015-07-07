@@ -55,7 +55,7 @@ private:
 	{
 		if (phase < 0)
 			phase = 0;
-#if 1
+#if USE_SIMD
 		// beware of the ringbuffer
 		if(m_ptr == 0) {
 			// only one straight block
