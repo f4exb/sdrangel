@@ -106,11 +106,21 @@ private:
 	QRectF m_glBot1ScaleRect;
 	QRectF m_glBot2ScaleRect;
 	QPixmap m_left1ScalePixmap;
+	QPixmap m_left2ScalePixmap;
+	QPixmap m_bot1ScalePixmap;
+	QPixmap m_bot2ScalePixmap;
 	bool m_left1ScaleTextureAllocated;
-	GLuint m_leftScaleTexture;
-	ScaleEngine m_timeScale;
-	ScaleEngine m_powerScale;
-	ScaleEngine m_amplitudeScale;
+	bool m_left2ScaleTextureAllocated;
+	bool m_bot1ScaleTextureAllocated;
+	bool m_bot2ScaleTextureAllocated;
+	GLuint m_left1ScaleTexture;
+	GLuint m_left2ScaleTexture;
+	GLuint m_bot1ScaleTexture;
+	GLuint m_bot2ScaleTexture;
+	ScaleEngine m_x1Scale;
+	ScaleEngine m_x2Scale;
+	ScaleEngine m_y1Scale;
+	ScaleEngine m_y2Scale;
 
 	void initializeGL();
 	void resizeGL(int width, int height);

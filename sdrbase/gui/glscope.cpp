@@ -33,8 +33,14 @@ GLScope::GLScope(QWidget* parent) :
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.start(50);
-	m_powerScale.setFont(font());
-	m_powerScale.setOrientation(Qt::Vertical);
+	m_y1Scale.setFont(font());
+	m_y1Scale.setOrientation(Qt::Vertical);
+	m_y2Scale.setFont(font());
+	m_y2Scale.setOrientation(Qt::Vertical);
+	m_x1Scale.setFont(font());
+	m_x1Scale.setOrientation(Qt::Horizontal);
+	m_x2Scale.setFont(font());
+	m_x2Scale.setOrientation(Qt::Horizontal);
 }
 
 GLScope::~GLScope()
@@ -76,12 +82,14 @@ void GLScope::setAmpOfs(Real ampOfs)
 void GLScope::setTimeBase(int timeBase)
 {
 	m_timeBase = timeBase;
+	m_configChanged = true;
 	update();
 }
 
 void GLScope::setTimeOfsProMill(int timeOfsProMill)
 {
 	m_timeOfsProMill = timeOfsProMill;
+	m_configChanged = true;
 	update();
 }
 
@@ -195,17 +203,38 @@ void GLScope::paintGL()
 	}
 	glPopMatrix();
 
-	// paint left scale
-	glBindTexture(GL_TEXTURE_2D, m_leftScaleTexture);
+	// paint left #1 scale
+	glBindTexture(GL_TEXTURE_2D, m_left1ScaleTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 	glPushMatrix();
 	glTranslatef(m_glLeft1ScaleRect.x(), m_glLeft1ScaleRect.y(), 0);
 	glScalef(m_glLeft1ScaleRect.width(), m_glLeft1ScaleRect.height(), 1);
+	glEnable(GL_TEXTURE_2D);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 1);
+	glVertex2f(0, 1);
+	glTexCoord2f(1, 1);
+	glVertex2f(1, 1);
+	glTexCoord2f(1, 0);
+	glVertex2f(1, 0);
+	glTexCoord2f(0, 0);
+	glVertex2f(0, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
 
+	// paint bottom #1 scale
+	glBindTexture(GL_TEXTURE_2D, m_bot1ScaleTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glPushMatrix();
+	glTranslatef(m_glBot1ScaleRect.x(), m_glBot1ScaleRect.y(), 0);
+	glScalef(m_glBot1ScaleRect.width(), m_glBot1ScaleRect.height(), 1);
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 1);
@@ -504,44 +533,52 @@ void GLScope::applyConfig()
 	int leftMargin = 35;
 	int rightMargin = 5;
 
+    float pow_floor = -100.0 + m_ofs * 100.0;
+    float pow_range = 100.0 / m_amp;
+    float amp_range = 2.0 / m_amp;
+    float t_start = (m_timeOfsProMill / 1000.0) * ((float) m_displayTrace->size() / m_sampleRate);
+    float t_len = ((float) m_displayTrace->size() / m_sampleRate) / (float) m_timeBase;
+
 	// QRectF(x, y, w, h); (x, y) = top left corner
 
 	if(m_orientation == Qt::Vertical) {
 		int scopeHeight = (height() - botMargin - botMargin - topMargin) / 2;
+        int scopeWidth = width() - leftMargin - rightMargin;
 		m_glScopeRect1 = QRectF(
-			(float)leftMargin / (float)width(),
-			(float)topMargin / (float)height(),
-			(float)(width() - leftMargin - rightMargin) / (float)width(),
+			(float) leftMargin / (float) width(),
+			(float) topMargin / (float) height(),
+			(float) scopeWidth / (float) width(),
 			(float) scopeHeight / (float) height()
 		);
 		m_glLeft1ScaleRect = QRectF(
 			0,
-			(float)topMargin / (float)height(),
-			(float)(leftMargin-1) / (float)width(),
+			(float) topMargin / (float) height(),
+			(float) (leftMargin-1) / (float) width(),
 			(float) scopeHeight / (float) height()
 		);
-		{ // Scales
-			float pow_floor = -100.0 + m_ofs * 100.0;
-			float pow_range = 100.0 / m_amp;
-			float amp_range = 2.0 / m_amp;
-
-			m_powerScale.setSize(scopeHeight);
-			m_powerScale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
-
-			//std::cerr << "Vertical: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
+        m_glBot1ScaleRect = QRectF(
+        	(float) leftMargin / (float) width(),
+            (float) (scopeHeight + topMargin + 1) / (float) height(),
+            (float) scopeWidth/ (float) width(),
+            (float) (botMargin - 1) / (float) height()
+        );
+		{ // Y1 scale
+			m_y1Scale.setSize(scopeHeight);
+			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
 
 			m_left1ScalePixmap = QPixmap(
 				leftMargin - 1,
 				scopeHeight
 			);
 
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+
 			m_left1ScalePixmap.fill(Qt::black);
 			QPainter painter(&m_left1ScalePixmap);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
 			painter.setFont(font());
-			const ScaleEngine::TickList* tickList;
-			const ScaleEngine::Tick* tick;
-			tickList = &m_powerScale.getTickList();
+            tickList = &m_y1Scale.getTickList();
 
 			for(int i = 0; i < tickList->count(); i++) {
 				tick = &(*tickList)[i];
@@ -553,17 +590,51 @@ void GLScope::applyConfig()
 				}
 			}
 
-			//painter.drawText(QPointF(2, 2), "0");
-
 			if (m_left1ScaleTextureAllocated)
-				deleteTexture(m_left1ScaleTextureAllocated);
-			m_leftScaleTexture = bindTexture(m_left1ScalePixmap,
+				deleteTexture(m_left1ScaleTexture);
+			m_left1ScaleTexture = bindTexture(m_left1ScalePixmap,
 				GL_TEXTURE_2D,
 				GL_RGBA,
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left1ScaleTextureAllocated = true;
-		}
+		} // Y1 scale
+		{ // X1 scale
+            m_x1Scale.setSize(scopeWidth);
+            m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
+
+            m_bot1ScalePixmap = QPixmap(
+                scopeWidth,
+                botMargin - 1
+            );
+
+            const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+
+			m_bot1ScalePixmap.fill(Qt::black);
+			QPainter painter(&m_bot1ScalePixmap);
+			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
+            tickList = &m_x1Scale.getTickList();
+
+			for(int i = 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
+					}
+				}
+			}
+
+			if (m_bot1ScaleTextureAllocated)
+				deleteTexture(m_bot1ScaleTexture);
+			m_bot1ScaleTexture = bindTexture(m_bot1ScalePixmap,
+				GL_TEXTURE_2D,
+				GL_RGBA,
+				QGLContext::LinearFilteringBindOption |
+				QGLContext::MipmapBindOption);
+			m_bot1ScaleTextureAllocated = true;
+		} // X1 scale
 
 		m_glScopeRect2 = QRectF(
 			(float)leftMargin / (float)width(),
@@ -575,40 +646,44 @@ void GLScope::applyConfig()
 	else // Horizontal
 	{
 		int scopeHeight = height() - topMargin - botMargin;
+        int scopeWidth = (width() - rightMargin)/2 - leftMargin;
 		m_glScopeRect1 = QRectF(
-			(float)leftMargin / (float)width(),
-			(float)topMargin / (float)height(),
-			(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
+			(float) leftMargin / (float) width(),
+			(float) topMargin / (float) height(),
+			(float) scopeWidth / (float) width(),
 			(float) scopeHeight / (float) height()
 		);
 		m_glLeft1ScaleRect = QRectF(
 			0,
-			(float)topMargin / (float)height(),
-			(float)(leftMargin-1) / (float)width(),
+			(float) topMargin / (float) height(),
+			(float) (leftMargin-1) / (float) width(),
 			(float) scopeHeight / (float) height()
 		);
-		{ // Scales
+		m_glBot1ScaleRect = QRectF(
+            (float) leftMargin / (float) width(),
+            (float) (scopeHeight + topMargin + 1) / (float) height(),
+            (float) scopeWidth / (float) width(),
+            (float) (botMargin - 1) / (float) height()
+        );
+		{ // Y1 scale
 			//std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 
-			float pow_floor = -100.0 + m_ofs * 100.0;
-			float pow_range = 100.0 / m_amp;
-			float amp_range = 2.0 / m_amp;
-
-			m_powerScale.setSize(scopeHeight);
-			m_powerScale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
+			m_y1Scale.setSize(scopeHeight);
+			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
 
 			m_left1ScalePixmap = QPixmap(
 				leftMargin - 1,
 				scopeHeight
 			);
 
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+
 			m_left1ScalePixmap.fill(Qt::black);
 			QPainter painter(&m_left1ScalePixmap);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
 			painter.setFont(font());
-			const ScaleEngine::TickList* tickList;
-			const ScaleEngine::Tick* tick;
-			tickList = &m_powerScale.getTickList();
+			tickList = &m_y1Scale.getTickList();
 
 			for(int i = 0; i < tickList->count(); i++) {
 				tick = &(*tickList)[i];
@@ -620,17 +695,51 @@ void GLScope::applyConfig()
 				}
 			}
 
-			//painter.drawText(QPointF(2, 2), "0");
-
 			if (m_left1ScaleTextureAllocated)
 				deleteTexture(m_left1ScaleTextureAllocated);
-			m_leftScaleTexture = bindTexture(m_left1ScalePixmap,
+			m_left1ScaleTexture = bindTexture(m_left1ScalePixmap,
 				GL_TEXTURE_2D,
 				GL_RGBA,
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left1ScaleTextureAllocated = true;
-		}
+		} // Y1 scale
+		{ // X1 scale
+            m_x1Scale.setSize(scopeWidth);
+            m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
+
+            m_bot1ScalePixmap = QPixmap(
+                scopeWidth,
+                botMargin - 1
+            );
+
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+
+			m_bot1ScalePixmap.fill(Qt::black);
+			QPainter painter(&m_bot1ScalePixmap);
+			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			painter.setFont(font());
+            tickList = &m_x1Scale.getTickList();
+
+			for(int i = 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
+					}
+				}
+			}
+
+			if (m_bot1ScaleTextureAllocated)
+				deleteTexture(m_bot1ScaleTexture);
+			m_bot1ScaleTexture = bindTexture(m_bot1ScalePixmap,
+				GL_TEXTURE_2D,
+				GL_RGBA,
+				QGLContext::LinearFilteringBindOption |
+				QGLContext::MipmapBindOption);
+			m_bot1ScaleTextureAllocated = true;
+		} // X1 scale
 
 		m_glScopeRect2 = QRectF(
 			(float)(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float)width(),
