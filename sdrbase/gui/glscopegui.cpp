@@ -115,6 +115,7 @@ void GLScopeGUI::applySettings()
 	ui->time->setValue(m_timeBase);
 	ui->timeOfs->setValue(m_timeOffset);
 	ui->amp->setValue(m_amplification);
+	ui->ampOfs->setValue(m_ampOffset);
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 }
 
