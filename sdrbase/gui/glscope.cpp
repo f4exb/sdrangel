@@ -97,6 +97,7 @@ void GLScope::setMode(Mode mode)
 {
 	m_mode = mode;
 	m_dataChanged = true;
+	m_configChanged = true;
 	update();
 }
 
@@ -493,19 +494,25 @@ void GLScope::mousePressEvent(QMouseEvent* event)
 void GLScope::handleMode()
 {
 	switch(m_mode) {
-		case ModeIQ:
+		case ModeIQ: {
+			m_mathTrace.resize(m_rawTrace.size());
+			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			m_displayTrace = &m_rawTrace;
+			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
+				*dst++ = Complex(src->real() - 2*m_ofs, src->imag() - m_ofs);
+			}
+			m_displayTrace = &m_mathTrace;
 			m_amp1 = m_amp;
 			m_amp2 = m_amp;
-			m_ofs1 = 0.0;
-			m_ofs2 = 0.0;
+			m_ofs1 = m_ofs;
+			m_ofs2 = m_ofs;
 			break;
-
+		}
 		case ModeMagLinPha: {
 			m_mathTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
-				*dst++ = Complex(abs(*src), arg(*src) / M_PI);
+				*dst++ = Complex(abs(*src) - m_ofs/2.0, arg(*src) / M_PI);
 			m_displayTrace = &m_mathTrace;
 			m_amp1 = m_amp;
 			m_amp2 = 1.0;
@@ -513,7 +520,6 @@ void GLScope::handleMode()
 			m_ofs2 = 0.0;
 			break;
 		}
-
 		case ModeMagdBPha: {
 			m_mathTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
@@ -530,7 +536,6 @@ void GLScope::handleMode()
 			m_ofs2 = 0.0;
 			break;
 		}
-
 		case ModeDerived12: {
 			if(m_rawTrace.size() > 3) {
 				m_mathTrace.resize(m_rawTrace.size() - 3);
@@ -548,7 +553,6 @@ void GLScope::handleMode()
 			}
 			break;
 		}
-
 		case ModeCyclostationary: {
 			if(m_rawTrace.size() > 2) {
 				m_mathTrace.resize(m_rawTrace.size() - 2);
@@ -563,7 +567,6 @@ void GLScope::handleMode()
 			}
 			break;
 		}
-
 	}
 }
 
@@ -582,13 +585,59 @@ void GLScope::applyConfig()
     float pow_floor = -100.0 + m_ofs * 100.0;
     float pow_range = 100.0 / m_amp;
     float amp_range = 2.0 / m_amp;
+    float amp_ofs = m_ofs;
     float t_start = (m_timeOfsProMill / 1000.0) * ((float) m_displayTrace->size() / m_sampleRate);
     float t_len = ((float) m_displayTrace->size() / m_sampleRate) / (float) m_timeBase;
 
-	m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
-	m_y2Scale.setRange(Unit::AngleDegrees, -180.0, 180.0);
     m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len);
+
+	switch(m_mode) {
+		case ModeIQ: {
+			if (amp_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);
+				m_y2Scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);
+			} else {
+				m_y1Scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
+				m_y2Scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
+			}
+			break;
+		}
+		case ModeMagLinPha: {
+			if (amp_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, amp_ofs * 500.0, amp_range * 1000.0 + amp_ofs * 500.0);
+			} else {
+				m_y1Scale.setRange(Unit::None, amp_ofs/2.0, amp_range + amp_ofs/2.0);
+			}
+			m_y2Scale.setRange(Unit::AngleDegrees, -180.0, 180.0);
+			break;
+		}
+		case ModeMagdBPha: {
+			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
+			m_y2Scale.setRange(Unit::AngleDegrees, -180.0, 180.0);
+			break;
+		}
+		case ModeDerived12: {
+			if (amp_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, 0.0, amp_range * 1000.0);
+				m_y2Scale.setRange(Unit::None, - amp_range * 500.0, amp_range * 500.0);
+			} else {
+				m_y1Scale.setRange(Unit::None, 0.0, amp_range);
+				m_y2Scale.setRange(Unit::None, - amp_range * 0.5, amp_range * 0.5);
+			}
+			break;
+		}
+		case ModeCyclostationary: {
+			if (amp_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, 0.0, amp_range * 1000.0);
+				m_y2Scale.setRange(Unit::None, - amp_range * 500.0, amp_range * 500.0);
+			} else {
+				m_y1Scale.setRange(Unit::None, 0.0, amp_range);
+				m_y2Scale.setRange(Unit::None, - amp_range * 0.5, amp_range * 0.5);
+			}
+			break;
+		}
+	}
 
     // QRectF(x, y, w, h); (x, y) = top left corner
 
