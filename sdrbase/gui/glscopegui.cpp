@@ -19,6 +19,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_sampleRate(1),
 	m_displayData(GLScope::ModeIQ),
 	m_displayOrientation(Qt::Horizontal),
+	m_displays(GLScope::DisplayBoth),
 	m_timeBase(1),
 	m_timeOffset(0),
 	m_amplification(0),
@@ -72,6 +73,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(5, m_amplification);
 	s.writeS32(6, m_displayGridIntensity);
 	s.writeS32(7, m_ampOffset);
+	s.writeS32(8, m_displays);
 
 	return s.final();
 }
@@ -95,6 +97,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		if(m_timeBase < 0)
 			m_timeBase = 1;
 		d.readS32(7, &m_ampOffset, 0);
+		d.readS32(8, &m_displays, GLScope::DisplayBoth);
 		applySettings();
 		return true;
 	} else {
@@ -106,14 +109,37 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 void GLScopeGUI::applySettings()
 {
 	ui->dataMode->setCurrentIndex(m_displayData);
-	if(m_displayOrientation == Qt::Horizontal) {
-		m_glScope->setOrientation(Qt::Horizontal);
-		ui->horizView->setChecked(true);
-		ui->vertView->setChecked(false);
-	} else {
-		m_glScope->setOrientation(Qt::Vertical);
+	if (m_displays == GLScope::DisplayBoth)
+	{
+		if(m_displayOrientation == Qt::Horizontal) {
+			m_glScope->setOrientation(Qt::Horizontal);
+			ui->horizView->setChecked(true);
+			ui->vertView->setChecked(false);
+			ui->onlyPrimeView->setChecked(false);
+			ui->onlySecondView->setChecked(false);
+		} else {
+			m_glScope->setOrientation(Qt::Vertical);
+			ui->horizView->setChecked(false);
+			ui->vertView->setChecked(true);
+			ui->onlyPrimeView->setChecked(false);
+			ui->onlySecondView->setChecked(false);
+		}
+	}
+	else if (m_displays == GLScope::DisplayFirstOnly)
+	{
+		m_glScope->setDisplays(GLScope::DisplayFirstOnly);
+		ui->onlyPrimeView->setChecked(true);
 		ui->horizView->setChecked(false);
-		ui->vertView->setChecked(true);
+		ui->vertView->setChecked(false);
+		ui->onlySecondView->setChecked(false);
+	}
+	else if (m_displays == GLScope::DisplaySecondOnly)
+	{
+		m_glScope->setDisplays(GLScope::DisplaySecondOnly);
+		ui->onlySecondView->setChecked(true);
+		ui->onlyPrimeView->setChecked(false);
+		ui->horizView->setChecked(false);
+		ui->vertView->setChecked(false);
 	}
 	ui->time->setValue(m_timeBase);
 	ui->timeOfs->setValue(m_timeOffset);
@@ -248,8 +274,8 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 
 void GLScopeGUI::on_horizView_clicked()
 {
-	std::cerr << "GLScopeGUI::on_horizView_clicked" << std::endl;
 	m_displayOrientation = Qt::Horizontal;
+	m_displays = GLScope::DisplayBoth;
 	if(ui->horizView->isChecked()) {
 		ui->vertView->setChecked(false);
 		ui->onlyPrimeView->setChecked(false);
@@ -265,8 +291,8 @@ void GLScopeGUI::on_horizView_clicked()
 
 void GLScopeGUI::on_vertView_clicked()
 {
-	std::cerr << "GLScopeGUI::on_vertView_clicked" << std::endl;
 	m_displayOrientation = Qt::Vertical;
+	m_displays = GLScope::DisplayBoth;
 	if(ui->vertView->isChecked()) {
 		ui->horizView->setChecked(false);
 		ui->onlyPrimeView->setChecked(false);
@@ -282,7 +308,7 @@ void GLScopeGUI::on_vertView_clicked()
 
 void GLScopeGUI::on_onlyPrimeView_clicked()
 {
-	std::cerr << "GLScopeGUI::on_onlyPrimeView_clicked" << std::endl;
+	m_displays = GLScope::DisplayFirstOnly;
 	if(ui->onlyPrimeView->isChecked()) {
 		ui->horizView->setChecked(false);
 		ui->vertView->setChecked(false);
@@ -296,7 +322,7 @@ void GLScopeGUI::on_onlyPrimeView_clicked()
 
 void GLScopeGUI::on_onlySecondView_clicked()
 {
-	std::cerr << "GLScopeGUI::on_onlySecondView_clicked" << std::endl;
+	m_displays = GLScope::DisplaySecondOnly;
 	if(ui->onlySecondView->isChecked()) {
 		ui->horizView->setChecked(false);
 		ui->vertView->setChecked(false);

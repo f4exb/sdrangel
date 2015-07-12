@@ -41,6 +41,7 @@ private:
 
 	qint32 m_displayData;
 	qint32 m_displayOrientation;
+	qint32 m_displays;
 	qint32 m_timeBase;
 	qint32 m_timeOffset;
 	qint32 m_amplification;
