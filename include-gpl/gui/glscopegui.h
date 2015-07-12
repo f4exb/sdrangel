@@ -49,6 +49,7 @@ private:
 
 	void applySettings();
 	void setTimeScaleDisplay();
+	void setTimeOfsDisplay();
 
 private slots:
 	void on_amp_valueChanged(int value);

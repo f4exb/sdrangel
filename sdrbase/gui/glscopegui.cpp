@@ -45,6 +45,7 @@ void GLScopeGUI::setSampleRate(int sampleRate)
 {
 	m_sampleRate = sampleRate;
 	setTimeScaleDisplay();
+	setTimeOfsDisplay();
 }
 
 void GLScopeGUI::resetToDefaults()
@@ -137,11 +138,13 @@ void GLScopeGUI::on_ampOfs_valueChanged(int value)
 void GLScopeGUI::on_scope_traceSizeChanged(int)
 {
 	setTimeScaleDisplay();
+	setTimeOfsDisplay();
 }
 
 void GLScopeGUI::on_scope_sampleRateChanged(int)
 {
 	setTimeScaleDisplay();
+	setTimeOfsDisplay();
 }
 
 void GLScopeGUI::setTimeScaleDisplay()
@@ -164,6 +167,21 @@ void GLScopeGUI::setTimeScaleDisplay()
 	else ui->timeText->setText(tr("%1\ns/div").arg(t * 1.0));
 }
 
+void GLScopeGUI::setTimeOfsDisplay()
+{
+	qreal dt = (m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate) / (qreal)m_timeBase;
+
+	if(dt < 0.000001)
+		ui->timeOfsText->setText(tr("%1\nns").arg(dt * 1000000000.0));
+	else if(dt < 0.001)
+		ui->timeOfsText->setText(tr("%1\nµs").arg(dt * 1000000.0));
+	else if(dt < 1.0)
+		ui->timeOfsText->setText(tr("%1\nms").arg(dt * 1000.0));
+	else ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0));
+
+	//ui->timeOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
+}
+
 void GLScopeGUI::on_time_valueChanged(int value)
 {
 	m_timeBase = value;
@@ -174,7 +192,7 @@ void GLScopeGUI::on_time_valueChanged(int value)
 void GLScopeGUI::on_timeOfs_valueChanged(int value)
 {
 	m_timeOffset = value;
-	ui->timeOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
+	setTimeOfsDisplay();
 	m_glScope->setTimeOfsProMill(value*10);
 }
 
