@@ -67,6 +67,8 @@ private slots:
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();
+	void on_onlyPrimeView_clicked();
+	void on_onlySecondView_clicked();
 };
 
 #endif // INCLUDE_GLSCOPEGUI_H

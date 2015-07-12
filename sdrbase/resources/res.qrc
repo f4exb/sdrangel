@@ -14,5 +14,7 @@
         <file>grid.png</file>
         <file>invertspectrum.png</file>
         <file>preset-last.png</file>
+        <file>display1.png</file>
+        <file>display2.png</file>
     </qresource>
 </RCC>

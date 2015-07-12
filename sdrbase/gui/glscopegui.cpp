@@ -248,24 +248,63 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 
 void GLScopeGUI::on_horizView_clicked()
 {
+	std::cerr << "GLScopeGUI::on_horizView_clicked" << std::endl;
 	m_displayOrientation = Qt::Horizontal;
 	if(ui->horizView->isChecked()) {
 		ui->vertView->setChecked(false);
+		ui->onlyPrimeView->setChecked(false);
+		ui->onlySecondView->setChecked(false);
 		m_glScope->setOrientation(Qt::Horizontal);
+		m_glScope->setDisplays(GLScope::DisplayBoth);
 	} else {
 		ui->horizView->setChecked(true);
+		m_glScope->setOrientation(Qt::Horizontal);
+		m_glScope->setDisplays(GLScope::DisplayBoth);
 	}
 }
 
 void GLScopeGUI::on_vertView_clicked()
 {
+	std::cerr << "GLScopeGUI::on_vertView_clicked" << std::endl;
 	m_displayOrientation = Qt::Vertical;
 	if(ui->vertView->isChecked()) {
 		ui->horizView->setChecked(false);
+		ui->onlyPrimeView->setChecked(false);
+		ui->onlySecondView->setChecked(false);
 		m_glScope->setOrientation(Qt::Vertical);
+		m_glScope->setDisplays(GLScope::DisplayBoth);
 	} else {
 		ui->vertView->setChecked(true);
 		m_glScope->setOrientation(Qt::Vertical);
+		m_glScope->setDisplays(GLScope::DisplayBoth);
+	}
+}
+
+void GLScopeGUI::on_onlyPrimeView_clicked()
+{
+	std::cerr << "GLScopeGUI::on_onlyPrimeView_clicked" << std::endl;
+	if(ui->onlyPrimeView->isChecked()) {
+		ui->horizView->setChecked(false);
+		ui->vertView->setChecked(false);
+		ui->onlySecondView->setChecked(false);
+		m_glScope->setDisplays(GLScope::DisplayFirstOnly);
+	} else {
+		ui->onlyPrimeView->setChecked(true);
+		m_glScope->setDisplays(GLScope::DisplayFirstOnly);
+	}
+}
+
+void GLScopeGUI::on_onlySecondView_clicked()
+{
+	std::cerr << "GLScopeGUI::on_onlySecondView_clicked" << std::endl;
+	if(ui->onlySecondView->isChecked()) {
+		ui->horizView->setChecked(false);
+		ui->vertView->setChecked(false);
+		ui->onlyPrimeView->setChecked(false);
+		m_glScope->setDisplays(GLScope::DisplaySecondOnly);
+	} else {
+		ui->onlySecondView->setChecked(true);
+		m_glScope->setDisplays(GLScope::DisplaySecondOnly);
 	}
 }
 

@@ -42,6 +42,12 @@ public:
 		ModeCyclostationary
 	};
 
+	enum Displays {
+		DisplayBoth,
+		DisplayFirstOnly,
+		DisplaySecondOnly
+	};
+
 	GLScope(QWidget* parent = NULL);
 	~GLScope();
 
@@ -51,6 +57,7 @@ public:
 	void setTimeBase(int timeBase);
 	void setTimeOfsProMill(int timeOfsProMill);
 	void setMode(Mode mode);
+	void setDisplays(Displays displays);
 	void setOrientation(Qt::Orientation orientation);
 	void setDisplayGridIntensity(int intensity);
 
@@ -72,6 +79,7 @@ private:
 	bool m_dataChanged;
 	bool m_configChanged;
 	Mode m_mode;
+	Displays m_displays;
 	Qt::Orientation m_orientation;
 
 	// traces

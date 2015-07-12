@@ -79,27 +79,27 @@
        </property>
        <item>
         <property name="text">
-         <string>I+Q (linear)</string>
+         <string>1:I 2:Q (linear)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Mag (linear) + Phi</string>
+         <string>1:Mag (linear) 2:Phi</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Mag (dB) + Phi</string>
+         <string>1:Mag (dB) 2: Phi</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Derived 1+2nd </string>
+         <string>1:Derived 1 2:2nd </string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Cyclostationary</string>
+         <string>1,2:Cyclostationary</string>
         </property>
        </item>
       </widget>
@@ -117,9 +117,55 @@
         <number>0</number>
        </property>
        <item>
+        <widget class="QToolButton" name="onlyPrimeView">
+         <property name="toolTip">
+          <string>Only primary display</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/display1.png</normaloff>:/display1.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="onlySecondView">
+         <property name="toolTip">
+          <string>Only secondary display</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/display2.png</normaloff>:/display2.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QToolButton" name="horizView">
          <property name="toolTip">
-          <string>Horizontal display arrangement</string>
+          <string>Both displays horizontally arranged</string>
          </property>
          <property name="text">
           <string/>
@@ -145,7 +191,7 @@
        <item>
         <widget class="QToolButton" name="vertView">
          <property name="toolTip">
-          <string>Vertical display arrangement</string>
+          <string>Both displays vertically arranged</string>
          </property>
          <property name="text">
           <string/>
