@@ -47,9 +47,13 @@ private:
 	qint32 m_ampOffset;
 	int m_displayGridIntensity;
 
+	static const qreal amps[11];
+
 	void applySettings();
 	void setTimeScaleDisplay();
 	void setTimeOfsDisplay();
+	void setAmpScaleDisplay();
+	void setAmpOfsDisplay();
 
 private slots:
 	void on_amp_valueChanged(int value);

@@ -59,6 +59,7 @@ public:
 
 	void setSampleRate(int sampleRate);
 	int getSampleRate() const {	return m_sampleRate; }
+	Mode getDataMode() const { return m_mode; }
 
 signals:
 	void traceSizeChanged(int);

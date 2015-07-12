@@ -8,6 +8,8 @@
 #include <iostream>
 #include <cstdio>
 
+const qreal GLScopeGUI::amps[11] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001 };
+
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::GLScopeGUI),
@@ -120,18 +122,37 @@ void GLScopeGUI::applySettings()
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 }
 
+void GLScopeGUI::setAmpScaleDisplay()
+{
+	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
+		ui->ampText->setText(tr("%1\ndB/div").arg(amps[m_amplification]*50.0, 0, 'f', 2));
+	} else {
+		ui->ampText->setText(tr("%1\n/div").arg(amps[m_amplification], 0, 'f', 4));
+	}
+}
+
+void GLScopeGUI::setAmpOfsDisplay()
+{
+	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
+		ui->ampOfsText->setText(tr("%1\ndB").arg(m_ampOffset - 100.0, 0, 'f', 0));
+	} else 	if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
+		ui->ampOfsText->setText(tr("%1").arg(m_ampOffset/200.0, 0, 'f', 3));
+	} else {
+		ui->ampOfsText->setText(tr("%1").arg(m_ampOffset/100.0, 0, 'f', 2));
+	}
+}
+
 void GLScopeGUI::on_amp_valueChanged(int value)
 {
-	static qreal amps[11] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001 };
-	ui->ampText->setText(tr("%1\n/div").arg(amps[value], 0, 'f', 4));
-	m_glScope->setAmp(0.2 / amps[value]);
 	m_amplification = value;
+	setAmpScaleDisplay();
+	m_glScope->setAmp(0.2 / amps[m_amplification]);
 }
 
 void GLScopeGUI::on_ampOfs_valueChanged(int value)
 {
 	m_ampOffset = value;
-	ui->ampOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
+	setAmpOfsDisplay();
 	m_glScope->setAmpOfs(value/100.0); // scale to [-1.0,1.0]
 }
 
@@ -199,6 +220,7 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
 void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 {
 	m_displayData = index;
+
 	switch(index) {
 		case 0: // i+q
 			m_glScope->setMode(GLScope::ModeIQ);
@@ -219,6 +241,9 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 		default:
 			break;
 	}
+
+	setAmpScaleDisplay();
+	setAmpOfsDisplay();
 }
 
 void GLScopeGUI::on_horizView_clicked()
