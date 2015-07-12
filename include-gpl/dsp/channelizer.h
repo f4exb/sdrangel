@@ -9,11 +9,13 @@ class MessageQueue;
 class IntHalfbandFilter;
 
 class SDRANGELOVE_API Channelizer : public SampleSink {
+	Q_OBJECT
 public:
 	Channelizer(SampleSink* sampleSink);
 	~Channelizer();
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
+	int getInputSampleRate() const { return m_inputSampleRate; }
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
@@ -54,6 +56,9 @@ protected:
 	bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
 	Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
 	void freeFilterChain();
+
+signals:
+	void inputSampleRateChanged();
 };
 
 #endif // INCLUDE_CHANNELIZER_H

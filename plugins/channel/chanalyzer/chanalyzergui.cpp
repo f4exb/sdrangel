@@ -108,6 +108,11 @@ void ChannelAnalyzerGUI::viewChanged()
 	applySettings();
 }
 
+void ChannelAnalyzerGUI::channelSampleRateChanged()
+{
+	setNewRate(m_spanLog2);
+}
+
 void ChannelAnalyzerGUI::on_deltaMinus_clicked(bool minus)
 {
 	int deltaFrequency = m_channelMarker->getCenterFrequency();
@@ -256,6 +261,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
 	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
+	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
@@ -360,7 +366,7 @@ void ChannelAnalyzerGUI::applySettings()
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
-		48000,
+		m_channelizer->getInputSampleRate(),
 		m_channelMarker->getCenterFrequency());
 	m_channelAnalyzer->configure(m_threadedSampleSink->getMessageQueue(),
 		ui->BW->value() * 100.0,

@@ -123,7 +123,7 @@ bool ChannelAnalyzer::handleMessage(Message* cmd)
 
 	if(DSPSignalNotification::match(cmd)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		//fprintf(stderr, "%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
+		fprintf(stderr, "ChannelAnalyzer::handleMessage: %d samples/sec, %lld Hz offset\n", signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
 		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
 		cmd->completed();

@@ -62,6 +62,8 @@ void GLScope::setDSPEngine(DSPEngine* dspEngine)
 
 void GLScope::setSampleRate(int sampleRate) {
 	m_sampleRate = sampleRate;
+	m_configChanged = true;
+	update();
 	emit sampleRateChanged(m_sampleRate);
 }
 
