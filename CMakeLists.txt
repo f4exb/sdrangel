@@ -88,7 +88,6 @@ set(sdrbase_SOURCES
 	sdrbase/gui/rollupwidget.cpp
 	sdrbase/gui/scale.cpp
 	sdrbase/gui/scaleengine.cpp
-	sdrbase/gui/scopewindow.cpp
 	sdrbase/gui/valuedial.cpp
 
 	sdrbase/dsp/samplesource/samplesource.cpp
@@ -160,7 +159,6 @@ set(sdrbase_HEADERS
 	include/gui/rollupwidget.h
 	include-gpl/gui/scale.h
 	include-gpl/gui/scaleengine.h
-	include-gpl/gui/scopewindow.h
 	include-gpl/gui/valuedial.h
 
 	include/dsp/samplesource/samplesource.h
@@ -197,7 +195,6 @@ set(sdrbase_FORMS
 	sdrbase/gui/glspectrumgui.ui
 	sdrbase/gui/pluginsdialog.ui
 	sdrbase/gui/preferencesdialog.ui
-	sdrbase/gui/scopewindow.ui
 )
 
 set(sdrbase_RESOURCES

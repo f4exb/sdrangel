@@ -23,7 +23,6 @@
 #include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
-#include "gui/scopewindow.h"
 #include "gui/addpresetdialog.h"
 #include "gui/pluginsdialog.h"
 #include "gui/preferencesdialog.h"
@@ -47,7 +46,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_dspEngine(new DSPEngine(m_messageQueue)),
 	m_lastEngineState((DSPEngine::State)-1),
 	m_startOsmoSDRUpdateAfterStop(false),
-	m_scopeWindow(0),
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
@@ -123,12 +121,6 @@ MainWindow::~MainWindow()
 
 	m_dspEngine->removeSink(m_spectrumVis);
 	delete m_spectrumVis;
-
-	if(m_scopeWindow != 0) {
-		delete m_scopeWindow;
-		m_scopeWindow = 0;
-	}
-
 	delete m_pluginManager;
 
 	m_dspEngine->stop();
@@ -193,12 +185,6 @@ void MainWindow::loadSettings(const Preset* preset)
 {
 	std::cerr << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString() << std::endl;
 
-	if(preset->getShowScope())
-	{
-		on_action_Oscilloscope_triggered();
-		m_scopeWindow->deserialize(preset->getScopeConfig());
-    }
-
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
 	ui->iqImbalance->setChecked(preset->getIQImbalanceCorrection());
@@ -223,16 +209,6 @@ void MainWindow::saveSettings(Preset* preset)
 	std::cerr << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString() << std::endl;
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
-
-	if(preset->getShowScope())
-	{
-		preset->setScopeConfig(m_scopeWindow->serialize());
-	}
-    else
-    {
-    	preset->setScopeConfig(QByteArray());
-    }
-
     preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
@@ -271,8 +247,6 @@ void MainWindow::updateSampleRate()
 {
 	ui->glSpectrum->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
-	if(m_scopeWindow != 0)
-		m_scopeWindow->setSampleRate(m_sampleRate);
 }
 
 void MainWindow::updatePresets()
@@ -377,13 +351,6 @@ void MainWindow::updateStatus()
 		}
 		m_lastEngineState = state;
 	}
-}
-
-void MainWindow::scopeWindowDestroyed()
-{
-	ui->action_Oscilloscope->setChecked(false);
-	m_settings.getCurrent()->setShowScope(false);
-	m_scopeWindow = 0;
 }
 
 void MainWindow::on_action_Start_triggered()
@@ -509,25 +476,6 @@ void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTre
 void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 {
 	on_presetLoad_clicked();
-}
-
-void MainWindow::on_action_Oscilloscope_triggered()
-{
-	if(m_scopeWindow != 0) {
-		((QWidget*)m_scopeWindow->parent())->raise();
-		return;
-	}
-
-	QDockWidget* dock = new QDockWidget(tr("Signalscope"), this);
-	dock->setObjectName(QString::fromUtf8("scopeDock"));
-	m_scopeWindow = new ScopeWindow(m_dspEngine);
-	connect(m_scopeWindow, SIGNAL(destroyed()), this, SLOT(scopeWindowDestroyed()));
-	m_scopeWindow->setSampleRate(m_sampleRate);
-	dock->setWidget(m_scopeWindow);
-	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::BottomDockWidgetArea, dock);
-	dock->setAttribute(Qt::WA_DeleteOnClose);
-	m_settings.getCurrent()->setShowScope(true);
 }
 
 void MainWindow::on_action_Loaded_Plugins_triggered()

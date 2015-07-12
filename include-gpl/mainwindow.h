@@ -30,7 +30,6 @@ class QDir;
 class AudioDeviceInfo;
 class DSPEngine;
 class Indicator;
-class ScopeWindow;
 class SpectrumVis;
 class SampleSource;
 class PluginAPI;
@@ -90,7 +89,6 @@ private:
 
 	bool m_startOsmoSDRUpdateAfterStop;
 
-	ScopeWindow* m_scopeWindow;
 	QWidget* m_inputGUI;
 
 	int m_sampleRate;
@@ -114,7 +112,6 @@ private:
 private slots:
 	void handleMessages();
 	void updateStatus();
-	void scopeWindowDestroyed();
 	void on_action_Start_triggered();
 	void on_action_Stop_triggered();
 	void on_dcOffset_toggled(bool checked);
@@ -127,7 +124,6 @@ private slots:
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
-	void on_action_Oscilloscope_triggered();
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_Preferences_triggered();
 	void on_sampleSource_currentIndexChanged(int index);

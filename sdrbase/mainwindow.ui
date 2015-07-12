@@ -81,8 +81,6 @@
      <string>&amp;View</string>
     </property>
     <addaction name="action_View_Fullscreen"/>
-    <addaction name="separator"/>
-    <addaction name="action_Oscilloscope"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
