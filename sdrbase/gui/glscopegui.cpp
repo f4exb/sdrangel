@@ -190,7 +190,7 @@ void GLScopeGUI::setTimeScaleDisplay()
 
 void GLScopeGUI::setTimeOfsDisplay()
 {
-	qreal dt = (m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate) / (qreal)m_timeBase;
+	qreal dt = m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate;
 
 	if(dt < 0.000001)
 		ui->timeOfsText->setText(tr("%1\nns").arg(dt * 1000000000.0));
