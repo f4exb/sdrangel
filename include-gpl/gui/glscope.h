@@ -60,6 +60,8 @@ public:
 	void setDisplays(Displays displays);
 	void setOrientation(Qt::Orientation orientation);
 	void setDisplayGridIntensity(int intensity);
+	void setTriggerChannel(ScopeVis::TriggerChannel triggerChannel);
+	void setTriggerLevel(Real triggerLevel);
 
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
 	int getTraceSize() const { return m_rawTrace.size(); }

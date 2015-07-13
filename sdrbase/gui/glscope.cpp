@@ -263,6 +263,7 @@ void GLScope::paintGL()
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 
+		// paint trigger level
 		if(m_triggerChannel == ScopeVis::TriggerChannelI) {
 			glPushMatrix();
 			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
@@ -401,7 +402,8 @@ void GLScope::paintGL()
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 
-		if(m_triggerChannel == ScopeVis::TriggerChannelQ) {
+		// paint trigger level
+		if(m_triggerChannel == ScopeVis::TriggerPhase) {
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
 			glScalef(m_glScopeRect2.width(), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
@@ -1238,4 +1240,14 @@ void GLScope::tick()
 {
 	if(m_dataChanged)
 		update();
+}
+
+void GLScope::setTriggerChannel(ScopeVis::TriggerChannel triggerChannel)
+{
+	m_triggerChannel = triggerChannel;
+}
+
+void GLScope::setTriggerLevel(Real triggerLevel)
+{
+	m_triggerLevel = triggerLevel;
 }
