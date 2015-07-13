@@ -16,5 +16,11 @@
         <file>preset-last.png</file>
         <file>display1.png</file>
         <file>display2.png</file>
+        <file>slopen_icon.png</file>
+        <file>slopep_icon.png</file>
+        <file>display1_w.png</file>
+        <file>display2_w.png</file>
+        <file>horizontal_w.png</file>
+        <file>vertical_w.png</file>
     </qresource>
 </RCC>

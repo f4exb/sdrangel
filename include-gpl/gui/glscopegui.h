@@ -48,16 +48,18 @@ private:
 	qint32 m_ampOffset;
 	int m_displayGridIntensity;
 	qint32 m_triggerChannel;
-	Real   m_triggerLevel;
+	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
 
 	static const qreal amps[11];
 
 	void applySettings();
+	void applyTriggerSettings();
 	void setTimeScaleDisplay();
 	void setTimeOfsDisplay();
 	void setAmpScaleDisplay();
 	void setAmpOfsDisplay();
+	void setTrigLevelDisplay();
 
 private slots:
 	void on_amp_valueChanged(int value);
@@ -73,6 +75,11 @@ private slots:
 	void on_vertView_clicked();
 	void on_onlyPrimeView_clicked();
 	void on_onlySecondView_clicked();
+
+	void on_trigMode_currentIndexChanged(int index);
+	void on_slopePos_clicked();
+	void on_slopeNeg_clicked();
+	void on_trigLevel_valueChanged(int value);
 };
 
 #endif // INCLUDE_GLSCOPEGUI_H

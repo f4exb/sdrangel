@@ -77,6 +77,9 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(6, m_displayGridIntensity);
 	s.writeS32(7, m_ampOffset);
 	s.writeS32(8, m_displays);
+	s.writeS32(9, m_triggerChannel);
+	s.writeS32(10, m_triggerLevel);
+	s.writeBool(11, m_triggerPositiveEdge);
 
 	return s.final();
 }
@@ -101,7 +104,16 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			m_timeBase = 1;
 		d.readS32(7, &m_ampOffset, 0);
 		d.readS32(8, &m_displays, GLScope::DisplayBoth);
+		d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
+		ui->trigMode->setCurrentIndex(m_triggerChannel);
+		d.readS32(10, &m_triggerLevel, 0);
+		ui->trigLevel->setValue(m_triggerLevel);
+		setTrigLevelDisplay();
+		d.readBool(11, &m_triggerPositiveEdge, true);
+		ui->slopePos->setChecked(m_triggerPositiveEdge);
+		ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
 		applySettings();
+		applyTriggerSettings();
 		return true;
 	} else {
 		resetToDefaults();
@@ -149,6 +161,15 @@ void GLScopeGUI::applySettings()
 	ui->amp->setValue(m_amplification);
 	ui->ampOfs->setValue(m_ampOffset);
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
+}
+
+void GLScopeGUI::applyTriggerSettings()
+{
+}
+
+void GLScopeGUI::setTrigLevelDisplay()
+{
+	ui->trigText->setText(tr("%1").arg(m_triggerLevel/100.0, 0, 'f', 2));
 }
 
 void GLScopeGUI::setAmpScaleDisplay()
@@ -342,6 +363,45 @@ void GLScopeGUI::on_gridIntensity_valueChanged(int index)
 	m_displayGridIntensity = index;
 	if(m_glScope != NULL)
 		m_glScope->setDisplayGridIntensity(m_displayGridIntensity);
+}
+
+void GLScopeGUI::on_trigMode_currentIndexChanged(int index)
+{
+	m_triggerChannel = index;
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_trigLevel_valueChanged(int value)
+{
+	m_triggerLevel = value;
+	setTrigLevelDisplay();
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_slopePos_clicked()
+{
+	m_triggerPositiveEdge = true;
+
+	if(ui->slopePos->isChecked()) {
+		ui->slopeNeg->setChecked(false);
+	} else {
+		ui->slopePos->setChecked(true);
+	}
+
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_slopeNeg_clicked()
+{
+	m_triggerPositiveEdge = false;
+
+	if(ui->slopeNeg->isChecked()) {
+		ui->slopePos->setChecked(false);
+	} else {
+		ui->slopeNeg->setChecked(true);
+	}
+
+	applyTriggerSettings();
 }
 
 bool GLScopeGUI::handleMessage(Message* cmd)

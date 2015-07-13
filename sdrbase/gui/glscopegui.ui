@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>807</width>
-    <height>50</height>
+    <height>67</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -126,7 +126,7 @@
          </property>
          <property name="icon">
           <iconset resource="../resources/res.qrc">
-           <normaloff>:/display1.png</normaloff>:/display1.png</iconset>
+           <normaloff>:/display1_w.png</normaloff>:/display1_w.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -135,6 +135,9 @@
           </size>
          </property>
          <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -149,7 +152,7 @@
          </property>
          <property name="icon">
           <iconset resource="../resources/res.qrc">
-           <normaloff>:/display2.png</normaloff>:/display2.png</iconset>
+           <normaloff>:/display2_w.png</normaloff>:/display2_w.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -158,6 +161,9 @@
           </size>
          </property>
          <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -172,7 +178,7 @@
          </property>
          <property name="icon">
           <iconset resource="../resources/res.qrc">
-           <normaloff>:/horizontal.png</normaloff>:/horizontal.png</iconset>
+           <normaloff>:/horizontal_w.png</normaloff>:/horizontal_w.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -184,6 +190,9 @@
           <bool>true</bool>
          </property>
          <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -198,7 +207,7 @@
          </property>
          <property name="icon">
           <iconset resource="../resources/res.qrc">
-           <normaloff>:/vertical.png</normaloff>:/vertical.png</iconset>
+           <normaloff>:/vertical_w.png</normaloff>:/vertical_w.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -207,6 +216,9 @@
           </size>
          </property>
          <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -239,6 +251,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Time range</string>
        </property>
        <property name="minimum">
         <number>1</number>
@@ -351,6 +366,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Y range</string>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -550,7 +568,11 @@
           <string>Trigger slope positive</string>
          </property>
          <property name="text">
-          <string>+</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/slopep_icon.png</normaloff>:/slopep_icon.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -562,6 +584,12 @@
           <bool>true</bool>
          </property>
          <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonIconOnly</enum>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -577,7 +605,11 @@
           <string>Trigger slope negative</string>
          </property>
          <property name="text">
-          <string>-</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/slopen_icon.png</normaloff>:/slopen_icon.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -586,6 +618,9 @@
           </size>
          </property>
          <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
           <bool>true</bool>
          </property>
         </widget>
@@ -601,6 +636,9 @@
        </property>
        <property name="toolTip">
         <string>Trigger level</string>
+       </property>
+       <property name="minimum">
+        <number>-100</number>
        </property>
        <property name="maximum">
         <number>100</number>
