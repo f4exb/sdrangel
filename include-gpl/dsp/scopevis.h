@@ -72,6 +72,7 @@ private:
 	TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	bool m_triggerPositiveEdge;
+	bool m_armed;
 	int m_sampleRate;
 
 	bool triggerCondition(SampleVector::const_iterator& it);

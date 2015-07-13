@@ -16,6 +16,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_triggerChannel(TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
+	m_armed(false),
 	m_sampleRate(0)
 {
 }
@@ -48,16 +49,25 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		}
 		else
 		{
-			if(m_triggerState == Untriggered) {
-				while(begin < end) {
-					if (triggerCondition(begin)) {
-						m_triggerState = Triggered;
-						break;
+			if(m_triggerState == Untriggered)
+			{
+				while(begin < end)
+				{
+					if (triggerCondition(begin) ^ !m_triggerPositiveEdge) {
+						if (m_armed) {
+							m_triggerState = Triggered;
+							m_armed = false;
+							break;
+						}
+					}
+					else {
+						m_armed = true;
 					}
 					++begin;
 				}
 			}
-			if(m_triggerState == Triggered) {
+			if(m_triggerState == Triggered)
+			{
 				int count = end - begin;
 				if(count > (int)(m_trace.size() - m_fill))
 					count = m_trace.size() - m_fill;
