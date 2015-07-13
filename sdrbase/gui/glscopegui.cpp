@@ -165,6 +165,16 @@ void GLScopeGUI::applySettings()
 
 void GLScopeGUI::applyTriggerSettings()
 {
+	Real triggerLevel;
+
+	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
+		triggerLevel = m_triggerLevel - 100.0;
+	}
+	else {
+		triggerLevel = m_triggerLevel / 100.0;
+	}
+
+	m_scopeVis->configure(m_messageQueue, (ScopeVis::TriggerChannel) m_triggerChannel, triggerLevel, m_triggerPositiveEdge);
 }
 
 void GLScopeGUI::setTrigLevelDisplay()

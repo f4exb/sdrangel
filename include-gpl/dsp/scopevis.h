@@ -70,10 +70,11 @@ private:
 	uint m_fill;
 	TriggerState m_triggerState;
 	TriggerChannel m_triggerChannel;
-	FixReal m_triggerLevelHigh;
-	FixReal m_triggerLevelLow;
+	Real m_triggerLevel;
 	bool m_triggerPositiveEdge;
 	int m_sampleRate;
+
+	bool triggerCondition(SampleVector::const_iterator& it);
 };
 
 #endif // INCLUDE_SCOPEVIS_H
