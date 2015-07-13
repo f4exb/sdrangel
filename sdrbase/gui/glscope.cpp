@@ -627,12 +627,12 @@ void GLScope::applyConfig()
 			} else {
 				m_y1Scale.setRange(Unit::None, amp_ofs/2.0, amp_range + amp_ofs/2.0);
 			}
-			m_y2Scale.setRange(Unit::AngleDegrees, -180.0, 180.0);
+			m_y2Scale.setRange(Unit::None, -1.0, 1.0); // Scale to Pi
 			break;
 		}
 		case ModeMagdBPha: {
 			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
-			m_y2Scale.setRange(Unit::AngleDegrees, -180.0, 180.0);
+			m_y2Scale.setRange(Unit::AngleDegrees, -1.0, 1.0); // Scale to Pi
 			break;
 		}
 		case ModeDerived12: {

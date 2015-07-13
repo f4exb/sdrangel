@@ -183,7 +183,7 @@ void GLScopeGUI::setTrigLevelDisplay()
 		ui->trigText->setText(tr("%1dB").arg(m_triggerLevel - 100.0, 0, 'f', 0));
 	}
 	else if (m_triggerChannel == ScopeVis::TriggerPhase) {
-		ui->trigText->setText(tr("%1°").arg(m_triggerLevel * 1.8, 0, 'f', 0));
+		ui->trigText->setText(tr("%1π").arg(m_triggerLevel / 100.0, 0, 'f', 2));
 	}
 	else {
 		ui->trigText->setText(tr("%1").arg(m_triggerLevel / 100.0, 0, 'f', 2));
