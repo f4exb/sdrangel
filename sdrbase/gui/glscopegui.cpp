@@ -24,7 +24,10 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_timeOffset(0),
 	m_amplification(0),
 	m_ampOffset(0),
-	m_displayGridIntensity(1)
+	m_displayGridIntensity(1),
+	m_triggerChannel(ScopeVis::TriggerFreeRun),
+	m_triggerLevel(0.0),
+	m_triggerPositiveEdge(true)
 {
 	ui->setupUi(this);
 }

@@ -3,6 +3,7 @@
 
 #include "dsp/samplesink.h"
 #include "util/export.h"
+#include "util/message.h"
 
 class GLScope;
 class MessageQueue;
@@ -12,12 +13,15 @@ public:
 	enum TriggerChannel {
 		TriggerFreeRun,
 		TriggerChannelI,
-		TriggerChannelQ
+		TriggerChannelQ,
+		TriggerMagLin,
+		TriggerMagDb,
+		TriggerPhase
 	};
 
 	ScopeVis(GLScope* glScope = NULL);
 
-	void configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevelHigh, Real triggerLevelLow);
+	void configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
@@ -29,6 +33,32 @@ public:
 	int getSampleRate() const { return m_sampleRate; }
 
 private:
+	class MsgConfigureScopeVis : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getTriggerChannel() const { return m_triggerChannel; }
+		Real getTriggerLevel() const { return m_triggerLevel; }
+		Real getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
+
+		static MsgConfigureScopeVis* create(int triggerChannel, Real triggerLevel, bool triggerPositiveEdge)
+		{
+			return new MsgConfigureScopeVis(triggerChannel, triggerLevel, triggerPositiveEdge);
+		}
+
+	private:
+		int m_triggerChannel;
+		Real m_triggerLevel;
+		bool m_triggerPositiveEdge;
+
+		MsgConfigureScopeVis(int triggerChannel, Real triggerLevel, bool triggerPositiveEdge) :
+			Message(),
+			m_triggerChannel(triggerChannel),
+			m_triggerLevel(triggerLevel),
+			m_triggerPositiveEdge(triggerPositiveEdge)
+		{ }
+	};
+
 	enum TriggerState {
 		Untriggered,
 		Triggered,
@@ -42,6 +72,7 @@ private:
 	TriggerChannel m_triggerChannel;
 	FixReal m_triggerLevelHigh;
 	FixReal m_triggerLevelLow;
+	bool m_triggerPositiveEdge;
 	int m_sampleRate;
 };
 

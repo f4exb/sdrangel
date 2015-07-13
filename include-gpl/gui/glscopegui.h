@@ -47,6 +47,9 @@ private:
 	qint32 m_amplification;
 	qint32 m_ampOffset;
 	int m_displayGridIntensity;
+	qint32 m_triggerChannel;
+	Real   m_triggerLevel;
+	bool   m_triggerPositiveEdge;
 
 	static const qreal amps[11];
 
