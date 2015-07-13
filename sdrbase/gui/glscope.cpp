@@ -273,14 +273,15 @@ void GLScope::paintGL()
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, 0.3f);
 			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevelHigh);
-			glVertex2f(1, m_triggerLevelHigh);
+			glVertex2f(0, m_triggerLevel);
+			glVertex2f(1, m_triggerLevel);
 			glEnd();
+			/*
 			glColor4f(0, 0.8f, 0.0, 0.3f);
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, m_triggerLevelLow);
 			glVertex2f(1, m_triggerLevelLow);
-			glEnd();
+			glEnd();*/
 			glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
@@ -410,14 +411,15 @@ void GLScope::paintGL()
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, 0.3f);
 			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevelHigh);
-			glVertex2f(1, m_triggerLevelHigh);
+			glVertex2f(0, m_triggerLevel);
+			glVertex2f(1, m_triggerLevel);
 			glEnd();
+			/*
 			glColor4f(0, 0.8f, 0.0, 0.3f);
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, m_triggerLevelLow);
 			glVertex2f(1, m_triggerLevelLow);
-			glEnd();
+			glEnd();*/
 			glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
@@ -491,17 +493,17 @@ void GLScope::mousePressEvent(QMouseEvent* event)
 
 	if(m_dspEngine != NULL) {
 		qDebug("amp %f", amplitude);
-		m_triggerLevelHigh = amplitude + 0.01 / m_amp;
+		m_triggerLevel = amplitude + 0.01 / m_amp;
 		m_triggerLevelLow = amplitude - 0.01 / m_amp;
-		if(m_triggerLevelHigh > 1.0)
-			m_triggerLevelHigh = 1.0;
-		else if(m_triggerLevelHigh < -1.0)
-			m_triggerLevelHigh = -1.0;
+		if(m_triggerLevel > 1.0)
+			m_triggerLevel = 1.0;
+		else if(m_triggerLevel < -1.0)
+			m_triggerLevel = -1.0;
 		if(m_triggerLevelLow > 1.0)
 			m_triggerLevelLow = 1.0;
 		else if(m_triggerLevelLow < -1.0)
 			m_triggerLevelLow = -1.0;
-		m_scopeVis->configure(m_dspEngine->getMessageQueue(), channel, m_triggerLevelHigh, m_triggerLevelLow);
+		m_scopeVis->configure(m_dspEngine->getMessageQueue(), channel, m_triggerLevel, m_triggerLevelLow);
 		m_triggerChannel = channel;
 		m_changed = true;
 		update();

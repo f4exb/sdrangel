@@ -103,8 +103,8 @@ private:
 	int m_timeBase;
 	int m_timeOfsProMill;
 	ScopeVis::TriggerChannel m_triggerChannel;
-	Real m_triggerLevelHigh;
-	Real m_triggerLevelLow;
+	Real m_triggerLevel;
+	//Real m_triggerLevelLow;
 
 	// graphics stuff
 	QRectF m_glScopeRect1;
