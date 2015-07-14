@@ -52,11 +52,7 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		{
 			if(m_triggerState == WaitForReset)
 			{
-				if (!m_triggerOneShot) {
-					m_triggerState = Untriggered;
-				} else {
-					break;
-				}
+				break;
 			}
 			if(m_triggerState == Untriggered)
 			{
@@ -185,4 +181,8 @@ bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 void ScopeVis::setOneShot(bool oneShot)
 {
 	m_triggerOneShot = oneShot;
+
+	if ((m_triggerState == WaitForReset) && !oneShot) {
+		m_triggerState = Untriggered;
+	}
 }
