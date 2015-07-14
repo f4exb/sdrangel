@@ -54,6 +54,8 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			{
 				if (!m_triggerOneShot) {
 					m_triggerState = Untriggered;
+				} else {
+					break;
 				}
 			}
 			if(m_triggerState == Untriggered)
