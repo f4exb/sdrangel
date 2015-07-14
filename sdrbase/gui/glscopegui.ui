@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>807</width>
-    <height>67</height>
+    <height>69</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -610,6 +610,32 @@
          <property name="icon">
           <iconset resource="../resources/res.qrc">
            <normaloff>:/slopen_icon.png</normaloff>:/slopen_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="oneShot">
+         <property name="toolTip">
+          <string>One shot</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/display1_w.png</normaloff>:/display1_w.png</iconset>
          </property>
          <property name="iconSize">
           <size>

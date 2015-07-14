@@ -16,6 +16,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_triggerChannel(TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
+	m_triggerOneShot(false),
 	m_armed(false),
 	m_sampleRate(0)
 {
@@ -49,6 +50,12 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		}
 		else
 		{
+			if(m_triggerState == WaitForReset)
+			{
+				if (!m_triggerOneShot) {
+					m_triggerState = Untriggered;
+				}
+			}
 			if(m_triggerState == Untriggered)
 			{
 				while(begin < end)
@@ -80,7 +87,11 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				if(m_fill >= m_trace.size()) {
 					m_glScope->newTrace(m_trace, m_sampleRate);
 					m_fill = 0;
-					m_triggerState = Untriggered;
+					if (m_triggerOneShot) {
+						m_triggerState = WaitForReset;
+					} else {
+						m_triggerState = Untriggered;
+					}
 				}
 			}
 		}
@@ -167,4 +178,9 @@ bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 	else {
 		return false;
 	}
+}
+
+void ScopeVis::setOneShot(bool oneShot)
+{
+	m_triggerOneShot = oneShot;
 }

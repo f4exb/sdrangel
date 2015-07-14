@@ -79,6 +79,7 @@ private slots:
 	void on_trigMode_currentIndexChanged(int index);
 	void on_slopePos_clicked();
 	void on_slopeNeg_clicked();
+	void on_oneShot_clicked();
 	void on_trigLevel_valueChanged(int value);
 };
 

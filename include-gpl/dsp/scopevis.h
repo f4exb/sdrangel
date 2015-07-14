@@ -22,6 +22,7 @@ public:
 	ScopeVis(GLScope* glScope = NULL);
 
 	void configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge);
+	void setOneShot(bool oneShot);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
@@ -72,6 +73,7 @@ private:
 	TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	bool m_triggerPositiveEdge;
+	bool m_triggerOneShot;
 	bool m_armed;
 	int m_sampleRate;
 

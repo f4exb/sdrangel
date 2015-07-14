@@ -426,6 +426,11 @@ void GLScopeGUI::on_slopeNeg_clicked()
 	applyTriggerSettings();
 }
 
+void GLScopeGUI::on_oneShot_clicked()
+{
+	m_scopeVis->setOneShot(ui->oneShot->isChecked());
+}
+
 bool GLScopeGUI::handleMessage(Message* cmd)
 {
 	return false;
