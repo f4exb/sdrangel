@@ -3,6 +3,7 @@
 #include "gui/glscope.h"
 #include "dsp/dspengine.h"
 
+#include <algorithm>
 #include <iostream>
 
 #ifdef _WIN32
@@ -328,6 +329,7 @@ void GLScope::paintGL()
 			glPopMatrix();
 		}
 
+		// paint trace
 		if(m_displayTrace->size() > 0) {
 			glPushMatrix();
 			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
@@ -337,8 +339,8 @@ void GLScope::paintGL()
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(1, 1, 0, 0.4f);
-			int start = m_timeOfsProMill * (m_displayTrace->size() - (m_displayTrace->size() / m_timeBase)) / 1000;
-			int end = start + m_displayTrace->size() / m_timeBase;
+			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)
 				start--;
 			float posLimit = 1.0 / m_amp1;
@@ -499,6 +501,7 @@ void GLScope::paintGL()
 			glPopMatrix();
 		}
 
+		// paint trace
 		if(m_displayTrace->size() > 0) {
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
@@ -508,8 +511,8 @@ void GLScope::paintGL()
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(1, 1, 0, 0.4f);
-			int start = m_timeOfsProMill * (m_displayTrace->size() - (m_displayTrace->size() / m_timeBase)) / 1000;
-			int end = start + m_displayTrace->size() / m_timeBase;
+			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)
 				start--;
 			float posLimit = 1.0 / m_amp2;
