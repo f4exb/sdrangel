@@ -196,9 +196,9 @@ void GLScopeGUI::setTrigLevelDisplay()
 void GLScopeGUI::setAmpScaleDisplay()
 {
 	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
-		ui->ampText->setText(tr("%1\ndB/div").arg(amps[m_amplification]*50.0, 0, 'f', 2));
+		ui->ampText->setText(tr("%1\ndB").arg(amps[m_amplification]*500.0, 0, 'f', 1));
 	} else {
-		ui->ampText->setText(tr("%1\n/div").arg(amps[m_amplification], 0, 'f', 4));
+		ui->ampText->setText(tr("%1").arg(amps[m_amplification]*10.0, 0, 'f', 3));
 	}
 }
 
@@ -242,7 +242,7 @@ void GLScopeGUI::on_scope_sampleRateChanged(int)
 void GLScopeGUI::setTimeScaleDisplay()
 {
 	m_sampleRate = m_glScope->getSampleRate();
-	qreal t = (m_glScope->getTraceSize() * 0.1 / m_sampleRate) / (qreal)m_timeBase;
+	qreal t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (qreal)m_timeBase;
 	/*
 	std::cerr << "GLScopeGUI::setTimeScaleDisplay: sample rate: "
 			<< m_glScope->getSampleRate()
@@ -251,12 +251,12 @@ void GLScopeGUI::setTimeScaleDisplay()
 			<< " glScope @" << m_glScope << std::endl;
 			*/
 	if(t < 0.000001)
-		ui->timeText->setText(tr("%1\nns/div").arg(t * 1000000000.0));
+		ui->timeText->setText(tr("%1\nns").arg(t * 1000000000.0));
 	else if(t < 0.001)
-		ui->timeText->setText(tr("%1\nµs/div").arg(t * 1000000.0));
+		ui->timeText->setText(tr("%1\nµs").arg(t * 1000000.0));
 	else if(t < 1.0)
-		ui->timeText->setText(tr("%1\nms/div").arg(t * 1000.0));
-	else ui->timeText->setText(tr("%1\ns/div").arg(t * 1.0));
+		ui->timeText->setText(tr("%1\nms").arg(t * 1000.0));
+	else ui->timeText->setText(tr("%1\ns").arg(t * 1.0));
 }
 
 void GLScopeGUI::setTimeOfsDisplay()

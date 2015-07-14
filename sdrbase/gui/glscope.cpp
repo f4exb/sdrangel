@@ -22,6 +22,10 @@ GLScope::GLScope(QWidget* parent) :
 	m_displayTrace(&m_rawTrace),
 	m_oldTraceSize(-1),
 	m_sampleRate(0),
+	m_amp1(1.0),
+	m_amp2(1.0),
+	m_ofs1(0.0),
+	m_ofs2(0.0),
 	m_dspEngine(NULL),
 	m_scopeVis(NULL),
 	m_amp(1.0),
@@ -29,7 +33,12 @@ GLScope::GLScope(QWidget* parent) :
 	m_timeBase(1),
 	m_timeOfsProMill(0),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
-	m_displayGridIntensity(5)
+	m_triggerLevel(0.0),
+	m_displayGridIntensity(5),
+	m_left1ScaleTextureAllocated(false),
+	m_left2ScaleTextureAllocated(false),
+	m_bot1ScaleTextureAllocated(false),
+	m_bot2ScaleTextureAllocated(false)
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -199,22 +208,54 @@ void GLScope::paintGL()
 		glDisable(GL_BLEND);
 
 		// paint grid
+		const ScaleEngine::TickList* tickList;
+		const ScaleEngine::Tick* tick;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+		// Horizontal Y1
+		tickList = &m_y1Scale.getTickList();
+		for(int i= 0; i < tickList->count(); i++) {
+			tick = &(*tickList)[i];
+			if(tick->major) {
+				if(tick->textSize > 0) {
+					float y = tick->pos / m_y1Scale.getSize();
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(0, y);
+					glVertex2f(1, y);
+					glEnd();
+				}
+			}
+		}
+		/*
 		for(int i = 1; i < 10; i++) {
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, i * 0.1);
 			glVertex2f(1, i * 0.1);
 			glEnd();
+		}*/
+		// Vertical X1
+		tickList = &m_x1Scale.getTickList();
+		for(int i= 0; i < tickList->count(); i++) {
+			tick = &(*tickList)[i];
+			if(tick->major) {
+				if(tick->textSize > 0) {
+					float x = tick->pos / m_x1Scale.getSize();
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(x, 0);
+					glVertex2f(x, 1);
+					glEnd();
+				}
+			}
 		}
+		/*
 		for(int i = 1; i < 10; i++) {
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(i * 0.1, 0);
 			glVertex2f(i * 0.1, 1);
 			glEnd();
-		}
+		}*/
 		glPopMatrix();
 
 		// paint left #1 scale
@@ -338,22 +379,54 @@ void GLScope::paintGL()
 		glDisable(GL_BLEND);
 
 		// paint grid
+		const ScaleEngine::TickList* tickList;
+		const ScaleEngine::Tick* tick;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+		// Horizontal Y2
+		tickList = &m_y2Scale.getTickList();
+		for(int i= 0; i < tickList->count(); i++) {
+			tick = &(*tickList)[i];
+			if(tick->major) {
+				if(tick->textSize > 0) {
+					float y = tick->pos / m_y2Scale.getSize();
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(0, y);
+					glVertex2f(1, y);
+					glEnd();
+				}
+			}
+		}
+		/*
 		for(int i = 1; i < 10; i++) {
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, i * 0.1);
 			glVertex2f(1, i * 0.1);
 			glEnd();
+		}*/
+		// Vertical X2
+		tickList = &m_x2Scale.getTickList();
+		for(int i= 0; i < tickList->count(); i++) {
+			tick = &(*tickList)[i];
+			if(tick->major) {
+				if(tick->textSize > 0) {
+					float x = tick->pos / m_x2Scale.getSize();
+					glBegin(GL_LINE_LOOP);
+					glVertex2f(x, 0);
+					glVertex2f(x, 1);
+					glEnd();
+				}
+			}
 		}
+		/*
 		for(int i = 1; i < 10; i++) {
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(i * 0.1, 0);
 			glVertex2f(i * 0.1, 1);
 			glEnd();
-		}
+		}*/
 		glPopMatrix();
 
 		// paint left #2 scale
