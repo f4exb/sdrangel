@@ -221,7 +221,7 @@ void GLScope::paintGL()
 			tick = &(*tickList)[i];
 			if(tick->major) {
 				if(tick->textSize > 0) {
-					float y = tick->pos / m_y1Scale.getSize();
+					float y = 1 - (tick->pos / m_y1Scale.getSize());
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0, y);
 					glVertex2f(1, y);
@@ -393,7 +393,7 @@ void GLScope::paintGL()
 			tick = &(*tickList)[i];
 			if(tick->major) {
 				if(tick->textSize > 0) {
-					float y = tick->pos / m_y2Scale.getSize();
+					float y = 1 - (tick->pos / m_y2Scale.getSize());
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0, y);
 					glVertex2f(1, y);
