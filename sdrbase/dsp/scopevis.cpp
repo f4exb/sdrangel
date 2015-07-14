@@ -30,6 +30,22 @@ void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, 
 
 void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
+	if (m_triggerChannel == TriggerFreeRun) {
+		m_triggerPoint = begin;
+	}
+	else if (m_triggerState == Triggered) {
+		m_triggerPoint = begin;
+	}
+	else if (m_triggerState == Untriggered) {
+		m_triggerPoint = end;
+	}
+	else if (m_triggerState == WaitForReset) {
+		m_triggerPoint = end;
+	}
+	else {
+		m_triggerPoint = begin;
+	}
+
 	while(begin < end)
 	{
 		if (m_triggerChannel == TriggerFreeRun)
@@ -62,6 +78,7 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 						if (m_armed) {
 							m_triggerState = Triggered;
 							m_armed = false;
+							m_triggerPoint = begin;
 							break;
 						}
 					}

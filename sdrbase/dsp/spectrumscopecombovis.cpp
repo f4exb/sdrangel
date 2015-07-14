@@ -10,8 +10,9 @@ SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis*
 
 void SpectrumScopeComboVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	m_spectrumVis->feed(begin, end, positiveOnly);
 	m_scopeVis->feed(begin, end, false);
+	SampleVector::const_iterator triggerPoint = m_scopeVis->getTriggerPoint();
+	m_spectrumVis->feedTriggered(triggerPoint, begin, end, positiveOnly);
 }
 
 void SpectrumScopeComboVis::start()

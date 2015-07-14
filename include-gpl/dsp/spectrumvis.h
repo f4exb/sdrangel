@@ -17,6 +17,7 @@ public:
 	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	void feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
 	bool handleMessageKeep(Message* message);
@@ -34,6 +35,7 @@ private:
 	size_t m_overlapSize;
 	size_t m_refillSize;
 	size_t m_fftBufferFill;
+	bool m_needMoreSamples;
 
 	GLSpectrum* m_glSpectrum;
 

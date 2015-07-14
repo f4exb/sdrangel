@@ -32,6 +32,7 @@ public:
 
 	void setSampleRate(int sampleRate);
 	int getSampleRate() const { return m_sampleRate; }
+	SampleVector::const_iterator getTriggerPoint() const { return m_triggerPoint; }
 
 private:
 	class MsgConfigureScopeVis : public Message {
@@ -76,6 +77,7 @@ private:
 	bool m_triggerOneShot;
 	bool m_armed;
 	int m_sampleRate;
+	SampleVector::const_iterator m_triggerPoint;
 
 	bool triggerCondition(SampleVector::const_iterator& it);
 };

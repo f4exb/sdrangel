@@ -18,6 +18,7 @@ SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
 	m_fftBuffer(MAX_FFT_SIZE),
 	m_logPowerSpectrum(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
+	m_needMoreSamples(false),
 	m_glSpectrum(glSpectrum)
 {
 	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
@@ -32,6 +33,25 @@ void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPerc
 {
 	Message* cmd = DSPConfigureSpectrumVis::create(fftSize, overlapPercent, window);
 	cmd->submit(msgQueue, this);
+}
+
+void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+{
+	if (triggerPoint == end)
+	{
+		// the following piece of code allows to terminate the FFT that ends past the end of scope captured data
+		// that is the spectrum will include the captured data
+		// just do nothing if you want the spectrum to be included inside the scope captured data
+		// that is to drop the FFT that dangles past the end of captured data
+		if (m_needMoreSamples) {
+			feed(begin, end, positiveOnly);
+			m_needMoreSamples = false;      // force finish
+		}
+	}
+	else
+	{
+		feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
+	}
 }
 
 void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -94,11 +114,13 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 
 			// start over
 			m_fftBufferFill = m_overlapSize;
+			m_needMoreSamples = false;
 		} else {
 			// not enough samples for FFT - just fill in new data and return
 			for(std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill; begin < end; ++begin)
 				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
 			m_fftBufferFill += todo;
+			m_needMoreSamples = true;
 		}
 	}
 }
