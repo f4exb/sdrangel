@@ -39,6 +39,8 @@ private:
 	Real m_refLevel;
 	Real m_powerRange;
 	int m_decay;
+	int m_histogramLateHoldoff;
+	int m_histogramStroke;
 	int m_displayGridIntensity;
 	bool m_displayWaterfall;
 	bool m_invertedWaterfall;
@@ -54,7 +56,9 @@ private slots:
 	void on_fftSize_currentIndexChanged(int index);
 	void on_refLevel_currentIndexChanged(int index);
 	void on_levelRange_currentIndexChanged(int index);
-	void on_decay_currentIndexChanged(int index);
+	void on_decay_valueChanged(int index);
+	void on_holdoff_valueChanged(int index);
+	void on_stroke_valueChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
 
 	void on_waterfall_toggled(bool checked);

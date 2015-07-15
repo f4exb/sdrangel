@@ -86,9 +86,10 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 		((quint8*)&m_histogramPalette[i])[2] = c.blue();
 		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
-	m_histogramHoldoffBase = 4;
+	m_histogramHoldoffBase = 1; // was 4
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
-	m_histogramLateHoldoff = 20;
+	m_histogramLateHoldoff = 1; // was 20
+	m_histogramStroke = 40; // was 4
 
 	m_timeScale.setFont(font());
 	m_timeScale.setOrientation(Qt::Vertical);
@@ -332,7 +333,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		m_histogramHoldoffCount = m_histogramHoldoffBase;
 	}
 
-//#define NO_AVX
+#define NO_AVX
 #ifdef NO_AVX
 	for(int i = 0; i < m_fftSize; i++) {
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
@@ -340,7 +341,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		if((v >= 0) && (v <= 99)) {
 			b = m_histogram + i * 100 + v;
 			if(*b < 220)
-				*b += 4;
+				*b += m_histogramStroke; // was 4
 			else if(*b < 239)
 				*b += 1;
 		}

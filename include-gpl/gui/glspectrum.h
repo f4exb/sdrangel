@@ -132,6 +132,7 @@ private:
 	int m_histogramHoldoffBase;
 	int m_histogramHoldoffCount;
 	int m_histogramLateHoldoff;
+	int m_histogramStroke;
 	QRectF m_glHistogramRect;
 	bool m_displayHistogram;
 
