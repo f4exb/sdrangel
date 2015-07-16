@@ -243,13 +243,11 @@ void GLScopeGUI::setTimeScaleDisplay()
 {
 	m_sampleRate = m_glScope->getSampleRate();
 	qreal t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (qreal)m_timeBase;
-	/*
-	std::cerr << "GLScopeGUI::setTimeScaleDisplay: sample rate: "
-			<< m_glScope->getSampleRate()
+	/*std::cerr << "GLScopeGUI::setTimeScaleDisplay: sample rate: "
+			<< m_sampleRate
 			<< " traceSize: " << m_glScope->getTraceSize()
 			<< " timeBase: " << m_timeBase
-			<< " glScope @" << m_glScope << std::endl;
-			*/
+			<< " t: " << t << std::endl;*/
 	if(t < 0.000001)
 		ui->timeText->setText(tr("%1\nns").arg(t * 1000000000.0));
 	else if(t < 0.001)

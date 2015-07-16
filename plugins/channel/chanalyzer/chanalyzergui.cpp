@@ -208,8 +208,8 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
 			m_channelMarker->setSidebands(ChannelMarker::usb);
 		}
 
-		ui->glSpectrum->setCenterFrequency(m_rate/2);
-		ui->glSpectrum->setSampleRate(m_rate);
+		ui->glSpectrum->setCenterFrequency(m_rate/4);
+		ui->glSpectrum->setSampleRate(m_rate/2);
 		ui->glSpectrum->setSsbSpectrum(true);
 
 		on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
@@ -219,7 +219,7 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
 		m_channelMarker->setSidebands(ChannelMarker::dsb);
 
 		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(2*m_rate);
+		ui->glSpectrum->setSampleRate(m_rate);
 		ui->glSpectrum->setSsbSpectrum(false);
 
 		applySettings();
@@ -342,20 +342,21 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 			m_channelMarker->setSidebands(ChannelMarker::usb);
 		}
 
-		ui->glSpectrum->setCenterFrequency(m_rate/2);
-		ui->glSpectrum->setSampleRate(m_rate);
+		ui->glSpectrum->setCenterFrequency(m_rate/4);
+		ui->glSpectrum->setSampleRate(m_rate/2);
 		ui->glSpectrum->setSsbSpectrum(true);
-		ui->glScope->setSampleRate(m_rate);
-		m_scopeVis->setSampleRate(m_rate);
-	} else {
+	}
+	else
+	{
 		m_channelMarker->setSidebands(ChannelMarker::dsb);
 
 		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(2*m_rate);
+		ui->glSpectrum->setSampleRate(m_rate);
 		ui->glSpectrum->setSsbSpectrum(false);
-		ui->glScope->setSampleRate(2*m_rate);
-		m_scopeVis->setSampleRate(2*m_rate);
 	}
+
+	ui->glScope->setSampleRate(m_rate);
+	m_scopeVis->setSampleRate(m_rate);
 
 	return true;
 }

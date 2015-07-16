@@ -63,7 +63,7 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 {
 	fftfilt::cmplx *sideband, sum;
 	int n_out;
-	int decim = 1<<(m_spanLog2 - 1);
+	int decim = 1<<m_spanLog2;
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {

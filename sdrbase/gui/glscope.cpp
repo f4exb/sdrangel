@@ -338,7 +338,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(1, 1, 0, 0.4f);
+			glColor4f(1, 1, 0.25f, 0.4f);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)
@@ -510,7 +510,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(1, 1, 0, 0.4f);
+			glColor4f(1, 1, 0.25f, 0.4f);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)

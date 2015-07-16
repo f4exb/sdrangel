@@ -125,8 +125,11 @@ bool ScopeVis::handleMessageKeep(Message* message)
 {
 	if(DSPSignalNotification::match(message)) {
 		DSPSignalNotification* signal = (DSPSignalNotification*)message;
-		//fprintf(stderr, "ScopeVis::handleMessage @%x : %d samples/sec, %lld Hz offset\n", this, signal->getSampleRate(), signal->getFrequencyOffset());
 		m_sampleRate = signal->getSampleRate();
+		/*fprintf(stderr, "ScopeVis::handleMessage : %d samples/sec, %lld Hz offset, traceSize: \n",
+				m_sampleRate,
+				signal->getFrequencyOffset(),
+				m_trace.size());*/
 		return true;
 	} else if(MsgConfigureScopeVis::match(message)) {
 		MsgConfigureScopeVis* conf = (MsgConfigureScopeVis*)message;
