@@ -302,7 +302,7 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 
 bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 {
-	if ((spanLog2 < 1) || (spanLog2 > 6)) {
+	if ((spanLog2 < 0) || (spanLog2 > 6)) {
 		return false;
 	}
 
