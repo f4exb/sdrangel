@@ -89,8 +89,6 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
 
-	//m_current.resize(m_fftSize);
-
 	m_histogramHoldoffBase = 2; // was 4
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
 	m_histogramLateHoldoff = 1; // was 20
@@ -237,11 +235,6 @@ void GLSpectrum::setDisplayMaxHold(bool display)
 
 void GLSpectrum::setDisplayCurrent(bool display)
 {
-	/*
-	if(display && (m_current.size() < (uint)m_fftSize)) {
-		m_current.resize(m_fftSize);
-	}*/
-
 	m_displayCurrent = display;
 	m_changesPending = true;
 	stopDrag();
@@ -369,10 +362,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		m_histogramHoldoffCount = m_histogramHoldoffBase;
 	}
 
-	/*
-	if(m_current.size() < (uint)m_fftSize)
-		m_current.resize(m_fftSize);*/
-	m_currentSpectrum = &spectrum;
+	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
 
 #define NO_AVX
 #ifdef NO_AVX
@@ -380,17 +370,6 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
 		if ((v >= 0) && (v <= 99)) {
-		/*
-		if (v < 0) {
-			m_current[i] = m_referenceLevel - m_powerRange;
-		}
-		else if (v > 99) {
-			m_current[i] = m_referenceLevel;
-		}
-		else {
-		*/
-			//m_current[i] = m_referenceLevel - m_powerRange + (v * m_powerRange) / 99.0;
-			//m_current[i] = spectrum[i];
 			b = m_histogram + i * 100 + v;
 			if(*b < 220)
 				*b += m_histogramStroke; // was 4
