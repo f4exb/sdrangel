@@ -286,41 +286,6 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="waterfall">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Display waterfall</string>
-       </property>
-       <property name="text">
-        <string>Waterfall</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/waterfall.png</normaloff>:/waterfall.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="ButtonSwitch" name="histogram">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -461,6 +426,41 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="waterfall">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Display waterfall</string>
+       </property>
+       <property name="text">
+        <string>Waterfall</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/waterfall.png</normaloff>:/waterfall.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="grid">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -536,7 +536,6 @@
   <tabstop>fftSize</tabstop>
   <tabstop>refLevel</tabstop>
   <tabstop>levelRange</tabstop>
-  <tabstop>waterfall</tabstop>
   <tabstop>histogram</tabstop>
   <tabstop>maxHold</tabstop>
   <tabstop>invert</tabstop>

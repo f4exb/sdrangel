@@ -855,7 +855,7 @@ void GLSpectrum::paintGL()
 		glPopMatrix();
 	}
 
-	// paint histogram grid
+	// TODO: paint histogram grid
 	if((m_displayHistogram || m_displayMaxHold || m_displayCurrent) && (m_displayGrid)) {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -876,8 +876,8 @@ void GLSpectrum::paintGL()
 				if(tick->textSize > 0) {
 					float y = tick->pos / m_powerScale.getSize();
 					glBegin(GL_LINE_LOOP);
-					glVertex2f(0, y);
-					glVertex2f(1, y);
+					glVertex2f(0, 1-y);
+					glVertex2f(1, 1-y);
 					glEnd();
 				}
 			}
