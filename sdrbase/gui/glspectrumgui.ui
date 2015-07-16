@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>234</width>
+    <width>273</width>
     <height>94</height>
    </rect>
   </property>
@@ -234,7 +234,7 @@
         <string>Decay:</string>
        </property>
        <property name="maximum">
-        <number>10</number>
+        <number>240</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -253,10 +253,10 @@
         <string>Holdoff:</string>
        </property>
        <property name="minimum">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>20</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -278,7 +278,7 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>240</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -370,7 +370,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Display live spectrum</string>
+        <string>Display max hold</string>
        </property>
        <property name="text">
         <string>Max Hold</string>
@@ -378,6 +378,41 @@
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/maxhold.png</normaloff>:/maxhold.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="current">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Display live spectrum</string>
+       </property>
+       <property name="text">
+        <string>Max Hold</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/current.png</normaloff>:/current.png</iconset>
        </property>
        <property name="iconSize">
         <size>

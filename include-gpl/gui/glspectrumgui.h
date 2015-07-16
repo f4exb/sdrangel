@@ -45,6 +45,7 @@ private:
 	bool m_displayWaterfall;
 	bool m_invertedWaterfall;
 	bool m_displayMaxHold;
+	bool m_displayCurrent;
 	bool m_displayHistogram;
 	bool m_displayGrid;
 	bool m_invert;
@@ -64,6 +65,7 @@ private slots:
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);
 	void on_maxHold_toggled(bool checked);
+	void on_current_toggled(bool checked);
 	void on_invert_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 };

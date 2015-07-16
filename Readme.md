@@ -107,16 +107,22 @@ Done since the fork
   - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
   - Variable span for the SSB demod down to 1.5 kHz
   - Filter out CTCSS tones for audio and full CTCSS support in NFMDemod
-  - Enhancement of the NFM squelch
+  - Enhancement of the NFM squelch mimicking professional analog squelch circuits (based on balance between two AF filters)
   - Added a channel analyzer plugin focusing on measurement (DSA/DSO functionnality). Basic functions.
   - Added a scope widget in the channel analyzer plugin
+  - Channel analyzer bandwidth up to half the available RF (IF) bandwidth (was 48k fixed)
+  - Enhanced scope display and controls: scale display, better X (time) and Y scales control, grid fit to scale, effectively implementing triggers, trigger on magnitude and phase, properly handling time shift, ...
+  - Enhanced spectrum display: Histogram: define NO_AVX, wider decay range, make stroke and late holdoff adjustable. Added option to show live spectrum (had only max hold before).
+  - Enhanced channel analyzer: enhanced scope and spectrum displays as mentioned above, make the spectrum display synchronous to scope (hence triggerable a la E4406A).
     
 =====
 To Do
 =====
 
+  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)
+  - Variable scope memory depth
+  - Level calibration
   - Enhance WFM (stereo, RDS?)
   - Even more demods ... 
-  - Triggering capability like on expensive spectrum analyzers to trap burst signals
   - recording capability
   - Tx channels for Rx/Tx boards like BladeRF

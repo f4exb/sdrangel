@@ -38,10 +38,13 @@ public:
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
+	void setHistoLateHoldoff(int lateHoldoff);
+	void setHistoStroke(int stroke);
 	void setDisplayWaterfall(bool display);
 	void setSsbSpectrum(bool ssbSpectrum);
 	void setInvertedWaterfall(bool inv);
 	void setDisplayMaxHold(bool display);
+	void setDisplayCurrent(bool display);
 	void setDisplayHistogram(bool display);
 	void setDisplayGrid(bool display);
 	void setDisplayGridIntensity(int intensity);
@@ -96,6 +99,8 @@ private:
 
 	std::vector<Real> m_maxHold;
 	bool m_displayMaxHold;
+	std::vector<Real> m_current;
+	bool m_displayCurrent;
 
 	Real m_waterfallShare;
 

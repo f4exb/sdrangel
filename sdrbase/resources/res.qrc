@@ -22,5 +22,6 @@
         <file>display2_w.png</file>
         <file>horizontal_w.png</file>
         <file>vertical_w.png</file>
+        <file>current.png</file>
     </qresource>
 </RCC>
