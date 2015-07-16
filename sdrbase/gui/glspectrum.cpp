@@ -36,6 +36,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayGridIntensity(5),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
+	m_currentSpectrum(0),
 	m_displayCurrent(false),
 	m_leftMarginTextureAllocated(false),
 	m_frequencyTextureAllocated(false),
@@ -88,9 +89,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
 
-	m_current.resize(m_fftSize);
+	//m_current.resize(m_fftSize);
 
-	m_histogramHoldoffBase = 1; // was 4
+	m_histogramHoldoffBase = 2; // was 4
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
 	m_histogramLateHoldoff = 1; // was 20
 	m_histogramStroke = 40; // was 4
@@ -236,9 +237,10 @@ void GLSpectrum::setDisplayMaxHold(bool display)
 
 void GLSpectrum::setDisplayCurrent(bool display)
 {
+	/*
 	if(display && (m_current.size() < (uint)m_fftSize)) {
 		m_current.resize(m_fftSize);
-	}
+	}*/
 
 	m_displayCurrent = display;
 	m_changesPending = true;
@@ -367,14 +369,18 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		m_histogramHoldoffCount = m_histogramHoldoffBase;
 	}
 
+	/*
 	if(m_current.size() < (uint)m_fftSize)
-		m_current.resize(m_fftSize);
+		m_current.resize(m_fftSize);*/
+	m_currentSpectrum = &spectrum;
 
 #define NO_AVX
 #ifdef NO_AVX
 	for(int i = 0; i < m_fftSize; i++) {
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
+		if ((v >= 0) && (v <= 99)) {
+		/*
 		if (v < 0) {
 			m_current[i] = m_referenceLevel - m_powerRange;
 		}
@@ -382,8 +388,9 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 			m_current[i] = m_referenceLevel;
 		}
 		else {
+		*/
 			//m_current[i] = m_referenceLevel - m_powerRange + (v * m_powerRange) / 99.0;
-			m_current[i] = spectrum[i];
+			//m_current[i] = spectrum[i];
 			b = m_histogram + i * 100 + v;
 			if(*b < 220)
 				*b += m_histogramStroke; // was 4
@@ -799,7 +806,7 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint current spectrum line on top of histogram
-	if(m_displayCurrent) {
+	if ((m_displayCurrent) && m_currentSpectrum) {
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
@@ -811,7 +818,7 @@ void GLSpectrum::paintGL()
 		Real bottom = -m_powerRange;
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
-			Real v = m_current[i] - m_referenceLevel;
+			Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
 			if(v > 0)
 				v = 0;
 			else if(v < bottom)

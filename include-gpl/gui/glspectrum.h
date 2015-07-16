@@ -99,7 +99,7 @@ private:
 
 	std::vector<Real> m_maxHold;
 	bool m_displayMaxHold;
-	std::vector<Real> m_current;
+	const std::vector<Real> *m_currentSpectrum;
 	bool m_displayCurrent;
 
 	Real m_waterfallShare;
