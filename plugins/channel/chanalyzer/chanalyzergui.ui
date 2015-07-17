@@ -163,7 +163,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Span</string>
+       <string>Rate</string>
       </property>
      </widget>
     </item>
