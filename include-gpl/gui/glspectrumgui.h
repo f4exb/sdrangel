@@ -42,6 +42,7 @@ private:
 	int m_histogramLateHoldoff;
 	int m_histogramStroke;
 	int m_displayGridIntensity;
+	int m_displayTraceIntensity;
 	bool m_displayWaterfall;
 	bool m_invertedWaterfall;
 	bool m_displayMaxHold;
@@ -61,6 +62,7 @@ private slots:
 	void on_holdoff_valueChanged(int index);
 	void on_stroke_valueChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
+	void on_traceIntensity_valueChanged(int index);
 
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);

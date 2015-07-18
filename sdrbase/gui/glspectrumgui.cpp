@@ -19,7 +19,8 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_decay(0),
 	m_histogramLateHoldoff(1),
 	m_histogramStroke(40),
-	m_displayGridIntensity(1),
+	m_displayGridIntensity(5),
+	m_displayTraceIntensity(50),
 	m_displayWaterfall(true),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
@@ -87,6 +88,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeS32(14, m_histogramLateHoldoff);
 	s.writeS32(15, m_histogramStroke);
 	s.writeBool(16, m_displayCurrent);
+	s.writeS32(17, m_displayTraceIntensity);
 	return s.final();
 }
 
@@ -112,10 +114,11 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readS32(10, &m_decay, 0);
 		d.readBool(11, &m_displayGrid, false);
 		d.readBool(12, &m_invert, true);
-		d.readS32(13, &m_displayGridIntensity, 0);
+		d.readS32(13, &m_displayGridIntensity, 5);
 		d.readS32(14, &m_histogramLateHoldoff, 1);
 		d.readS32(15, &m_histogramStroke, 40);
 		d.readBool(16, &m_displayCurrent, false);
+		d.readS32(17, &m_displayTraceIntensity, 50);
 		applySettings();
 		return true;
 	} else {
@@ -150,6 +153,7 @@ void GLSpectrumGUI::applySettings()
 	ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramLateHoldoff));
 	ui->stroke->setToolTip(QString("Stroke: %1").arg(m_histogramStroke));
 	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
+	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
 
 	m_glSpectrum->setDisplayWaterfall(m_displayWaterfall);
 	m_glSpectrum->setInvertedWaterfall(m_invertedWaterfall);
@@ -275,4 +279,12 @@ void GLSpectrumGUI::on_gridIntensity_valueChanged(int index)
 	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
 	if(m_glSpectrum != NULL)
 		m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+}
+
+void GLSpectrumGUI::on_traceIntensity_valueChanged(int index)
+{
+	m_displayTraceIntensity = index;
+	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
+	if(m_glSpectrum != NULL)
+		m_glSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
 }

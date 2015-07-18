@@ -34,6 +34,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_fftSize(512),
 	m_displayGrid(true),
 	m_displayGridIntensity(5),
+	m_displayTraceIntensity(50),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
 	m_currentSpectrum(0),
@@ -260,6 +261,19 @@ void GLSpectrum::setDisplayGridIntensity(int intensity)
 	m_displayGridIntensity = intensity;
 	if (m_displayGridIntensity > 100) {
 		m_displayGridIntensity = 100;
+	} else if (m_displayGridIntensity < 0) {
+		m_displayGridIntensity = 0;
+	}
+	update();
+}
+
+void GLSpectrum::setDisplayTraceIntensity(int intensity)
+{
+	m_displayTraceIntensity = intensity;
+	if (m_displayTraceIntensity > 100) {
+		m_displayTraceIntensity = 100;
+	} else if (m_displayTraceIntensity < 0) {
+		m_displayTraceIntensity = 0;
 	}
 	update();
 }
@@ -768,7 +782,7 @@ void GLSpectrum::paintGL()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
-		glColor3f(1, 0, 0);
+		glColor4f(1, 0, 0, m_displayTraceIntensity / 100.0);
 		Real bottom = -m_powerRange;
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
@@ -793,7 +807,7 @@ void GLSpectrum::paintGL()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
-		glColor3f(1.0f, 1.0f, 0.25f); // intense yellow
+		glColor4f(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0); // intense yellow
 		Real bottom = -m_powerRange;
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
