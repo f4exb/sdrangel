@@ -80,6 +80,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(9, m_triggerChannel);
 	s.writeS32(10, m_triggerLevel);
 	s.writeBool(11, m_triggerPositiveEdge);
+	s.writeS32(12, m_displayTraceIntensity);
 
 	return s.final();
 }
@@ -112,6 +113,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readBool(11, &m_triggerPositiveEdge, true);
 		ui->slopePos->setChecked(m_triggerPositiveEdge);
 		ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
+		d.readS32(12, &m_displayTraceIntensity, 50);
 		applySettings();
 		applyTriggerSettings();
 		return true;
@@ -161,6 +163,7 @@ void GLScopeGUI::applySettings()
 	ui->amp->setValue(m_amplification);
 	ui->ampOfs->setValue(m_ampOffset);
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
+	ui->traceIntensity->setSliderPosition(m_displayTraceIntensity);
 }
 
 void GLScopeGUI::applyTriggerSettings()
@@ -380,8 +383,17 @@ void GLScopeGUI::on_onlySecondView_clicked()
 void GLScopeGUI::on_gridIntensity_valueChanged(int index)
 {
 	m_displayGridIntensity = index;
+	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
 	if(m_glScope != NULL)
 		m_glScope->setDisplayGridIntensity(m_displayGridIntensity);
+}
+
+void GLScopeGUI::on_traceIntensity_valueChanged(int index)
+{
+	m_displayTraceIntensity = index;
+	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
+	if(m_glScope != NULL)
+		m_glScope->setDisplayTraceIntensity(m_displayTraceIntensity);
 }
 
 void GLScopeGUI::on_trigMode_currentIndexChanged(int index)

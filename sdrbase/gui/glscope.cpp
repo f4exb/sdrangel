@@ -36,6 +36,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_displayGridIntensity(5),
+	m_displayTraceIntensity(50),
 	m_left1ScaleTextureAllocated(false),
 	m_left2ScaleTextureAllocated(false),
 	m_bot1ScaleTextureAllocated(false),
@@ -134,6 +135,19 @@ void GLScope::setDisplayGridIntensity(int intensity)
 	m_displayGridIntensity = intensity;
 	if (m_displayGridIntensity > 100) {
 		m_displayGridIntensity = 100;
+	} else if (m_displayGridIntensity < 0) {
+		m_displayGridIntensity = 0;
+	}
+	update();
+}
+
+void GLScope::setDisplayTraceIntensity(int intensity)
+{
+	m_displayTraceIntensity = intensity;
+	if (m_displayTraceIntensity > 100) {
+		m_displayTraceIntensity = 100;
+	} else if (m_displayTraceIntensity < 0) {
+		m_displayTraceIntensity = 0;
 	}
 	update();
 }
@@ -338,7 +352,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(1, 1, 0.25f, 0.4f);
+			glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)
@@ -510,7 +524,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(1, 1, 0.25f, 0.4f);
+			glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 			if(end - start < 2)

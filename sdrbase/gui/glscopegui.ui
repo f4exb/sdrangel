@@ -460,6 +460,9 @@
          <height>24</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Grid intensity</string>
+       </property>
        <property name="maximum">
         <number>100</number>
        </property>
@@ -689,6 +692,35 @@
        </property>
        <property name="text">
         <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="traceIntensityLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="traceIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Trace intensity</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
       </widget>
      </item>

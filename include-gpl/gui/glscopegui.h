@@ -47,6 +47,7 @@ private:
 	qint32 m_amplification;
 	qint32 m_ampOffset;
 	int m_displayGridIntensity;
+	int m_displayTraceIntensity;
 	qint32 m_triggerChannel;
 	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
@@ -70,6 +71,7 @@ private slots:
 	void on_timeOfs_valueChanged(int value);
 	void on_dataMode_currentIndexChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
+	void on_traceIntensity_valueChanged(int index);
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();

@@ -60,6 +60,7 @@ public:
 	void setDisplays(Displays displays);
 	void setOrientation(Qt::Orientation orientation);
 	void setDisplayGridIntensity(int intensity);
+	void setDisplayTraceIntensity(int intensity);
 	void setTriggerChannel(ScopeVis::TriggerChannel triggerChannel);
 	void setTriggerLevel(Real triggerLevel);
 
@@ -112,6 +113,7 @@ private:
 	QRectF m_glScopeRect1;
 	QRectF m_glScopeRect2;
 	int m_displayGridIntensity;
+	int m_displayTraceIntensity;
 	QRectF m_glLeft1ScaleRect;
 	QRectF m_glLeft2ScaleRect;
 	QRectF m_glBot1ScaleRect;
