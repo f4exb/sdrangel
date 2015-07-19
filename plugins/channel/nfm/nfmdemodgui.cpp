@@ -136,14 +136,14 @@ void NFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 
 void NFMDemodGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
+	ui->rfBWText->setText(QString("%1 k").arg(m_rfBW[value] / 1000.0));
 	m_channelMarker->setBandwidth(m_rfBW[value]);
 	applySettings();
 }
 
 void NFMDemodGUI::on_afBW_valueChanged(int value)
 {
-	ui->afBWText->setText(QString("%1 kHz").arg(value));
+	ui->afBWText->setText(QString("%1 k").arg(value));
 	applySettings();
 }
 
