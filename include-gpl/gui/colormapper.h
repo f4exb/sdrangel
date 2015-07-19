@@ -17,6 +17,7 @@ class SDRANGELOVE_API ColorMapper
 public:
 	enum Theme {
 		Normal,
+		Gold,
 		ReverseGold,
 	};
 
@@ -29,6 +30,8 @@ public:
 	const QColor& getForegroundColor() const { return m_foregroundColor; };
 	const QColor& getSecondaryForegroundColor() const { return m_secondaryForegroundColor; };
 	const QColor& getHighlightColor() const { return m_highlightColor; };
+	const QColor& getBoundaryColor() const { return m_boundaryColor; };
+	const QColor& getBoundaryAlphaColor() const { return m_boundaryAlphaColor; };
 
 private:
 	Theme m_theme;
@@ -36,6 +39,8 @@ private:
 	QColor m_foregroundColor;
 	QColor m_secondaryForegroundColor;
 	QColor m_highlightColor;
+	QColor m_boundaryColor;
+	QColor m_boundaryAlphaColor;
 };
 
 #endif /* INCLUDE_GPL_GUI_COLORMAPPER_H_ */

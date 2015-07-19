@@ -172,22 +172,21 @@ void ValueDial::paintEvent(QPaintEvent*)
 
 	painter.drawRect(0, 0, width() - 1, height() - 1);
 
-	painter.setPen(QColor(0x20, 0x20, 0x20));
+	painter.setPen(m_colorMapper.getBoundaryColor());
 	painter.setBrush(Qt::NoBrush);
 	for(int i = 1; i < m_numDigits + m_numDecimalPoints; i++) {
-		painter.setPen(QColor(0x20, 0x20, 0x20));
+		painter.setPen(m_colorMapper.getBoundaryColor());
 		painter.drawLine(1 + i * m_digitWidth, 1, 1 + i * m_digitWidth, height() - 1);
-		painter.setPen(QColor(0x00, 0x00, 0x00, 0x20));
+		painter.setPen(m_colorMapper.getBoundaryAlphaColor());
 		painter.drawLine(0 + i * m_digitWidth, 1, 0 + i * m_digitWidth, height() - 1);
 		painter.drawLine(2 + i * m_digitWidth, 1, 2 + i * m_digitWidth, height() - 1);
 	}
-	painter.setPen(QColor(0x00, 0x00, 0x00, 0x20));
+	painter.setPen(m_colorMapper.getBoundaryAlphaColor());
 	painter.drawLine(1, 1, 1, height() - 1);
 	painter.drawLine(width() - 2, 1, width() - 2, height() - 1);
 
 	if(m_hightlightedDigit >= 0) {
 		painter.setPen(Qt::NoPen);
-		painter.setBrush(QColor(0xff, 0x00, 0x00, 0x20));
 		painter.setBrush(m_colorMapper.getHighlightColor());
 		painter.drawRect(2 + m_hightlightedDigit * m_digitWidth, 1, m_digitWidth - 1, height() - 1);
 	}
