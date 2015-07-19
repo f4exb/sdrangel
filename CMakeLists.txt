@@ -77,6 +77,7 @@ set(sdrbase_SOURCES
 	sdrbase/gui/basicchannelsettingswidget.cpp
 	sdrbase/gui/buttonswitch.cpp
 	sdrbase/gui/channelwindow.cpp
+	sdrbase/gui/colormapper.cpp
 	sdrbase/gui/glscope.cpp
 	sdrbase/gui/glscopegui.cpp
 	sdrbase/gui/glspectrum.cpp
@@ -147,6 +148,7 @@ set(sdrbase_HEADERS
 	include/gui/basicchannelsettingswidget.h
 	include-gpl/gui/buttonswitch.h
 	include-gpl/gui/channelwindow.h
+	include-gpl/gui/colormapper.h
 	include-gpl/gui/glscope.h
 	include-gpl/gui/glscopegui.h
 	include-gpl/gui/glspectrum.h

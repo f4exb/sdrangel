@@ -209,6 +209,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
 	}
 
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	//ui->deltaFrequency->setBold(true);
+
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addAudioSource(m_audioFifo);

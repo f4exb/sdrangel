@@ -21,9 +21,10 @@
 #include <QKeyEvent>
 #include "gui/valuedial.h"
 
-ValueDial::ValueDial(QWidget* parent) :
+ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
 	QWidget(parent),
-	m_animationState(0)
+	m_animationState(0),
+	m_colorMapper(colorMapper)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -35,6 +36,14 @@ ValueDial::ValueDial(QWidget* parent) :
 	m_background.setFinalStop(0, 1);
 	m_background.setCoordinateMode(QGradient::ObjectBoundingMode);
 
+	ColorMapper::colormap::const_iterator cmit = m_colorMapper.getDialBackgroundColorMap().begin();
+	ColorMapper::colormap::const_iterator cmitEnd = m_colorMapper.getDialBackgroundColorMap().end();
+
+	for (; cmit != cmitEnd; ++ cmit) {
+		m_background.setColorAt(cmit->first, cmit->second);
+	}
+
+	/*
 	m_background.setColorAt(0.0, QColor(0x40, 0x40, 0x40));
 	m_background.setColorAt(0.1, QColor(0xc0, 0xc0, 0xc0));
 	m_background.setColorAt(0.2, QColor(0xf0, 0xf0, 0xf0));
@@ -42,6 +51,7 @@ ValueDial::ValueDial(QWidget* parent) :
 	m_background.setColorAt(0.8, QColor(0xd0, 0xd0, 0xd0));
 	m_background.setColorAt(0.9, QColor(0xa0, 0xa0, 0xa0));
 	m_background.setColorAt(1.0, QColor(0x40, 0x40, 0x40));
+	*/
 
 	m_value =  0;
 	m_valueMin = 0;
@@ -70,6 +80,26 @@ void ValueDial::setFont(const QFont& font)
 	setFixedWidth((m_numDigits + m_numDecimalPoints) * m_digitWidth + 2);
 	setFixedHeight(m_digitHeight * 2 + 2);
 }
+
+void ValueDial::setBold(bool bold)
+{
+	QFont f = font();
+	f.setBold(bold);
+	setFont(f);
+}
+
+void ValueDial::setColorMapper(ColorMapper colorMapper)
+{
+	m_colorMapper = colorMapper;
+
+	ColorMapper::colormap::const_iterator cmit = m_colorMapper.getDialBackgroundColorMap().begin();
+	ColorMapper::colormap::const_iterator cmitEnd = m_colorMapper.getDialBackgroundColorMap().end();
+
+	for (; cmit != cmitEnd; ++ cmit) {
+		m_background.setColorAt(cmit->first, cmit->second);
+	}
+}
+
 
 void ValueDial::setValue(quint64 value)
 {
@@ -158,16 +188,17 @@ void ValueDial::paintEvent(QPaintEvent*)
 	if(m_hightlightedDigit >= 0) {
 		painter.setPen(Qt::NoPen);
 		painter.setBrush(QColor(0xff, 0x00, 0x00, 0x20));
+		painter.setBrush(m_colorMapper.getHighlightColor());
 		painter.drawRect(2 + m_hightlightedDigit * m_digitWidth, 1, m_digitWidth - 1, height() - 1);
 	}
 
 	if(m_animationState == 0) {
 		for(int i = 0; i < m_text.length(); i++) {
 			painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-			painter.setPen(QColor(0x10, 0x10, 0x10));
+			painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 			painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 			if(m_text[i] != QChar('.')) {
-				painter.setPen(QColor(0x00, 0x00, 0x00));
+				painter.setPen(m_colorMapper.getForegroundColor());
 				painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 				painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
 			}
@@ -175,7 +206,7 @@ void ValueDial::paintEvent(QPaintEvent*)
 		painter.setClipping(false);
 		if((m_cursor >= 0) && (m_cursorState)) {
 			painter.setPen(Qt::NoPen);
-			painter.setBrush(QColor(0x10, 0x10, 0x10));
+			painter.setBrush(m_colorMapper.getSecondaryForegroundColor());
 			painter.drawRect(4 + m_cursor * m_digitWidth, 1 + m_digitHeight * 1.5, m_digitWidth - 5, m_digitHeight / 6);
 		}
 	} else {
@@ -183,20 +214,20 @@ void ValueDial::paintEvent(QPaintEvent*)
 			for(int i = 0; i < m_text.length(); i++) {
 				if(m_text[i] == m_textNew[i]) {
 					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-					painter.setPen(QColor(0x10, 0x10, 0x10));
+					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 					painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 					if(m_text[i] != QChar('.')) {
-						painter.setPen(QColor(0x00, 0x00, 0x00));
+						painter.setPen(m_colorMapper.getForegroundColor());
 						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
 					}
 				} else {
 					int h = m_digitHeight * 0.6 + m_digitHeight * m_animationState / 2.0;
 					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-					painter.setPen(QColor(0x10, 0x10, 0x10));
+					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 					painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 					if(m_text[i] != QChar('.')) {
-						painter.setPen(QColor(0x00, 0x00, 0x00));
+						painter.setPen(m_colorMapper.getForegroundColor());
 						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
 					}

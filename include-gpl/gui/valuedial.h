@@ -17,17 +17,20 @@
 
 #include <QWidget>
 #include <QTimer>
+#include "gui/colormapper.h"
 #include "util/export.h"
 
 class SDRANGELOVE_API ValueDial : public QWidget {
 	Q_OBJECT
 
 public:
-	ValueDial(QWidget* parent = NULL);
+	ValueDial(QWidget* parent = NULL, ColorMapper colorMapper = ColorMapper(ColorMapper::Normal));
 
 	void setValue(quint64 value);
 	void setValueRange(uint numDigits, quint64 min, quint64 max);
 	void setFont(const QFont& font);
+	void setBold(bool bold);
+	void setColorMapper(ColorMapper colorMapper);
 
 signals:
 	void changed(quint64 value);
@@ -51,6 +54,8 @@ private:
 	int m_animationState;
 	QTimer m_animationTimer;
 	QTimer m_blinkTimer;
+
+	ColorMapper m_colorMapper;
 
 	quint64 findExponent(int digit);
 	QChar digitNeigh(QChar c, bool dir);
