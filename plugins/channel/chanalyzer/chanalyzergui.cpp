@@ -37,6 +37,11 @@ QString ChannelAnalyzerGUI::getName() const
 	return objectName();
 }
 
+qint64 ChannelAnalyzerGUI::getCenterFrequency() const
+{
+	return m_channelMarker->getCenterFrequency();
+}
+
 void ChannelAnalyzerGUI::resetToDefaults()
 {
 	ui->BW->setValue(30);

@@ -36,6 +36,11 @@ QString SSBDemodGUI::getName() const
 	return objectName();
 }
 
+qint64 SSBDemodGUI::getCenterFrequency() const
+{
+	return m_channelMarker->getCenterFrequency();
+}
+
 void SSBDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(30);

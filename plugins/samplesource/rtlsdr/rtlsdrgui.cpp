@@ -64,7 +64,7 @@ bool RTLSDRGui::deserializeGeneral(const QByteArray&data)
 	}
 }
 
-quint64 RTLSDRGui::getCenterFrequency() const
+qint64 RTLSDRGui::getCenterFrequency() const
 {
 	return m_generalSettings.m_centerFrequency;
 }

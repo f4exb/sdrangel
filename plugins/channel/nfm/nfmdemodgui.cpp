@@ -38,6 +38,11 @@ QString NFMDemodGUI::getName() const
 	return objectName();
 }
 
+qint64 NFMDemodGUI::getCenterFrequency() const
+{
+	return m_channelMarker->getCenterFrequency();
+}
+
 void NFMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

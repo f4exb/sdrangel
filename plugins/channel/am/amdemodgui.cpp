@@ -39,6 +39,10 @@ QString AMDemodGUI::getName() const
 	return objectName();
 }
 
+qint64 AMDemodGUI::getCenterFrequency() const {
+	return m_channelMarker->getCenterFrequency();
+}
+
 void AMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

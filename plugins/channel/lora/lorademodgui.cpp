@@ -34,6 +34,10 @@ QString LoRaDemodGUI::getName() const
 	return objectName();
 }
 
+qint64 LoRaDemodGUI::getCenterFrequency() const {
+	return m_channelMarker->getCenterFrequency();
+}
+
 void LoRaDemodGUI::resetToDefaults()
 {
 	ui->BW->setValue(0);

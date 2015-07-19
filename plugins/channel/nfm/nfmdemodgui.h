@@ -27,6 +27,7 @@ public:
 
 	void setName(const QString& name);
 	QString getName() const;
+	qint64 getCenterFrequency() const;
 
 	void resetToDefaults();
 	QByteArray serialize() const;

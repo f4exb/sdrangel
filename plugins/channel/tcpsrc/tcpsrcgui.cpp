@@ -24,6 +24,11 @@ void TCPSrcGUI::setName(const QString& name)
 	setObjectName(name);
 }
 
+qint64 TCPSrcGUI::getCenterFrequency() const
+{
+	return m_channelMarker->getCenterFrequency();
+}
+
 QString TCPSrcGUI::getName() const
 {
 	return objectName();

@@ -82,7 +82,7 @@ bool BladerfGui::deserializeGeneral(const QByteArray&data)
 	}
 }
 
-quint64 BladerfGui::getCenterFrequency() const
+qint64 BladerfGui::getCenterFrequency() const
 {
 	return m_generalSettings.m_centerFrequency;
 }

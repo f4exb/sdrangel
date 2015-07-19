@@ -45,7 +45,7 @@ public:
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
 	void loadSettings(const Preset* preset);
-	void saveSettings(Preset* preset) const;
+	void saveSettings(Preset* preset);
 
 	void freeAll();
 
@@ -78,6 +78,7 @@ private:
 			m_channelName(channelName),
 			m_gui(pluginGUI)
 		{ }
+		bool operator<(const ChannelInstanceRegistration& other) const;
 	};
 	typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 

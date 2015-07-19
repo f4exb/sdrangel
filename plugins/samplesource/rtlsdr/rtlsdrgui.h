@@ -26,7 +26,7 @@ public:
 	void resetToDefaults();
 	QByteArray serializeGeneral() const;
 	bool deserializeGeneral(const QByteArray&data);
-	quint64 getCenterFrequency() const;
+	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	bool handleMessage(Message* message);

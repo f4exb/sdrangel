@@ -10,7 +10,7 @@ bool PluginGUI::deserializeGeneral(const QByteArray& data)
 	return false;
 }
 
-quint64 PluginGUI::getCenterFrequency() const
+qint64 PluginGUI::getCenterFrequency() const
 {
 	return 0;
 }

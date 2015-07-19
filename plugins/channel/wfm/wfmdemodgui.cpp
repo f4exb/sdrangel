@@ -48,6 +48,11 @@ QString WFMDemodGUI::getName() const
 	return objectName();
 }
 
+qint64 WFMDemodGUI::getCenterFrequency() const
+{
+	return m_channelMarker->getCenterFrequency();
+}
+
 void WFMDemodGUI::resetToDefaults()
 {
 	ui->rfBW->setValue(4);

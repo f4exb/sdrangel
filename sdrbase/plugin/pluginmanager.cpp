@@ -133,7 +133,20 @@ void PluginManager::loadSettings(const Preset* preset)
 	}
 }
 
-void PluginManager::saveSettings(Preset* preset) const
+// sort by increasing delta frequency and type (i.e. name)
+bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const {
+	if (m_gui && other.m_gui) {
+		if (m_gui->getCenterFrequency() == other.m_gui->getCenterFrequency()) {
+			return m_gui->getName() < other.m_gui->getName();
+		} else {
+			return m_gui->getCenterFrequency() < other.m_gui->getCenterFrequency();
+		}
+	} else {
+		return false;
+	}
+}
+
+void PluginManager::saveSettings(Preset* preset)
 {
 	if(m_sampleSourceInstance != NULL) {
 		preset->setSourceConfig(m_sampleSource, m_sampleSourceInstance->serializeGeneral(), m_sampleSourceInstance->serialize());
@@ -141,8 +154,10 @@ void PluginManager::saveSettings(Preset* preset) const
 	} else {
 		preset->setSourceConfig(QString::null, QByteArray(), QByteArray());
 	}
-	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
 		preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+	}
 }
 
 void PluginManager::freeAll()

@@ -63,7 +63,7 @@ bool FCDGui::deserializeGeneral(const QByteArray&data)
 	}
 }
 
-quint64 FCDGui::getCenterFrequency() const
+qint64 FCDGui::getCenterFrequency() const
 {
 	return m_generalSettings.m_centerFrequency;
 }
