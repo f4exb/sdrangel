@@ -397,7 +397,7 @@
      <item>
       <widget class="QComboBox" name="fftSize">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -443,13 +443,19 @@
      <item>
       <widget class="QComboBox" name="refLevel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Reference level</string>
+        <string>Reference level (dB)</string>
        </property>
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToContents</enum>
@@ -459,13 +465,19 @@
      <item>
       <widget class="QComboBox" name="levelRange">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Range</string>
+        <string>Range (dB)</string>
        </property>
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToContents</enum>

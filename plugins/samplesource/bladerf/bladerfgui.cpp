@@ -30,7 +30,7 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::Gold));
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
