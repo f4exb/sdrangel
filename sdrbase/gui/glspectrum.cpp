@@ -378,7 +378,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
 
-#define NO_AVX
+//#define NO_AVX
 #ifdef NO_AVX
 	for(int i = 0; i < m_fftSize; i++) {
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
@@ -410,7 +410,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 				if((v >= 0) && (v <= 99)) {
 					b = m_histogram + (i + j) * 100 + v;
 					if(*b < 220)
-						*b += 4;
+						*b += m_histogramStroke; // was 4
 					else if(*b < 239)
 						*b += 1;
 				}

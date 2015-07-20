@@ -180,7 +180,7 @@ void GLScopeGUI::applyTriggerSettings()
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
 	m_glScope->setTriggerLevel(m_triggerLevel / 100.0);
 
-	m_scopeVis->configure(m_messageQueue, (ScopeVis::TriggerChannel) m_triggerChannel, triggerLevel, m_triggerPositiveEdge);
+	m_scopeVis->configure(m_messageQueue, (ScopeVis::TriggerChannel) m_triggerChannel, triggerLevel, m_triggerPositiveEdge, 0); // TODO: pass trigger delay as the last parameter
 }
 
 void GLScopeGUI::setTrigLevelDisplay()

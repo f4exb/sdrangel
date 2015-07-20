@@ -2,6 +2,7 @@
 #include "gui/glscope.h"
 #include "dsp/dspcommands.h"
 #include "util/messagequeue.h"
+#include <algorithm>
 
 #include <cstdio>
 #include <iostream>
@@ -11,6 +12,8 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 ScopeVis::ScopeVis(GLScope* glScope) :
 	m_glScope(glScope),
 	m_trace(96000),
+    m_traceback(96000),
+    m_tracebackCount(0),
 	m_fill(0),
 	m_triggerState(Untriggered),
 	m_triggerChannel(TriggerFreeRun),
@@ -22,9 +25,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 {
 }
 
-void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge)
+void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerDelay)
 {
-	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge);
+	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge, triggerDelay);
 	cmd->submit(msgQueue, this);
 }
 
@@ -74,15 +77,24 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			{
 				while(begin < end)
 				{
-					if (triggerCondition(begin) ^ !m_triggerPositiveEdge) {
-						if (m_armed) {
+                    bool trigger = triggerCondition(begin);
+					if ((trigger ^ !m_triggerPositiveEdge) && (m_tracebackCount > m_triggerDelay)) 
+                    {
+						if (m_armed) 
+                        {
 							m_triggerState = Triggered;
 							m_armed = false;
 							m_triggerPoint = begin;
+                            // fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
+                            if (m_triggerDelay) { // do this process only if there is a delayed trigger
+                                std::copy(m_traceback.end() - m_triggerDelay, m_traceback.end() - 1, m_trace.begin());
+                                m_fill = m_triggerDelay; // Increment m_fill accordingly (from 0).
+                            }
 							break;
 						}
 					}
-					else {
+					else 
+                    {
 						m_armed = true;
 					}
 					++begin;
@@ -105,6 +117,7 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 					if (m_triggerOneShot) {
 						m_triggerState = WaitForReset;
 					} else {
+                        m_tracebackCount = 0;
 						m_triggerState = Untriggered;
 					}
 				}
@@ -133,14 +146,20 @@ bool ScopeVis::handleMessageKeep(Message* message)
 		return true;
 	} else if(MsgConfigureScopeVis::match(message)) {
 		MsgConfigureScopeVis* conf = (MsgConfigureScopeVis*)message;
+        m_tracebackCount = 0;
 		m_triggerState = Untriggered;
 		m_triggerChannel = (TriggerChannel) conf->getTriggerChannel();
 		m_triggerLevel = conf->getTriggerLevel();
 		m_triggerPositiveEdge = conf->getTriggerPositiveEdge();
+        m_triggerDelay = conf->getTriggerDelay();
+        if (m_triggerDelay >= m_traceback.size()) {
+            m_triggerDelay = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (delay = 0)
+        }
 		std::cerr << "ScopeVis::handleMessageKeep:"
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
-				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-") << std::endl;
+				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
+				<< " m_triggerDelay: " << m_triggerDelay << std::endl;
 		return true;
 	/*
 	} else if(DSPConfigureScopeVis::match(message)) {
@@ -175,7 +194,12 @@ void ScopeVis::setSampleRate(int sampleRate)
 bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 {
 	Complex c(it->real()/32768.0, it->imag()/32768.0);
-
+    m_traceback.push_back(c); // store into trace memory FIFO
+    
+    if (m_tracebackCount < m_traceback.size()) { // increment count up to trace memory size
+        m_tracebackCount++;
+    }
+    
 	if (m_triggerChannel == TriggerChannelI) {
 		return c.real() > m_triggerLevel;
 	}
@@ -203,6 +227,7 @@ void ScopeVis::setOneShot(bool oneShot)
 	m_triggerOneShot = oneShot;
 
 	if ((m_triggerState == WaitForReset) && !oneShot) {
+        m_tracebackCount = 0;
 		m_triggerState = Untriggered;
 	}
 }
