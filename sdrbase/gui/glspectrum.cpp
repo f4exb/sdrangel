@@ -15,7 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifdef USE_SIMD
 #include <immintrin.h>
+#endif
 #include <QMouseEvent>
 #include "gui/glspectrum.h"
 
@@ -378,8 +380,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
 
-//#define NO_AVX
-#ifdef NO_AVX
+#ifndef USE_SIMD
 	for(int i = 0; i < m_fftSize; i++) {
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 

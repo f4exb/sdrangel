@@ -26,6 +26,10 @@ find_package(PkgConfig)
 find_package(Boost)
 find_package(FFTW3F)
 
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
+ SET(USE_SIMD "SSE2" CACHE STRING "Use SIMD instructions")
+ENDIF()
+
 ##############################################################################
 
 #include(${QT_USE_FILE})
@@ -267,15 +271,18 @@ include_directories(
 	${OPENGL_INCLUDE_DIR}
 )
 
-if(MSVC)
-	set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE2" )
-	set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE2" )
-	set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-	add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-else()
-	#set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse2" )
-	#set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse2" )
-	add_definitions(-msse2 -Wall)
+if(USE_SIMD MATCHES SSE2)
+	if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+		set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse2" )
+		set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse2" )
+		add_definitions(-DUSE_SIMD)
+	elseif(MSVC)
+		set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE2" )
+		set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE2" )
+		set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
+		add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
+		add_definitions(-DUSE_SIMD)
+	endif()
 endif()
 
 ##############################################################################
