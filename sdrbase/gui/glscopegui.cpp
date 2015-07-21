@@ -52,8 +52,6 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 void GLScopeGUI::setSampleRate(int sampleRate)
 {
 	m_sampleRate = sampleRate;
-	setTimeScaleDisplay();
-	setTimeOfsDisplay();
 }
 
 void GLScopeGUI::resetToDefaults()
@@ -241,12 +239,19 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 {
 	setTimeScaleDisplay();
 	setTimeOfsDisplay();
+	setTrigPreDisplay();
+	applySettings();
+	applyTriggerSettings();
 }
 
 void GLScopeGUI::on_scope_sampleRateChanged(int)
 {
+	m_sampleRate = m_glScope->getSampleRate();
 	setTimeScaleDisplay();
 	setTimeOfsDisplay();
+	setTrigPreDisplay();
+	applySettings();
+	applyTriggerSettings();
 }
 
 void GLScopeGUI::setTimeScaleDisplay()
