@@ -19,7 +19,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_triggerChannel(TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
-	m_triggerDelay(0),
+	m_triggerPre(0),
 	m_triggerOneShot(false),
 	m_armed(false),
 	m_sampleRate(0)
@@ -29,9 +29,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_traceback.resize(20*m_traceChunkSize);
 }
 
-void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerDelay, uint traceSize)
+void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerPre, uint traceSize)
 {
-	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge, triggerDelay, traceSize);
+	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge, triggerPre, traceSize);
 	cmd->submit(msgQueue, this);
 }
 
@@ -82,7 +82,7 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				while(begin < end)
 				{
                     bool trigger = triggerCondition(begin);
-					if ((trigger ^ !m_triggerPositiveEdge) && (m_tracebackCount > m_triggerDelay)) 
+					if ((trigger ^ !m_triggerPositiveEdge) && (m_tracebackCount > m_triggerPre))
                     {
 						if (m_armed) 
                         {
@@ -90,9 +90,9 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 							m_armed = false;
 							m_triggerPoint = begin;
                             // fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
-                            if (m_triggerDelay) { // do this process only if there is a delayed trigger
-                                std::copy(m_traceback.end() - m_triggerDelay, m_traceback.end() - 1, m_trace.begin());
-                                m_fill = m_triggerDelay; // Increment m_fill accordingly (from 0).
+                            if (m_triggerPre) { // do this process only if there is a pre-trigger delay
+                                std::copy(m_traceback.end() - m_triggerPre, m_traceback.end() - 1, m_trace.begin());
+                                m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
                             }
 							break;
 						}
@@ -155,9 +155,9 @@ bool ScopeVis::handleMessageKeep(Message* message)
 		m_triggerChannel = (TriggerChannel) conf->getTriggerChannel();
 		m_triggerLevel = conf->getTriggerLevel();
 		m_triggerPositiveEdge = conf->getTriggerPositiveEdge();
-        m_triggerDelay = conf->getTriggerDelay();
-        if (m_triggerDelay >= m_traceback.size()) {
-            m_triggerDelay = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (delay = 0)
+		m_triggerPre = conf->getTriggerPre();
+        if (m_triggerPre >= m_traceback.size()) {
+        	m_triggerPre = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (pre-trigger delay = 0)
         }
         uint newSize = conf->getTraceSize();
         if (newSize != m_trace.size()) {
@@ -170,7 +170,7 @@ bool ScopeVis::handleMessageKeep(Message* message)
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
 				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
-				<< " m_preTrigger: " << m_triggerDelay
+				<< " m_preTrigger: " << m_triggerPre
 				<< " m_traceSize: " << m_trace.size() << std::endl;
 		return true;
 	/*

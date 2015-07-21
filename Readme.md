@@ -115,13 +115,14 @@ Done since the fork
   - Enhanced spectrum display: Histogram: define NO_AVX, wider decay range, make stroke and late holdoff adjustable. Added option to show live spectrum (had only max hold before).
   - Enhanced channel analyzer: enhanced scope and spectrum displays as mentioned above, make the spectrum display synchronous to scope (hence triggerable a la E4406A).
   - Sort channel plugins by delta frequency and type before saving to preset
-  - Implemented scope trigger delay
+  - Implemented scope pre-trigger delay
     
 =====
 To Do
 =====
 
   - Variable scope memory depth
+  - Trigger delay
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
   - Level calibration
   - Enhance WFM (stereo, RDS?)

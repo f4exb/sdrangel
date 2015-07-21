@@ -713,21 +713,21 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="trigDelayLabel">
+      <widget class="QLabel" name="trigPreLabel">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string> Dly</string>
+        <string> Pre</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="trigDelay">
+      <widget class="QSlider" name="trigPre">
        <property name="toolTip">
-        <string>Trigger delay</string>
+        <string>Pre-trigger delay</string>
        </property>
        <property name="maximum">
         <number>100</number>
@@ -741,7 +741,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="trigDelayText">
+      <widget class="QLabel" name="trigPreText">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
