@@ -364,7 +364,7 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
 
 void GLScopeGUI::on_trigPre_valueChanged(int value)
 {
-	if ((value < 0) || (value > 100)) {
+	if ((value < 0) || (value > 99)) {
 		return;
 	}
 	m_triggerPre = value;
