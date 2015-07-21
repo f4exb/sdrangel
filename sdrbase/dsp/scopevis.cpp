@@ -91,7 +91,7 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 							m_triggerPoint = begin;
                             // fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
                             if (m_triggerPre) { // do this process only if there is a pre-trigger delay
-                                std::copy(m_traceback.end() - m_triggerPre, m_traceback.end() - 1, m_trace.begin());
+                                std::copy(m_traceback.end() - m_triggerPre - 1, m_traceback.end() - 1, m_trace.begin());
                                 m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
                             }
 							break;
