@@ -37,6 +37,8 @@ void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPerc
 
 void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
+	feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
+	/*
 	if (triggerPoint == end)
 	{
 		// the following piece of code allows to terminate the FFT that ends past the end of scope captured data
@@ -51,7 +53,7 @@ void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, Sampl
 	else
 	{
 		feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
-	}
+	}*/
 }
 
 void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
