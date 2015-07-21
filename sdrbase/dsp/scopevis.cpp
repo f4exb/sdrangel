@@ -82,25 +82,28 @@ void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				while(begin < end)
 				{
                     bool trigger = triggerCondition(begin);
-					if ((trigger ^ !m_triggerPositiveEdge) && (m_tracebackCount > m_triggerPre))
+                    if (m_tracebackCount > m_triggerPre)
                     {
-						if (m_armed) 
-                        {
-							m_triggerState = Triggered;
-							m_armed = false;
-							m_triggerPoint = begin;
-                            // fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
-                            if (m_triggerPre) { // do this process only if there is a pre-trigger delay
-                                std::copy(m_traceback.end() - m_triggerPre - 1, m_traceback.end() - 1, m_trace.begin());
-                                m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
-                            }
-							break;
+						if (trigger ^ !m_triggerPositiveEdge)
+						{
+							if (m_armed)
+							{
+								m_triggerState = Triggered;
+								m_armed = false;
+								m_triggerPoint = begin;
+								// fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
+								if (m_triggerPre) { // do this process only if there is a pre-trigger delay
+									std::copy(m_traceback.end() - m_triggerPre - 1, m_traceback.end() - 1, m_trace.begin());
+									m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
+								}
+								break;
+							}
 						}
-					}
-					else 
-                    {
-						m_armed = true;
-					}
+						else
+						{
+							m_armed = true;
+						}
+                    }
 					++begin;
 				}
 			}
