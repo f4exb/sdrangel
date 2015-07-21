@@ -52,6 +52,7 @@ private:
 	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
 	qint32 m_triggerDelay;
+    qint32 m_traceSize;
 
 	static const qreal amps[11];
 

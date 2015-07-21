@@ -9,25 +9,29 @@
 
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 
+const uint ScopeVis::m_traceChunkSize = 4800;
+
 ScopeVis::ScopeVis(GLScope* glScope) :
 	m_glScope(glScope),
-	m_trace(96000),
-    m_traceback(96000),
     m_tracebackCount(0),
 	m_fill(0),
 	m_triggerState(Untriggered),
 	m_triggerChannel(TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
+	m_triggerDelay(0),
 	m_triggerOneShot(false),
 	m_armed(false),
 	m_sampleRate(0)
 {
+	m_trace.reserve(100*m_traceChunkSize);
+	m_trace.resize(20*m_traceChunkSize);
+	m_traceback.resize(20*m_traceChunkSize);
 }
 
-void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerDelay)
+void ScopeVis::configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerDelay, uint traceSize)
 {
-	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge, triggerDelay);
+	Message* cmd = MsgConfigureScopeVis::create(triggerChannel, triggerLevel, triggerPositiveEdge, triggerDelay, traceSize);
 	cmd->submit(msgQueue, this);
 }
 
@@ -155,11 +159,19 @@ bool ScopeVis::handleMessageKeep(Message* message)
         if (m_triggerDelay >= m_traceback.size()) {
             m_triggerDelay = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (delay = 0)
         }
+        uint newSize = conf->getTraceSize();
+        if (newSize != m_trace.size()) {
+            m_trace.resize(newSize);
+        }
+        if (newSize > m_traceback.size()) {  // fitting the exact required space is not a requirement for the back trace
+            m_traceback.resize(newSize);
+        }
 		std::cerr << "ScopeVis::handleMessageKeep:"
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
 				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
-				<< " m_triggerDelay: " << m_triggerDelay << std::endl;
+				<< " m_preTrigger: " << m_triggerDelay
+				<< " m_traceSize: " << m_trace.size() << std::endl;
 		return true;
 	/*
 	} else if(DSPConfigureScopeVis::match(message)) {

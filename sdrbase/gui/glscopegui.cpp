@@ -27,7 +27,9 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_displayGridIntensity(1),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
-	m_triggerPositiveEdge(true)
+	m_triggerPositiveEdge(true),
+    m_triggerDelay(0),
+    m_traceSize(96000)
 {
 	ui->setupUi(this);
 }
@@ -185,7 +187,7 @@ void GLScopeGUI::applyTriggerSettings()
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
 	m_glScope->setTriggerLevel(m_triggerLevel / 100.0);
 
-	m_scopeVis->configure(m_messageQueue, (ScopeVis::TriggerChannel) m_triggerChannel, triggerLevel, m_triggerPositiveEdge, trigDelaySamples); // TODO: pass trigger delay as the last parameter
+	m_scopeVis->configure(m_messageQueue, (ScopeVis::TriggerChannel) m_triggerChannel, triggerLevel, m_triggerPositiveEdge, trigDelaySamples, 96000); // TODO: pass trace size as last parameter
 }
 
 void GLScopeGUI::setTrigLevelDisplay()
