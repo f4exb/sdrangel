@@ -233,7 +233,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Time</string>
+        <string>t</string>
        </property>
       </widget>
      </item>
@@ -353,7 +353,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Amp</string>
+        <string>A</string>
        </property>
       </widget>
      </item>
@@ -742,6 +742,59 @@
      </item>
      <item>
       <widget class="QLabel" name="trigPreText">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="traceLenLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="traceLenLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Len</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="traceLen">
+       <property name="toolTip">
+        <string>Trace length</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="traceLenText">
        <property name="font">
         <font>
          <pointsize>8</pointsize>

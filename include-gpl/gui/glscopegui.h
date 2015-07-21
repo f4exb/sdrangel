@@ -52,13 +52,14 @@ private:
 	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
 	qint32 m_triggerPre;
-    qint32 m_traceSize;
+    qint32 m_traceLenMult;
 
 	static const qreal amps[11];
 
 	void applySettings();
 	void applyTriggerSettings();
 	void setTimeScaleDisplay();
+	void setTraceLenDisplay();
 	void setTimeOfsDisplay();
 	void setAmpScaleDisplay();
 	void setAmpOfsDisplay();
@@ -71,6 +72,7 @@ private slots:
 	void on_scope_traceSizeChanged(int value);
 	void on_scope_sampleRateChanged(int value);
 	void on_time_valueChanged(int value);
+	void on_traceLen_valueChanged(int value);
 	void on_timeOfs_valueChanged(int value);
 	void on_dataMode_currentIndexChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
