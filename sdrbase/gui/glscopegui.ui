@@ -753,6 +753,33 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="trigDelayLabel">
+       <property name="text">
+        <string> Dly</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="trigDelay">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="trigDelayText">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="Line" name="traceLenLine">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

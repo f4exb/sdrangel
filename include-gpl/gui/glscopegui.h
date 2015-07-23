@@ -52,6 +52,7 @@ private:
 	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
 	qint32 m_triggerPre;
+    qint32 m_triggerDelay;
     qint32 m_traceLenMult;
 
 	static const qreal amps[11];
@@ -65,6 +66,7 @@ private:
 	void setAmpOfsDisplay();
 	void setTrigLevelDisplay();
 	void setTrigPreDisplay();
+	void setTrigDelayDisplay();
 
 private slots:
 	void on_amp_valueChanged(int value);
@@ -78,6 +80,7 @@ private slots:
 	void on_gridIntensity_valueChanged(int index);
 	void on_traceIntensity_valueChanged(int index);
 	void on_trigPre_valueChanged(int value);
+	void on_trigDelay_valueChanged(int value);
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();

@@ -24,7 +24,13 @@ public:
 
 	ScopeVis(GLScope* glScope = NULL);
 
-	void configure(MessageQueue* msgQueue, TriggerChannel triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerPre, uint traceSize);
+	void configure(MessageQueue* msgQueue, 
+        TriggerChannel triggerChannel, 
+        Real triggerLevel, 
+        bool triggerPositiveEdge, 
+        uint triggerPre,
+        uint triggerDelay, 
+        uint traceSize);
 	void setOneShot(bool oneShot);
 
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
@@ -46,11 +52,17 @@ private:
 		Real getTriggerLevel() const { return m_triggerLevel; }
 		Real getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
         uint getTriggerPre() const { return m_triggerPre; }
+        uint getTriggerDelay() const { return m_triggerDelay; }
         uint getTraceSize() const { return m_traceSize; }
 
-		static MsgConfigureScopeVis* create(int triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerPre, uint traceSize)
+		static MsgConfigureScopeVis* create(int triggerChannel, 
+            Real triggerLevel, 
+            bool triggerPositiveEdge, 
+            uint triggerPre,
+            uint triggerDelay, 
+            uint traceSize)
 		{
-			return new MsgConfigureScopeVis(triggerChannel, triggerLevel, triggerPositiveEdge, triggerPre, traceSize);
+			return new MsgConfigureScopeVis(triggerChannel, triggerLevel, triggerPositiveEdge, triggerPre, triggerDelay, traceSize);
 		}
 
 	private:
@@ -58,22 +70,44 @@ private:
 		Real m_triggerLevel;
 		bool m_triggerPositiveEdge;
         uint m_triggerPre;
+        uint m_triggerDelay;
         uint m_traceSize;
 
-		MsgConfigureScopeVis(int triggerChannel, Real triggerLevel, bool triggerPositiveEdge, uint triggerPre, uint traceSize) :
+		MsgConfigureScopeVis(int triggerChannel, 
+                Real triggerLevel, 
+                bool triggerPositiveEdge, 
+                uint triggerPre,
+                uint triggerDelay,
+                uint traceSize) :
 			Message(),
 			m_triggerChannel(triggerChannel),
 			m_triggerLevel(triggerLevel),
 			m_triggerPositiveEdge(triggerPositiveEdge),
             m_triggerPre(triggerPre),
+            m_triggerDelay(triggerDelay),
             m_traceSize(traceSize)
 		{ }
 	};
 
+    /**
+     *  TriggerState:
+     * 
+     *            send a                       Trigger condition                                               +--------------------+
+     *          dummy trace                    - Immediate                              m_triggerOneShot       |                    |
+     *  Config -------------> Untriggered ----------------------------------> Triggered ----------------> WaitForReset              |
+     *                         ^ ^ |                                             ^  |                          |  ^                 |
+     *                         | | |           - Delayed         Delay expired   |  |                          |  | setOneShot(true)|
+     *                         | | +---------------------> Delay ----------------+  |                          |  +-----------------+
+     *                         | |                                !m_triggerOneShot |                          |
+     *                         | +--------------------------------------------------+        setOneShot(false) |
+     *                         +-------------------------------------------------------------------------------+
+     */
 	enum TriggerState {
-		Untriggered,
-		Triggered,
-		WaitForReset
+		Untriggered,  //!< Search for trigger
+        Config,       //!< New configuration has just been received
+		Triggered,    //!< Trigger was kicked off
+		WaitForReset, //!< Wait for release from GUI
+        Delay         //!< Trigger delay engaged
 	};
 
 	GLScope* m_glScope;
@@ -85,9 +119,11 @@ private:
 	TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	bool m_triggerPositiveEdge;
-    uint  m_triggerPre; //!< Pre-trigger delay in number of samples
+    uint m_triggerPre; //!< Pre-trigger delay in number of samples
 	bool m_triggerOneShot;
 	bool m_armed;
+    uint m_triggerDelay;      //!< Trigger delay in number of trace sizes
+    uint m_triggerDelayCount; //!< trace sizes delay counter
 	int m_sampleRate;
 	SampleVector::const_iterator m_triggerPoint;
 

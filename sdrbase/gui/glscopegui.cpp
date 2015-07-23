@@ -29,6 +29,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
     m_triggerPre(0),
+    m_triggerDelay(0),
 	m_traceLenMult(20)
 {
 	ui->setupUi(this);
@@ -62,6 +63,12 @@ void GLScopeGUI::resetToDefaults()
 	m_timeOffset = 0;
 	m_amplification = 0;
 	m_displayGridIntensity = 5;
+    m_triggerChannel = ScopeVis::TriggerFreeRun;
+    m_triggerLevel = 0.0;
+    m_triggerPositiveEdge = true;
+    m_triggerPre = 0;
+    m_triggerDelay = 0;
+    m_traceLenMult = 20;
 	applySettings();
 }
 
@@ -83,6 +90,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(12, m_displayTraceIntensity);
 	s.writeS32(13, m_triggerPre);
 	s.writeS32(14, m_traceLenMult);
+	s.writeS32(15, m_triggerDelay);
 
 	return s.final();
 }
@@ -122,6 +130,9 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(14, &m_traceLenMult, 20);
 		ui->traceLen->setValue(m_traceLenMult);
 		setTraceLenDisplay();
+		d.readS32(15, &m_triggerDelay, 0);
+		ui->trigDelay->setValue(m_triggerDelay);
+		setTrigDelayDisplay();
 		applySettings();
 		applyTriggerSettings();
 		return true;
@@ -194,6 +205,7 @@ void GLScopeGUI::applyTriggerSettings()
 			triggerLevel,
 			m_triggerPositiveEdge,
 			preTriggerSamples,
+            m_triggerDelay,
 			m_traceLenMult * ScopeVis::m_traceChunkSize);
 }
 
@@ -250,6 +262,7 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 	setTraceLenDisplay();
 	setTimeOfsDisplay();
 	setTrigPreDisplay();
+    setTrigDelayDisplay();
 	applySettings();
 	applyTriggerSettings();
 }
@@ -261,6 +274,7 @@ void GLScopeGUI::on_scope_sampleRateChanged(int)
 	setTraceLenDisplay();
 	setTimeOfsDisplay();
 	setTrigPreDisplay();
+    setTrigDelayDisplay();
 	applySettings();
 	applyTriggerSettings();
 }
@@ -305,6 +319,32 @@ void GLScopeGUI::setTraceLenDisplay()
 	else if(t < 1.0)
 		ui->traceLenText->setText(tr("%1\nms").arg(t * 1000.0));
 	else ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0));
+}
+
+void GLScopeGUI::setTrigDelayDisplay()
+{
+	uint n_samples_delay = m_traceLenMult * ScopeVis::m_traceChunkSize * m_triggerDelay;
+
+	if (n_samples_delay < 1000) {
+		ui->trigDelayText->setToolTip(tr("%1S").arg(n_samples_delay));
+	} else if (n_samples_delay < 1000000) {
+		ui->trigDelayText->setToolTip(tr("%1kS").arg(n_samples_delay/1000.0));
+	} else if (n_samples_delay < 1000000000) {
+		ui->trigDelayText->setToolTip(tr("%1MS").arg(n_samples_delay/1000000.0));
+	} else {
+		ui->trigDelayText->setToolTip(tr("%1GS").arg(n_samples_delay/1000000000.0));
+	}
+
+	m_sampleRate = m_glScope->getSampleRate();
+	qreal t = (n_samples_delay * 1.0 / m_sampleRate);
+
+	if(t < 0.000001)
+		ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0));
+	else if(t < 0.001)
+		ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0));
+	else if(t < 1.0)
+		ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0));
+	else ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0));
 }
 
 void GLScopeGUI::setTimeOfsDisplay()
@@ -364,11 +404,21 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
 
 void GLScopeGUI::on_trigPre_valueChanged(int value)
 {
-	if ((value < 0) || (value > 99)) {
+	if ((value < 0) || (value > 100)) {
 		return;
 	}
 	m_triggerPre = value;
 	setTrigPreDisplay();
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_trigDelay_valueChanged(int value)
+{
+	if ((value < 0) || (value > 100)) {
+		return;
+	}
+	m_triggerDelay = value;
+	setTrigDelayDisplay();
 	applyTriggerSettings();
 }
 

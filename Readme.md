@@ -116,13 +116,13 @@ Done since the fork
   - Enhanced channel analyzer: enhanced scope and spectrum displays as mentioned above, make the spectrum display synchronous to scope (hence triggerable a la E4406A).
   - Sort channel plugins by delta frequency and type before saving to preset
   - Implemented scope pre-trigger delay
+  - Implemented variable scope memory depth
+  - Implemented trigger delay
     
 =====
 To Do
 =====
 
-  - Variable scope memory depth
-  - Trigger delay
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
   - Level calibration
   - Enhance WFM (stereo, RDS?)
