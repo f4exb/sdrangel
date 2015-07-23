@@ -89,6 +89,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeS32(15, m_histogramStroke);
 	s.writeBool(16, m_displayCurrent);
 	s.writeS32(17, m_displayTraceIntensity);
+	s.writeReal(18, m_glSpectrum->getWaterfallShare());
 	return s.final();
 }
 
@@ -119,6 +120,9 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readS32(15, &m_histogramStroke, 40);
 		d.readBool(16, &m_displayCurrent, false);
 		d.readS32(17, &m_displayTraceIntensity, 50);
+		Real waterfallShare;
+		d.readReal(18, &waterfallShare, 0.66);
+		m_glSpectrum->setWaterfallShare(waterfallShare);
 		applySettings();
 		return true;
 	} else {

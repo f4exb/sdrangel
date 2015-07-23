@@ -1530,3 +1530,16 @@ void GLSpectrum::channelMarkerDestroyed(QObject* object)
 {
 	removeChannelMarker((ChannelMarker*)object);
 }
+
+void GLSpectrum::setWaterfallShare(Real waterfallShare)
+{
+	if (waterfallShare < 0.1f) {
+		m_waterfallShare = 0.1f;
+	}
+	else if (waterfallShare > 0.8f) {
+		m_waterfallShare = 0.8f;
+	} else {
+		m_waterfallShare = waterfallShare;
+	}
+	m_changesPending = true;
+}

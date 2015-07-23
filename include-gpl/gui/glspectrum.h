@@ -56,6 +56,9 @@ public:
 	void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
 	void clearSpectrumHistogram();
 
+	Real getWaterfallShare() const { return m_waterfallShare; }
+	void setWaterfallShare(Real waterfallShare);
+
 private:
 	struct ChannelMarkerState {
 		ChannelMarker* m_channelMarker;
