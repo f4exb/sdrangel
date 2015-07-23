@@ -54,6 +54,7 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 
 	void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
+	void clearSpectrumHistogram();
 
 private:
 	struct ChannelMarkerState {

@@ -70,6 +70,7 @@ private slots:
 	void on_current_toggled(bool checked);
 	void on_invert_toggled(bool checked);
 	void on_grid_toggled(bool checked);
+	void on_clearSpectrum_clicked(bool checked);
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H

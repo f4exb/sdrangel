@@ -112,21 +112,24 @@ Done since the fork
   - Added a scope widget in the channel analyzer plugin
   - Channel analyzer bandwidth up to half the available RF (IF) bandwidth (was 48k fixed)
   - Enhanced scope display and controls: scale display, better X (time) and Y scales control, grid fit to scale, effectively implementing triggers, trigger on magnitude and phase, properly handling time shift, ...
-  - Enhanced spectrum display: Histogram: define NO_AVX, wider decay range, make stroke and late holdoff adjustable. Added option to show live spectrum (had only max hold before).
+  - Enhanced spectrum display: Histogram: wider decay range, make stroke and late holdoff adjustable. Added option to show live spectrum (had only max hold before).
   - Enhanced channel analyzer: enhanced scope and spectrum displays as mentioned above, make the spectrum display synchronous to scope (hence triggerable a la E4406A).
   - Sort channel plugins by delta frequency and type before saving to preset
   - Implemented scope pre-trigger delay
   - Implemented variable scope memory depth
   - Implemented trigger delay
   - Trigger on both edges
+  - Spectrum histogram clear
     
 =====
 To Do
 =====
 
-  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
+  - Trigger line display for all trigger modes
   - Level calibration
-  - Enhance WFM (stereo, RDS?)
-  - Even more demods ... 
+  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
   - recording capability
   - Tx channels for Rx/Tx boards like BladeRF
+  - Enhance WFM (stereo, RDS?)
+  - Even more demods ... 
+  

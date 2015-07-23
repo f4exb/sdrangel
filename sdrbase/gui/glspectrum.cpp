@@ -472,6 +472,18 @@ void GLSpectrum::resizeGL(int width, int height)
 	m_changesPending = true;
 }
 
+void GLSpectrum::clearSpectrumHistogram()
+{
+	if(!m_mutex.tryLock(2))
+		return;
+
+	memset(m_histogram, 0x00, 100 * m_fftSize);
+	memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
+
+	m_mutex.unlock();
+	update();
+}
+
 void GLSpectrum::paintGL()
 {
 	if(!m_mutex.tryLock(2))
