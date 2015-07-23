@@ -118,6 +118,7 @@ Done since the fork
   - Implemented scope pre-trigger delay
   - Implemented variable scope memory depth
   - Implemented trigger delay
+  - Trigger on both edges
     
 =====
 To Do

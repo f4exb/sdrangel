@@ -28,6 +28,7 @@ public:
         TriggerChannel triggerChannel, 
         Real triggerLevel, 
         bool triggerPositiveEdge, 
+        bool triggerBothEdges,
         uint triggerPre,
         uint triggerDelay, 
         uint traceSize);
@@ -51,6 +52,7 @@ private:
 		int getTriggerChannel() const { return m_triggerChannel; }
 		Real getTriggerLevel() const { return m_triggerLevel; }
 		Real getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
+		Real getTriggerBothEdges() const { return m_triggerBothEdges; }
         uint getTriggerPre() const { return m_triggerPre; }
         uint getTriggerDelay() const { return m_triggerDelay; }
         uint getTraceSize() const { return m_traceSize; }
@@ -58,17 +60,25 @@ private:
 		static MsgConfigureScopeVis* create(int triggerChannel, 
             Real triggerLevel, 
             bool triggerPositiveEdge, 
+            bool triggerBothEdges,
             uint triggerPre,
             uint triggerDelay, 
             uint traceSize)
 		{
-			return new MsgConfigureScopeVis(triggerChannel, triggerLevel, triggerPositiveEdge, triggerPre, triggerDelay, traceSize);
+			return new MsgConfigureScopeVis(triggerChannel,
+					triggerLevel,
+					triggerPositiveEdge,
+					triggerBothEdges,
+					triggerPre,
+					triggerDelay,
+					traceSize);
 		}
 
 	private:
 		int m_triggerChannel;
 		Real m_triggerLevel;
 		bool m_triggerPositiveEdge;
+		bool m_triggerBothEdges;
         uint m_triggerPre;
         uint m_triggerDelay;
         uint m_traceSize;
@@ -76,6 +86,7 @@ private:
 		MsgConfigureScopeVis(int triggerChannel, 
                 Real triggerLevel, 
                 bool triggerPositiveEdge, 
+                bool triggerBothEdges,
                 uint triggerPre,
                 uint triggerDelay,
                 uint traceSize) :
@@ -83,6 +94,7 @@ private:
 			m_triggerChannel(triggerChannel),
 			m_triggerLevel(triggerLevel),
 			m_triggerPositiveEdge(triggerPositiveEdge),
+			m_triggerBothEdges(triggerBothEdges),
             m_triggerPre(triggerPre),
             m_triggerDelay(triggerDelay),
             m_traceSize(traceSize)
@@ -119,6 +131,8 @@ private:
 	TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	bool m_triggerPositiveEdge;
+	bool m_triggerBothEdges;
+	bool m_prevTrigger;
     uint m_triggerPre; //!< Pre-trigger delay in number of samples
 	bool m_triggerOneShot;
 	bool m_armed;

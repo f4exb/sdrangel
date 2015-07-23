@@ -28,6 +28,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPositiveEdge(true),
+	m_triggerBothEdges(false),
     m_triggerPre(0),
     m_triggerDelay(0),
 	m_traceLenMult(20)
@@ -91,6 +92,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(13, m_triggerPre);
 	s.writeS32(14, m_traceLenMult);
 	s.writeS32(15, m_triggerDelay);
+	s.writeBool(16, m_triggerBothEdges);
 
 	return s.final();
 }
@@ -121,8 +123,6 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		ui->trigLevel->setValue(m_triggerLevel);
 		setTrigLevelDisplay();
 		d.readBool(11, &m_triggerPositiveEdge, true);
-		ui->slopePos->setChecked(m_triggerPositiveEdge);
-		ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
 		d.readS32(12, &m_displayTraceIntensity, 50);
 		d.readS32(13, &m_triggerPre, 0);
 		ui->trigPre->setValue(m_triggerPre);
@@ -133,6 +133,16 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(15, &m_triggerDelay, 0);
 		ui->trigDelay->setValue(m_triggerDelay);
 		setTrigDelayDisplay();
+		d.readBool(16, &m_triggerBothEdges, false);
+		if (m_triggerBothEdges) {
+			ui->slopePos->setChecked(false);
+			ui->slopeNeg->setChecked(false);
+			ui->slopeBoth->setChecked(true);
+		} else {
+			ui->slopeBoth->setChecked(false);
+			ui->slopePos->setChecked(m_triggerPositiveEdge);
+			ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
+		}
 		applySettings();
 		applyTriggerSettings();
 		return true;
@@ -204,6 +214,7 @@ void GLScopeGUI::applyTriggerSettings()
 			(ScopeVis::TriggerChannel) m_triggerChannel,
 			triggerLevel,
 			m_triggerPositiveEdge,
+			m_triggerBothEdges,
 			preTriggerSamples,
             m_triggerDelay,
 			m_traceLenMult * ScopeVis::m_traceChunkSize);
@@ -546,6 +557,9 @@ void GLScopeGUI::on_trigLevel_valueChanged(int value)
 void GLScopeGUI::on_slopePos_clicked()
 {
 	m_triggerPositiveEdge = true;
+	m_triggerBothEdges = false;
+
+	ui->slopeBoth->setChecked(false);
 
 	if(ui->slopePos->isChecked()) {
 		ui->slopeNeg->setChecked(false);
@@ -559,12 +573,26 @@ void GLScopeGUI::on_slopePos_clicked()
 void GLScopeGUI::on_slopeNeg_clicked()
 {
 	m_triggerPositiveEdge = false;
+	m_triggerBothEdges = false;
+
+	ui->slopeBoth->setChecked(false);
 
 	if(ui->slopeNeg->isChecked()) {
 		ui->slopePos->setChecked(false);
 	} else {
 		ui->slopeNeg->setChecked(true);
 	}
+
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_slopeBoth_clicked()
+{
+	std::cerr << "GLScopeGUI::on_slopeBoth_clicked" << std::endl;
+	ui->slopePos->setChecked(false);
+	ui->slopeNeg->setChecked(false);
+	ui->slopeBoth->setChecked(true);
+	m_triggerBothEdges = true;
 
 	applyTriggerSettings();
 }

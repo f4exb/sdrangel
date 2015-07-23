@@ -51,6 +51,7 @@ private:
 	qint32 m_triggerChannel;
 	qint32 m_triggerLevel; // percent
 	bool   m_triggerPositiveEdge;
+	bool   m_triggerBothEdges;
 	qint32 m_triggerPre;
     qint32 m_triggerDelay;
     qint32 m_traceLenMult;
@@ -90,6 +91,7 @@ private slots:
 	void on_trigMode_currentIndexChanged(int index);
 	void on_slopePos_clicked();
 	void on_slopeNeg_clicked();
+	void on_slopeBoth_clicked();
 	void on_oneShot_clicked();
 	void on_trigLevel_valueChanged(int value);
 };

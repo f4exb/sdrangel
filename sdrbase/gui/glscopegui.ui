@@ -571,7 +571,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Trigger slope positive</string>
+        <string>Trigger positive edge</string>
        </property>
        <property name="text">
         <string/>
@@ -608,7 +608,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Trigger slope negative</string>
+        <string>Trigger negative edge</string>
        </property>
        <property name="text">
         <string/>
@@ -625,6 +625,35 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="slopeBoth">
+       <property name="toolTip">
+        <string>Trigger on both edges</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/slopeb_icon.png</normaloff>:/slopeb_icon.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
        <property name="autoRaise">
         <bool>true</bool>

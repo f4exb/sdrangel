@@ -23,5 +23,6 @@
         <file>horizontal_w.png</file>
         <file>vertical_w.png</file>
         <file>current.png</file>
+        <file>slopeb_icon.png</file>
     </qresource>
 </RCC>
