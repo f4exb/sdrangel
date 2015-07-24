@@ -1,3 +1,8 @@
+===============
+RTL-SDRangelove
+===============
+![Channel analyzer plugins](https://github.com/f4exb/rtl-sdrangelove/blob/f4exb/doc/img/sdrangelove_cover.png)
+
 ======================
 Cloning the repository
 ======================
