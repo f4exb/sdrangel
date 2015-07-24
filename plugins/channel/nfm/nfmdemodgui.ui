@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
+    <width>263</width>
     <height>151</height>
    </rect>
   </property>
@@ -16,9 +16,9 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>35</x>
+     <x>6</x>
      <y>35</y>
-     <width>242</width>
+     <width>251</width>
      <height>111</height>
     </rect>
    </property>
@@ -90,14 +90,14 @@
     <item row="2" column="0">
      <widget class="QLabel" name="afLabel">
       <property name="text">
-       <string>AF Bandwidth</string>
+       <string>AF BW</string>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="rfBWLabel">
       <property name="text">
-       <string>RF Bandwidth</string>
+       <string>RF BW</string>
       </property>
      </widget>
     </item>
@@ -214,6 +214,9 @@
      <widget class="QLabel" name="deltaUnits">
       <property name="text">
        <string>Hz</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
