@@ -372,7 +372,7 @@
         <number>0</number>
        </property>
        <property name="maximum">
-        <number>8</number>
+        <number>10</number>
        </property>
        <property name="pageStep">
         <number>1</number>

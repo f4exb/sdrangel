@@ -238,7 +238,17 @@ void GLScopeGUI::setAmpScaleDisplay()
 	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
 		ui->ampText->setText(tr("%1\ndB").arg(amps[m_amplification]*500.0, 0, 'f', 1));
 	} else {
-		ui->ampText->setText(tr("%1").arg(amps[m_amplification]*10.0, 0, 'f', 3));
+		qreal a = amps[m_amplification]*10.0;
+		//ui->ampText->setText(tr("%1").arg(amps[m_amplification]*10.0, 0, 'f', 3));
+
+		if(a < 0.000001)
+			ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(a < 0.001)
+			ui->ampText->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(a < 1.0)
+			ui->ampText->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->ampText->setText(tr("%1").arg(a * 1.0));
 	}
 }
 
@@ -305,7 +315,8 @@ void GLScopeGUI::setTimeScaleDisplay()
 		ui->timeText->setText(tr("%1\nµs").arg(t * 1000000.0));
 	else if(t < 1.0)
 		ui->timeText->setText(tr("%1\nms").arg(t * 1000.0));
-	else ui->timeText->setText(tr("%1\ns").arg(t * 1.0));
+	else
+		ui->timeText->setText(tr("%1\ns").arg(t * 1.0));
 }
 
 void GLScopeGUI::setTraceLenDisplay()
@@ -329,7 +340,8 @@ void GLScopeGUI::setTraceLenDisplay()
 		ui->traceLenText->setText(tr("%1\nµs").arg(t * 1000000.0));
 	else if(t < 1.0)
 		ui->traceLenText->setText(tr("%1\nms").arg(t * 1000.0));
-	else ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0));
+	else
+		ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0));
 }
 
 void GLScopeGUI::setTrigDelayDisplay()
@@ -355,7 +367,8 @@ void GLScopeGUI::setTrigDelayDisplay()
 		ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0));
 	else if(t < 1.0)
 		ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0));
-	else ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0));
+	else
+		ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0));
 }
 
 void GLScopeGUI::setTimeOfsDisplay()
@@ -368,7 +381,8 @@ void GLScopeGUI::setTimeOfsDisplay()
 		ui->timeOfsText->setText(tr("%1\nµs").arg(dt * 1000000.0));
 	else if(dt < 1.0)
 		ui->timeOfsText->setText(tr("%1\nms").arg(dt * 1000.0));
-	else ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0));
+	else
+		ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0));
 
 	//ui->timeOfsText->setText(tr("%1").arg(value/100.0, 0, 'f', 2));
 }
@@ -383,7 +397,8 @@ void GLScopeGUI::setTrigPreDisplay()
 		ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0));
 	else if(dt < 1.0)
 		ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0));
-	else ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0));
+	else
+		ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0));
 }
 
 void GLScopeGUI::on_time_valueChanged(int value)
