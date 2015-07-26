@@ -201,14 +201,17 @@ void GLScopeGUI::applyTriggerSettings()
 	quint32 preTriggerSamples = (m_glScope->getTraceSize() * m_triggerPre) / 100;
 
 	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
-		triggerLevel = m_triggerLevel/10.0 - 100.0;
+		triggerLevel = m_triggerLevel/10.0 - 100.0; // [-200.0, 0.0]
+	}
+	else if (m_triggerChannel == ScopeVis::TriggerMagLin) {
+		triggerLevel = 1.0 + (m_triggerLevel / 1000.0); // [0.0, 2.0]
 	}
 	else {
-		triggerLevel = m_triggerLevel / 1000.0;
+		triggerLevel = m_triggerLevel / 1000.0; // [-1.0, 1.0]
 	}
 
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
-	m_glScope->setTriggerLevel(m_triggerLevel / 1000.0);
+	m_glScope->setTriggerLevel(m_triggerLevel / 1000.0);  // [-1.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
 			(ScopeVis::TriggerChannel) m_triggerChannel,
@@ -227,7 +230,13 @@ void GLScopeGUI::setTrigLevelDisplay()
 	}
 	else
 	{
-		qreal a = m_triggerLevel / 1000.0;
+		qreal a;
+
+		if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
+			a = 1.0 + (m_triggerLevel/1000.0);
+		} else {
+			a = m_triggerLevel/1000.0;
+		}
 
 		if(fabs(a) < 0.000001)
 			ui->trigText->setText(tr("%1\nn").arg(a * 1000000000.0));

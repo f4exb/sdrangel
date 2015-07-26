@@ -320,7 +320,11 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint trigger level
-		if(m_triggerChannel == ScopeVis::TriggerChannelI) {
+		if ((m_triggerChannel == ScopeVis::TriggerChannelI)
+				|| (m_triggerChannel == ScopeVis::TriggerMagLin)
+				|| (m_triggerChannel == ScopeVis::TriggerMagDb)
+				)
+		{
 			glPushMatrix();
 			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
 			glScalef(m_glScopeRect1.width(), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
@@ -330,8 +334,20 @@ void GLScope::paintGL()
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, 0.3f);
 			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevel);
-			glVertex2f(1, m_triggerLevel);
+
+			if (m_triggerChannel == ScopeVis::TriggerChannelI)
+			{
+				glVertex2f(0, m_triggerLevel);
+				glVertex2f(1, m_triggerLevel);
+			}
+			else if (m_triggerChannel == ScopeVis::TriggerMagLin)
+			{
+				Real y = (m_triggerLevel + 1.0 - (m_ofs / 2.0)) * m_amp1;
+				//std::cerr << "y=" << y << " ofs=" << m_ofs << std::endl;
+				glVertex2f(0, (y - 1.0)/m_amp1);
+				glVertex2f(1, (y - 1.0)/m_amp1);
+			}
+
 			glEnd();
 			/*
 			glColor4f(0, 0.8f, 0.0, 0.3f);
@@ -492,7 +508,8 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint trigger level
-		if(m_triggerChannel == ScopeVis::TriggerPhase) {
+		if((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
+		{
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
 			glScalef(m_glScopeRect2.width(), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
