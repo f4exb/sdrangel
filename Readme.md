@@ -106,7 +106,7 @@ Done since the fork
   - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
   - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
   - Added working WFM demodulation. Optimized for no atan2.
-  - OsmoSDR and GNURAdio plugins removed from the build as they have too many bugs that are too difficult to correct
+  - OsmoSDR and GNURadio plugins removed from the build as they have too many bugs that are too difficult to correct
   - New plugin for BladeRF interfacing libbladeRF directly
   - Corrected the nasty audio band resampling bug preventing use of sample rates that are not power of 2 multiples of 48kHz. This was because the resampling ratio was calculated with an integer division instead of a float division. 
   - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
@@ -137,4 +137,5 @@ To Do
   - Tx channels for Rx/Tx boards like BladeRF
   - Enhance WFM (stereo, RDS?)
   - Even more demods ... 
+  - ASRP4 support
   

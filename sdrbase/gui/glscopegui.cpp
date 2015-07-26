@@ -201,14 +201,14 @@ void GLScopeGUI::applyTriggerSettings()
 	quint32 preTriggerSamples = (m_glScope->getTraceSize() * m_triggerPre) / 100;
 
 	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
-		triggerLevel = m_triggerLevel - 100.0;
+		triggerLevel = m_triggerLevel/10.0 - 100.0;
 	}
 	else {
-		triggerLevel = m_triggerLevel / 100.0;
+		triggerLevel = m_triggerLevel / 1000.0;
 	}
 
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
-	m_glScope->setTriggerLevel(m_triggerLevel / 100.0);
+	m_glScope->setTriggerLevel(m_triggerLevel / 1000.0);
 
 	m_scopeVis->configure(m_messageQueue,
 			(ScopeVis::TriggerChannel) m_triggerChannel,
@@ -223,13 +223,20 @@ void GLScopeGUI::applyTriggerSettings()
 void GLScopeGUI::setTrigLevelDisplay()
 {
 	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
-		ui->trigText->setText(tr("%1dB").arg(m_triggerLevel - 100.0, 0, 'f', 0));
+		ui->trigText->setText(tr("%1\ndB").arg(m_triggerLevel/10.0 - 100.0, 0, 'f', 1));
 	}
-	else if (m_triggerChannel == ScopeVis::TriggerPhase) {
-		ui->trigText->setText(tr("%1π").arg(m_triggerLevel / 100.0, 0, 'f', 2));
-	}
-	else {
-		ui->trigText->setText(tr("%1").arg(m_triggerLevel / 100.0, 0, 'f', 2));
+	else
+	{
+		qreal a = m_triggerLevel / 1000.0;
+
+		if(fabs(a) < 0.000001)
+			ui->trigText->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(fabs(a) < 0.001)
+			ui->trigText->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(fabs(a) < 1.0)
+			ui->trigText->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->trigText->setText(tr("%1").arg(a * 1.0));
 	}
 }
 
@@ -239,7 +246,6 @@ void GLScopeGUI::setAmpScaleDisplay()
 		ui->ampText->setText(tr("%1\ndB").arg(amps[m_amplification]*500.0, 0, 'f', 1));
 	} else {
 		qreal a = amps[m_amplification]*10.0;
-		//ui->ampText->setText(tr("%1").arg(amps[m_amplification]*10.0, 0, 'f', 3));
 
 		if(a < 0.000001)
 			ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
