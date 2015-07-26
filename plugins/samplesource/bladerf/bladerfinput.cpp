@@ -330,17 +330,17 @@ bool BladerfInput::applySettings(const GeneralSettings& generalSettings, const S
 	}
 
 	if((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
+		m_settings.m_log2Decim = settings.m_log2Decim;
 		if(m_dev != NULL) {
-			m_settings.m_log2Decim = settings.m_log2Decim;
-			m_bladerfThread->setLog2Decimation(settings.m_log2Decim);
+			m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 			std::cerr << "BladerfInput: set decimation to " << (1<<settings.m_log2Decim) << std::endl;
 		}
 	}
 
 	if((m_settings.m_fcPos != settings.m_fcPos) || force) {
+		m_settings.m_fcPos = settings.m_fcPos;
 		if(m_dev != NULL) {
-			m_settings.m_fcPos = settings.m_fcPos;
-			m_bladerfThread->setFcPos((int) settings.m_fcPos);
+			m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
 			std::cerr << "BladerfInput: set fc pos (enum) to " << (int) m_settings.m_fcPos << std::endl;
 		}
 	}
