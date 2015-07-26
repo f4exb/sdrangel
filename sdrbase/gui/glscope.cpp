@@ -332,7 +332,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, 0.3f);
+			glColor4f(0, 1, 0, 0.5f);
 			glBegin(GL_LINE_LOOP);
 
 			if (m_triggerChannel == ScopeVis::TriggerChannelI)
@@ -347,14 +347,19 @@ void GLScope::paintGL()
 				glVertex2f(0, (y - 1.0)/m_amp1);
 				glVertex2f(1, (y - 1.0)/m_amp1);
 			}
+			else if (m_triggerChannel == ScopeVis::TriggerMagDb)
+			{
+				Real y = (m_triggerLevel - m_ofs) * m_amp1;
+				/*
+				std::cerr << "m_triggerLevel=" << m_triggerLevel
+						<< " amp1=" << m_amp1
+						<< " ofs=" << m_ofs
+						<< " ofs1=" << m_ofs1 << std::endl;*/
+				glVertex2f(0, (y - 1.0)/m_amp1);
+				glVertex2f(1, (y - 1.0)/m_amp1);
+			}
 
 			glEnd();
-			/*
-			glColor4f(0, 0.8f, 0.0, 0.3f);
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevelLow);
-			glVertex2f(1, m_triggerLevelLow);
-			glEnd();*/
 			glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
@@ -517,7 +522,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, 0.3f);
+			glColor4f(0, 1, 0, 0.5f);
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, m_triggerLevel);
 			glVertex2f(1, m_triggerLevel);
