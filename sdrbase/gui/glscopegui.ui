@@ -415,14 +415,20 @@
      </item>
      <item>
       <widget class="QSlider" name="ampOfs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Y offset</string>
        </property>
        <property name="minimum">
-        <number>-100</number>
+        <number>-1000</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>1000</number>
        </property>
        <property name="pageStep">
         <number>1</number>

@@ -255,11 +255,26 @@ void GLScopeGUI::setAmpScaleDisplay()
 void GLScopeGUI::setAmpOfsDisplay()
 {
 	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
-		ui->ampOfsText->setText(tr("%1\ndB").arg(m_ampOffset - 100.0, 0, 'f', 0));
-	} else 	if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
-		ui->ampOfsText->setText(tr("%1").arg(m_ampOffset/200.0, 0, 'f', 3));
-	} else {
-		ui->ampOfsText->setText(tr("%1").arg(m_ampOffset/100.0, 0, 'f', 2));
+		ui->ampOfsText->setText(tr("%1\ndB").arg(m_ampOffset/10.0 - 100.0, 0, 'f', 1));
+	}
+	else
+	{
+		qreal a;
+
+		if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
+			a = m_ampOffset/2000.0;
+		} else {
+			a = m_ampOffset/1000.0;
+		}
+
+		if(fabs(a) < 0.000001)
+			ui->ampOfsText->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(fabs(a) < 0.001)
+			ui->ampOfsText->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(fabs(a) < 1.0)
+			ui->ampOfsText->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->ampOfsText->setText(tr("%1").arg(a * 1.0));
 	}
 }
 
@@ -274,7 +289,7 @@ void GLScopeGUI::on_ampOfs_valueChanged(int value)
 {
 	m_ampOffset = value;
 	setAmpOfsDisplay();
-	m_glScope->setAmpOfs(value/100.0); // scale to [-1.0,1.0]
+	m_glScope->setAmpOfs(value/1000.0); // scale to [-1.0,1.0]
 }
 
 void GLScopeGUI::on_scope_traceSizeChanged(int)
