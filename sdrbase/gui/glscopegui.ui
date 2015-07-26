@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>809</width>
-    <height>69</height>
+    <height>65</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,13 +38,13 @@
       <number>2</number>
      </property>
      <property name="topMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="rightMargin">
       <number>2</number>
      </property>
      <property name="bottomMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QLabel" name="dataLabel">
@@ -500,13 +500,13 @@
       <number>2</number>
      </property>
      <property name="topMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="rightMargin">
       <number>2</number>
      </property>
      <property name="bottomMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QLabel" name="trigLabel">
@@ -712,28 +712,58 @@
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="trigLevel">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>Trigger level</string>
-       </property>
-       <property name="minimum">
-        <number>-1000</number>
-       </property>
-       <property name="maximum">
-        <number>1000</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="trigLevelLayout">
+       <item>
+        <widget class="QSlider" name="trigLevelCoarse">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>9</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trigger level coarse</string>
+         </property>
+         <property name="minimum">
+          <number>-100</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="trigLevelFine">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>9</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trigger level fine</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QLabel" name="trigText">

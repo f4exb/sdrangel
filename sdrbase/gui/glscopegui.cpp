@@ -26,7 +26,8 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_ampOffset(0),
 	m_displayGridIntensity(1),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
-	m_triggerLevel(0.0),
+	m_triggerLevelCoarse(0),
+	m_triggerLevelFine(0),
 	m_triggerPositiveEdge(true),
 	m_triggerBothEdges(false),
     m_triggerPre(0),
@@ -65,7 +66,8 @@ void GLScopeGUI::resetToDefaults()
 	m_amplification = 0;
 	m_displayGridIntensity = 5;
     m_triggerChannel = ScopeVis::TriggerFreeRun;
-    m_triggerLevel = 0.0;
+    m_triggerLevelCoarse = 0;
+    m_triggerLevelFine = 0;
     m_triggerPositiveEdge = true;
     m_triggerPre = 0;
     m_triggerDelay = 0;
@@ -86,13 +88,14 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(7, m_ampOffset);
 	s.writeS32(8, m_displays);
 	s.writeS32(9, m_triggerChannel);
-	s.writeS32(10, m_triggerLevel);
+	s.writeS32(10, m_triggerLevelCoarse);
 	s.writeBool(11, m_triggerPositiveEdge);
 	s.writeS32(12, m_displayTraceIntensity);
 	s.writeS32(13, m_triggerPre);
 	s.writeS32(14, m_traceLenMult);
 	s.writeS32(15, m_triggerDelay);
 	s.writeBool(16, m_triggerBothEdges);
+	s.writeS32(17, m_triggerLevelFine);
 
 	return s.final();
 }
@@ -119,9 +122,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(8, &m_displays, GLScope::DisplayBoth);
 		d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
 		ui->trigMode->setCurrentIndex(m_triggerChannel);
-		d.readS32(10, &m_triggerLevel, 0);
-		ui->trigLevel->setValue(m_triggerLevel);
-		setTrigLevelDisplay();
+		d.readS32(10, &m_triggerLevelCoarse, 0);
+		ui->trigLevelCoarse->setValue(m_triggerLevelCoarse);
 		d.readBool(11, &m_triggerPositiveEdge, true);
 		d.readS32(12, &m_displayTraceIntensity, 50);
 		d.readS32(13, &m_triggerPre, 0);
@@ -143,6 +145,9 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			ui->slopePos->setChecked(m_triggerPositiveEdge);
 			ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
 		}
+		d.readS32(17, &m_triggerLevelFine, 0);
+		ui->trigLevelFine->setValue(m_triggerLevelFine);
+		setTrigLevelDisplay();
 		applySettings();
 		applyTriggerSettings();
 		return true;
@@ -197,21 +202,22 @@ void GLScopeGUI::applySettings()
 
 void GLScopeGUI::applyTriggerSettings()
 {
-	Real triggerLevel;
+	qreal t = (m_triggerLevelCoarse / 100.0) + (m_triggerLevelFine / 20000.0); // [-1.0, 1.0]
+	qreal triggerLevel;
 	quint32 preTriggerSamples = (m_glScope->getTraceSize() * m_triggerPre) / 100;
 
 	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
-		triggerLevel = m_triggerLevel/10.0 - 100.0; // [-200.0, 0.0]
+		triggerLevel = 100.0 * (t - 1.0); // [-200.0, 0.0]
 	}
 	else if (m_triggerChannel == ScopeVis::TriggerMagLin) {
-		triggerLevel = 1.0 + (m_triggerLevel / 1000.0); // [0.0, 2.0]
+		triggerLevel = 1.0 + t; // [0.0, 2.0]
 	}
 	else {
-		triggerLevel = m_triggerLevel / 1000.0; // [-1.0, 1.0]
+		triggerLevel = t; // [-1.0, 1.0]
 	}
 
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
-	m_glScope->setTriggerLevel(m_triggerLevel / 1000.0);  // [-1.0, 1.0]
+	m_glScope->setTriggerLevel(t);  // [-1.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
 			(ScopeVis::TriggerChannel) m_triggerChannel,
@@ -225,17 +231,22 @@ void GLScopeGUI::applyTriggerSettings()
 
 void GLScopeGUI::setTrigLevelDisplay()
 {
+	qreal t = (m_triggerLevelCoarse / 100.0) + (m_triggerLevelFine / 20000.0);
+
+	ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(m_triggerLevelCoarse));
+	ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(m_triggerLevelFine * 50));
+
 	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
-		ui->trigText->setText(tr("%1\ndB").arg(m_triggerLevel/10.0 - 100.0, 0, 'f', 1));
+		ui->trigText->setText(tr("%1\ndB").arg(100.0 * (t - 1.0), 0, 'f', 1));
 	}
 	else
 	{
 		qreal a;
 
 		if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
-			a = 1.0 + (m_triggerLevel/1000.0);
+			a = 1.0 + t;
 		} else {
-			a = m_triggerLevel/1000.0;
+			a = t;
 		}
 
 		if(fabs(a) < 0.000001)
@@ -592,9 +603,16 @@ void GLScopeGUI::on_trigMode_currentIndexChanged(int index)
 	applyTriggerSettings();
 }
 
-void GLScopeGUI::on_trigLevel_valueChanged(int value)
+void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value)
 {
-	m_triggerLevel = value;
+	m_triggerLevelCoarse = value;
+	setTrigLevelDisplay();
+	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_trigLevelFine_valueChanged(int value)
+{
+	m_triggerLevelFine = value;
 	setTrigLevelDisplay();
 	applyTriggerSettings();
 }

@@ -49,7 +49,8 @@ private:
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
 	qint32 m_triggerChannel;
-	qint32 m_triggerLevel; // percent
+	qint32 m_triggerLevelCoarse; // percent of full range
+	qint32 m_triggerLevelFine;   // percent of coarse
 	bool   m_triggerPositiveEdge;
 	bool   m_triggerBothEdges;
 	qint32 m_triggerPre;
@@ -93,7 +94,8 @@ private slots:
 	void on_slopeNeg_clicked();
 	void on_slopeBoth_clicked();
 	void on_oneShot_clicked();
-	void on_trigLevel_valueChanged(int value);
+	void on_trigLevelCoarse_valueChanged(int value);
+	void on_trigLevelFine_valueChanged(int value);
 };
 
 #endif // INCLUDE_GLSCOPEGUI_H
