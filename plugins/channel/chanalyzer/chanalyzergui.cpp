@@ -270,6 +270,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);

@@ -231,6 +231,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addAudioSource(m_audioFifo);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
