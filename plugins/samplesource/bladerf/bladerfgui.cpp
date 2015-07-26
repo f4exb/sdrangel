@@ -134,13 +134,13 @@ void BladerfGui::displaySettings()
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-	ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGain));
+	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain*3));
 	ui->lna->setValue(m_settings.m_lnaGain);
 
-	ui->vga1Text->setText(tr("%1").arg(m_settings.m_vga1));
+	ui->vga1Text->setText(tr("%1dB").arg(m_settings.m_vga1));
 	ui->vga1->setValue(m_settings.m_vga1);
 
-	ui->vga2Text->setText(tr("%1").arg(m_settings.m_vga2));
+	ui->vga2Text->setText(tr("%1dBS").arg(m_settings.m_vga2));
 	ui->vga2->setValue(m_settings.m_vga2);
 
 	ui->xb200->setCurrentIndex(getXb200Index(m_settings.m_xb200, m_settings.m_xb200Path, m_settings.m_xb200Filter));
@@ -204,7 +204,7 @@ void BladerfGui::on_lna_valueChanged(int value)
 	if ((value < 0) || (value > 2))
 		return;
 
-	ui->lnaGainText->setText(tr("%1k").arg(value));
+	ui->lnaGainText->setText(tr("%1dB").arg(value*3));
 	m_settings.m_lnaGain = value;
 	sendSettings();
 }
@@ -214,7 +214,7 @@ void BladerfGui::on_vga1_valueChanged(int value)
 	if ((value < BLADERF_RXVGA1_GAIN_MIN) || (value > BLADERF_RXVGA1_GAIN_MAX))
 		return;
 
-	ui->vga1Text->setText(tr("%1").arg(value));
+	ui->vga1Text->setText(tr("%1dB").arg(value));
 	m_settings.m_vga1 = value;
 	sendSettings();
 }
@@ -224,7 +224,7 @@ void BladerfGui::on_vga2_valueChanged(int value)
 	if ((value < BLADERF_RXVGA2_GAIN_MIN) || (value > BLADERF_RXVGA2_GAIN_MAX))
 		return;
 
-	ui->vga2Text->setText(tr("%1").arg(value));
+	ui->vga2Text->setText(tr("%1dB").arg(value));
 	m_settings.m_vga2 = value;
 	sendSettings();
 }

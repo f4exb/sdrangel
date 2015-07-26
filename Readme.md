@@ -125,12 +125,13 @@ Done since the fork
   - Implemented trigger delay
   - Trigger on both edges
   - Spectrum histogram clear
+  - Trigger line display for all trigger modes
+  - Coarse and fine trigger level sliders
     
 =====
 To Do
 =====
 
-  - Trigger line display for all trigger modes
   - Level calibration
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
   - recording capability
