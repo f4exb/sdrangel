@@ -160,7 +160,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="8">
+     <item row="5" column="7">
       <widget class="QToolButton" name="presetLoad">
        <property name="toolTip">
         <string>Load selected preset</string>
@@ -213,7 +213,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1" rowspan="4" colspan="8">
+     <item row="1" column="1" rowspan="4" colspan="7">
       <widget class="QTreeWidget" name="presetTree">
        <property name="allColumnsShowFocus">
         <bool>true</bool>
@@ -241,26 +241,6 @@
        <property name="icon">
         <iconset resource="resources/res.qrc">
          <normaloff>:/preset-update.png</normaloff>:/preset-update.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="7">
-      <widget class="QToolButton" name="presetLoadLast">
-       <property name="toolTip">
-        <string>Load settings saved at last exit</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-last.png</normaloff>:/preset-last.png</iconset>
        </property>
        <property name="iconSize">
         <size>
