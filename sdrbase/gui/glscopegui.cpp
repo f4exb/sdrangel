@@ -244,7 +244,7 @@ void GLScopeGUI::setTrigLevelDisplay()
 	{
 		qreal a;
 
-		if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
+		if (m_triggerChannel == ScopeVis::TriggerMagLin) {
 			a = 1.0 + t;
 		} else {
 			a = t;
