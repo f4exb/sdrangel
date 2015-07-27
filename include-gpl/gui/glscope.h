@@ -63,6 +63,7 @@ public:
 	void setDisplayTraceIntensity(int intensity);
 	void setTriggerChannel(ScopeVis::TriggerChannel triggerChannel);
 	void setTriggerLevel(Real triggerLevel);
+	void setTriggerPre(Real triggerPre);
 
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
 	int getTraceSize() const { return m_rawTrace.size(); }
@@ -107,7 +108,7 @@ private:
 	int m_timeOfsProMill;
 	ScopeVis::TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
-	//Real m_triggerLevelLow;
+	Real m_triggerPre;
 
 	// graphics stuff
 	QRectF m_glScopeRect1;

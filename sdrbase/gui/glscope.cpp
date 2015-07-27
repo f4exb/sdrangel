@@ -35,6 +35,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_timeOfsProMill(0),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
+	m_triggerPre(0.0),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
 	m_left1ScaleTextureAllocated(false),
@@ -393,6 +394,40 @@ void GLScope::paintGL()
 			glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
+
+		// paint trigger time line if pretriggered
+
+		if ((m_triggerPre > 0.0) &&
+				((m_triggerChannel == ScopeVis::TriggerChannelI)
+				|| (m_triggerChannel == ScopeVis::TriggerMagLin)
+				|| (m_triggerChannel == ScopeVis::TriggerMagDb)))
+		{
+			float x = (m_triggerPre - (m_timeOfsProMill/1000.0)) * m_displayTrace->size();
+			//std::cerr << "x=" << x << " w=" << (float) m_displayTrace->size() / (float) m_timeBase << std::endl;
+
+			if ((x >= 0.0) && (x <= (float) m_displayTrace->size() / (float) m_timeBase))
+			{
+				glPushMatrix();
+				glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
+				glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glEnable(GL_LINE_SMOOTH);
+				glLineWidth(1.0f);
+				glColor4f(0, 1, 0, 0.5f);
+				glBegin(GL_LINE_LOOP);
+
+				float posLimit = 1.0 / m_amp1;
+				float negLimit = -1.0 / m_amp1;
+				glVertex2f(x, posLimit);
+				glVertex2f(x, negLimit);
+
+				glEnd();
+				glDisable(GL_LINE_SMOOTH);
+				glPopMatrix();
+			}
+		}
+
 	} // Both displays or primary only
 
 	// Q - secondary display
@@ -513,7 +548,7 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint trigger level
-		if((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
+		if ((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
 		{
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
@@ -566,6 +601,38 @@ void GLScope::paintGL()
 			glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
+
+		// paint trigger time line if pretriggered
+
+		if ((m_triggerPre > 0.0) &&
+				((m_triggerChannel == ScopeVis::TriggerPhase)
+				|| (m_triggerChannel == ScopeVis::TriggerChannelQ)))
+		{
+			float x = (m_triggerPre - (m_timeOfsProMill/1000.0)) * m_displayTrace->size();
+
+			if ((x >= 0.0) && (x <= (float) m_displayTrace->size() / (float) m_timeBase))
+			{
+				glPushMatrix();
+				glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
+				glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glEnable(GL_LINE_SMOOTH);
+				glLineWidth(1.0f);
+				glColor4f(0, 1, 0, 0.5f);
+				glBegin(GL_LINE_LOOP);
+
+				float posLimit = 1.0 / m_amp2;
+				float negLimit = -1.0 / m_amp2;
+				glVertex2f(x, posLimit);
+				glVertex2f(x, negLimit);
+
+				glEnd();
+				glDisable(GL_LINE_SMOOTH);
+				glPopMatrix();
+			}
+		}
+
 	} // Both displays or secondary display only
 
 	glPopMatrix();
@@ -1362,4 +1429,9 @@ void GLScope::setTriggerChannel(ScopeVis::TriggerChannel triggerChannel)
 void GLScope::setTriggerLevel(Real triggerLevel)
 {
 	m_triggerLevel = triggerLevel;
+}
+
+void GLScope::setTriggerPre(Real triggerPre)
+{
+	m_triggerPre = triggerPre;
 }

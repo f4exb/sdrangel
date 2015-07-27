@@ -218,6 +218,7 @@ void GLScopeGUI::applyTriggerSettings()
 
 	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
 	m_glScope->setTriggerLevel(t);  // [-1.0, 1.0]
+	m_glScope->setTriggerPre(m_triggerPre/100.0); // [0.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
 			(ScopeVis::TriggerChannel) m_triggerChannel,
