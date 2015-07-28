@@ -318,13 +318,13 @@ bool BladerfInput::applySettings(const GeneralSettings& generalSettings, const S
 	}
 
 	if((m_settings.m_bandwidth != settings.m_bandwidth) || force) {
+		m_settings.m_bandwidth = settings.m_bandwidth;
 		if(m_dev != NULL) {
 			unsigned int actualBandwidth;
-			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_RX, settings.m_bandwidth, &actualBandwidth) < 0)
-				qCritical("could not set sample rate: %d", settings.m_samplerate);
+			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_RX, m_settings.m_bandwidth, &actualBandwidth) < 0)
+				qCritical("could not set sample rate: %d", m_settings.m_samplerate);
 			else {
 				std::cerr << "bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth << std::endl;
-				m_settings.m_bandwidth = settings.m_bandwidth;
 			}
 		}
 	}
