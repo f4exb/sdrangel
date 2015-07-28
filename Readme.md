@@ -127,6 +127,7 @@ Done since the fork
   - Spectrum histogram clear
   - Trigger line display for all trigger modes
   - Coarse and fine trigger level sliders
+  - Minimalist recording
     
 =====
 To Do
@@ -134,7 +135,6 @@ To Do
 
   - Level calibration
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON)  
-  - recording capability
   - Tx channels for Rx/Tx boards like BladeRF
   - Enhance WFM (stereo, RDS?)
   - Even more demods ... 

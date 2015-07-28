@@ -31,6 +31,7 @@ class AudioDeviceInfo;
 class DSPEngine;
 class Indicator;
 class SpectrumVis;
+class FileSink;
 class SampleSource;
 class PluginAPI;
 class PluginGUI;
@@ -76,6 +77,7 @@ private:
 	Settings m_settings;
 
 	SpectrumVis* m_spectrumVis;
+	FileSink *m_fileSink;
 
 	DSPEngine* m_dspEngine;
 
@@ -83,6 +85,7 @@ private:
 	int m_lastEngineState;
 
 	QLabel* m_sampleRateWidget;
+	Indicator* m_recording;
 	Indicator* m_engineIdle;
 	Indicator* m_engineRunning;
 	Indicator* m_engineError;
@@ -93,6 +96,7 @@ private:
 
 	int m_sampleRate;
 	quint64 m_centerFrequency;
+	std::string m_sampleFileName;
 
 	PluginManager* m_pluginManager;
 
@@ -114,6 +118,8 @@ private slots:
 	void updateStatus();
 	void on_action_Start_triggered();
 	void on_action_Stop_triggered();
+	void on_action_Start_Recording_triggered();
+	void on_action_Stop_Recording_triggered();
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
 	void on_action_View_Fullscreen_toggled(bool checked);

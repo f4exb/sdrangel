@@ -140,7 +140,7 @@ void BladerfGui::displaySettings()
 	ui->vga1Text->setText(tr("%1dB").arg(m_settings.m_vga1));
 	ui->vga1->setValue(m_settings.m_vga1);
 
-	ui->vga2Text->setText(tr("%1dBS").arg(m_settings.m_vga2));
+	ui->vga2Text->setText(tr("%1dB").arg(m_settings.m_vga2));
 	ui->vga2->setValue(m_settings.m_vga2);
 
 	ui->xb200->setCurrentIndex(getXb200Index(m_settings.m_xb200, m_settings.m_xb200Path, m_settings.m_xb200Filter));

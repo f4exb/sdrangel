@@ -75,6 +75,9 @@
     </property>
     <addaction name="action_Start"/>
     <addaction name="action_Stop"/>
+    <addaction name="separator"/>
+    <addaction name="action_Start_Recording"/>
+    <addaction name="action_Stop_Recording"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -454,6 +457,22 @@
   <action name="action_Loaded_Plugins">
    <property name="text">
     <string>Loaded &amp;Plugins...</string>
+   </property>
+  </action>
+  <action name="action_Start_Recording">
+   <property name="text">
+    <string>Start Recording</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
+  <action name="action_Stop_Recording">
+   <property name="text">
+    <string>Stop Recording</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

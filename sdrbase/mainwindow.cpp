@@ -30,11 +30,13 @@
 #include "gui/rollupwidget.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/filesink.h"
 #include "dsp/dspcommands.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugingui.h"
 
+#include <string>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -49,6 +51,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
+	m_sampleFileName(std::string("./test.sdriq")),
 	m_pluginManager(new PluginManager(this, m_dspEngine))
 {
 	ui->setupUi(this);
@@ -94,6 +97,9 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_dspEngine->addSink(m_spectrumVis);
 
+	m_fileSink = new FileSink();
+	m_dspEngine->addSink(m_fileSink);
+
 	ui->glSpectrumGUI->setBuddies(m_dspEngine->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	loadSettings();
@@ -119,7 +125,9 @@ MainWindow::~MainWindow()
 
 	m_pluginManager->freeAll();
 
+	m_dspEngine->removeSink(m_fileSink);
 	m_dspEngine->removeSink(m_spectrumVis);
+	delete m_fileSink;
 	delete m_spectrumVis;
 	delete m_pluginManager;
 
@@ -221,6 +229,10 @@ void MainWindow::createStatusBar()
 	m_sampleRateWidget->setToolTip(tr("Sample Rate"));
 	statusBar()->addPermanentWidget(m_sampleRateWidget);
 
+	m_recording = new Indicator(tr("Rec"), this);
+	m_recording->setToolTip(tr("Recording"));
+	statusBar()->addPermanentWidget(m_recording);
+
 	m_engineIdle = new Indicator(tr("Idle"), this);
 	m_engineIdle->setToolTip(tr("DSP engine is idle"));
 	statusBar()->addPermanentWidget(m_engineIdle);
@@ -309,6 +321,8 @@ void MainWindow::handleMessages()
 			updateCenterFreqDisplay();
 			updateSampleRate();
 			message->completed();
+			std::cerr << "MainWindow::handleMessages: m_fileSink->configure" << std::endl;
+			m_fileSink->configure(m_dspEngine->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
 		} else {
 			if(!m_pluginManager->handleMessage(message))
 				message->completed();
@@ -361,6 +375,18 @@ void MainWindow::on_action_Start_triggered()
 void MainWindow::on_action_Stop_triggered()
 {
 	m_dspEngine->stopAcquistion();
+}
+
+void MainWindow::on_action_Start_Recording_triggered()
+{
+	m_recording->setColor(Qt::red);
+	m_fileSink->startRecording();
+}
+
+void MainWindow::on_action_Stop_Recording_triggered()
+{
+	m_recording->setColor(Qt::gray);
+	m_fileSink->stopRecording();
 }
 
 void MainWindow::on_dcOffset_toggled(bool checked)
