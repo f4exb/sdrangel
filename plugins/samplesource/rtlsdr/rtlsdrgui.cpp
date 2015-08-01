@@ -2,6 +2,7 @@
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"
+#include "gui/colormapper.h"
 
 RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	QWidget(parent),
@@ -11,6 +12,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 28500U, 1700000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
