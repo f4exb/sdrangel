@@ -1543,3 +1543,9 @@ void GLSpectrum::setWaterfallShare(Real waterfallShare)
 	}
 	m_changesPending = true;
 }
+
+void GLSpectrum::connectTimer(const QTimer& timer)
+{
+	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+}

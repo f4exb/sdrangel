@@ -58,6 +58,7 @@ public:
 
 	Real getWaterfallShare() const { return m_waterfallShare; }
 	void setWaterfallShare(Real waterfallShare);
+	void connectTimer(const QTimer& timer);
 
 private:
 	struct ChannelMarkerState {

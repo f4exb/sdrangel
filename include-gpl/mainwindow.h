@@ -61,6 +61,7 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 
 	void setInputGUI(QWidget* gui);
+	const QTimer& getMasterTimer() const { return m_masterTimer; }
 
 private:
 	enum {
@@ -81,6 +82,7 @@ private:
 
 	DSPEngine* m_dspEngine;
 
+	QTimer m_masterTimer;
 	QTimer m_statusTimer;
 	int m_lastEngineState;
 

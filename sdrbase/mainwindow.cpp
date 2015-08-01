@@ -87,6 +87,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
+	m_masterTimer.start(50);
+
 	m_pluginManager->loadPlugins();
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
@@ -100,6 +102,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
 
+	ui->glSpectrum->connectTimer(m_masterTimer);
 	ui->glSpectrumGUI->setBuddies(m_dspEngine->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	loadSettings();
