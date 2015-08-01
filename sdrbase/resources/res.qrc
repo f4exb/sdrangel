@@ -25,5 +25,7 @@
         <file>current.png</file>
         <file>slopeb_icon.png</file>
         <file>clear.png</file>
+        <file>playloop.png</file>
+        <file>play.png</file>
     </qresource>
 </RCC>
