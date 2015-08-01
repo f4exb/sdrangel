@@ -47,6 +47,9 @@ public:
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
+	// R/O access to main window
+	const MainWindow* getMainWindow() const { return m_mainWindow; }
+
 protected:
 	PluginManager* m_pluginManager;
 	MainWindow* m_mainWindow;

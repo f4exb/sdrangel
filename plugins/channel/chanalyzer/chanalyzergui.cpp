@@ -11,6 +11,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "mainwindow.h"
 
 #include <iostream>
 #include "chanalyzer.h"
@@ -277,6 +278,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(true);
+	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+
+	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::gray);

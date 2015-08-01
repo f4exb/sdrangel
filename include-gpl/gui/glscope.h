@@ -71,6 +71,7 @@ public:
 	void setSampleRate(int sampleRate);
 	int getSampleRate() const {	return m_sampleRate; }
 	Mode getDataMode() const { return m_mode; }
+	void connectTimer(const QTimer& timer);
 
 signals:
 	void traceSizeChanged(int);

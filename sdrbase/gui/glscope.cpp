@@ -1435,3 +1435,11 @@ void GLScope::setTriggerPre(Real triggerPre)
 {
 	m_triggerPre = triggerPre;
 }
+
+void GLScope::connectTimer(const QTimer& timer)
+{
+	std::cerr << "GLScope::connectTimer" << std::endl;
+	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+	m_timer.stop();
+}
