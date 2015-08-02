@@ -128,6 +128,7 @@ Done since the fork
   - Trigger line display for all trigger modes
   - Coarse and fine trigger level sliders
   - Minimalist recording
+  - Minimalist file source (recording reader) compilable but untested
     
 =====
 To Do
