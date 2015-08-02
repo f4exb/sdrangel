@@ -558,8 +558,11 @@
        <property name="maximum">
         <number>30</number>
        </property>
+       <property name="singleStep">
+        <number>3</number>
+       </property>
        <property name="pageStep">
-        <number>1</number>
+        <number>3</number>
        </property>
        <property name="value">
         <number>9</number>
