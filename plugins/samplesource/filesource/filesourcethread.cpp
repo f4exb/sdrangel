@@ -47,6 +47,7 @@ FileSourceThread::~FileSourceThread()
 
 void FileSourceThread::startWork()
 {
+	std::cerr << "FileSourceThread::startWork" << std::endl;
 	m_startWaitMutex.lock();
 	start();
 	while(!m_running)
@@ -56,6 +57,7 @@ void FileSourceThread::startWork()
 
 void FileSourceThread::stopWork()
 {
+	std::cerr << "FileSourceThread::stopWork" << std::endl;
 	m_running = false;
 	wait();
 }

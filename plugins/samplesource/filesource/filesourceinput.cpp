@@ -170,12 +170,16 @@ bool FileSourceInput::handleMessage(Message* message)
 bool FileSourceInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+	bool wasRunning = false;
 
 	if((m_settings.m_fileName != settings.m_fileName) || force) {
 		m_settings.m_fileName = settings.m_fileName;
 
 		if (m_fileSourceThread != 0) {
-			m_fileSourceThread->stopWork();
+			wasRunning = m_fileSourceThread->isRunning();
+			if (wasRunning) {
+				m_fileSourceThread->stopWork();
+			}
 		}
 
 		if (m_ifstream.is_open()) {
@@ -186,10 +190,16 @@ bool FileSourceInput::applySettings(const GeneralSettings& generalSettings, cons
 
 		if (m_fileSourceThread != 0) {
 			m_fileSourceThread->setSamplerate(m_sampleRate);
+			if (wasRunning) {
+				m_fileSourceThread->startWork();
+			}
 		}
 
-		std::cerr << "FileSourceInput: center freq: " << m_generalSettings.m_centerFrequency << " Hz"
-				<< " file name: " << settings.m_fileName.toStdString() << std::endl;
+		std::cerr << "FileSourceInput::applySettings:"
+				<< " file name: " << settings.m_fileName.toStdString()
+				<< " center freq: " << m_centerFrequency << " Hz"
+				<< " sample rate: " << m_sampleRate
+				<< " Unix timestamp: " << m_startingTimeStamp << std::endl;
 	}
 
 	return true;

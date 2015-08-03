@@ -39,6 +39,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
+	bool isRunning() const { return m_running; }
 
 	void connectTimer(const QTimer& timer);
 
