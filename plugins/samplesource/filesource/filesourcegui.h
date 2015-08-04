@@ -70,6 +70,7 @@ private:
 private slots:
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
+	void on_showFileDialog_clicked(bool checked);
 };
 
 #endif // INCLUDE_FILESOURCEGUI_H

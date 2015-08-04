@@ -19,6 +19,7 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
+#include <QFileDialog>
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
@@ -181,5 +182,15 @@ void FileSourceGui::updateHardware()
 
 void FileSourceGui::on_play_toggled(bool checked)
 {
+}
 
+void FileSourceGui::on_showFileDialog_clicked(bool checked)
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+	if (fileName != "") {
+		m_settings.m_fileName = fileName;
+		ui->fileNameText->setText(m_settings.m_fileName);
+		sendSettings();
+	}
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>198</width>
-    <height>88</height>
+    <height>133</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -101,6 +101,58 @@
    </item>
    <item>
     <widget class="Line" name="line_freq">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="fileSelectionLayout">
+     <item>
+      <widget class="QPushButton" name="showFileDialog">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fileNameText">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_file">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -212,7 +264,7 @@
          <activeoff>:/play.png</activeoff>
          <activeon>:/pause.png</activeon>
          <selectedoff>:/play.png</selectedoff>
-         <selectedon>:/pause.png</selectedon>:/pause.png</iconset>
+         <selectedon>:/pause.png</selectedon>:/play.png</iconset>
        </property>
        <property name="iconSize">
         <size>
