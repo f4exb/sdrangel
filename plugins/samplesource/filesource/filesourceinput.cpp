@@ -102,6 +102,11 @@ bool FileSourceInput::startInput(int device)
 	std::cerr << "FileSourceInput::startInput" << std::endl;
 	QMutexLocker mutexLocker(&m_mutex);
 
+	if(!m_sampleFifo.setSize(96000 * 4)) {
+		qCritical("Could not allocate SampleFifo");
+		return false;
+	}
+
 	openFileStream();
 
 	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {

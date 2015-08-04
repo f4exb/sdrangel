@@ -205,14 +205,14 @@
        </property>
        <property name="icon">
         <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/pause.png</normaloff>
-         <normalon>:/play.png</normalon>
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/pause.png</normalon>
          <disabledoff>:/stop.png</disabledoff>
          <disabledon>:/stop.png</disabledon>
-         <activeoff>:/pause.png</activeoff>
-         <activeon>:/play.png</activeon>
-         <selectedoff>:/pause.png</selectedoff>
-         <selectedon>:/play.png</selectedon>:/pause.png</iconset>
+         <activeoff>:/play.png</activeoff>
+         <activeon>:/pause.png</activeon>
+         <selectedoff>:/play.png</selectedoff>
+         <selectedon>:/pause.png</selectedon>:/pause.png</iconset>
        </property>
        <property name="iconSize">
         <size>

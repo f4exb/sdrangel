@@ -47,6 +47,7 @@ public:
 	~SampleFifo();
 
 	bool setSize(int size);
+	inline uint size() const { return m_size; }
 	inline uint fill() const { return m_fill; }
 
 	uint write(const quint8* data, uint count);
