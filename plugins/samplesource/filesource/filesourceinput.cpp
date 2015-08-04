@@ -84,6 +84,10 @@ FileSourceInput::~FileSourceInput()
 
 void FileSourceInput::openFileStream()
 {
+	if (m_ifstream.is_open()) {
+		m_ifstream.close();
+	}
+
 	m_ifstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
 	FileSink::Header header;
 	FileSink::readHeader(m_ifstream, header);
@@ -95,6 +99,7 @@ void FileSourceInput::openFileStream()
 
 bool FileSourceInput::startInput(int device)
 {
+	std::cerr << "FileSourceInput::startInput" << std::endl;
 	QMutexLocker mutexLocker(&m_mutex);
 
 	openFileStream();
@@ -111,8 +116,7 @@ bool FileSourceInput::startInput(int device)
 	mutexLocker.unlock();
 	applySettings(m_generalSettings, m_settings, true);
 
-	qDebug("bladerfInput: start");
-	//MsgReportBladerf::create(m_gains)->submit(m_guiMessageQueue); Pass anything here
+	MsgReportFileSource::create(true, m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // acquisition on
 
 	return true;
 
@@ -123,6 +127,7 @@ failed:
 
 void FileSourceInput::stopInput()
 {
+	std::cerr << "FileSourceInput::stopInput()" << std::endl;
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if(m_fileSourceThread != NULL) {
@@ -132,6 +137,8 @@ void FileSourceInput::stopInput()
 	}
 
 	m_deviceDescription.clear();
+
+	MsgReportFileSource::create(false, m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // acquisition off
 }
 
 const QString& FileSourceInput::getDeviceDescription() const

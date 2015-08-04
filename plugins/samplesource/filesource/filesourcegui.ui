@@ -80,7 +80,7 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="toolTip">
-        <string>Tuner center frequency in kHz</string>
+        <string>Record center frequency in kHz</string>
        </property>
       </widget>
      </item>
@@ -109,14 +109,14 @@
    <item>
     <layout class="QHBoxLayout" name="rateTimeLayout">
      <item>
-      <widget class="QLabel" name="rateText">
+      <widget class="QLabel" name="sampleRateText">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
-        <string>Rate</string>
+        <string>Record sample rate</string>
        </property>
        <property name="text">
         <string>0k</string>
@@ -153,6 +153,9 @@
          <pointsize>8</pointsize>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Record absolute time</string>
+       </property>
        <property name="text">
         <string>20150101 00:00:00.000</string>
        </property>
@@ -171,11 +174,14 @@
     <layout class="QHBoxLayout" name="playControllLayout">
      <item>
       <widget class="ButtonSwitch" name="playLoop">
+       <property name="toolTip">
+        <string>Play in a loop</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../../../sdrbase/resources/res.qrc">
          <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
        </property>
        <property name="iconSize">
@@ -191,12 +197,22 @@
      </item>
      <item>
       <widget class="ButtonSwitch" name="play">
+       <property name="toolTip">
+        <string>Stopped / Play / Pause</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/play.png</normaloff>:/play.png</iconset>
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/pause.png</normaloff>
+         <normalon>:/play.png</normalon>
+         <disabledoff>:/stop.png</disabledoff>
+         <disabledon>:/stop.png</disabledon>
+         <activeoff>:/pause.png</activeoff>
+         <activeon>:/play.png</activeon>
+         <selectedoff>:/pause.png</selectedoff>
+         <selectedon>:/play.png</selectedon>:/pause.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -242,6 +258,9 @@
          <pointsize>8</pointsize>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Record time from start</string>
+       </property>
        <property name="text">
         <string>00:00:00.000</string>
        </property>
@@ -264,6 +283,8 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

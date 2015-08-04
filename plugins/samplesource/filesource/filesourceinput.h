@@ -64,16 +64,29 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
+		bool getAcquisition() const { return m_acquisition; }
+		int getSampleRate() const { return m_sampleRate; }
+		quint64 getCenterFrequency() const { return m_centerFrequency; }
+		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
 
-		static MsgReportFileSource* create()
+		static MsgReportFileSource* create(bool acquisition, int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp)
 		{
-			return new MsgReportFileSource();
+			return new MsgReportFileSource(acquisition, sampleRate, centerFrequency, startingTimeStamp);
 		}
 
 	protected:
+		bool m_acquisition;
+		int m_sampleRate;
+		quint64 m_centerFrequency;
+		std::time_t m_startingTimeStamp;
 
-		MsgReportFileSource() :
-			Message()
+
+		MsgReportFileSource(bool acquisition, int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp) :
+			Message(),
+			m_acquisition(acquisition),
+			m_sampleRate(sampleRate),
+			m_centerFrequency(centerFrequency),
+			m_startingTimeStamp(startingTimeStamp)
 		{ }
 	};
 

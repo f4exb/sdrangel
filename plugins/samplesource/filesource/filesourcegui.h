@@ -56,8 +56,14 @@ private:
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
+    bool m_acquisition;
+	int m_sampleRate;
+	quint64 m_centerFrequency;
+	std::time_t m_startingTimeStamp;
+	int m_samplesCount;
 
 	void displaySettings();
+	void displayTime();
 	void sendSettings();
 	void updateHardware();
 

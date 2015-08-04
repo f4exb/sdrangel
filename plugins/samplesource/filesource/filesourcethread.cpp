@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <assert.h>
 #include "dsp/samplefifo.h"
 
 #include "filesourcethread.h"
@@ -32,6 +33,7 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleFifo* sam
 	m_sampleFifo(sampleFifo),
 	m_samplerate(0)
 {
+    assert(m_ifstream != 0);
 }
 
 FileSourceThread::~FileSourceThread()
@@ -47,12 +49,21 @@ FileSourceThread::~FileSourceThread()
 
 void FileSourceThread::startWork()
 {
-	std::cerr << "FileSourceThread::startWork" << std::endl;
-	m_startWaitMutex.lock();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+	std::cerr << "FileSourceThread::startWork: ";
+    
+    if (m_ifstream->is_open())
+    {
+        std::cerr << " file stream open, starting..." << std::endl;
+        m_startWaitMutex.lock();
+        start();
+        while(!m_running)
+            m_startWaiter.wait(&m_startWaitMutex, 100);
+        m_startWaitMutex.unlock();
+    }
+    else
+    {
+        std::cerr << " file stream closed, not starting." << std::endl;        
+    }
 }
 
 void FileSourceThread::stopWork()
@@ -64,19 +75,33 @@ void FileSourceThread::stopWork()
 
 void FileSourceThread::setSamplerate(int samplerate)
 {
+	std::cerr << "FileSourceThread::setSamplerate:"
+			<< " new:" << samplerate
+			<< " old:" << m_samplerate;
+
 	if (samplerate != m_samplerate)
 	{
 		if (m_running) {
 			stopWork();
 		}
 
+		m_samplerate = samplerate;
 		m_bufsize = (m_samplerate / m_rateDivider)*4;
 
 		if (m_buf == 0)	{
+			std::cerr << " Allocate buffer";
 			m_buf = (quint8*) malloc(m_bufsize);
 		} else {
+			std::cerr << " Re-allocate buffer";
 			m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
 		}
+
+		std::cerr << " size: " << m_bufsize
+				<< " #samples: " << (m_bufsize/4) << std::endl;
+	}
+	else
+	{
+		std::cerr << std::endl;
 	}
 
 	m_samplerate = samplerate;
@@ -90,7 +115,7 @@ void FileSourceThread::run()
 	m_running = true;
 	m_startWaiter.wakeAll();
 
-	while(m_running)
+	while(m_running) // actual work is in the tick() function
 	{
 		sleep(1);
 	}
@@ -110,7 +135,18 @@ void FileSourceThread::tick()
 	{
 		// read samples directly feeding the SampleFifo (no callback)
 		m_ifstream->read(reinterpret_cast<char*>(m_buf), m_chunksize);
-		m_sampleFifo->write(m_buf, m_chunksize);
+        
+        if (m_ifstream->eof())
+        {
+            m_sampleFifo->write(m_buf, m_ifstream->gcount());
+            // TODO: handle loop playback situation
+            stopWork();
+            m_ifstream->close();
+        }
+        else
+        {
+            m_sampleFifo->write(m_buf, m_chunksize);
+        }
 	}
 }
 
