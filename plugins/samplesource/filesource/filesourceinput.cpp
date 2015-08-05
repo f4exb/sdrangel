@@ -27,7 +27,9 @@
 #include "filesourcethread.h"
 
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSource, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileName, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 
 FileSourceInput::Settings::Settings() :
 	m_fileName("./test.sdriq")
@@ -70,6 +72,7 @@ FileSourceInput::FileSourceInput(MessageQueue* msgQueueToGUI, const QTimer& mast
 	m_settings(),
 	m_fileSourceThread(NULL),
 	m_deviceDescription(),
+	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
@@ -84,30 +87,46 @@ FileSourceInput::~FileSourceInput()
 
 void FileSourceInput::openFileStream()
 {
+	std::cerr << "FileSourceInput::openFileStream: " << m_fileName.toStdString() << std::endl;
+
+	//stopInput();
+
 	if (m_ifstream.is_open()) {
 		m_ifstream.close();
 	}
 
-	m_ifstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
+	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
 	FileSink::Header header;
 	FileSink::readHeader(m_ifstream, header);
 
 	m_sampleRate = header.sampleRate;
 	m_centerFrequency = header.centerFrequency;
 	m_startingTimeStamp = header.startTimeStamp;
+
+	MsgReportFileSourceStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // file stream data
 }
 
 bool FileSourceInput::startInput(int device)
 {
-	std::cerr << "FileSourceInput::startInput" << std::endl;
 	QMutexLocker mutexLocker(&m_mutex);
+	std::cerr << "FileSourceInput::startInput" << std::endl;
+
+	/*
+	if (!m_ifstream.is_open()) {
+		openFileStream();
+	}*/
+
+	if (m_ifstream.tellg() != 0) {
+		m_ifstream.clear();
+		m_ifstream.seekg(0, std::ios::beg);
+	}
 
 	if(!m_sampleFifo.setSize(96000 * 4)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	openFileStream();
+	//openFileStream();
 
 	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
@@ -119,9 +138,9 @@ bool FileSourceInput::startInput(int device)
 	m_fileSourceThread->startWork();
 
 	mutexLocker.unlock();
-	applySettings(m_generalSettings, m_settings, true);
+	//applySettings(m_generalSettings, m_settings, true);
 
-	MsgReportFileSource::create(true, m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // acquisition on
+	MsgReportFileSourceAcquisition::create(true)->submit(m_guiMessageQueue); // acquisition on
 
 	return true;
 
@@ -143,7 +162,7 @@ void FileSourceInput::stopInput()
 
 	m_deviceDescription.clear();
 
-	MsgReportFileSource::create(false, m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // acquisition off
+	MsgReportFileSourceAcquisition::create(false)->submit(m_guiMessageQueue); // acquisition off
 }
 
 const QString& FileSourceInput::getDeviceDescription() const
@@ -168,10 +187,11 @@ std::time_t FileSourceInput::getStartingTimeStamp() const
 
 bool FileSourceInput::handleMessage(Message* message)
 {
-	if(MsgConfigureFileSource::match(message)) {
-		MsgConfigureFileSource* conf = (MsgConfigureFileSource*)message;
-		if(!applySettings(conf->getGeneralSettings(), conf->getSettings(), false))
-			qDebug("File Source config error");
+	if(MsgConfigureFileName::match(message)) {
+		std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileName" << std::endl;
+		MsgConfigureFileName* conf = (MsgConfigureFileName*) message;
+		m_fileName = conf->getFileName();
+		openFileStream();
 		message->completed();
 		return true;
 	} else {

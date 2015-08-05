@@ -34,6 +34,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_settings(),
 	m_sampleSource(NULL),
 	m_acquisition(false),
+	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
@@ -42,6 +43,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
+	ui->fileNameText->setText(m_fileName);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -118,13 +120,20 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 
 bool FileSourceGui::handleMessage(Message* message)
 {
-	if(FileSourceInput::MsgReportFileSource::match(message))
+	if(FileSourceInput::MsgReportFileSourceAcquisition::match(message))
 	{
-		m_acquisition = ((FileSourceInput::MsgReportFileSource*)message)->getAcquisition();
-		m_sampleRate = ((FileSourceInput::MsgReportFileSource*)message)->getSampleRate();
-		m_centerFrequency = ((FileSourceInput::MsgReportFileSource*)message)->getCenterFrequency();
-		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSource*)message)->getStartingTimeStamp();
-		displaySettings();
+		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition*)message)->getAcquisition();
+		updateWithAcquisition();
+		message->completed();
+		return true;
+	}
+	else if(FileSourceInput::MsgReportFileSourceStreamData::match(message))
+	{
+		std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamData" << std::endl;
+		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getSampleRate();
+		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getCenterFrequency();
+		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getStartingTimeStamp();
+		updateWithStreamData();
 		message->completed();
 		return true;
 	}
@@ -136,14 +145,63 @@ bool FileSourceGui::handleMessage(Message* message)
 
 void FileSourceGui::displaySettings()
 {
+}
+
+void FileSourceGui::sendSettings()
+{
+	/*
+	if(!m_updateTimer.isActive())
+		m_updateTimer.start(100);
+		*/
+}
+
+void FileSourceGui::updateHardware()
+{
+	/*
+	FileSourceInput::MsgConfigureFileSource* message = FileSourceInput::MsgConfigureFileSource::create(m_generalSettings, m_settings);
+	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+	m_updateTimer.stop();*/
+}
+
+void FileSourceGui::on_play_toggled(bool checked)
+{
+}
+
+void FileSourceGui::on_showFileDialog_clicked(bool checked)
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+	if (fileName != "") {
+		m_fileName = fileName;
+		ui->fileNameText->setText(m_fileName);
+		configureFileName();
+	}
+}
+
+void FileSourceGui::configureFileName()
+{
+	std::cerr << "FileSourceGui::configureFileName: " << m_fileName.toStdString() << std::endl;
+	FileSourceInput::MsgConfigureFileName* message = FileSourceInput::MsgConfigureFileName::create(m_fileName);
+	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+}
+
+void FileSourceGui::updateWithAcquisition()
+{
+	ui->play->setEnabled(m_acquisition);
+	ui->play->setChecked(m_acquisition);
+	ui->showFileDialog->setEnabled(!m_acquisition);
+}
+
+void FileSourceGui::updateWithStreamData()
+{
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
 	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
 	ui->sampleRateText->setText(tr("%1k").arg(s));
 	ui->play->setEnabled(m_acquisition);
-	displayTime();
+	updateWithStreamTime(); // TODO: remove when time data is implemented
 }
 
-void FileSourceGui::displayTime()
+void FileSourceGui::updateWithStreamTime()
 {
 	int t_sec = 0;
 	int t_msec = 0;
@@ -165,32 +223,4 @@ void FileSourceGui::displayTime()
 	dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
 	ui->absTimeText->setText(s_date);
-}
-
-void FileSourceGui::sendSettings()
-{
-	if(!m_updateTimer.isActive())
-		m_updateTimer.start(100);
-}
-
-void FileSourceGui::updateHardware()
-{
-	FileSourceInput::MsgConfigureFileSource* message = FileSourceInput::MsgConfigureFileSource::create(m_generalSettings, m_settings);
-	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
-	m_updateTimer.stop();
-}
-
-void FileSourceGui::on_play_toggled(bool checked)
-{
-}
-
-void FileSourceGui::on_showFileDialog_clicked(bool checked)
-{
-	QString fileName = QFileDialog::getOpenFileName(this,
-	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
-	if (fileName != "") {
-		m_settings.m_fileName = fileName;
-		ui->fileNameText->setText(m_settings.m_fileName);
-		sendSettings();
-	}
 }

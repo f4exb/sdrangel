@@ -57,6 +57,7 @@ private:
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
+    QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
@@ -66,6 +67,10 @@ private:
 	void displayTime();
 	void sendSettings();
 	void updateHardware();
+	void configureFileName();
+	void updateWithAcquisition();
+	void updateWithStreamData();
+	void updateWithStreamTime();
 
 private slots:
 	void on_playLoop_toggled(bool checked);

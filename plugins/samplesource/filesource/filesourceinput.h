@@ -60,30 +60,66 @@ public:
 		{ }
 	};
 
-	class MsgReportFileSource : public Message {
+	class MsgConfigureFileName : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		const QString& getFileName() const { return m_fileName; }
+
+		static MsgConfigureFileName* create(const QString& fileName)
+		{
+			return new MsgConfigureFileName(fileName);
+		}
+
+	private:
+		QString m_fileName;
+
+		MsgConfigureFileName(const QString& fileName) :
+			Message(),
+			m_fileName(fileName)
+		{ }
+	};
+
+	class MsgReportFileSourceAcquisition : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool getAcquisition() const { return m_acquisition; }
-		int getSampleRate() const { return m_sampleRate; }
-		quint64 getCenterFrequency() const { return m_centerFrequency; }
-		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
 
-		static MsgReportFileSource* create(bool acquisition, int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp)
+		static MsgReportFileSourceAcquisition* create(bool acquisition)
 		{
-			return new MsgReportFileSource(acquisition, sampleRate, centerFrequency, startingTimeStamp);
+			return new MsgReportFileSourceAcquisition(acquisition);
 		}
 
 	protected:
 		bool m_acquisition;
+
+		MsgReportFileSourceAcquisition(bool acquisition) :
+			Message(),
+			m_acquisition(acquisition)
+		{ }
+	};
+
+	class MsgReportFileSourceStreamData : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getSampleRate() const { return m_sampleRate; }
+		quint64 getCenterFrequency() const { return m_centerFrequency; }
+		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
+
+		static MsgReportFileSourceStreamData* create(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp)
+		{
+			return new MsgReportFileSourceStreamData(sampleRate, centerFrequency, startingTimeStamp);
+		}
+
+	protected:
 		int m_sampleRate;
 		quint64 m_centerFrequency;
 		std::time_t m_startingTimeStamp;
 
-
-		MsgReportFileSource(bool acquisition, int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp) :
+		MsgReportFileSourceStreamData(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp) :
 			Message(),
-			m_acquisition(acquisition),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
 			m_startingTimeStamp(startingTimeStamp)
@@ -109,6 +145,7 @@ private:
 	std::ifstream m_ifstream;
 	FileSourceThread* m_fileSourceThread;
 	QString m_deviceDescription;
+	QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;

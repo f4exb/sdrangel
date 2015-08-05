@@ -141,7 +141,7 @@ void FileSourceThread::tick()
             m_sampleFifo->write(m_buf, m_ifstream->gcount());
             // TODO: handle loop playback situation
             stopWork();
-            m_ifstream->close();
+            //m_ifstream->close();
         }
         else
         {
