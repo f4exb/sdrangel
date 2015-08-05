@@ -40,6 +40,7 @@ public:
 	void stopWork();
 	void setSamplerate(int samplerate);
 	bool isRunning() const { return m_running; }
+	std::size_t getSamplesCount() const { return m_samplesCount; }
 
 	void connectTimer(const QTimer& timer);
 
@@ -53,6 +54,7 @@ private:
 	std::size_t m_bufsize;
 	std::size_t m_chunksize;
 	SampleFifo* m_sampleFifo;
+	std::size_t m_samplesCount;
 
 	int m_samplerate;
 	static const int m_rateDivider;

@@ -31,6 +31,7 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleFifo* sam
 	m_bufsize(0),
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
+	m_samplesCount(0),
 	m_samplerate(0)
 {
     assert(m_ifstream != 0);
@@ -142,12 +143,14 @@ void FileSourceThread::tick()
             // TODO: handle loop playback situation
     		m_ifstream->clear();
     		m_ifstream->seekg(0, std::ios::beg);
+    		m_samplesCount = 0;
             //stopWork();
             //m_ifstream->close();
         }
         else
         {
             m_sampleFifo->write(m_buf, m_chunksize);
+    		m_samplesCount += m_chunksize / 4;
         }
 	}
 }

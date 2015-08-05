@@ -129,13 +129,19 @@ bool FileSourceGui::handleMessage(Message* message)
 	}
 	else if(FileSourceInput::MsgReportFileSourceStreamData::match(message))
 	{
-		std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamData" << std::endl;
+		//std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamData" << std::endl;
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getSampleRate();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getCenterFrequency();
 		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getStartingTimeStamp();
 		updateWithStreamData();
 		message->completed();
 		return true;
+	}
+	else if(FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
+	{
+		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming*)message)->getSamplesCount();
+		std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamTiming: " << m_samplesCount << std::endl;
+		updateWithStreamTime();
 	}
 	else
 	{
@@ -165,6 +171,8 @@ void FileSourceGui::updateHardware()
 
 void FileSourceGui::on_play_toggled(bool checked)
 {
+	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
+	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 }
 
 void FileSourceGui::on_showFileDialog_clicked(bool checked)
@@ -212,15 +220,17 @@ void FileSourceGui::updateWithStreamTime()
 	}
 
 	QTime t(0, 0, 0, 0);
-	t.addSecs(t_sec);
-	t.addMSecs(t_msec);
+	t = t.addSecs(t_sec);
+	t = t.addMSecs(t_msec);
 	QString s_time = t.toString("hh:mm:ss.zzz");
 	ui->relTimeText->setText(s_time);
 
+	//std::cerr << "FileSourceGui::updateWithStreamTime: " << t_sec << "." << t_msec << " " << s_time.toStdString() << std::endl;
+
 	quint64 startingTimeStampMsec = m_startingTimeStamp * 1000;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-	dt.addSecs(t_sec);
-	dt.addMSecs(t_msec);
+	dt = dt.addSecs(t_sec);
+	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
 	ui->absTimeText->setText(s_date);
 }

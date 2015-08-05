@@ -28,8 +28,10 @@
 
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceName, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
 
 FileSourceInput::Settings::Settings() :
 	m_fileName("./test.sdriq")
@@ -187,14 +189,36 @@ std::time_t FileSourceInput::getStartingTimeStamp() const
 
 bool FileSourceInput::handleMessage(Message* message)
 {
-	if(MsgConfigureFileSourceName::match(message)) {
-		std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileName" << std::endl;
+	if (MsgConfigureFileSourceName::match(message))
+	{
+		//std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileName" << std::endl;
 		MsgConfigureFileSourceName* conf = (MsgConfigureFileSourceName*) message;
 		m_fileName = conf->getFileName();
 		openFileStream();
 		message->completed();
 		return true;
-	} else {
+	}
+	else if (MsgConfigureFileSourceWork::match(message))
+	{
+		//std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileSourceWork: ";
+		MsgConfigureFileSourceWork* conf = (MsgConfigureFileSourceWork*) message;
+		bool working = conf->isWorking();
+		//std::cerr << (working ? "working" : "not working") << std::endl;
+		if (m_fileSourceThread != 0)
+		{
+			if (working) {
+				m_fileSourceThread->startWork();
+			} else {
+				m_fileSourceThread->stopWork();
+			}
+
+			MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount())->submit(m_guiMessageQueue);
+		}
+		message->completed();
+		return true;
+	}
+	else
+	{
 		return false;
 	}
 }

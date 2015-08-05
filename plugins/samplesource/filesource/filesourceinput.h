@@ -80,6 +80,26 @@ public:
 		{ }
 	};
 
+	class MsgConfigureFileSourceWork : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		bool isWorking() const { return m_working; }
+
+		static MsgConfigureFileSourceWork* create(bool working)
+		{
+			return new MsgConfigureFileSourceWork(working);
+		}
+
+	private:
+		bool m_working;
+
+		MsgConfigureFileSourceWork(bool working) :
+			Message(),
+			m_working(working)
+		{ }
+	};
+
 	class MsgReportFileSourceAcquisition : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -123,6 +143,26 @@ public:
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
 			m_startingTimeStamp(startingTimeStamp)
+		{ }
+	};
+
+	class MsgReportFileSourceStreamTiming : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		std::size_t getSamplesCount() const { return m_samplesCount; }
+
+		static MsgReportFileSourceStreamTiming* create(std::size_t samplesCount)
+		{
+			return new MsgReportFileSourceStreamTiming(samplesCount);
+		}
+
+	protected:
+		std::size_t m_samplesCount;
+
+		MsgReportFileSourceStreamTiming(std::size_t samplesCount) :
+			Message(),
+			m_samplesCount(samplesCount)
 		{ }
 	};
 
