@@ -151,7 +151,7 @@ failed:
 
 void FileSourceInput::stopInput()
 {
-	std::cerr << "FileSourceInput::stopInput()" << std::endl;
+	std::cerr << "FileSourceInput::stopInput" << std::endl;
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if(m_fileSourceThread != NULL) {

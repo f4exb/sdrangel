@@ -140,7 +140,9 @@ void FileSourceThread::tick()
         {
             m_sampleFifo->write(m_buf, m_ifstream->gcount());
             // TODO: handle loop playback situation
-            stopWork();
+    		m_ifstream->clear();
+    		m_ifstream->seekg(0, std::ios::beg);
+            //stopWork();
             //m_ifstream->close();
         }
         else
