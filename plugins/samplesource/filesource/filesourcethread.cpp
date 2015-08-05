@@ -86,7 +86,8 @@ void FileSourceThread::setSamplerate(int samplerate)
 		}
 
 		m_samplerate = samplerate;
-		m_bufsize = (m_samplerate / m_rateDivider)*4;
+		m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
+		m_bufsize = m_chunksize;
 
 		if (m_buf == 0)	{
 			std::cerr << " Allocate buffer";
@@ -104,8 +105,7 @@ void FileSourceThread::setSamplerate(int samplerate)
 		std::cerr << std::endl;
 	}
 
-	m_samplerate = samplerate;
-	m_chunksize = (m_samplerate / m_rateDivider)*4;
+	//m_samplerate = samplerate;
 }
 
 void FileSourceThread::run()
