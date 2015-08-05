@@ -29,6 +29,7 @@
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
@@ -216,6 +217,14 @@ bool FileSourceInput::handleMessage(Message* message)
 		}
 		message->completed();
 		return true;
+	}
+	else if (MsgConfigureFileSourceStreamTiming::match(message))
+	{
+		if (m_fileSourceThread != 0) {
+			MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount())->submit(m_guiMessageQueue);
+		}else {
+			MsgReportFileSourceStreamTiming::create(0)->submit(m_guiMessageQueue);
+		}
 	}
 	else
 	{

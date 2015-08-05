@@ -38,13 +38,15 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
-	m_samplesCount(0)
+	m_samplesCount(0),
+	m_tickCount(0)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	displaySettings();
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindowMessageQueue(), m_pluginAPI->getMainWindow()->getMasterTimer());
@@ -133,15 +135,17 @@ bool FileSourceGui::handleMessage(Message* message)
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getSampleRate();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getCenterFrequency();
 		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getStartingTimeStamp();
-		updateWithStreamData();
 		message->completed();
+		updateWithStreamData();
 		return true;
 	}
 	else if(FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
 	{
 		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming*)message)->getSamplesCount();
-		std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamTiming: " << m_samplesCount << std::endl;
+		//std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamTiming: " << m_samplesCount << std::endl;
+		message->completed();
 		updateWithStreamTime();
+		return true;
 	}
 	else
 	{
@@ -233,4 +237,12 @@ void FileSourceGui::updateWithStreamTime()
 	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
 	ui->absTimeText->setText(s_date);
+}
+
+void FileSourceGui::tick()
+{
+	if ((++m_tickCount & 0xf) == 0) {
+		FileSourceInput::MsgConfigureFileSourceStreamTiming* message = FileSourceInput::MsgConfigureFileSourceStreamTiming::create();
+		message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+	}
 }

@@ -127,8 +127,8 @@ Done since the fork
   - Spectrum histogram clear
   - Trigger line display for all trigger modes
   - Coarse and fine trigger level sliders
-  - Minimalist recording
-  - Minimalist file source (recording reader) compilable but untested
+  - Minimalist recording (no file choice)
+  - File sample source plugin (recording reader) 
     
 =====
 To Do

@@ -100,6 +100,23 @@ public:
 		{ }
 	};
 
+	class MsgConfigureFileSourceStreamTiming : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+
+		static MsgConfigureFileSourceStreamTiming* create()
+		{
+			return new MsgConfigureFileSourceStreamTiming();
+		}
+
+	private:
+
+		MsgConfigureFileSourceStreamTiming() :
+			Message()
+		{ }
+	};
+
 	class MsgReportFileSourceAcquisition : public Message {
 		MESSAGE_CLASS_DECLARATION
 

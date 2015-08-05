@@ -62,6 +62,7 @@ private:
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
+	std::size_t m_tickCount;
 
 	void displaySettings();
 	void displayTime();
@@ -76,6 +77,7 @@ private slots:
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
+	void tick();
 };
 
 #endif // INCLUDE_FILESOURCEGUI_H
