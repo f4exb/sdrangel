@@ -27,7 +27,7 @@
 #include "filesourcethread.h"
 
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileName, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 
@@ -187,9 +187,9 @@ std::time_t FileSourceInput::getStartingTimeStamp() const
 
 bool FileSourceInput::handleMessage(Message* message)
 {
-	if(MsgConfigureFileName::match(message)) {
+	if(MsgConfigureFileSourceName::match(message)) {
 		std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileName" << std::endl;
-		MsgConfigureFileName* conf = (MsgConfigureFileName*) message;
+		MsgConfigureFileSourceName* conf = (MsgConfigureFileSourceName*) message;
 		m_fileName = conf->getFileName();
 		openFileStream();
 		message->completed();

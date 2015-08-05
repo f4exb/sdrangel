@@ -181,7 +181,7 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked)
 void FileSourceGui::configureFileName()
 {
 	std::cerr << "FileSourceGui::configureFileName: " << m_fileName.toStdString() << std::endl;
-	FileSourceInput::MsgConfigureFileName* message = FileSourceInput::MsgConfigureFileName::create(m_fileName);
+	FileSourceInput::MsgConfigureFileSourceName* message = FileSourceInput::MsgConfigureFileSourceName::create(m_fileName);
 	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 }
 

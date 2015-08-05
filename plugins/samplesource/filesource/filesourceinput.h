@@ -60,21 +60,21 @@ public:
 		{ }
 	};
 
-	class MsgConfigureFileName : public Message {
+	class MsgConfigureFileSourceName : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const QString& getFileName() const { return m_fileName; }
 
-		static MsgConfigureFileName* create(const QString& fileName)
+		static MsgConfigureFileSourceName* create(const QString& fileName)
 		{
-			return new MsgConfigureFileName(fileName);
+			return new MsgConfigureFileSourceName(fileName);
 		}
 
 	private:
 		QString m_fileName;
 
-		MsgConfigureFileName(const QString& fileName) :
+		MsgConfigureFileSourceName(const QString& fileName) :
 			Message(),
 			m_fileName(fileName)
 		{ }
