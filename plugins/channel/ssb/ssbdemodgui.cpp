@@ -224,7 +224,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 48000 / 4);
+	m_audioFifo = new AudioFifo(4, 48000 / 2);
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbDemod = new SSBDemod(m_audioFifo, m_spectrumVis);
 	m_channelizer = new Channelizer(m_ssbDemod);
