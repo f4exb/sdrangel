@@ -21,7 +21,6 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 
-#include <iostream>
 #include "chanalyzer.h"
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)

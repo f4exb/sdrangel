@@ -2,7 +2,7 @@
 #include "util/simpleserializer.h"
 #include "util/messagequeue.h"
 
-#include <iostream>
+#include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(FileSink::MsgConfigureFileSink, Message)
 
@@ -60,7 +60,7 @@ void FileSink::startRecording()
 {
     if (!m_sampleFile.is_open())
     {
-    	std::cerr << "FileSink::startRecording" << std::endl;
+    	qDebug() << "FileSink::startRecording";
         m_sampleFile.open(m_fileName.c_str(), std::ios::binary);
         m_recordOn = true;
         m_recordStart = true;
@@ -72,7 +72,7 @@ void FileSink::stopRecording()
 {
     if (m_sampleFile.is_open())
     {
-    	std::cerr << "FileSink::stopRecording" << std::endl;
+    	qDebug() << "FileSink::stopRecording";
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
@@ -85,10 +85,10 @@ bool FileSink::handleMessage(Message* message)
     {
         MsgConfigureFileSink* conf = (MsgConfigureFileSink*) message;
         handleConfigure(conf->getFileName(), conf->getSampleRate(), conf->getCenterFrequency());
-        std::cerr << "FileSink::handleMessage:"
+        qDebug() << "FileSink::handleMessage:"
         		<< " fileName: " << m_fileName
 				<< " sampleRate: " << m_sampleRate
-				<< " centerFrequency: " << m_centerFrequency << std::endl;
+				<< " centerFrequency: " << m_centerFrequency;
         message->completed();
         return true;
     }

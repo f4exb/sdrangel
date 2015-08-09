@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include <QDebug>
 #include <libbladeRF.h>
 
 #include "ui_bladerfgui.h"
@@ -199,7 +199,7 @@ void BladerfGui::on_fcPos_currentIndexChanged(int index)
 
 void BladerfGui::on_lna_valueChanged(int value)
 {
-	std::cerr << "BladerfGui: LNA gain = " << value << std::endl;
+	qDebug() << "BladerfGui: LNA gain = " << value;
 
 	if ((value < 0) || (value > 2))
 		return;

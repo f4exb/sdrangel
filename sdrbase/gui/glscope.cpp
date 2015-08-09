@@ -4,7 +4,7 @@
 #include "dsp/dspengine.h"
 
 #include <algorithm>
-#include <iostream>
+#include <QDebug>
 
 #ifdef _WIN32
 static double log2f(double n)
@@ -344,18 +344,12 @@ void GLScope::paintGL()
 			else if (m_triggerChannel == ScopeVis::TriggerMagLin)
 			{
 				Real y = (m_triggerLevel + 1.0 - (m_ofs / 2.0)) * m_amp1;
-				//std::cerr << "y=" << y << " ofs=" << m_ofs << std::endl;
 				glVertex2f(0, (y - 1.0)/m_amp1);
 				glVertex2f(1, (y - 1.0)/m_amp1);
 			}
 			else if (m_triggerChannel == ScopeVis::TriggerMagDb)
 			{
 				Real y = (m_triggerLevel - m_ofs) * m_amp1;
-				/*
-				std::cerr << "m_triggerLevel=" << m_triggerLevel
-						<< " amp1=" << m_amp1
-						<< " ofs=" << m_ofs
-						<< " ofs1=" << m_ofs1 << std::endl;*/
 				glVertex2f(0, (y - 1.0)/m_amp1);
 				glVertex2f(1, (y - 1.0)/m_amp1);
 			}
@@ -403,7 +397,6 @@ void GLScope::paintGL()
 				|| (m_triggerChannel == ScopeVis::TriggerMagDb)))
 		{
 			float x = (m_triggerPre - (m_timeOfsProMill/1000.0)) * m_displayTrace->size();
-			//std::cerr << "x=" << x << " w=" << (float) m_displayTrace->size() / (float) m_timeBase << std::endl;
 
 			if ((x >= 0.0) && (x <= (float) m_displayTrace->size() / (float) m_timeBase))
 			{
@@ -888,7 +881,6 @@ void GLScope::applyConfig()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0) {
-							//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 							painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 						}
 					}
@@ -978,7 +970,6 @@ void GLScope::applyConfig()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0) {
-							//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 							painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 						}
 					}
@@ -1055,7 +1046,6 @@ void GLScope::applyConfig()
 			);
 
 			{ // Y1 scale
-				//std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 				m_y1Scale.setSize(scopeHeight);
 
 				m_left1ScalePixmap = QPixmap(
@@ -1076,7 +1066,6 @@ void GLScope::applyConfig()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0) {
-							//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 							painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 						}
 					}
@@ -1167,7 +1156,6 @@ void GLScope::applyConfig()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0) {
-							//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 							painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 						}
 					}
@@ -1244,7 +1232,6 @@ void GLScope::applyConfig()
 		);
 
 		{ // Y1 scale
-			//std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 			m_y1Scale.setSize(scopeHeight);
 
 			m_left1ScalePixmap = QPixmap(
@@ -1265,7 +1252,6 @@ void GLScope::applyConfig()
 				tick = &(*tickList)[i];
 				if(tick->major) {
 					if(tick->textSize > 0) {
-						//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 					}
 				}
@@ -1341,7 +1327,6 @@ void GLScope::applyConfig()
 		);
 
 		{ // Y2 scale
-			//std::cerr << "Horizontal: " << width() << "x" << scopeHeight << " amp:" << m_amp << std::endl;
 			m_y2Scale.setSize(scopeHeight);
 
 			m_left2ScalePixmap = QPixmap(
@@ -1362,7 +1347,6 @@ void GLScope::applyConfig()
 				tick = &(*tickList)[i];
 				if(tick->major) {
 					if(tick->textSize > 0) {
-						//std::cerr << (tick->text).toStdString() << " @ " << tick->textPos << std::endl;
 						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
 					}
 				}
@@ -1438,7 +1422,7 @@ void GLScope::setTriggerPre(Real triggerPre)
 
 void GLScope::connectTimer(const QTimer& timer)
 {
-	std::cerr << "GLScope::connectTimer" << std::endl;
+	qDebug() << "GLScope::connectTimer";
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.stop();

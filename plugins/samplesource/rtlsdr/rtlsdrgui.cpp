@@ -1,4 +1,3 @@
-#include <iostream>
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"

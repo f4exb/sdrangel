@@ -2,8 +2,7 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
 
-//#include <cstdio>
-#include <iostream>
+#include <QDebug>
 
 Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
@@ -102,11 +101,10 @@ void Channelizer::applyConfiguration()
 		m_requestedCenterFrequency - m_requestedOutputSampleRate / 2, m_requestedCenterFrequency + m_requestedOutputSampleRate / 2);
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
 
-	std::cerr << "Channelizer::applyConfiguration in=" << m_inputSampleRate
+	qDebug() << "Channelizer::applyConfiguration in=" << m_inputSampleRate
 			<< ", req=" << m_requestedOutputSampleRate
 			<< ", out=" << m_currentOutputSampleRate
-			<< ", fc=" << m_currentCenterFrequency
-			<< std::endl;
+			<< ", fc=" << m_currentCenterFrequency;
 }
 
 Channelizer::FilterStage::FilterStage(Mode mode) :

@@ -24,8 +24,6 @@
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
 
-#include <iostream>
-
 static const Real afSqTones[2] = {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)

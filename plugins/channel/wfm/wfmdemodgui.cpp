@@ -9,7 +9,6 @@
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 
-#include <iostream>
 #include "wfmdemod.h"
 #include "wfmdemodgui.h"
 

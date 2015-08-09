@@ -22,8 +22,6 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 
-#include <iostream>
-
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
 SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :

@@ -37,7 +37,7 @@
 #include "plugin/plugingui.h"
 
 #include <string>
-#include <iostream>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
@@ -183,7 +183,7 @@ void MainWindow::setInputGUI(QWidget* gui)
 
 void MainWindow::loadSettings()
 {
-	std::cerr << "MainWindow::loadSettings" << std::endl;
+	qDebug() << "MainWindow::loadSettings";
     m_settings.load();
 
     for(int i = 0; i < m_settings.getPresetCount(); ++i)
@@ -198,7 +198,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::loadSettings(const Preset* preset)
 {
-	std::cerr << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString() << std::endl;
+	qDebug() << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString();
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
@@ -212,7 +212,7 @@ void MainWindow::loadSettings(const Preset* preset)
 
 void MainWindow::saveSettings()
 {
-	std::cerr << "MainWindow::saveSettings" << std::endl;
+	qDebug() << "MainWindow::saveSettings";
 
 	saveSettings(m_settings.getCurrent());
 	m_settings.save();
@@ -221,7 +221,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::saveSettings(Preset* preset)
 {
-	std::cerr << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString() << std::endl;
+	qDebug() << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString();
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
     preset->clearChannels();
@@ -334,6 +334,7 @@ void MainWindow::handleDSPMessages()
 			updateCenterFreqDisplay();
 			updateSampleRate();
 			message->completed();
+			qDebug() << "MainWindow::handleMessages: m_fileSink->configure";
 			m_fileSink->configure(m_dspEngine->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
 		}
 	}

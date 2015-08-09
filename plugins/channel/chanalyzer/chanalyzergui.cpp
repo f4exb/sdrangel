@@ -13,7 +13,6 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "mainwindow.h"
 
-#include <iostream>
 #include "chanalyzer.h"
 #include "chanalyzergui.h"
 

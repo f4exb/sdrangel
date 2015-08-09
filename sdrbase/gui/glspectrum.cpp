@@ -21,7 +21,7 @@
 #include <QMouseEvent>
 #include "gui/glspectrum.h"
 
-#include <iostream>
+#include <QDebug>
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
@@ -1546,7 +1546,7 @@ void GLSpectrum::setWaterfallShare(Real waterfallShare)
 
 void GLSpectrum::connectTimer(const QTimer& timer)
 {
-	std::cerr << "GLSpectrum::connectTimer" << std::endl;
+	qDebug() << "GLSpectrum::connectTimer";
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.stop();

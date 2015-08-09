@@ -11,7 +11,6 @@
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 
-#include <iostream>
 #include "amdemod.h"
 
 const int AMDemodGUI::m_rfBW[] = {

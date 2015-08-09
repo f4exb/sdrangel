@@ -16,8 +16,7 @@
 
 #include <string.h>
 #include <errno.h>
-#include <cstdio>
-#include <iostream>
+#include <QDebug>
 
 #include "util/simpleserializer.h"
 #include "dsp/filesink.h"
@@ -90,7 +89,7 @@ FileSourceInput::~FileSourceInput()
 
 void FileSourceInput::openFileStream()
 {
-	std::cerr << "FileSourceInput::openFileStream: " << m_fileName.toStdString() << std::endl;
+	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString();
 
 	//stopInput();
 
@@ -112,7 +111,7 @@ void FileSourceInput::openFileStream()
 bool FileSourceInput::startInput(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
-	std::cerr << "FileSourceInput::startInput" << std::endl;
+	qDebug() << "FileSourceInput::startInput";
 
 	/*
 	if (!m_ifstream.is_open()) {
@@ -154,7 +153,7 @@ failed:
 
 void FileSourceInput::stopInput()
 {
-	std::cerr << "FileSourceInput::stopInput" << std::endl;
+	qDebug() << "FileSourceInput::stopInput";
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if(m_fileSourceThread != NULL) {
@@ -192,7 +191,6 @@ bool FileSourceInput::handleMessage(Message* message)
 {
 	if (MsgConfigureFileSourceName::match(message))
 	{
-		//std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileName" << std::endl;
 		MsgConfigureFileSourceName* conf = (MsgConfigureFileSourceName*) message;
 		m_fileName = conf->getFileName();
 		openFileStream();
@@ -201,10 +199,8 @@ bool FileSourceInput::handleMessage(Message* message)
 	}
 	else if (MsgConfigureFileSourceWork::match(message))
 	{
-		//std::cerr << "FileSourceInput::handleMessage: MsgConfigureFileSourceWork: ";
 		MsgConfigureFileSourceWork* conf = (MsgConfigureFileSourceWork*) message;
 		bool working = conf->isWorking();
-		//std::cerr << (working ? "working" : "not working") << std::endl;
 		if (m_fileSourceThread != 0)
 		{
 			if (working) {
@@ -260,11 +256,11 @@ bool FileSourceInput::applySettings(const GeneralSettings& generalSettings, cons
 			}
 		}
 
-		std::cerr << "FileSourceInput::applySettings:"
+		qDebug() << "FileSourceInput::applySettings:"
 				<< " file name: " << settings.m_fileName.toStdString()
 				<< " center freq: " << m_centerFrequency << " Hz"
 				<< " sample rate: " << m_sampleRate
-				<< " Unix timestamp: " << m_startingTimeStamp << std::endl;
+				<< " Unix timestamp: " << m_startingTimeStamp;
 	}
 
 	return true;

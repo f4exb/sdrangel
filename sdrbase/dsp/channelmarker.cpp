@@ -1,7 +1,5 @@
 #include "dsp/channelmarker.h"
 
-#include <iostream>
-
 QRgb ChannelMarker::m_colorTable[] = {
 	qRgb(0xc0, 0x00, 0x00),
 	qRgb(0x00, 0xc0, 0x00),
