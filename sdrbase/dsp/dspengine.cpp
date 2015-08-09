@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>
+#include <QDebug>
 #include "dsp/dspengine.h"
 #include "dsp/channelizer.h"
 #include "dsp/samplefifo.h"
@@ -25,6 +26,8 @@
 
 DSPEngine::DSPEngine(QObject* parent) :
 	QThread(parent),
+	m_messageQueue(),
+	m_reportQueue(),
 	m_state(StNotStarted),
 	m_sampleSource(NULL),
 	m_sampleSinks(),
@@ -54,6 +57,7 @@ DSPEngine *DSPEngine::instance()
 
 void DSPEngine::start()
 {
+	qDebug() << "DSPEngine::start";
 	DSPPing cmd;
 	QThread::start();
 	cmd.execute(&m_messageQueue);
@@ -61,6 +65,7 @@ void DSPEngine::start()
 
 void DSPEngine::stop()
 {
+	qDebug() << "DSPEngine::stop";
 	DSPExit cmd;
 	cmd.execute(&m_messageQueue);
 }
@@ -131,6 +136,8 @@ QString DSPEngine::deviceDescription()
 
 void DSPEngine::run()
 {
+	qDebug() << "DSPEngine::run";
+
 	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
 	m_state = StIdle;
@@ -386,71 +393,113 @@ void DSPEngine::handleMessages()
 {
 	Message* message;
 	while((message = m_messageQueue.accept()) != NULL) {
-		qDebug("Message: %s", message->getIdentifier());
+		qDebug("DSPEngine::handleMessages: Message: %s", message->getIdentifier());
 
-		if(DSPPing::match(message)) {
+		if (DSPPing::match(message))
+		{
 			message->completed(m_state);
-		} else if(DSPExit::match(message)) {
+		}
+		else if (DSPExit::match(message))
+		{
 			gotoIdle();
 			m_state = StNotStarted;
 			exit();
 			message->completed(m_state);
-		} else if(DSPAcquisitionStart::match(message)) {
+		}
+		else if (DSPAcquisitionStart::match(message))
+		{
 			m_state = gotoIdle();
-			if(m_state == StIdle)
+			if(m_state == StIdle) {
 				m_state = gotoRunning();
+			}
 			message->completed(m_state);
-		} else if(DSPAcquisitionStop::match(message)) {
+		}
+		else if (DSPAcquisitionStop::match(message))
+		{
 			m_state = gotoIdle();
 			message->completed(m_state);
-		} else if(DSPGetDeviceDescription::match(message)) {
+		}
+		else if (DSPGetDeviceDescription::match(message))
+		{
 			((DSPGetDeviceDescription*)message)->setDeviceDescription(m_deviceDescription);
 			message->completed();
-		} else if(DSPGetErrorMessage::match(message)) {
+		}
+		else if (DSPGetErrorMessage::match(message))
+		{
 			((DSPGetErrorMessage*)message)->setErrorMessage(m_errorMessage);
 			message->completed();
-		} else if(DSPSetSource::match(message)) {
+		}
+		else if (DSPSetSource::match(message)) {
 			handleSetSource(((DSPSetSource*)message)->getSampleSource());
 			message->completed();
-		} else if(DSPAddSink::match(message)) {
+		}
+		else if (DSPAddSink::match(message))
+		{
 			SampleSink* sink = ((DSPAddSink*)message)->getSampleSink();
-			if(m_state == StRunning) {
+
+			if(m_state == StRunning)
+			{
 				DSPSignalNotification* signal = DSPSignalNotification::create(m_sampleRate, 0);
 				signal->submit(&m_messageQueue, sink);
 				sink->start();
 			}
+
 			m_sampleSinks.push_back(sink);
 			message->completed();
-		} else if(DSPRemoveSink::match(message)) {
+		}
+		else if (DSPRemoveSink::match(message))
+		{
 			SampleSink* sink = ((DSPAddSink*)message)->getSampleSink();
-			if(m_state == StRunning)
+
+			if(m_state == StRunning) {
 				sink->stop();
+			}
+
 			m_sampleSinks.remove(sink);
 			message->completed();
-		} else if(DSPAddAudioSource::match(message)) {
+		}
+		else if (DSPAddAudioSource::match(message))
+		{
 			m_audioOutput.addFifo(((DSPAddAudioSource*)message)->getAudioFifo());
 			message->completed();
-		} else if(DSPRemoveAudioSource::match(message)) {
+		}
+		else if (DSPRemoveAudioSource::match(message))
+		{
 			m_audioOutput.removeFifo(((DSPAddAudioSource*)message)->getAudioFifo());
 			message->completed();
-		} else if(DSPConfigureCorrection::match(message)) {
+		}
+		else if (DSPConfigureCorrection::match(message))
+		{
 			DSPConfigureCorrection* conf = (DSPConfigureCorrection*)message;
 			m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
-			if(m_dcOffsetCorrection != conf->getDCOffsetCorrection()) {
+
+			if(m_dcOffsetCorrection != conf->getDCOffsetCorrection())
+			{
 				m_dcOffsetCorrection = conf->getDCOffsetCorrection();
 				m_iOffset = 0;
 				m_qOffset = 0;
 			}
-			if(m_iqImbalanceCorrection != conf->getIQImbalanceCorrection()) {
+
+			if(m_iqImbalanceCorrection != conf->getIQImbalanceCorrection())
+			{
 				m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
 				m_iRange = 1 << 16;
 				m_qRange = 1 << 16;
 				m_imbalance = 65536;
 			}
+
 			message->completed();
-		} else {
-			if(!distributeMessage(message))
+		}
+		else
+		{
+			if (DSPSignalNotification::match(message))
+			{
+				DSPSignalNotification *conf = (DSPSignalNotification*)message;
+				qDebug() << "  (" << conf->getSampleRate() << "," << conf->getFrequencyOffset() << ")";
+			}
+			if(!distributeMessage(message)) {
 				message->completed();
+			}
 		}
 	}
 }

@@ -85,7 +85,7 @@ void ThreadedSampleSink::handleMessages()
 {
 	Message* message;
 	while((message = m_messageQueue.accept()) != NULL) {
-		qDebug("CMD: %s", message->getIdentifier());
+		qDebug("ThreadedSampleSink::handleMessages: %s", message->getIdentifier());
 		if(m_sampleSink != NULL) {
 			if(!m_sampleSink->handleMessage(message))
 				message->completed();

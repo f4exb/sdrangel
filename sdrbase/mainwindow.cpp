@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_sampleFileName(std::string("./test.sdriq")),
 	m_pluginManager(new PluginManager(this, m_dspEngine))
 {
+	connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 	m_dspEngine->start();
 
 	ui->setupUi(this);
@@ -85,7 +86,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
 	connect(m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
-	connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	//connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);

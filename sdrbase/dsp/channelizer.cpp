@@ -6,10 +6,10 @@
 
 Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_inputSampleRate(100000),
-	m_requestedOutputSampleRate(100000),
+	m_inputSampleRate(10),
+	m_requestedOutputSampleRate(10),
 	m_requestedCenterFrequency(0),
-	m_currentOutputSampleRate(100000),
+	m_currentOutputSampleRate(0),
 	m_currentCenterFrequency(0)
 {
 }
@@ -62,34 +62,50 @@ void Channelizer::stop()
 
 bool Channelizer::handleMessage(Message* cmd)
 {
-	if(DSPSignalNotification::match(cmd)) {
+	if (DSPSignalNotification::match(cmd))
+	{
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
 		m_inputSampleRate = signal->getSampleRate();
+		qDebug() << "Channelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
 		applyConfiguration();
 		cmd->completed();
-		if(m_sampleSink != NULL) {
+		if(m_sampleSink != NULL)
+		{
 			signal = DSPSignalNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
-			if(!m_sampleSink->handleMessage(signal))
+			if(!m_sampleSink->handleMessage(signal)) {
 				signal->completed();
+			}
 		}
+
 		emit inputSampleRateChanged();
 		return true;
-	} else if(DSPConfigureChannelizer::match(cmd)) {
+	}
+	else if (DSPConfigureChannelizer::match(cmd))
+	{
 		DSPConfigureChannelizer* chan = (DSPConfigureChannelizer*)cmd;
 		m_requestedOutputSampleRate = chan->getSampleRate();
 		m_requestedCenterFrequency = chan->getCenterFrequency();
+		qDebug() << "Channelizer::handleMessage: DSPConfigureChannelizer:"
+				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
+				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
 		applyConfiguration();
 		cmd->completed();
-		if(m_sampleSink != NULL) {
+		if(m_sampleSink != NULL)
+		{
 			DSPSignalNotification* signal = DSPSignalNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
-			if(!m_sampleSink->handleMessage(signal))
+			if(!m_sampleSink->handleMessage(signal)) {
 				signal->completed();
+			}
 		}
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if(m_sampleSink != NULL) {
 			return m_sampleSink->handleMessage(cmd);
-		else return false;
+		} else {
+			return false;
+		}
 	}
 }
 

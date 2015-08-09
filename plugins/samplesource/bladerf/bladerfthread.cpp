@@ -27,7 +27,7 @@ BladerfThread::BladerfThread(struct bladerf* dev, SampleFifo* sampleFifo, QObjec
 	m_dev(dev),
 	m_convertBuffer(BLADERF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
-	m_samplerate(3072000),
+	m_samplerate(10),
 	m_log2Decim(0),
 	m_fcPos(0)
 {
