@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_audioDeviceInfo(new AudioDeviceInfo),
 	m_messageQueue(new MessageQueue),
 	m_settings(),
-	m_dspEngine(new DSPEngine(m_messageQueue)),
+	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState((DSPEngine::State)-1),
 	m_startOsmoSDRUpdateAfterStop(false),
 	m_inputGUI(0),
@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_sampleFileName(std::string("./test.sdriq")),
 	m_pluginManager(new PluginManager(this, m_dspEngine))
 {
+	m_dspEngine->start();
+
 	ui->setupUi(this);
 	delete ui->mainToolBar;
 	createStatusBar();
@@ -83,6 +85,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
 	connect(m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
+	connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -90,11 +93,12 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_masterTimer.start(50);
 
 	m_pluginManager->loadPlugins();
+
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
-	m_dspEngine->start();
+	//m_dspEngine->start();
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_dspEngine->addSink(m_spectrumVis);
@@ -311,12 +315,18 @@ void MainWindow::applySettings()
 	updateSampleRate();
 }
 
-void MainWindow::handleMessages()
+void MainWindow::handleDSPMessages()
 {
 	Message* message;
-	while((message = m_messageQueue->accept()) != 0) {
+
+	while ((message = m_dspEngine->getReportQueue()->accept()) != 0)
+	{
 		qDebug("Message: %s", message->getIdentifier());
-		if(DSPEngineReport::match(message)) {
+
+		std::cerr << "MainWindow::handleDSPMessages: " << message->getIdentifier() << std::endl;
+
+		if (DSPEngineReport::match(message))
+		{
 			DSPEngineReport* rep = (DSPEngineReport*)message;
 			m_sampleRate = rep->getSampleRate();
 			m_centerFrequency = rep->getCenterFrequency();
@@ -324,11 +334,23 @@ void MainWindow::handleMessages()
 			updateCenterFreqDisplay();
 			updateSampleRate();
 			message->completed();
-			std::cerr << "MainWindow::handleMessages: m_fileSink->configure" << std::endl;
 			m_fileSink->configure(m_dspEngine->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
-		} else {
-			if(!m_pluginManager->handleMessage(message))
-				message->completed();
+		}
+	}
+}
+
+void MainWindow::handleMessages()
+{
+	Message* message;
+
+	while ((message = m_messageQueue->accept()) != 0)
+	{
+		qDebug("Message: %s", message->getIdentifier());
+
+		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;
+
+		if (!m_pluginManager->handleMessage(message)) {
+			message->completed();
 		}
 	}
 }
@@ -456,12 +478,6 @@ void MainWindow::on_presetUpdate_clicked()
 			}
 		}
 	}
-}
-
-void MainWindow::on_presetLastLoad_clicked()
-{
-	m_settings.load();
-	applySettings();
 }
 
 void MainWindow::on_presetLoad_clicked()

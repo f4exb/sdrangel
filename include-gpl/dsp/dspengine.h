@@ -44,10 +44,13 @@ public:
 		StError
 	};
 
-	DSPEngine(MessageQueue* reportQueue, QObject* parent = NULL);
+	DSPEngine(QObject* parent = NULL);
 	~DSPEngine();
 
+	static DSPEngine *instance();
+
 	MessageQueue* getMessageQueue() { return &m_messageQueue; }
+	MessageQueue* getReportQueue() { return &m_reportQueue; }
 
 	void start();
 	void stop();
@@ -72,7 +75,7 @@ public:
 
 private:
 	MessageQueue m_messageQueue;
-	MessageQueue* m_reportQueue;
+	MessageQueue m_reportQueue;
 
 	State m_state;
 

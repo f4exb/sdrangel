@@ -35,8 +35,9 @@ void PluginManager::loadPlugins()
 
 	qSort(m_plugins);
 
-	for(Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)
+	for(Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it) {
 		it->plugin->initPlugin(&m_pluginAPI);
+	}
 
 	updateSampleSourceDevices();
 }
@@ -289,20 +290,27 @@ int PluginManager::selectSampleSource(const QString& source)
 void PluginManager::loadPlugins(const QDir& dir)
 {
 	QDir pluginsDir(dir);
-	foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
+
+	foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+	{
 		QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
 		PluginInterface* plugin = qobject_cast<PluginInterface*>(loader->instance());
-		if(loader->isLoaded())
+
+		if (loader->isLoaded()) {
 			qWarning("loaded plugin %s", qPrintable(fileName));
-		if(plugin != NULL) {
+		}
+
+		if (plugin != NULL) {
 			m_plugins.append(Plugin(fileName, loader, plugin));
 		} else {
 			loader->unload();
 			delete loader;
 		}
 	}
-	foreach(QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+
+	foreach (QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
 		loadPlugins(pluginsDir.absoluteFilePath(dirName));
+	}
 }
 
 void PluginManager::renameChannelInstances()

@@ -23,10 +23,8 @@
 #include "dsp/dspcommands.h"
 #include "dsp/samplesource/samplesource.h"
 
-DSPEngine::DSPEngine(MessageQueue* reportQueue, QObject* parent) :
+DSPEngine::DSPEngine(QObject* parent) :
 	QThread(parent),
-	m_messageQueue(),
-	m_reportQueue(reportQueue),
 	m_state(StNotStarted),
 	m_sampleSource(NULL),
 	m_sampleSinks(),
@@ -46,6 +44,12 @@ DSPEngine::DSPEngine(MessageQueue* reportQueue, QObject* parent) :
 DSPEngine::~DSPEngine()
 {
 	wait();
+}
+
+Q_GLOBAL_STATIC(DSPEngine, dspEngine)
+DSPEngine *DSPEngine::instance()
+{
+	return dspEngine;
 }
 
 void DSPEngine::start()
@@ -349,7 +353,7 @@ void DSPEngine::generateReport()
 
 	if(needReport) {
 		Message* rep = DSPEngineReport::create(m_sampleRate, m_centerFrequency);
-		rep->submit(m_reportQueue);
+		rep->submit(&m_reportQueue);
 	}
 }
 

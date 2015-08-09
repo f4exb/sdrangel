@@ -19,16 +19,19 @@ class SDRANGELOVE_API PluginManager : public QObject {
 	Q_OBJECT
 
 public:
-	struct Plugin {
+	struct Plugin
+	{
 		QString filename;
 		QPluginLoader* loader;
 		PluginInterface* plugin;
+
 		Plugin(const QString& _filename, QPluginLoader* pluginLoader, PluginInterface* _plugin) :
 			filename(_filename),
 			loader(pluginLoader),
 			plugin(_plugin)
 		{ }
 	};
+
 	typedef QList<Plugin> Plugins;
 
 	explicit PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent = NULL);

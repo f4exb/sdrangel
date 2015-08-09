@@ -116,6 +116,7 @@ private:
 	void applySettings();
 
 private slots:
+	void handleDSPMessages();
 	void handleMessages();
 	void updateStatus();
 	void on_action_Start_triggered();
@@ -127,7 +128,6 @@ private slots:
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();
-	void on_presetLastLoad_clicked();
 	void on_presetLoad_clicked();
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
