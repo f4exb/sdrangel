@@ -72,8 +72,8 @@ void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
 	qDebug() << "PluginManager::registerSampleSource "
-			<< plugin->getPluginDescriptor().displayedName.toStdString()
-			<< " with source name " << sourceName.toStdString();
+			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+			<< " with source name " << sourceName.toStdString().c_str();
 
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
@@ -124,7 +124,7 @@ void PluginManager::loadSettings(const Preset* preset)
 	renameChannelInstances();
 
 	if(m_sampleSourceInstance != NULL) {
-		qDebug() << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString() << ")";
+		qDebug() << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString().c_str() << ")";
 		m_sampleSourceInstance->deserializeGeneral(preset->getSourceGeneralConfig());
 		if(m_sampleSource == preset->getSource()) {
 			qDebug() << "m_sampleSourceInstance->deserialize";
@@ -244,14 +244,14 @@ int PluginManager::selectSampleSource(int index)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString();
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString().c_str();
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }
 
 int PluginManager::selectSampleSource(const QString& source)
 {
-	qDebug() << "PluginManager::selectSampleSource by name: " << source.toStdString();
+	qDebug() << "PluginManager::selectSampleSource by name: " << source.toStdString().c_str();
 
 	int index = -1;
 
@@ -281,7 +281,7 @@ int PluginManager::selectSampleSource(const QString& source)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString();
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString().c_str();
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }

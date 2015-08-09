@@ -190,7 +190,7 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked)
 
 void FileSourceGui::configureFileName()
 {
-	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString();
+	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
 	FileSourceInput::MsgConfigureFileSourceName* message = FileSourceInput::MsgConfigureFileSourceName::create(m_fileName);
 	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 }

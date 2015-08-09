@@ -89,7 +89,7 @@ FileSourceInput::~FileSourceInput()
 
 void FileSourceInput::openFileStream()
 {
-	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString();
+	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str();
 
 	//stopInput();
 
@@ -257,7 +257,7 @@ bool FileSourceInput::applySettings(const GeneralSettings& generalSettings, cons
 		}
 
 		qDebug() << "FileSourceInput::applySettings:"
-				<< " file name: " << settings.m_fileName.toStdString()
+				<< " file name: " << settings.m_fileName.toStdString().c_str()
 				<< " center freq: " << m_centerFrequency << " Hz"
 				<< " sample rate: " << m_sampleRate
 				<< " Unix timestamp: " << m_startingTimeStamp;

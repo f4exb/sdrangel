@@ -198,7 +198,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::loadSettings(const Preset* preset)
 {
-	qDebug() << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString();
+	qDebug() << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString().c_str();
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
@@ -221,7 +221,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::saveSettings(Preset* preset)
 {
-	qDebug() << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString();
+	qDebug() << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString().c_str();
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
     preset->clearChannels();
