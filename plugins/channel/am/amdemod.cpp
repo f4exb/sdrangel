@@ -23,8 +23,6 @@
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
 
-#include <iostream>
-
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
 AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :

@@ -23,8 +23,6 @@
 #include "dsp/pidcontroller.h"
 #include "wfmdemod.h"
 
-//#include <iostream>
-
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 
 WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
@@ -168,7 +166,6 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 
 					//m_lastSample = ci;
-					//std::cerr << "demod=" << demod << std::endl;
 
 					/*
 					Real argument = atan2(ci.real()*m_lastSample.imag() - m_lastSample.real()*ci.imag(),
@@ -315,13 +312,5 @@ void WFMDemod::apply()
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-
-	/*
-	std::cerr << "WFMDemod::apply: in=" << m_config.m_inputSampleRate
-			<< ", df=" << m_config.m_inputFrequencyOffset
-			<< ", rfbw=" << m_config.m_rfBandwidth
-			<< ", afbw=" << m_config.m_afBandwidth
-			<< std::endl;
-	*/
 
 }

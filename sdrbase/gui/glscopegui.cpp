@@ -5,8 +5,7 @@
 #include "util/simpleserializer.h"
 #include "ui_glscopegui.h"
 
-#include <iostream>
-#include <cstdio>
+#include <QDebug>
 
 const qreal GLScopeGUI::amps[11] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001 };
 
@@ -346,11 +345,6 @@ void GLScopeGUI::setTimeScaleDisplay()
 {
 	m_sampleRate = m_glScope->getSampleRate();
 	qreal t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (qreal)m_timeBase;
-	/*std::cerr << "GLScopeGUI::setTimeScaleDisplay: sample rate: "
-			<< m_sampleRate
-			<< " traceSize: " << m_glScope->getTraceSize()
-			<< " timeBase: " << m_timeBase
-			<< " t: " << t << std::endl;*/
 	if(t < 0.000001)
 		ui->timeText->setText(tr("%1\nns").arg(t * 1000000000.0));
 	else if(t < 0.001)
@@ -652,7 +646,7 @@ void GLScopeGUI::on_slopeNeg_clicked()
 
 void GLScopeGUI::on_slopeBoth_clicked()
 {
-	std::cerr << "GLScopeGUI::on_slopeBoth_clicked" << std::endl;
+	qDebug() << "GLScopeGUI::on_slopeBoth_clicked";
 	ui->slopePos->setChecked(false);
 	ui->slopeNeg->setChecked(false);
 	ui->slopeBoth->setChecked(true);

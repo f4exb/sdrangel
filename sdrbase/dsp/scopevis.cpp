@@ -4,8 +4,7 @@
 #include "util/messagequeue.h"
 #include <algorithm>
 
-#include <cstdio>
-#include <iostream>
+#include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 
@@ -230,14 +229,14 @@ bool ScopeVis::handleMessageKeep(Message* message)
         if (newSize > m_traceback.size()) {  // fitting the exact required space is not a requirement for the back trace
             m_traceback.resize(newSize);
         }
-		std::cerr << "ScopeVis::handleMessageKeep:"
+		qDebug() << "ScopeVis::handleMessageKeep:"
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
 				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
 				<< " m_triggerBothEdges: " << (m_triggerBothEdges ? "yes" : "no")
 				<< " m_preTrigger: " << m_triggerPre
 				<< " m_triggerDelay: " << m_triggerDelay
-				<< " m_traceSize: " << m_trace.size() << std::endl;
+				<< " m_traceSize: " << m_trace.size();
 		return true;
 	/*
 	} else if(DSPConfigureScopeVis::match(message)) {

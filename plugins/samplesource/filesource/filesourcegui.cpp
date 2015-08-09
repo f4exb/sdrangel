@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include <QDebug>
 
 #include <QTime>
 #include <QDateTime>
@@ -131,7 +131,6 @@ bool FileSourceGui::handleMessage(Message* message)
 	}
 	else if(FileSourceInput::MsgReportFileSourceStreamData::match(message))
 	{
-		//std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamData" << std::endl;
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getSampleRate();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getCenterFrequency();
 		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getStartingTimeStamp();
@@ -142,7 +141,6 @@ bool FileSourceGui::handleMessage(Message* message)
 	else if(FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
 	{
 		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming*)message)->getSamplesCount();
-		//std::cerr << "FileSourceGui::handleMessage: MsgReportFileSourceStreamTiming: " << m_samplesCount << std::endl;
 		message->completed();
 		updateWithStreamTime();
 		return true;
@@ -192,7 +190,7 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked)
 
 void FileSourceGui::configureFileName()
 {
-	std::cerr << "FileSourceGui::configureFileName: " << m_fileName.toStdString() << std::endl;
+	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString();
 	FileSourceInput::MsgConfigureFileSourceName* message = FileSourceInput::MsgConfigureFileSourceName::create(m_fileName);
 	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
 }
@@ -228,8 +226,6 @@ void FileSourceGui::updateWithStreamTime()
 	t = t.addMSecs(t_msec);
 	QString s_time = t.toString("hh:mm:ss.zzz");
 	ui->relTimeText->setText(s_time);
-
-	//std::cerr << "FileSourceGui::updateWithStreamTime: " << t_sec << "." << t_msec << " " << s_time.toStdString() << std::endl;
 
 	quint64 startingTimeStampMsec = m_startingTimeStamp * 1000;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);

@@ -1,7 +1,7 @@
 #include "util/simpleserializer.h"
 #include "settings/preset.h"
 
-#include <iostream>
+#include <QDebug>
 
 Preset::Preset()
 {
@@ -27,7 +27,7 @@ void Preset::resetToDefaults()
 
 QByteArray Preset::serialize() const
 {
-	std::cerr << "Preset::serialize (" << this->getSource().toStdString()<< ")" << std::endl;
+	qDebug() << "Preset::serialize (" << this->getSource().toStdString()<< ")";
 
 	SimpleSerializer s(1);
 	s.writeString(1, m_group);
@@ -45,7 +45,7 @@ QByteArray Preset::serialize() const
 
 	s.writeS32(200, m_channelConfigs.size());
 
-	std::cerr << "  m_group: " << m_group.toStdString() << std::endl;
+	qDebug() << "  m_group: " << m_group.toStdString();
 
 	for(int i = 0; i < m_channelConfigs.size(); i++) {
 		s.writeString(201 + i * 2, m_channelConfigs[i].m_channel);
@@ -57,7 +57,7 @@ QByteArray Preset::serialize() const
 
 bool Preset::deserialize(const QByteArray& data)
 {
-	std::cerr << "Preset::deserialize (" << this->getSource().toStdString() << ")" << std::endl;
+	qDebug() << "Preset::deserialize (" << this->getSource().toStdString() << ")";
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
@@ -79,7 +79,7 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readBlob(11, &m_sourceGeneralConfig);
 		d.readBlob(12, &m_sourceConfig);
 
-		std::cerr << "  m_group: " << m_group.toStdString() << std::endl;
+		qDebug() << "  m_group: " << m_group.toStdString();
 
 		qint32 channelCount = 0;
 		d.readS32(200, &channelCount, 0);

@@ -8,8 +8,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/samplesource/samplesource.h"
 
-#include <iostream>
-#include <cstdio>
+#include <QDebug>
 #include "util/stacktrace.h"
 
 PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent) :
@@ -71,16 +70,16 @@ void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
 
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
-	std::cerr << "PluginManager::registerSampleSource "
+	qDebug() << "PluginManager::registerSampleSource "
 			<< plugin->getPluginDescriptor().displayedName.toStdString()
-			<< " with source name " << sourceName.toStdString() << std::endl;
+			<< " with source name " << sourceName.toStdString();
 
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
 void PluginManager::loadSettings(const Preset* preset)
 {
-	std::cerr << "PluginManager::loadSettings" << std::endl;
+	qDebug() << "PluginManager::loadSettings";
 
 	fprintf(stderr, "-------- [%s | %s] --------\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -124,10 +123,10 @@ void PluginManager::loadSettings(const Preset* preset)
 	renameChannelInstances();
 
 	if(m_sampleSourceInstance != NULL) {
-		std::cerr << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString() << ")" << std::endl;
+		qDebug() << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString() << ")";
 		m_sampleSourceInstance->deserializeGeneral(preset->getSourceGeneralConfig());
 		if(m_sampleSource == preset->getSource()) {
-			std::cerr << "m_sampleSourceInstance->deserialize" << std::endl;
+			qDebug() << "m_sampleSourceInstance->deserialize";
 			m_sampleSourceInstance->deserialize(preset->getSourceConfig());
 		}
 	}
@@ -214,7 +213,7 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 
 int PluginManager::selectSampleSource(int index)
 {
-	std::cout << "PluginManager::selectSampleSource by index" << std::endl;
+	qDebug() << "PluginManager::selectSampleSource by index";
 
 	m_dspEngine->stopAcquistion();
 
@@ -244,14 +243,14 @@ int PluginManager::selectSampleSource(int index)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	std::cerr << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString() << std::endl;
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString();
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }
 
 int PluginManager::selectSampleSource(const QString& source)
 {
-	std::cout << "PluginManager::selectSampleSource by name: " << source.toStdString() << std::endl;
+	qDebug() << "PluginManager::selectSampleSource by name: " << source.toStdString();
 
 	int index = -1;
 
@@ -281,7 +280,7 @@ int PluginManager::selectSampleSource(const QString& source)
 		return -1;
 
 	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	std::cerr << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString() << std::endl;
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString();
 	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
 	return index;
 }

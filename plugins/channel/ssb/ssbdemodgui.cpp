@@ -14,8 +14,6 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "mainwindow.h"
 
-#include <iostream>
-
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI)
 {
 	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI);

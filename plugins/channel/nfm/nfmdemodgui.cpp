@@ -11,8 +11,6 @@
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 
-#include <iostream>
-
 const int NFMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };

@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <assert.h>
 #include "dsp/samplefifo.h"
+#include <QDebug>
 
 #include "filesourcethread.h"
 
@@ -50,11 +51,11 @@ FileSourceThread::~FileSourceThread()
 
 void FileSourceThread::startWork()
 {
-	std::cerr << "FileSourceThread::startWork: ";
+	qDebug() << "FileSourceThread::startWork: ";
     
     if (m_ifstream->is_open())
     {
-        std::cerr << " file stream open, starting..." << std::endl;
+        qDebug() << "  - file stream open, starting...";
         m_startWaitMutex.lock();
         start();
         while(!m_running)
@@ -63,20 +64,20 @@ void FileSourceThread::startWork()
     }
     else
     {
-        std::cerr << " file stream closed, not starting." << std::endl;        
+        qDebug() << "  - file stream closed, not starting.";
     }
 }
 
 void FileSourceThread::stopWork()
 {
-	std::cerr << "FileSourceThread::stopWork" << std::endl;
+	qDebug() << "FileSourceThread::stopWork";
 	m_running = false;
 	wait();
 }
 
 void FileSourceThread::setSamplerate(int samplerate)
 {
-	std::cerr << "FileSourceThread::setSamplerate:"
+	qDebug() << "FileSourceThread::setSamplerate:"
 			<< " new:" << samplerate
 			<< " old:" << m_samplerate;
 
@@ -91,19 +92,15 @@ void FileSourceThread::setSamplerate(int samplerate)
 		m_bufsize = m_chunksize;
 
 		if (m_buf == 0)	{
-			std::cerr << " Allocate buffer";
+			qDebug() << "  - Allocate buffer";
 			m_buf = (quint8*) malloc(m_bufsize);
 		} else {
-			std::cerr << " Re-allocate buffer";
+			qDebug() << "  - Re-allocate buffer";
 			m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
 		}
 
-		std::cerr << " size: " << m_bufsize
-				<< " #samples: " << (m_bufsize/4) << std::endl;
-	}
-	else
-	{
-		std::cerr << std::endl;
+		qDebug() << "  - size: " << m_bufsize
+				<< " #samples: " << (m_bufsize/4);
 	}
 
 	//m_samplerate = samplerate;
@@ -126,7 +123,7 @@ void FileSourceThread::run()
 
 void FileSourceThread::connectTimer(const QTimer& timer)
 {
-	std::cerr << "FileSourceThread::connectTimer" << std::endl;
+	qDebug() << "FileSourceThread::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
