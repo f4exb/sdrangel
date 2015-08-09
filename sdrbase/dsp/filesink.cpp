@@ -86,7 +86,7 @@ bool FileSink::handleMessage(Message* message)
         MsgConfigureFileSink* conf = (MsgConfigureFileSink*) message;
         handleConfigure(conf->getFileName(), conf->getSampleRate(), conf->getCenterFrequency());
         qDebug() << "FileSink::handleMessage:"
-        		<< " fileName: " << m_fileName
+        		<< " fileName: " << m_fileName.c_str()
 				<< " sampleRate: " << m_sampleRate
 				<< " centerFrequency: " << m_centerFrequency;
         message->completed();
