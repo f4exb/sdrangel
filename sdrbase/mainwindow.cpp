@@ -140,7 +140,6 @@ MainWindow::~MainWindow()
 
 	m_dspEngine->stop();
 
-	delete m_dspEngine;
 	delete m_messageQueue;
 	delete ui;
 }

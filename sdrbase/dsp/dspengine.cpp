@@ -334,8 +334,8 @@ void DSPEngine::generateReport()
 		sampleRate = m_sampleSource->getSampleRate();
 		centerFrequency = m_sampleSource->getCenterFrequency();
 	} else {
-		sampleRate = 100000;
-		centerFrequency = 100000000;
+		sampleRate = 0;
+		centerFrequency = 0;
 	}
 
 	if(sampleRate != m_sampleRate) {
