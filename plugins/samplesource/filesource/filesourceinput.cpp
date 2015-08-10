@@ -138,9 +138,11 @@ bool FileSourceInput::startInput(int device)
 	m_fileSourceThread->setSamplerate(m_sampleRate);
 	m_fileSourceThread->connectTimer(m_masterTimer);
 	m_fileSourceThread->startWork();
+	m_deviceDescription = "FileSource";
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
+	qDebug("FileSourceInput::startInput: started");
 
 	MsgReportFileSourceAcquisition::create(true)->submit(m_guiMessageQueue); // acquisition on
 

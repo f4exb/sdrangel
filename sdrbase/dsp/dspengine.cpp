@@ -291,21 +291,28 @@ DSPEngine::State DSPEngine::gotoRunning()
 			break;
 	}
 
-	if(m_sampleSource == NULL)
+	if(m_sampleSource == NULL) {
 		return gotoError("No sample source configured");
+	}
 
 	m_iOffset = 0;
 	m_qOffset = 0;
 	m_iRange = 1 << 16;
 	m_qRange = 1 << 16;
 
-	if(!m_sampleSource->startInput(0))
+	if(!m_sampleSource->startInput(0)) {
 		return gotoError("Could not start sample source");
+	}
+
 	m_deviceDescription = m_sampleSource->getDeviceDescription();
+	qDebug() << "DSPEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
 
 	m_audioOutput.start(0, 48000);
-	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
+
+	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++) {
 		(*it)->start();
+	}
+
 	m_sampleRate = 0; // make sure, report is sent
 	generateReport();
 

@@ -166,11 +166,12 @@ bool BladerfInput::startInput(int device)
 	}
 
 	m_bladerfThread->startWork();
+	m_deviceDescription = "BladeRF";
 
 	mutexLocker.unlock();
 	applySettings(m_generalSettings, m_settings, true);
 
-	qDebug("bladerfInput: start");
+	qDebug("BladerfInput::startInput: started");
 	//MsgReportBladerf::create(m_gains)->submit(m_guiMessageQueue); Pass anything here
 
 	return true;
