@@ -52,7 +52,10 @@ void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_i
 void Channelizer::start()
 {
 	if(m_sampleSink != NULL)
+	{
+		qDebug() << "Channelizer::start";
 		m_sampleSink->start();
+	}
 }
 
 void Channelizer::stop()

@@ -328,7 +328,7 @@ DSPEngine::State DSPEngine::gotoInit()
 		case StNotStarted:
 			return StNotStarted;
 
-		case StRunning:
+		case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
 			return StRunning;
 
 		case StReady:
@@ -344,22 +344,26 @@ DSPEngine::State DSPEngine::gotoInit()
 		return gotoError("No sample source configured");
 	}
 
-	// init: pass sample rate to all sample rate dependent sinks waiting for completion
+	// init: pass sample rate and center frequency to all sample rate and/or center frequency dependent sinks and wait for completion
+
+	m_iOffset = 0;
+	m_qOffset = 0;
+	m_iRange = 1 << 16;
+	m_qRange = 1 << 16;
 
 	m_deviceDescription = m_sampleSource->getDeviceDescription();
 	m_centerFrequency = m_sampleSource->getCenterFrequency();
 	m_sampleRate = m_sampleSource->getSampleRate();
-	qDebug() << "DSPEngine::gotoInit: " << m_deviceDescription.toStdString().c_str()
-			<< ": sampleRate: " << m_sampleRate
+
+	qDebug() << "DSPEngine::gotoInit: " << m_deviceDescription.toStdString().c_str() << ": "
+			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 
 	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 	{
-		qDebug() << "  - " << (*it)->objectName().toStdString().c_str();
-		DSPSignalNotification* notif = DSPSignalNotification::create(m_sampleRate, 0);
-		//notif->execute(&m_outputMessageQueue, *it); // wait for completion
-		(*it)->executeMessage(notif);
-		(*it)->start();
+		qDebug() << "  - initializing " << (*it)->objectName().toStdString().c_str();
+		DSPSignalNotification* notif = DSPSignalNotification::create(m_sampleRate, m_centerFrequency);
+		(*it)->executeMessage(notif); // this one does not use queuing and thus waits for completion
 	}
 
 	// pass sample rate to main window
@@ -372,7 +376,10 @@ DSPEngine::State DSPEngine::gotoInit()
 
 DSPEngine::State DSPEngine::gotoRunning()
 {
-	switch(m_state) {
+    qDebug() << "DSPEngine::gotoRunning";
+    
+	switch(m_state) 
+    {
 		case StNotStarted:
 			return StNotStarted;
 
@@ -391,12 +398,7 @@ DSPEngine::State DSPEngine::gotoRunning()
 		return gotoError("No sample source configured");
 	}
 
-	qDebug() << "DSPEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
-
-	m_iOffset = 0;
-	m_qOffset = 0;
-	m_iRange = 1 << 16;
-	m_qRange = 1 << 16;
+	qDebug() << "  - " << m_deviceDescription.toStdString().c_str() << " started";
 
 	// Start everything
 
@@ -409,11 +411,11 @@ DSPEngine::State DSPEngine::gotoRunning()
 
 	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 	{
+        qDebug() << "  - starting " << (*it)->objectName().toStdString().c_str();
 		(*it)->start();
 	}
 
-	m_sampleRate = 0; // make sure, report is sent
-	//generateReport();
+	qDebug() << "  - input message queue pending: " << m_inputMessageQueue.countPending();
 
 	return StRunning;
 }
@@ -428,85 +430,57 @@ DSPEngine::State DSPEngine::gotoError(const QString& errorMessage)
 
 void DSPEngine::handleSetSource(SampleSource* source)
 {
+	qDebug() << "DSPEngine::handleSetSource: " << source->getDeviceDescription().toStdString().c_str();
+
 	gotoIdle();
-	if(m_sampleSource != NULL)
+
+	if(m_sampleSource != 0)
+	{
 		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
+	}
+
 	m_sampleSource = source;
-	if(m_sampleSource != NULL)
+
+	if(m_sampleSource != 0)
+	{
+		qDebug() << "  - connect";
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
-	//generateReport();
+	}
 }
-
-/*
-void DSPEngine::generateReport()
-{
-	bool needReport = false;
-	unsigned int sampleRate;
-	quint64 centerFrequency;
-
-	if (m_sampleSource != NULL)
-	{
-		sampleRate = m_sampleSource->getSampleRate();
-		centerFrequency = m_sampleSource->getCenterFrequency();
-	}
-	else
-	{
-		sampleRate = 0;
-		centerFrequency = 0;
-	}
-
-	qDebug() << "DSPEngine::generateReport:"
-			<< " sampleRate: " << sampleRate
-			<< " centerFrequency: " << centerFrequency;
-
-	if (sampleRate != m_sampleRate)
-	{
-		m_sampleRate = sampleRate;
-		needReport = true;
-
-		for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-		{
-			DSPSignalNotification* signal = DSPSignalNotification::create(m_sampleRate, 0);
-			signal->submit(&m_reportQueue, *it);
-		}
-	}
-
-	if (centerFrequency != m_centerFrequency)
-	{
-		m_centerFrequency = centerFrequency;
-		needReport = true;
-	}
-
-	if (needReport)
-	{
-		Message* rep = DSPEngineReport::create(m_sampleRate, m_centerFrequency);
-		rep->submit(&m_reportQueue);
-	}
-}*/
 
 bool DSPEngine::distributeMessage(Message* message)
 {
-	if(m_sampleSource != NULL) {
-		if((message->getDestination() == NULL) || (message->getDestination() == m_sampleSource)) {
-			if(m_sampleSource->handleMessage(message)) {
-				//generateReport();
+	if (m_sampleSource != 0)
+	{
+		if ((message->getDestination() == 0) || (message->getDestination() == m_sampleSource))
+		{
+			if (m_sampleSource->handleMessage(message))
+			{
 				return true;
 			}
 		}
 	}
-	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++) {
-		if((message->getDestination() == NULL) || (message->getDestination() == *it)) {
-			if((*it)->handleMessage(message))
+
+	for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
+	{
+		if ((message->getDestination() == NULL) || (message->getDestination() == *it))
+		{
+			if ((*it)->handleMessage(message))
+			{
 				return true;
+			}
 		}
 	}
+
 	return false;
 }
 
 void DSPEngine::handleData()
 {
 	if(m_state == StRunning)
+	{
 		work();
+	}
 }
 
 void DSPEngine::handleInputMessages()
@@ -533,7 +507,7 @@ void DSPEngine::handleInputMessages()
 			m_state = gotoIdle();
 
 			if(m_state == StIdle) {
-				m_state = gotoInit(); // State goes ready if OK or stays idle
+				m_state = gotoInit(); // State goes ready if init is performed
 			}
 
 			message->completed(m_state);
