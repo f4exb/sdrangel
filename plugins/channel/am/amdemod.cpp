@@ -29,6 +29,8 @@ AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
+	setObjectName("AMDemod");
+
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;

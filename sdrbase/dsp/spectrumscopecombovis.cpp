@@ -6,6 +6,7 @@ SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis*
 	m_spectrumVis(spectrumVis),
 	m_scopeVis(scopeVis)
 {
+	setObjectName("SpectrumScopeComboVis");
 }
 
 void SpectrumScopeComboVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)

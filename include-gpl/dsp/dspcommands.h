@@ -1,3 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_DSPCOMMANDS_H
 #define INCLUDE_DSPCOMMANDS_H
 
@@ -18,6 +35,10 @@ class SDRANGELOVE_API DSPExit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
+class SDRANGELOVE_API DSPAcquisitionInit : public Message {
+	MESSAGE_CLASS_DECLARATION
+};
+
 class SDRANGELOVE_API DSPAcquisitionStart : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
@@ -26,7 +47,7 @@ class SDRANGELOVE_API DSPAcquisitionStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPGetDeviceDescription : public Message {
+class SDRANGELOVE_API DSPGetSourceDeviceDescription : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -84,11 +105,11 @@ private:
 	SampleSink* m_sampleSink;
 };
 
-class SDRANGELOVE_API DSPAddAudioSource : public Message {
+class SDRANGELOVE_API DSPAddAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddAudioSource(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
+	DSPAddAudioSink(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
 
 	AudioFifo* getAudioFifo() const { return m_audioFifo; }
 
@@ -96,11 +117,11 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRANGELOVE_API DSPRemoveAudioSource : public Message {
+class SDRANGELOVE_API DSPRemoveAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveAudioSource(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
+	DSPRemoveAudioSink(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
 
 	AudioFifo* getAudioFifo() const { return m_audioFifo; }
 

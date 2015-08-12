@@ -26,6 +26,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_armed(false),
 	m_sampleRate(0)
 {
+	setObjectName("ScopeVis");
 	m_trace.reserve(100*m_traceChunkSize);
 	m_trace.resize(20*m_traceChunkSize);
 	m_traceback.resize(20*m_traceChunkSize);

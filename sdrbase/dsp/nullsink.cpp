@@ -4,6 +4,7 @@
 
 NullSink::NullSink()
 {
+	setObjectName("NullSink");
 }
 
 void NullSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)

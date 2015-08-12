@@ -1,4 +1,5 @@
 #include <QThread>
+#include <QDebug>
 #include "dsp/threadedsamplesink.h"
 #include "util/message.h"
 
@@ -6,6 +7,7 @@ ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink) :
 	m_thread(new QThread),
 	m_sampleSink(sampleSink)
 {
+	setObjectName("ThreadedSampleSink");
 	moveToThread(m_thread);
 	connect(m_thread, SIGNAL(started()), this, SLOT(threadStarted()));
 	connect(m_thread, SIGNAL(finished()), this, SLOT(threadFinished()));
@@ -47,8 +49,31 @@ void ThreadedSampleSink::stop()
 
 bool ThreadedSampleSink::handleMessage(Message* cmd)
 {
+	qDebug() << "ThreadedSampleSink::handleMessage: "
+			<< m_sampleSink->objectName().toStdString().c_str()
+			<< ": " << cmd->getIdentifier();
 	// called from other thread
 	m_messageQueue.submit(cmd);
+	return true;
+}
+
+bool ThreadedSampleSink::executeMessage(Message* cmd)
+{
+	qDebug() << "ThreadedSampleSink::executeMessage: "
+			<< m_sampleSink->objectName().toStdString().c_str()
+			<< ": " << cmd->getIdentifier();
+
+	if (m_sampleSink != NULL)
+	{
+		if (!m_sampleSink->handleMessage(cmd)) {
+			cmd->completed();
+		}
+	}
+	else
+	{
+		cmd->completed();
+	}
+
 	return true;
 }
 

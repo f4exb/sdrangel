@@ -15,6 +15,7 @@ FileSink::FileSink() :
     m_recordStart(false),
     m_byteCount(0)
 {
+	setObjectName("FileSink");
 }
 
 FileSink::~FileSink()

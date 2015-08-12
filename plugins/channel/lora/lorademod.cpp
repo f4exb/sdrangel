@@ -28,6 +28,8 @@ MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink)
 {
+	setObjectName("LoRaDemod");
+
 	m_Bandwidth = 7813;
 	m_sampleRate = 96000;
 	m_frequency = 0;

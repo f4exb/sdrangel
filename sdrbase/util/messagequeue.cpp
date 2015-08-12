@@ -38,3 +38,8 @@ int MessageQueue::countPending()
 
 	return m_queue.size();
 }
+
+void MessageQueue::clear()
+{
+	m_queue.clear();
+}

@@ -29,6 +29,8 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
+	setObjectName("WFMDemod");
+
 	m_config.m_inputSampleRate = 384000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 180000;

@@ -27,6 +27,8 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
 TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum)
 {
+	setObjectName("TCPSrc");
+
 	m_inputSampleRate = 96000;
 	m_sampleFormat = FormatSSB;
 	m_outputSampleRate = 48000;

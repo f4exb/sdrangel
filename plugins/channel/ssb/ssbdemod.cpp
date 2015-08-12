@@ -28,6 +28,8 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(audioFifo)
 {
+	setObjectName("SSBDemod");
+
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
 	m_volume = 2.0;

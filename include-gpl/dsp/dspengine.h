@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -38,10 +38,11 @@ class SDRANGELOVE_API DSPEngine : public QThread {
 
 public:
 	enum State {
-		StNotStarted,
-		StIdle,
-		StRunning,
-		StError
+		StNotStarted,  //!< engine is before initialization
+		StIdle,        //!< engine is idle
+		StReady,       //!< engine is ready to run
+		StRunning,     //!< engine is running
+		StError        //!< engine is in error
 	};
 
 	DSPEngine(QObject* parent = NULL);
@@ -49,33 +50,34 @@ public:
 
 	static DSPEngine *instance();
 
-	MessageQueue* getMessageQueue() { return &m_messageQueue; }
-	MessageQueue* getReportQueue() { return &m_reportQueue; }
+	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
+	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
 
-	void start();
-	void stop();
+	void start(); //!< This thread start
+	void stop();  //!< This thread stop
 
-	bool startAcquisition();
-	void stopAcquistion();
+	bool initAcquisition(); //!< Initialize acquisition sequence
+	bool startAcquisition(); //!< Start acquisition sequence
+	void stopAcquistion();   //!< Stop acquisition sequence
 
-	void setSource(SampleSource* source);
+	void setSource(SampleSource* source); //!< Set the unique sample source
 
-	void addSink(SampleSink* sink);
-	void removeSink(SampleSink* sink);
+	void addSink(SampleSink* sink); //!< Add a sample sink
+	void removeSink(SampleSink* sink); //!< Remove a sample sink
 
-	void addAudioSource(AudioFifo* audioFifo);
-	void removeAudioSource(AudioFifo* audioFifo);
+	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
+	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
-	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection);
+	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
 
-	State state() const { return m_state; }
+	State state() const { return m_state; } //!< Return DSP engine current state
 
-	QString errorMessage();
-	QString deviceDescription();
+	QString errorMessage(); //!< Return the current error message
+	QString sourceDeviceDescription(); //!< Return the source device description
 
 private:
-	MessageQueue m_messageQueue;
-	MessageQueue m_reportQueue;
+	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
+	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
 
 	State m_state;
 
@@ -87,7 +89,7 @@ private:
 	typedef std::list<SampleSink*> SampleSinks;
 	SampleSinks m_sampleSinks;
 
-	AudioOutput m_audioOutput;
+	AudioOutput m_audioSink;
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;
@@ -103,19 +105,19 @@ private:
 
 	void dcOffset(SampleVector::iterator begin, SampleVector::iterator end);
 	void imbalance(SampleVector::iterator begin, SampleVector::iterator end);
-	void work();
+	void work(); //!< transfer samples from source to sinks if in running state
 
-	State gotoIdle();
-	State gotoRunning();
-	State gotoError(const QString& errorMsg);
+	State gotoIdle();     //!< Go to the idle state
+	State gotoInit();     //!< Go to the acquisition init state from idle
+	State gotoRunning();  //!< Go to the running state from ready state
+	State gotoError(const QString& errorMsg); //!< Go to an error state
 
-	void handleSetSource(SampleSource* source);
-	void generateReport();
-	bool distributeMessage(Message* message);
+	void handleSetSource(SampleSource* source); //!< Manage source setting
+	bool distributeMessage(Message* message); // FIXME: remove ?
 
 private slots:
-	void handleData();
-	void handleMessages();
+	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
+	void handleInputMessages(); //!< Handle input message queue
 };
 
 #endif // INCLUDE_DSPENGINE_H

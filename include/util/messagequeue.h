@@ -19,6 +19,7 @@ public:
 	Message* accept();
 
 	int countPending();
+	void clear();
 
 signals:
 	void messageEnqueued();

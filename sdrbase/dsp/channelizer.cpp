@@ -12,6 +12,7 @@ Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_currentOutputSampleRate(0),
 	m_currentCenterFrequency(0)
 {
+	setObjectName("Channelizer");
 }
 
 Channelizer::~Channelizer()
@@ -62,6 +63,8 @@ void Channelizer::stop()
 
 bool Channelizer::handleMessage(Message* cmd)
 {
+	qDebug() << "Channelizer::handleMessage: " << cmd->getIdentifier();
+
 	if (DSPSignalNotification::match(cmd))
 	{
 		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;

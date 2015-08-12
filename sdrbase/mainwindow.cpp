@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_sampleFileName(std::string("./test.sdriq")),
 	m_pluginManager(new PluginManager(this, m_dspEngine))
 {
-	connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	connect(m_dspEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 	m_dspEngine->start();
 
 	ui->setupUi(this);
@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_dspEngine->addSink(m_fileSink);
 
 	ui->glSpectrum->connectTimer(m_masterTimer);
-	ui->glSpectrumGUI->setBuddies(m_dspEngine->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->glSpectrumGUI->setBuddies(m_dspEngine->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	loadSettings();
 
@@ -319,7 +319,7 @@ void MainWindow::handleDSPMessages()
 {
 	Message* message;
 
-	while ((message = m_dspEngine->getReportQueue()->accept()) != 0)
+	while ((message = m_dspEngine->getOutputMessageQueue()->accept()) != 0)
 	{
 		qDebug("Message: %s", message->getIdentifier());
 
@@ -335,7 +335,7 @@ void MainWindow::handleDSPMessages()
 			updateSampleRate();
 			message->completed();
 			qDebug() << "MainWindow::handleMessages: m_fileSink->configure";
-			m_fileSink->configure(m_dspEngine->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
+			m_fileSink->configure(m_dspEngine->getInputMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
 		}
 	}
 }
@@ -379,7 +379,7 @@ void MainWindow::updateStatus()
 				m_engineIdle->setColor(Qt::gray);
 				m_engineRunning->setColor(Qt::green);
 				m_engineError->setColor(Qt::gray);
-				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->deviceDescription()));
+				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->sourceDeviceDescription()));
 				break;
 
 			case DSPEngine::StError:
@@ -395,7 +395,10 @@ void MainWindow::updateStatus()
 
 void MainWindow::on_action_Start_triggered()
 {
-	m_dspEngine->startAcquisition();
+	if (m_dspEngine->initAcquisition())
+	{
+		m_dspEngine->startAcquisition();
+	}
 }
 
 void MainWindow::on_action_Stop_triggered()

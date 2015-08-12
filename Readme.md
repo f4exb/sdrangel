@@ -128,7 +128,9 @@ Done since the fork
   - Trigger line display for all trigger modes
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
-  - File sample source plugin (recording reader) 
+  - File sample source plugin (recording reader) not working
+  - Make the DSP engine global static
+  - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
     
 =====
 To Do

@@ -21,6 +21,7 @@ SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
 	m_needMoreSamples(false),
 	m_glSpectrum(glSpectrum)
 {
+	setObjectName("SpectrumVis");
 	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
 }
 

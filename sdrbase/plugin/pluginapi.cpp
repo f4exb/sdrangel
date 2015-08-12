@@ -72,17 +72,17 @@ void PluginAPI::removeSampleSink(SampleSink* sampleSink)
 
 MessageQueue* PluginAPI::getDSPEngineMessageQueue()
 {
-	return m_dspEngine->getMessageQueue();
+	return m_dspEngine->getInputMessageQueue();
 }
 
 void PluginAPI::addAudioSource(AudioFifo* audioFifo)
 {
-	m_dspEngine->addAudioSource(audioFifo);
+	m_dspEngine->addAudioSink(audioFifo);
 }
 
 void PluginAPI::removeAudioSource(AudioFifo* audioFifo)
 {
-	m_dspEngine->removeAudioSource(audioFifo);
+	m_dspEngine->removeAudioSink(audioFifo);
 }
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)

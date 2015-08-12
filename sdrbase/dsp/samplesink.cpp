@@ -8,6 +8,11 @@ SampleSink::~SampleSink()
 {
 }
 
+bool SampleSink::executeMessage(Message *cmd)
+{
+	return handleMessage(cmd);
+}
+
 #if 0
 #include "samplesink.h"
 
