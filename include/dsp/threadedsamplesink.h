@@ -23,7 +23,6 @@ public:
 	void start();
 	void stop();
 	bool handleMessage(Message* cmd);
-	virtual bool executeMessage(Message* cmd);
 
 protected:
 	QMutex m_mutex;

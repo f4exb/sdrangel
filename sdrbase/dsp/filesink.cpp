@@ -29,6 +29,19 @@ void FileSink::configure(MessageQueue* msgQueue, const std::string& filename, in
 	cmd->submit(msgQueue, this);
 }
 
+bool FileSink::init(Message* cmd)
+{
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification* notif = (DSPSignalNotification*) cmd;
+		m_sampleRate = notif->getSampleRate();
+		m_centerFrequency = notif->getFrequencyOffset();
+		qDebug() << "FileSink::init: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate;
+		cmd->completed();
+		return true;
+	}
+}
+
 void FileSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
     // if no recording is active, send the samples to /dev/null

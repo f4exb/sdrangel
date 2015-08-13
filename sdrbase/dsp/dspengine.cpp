@@ -363,7 +363,7 @@ DSPEngine::State DSPEngine::gotoInit()
 	{
 		qDebug() << "  - initializing " << (*it)->objectName().toStdString().c_str();
 		DSPSignalNotification* notif = DSPSignalNotification::create(m_sampleRate, m_centerFrequency);
-		(*it)->executeMessage(notif); // this one does not use queuing and thus waits for completion
+		(*it)->init(notif);
 	}
 
 	// pass sample rate to main window
@@ -542,15 +542,6 @@ void DSPEngine::handleInputMessages()
 		else if (DSPAddSink::match(message))
 		{
 			SampleSink* sink = ((DSPAddSink*)message)->getSampleSink();
-
-			/*
-			if(m_state == StRunning) // FIXME: fix this mess once init phase is coded
-			{
-				DSPSignalNotification* signal = DSPSignalNotification::create(m_sampleRate, 0);
-				signal->submit(&m_outputMessageQueue, sink);
-				sink->start();
-			}*/
-
 			m_sampleSinks.push_back(sink);
 			message->completed();
 		}

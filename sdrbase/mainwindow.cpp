@@ -335,7 +335,7 @@ void MainWindow::handleDSPMessages()
 			updateSampleRate();
 			message->completed();
 			qDebug() << "MainWindow::handleMessages: m_fileSink->configure";
-			m_fileSink->configure(m_dspEngine->getInputMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
+			m_fileSink->configure(m_fileSink->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
 		}
 	}
 }
@@ -486,6 +486,8 @@ void MainWindow::on_presetUpdate_clicked()
 
 void MainWindow::on_presetLoad_clicked()
 {
+	qDebug() << "MainWindow::on_presetLoad_clicked";
+
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 	if(item == 0) {
 		updatePresets();

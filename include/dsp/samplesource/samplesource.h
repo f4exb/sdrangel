@@ -40,6 +40,7 @@ public:
 	SampleSource(MessageQueue* guiMessageQueue);
 	virtual ~SampleSource();
 
+	virtual void init(Message* cmd) = 0;
 	virtual bool startInput(int device) = 0;
 	virtual void stopInput() = 0;
 

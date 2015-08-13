@@ -9,8 +9,7 @@
 #include "dsp/samplesink.h"
 #include "util/export.h"
 #include "util/message.h"
-
-class MessageQueue;
+#include "util/messagequeue.h"
 
 class SDRANGELOVE_API FileSink : public SampleSink {
 public:
@@ -23,19 +22,22 @@ public:
     };
 
 	FileSink();
-	~FileSink();
+	virtual ~FileSink();
     
     quint64 getByteCount() const { return m_byteCount; }
 
 	void configure(MessageQueue* msgQueue, const std::string& filename, int sampleRate, quint64 centerFrequency);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
+	virtual bool init(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(Message* message);
     void startRecording();
     void stopRecording();
-	bool handleMessage(Message* message);
     static void readHeader(std::ifstream& samplefile, Header& header);
+
+    MessageQueue *getMessageQueue() { return m_messageQueue; }
 
 private:
 	class MsgConfigureFileSink : public Message {
@@ -43,24 +45,18 @@ private:
 
 	public:
 		const std::string& getFileName() const { return m_fileName; }
-		int getSampleRate() const { return m_sampleRate; }
-		quint64 getCenterFrequency() const { return m_centerFrequency; }
 
-		static MsgConfigureFileSink* create(const std::string& fileName, int sampleRate, quint64 centerFrequency)
+		static MsgConfigureFileSink* create(const std::string& fileName)
 		{
-			return new MsgConfigureFileSink(fileName, sampleRate, centerFrequency);
+			return new MsgConfigureFileSink(fileName);
 		}
 
 	private:
 		std::string m_fileName;
-		int m_sampleRate;
-		quint64 m_centerFrequency;
 
-		MsgConfigureFileSink(const std::string& fileName, int sampleRate, quint64 centerFrequency) :
+		MsgConfigureFileSink(const std::string& fileName) :
 			Message(),
-			m_fileName(fileName),
-			m_sampleRate(sampleRate),
-			m_centerFrequency(centerFrequency)
+			m_fileName(fileName)
 		{ }
 	};
 
@@ -71,6 +67,7 @@ private:
     bool m_recordStart;
     std::ofstream m_sampleFile;
     quint64 m_byteCount;
+    MessageQueue m_messageQueue;
 
 	void handleConfigure(const std::string& fileName, int sampleRate, quint64 centerFrequency);
     void writeHeader();

@@ -57,26 +57,6 @@ bool ThreadedSampleSink::handleMessage(Message* cmd)
 	return true;
 }
 
-bool ThreadedSampleSink::executeMessage(Message* cmd)
-{
-	qDebug() << "ThreadedSampleSink::executeMessage: "
-			<< m_sampleSink->objectName().toStdString().c_str()
-			<< ": " << cmd->getIdentifier();
-
-	if (m_sampleSink != NULL)
-	{
-		if (!m_sampleSink->handleMessage(cmd)) {
-			cmd->completed();
-		}
-	}
-	else
-	{
-		cmd->completed();
-	}
-
-	return true;
-}
-
 void ThreadedSampleSink::handleData()
 {
 	bool positiveOnly = false;
