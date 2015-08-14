@@ -16,54 +16,41 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/samplesource/samplesource.h"
-#include "util/simpleserializer.h"
+#include "dsp/dspcommands.h"
 
 #include <QDebug>
 
-SampleSource::GeneralSettings::GeneralSettings() :
-	m_centerFrequency(100000000)
-{
-}
-
-void SampleSource::GeneralSettings::resetToDefaults()
-{
-	m_centerFrequency = 100000000;
-}
-
-QByteArray SampleSource::GeneralSettings::serialize() const
-{
-	SimpleSerializer s(1);
-	s.writeU64(1, m_centerFrequency);
-	return s.final();
-}
-
-bool SampleSource::GeneralSettings::deserialize(const QByteArray& data)
-{
-	SimpleDeserializer d(data);
-
-	if(!d.isValid()) {
-		qDebug() << "SampleSource::GeneralSettings::deserialize: invalid deserializer";
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1) {
-		d.readU64(1, &m_centerFrequency, 100000000);
-		qDebug() << "SampleSource::GeneralSettings::deserialize: center frequency = "
-				<< m_centerFrequency;
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
-
-SampleSource::SampleSource(MessageQueue* guiMessageQueue) :
-	m_sampleFifo(),
-	m_guiMessageQueue(guiMessageQueue)
+SampleSource::SampleSource() :
+	m_sampleRate(0),
+	m_centerFrequency(0)
 {
 }
 
 SampleSource::~SampleSource()
 {
+}
+
+void SampleSource::setSampleRate(int sampleRate)
+{
+	if (sampleRate != m_sampleRate)
+	{
+		// TODO: adjust FIFO size
+		m_sampleRate = sampleRate;
+		sendNewData();
+	}
+}
+
+void SampleSource::setCenterFrequency(quint64 centerFrequency)
+{
+	if (centerFrequency != m_centerFrequency)
+	{
+		m_centerFrequency = centerFrequency;
+		sendNewData();
+	}
+}
+
+void SampleSource::sendNewData()
+{
+	DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+	m_outputMessageQueue.push(notif);
 }

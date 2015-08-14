@@ -438,6 +438,7 @@ void DSPEngine::handleSetSource(SampleSource* source)
 	if(m_sampleSource != 0)
 	{
 		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
+		disconnect(m_sampleSource->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	}
 
 	m_sampleSource = source;
@@ -446,6 +447,7 @@ void DSPEngine::handleSetSource(SampleSource* source)
 	{
 		qDebug() << "  - connect";
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
+		connect(m_sampleSource->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	}
 }
 
@@ -561,6 +563,41 @@ void DSPEngine::handleInputMessages()
 				m_qRange = 1 << 16;
 				m_imbalance = 65536;
 			}
+		}
+
+		delete message;
+	}
+}
+
+void DSPEngine::handleSourceMessages()
+{
+	Message *message;
+
+	qDebug() << "DSPEngine::handleSourceMessages";
+
+	while ((message = m_sampleSource->getOutputMessageQueue()->pop()) != 0)
+	{
+		if (DSPSignalNotification::match(message))
+		{
+			DSPSignalNotification *notif = (DSPSignalNotification *) &message;
+
+			// update DSP values
+
+			m_sampleRate = notif->getSampleRate();
+			m_centerFrequency = notif->getFrequencyOffset();
+
+			// forward source changes to sinks
+
+			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
+			{
+				qDebug() << "  - initializing " << (*it)->objectName().toStdString().c_str();
+				(*it)->init(*message);
+			}
+
+			// forward changes to listeners
+
+			DSPEngineReport* rep = new DSPEngineReport(m_sampleRate, m_centerFrequency);
+			m_outputMessageQueue.push(rep);
 		}
 
 		delete message;

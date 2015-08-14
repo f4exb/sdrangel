@@ -118,6 +118,7 @@ private:
 
 private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
+	void handleSourceMessages(); //!< Handle source message output
 	void handleInputMessages(); //!< Handle input message queue
 	void handleSynchronousMessages(Message *message); //!< Handle synchronous messages with the thread
 };
