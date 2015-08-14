@@ -9,6 +9,18 @@ SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis*
 	setObjectName("SpectrumScopeComboVis");
 }
 
+SpectrumScopeComboVis::~SpectrumScopeComboVis()
+{
+}
+
+bool SpectrumScopeComboVis::init(const Message& cmd)
+{
+	bool spectDone = m_spectrumVis->init(cmd);
+	bool scopeDone = m_scopeVis->init(cmd);
+
+	return (spectDone || scopeDone);
+}
+
 void SpectrumScopeComboVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	m_scopeVis->feed(begin, end, false);
@@ -28,15 +40,10 @@ void SpectrumScopeComboVis::stop()
 	m_scopeVis->stop();
 }
 
-bool SpectrumScopeComboVis::handleMessage(Message* message)
+bool SpectrumScopeComboVis::handleMessage(const Message& message)
 {
-	bool spectDone = m_spectrumVis->handleMessageKeep(message);
-	bool scopeDone = m_scopeVis->handleMessageKeep(message);
-
-	if (spectDone || scopeDone)
-	{
-		message->completed();
-	}
+	bool spectDone = m_spectrumVis->handleMessage(message);
+	bool scopeDone = m_scopeVis->handleMessage(message);
 
 	return (spectDone || scopeDone);
 }

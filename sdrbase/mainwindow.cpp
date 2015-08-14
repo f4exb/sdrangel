@@ -319,7 +319,7 @@ void MainWindow::handleDSPMessages()
 {
 	Message* message;
 
-	while ((message = m_dspEngine->getOutputMessageQueue()->accept()) != 0)
+	while ((message = m_dspEngine->getOutputMessageQueue()->pop()) != 0)
 	{
 		qDebug("Message: %s", message->getIdentifier());
 
@@ -333,10 +333,11 @@ void MainWindow::handleDSPMessages()
 			qDebug("SampleRate:%d, CenterFrequency:%llu", rep->getSampleRate(), rep->getCenterFrequency());
 			updateCenterFreqDisplay();
 			updateSampleRate();
-			message->completed();
 			qDebug() << "MainWindow::handleMessages: m_fileSink->configure";
-			m_fileSink->configure(m_fileSink->getMessageQueue(), m_sampleFileName, m_sampleRate, m_centerFrequency);
+			m_fileSink->configure(m_fileSink->getInputMessageQueue(), m_sampleFileName);
 		}
+
+		delete message;
 	}
 }
 
@@ -344,14 +345,14 @@ void MainWindow::handleMessages()
 {
 	Message* message;
 
-	while ((message = m_messageQueue->accept()) != 0)
+	while ((message = m_messageQueue->pop()) != 0)
 	{
 		qDebug("Message: %s", message->getIdentifier());
-
 		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;
 
-		if (!m_pluginManager->handleMessage(message)) {
-			message->completed();
+		if (!m_pluginManager->handleMessage(message))
+		{
+			delete message;
 		}
 	}
 }

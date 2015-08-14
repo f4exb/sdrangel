@@ -131,6 +131,7 @@ Done since the fork
   - File sample source plugin (recording reader) not working
   - Make the DSP engine global static
   - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
+  - Message queuing and handling redesign
     
 =====
 To Do

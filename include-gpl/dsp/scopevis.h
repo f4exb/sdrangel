@@ -23,6 +23,7 @@ public:
 	static const uint m_traceChunkSize;
 
 	ScopeVis(GLScope* glScope = NULL);
+	virtual ~ScopeVis();
 
 	void configure(MessageQueue* msgQueue, 
         TriggerChannel triggerChannel, 
@@ -34,11 +35,11 @@ public:
         uint traceSize);
 	void setOneShot(bool oneShot);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessageKeep(Message* message);
-	bool handleMessage(Message* message);
+	virtual bool init(const Message& cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
 
 	void setSampleRate(int sampleRate);
 	int getSampleRate() const { return m_sampleRate; }

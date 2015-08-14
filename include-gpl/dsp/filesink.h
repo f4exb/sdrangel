@@ -26,18 +26,16 @@ public:
     
     quint64 getByteCount() const { return m_byteCount; }
 
-	void configure(MessageQueue* msgQueue, const std::string& filename, int sampleRate, quint64 centerFrequency);
+	void configure(MessageQueue* msgQueue, const std::string& filename);
 
-	virtual bool init(Message* cmd);
+	virtual bool init(const Message& cmd);
 	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
     void startRecording();
     void stopRecording();
     static void readHeader(std::ifstream& samplefile, Header& header);
-
-    MessageQueue *getMessageQueue() { return m_messageQueue; }
 
 private:
 	class MsgConfigureFileSink : public Message {
@@ -67,9 +65,8 @@ private:
     bool m_recordStart;
     std::ofstream m_sampleFile;
     quint64 m_byteCount;
-    MessageQueue m_messageQueue;
 
-	void handleConfigure(const std::string& fileName, int sampleRate, quint64 centerFrequency);
+	void handleConfigure(const std::string& fileName);
     void writeHeader();
 };
 

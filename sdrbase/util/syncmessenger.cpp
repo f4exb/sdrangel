@@ -15,63 +15,42 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "util/messagequeue.h"
+#include "util/syncmessenger.h"
 #include "util/message.h"
 
-MessageQueue::MessageQueue(QObject* parent) :
-	QObject(parent),
-	m_lock(),
-	m_queue()
-{
-}
+SyncMessenger::SyncMessenger() :
+	m_complete(0),
+	m_result(0)
+{}
 
-MessageQueue::~MessageQueue()
-{
-	Message* message;
+SyncMessenger::~SyncMessenger()
+{}
 
-	while ((message = pop()) != 0)
+int SyncMessenger::sendWait(Message *message, unsigned long msPollTime)
+{
+	m_mutex.lock();
+	m_complete.testAndSetAcquire(0, 1);
+
+	emit messageSent(message);
+
+	while (!m_complete.testAndSetAcquire(0, 1))
 	{
-		delete message;
-	}
-}
-
-void MessageQueue::push(Message* message, bool emitSignal)
-{
-	if (message)
-	{
-		m_lock.lock();
-		m_queue.append(message);
-		m_lock.unlock();
+		m_waitCondition.wait(&m_mutex, msPollTime);
 	}
 
-	if (emitSignal)
-	{
-		emit messageEnqueued();
-	}
+	m_complete = 0;
+	int result = m_result;
+	m_mutex.unlock();
+
+	return result;
 }
 
-Message* MessageQueue::pop()
+void SyncMessenger::done(int result)
 {
-	SpinlockHolder spinlockHolder(&m_lock);
-
-	if (m_queue.isEmpty())
-	{
-		return 0;
-	}
-	else
-	{
-		return m_queue.takeFirst();
-	}
+	m_result = result;
+	m_complete = 0;
+	m_waitCondition.wakeAll();
 }
 
-int MessageQueue::size()
-{
-	SpinlockHolder spinlockHolder(&m_lock);
 
-	return m_queue.size();
-}
 
-void MessageQueue::clear()
-{
-	m_queue.clear();
-}

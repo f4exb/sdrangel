@@ -7,6 +7,15 @@ NullSink::NullSink()
 	setObjectName("NullSink");
 }
 
+NullSink::~NullSink()
+{
+}
+
+bool NullSink::init(const Message& message)
+{
+	return false;
+}
+
 void NullSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 }
@@ -19,8 +28,7 @@ void NullSink::stop()
 {
 }
 
-bool NullSink::handleMessage(Message* message)
+bool NullSink::handleMessage(const Message& message)
 {
-	message->completed();
-	return true;
+	return false;
 }

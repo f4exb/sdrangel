@@ -30,10 +30,15 @@ SpectrumVis::~SpectrumVis()
 	delete m_fft;
 }
 
+bool SpectrumVis::init(const Message& cmd)
+{
+	return false;
+}
+
 void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window)
 {
-	Message* cmd = DSPConfigureSpectrumVis::create(fftSize, overlapPercent, window);
-	cmd->submit(msgQueue, this);
+	DSPConfigureSpectrumVis* cmd = new DSPConfigureSpectrumVis(fftSize, overlapPercent, window);
+	msgQueue->push(cmd);
 }
 
 void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -136,39 +141,39 @@ void SpectrumVis::stop()
 {
 }
 
-bool SpectrumVis::handleMessageKeep(Message* message)
+bool SpectrumVis::handleMessage(const Message& message)
 {
-	if(DSPConfigureSpectrumVis::match(message)) {
-		DSPConfigureSpectrumVis* conf = (DSPConfigureSpectrumVis*)message;
+	if(DSPConfigureSpectrumVis::match(&message))
+	{
+		DSPConfigureSpectrumVis* conf = (DSPConfigureSpectrumVis*) &message;
 		handleConfigure(conf->getFFTSize(), conf->getOverlapPercent(), conf->getWindow());
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
 
-bool SpectrumVis::handleMessage(Message* message)
-{
-	bool done = handleMessageKeep(message);
-
-	if (done)
-	{
-		message->completed();
-	}
-
-	return done;
-}
-
 void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window)
 {
-	if(fftSize > MAX_FFT_SIZE)
+	if (fftSize > MAX_FFT_SIZE)
+	{
 		fftSize = MAX_FFT_SIZE;
-	else if(fftSize < 64)
+	}
+	else if (fftSize < 64)
+	{
 		fftSize = 64;
-	if(overlapPercent > 100)
+	}
+
+	if (overlapPercent > 100)
+	{
 		m_overlapPercent = 100;
-	else if(overlapPercent < 0)
+	}
+	else if (overlapPercent < 0)
+	{
 		m_overlapPercent = 0;
+	}
 
 	m_fftSize = fftSize;
 	m_overlapPercent = overlapPercent;

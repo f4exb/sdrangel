@@ -6,17 +6,19 @@
 #include "dsp/scopevis.h"
 #include "util/export.h"
 
-class MessageQueue;
+class Message;
 
 class SDRANGELOVE_API SpectrumScopeComboVis : public SampleSink {
 public:
 
 	SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);
+	virtual ~SpectrumScopeComboVis();
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessage(Message* message);
+	virtual bool init(const Message& cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
 
 private:
 	SpectrumVis* m_spectrumVis;

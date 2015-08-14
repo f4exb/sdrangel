@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,42 +21,32 @@
 #include <QtGlobal>
 #include "dsp/samplefifo.h"
 #include "util/message.h"
+#include "util/messagequeue.h"
 #include "util/export.h"
-
-class PluginGUI;
-class MessageQueue;
 
 class SDRANGELOVE_API SampleSource {
 public:
-	struct SDRANGELOVE_API GeneralSettings {
-		quint64 m_centerFrequency;
-
-		GeneralSettings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
-	SampleSource(MessageQueue* guiMessageQueue);
+	SampleSource();
 	virtual ~SampleSource();
 
-	virtual void init(Message* cmd) = 0;
-	virtual bool startInput(int device) = 0;
-	virtual void stopInput() = 0;
+	virtual void init(const Message& cmd) = 0;
+	virtual bool start(int device) = 0;
+	virtual void stop() = 0;
 
 	virtual const QString& getDeviceDescription() const = 0;
 	virtual int getSampleRate() const = 0;
 	virtual quint64 getCenterFrequency() const = 0;
 
-	virtual bool handleMessage(Message* message) = 0;
-
-	SampleFifo* getSampleFifo() { return &m_sampleFifo; }
+	virtual bool handleMessage(const Message& message) = 0;
+	
+	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+	MessageQueue *getOutputMessageQueue() { return &m_outputMessageQueue; }
+    SampleFifo* getSampleFifo() { return &m_sampleFifo; }
 
 protected:
-	SampleFifo m_sampleFifo;
-	MessageQueue* m_guiMessageQueue;
-
-	GeneralSettings m_generalSettings;
+    SampleFifo m_sampleFifo;
+	MessageQueue m_inputMessageQueue;
+	MessageQueue m_outputMessageQueue;
 };
 
 #endif // INCLUDE_SAMPLESOURCE_H

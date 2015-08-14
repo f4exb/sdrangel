@@ -12,16 +12,16 @@ class MessageQueue;
 class SDRANGELOVE_API SpectrumVis : public SampleSink {
 public:
 	SpectrumVis(GLSpectrum* glSpectrum = NULL);
-	~SpectrumVis();
+	virtual ~SpectrumVis();
 
 	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual bool init(const Message& cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessageKeep(Message* message);
-	bool handleMessage(Message* message);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
 
 private:
 	FFTEngine* m_fft;
@@ -30,11 +30,11 @@ private:
 	std::vector<Complex> m_fftBuffer;
 	std::vector<Real> m_logPowerSpectrum;
 
-	size_t m_fftSize;
-	size_t m_overlapPercent;
-	size_t m_overlapSize;
-	size_t m_refillSize;
-	size_t m_fftBufferFill;
+	std::size_t m_fftSize;
+	std::size_t m_overlapPercent;
+	std::size_t m_overlapSize;
+	std::size_t m_refillSize;
+	std::size_t m_fftBufferFill;
 	bool m_needMoreSamples;
 
 	GLSpectrum* m_glSpectrum;

@@ -27,6 +27,7 @@
 #include "dsp/samplefifo.h"
 #include "audio/audiooutput.h"
 #include "util/messagequeue.h"
+#include "util/syncmessenger.h"
 #include "util/export.h"
 
 class SampleSource;
@@ -78,6 +79,7 @@ public:
 private:
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
 	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
+	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
 
 	State m_state;
 
@@ -113,11 +115,11 @@ private:
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
 	void handleSetSource(SampleSource* source); //!< Manage source setting
-	bool distributeMessage(Message* message); // FIXME: remove ?
 
 private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
 	void handleInputMessages(); //!< Handle input message queue
+	void handleSynchronousMessages(Message *message); //!< Handle synchronous messages with the thread
 };
 
 #endif // INCLUDE_DSPENGINE_H

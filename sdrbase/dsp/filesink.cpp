@@ -1,4 +1,5 @@
 #include "dsp/filesink.h"
+#include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 #include "util/messagequeue.h"
 
@@ -23,22 +24,25 @@ FileSink::~FileSink()
     stopRecording();
 }
 
-void FileSink::configure(MessageQueue* msgQueue, const std::string& filename, int sampleRate, quint64 centerFrequency)
+void FileSink::configure(MessageQueue* msgQueue, const std::string& filename)
 {
-	Message* cmd = MsgConfigureFileSink::create(filename, sampleRate, centerFrequency);
-	cmd->submit(msgQueue, this);
+	Message* cmd = MsgConfigureFileSink::create(filename);
+	msgQueue->push(cmd);
 }
 
-bool FileSink::init(Message* cmd)
+bool FileSink::init(const Message& cmd)
 {
-	if (DSPSignalNotification::match(cmd))
+	if (DSPSignalNotification::match(&cmd))
 	{
-		DSPSignalNotification* notif = (DSPSignalNotification*) cmd;
+		DSPSignalNotification* notif = (DSPSignalNotification*) &cmd;
 		m_sampleRate = notif->getSampleRate();
 		m_centerFrequency = notif->getFrequencyOffset();
 		qDebug() << "FileSink::init: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate;
-		cmd->completed();
 		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -93,17 +97,14 @@ void FileSink::stopRecording()
     }
 }
 
-bool FileSink::handleMessage(Message* message)
+bool FileSink::handleMessage(const Message& message)
 {
-    if (MsgConfigureFileSink::match(message))
+    if (MsgConfigureFileSink::match(&message))
     {
-        MsgConfigureFileSink* conf = (MsgConfigureFileSink*) message;
-        handleConfigure(conf->getFileName(), conf->getSampleRate(), conf->getCenterFrequency());
+        MsgConfigureFileSink* conf = (MsgConfigureFileSink*) &message;
+        handleConfigure(conf->getFileName());
         qDebug() << "FileSink::handleMessage:"
-        		<< " fileName: " << m_fileName.c_str()
-				<< " sampleRate: " << m_sampleRate
-				<< " centerFrequency: " << m_centerFrequency;
-        message->completed();
+        		<< " fileName: " << m_fileName.c_str();
         return true;
     }
     else
@@ -112,16 +113,14 @@ bool FileSink::handleMessage(Message* message)
     }
 }
 
-void FileSink::handleConfigure(const std::string& fileName, int sampleRate, quint64 centerFrequency)
+void FileSink::handleConfigure(const std::string& fileName)
 {
-    if ((fileName != m_fileName) || (m_sampleRate != sampleRate) || (m_centerFrequency != centerFrequency))
+    if (fileName != m_fileName)
     {
         stopRecording();
     }
     
 	m_fileName = fileName;
-    m_sampleRate = sampleRate;
-    m_centerFrequency = centerFrequency;
 }
 
 void FileSink::writeHeader()

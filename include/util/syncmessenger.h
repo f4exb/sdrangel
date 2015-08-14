@@ -15,63 +15,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "util/messagequeue.h"
-#include "util/message.h"
+#ifndef INCLUDE_UTIL_SYNCMESSENGER_H_
+#define INCLUDE_UTIL_SYNCMESSENGER_H_
 
-MessageQueue::MessageQueue(QObject* parent) :
-	QObject(parent),
-	m_lock(),
-	m_queue()
-{
-}
+#include <QObject>
+#include <QWaitCondition>
+#include <QMutex>
+#include <QAtomicInt>
+#include "util/export.h"
 
-MessageQueue::~MessageQueue()
-{
-	Message* message;
+class Message;
 
-	while ((message = pop()) != 0)
-	{
-		delete message;
-	}
-}
+/**
+ * This class is responsible of managing the synchronous processing of a message across threads
+ */
+class SDRANGELOVE_API SyncMessenger : public QObject {
+	Q_OBJECT
 
-void MessageQueue::push(Message* message, bool emitSignal)
-{
-	if (message)
-	{
-		m_lock.lock();
-		m_queue.append(message);
-		m_lock.unlock();
-	}
+public:
+	SyncMessenger();
+	~SyncMessenger();
 
-	if (emitSignal)
-	{
-		emit messageEnqueued();
-	}
-}
+	int sendWait(Message *message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
+	void done(int result = 0); //!< Processing of the message is complete
 
-Message* MessageQueue::pop()
-{
-	SpinlockHolder spinlockHolder(&m_lock);
+signals:
+	void messageSent(Message *message);
 
-	if (m_queue.isEmpty())
-	{
-		return 0;
-	}
-	else
-	{
-		return m_queue.takeFirst();
-	}
-}
+protected:
+	QWaitCondition m_waitCondition;
+	QMutex m_mutex;
+	QAtomicInt m_complete;
+	int m_result;
+};
 
-int MessageQueue::size()
-{
-	SpinlockHolder spinlockHolder(&m_lock);
 
-	return m_queue.size();
-}
 
-void MessageQueue::clear()
-{
-	m_queue.clear();
-}
+#endif /* INCLUDE_UTIL_SYNCMESSENGER_H_ */

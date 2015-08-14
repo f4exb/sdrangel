@@ -32,6 +32,10 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_traceback.resize(20*m_traceChunkSize);
 }
 
+ScopeVis::~ScopeVis()
+{
+}
+
 void ScopeVis::configure(MessageQueue* msgQueue, 
     TriggerChannel triggerChannel, 
     Real triggerLevel, 
@@ -48,7 +52,21 @@ void ScopeVis::configure(MessageQueue* msgQueue,
 			triggerPre,
 			triggerDelay,
 			traceSize);
-	cmd->submit(msgQueue, this);
+	msgQueue->push(cmd);
+}
+
+bool ScopeVis::init(const Message& cmd)
+{
+	if (DSPSignalNotification::match(&cmd))
+	{
+		DSPSignalNotification* signal = (DSPSignalNotification*) &cmd;
+		m_sampleRate = signal->getSampleRate();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -200,18 +218,11 @@ void ScopeVis::stop()
 {
 }
 
-bool ScopeVis::handleMessageKeep(Message* message)
+bool ScopeVis::handleMessage(const Message& message)
 {
-	if(DSPSignalNotification::match(message)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)message;
-		m_sampleRate = signal->getSampleRate();
-		/*fprintf(stderr, "ScopeVis::handleMessage : %d samples/sec, %lld Hz offset, traceSize: \n",
-				m_sampleRate,
-				signal->getFrequencyOffset(),
-				m_trace.size());*/
-		return true;
-	} else if(MsgConfigureScopeVis::match(message)) {
-		MsgConfigureScopeVis* conf = (MsgConfigureScopeVis*)message;
+	if (MsgConfigureScopeVis::match(&message))
+	{
+		MsgConfigureScopeVis* conf = (MsgConfigureScopeVis*) &message;
         m_tracebackCount = 0;
 		m_triggerState = Config;
 		m_triggerChannel = (TriggerChannel) conf->getTriggerChannel();
@@ -230,7 +241,7 @@ bool ScopeVis::handleMessageKeep(Message* message)
         if (newSize > m_traceback.size()) {  // fitting the exact required space is not a requirement for the back trace
             m_traceback.resize(newSize);
         }
-		qDebug() << "ScopeVis::handleMessageKeep:"
+		qDebug() << "ScopeVis::handleMessage:"
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
 				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
@@ -239,29 +250,11 @@ bool ScopeVis::handleMessageKeep(Message* message)
 				<< " m_triggerDelay: " << m_triggerDelay
 				<< " m_traceSize: " << m_trace.size();
 		return true;
-	/*
-	} else if(DSPConfigureScopeVis::match(message)) {
-		DSPConfigureScopeVis* conf = (DSPConfigureScopeVis*)message;
-		m_triggerState = Untriggered;
-		m_triggerChannel = (TriggerChannel)conf->getTriggerChannel();
-		m_triggerLevelHigh = conf->getTriggerLevelHigh() * 32767;
-		m_triggerLevelLow = conf->getTriggerLevelLow() * 32767;
-		return true;*/
-	} else {
+	}
+	else
+	{
 		return false;
 	}
-}
-
-bool ScopeVis::handleMessage(Message* message)
-{
-	bool done = handleMessageKeep(message);
-
-	if (done)
-	{
-		message->completed();
-	}
-
-	return done;
 }
 
 void ScopeVis::setSampleRate(int sampleRate)

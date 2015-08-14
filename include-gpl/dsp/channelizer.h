@@ -12,15 +12,16 @@ class SDRANGELOVE_API Channelizer : public SampleSink {
 	Q_OBJECT
 public:
 	Channelizer(SampleSink* sampleSink);
-	~Channelizer();
+	virtual ~Channelizer();
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
 	int getInputSampleRate() const { return m_inputSampleRate; }
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual bool init(const Message& cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 protected:
 	struct FilterStage {

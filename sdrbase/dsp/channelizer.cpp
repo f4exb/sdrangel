@@ -20,10 +20,26 @@ Channelizer::~Channelizer()
 	freeFilterChain();
 }
 
+bool Channelizer::init(const Message& cmd)
+{
+	if (DSPSignalNotification::match(&cmd))
+	{
+		DSPSignalNotification* notif = (DSPSignalNotification*) &cmd;
+		m_inputSampleRate = notif->getSampleRate();
+		qDebug() << "FileSink::init: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
+		emit inputSampleRateChanged();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void Channelizer::configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency)
 {
-	Message* cmd = DSPConfigureChannelizer::create(sampleRate, centerFrequency);
-	cmd->submit(messageQueue, this);
+	Message* cmd = new DSPConfigureChannelizer(sampleRate, centerFrequency);
+	messageQueue->push(cmd);
 }
 
 void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -64,52 +80,58 @@ void Channelizer::stop()
 		m_sampleSink->stop();
 }
 
-bool Channelizer::handleMessage(Message* cmd)
+bool Channelizer::handleMessage(const Message& cmd)
 {
-	qDebug() << "Channelizer::handleMessage: " << cmd->getIdentifier();
+	qDebug() << "Channelizer::handleMessage: " << cmd.getIdentifier();
 
-	if (DSPSignalNotification::match(cmd))
+	/*
+	if (DSPSignalNotification::match(&cmd))
 	{
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		m_inputSampleRate = signal->getSampleRate();
+		DSPSignalNotification* notif = (DSPSignalNotification*) &cmd;
+		m_inputSampleRate = notif->getSampleRate();
 		qDebug() << "Channelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
 		applyConfiguration();
-		cmd->completed();
-		if(m_sampleSink != NULL)
+
+		delete cmd;
+
+		if (m_sampleSink != NULL)
 		{
-			signal = DSPSignalNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
-			if(!m_sampleSink->handleMessage(signal)) {
-				signal->completed();
-			}
+			DSPSignalNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
+			m_sampleSink->handleMessage(notif))
 		}
 
 		emit inputSampleRateChanged();
 		return true;
 	}
-	else if (DSPConfigureChannelizer::match(cmd))
+	else*/
+	if (DSPConfigureChannelizer::match(&cmd))
 	{
-		DSPConfigureChannelizer* chan = (DSPConfigureChannelizer*)cmd;
+		DSPConfigureChannelizer* chan = (DSPConfigureChannelizer*) &cmd;
 		m_requestedOutputSampleRate = chan->getSampleRate();
 		m_requestedCenterFrequency = chan->getCenterFrequency();
+
 		qDebug() << "Channelizer::handleMessage: DSPConfigureChannelizer:"
 				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
 				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
+
 		applyConfiguration();
-		cmd->completed();
-		if(m_sampleSink != NULL)
+
+		if (m_sampleSink != NULL)
 		{
-			DSPSignalNotification* signal = DSPSignalNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
-			if(!m_sampleSink->handleMessage(signal)) {
-				signal->completed();
-			}
+			DSPSignalNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
+			m_sampleSink->handleMessage(notif);
 		}
+
 		return true;
 	}
 	else
 	{
-		if(m_sampleSink != NULL) {
+		if (m_sampleSink != NULL)
+		{
 			return m_sampleSink->handleMessage(cmd);
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
