@@ -21,7 +21,9 @@
 SyncMessenger::SyncMessenger() :
 	m_complete(0),
 	m_result(0)
-{}
+{
+	qRegisterMetaType<Message>("Message");
+}
 
 SyncMessenger::~SyncMessenger()
 {}
