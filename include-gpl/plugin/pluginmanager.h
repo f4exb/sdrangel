@@ -52,7 +52,7 @@ public:
 
 	void freeAll();
 
-	bool handleMessage(Message* message);
+	bool handleMessage(const Message& message);
 
 	void updateSampleSourceDevices();
 	void fillSampleSourceSelector(QComboBox* comboBox);

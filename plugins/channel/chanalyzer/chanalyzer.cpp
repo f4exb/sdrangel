@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QTime>
+#include <QDebug>
 #include <stdio.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
@@ -55,7 +56,7 @@ void ChannelAnalyzer::configure(MessageQueue* messageQueue,
 		bool ssb)
 {
 	Message* cmd = MsgConfigureChannelAnalyzer::create(Bandwidth, LowCutoff, spanLog2, ssb);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -65,13 +66,17 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 	int decim = 1<<m_spanLog2;
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-	for(SampleVector::const_iterator it = begin; it < end; ++it) {
+	for(SampleVector::const_iterator it = begin; it < end; ++it)
+	{
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		if (m_ssb) {
+		if (m_ssb)
+		{
 			n_out = SSBFilter->runSSB(c, &sideband, m_usb);
-		} else {
+		}
+		else
+		{
 			n_out = DSBFilter->runDSB(c, &sideband);
 		}
 
@@ -116,29 +121,41 @@ void ChannelAnalyzer::stop()
 {
 }
 
-bool ChannelAnalyzer::handleMessage(Message* cmd)
+bool ChannelAnalyzer::handleMessage(const Message& cmd)
 {
 	float band, lowCutoff;
 
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		fprintf(stderr, "ChannelAnalyzer::handleMessage: %d samples/sec, %lld Hz offset\n", signal->getSampleRate(), signal->getFrequencyOffset());
-		m_sampleRate = signal->getSampleRate();
-		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
-		cmd->completed();
+	qDebug() << "ChannelAnalyzer::handleMessage";
+
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_sampleRate = notif.getSampleRate();
+		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
+
+		qDebug() << "  - DSPSignalNotification: m_sampleRate: " << m_sampleRate
+				<< " frequencyOffset: " << notif.getFrequencyOffset();
+
 		return true;
-	} else if(MsgConfigureChannelAnalyzer::match(cmd)) {
-		MsgConfigureChannelAnalyzer* cfg = (MsgConfigureChannelAnalyzer*)cmd;
+	}
+	else if (MsgConfigureChannelAnalyzer::match(cmd))
+	{
+		MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
-		band = cfg->getBandwidth();
-		lowCutoff = cfg->getLoCutoff();
+		band = cfg.getBandwidth();
+		lowCutoff = cfg.getLoCutoff();
 
-		if (band < 0) {
+		if (band < 0)
+		{
 			band = -band;
 			lowCutoff = -lowCutoff;
 			m_usb = false;
-		} else
+		}
+		else
+		{
 			m_usb = true;
+		}
 
 		if (band < 100.0f)
 		{
@@ -153,14 +170,25 @@ bool ChannelAnalyzer::handleMessage(Message* cmd)
 		SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
 		DSBFilter->create_dsb_filter(m_Bandwidth / m_sampleRate);
 
-		m_spanLog2 = cfg->getSpanLog2();
-		m_ssb = cfg->getSSB();
+		m_spanLog2 = cfg.getSpanLog2();
+		m_ssb = cfg.getSSB();
 
-		cmd->completed();
+		qDebug() << "  - MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
+				<< " m_LowCutoff: " << m_LowCutoff
+				<< " m_spanLog2: " << m_spanLog2
+				<< " m_ssb: " << m_ssb;
+
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if (m_sampleSink != 0)
+		{
 		   return m_sampleSink->handleMessage(cmd);
-		else return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

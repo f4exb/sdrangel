@@ -9,10 +9,8 @@ class PluginAPI;
 class ChannelMarker;
 
 class AudioFifo;
-class ThreadedSampleSink;
 class Channelizer;
 class NFMDemod;
-class NullSink;
 
 namespace Ui {
 	class NFMDemodGUI;
@@ -33,7 +31,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 	void setCtcssFreq(Real ctcssFreq);
 
 private slots:
@@ -55,10 +53,8 @@ private:
 	bool m_basicSettingsShown;
 
 	AudioFifo* m_audioFifo;
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
-	NullSink *m_nullSink;
 
 	static const int m_rfBW[];
 

@@ -41,10 +41,10 @@ public:
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool po);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool po);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 	void registerGUI(NFMDemodGUI *nfmDemodGUI) {
 		m_nfmDemodGUI = nfmDemodGUI;

@@ -29,13 +29,13 @@ public:
 	SampleSource();
 	virtual ~SampleSource();
 
-	virtual void init(const Message& cmd) = 0;
+	virtual bool init(const Message& cmd) = 0;
 	virtual bool start(int device) = 0;
 	virtual void stop() = 0;
 
 	virtual const QString& getDeviceDescription() const = 0;
-	virtual int getSampleRate() const { return m_sampleRate; };
-	virtual quint64 getCenterFrequency() const { return m_centerFrequency; };
+	virtual int getSampleRate() const = 0; //!< Sample rate exposed by the source
+	virtual quint64 getCenterFrequency() const = 0; //!< Center frequency exposed by the source
 
 	virtual bool handleMessage(const Message& message) = 0;
 	
@@ -44,15 +44,9 @@ public:
     SampleFifo* getSampleFifo() { return &m_sampleFifo; }
 
 protected:
-    void setSampleRate(int sampleRate);
-    void setCenterFrequency(quint64 centerFrequency);
-	void sendNewData();
-
     SampleFifo m_sampleFifo;
 	MessageQueue m_inputMessageQueue;
 	MessageQueue m_outputMessageQueue;
-	int m_sampleRate;
-	quint64 m_centerFrequency;
 };
 
 #endif // INCLUDE_SAMPLESOURCE_H

@@ -33,25 +33,22 @@ class FileSourceGui : public QWidget, public PluginGUI {
 
 public:
 	explicit FileSourceGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~FileSourceGui();
+	virtual ~FileSourceGui();
 	void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;
 
 	void resetToDefaults();
-	QByteArray serializeGeneral() const;
-	bool deserializeGeneral(const QByteArray&data);
 	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::FileSourceGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	SampleSource::GeneralSettings m_generalSettings;
 	FileSourceInput::Settings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;

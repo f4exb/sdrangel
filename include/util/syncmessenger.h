@@ -36,11 +36,11 @@ public:
 	SyncMessenger();
 	~SyncMessenger();
 
-	int sendWait(Message *message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
+	int sendWait(const Message& message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
 	void done(int result = 0); //!< Processing of the message is complete
 
 signals:
-	void messageSent(Message *message);
+	void messageSent(const Message& message);
 
 protected:
 	QWaitCondition m_waitCondition;

@@ -3,7 +3,7 @@
 #include "tcpsrc.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
-#include "dsp/threadedsamplesink.h"
+#include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "ui_tcpsrcgui.h"
@@ -64,12 +64,14 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+	{
 		QByteArray bytetmp;
 		qint32 s32tmp;
 		Real realtmp;
@@ -104,22 +106,39 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->boost->setValue(s32tmp);
 		applySettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
 }
 
-bool TCPSrcGUI::handleMessage(Message* message)
+bool TCPSrcGUI::handleMessage(const Message& message)
 {
-	if(TCPSrc::MsgTCPSrcConnection::match(message)) {
-		TCPSrc::MsgTCPSrcConnection* con = (TCPSrc::MsgTCPSrcConnection*)message;
-		if(con->getConnect())
-			addConnection(con->getID(), con->getPeerAddress(), con->getPeerPort());
-		else delConnection(con->getID());
-		message->completed();
+	qDebug() << "TCPSrcGUI::handleMessage";
+
+	if (TCPSrc::MsgTCPSrcConnection::match(message))
+	{
+		TCPSrc::MsgTCPSrcConnection& con = (TCPSrc::MsgTCPSrcConnection&) message;
+
+		if(con.getConnect())
+		{
+			addConnection(con.getID(), con.getPeerAddress(), con.getPeerPort());
+		}
+		else
+		{
+			delConnection(con.getID());
+		}
+
+		qDebug() << "  - TCPSrc::MsgTCPSrcConnection: ID: " << con.getID()
+				<< " peerAddress: " << con.getPeerAddress()
+				<< " peerPort: " << con.getPeerPort();
+
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
@@ -145,14 +164,13 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_tcpSrc);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
-	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
+	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setBandwidth(16000);
@@ -162,7 +180,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
 }
@@ -170,8 +188,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 TCPSrcGUI::~TCPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_tcpSrc;
 	delete m_spectrumVis;
@@ -184,14 +201,26 @@ void TCPSrcGUI::applySettings()
 	bool ok;
 
 	Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
+
 	if((!ok) || (outputSampleRate < 1000))
+	{
 		outputSampleRate = 48000;
+	}
+
 	Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
+
 	if((!ok) || (rfBandwidth > outputSampleRate))
+	{
 		rfBandwidth = outputSampleRate;
+	}
+
 	int tcpPort = ui->tcpPort->text().toInt(&ok);
+
 	if((!ok) || (tcpPort < 1) || (tcpPort > 65535))
+	{
 		tcpPort = 9999;
+	}
+
 	int boost = ui->boost->value();
 
 	setTitleColor(m_channelMarker->getColor());
@@ -204,12 +233,14 @@ void TCPSrcGUI::applySettings()
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 	ui->glSpectrum->setSampleRate(outputSampleRate);
 
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		outputSampleRate,
 		m_channelMarker->getCenterFrequency());
 
 	TCPSrc::SampleFormat sampleFormat;
-	switch(ui->sampleFormat->currentIndex()) {
+
+	switch(ui->sampleFormat->currentIndex())
+	{
 		case 0:
 			sampleFormat = TCPSrc::FormatSSB;
 			break;
@@ -230,7 +261,7 @@ void TCPSrcGUI::applySettings()
 	m_tcpPort = tcpPort;
 	m_boost = boost;
 
-	m_tcpSrc->configure(m_threadedSampleSink->getMessageQueue(),
+	m_tcpSrc->configure(m_tcpSrc->getInputMessageQueue(),
 		sampleFormat,
 		outputSampleRate,
 		rfBandwidth,
@@ -273,13 +304,16 @@ void TCPSrcGUI::on_boost_valueChanged(int value)
 
 void TCPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-	if((widget == ui->spectrumBox) && (m_tcpSrc != NULL))
-		m_tcpSrc->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
+	if ((widget == ui->spectrumBox) && (m_tcpSrc != 0))
+	{
+		m_tcpSrc->setSpectrum(m_tcpSrc->getInputMessageQueue(), rollDown);
+	}
 }
 
 void TCPSrcGUI::onMenuDoubleClicked()
 {
-	if(!m_basicSettingsShown) {
+	if (!m_basicSettingsShown)
+	{
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
 		bcsw->show();
@@ -296,8 +330,10 @@ void TCPSrcGUI::addConnection(quint32 id, const QHostAddress& peerAddress, int p
 
 void TCPSrcGUI::delConnection(quint32 id)
 {
-	for(int i = 0; i < ui->connections->topLevelItemCount(); i++) {
-		if(ui->connections->topLevelItem(i)->type() == (int)id) {
+	for(int i = 0; i < ui->connections->topLevelItemCount(); i++)
+	{
+		if(ui->connections->topLevelItem(i)->type() == (int)id)
+		{
 			delete ui->connections->topLevelItem(i);
 			ui->connectedClientsBox->setWindowTitle(tr("Connected Clients (%1)").arg(ui->connections->topLevelItemCount()));
 			return;

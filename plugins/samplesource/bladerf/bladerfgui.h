@@ -34,25 +34,22 @@ class BladerfGui : public QWidget, public PluginGUI {
 
 public:
 	explicit BladerfGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~BladerfGui();
+	virtual ~BladerfGui();
 	void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;
 
 	void resetToDefaults();
-	QByteArray serializeGeneral() const;
-	bool deserializeGeneral(const QByteArray&data);
 	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::BladerfGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	SampleSource::GeneralSettings m_generalSettings;
 	BladerfInput::Settings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;

@@ -17,10 +17,9 @@ public:
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
 	int getInputSampleRate() const { return m_inputSampleRate; }
 
-	virtual bool init(const Message& cmd);
-	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual bool handleMessage(const Message& cmd);
 
 protected:

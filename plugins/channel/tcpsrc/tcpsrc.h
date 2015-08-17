@@ -26,15 +26,15 @@ public:
 	};
 
 	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum);
-	~TCPSrc();
+	virtual ~TCPSrc();
 
 	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 	class MsgTCPSrcConnection : public Message {
 		MESSAGE_CLASS_DECLARATION

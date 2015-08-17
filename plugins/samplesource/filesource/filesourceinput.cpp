@@ -69,8 +69,7 @@ bool FileSourceInput::Settings::deserialize(const QByteArray& data)
 	}
 }
 
-FileSourceInput::FileSourceInput(MessageQueue* msgQueueToGUI, const QTimer& masterTimer) :
-	SampleSource(msgQueueToGUI),
+FileSourceInput::FileSourceInput(const QTimer& masterTimer) :
 	m_settings(),
 	m_fileSourceThread(NULL),
 	m_deviceDescription(),
@@ -84,7 +83,7 @@ FileSourceInput::FileSourceInput(MessageQueue* msgQueueToGUI, const QTimer& mast
 
 FileSourceInput::~FileSourceInput()
 {
-	stopInput();
+	stop();
 }
 
 void FileSourceInput::openFileStream()
@@ -105,18 +104,14 @@ void FileSourceInput::openFileStream()
 	m_centerFrequency = header.centerFrequency;
 	m_startingTimeStamp = header.startTimeStamp;
 
-	MsgReportFileSourceStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp)->submit(m_guiMessageQueue); // file stream data
+	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp); // file stream data
+	getOutputMessageQueue()->push(report);
 }
 
-bool FileSourceInput::startInput(int device)
+bool FileSourceInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSourceInput::startInput";
-
-	/*
-	if (!m_ifstream.is_open()) {
-		openFileStream();
-	}*/
 
 	if (m_ifstream.tellg() != 0) {
 		m_ifstream.clear();
@@ -132,7 +127,8 @@ bool FileSourceInput::startInput(int device)
 
 	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
-		goto failed;
+		stop();
+		return false;
 	}
 
 	m_fileSourceThread->setSamplerate(m_sampleRate);
@@ -144,29 +140,28 @@ bool FileSourceInput::startInput(int device)
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSourceInput::startInput: started");
 
-	MsgReportFileSourceAcquisition::create(true)->submit(m_guiMessageQueue); // acquisition on
+	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
+	getOutputMessageQueue()->push(report);
 
 	return true;
-
-failed:
-	stopInput();
-	return false;
 }
 
-void FileSourceInput::stopInput()
+void FileSourceInput::stop()
 {
-	qDebug() << "FileSourceInput::stopInput";
+	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_fileSourceThread != NULL) {
+	if(m_fileSourceThread != 0)
+	{
 		m_fileSourceThread->stopWork();
 		delete m_fileSourceThread;
-		m_fileSourceThread = NULL;
+		m_fileSourceThread = 0;
 	}
 
 	m_deviceDescription.clear();
 
-	MsgReportFileSourceAcquisition::create(false)->submit(m_guiMessageQueue); // acquisition off
+	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
+	getOutputMessageQueue()->push(report);
 }
 
 const QString& FileSourceInput::getDeviceDescription() const
@@ -189,40 +184,52 @@ std::time_t FileSourceInput::getStartingTimeStamp() const
 	return m_startingTimeStamp;
 }
 
-bool FileSourceInput::handleMessage(Message* message)
+bool FileSourceInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureFileSourceName::match(message))
 	{
-		MsgConfigureFileSourceName* conf = (MsgConfigureFileSourceName*) message;
-		m_fileName = conf->getFileName();
+		MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) message;
+		m_fileName = conf.getFileName();
 		openFileStream();
-		message->completed();
 		return true;
 	}
 	else if (MsgConfigureFileSourceWork::match(message))
 	{
-		MsgConfigureFileSourceWork* conf = (MsgConfigureFileSourceWork*) message;
-		bool working = conf->isWorking();
+		MsgConfigureFileSourceWork& conf = (MsgConfigureFileSourceWork&) message;
+		bool working = conf.isWorking();
+
 		if (m_fileSourceThread != 0)
 		{
-			if (working) {
+			if (working)
+			{
 				m_fileSourceThread->startWork();
-			} else {
+			}
+			else
+			{
 				m_fileSourceThread->stopWork();
 			}
 
-			MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount())->submit(m_guiMessageQueue);
+			MsgReportFileSourceStreamTiming *report =
+					MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+			getOutputMessageQueue()->push(report);
 		}
-		message->completed();
+
 		return true;
 	}
 	else if (MsgConfigureFileSourceStreamTiming::match(message))
 	{
-		if (m_fileSourceThread != 0) {
-			MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount())->submit(m_guiMessageQueue);
-		}else {
-			MsgReportFileSourceStreamTiming::create(0)->submit(m_guiMessageQueue);
+		MsgReportFileSourceStreamTiming *report;
+
+		if (m_fileSourceThread != 0)
+		{
+			report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
 		}
+		else
+		{
+			report = MsgReportFileSourceStreamTiming::create(0);
+		}
+
+		getOutputMessageQueue()->push(report);
 	}
 	else
 	{
@@ -230,30 +237,38 @@ bool FileSourceInput::handleMessage(Message* message)
 	}
 }
 
-bool FileSourceInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
+bool FileSourceInput::applySettings(const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	bool wasRunning = false;
 
-	if((m_settings.m_fileName != settings.m_fileName) || force) {
+	if((m_settings.m_fileName != settings.m_fileName) || force)
+	{
 		m_settings.m_fileName = settings.m_fileName;
 
-		if (m_fileSourceThread != 0) {
+		if (m_fileSourceThread != 0)
+		{
 			wasRunning = m_fileSourceThread->isRunning();
-			if (wasRunning) {
+
+			if (wasRunning)
+			{
 				m_fileSourceThread->stopWork();
 			}
 		}
 
-		if (m_ifstream.is_open()) {
+		if (m_ifstream.is_open())
+		{
 			m_ifstream.close();
 		}
 
 		openFileStream();
 
-		if (m_fileSourceThread != 0) {
+		if (m_fileSourceThread != 0)
+		{
 			m_fileSourceThread->setSamplerate(m_sampleRate);
-			if (wasRunning) {
+
+			if (wasRunning)
+			{
 				m_fileSourceThread->startWork();
 			}
 		}

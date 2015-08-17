@@ -41,21 +41,18 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const GeneralSettings& getGeneralSettings() const { return m_generalSettings; }
 		const Settings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFileSource* create(const GeneralSettings& generalSettings, const Settings& settings)
+		static MsgConfigureFileSource* create(const Settings& settings)
 		{
-			return new MsgConfigureFileSource(generalSettings, settings);
+			return new MsgConfigureFileSource(settings);
 		}
 
 	private:
-		GeneralSettings m_generalSettings;
 		Settings m_settings;
 
-		MsgConfigureFileSource(const GeneralSettings& generalSettings, const Settings& settings) :
+		MsgConfigureFileSource(const Settings& settings) :
 			Message(),
-			m_generalSettings(generalSettings),
 			m_settings(settings)
 		{ }
 	};
@@ -183,18 +180,19 @@ public:
 		{ }
 	};
 
-	FileSourceInput(MessageQueue* msgQueueToGUI, const QTimer& masterTimer);
-	~FileSourceInput();
+	FileSourceInput(const QTimer& masterTimer);
+	virtual ~FileSourceInput();
 
-	bool startInput(int device);
-	void stopInput();
+	virtual bool init(const Message& message);
+	virtual bool start(int device);
+	virtual void stop();
 
-	const QString& getDeviceDescription() const;
-	int getSampleRate() const;
-	quint64 getCenterFrequency() const;
+	virtual const QString& getDeviceDescription() const;
+	virtual int getSampleRate() const;
+	virtual quint64 getCenterFrequency() const;
 	std::time_t getStartingTimeStamp() const;
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private:
 	QMutex m_mutex;
@@ -208,7 +206,7 @@ private:
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
-	bool applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
+	bool applySettings(const Settings& settings, bool force);
 	void openFileStream();
 };
 

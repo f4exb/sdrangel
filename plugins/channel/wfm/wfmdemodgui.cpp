@@ -1,9 +1,10 @@
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QDebug>
 #include "ui_wfmdemodgui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
-#include "dsp/nullsink.h"
+#include "dsp/dspengine.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -79,12 +80,14 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+	{
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
@@ -104,13 +107,15 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 			m_channelMarker->setColor(u32tmp);
 		applySettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
 }
 
-bool WFMDemodGUI::handleMessage(Message* message)
+bool WFMDemodGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -133,9 +138,12 @@ void WFMDemodGUI::on_deltaMinus_clicked(bool minus)
 
 void WFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 {
-	if (ui->deltaMinus->isChecked()) {
+	if (ui->deltaMinus->isChecked())
+	{
 		m_channelMarker->setCenterFrequency(-value);
-	} else {
+	}
+	else
+	{
 		m_channelMarker->setCenterFrequency(value);
 	}
 }
@@ -172,7 +180,8 @@ void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void WFMDemodGUI::onMenuDoubleClicked()
 {
-	if(!m_basicSettingsShown) {
+	if(!m_basicSettingsShown)
+	{
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
 		bcsw->show();
@@ -191,12 +200,10 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_audioFifo = new AudioFifo(4, 250000); // TODO: check. Room for 1s FIFO at max rate
-	m_nullSink = new NullSink();
-	m_wfmDemod = new WFMDemod(m_audioFifo, m_nullSink);
+	m_wfmDemod = new WFMDemod(m_audioFifo, 0);
 	m_channelizer = new Channelizer(m_wfmDemod);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addAudioSource(m_audioFifo);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addAudioSink(m_audioFifo);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::blue);
@@ -212,12 +219,10 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 WFMDemodGUI::~WFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeAudioSource(m_audioFifo);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeAudioSink(m_audioFifo);
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_wfmDemod;
-	delete m_nullSink;
 	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
@@ -226,12 +231,15 @@ WFMDemodGUI::~WFMDemodGUI()
 void WFMDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
 		m_channelMarker->getCenterFrequency());
+
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_wfmDemod->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
 		m_rfBW[ui->rfBW->value()],
 		ui->afBW->value() * 1000.0,
 		ui->volume->value() / 10.0,

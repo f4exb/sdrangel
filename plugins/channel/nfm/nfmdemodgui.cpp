@@ -10,6 +10,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "dsp/dspengine.h"
 
 const int NFMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
@@ -69,12 +70,14 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+	{
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
@@ -96,13 +99,15 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		ui->ctcss->setCurrentIndex(tmp);
 		applySettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
 }
 
-bool NFMDemodGUI::handleMessage(Message* message)
+bool NFMDemodGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -125,9 +130,12 @@ void NFMDemodGUI::on_deltaMinus_clicked(bool minus)
 
 void NFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 {
-	if (ui->deltaMinus->isChecked()) {
+	if (ui->deltaMinus->isChecked())
+	{
 		m_channelMarker->setCenterFrequency(-value);
-	} else {
+	}
+	else
+	{
 		m_channelMarker->setCenterFrequency(value);
 	}
 }
@@ -159,7 +167,8 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
 
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
-	if (m_nfmDemod != NULL) {
+	if (m_nfmDemod != 0)
+	{
 		m_nfmDemod->setSelectedCtcssIndex(index);
 	}
 }
@@ -174,7 +183,8 @@ void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void NFMDemodGUI::onMenuDoubleClicked()
 {
-	if(!m_basicSettingsShown) {
+	if (!m_basicSettingsShown)
+	{
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
 		bcsw->show();
@@ -193,9 +203,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_audioFifo = new AudioFifo(4, 48000);
-	m_nullSink = new NullSink();
 
-	m_nfmDemod = new NFMDemod(m_audioFifo, m_nullSink);
+	m_nfmDemod = new NFMDemod(m_audioFifo, 0);
 	m_nfmDemod->registerGUI(this);
 
 	int ctcss_nbTones;
@@ -203,7 +212,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	ui->ctcss->addItem("--");
 
-	for (int i=0; i<ctcss_nbTones; i++) {
+	for (int i=0; i<ctcss_nbTones; i++)
+	{
 		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
 	}
 
@@ -211,9 +221,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	//ui->deltaFrequency->setBold(true);
 
 	m_channelizer = new Channelizer(m_nfmDemod);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addAudioSource(m_audioFifo);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addAudioSink(m_audioFifo);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::red);
@@ -229,12 +238,10 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 NFMDemodGUI::~NFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeAudioSource(m_audioFifo);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeAudioSink(m_audioFifo);
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_nfmDemod;
-	delete m_nullSink;
 	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
@@ -243,12 +250,15 @@ NFMDemodGUI::~NFMDemodGUI()
 void NFMDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
+
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_nfmDemod->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
 		m_rfBW[ui->rfBW->value()],
 		ui->afBW->value() * 1000.0,
 		ui->volume->value() / 10.0,

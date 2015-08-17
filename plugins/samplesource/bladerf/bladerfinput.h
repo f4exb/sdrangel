@@ -32,10 +32,11 @@ public:
 	} fcPos_t;
 
 	struct Settings {
+		quint64 m_centerFrequency;
+		qint32 m_devSampleRate;
 		qint32 m_lnaGain;
 		qint32 m_vga1;
 		qint32 m_vga2;
-		qint32 m_samplerate;
 		qint32 m_bandwidth;
 		quint32 m_log2Decim;
 		fcPos_t m_fcPos;
@@ -53,21 +54,18 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const GeneralSettings& getGeneralSettings() const { return m_generalSettings; }
 		const Settings& getSettings() const { return m_settings; }
 
-		static MsgConfigureBladerf* create(const GeneralSettings& generalSettings, const Settings& settings)
+		static MsgConfigureBladerf* create(const Settings& settings)
 		{
-			return new MsgConfigureBladerf(generalSettings, settings);
+			return new MsgConfigureBladerf(settings);
 		}
 
 	private:
-		GeneralSettings m_generalSettings;
 		Settings m_settings;
 
-		MsgConfigureBladerf(const GeneralSettings& generalSettings, const Settings& settings) :
+		MsgConfigureBladerf(const Settings& settings) :
 			Message(),
-			m_generalSettings(generalSettings),
 			m_settings(settings)
 		{ }
 	};
@@ -89,28 +87,29 @@ public:
 		{ }
 	};
 
-	BladerfInput(MessageQueue* msgQueueToGUI);
-	~BladerfInput();
+	BladerfInput();
+	virtual ~BladerfInput();
 
-	bool startInput(int device);
-	void stopInput();
+	virtual bool init(const Message& message);
+	virtual bool start(int device);
+	virtual void stop();
 
-	const QString& getDeviceDescription() const;
-	int getSampleRate() const;
-	quint64 getCenterFrequency() const;
+	virtual const QString& getDeviceDescription() const;
+	virtual int getSampleRate() const;
+	virtual quint64 getCenterFrequency() const;
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private:
+	bool applySettings(const Settings& settings, bool force);
+	bladerf_lna_gain getLnaGain(int lnaGain);
+	struct bladerf *open_bladerf_from_serial(const char *serial);
+
 	QMutex m_mutex;
 	Settings m_settings;
 	struct bladerf* m_dev;
 	BladerfThread* m_bladerfThread;
 	QString m_deviceDescription;
-
-	bool applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
-	bladerf_lna_gain getLnaGain(int lnaGain);
-	struct bladerf *open_bladerf_from_serial(const char *serial);
 };
 
 #endif // INCLUDE_BLADERFINPUT_H

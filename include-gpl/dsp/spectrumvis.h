@@ -16,7 +16,6 @@ public:
 
 	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
 
-	virtual bool init(const Message& cmd);
 	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual void start();

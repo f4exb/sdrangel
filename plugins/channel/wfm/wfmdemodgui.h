@@ -8,10 +8,8 @@ class PluginAPI;
 class ChannelMarker;
 
 class AudioFifo;
-class ThreadedSampleSink;
 class Channelizer;
 class WFMDemod;
-class NullSink;
 
 namespace Ui {
 	class WFMDemodGUI;
@@ -32,7 +30,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void viewChanged();
@@ -52,15 +50,13 @@ private:
 	bool m_basicSettingsShown;
 
 	AudioFifo* m_audioFifo;
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
-	NullSink *m_nullSink;
 
 	static const int m_rfBW[];
 
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~WFMDemodGUI();
+	virtual ~WFMDemodGUI();
 
 	void applySettings();
 

@@ -28,7 +28,6 @@ public:
 
 	void configure(MessageQueue* msgQueue, const std::string& filename);
 
-	virtual bool init(const Message& cmd);
 	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();

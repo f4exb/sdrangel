@@ -5,11 +5,11 @@
 #include "ui_amdemodgui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
-#include "dsp/nullsink.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "dsp/dspengine.h"
 
 #include "amdemod.h"
 
@@ -100,7 +100,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool AMDemodGUI::handleMessage(Message* message)
+bool AMDemodGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -185,12 +185,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_audioFifo = new AudioFifo(4, 48000);
-	m_nullSink = new NullSink();
-	m_amDemod = new AMDemod(m_audioFifo, m_nullSink);
+	m_amDemod = new AMDemod(m_audioFifo, 0);
 	m_channelizer = new Channelizer(m_amDemod);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addAudioSource(m_audioFifo);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addAudioSink(m_audioFifo);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::yellow);
@@ -206,12 +204,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 AMDemodGUI::~AMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeAudioSource(m_audioFifo);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeAudioSink(m_audioFifo);
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_amDemod;
-	delete m_nullSink;
 	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
@@ -220,12 +216,15 @@ AMDemodGUI::~AMDemodGUI()
 void AMDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
+
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_amDemod->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_amDemod->configure(m_amDemod->getInputMessageQueue(),
 		m_rfBW[ui->rfBW->value()],
 		ui->afBW->value() * 1000.0,
 		ui->volume->value() / 10.0,

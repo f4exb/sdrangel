@@ -32,6 +32,7 @@
 
 class SampleSource;
 class SampleSink;
+class ThreadedSampleSink;
 class AudioFifo;
 
 class SDRANGELOVE_API DSPEngine : public QThread {
@@ -66,6 +67,9 @@ public:
 	void addSink(SampleSink* sink); //!< Add a sample sink
 	void removeSink(SampleSink* sink); //!< Remove a sample sink
 
+	void addThreadedSink(SampleSink* sink); //!< Add a sample sink that will run on its own thread
+	void removeThreadedSink(SampleSink* sink); //!< Remove a sample sink that runs on its own thread
+
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
@@ -89,7 +93,10 @@ private:
 	SampleSource* m_sampleSource;
 
 	typedef std::list<SampleSink*> SampleSinks;
-	SampleSinks m_sampleSinks;
+	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
+
+	typedef std::list<ThreadedSampleSink*> ThreadedSampleSinks;
+	ThreadedSampleSinks m_threadedSampleSinks; //!< sample sinks on their own threads (usually channels)
 
 	AudioOutput m_audioSink;
 
@@ -120,7 +127,7 @@ private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
 	void handleSourceMessages(); //!< Handle source message output
 	void handleInputMessages(); //!< Handle input message queue
-	void handleSynchronousMessages(Message *message); //!< Handle synchronous messages with the thread
+	void handleSynchronousMessages(const Message& message); //!< Handle synchronous messages with the thread
 };
 
 #endif // INCLUDE_DSPENGINE_H

@@ -105,6 +105,30 @@ private:
 	SampleSink* m_sampleSink;
 };
 
+class SDRANGELOVE_API DSPAddThreadedSink : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPAddThreadedSink(SampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+
+	SampleSink* getSampleSink() const { return m_sampleSink; }
+
+private:
+	SampleSink* m_sampleSink;
+};
+
+class SDRANGELOVE_API DSPRemoveThreadedSink : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPRemoveThreadedSink(SampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+
+	SampleSink* getSampleSink() const { return m_sampleSink; }
+
+private:
+	SampleSink* m_sampleSink;
+};
+
 class SDRANGELOVE_API DSPAddAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 

@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QTime>
+#include <QDebug>
 #include <stdio.h>
 #include "ssbdemod.h"
 #include "audio/audiooutput.h"
@@ -57,7 +58,7 @@ SSBDemod::~SSBDemod()
 void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
 {
 	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -69,17 +70,23 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int decim = 1<<(m_spanLog2 - 1);
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-	for(SampleVector::const_iterator it = begin; it < end; ++it) {
+	for(SampleVector::const_iterator it = begin; it < end; ++it)
+	{
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		{
 			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
 			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
-		} else
+		}
+		else
+		{
 			n_out = 0;
+		}
 
-		for (int i = 0; i < n_out; i++) {
+		for (int i = 0; i < n_out; i++)
+		{
 			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
 
 			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
@@ -87,7 +94,8 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 			sum += sideband[i];
 
-			if (!(m_undersampleCount++ & decim_mask)) {
+			if (!(m_undersampleCount++ & decim_mask))
+			{
 				avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
 				m_sampleBuffer.push_back(Sample(avg, 0.0));
 				sum.real() = 0.0;
@@ -98,20 +106,32 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
 			++m_audioBufferFill;
-			if(m_audioBufferFill >= m_audioBuffer.size()) {
+
+			if (m_audioBufferFill >= m_audioBuffer.size())
+			{
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
 				if (res != m_audioBufferFill)
+				{
 					qDebug("lost %u samples", m_audioBufferFill - res);
+				}
+
 				m_audioBufferFill = 0;
 			}
 		}
 	}
-	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
-		;//qDebug("lost samples");
+
+	if (m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+	{
+		qDebug("SSBDemod::feed: lost samples");
+	}
 	m_audioBufferFill = 0;
 
-	if(m_sampleSink != NULL)
+	if(m_sampleSink != 0)
+	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+	}
+
 	m_sampleBuffer.clear();
 }
 
@@ -123,24 +143,32 @@ void SSBDemod::stop()
 {
 }
 
-bool SSBDemod::handleMessage(Message* cmd)
+bool SSBDemod::handleMessage(const Message& cmd)
 {
 	float band, lowCutoff;
 
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		//fprintf(stderr, "%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
-		m_sampleRate = signal->getSampleRate();
-		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
+	qDebug() << "SSBDemod::handleMessage";
+
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_sampleRate = notif.getSampleRate();
+		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
 		m_sampleDistanceRemain = m_sampleRate / 48000.0;
-		cmd->completed();
-		return true;
-	} else if(MsgConfigureSSBDemod::match(cmd)) {
-		MsgConfigureSSBDemod* cfg = (MsgConfigureSSBDemod*)cmd;
 
-		band = cfg->getBandwidth();
-		lowCutoff = cfg->getLoCutoff();
+		qDebug() << "  - DSPSignalNotification: m_sampleRate: " << m_sampleRate
+				<< " frequencyOffset" << notif.getFrequencyOffset();
+
+		return true;
+	}
+	else if (MsgConfigureSSBDemod::match(cmd))
+	{
+		MsgConfigureSSBDemod& cfg = (MsgConfigureSSBDemod&) cmd;
+
+		band = cfg.getBandwidth();
+		lowCutoff = cfg.getLoCutoff();
 
 		if (band < 0) {
 			band = -band;
@@ -161,16 +189,27 @@ bool SSBDemod::handleMessage(Message* cmd)
 		m_interpolator.create(16, m_sampleRate, band * 2.0f);
 		SSBFilter->create_filter(m_LowCutoff / 48000.0f, m_Bandwidth / 48000.0f);
 
-		m_volume = cfg->getVolume();
+		m_volume = cfg.getVolume();
 		m_volume *= m_volume * 0.1;
 
-		m_spanLog2 = cfg->getSpanLog2();
+		m_spanLog2 = cfg.getSpanLog2();
 
-		cmd->completed();
+		qDebug() << "  - MsgConfigureSSBDemod: m_Bandwidth: " << m_Bandwidth
+				<< " m_LowCutoff: " << m_LowCutoff
+				<< " m_volume: " << m_volume
+				<< " m_spanLog2: " << m_spanLog2;
+
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if(m_sampleSink != 0)
+		{
 		   return m_sampleSink->handleMessage(cmd);
-		else return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

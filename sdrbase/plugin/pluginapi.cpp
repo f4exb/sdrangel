@@ -54,6 +54,7 @@ void PluginAPI::removeChannelMarker(ChannelMarker* channelMarker)
 	m_mainWindow->removeChannelMarker(channelMarker);
 }
 
+/*
 void PluginAPI::setSampleSource(SampleSource* sampleSource)
 {
 	m_dspEngine->stopAcquistion();
@@ -83,7 +84,7 @@ void PluginAPI::addAudioSource(AudioFifo* audioFifo)
 void PluginAPI::removeAudioSource(AudioFifo* audioFifo)
 {
 	m_dspEngine->removeAudioSink(audioFifo);
-}
+}*/
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {

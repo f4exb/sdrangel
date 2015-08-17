@@ -8,7 +8,6 @@ class PluginAPI;
 class ChannelMarker;
 
 class AudioFifo;
-class ThreadedSampleSink;
 class Channelizer;
 class SSBDemod;
 class SpectrumVis;
@@ -32,7 +31,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void viewChanged();
@@ -54,7 +53,6 @@ private:
 	int m_spanLog2;
 
 	AudioFifo* m_audioFifo;
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;

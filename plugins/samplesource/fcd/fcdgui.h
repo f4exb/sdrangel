@@ -16,25 +16,22 @@ class FCDGui : public QWidget, public PluginGUI {
 
 public:
 	explicit FCDGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~FCDGui();
+	virtual ~FCDGui();
 	void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;
 
 	void resetToDefaults();
-	QByteArray serializeGeneral() const;
-	bool deserializeGeneral(const QByteArray&data);
-	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-	bool handleMessage(Message* message);
+
+	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::FCDGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	SampleSource::GeneralSettings m_generalSettings;
 	FCDInput::Settings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;

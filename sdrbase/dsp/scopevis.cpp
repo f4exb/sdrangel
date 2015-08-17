@@ -55,20 +55,6 @@ void ScopeVis::configure(MessageQueue* msgQueue,
 	msgQueue->push(cmd);
 }
 
-bool ScopeVis::init(const Message& cmd)
-{
-	if (DSPSignalNotification::match(&cmd))
-	{
-		DSPSignalNotification* signal = (DSPSignalNotification*) &cmd;
-		m_sampleRate = signal->getSampleRate();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	if (m_triggerChannel == TriggerFreeRun) {
@@ -220,28 +206,47 @@ void ScopeVis::stop()
 
 bool ScopeVis::handleMessage(const Message& message)
 {
-	if (MsgConfigureScopeVis::match(&message))
+	qDebug() << "ScopeVis::handleMessage";
+
+	if (DSPSignalNotification::match(message))
 	{
-		MsgConfigureScopeVis* conf = (MsgConfigureScopeVis*) &message;
-        m_tracebackCount = 0;
+		DSPSignalNotification& notif = (DSPSignalNotification&) message;
+		m_sampleRate = notif.getSampleRate();
+		qDebug() << "  - DSPSignalNotification: m_sampleRate: " << m_sampleRate;
+
+		return true;
+	}
+	else if (MsgConfigureScopeVis::match(message))
+	{
+		MsgConfigureScopeVis& conf = (MsgConfigureScopeVis&) message;
+
+		m_tracebackCount = 0;
 		m_triggerState = Config;
-		m_triggerChannel = (TriggerChannel) conf->getTriggerChannel();
-		m_triggerLevel = conf->getTriggerLevel();
-		m_triggerPositiveEdge = conf->getTriggerPositiveEdge();
-		m_triggerBothEdges = conf->getTriggerBothEdges();
-		m_triggerPre = conf->getTriggerPre();
-        if (m_triggerPre >= m_traceback.size()) {
+		m_triggerChannel = (TriggerChannel) conf.getTriggerChannel();
+		m_triggerLevel = conf.getTriggerLevel();
+		m_triggerPositiveEdge = conf.getTriggerPositiveEdge();
+		m_triggerBothEdges = conf.getTriggerBothEdges();
+		m_triggerPre = conf.getTriggerPre();
+
+        if (m_triggerPre >= m_traceback.size())
+        {
         	m_triggerPre = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (pre-trigger delay = 0)
         }
-        m_triggerDelay = conf->getTriggerDelay();
-        uint newSize = conf->getTraceSize();
-        if (newSize != m_trace.size()) {
+
+        m_triggerDelay = conf.getTriggerDelay();
+        uint newSize = conf.getTraceSize();
+
+        if (newSize != m_trace.size())
+        {
             m_trace.resize(newSize);
         }
-        if (newSize > m_traceback.size()) {  // fitting the exact required space is not a requirement for the back trace
+
+        if (newSize > m_traceback.size()) // fitting the exact required space is not a requirement for the back trace
+        {
             m_traceback.resize(newSize);
         }
-		qDebug() << "ScopeVis::handleMessage:"
+
+		qDebug() << "  - MsgConfigureScopeVis:"
 				<< " m_triggerChannel: " << m_triggerChannel
 				<< " m_triggerLevel: " << m_triggerLevel
 				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
@@ -249,6 +254,7 @@ bool ScopeVis::handleMessage(const Message& message)
 				<< " m_preTrigger: " << m_triggerPre
 				<< " m_triggerDelay: " << m_triggerDelay
 				<< " m_traceSize: " << m_trace.size();
+
 		return true;
 	}
 	else

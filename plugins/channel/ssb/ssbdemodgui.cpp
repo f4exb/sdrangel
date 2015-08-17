@@ -12,6 +12,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "dsp/dspengine.h"
 #include "mainwindow.h"
 
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI)
@@ -66,12 +67,14 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+	{
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
@@ -92,13 +95,15 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		setNewRate(tmp);
 		applySettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
 }
 
-bool SSBDemodGUI::handleMessage(Message* message)
+bool SSBDemodGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -121,9 +126,12 @@ void SSBDemodGUI::on_deltaMinus_clicked(bool minus)
 
 void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
 {
-	if (ui->deltaMinus->isChecked()) {
+	if (ui->deltaMinus->isChecked())
+	{
 		m_channelMarker->setCenterFrequency(-value);
-	} else {
+	}
+	else
+	{
 		m_channelMarker->setCenterFrequency(value);
 	}
 }
@@ -134,9 +142,12 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker->setBandwidth(value * 100 * 2);
 
-	if (value < 0) {
+	if (value < 0)
+	{
 		m_channelMarker->setSidebands(ChannelMarker::lsb);
-	} else {
+	}
+	else
+	{
 		m_channelMarker->setSidebands(ChannelMarker::usb);
 	}
 
@@ -149,18 +160,25 @@ int SSBDemodGUI::getEffectiveLowCutoff(int lowCutoff)
 	int effectiveLowCutoff = lowCutoff;
 	const int guard = 100;
 
-	if (ssbBW < 0) {
-		if (effectiveLowCutoff < ssbBW + guard) {
+	if (ssbBW < 0)
+	{
+		if (effectiveLowCutoff < ssbBW + guard)
+		{
 			effectiveLowCutoff = ssbBW + guard;
 		}
-		if (effectiveLowCutoff > 0)	{
+		if (effectiveLowCutoff > 0)
+		{
 			effectiveLowCutoff = 0;
 		}
-	} else {
-		if (effectiveLowCutoff > ssbBW - guard)	{
+	}
+	else
+	{
+		if (effectiveLowCutoff > ssbBW - guard)
+		{
 			effectiveLowCutoff = ssbBW - guard;
 		}
-		if (effectiveLowCutoff < 0)	{
+		if (effectiveLowCutoff < 0)
+		{
 			effectiveLowCutoff = 0;
 		}
 	}
@@ -186,7 +204,8 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 
 void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 {
-	if (setNewRate(value)) {
+	if (setNewRate(value))
+	{
 		applySettings();
 	}
 
@@ -202,7 +221,8 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void SSBDemodGUI::onMenuDoubleClicked()
 {
-	if(!m_basicSettingsShown) {
+	if(!m_basicSettingsShown)
+	{
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
 		bcsw->show();
@@ -226,9 +246,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbDemod = new SSBDemod(m_audioFifo, m_spectrumVis);
 	m_channelizer = new Channelizer(m_ssbDemod);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addAudioSource(m_audioFifo);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addAudioSink(m_audioFifo);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -248,7 +267,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
 }
@@ -256,9 +275,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 SSBDemodGUI::~SSBDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeAudioSource(m_audioFifo);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeAudioSink(m_audioFifo);
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_ssbDemod;
 	delete m_spectrumVis;
@@ -269,25 +287,32 @@ SSBDemodGUI::~SSBDemodGUI()
 
 bool SSBDemodGUI::setNewRate(int spanLog2)
 {
-	if ((spanLog2 < 1) || (spanLog2 > 5)) {
+	if ((spanLog2 < 1) || (spanLog2 > 5))
+	{
 		return false;
 	}
 
 	m_spanLog2 = spanLog2;
 	m_rate = 48000 / (1<<spanLog2);
 
-	if (ui->BW->value() < -m_rate/100) {
+	if (ui->BW->value() < -m_rate/100)
+	{
 		ui->BW->setValue(-m_rate/100);
 		m_channelMarker->setBandwidth(-m_rate*2);
-	} else if (ui->BW->value() > m_rate/100) {
+	}
+	else if (ui->BW->value() > m_rate/100)
+	{
 		ui->BW->setValue(m_rate/100);
 		m_channelMarker->setBandwidth(m_rate*2);
 	}
 
-	if (ui->lowCut->value() < -m_rate/100) {
+	if (ui->lowCut->value() < -m_rate/100)
+	{
 		ui->lowCut->setValue(-m_rate/100);
 		m_channelMarker->setLowCutoff(-m_rate);
-	} else if (ui->lowCut->value() > m_rate/100) {
+	}
+	else if (ui->lowCut->value() > m_rate/100)
+	{
 		ui->lowCut->setValue(m_rate/100);
 		m_channelMarker->setLowCutoff(m_rate);
 	}
@@ -311,10 +336,12 @@ void SSBDemodGUI::applySettings()
 	setTitleColor(m_channelMarker->getColor());
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		48000,
 		m_channelMarker->getCenterFrequency());
-	m_ssbDemod->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
 		ui->BW->value() * 100.0,
 		ui->lowCut->value() * 100.0,
 		ui->volume->value() / 10.0,

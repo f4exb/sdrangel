@@ -17,25 +17,22 @@ class RTLSDRGui : public QWidget, public PluginGUI {
 
 public:
 	explicit RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~RTLSDRGui();
+	virtual ~RTLSDRGui();
 	void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;
 
 	void resetToDefaults();
-	QByteArray serializeGeneral() const;
-	bool deserializeGeneral(const QByteArray&data);
 	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::RTLSDRGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	SampleSource::GeneralSettings m_generalSettings;
 	RTLSDRInput::Settings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;

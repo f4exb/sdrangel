@@ -8,7 +8,6 @@
 
 class PluginAPI;
 class ChannelMarker;
-class ThreadedSampleSink;
 class Channelizer;
 class TCPSrc;
 class SpectrumVis;
@@ -32,7 +31,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void channelMarkerChanged();
@@ -59,12 +58,11 @@ private:
 	bool m_basicSettingsShown;
 
 	// RF path
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
 	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~TCPSrcGUI();
+	virtual ~TCPSrcGUI();
 
 	void applySettings();
 

@@ -37,12 +37,14 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 
 	// DSPEngine access
+	/* Direct access with DSP engine singleton
 	void setSampleSource(SampleSource* sampleSource);
 	void addSampleSink(SampleSink* sampleSink);
 	void removeSampleSink(SampleSink* sampleSink);
 	MessageQueue* getDSPEngineMessageQueue();
 	void addAudioSource(AudioFifo* audioFifo);
 	void removeAudioSource(AudioFifo* audioFifo);
+	*/
 
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);

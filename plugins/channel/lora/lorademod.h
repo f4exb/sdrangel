@@ -34,14 +34,14 @@
 class LoRaDemod : public SampleSink {
 public:
 	LoRaDemod(SampleSink* sampleSink);
-	~LoRaDemod();
+	virtual ~LoRaDemod();
 
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 private:
 	int  detect(Complex sample, Complex angle);

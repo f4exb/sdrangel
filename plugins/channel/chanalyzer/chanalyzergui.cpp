@@ -1,7 +1,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include "ui_chanalyzergui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
@@ -11,6 +10,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "dsp/dspengine.h"
 #include "mainwindow.h"
 
 #include "chanalyzer.h"
@@ -103,7 +103,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool ChannelAnalyzerGUI::handleMessage(Message* message)
+bool ChannelAnalyzerGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -267,8 +267,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -290,8 +289,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
-	ui->scopeGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_scopeVis, ui->glScope);
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	applySettings();
 }
@@ -299,8 +298,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;
@@ -376,10 +374,12 @@ void ChannelAnalyzerGUI::applySettings()
 	setTitleColor(m_channelMarker->getColor());
 	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
 	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		m_channelizer->getInputSampleRate(),
 		m_channelMarker->getCenterFrequency());
-	m_channelAnalyzer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
 		ui->BW->value() * 100.0,
 		ui->lowCut->value() * 100.0,
 		m_spanLog2,

@@ -26,7 +26,7 @@ SyncMessenger::SyncMessenger() :
 SyncMessenger::~SyncMessenger()
 {}
 
-int SyncMessenger::sendWait(Message *message, unsigned long msPollTime)
+int SyncMessenger::sendWait(const Message& message, unsigned long msPollTime)
 {
 	m_mutex.lock();
 	m_complete.testAndSetAcquire(0, 1);

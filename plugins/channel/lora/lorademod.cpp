@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QTime>
+#include <QDebug>
 #include <stdio.h>
 #include "lorademod.h"
 #include "dsp/dspcommands.h"
@@ -44,6 +45,7 @@ LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
 	m_count = 0;
 	m_header = 0;
 	m_time = 0;
+	m_tune = 0;
 
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
@@ -70,7 +72,7 @@ LoRaDemod::~LoRaDemod()
 void LoRaDemod::configure(MessageQueue* messageQueue, Real Bandwidth)
 {
 	Message* cmd = MsgConfigureLoRaDemod::create(Bandwidth);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void LoRaDemod::dumpRaw()
@@ -79,13 +81,18 @@ void LoRaDemod::dumpRaw()
 	char text[256];
 
 	max = m_time / 4 - 3;
-	if (max > 140)
-		max = 140; // about 2 symbols to each char
 
-	for ( j=0; j < max; j++) {
+	if (max > 140)
+	{
+		max = 140; // about 2 symbols to each char
+	}
+
+	for ( j=0; j < max; j++)
+	{
 		bin = (history[(j + 1)  * 4] + m_tune ) & (LORA_SFFT_LEN - 1);
 		text[j] = toGray(bin >> 1);
 	}
+
 	prng6(text, max);
 	// First block is always 8 symbols
 	interleave6(text, 6);
@@ -93,46 +100,75 @@ void LoRaDemod::dumpRaw()
 	hamming6(text, 6);
 	hamming6(&text[8], max);
 
-	for ( j=0; j < max / 2; j++) {
+	for ( j=0; j < max / 2; j++)
+	{
 		text[j] = (text[j * 2 + 1] << 4) | (0xf & text[j * 2 + 0]);
+
 		if ((text[j] < 32 )||( text[j] > 126))
+		{
 			text[j] = 0x5f;
+		}
 	}
+
 	text[3] = text[2];
 	text[2] = text[1];
 	text[1] = text[0];
 	text[j] = 0;
+
 	printf("%s\n", &text[1]);
 }
 
 short LoRaDemod::synch(short bin)
 {
 	short i, j;
-	if (bin < 0) {
+
+	if (bin < 0)
+	{
 		if (m_time > 70)
+		{
 			dumpRaw();
+		}
+
 		m_time = 0;
 		return -1;
 	}
+
 	history[m_time] = bin;
+
 	if (m_time > 12)
+	{
 		if (bin == history[m_time - 6])
-			if (bin == history[m_time - 12]) {
+		{
+			if (bin == history[m_time - 12])
+			{
 				m_tune = LORA_SFFT_LEN - bin;
 				j = 0;
+
 				for (i=0; i<12; i++)
+				{
 					j += finetune[15 & (m_time - i)];
+				}
+
 				if (j < 0)
+				{
 					m_tune += 1;
+				}
+
 				m_tune &= (LORA_SFFT_LEN - 1);
 				m_time = 0;
 				return -1;
 			}
+		}
+	}
 
 	m_time++;
 	m_time &= 1023;
+
 	if (m_time & 3)
+	{
 		return -1;
+	}
+
 	return (bin + m_tune) & (LORA_SFFT_LEN - 1);
 }
 
@@ -149,24 +185,34 @@ int LoRaDemod::detect(Complex c, Complex a)
 
 	// process spectrum twice in FFTLEN
 	if (++m_count & ((1 << DATA_BITS) - 1))
+	{
 		return m_result;
+	}
+
 	movpoint = 3 & (m_count >> DATA_BITS);
 
 	loraFilter->fetch(mag);
 	negaFilter->fetch(rev);
 	peak = negpeak = 0.0f;
 	result = negresult = 0;
-	for (i = 0; i < LORA_SFFT_LEN; i++) {
-		if (rev[i] > negpeak) {
+
+	for (i = 0; i < LORA_SFFT_LEN; i++)
+	{
+		if (rev[i] > negpeak)
+		{
 			negpeak = rev[i];
 			negresult = i;
 		}
+
 		tfloat = mov[i] + mov[LORA_SFFT_LEN + i] +mov[2 * LORA_SFFT_LEN + i]
 				+ mov[3 * LORA_SFFT_LEN + i] + mag[i];
-		if (tfloat > peak) {
+
+		if (tfloat > peak)
+		{
 			peak = tfloat;
 			result = i;
 		}
+
 		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
 	}
 
@@ -175,10 +221,17 @@ int LoRaDemod::detect(Complex c, Complex a)
 	finetune[15 & m_time] = (mag[p] > mag[q]) ? -1 : 1;
 
 	if (peak < negpeak * LORA_SQUELCH)
+	{
 		result = -1;
+	}
+
 	result = synch(result);
+
 	if (result >= 0)
+	{
 		m_result = result;
+	}
+
 	return m_result;
 }
 
@@ -188,11 +241,14 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 	Complex ci;
 
 	m_sampleBuffer.clear();
-	for(SampleVector::const_iterator it = begin; it < end; ++it) {
+
+	for(SampleVector::const_iterator it = begin; it < end; ++it)
+	{
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		{
 			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
                         m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
 			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
@@ -204,8 +260,11 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_Bandwidth;
 		}
 	}
-	if(m_sampleSink != NULL)
+
+	if(m_sampleSink != 0)
+	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+	}
 }
 
 void LoRaDemod::start()
@@ -216,26 +275,43 @@ void LoRaDemod::stop()
 {
 }
 
-bool LoRaDemod::handleMessage(Message* cmd)
+bool LoRaDemod::handleMessage(const Message& cmd)
 {
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		m_sampleRate = signal->getSampleRate();
-		m_nco.setFreq(-signal->getFrequencyOffset(), m_sampleRate);
+	qDebug() << "LoRaDemod::handleMessage";
+
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_sampleRate = notif.getSampleRate();
+		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 		m_sampleDistanceRemain = m_sampleRate / m_Bandwidth;
-		cmd->completed();
+
+		qDebug() << " DSPSignalNotification: m_sampleRate: " << m_sampleRate;
+
 		return true;
-	} else if(MsgConfigureLoRaDemod::match(cmd)) {
-		MsgConfigureLoRaDemod* cfg = (MsgConfigureLoRaDemod*)cmd;
-		m_Bandwidth = cfg->getBandwidth();
+	}
+	else if (MsgConfigureLoRaDemod::match(cmd))
+	{
+		MsgConfigureLoRaDemod& cfg = (MsgConfigureLoRaDemod&) cmd;
+
+		m_Bandwidth = cfg.getBandwidth();
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
-		cmd->completed();
+
+		qDebug() << " MsgConfigureLoRaDemod: m_Bandwidth: " << m_Bandwidth;
+
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if(m_sampleSink != 0)
+		{
 			 return m_sampleSink->handleMessage(cmd);
+		}
 		else
+		{
 			return false;
+		}
 	}
 }

@@ -27,8 +27,9 @@ class RTLSDRThread;
 class RTLSDRInput : public SampleSource {
 public:
 	struct Settings {
+		int m_devSampleRate;
+		quint64 m_centerFrequency;
 		qint32 m_gain;
-		qint32 m_samplerate;
 		qint32 m_loPpmCorrection;
 		quint32 m_log2Decim;
 
@@ -42,21 +43,18 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const GeneralSettings& getGeneralSettings() const { return m_generalSettings; }
 		const Settings& getSettings() const { return m_settings; }
 
-		static MsgConfigureRTLSDR* create(const GeneralSettings& generalSettings, const Settings& settings)
+		static MsgConfigureRTLSDR* create(const Settings& settings)
 		{
-			return new MsgConfigureRTLSDR(generalSettings, settings);
+			return new MsgConfigureRTLSDR(settings);
 		}
 
 	private:
-		GeneralSettings m_generalSettings;
 		Settings m_settings;
 
-		MsgConfigureRTLSDR(const GeneralSettings& generalSettings, const Settings& settings) :
+		MsgConfigureRTLSDR(const Settings& settings) :
 			Message(),
-			m_generalSettings(generalSettings),
 			m_settings(settings)
 		{ }
 	};
@@ -81,18 +79,18 @@ public:
 		{ }
 	};
 
-	RTLSDRInput(MessageQueue* msgQueueToGUI);
-	~RTLSDRInput();
+	RTLSDRInput();
+	virtual ~RTLSDRInput();
 
-	bool startInput(int device);
-	void stopInput();
+	virtual bool init(const Message& message);
+	virtual bool start(int device);
+	virtual void stop();
 
-	const QString& getDeviceDescription() const;
-	int getSampleRate() const;
-	quint64 getCenterFrequency() const;
+	virtual const QString& getDeviceDescription() const;
+	virtual int getSampleRate() const;
+	virtual quint64 getCenterFrequency() const;
 
-	bool handleMessage(Message* message);
-
+	virtual bool handleMessage(const Message& message);
 
 	void set_ds_mode(int on);
 
@@ -104,7 +102,7 @@ private:
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
 
-	bool applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
+	bool applySettings(const Settings& settings, bool force);
 };
 
 #endif // INCLUDE_RTLSDRINPUT_H

@@ -33,7 +33,7 @@
 class ChannelAnalyzer : public SampleSink {
 public:
 	ChannelAnalyzer(SampleSink* m_sampleSink);
-	~ChannelAnalyzer();
+	virtual ~ChannelAnalyzer();
 
 	void configure(MessageQueue* messageQueue,
 			Real Bandwidth,
@@ -45,10 +45,10 @@ public:
 		return m_sampleRate;
 	}
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 private:
 	class MsgConfigureChannelAnalyzer : public Message {

@@ -23,6 +23,7 @@
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "dsp/dspengine.h"
 #include "mainwindow.h"
 
 #include "filesourcegui.h"
@@ -49,8 +50,8 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	displaySettings();
 
-	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindowMessageQueue(), m_pluginAPI->getMainWindow()->getMasterTimer());
-	m_pluginAPI->setSampleSource(m_sampleSource);
+	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
+	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -75,32 +76,14 @@ QString FileSourceGui::getName() const
 
 void FileSourceGui::resetToDefaults()
 {
-	m_generalSettings.resetToDefaults();
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray FileSourceGui::serializeGeneral() const
-{
-	return m_generalSettings.serialize();
-}
-
-bool FileSourceGui::deserializeGeneral(const QByteArray&data)
-{
-	if(m_generalSettings.deserialize(data)) {
-		displaySettings();
-		sendSettings();
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
-
 qint64 FileSourceGui::getCenterFrequency() const
 {
-	return m_generalSettings.m_centerFrequency;
+	return m_centerFrequency;
 }
 
 QByteArray FileSourceGui::serialize() const
@@ -120,28 +103,25 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FileSourceGui::handleMessage(Message* message)
+bool FileSourceGui::handleMessage(const Message& message)
 {
 	if(FileSourceInput::MsgReportFileSourceAcquisition::match(message))
 	{
-		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition*)message)->getAcquisition();
+		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition&)message).getAcquisition();
 		updateWithAcquisition();
-		message->completed();
 		return true;
 	}
 	else if(FileSourceInput::MsgReportFileSourceStreamData::match(message))
 	{
-		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getSampleRate();
-		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getCenterFrequency();
-		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData*)message)->getStartingTimeStamp();
-		message->completed();
+		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleRate();
+		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getCenterFrequency();
+		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
 		updateWithStreamData();
 		return true;
 	}
 	else if(FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
 	{
-		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming*)message)->getSamplesCount();
-		message->completed();
+		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
 	}
@@ -157,31 +137,25 @@ void FileSourceGui::displaySettings()
 
 void FileSourceGui::sendSettings()
 {
-	/*
-	if(!m_updateTimer.isActive())
-		m_updateTimer.start(100);
-		*/
 }
 
 void FileSourceGui::updateHardware()
 {
-	/*
-	FileSourceInput::MsgConfigureFileSource* message = FileSourceInput::MsgConfigureFileSource::create(m_generalSettings, m_settings);
-	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
-	m_updateTimer.stop();*/
 }
 
 void FileSourceGui::on_play_toggled(bool checked)
 {
 	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
-	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void FileSourceGui::on_showFileDialog_clicked(bool checked)
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
-	if (fileName != "") {
+
+	if (fileName != "")
+	{
 		m_fileName = fileName;
 		ui->fileNameText->setText(m_fileName);
 		configureFileName();
@@ -192,7 +166,7 @@ void FileSourceGui::configureFileName()
 {
 	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
 	FileSourceInput::MsgConfigureFileSourceName* message = FileSourceInput::MsgConfigureFileSourceName::create(m_fileName);
-	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void FileSourceGui::updateWithAcquisition()
@@ -239,6 +213,6 @@ void FileSourceGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0) {
 		FileSourceInput::MsgConfigureFileSourceStreamTiming* message = FileSourceInput::MsgConfigureFileSourceStreamTiming::create();
-		message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }

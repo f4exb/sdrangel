@@ -8,7 +8,6 @@
 
 class PluginAPI;
 class ChannelMarker;
-class ThreadedSampleSink;
 class Channelizer;
 class LoRaDemod;
 class SpectrumVis;
@@ -32,7 +31,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void viewChanged();
@@ -47,7 +46,6 @@ private:
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
 
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;

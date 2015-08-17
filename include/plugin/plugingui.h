@@ -9,6 +9,8 @@ class Message;
 class SDRANGELOVE_API PluginGUI {
 public:
 	PluginGUI() { };
+	virtual ~PluginGUI() { };
+
 	virtual void destroy() = 0;
 
 	virtual void setName(const QString& name) = 0;
@@ -23,7 +25,7 @@ public:
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
 
-	virtual bool handleMessage(Message* message) = 0;
+	virtual bool handleMessage(const Message& message) = 0;
 };
 
 #endif // INCLUDE_PLUGINGUI_H

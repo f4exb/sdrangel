@@ -12,6 +12,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "dsp/dspengine.h"
 
 LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI)
 {
@@ -83,7 +84,7 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool LoRaDemodGUI::handleMessage(Message* message)
+bool LoRaDemodGUI::handleMessage(const Message& message)
 {
 	return false;
 }
@@ -137,8 +138,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_LoRaDemod);
-	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addSampleSink(m_threadedSampleSink);
+	DSPEngine::instance()->addThreadedSink(m_channelizer);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
@@ -155,7 +155,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_threadedSampleSink->getMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->spectrumGUI->setBuddies(m_channelizer->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
 }
@@ -163,8 +163,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 LoRaDemodGUI::~LoRaDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
-	delete m_threadedSampleSink;
+	DSPEngine::instance()->removeThreadedSink(m_channelizer);
 	delete m_channelizer;
 	delete m_LoRaDemod;
 	delete m_spectrumVis;
@@ -176,8 +175,10 @@ void LoRaDemodGUI::applySettings()
 {
 	const int  loraBW[] = BANDWIDTHSTRING;
 	int thisBW = loraBW[ui->BW->value()];
-	m_channelizer->configure(m_threadedSampleSink->getMessageQueue(),
+
+	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 		thisBW,
 		m_channelMarker->getCenterFrequency());
-	m_LoRaDemod->configure(m_threadedSampleSink->getMessageQueue(), thisBW);
+
+	m_LoRaDemod->configure(m_LoRaDemod->getInputMessageQueue(), thisBW);
 }

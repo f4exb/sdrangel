@@ -177,21 +177,30 @@ void PluginManager::freeAll()
 	}
 }
 
-bool PluginManager::handleMessage(Message* message)
+bool PluginManager::handleMessage(const Message& message)
 {
-	if(m_sampleSourceInstance != NULL) {
-		if((message->getDestination() == NULL) || (message->getDestination() == m_sampleSourceInstance)) {
-			if(m_sampleSourceInstance->handleMessage(message))
+	if (m_sampleSourceInstance != 0)
+	{
+		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourceInstance))
+		{
+			if (m_sampleSourceInstance->handleMessage(message))
+			{
 				return true;
+			}
 		}
 	}
 
-	for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it) {
-		if((message->getDestination() == NULL) || (message->getDestination() == it->m_gui)) {
-			if(it->m_gui->handleMessage(message))
+	for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
+	{
+		if ((message.getDestination() == 0) || (message.getDestination() == it->m_gui))
+		{
+			if (it->m_gui->handleMessage(message))
+			{
 				return true;
+			}
 		}
 	}
+
 	return false;
 }
 

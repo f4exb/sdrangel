@@ -4,59 +4,56 @@
 #include "util/message.h"
 
 ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink) :
-	m_thread(new QThread),
 	m_sampleSink(sampleSink)
 {
-	setObjectName("ThreadedSampleSink");
-	moveToThread(m_thread);
-	connect(m_thread, SIGNAL(started()), this, SLOT(threadStarted()));
-	connect(m_thread, SIGNAL(finished()), this, SLOT(threadFinished()));
-
-	m_messageQueue.moveToThread(m_thread);
-	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()));
-
-	m_sampleFifo.moveToThread(m_thread);
-	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
-	m_sampleFifo.setSize(262144);
-
-	sampleSink->moveToThread(m_thread);
+	moveToThread(this);
 }
 
 ThreadedSampleSink::~ThreadedSampleSink()
 {
-	m_thread->exit();
-	m_thread->wait();
-	delete m_thread;
-}
-
-void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
-{
-	Q_UNUSED(positiveOnly);
-	m_sampleFifo.write(begin, end);
+	wait();
 }
 
 void ThreadedSampleSink::start()
 {
-	m_thread->start();
+	QThread::start();
 }
 
 void ThreadedSampleSink::stop()
 {
-	m_thread->exit();
-	m_thread->wait();
-	m_sampleFifo.readCommit(m_sampleFifo.fill());
+	exit();
+	wait();
 }
 
-bool ThreadedSampleSink::handleMessage(Message* cmd)
+void ThreadedSampleSink::run()
 {
-	qDebug() << "ThreadedSampleSink::handleMessage: "
-			<< m_sampleSink->objectName().toStdString().c_str()
-			<< ": " << cmd->getIdentifier();
-	// called from other thread
-	m_messageQueue.submit(cmd);
-	return true;
+	connect(&m_syncMessenger, SIGNAL(messageSent(const Message&)), this, SLOT(handleSynchronousMessages(const Message&)), Qt::QueuedConnection);
+	exec();
 }
 
+void ThreadedSampleSink::feed(SampleVector::const_iterator& begin, SampleVector::const_iterator& end, bool positiveOnly)
+{
+	m_sampleSink->feed(begin, end, positiveOnly);
+}
+
+bool ThreadedSampleSink::sendWaitSink(const Message& cmd)
+{
+	m_syncMessenger.sendWait(cmd);
+}
+
+void ThreadedSampleSink::handleSynchronousMessages(const Message& message)
+{
+	m_sampleSink->handleMessage(message); // just delegate to the sink
+	m_syncMessenger.done();
+}
+
+QString ThreadedSampleSink::getSampleSinkObjectName() const
+{
+	return m_sampleSink->objectName();
+}
+
+
+/*
 void ThreadedSampleSink::handleData()
 {
 	bool positiveOnly = false;
@@ -84,30 +81,5 @@ void ThreadedSampleSink::handleData()
 			m_sampleFifo.readCommit(part2end - part2begin);
 		}
 	}
-}
+}*/
 
-void ThreadedSampleSink::handleMessages()
-{
-	Message* message;
-	while((message = m_messageQueue.accept()) != NULL) {
-		qDebug("ThreadedSampleSink::handleMessages: %s", message->getIdentifier());
-		if(m_sampleSink != NULL) {
-			if(!m_sampleSink->handleMessage(message))
-				message->completed();
-		} else {
-			message->completed();
-		}
-	}
-}
-
-void ThreadedSampleSink::threadStarted()
-{
-	if(m_sampleSink != NULL)
-		m_sampleSink->start();
-}
-
-void ThreadedSampleSink::threadFinished()
-{
-	if(m_sampleSink != NULL)
-		m_sampleSink->stop();
-}

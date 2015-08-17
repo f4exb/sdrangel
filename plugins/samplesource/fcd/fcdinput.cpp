@@ -20,12 +20,14 @@
 #include "fcdinput.h"
 #include "fcdthread.h"
 #include "fcdgui.h"
+#include "qthid.h"
 #include "util/simpleserializer.h"
 
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
 
 FCDInput::Settings::Settings() :
+	centerFrequency(435000000),
 	range(0),
 	gain(0),
 	bias(0)
@@ -34,6 +36,7 @@ FCDInput::Settings::Settings() :
 
 void FCDInput::Settings::resetToDefaults()
 {
+	centerFrequency = 435000000;
 	range = 0;
 	gain = 0;
 	bias = 0;
@@ -42,75 +45,92 @@ void FCDInput::Settings::resetToDefaults()
 QByteArray FCDInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeS32(1, range);
-	s.writeS32(2, gain);
-	s.writeS32(3, bias);
+	s.writeU64(1, centerFrequency);
+	s.writeS32(2, range);
+	s.writeS32(3, gain);
+	s.writeS32(4, bias);
 	return s.final();
 }
 
 bool FCDInput::Settings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
-	if(d.isValid() && d.getVersion() == 1) {
-                d.readS32(1, &range, 0);
-		d.readS32(2, &gain, 0);
-		d.readS32(3, &bias, 0);
+
+	if (d.isValid() && d.getVersion() == 1)
+	{
+		d.readU64(1, &centerFrequency, 435000000);
+        d.readS32(2, &range, 0);
+		d.readS32(3, &gain, 0);
+		d.readS32(4, &bias, 0);
 		return true;
 	}
+
 	resetToDefaults();
 	return true;
 }
 
-FCDInput::FCDInput(MessageQueue* msgQueueToGUI) :
-	SampleSource(msgQueueToGUI),
+FCDInput::FCDInput() :
 	m_settings(),
-	m_FCDThread(NULL),
+	m_FCDThread(0),
 	m_deviceDescription()
 {
 }
 
 FCDInput::~FCDInput()
 {
-	stopInput();
+	stop();
 }
 
-bool FCDInput::startInput(int device)
+bool FCDInput::init(const Message& cmd)
+{
+	return false;
+}
+
+bool FCDInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_FCDThread)
+	if (m_FCDThread)
+	{
 		return false;
+	}
+
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
 	 * Failure is harmless if no device is found */
-	applySettings(m_generalSettings, m_settings, true);
 
-	if(!m_sampleFifo.setSize(4096*16)) {
+	applySettings(m_settings, true);
+
+	if(!m_sampleFifo.setSize(4096*16))
+	{
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	if((m_FCDThread = new FCDThread(&m_sampleFifo)) == NULL) {
+	if ((m_FCDThread = new FCDThread(&m_sampleFifo)) == NULL)
+	{
 		qFatal("out of memory");
 		return false;
 	}
 
 	m_deviceDescription = QString("Funcube Dongle");
 
-	qDebug("FCDInput: start");
+	qDebug("FCDInput::start");
 	return true;
 }
 
-void FCDInput::stopInput()
+void FCDInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_FCDThread) {
+	if (m_FCDThread)
+	{
 		m_FCDThread->stopWork();
 		// wait for thread to quit ?
 		delete m_FCDThread;
-		m_FCDThread = NULL;
+		m_FCDThread = 0;
 	}
+
 	m_deviceDescription.clear();
 }
 
@@ -121,45 +141,66 @@ const QString& FCDInput::getDeviceDescription() const
 
 int FCDInput::getSampleRate() const
 {
-	return 192000;
+	return 96000;
 }
 
 quint64 FCDInput::getCenterFrequency() const
 {
-	return m_generalSettings.m_centerFrequency;
+	return m_settings.centerFrequency;
 }
 
-bool FCDInput::handleMessage(Message* message)
+bool FCDInput::handleMessage(const Message& message)
 {
-	if(MsgConfigureFCD::match(message)) {
-		MsgConfigureFCD* conf = (MsgConfigureFCD*)message;
-		applySettings(conf->getGeneralSettings(), conf->getSettings(), false);
-		message->completed();
+	if(MsgConfigureFCD::match(message))
+	{
+		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
+		applySettings(conf.getSettings(), false);
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
 
-void FCDInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
+void FCDInput::applySettings(const Settings& settings, bool force)
 {
-	bool freqChange;
+	bool sampleSourcChange = false;
 
-	if((m_generalSettings.m_centerFrequency != generalSettings.m_centerFrequency))
-		freqChange = true;
-	else
-		freqChange = false;
-
-	if(freqChange || force) {
-		m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-		set_center_freq( (double)(generalSettings.m_centerFrequency) );
+	if ((m_settings.centerFrequency != settings.centerFrequency))
+	{
+		m_settings.centerFrequency = settings.centerFrequency;
+		set_center_freq((double) m_settings.centerFrequency);
+		sampleSourcChange = true;
 	}
 
-	if(!freqChange || force) {
-		set_lna_gain(settings.gain);
-		set_bias_t(settings.bias);
+	if (!sampleSourcChange || force)
+	{
+		set_lna_gain(settings.gain > 0);
+		set_bias_t(settings.bias > 0);
 	}	
+}
 
+void FCDInput::set_center_freq(double freq)
+{
+	if (fcdAppSetFreq(freq) == FCD_MODE_NONE)
+	{
+		qDebug("No FCD HID found for frquency change");
+	}
+}
+
+void FCDInput::set_bias_t(bool on)
+{
+	quint8 cmd = on ? 1 : 0;
+
+	fcdAppSetParam(FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
+}
+
+void FCDInput::set_lna_gain(bool on)
+{
+	quint8 cmd = on ? 1 : 0;
+
+	fcdAppSetParam(FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
 }
 
 

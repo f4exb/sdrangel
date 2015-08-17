@@ -35,7 +35,6 @@ public:
         uint traceSize);
 	void setOneShot(bool oneShot);
 
-	virtual bool init(const Message& cmd);
 	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();

@@ -43,7 +43,7 @@ protected:
 	public: \
 		const char* getIdentifier() const; \
 		bool matchIdentifier(const char* identifier) const; \
-		static bool match(const Message* message); \
+		static bool match(const Message& message); \
 	protected: \
 		static const char* m_identifier; \
 	private:
@@ -54,6 +54,6 @@ protected:
 	bool Name::matchIdentifier(const char* identifier) const {\
 		return (m_identifier == identifier) ? true : BaseClass::matchIdentifier(identifier); \
 	} \
-	bool Name::match(const Message* message) { return message->matchIdentifier(m_identifier); }
+	bool Name::match(const Message& message) { return message.matchIdentifier(m_identifier); }
 
 #endif // INCLUDE_MESSAGE_H

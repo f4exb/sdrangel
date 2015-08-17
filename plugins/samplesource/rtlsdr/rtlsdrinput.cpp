@@ -26,8 +26,9 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
 RTLSDRInput::Settings::Settings() :
+	m_devSampleRate(1024*1000),
+	m_centerFrequency(435000*1000),
 	m_gain(0),
-	m_samplerate(1024000),
 	m_loPpmCorrection(0),
 	m_log2Decim(4)
 {
@@ -35,8 +36,9 @@ RTLSDRInput::Settings::Settings() :
 
 void RTLSDRInput::Settings::resetToDefaults()
 {
+	m_devSampleRate = 1024*1000;
+	m_centerFrequency = 435000*1000;
 	m_gain = 0;
-	m_samplerate = 1024000;
 	m_loPpmCorrection = 0;
 	m_log2Decim = 4;
 }
@@ -44,10 +46,11 @@ void RTLSDRInput::Settings::resetToDefaults()
 QByteArray RTLSDRInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeS32(1, m_gain);
-	s.writeS32(2, m_samplerate);
-	s.writeS32(3, m_loPpmCorrection);
-	s.writeU32(4, m_log2Decim);
+	s.writeS32(1, m_devSampleRate);
+	s.writeU64(2, m_centerFrequency);
+	s.writeS32(3, m_gain);
+	s.writeS32(4, m_loPpmCorrection);
+	s.writeU32(5, m_log2Decim);
 	return s.final();
 }
 
@@ -55,43 +58,49 @@ bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
-		d.readS32(1, &m_gain, 0);
-		d.readS32(2, &m_samplerate, 0);
-		d.readS32(3, &m_loPpmCorrection, 0);
-		d.readU32(4, &m_log2Decim, 4);
+	if(d.getVersion() == 1)
+	{
+		d.readS32(1, &m_devSampleRate, 1024*1000);
+		d.readU64(2, &m_centerFrequency, 435000*1000);
+		d.readS32(3, &m_gain, 0);
+		d.readS32(4, &m_loPpmCorrection, 0);
+		d.readU32(5, &m_log2Decim, 4);
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
 }
 
-RTLSDRInput::RTLSDRInput(MessageQueue* msgQueueToGUI) :
-	SampleSource(msgQueueToGUI),
+RTLSDRInput::RTLSDRInput() :
 	m_settings(),
-	m_dev(NULL),
-	m_rtlSDRThread(NULL),
+	m_dev(0),
+	m_rtlSDRThread(0),
 	m_deviceDescription()
 {
 }
 
 RTLSDRInput::~RTLSDRInput()
 {
-	stopInput();
+	stop();
 }
 
-bool RTLSDRInput::startInput(int device)
+bool RTLSDRInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_dev != NULL)
-		stopInput();
+	if (m_dev != 0)
+	{
+		stop();
+	}
 
 	char vendor[256];
 	char product[256];
@@ -99,12 +108,14 @@ bool RTLSDRInput::startInput(int device)
 	int res;
 	int numberOfGains;
 
-	if(!m_sampleFifo.setSize(96000 * 4)) {
+	if (!m_sampleFifo.setSize(96000 * 4))
+	{
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	if((res = rtlsdr_open(&m_dev, device)) < 0) {
+	if ((res = rtlsdr_open(&m_dev, device)) < 0)
+	{
 		qCritical("could not open RTLSDR #%d: %s", device, strerror(errno));
 		return false;
 	}
@@ -112,74 +123,101 @@ bool RTLSDRInput::startInput(int device)
 	vendor[0] = '\0';
 	product[0] = '\0';
 	serial[0] = '\0';
-	if((res = rtlsdr_get_usb_strings(m_dev, vendor, product, serial)) < 0) {
+
+	if ((res = rtlsdr_get_usb_strings(m_dev, vendor, product, serial)) < 0)
+	{
 		qCritical("error accessing USB device");
-		goto failed;
+		stop();
+		return false;
 	}
+
 	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if((res = rtlsdr_set_sample_rate(m_dev, 1024000)) < 0) {
+	if ((res = rtlsdr_set_sample_rate(m_dev, 1024000)) < 0)
+	{
 		qCritical("could not set sample rate: 1024k S/s");
-		goto failed;
+		stop();
+		return false;
 	}
 
-	if((res = rtlsdr_set_tuner_gain_mode(m_dev, 1)) < 0) {
+	if ((res = rtlsdr_set_tuner_gain_mode(m_dev, 1)) < 0)
+	{
 		qCritical("error setting tuner gain mode");
-		goto failed;
+		stop();
+		return false;
 	}
-	if((res = rtlsdr_set_agc_mode(m_dev, 0)) < 0) {
+
+	if ((res = rtlsdr_set_agc_mode(m_dev, 0)) < 0)
+	{
 		qCritical("error setting agc mode");
-		goto failed;
+		stop();
+		return false;
 	}
 
 	numberOfGains = rtlsdr_get_tuner_gains(m_dev, NULL);
-	if(numberOfGains < 0) {
+
+	if (numberOfGains < 0)
+	{
 		qCritical("error getting number of gain values supported");
-		goto failed;
-	}
-	m_gains.resize(numberOfGains);
-	if(rtlsdr_get_tuner_gains(m_dev, &m_gains[0]) < 0) {
-		qCritical("error getting gain values");
-		goto failed;
-	}
-	if((res = rtlsdr_reset_buffer(m_dev)) < 0) {
-		qCritical("could not reset USB EP buffers: %s", strerror(errno));
-		goto failed;
+		stop();
+		return false;
 	}
 
-	if((m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo)) == NULL) {
-		qFatal("out of memory");
-		goto failed;
+	m_gains.resize(numberOfGains);
+
+	if (rtlsdr_get_tuner_gains(m_dev, &m_gains[0]) < 0)
+	{
+		qCritical("error getting gain values");
+		stop();
+		return false;
 	}
+
+	if ((res = rtlsdr_reset_buffer(m_dev)) < 0)
+	{
+		qCritical("could not reset USB EP buffers: %s", strerror(errno));
+		stop();
+		return false;
+	}
+
+	if ((m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo)) == NULL)
+	{
+		qFatal("out of memory");
+		stop();
+		return false;
+	}
+
 	m_rtlSDRThread->startWork();
 
 	mutexLocker.unlock();
-	applySettings(m_generalSettings, m_settings, true);
 
-	qDebug("RTLSDRInput: start");
-	MsgReportRTLSDR::create(m_gains)->submit(m_guiMessageQueue);
+	applySettings(m_settings, true);
+
+	qDebug("RTLSDRInput::start");
+
+	MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);
+	getOutputMessageQueue()->push(message);
 
 	return true;
-
-failed:
-	stopInput();
-	return false;
 }
 
-void RTLSDRInput::stopInput()
+void RTLSDRInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_rtlSDRThread != NULL) {
+	if (m_rtlSDRThread != 0)
+	{
 		m_rtlSDRThread->stopWork();
 		delete m_rtlSDRThread;
-		m_rtlSDRThread = NULL;
+		m_rtlSDRThread = 0;
 	}
-	if(m_dev != NULL) {
+
+	if (m_dev != 0)
+	{
 		rtlsdr_close(m_dev);
-		m_dev = NULL;
+		m_dev = 0;
 	}
+
 	m_deviceDescription.clear();
 }
 
@@ -190,88 +228,110 @@ const QString& RTLSDRInput::getDeviceDescription() const
 
 int RTLSDRInput::getSampleRate() const
 {
-	int rate = m_settings.m_samplerate;
+	int rate = m_settings.m_devSampleRate;
 	return (rate / (1<<m_settings.m_log2Decim));
-	/*
-	if (rate < 800000)
-		return (rate / 4);
-	if ((rate == 1152000) || (rate == 2048000))
-		return (rate / 8);
-	return (rate / 16);
-	*/
 }
 
 quint64 RTLSDRInput::getCenterFrequency() const
 {
-	return m_generalSettings.m_centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
-bool RTLSDRInput::handleMessage(Message* message)
+bool RTLSDRInput::handleMessage(const Message& message)
 {
-	if(MsgConfigureRTLSDR::match(message)) {
-		MsgConfigureRTLSDR* conf = (MsgConfigureRTLSDR*)message;
-		if(!applySettings(conf->getGeneralSettings(), conf->getSettings(), false))
+	if (MsgConfigureRTLSDR::match(message))
+	{
+		MsgConfigureRTLSDR& conf = (MsgConfigureRTLSDR&) message;
+
+		if (!applySettings(conf.getSettings(), false))
+		{
 			qDebug("RTLSDR config error");
-		message->completed();
+		}
+
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
 
-bool RTLSDRInput::applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force)
+bool RTLSDRInput::applySettings(const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if((m_settings.m_gain != settings.m_gain) || force) {
+	if ((m_settings.m_gain != settings.m_gain) || force)
+	{
 		m_settings.m_gain = settings.m_gain;
-		if(m_dev != NULL) {
+
+		if(m_dev != 0)
+		{
 			if(rtlsdr_set_tuner_gain(m_dev, m_settings.m_gain) != 0)
+			{
 				qDebug("rtlsdr_set_tuner_gain() failed");
-		}
-	}
-
-	if((m_settings.m_samplerate != settings.m_samplerate) || force) {
-		if(m_dev != NULL) {
-			if( rtlsdr_set_sample_rate(m_dev, settings.m_samplerate) < 0)
-				qCritical("could not set sample rate: %d", settings.m_samplerate);
-			else {
-				m_settings.m_samplerate = settings.m_samplerate;
-				m_rtlSDRThread->setSamplerate(settings.m_samplerate);
 			}
 		}
 	}
 
-	if((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force) {
-		if(m_dev != NULL) {
-			if( rtlsdr_set_freq_correction(m_dev, settings.m_loPpmCorrection) < 0)
+	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+	{
+		if(m_dev != 0)
+		{
+			if( rtlsdr_set_sample_rate(m_dev, settings.m_devSampleRate) < 0)
+			{
+				qCritical("could not set sample rate: %d", settings.m_devSampleRate);
+			}
+			else
+			{
+				m_settings.m_devSampleRate = settings.m_devSampleRate;
+				m_rtlSDRThread->setSamplerate(settings.m_devSampleRate);
+			}
+		}
+	}
+
+	if ((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force)
+	{
+		if (m_dev != 0)
+		{
+			if (rtlsdr_set_freq_correction(m_dev, settings.m_loPpmCorrection) < 0)
+			{
 				qCritical("could not set LO ppm correction: %d", settings.m_loPpmCorrection);
-			else {
+			}
+			else
+			{
 				m_settings.m_loPpmCorrection = settings.m_loPpmCorrection;
-				//m_rtlSDRThread->setSamplerate(settings.m_samplerate);
 			}
 		}
 	}
 
-	if((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
-		if(m_dev != NULL) {
+	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+	{
+		if(m_dev != 0)
+		{
 			m_settings.m_log2Decim = settings.m_log2Decim;
 			m_rtlSDRThread->setLog2Decimation(settings.m_log2Decim);
 		}
 	}
 
-	m_generalSettings.m_centerFrequency = generalSettings.m_centerFrequency;
-	if(m_dev != NULL) {
-		qint64 centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+	m_settings.m_centerFrequency = settings.m_centerFrequency;
 
-		if (m_settings.m_log2Decim == 0) { // Little wooby-doop if no decimation
-			centerFrequency = m_generalSettings.m_centerFrequency;
-		} else {
-			centerFrequency = m_generalSettings.m_centerFrequency + (m_settings.m_samplerate / 4);
+	if(m_dev != 0)
+	{
+		qint64 centerFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
+
+		if (m_settings.m_log2Decim == 0)
+		{ // Little wooby-doop if no decimation
+			centerFrequency = m_settings.m_centerFrequency;
+		}
+		else
+		{
+			centerFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
 		}
 
-		if(rtlsdr_set_center_freq( m_dev, centerFrequency ) != 0)
-			qDebug("osmosdr_set_center_freq(%lld) failed", m_generalSettings.m_centerFrequency);
+		if (rtlsdr_set_center_freq( m_dev, centerFrequency ) != 0)
+		{
+			qDebug("rtlsdr_set_center_freq(%lld) failed", m_settings.m_centerFrequency);
+		}
 	}
 
 	return true;

@@ -129,9 +129,12 @@ Done since the fork
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
   - File sample source plugin (recording reader) not working
-  - Make the DSP engine global static
-  - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
-  - Message queuing and handling redesign
+  - Redesign:
+    - Make the DSP engine global static
+    - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
+    - Synchronous messaging class to push message to thread and wait for completion
+    - Message queuing and handling redesign
+    - Many other little things...
     
 =====
 To Do

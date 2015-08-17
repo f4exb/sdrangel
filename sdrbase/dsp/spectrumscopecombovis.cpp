@@ -13,14 +13,6 @@ SpectrumScopeComboVis::~SpectrumScopeComboVis()
 {
 }
 
-bool SpectrumScopeComboVis::init(const Message& cmd)
-{
-	bool spectDone = m_spectrumVis->init(cmd);
-	bool scopeDone = m_scopeVis->init(cmd);
-
-	return (spectDone || scopeDone);
-}
-
 void SpectrumScopeComboVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	m_scopeVis->feed(begin, end, false);

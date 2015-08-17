@@ -5,7 +5,6 @@ set(fcd_SOURCES
 	fcdinput.cpp
 	fcdplugin.cpp
 	fcdthread.cpp
-	fcdsource.cpp
 	hid-libusb.c
 )
 

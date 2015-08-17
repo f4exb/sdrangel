@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QTime>
+#include <QDebug>
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
@@ -51,13 +52,15 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 WFMDemod::~WFMDemod()
 {
 	if (m_rfFilter)
+	{
 		delete m_rfFilter;
+	}
 }
 
 void WFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
 {
 	Message* cmd = MsgConfigureWFMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
@@ -79,13 +82,6 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 		for (int i =0 ; i  <rf_out; i++)
 		{
-			/*
-			// atan2 version
-			Real x = rf[i].real() * m_lastSample.real() + rf[i].imag() * m_lastSample.imag();
-			Real y = rf[i].real() * m_m1Sample.imag() - rf[i].imag() * m_m1Sample.real();
-			Real demod = atan2(x,y) / M_PI;
-			*/
-
 			msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
 
 			m_movingAverage.feed(msq);
@@ -135,89 +131,6 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				m_interpolatorDistanceRemain += m_interpolatorDistance;
 			}
 		}
-
-#if 0
-		{
-			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
-			{
-				m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
-
-				m_movingAverage.feed(ci.real() * ci.real() + ci.imag() * ci.imag());
-				if(m_movingAverage.average() >= m_squelchLevel)
-					m_squelchState = m_running.m_audioSampleRate/ 20;
-
-				qint16 sample;
-				if(m_squelchState > 0) {
-					m_squelchState--;
-
-					/*
-					Real argument = arg(ci);
-					argument /= M_PI;
-					Real demod = argument - m_lastArgument;
-					m_lastArgument = argument;
-					*/
-
-
-					//ci *= 32768.0;
-
-					/*
-					Complex d = conj(m_lastSample) * ci;
-					m_lastSample = ci;
-					Real demod = atan2(d.imag(), d.real());
-					*/
-
-
-					//m_lastSample = ci;
-
-					/*
-					Real argument = atan2(ci.real()*m_lastSample.imag() - m_lastSample.real()*ci.imag(),
-							ci.real()*m_lastSample.real() + ci.imag()*m_lastSample.imag());
-					argument /= M_PI;
-					Real demod = argument - m_lastArgument;
-					m_lastArgument = argument;
-					m_lastSample = ci;
-					*/
-
-					//Real demod = arctan2(d.imag(), d.real());
-/*
-					Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
-					Real argument2 = m_lastSample.real();
-					Real demod = angleDist(argument2, argument1);
-					m_lastSample = Complex(argument1, 0);
-*/
-					//demod /= M_PI;
-
-					demod = m_lowpass.filter(demod);
-
-					/*
-					if(demod < -1)
-						demod = -1;
-					else if(demod > 1)
-						demod = 1;
-					*/
-
-					demod *= m_running.m_volume;
-					sample = demod * 64;
-
-				} else {
-					sample = 0;
-				}
-
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
-				++m_audioBufferFill;
-				if(m_audioBufferFill >= m_audioBuffer.size()) {
-					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-					if(res != m_audioBufferFill)
-						qDebug("lost %u audio samples", m_audioBufferFill - res);
-					m_audioBufferFill = 0;
-				}
-
-				m_interpolatorDistanceRemain += m_interpolatorDistance;
-			}
-		}
-#endif
-
 	}
 
 	if(m_audioBufferFill > 0) {
@@ -246,28 +159,50 @@ void WFMDemod::stop()
 {
 }
 
-bool WFMDemod::handleMessage(Message* cmd)
+bool WFMDemod::handleMessage(const Message& cmd)
 {
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
+	qDebug() << "WFMDemod::handleMessage";
 
-		m_config.m_inputSampleRate = signal->getSampleRate();
-		m_config.m_inputFrequencyOffset = signal->getFrequencyOffset();
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_config.m_inputSampleRate = notif.getSampleRate();
+		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 		apply();
-		cmd->completed();
+
+		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+
 		return true;
-	} else if(MsgConfigureWFMDemod::match(cmd)) {
-		MsgConfigureWFMDemod* cfg = (MsgConfigureWFMDemod*)cmd;
-		m_config.m_rfBandwidth = cfg->getRFBandwidth();
-		m_config.m_afBandwidth = cfg->getAFBandwidth();
-		m_config.m_volume = cfg->getVolume();
-		m_config.m_squelch = cfg->getSquelch();
+	}
+	else if (MsgConfigureWFMDemod::match(cmd))
+	{
+		MsgConfigureWFMDemod& cfg = (MsgConfigureWFMDemod&) cmd;
+
+		m_config.m_rfBandwidth = cfg.getRFBandwidth();
+		m_config.m_afBandwidth = cfg.getAFBandwidth();
+		m_config.m_volume = cfg.getVolume();
+		m_config.m_squelch = cfg.getSquelch();
 		apply();
+
+		qDebug() << "  - MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+				<< " m_afBandwidth: " << m_config.m_afBandwidth
+				<< " m_volume: " << m_config.m_volume
+				<< " m_squelch: " << m_config.m_squelch;
+
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if (m_sampleSink != 0)
+		{
 		   return m_sampleSink->handleMessage(cmd);
-		else return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 

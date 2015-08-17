@@ -8,10 +8,8 @@ class PluginAPI;
 class ChannelMarker;
 
 class AudioFifo;
-class ThreadedSampleSink;
 class Channelizer;
 class AMDemod;
-class NullSink;
 
 namespace Ui {
 	class AMDemodGUI;
@@ -32,7 +30,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	bool handleMessage(Message* message);
+	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void viewChanged();
@@ -52,10 +50,8 @@ private:
 	bool m_basicSettingsShown;
 
 	AudioFifo* m_audioFifo;
-	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	AMDemod* m_amDemod;
-	NullSink *m_nullSink;
 
 	static const int m_rfBW[];
 

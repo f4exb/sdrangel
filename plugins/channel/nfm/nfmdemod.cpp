@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QTime>
+#include <QDebug>
 #include <stdio.h>
 #include <complex.h>
 #include "nfmdemod.h"
@@ -23,6 +24,7 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/dspengine.h"
 
 static const Real afSqTones[2] = {1200.0, 8000.0};
 
@@ -68,7 +70,7 @@ NFMDemod::~NFMDemod()
 void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
 {
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 float arctan2(Real y, Real x)
@@ -250,52 +252,80 @@ void NFMDemod::stop()
 {
 }
 
-bool NFMDemod::handleMessage(Message* cmd)
+bool NFMDemod::handleMessage(const Message& cmd)
 {
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
+	qDebug() << "NFMDemod::handleMessage";
 
-		m_config.m_inputSampleRate = signal->getSampleRate();
-		m_config.m_inputFrequencyOffset = signal->getFrequencyOffset();
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_config.m_inputSampleRate = notif.getSampleRate();
+		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+
 		apply();
-		cmd->completed();
+
+		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+
 		return true;
-	} else if(MsgConfigureNFMDemod::match(cmd)) {
-		MsgConfigureNFMDemod* cfg = (MsgConfigureNFMDemod*)cmd;
-		m_config.m_rfBandwidth = cfg->getRFBandwidth();
-		m_config.m_afBandwidth = cfg->getAFBandwidth();
-		m_config.m_volume = cfg->getVolume();
-		m_config.m_squelch = cfg->getSquelch();
+	}
+	else if (MsgConfigureNFMDemod::match(cmd))
+	{
+		MsgConfigureNFMDemod& cfg = (MsgConfigureNFMDemod&) cmd;
+
+		m_config.m_rfBandwidth = cfg.getRFBandwidth();
+		m_config.m_afBandwidth = cfg.getAFBandwidth();
+		m_config.m_volume = cfg.getVolume();
+		m_config.m_squelch = cfg.getSquelch();
+
 		apply();
+
+		qDebug() << "  - MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+				<< " m_afBandwidth: " << m_config.m_afBandwidth
+				<< " m_volume: " << m_config.m_volume
+				<< " m_squelch: " << m_config.m_squelch;
+
 		return true;
-	} else {
-		if(m_sampleSink != NULL)
+	}
+	else
+	{
+		if (m_sampleSink != 0)
+		{
 		   return m_sampleSink->handleMessage(cmd);
-		else return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
 void NFMDemod::apply()
 {
 	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_inputSampleRate != m_running.m_inputSampleRate)) {
+		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))
+	{
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth)) {
+		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
+	{
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate)) {
+		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+	{
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 	}
 
-	if(m_config.m_squelch != m_running.m_squelch) {
+	if(m_config.m_squelch != m_running.m_squelch)
+	{
 		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
 		m_squelchLevel *= m_squelchLevel;
 		m_afSquelch.setThreshold(m_squelchLevel);

@@ -23,7 +23,7 @@
 
 struct fcd_buffer {
 	void *start;
-	size_t length;
+	std::size_t length;
 };
 
 class FCDThread;
@@ -32,6 +32,7 @@ class FCDInput : public SampleSource {
 public:
 	struct Settings {
 		Settings();
+		quint64 centerFrequency;
 		qint32 range;
 		qint32 gain;
 		qint32 bias;
@@ -44,46 +45,46 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const GeneralSettings& getGeneralSettings() const { return m_generalSettings; }
 		const Settings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFCD* create(const GeneralSettings& generalSettings, const Settings& settings)
+		static MsgConfigureFCD* create(const Settings& settings)
 		{
-			return new MsgConfigureFCD(generalSettings, settings);
+			return new MsgConfigureFCD(settings);
 		}
 
 	private:
-		GeneralSettings m_generalSettings;
 		Settings m_settings;
 
-		MsgConfigureFCD(const GeneralSettings& generalSettings, const Settings& settings) :
+		MsgConfigureFCD(const Settings& settings) :
 			Message(),
-			m_generalSettings(generalSettings),
 			m_settings(settings)
 		{ }
 	};
 
+	FCDInput();
+	virtual ~FCDInput();
 
-	FCDInput(MessageQueue* msgQueueToGUI);
-	~FCDInput();
+	virtual bool init(const Message& cmd);
+	virtual bool start(int device);
+	virtual void stop();
 
-	bool startInput(int device);
-	void stopInput();
+	virtual const QString& getDeviceDescription() const;
+	virtual int getSampleRate() const;
+	virtual quint64 getCenterFrequency() const;
 
-	const QString& getDeviceDescription() const;
-	int getSampleRate() const;
+	virtual bool handleMessage(const Message& message);
+
 	void set_center_freq(double freq);
 	void set_bias_t(bool on);
 	void set_lna_gain(bool on);
-	quint64 getCenterFrequency() const;
-	bool handleMessage(Message* message);
 
 private:
+	void applySettings(const Settings& settings, bool force);
+
 	QMutex m_mutex;
 	Settings m_settings;
 	FCDThread* m_FCDThread;
 	QString m_deviceDescription;
-	void applySettings(const GeneralSettings& generalSettings, const Settings& settings, bool force);
 };
 
 #endif // INCLUDE_FCD_H

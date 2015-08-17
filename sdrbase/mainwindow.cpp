@@ -325,9 +325,9 @@ void MainWindow::handleDSPMessages()
 
 		std::cerr << "MainWindow::handleDSPMessages: " << message->getIdentifier() << std::endl;
 
-		if (DSPEngineReport::match(message))
+		if (DSPEngineReport::match(*message))
 		{
-			DSPEngineReport* rep = (DSPEngineReport*)message;
+			DSPEngineReport* rep = (DSPEngineReport*) message;
 			m_sampleRate = rep->getSampleRate();
 			m_centerFrequency = rep->getCenterFrequency();
 			qDebug("SampleRate:%d, CenterFrequency:%llu", rep->getSampleRate(), rep->getCenterFrequency());
@@ -350,7 +350,7 @@ void MainWindow::handleMessages()
 		qDebug("Message: %s", message->getIdentifier());
 		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;
 
-		if (!m_pluginManager->handleMessage(message))
+		if (!m_pluginManager->handleMessage(*message))
 		{
 			delete message;
 		}

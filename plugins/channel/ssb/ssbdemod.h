@@ -33,14 +33,14 @@ class AudioFifo;
 class SSBDemod : public SampleSink {
 public:
 	SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
-	~SSBDemod();
+	virtual ~SSBDemod();
 
 	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2);
 
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
-	void start();
-	void stop();
-	bool handleMessage(Message* cmd);
+	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& cmd);
 
 private:
 	class MsgConfigureSSBDemod : public Message {

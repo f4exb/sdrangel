@@ -47,6 +47,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_last = 0;
 	m_this = 0;
 	m_scale = 0;
+	m_boost = 0;
 	m_sampleBufferSSB.resize(tcpFftLen);
 	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
 	// if (!TCPFilter) segfault;
@@ -60,13 +61,13 @@ TCPSrc::~TCPSrc()
 void TCPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
 {
 	Message* cmd = MsgTCPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, tcpPort, boost);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
 	Message* cmd = MsgTCPSrcSpectrum::create(enabled);
-	cmd->submit(messageQueue, this);
+	messageQueue->push(cmd);
 }
 
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -157,61 +158,101 @@ void TCPSrc::stop()
 	delete m_tcpServer;
 }
 
-bool TCPSrc::handleMessage(Message* cmd)
+bool TCPSrc::handleMessage(const Message& cmd)
 {
-	if(DSPSignalNotification::match(cmd)) {
-		DSPSignalNotification* signal = (DSPSignalNotification*)cmd;
-		qDebug("%d samples/sec, %lld Hz offset", signal->getSampleRate(), signal->getFrequencyOffset());
-		m_inputSampleRate = signal->getSampleRate();
-		m_nco.setFreq(-signal->getFrequencyOffset(), m_inputSampleRate);
+	qDebug() << "TCPSrc::handleMessage";
+
+	if (DSPSignalNotification::match(cmd))
+	{
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+		m_inputSampleRate = notif.getSampleRate();
+		m_nco.setFreq(-notif.getFrequencyOffset(), m_inputSampleRate);
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
-		cmd->completed();
+
+		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate
+				<< " frequencyOffset: " << notif.getFrequencyOffset();
+
 		return true;
-	} else if(MsgTCPSrcConfigure::match(cmd)) {
-		MsgTCPSrcConfigure* cfg = (MsgTCPSrcConfigure*)cmd;
-		m_sampleFormat = cfg->getSampleFormat();
-		m_outputSampleRate = cfg->getOutputSampleRate();
-		m_rfBandwidth = cfg->getRFBandwidth();
-		if(cfg->getTCPPort() != m_tcpPort) {
-			m_tcpPort = cfg->getTCPPort();
+	}
+	else if (MsgTCPSrcConfigure::match(cmd))
+	{
+		MsgTCPSrcConfigure& cfg = (MsgTCPSrcConfigure&) cmd;
+
+		m_sampleFormat = cfg.getSampleFormat();
+		m_outputSampleRate = cfg.getOutputSampleRate();
+		m_rfBandwidth = cfg.getRFBandwidth();
+
+		if (cfg.getTCPPort() != m_tcpPort)
+		{
+			m_tcpPort = cfg.getTCPPort();
+
 			if(m_tcpServer->isListening())
+			{
 				m_tcpServer->close();
+			}
+
 			m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
 		}
-		m_boost = cfg->getBoost();
+
+		m_boost = cfg.getBoost();
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
+
 		if (m_sampleFormat == FormatSSB)
+		{
 			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+		}
 		else
+		{
 			TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
-		cmd->completed();
+		}
+
+		qDebug() << "  - MsgTCPSrcConfigure: m_sampleFormat: " << m_sampleFormat
+				<< " m_outputSampleRate: " << m_outputSampleRate
+				<< " m_rfBandwidth: " << m_rfBandwidth
+				<< " m_boost: " << m_boost;
+
 		return true;
-	} else if(MsgTCPSrcSpectrum::match(cmd)) {
-		MsgTCPSrcSpectrum* spc = (MsgTCPSrcSpectrum*)cmd;
-		m_spectrumEnabled = spc->getEnabled();
-		cmd->completed();
+	}
+	else if (MsgTCPSrcSpectrum::match(cmd))
+	{
+		MsgTCPSrcSpectrum& spc = (MsgTCPSrcSpectrum&) cmd;
+
+		m_spectrumEnabled = spc.getEnabled();
+
+		qDebug() << "  - MsgTCPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+
 		return true;
-	} else {
-		if(m_spectrum != NULL)
+	}
+	else
+	{
+		if(m_spectrum != 0)
+		{
 		   return m_spectrum->handleMessage(cmd);
-		else return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
 void TCPSrc::closeAllSockets(Sockets* sockets)
 {
-	for(int i = 0; i < sockets->count(); ++i) {
+	for(int i = 0; i < sockets->count(); ++i)
+	{
 		MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(false, sockets->at(i).id, QHostAddress(), 0);
-		msg->submit(m_uiMessageQueue, (PluginGUI*)m_tcpSrcGUI);
+		m_uiMessageQueue->push(msg);
 		sockets->at(i).socket->close();
 	}
 }
 
 void TCPSrc::onNewConnection()
 {
-	while(m_tcpServer->hasPendingConnections()) {
+	while(m_tcpServer->hasPendingConnections())
+	{
 		QTcpSocket* connection = m_tcpServer->nextPendingConnection();
 		connect(connection, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
 
@@ -223,7 +264,7 @@ void TCPSrc::onNewConnection()
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
 				m_ssbSockets.push_back(Socket(id, connection));
-				msg->submit(m_uiMessageQueue, (PluginGUI*)m_tcpSrcGUI);
+				m_uiMessageQueue->push(msg);
 				break;
 			}
 
@@ -232,7 +273,7 @@ void TCPSrc::onNewConnection()
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextS16leId = (m_nextS16leId + 1) & 0xffffff;
 				m_s16leSockets.push_back(Socket(id, connection));
-				msg->submit(m_uiMessageQueue, (PluginGUI*)m_tcpSrcGUI);
+				m_uiMessageQueue->push(msg);
 				break;
 			}
 
@@ -246,19 +287,25 @@ void TCPSrc::onNewConnection()
 void TCPSrc::onDisconnected()
 {
 	quint32 id;
-	QTcpSocket* socket = NULL;
+	QTcpSocket* socket = 0;
 
-	for(int i = 0; i < m_ssbSockets.count(); i++) {
-		if(m_ssbSockets[i].socket == sender()) {
+	for(int i = 0; i < m_ssbSockets.count(); i++)
+	{
+		if(m_ssbSockets[i].socket == sender())
+		{
 			id = m_ssbSockets[i].id;
 			socket = m_ssbSockets[i].socket;
 			m_ssbSockets.removeAt(i);
 			break;
 		}
 	}
-	if(socket == NULL) {
-		for(int i = 0; i < m_s16leSockets.count(); i++) {
-			if(m_s16leSockets[i].socket == sender()) {
+
+	if(socket == 0)
+	{
+		for(int i = 0; i < m_s16leSockets.count(); i++)
+		{
+			if(m_s16leSockets[i].socket == sender())
+			{
 				id = m_s16leSockets[i].id;
 				socket = m_s16leSockets[i].socket;
 				m_s16leSockets.removeAt(i);
@@ -266,9 +313,11 @@ void TCPSrc::onDisconnected()
 			}
 		}
 	}
-	if(socket != NULL) {
+
+	if(socket != 0)
+	{
 		MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(false, id, QHostAddress(), 0);
-		msg->submit(m_uiMessageQueue, (PluginGUI*)m_tcpSrcGUI);
+		m_uiMessageQueue->push(msg);
 		socket->deleteLater();
 	}
 }

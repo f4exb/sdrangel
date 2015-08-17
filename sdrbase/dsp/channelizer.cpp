@@ -20,22 +20,6 @@ Channelizer::~Channelizer()
 	freeFilterChain();
 }
 
-bool Channelizer::init(const Message& cmd)
-{
-	if (DSPSignalNotification::match(&cmd))
-	{
-		DSPSignalNotification* notif = (DSPSignalNotification*) &cmd;
-		m_inputSampleRate = notif->getSampleRate();
-		qDebug() << "FileSink::init: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
-		emit inputSampleRateChanged();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 void Channelizer::configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency)
 {
 	Message* cmd = new DSPConfigureChannelizer(sampleRate, centerFrequency);
@@ -84,31 +68,27 @@ bool Channelizer::handleMessage(const Message& cmd)
 {
 	qDebug() << "Channelizer::handleMessage: " << cmd.getIdentifier();
 
-	/*
-	if (DSPSignalNotification::match(&cmd))
+	if (DSPSignalNotification::match(cmd))
 	{
-		DSPSignalNotification* notif = (DSPSignalNotification*) &cmd;
-		m_inputSampleRate = notif->getSampleRate();
+		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		m_inputSampleRate = notif.getSampleRate();
 		qDebug() << "Channelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
 		applyConfiguration();
 
-		delete cmd;
-
 		if (m_sampleSink != NULL)
 		{
-			DSPSignalNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
-			m_sampleSink->handleMessage(notif))
+			m_sampleSink->handleMessage(notif);
 		}
 
 		emit inputSampleRateChanged();
 		return true;
 	}
-	else*/
-	if (DSPConfigureChannelizer::match(&cmd))
+	else
+	if (DSPConfigureChannelizer::match(cmd))
 	{
-		DSPConfigureChannelizer* chan = (DSPConfigureChannelizer*) &cmd;
-		m_requestedOutputSampleRate = chan->getSampleRate();
-		m_requestedCenterFrequency = chan->getCenterFrequency();
+		DSPConfigureChannelizer& chan = (DSPConfigureChannelizer&) cmd;
+		m_requestedOutputSampleRate = chan.getSampleRate();
+		m_requestedCenterFrequency = chan.getCenterFrequency();
 
 		qDebug() << "Channelizer::handleMessage: DSPConfigureChannelizer:"
 				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate

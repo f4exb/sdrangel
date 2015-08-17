@@ -20,6 +20,7 @@
 #include "ui_bladerfgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "dsp/dspengine.h"
 #include "bladerfgui.h"
 
 BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
@@ -35,8 +36,8 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
-	m_sampleSource = new BladerfInput(m_pluginAPI->getMainWindowMessageQueue());
-	m_pluginAPI->setSampleSource(m_sampleSource);
+	m_sampleSource = new BladerfInput();
+	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
 BladerfGui::~BladerfGui()
@@ -61,32 +62,14 @@ QString BladerfGui::getName() const
 
 void BladerfGui::resetToDefaults()
 {
-	m_generalSettings.resetToDefaults();
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray BladerfGui::serializeGeneral() const
-{
-	return m_generalSettings.serialize();
-}
-
-bool BladerfGui::deserializeGeneral(const QByteArray&data)
-{
-	if(m_generalSettings.deserialize(data)) {
-		displaySettings();
-		sendSettings();
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
-
 qint64 BladerfGui::getCenterFrequency() const
 {
-	return m_generalSettings.m_centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 QByteArray BladerfGui::serialize() const
@@ -106,23 +89,25 @@ bool BladerfGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool BladerfGui::handleMessage(Message* message)
+bool BladerfGui::handleMessage(const Message& message)
 {
-	if(BladerfInput::MsgReportBladerf::match(message)) {
+	if (BladerfInput::MsgReportBladerf::match(message))
+	{
 		displaySettings();
-		message->completed();
 		return true;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
 
 void BladerfGui::displaySettings()
 {
-	ui->centerFrequency->setValue(m_generalSettings.m_centerFrequency / 1000);
+	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
-	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_samplerate / 1000));
-	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_samplerate);
+	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
+	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_devSampleRate);
 	ui->samplerate->setValue(sampleRateIndex);
 
 	ui->bandwidthText->setText(tr("%1k").arg(m_settings.m_bandwidth / 1000));
@@ -154,7 +139,7 @@ void BladerfGui::sendSettings()
 
 void BladerfGui::on_centerFrequency_changed(quint64 value)
 {
-	m_generalSettings.m_centerFrequency = value * 1000;
+	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
 }
 
@@ -162,7 +147,7 @@ void BladerfGui::on_samplerate_valueChanged(int value)
 {
 	int newrate = BladerfSampleRates::getRate(value);
 	ui->samplerateText->setText(tr("%1k").arg(newrate));
-	m_settings.m_samplerate = newrate * 1000;
+	m_settings.m_devSampleRate = newrate * 1000;
 	sendSettings();
 }
 
@@ -291,8 +276,8 @@ void BladerfGui::on_xb200_currentIndexChanged(int index)
 
 void BladerfGui::updateHardware()
 {
-	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create(m_generalSettings, m_settings);
-	message->submit(m_pluginAPI->getDSPEngineMessageQueue());
+	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create( m_settings);
+	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
 }
 

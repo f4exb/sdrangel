@@ -30,11 +30,6 @@ SpectrumVis::~SpectrumVis()
 	delete m_fft;
 }
 
-bool SpectrumVis::init(const Message& cmd)
-{
-	return false;
-}
-
 void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window)
 {
 	DSPConfigureSpectrumVis* cmd = new DSPConfigureSpectrumVis(fftSize, overlapPercent, window);
@@ -69,13 +64,13 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 		return;
 
 	while(begin < end) {
-		size_t todo = end - begin;
-		size_t samplesNeeded = m_refillSize - m_fftBufferFill;
+		std::size_t todo = end - begin;
+		std::size_t samplesNeeded = m_refillSize - m_fftBufferFill;
 
 		if(todo >= samplesNeeded) {
 			// fill up the buffer
 			std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill;
-			for(size_t i = 0; i < samplesNeeded; ++i, ++begin)
+			for(std::size_t i = 0; i < samplesNeeded; ++i, ++begin)
 				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
 
 			// apply fft window (and copy from m_fftBuffer to m_fftIn)
@@ -90,10 +85,10 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 			const Complex* fftOut = m_fft->out();
 			Complex c;
 			Real v;
-			size_t halfSize = m_fftSize / 2;
+			std::size_t halfSize = m_fftSize / 2;
 
 			if ( positiveOnly ) {
-				for(size_t i = 0; i < halfSize; i++) {
+				for(std::size_t i = 0; i < halfSize; i++) {
 					c = fftOut[i];
 					v = c.real() * c.real() + c.imag() * c.imag();
 					v = mult * log2f(v) + ofs;
@@ -101,7 +96,7 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 					m_logPowerSpectrum[i * 2 + 1] = v;
 				}
 			} else {
-				for(size_t i = 0; i < halfSize; i++) {
+				for(std::size_t i = 0; i < halfSize; i++) {
 					c = fftOut[i + halfSize];
 					v = c.real() * c.real() + c.imag() * c.imag();
 					v = mult * log2f(v) + ofs;
@@ -143,10 +138,10 @@ void SpectrumVis::stop()
 
 bool SpectrumVis::handleMessage(const Message& message)
 {
-	if(DSPConfigureSpectrumVis::match(&message))
+	if (DSPConfigureSpectrumVis::match(message))
 	{
-		DSPConfigureSpectrumVis* conf = (DSPConfigureSpectrumVis*) &message;
-		handleConfigure(conf->getFFTSize(), conf->getOverlapPercent(), conf->getWindow());
+		DSPConfigureSpectrumVis& conf = (DSPConfigureSpectrumVis&) message;
+		handleConfigure(conf.getFFTSize(), conf.getOverlapPercent(), conf.getWindow());
 		return true;
 	}
 	else
