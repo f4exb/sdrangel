@@ -19,8 +19,22 @@
 
 SampleSource::SampleSource()
 {
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 SampleSource::~SampleSource()
 {
+}
+
+void SampleSource::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message))
+		{
+			delete message;
+		}
+	}
 }

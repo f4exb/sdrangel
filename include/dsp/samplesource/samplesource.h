@@ -24,7 +24,8 @@
 #include "util/messagequeue.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API SampleSource {
+class SDRANGELOVE_API SampleSource : public QObject {
+	Q_OBJECT
 public:
 	SampleSource();
 	virtual ~SampleSource();
@@ -42,6 +43,9 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue *getOutputMessageQueue() { return &m_outputMessageQueue; }
     SampleFifo* getSampleFifo() { return &m_sampleFifo; }
+
+protected slots:
+	void handleInputMessages();
 
 protected:
     SampleFifo m_sampleFifo;

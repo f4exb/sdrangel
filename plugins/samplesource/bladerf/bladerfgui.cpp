@@ -276,6 +276,7 @@ void BladerfGui::on_xb200_currentIndexChanged(int index)
 
 void BladerfGui::updateHardware()
 {
+	qDebug() << "BladerfGui::updateHardware";
 	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create( m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
