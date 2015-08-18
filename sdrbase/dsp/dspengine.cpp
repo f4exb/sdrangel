@@ -475,7 +475,7 @@ DSPEngine::State DSPEngine::gotoError(const QString& errorMessage)
 
 void DSPEngine::handleSetSource(SampleSource* source)
 {
-	qDebug() << "DSPEngine::handleSetSource: " << source->getDeviceDescription().toStdString().c_str();
+	qDebug() << "DSPEngine::handleSetSource";
 
 	gotoIdle();
 
@@ -489,9 +489,13 @@ void DSPEngine::handleSetSource(SampleSource* source)
 
 	if(m_sampleSource != 0)
 	{
-		qDebug() << "  - connect";
+		qDebug() << "  - set " << source->getDeviceDescription().toStdString().c_str();
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
 		connect(m_sampleSource->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+	}
+	else
+	{
+		qDebug() << "  - set none";
 	}
 }
 
@@ -505,8 +509,8 @@ void DSPEngine::handleData()
 
 void DSPEngine::handleSynchronousMessages()
 {
-	qDebug() << "DSPEngine::handleSynchronousMessages";
     Message *message = m_syncMessenger.getMessage();
+	qDebug() << "DSPEngine::handleSynchronousMessages: " << message->getIdentifier();
 
 	if (DSPExit::match(*message))
 	{
@@ -580,11 +584,7 @@ void DSPEngine::handleSynchronousMessages()
 
 		if (threadedSinkIt != m_threadedSampleSinks.end())
 		{
-			if (m_state == StRunning)
-			{
-				(*threadedSinkIt)->stop();
-			}
-
+			(*threadedSinkIt)->stop();
 			m_threadedSampleSinks.remove(*threadedSinkIt);
 			delete (*threadedSinkIt);
 		}
