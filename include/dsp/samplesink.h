@@ -9,6 +9,7 @@
 class Message;
 
 class SDRANGELOVE_API SampleSink : public QObject {
+	Q_OBJECT
 public:
 	SampleSink();
 	virtual ~SampleSink();
@@ -22,9 +23,11 @@ public:
 	MessageQueue *getOutputMessageQueue() { return &m_outputMessageQueue; } //!< Get the queue for asynchronous outbound communication
 
 protected:
-	void handleInputMessages();
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 	MessageQueue m_outputMessageQueue; //!< Queue for asynchronous outbound communication
+
+protected slots:
+	void handleInputMessages();
 };
 
 #endif // INCLUDE_SAMPLESINK_H

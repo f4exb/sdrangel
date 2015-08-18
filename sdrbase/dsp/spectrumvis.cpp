@@ -12,6 +12,8 @@ double log2f(double n)
 }
 #endif
 
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
+
 SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
 	SampleSink(),
 	m_fft(FFTEngine::create()),
@@ -32,7 +34,7 @@ SpectrumVis::~SpectrumVis()
 
 void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window)
 {
-	DSPConfigureSpectrumVis* cmd = new DSPConfigureSpectrumVis(fftSize, overlapPercent, window);
+	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, window);
 	msgQueue->push(cmd);
 }
 
@@ -138,9 +140,9 @@ void SpectrumVis::stop()
 
 bool SpectrumVis::handleMessage(const Message& message)
 {
-	if (DSPConfigureSpectrumVis::match(message))
+	if (MsgConfigureSpectrumVis::match(message))
 	{
-		DSPConfigureSpectrumVis& conf = (DSPConfigureSpectrumVis&) message;
+		MsgConfigureSpectrumVis& conf = (MsgConfigureSpectrumVis&) message;
 		handleConfigure(conf.getFFTSize(), conf.getOverlapPercent(), conf.getWindow());
 		return true;
 	}

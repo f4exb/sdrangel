@@ -32,7 +32,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	SampleSourceDevices enumSampleSources();
-	PluginGUI* createSampleSource(const QString& sourceName, const QByteArray& address);
+	PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

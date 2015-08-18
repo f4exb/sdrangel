@@ -1,6 +1,7 @@
 #include <QThread>
 #include <QDebug>
 #include "dsp/threadedsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "util/message.h"
 
 ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink) :
@@ -16,18 +17,24 @@ ThreadedSampleSink::~ThreadedSampleSink()
 
 void ThreadedSampleSink::start()
 {
+	qDebug() << "ThreadedSampleSink::start";
+	DSPPing cmd;
 	QThread::start();
+	m_syncMessenger.sendWait(cmd);
 }
 
 void ThreadedSampleSink::stop()
 {
+	qDebug() << "ThreadedSampleSink::stop";
 	exit();
 	wait();
 }
 
 void ThreadedSampleSink::run()
 {
-	connect(&m_syncMessenger, SIGNAL(messageSent(const Message&)), this, SLOT(handleSynchronousMessages(const Message&)), Qt::QueuedConnection);
+	qDebug() << "ThreadedSampleSink::run";
+	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
+	m_syncMessenger.done(); // Release start() that is waiting in calling trhead
 	exec();
 }
 
@@ -36,14 +43,17 @@ void ThreadedSampleSink::feed(SampleVector::const_iterator& begin, SampleVector:
 	m_sampleSink->feed(begin, end, positiveOnly);
 }
 
-bool ThreadedSampleSink::sendWaitSink(const Message& cmd)
+bool ThreadedSampleSink::sendWaitSink(Message& cmd)
 {
 	m_syncMessenger.sendWait(cmd);
 }
 
-void ThreadedSampleSink::handleSynchronousMessages(const Message& message)
+void ThreadedSampleSink::handleSynchronousMessages()
 {
-	m_sampleSink->handleMessage(message); // just delegate to the sink
+	qDebug() << "ThreadedSampleSink::handleSynchronousMessages";
+	Message *message = m_syncMessenger.getMessage();
+	qDebug() << "  - message: " << message->getIdentifier();
+	m_sampleSink->handleMessage(*message); // just delegate to the sink
 	m_syncMessenger.done();
 }
 

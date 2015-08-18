@@ -45,7 +45,7 @@ public:
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()
 
-	bool sendWaitSink(const Message& cmd); //!< Send message to sink synchronously
+	bool sendWaitSink(Message& cmd); //!< Send message to sink synchronously
 	void feed(SampleVector::const_iterator& begin, SampleVector::const_iterator& end, bool positiveOnly); //!< Feed sink with samples
 
 	QString getSampleSinkObjectName() const;
@@ -56,7 +56,9 @@ protected:
 
 private:
 	void run(); //!< this thread run() method
-	void handleSynchronousMessages(const Message& message); //!< Handle synchronous messages with the thread
+
+private slots:
+	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 };
 
 #endif // INCLUDE_THREADEDSAMPLESINK_H

@@ -59,11 +59,11 @@ void DSPEngine::run()
 	qDebug() << "DSPEngine::run";
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-	connect(&m_syncMessenger, SIGNAL(messageSent(const Message&)), this, SLOT(handleSynchronousMessages(const Message&)), Qt::QueuedConnection);
+	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
 
 	m_state = StIdle;
 
-	//handleInputMessages();
+    m_syncMessenger.done(); // Release start() that is waiting in main trhead
 	exec();
 }
 
@@ -87,7 +87,7 @@ bool DSPEngine::initAcquisition()
 	qDebug() << "DSPEngine::initAcquisition";
 	DSPAcquisitionInit cmd;
 
-	return 	m_syncMessenger.sendWait(cmd) == StReady;
+	return m_syncMessenger.sendWait(cmd) == StReady;
 }
 
 bool DSPEngine::startAcquisition()
@@ -189,8 +189,6 @@ void DSPEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator en
 	int qo = 0;
 	Sample corr((qint16)m_iOffset, (qint16)m_qOffset);
 
-	qDebug() << "DSPEngine::dcOffset";
-
 	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++)
 	{
@@ -211,8 +209,6 @@ void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator e
 	int iMax = 0;
 	int qMin = 0;
 	int qMax = 0;
-
-	qDebug() << "DSPEngine::imbalance";
 
 	// find value ranges for both I and Q
 	// both intervals should be same same size (for a perfect circle)
@@ -258,8 +254,6 @@ void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator e
 
 void DSPEngine::work()
 {
-	qDebug() << "DSPEngine::work";
-
 	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
 	std::size_t samplesDone = 0;
 	bool positiveOnly = false;
@@ -503,90 +497,77 @@ void DSPEngine::handleSetSource(SampleSource* source)
 
 void DSPEngine::handleData()
 {
-	qDebug() << "DSPEngine::handleData";
-
 	if(m_state == StRunning)
 	{
 		work();
 	}
 }
 
-void DSPEngine::handleSynchronousMessages(const Message& message)
+void DSPEngine::handleSynchronousMessages()
 {
 	qDebug() << "DSPEngine::handleSynchronousMessages";
+    Message *message = m_syncMessenger.getMessage();
 
-	if (DSPExit::match(message))
+	if (DSPExit::match(*message))
 	{
 		gotoIdle();
 		m_state = StNotStarted;
 		exit();
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPAcquisitionInit::match(message))
+	else if (DSPAcquisitionInit::match(*message))
 	{
 		m_state = gotoIdle();
 
 		if(m_state == StIdle) {
 			m_state = gotoInit(); // State goes ready if init is performed
 		}
-
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPAcquisitionStart::match(message))
+	else if (DSPAcquisitionStart::match(*message))
 	{
 		if(m_state == StReady) {
 			m_state = gotoRunning();
 		}
-
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPAcquisitionStop::match(message))
+	else if (DSPAcquisitionStop::match(*message))
 	{
 		m_state = gotoIdle();
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPGetSourceDeviceDescription::match(message))
+	else if (DSPGetSourceDeviceDescription::match(*message))
 	{
-		((DSPGetSourceDeviceDescription&) message).setDeviceDescription(m_deviceDescription);
-		m_syncMessenger.done(m_state);
+		((DSPGetSourceDeviceDescription*) message)->setDeviceDescription(m_deviceDescription);
 	}
-	else if (DSPGetErrorMessage::match(message))
+	else if (DSPGetErrorMessage::match(*message))
 	{
-		((DSPGetErrorMessage&) message).setErrorMessage(m_errorMessage);
-		m_syncMessenger.done(m_state);
+		((DSPGetErrorMessage*) message)->setErrorMessage(m_errorMessage);
 	}
-	else if (DSPSetSource::match(message)) {
-		handleSetSource(((DSPSetSource&) message).getSampleSource());
-		m_syncMessenger.done(m_state);
+	else if (DSPSetSource::match(*message)) {
+		handleSetSource(((DSPSetSource*) message)->getSampleSource());
 	}
-	else if (DSPAddSink::match(message))
+	else if (DSPAddSink::match(*message))
 	{
-		SampleSink* sink = ((DSPAddSink&)message).getSampleSink();
+		SampleSink* sink = ((DSPAddSink*) message)->getSampleSink();
 		m_sampleSinks.push_back(sink);
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPRemoveSink::match(message))
+	else if (DSPRemoveSink::match(*message))
 	{
-		SampleSink* sink = ((DSPRemoveSink&)message).getSampleSink();
+		SampleSink* sink = ((DSPRemoveSink*) message)->getSampleSink();
 
 		if(m_state == StRunning) {
 			sink->stop();
 		}
 
 		m_sampleSinks.remove(sink);
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPAddThreadedSink::match(message))
+	else if (DSPAddThreadedSink::match(*message))
 	{
-		SampleSink* sink = ((DSPAddThreadedSink&) message).getSampleSink();
+		SampleSink* sink = ((DSPAddThreadedSink*) message)->getSampleSink();
 		ThreadedSampleSink *threadedSink = new ThreadedSampleSink(sink);
 		m_threadedSampleSinks.push_back(threadedSink);
 		threadedSink->start();
-		m_syncMessenger.done(m_state);
 	}
-	else if (DSPRemoveThreadedSink::match(message))
+	else if (DSPRemoveThreadedSink::match(*message))
 	{
-		SampleSink* sink = ((DSPRemoveThreadedSink&) message).getSampleSink();
+		SampleSink* sink = ((DSPRemoveThreadedSink*) message)->getSampleSink();
 		ThreadedSampleSinks::iterator threadedSinkIt = m_threadedSampleSinks.begin();
 
 		for (; threadedSinkIt != m_threadedSampleSinks.end(); ++threadedSinkIt)
@@ -608,15 +589,13 @@ void DSPEngine::handleSynchronousMessages(const Message& message)
 			delete (*threadedSinkIt);
 		}
 	}
-	else if (DSPAddAudioSink::match(message))
+	else if (DSPAddAudioSink::match(*message))
 	{
-		m_audioSink.addFifo(((DSPAddAudioSink&) message).getAudioFifo());
-		m_syncMessenger.done(m_state);
+		m_audioSink.addFifo(((DSPAddAudioSink*) message)->getAudioFifo());
 	}
-	else if (DSPRemoveAudioSink::match(message))
+	else if (DSPRemoveAudioSink::match(*message))
 	{
-		m_audioSink.removeFifo(((DSPRemoveAudioSink&) message).getAudioFifo());
-		m_syncMessenger.done(m_state);
+		m_audioSink.removeFifo(((DSPRemoveAudioSink*) message)->getAudioFifo());
 	}
 
 	m_syncMessenger.done(m_state);
@@ -630,7 +609,7 @@ void DSPEngine::handleInputMessages()
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		qDebug("DSPEngine::handleInputMessages: Message: %s", message->getIdentifier());
+		qDebug("  - message: %s", message->getIdentifier());
 
 		if (DSPConfigureCorrection::match(*message))
 		{

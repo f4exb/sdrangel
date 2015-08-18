@@ -36,16 +36,18 @@ public:
 	SyncMessenger();
 	~SyncMessenger();
 
-	int sendWait(const Message& message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
+	int sendWait(Message& message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
+    Message* getMessage() const { return m_message; }
 	void done(int result = 0); //!< Processing of the message is complete
 
 signals:
-	void messageSent(const Message& message);
+	void messageSent();
 
 protected:
 	QWaitCondition m_waitCondition;
 	QMutex m_mutex;
 	QAtomicInt m_complete;
+    Message *m_message;
 	int m_result;
 };
 

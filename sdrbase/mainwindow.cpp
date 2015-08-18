@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	m_audioDeviceInfo(new AudioDeviceInfo),
-	m_messageQueue(new MessageQueue),
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState((DSPEngine::State)-1),
@@ -85,7 +84,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
-	connect(m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 	//connect(m_dspEngine->getReportQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -108,7 +107,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_dspEngine->addSink(m_fileSink);
 
 	ui->glSpectrum->connectTimer(m_masterTimer);
-	ui->glSpectrumGUI->setBuddies(m_dspEngine->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->glSpectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	loadSettings();
 
@@ -141,7 +140,6 @@ MainWindow::~MainWindow()
 
 	m_dspEngine->stop();
 
-	delete m_messageQueue;
 	delete ui;
 }
 
@@ -345,7 +343,7 @@ void MainWindow::handleMessages()
 {
 	Message* message;
 
-	while ((message = m_messageQueue->pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
 		qDebug("Message: %s", message->getIdentifier());
 		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;

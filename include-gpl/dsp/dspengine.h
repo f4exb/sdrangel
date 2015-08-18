@@ -127,7 +127,7 @@ private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
 	void handleSourceMessages(); //!< Handle source message output
 	void handleInputMessages(); //!< Handle input message queue
-	void handleSynchronousMessages(const Message& message); //!< Handle synchronous messages with the thread
+	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 };
 
 #endif // INCLUDE_DSPENGINE_H

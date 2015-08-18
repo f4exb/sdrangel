@@ -3,7 +3,7 @@
 
 SampleSink::SampleSink()
 {
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessage()));
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 SampleSink::~SampleSink()

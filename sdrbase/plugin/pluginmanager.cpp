@@ -16,8 +16,8 @@ PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObje
 	m_pluginAPI(this, mainWindow, dspEngine),
 	m_mainWindow(mainWindow),
 	m_dspEngine(dspEngine),
-	m_sampleSource(),
-	m_sampleSourceInstance(NULL)
+	m_sampleSourceName(),
+	m_sampleSourcePluginGUI(NULL)
 {
 }
 
@@ -123,12 +123,16 @@ void PluginManager::loadSettings(const Preset* preset)
 
 	renameChannelInstances();
 
-	if(m_sampleSourceInstance != NULL) {
-		qDebug() << "m_sampleSourceInstance->deserializeGeneral (" << m_sampleSourceInstance->getName().toStdString().c_str() << ")";
-		m_sampleSourceInstance->deserializeGeneral(preset->getSourceGeneralConfig());
-		if(m_sampleSource == preset->getSource()) {
-			qDebug() << "m_sampleSourceInstance->deserialize";
-			m_sampleSourceInstance->deserialize(preset->getSourceConfig());
+	if(m_sampleSourcePluginGUI != 0)
+	{
+		/* FIXME: remove in pluginGUI and preset
+		qDebug() << "m_sampleSourcePluginGUI->deserializeGeneral (" << m_sampleSourcePluginGUI->getName().toStdString().c_str() << ")";
+		m_sampleSourcePluginGUI->deserializeGeneral(preset->getSourceGeneralConfig());
+	    */
+		if(m_sampleSourceName == preset->getSource())
+		{
+			qDebug() << "m_sampleSourcePluginGUI->deserialize (" << m_sampleSourceName .toStdString().c_str() << ")";
+			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
 		}
 	}
 }
@@ -148,9 +152,9 @@ bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstance
 
 void PluginManager::saveSettings(Preset* preset)
 {
-	if(m_sampleSourceInstance != NULL) {
-		preset->setSourceConfig(m_sampleSource, m_sampleSourceInstance->serializeGeneral(), m_sampleSourceInstance->serialize());
-		preset->setCenterFrequency(m_sampleSourceInstance->getCenterFrequency());
+	if(m_sampleSourcePluginGUI != NULL) {
+		preset->setSourceConfig(m_sampleSourceName, m_sampleSourcePluginGUI->serializeGeneral(), m_sampleSourcePluginGUI->serialize());
+		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
 	} else {
 		preset->setSourceConfig(QString::null, QByteArray(), QByteArray());
 	}
@@ -169,21 +173,21 @@ void PluginManager::freeAll()
 		reg.m_gui->destroy();
 	}
 
-	if(m_sampleSourceInstance != NULL) {
+	if(m_sampleSourcePluginGUI != NULL) {
 		m_dspEngine->setSource(NULL);
-		m_sampleSourceInstance->destroy();
-		m_sampleSourceInstance = NULL;
-		m_sampleSource.clear();
+		m_sampleSourcePluginGUI->destroy();
+		m_sampleSourcePluginGUI = NULL;
+		m_sampleSourceName.clear();
 	}
 }
 
 bool PluginManager::handleMessage(const Message& message)
 {
-	if (m_sampleSourceInstance != 0)
+	if (m_sampleSourcePluginGUI != 0)
 	{
-		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourceInstance))
+		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourcePluginGUI))
 		{
-			if (m_sampleSourceInstance->handleMessage(message))
+			if (m_sampleSourcePluginGUI->handleMessage(message))
 			{
 				return true;
 			}
@@ -227,18 +231,18 @@ int PluginManager::selectSampleSource(int index)
 
 	m_dspEngine->stopAcquistion();
 
-	if(m_sampleSourceInstance != NULL) {
+	if(m_sampleSourcePluginGUI != NULL) {
 		m_dspEngine->stopAcquistion();
 		m_dspEngine->setSource(NULL);
-		m_sampleSourceInstance->destroy();
-		m_sampleSourceInstance = NULL;
-		m_sampleSource.clear();
+		m_sampleSourcePluginGUI->destroy();
+		m_sampleSourcePluginGUI = NULL;
+		m_sampleSourceName.clear();
 	}
 
 	if(index == -1) {
-		if(!m_sampleSource.isEmpty()) {
+		if(!m_sampleSourceName.isEmpty()) {
 			for(int i = 0; i < m_sampleSourceDevices.count(); i++) {
-				if(m_sampleSourceDevices[i].m_sourceName == m_sampleSource) {
+				if(m_sampleSourceDevices[i].m_sourceName == m_sampleSourceName) {
 					index = i;
 					break;
 				}
@@ -252,9 +256,9 @@ int PluginManager::selectSampleSource(int index)
 	if(index == -1)
 		return -1;
 
-	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString().c_str();
-	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
+	m_sampleSourceName = m_sampleSourceDevices[index].m_sourceName;
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSourceName.toStdString().c_str();
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceName, m_sampleSourceDevices[index].m_address);
 	return index;
 }
 
@@ -266,12 +270,12 @@ int PluginManager::selectSampleSource(const QString& source)
 
 	m_dspEngine->stopAcquistion();
 
-	if(m_sampleSourceInstance != NULL) {
+	if(m_sampleSourcePluginGUI != NULL) {
 		m_dspEngine->stopAcquistion();
 		m_dspEngine->setSource(NULL);
-		m_sampleSourceInstance->destroy();
-		m_sampleSourceInstance = NULL;
-		m_sampleSource.clear();
+		m_sampleSourcePluginGUI->destroy();
+		m_sampleSourcePluginGUI = NULL;
+		m_sampleSourceName.clear();
 	}
 
 	qDebug("finding sample source [%s]", qPrintable(source));
@@ -289,9 +293,9 @@ int PluginManager::selectSampleSource(const QString& source)
 	if(index == -1)
 		return -1;
 
-	m_sampleSource = m_sampleSourceDevices[index].m_sourceName;
-	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSource.toStdString().c_str();
-	m_sampleSourceInstance = m_sampleSourceDevices[index].m_plugin->createSampleSource(m_sampleSource, m_sampleSourceDevices[index].m_address);
+	m_sampleSourceName = m_sampleSourceDevices[index].m_sourceName;
+	qDebug() << "m_sampleSource at index " << index << " is " << m_sampleSourceName.toStdString().c_str();
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceName, m_sampleSourceDevices[index].m_address);
 	return index;
 }
 

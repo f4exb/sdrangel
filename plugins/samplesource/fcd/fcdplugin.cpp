@@ -43,7 +43,7 @@ PluginInterface::SampleSourceDevices FCDPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FCDPlugin::createSampleSource(const QString& sourceName, const QByteArray& address)
+PluginGUI* FCDPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
 	if(sourceName == "org.osmocom.sdr.samplesource.fcd") {
 		FCDGui* gui = new FCDGui(m_pluginAPI);

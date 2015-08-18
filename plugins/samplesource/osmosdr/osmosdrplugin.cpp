@@ -57,7 +57,7 @@ PluginInterface::SampleSourceDevices OsmoSDRPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* OsmoSDRPlugin::createSampleSource(const QString& sourceName, const QByteArray& address)
+PluginGUI* OsmoSDRPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
 	if(sourceName == "org.osmocom.sdr.samplesource.osmo-sdr") {
 		OsmoSDRGui* gui = new OsmoSDRGui(m_pluginAPI);

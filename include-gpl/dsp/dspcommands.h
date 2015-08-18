@@ -153,6 +153,7 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
+/*
 class SDRANGELOVE_API DSPConfigureSpectrumVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -172,7 +173,7 @@ private:
 	int m_fftSize;
 	int m_overlapPercent;
 	FFTWindow::Function m_window;
-};
+};*/
 
 class SDRANGELOVE_API DSPConfigureCorrection : public Message {
 	MESSAGE_CLASS_DECLARATION

@@ -16,7 +16,7 @@ QDockWidget* PluginAPI::createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, 
 
 MessageQueue* PluginAPI::getMainWindowMessageQueue()
 {
-	return m_mainWindow->getMessageQueue();
+	return m_mainWindow->getInputMessageQueue();
 }
 
 void PluginAPI::setInputGUI(QWidget* inputGUI)

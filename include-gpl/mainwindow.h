@@ -21,6 +21,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "settings/settings.h"
+#include "util/messagequeue.h"
 #include "util/export.h"
 
 class QLabel;
@@ -36,7 +37,6 @@ class SampleSource;
 class PluginAPI;
 class PluginGUI;
 class ChannelMarker;
-class MessageQueue;
 class PluginManager;
 class PluginInterface;
 
@@ -51,7 +51,7 @@ public:
 	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
 
-	MessageQueue* getMessageQueue() { return m_messageQueue; }
+	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
 	void addChannelCreateAction(QAction* action);
 	void addChannelRollup(QWidget* widget);
@@ -73,7 +73,7 @@ private:
 
 	AudioDeviceInfo* m_audioDeviceInfo;
 
-	MessageQueue* m_messageQueue;
+	MessageQueue m_inputMessageQueue;
 
 	Settings m_settings;
 

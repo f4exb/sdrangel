@@ -120,8 +120,8 @@ private:
 	SampleSourceRegistrations m_sampleSourceRegistrations;
 	SampleSourceDevices m_sampleSourceDevices;
 
-	QString m_sampleSource;
-	PluginGUI* m_sampleSourceInstance;
+	QString m_sampleSourceName;
+	PluginGUI* m_sampleSourcePluginGUI;
 
 	void loadPlugins(const QDir& dir);
 	void renameChannelInstances();

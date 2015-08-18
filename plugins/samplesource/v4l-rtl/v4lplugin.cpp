@@ -44,7 +44,7 @@ PluginInterface::SampleSourceDevices V4LPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* V4LPlugin::createSampleSource(const QString& sourceName, const QByteArray& address)
+PluginGUI* V4LPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
 	if(sourceName == "org.osmocom.sdr.samplesource.v4l") {
 		V4LGui* gui = new V4LGui(m_pluginAPI);

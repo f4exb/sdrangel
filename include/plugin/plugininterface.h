@@ -40,7 +40,7 @@ public:
 	virtual PluginGUI* createChannel(const QString& channelName) { return NULL; }
 
 	virtual SampleSourceDevices enumSampleSources() { return SampleSourceDevices(); }
-	virtual PluginGUI* createSampleSource(const QString& sourceName, const QByteArray& address) { return NULL; }
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address) { return NULL; }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "de.maintech.SDRangelove.PluginInterface/0.1");
