@@ -44,11 +44,15 @@ qint64 NFMDemodGUI::getCenterFrequency() const
 
 void NFMDemodGUI::resetToDefaults()
 {
+	blockGUISignals(true);
+
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+
+	blockGUISignals(false);
 	applySettings();
 }
 
@@ -81,6 +85,9 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+
+		blockGUISignals(true);
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
@@ -97,6 +104,9 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 			m_channelMarker->setColor(u32tmp);
 		d.readS32(8, &tmp, 0);
 		ui->ctcss->setCurrentIndex(tmp);
+
+		blockGUISignals(false);
+
 		applySettings();
 		return true;
 	}
@@ -285,5 +295,16 @@ void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)
 	{
 		ui->ctcssText->setText(QString("%1").arg(ctcssFreq));
 	}
+}
+
+void NFMDemodGUI::blockGUISignals(bool block)
+{
+	m_channelMarker->blockSignals(block);
+	ui->deltaFrequency->blockSignals(block);
+	ui->deltaMinus->blockSignals(block);
+	ui->rfBW->blockSignals(block);
+	ui->afBW->blockSignals(block);
+	ui->volume->blockSignals(block);
+	ui->squelch->blockSignals(block);
 }
 

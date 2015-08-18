@@ -61,17 +61,17 @@ void BladerfInput::Settings::resetToDefaults()
 QByteArray BladerfInput::Settings::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeU64(1, m_centerFrequency);
-	s.writeS32(2, m_devSampleRate);
-	s.writeS32(3, m_lnaGain);
-	s.writeS32(4, m_vga1);
-	s.writeS32(5, m_vga2);
-	s.writeU32(6, m_log2Decim);
-	s.writeBool(7, m_xb200);
-	s.writeS32(8, (int) m_xb200Path);
-	s.writeS32(9, (int) m_xb200Filter);
-	s.writeS32(10, m_bandwidth);
-	s.writeS32(11, (int) m_fcPos);
+	s.writeS32(1, m_lnaGain);
+	s.writeS32(2, m_vga1);
+	s.writeS32(3, m_vga2);
+	s.writeU32(4, m_log2Decim);
+	s.writeBool(5, m_xb200);
+	s.writeS32(6, (int) m_xb200Path);
+	s.writeS32(7, (int) m_xb200Filter);
+	s.writeS32(8, m_bandwidth);
+	s.writeS32(9, (int) m_fcPos);
+	s.writeU64(10, m_centerFrequency);
+	s.writeS32(11, m_devSampleRate);
 	return s.final();
 }
 
@@ -88,20 +88,20 @@ bool BladerfInput::Settings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
-		d.readU64(1, &m_centerFrequency, 435000*1000);
-		d.readS32(2, &m_devSampleRate, 3072000);
-		d.readS32(3, &m_lnaGain, 0);
-		d.readS32(4, &m_vga1, 20);
-		d.readS32(5, &m_vga2, 9);
-		d.readU32(6, &m_log2Decim, 0);
-		d.readBool(7, &m_xb200);
-		d.readS32(8, &intval);
+		d.readS32(1, &m_lnaGain, 0);
+		d.readS32(2, &m_vga1, 20);
+		d.readS32(3, &m_vga2, 9);
+		d.readU32(4, &m_log2Decim, 0);
+		d.readBool(5, &m_xb200);
+		d.readS32(6, &intval);
 		m_xb200Path = (bladerf_xb200_path) intval;
-		d.readS32(9, &intval);
+		d.readS32(7, &intval);
 		m_xb200Filter = (bladerf_xb200_filter) intval;
-		d.readS32(10, &m_bandwidth, 0);
-		d.readS32(11, &intval, 0);
+		d.readS32(8, &m_bandwidth, 0);
+		d.readS32(9, &intval, 0);
 		m_fcPos = (fcPos_t) intval;
+		d.readU64(10, &m_centerFrequency, 435000*1000);
+		d.readS32(11, &m_devSampleRate, 3072000);
 		return true;
 	}
 	else

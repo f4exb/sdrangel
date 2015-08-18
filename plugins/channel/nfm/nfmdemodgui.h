@@ -59,8 +59,9 @@ private:
 	static const int m_rfBW[];
 
 	explicit NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~NFMDemodGUI();
+	virtual ~NFMDemodGUI();
 
+	void blockGUISignals(bool block);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

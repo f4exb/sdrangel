@@ -82,41 +82,57 @@ void PluginManager::loadSettings(const Preset* preset)
 {
 	qDebug() << "PluginManager::loadSettings";
 
-	fprintf(stderr, "-------- [%s | %s] --------\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+	fprintf(stderr, "Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
 	// copy currently open channels and clear list
 	ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
 	m_channelInstanceRegistrations.clear();
 
-	for(int i = 0; i < preset->getChannelCount(); i++) {
+	for(int i = 0; i < preset->getChannelCount(); i++)
+	{
 		const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
 		ChannelInstanceRegistration reg;
+
 		// if we have one instance available already, use it
-		for(int i = 0; i < openChannels.count(); i++) {
-			qDebug("compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
-			if(openChannels[i].m_channelName == channelConfig.m_channel) {
+
+		for(int i = 0; i < openChannels.count(); i++)
+		{
+			qDebug("  - compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+
+			if(openChannels[i].m_channelName == channelConfig.m_channel)
+			{
 				qDebug("channel [%s] found", qPrintable(openChannels[i].m_channelName));
 				reg = openChannels.takeAt(i);
 				m_channelInstanceRegistrations.append(reg);
 				break;
 			}
 		}
+
 		// if we haven't one already, create one
-		if(reg.m_gui == NULL) {
-			for(int i = 0; i < m_channelRegistrations.count(); i++) {
-				if(m_channelRegistrations[i].m_channelName == channelConfig.m_channel) {
-					qDebug("creating new channel [%s]", qPrintable(channelConfig.m_channel));
+
+		if(reg.m_gui == NULL)
+		{
+			for(int i = 0; i < m_channelRegistrations.count(); i++)
+			{
+				if(m_channelRegistrations[i].m_channelName == channelConfig.m_channel)
+				{
+					qDebug("  - creating new channel [%s]", qPrintable(channelConfig.m_channel));
 					reg = ChannelInstanceRegistration(channelConfig.m_channel, m_channelRegistrations[i].m_plugin->createChannel(channelConfig.m_channel));
 					break;
 				}
 			}
 		}
+
 		if(reg.m_gui != NULL)
+		{
+			qDebug("  - deserializing channel [%s]", qPrintable(channelConfig.m_channel));
 			reg.m_gui->deserialize(channelConfig.m_config);
+		}
 	}
 
 	// everything, that is still "available" is not needed anymore
-	for(int i = 0; i < openChannels.count(); i++) {
+	for(int i = 0; i < openChannels.count(); i++)
+	{
 		qDebug("destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
 		openChannels[i].m_gui->destroy();
 	}
@@ -131,7 +147,7 @@ void PluginManager::loadSettings(const Preset* preset)
 	    */
 		if(m_sampleSourceName == preset->getSource())
 		{
-			qDebug() << "m_sampleSourcePluginGUI->deserialize (" << m_sampleSourceName .toStdString().c_str() << ")";
+			qDebug() << "  - deserializing source " << qPrintable(m_sampleSourceName);
 			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
 		}
 	}

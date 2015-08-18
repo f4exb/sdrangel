@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SDRangelove</string>
+   <string>SDRangelove V2</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources/res.qrc">
