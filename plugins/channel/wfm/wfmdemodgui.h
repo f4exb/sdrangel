@@ -48,6 +48,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 
 	AudioFifo* m_audioFifo;
 	Channelizer* m_channelizer;
@@ -58,6 +59,7 @@ private:
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
 	virtual ~WFMDemodGUI();
 
+    void blockApplySettings(bool block);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

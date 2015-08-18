@@ -49,6 +49,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
 
@@ -58,10 +59,12 @@ private:
 	SpectrumVis* m_spectrumVis;
 
 	explicit SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~SSBDemodGUI();
+	virtual ~SSBDemodGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);
 	bool setNewRate(int spanLog2);
+    
+    void blockApplySettings(bool block);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

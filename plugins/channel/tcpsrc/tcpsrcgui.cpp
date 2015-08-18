@@ -36,14 +36,17 @@ QString TCPSrcGUI::getName() const
 
 void TCPSrcGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+    
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
 	ui->tcpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	ui->boost->setValue(1);
-	applySettings();
 
+	blockApplySettings(false);
+	applySettings();
 }
 
 QByteArray TCPSrcGUI::serialize() const
@@ -75,6 +78,9 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		qint32 s32tmp;
 		Real realtmp;
+        
+		blockApplySettings(true);
+        
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
@@ -104,6 +110,9 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->spectrumGUI->deserialize(bytetmp);
 		d.readS32(8, &s32tmp, 1);
 		ui->boost->setValue(s32tmp);
+        
+		blockApplySettings(false);
+        
 		applySettings();
 		return true;
 	}
@@ -153,7 +162,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
 	m_tcpSrc(NULL),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	ui->connectedClientsBox->hide();
@@ -194,6 +204,12 @@ TCPSrcGUI::~TCPSrcGUI()
 	delete m_spectrumVis;
 	delete m_channelMarker;
 	delete ui;
+}
+
+void TCPSrcGUI::blockApplySettings(bool block)
+{
+    m_channelizer->blockSignals(block);
+    m_doApplySettings = !block;
 }
 
 void TCPSrcGUI::applySettings()

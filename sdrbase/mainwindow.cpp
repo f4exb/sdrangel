@@ -61,14 +61,10 @@ MainWindow::MainWindow(QWidget* parent) :
 	delete ui->mainToolBar;
 	createStatusBar();
 
-	qDebug() << "MainWindow::MainWindow: step #1";
-
 	setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
 	setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-
-	qDebug() << "MainWindow::MainWindow: step #2";
 
 	// work around broken Qt dock widget ordering
 	removeDockWidget(ui->inputDock);
@@ -80,25 +76,17 @@ MainWindow::MainWindow(QWidget* parent) :
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
-	qDebug() << "MainWindow::MainWindow: step #3";
-
 	ui->inputDock->show();
 	ui->processingDock->show();
 	ui->presetDock->show();
 	ui->channelDock->show();
-
-	qDebug() << "MainWindow::MainWindow: step #4";
 
 	ui->menu_Window->addAction(ui->inputDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->processingDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
-	qDebug() << "MainWindow::MainWindow: step #5";
-
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
-
-	qDebug() << "MainWindow::MainWindow: step #6";
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -107,13 +95,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	m_pluginManager->loadPlugins();
 
-	qDebug() << "MainWindow::MainWindow: step #7";
-
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
-
-	qDebug() << "MainWindow::MainWindow: step #8 (was DSP engine start)";
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_dspEngine->addSink(m_spectrumVis);
@@ -124,15 +108,13 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->glSpectrum->connectTimer(m_masterTimer);
 	ui->glSpectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
-	qDebug() << "MainWindow::MainWindow: step #9";
+	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
 	loadSettings();
 
-	qDebug() << "MainWindow::MainWindow: step #10";
+	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_pluginManager->selectSampleSource(m_settings.getCurrent()->getSource()); // select SampleSource from settings
-
-	qDebug() << "MainWindow::MainWindow: step #11";
 
 	if(sampleSourceIndex >= 0)
 	{
@@ -141,15 +123,15 @@ MainWindow::MainWindow(QWidget* parent) :
 		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	}
 
-	qDebug() << "MainWindow::MainWindow: step #12";
+	qDebug() << "MainWindow::MainWindow: load current settings...";
 
 	loadSettings(m_settings.getCurrent());
 
-	qDebug() << "MainWindow::MainWindow: step #13";
+	qDebug() << "MainWindow::MainWindow: apply settings...";
 
 	applySettings();
 
-	qDebug() << "MainWindow::MainWindow: step #14";
+	qDebug() << "MainWindow::MainWindow: update presets...";
 
 	updatePresets();
 

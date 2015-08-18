@@ -1,5 +1,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QDebug>
 #include "nfmdemodgui.h"
 #include "ui_nfmdemodgui.h"
 #include "dsp/threadedsamplesink.h"
@@ -44,7 +45,7 @@ qint64 NFMDemodGUI::getCenterFrequency() const
 
 void NFMDemodGUI::resetToDefaults()
 {
-	blockGUISignals(true);
+	blockApplySettings(true);
 
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
@@ -52,7 +53,7 @@ void NFMDemodGUI::resetToDefaults()
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
 
-	blockGUISignals(false);
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -64,7 +65,6 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
-	//s.writeBlob(6, ui->spectrumGUI->serialize());
 	s.writeU32(7, m_channelMarker->getColor().rgb());
 	s.writeS32(8, ui->ctcss->currentIndex());
 	return s.final();
@@ -86,7 +86,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		quint32 u32tmp;
 		qint32 tmp;
 
-		blockGUISignals(true);
+		blockApplySettings(true);
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
@@ -98,14 +98,16 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-		//d.readBlob(6, &bytetmp);
-		//ui->spectrumGUI->deserialize(bytetmp);
+
 		if(d.readU32(7, &u32tmp))
+		{
 			m_channelMarker->setColor(u32tmp);
+		}
+
 		d.readS32(8, &tmp, 0);
 		ui->ctcss->setCurrentIndex(tmp);
 
-		blockGUISignals(false);
+		blockApplySettings(false);
 
 		applySettings();
 		return true;
@@ -205,7 +207,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -259,30 +262,39 @@ NFMDemodGUI::~NFMDemodGUI()
 
 void NFMDemodGUI::applySettings()
 {
-	setTitleColor(m_channelMarker->getColor());
+	if (m_doApplySettings)
+	{
+		qDebug() << "NFMDemodGUI::applySettings";
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		48000,
-		m_channelMarker->getCenterFrequency());
+		setTitleColor(m_channelMarker->getColor());
 
-	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			48000,
+			m_channelMarker->getCenterFrequency());
 
-	m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
-		m_rfBW[ui->rfBW->value()],
-		ui->afBW->value() * 1000.0,
-		ui->volume->value() / 10.0,
-		ui->squelch->value());
+		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+
+		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
+			m_rfBW[ui->rfBW->value()],
+			ui->afBW->value() * 1000.0,
+			ui->volume->value() / 10.0,
+			ui->squelch->value());
+	}
 }
 
 void NFMDemodGUI::leaveEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(false);
+	blockApplySettings(false);
 }
 
 void NFMDemodGUI::enterEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(true);
+	blockApplySettings(false);
 }
 
 void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)
@@ -297,14 +309,9 @@ void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)
 	}
 }
 
-void NFMDemodGUI::blockGUISignals(bool block)
+void NFMDemodGUI::blockApplySettings(bool block)
 {
 	m_channelMarker->blockSignals(block);
-	ui->deltaFrequency->blockSignals(block);
-	ui->deltaMinus->blockSignals(block);
-	ui->rfBW->blockSignals(block);
-	ui->afBW->blockSignals(block);
-	ui->volume->blockSignals(block);
-	ui->squelch->blockSignals(block);
+	m_doApplySettings = !block;
 }
 

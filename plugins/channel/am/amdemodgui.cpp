@@ -44,11 +44,15 @@ qint64 AMDemodGUI::getCenterFrequency() const {
 
 void AMDemodGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+    
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -60,7 +64,6 @@ QByteArray AMDemodGUI::serialize() const
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
-	//s.writeBlob(6, ui->spectrumGUI->serialize());
 	s.writeU32(7, m_channelMarker->getColor().rgb());
 	return s.final();
 }
@@ -69,15 +72,20 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if(!d.isValid()) 
+    {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if(d.getVersion() == 1) 
+    {
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+        
+		blockApplySettings(true);
+        
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
@@ -88,13 +96,19 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-		//d.readBlob(6, &bytetmp);
-		//ui->spectrumGUI->deserialize(bytetmp);
-		if(d.readU32(7, &u32tmp))
+		
+        if(d.readU32(7, &u32tmp))
+        {
 			m_channelMarker->setColor(u32tmp);
+        }
+        
+        blockApplySettings(false);
+
 		applySettings();
 		return true;
-	} else {
+	} 
+    else 
+    {
 		resetToDefaults();
 		return false;
 	}
@@ -177,7 +191,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -213,31 +228,44 @@ AMDemodGUI::~AMDemodGUI()
 	delete ui;
 }
 
+void AMDemodGUI::blockApplySettings(bool block)
+{
+    m_channelMarker->blockSignals(block);
+    m_doApplySettings = !block;
+}
+
 void AMDemodGUI::applySettings()
 {
-	setTitleColor(m_channelMarker->getColor());
+	if (m_doApplySettings)
+	{
+		setTitleColor(m_channelMarker->getColor());
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		48000,
-		m_channelMarker->getCenterFrequency());
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			48000,
+			m_channelMarker->getCenterFrequency());
 
-	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 
-	m_amDemod->configure(m_amDemod->getInputMessageQueue(),
-		m_rfBW[ui->rfBW->value()],
-		ui->afBW->value() * 1000.0,
-		ui->volume->value() / 10.0,
-		ui->squelch->value());
+		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
+			m_rfBW[ui->rfBW->value()],
+			ui->afBW->value() * 1000.0,
+			ui->volume->value() / 10.0,
+			ui->squelch->value());
+	}
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(false);
+	blockApplySettings(false);
 }
 
 void AMDemodGUI::enterEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(true);
+	blockApplySettings(false);
 }
 

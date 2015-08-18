@@ -45,14 +45,16 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 
 	Channelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
 
 	explicit LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~LoRaDemodGUI();
+	virtual ~LoRaDemodGUI();
 
+    void blockApplySettings(bool block);
 	void applySettings();
 };
 

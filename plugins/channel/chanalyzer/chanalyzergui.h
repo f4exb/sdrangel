@@ -52,6 +52,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
 
@@ -62,10 +63,12 @@ private:
 	ScopeVis* m_scopeVis;
 
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~ChannelAnalyzerGUI();
+	virtual ~ChannelAnalyzerGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);
 	bool setNewRate(int spanLog2);
+
+	void blockApplySettings(bool block);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

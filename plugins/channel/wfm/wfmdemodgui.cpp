@@ -55,11 +55,15 @@ qint64 WFMDemodGUI::getCenterFrequency() const
 
 void WFMDemodGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -71,7 +75,6 @@ QByteArray WFMDemodGUI::serialize() const
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
-	//s.writeBlob(6, ui->spectrumGUI->serialize());
 	s.writeU32(7, m_channelMarker->getColor().rgb());
 	return s.final();
 }
@@ -91,6 +94,9 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+
+		blockApplySettings(true);
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
@@ -101,10 +107,14 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-		//d.readBlob(6, &bytetmp);
-		//ui->spectrumGUI->deserialize(bytetmp);
+
 		if(d.readU32(7, &u32tmp))
+		{
 			m_channelMarker->setColor(u32tmp);
+		}
+
+		blockApplySettings(false);
+
 		applySettings();
 		return true;
 	}
@@ -228,6 +238,12 @@ WFMDemodGUI::~WFMDemodGUI()
 	delete ui;
 }
 
+void WFMDemodGUI::blockApplySettings(bool block)
+{
+    m_channelMarker->blockSignals(block);
+    m_doApplySettings = !block;
+}
+
 void WFMDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
@@ -248,11 +264,15 @@ void WFMDemodGUI::applySettings()
 
 void WFMDemodGUI::leaveEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(false);
+	blockApplySettings(false);
 }
 
 void WFMDemodGUI::enterEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(true);
+	blockApplySettings(false);
 }
 

@@ -56,6 +56,7 @@ private:
 	int m_boost;
 	int m_tcpPort;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 
 	// RF path
 	Channelizer* m_channelizer;
@@ -64,6 +65,7 @@ private:
 	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
 	virtual ~TCPSrcGUI();
 
+    void blockApplySettings(bool block);
 	void applySettings();
 
 	void addConnection(quint32 id, const QHostAddress& peerAddress, int peerPort);

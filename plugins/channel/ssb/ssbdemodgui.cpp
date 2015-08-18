@@ -43,10 +43,14 @@ qint64 SSBDemodGUI::getCenterFrequency() const
 
 void SSBDemodGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+    
 	ui->BW->setValue(30);
 	ui->volume->setValue(40);
 	ui->deltaFrequency->setValue(0);
 	ui->spanLog2->setValue(3);
+
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -78,6 +82,9 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+        
+		blockApplySettings(true);
+        
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
@@ -93,6 +100,9 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(7, &tmp, 20);
 		ui->spanLog2->setValue(tmp);
 		setNewRate(tmp);
+        
+		blockApplySettings(false);
+        
 		applySettings();
 		return true;
 	}
@@ -234,6 +244,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_basicSettingsShown(false),
+	m_doApplySettings(true),
 	m_rate(6000),
 	m_spanLog2(3)
 {
@@ -331,6 +342,12 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 	return true;
 }
 
+void SSBDemodGUI::blockApplySettings(bool block)
+{
+    m_channelMarker->blockSignals(block);
+    m_doApplySettings = !block;
+}
+
 void SSBDemodGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
@@ -350,11 +367,15 @@ void SSBDemodGUI::applySettings()
 
 void SSBDemodGUI::leaveEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(false);
+	blockApplySettings(false);
 }
 
 void SSBDemodGUI::enterEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(true);
+	blockApplySettings(false);
 }
 

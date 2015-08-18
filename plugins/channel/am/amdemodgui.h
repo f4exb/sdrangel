@@ -48,6 +48,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
+	bool m_doApplySettings;
 
 	AudioFifo* m_audioFifo;
 	Channelizer* m_channelizer;
@@ -56,8 +57,9 @@ private:
 	static const int m_rfBW[];
 
 	explicit AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	~AMDemodGUI();
+	virtual ~AMDemodGUI();
 
+    void blockApplySettings(bool block);
 	void applySettings();
 
 	void leaveEvent(QEvent*);

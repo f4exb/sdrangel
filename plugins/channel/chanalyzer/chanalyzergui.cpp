@@ -44,9 +44,13 @@ qint64 ChannelAnalyzerGUI::getCenterFrequency() const
 
 void ChannelAnalyzerGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+    
 	ui->BW->setValue(30);
 	ui->deltaFrequency->setValue(0);
 	ui->spanLog2->setValue(3);
+    
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -68,16 +72,21 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if(!d.isValid()) 
+    {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if(d.getVersion() == 1) 
+    {
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
 		bool tmpBool;
+        
+		blockApplySettings(true);
+        
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
@@ -95,9 +104,14 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		ui->ssb->setChecked(tmpBool);
 		d.readBlob(8, &bytetmp);
 		ui->scopeGUI->deserialize(bytetmp);
+        
+		blockApplySettings(false);
+        
 		applySettings();
 		return true;
-	} else {
+	} 
+    else 
+    {
 		resetToDefaults();
 		return false;
 	}
@@ -253,6 +267,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
 	m_basicSettingsShown(false),
+	m_doApplySettings(true),
 	m_rate(6000),
 	m_spanLog2(3)
 {
@@ -317,7 +332,7 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
-
+    
 	if (ui->BW->value() < -m_rate/100) {
 		ui->BW->setValue(-m_rate/100);
 		m_channelMarker->setBandwidth(-m_rate*2);
@@ -369,6 +384,14 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	return true;
 }
 
+void ChannelAnalyzerGUI::blockApplySettings(bool block)
+{
+    ui->glScope->blockSignals(block);
+    ui->glSpectrum->blockSignals(block);
+    m_channelMarker->blockSignals(block);
+    m_doApplySettings = !block;
+}
+
 void ChannelAnalyzerGUI::applySettings()
 {
 	setTitleColor(m_channelMarker->getColor());
@@ -388,11 +411,15 @@ void ChannelAnalyzerGUI::applySettings()
 
 void ChannelAnalyzerGUI::leaveEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(false);
+	blockApplySettings(false);
 }
 
 void ChannelAnalyzerGUI::enterEvent(QEvent*)
 {
+	blockApplySettings(true);
 	m_channelMarker->setHighlighted(true);
+	blockApplySettings(false);
 }
 

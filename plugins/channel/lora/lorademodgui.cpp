@@ -41,8 +41,12 @@ qint64 LoRaDemodGUI::getCenterFrequency() const {
 
 void LoRaDemodGUI::resetToDefaults()
 {
+	blockApplySettings(true);
+    
 	ui->BW->setValue(0);
 	ui->Spread->setValue(0);
+    
+	blockApplySettings(false);
 	applySettings();
 }
 
@@ -60,14 +64,19 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) {
+	if(!d.isValid()) 
+    {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if(d.getVersion() == 1) 
+    {
 		QByteArray bytetmp;
 		qint32 tmp;
+        
+		blockApplySettings(true);
+        
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 0);
@@ -76,9 +85,14 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 		ui->Spread->setValue(tmp);
 		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
+        
+		blockApplySettings(false);
+        
 		applySettings();
 		return true;
-	} else {
+	} 
+    else 
+    {
 		resetToDefaults();
 		return false;
 	}
@@ -128,7 +142,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -169,6 +184,12 @@ LoRaDemodGUI::~LoRaDemodGUI()
 	delete m_spectrumVis;
 	delete m_channelMarker;
 	delete ui;
+}
+
+void LoRaDemodGUI::blockApplySettings(bool block)
+{
+    m_channelMarker->blockSignals(block);
+    m_doApplySettings = !block;
 }
 
 void LoRaDemodGUI::applySettings()
