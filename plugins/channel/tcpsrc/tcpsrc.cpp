@@ -19,7 +19,7 @@
 #include <QThread>
 #include "tcpsrc.h"
 #include "tcpsrcgui.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
@@ -162,16 +162,16 @@ bool TCPSrc::handleMessage(const Message& cmd)
 {
 	qDebug() << "TCPSrc::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_inputSampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_inputSampleRate);
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 
-		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate
+		qDebug() << "TCPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_inputSampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;

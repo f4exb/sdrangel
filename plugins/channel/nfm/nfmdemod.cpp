@@ -22,7 +22,7 @@
 #include "nfmdemod.h"
 #include "nfmdemodgui.h"
 #include "audio/audiooutput.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 
@@ -256,16 +256,16 @@ bool NFMDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "NFMDemod::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		apply();
 
-		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+		qDebug() << "NFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;

@@ -4,6 +4,7 @@
 #include <list>
 #include "dsp/samplesink.h"
 #include "util/export.h"
+#include "util/message.h"
 
 class MessageQueue;
 class IntHalfbandFilter;
@@ -11,6 +12,24 @@ class IntHalfbandFilter;
 class SDRANGELOVE_API Channelizer : public SampleSink {
 	Q_OBJECT
 public:
+	class SDRANGELOVE_API MsgChannelizerNotification : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		MsgChannelizerNotification(int samplerate, qint64 frequencyOffset) :
+			Message(),
+			m_sampleRate(samplerate),
+			m_frequencyOffset(frequencyOffset)
+		{ }
+
+		int getSampleRate() const { return m_sampleRate; }
+		qint64 getFrequencyOffset() const { return m_frequencyOffset; }
+
+	private:
+		int m_sampleRate;
+		qint64 m_frequencyOffset;
+	};
+
 	Channelizer(SampleSink* sampleSink);
 	virtual ~Channelizer();
 

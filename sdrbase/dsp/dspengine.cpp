@@ -651,7 +651,7 @@ void DSPEngine::handleSourceMessages()
 			// update DSP values
 
 			m_sampleRate = notif->getSampleRate();
-			m_centerFrequency = notif->getFrequencyOffset();
+			m_centerFrequency = notif->getCenterFrequency();
 
 			qDebug() << "DSPEngine::handleSourceMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
 

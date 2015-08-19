@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <stdio.h>
 #include "audio/audiooutput.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 
 #include "chanalyzer.h"
 
@@ -127,14 +127,14 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 
 	qDebug() << "ChannelAnalyzer::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 
-		qDebug() << "  - DSPSignalNotification: m_sampleRate: " << m_sampleRate
+		qDebug() << "ChannelAnalyzer::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 #include "wfmdemod.h"
 
@@ -163,15 +163,15 @@ bool WFMDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "WFMDemod::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 		apply();
 
-		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+		qDebug() << "WFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;

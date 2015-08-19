@@ -342,8 +342,8 @@ void MainWindow::handleDSPMessages()
 		{
 			DSPSignalNotification* notif = (DSPSignalNotification*) message;
 			m_sampleRate = notif->getSampleRate();
-			m_centerFrequency = notif->getFrequencyOffset();
-			qDebug("SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getFrequencyOffset());
+			m_centerFrequency = notif->getCenterFrequency();
+			qDebug("SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
 			updateCenterFreqDisplay();
 			updateSampleRate();
 			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";

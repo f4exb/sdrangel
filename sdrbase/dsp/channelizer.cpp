@@ -4,6 +4,8 @@
 
 #include <QDebug>
 
+MESSAGE_CLASS_DEFINITION(Channelizer::MsgChannelizerNotification, Message)
+
 Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_inputSampleRate(10),
@@ -83,8 +85,7 @@ bool Channelizer::handleMessage(const Message& cmd)
 		emit inputSampleRateChanged();
 		return true;
 	}
-	else
-	if (DSPConfigureChannelizer::match(cmd))
+	else if (DSPConfigureChannelizer::match(cmd))
 	{
 		DSPConfigureChannelizer& chan = (DSPConfigureChannelizer&) cmd;
 		m_requestedOutputSampleRate = chan.getSampleRate();
@@ -98,7 +99,7 @@ bool Channelizer::handleMessage(const Message& cmd)
 
 		if (m_sampleSink != NULL)
 		{
-			DSPSignalNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
+			MsgChannelizerNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
 			m_sampleSink->handleMessage(notif);
 		}
 

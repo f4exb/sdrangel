@@ -153,7 +153,6 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-/*
 class SDRANGELOVE_API DSPConfigureSpectrumVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -173,7 +172,7 @@ private:
 	int m_fftSize;
 	int m_overlapPercent;
 	FFTWindow::Function m_window;
-};*/
+};
 
 class SDRANGELOVE_API DSPConfigureCorrection : public Message {
 	MESSAGE_CLASS_DECLARATION
@@ -237,18 +236,18 @@ class SDRANGELOVE_API DSPSignalNotification : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPSignalNotification(int samplerate, qint64 frequencyOffset) :
+	DSPSignalNotification(int samplerate, qint64 centerFrequency) :
 		Message(),
 		m_sampleRate(samplerate),
-		m_frequencyOffset(frequencyOffset)
+		m_centerFrequency(centerFrequency)
 	{ }
 
 	int getSampleRate() const { return m_sampleRate; }
-	qint64 getFrequencyOffset() const { return m_frequencyOffset; }
+	qint64 getCenterFrequency() const { return m_centerFrequency; }
 
 private:
 	int m_sampleRate;
-	qint64 m_frequencyOffset;
+	qint64 m_centerFrequency;
 };
 
 class SDRANGELOVE_API DSPConfigureChannelizer : public Message {

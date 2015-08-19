@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "ssbdemod.h"
 #include "audio/audiooutput.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
@@ -149,16 +149,16 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 	qDebug() << "SSBDemod::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
 		m_sampleDistanceRemain = m_sampleRate / 48000.0;
 
-		qDebug() << "  - DSPSignalNotification: m_sampleRate: " << m_sampleRate
+		qDebug() << "SSBDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset" << notif.getFrequencyOffset();
 
 		return true;

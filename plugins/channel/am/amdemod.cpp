@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
@@ -176,16 +176,16 @@ bool AMDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "AMDemod::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		apply();
 
-		qDebug() << "  - DSPSignalNotification:"
+		qDebug() << "AMDemod::handleMessage: MsgChannelizerNotification:"
 				<< " m_inputSampleRate: " << m_config.m_inputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
@@ -212,7 +212,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 	}
 	else
 	{
-		if(m_sampleSink != 0)
+		if(m_sampleSink != 0) // FIXME: for dependent sample sink - unused for this demod
 		{
 		   return m_sampleSink->handleMessage(cmd);
 		}

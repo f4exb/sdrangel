@@ -89,7 +89,7 @@ bool FileSink::handleMessage(const Message& message)
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;
 		m_sampleRate = notif.getSampleRate();
-		m_centerFrequency = notif.getFrequencyOffset();
+		m_centerFrequency = notif.getCenterFrequency();
 		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
 				<< " m_centerFrequency: " << m_centerFrequency;
 		return true;

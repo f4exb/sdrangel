@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <stdio.h>
 #include "lorademod.h"
-#include "dsp/dspcommands.h"
+#include "dsp/channelizer.h"
 
 #include "lorabits.h"
 
@@ -279,16 +279,17 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "LoRaDemod::handleMessage";
 
-	if (DSPSignalNotification::match(cmd))
+	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
-		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 		m_sampleDistanceRemain = m_sampleRate / m_Bandwidth;
 
-		qDebug() << " DSPSignalNotification: m_sampleRate: " << m_sampleRate;
+		qDebug() << "LoRaDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
+				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;
 	}
