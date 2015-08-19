@@ -260,6 +260,7 @@ bool BladerfInput::handleMessage(const Message& message)
 
 bool BladerfInput::applySettings(const Settings& settings, bool force)
 {
+	bool forwardChange = false;
 	QMutexLocker mutexLocker(&m_mutex);
 
 	qDebug() << "BladerfInput::applySettings: m_dev: " << m_dev;
@@ -383,6 +384,7 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
 		m_settings.m_devSampleRate = settings.m_devSampleRate;
+		forwardChange = true;
 
 		if (m_dev != 0)
 		{
@@ -422,6 +424,7 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
 		m_settings.m_log2Decim = settings.m_log2Decim;
+		forwardChange = true;
 
 		if(m_dev != 0)
 		{
@@ -441,45 +444,57 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 		}
 	}
 
+	if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+	{
+		forwardChange = true;
+	}
+
 	m_settings.m_centerFrequency = settings.m_centerFrequency;
 
-	qint64 centerFrequency = m_settings.m_centerFrequency;
-	qint64 f_img = centerFrequency;
-	qint64 f_cut = centerFrequency + m_settings.m_bandwidth/2;
+	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+	qint64 f_img = deviceCenterFrequency;
+	qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 
 	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
 	{
-		centerFrequency = m_settings.m_centerFrequency;
-		f_img = centerFrequency;
-		f_cut = centerFrequency + m_settings.m_bandwidth/2;
+		deviceCenterFrequency = m_settings.m_centerFrequency;
+		f_img = deviceCenterFrequency;
+		f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 	}
 	else
 	{
 		if (m_settings.m_fcPos == FC_POS_INFRA)
 		{
-			centerFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
-			f_img = centerFrequency + m_settings.m_devSampleRate/2;
-			f_cut = centerFrequency + m_settings.m_bandwidth/2;
+			deviceCenterFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
+			f_img = deviceCenterFrequency + m_settings.m_devSampleRate/2;
+			f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 		}
 		else if (m_settings.m_fcPos == FC_POS_SUPRA)
 		{
-			centerFrequency = m_settings.m_centerFrequency - (m_settings.m_devSampleRate / 4);
-			f_img = centerFrequency - m_settings.m_devSampleRate/2;
-			f_cut = centerFrequency - m_settings.m_bandwidth/2;
+			deviceCenterFrequency = m_settings.m_centerFrequency - (m_settings.m_devSampleRate / 4);
+			f_img = deviceCenterFrequency - m_settings.m_devSampleRate/2;
+			f_cut = deviceCenterFrequency - m_settings.m_bandwidth/2;
 		}
 	}
 
 	if (m_dev != NULL)
 	{
-		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, centerFrequency ) != 0)
+		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0)
 		{
 			qDebug("bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
 		}
 	}
 
-	qDebug() << "  - center freq: " << m_settings.m_centerFrequency << " Hz"
-			<< " RF center freq: " << centerFrequency << " Hz"
-			<< " RF sample rate: " << m_settings.m_devSampleRate << "Hz"
+	if (forwardChange)
+	{
+		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+		getOutputMessageQueue()->push(notif);
+	}
+
+	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+			<< " device center freq: " << deviceCenterFrequency << " Hz"
+			<< " device sample rate: " << m_settings.m_devSampleRate << "Hz"
 			<< " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
 			<< " BW: " << m_settings.m_bandwidth << "Hz"
 			<< " img: " << f_img << "Hz"

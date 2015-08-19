@@ -338,16 +338,16 @@ void MainWindow::handleDSPMessages()
 
 		std::cerr << "MainWindow::handleDSPMessages: " << message->getIdentifier() << std::endl;
 
-		if (DSPEngineReport::match(*message))
+		if (DSPSignalNotification::match(*message))
 		{
-			DSPEngineReport* rep = (DSPEngineReport*) message;
-			m_sampleRate = rep->getSampleRate();
-			m_centerFrequency = rep->getCenterFrequency();
-			qDebug("SampleRate:%d, CenterFrequency:%llu", rep->getSampleRate(), rep->getCenterFrequency());
+			DSPSignalNotification* notif = (DSPSignalNotification*) message;
+			m_sampleRate = notif->getSampleRate();
+			m_centerFrequency = notif->getFrequencyOffset();
+			qDebug("SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getFrequencyOffset());
 			updateCenterFreqDisplay();
 			updateSampleRate();
-			qDebug() << "MainWindow::handleMessages: m_fileSink->configure";
-			m_fileSink->configure(m_fileSink->getInputMessageQueue(), m_sampleFileName);
+			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
+			m_fileSink->handleMessage(*notif);
 		}
 
 		delete message;

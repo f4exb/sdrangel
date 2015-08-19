@@ -403,9 +403,9 @@ DSPEngine::State DSPEngine::gotoInit()
 		(*it)->sendWaitSink(notif);
 	}
 
-	// pass sample rate to main window
+	// pass data to listeners
 
-	DSPEngineReport* rep = new DSPEngineReport(m_sampleRate, m_centerFrequency);
+	DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
 	m_outputMessageQueue.push(rep);
 
 	return StReady;
@@ -653,25 +653,25 @@ void DSPEngine::handleSourceMessages()
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getFrequencyOffset();
 
-			qDebug() << "  - DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
+			qDebug() << "DSPEngine::handleSourceMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
 
-			// forward source changes to sinks
+			// forward source changes to sinks with immediate execution
 
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 			{
-				qDebug() << "  - forward message to " << (*it)->objectName().toStdString().c_str();
+				qDebug() << "DSPEngine::handleSourceMessages: forward message to " << (*it)->objectName().toStdString().c_str();
 				(*it)->handleMessage(*message);
 			}
 
 			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
 			{
-				qDebug() << "  - forward message to ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+				qDebug() << "DSPEngine::handleSourceMessages: forward message to ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
 				(*it)->sendWaitSink(*message);
 			}
 
-			// forward changes to listeners
+			// forward changes to listeners on DSP output queue
 
-			DSPEngineReport* rep = new DSPEngineReport(m_sampleRate, m_centerFrequency);
+			DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
 			m_outputMessageQueue.push(rep);
 		}
 
