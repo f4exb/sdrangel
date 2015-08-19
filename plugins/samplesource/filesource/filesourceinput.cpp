@@ -19,6 +19,7 @@
 #include <QDebug>
 
 #include "util/simpleserializer.h"
+#include "dsp/dspcommands.h"
 #include "dsp/filesink.h"
 
 #include "filesourcegui.h"
@@ -272,6 +273,9 @@ bool FileSourceInput::applySettings(const Settings& settings, bool force)
 				m_fileSourceThread->startWork();
 			}
 		}
+        
+		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+		getOutputMessageQueue()->push(notif);                
 
 		qDebug() << "FileSourceInput::applySettings:"
 				<< " file name: " << settings.m_fileName.toStdString().c_str()

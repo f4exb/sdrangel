@@ -21,6 +21,7 @@
 #include "fcdthread.h"
 #include "fcdgui.h"
 #include "qthid.h"
+#include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
@@ -178,7 +179,13 @@ void FCDInput::applySettings(const Settings& settings, bool force)
 	{
 		set_lna_gain(settings.gain > 0);
 		set_bias_t(settings.bias > 0);
-	}	
+	}
+    
+    if (sampleSourcChange)
+    {
+		DSPSignalNotification *notif = new DSPSignalNotification(960000, m_settings.centerFrequency);
+		getOutputMessageQueue()->push(notif);        
+    }
 }
 
 void FCDInput::set_center_freq(double freq)

@@ -19,7 +19,6 @@
 #include <QDebug>
 
 #include "util/simpleserializer.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "bladerfgui.h"
 #include "bladerfinput.h"

@@ -20,6 +20,7 @@
 #include "rtlsdrinput.h"
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
+#include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
@@ -259,6 +260,7 @@ bool RTLSDRInput::handleMessage(const Message& message)
 bool RTLSDRInput::applySettings(const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+    bool forwardChange = false;
 
 	if ((m_settings.m_gain != settings.m_gain) || force)
 	{
@@ -275,6 +277,8 @@ bool RTLSDRInput::applySettings(const Settings& settings, bool force)
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
+        forwardChange = true;
+        
 		if(m_dev != 0)
 		{
 			if( rtlsdr_set_sample_rate(m_dev, settings.m_devSampleRate) < 0)
@@ -306,12 +310,19 @@ bool RTLSDRInput::applySettings(const Settings& settings, bool force)
 
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
+        forwardChange = true;
+        
 		if(m_dev != 0)
 		{
 			m_settings.m_log2Decim = settings.m_log2Decim;
 			m_rtlSDRThread->setLog2Decimation(settings.m_log2Decim);
 		}
 	}
+
+    if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+    {
+        forwardChange = true;
+    }
 
 	m_settings.m_centerFrequency = settings.m_centerFrequency;
 
@@ -333,6 +344,13 @@ bool RTLSDRInput::applySettings(const Settings& settings, bool force)
 			qDebug("rtlsdr_set_center_freq(%lld) failed", m_settings.m_centerFrequency);
 		}
 	}
+    
+    if (forwardChange)
+    {
+		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+		getOutputMessageQueue()->push(notif);        
+    }
 
 	return true;
 }
