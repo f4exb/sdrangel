@@ -80,6 +80,7 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		Real realtmp;
         
 		blockApplySettings(true);
+		m_channelMarker->blockSignals(true);
         
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
@@ -112,6 +113,7 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->boost->setValue(s32tmp);
         
 		blockApplySettings(false);
+		m_channelMarker->blockSignals(false);
         
 		applySettings();
 		return true;
@@ -208,7 +210,6 @@ TCPSrcGUI::~TCPSrcGUI()
 
 void TCPSrcGUI::blockApplySettings(bool block)
 {
-    m_channelizer->blockSignals(block);
     m_doApplySettings = !block;
 }
 

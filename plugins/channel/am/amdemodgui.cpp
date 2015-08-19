@@ -85,6 +85,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		qint32 tmp;
         
 		blockApplySettings(true);
+		m_channelMarker->blockSignals(true);
         
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
@@ -103,6 +104,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         }
         
         blockApplySettings(false);
+		m_channelMarker->blockSignals(false);
 
 		applySettings();
 		return true;
@@ -230,7 +232,6 @@ AMDemodGUI::~AMDemodGUI()
 
 void AMDemodGUI::blockApplySettings(bool block)
 {
-    m_channelMarker->blockSignals(block);
     m_doApplySettings = !block;
 }
 

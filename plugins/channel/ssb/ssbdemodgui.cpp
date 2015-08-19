@@ -84,6 +84,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		qint32 tmp;
         
 		blockApplySettings(true);
+	    m_channelMarker->blockSignals(true);
         
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
@@ -102,6 +103,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		setNewRate(tmp);
         
 		blockApplySettings(false);
+	    m_channelMarker->blockSignals(false);
         
 		applySettings();
 		return true;
@@ -344,7 +346,6 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 
 void SSBDemodGUI::blockApplySettings(bool block)
 {
-    m_channelMarker->blockSignals(block);
     m_doApplySettings = !block;
 }
 

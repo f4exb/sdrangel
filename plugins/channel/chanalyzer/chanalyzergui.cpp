@@ -86,6 +86,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		bool tmpBool;
         
 		blockApplySettings(true);
+	    m_channelMarker->blockSignals(true);
         
 		d.readS32(1, &tmp, 0);
 		m_channelMarker->setCenterFrequency(tmp);
@@ -106,6 +107,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		ui->scopeGUI->deserialize(bytetmp);
         
 		blockApplySettings(false);
+	    m_channelMarker->blockSignals(false);
         
 		applySettings();
 		return true;
@@ -388,7 +390,6 @@ void ChannelAnalyzerGUI::blockApplySettings(bool block)
 {
     ui->glScope->blockSignals(block);
     ui->glSpectrum->blockSignals(block);
-    m_channelMarker->blockSignals(block);
     m_doApplySettings = !block;
 }
 
