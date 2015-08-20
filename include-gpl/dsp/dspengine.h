@@ -98,7 +98,7 @@ private:
 	typedef std::list<ThreadedSampleSink*> ThreadedSampleSinks;
 	ThreadedSampleSinks m_threadedSampleSinks; //!< sample sinks on their own threads (usually channels)
 
-	AudioOutput m_audioSink;
+	AudioOutput m_audioOutput;
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;

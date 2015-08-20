@@ -38,7 +38,7 @@ void ThreadedSampleSink::run()
 	exec();
 }
 
-void ThreadedSampleSink::feed(SampleVector::const_iterator& begin, SampleVector::const_iterator& end, bool positiveOnly)
+void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	m_sampleSink->feed(begin, end, positiveOnly);
 }

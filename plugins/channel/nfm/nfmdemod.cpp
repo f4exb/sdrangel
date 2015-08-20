@@ -107,15 +107,19 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 {
 	Complex ci;
 
-	if(m_audioFifo->size() <= 0)
+	if (m_audioFifo->size() == 0)
+	{
 		return;
+	}
 
-	for(SampleVector::const_iterator it = begin; it != end; ++it) {
+	for (SampleVector::const_iterator it = begin; it != end; ++it)
+	{
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
 		{
-			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci)) {
+			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+			{
 				m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
 
 				qint16 sample;
@@ -160,7 +164,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 				// AF processing
 
-				if(m_afSquelch.analyze(&demod)) {
+				if(m_afSquelch.analyze(&demod))
+				{
 					m_squelchOpen = m_afSquelch.open();
 				}
 
@@ -176,14 +181,16 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 							if (m_ctcssDetector.getDetectedTone(maxToneIndex))
 							{
-								if (maxToneIndex+1 != m_ctcssIndex) {
+								if (maxToneIndex+1 != m_ctcssIndex)
+								{
 									m_nfmDemodGUI->setCtcssFreq(m_ctcssDetector.getToneSet()[maxToneIndex]);
 									m_ctcssIndex = maxToneIndex+1;
 								}
 							}
 							else
 							{
-								if (m_ctcssIndex != 0) {
+								if (m_ctcssIndex != 0)
+								{
 									m_nfmDemodGUI->setCtcssFreq(0);
 									m_ctcssIndex = 0;
 								}
@@ -204,7 +211,8 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				}
 				else
 				{
-					if (m_ctcssIndex != 0) {
+					if (m_ctcssIndex != 0)
+					{
 						m_nfmDemodGUI->setCtcssFreq(0);
 						m_ctcssIndex = 0;
 					}
@@ -216,10 +224,17 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
 				++m_audioBufferFill;
-				if(m_audioBufferFill >= m_audioBuffer.size()) {
+
+				if (m_audioBufferFill >= m_audioBuffer.size())
+				{
 					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-					if(res != m_audioBufferFill)
+
+					/* FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
+					if (res != m_audioBufferFill)
+					{
 						qDebug("lost %u audio samples", m_audioBufferFill - res);
+					}*/
+
 					m_audioBufferFill = 0;
 				}
 
@@ -227,10 +242,17 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			}
 		}
 	}
-	if(m_audioBufferFill > 0) {
+
+	if (m_audioBufferFill > 0)
+	{
 		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-		if(res != m_audioBufferFill)
+
+		/* Same remark as above
+		if (res != m_audioBufferFill)
+		{
 			qDebug("lost %u samples", m_audioBufferFill - res);
+		}*/
+
 		m_audioBufferFill = 0;
 	}
 

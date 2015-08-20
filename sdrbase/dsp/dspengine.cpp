@@ -271,16 +271,25 @@ void DSPEngine::work()
 		if (part1begin != part1end)
 		{
 			// correct stuff
-			if (m_dcOffsetCorrection) {
+			if (m_dcOffsetCorrection)
+			{
 				dcOffset(part1begin, part1end);
 			}
 
-			if (m_iqImbalanceCorrection) {
+			if (m_iqImbalanceCorrection)
+			{
 				imbalance(part1begin, part1end);
 			}
 
-			// feed data to handlers
-			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++) {
+			// feed data to direct sinks
+			for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); ++it)
+			{
+				(*it)->feed(part1begin, part1end, positiveOnly);
+			}
+
+			// feed data to threaded sinks
+			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
+			{
 				(*it)->feed(part1begin, part1end, positiveOnly);
 			}
 		}
@@ -289,16 +298,25 @@ void DSPEngine::work()
 		if(part2begin != part2end)
 		{
 			// correct stuff
-			if(m_dcOffsetCorrection) {
+			if (m_dcOffsetCorrection)
+			{
 				dcOffset(part2begin, part2end);
 			}
 
-			if(m_iqImbalanceCorrection) {
+			if (m_iqImbalanceCorrection)
+			{
 				imbalance(part2begin, part2end);
 			}
 
-			// feed data to handlers
-			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++) {
+			// feed data to direct sinks
+			for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
+			{
+				(*it)->feed(part2begin, part2end, positiveOnly);
+			}
+
+			// feed data to threaded sinks
+			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
+			{
 				(*it)->feed(part2begin, part2end, positiveOnly);
 			}
 		}
@@ -344,7 +362,7 @@ DSPEngine::State DSPEngine::gotoIdle()
 
 	m_sampleSource->stop();
 	m_deviceDescription.clear();
-	m_audioSink.stop();
+	m_audioOutput.stop();
 	m_sampleRate = 0;
 
 	return StIdle;
@@ -444,7 +462,7 @@ DSPEngine::State DSPEngine::gotoRunning()
 		return gotoError("Could not start sample source");
 	}
 
-	m_audioSink.start(0, 48000);
+	m_audioOutput.start(-1, 48000); // Use default output device at 48 kHz
 
 	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 	{
@@ -591,11 +609,11 @@ void DSPEngine::handleSynchronousMessages()
 	}
 	else if (DSPAddAudioSink::match(*message))
 	{
-		m_audioSink.addFifo(((DSPAddAudioSink*) message)->getAudioFifo());
+		m_audioOutput.addFifo(((DSPAddAudioSink*) message)->getAudioFifo());
 	}
 	else if (DSPRemoveAudioSink::match(*message))
 	{
-		m_audioSink.removeFifo(((DSPRemoveAudioSink*) message)->getAudioFifo());
+		m_audioOutput.removeFifo(((DSPRemoveAudioSink*) message)->getAudioFifo());
 	}
 
 	m_syncMessenger.done(m_state);

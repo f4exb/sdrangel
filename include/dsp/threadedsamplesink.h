@@ -46,7 +46,7 @@ public:
 	void stop();  //!< this thread exit() and wait()
 
 	bool sendWaitSink(Message& cmd); //!< Send message to sink synchronously
-	void feed(SampleVector::const_iterator& begin, SampleVector::const_iterator& end, bool positiveOnly); //!< Feed sink with samples
+	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly); //!< Feed sink with samples
 
 	QString getSampleSinkObjectName() const;
 

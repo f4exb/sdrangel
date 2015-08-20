@@ -63,7 +63,7 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 {
 	Complex ci;
 
-	if (m_audioFifo->size() <= 0)
+	if (m_audioFifo->size() == 0)
 	{
 		return;
 	}
@@ -73,68 +73,67 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
 		c *= m_nco.nextIQ();
 
+		if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
 		{
-			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+			m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
+
+			Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+			m_movingAverage.feed(magsq);
+
+			if (m_movingAverage.average() >= m_squelchLevel)
 			{
-				m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
-
-				Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-				m_movingAverage.feed(magsq);
-
-				if (m_movingAverage.average() >= m_squelchLevel)
-				{
-					m_squelchState = m_running.m_audioSampleRate/ 20;
-				}
-
-				qint16 sample;
-
-				if (m_squelchState > 0)
-				{
-					m_squelchState--;
-					Real demod = sqrt(magsq);
-
-					demod = m_lowpass.filter(demod);
-
-					if (demod < -1)
-					{
-						demod = -1;
-					}
-					else if (demod > 1)
-					{
-						demod = 1;
-					}
-
-					m_volumeAGC.feed(demod);
-
-					demod *= (0.003 / m_volumeAGC.getValue());
-					demod *= m_running.m_volume;
-					sample = demod * 32700 * 16;
-
-				}
-				else
-				{
-					m_volumeAGC.close();
-					sample = 0;
-				}
-
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
-				++m_audioBufferFill;
-
-				if (m_audioBufferFill >= m_audioBuffer.size())
-				{
-					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-
-					if (res != m_audioBufferFill)
-					{
-						qDebug("lost %u audio samples", m_audioBufferFill - res);
-					}
-
-					m_audioBufferFill = 0;
-				}
-
-				m_interpolatorDistanceRemain += m_interpolatorDistance;
+				m_squelchState = m_running.m_audioSampleRate/ 20;
 			}
+
+			qint16 sample;
+
+			if (m_squelchState > 0)
+			{
+				m_squelchState--;
+				Real demod = sqrt(magsq);
+
+				demod = m_lowpass.filter(demod);
+
+				if (demod < -1)
+				{
+					demod = -1;
+				}
+				else if (demod > 1)
+				{
+					demod = 1;
+				}
+
+				m_volumeAGC.feed(demod);
+
+				demod *= (0.003 / m_volumeAGC.getValue());
+				demod *= m_running.m_volume;
+				sample = demod * 32700 * 16;
+
+			}
+			else
+			{
+				m_volumeAGC.close();
+				sample = 0;
+			}
+
+			m_audioBuffer[m_audioBufferFill].l = sample;
+			m_audioBuffer[m_audioBufferFill].r = sample;
+			++m_audioBufferFill;
+
+			if (m_audioBufferFill >= m_audioBuffer.size())
+			{
+				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
+				/* FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
+				if (res != m_audioBufferFill)
+				{
+					qDebug("AMDemod::feed: %u/%u audio samples lost", m_audioBufferFill - res, m_audioBufferFill);
+				}*/
+
+				m_audioBufferFill = 0;
+			}
+
+			m_interpolatorDistanceRemain += m_interpolatorDistance;
 		}
 	}
 
@@ -142,10 +141,11 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 	{
 		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
+		/* SAme remark as above
 		if (res != m_audioBufferFill)
 		{
-			qDebug("lost %u samples", m_audioBufferFill - res);
-		}
+			qDebug("AMDemod::feed: %u samples written vs %u requested", res, m_audioBufferFill);
+		}*/
 
 		m_audioBufferFill = 0;
 	}

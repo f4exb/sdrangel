@@ -31,7 +31,7 @@ class AudioOutputPipe;
 class SDRANGELOVE_API AudioOutput : QIODevice {
 public:
 	AudioOutput();
-	~AudioOutput();
+	virtual ~AudioOutput();
 
 	bool start(int device, int rate);
 	void stop();
@@ -47,9 +47,9 @@ private:
 	AudioFifos m_audioFifos;
 	std::vector<qint32> m_mixBuffer;
 
-	bool open(OpenMode mode);
-	qint64 readData(char* data, qint64 maxLen);
-	qint64 writeData(const char* data, qint64 len);
+	//virtual bool open(OpenMode mode);
+	virtual qint64 readData(char* data, qint64 maxLen);
+	virtual qint64 writeData(const char* data, qint64 len);
 
 	friend class AudioOutputPipe;
 };
