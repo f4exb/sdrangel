@@ -124,11 +124,11 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 			{
 				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-				/* FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
+				// FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
 				if (res != m_audioBufferFill)
 				{
 					qDebug("AMDemod::feed: %u/%u audio samples lost", m_audioBufferFill - res, m_audioBufferFill);
-				}*/
+				}
 
 				m_audioBufferFill = 0;
 			}
@@ -141,7 +141,8 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 	{
 		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-		/* SAme remark as above
+		// Same remark as above
+		/*
 		if (res != m_audioBufferFill)
 		{
 			qDebug("AMDemod::feed: %u samples written vs %u requested", res, m_audioBufferFill);

@@ -8,6 +8,7 @@
 
 class PluginAPI;
 class ChannelMarker;
+class ThreadedSampleSink;
 class Channelizer;
 class TCPSrc;
 class SpectrumVis;
@@ -59,6 +60,7 @@ private:
 	bool m_doApplySettings;
 
 	// RF path
+	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 

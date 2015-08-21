@@ -236,8 +236,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	//ui->deltaFrequency->setBold(true);
 
 	m_channelizer = new Channelizer(m_nfmDemod);
+	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addAudioSink(m_audioFifo);
-	DSPEngine::instance()->addThreadedSink(m_channelizer);
+	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::red);
@@ -254,7 +255,8 @@ NFMDemodGUI::~NFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
 	DSPEngine::instance()->removeAudioSink(m_audioFifo);
-	DSPEngine::instance()->removeThreadedSink(m_channelizer);
+	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_nfmDemod;
 	delete m_audioFifo;

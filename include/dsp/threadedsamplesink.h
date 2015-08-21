@@ -19,7 +19,6 @@
 #define INCLUDE_THREADEDSAMPLESINK_H
 
 #include <QMutex>
-#include <QThread>
 #include "samplesink.h"
 #include "dsp/samplefifo.h"
 #include "util/messagequeue.h"
@@ -27,15 +26,16 @@
 #include "util/syncmessenger.h"
 
 class SampleSink;
+class QThread;
 
 /**
  * This class is a wrapper for SampleSink that runs the SampleSink object in its own thread
  */
-class SDRANGELOVE_API ThreadedSampleSink : public QThread {
+class SDRANGELOVE_API ThreadedSampleSink : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedSampleSink(SampleSink* sampleSink);
+	ThreadedSampleSink(SampleSink* sampleSink, QObject *parent = 0);
 	~ThreadedSampleSink();
 
 	const SampleSink *getSink() const { return m_sampleSink; }
@@ -45,20 +45,19 @@ public:
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()
 
-	bool sendWaitSink(Message& cmd); //!< Send message to sink synchronously
+	bool handleSinkMessage(Message& cmd); //!< Send message to sink synchronously
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly); //!< Feed sink with samples
 
 	QString getSampleSinkObjectName() const;
 
 protected:
+	QThread *m_thread; //!< The thead object
 	SyncMessenger m_syncMessenger;  //!< Used to process messages synchronously with the thread
 	SampleSink* m_sampleSink;
+	SampleFifo m_sampleFifo;
 
-private:
-	void run(); //!< this thread run() method
-
-private slots:
-	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
+protected slots:
+	void handleData();
 };
 
 #endif // INCLUDE_THREADEDSAMPLESINK_H

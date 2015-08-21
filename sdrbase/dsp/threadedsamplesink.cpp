@@ -1,60 +1,59 @@
 #include <QThread>
 #include <QDebug>
+#include <QApplication>
 #include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "util/message.h"
 
-ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink) :
+ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink, QObject *parent) :
 	m_sampleSink(sampleSink)
 {
-	moveToThread(this);
+	QString name = "ThreadedSampleSink(" + m_sampleSink->objectName() + ")";
+	setObjectName(name);
+
+	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: " << name;
+
+	m_thread = new QThread(parent);
+	moveToThread(m_thread); // FIXME: the intermediate FIFO should be handled within the sink. Define a new type of sink that is compatible with threading
+	m_sampleSink->moveToThread(m_thread);
+	m_sampleFifo.moveToThread(m_thread);
+	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
+	m_sampleFifo.setSize(262144);
+
+	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: thread: " << thread() << " m_thread: " << m_thread;
 }
 
 ThreadedSampleSink::~ThreadedSampleSink()
 {
-	wait();
+	delete m_thread;
 }
 
 void ThreadedSampleSink::start()
 {
 	qDebug() << "ThreadedSampleSink::start";
-	DSPPing cmd;
-	QThread::start();
-	m_syncMessenger.sendWait(cmd);
+	m_thread->start();
+	m_sampleSink->start();
 }
 
 void ThreadedSampleSink::stop()
 {
 	qDebug() << "ThreadedSampleSink::stop";
-	exit();
-	wait();
-}
+	m_sampleSink->stop();
+	m_thread->exit();
+	m_thread->wait();
+	m_sampleFifo.readCommit(m_sampleFifo.fill());
 
-void ThreadedSampleSink::run()
-{
-	qDebug() << "ThreadedSampleSink::run";
-	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
-	m_syncMessenger.done(); // Release start() that is waiting in calling trhead
-	exec();
 }
 
 void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	m_sampleSink->feed(begin, end, positiveOnly);
+	//	m_sampleSink->feed(begin, end, positiveOnly);
+	m_sampleFifo.write(begin, end);
 }
 
-bool ThreadedSampleSink::sendWaitSink(Message& cmd)
+bool ThreadedSampleSink::handleSinkMessage(Message& cmd)
 {
-	m_syncMessenger.sendWait(cmd);
-}
-
-void ThreadedSampleSink::handleSynchronousMessages()
-{
-	qDebug() << "ThreadedSampleSink::handleSynchronousMessages";
-	Message *message = m_syncMessenger.getMessage();
-	qDebug() << "  - message: " << message->getIdentifier();
-	m_sampleSink->handleMessage(*message); // just delegate to the sink
-	m_syncMessenger.done();
+	return m_sampleSink->handleMessage(cmd);
 }
 
 QString ThreadedSampleSink::getSampleSinkObjectName() const
@@ -63,33 +62,44 @@ QString ThreadedSampleSink::getSampleSinkObjectName() const
 }
 
 
-/*
-void ThreadedSampleSink::handleData()
+void ThreadedSampleSink::handleData() // FIXME: Move it to the new threadable sink class
 {
 	bool positiveOnly = false;
 
-	while((m_sampleFifo.fill() > 0) && (m_messageQueue.countPending() == 0)) {
+	while ((m_sampleFifo.fill() > 0) && (m_sampleSink->getInputMessageQueue()->size() == 0))
+	{
 		SampleVector::iterator part1begin;
 		SampleVector::iterator part1end;
 		SampleVector::iterator part2begin;
 		SampleVector::iterator part2end;
 
-		size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
+		std::size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
 
 		// first part of FIFO data
-		if(count > 0) {
+
+		if (count > 0)
+		{
 			// handle data
 			if(m_sampleSink != NULL)
+			{
 				m_sampleSink->feed(part1begin, part1end, positiveOnly);
+			}
+
 			m_sampleFifo.readCommit(part1end - part1begin);
 		}
+
 		// second part of FIFO data (used when block wraps around)
-		if(part2begin != part2end) {
+
+		if(part2begin != part2end)
+		{
 			// handle data
 			if(m_sampleSink != NULL)
+			{
 				m_sampleSink->feed(part2begin, part2end, positiveOnly);
+			}
+
 			m_sampleFifo.readCommit(part2end - part2begin);
 		}
 	}
-}*/
+}
 

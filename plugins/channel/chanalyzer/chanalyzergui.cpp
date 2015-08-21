@@ -1,6 +1,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include "ui_chanalyzergui.h"
+#include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
@@ -283,8 +284,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
 	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
 	m_channelizer = new Channelizer(m_channelAnalyzer);
+	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	DSPEngine::instance()->addThreadedSink(m_channelizer);
+	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -315,7 +317,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_channelizer);
+	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;

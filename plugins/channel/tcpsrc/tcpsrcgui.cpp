@@ -1,6 +1,7 @@
 #include "tcpsrcgui.h"
 #include "plugin/pluginapi.h"
 #include "tcpsrc.h"
+#include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
@@ -176,7 +177,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_tcpSrc);
-	DSPEngine::instance()->addThreadedSink(m_channelizer);
+	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
@@ -200,7 +202,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 TCPSrcGUI::~TCPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_channelizer);
+	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_tcpSrc;
 	delete m_spectrumVis;

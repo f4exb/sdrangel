@@ -131,17 +131,17 @@ void DSPEngine::removeSink(SampleSink* sink)
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPEngine::addThreadedSink(SampleSink* sink)
+void DSPEngine::addThreadedSink(ThreadedSampleSink* sink)
 {
 	qDebug() << "DSPEngine::addThreadedSink: " << sink->objectName().toStdString().c_str();
-	DSPAddThreadedSink cmd(sink);
+	DSPAddThreadedSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPEngine::removeThreadedSink(SampleSink* sink)
+void DSPEngine::removeThreadedSink(ThreadedSampleSink* sink)
 {
 	qDebug() << "DSPEngine::removeThreadedSink: " << sink->objectName().toStdString().c_str();
-	DSPRemoveThreadedSink cmd(sink);
+	DSPRemoveThreadedSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
@@ -418,7 +418,7 @@ DSPEngine::State DSPEngine::gotoInit()
 	for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
 	{
 		qDebug() << "  - initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-		(*it)->sendWaitSink(notif);
+		(*it)->handleSinkMessage(notif);
 	}
 
 	// pass data to listeners
@@ -580,32 +580,17 @@ void DSPEngine::handleSynchronousMessages()
 
 		m_sampleSinks.remove(sink);
 	}
-	else if (DSPAddThreadedSink::match(*message))
+	else if (DSPAddThreadedSampleSink::match(*message))
 	{
-		SampleSink* sink = ((DSPAddThreadedSink*) message)->getSampleSink();
-		ThreadedSampleSink *threadedSink = new ThreadedSampleSink(sink);
+		ThreadedSampleSink *threadedSink = ((DSPAddThreadedSampleSink*) message)->getThreadedSampleSink();
 		m_threadedSampleSinks.push_back(threadedSink);
 		threadedSink->start();
 	}
-	else if (DSPRemoveThreadedSink::match(*message))
+	else if (DSPRemoveThreadedSampleSink::match(*message))
 	{
-		SampleSink* sink = ((DSPRemoveThreadedSink*) message)->getSampleSink();
-		ThreadedSampleSinks::iterator threadedSinkIt = m_threadedSampleSinks.begin();
-
-		for (; threadedSinkIt != m_threadedSampleSinks.end(); ++threadedSinkIt)
-		{
-			if ((*threadedSinkIt)->getSink() == sink)
-			{
-				break;
-			}
-		}
-
-		if (threadedSinkIt != m_threadedSampleSinks.end())
-		{
-			(*threadedSinkIt)->stop();
-			m_threadedSampleSinks.remove(*threadedSinkIt);
-			delete (*threadedSinkIt);
-		}
+		ThreadedSampleSink* threadedSink = ((DSPRemoveThreadedSampleSink*) message)->getThreadedSampleSink();
+		threadedSink->stop();
+		m_threadedSampleSinks.remove(threadedSink);
 	}
 	else if (DSPAddAudioSink::match(*message))
 	{
@@ -684,7 +669,7 @@ void DSPEngine::handleSourceMessages()
 			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
 			{
 				qDebug() << "DSPEngine::handleSourceMessages: forward message to ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-				(*it)->sendWaitSink(*message);
+				(*it)->handleSinkMessage(*message);
 			}
 
 			// forward changes to listeners on DSP output queue

@@ -259,8 +259,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbDemod = new SSBDemod(m_audioFifo, m_spectrumVis);
 	m_channelizer = new Channelizer(m_ssbDemod);
+	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addAudioSink(m_audioFifo);
-	DSPEngine::instance()->addThreadedSink(m_channelizer);
+	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -289,7 +290,8 @@ SSBDemodGUI::~SSBDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
 	DSPEngine::instance()->removeAudioSink(m_audioFifo);
-	DSPEngine::instance()->removeThreadedSink(m_channelizer);
+	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_ssbDemod;
 	delete m_spectrumVis;

@@ -8,6 +8,7 @@
 
 class PluginAPI;
 class ChannelMarker;
+class ThreadedSampleSink;
 class Channelizer;
 class LoRaDemod;
 class SpectrumVis;
@@ -47,6 +48,7 @@ private:
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
+	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;

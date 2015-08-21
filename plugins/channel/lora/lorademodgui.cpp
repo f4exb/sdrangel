@@ -155,7 +155,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_LoRaDemod);
-	DSPEngine::instance()->addThreadedSink(m_channelizer);
+	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer);
+	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
@@ -180,7 +181,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 LoRaDemodGUI::~LoRaDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_channelizer);
+	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_LoRaDemod;
 	delete m_spectrumVis;

@@ -67,8 +67,8 @@ public:
 	void addSink(SampleSink* sink); //!< Add a sample sink
 	void removeSink(SampleSink* sink); //!< Remove a sample sink
 
-	void addThreadedSink(SampleSink* sink); //!< Add a sample sink that will run on its own thread
-	void removeThreadedSink(SampleSink* sink); //!< Remove a sample sink that runs on its own thread
+	void addThreadedSink(ThreadedSampleSink* sink); //!< Add a sample sink that will run on its own thread
+	void removeThreadedSink(ThreadedSampleSink* sink); //!< Remove a sample sink that runs on its own thread
 
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink

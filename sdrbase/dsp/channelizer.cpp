@@ -2,6 +2,7 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
 
+#include <QString>
 #include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(Channelizer::MsgChannelizerNotification, Message)
@@ -14,7 +15,8 @@ Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_currentOutputSampleRate(0),
 	m_currentCenterFrequency(0)
 {
-	setObjectName("Channelizer");
+	QString name = "Channelizer(" + m_sampleSink->objectName() + ")";
+	setObjectName(name);
 }
 
 Channelizer::~Channelizer()
@@ -55,7 +57,7 @@ void Channelizer::start()
 {
 	if(m_sampleSink != NULL)
 	{
-		qDebug() << "Channelizer::start";
+		qDebug() << "Channelizer::start: thread: " << thread();
 		m_sampleSink->start();
 	}
 }

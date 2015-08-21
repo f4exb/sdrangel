@@ -8,6 +8,7 @@ class PluginAPI;
 class ChannelMarker;
 
 class AudioFifo;
+class ThreadedSampleSink;
 class Channelizer;
 class SSBDemod;
 class SpectrumVis;
@@ -54,6 +55,7 @@ private:
 	int m_spanLog2;
 
 	AudioFifo* m_audioFifo;
+	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
