@@ -20,6 +20,7 @@
 
 #include <QMutex>
 #include <QIODevice>
+#include <QAudioFormat>
 #include <list>
 #include <vector>
 #include "util/export.h"
@@ -39,6 +40,8 @@ public:
 	void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
 
+	uint getRate() const { return m_audioFormat.sampleRate(); }
+
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
@@ -46,6 +49,8 @@ private:
 	typedef std::list<AudioFifo*> AudioFifos;
 	AudioFifos m_audioFifos;
 	std::vector<qint32> m_mixBuffer;
+
+	QAudioFormat m_audioFormat;
 
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);

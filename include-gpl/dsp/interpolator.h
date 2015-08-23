@@ -20,13 +20,18 @@ public:
 	void free();
 
 	// Original code allowed for upsampling, but was never used that way
-	bool interpolate(Real* distance, const Complex& next, Complex* result)
+	bool interpolate(Real *distance, const Complex& next, Complex* result)
 	{
 		advanceFilter(next);
 		*distance -= 1.0;
+
 		if (*distance >= 1.0)
+		{
 			return false;
-		doInterpolate((int)floor(*distance * (Real)m_phaseSteps), result);
+		}
+
+		doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
+
 		return true;
 	}
 

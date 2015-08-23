@@ -103,15 +103,15 @@ private:
 	PluginManager* m_pluginManager;
 
 	void loadSettings();
-	void loadSettings(const Preset* preset);
-	void saveSettings(Preset* preset);
+	void loadPresetSettings(const Preset* preset);
+	void savePresetSettings(Preset* preset);
 	void saveSettings();
 
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
 	void updateCenterFreqDisplay();
 	void updateSampleRate();
-	void updatePresets();
+	void updatePresetControls();
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
 

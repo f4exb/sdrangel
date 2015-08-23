@@ -18,11 +18,13 @@
 #ifndef INCLUDE_AUDIOFIFO_H
 #define INCLUDE_AUDIOFIFO_H
 
+#include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
 #include "util/export.h"
 
-class SDRANGELOVE_API AudioFifo {
+class SDRANGELOVE_API AudioFifo : public QObject {
+	Q_OBJECT
 public:
 	AudioFifo();
 	AudioFifo(uint sampleSize, uint numSamples);
@@ -30,8 +32,8 @@ public:
 
 	bool setSize(uint sampleSize, uint numSamples);
 
-	uint write(const quint8* data, uint numSamples, int timeout = INT_MAX);
-	uint read(quint8* data, uint numSamples, int timeout = INT_MAX);
+	uint write(const quint8* data, uint numSamples, int timeout_ms = INT_MAX);
+	uint read(quint8* data, uint numSamples, int timeout_ms = INT_MAX);
 
 	uint drain(uint numSamples);
 	void clear();

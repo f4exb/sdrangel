@@ -50,7 +50,6 @@ bool AudioOutput::start(int device, int rate)
 	//Q_UNUSED(device);
 	//Q_UNUSED(rate);
 
-	QAudioFormat format;
 	QAudioDeviceInfo devInfo;
 
 	if (device < 0)
@@ -76,30 +75,35 @@ bool AudioOutput::start(int device, int rate)
 
 	//QAudioDeviceInfo devInfo(QAudioDeviceInfo::defaultOutputDevice());
 
-	format.setSampleRate(rate);
-	format.setChannelCount(2);
-	format.setSampleSize(16);
-	format.setCodec("audio/pcm");
-	format.setByteOrder(QAudioFormat::LittleEndian);
-	format.setSampleType(QAudioFormat::SignedInt);
+	m_audioFormat.setSampleRate(rate);
+	m_audioFormat.setChannelCount(2);
+	m_audioFormat.setSampleSize(16);
+	m_audioFormat.setCodec("audio/pcm");
+	m_audioFormat.setByteOrder(QAudioFormat::LittleEndian);
+	m_audioFormat.setSampleType(QAudioFormat::SignedInt);
 
-	if (!devInfo.isFormatSupported(format))
+	if (!devInfo.isFormatSupported(m_audioFormat))
 	{
-		qWarning("AudioOutput::start: %d Hz S16_LE audio format not supported", rate);
-		format = devInfo.nearestFormat(format);
+		m_audioFormat = devInfo.nearestFormat(m_audioFormat);
+		qWarning("AudioOutput::start: %d Hz S16_LE audio format not supported. New rate: %d", rate, m_audioFormat.sampleRate());
 	}
 
-	if (format.sampleSize() != 16)
+	if (m_audioFormat.sampleSize() != 16)
 	{
 		qWarning("AudioOutput::start: Audio device ( %s ) failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
 		return false;
 	}
 
-	m_audioOutput = new QAudioOutput(devInfo, format);
+	m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
 
 	QIODevice::open(QIODevice::ReadOnly);
 
 	m_audioOutput->start(this);
+
+	if (m_audioOutput->state() != QAudio::ActiveState)
+	{
+		qWarning("AudioOutput::start: cannot start");
+	}
 
 	return true;
 

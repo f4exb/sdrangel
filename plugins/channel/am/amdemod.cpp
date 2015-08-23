@@ -21,14 +21,15 @@
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
+#include "dsp/dspengine.h"
 #include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
-AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+AMDemod::AMDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(audioFifo)
+	m_audioFifo(4, 48000)
 {
 	setObjectName("AMDemod");
 
@@ -38,15 +39,17 @@ AMDemod::AMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_config.m_afBandwidth = 3000;
 	m_config.m_squelch = -40.0;
 	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = 48000;
+	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
 
-	m_audioBuffer.resize(16384);
+	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
+
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 AMDemod::~AMDemod()
@@ -63,7 +66,7 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 {
 	Complex ci;
 
-	if (m_audioFifo->size() == 0)
+	if (m_audioFifo.size() == 0)
 	{
 		return;
 	}
@@ -82,7 +85,7 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 
 			if (m_movingAverage.average() >= m_squelchLevel)
 			{
-				m_squelchState = m_running.m_audioSampleRate/ 20;
+				m_squelchState = m_running.m_audioSampleRate / 20;
 			}
 
 			qint16 sample;
@@ -122,12 +125,11 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 
 			if (m_audioBufferFill >= m_audioBuffer.size())
 			{
-				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
-				// FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
 				if (res != m_audioBufferFill)
 				{
-					qDebug("AMDemod::feed: %u/%u audio samples lost", m_audioBufferFill - res, m_audioBufferFill);
+					qDebug("AMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
 				}
 
 				m_audioBufferFill = 0;
@@ -139,14 +141,12 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 
 	if (m_audioBufferFill > 0)
 	{
-		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
-		// Same remark as above
-		/*
 		if (res != m_audioBufferFill)
 		{
-			qDebug("AMDemod::feed: %u samples written vs %u requested", res, m_audioBufferFill);
-		}*/
+			qDebug("AMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
+		}
 
 		m_audioBufferFill = 0;
 	}
@@ -161,12 +161,11 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 
 void AMDemod::start()
 {
+	qDebug() << "AMDemod::start: m_inputSampleRate: " << m_config.m_inputSampleRate
+			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+
 	m_squelchState = 0;
-	m_audioFifo->clear();
-	m_interpolatorRegulation = 0.9999;
-	m_interpolatorDistance = 1.0;
-	m_interpolatorDistanceRemain = 0.0;
-	m_lastSample = 0;
+	m_audioFifo.clear();
 }
 
 void AMDemod::stop()
@@ -203,7 +202,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "  - MsgConfigureAMDemod:"
+		qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
@@ -239,6 +238,8 @@ void AMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		qDebug() << "AMDemod::apply: m_inputSampleRate: " << m_config.m_inputSampleRate
+				<< " m_interpolatorDistance: " << m_interpolatorDistance;
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||

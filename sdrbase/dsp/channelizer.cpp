@@ -32,7 +32,7 @@ void Channelizer::configure(MessageQueue* messageQueue, int sampleRate, int cent
 
 void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
-	if(m_sampleSink == NULL) {
+	if(m_sampleSink == 0) {
 		m_sampleBuffer.clear();
 		return;
 	}
@@ -55,16 +55,19 @@ void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_i
 
 void Channelizer::start()
 {
-	if(m_sampleSink != NULL)
+	if(m_sampleSink != 0)
 	{
-		qDebug() << "Channelizer::start: thread: " << thread();
+		qDebug() << "Channelizer::start: thread: " << thread()
+				<< " m_inputSampleRate: " << m_inputSampleRate
+				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
+				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
 		m_sampleSink->start();
 	}
 }
 
 void Channelizer::stop()
 {
-	if(m_sampleSink != NULL)
+	if(m_sampleSink != 0)
 		m_sampleSink->stop();
 }
 
@@ -79,7 +82,7 @@ bool Channelizer::handleMessage(const Message& cmd)
 		qDebug() << "Channelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
 		applyConfiguration();
 
-		if (m_sampleSink != NULL)
+		if (m_sampleSink != 0)
 		{
 			m_sampleSink->handleMessage(notif);
 		}
@@ -99,17 +102,11 @@ bool Channelizer::handleMessage(const Message& cmd)
 
 		applyConfiguration();
 
-		if (m_sampleSink != NULL)
-		{
-			MsgChannelizerNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
-			m_sampleSink->handleMessage(notif);
-		}
-
 		return true;
 	}
 	else
 	{
-		if (m_sampleSink != NULL)
+		if (m_sampleSink != 0)
 		{
 			return m_sampleSink->handleMessage(cmd);
 		}
@@ -132,11 +129,17 @@ void Channelizer::applyConfiguration()
 			<< ", req=" << m_requestedOutputSampleRate
 			<< ", out=" << m_currentOutputSampleRate
 			<< ", fc=" << m_currentCenterFrequency;
+
+	if (m_sampleSink != 0)
+	{
+		MsgChannelizerNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
+		m_sampleSink->handleMessage(notif);
+	}
 }
 
 Channelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilter),
-	m_workFunction(NULL)
+	m_workFunction(0)
 {
 	switch(mode) {
 		case ModeCenter:

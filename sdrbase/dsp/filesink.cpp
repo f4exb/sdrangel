@@ -90,7 +90,7 @@ bool FileSink::handleMessage(const Message& message)
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;
 		m_sampleRate = notif.getSampleRate();
 		m_centerFrequency = notif.getCenterFrequency();
-		qDebug() << "  - DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
+		qDebug() << "FileSink::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
 				<< " m_centerFrequency: " << m_centerFrequency;
 		return true;
 	}
@@ -98,7 +98,7 @@ bool FileSink::handleMessage(const Message& message)
     {
         MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
         handleConfigure(conf.getFileName());
-        qDebug() << "  - MsgConfigureFileSink: fileName: " << m_fileName.c_str();
+        qDebug() << "FileSink::handleMessage: MsgConfigureFileSink: fileName: " << m_fileName.c_str();
         return true;
     }
     else

@@ -55,6 +55,9 @@ public:
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
 
+	uint getAudioSampleRate() const { return m_audioSampleRate; }
+	void setAudioSampleRate(uint rate);
+
 	void start(); //!< This thread start
 	void stop();  //!< This thread stop
 
@@ -102,6 +105,7 @@ private:
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;
+	uint m_audioSampleRate;
 
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;

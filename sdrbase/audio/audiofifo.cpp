@@ -62,7 +62,7 @@ bool AudioFifo::setSize(uint sampleSize, uint numSamples)
 	return create(sampleSize, numSamples);
 }
 
-uint AudioFifo::write(const quint8* data, uint numSamples, int timeout)
+uint AudioFifo::write(const quint8* data, uint numSamples, int timeout_ms)
 {
 	QTime time;
 	uint total;
@@ -77,7 +77,7 @@ uint AudioFifo::write(const quint8* data, uint numSamples, int timeout)
 	time.start();
 	m_mutex.lock();
 
-	if(timeout == 0)
+	if(timeout_ms == 0)
 	{
 		total = MIN(numSamples, m_size - m_fill);
 	}
@@ -92,11 +92,11 @@ uint AudioFifo::write(const quint8* data, uint numSamples, int timeout)
 	{
 		if (isFull())
 		{
-			if (time.elapsed() < timeout)
+			if (time.elapsed() < timeout_ms)
 			{
 				m_writeWaitLock.lock();
 				m_mutex.unlock();
-				int ms = timeout - time.elapsed();
+				int ms = timeout_ms - time.elapsed();
 
 				if(ms < 1)
 				{
@@ -141,7 +141,7 @@ uint AudioFifo::write(const quint8* data, uint numSamples, int timeout)
 	return total;
 }
 
-uint AudioFifo::read(quint8* data, uint numSamples, int timeout)
+uint AudioFifo::read(quint8* data, uint numSamples, int timeout_ms)
 {
 	QTime time;
 	uint total;
@@ -156,7 +156,7 @@ uint AudioFifo::read(quint8* data, uint numSamples, int timeout)
 	time.start();
 	m_mutex.lock();
 
-	if(timeout == 0)
+	if(timeout_ms == 0)
 	{
 		total = MIN(numSamples, m_fill);
 	}
@@ -171,11 +171,11 @@ uint AudioFifo::read(quint8* data, uint numSamples, int timeout)
 	{
 		if(isEmpty())
 		{
-			if(time.elapsed() < timeout)
+			if(time.elapsed() < timeout_ms)
 			{
 				m_readWaitLock.lock();
 				m_mutex.unlock();
-				int ms = timeout - time.elapsed();
+				int ms = timeout_ms - time.elapsed();
 
 				if(ms < 1)
 				{

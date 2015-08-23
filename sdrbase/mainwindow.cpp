@@ -100,13 +100,12 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	ui->glSpectrum->connectTimer(m_masterTimer);
+	ui->glSpectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	m_dspEngine->addSink(m_spectrumVis);
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
-
-	ui->glSpectrum->connectTimer(m_masterTimer);
-	ui->glSpectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -123,17 +122,17 @@ MainWindow::MainWindow(QWidget* parent) :
 		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	}
 
-	qDebug() << "MainWindow::MainWindow: load current settings...";
+	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
-	loadSettings(m_settings.getCurrent());
+	loadPresetSettings(m_settings.getCurrent());
 
 	qDebug() << "MainWindow::MainWindow: apply settings...";
 
 	applySettings();
 
-	qDebug() << "MainWindow::MainWindow: update presets...";
+	qDebug() << "MainWindow::MainWindow: update preset controls...";
 
-	updatePresets();
+	updatePresetControls();
 
 	qDebug() << "MainWindow::MainWindow: end";
 }
@@ -203,15 +202,11 @@ void MainWindow::loadSettings()
     {
     	addPresetToTree(m_settings.getPreset(i));
     }
-
-    Preset* current = m_settings.getCurrent();
-
-    //loadSettings(current);
 }
 
-void MainWindow::loadSettings(const Preset* preset)
+void MainWindow::loadPresetSettings(const Preset* preset)
 {
-	qDebug() << "MainWindow::loadSettings(preset): " << preset->getSource().toStdString().c_str();
+	qDebug() << "MainWindow::loadPresetSettings: preset: " << preset->getSource().toStdString().c_str();
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
@@ -227,14 +222,14 @@ void MainWindow::saveSettings()
 {
 	qDebug() << "MainWindow::saveSettings";
 
-	saveSettings(m_settings.getCurrent());
+	savePresetSettings(m_settings.getCurrent());
 	m_settings.save();
 
 }
 
-void MainWindow::saveSettings(Preset* preset)
+void MainWindow::savePresetSettings(Preset* preset)
 {
-	qDebug() << "MainWindow::saveSettings(preset): " << preset->getSource().toStdString().c_str();
+	qDebug() << "MainWindow::savePresetSettings: preset: " << preset->getSource().toStdString().c_str();
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
     preset->clearChannels();
@@ -281,13 +276,17 @@ void MainWindow::updateSampleRate()
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
 
-void MainWindow::updatePresets()
+void MainWindow::updatePresetControls()
 {
 	ui->presetTree->resizeColumnToContents(0);
-	if(ui->presetTree->currentItem() != 0) {
+
+	if(ui->presetTree->currentItem() != 0)
+	{
 		ui->presetDelete->setEnabled(true);
 		ui->presetLoad->setEnabled(true);
-	} else {
+	}
+	else
+	{
 		ui->presetDelete->setEnabled(false);
 		ui->presetLoad->setEnabled(false);
 	}
@@ -318,7 +317,7 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 	item->setData(0, Qt::UserRole, qVariantFromValue(preset));
 	ui->presetTree->resizeColumnToContents(0);
 
-	updatePresets();
+	updatePresetControls();
 	return item;
 }
 
@@ -477,7 +476,7 @@ void MainWindow::on_presetSave_clicked()
 
 	if(dlg.exec() == QDialog::Accepted) {
 		Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
-		saveSettings(preset);
+		savePresetSettings(preset);
 
 		ui->presetTree->setCurrentItem(addPresetToTree(preset));
 	}
@@ -492,7 +491,7 @@ void MainWindow::on_presetUpdate_clicked()
 			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
 			if (preset != 0) {
 				Preset* preset_mod = const_cast<Preset*>(preset);
-				saveSettings(preset_mod);
+				savePresetSettings(preset_mod);
 			}
 		}
 	}
@@ -504,7 +503,7 @@ void MainWindow::on_presetLoad_clicked()
 
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 	if(item == 0) {
-		updatePresets();
+		updatePresetControls();
 		return;
 	}
 	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
@@ -512,7 +511,7 @@ void MainWindow::on_presetLoad_clicked()
 		return;
 	}
 
-	loadSettings(preset);
+	loadPresetSettings(preset);
 	applySettings();
 }
 
@@ -520,7 +519,7 @@ void MainWindow::on_presetDelete_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 	if(item == 0) {
-		updatePresets();
+		updatePresetControls();
 		return;
 	}
 	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
@@ -535,7 +534,7 @@ void MainWindow::on_presetDelete_clicked()
 
 void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
-	updatePresets();
+	updatePresetControls();
 }
 
 void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)

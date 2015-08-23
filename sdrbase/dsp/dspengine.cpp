@@ -32,6 +32,7 @@ DSPEngine::DSPEngine(QObject* parent) :
 	m_sampleSinks(),
 	m_sampleRate(0),
 	m_centerFrequency(0),
+	m_audioSampleRate(48000),
 	m_dcOffsetCorrection(false),
 	m_iqImbalanceCorrection(false),
 	m_iOffset(0),
@@ -411,13 +412,13 @@ DSPEngine::State DSPEngine::gotoInit()
 
 	for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); ++it)
 	{
-		qDebug() << "  - initializing " << (*it)->objectName().toStdString().c_str();
+		qDebug() << "DSPEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
 		(*it)->handleMessage(notif);
 	}
 
 	for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
 	{
-		qDebug() << "  - initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+		qDebug() << "DSPEngine::gotoInit: initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
 		(*it)->handleSinkMessage(notif);
 	}
 
@@ -431,8 +432,8 @@ DSPEngine::State DSPEngine::gotoInit()
 
 DSPEngine::State DSPEngine::gotoRunning()
 {
-    qDebug() << "DSPEngine::gotoRunning";
-    
+	qDebug() << "DSPEngine::gotoRunning";
+
 	switch(m_state) 
     {
 		case StNotStarted:
@@ -450,10 +451,10 @@ DSPEngine::State DSPEngine::gotoRunning()
 	}
 
 	if(m_sampleSource == NULL) {
-		return gotoError("No sample source configured");
+		return gotoError("DSPEngine::gotoRunning: No sample source configured");
 	}
 
-	qDebug() << "  - " << m_deviceDescription.toStdString().c_str() << " started";
+	qDebug() << "DSPEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
 
 	// Start everything
 
@@ -463,20 +464,21 @@ DSPEngine::State DSPEngine::gotoRunning()
 	}
 
 	m_audioOutput.start(-1, 48000); // Use default output device at 48 kHz
+	m_audioSampleRate = m_audioOutput.getRate();
 
 	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 	{
-        qDebug() << "  - starting " << (*it)->objectName().toStdString().c_str();
+        qDebug() << "DSPEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
 		(*it)->start();
 	}
 
 	for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
 	{
-		qDebug() << "  - starting ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+		qDebug() << "DSPEngine::gotoRunning: starting ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
 		(*it)->start();
 	}
 
-	qDebug() << "  - input message queue pending: " << m_inputMessageQueue.size();
+	qDebug() << "DSPEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
 
 	return StRunning;
 }
@@ -680,4 +682,9 @@ void DSPEngine::handleSourceMessages()
 
 		delete message;
 	}
+}
+
+void DSPEngine::setAudioSampleRate(uint rate)
+{
+	m_audioSampleRate = rate;
 }

@@ -201,11 +201,9 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 48000);
-	m_amDemod = new AMDemod(m_audioFifo, 0);
+	m_amDemod = new AMDemod(0);
 	m_channelizer = new Channelizer(m_amDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addAudioSink(m_audioFifo);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	m_channelMarker = new ChannelMarker(this);
@@ -227,7 +225,6 @@ AMDemodGUI::~AMDemodGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_amDemod;
-	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
 }

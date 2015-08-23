@@ -23,10 +23,28 @@
 #include "dsp/samplefifo.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
-#include "util/syncmessenger.h"
 
 class SampleSink;
 class QThread;
+
+/**
+ * Because Qt is a piece of shit this class cannot be a nested protected class of ThreadedSampleSink
+ * So let's make everything public
+ */
+class ThreadedSampleFifo : public QObject {
+	Q_OBJECT
+
+public:
+	ThreadedSampleFifo(SampleSink* sampleSink, std::size_t size = 1<<18);
+	~ThreadedSampleFifo();
+	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
+
+	SampleSink* m_sampleSink;
+	SampleFifo m_sampleFifo;
+
+public slots:
+	void handleFifoData();
+};
 
 /**
  * This class is a wrapper for SampleSink that runs the SampleSink object in its own thread
@@ -51,13 +69,10 @@ public:
 	QString getSampleSinkObjectName() const;
 
 protected:
-	QThread *m_thread; //!< The thead object
-	SyncMessenger m_syncMessenger;  //!< Used to process messages synchronously with the thread
-	SampleSink* m_sampleSink;
-	SampleFifo m_sampleFifo;
 
-protected slots:
-	void handleData();
+	QThread *m_thread; //!< The thead object
+	ThreadedSampleFifo *m_threadedSampleFifo;
+	SampleSink* m_sampleSink;
 };
 
 #endif // INCLUDE_THREADEDSAMPLESINK_H
