@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
-AMDemod::AMDemod(SampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
+AMDemod::AMDemod() :
 	m_audioFifo(4, 48000)
 {
 	setObjectName("AMDemod");
@@ -151,11 +150,6 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 		m_audioBufferFill = 0;
 	}
 
-	if(m_sampleSink != 0)
-	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
-	}
-
 	m_sampleBuffer.clear();
 }
 
@@ -212,14 +206,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 	}
 	else
 	{
-		if(m_sampleSink != 0) // FIXME: for dependent sample sink - unused for this demod
-		{
-		   return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 }
 

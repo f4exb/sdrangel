@@ -32,7 +32,7 @@ class AudioFifo;
 class AMDemod : public SampleSink {
 	Q_OBJECT
 public:
-	AMDemod(SampleSink* sampleSink);
+	AMDemod();
 	~AMDemod();
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
@@ -121,7 +121,6 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
-	SampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 
