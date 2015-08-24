@@ -502,12 +502,17 @@ void MainWindow::on_presetLoad_clicked()
 	qDebug() << "MainWindow::on_presetLoad_clicked";
 
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item == 0) {
+
+	if(item == 0)
+	{
 		updatePresetControls();
 		return;
 	}
+
 	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-	if(preset == 0) {
+
+	if(preset == 0)
+	{
 		return;
 	}
 

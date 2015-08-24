@@ -9,8 +9,8 @@ MESSAGE_CLASS_DEFINITION(Channelizer::MsgChannelizerNotification, Message)
 
 Channelizer::Channelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_inputSampleRate(10),
-	m_requestedOutputSampleRate(10),
+	m_inputSampleRate(0),
+	m_requestedOutputSampleRate(0),
 	m_requestedCenterFrequency(0),
 	m_currentOutputSampleRate(0),
 	m_currentCenterFrequency(0)
@@ -55,7 +55,7 @@ void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_i
 
 void Channelizer::start()
 {
-	if(m_sampleSink != 0)
+	if (m_sampleSink != 0)
 	{
 		qDebug() << "Channelizer::start: thread: " << thread()
 				<< " m_inputSampleRate: " << m_inputSampleRate
@@ -119,10 +119,18 @@ bool Channelizer::handleMessage(const Message& cmd)
 
 void Channelizer::applyConfiguration()
 {
+	if (m_inputSampleRate == 0)
+	{
+		qDebug() << "Channelizer::applyConfiguration: m_inputSampleRate=0 aborting";
+		return;
+	}
+
 	freeFilterChain();
+
 	m_currentCenterFrequency = createFilterChain(
 		m_inputSampleRate / -2, m_inputSampleRate / 2,
 		m_requestedCenterFrequency - m_requestedOutputSampleRate / 2, m_requestedCenterFrequency + m_requestedOutputSampleRate / 2);
+
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
 
 	qDebug() << "Channelizer::applyConfiguration in=" << m_inputSampleRate

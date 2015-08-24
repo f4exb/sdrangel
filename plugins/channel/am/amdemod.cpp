@@ -53,6 +53,7 @@ AMDemod::AMDemod() :
 
 AMDemod::~AMDemod()
 {
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
 void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
@@ -225,8 +226,6 @@ void AMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		qDebug() << "AMDemod::apply: m_inputSampleRate: " << m_config.m_inputSampleRate
-				<< " m_interpolatorDistance: " << m_interpolatorDistance;
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||

@@ -217,9 +217,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 48000);
-
-	m_nfmDemod = new NFMDemod(m_audioFifo, 0);
+	m_nfmDemod = new NFMDemod();
 	m_nfmDemod->registerGUI(this);
 
 	int ctcss_nbTones;
@@ -233,11 +231,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	}
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	//ui->deltaFrequency->setBold(true);
 
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addAudioSink(m_audioFifo);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	m_channelMarker = new ChannelMarker(this);
@@ -245,7 +241,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker->setBandwidth(12500);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
+
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
 	m_pluginAPI->addChannelMarker(m_channelMarker);
 
 	applySettings();
@@ -254,12 +252,10 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 NFMDemodGUI::~NFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeAudioSink(m_audioFifo);
 	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_nfmDemod;
-	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
 }

@@ -30,13 +30,12 @@ static const Real afSqTones[2] = {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
-NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_afSquelch(2, afSqTones),
 	m_squelchOpen(false),
-	m_sampleSink(sampleSink),
-	m_audioFifo(audioFifo)
+	m_audioFifo(4, 48000)
 {
 	setObjectName("NFMDemod");
 
@@ -46,11 +45,11 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_config.m_afBandwidth = 3000;
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = 48000;
+	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
 
-	m_audioBuffer.resize(16384);
+	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
@@ -61,10 +60,13 @@ NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 48000.0, 5, 1); // 4000 Hz span, 250us
 	m_afSquelch.setThreshold(0.001);
+
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 NFMDemod::~NFMDemod()
 {
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
 void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
@@ -107,7 +109,7 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 {
 	Complex ci;
 
-	if (m_audioFifo->size() == 0)
+	if (m_audioFifo.size() == 0)
 	{
 		return;
 	}
@@ -227,13 +229,12 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 				if (m_audioBufferFill >= m_audioBuffer.size())
 				{
-					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
-					/* FIXME: Not necessarily bad, There is a race between threads but generally it works i.e. samples are not lost
 					if (res != m_audioBufferFill)
 					{
-						qDebug("lost %u audio samples", m_audioBufferFill - res);
-					}*/
+						qDebug("NFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+					}
 
 					m_audioBufferFill = 0;
 				}
@@ -245,28 +246,22 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 	if (m_audioBufferFill > 0)
 	{
-		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
-		/* Same remark as above
 		if (res != m_audioBufferFill)
 		{
-			qDebug("lost %u samples", m_audioBufferFill - res);
-		}*/
+			qDebug("NFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
+		}
 
 		m_audioBufferFill = 0;
 	}
 
-	if(m_sampleSink != NULL)
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
 	m_sampleBuffer.clear();
 }
 
 void NFMDemod::start()
 {
-	m_audioFifo->clear();
-	m_interpolatorRegulation = 0.9999;
-	m_interpolatorDistance = 1.0;
-	m_interpolatorDistanceRemain = 0.0;
+	m_audioFifo.clear();
 	m_m1Sample = 0;
 }
 
@@ -312,14 +307,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	}
 	else
 	{
-		if (m_sampleSink != 0)
-		{
-		   return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 }
 
