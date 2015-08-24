@@ -30,11 +30,9 @@
 
 #define rfFilterFftLength 1024
 
-class AudioFifo;
-
 class WFMDemod : public SampleSink {
 public:
-	WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
+	WFMDemod(SampleSink* sampleSink);
 	virtual ~WFMDemod();
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
@@ -109,8 +107,7 @@ private:
 	Config m_running;
 
 	NCO m_nco;
-	Real m_interpolatorRegulation;
-	Interpolator m_interpolator; // Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
+	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
 	Lowpass<Real> m_lowpass;
@@ -120,15 +117,15 @@ private:
 	int m_squelchState;
 
 	Real m_lastArgument;
-	Complex m_m1Sample; // x^-1 sample
-	Complex m_m2Sample; // x^-1 sample
+	Complex m_m1Sample; //!< x^-1 sample
+	Complex m_m2Sample; //!< x^-1 sample
 	MovingAverage<Real> m_movingAverage;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
 	SampleSink* m_sampleSink;
-	AudioFifo* m_audioFifo;
+	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 
 	void apply();

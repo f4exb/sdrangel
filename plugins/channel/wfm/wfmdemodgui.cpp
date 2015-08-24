@@ -211,11 +211,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 250000); // TODO: check. Room for 1s FIFO at max rate
-	m_wfmDemod = new WFMDemod(m_audioFifo, 0);
+	m_wfmDemod = new WFMDemod(0);
 	m_channelizer = new Channelizer(m_wfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addAudioSink(m_audioFifo);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	m_channelMarker = new ChannelMarker(this);
@@ -232,12 +230,10 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 WFMDemodGUI::~WFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeAudioSink(m_audioFifo);
 	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_wfmDemod;
-	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
 }

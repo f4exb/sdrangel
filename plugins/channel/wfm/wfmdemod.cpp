@@ -20,15 +20,16 @@
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
+#include "dsp/dspengine.h"
 #include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 #include "wfmdemod.h"
 
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 
-WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+WFMDemod::WFMDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(audioFifo)
+	m_audioFifo(4, 250000)
 {
 	setObjectName("WFMDemod");
 
@@ -38,7 +39,7 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_config.m_afBandwidth = 15000;
 	m_config.m_squelch = -60.0;
 	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = 48000;
+	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 
 	apply();
@@ -47,6 +48,8 @@ WFMDemod::WFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
+
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 WFMDemod::~WFMDemod()
@@ -55,6 +58,8 @@ WFMDemod::~WFMDemod()
 	{
 		delete m_rfFilter;
 	}
+
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
 void WFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
@@ -70,7 +75,7 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int rf_out;
 	Real msq, demod;
 
-	if (m_audioFifo->size() <= 0)
+	if (m_audioFifo.size() <= 0)
 		return;
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
@@ -122,9 +127,13 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 				if(m_audioBufferFill >= m_audioBuffer.size())
 				{
-					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
 					if(res != m_audioBufferFill)
-						qDebug("lost %u samples", m_audioBufferFill - res);
+					{
+						qDebug("WFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+					}
+
 					m_audioBufferFill = 0;
 				}
 
@@ -133,25 +142,30 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		}
 	}
 
-	if(m_audioBufferFill > 0) {
-		uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+	if(m_audioBufferFill > 0)
+	{
+		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
 		if(res != m_audioBufferFill)
-			qDebug("lost %u samples", m_audioBufferFill - res);
+		{
+			qDebug("WFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
+		}
+
 		m_audioBufferFill = 0;
 	}
 
 	if(m_sampleSink != NULL)
+	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+	}
+
 	m_sampleBuffer.clear();
 }
 
 void WFMDemod::start()
 {
 	m_squelchState = 0;
-	m_audioFifo->clear();
-	m_interpolatorRegulation = 0.9999;
-	m_interpolatorDistance = 1.0;
-	m_interpolatorDistanceRemain = 0.0;
+	m_audioFifo.clear();
 	m_m1Sample = 0;
 }
 
@@ -169,6 +183,7 @@ bool WFMDemod::handleMessage(const Message& cmd)
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+
 		apply();
 
 		qDebug() << "WFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
