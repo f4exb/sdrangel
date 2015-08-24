@@ -27,7 +27,7 @@ void TCPSrcGUI::setName(const QString& name)
 
 qint64 TCPSrcGUI::getCenterFrequency() const
 {
-	return m_channelMarker->getCenterFrequency();
+	return m_channelMarker.getCenterFrequency();
 }
 
 QString TCPSrcGUI::getName() const
@@ -54,7 +54,7 @@ QByteArray TCPSrcGUI::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeBlob(1, saveState());
-	s.writeS32(2, m_channelMarker->getCenterFrequency());
+	s.writeS32(2, m_channelMarker.getCenterFrequency());
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
 	s.writeReal(5, m_rfBandwidth);
@@ -81,12 +81,12 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		Real realtmp;
         
 		blockApplySettings(true);
-		m_channelMarker->blockSignals(true);
+		m_channelMarker.blockSignals(true);
         
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
-		m_channelMarker->setCenterFrequency(s32tmp);
+		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readS32(3, &s32tmp, TCPSrc::FormatSSB);
 		switch(s32tmp) {
 			case TCPSrc::FormatSSB:
@@ -114,7 +114,7 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->boost->setValue(s32tmp);
         
 		blockApplySettings(false);
-		m_channelMarker->blockSignals(false);
+		m_channelMarker.blockSignals(false);
         
 		applySettings();
 		return true;
@@ -165,6 +165,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
 	m_tcpSrc(NULL),
+	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true)
 {
@@ -186,13 +187,13 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayMaxHold(true);
 	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
-	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setBandwidth(16000);
-	m_channelMarker->setCenterFrequency(0);
-	m_channelMarker->setColor(Qt::green);
-	m_channelMarker->setVisible(true);
-	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-	m_pluginAPI->addChannelMarker(m_channelMarker);
+	//m_channelMarker = new ChannelMarker(this);
+	m_channelMarker.setBandwidth(16000);
+	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setColor(Qt::green);
+	m_channelMarker.setVisible(true);
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -207,7 +208,7 @@ TCPSrcGUI::~TCPSrcGUI()
 	delete m_channelizer;
 	delete m_tcpSrc;
 	delete m_spectrumVis;
-	delete m_channelMarker;
+	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -245,19 +246,19 @@ void TCPSrcGUI::applySettings()
 
 		int boost = ui->boost->value();
 
-		setTitleColor(m_channelMarker->getColor());
+		setTitleColor(m_channelMarker.getColor());
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
 		ui->tcpPort->setText(QString("%1").arg(tcpPort));
 		ui->boost->setValue(boost);
-		m_channelMarker->disconnect(this, SLOT(channelMarkerChanged()));
-		m_channelMarker->setBandwidth((int)rfBandwidth);
-		connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
+		m_channelMarker.setBandwidth((int)rfBandwidth);
+		connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 		ui->glSpectrum->setSampleRate(outputSampleRate);
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			outputSampleRate,
-			m_channelMarker->getCenterFrequency());
+			m_channelMarker.getCenterFrequency());
 
 		TCPSrc::SampleFormat sampleFormat;
 
@@ -338,7 +339,7 @@ void TCPSrcGUI::onMenuDoubleClicked()
 	if (!m_basicSettingsShown)
 	{
 		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
+		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
 	}
 }

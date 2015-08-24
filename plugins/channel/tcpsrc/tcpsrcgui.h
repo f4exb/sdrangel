@@ -4,10 +4,10 @@
 #include <QHostAddress>
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/channelmarker.h"
 #include "tcpsrc.h"
 
 class PluginAPI;
-class ChannelMarker;
 class ThreadedSampleSink;
 class Channelizer;
 class TCPSrc;
@@ -48,7 +48,7 @@ private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
 	TCPSrc* m_tcpSrc;
-	ChannelMarker* m_channelMarker;
+	ChannelMarker m_channelMarker;
 
 	// settings
 	TCPSrc::SampleFormat m_sampleFormat;
