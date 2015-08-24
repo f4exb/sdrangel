@@ -1,6 +1,7 @@
 #ifndef INCLUDE_TCPSRC_H
 #define INCLUDE_TCPSRC_H
 
+#include <QMutex>
 #include <QHostAddress>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -155,6 +156,8 @@ protected:
 	Sockets m_s16leSockets;
 	quint32 m_nextSSBId;
 	quint32 m_nextS16leId;
+
+	QMutex m_settingsMutex;
 
 	void closeAllSockets(Sockets* sockets);
 

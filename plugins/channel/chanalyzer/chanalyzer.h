@@ -18,6 +18,7 @@
 #ifndef INCLUDE_CHANALYZER_H
 #define INCLUDE_CHANALYZER_H
 
+#include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -99,6 +100,7 @@ private:
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
+	QMutex m_settingsMutex;
 };
 
 #endif // INCLUDE_CHANALYZER_H

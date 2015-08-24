@@ -28,7 +28,8 @@
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
 AMDemod::AMDemod() :
-	m_audioFifo(4, 48000)
+	m_audioFifo(4, 48000),
+	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("AMDemod");
 
@@ -66,10 +67,7 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 {
 	Complex ci;
 
-	if (m_audioFifo.size() == 0)
-	{
-		return;
-	}
+	m_settingsMutex.lock();
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
@@ -152,6 +150,8 @@ void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_itera
 	}
 
 	m_sampleBuffer.clear();
+
+	m_settingsMutex.unlock();
 }
 
 void AMDemod::start()
@@ -223,15 +223,19 @@ void AMDemod::apply()
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
 	{
+		m_settingsMutex.lock();
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_settingsMutex.unlock();
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
+		m_settingsMutex.lock();
 		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		m_settingsMutex.unlock();
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch)

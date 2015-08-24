@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SSBDEMOD_H
 #define INCLUDE_SSBDEMOD_H
 
+#include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -97,6 +98,8 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
+
+	QMutex m_settingsMutex;
 };
 
 #endif // INCLUDE_SSBDEMOD_H

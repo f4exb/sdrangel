@@ -32,7 +32,6 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
-class AudioFifo;
 class NFMDemodGUI;
 
 class NFMDemod : public SampleSink {

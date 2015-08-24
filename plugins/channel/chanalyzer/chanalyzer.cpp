@@ -27,7 +27,8 @@
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 
 ChannelAnalyzer::ChannelAnalyzer(SampleSink* sampleSink) :
-	m_sampleSink(sampleSink)
+	m_sampleSink(sampleSink),
+	m_settingsMutex(QMutex::Recursive)
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
@@ -65,6 +66,8 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 	int n_out;
 	int decim = 1<<m_spanLog2;
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+
+	m_settingsMutex.lock();
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
@@ -111,6 +114,8 @@ void ChannelAnalyzer::feed(SampleVector::const_iterator begin, SampleVector::con
 	}
 
 	m_sampleBuffer.clear();
+
+	m_settingsMutex.unlock();
 }
 
 void ChannelAnalyzer::start()
@@ -163,6 +168,8 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 			lowCutoff = 0;
 		}
 
+		m_settingsMutex.lock();
+
 		m_Bandwidth = band;
 		m_LowCutoff = lowCutoff;
 
@@ -171,6 +178,8 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_ssb = cfg.getSSB();
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "  - MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff

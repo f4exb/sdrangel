@@ -28,7 +28,8 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
 SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(4, 24000)
+	m_audioFifo(4, 24000),
+	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("SSBDemod");
 
@@ -76,6 +77,9 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	fftfilt::cmplx *sideband, sum;
 	Real avg;
 	int n_out;
+
+	m_settingsMutex.lock();
+
 	int decim = 1<<(m_spanLog2 - 1);
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
@@ -142,6 +146,8 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	}
 
 	m_sampleBuffer.clear();
+
+	m_settingsMutex.unlock();
 }
 
 void SSBDemod::start()
@@ -162,10 +168,14 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	{
 		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
+		m_settingsMutex.lock();
+
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
 		m_sampleDistanceRemain = m_sampleRate / m_audioSampleRate;
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "SSBDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset" << notif.getFrequencyOffset();
@@ -175,6 +185,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	else if (MsgConfigureSSBDemod::match(cmd))
 	{
 		MsgConfigureSSBDemod& cfg = (MsgConfigureSSBDemod&) cmd;
+
+		m_settingsMutex.lock();
 
 		band = cfg.getBandwidth();
 		lowCutoff = cfg.getLoCutoff();
@@ -191,7 +203,6 @@ bool SSBDemod::handleMessage(const Message& cmd)
 			band = 100.0f;
 			lowCutoff = 0;
 		}
-
 		m_Bandwidth = band;
 		m_LowCutoff = lowCutoff;
 
@@ -202,6 +213,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_volume *= m_volume * 0.1;
 
 		m_spanLog2 = cfg.getSpanLog2();
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "  - MsgConfigureSSBDemod: m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff

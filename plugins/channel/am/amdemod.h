@@ -17,6 +17,7 @@
 #ifndef INCLUDE_AMDEMOD_H
 #define INCLUDE_AMDEMOD_H
 
+#include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -26,8 +27,6 @@
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-
-class AudioFifo;
 
 class AMDemod : public SampleSink {
 	Q_OBJECT
@@ -123,6 +122,7 @@ private:
 
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
+	QMutex m_settingsMutex;
 
 	void apply();
 };

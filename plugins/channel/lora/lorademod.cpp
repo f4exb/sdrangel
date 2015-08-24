@@ -27,7 +27,8 @@
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 
 LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
-	m_sampleSink(sampleSink)
+	m_sampleSink(sampleSink),
+	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("LoRaDemod");
 
@@ -242,6 +243,8 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 
 	m_sampleBuffer.clear();
 
+	m_settingsMutex.lock();
+
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
 		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
@@ -265,6 +268,8 @@ void LoRaDemod::feed(SampleVector::const_iterator begin, SampleVector::const_ite
 	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
 	}
+
+	m_settingsMutex.unlock();
 }
 
 void LoRaDemod::start()
@@ -283,10 +288,14 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 	{
 		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
+		m_settingsMutex.lock();
+
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
 		m_sampleDistanceRemain = m_sampleRate / m_Bandwidth;
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "LoRaDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
@@ -297,8 +306,12 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 	{
 		MsgConfigureLoRaDemod& cfg = (MsgConfigureLoRaDemod&) cmd;
 
+		m_settingsMutex.lock();
+
 		m_Bandwidth = cfg.getBandwidth();
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth/1.9);
+
+		m_settingsMutex.unlock();
 
 		qDebug() << " MsgConfigureLoRaDemod: m_Bandwidth: " << m_Bandwidth;
 

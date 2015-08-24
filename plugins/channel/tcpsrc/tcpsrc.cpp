@@ -25,7 +25,8 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum)
+TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum) :
+	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");
 
@@ -77,6 +78,8 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 	Real l, r;
 
 	m_sampleBuffer.clear();
+
+	m_settingsMutex.lock();
 
 	// Rtl-Sdr uses full 16-bit scale; FCDPP does not
 	int rescale = 30000 * (1 << m_boost);
@@ -139,6 +142,8 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 			}
 		}
 	}
+
+	m_settingsMutex.unlock();
 }
 
 void TCPSrc::start()
@@ -166,10 +171,14 @@ bool TCPSrc::handleMessage(const Message& cmd)
 	{
 		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
 
+		m_settingsMutex.lock();
+
 		m_inputSampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_inputSampleRate);
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "TCPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_inputSampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
@@ -179,6 +188,8 @@ bool TCPSrc::handleMessage(const Message& cmd)
 	else if (MsgTCPSrcConfigure::match(cmd))
 	{
 		MsgTCPSrcConfigure& cfg = (MsgTCPSrcConfigure&) cmd;
+
+		m_settingsMutex.lock();
 
 		m_sampleFormat = cfg.getSampleFormat();
 		m_outputSampleRate = cfg.getOutputSampleRate();
@@ -208,6 +219,8 @@ bool TCPSrc::handleMessage(const Message& cmd)
 		{
 			TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
+
+		m_settingsMutex.unlock();
 
 		qDebug() << "  - MsgTCPSrcConfigure: m_sampleFormat: " << m_sampleFormat
 				<< " m_outputSampleRate: " << m_outputSampleRate
