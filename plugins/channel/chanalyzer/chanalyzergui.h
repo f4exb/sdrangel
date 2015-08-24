@@ -3,11 +3,10 @@
 
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/channelmarker.h"
 
 class PluginAPI;
-class ChannelMarker;
 
-//class AudioFifo;
 class ThreadedSampleSink;
 class Channelizer;
 class ChannelAnalyzer;
@@ -51,7 +50,7 @@ private slots:
 private:
 	Ui::ChannelAnalyzerGUI* ui;
 	PluginAPI* m_pluginAPI;
-	ChannelMarker* m_channelMarker;
+	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate;

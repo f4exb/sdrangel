@@ -40,7 +40,7 @@ QString ChannelAnalyzerGUI::getName() const
 
 qint64 ChannelAnalyzerGUI::getCenterFrequency() const
 {
-	return m_channelMarker->getCenterFrequency();
+	return m_channelMarker.getCenterFrequency();
 }
 
 void ChannelAnalyzerGUI::resetToDefaults()
@@ -58,10 +58,10 @@ void ChannelAnalyzerGUI::resetToDefaults()
 QByteArray ChannelAnalyzerGUI::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker->getCenterFrequency());
+	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->BW->value());
 	s.writeBlob(3, ui->spectrumGUI->serialize());
-	s.writeU32(4, m_channelMarker->getColor().rgb());
+	s.writeU32(4, m_channelMarker.getColor().rgb());
 	s.writeS32(5, ui->lowCut->value());
 	s.writeS32(6, ui->spanLog2->value());
 	s.writeBool(7, ui->ssb->isChecked());
@@ -87,16 +87,20 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		bool tmpBool;
         
 		blockApplySettings(true);
-	    m_channelMarker->blockSignals(true);
+	    m_channelMarker.blockSignals(true);
         
 		d.readS32(1, &tmp, 0);
-		m_channelMarker->setCenterFrequency(tmp);
+		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
 		d.readBlob(3, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
+
 		if(d.readU32(4, &u32tmp))
-			m_channelMarker->setColor(u32tmp);
+		{
+			m_channelMarker.setColor(u32tmp);
+		}
+
 		d.readS32(5, &tmp, 3);
 		ui->lowCut->setValue(tmp);
 		d.readS32(6, &tmp, 20);
@@ -108,7 +112,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		ui->scopeGUI->deserialize(bytetmp);
         
 		blockApplySettings(false);
-	    m_channelMarker->blockSignals(false);
+	    m_channelMarker.blockSignals(false);
         
 		applySettings();
 		return true;
@@ -137,21 +141,21 @@ void ChannelAnalyzerGUI::channelSampleRateChanged()
 
 void ChannelAnalyzerGUI::on_deltaMinus_clicked(bool minus)
 {
-	int deltaFrequency = m_channelMarker->getCenterFrequency();
+	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
 
 	if (minus ^ minusDelta) // sign change
 	{
-		m_channelMarker->setCenterFrequency(-deltaFrequency);
+		m_channelMarker.setCenterFrequency(-deltaFrequency);
 	}
 }
 
 void ChannelAnalyzerGUI::on_deltaFrequency_changed(quint64 value)
 {
 	if (ui->deltaMinus->isChecked()) {
-		m_channelMarker->setCenterFrequency(-value);
+		m_channelMarker.setCenterFrequency(-value);
 	} else {
-		m_channelMarker->setCenterFrequency(value);
+		m_channelMarker.setCenterFrequency(value);
 	}
 }
 
@@ -159,27 +163,27 @@ void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
 {
 	QString s = QString::number(value/10.0, 'f', 1);
 	ui->BWText->setText(tr("%1k").arg(s));
-	m_channelMarker->setBandwidth(value * 100 * 2);
+	m_channelMarker.setBandwidth(value * 100 * 2);
 
 	if (ui->ssb->isChecked())
 	{
 		if (value < 0) {
-			m_channelMarker->setSidebands(ChannelMarker::lsb);
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
 		} else {
-			m_channelMarker->setSidebands(ChannelMarker::usb);
+			m_channelMarker.setSidebands(ChannelMarker::usb);
 		}
 	}
 	else
 	{
-		m_channelMarker->setSidebands(ChannelMarker::dsb);
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
 	}
 
-	on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
+	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 }
 
 int ChannelAnalyzerGUI::getEffectiveLowCutoff(int lowCutoff)
 {
-	int ssbBW = m_channelMarker->getBandwidth() / 2;
+	int ssbBW = m_channelMarker.getBandwidth() / 2;
 	int effectiveLowCutoff = lowCutoff;
 	const int guard = 100;
 
@@ -205,7 +209,7 @@ int ChannelAnalyzerGUI::getEffectiveLowCutoff(int lowCutoff)
 void ChannelAnalyzerGUI::on_lowCut_valueChanged(int value)
 {
 	int lowCutoff = getEffectiveLowCutoff(value * 100);
-	m_channelMarker->setLowCutoff(lowCutoff);
+	m_channelMarker.setLowCutoff(lowCutoff);
 	QString s = QString::number(lowCutoff/1000.0, 'f', 1);
 	ui->lowCutText->setText(tr("%1k").arg(s));
 	ui->lowCut->setValue(lowCutoff/100);
@@ -225,20 +229,20 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
 	if (checked)
 	{
 		if (ui->BW->value() < 0) {
-			m_channelMarker->setSidebands(ChannelMarker::lsb);
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
 		} else {
-			m_channelMarker->setSidebands(ChannelMarker::usb);
+			m_channelMarker.setSidebands(ChannelMarker::usb);
 		}
 
 		ui->glSpectrum->setCenterFrequency(m_rate/4);
 		ui->glSpectrum->setSampleRate(m_rate/2);
 		ui->glSpectrum->setSsbSpectrum(true);
 
-		on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
+		on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 	}
 	else
 	{
-		m_channelMarker->setSidebands(ChannelMarker::dsb);
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
 
 		ui->glSpectrum->setCenterFrequency(0);
 		ui->glSpectrum->setSampleRate(m_rate);
@@ -260,7 +264,7 @@ void ChannelAnalyzerGUI::onMenuDoubleClicked()
 {
 	if(!m_basicSettingsShown) {
 		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
+		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
 	}
 }
@@ -269,6 +273,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
+	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
@@ -299,14 +304,14 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 
-	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setColor(Qt::gray);
-	m_channelMarker->setBandwidth(m_rate);
-	m_channelMarker->setSidebands(ChannelMarker::usb);
-	m_channelMarker->setCenterFrequency(0);
-	m_channelMarker->setVisible(true);
-	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(m_channelMarker);
+	//m_channelMarker = new ChannelMarker(this);
+	m_channelMarker.setColor(Qt::gray);
+	m_channelMarker.setBandwidth(m_rate);
+	m_channelMarker.setSidebands(ChannelMarker::usb);
+	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setVisible(true);
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
@@ -324,7 +329,7 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 	delete m_spectrumVis;
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;
-	delete m_channelMarker;
+	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -340,18 +345,18 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
     
 	if (ui->BW->value() < -m_rate/100) {
 		ui->BW->setValue(-m_rate/100);
-		m_channelMarker->setBandwidth(-m_rate*2);
+		m_channelMarker.setBandwidth(-m_rate*2);
 	} else if (ui->BW->value() > m_rate/100) {
 		ui->BW->setValue(m_rate/100);
-		m_channelMarker->setBandwidth(m_rate*2);
+		m_channelMarker.setBandwidth(m_rate*2);
 	}
 
 	if (ui->lowCut->value() < -m_rate/100) {
 		ui->lowCut->setValue(-m_rate/100);
-		m_channelMarker->setLowCutoff(-m_rate);
+		m_channelMarker.setLowCutoff(-m_rate);
 	} else if (ui->lowCut->value() > m_rate/100) {
 		ui->lowCut->setValue(m_rate/100);
-		m_channelMarker->setLowCutoff(m_rate);
+		m_channelMarker.setLowCutoff(m_rate);
 	}
 
 	ui->BW->setMinimum(-m_rate/100);
@@ -365,9 +370,9 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	if (ui->ssb->isChecked())
 	{
 		if (ui->BW->value() < 0) {
-			m_channelMarker->setSidebands(ChannelMarker::lsb);
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
 		} else {
-			m_channelMarker->setSidebands(ChannelMarker::usb);
+			m_channelMarker.setSidebands(ChannelMarker::usb);
 		}
 
 		ui->glSpectrum->setCenterFrequency(m_rate/4);
@@ -376,7 +381,7 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	}
 	else
 	{
-		m_channelMarker->setSidebands(ChannelMarker::dsb);
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
 
 		ui->glSpectrum->setCenterFrequency(0);
 		ui->glSpectrum->setSampleRate(m_rate);
@@ -400,13 +405,13 @@ void ChannelAnalyzerGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker->getColor());
-		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		setTitleColor(m_channelMarker.getColor());
+		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			m_channelizer->getInputSampleRate(),
-			m_channelMarker->getCenterFrequency());
+			m_channelMarker.getCenterFrequency());
 
 		m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
 			ui->BW->value() * 100.0,
@@ -419,14 +424,14 @@ void ChannelAnalyzerGUI::applySettings()
 void ChannelAnalyzerGUI::leaveEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(false);
+	m_channelMarker.setHighlighted(false);
 	blockApplySettings(false);
 }
 
 void ChannelAnalyzerGUI::enterEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(true);
+	m_channelMarker.setHighlighted(true);
 	blockApplySettings(false);
 }
 
