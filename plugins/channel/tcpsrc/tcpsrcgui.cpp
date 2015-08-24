@@ -218,77 +218,80 @@ void TCPSrcGUI::blockApplySettings(bool block)
 
 void TCPSrcGUI::applySettings()
 {
-	bool ok;
-
-	Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
-
-	if((!ok) || (outputSampleRate < 1000))
+	if (m_doApplySettings)
 	{
-		outputSampleRate = 48000;
+		bool ok;
+
+		Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
+
+		if((!ok) || (outputSampleRate < 1000))
+		{
+			outputSampleRate = 48000;
+		}
+
+		Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
+
+		if((!ok) || (rfBandwidth > outputSampleRate))
+		{
+			rfBandwidth = outputSampleRate;
+		}
+
+		int tcpPort = ui->tcpPort->text().toInt(&ok);
+
+		if((!ok) || (tcpPort < 1) || (tcpPort > 65535))
+		{
+			tcpPort = 9999;
+		}
+
+		int boost = ui->boost->value();
+
+		setTitleColor(m_channelMarker->getColor());
+		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
+		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
+		ui->tcpPort->setText(QString("%1").arg(tcpPort));
+		ui->boost->setValue(boost);
+		m_channelMarker->disconnect(this, SLOT(channelMarkerChanged()));
+		m_channelMarker->setBandwidth((int)rfBandwidth);
+		connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+		ui->glSpectrum->setSampleRate(outputSampleRate);
+
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			outputSampleRate,
+			m_channelMarker->getCenterFrequency());
+
+		TCPSrc::SampleFormat sampleFormat;
+
+		switch(ui->sampleFormat->currentIndex())
+		{
+			case 0:
+				sampleFormat = TCPSrc::FormatSSB;
+				break;
+			case 1:
+				sampleFormat = TCPSrc::FormatNFM;
+				break;
+			case 2:
+				sampleFormat = TCPSrc::FormatS16LE;
+				break;
+			default:
+				sampleFormat = TCPSrc::FormatSSB;
+				break;
+		}
+
+		m_sampleFormat = sampleFormat;
+		m_outputSampleRate = outputSampleRate;
+		m_rfBandwidth = rfBandwidth;
+		m_tcpPort = tcpPort;
+		m_boost = boost;
+
+		m_tcpSrc->configure(m_tcpSrc->getInputMessageQueue(),
+			sampleFormat,
+			outputSampleRate,
+			rfBandwidth,
+			tcpPort,
+			boost);
+
+		ui->applyBtn->setEnabled(false);
 	}
-
-	Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
-
-	if((!ok) || (rfBandwidth > outputSampleRate))
-	{
-		rfBandwidth = outputSampleRate;
-	}
-
-	int tcpPort = ui->tcpPort->text().toInt(&ok);
-
-	if((!ok) || (tcpPort < 1) || (tcpPort > 65535))
-	{
-		tcpPort = 9999;
-	}
-
-	int boost = ui->boost->value();
-
-	setTitleColor(m_channelMarker->getColor());
-	ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
-	ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-	ui->tcpPort->setText(QString("%1").arg(tcpPort));
-	ui->boost->setValue(boost);
-	m_channelMarker->disconnect(this, SLOT(channelMarkerChanged()));
-	m_channelMarker->setBandwidth((int)rfBandwidth);
-	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-	ui->glSpectrum->setSampleRate(outputSampleRate);
-
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		outputSampleRate,
-		m_channelMarker->getCenterFrequency());
-
-	TCPSrc::SampleFormat sampleFormat;
-
-	switch(ui->sampleFormat->currentIndex())
-	{
-		case 0:
-			sampleFormat = TCPSrc::FormatSSB;
-			break;
-		case 1:
-			sampleFormat = TCPSrc::FormatNFM;
-			break;
-		case 2:
-			sampleFormat = TCPSrc::FormatS16LE;
-			break;
-		default:
-			sampleFormat = TCPSrc::FormatSSB;
-			break;
-	}
-
-	m_sampleFormat = sampleFormat;
-	m_outputSampleRate = outputSampleRate;
-	m_rfBandwidth = rfBandwidth;
-	m_tcpPort = tcpPort;
-	m_boost = boost;
-
-	m_tcpSrc->configure(m_tcpSrc->getInputMessageQueue(),
-		sampleFormat,
-		outputSampleRate,
-		rfBandwidth,
-		tcpPort,
-		boost);
-
-	ui->applyBtn->setEnabled(false);
 }
 
 void TCPSrcGUI::on_sampleFormat_currentIndexChanged(int index)

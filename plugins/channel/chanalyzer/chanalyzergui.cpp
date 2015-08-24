@@ -398,19 +398,22 @@ void ChannelAnalyzerGUI::blockApplySettings(bool block)
 
 void ChannelAnalyzerGUI::applySettings()
 {
-	setTitleColor(m_channelMarker->getColor());
-	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+	if (m_doApplySettings)
+	{
+		setTitleColor(m_channelMarker->getColor());
+		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		m_channelizer->getInputSampleRate(),
-		m_channelMarker->getCenterFrequency());
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			m_channelizer->getInputSampleRate(),
+			m_channelMarker->getCenterFrequency());
 
-	m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
-		ui->BW->value() * 100.0,
-		ui->lowCut->value() * 100.0,
-		m_spanLog2,
-		ui->ssb->isChecked());
+		m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
+			ui->BW->value() * 100.0,
+			ui->lowCut->value() * 100.0,
+			m_spanLog2,
+			ui->ssb->isChecked());
+	}
 }
 
 void ChannelAnalyzerGUI::leaveEvent(QEvent*)

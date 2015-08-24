@@ -345,6 +345,7 @@ void NFMDemod::apply()
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
+	m_running.m_afBandwidth = m_config.m_afBandwidth;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;

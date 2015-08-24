@@ -199,9 +199,10 @@ bool WFMDemod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
+
 		apply();
 
-		qDebug() << "  - MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+		qDebug() << "WFMDemod::handleMessage: MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch;
@@ -212,7 +213,7 @@ bool WFMDemod::handleMessage(const Message& cmd)
 	{
 		if (m_sampleSink != 0)
 		{
-		   return m_sampleSink->handleMessage(cmd);
+		    return m_sampleSink->handleMessage(cmd);
 		}
 		else
 		{
@@ -227,12 +228,14 @@ void WFMDemod::apply()
 	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))
 	{
+		qDebug() << "WFMDemod::handleMessage: m_nco.setFreq";
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_afBandwidth != m_running.m_afBandwidth))
 	{
+		qDebug() << "WFMDemod::handleMessage: m_interpolator.create";
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
@@ -242,6 +245,7 @@ void WFMDemod::apply()
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
 		(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset))
 	{
+		qDebug() << "WFMDemod::handleMessage: m_rfFilter->create_filter";
 		Real lowCut = (m_config.m_inputFrequencyOffset - (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_inputFrequencyOffset + (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
@@ -250,10 +254,12 @@ void WFMDemod::apply()
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
+		qDebug() << "WFMDemod::handleMessage: m_lowpass.create";
 		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch) {
+		qDebug() << "WFMDemod::handleMessage: set m_squelchLevel";
 		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
 		m_squelchLevel *= m_squelchLevel;
 	}
@@ -261,6 +267,7 @@ void WFMDemod::apply()
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
+	m_running.m_afBandwidth = m_config.m_afBandwidth;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;

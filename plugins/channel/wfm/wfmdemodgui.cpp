@@ -245,20 +245,23 @@ void WFMDemodGUI::blockApplySettings(bool block)
 
 void WFMDemodGUI::applySettings()
 {
-	setTitleColor(m_channelMarker->getColor());
+	if (m_doApplySettings)
+	{
+		setTitleColor(m_channelMarker->getColor());
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
-		m_channelMarker->getCenterFrequency());
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
+			m_channelMarker->getCenterFrequency());
 
-	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 
-	m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
-		m_rfBW[ui->rfBW->value()],
-		ui->afBW->value() * 1000.0,
-		ui->volume->value() / 10.0,
-		ui->squelch->value());
+		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
+			m_rfBW[ui->rfBW->value()],
+			ui->afBW->value() * 1000.0,
+			ui->volume->value() / 10.0,
+			ui->squelch->value());
+	}
 }
 
 void WFMDemodGUI::leaveEvent(QEvent*)

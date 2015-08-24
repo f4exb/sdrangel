@@ -197,12 +197,15 @@ void LoRaDemodGUI::blockApplySettings(bool block)
 
 void LoRaDemodGUI::applySettings()
 {
-	const int  loraBW[] = BANDWIDTHSTRING;
-	int thisBW = loraBW[ui->BW->value()];
+	if (m_doApplySettings)
+	{
+		const int  loraBW[] = BANDWIDTHSTRING;
+		int thisBW = loraBW[ui->BW->value()];
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		thisBW,
-		m_channelMarker->getCenterFrequency());
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			thisBW,
+			m_channelMarker->getCenterFrequency());
 
-	m_LoRaDemod->configure(m_LoRaDemod->getInputMessageQueue(), thisBW);
+		m_LoRaDemod->configure(m_LoRaDemod->getInputMessageQueue(), thisBW);
+	}
 }

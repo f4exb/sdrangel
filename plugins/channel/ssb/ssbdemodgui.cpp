@@ -349,19 +349,22 @@ void SSBDemodGUI::blockApplySettings(bool block)
 
 void SSBDemodGUI::applySettings()
 {
-	setTitleColor(m_channelMarker->getColor());
-	ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-	ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+	if (m_doApplySettings)
+	{
+		setTitleColor(m_channelMarker->getColor());
+		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
 
-	m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		48000,
-		m_channelMarker->getCenterFrequency());
+		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+			48000,
+			m_channelMarker->getCenterFrequency());
 
-	m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
-		ui->BW->value() * 100.0,
-		ui->lowCut->value() * 100.0,
-		ui->volume->value() / 10.0,
-		m_spanLog2);
+		m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
+			ui->BW->value() * 100.0,
+			ui->lowCut->value() * 100.0,
+			ui->volume->value() / 10.0,
+			m_spanLog2);
+	}
 }
 
 void SSBDemodGUI::leaveEvent(QEvent*)
