@@ -3,9 +3,9 @@
 
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/channelmarker.h"
 
 class PluginAPI;
-class ChannelMarker;
 
 class AudioFifo;
 class ThreadedSampleSink;
@@ -48,7 +48,7 @@ private slots:
 private:
 	Ui::SSBDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	ChannelMarker* m_channelMarker;
+	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate;

@@ -38,7 +38,7 @@ QString SSBDemodGUI::getName() const
 
 qint64 SSBDemodGUI::getCenterFrequency() const
 {
-	return m_channelMarker->getCenterFrequency();
+	return m_channelMarker.getCenterFrequency();
 }
 
 void SSBDemodGUI::resetToDefaults()
@@ -57,11 +57,11 @@ void SSBDemodGUI::resetToDefaults()
 QByteArray SSBDemodGUI::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker->getCenterFrequency());
+	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->BW->value());
 	s.writeS32(3, ui->volume->value());
 	s.writeBlob(4, ui->spectrumGUI->serialize());
-	s.writeU32(5, m_channelMarker->getColor().rgb());
+	s.writeU32(5, m_channelMarker.getColor().rgb());
 	s.writeS32(6, ui->lowCut->value());
 	s.writeS32(7, ui->spanLog2->value());
 	return s.final();
@@ -84,10 +84,10 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		qint32 tmp;
         
 		blockApplySettings(true);
-	    m_channelMarker->blockSignals(true);
+	    m_channelMarker.blockSignals(true);
         
 		d.readS32(1, &tmp, 0);
-		m_channelMarker->setCenterFrequency(tmp);
+		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
 		d.readS32(3, &tmp, 20);
@@ -95,7 +95,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
 		if(d.readU32(5, &u32tmp))
-			m_channelMarker->setColor(u32tmp);
+			m_channelMarker.setColor(u32tmp);
 		d.readS32(6, &tmp, 3);
 		ui->lowCut->setValue(tmp);
 		d.readS32(7, &tmp, 20);
@@ -103,7 +103,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		setNewRate(tmp);
         
 		blockApplySettings(false);
-	    m_channelMarker->blockSignals(false);
+	    m_channelMarker.blockSignals(false);
         
 		applySettings();
 		return true;
@@ -127,12 +127,12 @@ void SSBDemodGUI::viewChanged()
 
 void SSBDemodGUI::on_deltaMinus_clicked(bool minus)
 {
-	int deltaFrequency = m_channelMarker->getCenterFrequency();
+	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
 
 	if (minus ^ minusDelta) // sign change
 	{
-		m_channelMarker->setCenterFrequency(-deltaFrequency);
+		m_channelMarker.setCenterFrequency(-deltaFrequency);
 	}
 }
 
@@ -140,11 +140,11 @@ void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
 {
 	if (ui->deltaMinus->isChecked())
 	{
-		m_channelMarker->setCenterFrequency(-value);
+		m_channelMarker.setCenterFrequency(-value);
 	}
 	else
 	{
-		m_channelMarker->setCenterFrequency(value);
+		m_channelMarker.setCenterFrequency(value);
 	}
 }
 
@@ -152,23 +152,23 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 {
 	QString s = QString::number(value/10.0, 'f', 1);
 	ui->BWText->setText(tr("%1k").arg(s));
-	m_channelMarker->setBandwidth(value * 100 * 2);
+	m_channelMarker.setBandwidth(value * 100 * 2);
 
 	if (value < 0)
 	{
-		m_channelMarker->setSidebands(ChannelMarker::lsb);
+		m_channelMarker.setSidebands(ChannelMarker::lsb);
 	}
 	else
 	{
-		m_channelMarker->setSidebands(ChannelMarker::usb);
+		m_channelMarker.setSidebands(ChannelMarker::usb);
 	}
 
-	on_lowCut_valueChanged(m_channelMarker->getLowCutoff()/100);
+	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 }
 
 int SSBDemodGUI::getEffectiveLowCutoff(int lowCutoff)
 {
-	int ssbBW = m_channelMarker->getBandwidth() / 2;
+	int ssbBW = m_channelMarker.getBandwidth() / 2;
 	int effectiveLowCutoff = lowCutoff;
 	const int guard = 100;
 
@@ -201,7 +201,7 @@ int SSBDemodGUI::getEffectiveLowCutoff(int lowCutoff)
 void SSBDemodGUI::on_lowCut_valueChanged(int value)
 {
 	int lowCutoff = getEffectiveLowCutoff(value * 100);
-	m_channelMarker->setLowCutoff(lowCutoff);
+	m_channelMarker.setLowCutoff(lowCutoff);
 	QString s = QString::number(lowCutoff/1000.0, 'f', 1);
 	ui->lowCutText->setText(tr("%1k").arg(s));
 	ui->lowCut->setValue(lowCutoff/100);
@@ -236,7 +236,7 @@ void SSBDemodGUI::onMenuDoubleClicked()
 	if(!m_basicSettingsShown)
 	{
 		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
+		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
 	}
 }
@@ -245,6 +245,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
@@ -270,14 +271,14 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setSsbSpectrum(true);
 	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 
-	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setColor(Qt::green);
-	m_channelMarker->setBandwidth(m_rate);
-	m_channelMarker->setSidebands(ChannelMarker::usb);
-	m_channelMarker->setCenterFrequency(0);
-	m_channelMarker->setVisible(true);
-	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(m_channelMarker);
+	//m_channelMarker = new ChannelMarker(this);
+	m_channelMarker.setColor(Qt::green);
+	m_channelMarker.setBandwidth(m_rate);
+	m_channelMarker.setSidebands(ChannelMarker::usb);
+	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setVisible(true);
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -292,7 +293,7 @@ SSBDemodGUI::~SSBDemodGUI()
 	delete m_channelizer;
 	delete m_ssbDemod;
 	delete m_spectrumVis;
-	delete m_channelMarker;
+	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -309,23 +310,23 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 	if (ui->BW->value() < -m_rate/100)
 	{
 		ui->BW->setValue(-m_rate/100);
-		m_channelMarker->setBandwidth(-m_rate*2);
+		m_channelMarker.setBandwidth(-m_rate*2);
 	}
 	else if (ui->BW->value() > m_rate/100)
 	{
 		ui->BW->setValue(m_rate/100);
-		m_channelMarker->setBandwidth(m_rate*2);
+		m_channelMarker.setBandwidth(m_rate*2);
 	}
 
 	if (ui->lowCut->value() < -m_rate/100)
 	{
 		ui->lowCut->setValue(-m_rate/100);
-		m_channelMarker->setLowCutoff(-m_rate);
+		m_channelMarker.setLowCutoff(-m_rate);
 	}
 	else if (ui->lowCut->value() > m_rate/100)
 	{
 		ui->lowCut->setValue(m_rate/100);
-		m_channelMarker->setLowCutoff(m_rate);
+		m_channelMarker.setLowCutoff(m_rate);
 	}
 
 	ui->BW->setMinimum(-m_rate/100);
@@ -351,13 +352,13 @@ void SSBDemodGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker->getColor());
-		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		setTitleColor(m_channelMarker.getColor());
+		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			48000,
-			m_channelMarker->getCenterFrequency());
+			m_channelMarker.getCenterFrequency());
 
 		m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
 			ui->BW->value() * 100.0,
@@ -370,14 +371,14 @@ void SSBDemodGUI::applySettings()
 void SSBDemodGUI::leaveEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(false);
+	m_channelMarker.setHighlighted(false);
 	blockApplySettings(false);
 }
 
 void SSBDemodGUI::enterEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(true);
+	m_channelMarker.setHighlighted(true);
 	blockApplySettings(false);
 }
 
