@@ -3,9 +3,9 @@
 
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/channelmarker.h"
 
 class PluginAPI;
-class ChannelMarker;
 
 class ThreadedSampleSink;
 class Channelizer;
@@ -46,7 +46,7 @@ private slots:
 private:
 	Ui::AMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	ChannelMarker* m_channelMarker;
+	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
