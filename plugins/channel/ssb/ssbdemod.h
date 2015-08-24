@@ -28,11 +28,9 @@
 
 #define ssbFftLen 1024
 
-class AudioFifo;
-
 class SSBDemod : public SampleSink {
 public:
-	SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
+	SSBDemod(SampleSink* sampleSink);
 	virtual ~SSBDemod();
 
 	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2);
@@ -97,7 +95,8 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-	AudioFifo* m_audioFifo;
+	AudioFifo m_audioFifo;
+	quint32 m_audioSampleRate;
 };
 
 #endif // INCLUDE_SSBDEMOD_H

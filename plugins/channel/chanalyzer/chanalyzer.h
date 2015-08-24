@@ -21,14 +21,11 @@
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
-#include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
 #define ssbFftLen 1024
-
-//class AudioFifo;
 
 class ChannelAnalyzer : public SampleSink {
 public:

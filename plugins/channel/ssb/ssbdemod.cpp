@@ -21,13 +21,14 @@
 #include <stdio.h>
 #include "ssbdemod.h"
 #include "audio/audiooutput.h"
+#include "dsp/dspengine.h"
 #include "dsp/channelizer.h"
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
-SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
+SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(audioFifo)
+	m_audioFifo(4, 24000)
 {
 	setObjectName("SSBDemod");
 
@@ -38,21 +39,29 @@ SSBDemod::SSBDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, 5000);
-	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
+	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
-	m_audioBuffer.resize(512);
+	m_interpolator.create(16, m_sampleRate, 5000);
+	m_sampleDistanceRemain = (Real) m_sampleRate / m_audioSampleRate;
+
+	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 
 	m_usb = true;
-	SSBFilter = new fftfilt(m_LowCutoff / 48000.0, m_Bandwidth / 48000.0, ssbFftLen);
-	// if (!USBFilter) segfault;
+	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
+
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 SSBDemod::~SSBDemod()
 {
-	if (SSBFilter) delete SSBFilter;
+	if (SSBFilter)
+	{
+		delete SSBFilter;
+	}
+
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
 void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
@@ -78,7 +87,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
 		{
 			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
+			m_sampleDistanceRemain += (Real)m_sampleRate / m_audioSampleRate;
 		}
 		else
 		{
@@ -109,7 +118,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 
 			if (m_audioBufferFill >= m_audioBuffer.size())
 			{
-				uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
 				if (res != m_audioBufferFill)
 				{
@@ -121,7 +130,7 @@ void SSBDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 		}
 	}
 
-	if (m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+	if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
 	{
 		qDebug("SSBDemod::feed: lost samples");
 	}
@@ -156,7 +165,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
 		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_sampleDistanceRemain = m_sampleRate / 48000.0;
+		m_sampleDistanceRemain = m_sampleRate / m_audioSampleRate;
 
 		qDebug() << "SSBDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset" << notif.getFrequencyOffset();
@@ -187,7 +196,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_LowCutoff = lowCutoff;
 
 		m_interpolator.create(16, m_sampleRate, band * 2.0f);
-		SSBFilter->create_filter(m_LowCutoff / 48000.0f, m_Bandwidth / 48000.0f);
+		SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
 
 		m_volume = cfg.getVolume();
 		m_volume *= m_volume * 0.1;

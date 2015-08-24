@@ -166,7 +166,6 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 		m_Bandwidth = band;
 		m_LowCutoff = lowCutoff;
 
-		//m_interpolator.create(16, m_sampleRate, band * 2.0f);
 		SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
 		DSBFilter->create_dsb_filter(m_Bandwidth / m_sampleRate);
 

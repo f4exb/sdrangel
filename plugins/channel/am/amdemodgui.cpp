@@ -220,7 +220,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 AMDemodGUI::~AMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeAudioSink(m_audioFifo);
 	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

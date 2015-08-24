@@ -54,7 +54,6 @@ private:
 	int m_rate;
 	int m_spanLog2;
 
-	AudioFifo* m_audioFifo;
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
