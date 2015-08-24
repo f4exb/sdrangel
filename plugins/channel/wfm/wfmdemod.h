@@ -18,6 +18,7 @@
 #ifndef INCLUDE_WFMDEMOD_H
 #define INCLUDE_WFMDEMOD_H
 
+#include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -127,6 +128,7 @@ private:
 	SampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
+	QMutex m_settingsMutex;
 
 	void apply();
 };

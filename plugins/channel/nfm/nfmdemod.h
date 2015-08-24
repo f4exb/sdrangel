@@ -18,6 +18,7 @@
 #ifndef INCLUDE_NFMDEMOD_H
 #define INCLUDE_NFMDEMOD_H
 
+#include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
 #include "dsp/nco.h"
@@ -156,6 +157,7 @@ private:
 	SampleVector m_sampleBuffer;
 
 	NFMDemodGUI *m_nfmDemodGUI;
+	QMutex m_settingsMutex;
 
 	void apply();
 };

@@ -29,7 +29,8 @@ MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 
 WFMDemod::WFMDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(4, 250000)
+	m_audioFifo(4, 250000),
+	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("WFMDemod");
 
@@ -75,8 +76,7 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	int rf_out;
 	Real msq, demod;
 
-	if (m_audioFifo.size() <= 0)
-		return;
+	m_settingsMutex.lock();
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
@@ -160,6 +160,8 @@ void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 	}
 
 	m_sampleBuffer.clear();
+
+	m_settingsMutex.unlock();
 }
 
 void WFMDemod::start()
@@ -235,27 +237,33 @@ void WFMDemod::apply()
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_afBandwidth != m_running.m_afBandwidth))
 	{
+		m_settingsMutex.lock();
 		qDebug() << "WFMDemod::handleMessage: m_interpolator.create";
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_settingsMutex.unlock();
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
 		(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset))
 	{
+		m_settingsMutex.lock();
 		qDebug() << "WFMDemod::handleMessage: m_rfFilter->create_filter";
 		Real lowCut = (m_config.m_inputFrequencyOffset - (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_inputFrequencyOffset + (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
+		m_settingsMutex.unlock();
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
+		m_settingsMutex.lock();
 		qDebug() << "WFMDemod::handleMessage: m_lowpass.create";
 		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		m_settingsMutex.unlock();
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch) {
