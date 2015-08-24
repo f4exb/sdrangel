@@ -50,7 +50,7 @@ QString WFMDemodGUI::getName() const
 
 qint64 WFMDemodGUI::getCenterFrequency() const
 {
-	return m_channelMarker->getCenterFrequency();
+	return m_channelMarker.getCenterFrequency();
 }
 
 void WFMDemodGUI::resetToDefaults()
@@ -70,12 +70,12 @@ void WFMDemodGUI::resetToDefaults()
 QByteArray WFMDemodGUI::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker->getCenterFrequency());
+	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
-	s.writeU32(7, m_channelMarker->getColor().rgb());
+	s.writeU32(7, m_channelMarker.getColor().rgb());
 	return s.final();
 }
 
@@ -96,10 +96,10 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 		qint32 tmp;
 
 		blockApplySettings(true);
-	    m_channelMarker->blockSignals(true);
+	    m_channelMarker.blockSignals(true);
 
 		d.readS32(1, &tmp, 0);
-		m_channelMarker->setCenterFrequency(tmp);
+		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
 		ui->rfBW->setValue(tmp);
 		d.readS32(3, &tmp, 3);
@@ -111,11 +111,11 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 
 		if(d.readU32(7, &u32tmp))
 		{
-			m_channelMarker->setColor(u32tmp);
+			m_channelMarker.setColor(u32tmp);
 		}
 
 		blockApplySettings(false);
-	    m_channelMarker->blockSignals(false);
+	    m_channelMarker.blockSignals(false);
 
 		applySettings();
 		return true;
@@ -139,12 +139,12 @@ void WFMDemodGUI::viewChanged()
 
 void WFMDemodGUI::on_deltaMinus_clicked(bool minus)
 {
-	int deltaFrequency = m_channelMarker->getCenterFrequency();
+	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
 
 	if (minus ^ minusDelta) // sign change
 	{
-		m_channelMarker->setCenterFrequency(-deltaFrequency);
+		m_channelMarker.setCenterFrequency(-deltaFrequency);
 	}
 }
 
@@ -152,18 +152,18 @@ void WFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 {
 	if (ui->deltaMinus->isChecked())
 	{
-		m_channelMarker->setCenterFrequency(-value);
+		m_channelMarker.setCenterFrequency(-value);
 	}
 	else
 	{
-		m_channelMarker->setCenterFrequency(value);
+		m_channelMarker.setCenterFrequency(value);
 	}
 }
 
 void WFMDemodGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker->setBandwidth(m_rfBW[value]);
+	m_channelMarker.setBandwidth(m_rfBW[value]);
 	applySettings();
 }
 
@@ -195,7 +195,7 @@ void WFMDemodGUI::onMenuDoubleClicked()
 	if(!m_basicSettingsShown)
 	{
 		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(m_channelMarker, this);
+		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
 	}
 }
@@ -204,6 +204,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_channelMarker(this),
 	m_basicSettingsShown(false)
 {
 	ui->setupUi(this);
@@ -216,13 +217,13 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
-	m_channelMarker = new ChannelMarker(this);
-	m_channelMarker->setColor(Qt::blue);
-	m_channelMarker->setBandwidth(12500);
-	m_channelMarker->setCenterFrequency(0);
-	m_channelMarker->setVisible(true);
-	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(m_channelMarker);
+	//m_channelMarker = new ChannelMarker(this);
+	m_channelMarker.setColor(Qt::blue);
+	m_channelMarker.setBandwidth(12500);
+	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setVisible(true);
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	applySettings();
 }
@@ -234,7 +235,7 @@ WFMDemodGUI::~WFMDemodGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_wfmDemod;
-	delete m_channelMarker;
+	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -247,14 +248,14 @@ void WFMDemodGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker->getColor());
+		setTitleColor(m_channelMarker.getColor());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
-			m_channelMarker->getCenterFrequency());
+			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(abs(m_channelMarker->getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker->getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->value()],
@@ -267,14 +268,14 @@ void WFMDemodGUI::applySettings()
 void WFMDemodGUI::leaveEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(false);
+	m_channelMarker.setHighlighted(false);
 	blockApplySettings(false);
 }
 
 void WFMDemodGUI::enterEvent(QEvent*)
 {
 	blockApplySettings(true);
-	m_channelMarker->setHighlighted(true);
+	m_channelMarker.setHighlighted(true);
 	blockApplySettings(false);
 }
 
