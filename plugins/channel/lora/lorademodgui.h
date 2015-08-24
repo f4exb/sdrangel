@@ -3,11 +3,11 @@
 
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
+#include "dsp/channelmarker.h"
 
 #define BANDWIDTHSTRING {7813,15625,20833,31250,62500}
 
 class PluginAPI;
-class ChannelMarker;
 class ThreadedSampleSink;
 class Channelizer;
 class LoRaDemod;
@@ -44,7 +44,7 @@ private slots:
 private:
 	Ui::LoRaDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	ChannelMarker* m_channelMarker;
+	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
