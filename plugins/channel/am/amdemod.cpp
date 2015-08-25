@@ -63,7 +63,7 @@ void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBan
 	messageQueue->push(cmd);
 }
 
-void AMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
 	Complex ci;
 

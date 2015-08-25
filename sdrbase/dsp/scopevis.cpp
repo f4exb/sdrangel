@@ -55,8 +55,10 @@ void ScopeVis::configure(MessageQueue* msgQueue,
 	msgQueue->push(cmd);
 }
 
-void ScopeVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+	SampleVector::const_iterator begin(cbegin);
+
 	if (m_triggerChannel == TriggerFreeRun) {
 		m_triggerPoint = begin;
 	}

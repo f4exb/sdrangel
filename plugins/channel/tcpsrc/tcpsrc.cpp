@@ -71,7 +71,7 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 	messageQueue->push(cmd);
 }
 
-void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	Complex ci;
 	fftfilt::cmplx* sideband;

@@ -39,7 +39,7 @@ public:
 
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
 
-	virtual void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool pO);
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);

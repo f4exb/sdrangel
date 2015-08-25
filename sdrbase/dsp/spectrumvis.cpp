@@ -38,7 +38,7 @@ void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPerc
 	msgQueue->push(cmd);
 }
 
-void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
 	/*
@@ -59,21 +59,31 @@ void SpectrumVis::feedTriggered(SampleVector::const_iterator triggerPoint, Sampl
 	}*/
 }
 
-void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	// if no visualisation is set, send the samples to /dev/null
-	if(m_glSpectrum == NULL)
-		return;
 
-	while(begin < end) {
+	if(m_glSpectrum == 0)
+	{
+		return;
+	}
+
+	SampleVector::const_iterator begin(cbegin);
+
+	while (begin < end)
+	{
 		std::size_t todo = end - begin;
 		std::size_t samplesNeeded = m_refillSize - m_fftBufferFill;
 
-		if(todo >= samplesNeeded) {
+		if (todo >= samplesNeeded)
+		{
 			// fill up the buffer
 			std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill;
-			for(std::size_t i = 0; i < samplesNeeded; ++i, ++begin)
+
+			for (std::size_t i = 0; i < samplesNeeded; ++i, ++begin)
+			{
 				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
+			}
 
 			// apply fft window (and copy from m_fftBuffer to m_fftIn)
 			m_window.apply(&m_fftBuffer[0], m_fft->in());
@@ -89,16 +99,21 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 			Real v;
 			std::size_t halfSize = m_fftSize / 2;
 
-			if ( positiveOnly ) {
-				for(std::size_t i = 0; i < halfSize; i++) {
+			if ( positiveOnly )
+			{
+				for (std::size_t i = 0; i < halfSize; i++)
+				{
 					c = fftOut[i];
 					v = c.real() * c.real() + c.imag() * c.imag();
 					v = mult * log2f(v) + ofs;
 					m_logPowerSpectrum[i * 2] = v;
 					m_logPowerSpectrum[i * 2 + 1] = v;
 				}
-			} else {
-				for(std::size_t i = 0; i < halfSize; i++) {
+			}
+			else
+			{
+				for (std::size_t i = 0; i < halfSize; i++)
+				{
 					c = fftOut[i + halfSize];
 					v = c.real() * c.real() + c.imag() * c.imag();
 					v = mult * log2f(v) + ofs;
@@ -120,10 +135,15 @@ void SpectrumVis::feed(SampleVector::const_iterator begin, SampleVector::const_i
 			// start over
 			m_fftBufferFill = m_overlapSize;
 			m_needMoreSamples = false;
-		} else {
+		}
+		else
+		{
 			// not enough samples for FFT - just fill in new data and return
 			for(std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill; begin < end; ++begin)
+			{
 				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
+			}
+
 			m_fftBufferFill += todo;
 			m_needMoreSamples = true;
 		}

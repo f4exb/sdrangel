@@ -69,7 +69,7 @@ void WFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 	messageQueue->push(cmd);
 }
 
-void WFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
 	Complex ci;
 	fftfilt::cmplx *rf;

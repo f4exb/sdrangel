@@ -30,7 +30,7 @@ void FileSink::configure(MessageQueue* msgQueue, const std::string& filename)
 	msgQueue->push(cmd);
 }
 
-void FileSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void FileSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     // if no recording is active, send the samples to /dev/null
     if(!m_recordOn)

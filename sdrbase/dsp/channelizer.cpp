@@ -30,7 +30,7 @@ void Channelizer::configure(MessageQueue* messageQueue, int sampleRate, int cent
 	messageQueue->push(cmd);
 }
 
-void Channelizer::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void Channelizer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	if(m_sampleSink == 0) {
 		m_sampleBuffer.clear();

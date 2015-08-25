@@ -106,7 +106,7 @@ Real angleDist(Real a, Real b)
 	return dist;
 }
 
-void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool firstOfBurst)
+void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
 	Complex ci;
 
