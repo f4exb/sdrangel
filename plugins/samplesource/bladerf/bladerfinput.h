@@ -17,7 +17,7 @@
 #ifndef INCLUDE_BLADERFINPUT_H
 #define INCLUDE_BLADERFINPUT_H
 
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 #include <libbladeRF.h>
 #include <QString>
 

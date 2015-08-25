@@ -98,7 +98,7 @@ set(sdrbase_SOURCES
 	sdrbase/gui/scaleengine.cpp
 	sdrbase/gui/valuedial.cpp
 
-	sdrbase/dsp/samplesource/samplesource.cpp
+	sdrbase/dsp/samplesource.cpp
 
 	sdrbase/plugin/pluginapi.cpp
 	sdrbase/plugin/plugingui.cpp
@@ -172,7 +172,7 @@ set(sdrbase_HEADERS
 	include-gpl/gui/scaleengine.h
 	include-gpl/gui/valuedial.h
 
-	include/dsp/samplesource/samplesource.h
+	include/dsp/samplesource.h
 
 	include/plugin/pluginapi.h
 	include/plugin/plugingui.h

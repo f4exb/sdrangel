@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 
 SampleSource::SampleSource()
 {

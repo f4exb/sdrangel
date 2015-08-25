@@ -17,7 +17,7 @@
 #ifndef INCLUDE_FILESOURCEINPUT_H
 #define INCLUDE_FILESOURCEINPUT_H
 
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 #include <QString>
 #include <QTimer>
 #include <ctime>

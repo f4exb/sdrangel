@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FCDINPUT_H
 #define INCLUDE_FCDINPUT_H
 
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 #include <QString>
 
 struct fcd_buffer {

@@ -6,7 +6,7 @@
 #include "settings/preset.h"
 #include "mainwindow.h"
 #include "dsp/dspengine.h"
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 
 #include <QDebug>
 #include "util/stacktrace.h"

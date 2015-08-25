@@ -18,7 +18,7 @@
 #ifndef INCLUDE_RTLSDRINPUT_H
 #define INCLUDE_RTLSDRINPUT_H
 
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 #include <rtl-sdr.h>
 #include <QString>
 

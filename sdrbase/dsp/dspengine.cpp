@@ -23,7 +23,7 @@
 #include "dsp/samplesink.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "dsp/samplesource/samplesource.h"
+#include "dsp/samplesource.h"
 
 DSPEngine::DSPEngine(QObject* parent) :
 	QThread(parent),
