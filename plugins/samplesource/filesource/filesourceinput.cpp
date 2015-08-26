@@ -109,6 +109,11 @@ void FileSourceInput::openFileStream()
 	getOutputMessageQueue()->push(report);
 }
 
+bool FileSourceInput::init(const Message& message)
+{
+	return false;
+}
+
 bool FileSourceInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);

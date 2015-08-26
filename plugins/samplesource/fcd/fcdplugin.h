@@ -4,7 +4,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class FCDPlugin : public QObject, PluginInterface {
+class FCDPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.fcd")

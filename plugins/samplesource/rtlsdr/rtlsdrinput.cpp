@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include <string.h>
 #include <errno.h>
 #include "rtlsdrinput.h"
@@ -94,6 +95,11 @@ RTLSDRInput::~RTLSDRInput()
 	stop();
 }
 
+bool RTLSDRInput::init(const Message& message)
+{
+	return false;
+}
+
 bool RTLSDRInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -111,13 +117,13 @@ bool RTLSDRInput::start(int device)
 
 	if (!m_sampleFifo.setSize(96000 * 4))
 	{
-		qCritical("Could not allocate SampleFifo");
+		qCritical("RTLSDRInput::start: Could not allocate SampleFifo");
 		return false;
 	}
 
 	if ((res = rtlsdr_open(&m_dev, device)) < 0)
 	{
-		qCritical("could not open RTLSDR #%d: %s", device, strerror(errno));
+		qCritical("RTLSDRInput::start: could not open RTLSDR #%d: %s", device, strerror(errno));
 		return false;
 	}
 
@@ -127,31 +133,31 @@ bool RTLSDRInput::start(int device)
 
 	if ((res = rtlsdr_get_usb_strings(m_dev, vendor, product, serial)) < 0)
 	{
-		qCritical("error accessing USB device");
+		qCritical("RTLSDRInput::start: error accessing USB device");
 		stop();
 		return false;
 	}
 
-	qWarning("RTLSDRInput open: %s %s, SN: %s", vendor, product, serial);
+	qWarning("RTLSDRInput::start: open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if ((res = rtlsdr_set_sample_rate(m_dev, 1024000)) < 0)
+	if ((res = rtlsdr_set_sample_rate(m_dev, 1152000)) < 0)
 	{
-		qCritical("could not set sample rate: 1024k S/s");
+		qCritical("RTLSDRInput::start: could not set sample rate: 1024k S/s");
 		stop();
 		return false;
 	}
 
 	if ((res = rtlsdr_set_tuner_gain_mode(m_dev, 1)) < 0)
 	{
-		qCritical("error setting tuner gain mode");
+		qCritical("RTLSDRInput::start: error setting tuner gain mode");
 		stop();
 		return false;
 	}
 
 	if ((res = rtlsdr_set_agc_mode(m_dev, 0)) < 0)
 	{
-		qCritical("error setting agc mode");
+		qCritical("RTLSDRInput::start: error setting agc mode");
 		stop();
 		return false;
 	}
@@ -160,7 +166,7 @@ bool RTLSDRInput::start(int device)
 
 	if (numberOfGains < 0)
 	{
-		qCritical("error getting number of gain values supported");
+		qCritical("RTLSDRInput::start: error getting number of gain values supported");
 		stop();
 		return false;
 	}
@@ -169,21 +175,27 @@ bool RTLSDRInput::start(int device)
 
 	if (rtlsdr_get_tuner_gains(m_dev, &m_gains[0]) < 0)
 	{
-		qCritical("error getting gain values");
+		qCritical("RTLSDRInput::start: error getting gain values");
 		stop();
 		return false;
+	}
+	else
+	{
+		qDebug() << "RTLSDRInput::start: " << m_gains.size() << "gains";
+		MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);
+		getOutputMessageQueueToGUI()->push(message);
 	}
 
 	if ((res = rtlsdr_reset_buffer(m_dev)) < 0)
 	{
-		qCritical("could not reset USB EP buffers: %s", strerror(errno));
+		qCritical("RTLSDRInput::start: could not reset USB EP buffers: %s", strerror(errno));
 		stop();
 		return false;
 	}
 
 	if ((m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo)) == NULL)
 	{
-		qFatal("out of memory");
+		qFatal("RTLSDRInput::start: out of memory");
 		stop();
 		return false;
 	}
@@ -193,11 +205,6 @@ bool RTLSDRInput::start(int device)
 	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
-
-	qDebug("RTLSDRInput::start");
-
-	MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);
-	getOutputMessageQueue()->push(message);
 
 	return true;
 }

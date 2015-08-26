@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"
@@ -18,6 +19,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displaySettings();
 
 	m_sampleSource = new RTLSDRInput();
+	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(HandleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
@@ -77,6 +79,7 @@ bool RTLSDRGui::handleMessage(const Message& message)
 {
 	if (RTLSDRInput::MsgReportRTLSDR::match(message))
 	{
+		qDebug() << "RTLSDRGui::handleMessage: MsgReportRTLSDR";
 		m_gains = ((RTLSDRInput::MsgReportRTLSDR&) message).getGains();
 		displaySettings();
 		return true;
@@ -84,6 +87,21 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	else
 	{
 		return false;
+	}
+}
+
+void RTLSDRGui::HandleSourceMessages()
+{
+	Message* message;
+
+	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
+	{
+		qDebug("RTLSDRGui::HandleSourceMessages: message: %s", message->getIdentifier());
+
+		if (handleMessage(*message))
+		{
+			delete message;
+		}
 	}
 }
 
@@ -219,8 +237,8 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
-unsigned int RTLSDRSampleRates::m_rates[] = {288, 1024, 1536, 1152, 2048, 2500 };
-unsigned int RTLSDRSampleRates::m_nb_rates = 6;
+unsigned int RTLSDRSampleRates::m_rates[] = {288, 1152, 1536, 2304};
+unsigned int RTLSDRSampleRates::m_nb_rates = 4;
 
 unsigned int RTLSDRSampleRates::getRate(unsigned int rate_index)
 {

@@ -93,6 +93,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	m_masterTimer.start(50);
 
+	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
+
 	m_pluginManager->loadPlugins();
 
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
@@ -347,9 +349,9 @@ void MainWindow::handleDSPMessages()
 			updateSampleRate();
 			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
 			m_fileSink->handleMessage(*notif);
-		}
 
-		delete message;
+			delete message;
+		}
 	}
 }
 

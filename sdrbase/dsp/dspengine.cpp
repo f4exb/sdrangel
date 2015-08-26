@@ -614,7 +614,7 @@ void DSPEngine::handleInputMessages()
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		qDebug("  - message: %s", message->getIdentifier());
+		qDebug("DSPEngine::handleInputMessages: message: %s", message->getIdentifier());
 
 		if (DSPConfigureCorrection::match(*message))
 		{
@@ -635,9 +635,9 @@ void DSPEngine::handleInputMessages()
 				m_qRange = 1 << 16;
 				m_imbalance = 65536;
 			}
-		}
 
-		delete message;
+			delete message;
+		}
 	}
 }
 
@@ -645,12 +645,14 @@ void DSPEngine::handleSourceMessages()
 {
 	Message *message;
 
-	qDebug() << "DSPEngine::handleSourceMessages";
-
 	while ((message = m_sampleSource->getOutputMessageQueue()->pop()) != 0)
 	{
+		qDebug() << "DSPEngine::handleSourceMessages: " << message->getIdentifier();
+
 		if (DSPSignalNotification::match(*message))
 		{
+			qDebug() << "DSPEngine::handleSourceMessages: process DSPSignalNotification";
+
 			DSPSignalNotification *notif = (DSPSignalNotification *) message;
 
 			// update DSP values
@@ -678,9 +680,9 @@ void DSPEngine::handleSourceMessages()
 
 			DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
 			m_outputMessageQueue.push(rep);
-		}
 
-		delete message;
+			delete message;
+		}
 	}
 }
 

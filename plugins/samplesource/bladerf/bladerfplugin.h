@@ -20,7 +20,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class BlderfPlugin : public QObject, PluginInterface {
+class BlderfPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.bladerf")
