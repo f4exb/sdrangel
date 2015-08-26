@@ -127,6 +127,7 @@ set(sdrbase_HEADERS
 	include-gpl/dsp/channelizer.h
 	include/dsp/channelmarker.h
 	include-gpl/dsp/complex.h
+	include-gpl/dsp/decimators.h
 	include-gpl/dsp/dspcommands.h
 	include-gpl/dsp/dspengine.h
 	include/dsp/dsptypes.h

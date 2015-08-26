@@ -80,90 +80,6 @@ void RTLSDRThread::run()
 	m_running = false;
 }
 
-void RTLSDRThread::decimate1(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	qint16 xreal, yimag;
-	for (int pos = 0; pos < len; pos += 2) {
-		xreal = buf[pos+0];
-		yimag = buf[pos+1];
-		Sample s( xreal << 3, yimag << 3 );
-		**it = s;
-		(*it)++;
-	}
-}
-
-void RTLSDRThread::decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	qint16 xreal, yimag;
-	for (int pos = 0; pos < len - 7; pos += 8) {
-		xreal = buf[pos+0] - buf[pos+3];
-		yimag = buf[pos+1] + buf[pos+2] - 255;
-		Sample s( xreal << 3, yimag << 3 );
-		**it = s;
-		(*it)++;
-		xreal = buf[pos+7] - buf[pos+4];
-		yimag = 255 - buf[pos+5] - buf[pos+6];
-		Sample t( xreal << 3, yimag << 3 );
-		**it = t;
-		(*it)++;
-	}
-}
-void RTLSDRThread::decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	qint16 xreal, yimag;
-		for (int pos = 0; pos < len - 7; pos += 8) {
-		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
-		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s( xreal << 3, yimag << 3 );
-		**it = s;
-		(*it)++;
-	}
-}
-
-void RTLSDRThread::decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	qint16 xreal, yimag;
-	for (int pos = 0; pos < len - 15; pos += 8) {
-		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
-		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s1( xreal << 3, yimag << 3 );
-		pos += 8;
-		xreal = buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4];
-		yimag = buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6];
-		Sample s2( xreal << 3, yimag << 3 );
-
-		m_decimator2.myDecimate(&s1, &s2);
-		**it = s2;
-		(*it)++;
-	}
-}
-
-void RTLSDRThread::decimate16(SampleVector::iterator* it, const quint8* buf, qint32 len)
-{
-	// Offset tuning: 4x downsample and rotate, then
-	// downsample 4x more. [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-	qint16 xreal[4], yimag[4];
-
-	for (int pos = 0; pos < len - 31; ) {
-		for (int i = 0; i < 4; i++) {
-			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << 4;
-			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << 4;
-			pos += 8;
-		}
-		Sample s1( xreal[0], yimag[0] );
-		Sample s2( xreal[1], yimag[1] );
-		Sample s3( xreal[2], yimag[2] );
-		Sample s4( xreal[3], yimag[3] );
-		m_decimator2.myDecimate(&s1, &s2);
-		m_decimator2.myDecimate(&s3, &s4);
-		m_decimator4.myDecimate(&s2, &s4);
-		**it = s4;
-		(*it)++;
-	}
-}
-
-
-
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
 void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
@@ -172,32 +88,23 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 	switch (m_log2Decim)
 	{
 	case 0:
-		decimate1(&it, buf, len);
+		m_decimators.decimate1(&it, buf, len);
 		break;
 	case 1:
-		decimate2(&it, buf, len);
+		m_decimators.decimate2(&it, buf, len);
 		break;
 	case 2:
-		decimate4(&it, buf, len);
+		m_decimators.decimate4(&it, buf, len);
 		break;
 	case 3:
-		decimate8(&it, buf, len);
+		m_decimators.decimate8(&it, buf, len);
 		break;
 	case 4:
-		decimate16(&it, buf, len);
+		m_decimators.decimate16(&it, buf, len);
 		break;
 	default:
 		break;
 	}
-
-	/*
-	if (m_samplerate < 800000)
-		decimate4(&it, buf, len);
-	else if ((m_samplerate == 1152000)||(m_samplerate == 2048000))
-		decimate8(&it, buf, len);
-	else
-		decimate16(&it, buf, len);
-	*/
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 

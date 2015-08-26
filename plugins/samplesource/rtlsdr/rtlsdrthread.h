@@ -23,7 +23,8 @@
 #include <QWaitCondition>
 #include <rtl-sdr.h>
 #include "dsp/samplefifo.h"
-#include "dsp/inthalfbandfilter.h"
+//#include "dsp/inthalfbandfilter.h"
+#include "dsp/decimators.h"
 
 class RTLSDRThread : public QThread {
 	Q_OBJECT
@@ -49,15 +50,9 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 
-	IntHalfbandFilter m_decimator2;
-	IntHalfbandFilter m_decimator4;
+	Decimators<quint8> m_decimators;
 
 	void run();
-	void decimate1(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate2(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate4(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate8(SampleVector::iterator* it, const quint8* buf, qint32 len);
-	void decimate16(SampleVector::iterator* it, const quint8* buf, qint32 len);
 	void callback(const quint8* buf, qint32 len);
 
 	static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
