@@ -51,6 +51,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displaySettings();
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
+	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
@@ -105,13 +106,13 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 
 bool FileSourceGui::handleMessage(const Message& message)
 {
-	if(FileSourceInput::MsgReportFileSourceAcquisition::match(message))
+	if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
 	{
 		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition&)message).getAcquisition();
 		updateWithAcquisition();
 		return true;
 	}
-	else if(FileSourceInput::MsgReportFileSourceStreamData::match(message))
+	else if (FileSourceInput::MsgReportFileSourceStreamData::match(message))
 	{
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleRate();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getCenterFrequency();
@@ -119,7 +120,7 @@ bool FileSourceGui::handleMessage(const Message& message)
 		updateWithStreamData();
 		return true;
 	}
-	else if(FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
+	else if (FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
 	{
 		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
@@ -128,6 +129,21 @@ bool FileSourceGui::handleMessage(const Message& message)
 	else
 	{
 		return false;
+	}
+}
+
+void FileSourceGui::handleSourceMessages()
+{
+	Message* message;
+
+	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
+	{
+		qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
+
+		if (handleMessage(*message))
+		{
+			delete message;
+		}
 	}
 }
 

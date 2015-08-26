@@ -71,6 +71,7 @@ private:
 	void updateWithStreamTime();
 
 private slots:
+	void handleSourceMessages();
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);

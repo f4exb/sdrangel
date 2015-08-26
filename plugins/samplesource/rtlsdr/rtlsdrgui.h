@@ -49,7 +49,7 @@ private slots:
 	void on_samplerate_valueChanged(int value);
 	void on_checkBox_stateChanged(int state);
 	void updateHardware();
-	void HandleSourceMessages();
+	void handleSourceMessages();
 };
 
 class RTLSDRSampleRates {

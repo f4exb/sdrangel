@@ -106,7 +106,7 @@ void FileSourceInput::openFileStream()
 	m_startingTimeStamp = header.startTimeStamp;
 
 	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp); // file stream data
-	getOutputMessageQueue()->push(report);
+	getOutputMessageQueueToGUI()->push(report);
 }
 
 bool FileSourceInput::init(const Message& message)
@@ -147,7 +147,7 @@ bool FileSourceInput::start(int device)
 	qDebug("FileSourceInput::startInput: started");
 
 	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
-	getOutputMessageQueue()->push(report);
+	getOutputMessageQueueToGUI()->push(report);
 
 	return true;
 }
@@ -167,7 +167,7 @@ void FileSourceInput::stop()
 	m_deviceDescription.clear();
 
 	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
-	getOutputMessageQueue()->push(report);
+	getOutputMessageQueueToGUI()->push(report);
 }
 
 const QString& FileSourceInput::getDeviceDescription() const
@@ -217,7 +217,7 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 			MsgReportFileSourceStreamTiming *report =
 					MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-			getOutputMessageQueue()->push(report);
+			getOutputMessageQueueToGUI()->push(report);
 		}
 
 		return true;
@@ -235,7 +235,7 @@ bool FileSourceInput::handleMessage(const Message& message)
 			report = MsgReportFileSourceStreamTiming::create(0);
 		}
 
-		getOutputMessageQueue()->push(report);
+		getOutputMessageQueueToGUI()->push(report);
 	}
 	else
 	{
