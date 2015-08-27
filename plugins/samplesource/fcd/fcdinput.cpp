@@ -15,6 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+// FIXME: FCD is handled very badly!
+
+#include <QDebug>
 #include <string.h>
 #include <errno.h>
 #include "fcdinput.h"
@@ -154,6 +157,7 @@ bool FCDInput::handleMessage(const Message& message)
 {
 	if(MsgConfigureFCD::match(message))
 	{
+		qDebug() << "FCDInput::handleMessage: MsgConfigureFCD";
 		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
 		applySettings(conf.getSettings(), false);
 		return true;
@@ -166,22 +170,29 @@ bool FCDInput::handleMessage(const Message& message)
 
 void FCDInput::applySettings(const Settings& settings, bool force)
 {
-	bool sampleSourcChange = false;
+	bool signalChange = false;
 
 	if ((m_settings.centerFrequency != settings.centerFrequency))
 	{
+		qDebug() << "FCDInput::applySettings: fc: " << settings.centerFrequency;
 		m_settings.centerFrequency = settings.centerFrequency;
 		set_center_freq((double) m_settings.centerFrequency);
-		sampleSourcChange = true;
+		signalChange = true;
 	}
 
-	if (!sampleSourcChange || force)
+	if ((m_settings.gain != settings.gain) || force)
 	{
 		set_lna_gain(settings.gain > 0);
+		m_settings.gain = settings.gain;
+	}
+
+	if ((m_settings.bias != settings.bias) || force)
+	{
 		set_bias_t(settings.bias > 0);
+		m_settings.bias = settings.bias;
 	}
     
-    if (sampleSourcChange)
+    if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(960000, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        

@@ -42,7 +42,7 @@ void FCDThread::stopWork()
 
 void FCDThread::run()
 {
-	if ( !OpenSource("hw:CARD=V20") )
+	if ( !OpenSource("hw:CARD=V10") ) // FIXME: original is V10 pro is V20. Make it an option
                 return;
 	// TODO: fallback to original fcd
 

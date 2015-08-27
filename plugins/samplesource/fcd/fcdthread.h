@@ -25,7 +25,7 @@
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
 
-#define FCDPP_RATE 192000
+#define FCDPP_RATE 192000 // FIXME: The Pro / Pro+ switch should be handled better than this!
 #define BLOCKSIZE 8192
 
 class FCDThread : public QThread {

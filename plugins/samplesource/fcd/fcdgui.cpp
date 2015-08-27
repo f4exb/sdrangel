@@ -1,6 +1,7 @@
 #include "fcdgui.h"
 #include "ui_fcdgui.h"
 #include "plugin/pluginapi.h"
+#include "gui/colormapper.h"
 #include "dsp/dspengine.h"
 
 FCDGui::FCDGui(PluginAPI* pluginAPI, QWidget* parent) :
@@ -11,7 +12,8 @@ FCDGui::FCDGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, 420000U, 1900000U);
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->centerFrequency->setValueRange(7, 64000U, 1700000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -100,7 +102,7 @@ void FCDGui::updateHardware()
 
 void FCDGui::on_checkBoxR_stateChanged(int state)
 {
-	if (state == Qt::Checked)
+	if (state == Qt::Checked) // FIXME: this is for the Pro+ version only!
 	{
 		ui->centerFrequency->setValueRange(7, 150U, 240000U);
 		ui->centerFrequency->setValue(7000);
@@ -109,7 +111,7 @@ void FCDGui::on_checkBoxR_stateChanged(int state)
 	}
 	else
 	{
-		ui->centerFrequency->setValueRange(7, 420000U, 1900000U);
+		ui->centerFrequency->setValueRange(7, 64000U, 1900000U);
 		ui->centerFrequency->setValue(435000);
 		m_settings.centerFrequency = 435000 * 1000;
 		m_settings.range = 0;

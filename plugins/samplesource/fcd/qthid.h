@@ -34,7 +34,7 @@
 typedef bool BOOL;
 
 
-#define FCDPP
+//#define FCDPP // FIXME: the Pro / Pro+ switch should be handled better than this!
 const unsigned short _usVID=0x04D8;  /*!< USB vendor ID. */
 #ifdef FCDPP
 const unsigned short _usPID=0xFB31;  /*!< USB product ID. */
