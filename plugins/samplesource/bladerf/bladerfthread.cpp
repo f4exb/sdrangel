@@ -87,6 +87,7 @@ void BladerfThread::run()
 	m_running = false;
 }
 
+/*
 void BladerfThread::decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	qint16 xreal, yimag;
@@ -227,7 +228,7 @@ void BladerfThread::decimate32_cen(SampleVector::iterator* it, const qint16* buf
 	}
 }
 */
-
+/*
 void BladerfThread::decimate2_cen(SampleVector::iterator* it, const qint16* buf, qint32 len)
 {
 	for (int pos = 0; pos < len - 3; pos += 4) {
@@ -591,6 +592,7 @@ void BladerfThread::decimate32_sup(SampleVector::iterator* it, const qint16* buf
 		(*it)++;
 	}
 }
+*/
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
 void BladerfThread::callback(const qint16* buf, qint32 len)
@@ -599,7 +601,7 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 
 	if (m_log2Decim == 0)
 	{
-		decimate1(&it, buf, len);
+		m_decimators.decimate1(&it, buf, len);
 	}
 	else
 	{
@@ -608,19 +610,19 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 			switch (m_log2Decim)
 			{
 			case 1:
-				decimate2(&it, buf, len);
+				m_decimators.decimate2(&it, buf, len);
 				break;
 			case 2:
-				decimate4(&it, buf, len);
+				m_decimators.decimate4(&it, buf, len);
 				break;
 			case 3:
-				decimate8(&it, buf, len);
+				m_decimators.decimate8(&it, buf, len);
 				break;
 			case 4:
-				decimate16(&it, buf, len);
+				m_decimators.decimate16(&it, buf, len);
 				break;
 			case 5:
-				decimate32(&it, buf, len);
+				m_decimators.decimate32(&it, buf, len);
 				break;
 			default:
 				break;
@@ -631,19 +633,19 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 			switch (m_log2Decim)
 			{
 			case 1:
-				decimate2_sup(&it, buf, len);
+				m_decimators.decimate2_sup(&it, buf, len);
 				break;
 			case 2:
-				decimate4_sup(&it, buf, len);
+				m_decimators.decimate4_sup(&it, buf, len);
 				break;
 			case 3:
-				decimate8_sup(&it, buf, len);
+				m_decimators.decimate8_sup(&it, buf, len);
 				break;
 			case 4:
-				decimate16_sup(&it, buf, len);
+				m_decimators.decimate16_sup(&it, buf, len);
 				break;
 			case 5:
-				decimate32_sup(&it, buf, len);
+				m_decimators.decimate32_sup(&it, buf, len);
 				break;
 			default:
 				break;
@@ -654,19 +656,19 @@ void BladerfThread::callback(const qint16* buf, qint32 len)
 			switch (m_log2Decim)
 			{
 			case 1:
-				decimate2_cen(&it, buf, len);
+				m_decimators.decimate2_cen(&it, buf, len);
 				break;
 			case 2:
-				decimate4_cen(&it, buf, len);
+				m_decimators.decimate4_cen(&it, buf, len);
 				break;
 			case 3:
-				decimate8_cen(&it, buf, len);
+				m_decimators.decimate8_cen(&it, buf, len);
 				break;
 			case 4:
-				decimate16_cen(&it, buf, len);
+				m_decimators.decimate16_cen(&it, buf, len);
 				break;
 			case 5:
-				decimate32_cen(&it, buf, len);
+				m_decimators.decimate32_cen(&it, buf, len);
 				break;
 			default:
 				break;

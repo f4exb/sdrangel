@@ -22,7 +22,8 @@
 #include <QWaitCondition>
 #include <libbladeRF.h>
 #include "dsp/samplefifo.h"
-#include "dsp/inthalfbandfilter.h"
+//#include "dsp/inthalfbandfilter.h"
+#include "dsp/decimators.h"
 
 #define BLADERF_BLOCKSIZE (1<<14)
 
@@ -53,13 +54,18 @@ private:
 	unsigned int m_log2Decim;
 	int m_fcPos;
 
+	/*
 	IntHalfbandFilter m_decimator2;  // 1st stages
 	IntHalfbandFilter m_decimator4;  // 2nd stages
 	IntHalfbandFilter m_decimator8;  // 3rd stages
 	IntHalfbandFilter m_decimator16; // 4th stages
 	IntHalfbandFilter m_decimator32; // 5th stages
+	*/
+
+	Decimators<qint16> m_decimators;
 
 	void run();
+	/*
 	void decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void decimate2_u(SampleVector::iterator* it, const quint16* buf, qint32 len);
 	void decimate2(SampleVector::iterator* it, const qint16* buf, qint32 len);
@@ -77,6 +83,7 @@ private:
 	void decimate32(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void decimate32_sup(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void decimate32_cen(SampleVector::iterator* it, const qint16* buf, qint32 len);
+	*/
 	void callback(const qint16* buf, qint32 len);
 };
 
