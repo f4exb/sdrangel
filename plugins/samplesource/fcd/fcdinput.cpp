@@ -194,7 +194,7 @@ void FCDInput::applySettings(const Settings& settings, bool force)
     
     if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(960000, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(96000, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        
     }
 }
