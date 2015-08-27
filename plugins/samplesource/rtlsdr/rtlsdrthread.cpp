@@ -20,13 +20,13 @@
 #include "rtlsdrthread.h"
 #include "dsp/samplefifo.h"
 
-#define BLOCKSIZE 16384
+#define FCD_BLOCKSIZE 16384
 
 RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
-	m_convertBuffer(BLOCKSIZE),
+	m_convertBuffer(FCD_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(288000),
 	m_log2Decim(4)
@@ -71,7 +71,7 @@ void RTLSDRThread::run()
 	m_startWaiter.wakeAll();
 
 	while(m_running) {
-		if((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 32, BLOCKSIZE)) < 0) {
+		if((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 32, FCD_BLOCKSIZE)) < 0) {
 			qCritical("RTLSDRThread: async error: %s", strerror(errno));
 			break;
 		}

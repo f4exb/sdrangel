@@ -26,7 +26,7 @@
 #include <alsa/asoundlib.h>
 
 #define FCDPP_RATE 192000 // FIXME: The Pro / Pro+ switch should be handled better than this!
-#define BLOCKSIZE 8192
+#define FCD_BLOCKSIZE (1<<11)
 
 class FCDThread : public QThread {
 	Q_OBJECT

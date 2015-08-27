@@ -24,7 +24,7 @@ FCDThread::FCDThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	fcd_handle(NULL),
 	m_running(false),
-	m_convertBuffer(BLOCKSIZE),
+	m_convertBuffer(FCD_BLOCKSIZE),
 	m_sampleFifo(sampleFifo)
 {
 	start();
@@ -48,7 +48,7 @@ void FCDThread::run()
 
 	m_running = true;
 	while(m_running) {
-		if ( work(BLOCKSIZE) < 0)
+		if ( work(FCD_BLOCKSIZE) < 0)
 			break;
 	}
 	CloseSource();

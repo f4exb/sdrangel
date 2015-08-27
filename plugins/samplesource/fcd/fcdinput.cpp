@@ -105,7 +105,7 @@ bool FCDInput::start(int device)
 
 	applySettings(m_settings, true);
 
-	if(!m_sampleFifo.setSize(4096*16))
+	if(!m_sampleFifo.setSize(96000*4))
 	{
 		qCritical("Could not allocate SampleFifo");
 		return false;

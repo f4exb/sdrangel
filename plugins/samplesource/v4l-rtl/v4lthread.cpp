@@ -23,7 +23,7 @@
 V4LThread::V4LThread(SampleFifo* sampleFifo, double frequency, QObject* parent) :
 	QThread(parent),
 	m_running(false),
-	m_convertBuffer(BLOCKSIZE),
+	m_convertBuffer(FCD_BLOCKSIZE),
 	m_sampleFifo(sampleFifo)
 {
 	centerFreq = frequency;
@@ -48,7 +48,7 @@ void V4LThread::run()
                 return;
 
 	while(m_running) {
-		work(BLOCKSIZE);
+		work(FCD_BLOCKSIZE);
 	}
 	CloseSource();
 }

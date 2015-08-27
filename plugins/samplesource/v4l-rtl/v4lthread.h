@@ -25,7 +25,7 @@
 #include "dsp/inthalfbandfilter.h"
 
 #define SAMPLERATE 1024000
-#define BLOCKSIZE 4096
+#define FCD_BLOCKSIZE 4096
 
 class V4LThread : public QThread {
 	Q_OBJECT
