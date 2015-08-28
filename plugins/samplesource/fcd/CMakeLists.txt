@@ -4,6 +4,7 @@ set(fcd_SOURCES
 	fcdgui.cpp
 	fcdinput.cpp
 	fcdplugin.cpp
+	fcdserializer.cpp
 	fcdthread.cpp
 	hid-libusb.c
 )
@@ -12,6 +13,7 @@ set(fcd_HEADERS
 	fcdgui.h
 	fcdinput.h
 	fcdplugin.h
+	fcdserializer.h
 	fcdthread.h
 	qthid.h
 	hid-libusb.h
