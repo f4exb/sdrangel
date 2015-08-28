@@ -36,7 +36,7 @@ public:
 		qint32 m_RxGain3;    //!< Rx third stage amplifier gain
 	};
 
-	static const QByteArray& writeSerializedData(const Data& data);
+	static void writeSerializedData(const Data& data, QByteArray& serializedData);
 	static bool readSerializedData(const QByteArray& serializedData, Data& data);
 	static void setDefaults(Data& data);
 	static uint getSerializerVersion() { return m_version; }

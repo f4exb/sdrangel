@@ -25,7 +25,7 @@
 #include "fcdgui.h"
 #include "qthid.h"
 #include "dsp/dspcommands.h"
-#include "util/simpleserializer.h"
+#include "fcdserializer.h"
 
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
@@ -48,16 +48,42 @@ void FCDInput::Settings::resetToDefaults()
 
 QByteArray FCDInput::Settings::serialize() const
 {
+	FCDSerializer::FCDData data;
+
+	data.m_data.m_lnaGain = gain;
+	data.m_data.m_frequency = centerFrequency;
+	data.m_range = range;
+	data.m_bias = bias;
+
+	QByteArray byteArray;
+
+	FCDSerializer::writeSerializedData(data, byteArray);
+
+	return byteArray;
+
+	/*
 	SimpleSerializer s(1);
 	s.writeU64(1, centerFrequency);
 	s.writeS32(2, range);
 	s.writeS32(3, gain);
 	s.writeS32(4, bias);
-	return s.final();
+	return s.final();*/
 }
 
-bool FCDInput::Settings::deserialize(const QByteArray& data)
+bool FCDInput::Settings::deserialize(const QByteArray& serializedData)
 {
+	FCDSerializer::FCDData data;
+
+	bool valid = FCDSerializer::readSerializedData(serializedData, data);
+
+	gain = data.m_data.m_lnaGain;
+	centerFrequency = data.m_data.m_frequency;
+	range = data.m_range;
+	bias = data.m_bias;
+
+	return valid;
+
+	/*
 	SimpleDeserializer d(data);
 
 	if (d.isValid() && d.getVersion() == 1)
@@ -70,7 +96,7 @@ bool FCDInput::Settings::deserialize(const QByteArray& data)
 	}
 
 	resetToDefaults();
-	return true;
+	return true;*/
 }
 
 FCDInput::FCDInput() :

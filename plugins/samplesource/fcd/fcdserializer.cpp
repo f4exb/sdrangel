@@ -14,30 +14,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "util/samplesourceserializer.h"
+#include "fcdserializer.h"
 
-const uint SampleSourceSerializer::m_version = 1;
-
-void SampleSourceSerializer::writeSerializedData(const Data& data, QByteArray& serializedData)
+void FCDSerializer::writeSerializedData(const FCDData& data, QByteArray& serializedData)
 {
+	QByteArray sampleSourceSerialized;
+	SampleSourceSerializer::writeSerializedData(data.m_data, sampleSourceSerialized);
+
 	SimpleSerializer s(1);
 
-	s.writeU64(1, data.m_frequency);
-	s.writeS32(2, data.m_correction);
-	s.writeS32(3, data.m_rate);
-	s.writeU32(4, data.m_log2Decim);
-	s.writeS32(5, data.m_bandwidth);
-	s.writeS32(6, data.m_fcPosition);
-	s.writeS32(7, data.m_lnaGain);
-	s.writeS32(8, data.m_RxGain1);
-	s.writeS32(9, data.m_RxGain2);
-	s.writeS32(10, data.m_RxGain3);
+	s.writeBlob(1, sampleSourceSerialized);
+	s.writeS32(2, data.m_bias);
+	s.writeS32(3, data.m_range);
 
 	serializedData = s.final();
 }
 
-bool SampleSourceSerializer::readSerializedData(const QByteArray& serializedData, Data& data)
+bool FCDSerializer::readSerializedData(const QByteArray& serializedData, FCDData& data)
 {
+	bool valid = SampleSourceSerializer::readSerializedData(serializedData, data.m_data);
+
+	QByteArray sampleSourceSerialized;
+
 	SimpleDeserializer d(serializedData);
 
 	if (!d.isValid())
@@ -46,20 +44,15 @@ bool SampleSourceSerializer::readSerializedData(const QByteArray& serializedData
 		return false;
 	}
 
-	if (d.getVersion() == m_version)
+	if (d.getVersion() == SampleSourceSerializer::getSerializerVersion())
 	{
-		d.readU64(1, &data.m_frequency, 0);
-		d.readS32(2, &data.m_correction, 0);
-		d.readS32(3, &data.m_rate, 0);
-		d.readU32(4, &data.m_log2Decim, 0);
-		d.readS32(5, &data.m_bandwidth, 0);
-		d.readS32(6, &data.m_fcPosition, 0);
-		d.readS32(7, &data.m_lnaGain, 0);
-		d.readS32(8, &data.m_RxGain1, 0);
-		d.readS32(9, &data.m_RxGain2, 0);
-		d.readS32(10, &data.m_RxGain3, 0);
+		int intval;
 
-		return true;
+		d.readBlob(1, &sampleSourceSerialized);
+		d.readS32(2, &data.m_bias);
+		d.readS32(3, &data.m_range);
+
+		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
 	}
 	else
 	{
@@ -68,16 +61,8 @@ bool SampleSourceSerializer::readSerializedData(const QByteArray& serializedData
 	}
 }
 
-void SampleSourceSerializer::setDefaults(Data& data)
+void FCDSerializer::setDefaults(FCDData& data)
 {
-	data.m_frequency = 0;
-	data.m_correction = 0;
-	data.m_rate = 0;
-	data.m_log2Decim = 0;
-	data.m_bandwidth = 0;
-	data.m_fcPosition = 0;
-	data.m_lnaGain = 0;
-	data.m_RxGain1 = 0;
-	data.m_RxGain2 = 0;
-	data.m_RxGain3 = 0;
+	data.m_range = 0;
+	data.m_bias = 0;
 }

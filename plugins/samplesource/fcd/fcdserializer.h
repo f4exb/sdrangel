@@ -14,19 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "rtlsdrserializer.h"
+#ifndef PLUGINS_SAMPLESOURCE_FCD_FCDSERIALIZER_H_
+#define PLUGINS_SAMPLESOURCE_FCD_FCDSERIALIZER_H_
 
-void RTLSDRSerializer::writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData)
-{
-	SampleSourceSerializer::writeSerializedData(data, serializedData);
-}
+#include "util/samplesourceserializer.h"
 
-bool RTLSDRSerializer::readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data)
+class FCDSerializer
 {
-	return SampleSourceSerializer::readSerializedData(serializedData, data);
-}
+public:
+	struct FCDData
+	{
+		SampleSourceSerializer::Data m_data;
+		qint32 m_bias;
+		qint32 m_range;
+	};
 
-void RTLSDRSerializer::setDefaults(SampleSourceSerializer::Data& data)
-{
-	SampleSourceSerializer::setDefaults(data);
-}
+	static void writeSerializedData(const FCDData& data, QByteArray& serializedData);
+	static bool readSerializedData(const QByteArray& serializedData, FCDData& data);
+	static void setDefaults(FCDData& data);
+};
+
+
+
+#endif /* PLUGINS_SAMPLESOURCE_FCD_FCDSERIALIZER_H_ */

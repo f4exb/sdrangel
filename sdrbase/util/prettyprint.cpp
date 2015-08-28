@@ -14,19 +14,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "rtlsdrserializer.h"
+#include "util/prettyprint.h"
 
-void RTLSDRSerializer::writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData)
-{
-	SampleSourceSerializer::writeSerializedData(data, serializedData);
-}
+const QString EscapeColors::red = "\033[0;31m";
+const QString EscapeColors::blue = "\033[0;34m";
+const QString EscapeColors::green = "\033[0;32m";
+const QString EscapeColors::cyan = "\033[0;36m";
+const QString EscapeColors::purple = "\033[0;35m";
+const QString EscapeColors::yellow = "\033[0;33m";
 
-bool RTLSDRSerializer::readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data)
-{
-	return SampleSourceSerializer::readSerializedData(serializedData, data);
-}
+const QString EscapeColors::lightRed = "\033[1;31m";
+const QString EscapeColors::lightBlue = "\033[1;34m";
+const QString EscapeColors::lightGreen = "\033[1;32m";
+const QString EscapeColors::lightCyan = "\033[1;36m";
+const QString EscapeColors::lightPurple = "\033[1;35m";
+const QString EscapeColors::brown = "\033[1;33m";
 
-void RTLSDRSerializer::setDefaults(SampleSourceSerializer::Data& data)
-{
-	SampleSourceSerializer::setDefaults(data);
-}
+const QString EscapeColors::terminator = "\033[0m";

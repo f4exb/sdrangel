@@ -14,19 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "rtlsdrserializer.h"
+#ifndef INCLUDE_UTIL_PRETTYPRINT_H_
+#define INCLUDE_UTIL_PRETTYPRINT_H_
 
-void RTLSDRSerializer::writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData)
-{
-	SampleSourceSerializer::writeSerializedData(data, serializedData);
-}
+#include <QString>
 
-bool RTLSDRSerializer::readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data)
+class EscapeColors
 {
-	return SampleSourceSerializer::readSerializedData(serializedData, data);
-}
+public:
+	static const QString red;
+	static const QString blue;
+	static const QString green;
+	static const QString cyan;
+	static const QString purple;
+	static const QString yellow;
+	static const QString lightRed;
+	static const QString lightBlue;
+	static const QString lightGreen;
+	static const QString lightCyan;
+	static const QString lightPurple;
+	static const QString brown;
+	static const QString terminator;
+};
 
-void RTLSDRSerializer::setDefaults(SampleSourceSerializer::Data& data)
-{
-	SampleSourceSerializer::setDefaults(data);
-}
+#endif /* INCLUDE_UTIL_PRETTYPRINT_H_ */

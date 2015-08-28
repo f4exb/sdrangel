@@ -19,7 +19,8 @@
 
 void BladeRFSerializer::writeSerializedData(const BladeRFData& data, QByteArray& serializedData)
 {
-	const QByteArray& sampleSourceSerialized = SampleSourceSerializer::writeSerializedData(data.m_data);
+	QByteArray sampleSourceSerialized;
+	SampleSourceSerializer::writeSerializedData(data.m_data, sampleSourceSerialized);
 
 	SimpleSerializer s(1);
 

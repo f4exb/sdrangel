@@ -111,6 +111,7 @@ set(sdrbase_SOURCES
 
 	sdrbase/util/message.cpp
 	sdrbase/util/messagequeue.cpp
+	sdrbase/util/prettyprint.cpp
 	sdrbase/util/syncmessenger.cpp
 	#sdrbase/util/miniz.cpp
 	sdrbase/util/samplesourceserializer.cpp
@@ -188,6 +189,7 @@ set(sdrbase_HEADERS
 	include/util/export.h
 	include/util/message.h
 	include/util/messagequeue.h
+	include/util/prettyprint.h
 	include/util/syncmessenger.h
 	#include/util/miniz.h
 	include/util/samplesourceserializer.h
