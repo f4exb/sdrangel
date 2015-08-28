@@ -19,12 +19,12 @@
 
 #include "util/samplesourceserializer.h"
 
-class BladeRFSerializer : public SampleSourceSerializer
+class BladeRFSerializer
 {
 public:
 	struct BladeRFData
 	{
-		Data m_data;
+		SampleSourceSerializer::Data m_data;
 		bool m_xb200;
 		quint32 m_xb200Path;
 		quint32 m_xb200Filter;

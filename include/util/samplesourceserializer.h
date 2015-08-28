@@ -39,6 +39,7 @@ public:
 	static const QByteArray& writeSerializedData(const Data& data);
 	static bool readSerializedData(const QByteArray& serializedData, Data& data);
 	static void setDefaults(Data& data);
+	static uint getSerializerVersion() { return m_version; }
 
 protected:
 	static const uint m_version;

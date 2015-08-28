@@ -45,7 +45,7 @@ bool BladeRFSerializer::readSerializedData(const QByteArray& serializedData, Bla
 		return false;
 	}
 
-	if (d.getVersion() == m_version)
+	if (d.getVersion() == SampleSourceSerializer::getSerializerVersion())
 	{
 		int intval;
 
