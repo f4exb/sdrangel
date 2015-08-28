@@ -23,6 +23,7 @@
 #include "bladerfgui.h"
 #include "bladerfinput.h"
 #include "bladerfthread.h"
+#include "bladerfserializer.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
@@ -52,62 +53,53 @@ void BladerfInput::Settings::resetToDefaults()
 	m_bandwidth = 1500000;
 	m_log2Decim = 0;
 	m_fcPos = FC_POS_INFRA;
-	m_xb200 = false;
-	m_xb200Path = BLADERF_XB200_MIX;
-	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
+		m_xb200 = false;
+		m_xb200Path = BLADERF_XB200_MIX;
+		m_xb200Filter = BLADERF_XB200_AUTO_1DB;
 }
 
 QByteArray BladerfInput::Settings::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_lnaGain);
-	s.writeS32(2, m_vga1);
-	s.writeS32(3, m_vga2);
-	s.writeU32(4, m_log2Decim);
-	s.writeBool(5, m_xb200);
-	s.writeS32(6, (int) m_xb200Path);
-	s.writeS32(7, (int) m_xb200Filter);
-	s.writeS32(8, m_bandwidth);
-	s.writeS32(9, (int) m_fcPos);
-	s.writeU64(10, m_centerFrequency);
-	s.writeS32(11, m_devSampleRate);
-	return s.final();
+	BladeRFSerializer::BladeRFData data;
+
+	data.m_data.m_lnaGain = m_lnaGain;
+	data.m_data.m_RxGain1 = m_vga1;
+	data.m_data.m_RxGain2 = m_vga2;
+	data.m_data.m_log2Decim = m_log2Decim;
+	data.m_xb200 = m_xb200;
+	data.m_xb200Path = (int) m_xb200Path;
+	data.m_xb200Filter = (int) m_xb200Filter;
+	data.m_data.m_bandwidth = m_bandwidth;
+	data.m_data.m_fcPosition = (int) m_fcPos;
+	data.m_data.m_frequency = m_centerFrequency;
+	data.m_data.m_rate = m_devSampleRate;
+
+	QByteArray byteArray;
+
+	BladeRFSerializer::writeSerializedData(data, byteArray);
+
+	return byteArray;
 }
 
-bool BladerfInput::Settings::deserialize(const QByteArray& data)
+bool BladerfInput::Settings::deserialize(const QByteArray& serializedData)
 {
-	SimpleDeserializer d(data);
+	BladeRFSerializer::BladeRFData data;
 
-	if (!d.isValid())
-	{
-		resetToDefaults();
-		return false;
-	}
+	bool valid = BladeRFSerializer::readSerializedData(serializedData, data);
 
-	if (d.getVersion() == 1)
-	{
-		int intval;
-		d.readS32(1, &m_lnaGain, 0);
-		d.readS32(2, &m_vga1, 20);
-		d.readS32(3, &m_vga2, 9);
-		d.readU32(4, &m_log2Decim, 0);
-		d.readBool(5, &m_xb200);
-		d.readS32(6, &intval);
-		m_xb200Path = (bladerf_xb200_path) intval;
-		d.readS32(7, &intval);
-		m_xb200Filter = (bladerf_xb200_filter) intval;
-		d.readS32(8, &m_bandwidth, 0);
-		d.readS32(9, &intval, 0);
-		m_fcPos = (fcPos_t) intval;
-		d.readU64(10, &m_centerFrequency, 435000*1000);
-		d.readS32(11, &m_devSampleRate, 3072000);
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
+	m_lnaGain = data.m_data.m_lnaGain;
+	m_vga1 = data.m_data.m_RxGain1;
+	m_vga2 = data.m_data.m_RxGain2;
+	m_log2Decim = data.m_data.m_log2Decim;
+	m_xb200 = data.m_xb200;
+	m_xb200Path = (bladerf_xb200_path) data.m_xb200Path;
+	m_xb200Filter = (bladerf_xb200_filter) data.m_xb200Filter;
+	m_bandwidth = data.m_data.m_bandwidth;
+	m_fcPos = (fcPos_t) data.m_data.m_fcPosition;
+	m_centerFrequency = data.m_data.m_frequency;
+	m_devSampleRate = data.m_data.m_rate;
+
+	return valid;
 }
 
 BladerfInput::BladerfInput() :

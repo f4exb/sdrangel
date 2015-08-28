@@ -113,6 +113,7 @@ set(sdrbase_SOURCES
 	sdrbase/util/messagequeue.cpp
 	sdrbase/util/syncmessenger.cpp
 	#sdrbase/util/miniz.cpp
+	sdrbase/util/samplesourceserializer.cpp
 	sdrbase/util/simpleserializer.cpp
 	sdrbase/util/spinlock.cpp
 )
@@ -189,6 +190,7 @@ set(sdrbase_HEADERS
 	include/util/messagequeue.h
 	include/util/syncmessenger.h
 	#include/util/miniz.h
+	include/util/samplesourceserializer.h
 	include/util/simpleserializer.h
 	include/util/spinlock.h
 )
