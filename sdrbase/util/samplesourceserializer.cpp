@@ -18,7 +18,7 @@
 
 const uint SampleSourceSerializer::m_version = 1;
 
-void SampleSourceSerializer::writeSerializedData(const Data& data, QByteArray& serializedData)
+const QByteArray& SampleSourceSerializer::writeSerializedData(const Data& data)
 {
 	SimpleSerializer s(1);
 
@@ -33,7 +33,7 @@ void SampleSourceSerializer::writeSerializedData(const Data& data, QByteArray& s
 	s.writeS32(9, data.m_RxGain2);
 	s.writeS32(10, data.m_RxGain3);
 
-	serializedData = s.final();
+	return s.final();
 }
 
 bool SampleSourceSerializer::readSerializedData(const QByteArray& serializedData, Data& data)

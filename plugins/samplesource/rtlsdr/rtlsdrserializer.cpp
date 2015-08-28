@@ -14,36 +14,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_UTIL_SAMPLESOURCESERIALIZER_H_
-#define INCLUDE_UTIL_SAMPLESOURCESERIALIZER_H_
+#include "rtlsdrserializer.h"
 
-#include "util/simpleserializer.h"
-
-class SampleSourceSerializer
+void RTLSDRSerializer::writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData)
 {
-public:
-	struct Data
-	{
-		quint64 m_frequency; //!< RF center frequency
-		qint32 m_correction; //!< LO correction factor
-		qint32 m_rate;       //!< RF sampler sample rate
-		quint32 m_log2Decim; //!< Decimation ratio log2
-		qint32 m_bandwidth;  //!< RF bandwidth
-		qint32 m_fcPosition; //!< Decimated band placement (infradyne, supradyne, centered)
-		qint32 m_lnaGain;    //!< RF LNA gain
-		qint32 m_RxGain1;    //!< Rx first stage amplifier gain
-		qint32 m_RxGain2;    //!< Rx second stage amplifier gain
-		qint32 m_RxGain3;    //!< Rx third stage amplifier gain
-	};
+	serializedData = SampleSourceSerializer::writeSerializedData(data);
+}
 
-	static const QByteArray& writeSerializedData(const Data& data);
-	static bool readSerializedData(const QByteArray& serializedData, Data& data);
-	static void setDefaults(Data& data);
+bool RTLSDRSerializer::readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data)
+{
+	return SampleSourceSerializer::readSerializedData(serializedData, data);
+}
 
-protected:
-	static const uint m_version;
-};
-
-
-
-#endif /* INCLUDE_UTIL_SAMPLESOURCESERIALIZER_H_ */
+void RTLSDRSerializer::setDefaults(SampleSourceSerializer::Data& data)
+{
+	SampleSourceSerializer::setDefaults(data);
+}

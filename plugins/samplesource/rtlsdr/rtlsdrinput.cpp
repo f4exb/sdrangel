@@ -22,7 +22,7 @@
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
-#include "util/simpleserializer.h"
+#include "rtlsdrserializer.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
@@ -47,39 +47,34 @@ void RTLSDRInput::Settings::resetToDefaults()
 
 QByteArray RTLSDRInput::Settings::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_devSampleRate);
-	s.writeU64(2, m_centerFrequency);
-	s.writeS32(3, m_gain);
-	s.writeS32(4, m_loPpmCorrection);
-	s.writeU32(5, m_log2Decim);
-	return s.final();
+	SampleSourceSerializer::Data data;
+
+	data.m_lnaGain = m_gain;
+	data.m_log2Decim = m_log2Decim;
+	data.m_frequency = m_centerFrequency;
+	data.m_rate = m_devSampleRate;
+	data.m_correction = m_loPpmCorrection;
+
+	QByteArray byteArray;
+
+	RTLSDRSerializer::writeSerializedData(data, byteArray);
+
+	return byteArray;
 }
 
-bool RTLSDRInput::Settings::deserialize(const QByteArray& data)
+bool RTLSDRInput::Settings::deserialize(const QByteArray& serializedData)
 {
-	SimpleDeserializer d(data);
+	SampleSourceSerializer::Data data;
 
-	if (!d.isValid())
-	{
-		resetToDefaults();
-		return false;
-	}
+	bool valid = RTLSDRSerializer::readSerializedData(serializedData, data);
 
-	if(d.getVersion() == 1)
-	{
-		d.readS32(1, &m_devSampleRate, 1024*1000);
-		d.readU64(2, &m_centerFrequency, 435000*1000);
-		d.readS32(3, &m_gain, 0);
-		d.readS32(4, &m_loPpmCorrection, 0);
-		d.readU32(5, &m_log2Decim, 4);
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
+	m_gain = data.m_lnaGain;
+	m_log2Decim = data.m_log2Decim;
+	m_centerFrequency = data.m_frequency;
+	m_devSampleRate = data.m_rate;
+	m_loPpmCorrection = data.m_correction;
+
+	return valid;
 }
 
 RTLSDRInput::RTLSDRInput() :
