@@ -113,7 +113,7 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 			}
 			else
 			{
-				m_volumeAGC.close();
+				m_volumeAGC.closedSquelch();
 				sample = 0;
 			}
 

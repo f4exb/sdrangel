@@ -26,7 +26,7 @@
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 
-static const Real afSqTones[2] = {1200.0, 8000.0};
+static const Real afSqTones[2] = {1200.0, 6000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
@@ -54,9 +54,9 @@ NFMDemod::NFMDemod() :
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
-	m_agcLevel = 0.003;
+	m_agcLevel = 0.003; // 0.003
 	//m_AGC.resize(480, m_agcLevel, 0, 0.1*m_agcLevel);
-	m_AGC.resize(240, m_agcLevel*m_agcLevel, 0.1);
+	m_AGC.resize(240, m_agcLevel*m_agcLevel, 0.3);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 48000.0, 5, 1); // 4000 Hz span, 250us
@@ -208,6 +208,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 						demod *= m_running.m_volume;
 						sample = demod * ((1<<15)/301); // denominator = bandpass filter number of taps
 					}
+
+					m_AGC.openedSquelch();
 				}
 				else
 				{
@@ -217,7 +219,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 						m_ctcssIndex = 0;
 					}
 
-					m_AGC.close();
+					m_AGC.closedSquelch();
 					sample = 0;
 				}
 
