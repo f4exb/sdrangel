@@ -195,14 +195,16 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 	// convert to int16
 
-	std::vector<qint32>::const_iterator src = m_mixBuffer.begin();
+	//std::vector<qint32>::const_iterator src = m_mixBuffer.begin(); // Valgrind optim
 	qint16* dst = (qint16*) data;
+	qint32 s;
 
 	for (uint i = 0; i < framesPerBuffer; i++)
 	{
 		// left channel
 
-		qint32 s = *src++;
+		//s = *src++; // Valgrind optim
+		s = m_mixBuffer[2*i];
 
 		if(s < -32768)
 		{
@@ -217,7 +219,8 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 		// right channel
 
-		s = *src++;
+		//s = *src++; // Valgrind optim
+		s = m_mixBuffer[2*i + 1];
 
 		if(s < -32768)
 		{

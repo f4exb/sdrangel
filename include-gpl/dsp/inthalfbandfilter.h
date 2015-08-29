@@ -224,16 +224,19 @@ public:
 	}
 
 	void myDecimate(Sample* sample1, Sample* sample2)
-        {
+    {
 		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
-							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2} ;
+							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2};
+
 		m_samples[m_ptr][0] = sample1->real();
 		m_samples[m_ptr][1] = sample1->imag();
 		m_ptr = mod33[m_ptr + 2 - 1];
 
 		m_samples[m_ptr][0] = sample2->real();
 		m_samples[m_ptr][1] = sample2->imag();
+
 		doFIR(sample2);
+
 		m_ptr = mod33[m_ptr + 2 - 1];
 	}
 
@@ -305,12 +308,14 @@ protected:
 		// go through samples in buffer
 		qint32 iAcc = 0;
 		qint32 qAcc = 0;
-		for(int i = 0; i < HB_FILTERORDER / 4; i++) {
+
+		for (int i = 0; i < HB_FILTERORDER / 4; i++)
+		{
 			// do multiply-accumulate
-			qint32 iTmp = m_samples[a][0] + m_samples[b][0];
-			qint32 qTmp = m_samples[a][1] + m_samples[b][1];
-			iAcc += iTmp * COEFF[i];
-			qAcc += qTmp * COEFF[i];
+			//qint32 iTmp = m_samples[a][0] + m_samples[b][0]; // Valgrind optim
+			//qint32 qTmp = m_samples[a][1] + m_samples[b][1]; // Valgrind optim
+			iAcc += (m_samples[a][0] + m_samples[b][0]) * COEFF[i];
+			qAcc += (m_samples[a][1] + m_samples[b][1]) * COEFF[i];
 
 			// update read-pointer
 			a = mod33[a + 2 + 2];
@@ -318,6 +323,7 @@ protected:
 		}
 
 		a = mod33[a + 2 - 1];
+
 		iAcc += ((qint32)m_samples[a][0] + 1) << (HB_SHIFT - 1);
 		qAcc += ((qint32)m_samples[a][1] + 1) << (HB_SHIFT - 1);
 
