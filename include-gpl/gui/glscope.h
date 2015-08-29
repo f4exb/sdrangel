@@ -30,7 +30,7 @@
 class DSPEngine;
 class ScopeVis;
 
-class SDRANGELOVE_API GLScope: public QGLWidget {
+class SDRANGEL_API GLScope: public QGLWidget {
 	Q_OBJECT
 
 public:

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SDRangelove V2</string>
+   <string>SDRangel</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources/res.qrc">
@@ -446,7 +446,7 @@
   </action>
   <action name="action_About">
    <property name="text">
-    <string>&amp;About SDRangelove...</string>
+    <string>&amp;About SDRangel...</string>
    </property>
   </action>
   <action name="action_Preferences">

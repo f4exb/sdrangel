@@ -26,7 +26,7 @@
 #include "dsp/channelmarker.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API GLSpectrum : public QGLWidget {
+class SDRANGEL_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
 
 public:

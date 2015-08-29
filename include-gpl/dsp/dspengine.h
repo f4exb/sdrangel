@@ -35,7 +35,7 @@ class SampleSink;
 class ThreadedSampleSink;
 class AudioFifo;
 
-class SDRANGELOVE_API DSPEngine : public QThread {
+class SDRANGEL_API DSPEngine : public QThread {
 	Q_OBJECT
 
 public:

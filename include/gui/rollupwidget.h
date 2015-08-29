@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "util/export.h"
 
-class SDRANGELOVE_API RollupWidget : public QWidget {
+class SDRANGEL_API RollupWidget : public QWidget {
 	Q_OBJECT
 
 public:

@@ -10,10 +10,10 @@
 class GLSpectrum;
 class MessageQueue;
 
-class SDRANGELOVE_API SpectrumVis : public SampleSink {
+class SDRANGEL_API SpectrumVis : public SampleSink {
 
 public:
-	class SDRANGELOVE_API MsgConfigureSpectrumVis : public Message {
+	class SDRANGEL_API MsgConfigureSpectrumVis : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:

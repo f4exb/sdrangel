@@ -8,7 +8,7 @@
 
 class Message;
 
-class SDRANGELOVE_API SampleSink : public QObject {
+class SDRANGEL_API SampleSink : public QObject {
 	Q_OBJECT
 public:
 	SampleSink();

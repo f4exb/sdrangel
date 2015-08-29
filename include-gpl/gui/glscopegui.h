@@ -14,7 +14,7 @@ class MessageQueue;
 class ScopeVis;
 class GLScope;
 
-class SDRANGELOVE_API GLScopeGUI : public QWidget {
+class SDRANGEL_API GLScopeGUI : public QWidget {
 	Q_OBJECT
 
 public:

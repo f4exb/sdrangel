@@ -9,7 +9,7 @@
 class GLScope;
 class MessageQueue;
 
-class SDRANGELOVE_API ScopeVis : public SampleSink {
+class SDRANGEL_API ScopeVis : public SampleSink {
 public:
 	enum TriggerChannel {
 		TriggerFreeRun,

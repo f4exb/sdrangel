@@ -23,7 +23,7 @@
 #include <QWaitCondition>
 #include "util/export.h"
 
-class SDRANGELOVE_API AudioFifo : public QObject {
+class SDRANGEL_API AudioFifo : public QObject {
 	Q_OBJECT
 public:
 	AudioFifo();

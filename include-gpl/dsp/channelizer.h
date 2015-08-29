@@ -9,10 +9,10 @@
 class MessageQueue;
 class IntHalfbandFilter;
 
-class SDRANGELOVE_API Channelizer : public SampleSink {
+class SDRANGEL_API Channelizer : public SampleSink {
 	Q_OBJECT
 public:
-	class SDRANGELOVE_API MsgChannelizerNotification : public Message {
+	class SDRANGEL_API MsgChannelizerNotification : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:

@@ -44,7 +44,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-class SDRANGELOVE_API MainWindow : public QMainWindow {
+class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:

@@ -24,7 +24,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API FFTWindow {
+class SDRANGEL_API FFTWindow {
 public:
 	enum Function {
 		Bartlett,

@@ -28,27 +28,27 @@ class SampleSink;
 class ThreadedSampleSink;
 class AudioFifo;
 
-class SDRANGELOVE_API DSPPing : public Message {
+class SDRANGEL_API DSPPing : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPExit : public Message {
+class SDRANGEL_API DSPExit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPAcquisitionInit : public Message {
+class SDRANGEL_API DSPAcquisitionInit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPAcquisitionStart : public Message {
+class SDRANGEL_API DSPAcquisitionStart : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPAcquisitionStop : public Message {
+class SDRANGEL_API DSPAcquisitionStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGELOVE_API DSPGetSourceDeviceDescription : public Message {
+class SDRANGEL_API DSPGetSourceDeviceDescription : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -59,7 +59,7 @@ private:
 	QString m_deviceDescription;
 };
 
-class SDRANGELOVE_API DSPGetErrorMessage : public Message {
+class SDRANGEL_API DSPGetErrorMessage : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -70,7 +70,7 @@ private:
 	QString m_errorMessage;
 };
 
-class SDRANGELOVE_API DSPSetSource : public Message {
+class SDRANGEL_API DSPSetSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -82,7 +82,7 @@ private:
 	SampleSource* m_sampleSource;
 };
 
-class SDRANGELOVE_API DSPAddSink : public Message {
+class SDRANGEL_API DSPAddSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -94,7 +94,7 @@ private:
 	SampleSink* m_sampleSink;
 };
 
-class SDRANGELOVE_API DSPRemoveSink : public Message {
+class SDRANGEL_API DSPRemoveSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -106,7 +106,7 @@ private:
 	SampleSink* m_sampleSink;
 };
 
-class SDRANGELOVE_API DSPAddThreadedSampleSink : public Message {
+class SDRANGEL_API DSPAddThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -118,7 +118,7 @@ private:
 	ThreadedSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGELOVE_API DSPRemoveThreadedSampleSink : public Message {
+class SDRANGEL_API DSPRemoveThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -130,7 +130,7 @@ private:
 	ThreadedSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGELOVE_API DSPAddAudioSink : public Message {
+class SDRANGEL_API DSPAddAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -142,7 +142,7 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRANGELOVE_API DSPRemoveAudioSink : public Message {
+class SDRANGEL_API DSPRemoveAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -154,7 +154,7 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRANGELOVE_API DSPConfigureSpectrumVis : public Message {
+class SDRANGEL_API DSPConfigureSpectrumVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -175,7 +175,7 @@ private:
 	FFTWindow::Function m_window;
 };
 
-class SDRANGELOVE_API DSPConfigureCorrection : public Message {
+class SDRANGEL_API DSPConfigureCorrection : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -194,7 +194,7 @@ private:
 
 };
 
-class SDRANGELOVE_API DSPEngineReport : public Message {
+class SDRANGEL_API DSPEngineReport : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -212,7 +212,7 @@ private:
 	quint64 m_centerFrequency;
 };
 
-class SDRANGELOVE_API DSPConfigureScopeVis : public Message {
+class SDRANGEL_API DSPConfigureScopeVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -233,7 +233,7 @@ private:
 	Real m_triggerLevelLow;
 };
 
-class SDRANGELOVE_API DSPSignalNotification : public Message {
+class SDRANGEL_API DSPSignalNotification : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -251,7 +251,7 @@ private:
 	qint64 m_centerFrequency;
 };
 
-class SDRANGELOVE_API DSPConfigureChannelizer : public Message {
+class SDRANGEL_API DSPConfigureChannelizer : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:

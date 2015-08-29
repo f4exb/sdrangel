@@ -18,7 +18,7 @@ class MainWindow;
 class ChannelMarker;
 class PluginGUI;
 
-class SDRANGELOVE_API PluginAPI : public QObject {
+class SDRANGEL_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:

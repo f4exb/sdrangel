@@ -11,7 +11,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class SDRANGELOVE_API FileSink : public SampleSink {
+class SDRANGEL_API FileSink : public SampleSink {
 public:
 
     struct Header

@@ -49,7 +49,7 @@ public slots:
 /**
  * This class is a wrapper for SampleSink that runs the SampleSink object in its own thread
  */
-class SDRANGELOVE_API ThreadedSampleSink : public QObject {
+class SDRANGEL_API ThreadedSampleSink : public QObject {
 	Q_OBJECT
 
 public:

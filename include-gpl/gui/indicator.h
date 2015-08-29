@@ -21,7 +21,7 @@
 #include <QWidget>
 #include "util/export.h"
 
-class SDRANGELOVE_API Indicator : public QWidget {
+class SDRANGEL_API Indicator : public QWidget {
 private:
 	Q_OBJECT;
 

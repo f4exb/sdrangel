@@ -28,7 +28,7 @@ namespace Ui {
 	class ScopeWindow;
 }
 
-class SDRANGELOVE_API ScopeWindow : public QWidget {
+class SDRANGEL_API ScopeWindow : public QWidget {
 	Q_OBJECT
 
 public:

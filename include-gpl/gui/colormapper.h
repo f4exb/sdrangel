@@ -12,7 +12,7 @@
 #include <utility>
 #include "util/export.h"
 
-class SDRANGELOVE_API ColorMapper
+class SDRANGEL_API ColorMapper
 {
 public:
 	enum Theme {

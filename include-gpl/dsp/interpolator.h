@@ -11,7 +11,7 @@
 #include <unistd.h>
 #endif
 
-class SDRANGELOVE_API Interpolator {
+class SDRANGEL_API Interpolator {
 public:
 	Interpolator();
 	~Interpolator();

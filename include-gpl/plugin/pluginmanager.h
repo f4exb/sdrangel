@@ -15,7 +15,7 @@ class MainWindow;
 class SampleSource;
 class Message;
 
-class SDRANGELOVE_API PluginManager : public QObject {
+class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
 
 public:

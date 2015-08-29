@@ -5,7 +5,7 @@
 #include <QColor>
 #include "util/export.h"
 
-class SDRANGELOVE_API ChannelMarker : public QObject {
+class SDRANGEL_API ChannelMarker : public QObject {
 	Q_OBJECT
 
 public:

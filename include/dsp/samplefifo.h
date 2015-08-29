@@ -24,7 +24,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API SampleFifo : public QObject {
+class SDRANGEL_API SampleFifo : public QObject {
 	Q_OBJECT
 
 private:

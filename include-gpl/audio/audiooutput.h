@@ -29,7 +29,7 @@ class QAudioOutput;
 class AudioFifo;
 class AudioOutputPipe;
 
-class SDRANGELOVE_API AudioOutput : QIODevice {
+class SDRANGEL_API AudioOutput : QIODevice {
 public:
 	AudioOutput();
 	virtual ~AudioOutput();

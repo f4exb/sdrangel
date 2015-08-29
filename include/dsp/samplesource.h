@@ -24,7 +24,7 @@
 #include "util/messagequeue.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API SampleSource : public QObject {
+class SDRANGEL_API SampleSource : public QObject {
 	Q_OBJECT
 public:
 	SampleSource();

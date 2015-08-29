@@ -6,7 +6,7 @@
 
 class Message;
 
-class SDRANGELOVE_API PluginGUI {
+class SDRANGEL_API PluginGUI {
 public:
 	PluginGUI() { };
 	virtual ~PluginGUI() { };

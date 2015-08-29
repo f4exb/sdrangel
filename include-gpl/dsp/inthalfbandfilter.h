@@ -13,7 +13,7 @@
 #define HB_FILTERORDER 32
 #define HB_SHIFT 14
 
-class SDRANGELOVE_API IntHalfbandFilter {
+class SDRANGEL_API IntHalfbandFilter {
 public:
 	IntHalfbandFilter();
 

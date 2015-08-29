@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "util/export.h"
 
-class SDRANGELOVE_API Message {
+class SDRANGEL_API Message {
 public:
 	Message();
 	virtual ~Message();

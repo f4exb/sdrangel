@@ -8,7 +8,7 @@
 
 class Message;
 
-class SDRANGELOVE_API SpectrumScopeComboVis : public SampleSink {
+class SDRANGEL_API SpectrumScopeComboVis : public SampleSink {
 public:
 
 	SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);

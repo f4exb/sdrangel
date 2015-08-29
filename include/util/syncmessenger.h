@@ -29,7 +29,7 @@ class Message;
 /**
  * This class is responsible of managing the synchronous processing of a message across threads
  */
-class SDRANGELOVE_API SyncMessenger : public QObject {
+class SDRANGEL_API SyncMessenger : public QObject {
 	Q_OBJECT
 
 public:

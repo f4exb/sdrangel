@@ -4,7 +4,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API FFTEngine {
+class SDRANGEL_API FFTEngine {
 public:
 	virtual ~FFTEngine();
 

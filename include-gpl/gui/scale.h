@@ -19,7 +19,7 @@
 #include "gui/scaleengine.h"
 #include "util/export.h"
 
-class SDRANGELOVE_API Scale : public QWidget {
+class SDRANGEL_API Scale : public QWidget {
 	Q_OBJECT
 
 public:

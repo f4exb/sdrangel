@@ -21,7 +21,7 @@
 #include <QStringList>
 #include "util/export.h"
 
-class SDRANGELOVE_API AudioDeviceInfo {
+class SDRANGEL_API AudioDeviceInfo {
 public:
 	struct Device {
 		QString name;

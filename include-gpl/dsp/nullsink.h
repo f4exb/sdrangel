@@ -6,7 +6,7 @@
 
 class Message;
 
-class SDRANGELOVE_API NullSink : public SampleSink {
+class SDRANGEL_API NullSink : public SampleSink {
 public:
 
 	NullSink();

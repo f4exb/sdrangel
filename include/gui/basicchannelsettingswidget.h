@@ -10,7 +10,7 @@ namespace Ui {
 
 class ChannelMarker;
 
-class SDRANGELOVE_API BasicChannelSettingsWidget : public QWidget {
+class SDRANGEL_API BasicChannelSettingsWidget : public QWidget {
 	Q_OBJECT
 
 public:

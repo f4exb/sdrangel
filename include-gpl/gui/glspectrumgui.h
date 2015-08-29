@@ -13,7 +13,7 @@ class MessageQueue;
 class SpectrumVis;
 class GLSpectrum;
 
-class SDRANGELOVE_API GLSpectrumGUI : public QWidget {
+class SDRANGEL_API GLSpectrumGUI : public QWidget {
 	Q_OBJECT
 
 public:
