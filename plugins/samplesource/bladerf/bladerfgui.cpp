@@ -42,6 +42,7 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 BladerfGui::~BladerfGui()
 {
+	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
 

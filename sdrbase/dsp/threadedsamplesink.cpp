@@ -43,6 +43,7 @@ ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink, QObject *parent) 
 
 ThreadedSampleSink::~ThreadedSampleSink()
 {
+	delete m_threadedSampleFifo; // Valgrind memcheck
 	delete m_thread;
 }
 

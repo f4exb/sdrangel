@@ -32,7 +32,8 @@ const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
 };
 
 BlderfPlugin::BlderfPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 
@@ -51,6 +52,7 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
 	struct bladerf_devinfo *devinfo;
+
 	int count = bladerf_get_device_list(&devinfo);
 
 	for(int i = 0; i < count; i++)
@@ -61,16 +63,27 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 		s.writeString(2, devinfo[i].serial);
 		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.bladerf", s.final()));
 	}
+
+	bladerf_free_device_list(devinfo); // Valgrind memcheck
+
 	return result;
 }
 
 PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
-	if(sourceName == "org.osmocom.sdr.samplesource.bladerf") {
+	if (!m_pluginAPI)
+	{
+		return 0;
+	}
+
+	if(sourceName == "org.osmocom.sdr.samplesource.bladerf")
+	{
 		BladerfGui* gui = new BladerfGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
 		return gui;
-	} else {
-		return NULL;
+	}
+	else
+	{
+		return 0;
 	}
 }

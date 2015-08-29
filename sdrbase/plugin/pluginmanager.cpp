@@ -347,8 +347,9 @@ void PluginManager::loadPlugins(const QDir& dir)
 			else
 			{
 				loader->unload();
-				delete loader;
 			}
+
+			delete loader; // Valgrind memcheck
 		}
 	}
 

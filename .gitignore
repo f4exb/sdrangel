@@ -1,6 +1,8 @@
 CMakeLists.txt.user*
 build/*
+qtbuild/*
 LOCAL/*
+sdrangelove.supp
 .cproject
 .project
 .settings/
