@@ -35,6 +35,7 @@
 
 template <typename FFT_TYPE>
 class g_fft {
+
 #define FFT_RECIPLN2  1.442695040888963407359924681001892137426 // 1.0/log(2) 
 
 // some useful conversions between a number and its power of 2
@@ -49,6 +50,7 @@ class g_fft {
 #define FFT_ROOT2   1.414213562373095048801688724209698078569	// sqrt(2)
 #define FFT_COSPID8 0.9238795325112867561281831893967882868224	// cos(pi/8)
 #define FFT_SINPID8 0.3826834323650897717284599840303988667613	// sin(pi/8)
+
 private:
 	int			FFT_size;
 	int			FFT_N;
@@ -102,14 +104,18 @@ private:
 	void fftCosInit(int M, FFT_TYPE *Utbl);
 	
 public:
-	g_fft(int M = 8192) {
+	g_fft (int M = 8192)
+    {
 		if (M < 16) M = 16;
 		if (M > 268435456) M = 268435456;
 		FFT_size = M;
 		fftInit();
 	}
-	~g_fft() {
-		for (int i = 0; i < 32; i++) {
+
+	~g_fft()
+	{
+		for (int i = 0; i < 32; i++)
+		{
 			if (FFT_table_1[i] != 0) delete [] FFT_table_1[i];
 			if (FFT_table_2[i] != 0) delete [] FFT_table_2[i];
 		}
@@ -3225,7 +3231,8 @@ void g_fft<FFT_TYPE>::riffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRL
 template <typename FFT_TYPE>
 void g_fft<FFT_TYPE>::fftInit()
 {
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < 32; i++)
+	{
 		FFT_table_1[i] = (FFT_TYPE*)0;
 		FFT_table_2[i] = (short int*)0;
 	}

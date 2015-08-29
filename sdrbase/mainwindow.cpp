@@ -50,10 +50,10 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_sampleFileName(std::string("./test.sdriq")),
-	m_pluginManager(new PluginManager(this, m_dspEngine))
+	m_sampleFileName(std::string("./test.sdriq"))
 {
 	qDebug() << "MainWindow::MainWindow: start";
+	m_pluginManager = new PluginManager(this, m_dspEngine);
 	connect(m_dspEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 	m_dspEngine->start();
 
