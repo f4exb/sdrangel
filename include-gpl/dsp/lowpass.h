@@ -54,27 +54,43 @@ public:
 		Type acc = 0;
 		int a = m_ptr;
 		int b = a - 1;
-		int i;
+		int i, size;
 
 		m_samples[m_ptr] = sample;
 
-		while(b < 0)
+		while (b < 0)
+		{
 			b += m_samples.size();
-
-		for(i = 0; i < (int)m_taps.size() - 1; i++) {
-			acc +=  (m_samples[a] + m_samples[b]) * m_taps[i];
-			a++;
-			while(a >= (int)m_samples.size())
-				a -= m_samples.size();
-			b--;
-			while(b < 0)
-				b += m_samples.size();
 		}
+
+		size = (int) m_taps.size() - 1; // Valgrind optim
+
+		for (i = 0; i < size; i++)
+		{
+			acc += (m_samples[a] + m_samples[b]) * m_taps[i];
+			a++;
+
+			while (a >= (int)m_samples.size())
+			{
+				a -= m_samples.size();
+			}
+
+			b--;
+
+			while(b < 0)
+			{
+				b += m_samples.size();
+			}
+		}
+
 		acc += m_samples[a] * m_taps[i];
 
 		m_ptr++;
+
 		while(m_ptr >= (int)m_samples.size())
+		{
 			m_ptr -= m_samples.size();
+		}
 
 		return acc;
 	}
