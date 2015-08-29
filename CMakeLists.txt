@@ -6,7 +6,7 @@ option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-project(sdrangelove)
+project(sdrangel)
 
 set(CMAKE_BUILD_TYPE "Release")
 #set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
@@ -270,7 +270,7 @@ if(FFTW3F_FOUND)
 	target_link_libraries(sdrbase ${FFTW3F_LIBRARIES})
 endif(FFTW3F_FOUND)
 
-set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangelove_EXPORTS")
+set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 
 qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
 
@@ -297,34 +297,34 @@ endif()
 
 ##############################################################################
 
-set(sdrangelove_SOURCES
+set(sdrangel_SOURCES
 	main.cpp
 )
 
 if(WIN32)
-	SET(sdrangelove_SOURCES ${sdrangelove_SOURCES} sdrbase/resources/sdrangelove.rc)
+	SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrbase/resources/sdrangelove.rc)
 endif(WIN32)
 
-add_executable(sdrangelove
-	${sdrangelove_SOURCES}
+add_executable(sdrangel
+	${sdrangel_SOURCES}
 )
 
-target_link_libraries(sdrangelove
+target_link_libraries(sdrangel
 	sdrbase
 	${QT_LIBRARIES}
 	${OPENGL_LIBRARIES}
 )
 
 if(WIN32)
-	set_target_properties(sdrangelove PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(sdrangelove PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-	set_target_properties(sdrangelove PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-	set_target_properties(sdrangelove PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-	set_target_properties(sdrangelove PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
-	set_target_properties(sdrangelove PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+	set_target_properties(sdrangel PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(sdrangel PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+	set_target_properties(sdrangel PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+	set_target_properties(sdrangel PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+	set_target_properties(sdrangel PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+	set_target_properties(sdrangel PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 endif(WIN32)
 
-qt5_use_modules(sdrangelove Widgets Multimedia)
+qt5_use_modules(sdrangel Widgets Multimedia)
 
 ##############################################################################
 
