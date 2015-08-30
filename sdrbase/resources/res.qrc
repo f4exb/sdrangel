@@ -30,5 +30,6 @@
         <file>pause.png</file>
         <file>stop.png</file>
         <file>sdrangel_logo.png</file>
+        <file>sdrangel_icon.png</file>
     </qresource>
 </RCC>
