@@ -29,5 +29,6 @@
         <file>play.png</file>
         <file>pause.png</file>
         <file>stop.png</file>
+        <file>sdrangel_logo.png</file>
     </qresource>
 </RCC>

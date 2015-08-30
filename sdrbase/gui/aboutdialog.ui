@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>About SDRangelove</string>
+   <string>About SDRangel</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="sizeConstraint">
@@ -53,7 +53,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../resources/res.qrc">:/logo.png</pixmap>
+        <pixmap resource="../resources/res.qrc">:/sdrangel_logo.png</pixmap>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -78,12 +78,14 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;p&gt;Copyright (C) 2013 maintech GmbH, Otto-Hahn-Str. 15, 97204 Höchberg, Germany&lt;br&gt;
-Written by Christian Daniel.&lt;/p&gt;
-&lt;p&gt;Version 2 Copyright (C) 2015 Edouard Griffiths, F4EXB. Code branch at: &lt;a href=&quot;https://github.com/f4exb/rtl-sdrangelove/tree/f4exb&quot;&gt;https://github.com/f4exb/rtl-sdrangelove/tree/f4exb&lt;/a&gt;. Complete redesign.&lt;/p&gt;
-&lt;p&gt;Many thanks to the osmocom developer team - especially horizon, Hoernchen &amp;amp; tnt.&lt;/p&gt;
-&lt;p&gt;SDRangelove itself is licensed as &quot;GPL2+&quot; with the added exception, that plugins using only header files from the &quot;include&quot;-subdirectory and not from the &quot;include-gpl&quot;-subdirectory do not count as derived works.&lt;/p&gt;
-&lt;p&gt;The following rules apply to the SDRangelove main application and libsdrbase:&lt;br&gt;
+      <string>&lt;p&gt;Copyright (C) 2015 Edouard Griffiths, F4EXB. &lt;/p&gt;
+&lt;p&gt;Code at &lt;a href=&quot;https://github.com/f4exb/sdrangel&quot;&gt;https://github.com/f4exb/sdrangel&lt;/a&gt; This is a complete redesign from RTL-SDRangelove at &lt;a href=&quot;https://github.com/hexameron/rtl-sdrangelove&quot;&gt;https://github.com/hexameron/rtl-sdrangelove&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Many thanks to the original developers:&lt;/p&gt;
+&lt;p&gt;The osmocom developer team - especially horizon, Hoernchen &amp;amp; tnt.&lt;/p&gt;
+&lt;p&gt;Christian Daniel from maintech GmbH.&lt;p&gt;
+&lt;p&gt;John Greb (hexameron) for the contributions in RTL-SDRangelove&lt;p&gt;
+&lt;p&gt;SDRangel itself is licensed as &quot;GPL2+&quot; with the added exception, that plugins using only header files from the &quot;include&quot;-subdirectory and not from the &quot;include-gpl&quot;-subdirectory do not count as derived works.&lt;/p&gt;
+&lt;p&gt;The following rules apply to the SDRangel main application and libsdrbase:&lt;br&gt;
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 You should have received a copy of the GNU General Public License along with this program. If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;.&lt;/p&gt;
