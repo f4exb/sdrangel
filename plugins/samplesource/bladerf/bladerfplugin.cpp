@@ -51,7 +51,7 @@ void BlderfPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
-	struct bladerf_devinfo *devinfo;
+	struct bladerf_devinfo *devinfo = 0;
 
 	int count = bladerf_get_device_list(&devinfo);
 
@@ -64,7 +64,10 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.bladerf", s.final()));
 	}
 
-	bladerf_free_device_list(devinfo); // Valgrind memcheck
+	if (devinfo)
+	{
+		bladerf_free_device_list(devinfo); // Valgrind memcheck
+	}
 
 	return result;
 }
