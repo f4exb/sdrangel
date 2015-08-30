@@ -228,13 +228,10 @@ quint64 BladerfInput::getCenterFrequency() const
 
 bool BladerfInput::handleMessage(const Message& message)
 {
-	qDebug() << "BladerfInput::handleMessage";
-
 	if (MsgConfigureBladerf::match(message))
 	{
-		qDebug() << "  - MsgConfigureBladerf";
-
 		MsgConfigureBladerf& conf = (MsgConfigureBladerf&) message;
+		qDebug() << "BladerfInput::handleMessage: MsgConfigureBladerf";
 
 		if (!applySettings(conf.getSettings(), false))
 		{

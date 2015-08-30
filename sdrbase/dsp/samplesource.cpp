@@ -29,19 +29,12 @@ SampleSource::~SampleSource()
 void SampleSource::handleInputMessages()
 {
 	Message* message;
-	int queueSize = m_inputMessageQueue.size();
 
-	for (int i = 0; i < queueSize; i++)
+	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		message = m_inputMessageQueue.pop();
-
 		if (handleMessage(*message))
 		{
 			delete message;
-		}
-		else
-		{
-			m_inputMessageQueue.push(message);
 		}
 	}
 }

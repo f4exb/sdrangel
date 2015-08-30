@@ -332,13 +332,12 @@ void MainWindow::applySettings()
 void MainWindow::handleDSPMessages()
 {
 	Message* message;
-	MessageQueue* messageQueue = m_dspEngine->getOutputMessageQueue();
-	int queueSize =  messageQueue->size();
 
-	for (int i = 0; i < queueSize; i++)
+	while ((message = m_dspEngine->getOutputMessageQueue()->pop()) != 0)
 	{
-		message = messageQueue->pop();
-		qDebug() << "MainWindow::handleDSPMessages: " << message->getIdentifier();
+		qDebug("Message: %s", message->getIdentifier());
+
+		std::cerr << "MainWindow::handleDSPMessages: " << message->getIdentifier() << std::endl;
 
 		if (DSPSignalNotification::match(*message))
 		{
@@ -353,30 +352,21 @@ void MainWindow::handleDSPMessages()
 
 			delete message;
 		}
-		else
-		{
-			messageQueue->push(message);
-		}
 	}
 }
 
 void MainWindow::handleMessages()
 {
 	Message* message;
-	int queueSize =  m_inputMessageQueue.size();
 
-	for (int i = 0; i < queueSize; i++)
+	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		message = m_inputMessageQueue.pop();
-		qDebug() << "MainWindow::handleMessages: " << message->getIdentifier();
+		qDebug("Message: %s", message->getIdentifier());
+		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;
 
-		if (m_pluginManager->handleMessage(*message))
+		if (!m_pluginManager->handleMessage(*message))
 		{
 			delete message;
-		}
-		else
-		{
-			m_inputMessageQueue.push(message);
 		}
 	}
 }
