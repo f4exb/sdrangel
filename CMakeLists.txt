@@ -250,7 +250,7 @@ qt5_wrap_ui(sdrbase_FORMS_HEADERS ${sdrbase_FORMS})
 qt5_add_resources(sdrbase_RESOURCES_RCC ${sdrbase_RESOURCES})
 
 if(WIN32)
-	SET(sdrbase_SOURCES ${sdrbase_SOURCES} sdrbase/resources/sdrangelove.rc)
+	SET(sdrbase_SOURCES ${sdrbase_SOURCES} sdrbase/resources/sdrangel.rc)
 endif(WIN32)
 
 add_library(sdrbase SHARED
@@ -302,7 +302,7 @@ set(sdrangel_SOURCES
 )
 
 if(WIN32)
-	SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrbase/resources/sdrangelove.rc)
+	SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrbase/resources/sdrangel.rc)
 endif(WIN32)
 
 add_executable(sdrangel
