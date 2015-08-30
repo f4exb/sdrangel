@@ -608,13 +608,13 @@ void DSPEngine::handleSynchronousMessages()
 
 void DSPEngine::handleInputMessages()
 {
-	qDebug() << "DSPEngine::handleInputMessages";
-
 	Message* message;
+	int queueSize =  m_inputMessageQueue.size();
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	for (int i = 0; i < queueSize; i++)
 	{
-		qDebug("DSPEngine::handleInputMessages: message: %s", message->getIdentifier());
+		message = m_inputMessageQueue.pop();
+		qDebug() << "DSPEngine::handleInputMessages: " << message->getIdentifier();
 
 		if (DSPConfigureCorrection::match(*message))
 		{
@@ -636,7 +636,11 @@ void DSPEngine::handleInputMessages()
 				m_imbalance = 65536;
 			}
 
-			delete message;
+			delete message; // delete
+		}
+		else
+		{
+			m_inputMessageQueue.push(message); // repush
 		}
 	}
 }
@@ -644,9 +648,11 @@ void DSPEngine::handleInputMessages()
 void DSPEngine::handleSourceMessages()
 {
 	Message *message;
+	int queueSize =  m_inputMessageQueue.size();
 
-	while ((message = m_sampleSource->getOutputMessageQueue()->pop()) != 0)
+	for (int i = 0; i < queueSize; i++)
 	{
+		message = m_inputMessageQueue.pop();
 		qDebug() << "DSPEngine::handleSourceMessages: " << message->getIdentifier();
 
 		if (DSPSignalNotification::match(*message))
@@ -682,6 +688,10 @@ void DSPEngine::handleSourceMessages()
 			m_outputMessageQueue.push(rep);
 
 			delete message;
+		}
+		else
+		{
+			m_inputMessageQueue.push(message);
 		}
 	}
 }

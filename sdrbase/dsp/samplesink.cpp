@@ -13,12 +13,19 @@ SampleSink::~SampleSink()
 void SampleSink::handleInputMessages()
 {
 	Message* message;
+	int queueSize = m_inputMessageQueue.size();
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	for (int i = 0; i < queueSize; i++)
 	{
+		message = m_inputMessageQueue.pop();
+
 		if (handleMessage(*message))
 		{
 			delete message;
+		}
+		else
+		{
+			m_inputMessageQueue.push(message);
 		}
 	}
 }

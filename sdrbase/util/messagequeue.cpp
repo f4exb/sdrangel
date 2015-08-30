@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include "util/messagequeue.h"
 #include "util/message.h"
 
@@ -31,6 +32,7 @@ MessageQueue::~MessageQueue()
 
 	while ((message = pop()) != 0)
 	{
+		qDebug() << "MessageQueue::~MessageQueue: message: " << message->getIdentifier() << " was still in queue";
 		delete message;
 	}
 }
