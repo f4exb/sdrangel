@@ -209,15 +209,14 @@ bool FileSourceInput::handleMessage(const Message& message)
 			if (working)
 			{
 				m_fileSourceThread->startWork();
+				MsgReportFileSourceStreamTiming *report =
+						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+				getOutputMessageQueueToGUI()->push(report);
 			}
 			else
 			{
 				m_fileSourceThread->stopWork();
 			}
-
-			MsgReportFileSourceStreamTiming *report =
-					MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-			getOutputMessageQueueToGUI()->push(report);
 		}
 
 		return true;
@@ -229,13 +228,10 @@ bool FileSourceInput::handleMessage(const Message& message)
 		if (m_fileSourceThread != 0)
 		{
 			report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-		}
-		else
-		{
-			report = MsgReportFileSourceStreamTiming::create(0);
+			getOutputMessageQueueToGUI()->push(report);
 		}
 
-		getOutputMessageQueueToGUI()->push(report);
+		return true;
 	}
 	else
 	{
