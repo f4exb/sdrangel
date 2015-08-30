@@ -1,31 +1,35 @@
-===============
-RTL-SDRangelove
-===============
-![Channel analyzer plugins](https://github.com/f4exb/rtl-sdrangelove/blob/f4exb/doc/img/sdrangelove_cover.png)
+========
+SDRangel
+========
+![Channel analyzer plugins](https://github.com/f4exb/sdrangel/blob/f4exb/doc/img/sdrangel_banner.png)
 
-======================
-Cloning the repository
-======================
+SDRangel is a Qt5/OpenGL SDR frontend to various hardware
 
-- Clone as usual
-- Checkout the f4exb branch: `git checkout f4exb`
+===================
+Repository branches
+===================
 
-=======================
-GNURadio and libosmosdr
-=======================
+- master: the "production" branch
+- rtlsdrangelove: the master from hexameron rtl-sdrangelove
+- legacy: the modified rtl-sdrangelove before major redeisign
 
-These plugins have a lot of bugs and they have been removed trom the build. Original sources still exist in the tree. So current version only supports the following hardware:
-  - RTL-SDR
-  - Funcube
-  - BladeRF (standard and with XB-200 transverter) 
+================================================
+Plugins unsupported but still in the source tree
+================================================
+
+- Channels:
+  - tetra 
+- Sample sources:
+  - gnuradio
+  - osmosdr
+  - v4l-msi
+  - v4l-rtl
 
 ==============
 Funcube Dongle
 ==============
 
-Funcube Dongle Pro+ support will need "libasound2-dev" installed. ("libhid" is built from source). Install the rules file "fcdpp.rules" in "/etc/udev/rules.d" to gain the "root access" needed to control the dongle.
-
-Funcube Dongle Pro+ USB drivers are broken on some hardware with recent kernels. It works well for me with an Atom Chipset, which has Full Speed USB ports, or a "Valleyview" Chromebook (kernel 3.10). A Desktop with the "same" chipset needs kernel 3.2, available with Debian 7 "wheezy". YMMV.
+Only the original Funcube Dongle Pro is supported. Funcube Dongle Pro+ will come later 
 
 =======
 BladeRF
@@ -65,30 +69,31 @@ For non standard installations of RTL-SDR library, the GNU Radio runtime and gr.
     
 There is no installation procedure the executable is at the root of the build directory
 
-============
-For Debian 8
-============
+==========
+For Debian
+==========
 
-Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5.
+For any version of Debian you will need Qt5.
+
+Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5. 
+
+Assuming Debian Jessie is used:
 
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev`
 
 `mkdir build && cd build && cmake ../ && make`
 
-The same remarks as for Ubuntu apply...
+Then the same remarks as for Ubuntu apply...
 
 ============
 Known Issues
 ============
 
-  - Actually NFM seems to be working pretty well
-  - RTL frontend will have bad aliasing in noisy environments. Considering the size of the hardware there is no place for proper filters. With good filtering and a good antenna up front these devices work remarkably well for the price! 
-  - Aliasing can be annoying for broadcast FM. In this case try to shift the signal until you find a clear background for your station. This is a limitation of the RTL hardware so just use this workaround.
-  - GNU Radio plugin is not fully functional and has serious bugs (frequent segfaults). Trying to repair it is abandonned. 
+  - You will need to stop input before changing preset then start again
 
-===================
-Done since the fork
-===================
+========================
+Changes from SDRangelove
+========================
 
   - Added ppm correction for the LO of RTL-SDR. This uses the corresponding function in the librtlsdr interface (range -99..99 ppm)
   - Added a preset update button (the diskette with the yellow corner) to be able to save the current settings on an existing preset
@@ -129,7 +134,7 @@ Done since the fork
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
   - File sample source plugin (recording reader) not working
-  - Redesign:
+  - Major redesign:
     - Make the DSP engine global static
     - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
     - Synchronous messaging class to push message to thread and wait for completion
