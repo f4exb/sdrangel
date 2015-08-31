@@ -46,6 +46,7 @@ NFMDemod::NFMDemod() :
 	m_config.m_afBandwidth = 3000;
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 2.0;
+	m_config.m_ctcssOn = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -70,9 +71,18 @@ NFMDemod::~NFMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void NFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+void NFMDemod::configure(MessageQueue* messageQueue,
+		Real rfBandwidth,
+		Real afBandwidth,
+		Real volume,
+		Real squelch,
+		bool ctcssOn)
 {
-	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
+	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
+			afBandwidth,
+			volume,
+			squelch,
+			ctcssOn);
 	messageQueue->push(cmd);
 }
 
@@ -171,34 +181,37 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_squelchOpen)
 				{
-					Real ctcss_sample = m_lowpass.filter(demod);
-
-					if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+					if (m_running.m_ctcssOn)
 					{
-						if (m_ctcssDetector.analyze(&ctcss_sample))
-						{
-							int maxToneIndex;
+						Real ctcss_sample = m_lowpass.filter(demod);
 
-							if (m_ctcssDetector.getDetectedTone(maxToneIndex))
+						if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+						{
+							if (m_ctcssDetector.analyze(&ctcss_sample))
 							{
-								if (maxToneIndex+1 != m_ctcssIndex)
+								int maxToneIndex;
+
+								if (m_ctcssDetector.getDetectedTone(maxToneIndex))
 								{
-									m_nfmDemodGUI->setCtcssFreq(m_ctcssDetector.getToneSet()[maxToneIndex]);
-									m_ctcssIndex = maxToneIndex+1;
+									if (maxToneIndex+1 != m_ctcssIndex)
+									{
+										m_nfmDemodGUI->setCtcssFreq(m_ctcssDetector.getToneSet()[maxToneIndex]);
+										m_ctcssIndex = maxToneIndex+1;
+									}
 								}
-							}
-							else
-							{
-								if (m_ctcssIndex != 0)
+								else
 								{
-									m_nfmDemodGUI->setCtcssFreq(0);
-									m_ctcssIndex = 0;
+									if (m_ctcssIndex != 0)
+									{
+										m_nfmDemodGUI->setCtcssFreq(0);
+										m_ctcssIndex = 0;
+									}
 								}
 							}
 						}
 					}
 
-					if (m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
+					if (m_running.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
 					{
 						sample = 0;
 					}
@@ -297,13 +310,15 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
+		m_config.m_ctcssOn = cfg.getCtcssOn();
 
 		apply();
 
 		qDebug() << "  - MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch;
+				<< " m_squelch: " << m_config.m_squelch
+				<< " m_ctcssOn: " << m_config.m_ctcssOn;
 
 		return true;
 	}
@@ -315,13 +330,13 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 void NFMDemod::apply()
 {
-	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
+	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))
 	{
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
 	}
 
-	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
+	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
 	{
 		m_settingsMutex.lock();
@@ -331,7 +346,7 @@ void NFMDemod::apply()
 		m_settingsMutex.unlock();
 	}
 
-	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
+	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
@@ -340,7 +355,7 @@ void NFMDemod::apply()
 		m_settingsMutex.unlock();
 	}
 
-	if(m_config.m_squelch != m_running.m_squelch)
+	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
 		m_squelchLevel *= m_squelchLevel;
@@ -355,4 +370,5 @@ void NFMDemod::apply()
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
+	m_running.m_ctcssOn = m_config.m_ctcssOn;
 }

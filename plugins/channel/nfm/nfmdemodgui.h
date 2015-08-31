@@ -43,6 +43,7 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_ctcss_currentIndexChanged(int index);
+	void on_ctcssOn_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 
@@ -56,6 +57,7 @@ private:
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
+	bool m_ctcssOn;
 
 	static const int m_rfBW[];
 

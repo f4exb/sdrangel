@@ -41,7 +41,34 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="3" column="1">
+    <item row="5" column="4">
+     <layout class="QHBoxLayout" name="CTCSSblock">
+      <item>
+       <widget class="QCheckBox" name="ctcssOn">
+        <property name="toolTip">
+         <string>Activate CTCSS</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ctcss">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Set CTCSS Frequency</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="4">
      <widget class="QSlider" name="volume">
       <property name="maximum">
        <number>100</number>
@@ -54,7 +81,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
+    <item row="1" column="4">
      <widget class="QSlider" name="rfBW">
       <property name="maximum">
        <number>8</number>
@@ -101,7 +128,7 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
+    <item row="4" column="4">
      <widget class="QSlider" name="squelch">
       <property name="minimum">
        <number>-60</number>
@@ -120,7 +147,14 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
+    <item row="3" column="0">
+     <widget class="QLabel" name="volumeLabel">
+      <property name="text">
+       <string>Volume</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="6">
      <widget class="QLabel" name="rfBWText">
       <property name="minimumSize">
        <size>
@@ -136,7 +170,7 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
+    <item row="2" column="6">
      <widget class="QLabel" name="afBWText">
       <property name="minimumSize">
        <size>
@@ -152,14 +186,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="volumeLabel">
-      <property name="text">
-       <string>Volume</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
+    <item row="2" column="4">
      <widget class="QSlider" name="afBW">
       <property name="minimum">
        <number>1</number>
@@ -178,7 +205,7 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="2">
+    <item row="4" column="6">
      <widget class="QLabel" name="squelchText">
       <property name="minimumSize">
        <size>
@@ -194,7 +221,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
+    <item row="3" column="6">
      <widget class="QLabel" name="volumeText">
       <property name="minimumSize">
        <size>
@@ -210,7 +237,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="6">
      <widget class="QLabel" name="deltaUnits">
       <property name="text">
        <string>Hz</string>
@@ -220,7 +247,14 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="5" column="0">
+     <widget class="QLabel" name="ctcssLabel">
+      <property name="text">
+       <string>CTCSS</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
      <widget class="ValueDial" name="deltaFrequency" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -251,21 +285,7 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="ctcssLabel">
-      <property name="text">
-       <string>CTCSS</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QComboBox" name="ctcss">
-      <property name="toolTip">
-       <string>Set CTCSS</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="2">
+    <item row="5" column="6">
      <widget class="QLabel" name="ctcssText">
       <property name="toolTip">
        <string>CTCSS detected</string>

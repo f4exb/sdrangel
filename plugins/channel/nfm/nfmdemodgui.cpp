@@ -52,6 +52,7 @@ void NFMDemodGUI::resetToDefaults()
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+	ui->ctcssOn->setChecked(false);
 
 	blockApplySettings(false);
 	applySettings();
@@ -67,6 +68,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeS32(8, ui->ctcss->currentIndex());
+	s.writeBool(9, ui->ctcssOn->isChecked());
 	return s.final();
 }
 
@@ -85,6 +87,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool boolTmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -107,6 +110,9 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readS32(8, &tmp, 0);
 		ui->ctcss->setCurrentIndex(tmp);
+
+		d.readBool(9, &boolTmp, false);
+		ui->ctcssOn->setChecked(boolTmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -176,6 +182,12 @@ void NFMDemodGUI::on_volume_valueChanged(int value)
 void NFMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
+	applySettings();
+}
+
+void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
+{
+	m_ctcssOn = checked;
 	applySettings();
 }
 
@@ -280,7 +292,8 @@ void NFMDemodGUI::applySettings()
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
-			ui->squelch->value());
+			ui->squelch->value(),
+			ui->ctcssOn->isChecked());
 	}
 }
 
