@@ -1,7 +1,7 @@
 SDRangel
 ========
 
-![SDR Angel banner](https://github.com/f4exb/sdrangel/blob/f4exb/doc/img/sdrangel_banner.png)
+![SDR Angel banner](/doc/img/sdrangel_banner.png)
 
 **SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware. 
 
@@ -12,8 +12,7 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 <h2>Repository branches</h2>
 
 - master: the "production" branch
-- rtlsdrangelove: the master branch from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove)
-- legacy: the modified rtl-sdrangelove before a major redeisign of the code was carried out.
+- legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
 
 <h2>Unsupported plugins</h2>
 
