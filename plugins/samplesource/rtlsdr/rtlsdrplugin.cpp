@@ -8,11 +8,11 @@
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QString("RTL-SDR Input"),
-	QString("1.0"),
-	QString("(c) librtlsdr Authors (see source URL)"),
-	QString("http://sdr.osmocom.org/trac/wiki/rtl-sdr"),
+	QString("---"),
+	QString("(c) Edouard Griffiths, F4EXB"),
+	QString("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("github.com/hexameron/rtl-sdrangelove")
+	QString("https://github.com/f4exb/sdrangel")
 };
 
 RTLSDRPlugin::RTLSDRPlugin(QObject* parent) :

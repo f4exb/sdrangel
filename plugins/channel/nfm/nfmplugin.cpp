@@ -7,10 +7,10 @@
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
 	QString("NFM Demodulator"),
 	QString("---"),
-	QString("(c) maintech GmbH (written by Christian Daniel)"),
-	QString("http://www.maintech.de"),
+	QString("(c) Edouard Griffiths, F4EXB"),
+	QString("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("http://www.maintech.de")
+	QString("https://github.com/f4exb/sdrangel")
 };
 
 NFMPlugin::NFMPlugin(QObject* parent) :

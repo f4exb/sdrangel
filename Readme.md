@@ -91,7 +91,8 @@ Assuming Debian Jessie is used:
 
 <h1>Known Issues</h1>
 
-  - You will need to stop input before changing preset then start again
+  - You will need to stop input before changing sample rate or frequency (hence preset) then start again. There are still segfaults on critical changes
+  - There are still some unexpected segfaults but they are rather rare
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
   - As the objects input and output queues can be publicly accessed there is no strict control of which objects post messages on these queues. The correct assumption is that messages can be popped from the input queue only by its holder and that messages can be pushed on the output queue only by its holder.
 
@@ -148,6 +149,7 @@ Assuming Debian Jessie is used:
   - Objects have their own input and output message queues
   - Dedicated message queue to communicate to the GUI for objects coupled with a GUI
   - Optimizations with Valgrind cachegrind
+  - Corrected decimators bit shifting so that the number of effective output bits is constant and fill the internal sample width
   - Many other little things...
     
 <h1>To Do</h1>

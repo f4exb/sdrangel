@@ -25,11 +25,11 @@
 
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("File source input"),
-	QString("1.0"),
+	QString("---"),
 	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb"),
+	QString("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/rtl-sdrangelove/tree/f4exb")
+	QString("https://github.com/f4exb/sdrangel")
 };
 
 FileSourcePlugin::FileSourcePlugin(QObject* parent) :
