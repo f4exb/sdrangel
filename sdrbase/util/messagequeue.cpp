@@ -16,12 +16,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMutexLocker>
 #include "util/messagequeue.h"
 #include "util/message.h"
 
 MessageQueue::MessageQueue(QObject* parent) :
 	QObject(parent),
-	m_lock(),
+	m_lock(QMutex::Recursive),
 	m_queue()
 {
 }
@@ -54,7 +55,7 @@ void MessageQueue::push(Message* message, bool emitSignal)
 
 Message* MessageQueue::pop()
 {
-	SpinlockHolder spinlockHolder(&m_lock);
+	QMutexLocker locker(&m_lock);
 
 	if (m_queue.isEmpty())
 	{
@@ -68,12 +69,13 @@ Message* MessageQueue::pop()
 
 int MessageQueue::size()
 {
-	SpinlockHolder spinlockHolder(&m_lock);
+	QMutexLocker locker(&m_lock);
 
 	return m_queue.size();
 }
 
 void MessageQueue::clear()
 {
+	QMutexLocker locker(&m_lock);
 	m_queue.clear();
 }

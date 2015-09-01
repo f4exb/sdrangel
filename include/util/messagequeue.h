@@ -20,7 +20,7 @@
 
 #include <QObject>
 #include <QQueue>
-#include "spinlock.h"
+#include <QMutex>
 #include "util/export.h"
 
 class Message;
@@ -42,7 +42,7 @@ signals:
 	void messageEnqueued();
 
 private:
-	Spinlock m_lock;
+	QMutex m_lock;
 	QQueue<Message*> m_queue;
 };
 

@@ -45,7 +45,7 @@ Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Exper
 
 <h2>BladeRF</h2>
 
-BladeRF is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support.
+BladeRF is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
 
 If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
@@ -59,7 +59,7 @@ The interface is built in the software and do not require additional libraries o
 
 <h2>RTL-SDR</h2>
 
-RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support.
+RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
 
 If you use your own location for librtlsdr install directory you need to specify library and include locations. Example with `/opt/install/librtlsdr` with the following defines on `cmake` command line:
 

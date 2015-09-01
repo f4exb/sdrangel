@@ -116,7 +116,7 @@ set(sdrbase_SOURCES
 	#sdrbase/util/miniz.cpp
 	sdrbase/util/samplesourceserializer.cpp
 	sdrbase/util/simpleserializer.cpp
-	sdrbase/util/spinlock.cpp
+	#sdrbase/util/spinlock.cpp
 )
 
 set(sdrbase_HEADERS
@@ -194,7 +194,7 @@ set(sdrbase_HEADERS
 	#include/util/miniz.h
 	include/util/samplesourceserializer.h
 	include/util/simpleserializer.h
-	include/util/spinlock.h
+	#include/util/spinlock.h
 )
 
 set(sdrbase_SOURCES
