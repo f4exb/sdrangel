@@ -22,6 +22,8 @@
 #include <vector>
 #include <QtGlobal>
 
+#define SDR_SAMP_SZ 16 // internal fixed arithmetic sample size
+
 typedef float Real;
 typedef std::complex<Real> Complex;
 

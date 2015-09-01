@@ -62,7 +62,7 @@ private:
 	IntHalfbandFilter m_decimator32; // 5th stages
 	*/
 
-	Decimators<qint16> m_decimators;
+	Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 
 	void run();
 	/*

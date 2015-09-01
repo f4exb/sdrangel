@@ -130,7 +130,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		{
 			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
 			{
-				m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
 
 				qint16 sample;
 
@@ -268,8 +267,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		m_audioBufferFill = 0;
 	}
-
-	m_sampleBuffer.clear();
 
 	m_settingsMutex.unlock();
 }

@@ -424,7 +424,7 @@ protected:
 			0.317491986549921390015072120149852707982 * (1 << HB_SHIFT)
 		};
 	#elif HB_FILTERORDER == 32
-		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+		static const int mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
 							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2} ;
 		static const qint32 COEFF[8] = {
 			(qint32)(-0.015956912844043127236437484839370881673 * (1 << HB_SHIFT)),
@@ -467,8 +467,8 @@ protected:
 		iAcc += ((qint32)m_samples[a][0] + 1) << (HB_SHIFT - 1);
 		qAcc += ((qint32)m_samples[a][1] + 1) << (HB_SHIFT - 1);
 
-		*x = iAcc >> HB_SHIFT;
-		*y = qAcc >> HB_SHIFT;
+		*x = iAcc >> (HB_SHIFT -1); // HB_SHIFT incorrect do not loose the gained bit
+		*y = qAcc >> (HB_SHIFT -1);
 	}
 
 };

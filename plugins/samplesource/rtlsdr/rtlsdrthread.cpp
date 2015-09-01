@@ -91,16 +91,16 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 		m_decimators.decimate1(&it, buf, len);
 		break;
 	case 1:
-		m_decimators.decimate2(&it, buf, len);
+		m_decimators.decimate2_inf(&it, buf, len);
 		break;
 	case 2:
-		m_decimators.decimate4(&it, buf, len);
+		m_decimators.decimate4_inf(&it, buf, len);
 		break;
 	case 3:
-		m_decimators.decimate8(&it, buf, len);
+		m_decimators.decimate8_inf(&it, buf, len);
 		break;
 	case 4:
-		m_decimators.decimate16(&it, buf, len);
+		m_decimators.decimate16_inf(&it, buf, len);
 		break;
 	default:
 		break;

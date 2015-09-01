@@ -171,7 +171,6 @@ private:
 	uint m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
-	SampleVector m_sampleBuffer;
 
 	NFMDemodGUI *m_nfmDemodGUI;
 	QMutex m_settingsMutex;

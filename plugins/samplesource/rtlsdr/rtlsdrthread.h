@@ -50,7 +50,7 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 
-	Decimators<quint8> m_decimators;
+	Decimators<quint8, SDR_SAMP_SZ, 8> m_decimators;
 
 	void run();
 	void callback(const quint8* buf, qint32 len);
