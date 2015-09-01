@@ -22,6 +22,24 @@ These plugins come from the parent code base and are still present in the source
   - osmosdr
   - v4l-msi
   - v4l-rtl
+  
+<h3>Gnuradio</h3>
+
+The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
+
+If you use your own location for Gnuradio install directory you need to specify library and include locations. Example with `/opt/install/gnuradio-3.7.5.1` with the following defines on `cmake` command line:
+
+`-DGNURADIO_RUNTIME_LIBRARIES=/opt/install/gnuradio-3.7.5.1/lib/libgnuradio-runtime.so -DGNURADIO_RUNTIME_INCLUDE_DIRS=/opt/install/gnuradio-3.7.5.1/include`
+
+<h3>osmosdr</h3>
+
+If you use your own location for gr.osmocom install directory you need to specify library and include locations. Example with `/opt/install/gr-osmosdr` with the following defines on `cmake` command line:
+
+`-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so -DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
+
+<h3>v4l-*</h3>
+
+Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
 
 <h1>Supported hardware</h1>
 
@@ -57,22 +75,6 @@ If you use your own location for librtlsdr install directory you need to specify
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
 
-Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
-
-The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
-
-For non standard installations of RTL-SDR library, the GNU Radio runtime and gr.osmocom drivers use the following variables in the cmake command line. The paths specified are just examples:
-
-  - For GNU Radio runtime:
-    - Includes: `-DGNURADIO_RUNTIME_INCLUDE_DIRS=/opt/install/gnuradio-3.7.5.1/include`
-    - Library: `-DGNURADIO_RUNTIME_LIBRARIES=/opt/install/gnuradio-3.7.5.1/lib/libgnuradio-runtime.so`
-  - For gr.osmocom:
-    - Includes: `-DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
-    - Library: `-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so`
-  - For RTL-SDR library:
-    - Includes: `-DLIBRTLSDR_INCLUDE_DIR=/opt/install/rtlsdr/include`
-    - Library: `-DLIBRTLSDR_LIBRARIES=/opt/install/rtlsdr/lib/librtlsdr.so`
-    
 There is no installation procedure the executable is at the root of the build directory
 
 <h2>For Debian</h2>
@@ -86,8 +88,6 @@ Assuming Debian Jessie is used:
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev`
 
 `mkdir build && cd build && cmake ../ && make`
-
-Then the same remarks as for Ubuntu apply...
 
 <h1>Known Issues</h1>
 
@@ -147,6 +147,7 @@ Then the same remarks as for Ubuntu apply...
   - Message queuing and handling redesign. Still not completely satisfactory
   - Objects have their own input and output message queues
   - Dedicated message queue to communicate to the GUI for objects coupled with a GUI
+  - Optimizations with Valgrind cachegrind
   - Many other little things...
     
 <h1>To Do</h1>

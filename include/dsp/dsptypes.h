@@ -28,21 +28,22 @@ typedef std::complex<Real> Complex;
 typedef qint16 FixReal;
 
 #pragma pack(push, 1)
-struct Sample {
+struct Sample
+{
 	Sample() {}
 	Sample(FixReal real) : m_real(real), m_imag(0) {}
 	Sample(FixReal real, FixReal imag) : m_real(real), m_imag(imag) {}
 	Sample(const Sample& other) : m_real(other.m_real), m_imag(other.m_imag) {}
-	Sample& operator=(const Sample& other) { m_real = other.m_real; m_imag = other.m_imag; return *this; }
+	inline Sample& operator=(const Sample& other) { m_real = other.m_real; m_imag = other.m_imag; return *this; }
 
-	Sample& operator+=(const Sample& other) { m_real += other.m_real; m_imag += other.m_imag; return *this; }
-	Sample& operator-=(const Sample& other) { m_real -= other.m_real; m_imag -= other.m_imag; return *this; }
+	inline Sample& operator+=(const Sample& other) { m_real += other.m_real; m_imag += other.m_imag; return *this; }
+	inline Sample& operator-=(const Sample& other) { m_real -= other.m_real; m_imag -= other.m_imag; return *this; }
 
-	void setReal(FixReal v) { m_real = v; }
-	void setImag(FixReal v) { m_imag = v; }
+	inline void setReal(FixReal v) { m_real = v; }
+	inline void setImag(FixReal v) { m_imag = v; }
 
-	FixReal real() const { return m_real; }
-	FixReal imag() const { return m_imag; }
+	inline FixReal real() const { return m_real; }
+	inline FixReal imag() const { return m_imag; }
 
 	FixReal m_real;
 	FixReal m_imag;
