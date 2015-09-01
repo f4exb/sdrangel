@@ -51,7 +51,7 @@ public:
 		}
 	}
 
-	bool workDecimateCenter(qint16 *x, qint16 *y)
+	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
 		m_samples[m_ptr][0] = *x;
@@ -277,7 +277,7 @@ public:
 		m_ptr = mod33[m_ptr + 2 - 1];
 	}
 
-	void myDecimate(qint16 x1, qint16 y1, qint16 *x2, qint16 *y2)
+	void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
 	{
 		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
 							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2};
@@ -385,7 +385,7 @@ protected:
 		sample->setImag(qAcc >> HB_SHIFT);
 	}
 
-	void doFIR(qint16 *x, qint16 *y)
+	void doFIR(qint32 *x, qint32 *y)
 	{
 		// coefficents
 
