@@ -48,6 +48,11 @@ void FCDGui::resetToDefaults()
 	sendSettings();
 }
 
+qint64 FCDGui::getCenterFrequency() const
+{
+	return m_settings.centerFrequency;
+}
+
 QByteArray FCDGui::serialize() const
 {
 	return m_settings.serialize();

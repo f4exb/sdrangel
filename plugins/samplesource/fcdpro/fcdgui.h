@@ -23,6 +23,7 @@ public:
 	QString getName() const;
 
 	void resetToDefaults();
+	qint64 getCenterFrequency() const;
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
