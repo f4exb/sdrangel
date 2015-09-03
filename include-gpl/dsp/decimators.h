@@ -37,6 +37,22 @@ struct decimation_shifts
 };
 
 template<>
+struct decimation_shifts<16, 16>
+{
+    static const uint pre1   = 0;
+    static const uint pre2   = 0;
+    static const uint post2  = 1;
+    static const uint pre4   = 0;
+    static const uint post4  = 2;
+    static const uint pre8   = 0;
+    static const uint post8  = 3;
+    static const uint pre16  = 0;
+    static const uint post16 = 4;
+    static const uint pre32  = 0;
+    static const uint post32 = 5;
+};
+
+template<>
 struct decimation_shifts<16, 12>
 {
     static const uint pre1   = 4; 
