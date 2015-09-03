@@ -35,10 +35,11 @@ public:
 	FCDThread(SampleFifo* sampleFifo, QObject* parent = NULL);
 	~FCDThread();
 
+	void startWork();
 	void stopWork();
 	bool OpenSource(const char *filename);
 	void CloseSource();
-	int work(int n_items);
+
 private:
 	snd_pcm_format_t fcd_format;
 	snd_pcm_t* fcd_handle;
@@ -51,6 +52,6 @@ private:
 	SampleFifo* m_sampleFifo;
 
 	void run();
-
+	int work(int n_items);
 };
 #endif // INCLUDE_FCDTHREAD_H

@@ -145,11 +145,14 @@ bool FCDInput::start(int device)
 		return false;
 	}
 
+	m_deviceDescription = QString("Funcube Dongle");
+
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
-	 * Failure is harmless if no device is found */
+	 * Failure is harmless if no device is found
+	 * ... This is rubbish...*/
 
-	applySettings(m_settings, true);
+	//applySettings(m_settings, true);
 
 	if(!m_sampleFifo.setSize(96000*4))
 	{
@@ -163,7 +166,10 @@ bool FCDInput::start(int device)
 		return false;
 	}
 
-	m_deviceDescription = QString("Funcube Dongle");
+	m_FCDThread->startWork();
+
+	mutexLocker.unlock();
+	applySettings(m_settings, true);
 
 	qDebug("FCDInput::started");
 	return true;
@@ -221,7 +227,7 @@ void FCDInput::applySettings(const Settings& settings, bool force)
 {
 	bool signalChange = false;
 
-	if ((m_settings.centerFrequency != settings.centerFrequency))
+	if ((m_settings.centerFrequency != settings.centerFrequency) || force)
 	{
 		qDebug() << "FCDInput::applySettings: fc: " << settings.centerFrequency;
 		m_settings.centerFrequency = settings.centerFrequency;

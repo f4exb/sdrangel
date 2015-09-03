@@ -143,8 +143,6 @@ bool FCDInput::start(int device)
 		return false;
 	}
 
-	m_deviceDescription = QString("Funcube Dongle");
-
 	qDebug("FCDInput::start");
 	return true;
 }
@@ -198,7 +196,7 @@ void FCDInput::applySettings(const Settings& settings, bool force)
 {
 	bool signalChange = false;
 
-	if ((m_settings.centerFrequency != settings.centerFrequency))
+	if ((m_settings.centerFrequency != settings.centerFrequency) || force)
 	{
 		qDebug() << "FCDInput::applySettings: fc: " << settings.centerFrequency;
 		m_settings.centerFrequency = settings.centerFrequency;

@@ -36,6 +36,20 @@ FCDThread::~FCDThread()
 {
 }
 
+void FCDThread::startWork()
+{
+	m_startWaitMutex.lock();
+
+	start();
+
+	while(!m_running)
+	{
+		m_startWaiter.wait(&m_startWaitMutex, 100);
+	}
+
+	m_startWaitMutex.unlock();
+}
+
 void FCDThread::stopWork()
 {
 	m_running = false;
