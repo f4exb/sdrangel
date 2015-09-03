@@ -18,11 +18,16 @@ These plugins come from the parent code base and are still present in the source
 - Channels:
   - tetra 
 - Sample sources:
+  - fcd
   - gnuradio
   - osmosdr
   - v4l-msi
   - v4l-rtl
   
+<h3>Funcube Dongle (fcd)</h3>
+
+This is the old driver.
+
 <h3>Gnuradio</h3>
 
 The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
@@ -51,11 +56,11 @@ If you use your own location for libbladeRF install directory you need to specif
 
 `-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
 
-<h2>Funcube Dongle</h2>
+<h2>FunCube Dongle</h2>
 
-Only the original Funcube Dongle Pro is supported. Funcube Dongle Pro+ will come later.
+At the moment only the Pro+ is supported with the plugin in fcdpro. This is a work in progress. Support of features is still limited (no IF gain, no filter settings).
 
-The interface is built in the software and do not require additional libraries other than USB support with libusb. 
+The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support.
 
 <h2>RTL-SDR</h2>
 

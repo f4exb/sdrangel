@@ -329,3 +329,4 @@ qt5_use_modules(sdrangel Widgets Multimedia)
 ##############################################################################
 
 add_subdirectory(plugins)
+add_subdirectory(fcdhid)

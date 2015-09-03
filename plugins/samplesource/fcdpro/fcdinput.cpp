@@ -23,12 +23,21 @@
 #include "fcdinput.h"
 #include "fcdthread.h"
 #include "fcdgui.h"
-#include "qthid.h"
 #include "dsp/dspcommands.h"
 #include "fcdserializer.h"
 
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
+
+const uint16_t FCDInput::m_vendorId  = 0x04D8;
+
+const uint16_t FCDInput::m_productId = 0xFB31;
+const int FCDInput::m_sampleRate = 192000;
+const std::string FCDInput::m_deviceName("hw:CARD=V20");
+
+//const uint16_t FCDInput::m_productId = 0xFB56;
+//const int FCDInput::m_sampleRate = 96000;
+//const std::string FCDInput::m_deviceName("hw:CARD=V10");
 
 FCDInput::Settings::Settings() :
 	centerFrequency(435000000),
@@ -100,6 +109,7 @@ bool FCDInput::Settings::deserialize(const QByteArray& serializedData)
 }
 
 FCDInput::FCDInput() :
+	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
 	m_deviceDescription()
@@ -118,10 +128,20 @@ bool FCDInput::init(const Message& cmd)
 
 bool FCDInput::start(int device)
 {
+	qDebug() << "FCDInput::start with device #" << device;
+
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_FCDThread)
 	{
+		return false;
+	}
+
+	m_dev = fcdOpen(m_vendorId, m_productId, device);
+
+	if (m_dev == 0)
+	{
+		qCritical("FCDInput::start: could not open FCD");
 		return false;
 	}
 
@@ -145,7 +165,7 @@ bool FCDInput::start(int device)
 
 	m_deviceDescription = QString("Funcube Dongle");
 
-	qDebug("FCDInput::start");
+	qDebug("FCDInput::started");
 	return true;
 }
 
@@ -161,6 +181,9 @@ void FCDInput::stop()
 		m_FCDThread = 0;
 	}
 
+	fcdClose(m_dev);
+	m_dev = 0;
+
 	m_deviceDescription.clear();
 }
 
@@ -171,7 +194,7 @@ const QString& FCDInput::getDeviceDescription() const
 
 int FCDInput::getSampleRate() const
 {
-	return 192000;
+	return m_sampleRate;
 }
 
 quint64 FCDInput::getCenterFrequency() const
@@ -202,32 +225,45 @@ void FCDInput::applySettings(const Settings& settings, bool force)
 	{
 		qDebug() << "FCDInput::applySettings: fc: " << settings.centerFrequency;
 		m_settings.centerFrequency = settings.centerFrequency;
-		set_center_freq((double) m_settings.centerFrequency);
+
+		if (m_dev != 0)
+		{
+			set_center_freq((double) m_settings.centerFrequency);
+		}
+
 		signalChange = true;
 	}
 
 	if ((m_settings.gain != settings.gain) || force)
 	{
-		set_lna_gain(settings.gain > 0);
 		m_settings.gain = settings.gain;
+
+		if (m_dev != 0)
+		{
+			set_lna_gain(settings.gain > 0);
+		}
 	}
 
 	if ((m_settings.bias != settings.bias) || force)
 	{
-		set_bias_t(settings.bias > 0);
 		m_settings.bias = settings.bias;
+
+		if (m_dev != 0)
+		{
+			set_bias_t(settings.bias > 0);
+		}
 	}
     
     if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(192000, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        
     }
 }
 
 void FCDInput::set_center_freq(double freq)
 {
-	if (fcdAppSetFreq(freq) == FCD_MODE_NONE)
+	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
 		qDebug("No FCD HID found for frquency change");
 	}
@@ -237,14 +273,14 @@ void FCDInput::set_bias_t(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
-	fcdAppSetParam(FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
+	fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
 }
 
 void FCDInput::set_lna_gain(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
-	fcdAppSetParam(FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
+	fcdAppSetParam(m_dev, FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
 }
 
 

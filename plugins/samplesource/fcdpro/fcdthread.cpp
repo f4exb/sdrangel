@@ -15,9 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include <stdio.h>
 #include <errno.h>
 #include "fcdthread.h"
+#include "fcdinput.h"
 #include "dsp/samplefifo.h"
 
 FCDThread::FCDThread(SampleFifo* sampleFifo, QObject* parent) :
@@ -42,15 +44,23 @@ void FCDThread::stopWork()
 
 void FCDThread::run()
 {
-	if ( !OpenSource("hw:CARD=V20") ) // FIXME: pro is V10 pro+ is V20. Make it an option
-                return;
+	if ( !OpenSource(FCDInput::m_deviceName.c_str()) )
+	{
+		qCritical() << "FCDThread::run: cannot open FCD sound card";
+		return;
+	}
 	// TODO: fallback to original fcd
 
 	m_running = true;
-	while(m_running) {
-		if ( work(FCD_BLOCKSIZE) < 0)
+
+	while(m_running)
+	{
+		if (work(FCD_BLOCKSIZE) < 0)
+		{
 			break;
+		}
 	}
+
 	CloseSource();
 }
 
@@ -98,13 +108,12 @@ bool FCDThread::OpenSource(const char* cardname)
 
 	if (fail)
 	{
-		qCritical("Funcube Dongle stream start failed");
 		snd_pcm_close( fcd_handle );
 		return false;
 	}
 	else
 	{
-		qDebug("Funcube stream started");
+		qDebug("FCDThread::OpenSource: Funcube stream started");
 	}
 
 	return true;
