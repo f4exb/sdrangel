@@ -18,16 +18,11 @@ These plugins come from the parent code base and are still present in the source
 - Channels:
   - tetra 
 - Sample sources:
-  - fcd
   - gnuradio
   - osmosdr
   - v4l-msi
   - v4l-rtl
   
-<h3>Funcube Dongle (fcd, fcdpro)</h3>
-
-- fcd is the old driver and will be completely removed in the future.
-
 <h3>Gnuradio</h3>
 
 The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
