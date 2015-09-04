@@ -42,7 +42,6 @@ add_library(inputfilesource SHARED
 
 target_link_libraries(inputfilesource
 	${QT_LIBRARIES}
-	${LIBBLADERF_LIBRARIES}
 	${LIBUSB_LIBRARIES}
 	sdrbase
 )
