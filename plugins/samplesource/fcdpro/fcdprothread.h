@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FCDTHREAD_H
-#define INCLUDE_FCDTHREAD_H
+#ifndef INCLUDE_FCDPROTHREAD_H
+#define INCLUDE_FCDPROTHREAD_H
 
 #include <QThread>
 #include <QMutex>
@@ -25,15 +24,15 @@
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
 
-#define FCDPP_RATE 192000 // FIXME: The Pro / Pro+ switch should be handled better than this!
+#define FCDPP_RATE 192000
 #define FCD_BLOCKSIZE (1<<11)
 
-class FCDThread : public QThread {
+class FCDProThread : public QThread {
 	Q_OBJECT
 
 public:
-	FCDThread(SampleFifo* sampleFifo, QObject* parent = NULL);
-	~FCDThread();
+	FCDProThread(SampleFifo* sampleFifo, QObject* parent = NULL);
+	~FCDProThread();
 
 	void startWork();
 	void stopWork();
@@ -53,4 +52,4 @@ private:
 	void run();
 	int work(int n_items);
 };
-#endif // INCLUDE_FCDTHREAD_H
+#endif // INCLUDE_FCDPROTHREAD_H

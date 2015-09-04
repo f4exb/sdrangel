@@ -18,7 +18,7 @@ if(LIBUSB_FOUND AND UNIX)
 	FIND_LIBRARY (LIBASOUND asound)
 endif()
 if(LIBASOUND AND ASOUNDH)
-	add_subdirectory(fcdpro)
+	add_subdirectory(fcdproplus)
 endif()
 
 find_package(LibRTLSDR)

@@ -18,10 +18,10 @@
 #include <QAction>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "fcdplugin.h"
-#include "fcdgui.h"
+#include "fcdproplugin.h"
+#include "fcdprogui.h"
 
-const PluginDescriptor FCDPlugin::m_pluginDescriptor = {
+const PluginDescriptor FCDProPlugin::m_pluginDescriptor = {
 	QString("FunCube Pro Input"),
 	QString("---"),
 	QString("(c) Edouard Griffiths, F4EXB"),
@@ -30,24 +30,24 @@ const PluginDescriptor FCDPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-FCDPlugin::FCDPlugin(QObject* parent) :
+FCDProPlugin::FCDProPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& FCDPlugin::getPluginDescriptor() const
+const PluginDescriptor& FCDProPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void FCDPlugin::initPlugin(PluginAPI* pluginAPI)
+void FCDProPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
 	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.fcdpro", this);
 }
 
-PluginInterface::SampleSourceDevices FCDPlugin::enumSampleSources()
+PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
 
@@ -59,11 +59,11 @@ PluginInterface::SampleSourceDevices FCDPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FCDPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
+PluginGUI* FCDProPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
 	if(sourceName == "org.osmocom.sdr.samplesource.fcdpro")
 	{
-		FCDGui* gui = new FCDGui(m_pluginAPI);
+		FCDProGui* gui = new FCDProGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
 		return gui;
 	}

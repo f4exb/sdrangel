@@ -1,12 +1,12 @@
-#include "fcdgui.h"
-#include "ui_fcdgui.h"
+#include "ui_fcdprogui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "dsp/dspengine.h"
+#include "fcdprogui.h"
 
-FCDGui::FCDGui(PluginAPI* pluginAPI, QWidget* parent) :
+FCDProGui::FCDProGui(PluginAPI* pluginAPI, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::FCDGui),
+	ui(new Ui::FCDProGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
 	m_sampleSource(NULL)
@@ -17,48 +17,48 @@ FCDGui::FCDGui(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
-	m_sampleSource = new FCDInput();
+	m_sampleSource = new FCDProInput();
 	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
-FCDGui::~FCDGui()
+FCDProGui::~FCDProGui()
 {
 	delete ui;
 }
 
-void FCDGui::destroy()
+void FCDProGui::destroy()
 {
 	delete this;
 }
 
-void FCDGui::setName(const QString& name)
+void FCDProGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString FCDGui::getName() const
+QString FCDProGui::getName() const
 {
 	return objectName();
 }
 
-void FCDGui::resetToDefaults()
+void FCDProGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 FCDGui::getCenterFrequency() const
+qint64 FCDProGui::getCenterFrequency() const
 {
 	return m_settings.centerFrequency;
 }
 
-QByteArray FCDGui::serialize() const
+QByteArray FCDProGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool FCDGui::deserialize(const QByteArray& data)
+bool FCDProGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data))
 	{
@@ -73,12 +73,12 @@ bool FCDGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FCDGui::handleMessage(const Message& message)
+bool FCDProGui::handleMessage(const Message& message)
 {
 	return false;
 }
 
-void FCDGui::displaySettings()
+void FCDProGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
 	ui->checkBoxR->setChecked(m_settings.range);
@@ -86,26 +86,26 @@ void FCDGui::displaySettings()
 	ui->checkBoxB->setChecked(m_settings.bias);
 }
 
-void FCDGui::sendSettings()
+void FCDProGui::sendSettings()
 {
 	if(!m_updateTimer.isActive())
 		m_updateTimer.start(100);
 }
 
-void FCDGui::on_centerFrequency_changed(quint64 value)
+void FCDProGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.centerFrequency = value * 1000;
 	sendSettings();
 }
 
-void FCDGui::updateHardware()
+void FCDProGui::updateHardware()
 {
-	FCDInput::MsgConfigureFCD* message = FCDInput::MsgConfigureFCD::create(m_settings);
+	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
 }
 
-void FCDGui::on_checkBoxR_stateChanged(int state)
+void FCDProGui::on_checkBoxR_stateChanged(int state)
 {
 	if (state == Qt::Checked) // FIXME: this is for the Pro+ version only!
 	{
@@ -125,7 +125,7 @@ void FCDGui::on_checkBoxR_stateChanged(int state)
 	sendSettings();
 }
 
-void FCDGui::on_checkBoxG_stateChanged(int state)
+void FCDProGui::on_checkBoxG_stateChanged(int state)
 {
 	if (state == Qt::Checked)
 	{
@@ -139,7 +139,7 @@ void FCDGui::on_checkBoxG_stateChanged(int state)
 	sendSettings();
 }
 
-void FCDGui::on_checkBoxB_stateChanged(int state)
+void FCDProGui::on_checkBoxB_stateChanged(int state)
 {
 	if (state == Qt::Checked)
 	{

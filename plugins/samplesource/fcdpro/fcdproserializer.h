@@ -14,55 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "fcdserializer.h"
+#ifndef PLUGINS_SAMPLESOURCE_FCD_FCDPROSERIALIZER_H_
+#define PLUGINS_SAMPLESOURCE_FCD_FCDPROSERIALIZER_H_
 
-void FCDSerializer::writeSerializedData(const FCDData& data, QByteArray& serializedData)
+#include "util/samplesourceserializer.h"
+
+class FCDProSerializer
 {
-	QByteArray sampleSourceSerialized;
-	SampleSourceSerializer::writeSerializedData(data.m_data, sampleSourceSerialized);
-
-	SimpleSerializer s(1);
-
-	s.writeBlob(1, sampleSourceSerialized);
-	s.writeS32(2, data.m_bias);
-	s.writeS32(3, data.m_range);
-
-	serializedData = s.final();
-}
-
-bool FCDSerializer::readSerializedData(const QByteArray& serializedData, FCDData& data)
-{
-	bool valid = SampleSourceSerializer::readSerializedData(serializedData, data.m_data);
-
-	QByteArray sampleSourceSerialized;
-
-	SimpleDeserializer d(serializedData);
-
-	if (!d.isValid())
+public:
+	struct FCDData
 	{
-		setDefaults(data);
-		return false;
-	}
+		SampleSourceSerializer::Data m_data;
+		qint32 m_bias;
+		qint32 m_range;
+	};
 
-	if (d.getVersion() == SampleSourceSerializer::getSerializerVersion())
-	{
-		int intval;
+	static void writeSerializedData(const FCDData& data, QByteArray& serializedData);
+	static bool readSerializedData(const QByteArray& serializedData, FCDData& data);
+	static void setDefaults(FCDData& data);
+};
 
-		d.readBlob(1, &sampleSourceSerialized);
-		d.readS32(2, &data.m_bias);
-		d.readS32(3, &data.m_range);
 
-		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
-	}
-	else
-	{
-		setDefaults(data);
-		return false;
-	}
-}
 
-void FCDSerializer::setDefaults(FCDData& data)
-{
-	data.m_range = 0;
-	data.m_bias = 0;
-}
+#endif /* PLUGINS_SAMPLESOURCE_FCD_FCDPROSERIALIZER_H_ */

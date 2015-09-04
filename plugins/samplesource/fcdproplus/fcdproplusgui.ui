@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FCDGui</class>
- <widget class="QWidget" name="FCDGui">
+ <class>FCDProPlusGui</class>
+ <widget class="QWidget" name="FCDProPlusGui">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>132</width>
+    <width>165</width>
     <height>119</height>
    </rect>
   </property>

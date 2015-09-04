@@ -20,13 +20,14 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
-#include "fcdinput.h"
-#include "fcdthread.h"
-#include "fcdgui.h"
 #include "dsp/dspcommands.h"
-#include "fcdserializer.h"
+#include "fcdproplusinput.h"
 
-MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
+#include "fcdproplusgui.h"
+#include "fcdproplusserializer.h"
+#include "fcdproplusthread.h"
+
+MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
 
 /*
@@ -40,7 +41,7 @@ const int FCDInput::m_sampleRate = 96000;
 const std::string FCDInput::m_deviceName("hw:CARD=V10");
 */
 
-FCDInput::Settings::Settings() :
+FCDProPlusInput::Settings::Settings() :
 	centerFrequency(435000000),
 	range(0),
 	gain(0),
@@ -48,7 +49,7 @@ FCDInput::Settings::Settings() :
 {
 }
 
-void FCDInput::Settings::resetToDefaults()
+void FCDProPlusInput::Settings::resetToDefaults()
 {
 	centerFrequency = 435000000;
 	range = 0;
@@ -56,9 +57,9 @@ void FCDInput::Settings::resetToDefaults()
 	bias = 0;
 }
 
-QByteArray FCDInput::Settings::serialize() const
+QByteArray FCDProPlusInput::Settings::serialize() const
 {
-	FCDSerializer::FCDData data;
+	FCDProPlusSerializer::FCDData data;
 
 	data.m_data.m_lnaGain = gain;
 	data.m_data.m_frequency = centerFrequency;
@@ -67,7 +68,7 @@ QByteArray FCDInput::Settings::serialize() const
 
 	QByteArray byteArray;
 
-	FCDSerializer::writeSerializedData(data, byteArray);
+	FCDProPlusSerializer::writeSerializedData(data, byteArray);
 
 	return byteArray;
 
@@ -80,11 +81,11 @@ QByteArray FCDInput::Settings::serialize() const
 	return s.final();*/
 }
 
-bool FCDInput::Settings::deserialize(const QByteArray& serializedData)
+bool FCDProPlusInput::Settings::deserialize(const QByteArray& serializedData)
 {
-	FCDSerializer::FCDData data;
+	FCDProPlusSerializer::FCDData data;
 
-	bool valid = FCDSerializer::readSerializedData(serializedData, data);
+	bool valid = FCDProPlusSerializer::readSerializedData(serializedData, data);
 
 	gain = data.m_data.m_lnaGain;
 	centerFrequency = data.m_data.m_frequency;
@@ -109,27 +110,27 @@ bool FCDInput::Settings::deserialize(const QByteArray& serializedData)
 	return true;*/
 }
 
-FCDInput::FCDInput() :
+FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
-	m_deviceDescription()
+	m_deviceDescription("Funcube Dongle Pro+")
 {
 }
 
-FCDInput::~FCDInput()
+FCDProPlusInput::~FCDProPlusInput()
 {
 	stop();
 }
 
-bool FCDInput::init(const Message& cmd)
+bool FCDProPlusInput::init(const Message& cmd)
 {
 	return false;
 }
 
-bool FCDInput::start(int device)
+bool FCDProPlusInput::start(int device)
 {
-	qDebug() << "FCDInput::start with device #" << device;
+	qDebug() << "FCDProPlusInput::start with device #" << device;
 
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -142,11 +143,9 @@ bool FCDInput::start(int device)
 
 	if (m_dev == 0)
 	{
-		qCritical("FCDInput::start: could not open FCD");
+		qCritical("FCDProPlusInput::start: could not open FCD");
 		return false;
 	}
-
-	m_deviceDescription = QString("Funcube Dongle");
 
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
@@ -161,7 +160,7 @@ bool FCDInput::start(int device)
 		return false;
 	}
 
-	if ((m_FCDThread = new FCDThread(&m_sampleFifo)) == NULL)
+	if ((m_FCDThread = new FCDProPlusThread(&m_sampleFifo)) == NULL)
 	{
 		qFatal("out of memory");
 		return false;
@@ -172,11 +171,11 @@ bool FCDInput::start(int device)
 	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
-	qDebug("FCDInput::started");
+	qDebug("FCDProPlusInput::started");
 	return true;
 }
 
-void FCDInput::stop()
+void FCDProPlusInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -190,30 +189,28 @@ void FCDInput::stop()
 
 	fcdClose(m_dev);
 	m_dev = 0;
-
-	m_deviceDescription.clear();
 }
 
-const QString& FCDInput::getDeviceDescription() const
+const QString& FCDProPlusInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int FCDInput::getSampleRate() const
+int FCDProPlusInput::getSampleRate() const
 {
 	return 192000;
 }
 
-quint64 FCDInput::getCenterFrequency() const
+quint64 FCDProPlusInput::getCenterFrequency() const
 {
 	return m_settings.centerFrequency;
 }
 
-bool FCDInput::handleMessage(const Message& message)
+bool FCDProPlusInput::handleMessage(const Message& message)
 {
 	if(MsgConfigureFCD::match(message))
 	{
-		qDebug() << "FCDInput::handleMessage: MsgConfigureFCD";
+		qDebug() << "FCDProPlusInput::handleMessage: MsgConfigureFCD";
 		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
 		applySettings(conf.getSettings(), false);
 		return true;
@@ -224,13 +221,13 @@ bool FCDInput::handleMessage(const Message& message)
 	}
 }
 
-void FCDInput::applySettings(const Settings& settings, bool force)
+void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 {
 	bool signalChange = false;
 
 	if ((m_settings.centerFrequency != settings.centerFrequency) || force)
 	{
-		qDebug() << "FCDInput::applySettings: fc: " << settings.centerFrequency;
+		qDebug() << "FCDProPlusInput::applySettings: fc: " << settings.centerFrequency;
 		m_settings.centerFrequency = settings.centerFrequency;
 
 		if (m_dev != 0)
@@ -268,7 +265,7 @@ void FCDInput::applySettings(const Settings& settings, bool force)
     }
 }
 
-void FCDInput::set_center_freq(double freq)
+void FCDProPlusInput::set_center_freq(double freq)
 {
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
@@ -276,14 +273,14 @@ void FCDInput::set_center_freq(double freq)
 	}
 }
 
-void FCDInput::set_bias_t(bool on)
+void FCDProPlusInput::set_bias_t(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
 	fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
 }
 
-void FCDInput::set_lna_gain(bool on)
+void FCDProPlusInput::set_lna_gain(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 

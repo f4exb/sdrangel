@@ -1,16 +1,16 @@
-#ifndef INCLUDE_FCDPLUGIN_H
-#define INCLUDE_FCDPLUGIN_H
+#ifndef INCLUDE_FCDPROPLUSPLUGIN_H
+#define INCLUDE_FCDPROPLUSPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class FCDPlugin : public QObject, public PluginInterface {
+class FCDProPlusPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.fcdpro")
+	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.fcdproplus")
 
 public:
-	explicit FCDPlugin(QObject* parent = NULL);
+	explicit FCDProPlusPlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
@@ -24,4 +24,4 @@ private:
 	PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_FCDPLUGIN_H
+#endif // INCLUDE_FCDPROPLUSPLUGIN_H

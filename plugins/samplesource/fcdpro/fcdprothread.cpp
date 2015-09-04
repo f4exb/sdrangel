@@ -18,11 +18,11 @@
 #include <QDebug>
 #include <stdio.h>
 #include <errno.h>
-#include "fcdthread.h"
-#include "fcdinput.h"
 #include "dsp/samplefifo.h"
+#include "fcdprothread.h"
+#include "fcdproinput.h"
 
-FCDThread::FCDThread(SampleFifo* sampleFifo, QObject* parent) :
+FCDProThread::FCDProThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	fcd_handle(NULL),
 	m_running(false),
@@ -32,11 +32,11 @@ FCDThread::FCDThread(SampleFifo* sampleFifo, QObject* parent) :
 	start();
 }
 
-FCDThread::~FCDThread()
+FCDProThread::~FCDProThread()
 {
 }
 
-void FCDThread::startWork()
+void FCDProThread::startWork()
 {
 	m_startWaitMutex.lock();
 
@@ -50,15 +50,15 @@ void FCDThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void FCDThread::stopWork()
+void FCDProThread::stopWork()
 {
 	m_running = false;
 	wait();
 }
 
-void FCDThread::run()
+void FCDProThread::run()
 {
-	if ( !OpenSource("hw:CARD=V20") )
+	if ( !OpenSource("hw:CARD=V10") )
 	{
 		qCritical() << "FCDThread::run: cannot open FCD sound card";
 		return;
@@ -78,7 +78,7 @@ void FCDThread::run()
 	CloseSource();
 }
 
-bool FCDThread::OpenSource(const char* cardname)
+bool FCDProThread::OpenSource(const char* cardname)
 {
 	bool fail = false;
 	snd_pcm_hw_params_t* params;
@@ -133,7 +133,7 @@ bool FCDThread::OpenSource(const char* cardname)
 	return true;
 }
 
-void FCDThread::CloseSource()
+void FCDProThread::CloseSource()
 {
 	if (fcd_handle)
 	{
@@ -143,7 +143,7 @@ void FCDThread::CloseSource()
 	fcd_handle = NULL;
 }
 
-int FCDThread::work(int n_items)
+int FCDProThread::work(int n_items)
 {
 	int l;
 	SampleVector::iterator it;

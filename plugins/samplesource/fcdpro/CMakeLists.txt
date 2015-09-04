@@ -1,23 +1,23 @@
 project(fcdpro)
 
 set(fcdpro_SOURCES
-	fcdgui.cpp
-	fcdinput.cpp
-	fcdplugin.cpp
-	fcdserializer.cpp
-	fcdthread.cpp
+	fcdprogui.cpp
+	fcdproinput.cpp
+	fcdproplugin.cpp
+	fcdproserializer.cpp
+	fcdprothread.cpp
 )
 
 set(fcdpro_HEADERS
-	fcdgui.h
-	fcdinput.h
-	fcdplugin.h
-	fcdserializer.h
-	fcdthread.h
+	fcdprogui.h
+	fcdproinput.h
+	fcdproplugin.h
+	fcdproserializer.h
+	fcdprothread.h
 )
 
 set(fcdpro_FORMS
-	fcdgui.ui
+	fcdprogui.ui
 )
 
 include_directories(

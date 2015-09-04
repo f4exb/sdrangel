@@ -28,9 +28,9 @@ struct fcd_buffer {
 	std::size_t length;
 };
 
-class FCDThread;
+class FCDProPlusThread;
 
-class FCDInput : public SampleSource {
+class FCDProPlusInput : public SampleSource {
 public:
 	struct Settings {
 		Settings();
@@ -63,8 +63,8 @@ public:
 		{ }
 	};
 
-	FCDInput();
-	virtual ~FCDInput();
+	FCDProPlusInput();
+	virtual ~FCDProPlusInput();
 
 	virtual bool init(const Message& cmd);
 	virtual bool start(int device);
@@ -86,7 +86,7 @@ private:
 	hid_device *m_dev;
 	QMutex m_mutex;
 	Settings m_settings;
-	FCDThread* m_FCDThread;
+	FCDProPlusThread* m_FCDThread;
 	QString m_deviceDescription;
 };
 

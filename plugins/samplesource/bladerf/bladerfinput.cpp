@@ -206,8 +206,6 @@ void BladerfInput::stop()
 		bladerf_close(m_dev);
 		m_dev = 0;
 	}
-
-	m_deviceDescription.clear();
 }
 
 const QString& BladerfInput::getDeviceDescription() const

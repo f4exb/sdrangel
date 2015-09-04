@@ -1,22 +1,23 @@
-#ifndef INCLUDE_FCDGUI_H
-#define INCLUDE_FCDGUI_H
+#ifndef INCLUDE_FCDPROGUI_H
+#define INCLUDE_FCDPROGUI_H
 
 #include <QTimer>
+
+#include "fcdproinput.h"
 #include "plugin/plugingui.h"
-#include "fcdinput.h"
 
 class PluginAPI;
 
 namespace Ui {
-	class FCDGui;
+	class FCDProGui;
 }
 
-class FCDGui : public QWidget, public PluginGUI {
+class FCDProGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit FCDGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
-	virtual ~FCDGui();
+	explicit FCDProGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	virtual ~FCDProGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -30,10 +31,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::FCDGui* ui;
+	Ui::FCDProGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	FCDInput::Settings m_settings;
+	FCDProInput::Settings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
@@ -49,4 +50,4 @@ private slots:
 	void updateHardware();
 };
 
-#endif // INCLUDE_FCDGUI_H
+#endif // INCLUDE_FCDPROGUI_H
