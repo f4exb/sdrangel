@@ -24,7 +24,6 @@
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
 
-#define FCDPP_RATE 192000
 #define FCD_BLOCKSIZE (1<<11)
 
 class FCDProThread : public QThread {
