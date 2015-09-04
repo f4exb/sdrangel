@@ -19,7 +19,6 @@ These plugins come from the parent code base and are still present in the source
   - tetra 
 - Sample sources:
   - fcd
-  - fcdpro
   - gnuradio
   - osmosdr
   - v4l-msi
@@ -28,7 +27,6 @@ These plugins come from the parent code base and are still present in the source
 <h3>Funcube Dongle (fcd, fcdpro)</h3>
 
 - fcd is the old driver and will be completely removed in the future.
-- fcdpro is the plugin for the original FunCube Dongle Pro (not Pro+). It is temporarily removed from the build to avoid confusion until the enumeration of devices works properly.
 
 <h3>Gnuradio</h3>
 

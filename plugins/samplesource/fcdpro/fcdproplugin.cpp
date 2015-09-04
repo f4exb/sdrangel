@@ -51,10 +51,20 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
 
-	QString displayedName(QString("Funcube Dongle Pro #1"));
-	SimpleSerializer s(1);
-	s.writeS32(1, 0);
-	result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.fcdpro", s.final()));
+	int i = 1;
+	struct hid_device_info *device_info = hid_enumerate(0x04D8, 0xFB56);
+
+	while (device_info != 0)
+	{
+		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
+		QString displayedName(QString("FunCube Dongle Pro #%1 ").arg(i) + serialNumber);
+		SimpleSerializer s(1);
+		s.writeS32(1, 0);
+		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.fcdpro", s.final()));
+
+		device_info = device_info->next;
+		i++;
+	}
 
 	return result;
 }
