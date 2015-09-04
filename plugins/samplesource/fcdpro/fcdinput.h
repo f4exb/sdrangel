@@ -80,11 +80,6 @@ public:
 	void set_bias_t(bool on);
 	void set_lna_gain(bool on);
 
-	static const uint16_t m_vendorId;  //!< USB vendor ID.
-	static const uint16_t m_productId; //!< USB product ID.
-	static const int m_sampleRate;
-	static const std::string m_deviceName;
-
 private:
 	void applySettings(const Settings& settings, bool force);
 

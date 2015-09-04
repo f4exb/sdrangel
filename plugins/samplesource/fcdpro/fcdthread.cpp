@@ -58,7 +58,7 @@ void FCDThread::stopWork()
 
 void FCDThread::run()
 {
-	if ( !OpenSource(FCDInput::m_deviceName.c_str()) )
+	if ( !OpenSource("hw:CARD=V20") )
 	{
 		qCritical() << "FCDThread::run: cannot open FCD sound card";
 		return;

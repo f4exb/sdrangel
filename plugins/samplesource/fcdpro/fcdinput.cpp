@@ -29,15 +29,16 @@
 MESSAGE_CLASS_DEFINITION(FCDInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
 
+/*
 const uint16_t FCDInput::m_vendorId  = 0x04D8;
-
 const uint16_t FCDInput::m_productId = 0xFB31;
 const int FCDInput::m_sampleRate = 192000;
 const std::string FCDInput::m_deviceName("hw:CARD=V20");
 
-//const uint16_t FCDInput::m_productId = 0xFB56;
-//const int FCDInput::m_sampleRate = 96000;
-//const std::string FCDInput::m_deviceName("hw:CARD=V10");
+const uint16_t FCDInput::m_productId = 0xFB56;
+const int FCDInput::m_sampleRate = 96000;
+const std::string FCDInput::m_deviceName("hw:CARD=V10");
+*/
 
 FCDInput::Settings::Settings() :
 	centerFrequency(435000000),
@@ -137,7 +138,7 @@ bool FCDInput::start(int device)
 		return false;
 	}
 
-	m_dev = fcdOpen(m_vendorId, m_productId, device);
+	m_dev = fcdOpen(0x04D8, 0xFB31, device);
 
 	if (m_dev == 0)
 	{
@@ -200,7 +201,7 @@ const QString& FCDInput::getDeviceDescription() const
 
 int FCDInput::getSampleRate() const
 {
-	return m_sampleRate;
+	return 192000;
 }
 
 quint64 FCDInput::getCenterFrequency() const
@@ -262,7 +263,7 @@ void FCDInput::applySettings(const Settings& settings, bool force)
     
     if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(192000, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        
     }
 }

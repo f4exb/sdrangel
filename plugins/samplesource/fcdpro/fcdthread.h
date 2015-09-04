@@ -41,7 +41,6 @@ public:
 	void CloseSource();
 
 private:
-	snd_pcm_format_t fcd_format;
 	snd_pcm_t* fcd_handle;
 
 	QMutex m_startWaitMutex;
