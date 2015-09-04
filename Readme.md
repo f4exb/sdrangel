@@ -19,14 +19,16 @@ These plugins come from the parent code base and are still present in the source
   - tetra 
 - Sample sources:
   - fcd
+  - fcdpro
   - gnuradio
   - osmosdr
   - v4l-msi
   - v4l-rtl
   
-<h3>Funcube Dongle (fcd)</h3>
+<h3>Funcube Dongle (fcd, fcdpro)</h3>
 
-This is the old driver.
+- fcd is the old driver and will be completely removed in the future.
+- fcdpro is the plugin for the original FunCube Dongle Pro (not Pro+). It is temporarily removed from the build to avoid confusion until the enumeration of devices works properly.
 
 <h3>Gnuradio</h3>
 
@@ -58,7 +60,7 @@ If you use your own location for libbladeRF install directory you need to specif
 
 <h2>FunCube Dongle</h2>
 
-At the moment only the Pro+ is supported with the plugin in fcdpro. This is a work in progress. Support of features is still limited (no IF gain, no filter settings).
+At the moment only the Pro+ is supported with the plugin in fcdproplus. This is a work in progress. Support of features is still limited (no IF gain, no filter settings).
 
 The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support.
 
@@ -155,6 +157,7 @@ Assuming Debian Jessie is used:
   - Dedicated message queue to communicate to the GUI for objects coupled with a GUI
   - Optimizations with Valgrind cachegrind
   - Corrected decimators bit shifting so that the number of effective output bits is constant and fill the internal sample width
+  - Separate library to support all flavours of FunCube dongles
   - Many other little things...
     
 <h1>To Do</h1>
