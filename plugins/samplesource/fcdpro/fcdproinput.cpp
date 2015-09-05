@@ -277,14 +277,16 @@ void FCDProInput::set_bias_t(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
-	fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
+	// TODO: use FCD Pro controls
+	//fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
 }
 
 void FCDProInput::set_lna_gain(bool on)
 {
 	quint8 cmd = on ? 1 : 0;
 
-	fcdAppSetParam(m_dev, FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
+	// TODO: use FCD Pro controls
+	//fcdAppSetParam(m_dev, FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
 }
 
 
