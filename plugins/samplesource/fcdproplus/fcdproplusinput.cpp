@@ -27,6 +27,7 @@
 #include "fcdproplusserializer.h"
 #include "fcdproplusthread.h"
 #include "fcdtraits.h"
+#include "fcdproplusconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
@@ -44,28 +45,36 @@ const std::string FCDInput::m_deviceName("hw:CARD=V10");
 
 FCDProPlusInput::Settings::Settings() :
 	centerFrequency(435000000),
-	range(0),
-	gain(0),
-	bias(0)
+	rangeLow(true),
+	lnaGain(true),
+	mixGain(true),
+	biasT(false),
+	ifGain(0),
+	ifFilterIndex(0),
+	rfFilterIndex(0)
 {
 }
 
 void FCDProPlusInput::Settings::resetToDefaults()
 {
 	centerFrequency = 435000000;
-	range = 0;
-	gain = 0;
-	bias = 0;
+	rangeLow = true;
+	lnaGain = true;
+	biasT = false;
+	ifGain = 0;
+	rfFilterIndex = 0;
+	ifFilterIndex = 0;
 }
 
 QByteArray FCDProPlusInput::Settings::serialize() const
 {
 	FCDProPlusSerializer::FCDData data;
 
-	data.m_data.m_lnaGain = gain;
+	data.m_data.m_lnaGain = lnaGain;
+	data.m_data.m_RxGain1 = ifGain;
 	data.m_data.m_frequency = centerFrequency;
-	data.m_range = range;
-	data.m_bias = bias;
+	data.m_rangeLow = rangeLow;
+	data.m_biasT = biasT;
 
 	QByteArray byteArray;
 
@@ -88,10 +97,11 @@ bool FCDProPlusInput::Settings::deserialize(const QByteArray& serializedData)
 
 	bool valid = FCDProPlusSerializer::readSerializedData(serializedData, data);
 
-	gain = data.m_data.m_lnaGain;
+	lnaGain = data.m_data.m_lnaGain;
+	ifGain = data.m_data.m_RxGain1;
 	centerFrequency = data.m_data.m_frequency;
-	range = data.m_range;
-	bias = data.m_bias;
+	rangeLow = data.m_rangeLow;
+	biasT = data.m_biasT;
 
 	return valid;
 
@@ -239,23 +249,23 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 		signalChange = true;
 	}
 
-	if ((m_settings.gain != settings.gain) || force)
+	if ((m_settings.lnaGain != settings.lnaGain) || force)
 	{
-		m_settings.gain = settings.gain;
+		m_settings.lnaGain = settings.lnaGain;
 
 		if (m_dev != 0)
 		{
-			set_lna_gain(settings.gain > 0);
+			set_lna_gain(settings.lnaGain > 0);
 		}
 	}
 
-	if ((m_settings.bias != settings.bias) || force)
+	if ((m_settings.biasT != settings.biasT) || force)
 	{
-		m_settings.bias = settings.bias;
+		m_settings.biasT = settings.biasT;
 
 		if (m_dev != 0)
 		{
-			set_bias_t(settings.bias > 0);
+			set_bias_t(settings.biasT > 0);
 		}
 	}
     
@@ -287,5 +297,50 @@ void FCDProPlusInput::set_lna_gain(bool on)
 
 	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_LNA_GAIN, &cmd, 1);
 }
+
+void FCDProPlusInput::set_mixer_gain(bool on)
+{
+	quint8 cmd = on ? 1 : 0;
+
+	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_MIXER_GAIN, &cmd, 1);
+}
+
+void FCDProPlusInput::set_if_gain(int gain)
+{
+	if (gain < 0)
+	{
+		return;
+	}
+
+	quint8 cmd_value = gain;
+
+	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_GAIN, &cmd_value, 1);
+}
+
+void FCDProPlusInput::set_if_filter(int filterIndex)
+{
+	if ((filterIndex < 0) || (filterIndex >= FCDProPlusConstants::fcdproplus_if_filter_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProPlusConstants::if_filters[filterIndex].value;
+
+	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_FILTER, &cmd_value, 1);
+}
+
+
+void FCDProPlusInput::set_rf_filter(int filterIndex)
+{
+	if ((filterIndex < 0) || (filterIndex >= FCDProPlusConstants::fcdproplus_rf_filter_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProPlusConstants::rf_filters[filterIndex].value;
+
+	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_RF_FILTER, &cmd_value, 1);
+}
+
 
 

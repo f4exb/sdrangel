@@ -24,8 +24,11 @@ void FCDProPlusSerializer::writeSerializedData(const FCDData& data, QByteArray& 
 	SimpleSerializer s(1);
 
 	s.writeBlob(1, sampleSourceSerialized);
-	s.writeS32(2, data.m_bias);
-	s.writeS32(3, data.m_range);
+	s.writeBool(2, data.m_biasT);
+	s.writeBool(3, data.m_rangeLow);
+	s.writeBool(4, data.m_mixGain);
+	s.writeS32(5, data.m_ifFilterIndex);
+	s.writeS32(6, data.m_rfFilterIndex);
 
 	serializedData = s.final();
 }
@@ -49,8 +52,11 @@ bool FCDProPlusSerializer::readSerializedData(const QByteArray& serializedData, 
 		int intval;
 
 		d.readBlob(1, &sampleSourceSerialized);
-		d.readS32(2, &data.m_bias);
-		d.readS32(3, &data.m_range);
+		d.readBool(2, &data.m_biasT, false);
+		d.readBool(3, &data.m_rangeLow, false);
+		d.readBool(4, &data.m_mixGain, true);
+		d.readS32(5, &data.m_ifFilterIndex, 0);
+		d.readS32(6, &data.m_rfFilterIndex, 0);
 
 		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
 	}
@@ -63,6 +69,9 @@ bool FCDProPlusSerializer::readSerializedData(const QByteArray& serializedData, 
 
 void FCDProPlusSerializer::setDefaults(FCDData& data)
 {
-	data.m_range = 0;
-	data.m_bias = 0;
+	data.m_rangeLow = false;
+	data.m_biasT = false;
+	data.m_mixGain = true;
+	data.m_ifFilterIndex = 0;
+	data.m_rfFilterIndex = 0;
 }

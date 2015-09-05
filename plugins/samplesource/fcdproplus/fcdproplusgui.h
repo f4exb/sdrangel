@@ -47,6 +47,10 @@ private slots:
 	void on_checkBoxR_stateChanged(int state);
 	void on_checkBoxG_stateChanged(int state);
 	void on_checkBoxB_stateChanged(int state);
+	void on_mixGain_stateChanged(int state);
+	void on_ifGain_valueChanged(int value);
+	void on_filterRF_currentIndexChanged(int index);
+	void on_filterIF_currentIndexChanged(int index);
 	void updateHardware();
 };
 

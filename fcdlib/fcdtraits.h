@@ -50,7 +50,7 @@ struct fcd_traits<ProPlus>
 	static const uint16_t vendorId = 0x04D8;
 	static const uint16_t productId = 0xFB31;
 	static const int sampleRate = 192000;
-	static const int convBufSize = (1<<13);
+	static const int convBufSize = (1<<12);
 	static const char *alsaDeviceName;
     static const char *interfaceIID;
     static const char *displayedName;

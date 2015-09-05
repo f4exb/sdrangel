@@ -31,6 +31,7 @@ public:
 	void setFont(const QFont& font);
 	void setBold(bool bold);
 	void setColorMapper(ColorMapper colorMapper);
+	quint64 getValue() const { return m_value; }
 
 signals:
 	void changed(quint64 value);

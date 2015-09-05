@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>165</width>
-    <height>119</height>
+    <width>190</width>
+    <height>137</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -103,6 +103,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutR">
      <item>
+      <widget class="QCheckBox" name="mixGain">
+       <property name="text">
+        <string>Mix Gain</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="checkBoxR">
        <property name="text">
         <string>Low Range</string>
@@ -124,6 +131,49 @@
       <widget class="QCheckBox" name="checkBoxB">
        <property name="text">
         <string>Bias T</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_IF">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>IF gain</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="ifGain">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ifGainText">
+       <property name="text">
+        <string>0 dB</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QComboBox" name="filterRF">
+       <property name="toolTip">
+        <string>RF filter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="filterIF">
+       <property name="toolTip">
+        <string>IF filter</string>
        </property>
       </widget>
      </item>

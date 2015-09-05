@@ -35,9 +35,13 @@ public:
 	struct Settings {
 		Settings();
 		quint64 centerFrequency;
-		qint32 range;
-		qint32 gain;
-		qint32 bias;
+		bool rangeLow;
+		bool lnaGain;
+		bool mixGain;
+		bool biasT;
+		quint32 ifGain;
+		qint32 ifFilterIndex;
+		qint32 rfFilterIndex;
 		void resetToDefaults();
 		QByteArray serialize() const;
 		bool deserialize(const QByteArray& data);
@@ -79,6 +83,10 @@ public:
 	void set_center_freq(double freq);
 	void set_bias_t(bool on);
 	void set_lna_gain(bool on);
+	void set_mixer_gain(bool on);
+	void set_if_gain(int gain);
+	void set_rf_filter(int filterIndex);
+	void set_if_filter(int filterIndex);
 
 private:
 	void applySettings(const Settings& settings, bool force);
