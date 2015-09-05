@@ -25,8 +25,6 @@
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
 
-#define FCD_BLOCKSIZE (1<<13)
-
 class FCDProPlusThread : public QThread {
 	Q_OBJECT
 

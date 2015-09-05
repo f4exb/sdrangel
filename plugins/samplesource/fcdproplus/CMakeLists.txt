@@ -26,6 +26,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/include
 	${CMAKE_SOURCE_DIR}/include-gpl
 	${CMAKE_SOURCE_DIR}/fcdhid
+	${CMAKE_SOURCE_DIR}/fcdlib
 )
 
 #include(${QT_USE_FILE})
@@ -47,6 +48,7 @@ target_link_libraries(inputfcdproplus
 	${LIBUSB_LIBRARIES}
 	asound
 	fcdhid
+	fcdlib
 	sdrbase
 )
 

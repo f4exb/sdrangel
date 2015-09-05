@@ -20,13 +20,13 @@
 #include <errno.h>
 #include "dsp/samplefifo.h"
 #include "fcdproplusthread.h"
-#include "fcdproplusinput.h"
+#include "fcdtraits.h"
 
 FCDProPlusThread::FCDProPlusThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	fcd_handle(NULL),
 	m_running(false),
-	m_convertBuffer(FCD_BLOCKSIZE),
+	m_convertBuffer(fcd_traits<ProPlus>::convBufSize),
 	m_sampleFifo(sampleFifo)
 {
 	start();
@@ -58,7 +58,7 @@ void FCDProPlusThread::stopWork()
 
 void FCDProPlusThread::run()
 {
-	if ( !OpenSource("hw:CARD=V20") )
+	if ( !OpenSource(fcd_traits<ProPlus>::alsaDeviceName) )
 	{
 		qCritical() << "FCDThread::run: cannot open FCD sound card";
 		return;
@@ -69,7 +69,7 @@ void FCDProPlusThread::run()
 
 	while(m_running)
 	{
-		if (work(FCD_BLOCKSIZE) < 0)
+		if (work(fcd_traits<ProPlus>::convBufSize) < 0)
 		{
 			break;
 		}

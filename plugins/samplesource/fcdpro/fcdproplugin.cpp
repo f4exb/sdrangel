@@ -20,10 +20,11 @@
 #include "util/simpleserializer.h"
 #include "fcdproplugin.h"
 #include "fcdprogui.h"
+#include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlugin::m_pluginDescriptor = {
-	QString("FunCube Pro Input"),
-	QString("---"),
+	QString(fcd_traits<Pro>::pluginDisplayedName),
+	QString(fcd_traits<Pro>::pluginVersion),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -44,7 +45,7 @@ void FCDProPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.fcdpro", this);
+	m_pluginAPI->registerSampleSource(fcd_traits<Pro>::interfaceIID, this);
 }
 
 PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
@@ -52,15 +53,15 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 	SampleSourceDevices result;
 
 	int i = 1;
-	struct hid_device_info *device_info = hid_enumerate(0x04D8, 0xFB56);
+	struct hid_device_info *device_info = hid_enumerate(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId);
 
 	while (device_info != 0)
 	{
 		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
-		QString displayedName(QString("FunCube Dongle Pro #%1 ").arg(i) + serialNumber);
+		QString displayedName(QString("%1 #%2 %3").arg(fcd_traits<Pro>::displayedName).arg(i).arg(serialNumber));
 		SimpleSerializer s(1);
 		s.writeS32(1, 0);
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.fcdpro", s.final()));
+		result.append(SampleSourceDevice(displayedName, fcd_traits<Pro>::interfaceIID, s.final()));
 
 		device_info = device_info->next;
 		i++;
@@ -71,7 +72,7 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 
 PluginGUI* FCDProPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
-	if(sourceName == "org.osmocom.sdr.samplesource.fcdpro")
+	if(sourceName == fcd_traits<Pro>::interfaceIID)
 	{
 		FCDProGui* gui = new FCDProGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);

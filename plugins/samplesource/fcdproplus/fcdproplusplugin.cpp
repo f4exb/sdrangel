@@ -20,10 +20,11 @@
 #include "util/simpleserializer.h"
 #include "fcdproplusplugin.h"
 #include "fcdproplusgui.h"
+#include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlusPlugin::m_pluginDescriptor = {
-	QString("FunCube Pro+ Input"),
-	QString("---"),
+	QString(fcd_traits<ProPlus>::pluginDisplayedName),
+	QString(fcd_traits<ProPlus>::pluginVersion),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -44,7 +45,7 @@ void FCDProPlusPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.fcdproplus", this);
+	m_pluginAPI->registerSampleSource(fcd_traits<ProPlus>::interfaceIID, this);
 }
 
 PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
@@ -52,15 +53,15 @@ PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
 	SampleSourceDevices result;
 
 	int i = 1;
-	struct hid_device_info *device_info = hid_enumerate(0x04D8, 0xFB31);
+	struct hid_device_info *device_info = hid_enumerate(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId);
 
 	while (device_info != 0)
 	{
 		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
-		QString displayedName(QString("FunCube Dongle Pro+ #%1 ").arg(i) + serialNumber);
+		QString displayedName(QString("%1 #%2 %3").arg(fcd_traits<ProPlus>::displayedName).arg(i).arg(serialNumber));
 		SimpleSerializer s(1);
 		s.writeS32(1, 0);
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.fcdproplus", s.final()));
+		result.append(SampleSourceDevice(displayedName, fcd_traits<ProPlus>::interfaceIID, s.final()));
 
 		device_info = device_info->next;
 		i++;
@@ -71,7 +72,7 @@ PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
 
 PluginGUI* FCDProPlusPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
 {
-	if(sourceName == "org.osmocom.sdr.samplesource.fcdproplus")
+	if(sourceName == fcd_traits<ProPlus>::interfaceIID)
 	{
 		FCDProPlusGui* gui = new FCDProPlusGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);

@@ -26,6 +26,7 @@
 #include "fcdproplusgui.h"
 #include "fcdproplusserializer.h"
 #include "fcdproplusthread.h"
+#include "fcdtraits.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 //MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
@@ -114,7 +115,7 @@ FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
-	m_deviceDescription("Funcube Dongle Pro+")
+	m_deviceDescription(fcd_traits<ProPlus>::displayedName)
 {
 }
 
@@ -139,7 +140,7 @@ bool FCDProPlusInput::start(int device)
 		return false;
 	}
 
-	m_dev = fcdOpen(0x04D8, 0xFB31, device);
+	m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
 
 	if (m_dev == 0)
 	{
@@ -198,7 +199,7 @@ const QString& FCDProPlusInput::getDeviceDescription() const
 
 int FCDProPlusInput::getSampleRate() const
 {
-	return 192000;
+	return fcd_traits<ProPlus>::sampleRate;
 }
 
 quint64 FCDProPlusInput::getCenterFrequency() const
@@ -260,7 +261,7 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
     
     if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(192000, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        
     }
 }
