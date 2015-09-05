@@ -17,31 +17,4 @@
 
 #define FCD_RESET                    255 // Reset to bootloader
 
-typedef enum 
-{
-	TRFE_0_4,
-	TRFE_4_8,
-	TRFE_8_16,
-	TRFE_16_32,
-	TRFE_32_75,
-	TRFE_75_125,
-	TRFE_125_250,
-	TRFE_145,
-	TRFE_410_875,
-	TRFE_435,
-	TRFE_875_2000
-} fcdproplus_tuner_rf_filters;
-
-typedef enum
-{
-  TIFE_200KHZ=0,
-  TIFE_300KHZ=1,
-  TIFE_600KHZ=2,
-  TIFE_1536KHZ=3,
-  TIFE_5MHZ=4,
-  TIFE_6MHZ=5,
-  TIFE_7MHZ=6,
-  TIFE_8MHZ=7
-} fcdproplus_tuner_if_filters;
-
 #endif // _FCD_PRO_PLUS_HID_CMD_H_
