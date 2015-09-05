@@ -51,7 +51,8 @@ FCDProPlusInput::Settings::Settings() :
 	biasT(false),
 	ifGain(0),
 	ifFilterIndex(0),
-	rfFilterIndex(0)
+	rfFilterIndex(0),
+	LOppmTenths(0)
 {
 }
 
@@ -64,6 +65,7 @@ void FCDProPlusInput::Settings::resetToDefaults()
 	ifGain = 0;
 	rfFilterIndex = 0;
 	ifFilterIndex = 0;
+	LOppmTenths = 0;
 }
 
 QByteArray FCDProPlusInput::Settings::serialize() const
@@ -71,6 +73,7 @@ QByteArray FCDProPlusInput::Settings::serialize() const
 	FCDProPlusSerializer::FCDData data;
 
 	data.m_data.m_lnaGain = lnaGain;
+	data.m_data.m_correction = LOppmTenths;
 	data.m_data.m_RxGain1 = ifGain;
 	data.m_data.m_frequency = centerFrequency;
 	data.m_rangeLow = rangeLow;
@@ -98,6 +101,7 @@ bool FCDProPlusInput::Settings::deserialize(const QByteArray& serializedData)
 	bool valid = FCDProPlusSerializer::readSerializedData(serializedData, data);
 
 	lnaGain = data.m_data.m_lnaGain;
+	LOppmTenths = data.m_data.m_correction;
 	ifGain = data.m_data.m_RxGain1;
 	centerFrequency = data.m_data.m_frequency;
 	rangeLow = data.m_rangeLow;
@@ -255,7 +259,7 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			set_lna_gain(settings.lnaGain > 0);
+			set_lna_gain(settings.lnaGain);
 		}
 	}
 
@@ -265,11 +269,61 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			set_bias_t(settings.biasT > 0);
+			set_bias_t(settings.biasT);
 		}
 	}
     
-    if (signalChange)
+	if ((m_settings.mixGain != settings.mixGain) || force)
+	{
+		m_settings.mixGain = settings.mixGain;
+
+		if (m_dev != 0)
+		{
+			set_mixer_gain(settings.mixGain);
+		}
+	}
+
+	if ((m_settings.ifGain != settings.ifGain) || force)
+	{
+		m_settings.ifGain = settings.ifGain;
+
+		if (m_dev != 0)
+		{
+			set_if_gain(settings.ifGain);
+		}
+	}
+
+	if ((m_settings.ifFilterIndex != settings.ifFilterIndex) || force)
+	{
+		m_settings.ifFilterIndex = settings.ifFilterIndex;
+
+		if (m_dev != 0)
+		{
+			set_if_filter(settings.ifFilterIndex);
+		}
+	}
+
+	if ((m_settings.rfFilterIndex != settings.rfFilterIndex) || force)
+	{
+		m_settings.rfFilterIndex = settings.rfFilterIndex;
+
+		if (m_dev != 0)
+		{
+			set_rf_filter(settings.rfFilterIndex);
+		}
+	}
+
+	if ((m_settings.LOppmTenths != settings.LOppmTenths) || force)
+	{
+		m_settings.LOppmTenths = settings.LOppmTenths;
+
+		if (m_dev != 0)
+		{
+			set_lo_ppm();
+		}
+	}
+
+	if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.centerFrequency);
 		getOutputMessageQueue()->push(notif);        
@@ -278,6 +332,8 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 
 void FCDProPlusInput::set_center_freq(double freq)
 {
+	freq += freq*(((double) m_settings.LOppmTenths)/10000000.0);
+
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
 		qDebug("No FCD HID found for frquency change");
@@ -314,7 +370,10 @@ void FCDProPlusInput::set_if_gain(int gain)
 
 	quint8 cmd_value = gain;
 
-	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_GAIN, &cmd_value, 1);
+	if (fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_GAIN, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_if_gain: failed to set at " << cmd_value;
+	}
 }
 
 void FCDProPlusInput::set_if_filter(int filterIndex)
@@ -326,7 +385,10 @@ void FCDProPlusInput::set_if_filter(int filterIndex)
 
 	quint8 cmd_value = FCDProPlusConstants::if_filters[filterIndex].value;
 
-	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_FILTER, &cmd_value, 1);
+	if (fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_IF_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_if_filter: failed to set at " << cmd_value;
+	}
 }
 
 
@@ -339,8 +401,17 @@ void FCDProPlusInput::set_rf_filter(int filterIndex)
 
 	quint8 cmd_value = FCDProPlusConstants::rf_filters[filterIndex].value;
 
-	fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_RF_FILTER, &cmd_value, 1);
+	if (fcdAppSetParam(m_dev, FCDPROPLUS_HID_CMD_SET_RF_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_rf_filter: failed to set at " << cmd_value;
+	}
 }
+
+void FCDProPlusInput::set_lo_ppm()
+{
+	set_center_freq((double) m_settings.centerFrequency);
+}
+
 
 
 

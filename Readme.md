@@ -53,7 +53,7 @@ If you use your own location for libbladeRF install directory you need to specif
 
 <h2>FunCube Dongle</h2>
 
-Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. This is a work in progress. Support of features is still limited for Pro+ (no IF gain, no filter settings) and inadapted for Pro which is just a copy from Pro+ apart from some constants to make it work with Pro.
+Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. This is a work in progress. For Pro+ the RF filter selection does not seem to be effective. Perhaps it is derived from the given center frequency internally. Support of features is still inadapted for Pro which is just a copy from Pro+ apart from some constants to make it work with Pro.
 
 The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support. Library fcdlib is used to store the constants for each dongle type.
 

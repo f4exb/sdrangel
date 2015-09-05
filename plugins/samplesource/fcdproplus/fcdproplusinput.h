@@ -42,6 +42,7 @@ public:
 		quint32 ifGain;
 		qint32 ifFilterIndex;
 		qint32 rfFilterIndex;
+		qint32 LOppmTenths;
 		void resetToDefaults();
 		QByteArray serialize() const;
 		bool deserialize(const QByteArray& data);
@@ -87,6 +88,7 @@ public:
 	void set_if_gain(int gain);
 	void set_rf_filter(int filterIndex);
 	void set_if_filter(int filterIndex);
+	void set_lo_ppm();
 
 private:
 	void applySettings(const Settings& settings, bool force);

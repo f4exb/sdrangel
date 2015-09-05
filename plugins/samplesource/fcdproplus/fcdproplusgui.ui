@@ -101,34 +101,32 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutR">
-     <item>
-      <widget class="QCheckBox" name="mixGain">
-       <property name="text">
-        <string>Mix Gain</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="checkBoxR">
-       <property name="text">
-        <string>Low Range</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayoutG">
      <item>
       <widget class="QCheckBox" name="checkBoxG">
+       <property name="toolTip">
+        <string>Activate LNA </string>
+       </property>
        <property name="text">
-        <string>LNA Gain</string>
+        <string>LNA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="mixGain">
+       <property name="toolTip">
+        <string>Activate mixer gain</string>
+       </property>
+       <property name="text">
+        <string>Mix</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="checkBoxB">
+       <property name="toolTip">
+        <string>Activate bias tee</string>
+       </property>
        <property name="text">
         <string>Bias T</string>
        </property>
@@ -147,6 +145,12 @@
      </item>
      <item>
       <widget class="QSlider" name="ifGain">
+       <property name="maximum">
+        <number>59</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -156,6 +160,43 @@
       <widget class="QLabel" name="ifGainText">
        <property name="text">
         <string>0 dB</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="ppmLabel">
+       <property name="text">
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="ppm">
+       <property name="toolTip">
+        <string>LO ppm correction</string>
+       </property>
+       <property name="minimum">
+        <number>-100</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ppmText">
+       <property name="text">
+        <string>0.0</string>
        </property>
       </widget>
      </item>

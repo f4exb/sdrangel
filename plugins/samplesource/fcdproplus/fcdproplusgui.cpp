@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "ui_fcdproplusgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
@@ -15,7 +16,7 @@ FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	ui->centerFrequency->setValueRange(7, 400000U, 2000000U);
+	ui->centerFrequency->setValueRange(7, 150U, 2000000U);
 
 	ui->filterIF->clear();
 	for (int i = 0; i < FCDProPlusConstants::fcdproplus_if_filter_nb_values(); i++)
@@ -96,9 +97,15 @@ bool FCDProPlusGui::handleMessage(const Message& message)
 void FCDProPlusGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
-	ui->checkBoxR->setChecked(m_settings.rangeLow);
 	ui->checkBoxG->setChecked(m_settings.lnaGain);
 	ui->checkBoxB->setChecked(m_settings.biasT);
+	ui->mixGain->setChecked(m_settings.mixGain);
+	ui->ifGain->setValue(m_settings.ifGain);
+	ui->ifGainText->setText(QString("%1dB").arg(m_settings.ifGain));
+	ui->filterIF->setCurrentIndex(m_settings.ifFilterIndex);
+	ui->filterRF->setCurrentIndex(m_settings.rfFilterIndex);
+	ui->ppm->setValue(m_settings.LOppmTenths);
+	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.LOppmTenths/10.0, 'f', 1)));
 }
 
 void FCDProPlusGui::sendSettings()
@@ -118,34 +125,6 @@ void FCDProPlusGui::updateHardware()
 	FCDProPlusInput::MsgConfigureFCD* message = FCDProPlusInput::MsgConfigureFCD::create(m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
-}
-
-void FCDProPlusGui::on_checkBoxR_stateChanged(int state)
-{
-	if (state == Qt::Checked)
-	{
-		ui->centerFrequency->setValueRange(7, 150U, 240000U);
-
-		if ((ui->centerFrequency->getValue() < 150U) || (ui->centerFrequency->getValue() > 240000U))
-		{
-			ui->centerFrequency->setValue(7000);
-			m_settings.centerFrequency = 7000 * 1000;
-			m_settings.rangeLow = true;
-		}
-	}
-	else
-	{
-		ui->centerFrequency->setValueRange(7, 400000U, 2000000U);
-
-		if ((ui->centerFrequency->getValue() < 150U) || (ui->centerFrequency->getValue() > 240000U))
-		{
-			ui->centerFrequency->setValue(435000);
-			m_settings.centerFrequency = 435000 * 1000;
-			m_settings.rangeLow = false;
-		}
-	}
-
-	sendSettings();
 }
 
 void FCDProPlusGui::on_checkBoxG_stateChanged(int state)
@@ -181,6 +160,14 @@ void FCDProPlusGui::on_filterRF_currentIndexChanged(int index)
 void FCDProPlusGui::on_ifGain_valueChanged(int value)
 {
 	m_settings.ifGain = value;
+	displaySettings();
+	sendSettings();
+}
+
+void FCDProPlusGui::on_ppm_valueChanged(int value)
+{
+	m_settings.LOppmTenths = value;
+	displaySettings();
 	sendSettings();
 }
 
