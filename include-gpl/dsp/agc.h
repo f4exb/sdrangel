@@ -87,19 +87,25 @@ public:
 	EvenSimplerAGC() :
 		m_u0(1.0),
 		m_R(1.0),
-		m_moving_average()
+		m_moving_average(),
+		m_historySize(0),
+		m_count(0)
 	{}
 
 	EvenSimplerAGC(int historySize, Real R) :
 		m_u0(1.0),
 		m_R(R),
-		m_moving_average(historySize, m_R)
+		m_moving_average(historySize, m_R),
+		m_historySize(historySize),
+		m_count(0)
 	{}
 
 	void resize(int historySize, Real R)
 	{
 		m_R = R;
 		m_moving_average.resize(historySize, R);
+		m_historySize = historySize;
+		m_count = 0;
 	}
 
 	Real getValue()
@@ -107,28 +113,49 @@ public:
 		return m_u0;
 	}
 
+	Real getDelayedValue()
+	{
+		if (m_count < m_historySize*m_mult)
+		{
+			return 0;
+		}
+		else
+		{
+			return m_u0;
+		}
+	}
+
 	void feed(Complex& ci)
 	{
 		ci *= m_u0;
-		Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
-		m_moving_average.feed(magsq);
+		Real mag = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
+		m_moving_average.feed(mag);
 	}
 
 	void openedSquelch()
 	{
+		if (m_count < m_historySize*m_mult)
+		{
+			m_count++;
+		}
+
 		m_u0 = m_R / m_moving_average.average();
 	}
 
 	void closedSquelch()
 	{
 		//m_moving_average.fill(m_R); // Valgrind optim
-		m_u0 = 1.0;
+		m_count = 0;
+		m_u0 = m_R / m_moving_average.average();
 	}
 
 private:
 	Real m_u0;
-	Real m_R;       // objective magsq
+	Real m_R;       // objective mag
 	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+	int m_historySize;
+	int m_count;
+	static const int m_mult = 4;
 };
 
 class AlphaAGC
@@ -140,7 +167,9 @@ public:
 		m_R(1.0),
 		m_alpha(0.1),
 		m_squelchOpen(true),
-		m_moving_average()
+		m_moving_average(),
+		m_historySize(0),
+		m_count(0)
 	{}
 
 	AlphaAGC(int historySize, Real R, Real alpha) :
@@ -148,7 +177,9 @@ public:
 		m_R(R),
 		m_alpha(alpha),
 		m_squelchOpen(true),
-		m_moving_average(historySize, m_R)
+		m_moving_average(historySize, m_R),
+		m_historySize(historySize),
+		m_count(0)
 	{}
 
 	void resize(int historySize, Real R, Real alpha)
@@ -157,6 +188,8 @@ public:
 		m_alpha = alpha;
 		m_squelchOpen = true;
 		m_moving_average.resize(historySize, R);
+		m_historySize = historySize;
+		m_count = 0;
 	}
 
 	Real getValue()
@@ -164,25 +197,42 @@ public:
 		return m_u0;
 	}
 
+	Real getDelayedValue()
+	{
+		if (m_count < m_historySize)
+		{
+			return 0;
+		}
+		else
+		{
+			return m_u0;
+		}
+	}
+
 	void feed(Complex& ci)
 	{
 		ci *= m_u0;
-		Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
+		Real mag = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
 
-		if (m_squelchOpen && (magsq < m_moving_average.average()))
+		if (m_squelchOpen && (mag < m_moving_average.average()))
 		{
-			m_moving_average.feed(m_moving_average.average() - m_alpha*(m_moving_average.average() - magsq));
+			m_moving_average.feed(m_moving_average.average() - m_alpha*(m_moving_average.average() - mag));
 		}
 		else
 		{
 			//m_squelchOpen = true;
-			m_moving_average.feed(magsq);
+			m_moving_average.feed(mag);
 		}
 
 	}
 
 	void openedSquelch()
 	{
+		if (m_count < m_historySize)
+		{
+			m_count++;
+		}
+
 		m_u0 = m_R / m_moving_average.average();
 		m_squelchOpen = true;
 	}
@@ -190,7 +240,9 @@ public:
 	void closedSquelch()
 	{
 		//m_moving_average.fill(m_R); // Valgrind optim
-		m_u0 = 1.0;
+		m_count = 0;
+		//m_u0 = 1.0;
+		m_u0 = m_R / m_moving_average.average();
 		m_squelchOpen = false;
 	}
 
@@ -200,6 +252,8 @@ private:
 	Real m_alpha;
 	bool m_squelchOpen;
 	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+	int m_historySize;
+	int m_count;
 };
 
 

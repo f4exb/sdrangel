@@ -86,6 +86,8 @@ bool Channelizer::handleMessage(const Message& cmd)
 {
 	qDebug() << "Channelizer::handleMessage: " << cmd.getIdentifier();
 
+	// TODO: apply changes only if input sample rate or requested output sample rate change. Change of center frequency has no impact.
+
 	if (DSPSignalNotification::match(cmd))
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;

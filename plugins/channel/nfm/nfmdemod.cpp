@@ -55,9 +55,9 @@ NFMDemod::NFMDemod() :
 	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
-	m_agcLevel = 0.003; // 0.003
+	m_agcLevel = 0.25; // 0.003
 	//m_AGC.resize(480, m_agcLevel, 0, 0.1*m_agcLevel);
-	m_AGC.resize(240, m_agcLevel*m_agcLevel, 0.3);
+	m_AGC.resize(600, m_agcLevel*m_agcLevel); //, 0.3);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 48000.0, 5, 1); // 4000 Hz span, 250us
@@ -165,7 +165,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Real qp = ci.imag() - m_m2Sample.imag();
 				Real h1 = m_m1Sample.real() * qp;
 				Real h2 = m_m1Sample.imag() * ip;
-				Real demod = (h1 - h2) * 10000;
+				Real demod = (h1 - h2) * 30; // 10000
 
 				m_m2Sample = m_m1Sample;
 				m_m1Sample = ci;
@@ -218,7 +218,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						demod = m_bandpass.filter(demod);
 						demod *= m_running.m_volume;
-						sample = demod * ((1<<15)/301); // denominator = bandpass filter number of taps
+						sample = demod * ((1<<15)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
 					}
 
 					m_AGC.openedSquelch();
