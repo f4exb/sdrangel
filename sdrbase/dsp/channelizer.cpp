@@ -37,17 +37,28 @@ void Channelizer::feed(const SampleVector::const_iterator& begin, const SampleVe
 		return;
 	}
 
-	for(SampleVector::const_iterator sample = begin; sample != end; ++sample) {
+	m_mutex.lock();
+
+	for(SampleVector::const_iterator sample = begin; sample != end; ++sample)
+	{
 		Sample s(*sample);
 		FilterStages::iterator stage = m_filterStages.begin();
-		while(stage != m_filterStages.end()) {
+
+		for (; stage != m_filterStages.end(); ++stage)
+		{
 			if(!(*stage)->work(&s))
+			{
 				break;
-			++stage;
+			}
 		}
+
 		if(stage == m_filterStages.end())
+		{
 			m_sampleBuffer.push_back(s);
+		}
 	}
+
+	m_mutex.unlock();
 
 	m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
 	m_sampleBuffer.clear();
@@ -125,11 +136,15 @@ void Channelizer::applyConfiguration()
 		return;
 	}
 
+	m_mutex.lock();
+
 	freeFilterChain();
 
 	m_currentCenterFrequency = createFilterChain(
 		m_inputSampleRate / -2, m_inputSampleRate / 2,
 		m_requestedCenterFrequency - m_requestedOutputSampleRate / 2, m_requestedCenterFrequency + m_requestedOutputSampleRate / 2);
+
+	m_mutex.unlock();
 
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
 
