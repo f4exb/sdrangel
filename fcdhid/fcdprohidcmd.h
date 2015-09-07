@@ -70,7 +70,7 @@ typedef enum
   TLEE_1=3,
   TLEE_2=5,
   TLEE_3=7
-} fcdpro_tuner_lna_enhance;
+} fcdpro_lna_enhance;
 
 typedef enum
 {

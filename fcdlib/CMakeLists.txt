@@ -3,11 +3,13 @@ project(fcdlib)
 set(fcdlib_SOURCES
 	fcdtraits.cpp
 	fcdproplusconst.cpp
+	fcdproconst.cpp
 )
 
 set(fcdlib_HEADERS
 	fcdtraits.h
 	fcdproplusconst.h
+	fcdproconst.h
 )
 
 include_directories(
