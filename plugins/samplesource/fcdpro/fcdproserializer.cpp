@@ -67,7 +67,7 @@ bool FCDProSerializer::readSerializedData(const QByteArray& serializedData, FCDD
 		d.readBlob(1, &sampleSourceSerialized);
 		d.readS32(2, &data.m_LOppmTenths);
 		d.readBool(3, &data.m_biasT);
-		d.readS32(4, &data.m_LOppmTenths);
+		d.readS32(4, &data.m_lnaGainIndex);
 		d.readS32(5, &data.m_rfFilterIndex);
 		d.readS32(6, &data.m_lnaEnhanceIndex);
 		d.readS32(7, &data.m_bandIndex);
