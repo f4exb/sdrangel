@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>165</width>
-    <height>119</height>
+    <width>259</width>
+    <height>324</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,7 +36,7 @@
     <number>2</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="layoutFrequency">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -101,31 +101,249 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutR">
+    <layout class="QHBoxLayout" name="layoutPPM">
      <item>
-      <widget class="QCheckBox" name="checkBoxR">
+      <widget class="QLabel" name="ppmLabal">
        <property name="text">
-        <string>Low Range</string>
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="ppm">
+       <property name="toolTip">
+        <string>LO ppm correction</string>
+       </property>
+       <property name="minimum">
+        <number>-1000</number>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>0.0</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutG">
-     <item>
-      <widget class="QCheckBox" name="checkBoxG">
-       <property name="text">
-        <string>LNA Gain</string>
-       </property>
-      </widget>
-     </item>
+    <layout class="QHBoxLayout" name="layoutBiasT">
      <item>
       <widget class="QCheckBox" name="checkBoxB">
        <property name="text">
         <string>Bias T</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="defaultsButton">
+       <property name="text">
+        <string>Defaults</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutLNA">
+     <item>
+      <widget class="QLabel" name="lnaGainLabel">
+       <property name="text">
+        <string>LNA G</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="lnaGain"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="rfFilterLabel">
+       <property name="text">
+        <string>RF filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="rfFilter"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutBand">
+     <item>
+      <widget class="QLabel" name="lnaEnhanceLabel">
+       <property name="text">
+        <string>LNA En</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="lnaEnhance"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="bandLabel">
+       <property name="text">
+        <string>Band</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="band"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutMixer">
+     <item>
+      <widget class="QLabel" name="mixGainLabel">
+       <property name="text">
+        <string>Mix G</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mixGain"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="mixFilterLabel">
+       <property name="text">
+        <string>Mix filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mixFilter"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutBias">
+     <item>
+      <widget class="QLabel" name="biasLabel">
+       <property name="text">
+        <string>Bias</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="bias"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Mode</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mode"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutGain1">
+     <item>
+      <widget class="QLabel" name="gain1Label">
+       <property name="text">
+        <string>Gain1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain1"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="rcFilterLabel">
+       <property name="text">
+        <string>RC filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="rcFilter"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutGain2">
+     <item>
+      <widget class="QLabel" name="gain2Label">
+       <property name="text">
+        <string>Gain2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain2"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="gain3Label">
+       <property name="text">
+        <string>Gain3</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain3"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutGain4">
+     <item>
+      <widget class="QLabel" name="gain4Label">
+       <property name="text">
+        <string>Gain4</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain4"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>IF filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="ifFilter"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutGain5">
+     <item>
+      <widget class="QLabel" name="gain5Label">
+       <property name="text">
+        <string>Gain5</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain5"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="gain6Label">
+       <property name="text">
+        <string>Gain6</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gain6"/>
      </item>
     </layout>
    </item>

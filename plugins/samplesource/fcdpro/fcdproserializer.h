@@ -25,8 +25,24 @@ public:
 	struct FCDData
 	{
 		SampleSourceSerializer::Data m_data;
-		qint32 m_bias;
-		qint32 m_range;
+		qint32 m_LOppmTenths;
+		bool m_biasT;
+		qint32 m_lnaGainIndex;
+		qint32 m_rfFilterIndex;
+		qint32 m_lnaEnhanceIndex;
+		qint32 m_bandIndex;
+		qint32 m_mixerGainIndex;
+		qint32 m_mixerFilterIndex;
+		qint32 m_biasCurrentIndex;
+		qint32 m_modeIndex;
+		qint32 m_gain1Index;
+		qint32 m_rcFilterIndex;
+		qint32 m_gain2Index;
+		qint32 m_gain3Index;
+		qint32 m_gain4Index;
+		qint32 m_ifFilterIndex;
+		qint32 m_gain5Index;
+		qint32 m_gain6Index;
 	};
 
 	static void writeSerializedData(const FCDData& data, QByteArray& serializedData);

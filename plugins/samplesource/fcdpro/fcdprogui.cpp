@@ -81,9 +81,7 @@ bool FCDProGui::handleMessage(const Message& message)
 void FCDProGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
-	ui->checkBoxR->setChecked(m_settings.range);
-	ui->checkBoxG->setChecked(m_settings.gain);
-	ui->checkBoxB->setChecked(m_settings.bias);
+	ui->checkBoxB->setChecked(m_settings.biasT);
 }
 
 void FCDProGui::sendSettings()
@@ -98,44 +96,10 @@ void FCDProGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void FCDProGui::updateHardware()
+void FCDProGui::on_ppm_valueChanged(int value)
 {
-	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings);
-	m_sampleSource->getInputMessageQueue()->push(message);
-	m_updateTimer.stop();
-}
-
-void FCDProGui::on_checkBoxR_stateChanged(int state)
-{
-	if (state == Qt::Checked) // FIXME: this is for the Pro+ version only!
-	{
-		ui->centerFrequency->setValueRange(7, 150U, 240000U);
-		ui->centerFrequency->setValue(7000);
-		m_settings.centerFrequency = 7000 * 1000;
-		m_settings.range = 1;
-	}
-	else
-	{
-		ui->centerFrequency->setValueRange(7, 64000U, 1900000U);
-		ui->centerFrequency->setValue(435000);
-		m_settings.centerFrequency = 435000 * 1000;
-		m_settings.range = 0;
-	}
-
-	sendSettings();
-}
-
-void FCDProGui::on_checkBoxG_stateChanged(int state)
-{
-	if (state == Qt::Checked)
-	{
-		m_settings.gain = 1;
-	}
-	else
-	{
-		m_settings.gain = 0;
-	}
-
+	m_settings.LOppmTenths = value;
+	displaySettings();
 	sendSettings();
 }
 
@@ -143,12 +107,100 @@ void FCDProGui::on_checkBoxB_stateChanged(int state)
 {
 	if (state == Qt::Checked)
 	{
-		m_settings.bias = 1;
+		m_settings.biasT = 1;
 	}
 	else
 	{
-		m_settings.bias = 0;
+		m_settings.biasT = 0;
 	}
 
 	sendSettings();
 }
+
+void FCDProGui::on_lnaGain_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_rfFilter_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_lnaEnhance_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_band_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_mixGain_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_mixFilter_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_bias_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_mode_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain1_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_rcFilter_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain2_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain3_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain4_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_ifFilter_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain5_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::on_gain6_currentIndexChanged(int index)
+{
+
+}
+
+void FCDProGui::updateHardware()
+{
+	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings);
+	m_sampleSource->getInputMessageQueue()->push(message);
+	m_updateTimer.stop();
+}
+

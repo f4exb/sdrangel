@@ -44,9 +44,25 @@ private:
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
-	void on_checkBoxR_stateChanged(int state);
-	void on_checkBoxG_stateChanged(int state);
+	void on_ppm_valueChanged(int value);
 	void on_checkBoxB_stateChanged(int state);
+	// TOOD: defaults push button
+	void on_lnaGain_currentIndexChanged(int index);
+	void on_rfFilter_currentIndexChanged(int index);
+	void on_lnaEnhance_currentIndexChanged(int index);
+	void on_band_currentIndexChanged(int index);
+	void on_mixGain_currentIndexChanged(int index);
+	void on_mixFilter_currentIndexChanged(int index);
+	void on_bias_currentIndexChanged(int index);
+	void on_mode_currentIndexChanged(int index);
+	void on_gain1_currentIndexChanged(int index);
+	void on_rcFilter_currentIndexChanged(int index);
+	void on_gain2_currentIndexChanged(int index);
+	void on_gain3_currentIndexChanged(int index);
+	void on_gain4_currentIndexChanged(int index);
+	void on_ifFilter_currentIndexChanged(int index);
+	void on_gain5_currentIndexChanged(int index);
+	void on_gain6_currentIndexChanged(int index);
 	void updateHardware();
 };
 

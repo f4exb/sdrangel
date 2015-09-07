@@ -27,58 +27,67 @@
 #include "fcdproserializer.h"
 #include "fcdprothread.h"
 #include "fcdtraits.h"
+#include "fcdproconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCD, Message)
 
-/*
-const uint16_t FCDInput::m_vendorId  = 0x04D8;
-const uint16_t FCDInput::m_productId = 0xFB31;
-const int FCDInput::m_sampleRate = 192000;
-const std::string FCDInput::m_deviceName("hw:CARD=V20");
-
-const uint16_t FCDInput::m_productId = 0xFB56;
-const int FCDInput::m_sampleRate = 96000;
-const std::string FCDInput::m_deviceName("hw:CARD=V10");
-*/
-
-FCDProInput::Settings::Settings() :
-	centerFrequency(435000000),
-	range(0),
-	gain(0),
-	bias(0)
+FCDProInput::Settings::Settings()
 {
+	resetToDefaults();
 }
 
 void FCDProInput::Settings::resetToDefaults()
 {
 	centerFrequency = 435000000;
-	range = 0;
-	gain = 0;
-	bias = 0;
+	LOppmTenths = 0;
+	biasT = 0;
+	lnaGainIndex = 0;
+	rfFilterIndex = 0;
+	lnaEnhanceIndex = 0;
+	bandIndex = 0;
+	mixerGainIndex = 0;
+	mixerFilterIndex = 0;
+	biasCurrentIndex = 0;
+	modeIndex = 0;
+	gain1Index = 0;
+	rcFilterIndex = 0;
+	gain2Index = 0;
+	gain3Index = 0;
+	gain4Index = 0;
+	ifFilterIndex = 0;
+	gain5Index = 0;
+	gain6Index = 0;
 }
 
 QByteArray FCDProInput::Settings::serialize() const
 {
 	FCDProSerializer::FCDData data;
 
-	data.m_data.m_lnaGain = gain;
 	data.m_data.m_frequency = centerFrequency;
-	data.m_range = range;
-	data.m_bias = bias;
+	data.m_LOppmTenths = LOppmTenths;
+	data.m_biasT = biasT;
+	data.m_lnaGainIndex = lnaGainIndex;
+	data.m_rfFilterIndex = rfFilterIndex;
+	data.m_lnaEnhanceIndex = lnaEnhanceIndex;
+	data.m_bandIndex = bandIndex;
+	data.m_mixerGainIndex = mixerGainIndex;
+	data.m_mixerFilterIndex = mixerFilterIndex;
+	data.m_biasCurrentIndex = biasCurrentIndex;
+	data.m_modeIndex = modeIndex;
+	data.m_gain1Index = gain1Index;
+	data.m_rcFilterIndex = rcFilterIndex;
+	data.m_gain2Index = gain2Index;
+	data.m_gain3Index = gain3Index;
+	data.m_gain4Index = gain4Index;
+	data.m_ifFilterIndex = ifFilterIndex;
+	data.m_gain5Index = gain5Index;
+	data.m_gain6Index = gain6Index;
 
 	QByteArray byteArray;
 
 	FCDProSerializer::writeSerializedData(data, byteArray);
 
 	return byteArray;
-
-	/*
-	SimpleSerializer s(1);
-	s.writeU64(1, centerFrequency);
-	s.writeS32(2, range);
-	s.writeS32(3, gain);
-	s.writeS32(4, bias);
-	return s.final();*/
 }
 
 bool FCDProInput::Settings::deserialize(const QByteArray& serializedData)
@@ -87,27 +96,26 @@ bool FCDProInput::Settings::deserialize(const QByteArray& serializedData)
 
 	bool valid = FCDProSerializer::readSerializedData(serializedData, data);
 
-	gain = data.m_data.m_lnaGain;
 	centerFrequency = data.m_data.m_frequency;
-	range = data.m_range;
-	bias = data.m_bias;
+	LOppmTenths = data.m_LOppmTenths;
+	biasT = data.m_biasT;
+	lnaGainIndex = data.m_lnaGainIndex;
+	rfFilterIndex = data.m_rfFilterIndex;
+	lnaEnhanceIndex = data.m_lnaEnhanceIndex;
+	bandIndex = data.m_bandIndex;
+	mixerGainIndex = data.m_mixerGainIndex;
+	biasCurrentIndex = data.m_biasCurrentIndex;
+	modeIndex = data.m_modeIndex;
+	gain1Index = data.m_gain1Index;
+	rcFilterIndex = data.m_rcFilterIndex;
+	gain2Index = data.m_gain2Index;
+	gain3Index = data.m_gain3Index;
+	gain4Index = data.m_gain4Index;
+	ifFilterIndex = data.m_ifFilterIndex;
+	gain5Index = data.m_gain5Index;
+	gain6Index = data.m_gain6Index;
 
 	return valid;
-
-	/*
-	SimpleDeserializer d(data);
-
-	if (d.isValid() && d.getVersion() == 1)
-	{
-		d.readU64(1, &centerFrequency, 435000000);
-        d.readS32(2, &range, 0);
-		d.readS32(3, &gain, 0);
-		d.readS32(4, &bias, 0);
-		return true;
-	}
-
-	resetToDefaults();
-	return true;*/
 }
 
 FCDProInput::FCDProInput() :
@@ -238,23 +246,13 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 		signalChange = true;
 	}
 
-	if ((m_settings.gain != settings.gain) || force)
+	if ((m_settings.biasT != settings.biasT) || force)
 	{
-		m_settings.gain = settings.gain;
+		m_settings.biasT = settings.biasT;
 
 		if (m_dev != 0)
 		{
-			set_lna_gain(settings.gain > 0);
-		}
-	}
-
-	if ((m_settings.bias != settings.bias) || force)
-	{
-		m_settings.bias = settings.bias;
-
-		if (m_dev != 0)
-		{
-			set_bias_t(settings.bias > 0);
+			set_bias_t(settings.biasT > 0);
 		}
 	}
     
@@ -281,12 +279,243 @@ void FCDProInput::set_bias_t(bool on)
 	//fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);
 }
 
-void FCDProInput::set_lna_gain(bool on)
+void FCDProInput::set_lnaGain(int index)
 {
-	quint8 cmd = on ? 1 : 0;
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_lna_gain_nb_values()))
+	{
+		return;
+	}
 
-	// TODO: use FCD Pro controls
-	//fcdAppSetParam(m_dev, FCD_CMD_APP_SET_LNA_GAIN, &cmd, 1);
+	quint8 cmd_value = FCDProConstants::lna_gains[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_LNA_GAIN, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_lnaGain: failed to set at " << cmd_value;
+	}
 }
 
+void FCDProInput::set_rfFilter(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_rf_filter_nb_values()))
+	{
+		return;
+	}
 
+	quint8 cmd_value = FCDProConstants::rf_filters[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_RF_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_rfFilter: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_lnaEnhance(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_lna_enhance_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::lna_enhances[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_LNA_ENHANCE, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_lnaEnhance: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_band(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_band_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::bands[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_BAND, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_band: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_mixerGain(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_mixer_gain_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::mixer_gains[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_MIXER_GAIN, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_mixerGain: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_mixerFilter(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_mixer_filter_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::mixer_filters[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_MIXER_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_mixerFilter: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_biasCurrent(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_bias_current_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::bias_currents[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_BIAS_CURRENT, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_biasCurrent: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_mode(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain_mode_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gain_modes[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN_MODE, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_mode: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_gain1(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain1_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains1[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN1, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain1: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_rcFilter(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_rc_filter_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_rc_filters[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_RC_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_rcFilter: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_gain2(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain2_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains2[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN2, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain2: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_gain3(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain3_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains3[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN3, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain3: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_gain4(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain4_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains4[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN4, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain4: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_ifFilter(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_filter_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_filters[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_FILTER, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_ifFilter: failed to set at " << cmd_value;
+	}
+
+}
+
+void FCDProInput::set_gain5(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain5_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains5[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN5, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain5: failed to set at " << cmd_value;
+	}
+}
+
+void FCDProInput::set_gain6(int index)
+{
+	if ((index < 0) || (index >= FCDProConstants::fcdpro_if_gain6_nb_values()))
+	{
+		return;
+	}
+
+	quint8 cmd_value = FCDProConstants::if_gains6[index].value;
+
+	if (fcdAppSetParam(m_dev, FCDPRO_HID_CMD_SET_IF_GAIN6, &cmd_value, 1) != FCD_MODE_APP)
+	{
+		qWarning() << "FCDProPlusInput::set_gain6: failed to set at " << cmd_value;
+	}
+}
