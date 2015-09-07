@@ -40,7 +40,6 @@ void FCDProInput::Settings::resetToDefaults()
 {
 	centerFrequency = 435000000;
 	LOppmTenths = 0;
-	biasT = 0;
 	lnaGainIndex = 0;
 	rfFilterIndex = 0;
 	lnaEnhanceIndex = 0;
@@ -65,7 +64,6 @@ QByteArray FCDProInput::Settings::serialize() const
 
 	data.m_data.m_frequency = centerFrequency;
 	data.m_LOppmTenths = LOppmTenths;
-	data.m_biasT = biasT;
 	data.m_lnaGainIndex = lnaGainIndex;
 	data.m_rfFilterIndex = rfFilterIndex;
 	data.m_lnaEnhanceIndex = lnaEnhanceIndex;
@@ -98,12 +96,12 @@ bool FCDProInput::Settings::deserialize(const QByteArray& serializedData)
 
 	centerFrequency = data.m_data.m_frequency;
 	LOppmTenths = data.m_LOppmTenths;
-	biasT = data.m_biasT;
 	lnaGainIndex = data.m_lnaGainIndex;
 	rfFilterIndex = data.m_rfFilterIndex;
 	lnaEnhanceIndex = data.m_lnaEnhanceIndex;
 	bandIndex = data.m_bandIndex;
 	mixerGainIndex = data.m_mixerGainIndex;
+	mixerFilterIndex = data.m_mixerFilterIndex;
 	biasCurrentIndex = data.m_biasCurrentIndex;
 	modeIndex = data.m_modeIndex;
 	gain1Index = data.m_gain1Index;
@@ -246,16 +244,6 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 		signalChange = true;
 	}
 
-	if ((m_settings.biasT != settings.biasT) || force)
-	{
-		m_settings.biasT = settings.biasT;
-
-		if (m_dev != 0)
-		{
-			set_bias_t(settings.biasT > 0);
-		}
-	}
-    
 	if ((m_settings.lnaGainIndex != settings.lnaGainIndex) || force)
 	{
 		m_settings.lnaGainIndex = settings.lnaGainIndex;
@@ -416,6 +404,16 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 		}
 	}
 
+	if ((m_settings.LOppmTenths != settings.LOppmTenths) || force)
+	{
+		m_settings.LOppmTenths = settings.LOppmTenths;
+
+		if (m_dev != 0)
+		{
+			set_lo_ppm();
+		}
+	}
+
     if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.centerFrequency);
@@ -425,10 +423,13 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 
 void FCDProInput::set_center_freq(double freq)
 {
+	freq += freq*(((double) m_settings.LOppmTenths)/10000000.0);
+
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
 		qDebug("No FCD HID found for frquency change");
 	}
+
 }
 
 void FCDProInput::set_bias_t(bool on)
@@ -678,4 +679,9 @@ void FCDProInput::set_gain6(int index)
 	{
 		qWarning() << "FCDProPlusInput::set_gain6: failed to set at " << cmd_value;
 	}
+}
+
+void FCDProInput::set_lo_ppm()
+{
+	set_center_freq((double) m_settings.centerFrequency);
 }

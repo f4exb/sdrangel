@@ -36,7 +36,6 @@ public:
 		Settings();
 		quint64 centerFrequency;
 		qint32 LOppmTenths;
-		bool biasT;
 		qint32 lnaGainIndex;
 		qint32 rfFilterIndex;
 		qint32 lnaEnhanceIndex;
@@ -112,6 +111,7 @@ public:
 
 private:
 	void applySettings(const Settings& settings, bool force);
+	void set_lo_ppm();
 
 	hid_device *m_dev;
 	QMutex m_mutex;

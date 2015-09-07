@@ -179,7 +179,6 @@ bool FCDProGui::handleMessage(const Message& message)
 void FCDProGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
-	ui->checkBoxB->setChecked(m_settings.biasT);
 	ui->ppm->setValue(m_settings.LOppmTenths);
 	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.LOppmTenths/10.0, 'f', 1)));
 
@@ -217,20 +216,6 @@ void FCDProGui::on_ppm_valueChanged(int value)
 {
 	m_settings.LOppmTenths = value;
 	displaySettings();
-	sendSettings();
-}
-
-void FCDProGui::on_checkBoxB_stateChanged(int state)
-{
-	if (state == Qt::Checked)
-	{
-		m_settings.biasT = 1;
-	}
-	else
-	{
-		m_settings.biasT = 0;
-	}
-
 	sendSettings();
 }
 
@@ -327,6 +312,27 @@ void FCDProGui::on_gain5_currentIndexChanged(int index)
 void FCDProGui::on_gain6_currentIndexChanged(int index)
 {
 	m_settings.gain6Index = index;
+	sendSettings();
+}
+
+void FCDProGui::on_setDefaults_clicked(bool checked)
+{
+	m_settings.lnaGainIndex = 4;
+	//m_settings.rfFilterIndex = 0;
+	m_settings.mixerGainIndex = 1;
+	m_settings.mixerFilterIndex = 8;
+	m_settings.gain1Index = 1;
+	m_settings.rcFilterIndex = 15;
+	m_settings.gain2Index = 1;
+	m_settings.gain3Index = 1;
+	m_settings.gain4Index = 0;
+	m_settings.ifFilterIndex = 31;
+	m_settings.gain5Index = 0;
+	m_settings.gain6Index = 0;
+	m_settings.lnaEnhanceIndex = 0;
+	m_settings.biasCurrentIndex = 3;
+	m_settings.modeIndex = 0;
+	displaySettings();
 	sendSettings();
 }
 

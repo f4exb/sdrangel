@@ -26,7 +26,6 @@ public:
 	{
 		SampleSourceSerializer::Data m_data;
 		qint32 m_LOppmTenths;
-		bool m_biasT;
 		qint32 m_lnaGainIndex;
 		qint32 m_rfFilterIndex;
 		qint32 m_lnaEnhanceIndex;

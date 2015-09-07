@@ -115,10 +115,10 @@
         <string>LO ppm correction</string>
        </property>
        <property name="minimum">
-        <number>-1000</number>
+        <number>-2000</number>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <number>2000</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -140,42 +140,11 @@
    <item>
     <layout class="QHBoxLayout" name="layoutBiasT">
      <item>
-      <widget class="QCheckBox" name="checkBoxB">
-       <property name="text">
-        <string>Bias T</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="defaultsButton">
+      <widget class="QPushButton" name="setDefaults">
        <property name="text">
         <string>Defaults</string>
        </property>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="layoutLNA">
-     <item>
-      <widget class="QLabel" name="lnaGainLabel">
-       <property name="text">
-        <string>LNA G</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="lnaGain"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="rfFilterLabel">
-       <property name="text">
-        <string>RF filt</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="rfFilter"/>
      </item>
     </layout>
    </item>
@@ -204,30 +173,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="layoutMixer">
-     <item>
-      <widget class="QLabel" name="mixGainLabel">
-       <property name="text">
-        <string>Mix G</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="mixGain"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="mixFilterLabel">
-       <property name="text">
-        <string>Mix filt</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="mixFilter"/>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="layoutBias">
      <item>
       <widget class="QLabel" name="biasLabel">
@@ -248,6 +193,54 @@
      </item>
      <item>
       <widget class="QComboBox" name="mode"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutLNA">
+     <item>
+      <widget class="QLabel" name="lnaGainLabel">
+       <property name="text">
+        <string>LNA G</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="lnaGain"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="rfFilterLabel">
+       <property name="text">
+        <string>RF filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="rfFilter"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutMixer">
+     <item>
+      <widget class="QLabel" name="mixGainLabel">
+       <property name="text">
+        <string>Mix G</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mixGain"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="mixFilterLabel">
+       <property name="text">
+        <string>Mix filt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="mixFilter"/>
      </item>
     </layout>
    </item>
