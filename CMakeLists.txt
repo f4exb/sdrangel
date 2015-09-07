@@ -55,6 +55,7 @@ set(sdrbase_SOURCES
 	sdrbase/audio/audiofifo.cpp
 	sdrbase/audio/audiooutput.cpp
 
+	sdrbase/dsp/agc.cpp
 	sdrbase/dsp/afsquelch.cpp
 	sdrbase/dsp/channelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
