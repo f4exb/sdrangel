@@ -163,7 +163,7 @@ private:
 	Complex m_m1Sample;
 	Complex m_m2Sample;
 	MovingAverage<Real> m_movingAverage;
-	EvenSimplerAGC m_AGC;
+	MagSquaredAGC m_AGC;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
 
