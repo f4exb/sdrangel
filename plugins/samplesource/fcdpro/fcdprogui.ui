@@ -153,7 +153,7 @@
      <item>
       <widget class="QLabel" name="lnaEnhanceLabel">
        <property name="text">
-        <string>LNA En</string>
+        <string>LNA Enh</string>
        </property>
       </widget>
      </item>

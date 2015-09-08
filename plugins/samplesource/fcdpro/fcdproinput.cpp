@@ -250,7 +250,7 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			set_ifFilter(settings.lnaGainIndex);
+			set_lnaGain(settings.lnaGainIndex);
 		}
 	}
 

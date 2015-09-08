@@ -317,21 +317,21 @@ void FCDProGui::on_gain6_currentIndexChanged(int index)
 
 void FCDProGui::on_setDefaults_clicked(bool checked)
 {
-	m_settings.lnaGainIndex = 4;
+	m_settings.lnaGainIndex = 8;        // +15 dB
 	//m_settings.rfFilterIndex = 0;
-	m_settings.mixerGainIndex = 1;
-	m_settings.mixerFilterIndex = 8;
-	m_settings.gain1Index = 1;
-	m_settings.rcFilterIndex = 15;
-	m_settings.gain2Index = 1;
-	m_settings.gain3Index = 1;
-	m_settings.gain4Index = 0;
-	m_settings.ifFilterIndex = 31;
-	m_settings.gain5Index = 0;
-	m_settings.gain6Index = 0;
-	m_settings.lnaEnhanceIndex = 0;
-	m_settings.biasCurrentIndex = 3;
-	m_settings.modeIndex = 0;
+	m_settings.mixerGainIndex = 1;      // +12 dB
+	m_settings.mixerFilterIndex = 8;    // 1.9 MHz
+	m_settings.gain1Index = 1;          // +6 dB
+	m_settings.rcFilterIndex = 15;      // 1.0 MHz
+	m_settings.gain2Index = 1;          // +3 dB
+	m_settings.gain3Index = 1;          // +3 dB
+	m_settings.gain4Index = 0;          // 0 dB
+	m_settings.ifFilterIndex = 31;      // 2.15 MHz
+	m_settings.gain5Index = 0;          // +3 dB
+	m_settings.gain6Index = 0;          // +3 dB
+	m_settings.lnaEnhanceIndex = 0;     // Off
+	m_settings.biasCurrentIndex = 3;    // V/U band
+	m_settings.modeIndex = 0;           // Linearity
 	displaySettings();
 	sendSettings();
 }
