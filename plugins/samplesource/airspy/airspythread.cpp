@@ -20,7 +20,7 @@
 #include "airspythread.h"
 #include "dsp/samplefifo.h"
 
-AirspyThread *airspyThread = 0;
+AirspyThread *AirspyThread::m_this = 0;
 
 AirspyThread::AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
@@ -32,13 +32,13 @@ AirspyThread::AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QO
 	m_log2Decim(0),
 	m_fcPos(0)
 {
-	airspyThread = this;
+	m_this = this;
 }
 
 AirspyThread::~AirspyThread()
 {
 	stopWork();
-	airspyThread = 0;
+	m_this = 0;
 }
 
 void AirspyThread::startWork()
@@ -185,5 +185,5 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 int AirspyThread::rx_callback(airspy_transfer_t* transfer)
 {
 	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16) * 2;
-	airspyThread->callback((qint16 *) transfer->samples, bytes_to_write);
+	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
 }

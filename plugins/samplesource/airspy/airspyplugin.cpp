@@ -73,6 +73,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 
 			if (rc != AIRSPY_SUCCESS)
 			{
+				qDebug("AirspyPlugin::enumSampleSources: failed to read serial no: %s", airspy_error_name(rc));
 				continue; // next
 			}
 
@@ -88,6 +89,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 		}
 		else
 		{
+			qDebug("AirspyPlugin::enumSampleSources: enumerated %d Airspy devices %s", i, airspy_error_name(rc));
 			break; // finished
 		}
 	}

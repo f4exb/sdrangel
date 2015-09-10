@@ -52,6 +52,7 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 	int m_fcPos;
+	static AirspyThread *m_this;
 
 	Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 
