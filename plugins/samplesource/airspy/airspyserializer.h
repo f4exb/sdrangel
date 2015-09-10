@@ -26,9 +26,9 @@ public:
 	{
 		SampleSourceSerializer::Data m_data;
 		qint32 m_LOppmTenths;
-		qint32 m_sampleRate;
+		quint32 m_sampleRateIndex;
 		quint32 m_log2Decim;
-		quint32 m_fcPos;
+		qint32 m_fcPos;
 		quint32 m_lnaGain;
 		quint32 m_mixerGain;
 		quint32 m_vgaGain;

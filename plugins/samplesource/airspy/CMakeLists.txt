@@ -29,6 +29,7 @@ include_directories(
 )
 
 #include(${QT_USE_FILE})
+#add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_OLD")
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)

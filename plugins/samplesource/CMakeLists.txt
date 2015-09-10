@@ -32,4 +32,9 @@ if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 	add_subdirectory(bladerf)
 endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 
+find_package(LibAIRSPY)
+if(LIBUSB_FOUND AND LIBAIRSPY_FOUND)
+	add_subdirectory(airspy)
+endif(LIBUSB_FOUND AND LIBAIRSPY_FOUND)
+
 add_subdirectory(filesource)

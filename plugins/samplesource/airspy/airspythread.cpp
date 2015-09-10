@@ -20,9 +20,9 @@
 #include "airspythread.h"
 #include "dsp/samplefifo.h"
 
+AirspyThread *airspyThread = 0;
 
-
-AirspyThread::AirspyThread(struct bladerf* dev, SampleFifo* sampleFifo, QObject* parent) :
+AirspyThread::AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -32,11 +32,13 @@ AirspyThread::AirspyThread(struct bladerf* dev, SampleFifo* sampleFifo, QObject*
 	m_log2Decim(0),
 	m_fcPos(0)
 {
+	airspyThread = this;
 }
 
 AirspyThread::~AirspyThread()
 {
 	stopWork();
+	airspyThread = 0;
 }
 
 void AirspyThread::startWork()
@@ -54,7 +56,7 @@ void AirspyThread::stopWork()
 	wait();
 }
 
-void AirspyThread::setSamplerate(int samplerate)
+void AirspyThread::setSamplerate(uint32_t samplerate)
 {
 	m_samplerate = samplerate;
 }
@@ -71,18 +73,23 @@ void AirspyThread::setFcPos(int fcPos)
 
 void AirspyThread::run()
 {
-	int res;
+	airspy_error rc;
 
 	m_running = true;
 	m_startWaiter.wakeAll();
 
-	while(m_running) {
-		if((res = bladerf_sync_rx(m_dev, m_buf, AIRSPY_BLOCKSIZE, NULL, 10000)) < 0) {
-			qCritical("AirspyThread: sync error: %s", strerror(errno));
-			break;
-		}
+	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, NULL);
 
-		callback(m_buf, 2 * AIRSPY_BLOCKSIZE);
+	if (rc != AIRSPY_SUCCESS)
+	{
+		qCritical("AirspyInput::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
+	}
+	else
+	{
+		while ((m_running) && (airspy_is_streaming(m_dev) == AIRSPY_TRUE))
+		{
+			sleep(1);
+		}
 	}
 
 	m_running = false;
@@ -172,4 +179,11 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
+
+
+int AirspyThread::rx_callback(airspy_transfer_t* transfer)
+{
+	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16) * 2;
+	airspyThread->callback((qint16 *) transfer->samples, bytes_to_write);
 }

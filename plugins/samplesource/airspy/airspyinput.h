@@ -34,7 +34,7 @@ public:
 	struct Settings {
 		quint64 m_centerFrequency;
 		qint32  m_LOppmTenths;
-		int m_devSampleRate;
+		quint32 m_devSampleRateIndex;
 		quint32 m_lnaGain;
 		quint32 m_mixerGain;
 		quint32 m_vgaGain;
@@ -72,17 +72,17 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const std::vector<int>& getSampleRates() const { return m_sampleRates; }
+		const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
-		static MsgReportAirspy* create(const std::vector<int>& sampleRates)
+		static MsgReportAirspy* create(const std::vector<uint32_t>& sampleRates)
 		{
 			return new MsgReportAirspy(sampleRates);
 		}
 
 	protected:
-		std::vector<int> m_sampleRates;
+		std::vector<uint32_t> m_sampleRates;
 
-		MsgReportAirspy(const std::vector<int>& sampleRates) :
+		MsgReportAirspy(const std::vector<uint32_t>& sampleRates) :
 			Message(),
 			m_sampleRates(sampleRates)
 		{ }
@@ -104,13 +104,14 @@ public:
 private:
 	bool applySettings(const Settings& settings, bool force);
 	struct airspy_device *open_airspy_from_sequence(int sequence);
+	void setCenterFrequency(quint64 freq);
 
 	QMutex m_mutex;
 	Settings m_settings;
 	struct airspy_device* m_dev;
 	AirspyThread* m_airspyThread;
 	QString m_deviceDescription;
-	std::vector<int> m_sampleRates;
+	std::vector<uint32_t> m_sampleRates;
 };
 
 #endif // INCLUDE_AIRSPYINPUT_H

@@ -30,7 +30,7 @@ MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
 AirspyInput::Settings::Settings() :
 	m_centerFrequency(435000*1000),
-	m_devSampleRate(2500000),
+	m_devSampleRateIndex(0),
 	m_LOppmTenths(0),
 	m_lnaGain(1),
 	m_mixerGain(5),
@@ -44,7 +44,7 @@ AirspyInput::Settings::Settings() :
 void AirspyInput::Settings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
-	m_devSampleRate = 2500000;
+	m_devSampleRateIndex = 0;
 	m_LOppmTenths = 0;
 	m_lnaGain = 1;
 	m_mixerGain = 5;
@@ -60,9 +60,9 @@ QByteArray AirspyInput::Settings::serialize() const
 
 	data.m_data.m_frequency = m_centerFrequency;
 	data.m_LOppmTenths = m_LOppmTenths;
-	data.m_sampleRate = m_devSampleRate;
+	data.m_sampleRateIndex = m_devSampleRateIndex;
 	data.m_log2Decim = m_log2Decim;
-	data.m_fcPos = m_fcPos;
+	data.m_fcPos = (qint32) m_fcPos;
 	data.m_lnaGain = m_lnaGain;
 	data.m_mixerGain = m_mixerGain;
 	data.m_vgaGain = m_vgaGain;
@@ -83,9 +83,9 @@ bool AirspyInput::Settings::deserialize(const QByteArray& serializedData)
 
 	m_centerFrequency = data.m_data.m_frequency;
 	m_LOppmTenths = data.m_LOppmTenths;
-	m_devSampleRate = data.m_sampleRate;
+	m_devSampleRateIndex = data.m_sampleRateIndex;
 	m_log2Decim = data.m_log2Decim;
-	m_fcPos = data.m_fcPos;
+	m_fcPos = (fcPos_t) data.m_fcPos;
 	m_lnaGain = data.m_lnaGain;
 	m_mixerGain = data.m_mixerGain;
 	m_vgaGain = data.m_vgaGain;
@@ -117,7 +117,7 @@ bool AirspyInput::start(int device)
 	QMutexLocker mutexLocker(&m_mutex);
 	airspy_error rc;
 
-	rc = airspy_init();
+	rc = (airspy_error) airspy_init();
 
 	if (rc != AIRSPY_SUCCESS)
 	{
@@ -143,16 +143,22 @@ bool AirspyInput::start(int device)
 
 #ifdef LIBAIRSPY_OLD
 	m_sampleRates.push_back(2500000);
-	m_sampleRates.push_back(10000000)
+	m_sampleRates.push_back(10000000);
 #else
 	uint32_t nbSampleRates;
-	uint32_t sampleRates[];
+	uint32_t *sampleRates;
 
 	airspy_get_samplerates(m_dev, &nbSampleRates, 0);
 
 	sampleRates = new uint32_t[nbSampleRates];
 
 	airspy_get_samplerates(m_dev, sampleRates, nbSampleRates);
+
+	if (nbSampleRates == 0)
+	{
+		qCritical("AirspyInput::start: could not obtain Airspy sample rates");
+		return false;
+	}
 
 	for (int i=0; i<nbSampleRates; i++)
 	{
@@ -161,6 +167,16 @@ bool AirspyInput::start(int device)
 
 	delete[] sampleRates;
 #endif
+
+	rc = (airspy_error) airspy_set_sample_type(m_dev, AIRSPY_SAMPLE_INT16_IQ);
+
+	if (rc != AIRSPY_SUCCESS)
+	{
+		qCritical("AirspyInput::start: could not set sample type to INT16_IQ");
+		return false;
+	}
+
+	applySettings(m_settings, true);
 
 	MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
 	getOutputMessageQueueToGUI()->push(message);
@@ -173,11 +189,14 @@ bool AirspyInput::start(int device)
 	m_airspyThread->startWork();
 
 	mutexLocker.unlock();
-	applySettings(m_settings, true);
 
 	qDebug("AirspyInput::startInput: started");
 
 	return true;
+
+failed:
+		stop();
+		return false;
 }
 
 void AirspyInput::stop()
@@ -208,7 +227,7 @@ const QString& AirspyInput::getDeviceDescription() const
 
 int AirspyInput::getSampleRate() const
 {
-	int rate = m_settings.m_devSampleRate;
+	int rate = m_sampleRates[m_settings.m_devSampleRateIndex];
 	return (rate / (1<<m_settings.m_log2Decim));
 }
 
@@ -237,88 +256,59 @@ bool AirspyInput::handleMessage(const Message& message)
 	}
 }
 
+void AirspyInput::setCenterFrequency(quint64 freq_hz)
+{
+	freq_hz += (freq_hz * m_settings.m_LOppmTenths) / 10000000ULL;
+
+	airspy_error rc = (airspy_error) airspy_set_freq(m_dev, static_cast<uint32_t>(freq_hz));
+
+	if (rc != AIRSPY_SUCCESS)
+	{
+		qWarning("AirspyInput::setCenterFrequency: could not frequency to %llu Hz", freq_hz);
+	}
+	else
+	{
+		qWarning("AirspyInput::setCenterFrequency: frequency set to %llu Hz", freq_hz);
+	}
+}
+
 bool AirspyInput::applySettings(const Settings& settings, bool force)
 {
 	bool forwardChange = false;
 	airspy_error rc;
+	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+	qint64 f_img = deviceCenterFrequency;
+	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
+
 	QMutexLocker mutexLocker(&m_mutex);
 
 	qDebug() << "AirspyInput::applySettings: m_dev: " << m_dev;
 
-	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
+	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
-		m_settings.m_lnaGain = settings.m_lnaGain;
-
-		if (m_dev != 0)
+		if (settings.m_devSampleRateIndex < m_sampleRates.size())
 		{
-			rc = airspy_set_lna_gain(m_dev, m_settings.m_lnaGain);
-
-			if(rc != AIRSPY_SUCCESS)
-			{
-				qDebug("AirspyInput::applySettings: airspy_set_lna_gain failed: %s", airspy_error_name(rc));
-			}
-			else
-			{
-				qDebug() << "AirspyInput:applySettings: LNA gain set to " << m_settings.m_lnaGain;
-			}
+			m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
 		}
-	}
-
-	if ((m_settings.m_mixerGain != settings.m_mixerGain) || force)
-	{
-		m_settings.m_mixerGain = settings.m_mixerGain;
-
-		if (m_dev != 0)
+		else
 		{
-			rc = airspy_set_mixer_gain(m_dev, m_settings.m_mixerGain);
-
-			if(rc != AIRSPY_SUCCESS)
-			{
-				qDebug("AirspyInput::applySettings: airspy_set_mixer_gain failed: %s", airspy_error_name(rc));
-			}
-			else
-			{
-				qDebug() << "AirspyInput:applySettings: mixer gain set to " << m_settings.m_mixerGain;
-			}
+			m_settings.m_devSampleRateIndex =  m_sampleRates.size() - 1;
 		}
-	}
 
-	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
-	{
-		m_settings.m_vgaGain = settings.m_vgaGain;
-
-		if (m_dev != 0)
-		{
-			rc = airspy_set_vga_gain(m_dev, m_settings.m_vgaGain);
-
-			if(rc != AIRSPY_SUCCESS)
-			{
-				qDebug("AirspyInput::applySettings: airspy_set_vga_gain failed: %s", airspy_error_name(rc));
-			}
-			else
-			{
-				qDebug() << "AirspyInput:applySettings: VGA gain set to " << m_settings.m_vgaGain;
-			}
-		}
-	}
-
-	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
-	{
-		m_settings.m_devSampleRate = settings.m_devSampleRate;
 		forwardChange = true;
 
 		if (m_dev != 0)
 		{
-			unsigned int actualSamplerate;
+			rc = (airspy_error) airspy_set_samplerate(m_dev, static_cast<airspy_samplerate_t>(m_sampleRates[m_settings.m_devSampleRateIndex]));
 
-			if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_RX, m_settings.m_devSampleRate, &actualSamplerate) < 0)
+			if (rc != AIRSPY_SUCCESS)
 			{
-				qCritical("could not set sample rate: %d", m_settings.m_devSampleRate);
+				qCritical("AirspyInput::applySettings: could not set sample rate index %u (%d S/s): %s", m_settings.m_devSampleRateIndex, m_sampleRates[m_settings.m_devSampleRateIndex], airspy_error_name(rc));
 			}
 			else
 			{
-				qDebug() << "bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
-				m_airspyThread->setSamplerate(m_settings.m_devSampleRate);
+				qDebug("AirspyInput::applySettings: sample rate set to index: %u (%d S/s)", m_settings.m_devSampleRateIndex, m_sampleRates[m_settings.m_devSampleRateIndex]);
+				m_airspyThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
 			}
 		}
 	}
@@ -346,62 +336,125 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 		}
 	}
 
-	if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
 	{
+		m_settings.m_centerFrequency = settings.m_centerFrequency;
+
+		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+		{
+			deviceCenterFrequency = m_settings.m_centerFrequency;
+			f_img = deviceCenterFrequency;
+		}
+		else
+		{
+			if (m_settings.m_fcPos == FC_POS_INFRA)
+			{
+				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
+				f_img = deviceCenterFrequency + devSampleRate/2;
+			}
+			else if (m_settings.m_fcPos == FC_POS_SUPRA)
+			{
+				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
+				f_img = deviceCenterFrequency - devSampleRate/2;
+			}
+		}
+
+		if (m_dev != 0)
+		{
+			setCenterFrequency(deviceCenterFrequency);
+
+			qDebug() << "AirspyInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+					<< " device center freq: " << deviceCenterFrequency << " Hz"
+					<< " device sample rate: " << devSampleRate << "Hz"
+					<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
+					<< " img: " << f_img << "Hz";
+		}
+
 		forwardChange = true;
 	}
 
-	m_settings.m_centerFrequency = settings.m_centerFrequency;
-
-	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-
-	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
-		deviceCenterFrequency = m_settings.m_centerFrequency;
-		f_img = deviceCenterFrequency;
-		f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-	}
-	else
-	{
-		if (m_settings.m_fcPos == FC_POS_INFRA)
+		m_settings.m_lnaGain = settings.m_lnaGain;
+
+		if (m_dev != 0)
 		{
-			deviceCenterFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
-			f_img = deviceCenterFrequency + m_settings.m_devSampleRate/2;
-			f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-		}
-		else if (m_settings.m_fcPos == FC_POS_SUPRA)
-		{
-			deviceCenterFrequency = m_settings.m_centerFrequency - (m_settings.m_devSampleRate / 4);
-			f_img = deviceCenterFrequency - m_settings.m_devSampleRate/2;
-			f_cut = deviceCenterFrequency - m_settings.m_bandwidth/2;
+			rc = (airspy_error) airspy_set_lna_gain(m_dev, m_settings.m_lnaGain);
+
+			if(rc != AIRSPY_SUCCESS)
+			{
+				qDebug("AirspyInput::applySettings: airspy_set_lna_gain failed: %s", airspy_error_name(rc));
+			}
+			else
+			{
+				qDebug() << "AirspyInput:applySettings: LNA gain set to " << m_settings.m_lnaGain;
+			}
 		}
 	}
 
-	if (m_dev != NULL)
+	if ((m_settings.m_mixerGain != settings.m_mixerGain) || force)
 	{
-		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0)
+		m_settings.m_mixerGain = settings.m_mixerGain;
+
+		if (m_dev != 0)
 		{
-			qDebug("bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
+			rc = (airspy_error) airspy_set_mixer_gain(m_dev, m_settings.m_mixerGain);
+
+			if(rc != AIRSPY_SUCCESS)
+			{
+				qDebug("AirspyInput::applySettings: airspy_set_mixer_gain failed: %s", airspy_error_name(rc));
+			}
+			else
+			{
+				qDebug() << "AirspyInput:applySettings: mixer gain set to " << m_settings.m_mixerGain;
+			}
+		}
+	}
+
+	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
+	{
+		m_settings.m_vgaGain = settings.m_vgaGain;
+
+		if (m_dev != 0)
+		{
+			rc = (airspy_error) airspy_set_vga_gain(m_dev, m_settings.m_vgaGain);
+
+			if(rc != AIRSPY_SUCCESS)
+			{
+				qDebug("AirspyInput::applySettings: airspy_set_vga_gain failed: %s", airspy_error_name(rc));
+			}
+			else
+			{
+				qDebug() << "AirspyInput:applySettings: VGA gain set to " << m_settings.m_vgaGain;
+			}
+		}
+	}
+
+	if ((m_settings.m_biasT != settings.m_biasT) || force)
+	{
+		m_settings.m_biasT = settings.m_biasT;
+
+		if (m_dev != 0)
+		{
+			rc = (airspy_error) airspy_set_rf_bias(m_dev, (m_settings.m_biasT ? 1 : 0));
+
+			if(rc != AIRSPY_SUCCESS)
+			{
+				qDebug("AirspyInput::applySettings: airspy_set_rf_bias failed: %s", airspy_error_name(rc));
+			}
+			else
+			{
+				qDebug() << "AirspyInput:applySettings: bias tee set to " << m_settings.m_biasT;
+			}
 		}
 	}
 
 	if (forwardChange)
 	{
-		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		getOutputMessageQueue()->push(notif);
 	}
-
-	qDebug() << "AirspyInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-			<< " device center freq: " << deviceCenterFrequency << " Hz"
-			<< " device sample rate: " << m_settings.m_devSampleRate << "Hz"
-			<< " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
-			<< " BW: " << m_settings.m_bandwidth << "Hz"
-			<< " img: " << f_img << "Hz"
-			<< " cut: " << f_cut << "Hz"
-			<< " img - cut: " << f_img - f_cut;
 
 	return true;
 }
@@ -415,9 +468,12 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 	{
 		rc = airspy_open(&devinfo);
 
-		if ((rc == AIRSPY_SUCCESS) && (i == sequence))
+		if (rc == AIRSPY_SUCCESS)
 		{
-			return devinfo;
+			if (i == sequence)
+			{
+				return devinfo;
+			}
 		}
 		else
 		{

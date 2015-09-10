@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BladerfGui</class>
- <widget class="QWidget" name="BladerfGui">
+ <class>AirspyGui</class>
+ <widget class="QWidget" name="AirspyGui">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>198</width>
-    <height>239</height>
+    <height>214</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -128,7 +128,7 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="LOppmText">
        <property name="text">
         <string>0.0</string>
        </property>
@@ -148,30 +148,15 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="samplerate">
-       <property name="toolTip">
-        <string>Device Samplerate</string>
-       </property>
-       <property name="maximum">
-        <number>1</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="sliderPosition">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+     <item row="0" column="2">
+      <widget class="QCheckBox" name="biasT">
+       <property name="text">
+        <string>Bias T</string>
        </property>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="samplerateLabel">
+      <widget class="QLabel" name="sampleRateLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -183,19 +168,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="samplerateText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>---</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="sampleRate">
+       <property name="toolTip">
+        <string>Device sample rate</string>
        </property>
       </widget>
      </item>
@@ -346,7 +322,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string>0dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -391,7 +367,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string>0dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -450,43 +426,12 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string>0dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_vga2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_biasT">
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="biasT">
-       <property name="text">
-        <string>Bias Tee</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <spacer name="biasTSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

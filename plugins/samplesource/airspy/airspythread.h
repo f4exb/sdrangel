@@ -30,12 +30,12 @@ class AirspyThread : public QThread {
 	Q_OBJECT
 
 public:
-	AirspyThread(struct bladerf* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
 	~AirspyThread();
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(int samplerate);
+	void setSamplerate(uint32_t samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
 	void setFcPos(int fcPos);
 
@@ -44,7 +44,7 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	struct bladerf* m_dev;
+	struct airspy_device* m_dev;
 	qint16 m_buf[2*AIRSPY_BLOCKSIZE];
 	SampleVector m_convertBuffer;
 	SampleFifo* m_sampleFifo;
@@ -57,6 +57,7 @@ private:
 
 	void run();
 	void callback(const qint16* buf, qint32 len);
+	static int rx_callback(airspy_transfer_t* transfer);
 };
 
 #endif // INCLUDE_AIRSPYTHREAD_H

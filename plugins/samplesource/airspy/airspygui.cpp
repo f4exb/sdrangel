@@ -32,7 +32,7 @@ AirspyGui::AirspyGui(PluginAPI* pluginAPI, QWidget* parent) :
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
+	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -107,29 +107,26 @@ void AirspyGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
-	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
-	unsigned int sampleRateIndex = AirspySampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->samplerate->setValue(sampleRateIndex);
+	ui->LOppm->setValue(m_settings.m_LOppmTenths);
+	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
-	ui->bandwidthText->setText(tr("%1k").arg(m_settings.m_bandwidth / 1000));
-	unsigned int bandwidthIndex = AirspyBandwidths::getBandwidthIndex(m_settings.m_bandwidth);
-	ui->bandwidth->setValue(bandwidthIndex);
+	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
+
+	ui->biasT->setChecked(m_settings.m_biasT);
 
 	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
 	ui->decim->setValue(m_settings.m_log2Decim);
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain*3));
+	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
 
-	ui->vga1Text->setText(tr("%1dB").arg(m_settings.m_vga1));
-	ui->vga1->setValue(m_settings.m_vga1);
+	ui->mixText->setText(tr("%1dB").arg(m_settings.m_mixerGain));
+	ui->mix->setValue(m_settings.m_mixerGain);
 
-	ui->vga2Text->setText(tr("%1dB").arg(m_settings.m_vga2));
-	ui->vga2->setValue(m_settings.m_vga2);
-
-	ui->xb200->setCurrentIndex(getXb200Index(m_settings.m_xb200, m_settings.m_xb200Path, m_settings.m_xb200Filter));
+	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
+	ui->vga->setValue(m_settings.m_vgaGain);
 }
 
 void AirspyGui::sendSettings()
@@ -144,19 +141,22 @@ void AirspyGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void AirspyGui::on_samplerate_valueChanged(int value)
+void AirspyGui::on_LOppm_valueChanged(int value)
 {
-	int newrate = AirspySampleRates::getRate(value);
-	ui->samplerateText->setText(tr("%1k").arg(newrate));
-	m_settings.m_devSampleRate = newrate * 1000;
+	m_settings.m_LOppmTenths = value;
+	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 	sendSettings();
 }
 
-void AirspyGui::on_bandwidth_valueChanged(int value)
+void AirspyGui::on_sampleRate_currentIndexChanged(int index)
 {
-	int newbw = AirspyBandwidths::getBandwidth(value);
-	ui->bandwidthText->setText(tr("%1k").arg(newbw));
-	m_settings.m_bandwidth = newbw * 1000;
+	m_settings.m_devSampleRateIndex = index;
+	sendSettings();
+}
+
+void AirspyGui::on_biasT_stateChanged(int state)
+{
+	m_settings.m_biasT = (state == Qt::Checked);
 	sendSettings();
 }
 
@@ -185,9 +185,7 @@ void AirspyGui::on_fcPos_currentIndexChanged(int index)
 
 void AirspyGui::on_lna_valueChanged(int value)
 {
-	qDebug() << "AirspyGui: LNA gain = " << value;
-
-	if ((value < 0) || (value > 2))
+	if ((value < 0) || (value > 14))
 		return;
 
 	ui->lnaGainText->setText(tr("%1dB").arg(value*3));
@@ -195,83 +193,23 @@ void AirspyGui::on_lna_valueChanged(int value)
 	sendSettings();
 }
 
-void AirspyGui::on_vga1_valueChanged(int value)
+void AirspyGui::on_mix_valueChanged(int value)
 {
-	if ((value < BLADERF_RXVGA1_GAIN_MIN) || (value > BLADERF_RXVGA1_GAIN_MAX))
+	if ((value < 0) || (value > 15))
 		return;
 
-	ui->vga1Text->setText(tr("%1dB").arg(value));
-	m_settings.m_vga1 = value;
+	ui->mixText->setText(tr("%1dB").arg(value*3));
+	m_settings.m_lnaGain = value;
 	sendSettings();
 }
 
-void AirspyGui::on_vga2_valueChanged(int value)
+void AirspyGui::on_vga_valueChanged(int value)
 {
-	if ((value < BLADERF_RXVGA2_GAIN_MIN) || (value > BLADERF_RXVGA2_GAIN_MAX))
+	if ((value < 0) || (value > 15))
 		return;
 
-	ui->vga2Text->setText(tr("%1dB").arg(value));
-	m_settings.m_vga2 = value;
-	sendSettings();
-}
-
-void AirspyGui::on_xb200_currentIndexChanged(int index)
-{
-	if (index == 1) // bypass
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_BYPASS;
-	}
-	else if (index == 2) // Auto 1dB
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_AUTO_1DB;
-	}
-	else if (index == 3) // Auto 3dB
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_AUTO_3DB;
-	}
-	else if (index == 4) // Custom
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_CUSTOM;
-	}
-	else if (index == 5) // 50 MHz
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_50M;
-	}
-	else if (index == 6) // 144 MHz
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_144M;
-	}
-	else if (index == 7) // 222 MHz
-	{
-		m_settings.m_xb200 = true;
-		m_settings.m_xb200Path = BLADERF_XB200_MIX;
-		m_settings.m_xb200Filter = BLADERF_XB200_222M;
-	}
-	else // no xb200
-	{
-		m_settings.m_xb200 = false;
-	}
-
-	if (m_settings.m_xb200)
-	{
-		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
-	}
-	else
-	{
-		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
-	}
-
+	ui->vgaText->setText(tr("%1dB").arg(value*3));
+	m_settings.m_lnaGain = value;
 	sendSettings();
 }
 
@@ -283,58 +221,9 @@ void AirspyGui::updateHardware()
 	m_updateTimer.stop();
 }
 
-unsigned int AirspyGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter)
+uint32_t AirspyGui::getDevSampleRate(unsigned int rate_index)
 {
-	if (xb_200)
-	{
-		if (xb200Path == BLADERF_XB200_BYPASS)
-		{
-			return 1;
-		}
-		else
-		{
-			if (xb200Filter == BLADERF_XB200_AUTO_1DB)
-			{
-				return 2;
-			}
-			else if (xb200Filter == BLADERF_XB200_AUTO_3DB)
-			{
-				return 3;
-			}
-			else if (xb200Filter == BLADERF_XB200_CUSTOM)
-			{
-				return 4;
-			}
-			else if (xb200Filter == BLADERF_XB200_50M)
-			{
-				return 5;
-			}
-			else if (xb200Filter == BLADERF_XB200_144M)
-			{
-				return 6;
-			}
-			else if (xb200Filter == BLADERF_XB200_222M)
-			{
-				return 7;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-unsigned int AirspySampleRates::m_rates[] = {2500, 10000};
-unsigned int AirspySampleRates::m_nb_rates = 2;
-
-unsigned int AirspySampleRates::getRate(unsigned int rate_index)
-{
-	if (rate_index < m_nb_rates)
+	if (rate_index < m_rates.size())
 	{
 		return m_rates[rate_index];
 	}
@@ -344,43 +233,15 @@ unsigned int AirspySampleRates::getRate(unsigned int rate_index)
 	}
 }
 
-unsigned int AirspySampleRates::getRateIndex(unsigned int rate)
+int AirspyGui::getDevSampleRateIndex(uint32_t sampeRate)
 {
-	for (unsigned int i=0; i < m_nb_rates; i++)
+	for (unsigned int i=0; i < m_rates.size(); i++)
 	{
-		if (rate/1000 == m_rates[i])
+		if (sampeRate == m_rates[i])
 		{
 			return i;
 		}
 	}
 
-	return 0;
-}
-
-unsigned int AirspyBandwidths::m_halfbw[] = {};
-unsigned int AirspyBandwidths::m_nb_halfbw = 0;
-
-unsigned int AirspyBandwidths::getBandwidth(unsigned int bandwidth_index)
-{
-	if (bandwidth_index < m_nb_halfbw)
-	{
-		return m_halfbw[bandwidth_index] * 2;
-	}
-	else
-	{
-		return m_halfbw[0] * 2;
-	}
-}
-
-unsigned int AirspyBandwidths::getBandwidthIndex(unsigned int bandwidth)
-{
-	for (unsigned int i=0; i < m_nb_halfbw; i++)
-	{
-		if (bandwidth/2000 == m_halfbw[i])
-		{
-			return i;
-		}
-	}
-
-	return 0;
+	return -1;
 }

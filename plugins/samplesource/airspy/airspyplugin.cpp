@@ -56,21 +56,20 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 	struct airspy_device *devinfo = 0;
 	airspy_error rc;
 
-	rc = airspy_init();
+	rc = (airspy_error) airspy_init();
 
 	if (rc != AIRSPY_SUCCESS)
 	{
-		qCritical() << "AirspyPlugin::enumSampleSources: failed to initiate Airspy library "
-				<< airspy_error_name(rc) << std::endl;
+		qCritical("AirspyPlugin::enumSampleSources: failed to initiate Airspy library: %s", airspy_error_name(rc));
 	}
 
 	for (int i=0; i < AIRSPY_MAX_DEVICE; i++)
 	{
-		rc = airspy_open(&devinfo);
+		rc = (airspy_error) airspy_open(&devinfo);
 
 		if (rc == AIRSPY_SUCCESS)
 		{
-			rc = airspy_board_partid_serialno_read(devinfo, &read_partid_serialno);
+			rc = (airspy_error) airspy_board_partid_serialno_read(devinfo, &read_partid_serialno);
 
 			if (rc != AIRSPY_SUCCESS)
 			{
@@ -78,7 +77,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 			}
 
 			QString serial_str = QString::number(read_partid_serialno.serial_no[2], 16) + QString::number(read_partid_serialno.serial_no[3], 16);
-			uint64_t serial_num = (read_partid_serialno.serial_no[2] << 32) + read_partid_serialno.serial_no[3];
+			uint64_t serial_num = (((uint64_t) read_partid_serialno.serial_no[2])<<32) + read_partid_serialno.serial_no[3];
 			QString displayedName(QString("Airspy #%1 0x%2").arg(i+1).arg(serial_str));
 			SimpleSerializer s(1);
 			s.writeS32(1, i);

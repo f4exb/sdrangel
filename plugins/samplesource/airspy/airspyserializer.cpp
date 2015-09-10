@@ -25,9 +25,9 @@ void AirspySerializer::writeSerializedData(const AirspyData& data, QByteArray& s
 
 	s.writeBlob(1, sampleSourceSerialized);
 	s.writeS32(2, data.m_LOppmTenths);
-	s.writeS32(3, data.m_sampleRate);
+	s.writeU32(3, data.m_sampleRateIndex);
 	s.writeU32(4, data.m_log2Decim);
-	s.writeU32(5, data.m_fcPos);
+	s.writeS32(5, data.m_fcPos);
 	s.writeU32(6, data.m_lnaGain);
 	s.writeU32(7, data.m_mixerGain);
 	s.writeU32(8, data.m_vgaGain);
@@ -56,9 +56,9 @@ bool AirspySerializer::readSerializedData(const QByteArray& serializedData, Airs
 
 		d.readBlob(1, &sampleSourceSerialized);
 		d.readS32(2, &data.m_LOppmTenths, 0);
-		d.readS32(3, &data.m_sampleRate, 0);
+		d.readU32(3, &data.m_sampleRateIndex, 0);
 		d.readU32(4, &data.m_log2Decim, 0);
-		d.readU32(5, &data.m_fcPos, 0);
+		d.readS32(5, &data.m_fcPos, 0);
 		d.readU32(6, &data.m_lnaGain, 1);
 		d.readU32(7, &data.m_mixerGain, 5);
 		d.readU32(8, &data.m_vgaGain, 5);
@@ -76,7 +76,7 @@ bool AirspySerializer::readSerializedData(const QByteArray& serializedData, Airs
 void AirspySerializer::setDefaults(AirspyData& data)
 {
 	data.m_LOppmTenths = 0;
-	data.m_sampleRate = 0;
+	data.m_sampleRateIndex = 0;
 	data.m_log2Decim = 0;
 	data.m_fcPos = 0;
 	data.m_lnaGain = 1;
