@@ -131,7 +131,7 @@ void Decimators<T, SdrBits, InputBits>::decimate1(SampleVector::iterator* it, co
 {
 	qint32 xreal, yimag;
 
-	for (int pos = 0; pos < len; pos += 2)
+	for (int pos = 0; pos < len - 1; pos += 2)
 	{
 		xreal = buf[pos+0];
 		yimag = buf[pos+1];
@@ -209,7 +209,7 @@ void Decimators<T, SdrBits, InputBits>::decimate2_cen(SampleVector::iterator* it
 {
 	int pos = 0;
 
-	while (pos < len - 3)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre2;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre2;
@@ -229,7 +229,7 @@ void Decimators<T, SdrBits, InputBits>::decimate4_cen(SampleVector::iterator* it
 {
 	int pos = 0;
 
-	while (pos < len)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4;
@@ -255,7 +255,7 @@ void Decimators<T, SdrBits, InputBits>::decimate8_cen(SampleVector::iterator* it
 {
 	int pos = 0;
 
-	while (pos < len)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre8;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre8;
@@ -287,7 +287,7 @@ void Decimators<T, SdrBits, InputBits>::decimate16_cen(SampleVector::iterator* i
 {
 	int pos = 0;
 
-	while (pos < len)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre16;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre16;
@@ -325,7 +325,7 @@ void Decimators<T, SdrBits, InputBits>::decimate32_cen(SampleVector::iterator* i
 {
 	int pos = 0;
 
-	while (pos < len)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre32;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre32;
@@ -370,7 +370,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_cen(SampleVector::iterator* i
 {
 	int pos = 0;
 
-	while (pos < len)
+	while (pos < len - 1)
 	{
 		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre64;
 		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre64;
