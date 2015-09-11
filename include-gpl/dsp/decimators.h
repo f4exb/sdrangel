@@ -401,7 +401,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_cen(SampleVector::iterator* i
 							qint32 x5 = x4;
 							qint32 y5 = y4;
 
-							if (m_decimator64.workDecimateCenter(&x4, &y4))
+							if (m_decimator64.workDecimateCenter(&x5, &y5))
 							{
 								(**it).setReal(x5 >> decimation_shifts<SdrBits, InputBits>::post64);
 								(**it).setImag(y5 >> decimation_shifts<SdrBits, InputBits>::post64);
