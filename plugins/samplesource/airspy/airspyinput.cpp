@@ -340,9 +340,11 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 	qint64 f_img = deviceCenterFrequency;
 	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
 
-	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
+			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
 	{
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
+		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
 		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
 		{
