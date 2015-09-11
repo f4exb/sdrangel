@@ -165,7 +165,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Real qp = ci.imag() - m_m2Sample.imag();
 				Real h1 = m_m1Sample.real() * qp;
 				Real h2 = m_m1Sample.imag() * ip;
-				Real demod = (h1 - h2) * 16; // 10000 (multiply by 2^16 after demod)
+				Real demod = (h1 - h2) * 2; // 10000 (multiply by 2^16 after demod)
 
 				m_m2Sample = m_m1Sample;
 				m_m1Sample = ci;
@@ -218,7 +218,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						demod = m_bandpass.filter(demod);
 						demod *= m_running.m_volume;
-						sample = demod * ((1<<16)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
+						sample = demod * ((1<<19)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
 					}
 
 					m_AGC.openedSquelch();
