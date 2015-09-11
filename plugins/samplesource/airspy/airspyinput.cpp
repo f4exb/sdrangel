@@ -484,10 +484,6 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 			{
 				return devinfo;
 			}
-			else
-			{
-				airspy_close(devinfo);
-			}
 		}
 		else
 		{
