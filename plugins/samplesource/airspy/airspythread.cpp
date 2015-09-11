@@ -137,6 +137,9 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 			case 5:
 				m_decimators.decimate32_inf(&it, buf, len);
 				break;
+			case 6:
+				m_decimators.decimate64_inf(&it, buf, len);
+				break;
 			default:
 				break;
 			}
@@ -160,6 +163,9 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 			case 5:
 				m_decimators.decimate32_sup(&it, buf, len);
 				break;
+			case 6:
+				m_decimators.decimate64_sup(&it, buf, len);
+				break;
 			default:
 				break;
 			}
@@ -182,6 +188,9 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 				break;
 			case 5:
 				m_decimators.decimate32_cen(&it, buf, len);
+				break;
+			case 6:
+				m_decimators.decimate64_cen(&it, buf, len);
 				break;
 			default:
 				break;

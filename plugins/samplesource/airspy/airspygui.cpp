@@ -209,7 +209,7 @@ void AirspyGui::on_biasT_stateChanged(int state)
 
 void AirspyGui::on_decim_valueChanged(int value)
 {
-	if ((value <0) || (value > 5))
+	if ((value <0) || (value > 6))
 		return;
 	ui->decimText->setText(tr("%1").arg(1<<value));
 	m_settings.m_log2Decim = value;
