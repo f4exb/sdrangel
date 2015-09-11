@@ -34,6 +34,8 @@ struct decimation_shifts
     static const uint post16 = 0; 
     static const uint pre32  = 0; 
     static const uint post32 = 0; 
+    static const uint pre64  = 0;
+    static const uint post64 = 0;
 };
 
 template<>
@@ -50,6 +52,8 @@ struct decimation_shifts<16, 16>
     static const uint post16 = 4;
     static const uint pre32  = 0;
     static const uint post32 = 5;
+    static const uint pre64  = 0;
+    static const uint post64 = 6;
 };
 
 template<>
@@ -66,22 +70,26 @@ struct decimation_shifts<16, 12>
     static const uint post16 = 0; 
     static const uint pre32  = 0; 
     static const uint post32 = 1; 
+    static const uint pre64  = 0;
+    static const uint post64 = 2;
 };
 
 template<>
 struct decimation_shifts<16, 8>
 {
-    static const uint pre1   = 5;
-    static const uint pre2   = 4;
+    static const uint pre1   = 6;
+    static const uint pre2   = 5;
     static const uint post2  = 0; 
-    static const uint pre4   = 3;
+    static const uint pre4   = 4;
     static const uint post4  = 0; 
-    static const uint pre8   = 2;
+    static const uint pre8   = 3;
     static const uint post8  = 0; 
-    static const uint pre16  = 1;
+    static const uint pre16  = 2;
     static const uint post16 = 0; 
-    static const uint pre32  = 0;
+    static const uint pre32  = 1;
     static const uint post32 = 0; 
+    static const uint pre64  = 0;
+    static const uint post64 = 0;
 };
 
 template<typename T, uint SdrBits, uint InputBits>
@@ -105,6 +113,9 @@ public:
 	void decimate32_inf(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate32_sup(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate32_cen(SampleVector::iterator* it, const T* buf, qint32 len);
+	void decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len);
+	void decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len);
+	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
 	IntHalfbandFilter m_decimator2;  // 1st stages
@@ -112,6 +123,7 @@ private:
 	IntHalfbandFilter m_decimator8;  // 3rd stages
 	IntHalfbandFilter m_decimator16; // 4th stages
 	IntHalfbandFilter m_decimator32; // 5th stages
+	IntHalfbandFilter m_decimator64; // 6th stages
 };
 
 template<typename T, uint SdrBits, uint InputBits>
@@ -352,6 +364,57 @@ void Decimators<T, SdrBits, InputBits>::decimate32_cen(SampleVector::iterator* i
 	}
 }
 
+
+template<typename T, uint SdrBits, uint InputBits>
+void Decimators<T, SdrBits, InputBits>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+{
+	int pos = 0;
+
+	while (pos < len)
+	{
+		qint32 x0 = buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre64;
+		qint32 y0 = buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre64;
+		pos += 2;
+
+		if (m_decimator2.workDecimateCenter(&x0, &y0))
+		{
+			qint32 x1 = x0;
+			qint32 y1 = y0;
+
+			if (m_decimator4.workDecimateCenter(&x1, &y1))
+			{
+				qint32 x2 = x1;
+				qint32 y2 = y1;
+
+				if (m_decimator8.workDecimateCenter(&x2, &y2))
+				{
+					qint32 x3 = x2;
+					qint32 y3 = y2;
+
+					if (m_decimator16.workDecimateCenter(&x3, &y3))
+					{
+						qint32 x4 = x3;
+						qint32 y4 = y3;
+
+						if (m_decimator32.workDecimateCenter(&x4, &y4))
+						{
+							qint32 x5 = x4;
+							qint32 y5 = y4;
+
+							if (m_decimator64.workDecimateCenter(&x4, &y4))
+							{
+								(**it).setReal(x5 >> decimation_shifts<SdrBits, InputBits>::post64);
+								(**it).setImag(y5 >> decimation_shifts<SdrBits, InputBits>::post64);
+								++(*it);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 template<typename T, uint SdrBits, uint InputBits>
 void Decimators<T, SdrBits, InputBits>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
@@ -551,6 +614,86 @@ void Decimators<T, SdrBits, InputBits>::decimate32_sup(SampleVector::iterator* i
 
 		(**it).setReal(xreal[7] >> decimation_shifts<SdrBits, InputBits>::post32);
 		(**it).setImag(yimag[7] >> decimation_shifts<SdrBits, InputBits>::post32);
+
+		++(*it);
+	}
+}
+
+template<typename T, uint SdrBits, uint InputBits>
+void Decimators<T, SdrBits, InputBits>::decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+{
+	qint32 xreal[16], yimag[16];
+
+	for (int pos = 0; pos < len - 127; )
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre64;
+			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre64;
+			pos += 16;
+		}
+
+		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+		m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
+		m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
+		m_decimator2.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
+		m_decimator2.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
+
+		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
+		m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
+		m_decimator4.myDecimate(xreal[9], yimag[9], &xreal[11], &yimag[11]);
+		m_decimator4.myDecimate(xreal[13], yimag[13], &xreal[15], &yimag[15]);
+
+		m_decimator8.myDecimate(xreal[3], yimag[3], &xreal[7], &yimag[7]);
+		m_decimator8.myDecimate(xreal[11], yimag[11], &xreal[15], &yimag[15]);
+
+		m_decimator16.myDecimate(xreal[7], yimag[7], &xreal[15], &yimag[15]);
+
+		(**it).setReal(xreal[15] >> decimation_shifts<SdrBits, InputBits>::post64);
+		(**it).setImag(yimag[15] >> decimation_shifts<SdrBits, InputBits>::post64);
+
+		++(*it);
+	}
+}
+
+template<typename T, uint SdrBits, uint InputBits>
+void Decimators<T, SdrBits, InputBits>::decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+{
+	qint32 xreal[16], yimag[16];
+
+	for (int pos = 0; pos < len - 127; )
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			xreal[i] = (buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre32;
+			yimag[i] = (buf[pos+4] + buf[pos+7] - buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre32;
+			pos += 16;
+		}
+
+		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+		m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
+		m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
+		m_decimator2.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
+		m_decimator2.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
+
+		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
+		m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
+		m_decimator4.myDecimate(xreal[9], yimag[9], &xreal[11], &yimag[11]);
+		m_decimator4.myDecimate(xreal[13], yimag[13], &xreal[15], &yimag[15]);
+
+		m_decimator8.myDecimate(xreal[3], yimag[3], &xreal[7], &yimag[7]);
+		m_decimator8.myDecimate(xreal[11], yimag[11], &xreal[15], &yimag[15]);
+
+		m_decimator16.myDecimate(xreal[7], yimag[7], &xreal[15], &yimag[15]);
+
+		(**it).setReal(xreal[15] >> decimation_shifts<SdrBits, InputBits>::post64);
+		(**it).setImag(yimag[15] >> decimation_shifts<SdrBits, InputBits>::post64);
 
 		++(*it);
 	}
