@@ -100,6 +100,8 @@ AirspyInput::AirspyInput() :
 	m_airspyThread(0),
 	m_deviceDescription("Airspy")
 {
+	m_sampleRates.push_back(10000000);
+	m_sampleRates.push_back(2500000);
 }
 
 AirspyInput::~AirspyInput()
@@ -135,16 +137,13 @@ bool AirspyInput::start(int device)
 		return false;
 	}
 
-	if ((m_dev = open_airspy_from_sequence(device)) == 0) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+	if ((m_dev = open_airspy_from_sequence(device)) == 0)
 	{
-		qCritical("AirspyInput::start: could not open Airspy");
+		qCritical("AirspyInput::start: could not open Airspy #%d", device);
 		return false;
 	}
 
-#ifdef LIBAIRSPY_OLD
-	m_sampleRates.push_back(2500000);
-	m_sampleRates.push_back(10000000);
-#else
+#ifdef LIBAIRSPY_DYN_RATES
 	uint32_t nbSampleRates;
 	uint32_t *sampleRates;
 
@@ -160,13 +159,19 @@ bool AirspyInput::start(int device)
 		return false;
 	}
 
+	m_sampleRates.clear();
+
 	for (int i=0; i<nbSampleRates; i++)
 	{
 		m_sampleRates.push_back(sampleRates[i]);
+		qDebug("AirspyInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
 	}
 
 	delete[] sampleRates;
 #endif
+
+	MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
+	getOutputMessageQueueToGUI()->push(message);
 
 	rc = (airspy_error) airspy_set_sample_type(m_dev, AIRSPY_SAMPLE_INT16_IQ);
 
@@ -176,31 +181,27 @@ bool AirspyInput::start(int device)
 		return false;
 	}
 
-	applySettings(m_settings, true);
-
-	MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
-	getOutputMessageQueueToGUI()->push(message);
-
-	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == NULL) {
-		qFatal("out of memory");
-		goto failed;
+	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == 0)
+	{
+		qFatal("AirspyInput::start: out of memory");
+		stop();
+		return false;
 	}
 
 	m_airspyThread->startWork();
 
 	mutexLocker.unlock();
 
+	applySettings(m_settings, true);
+
 	qDebug("AirspyInput::startInput: started");
 
 	return true;
-
-failed:
-		stop();
-		return false;
 }
 
 void AirspyInput::stop()
 {
+	qDebug("AirspyInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if(m_airspyThread != 0)
@@ -243,7 +244,9 @@ bool AirspyInput::handleMessage(const Message& message)
 		MsgConfigureAirspy& conf = (MsgConfigureAirspy&) message;
 		qDebug() << "AirspyInput::handleMessage: MsgConfigureAirspy";
 
-		if (!applySettings(conf.getSettings(), false))
+		bool success = applySettings(conf.getSettings(), false);
+
+		if (!success)
 		{
 			qDebug("Airspy config error");
 		}
@@ -274,32 +277,29 @@ void AirspyInput::setCenterFrequency(quint64 freq_hz)
 
 bool AirspyInput::applySettings(const Settings& settings, bool force)
 {
-	bool forwardChange = false;
-	airspy_error rc;
-	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
-
 	QMutexLocker mutexLocker(&m_mutex);
 
-	qDebug() << "AirspyInput::applySettings: m_dev: " << m_dev;
+	bool forwardChange = false;
+	airspy_error rc;
+
+	qDebug() << "AirspyInput::applySettings";
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
+		forwardChange = true;
+
 		if (settings.m_devSampleRateIndex < m_sampleRates.size())
 		{
 			m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
 		}
 		else
 		{
-			m_settings.m_devSampleRateIndex =  m_sampleRates.size() - 1;
+			m_settings.m_devSampleRateIndex = m_sampleRates.size() - 1;
 		}
-
-		forwardChange = true;
 
 		if (m_dev != 0)
 		{
-			rc = (airspy_error) airspy_set_samplerate(m_dev, static_cast<airspy_samplerate_t>(m_sampleRates[m_settings.m_devSampleRateIndex]));
+			rc = (airspy_error) airspy_set_samplerate(m_dev, static_cast<airspy_samplerate_t>(m_settings.m_devSampleRateIndex));
 
 			if (rc != AIRSPY_SUCCESS)
 			{
@@ -335,6 +335,10 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
 		}
 	}
+
+	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+	qint64 f_img = deviceCenterFrequency;
+	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
 	{
@@ -461,12 +465,16 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 
 struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 {
-	struct airspy_device *devinfo;
-	int rc;
+	airspy_read_partid_serialno_t read_partid_serialno;
+	struct airspy_device *devinfo, *retdev = 0;
+	uint32_t serial_msb = 0;
+	uint32_t serial_lsb = 0;
+	airspy_error rc;
+	int i;
 
-	for (int i=0; i < AIRSPY_MAX_DEVICE; i++)
+	for (int i = 0; i < AIRSPY_MAX_DEVICE; i++)
 	{
-		rc = airspy_open(&devinfo);
+		rc = (airspy_error) airspy_open(&devinfo);
 
 		if (rc == AIRSPY_SUCCESS)
 		{
@@ -474,10 +482,14 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 			{
 				return devinfo;
 			}
+			else
+			{
+				airspy_close(devinfo);
+			}
 		}
 		else
 		{
-			break; // finished
+			break;
 		}
 	}
 

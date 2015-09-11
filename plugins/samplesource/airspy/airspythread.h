@@ -24,7 +24,7 @@
 #include "dsp/samplefifo.h"
 #include "dsp/decimators.h"
 
-#define AIRSPY_BLOCKSIZE (1<<14)
+#define AIRSPY_BLOCKSIZE (1<<17)
 
 class AirspyThread : public QThread {
 	Q_OBJECT

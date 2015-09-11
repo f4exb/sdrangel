@@ -37,6 +37,9 @@ AirspyGui::AirspyGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displaySettings();
 
 	m_sampleSource = new AirspyInput();
+	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
+	displaySampleRates();
+	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
@@ -94,12 +97,29 @@ bool AirspyGui::handleMessage(const Message& message)
 {
 	if (AirspyInput::MsgReportAirspy::match(message))
 	{
-		displaySettings();
+		qDebug() << "AirspyGui::handleMessage: MsgReportAirspy";
+		m_rates = ((AirspyInput::MsgReportAirspy&) message).getSampleRates();
+		displaySampleRates();
 		return true;
 	}
 	else
 	{
 		return false;
+	}
+}
+
+void AirspyGui::handleSourceMessages()
+{
+	Message* message;
+
+	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
+	{
+		qDebug("AirspyGui::HandleSourceMessages: message: %s", message->getIdentifier());
+
+		if (handleMessage(*message))
+		{
+			delete message;
+		}
 	}
 }
 
@@ -127,6 +147,33 @@ void AirspyGui::displaySettings()
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->vga->setValue(m_settings.m_vgaGain);
+}
+
+void AirspyGui::displaySampleRates()
+{
+	int savedIndex = m_settings.m_devSampleRateIndex;
+	ui->sampleRate->blockSignals(true);
+
+	if (m_rates.size() > 0)
+	{
+		ui->sampleRate->clear();
+
+		for (int i = 0; i < m_rates.size(); i++)
+		{
+			ui->sampleRate->addItem(QString("%1M").arg(QString::number(m_rates[i]/1000000.0, 'f', 3)));
+		}
+	}
+
+	ui->sampleRate->blockSignals(false);
+
+	if (savedIndex < m_rates.size())
+	{
+		ui->sampleRate->setCurrentIndex(savedIndex);
+	}
+	else
+	{
+		ui->sampleRate->setCurrentIndex((int) m_rates.size()-1);
+	}
 }
 
 void AirspyGui::sendSettings()
@@ -188,7 +235,7 @@ void AirspyGui::on_lna_valueChanged(int value)
 	if ((value < 0) || (value > 14))
 		return;
 
-	ui->lnaGainText->setText(tr("%1dB").arg(value*3));
+	ui->lnaGainText->setText(tr("%1dB").arg(value));
 	m_settings.m_lnaGain = value;
 	sendSettings();
 }
@@ -198,7 +245,7 @@ void AirspyGui::on_mix_valueChanged(int value)
 	if ((value < 0) || (value > 15))
 		return;
 
-	ui->mixText->setText(tr("%1dB").arg(value*3));
+	ui->mixText->setText(tr("%1dB").arg(value));
 	m_settings.m_lnaGain = value;
 	sendSettings();
 }
@@ -208,7 +255,7 @@ void AirspyGui::on_vga_valueChanged(int value)
 	if ((value < 0) || (value > 15))
 		return;
 
-	ui->vgaText->setText(tr("%1dB").arg(value*3));
+	ui->vgaText->setText(tr("%1dB").arg(value));
 	m_settings.m_lnaGain = value;
 	sendSettings();
 }

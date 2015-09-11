@@ -51,7 +51,7 @@ If you use your own location for libairspy install directory you need to specify
 
 `-DLIBAIRSPY_LIBRARIES=/opt/install/libairspy/lib/libairspy.so -DLIBAIRSPY_INCLUDE_DIR=/opt/install/libairspy/include`
 
-Please note that if you are not using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is not supported. In this case you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_OLD")`. In fact both lines are present with the former one commented out. 
+Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out. 
 
 <h2>BladeRF</h2>
 

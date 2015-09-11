@@ -98,6 +98,7 @@ public:
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+	const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
 	virtual bool handleMessage(const Message& message);
 

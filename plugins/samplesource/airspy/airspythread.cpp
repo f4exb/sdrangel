@@ -52,6 +52,7 @@ void AirspyThread::startWork()
 
 void AirspyThread::stopWork()
 {
+	qDebug("AirspyThread::stopWork");
 	m_running = false;
 	wait();
 }
@@ -90,6 +91,17 @@ void AirspyThread::run()
 		{
 			sleep(1);
 		}
+	}
+
+	rc = (airspy_error) airspy_stop_rx(m_dev);
+
+	if (rc == AIRSPY_SUCCESS)
+	{
+		qDebug("AirspyInput::run: stopped Airspy Rx");
+	}
+	else
+	{
+		qDebug("AirspyInput::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
 	}
 
 	m_running = false;
@@ -177,13 +189,13 @@ void AirspyThread::callback(const qint16* buf, qint32 len)
 		}
 	}
 
-
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
 
 int AirspyThread::rx_callback(airspy_transfer_t* transfer)
 {
-	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16) * 2;
+	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
 	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
+	return 0;
 }

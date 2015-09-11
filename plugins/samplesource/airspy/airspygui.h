@@ -60,6 +60,7 @@ private:
 	SampleSource* m_sampleSource;
 
 	void displaySettings();
+	void displaySampleRates();
 	void sendSettings();
 
 private slots:
@@ -73,6 +74,7 @@ private slots:
 	void on_mix_valueChanged(int value);
 	void on_vga_valueChanged(int value);
 	void updateHardware();
+	void handleSourceMessages();
 };
 
 #endif // INCLUDE_AIRSPYGUI_H
