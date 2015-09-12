@@ -40,35 +40,10 @@ Real AGC::getValue()
 	return m_u0;
 }
 
-Real AGC::getDelayedValue()
+Real AGC::getAverage()
 {
-	if (m_count < m_historySize*m_mult)
-	{
-		return 0;
-	}
-	else
-	{
-		return returnedDelayedValue();
-	}
+	return m_moving_average.average();
 }
-
-void AGC::openedSquelch()
-{
-	if (m_count < m_historySize*m_mult)
-	{
-		m_count++;
-	}
-
-	m_u0 = m_R / m_moving_average.average();
-}
-
-void AGC::closedSquelch()
-{
-	//m_moving_average.fill(m_R); // Valgrind optim
-	m_count = 0;
-	m_u0 = m_R / m_moving_average.average();
-}
-
 
 MagSquaredAGC::MagSquaredAGC() :
 	AGC()
@@ -83,9 +58,10 @@ MagSquaredAGC::~MagSquaredAGC()
 
 void MagSquaredAGC::feed(Complex& ci)
 {
-	ci *= m_u0;
 	Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
 	m_moving_average.feed(magsq);
+	m_u0 = m_R / m_moving_average.average();
+	ci *= m_u0;
 }
 
 
@@ -102,9 +78,10 @@ MagAGC::~MagAGC()
 
 void MagAGC::feed(Complex& ci)
 {
-	ci *= m_u0;
 	Real mag = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
 	m_moving_average.feed(mag);
+	m_u0 = m_R / m_moving_average.average();
+	ci *= m_u0;
 }
 
 
@@ -140,7 +117,6 @@ void AlphaAGC::resize(int historySize, Real R, Real alpha)
 
 void AlphaAGC::feed(Complex& ci)
 {
-	ci *= m_u0;
 	Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
 
 	if (m_squelchOpen && (magsq))
@@ -152,16 +128,5 @@ void AlphaAGC::feed(Complex& ci)
 		//m_squelchOpen = true;
 		m_moving_average.feed(magsq);
 	}
-}
-
-void AlphaAGC::openedSquelch()
-{
-	AGC::openedSquelch();
-	m_squelchOpen = true;
-}
-
-void AlphaAGC::closedSquelch()
-{
-	AGC::closedSquelch();
-	m_squelchOpen = false;
+	ci *= m_u0;
 }

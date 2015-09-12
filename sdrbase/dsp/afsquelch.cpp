@@ -18,73 +18,73 @@
 #include "dsp/afsquelch.h"
 
 AFSquelch::AFSquelch() :
-			N(0),
-			sampleRate(0),
-			samplesProcessed(0),
-			maxPowerIndex(0),
-			nTones(2),
-			samplesAttack(0),
-			attackCount(0),
-			samplesDecay(0),
-			decayCount(0),
-			isOpen(false),
-			threshold(0.0)
+			m_N(0),
+			m_sampleRate(0),
+			m_samplesProcessed(0),
+			m_maxPowerIndex(0),
+			m_nTones(2),
+			m_samplesAttack(0),
+			m_attackCount(0),
+			m_samplesDecay(0),
+			m_decayCount(0),
+			m_isOpen(false),
+			m_threshold(0.0)
 {
-	k = new double[nTones];
-	coef = new double[nTones];
-	toneSet = new Real[nTones];
-	u0 = new double[nTones];
-	u1 = new double[nTones];
-	power = new double[nTones];
+	m_k = new double[m_nTones];
+	m_coef = new double[m_nTones];
+	m_toneSet = new Real[m_nTones];
+	m_u0 = new double[m_nTones];
+	m_u1 = new double[m_nTones];
+	m_power = new double[m_nTones];
 
-	toneSet[0]  = 2000.0;
-	toneSet[1]  = 10000.0;
+	m_toneSet[0]  = 2000.0;
+	m_toneSet[1]  = 10000.0;
 }
 
-AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
-			N(0),
-			sampleRate(0),
-			samplesProcessed(0),
-			maxPowerIndex(0),
-			nTones(nbTones),
-			samplesAttack(0),
-			attackCount(0),
-			samplesDecay(0),
-			decayCount(0),
-			isOpen(false),
-			threshold(0.0)
+AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones, int samplesAttack, int samplesDecay) :
+			m_N(0),
+			m_sampleRate(0),
+			m_samplesProcessed(0),
+			m_maxPowerIndex(0),
+			m_nTones(nbTones),
+			m_samplesAttack(samplesAttack),
+			m_attackCount(0),
+			m_samplesDecay(samplesDecay),
+			m_decayCount(0),
+			m_isOpen(false),
+			m_threshold(0.0)
 {
-	k = new double[nTones];
-	coef = new double[nTones];
-	toneSet = new Real[nTones];
-	u0 = new double[nTones];
-	u1 = new double[nTones];
-	power = new double[nTones];
+	m_k = new double[m_nTones];
+	m_coef = new double[m_nTones];
+	m_toneSet = new Real[m_nTones];
+	m_u0 = new double[m_nTones];
+	m_u1 = new double[m_nTones];
+	m_power = new double[m_nTones];
 
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		toneSet[j] = tones[j];
+		m_toneSet[j] = tones[j];
 	}
 }
 
 
 AFSquelch::~AFSquelch()
 {
-	delete[] k;
-	delete[] coef;
-	delete[] toneSet;
-	delete[] u0;
-	delete[] u1;
-	delete[] power;
+	delete[] m_k;
+	delete[] m_coef;
+	delete[] m_toneSet;
+	delete[] m_u0;
+	delete[] m_u1;
+	delete[] m_power;
 }
 
 
 void AFSquelch::setCoefficients(int _N, int _samplerate, int _samplesAttack, int _samplesDecay )
 {
-	N = _N;                   // save the basic parameters for use during analysis
-	sampleRate = _samplerate;
-	samplesAttack = _samplesAttack;
-	samplesDecay = _samplesDecay;
+	m_N = _N;                   // save the basic parameters for use during analysis
+	m_sampleRate = _samplerate;
+	m_samplesAttack = _samplesAttack;
+	m_samplesDecay = _samplesDecay;
 
 	// for each of the frequencies (tones) of interest calculate
 	// k and the associated filter coefficient as per the Goertzel
@@ -93,10 +93,10 @@ void AFSquelch::setCoefficients(int _N, int _samplerate, int _samplesAttack, int
 	// for later display. The tone set is specified in the
 	// constructor. Notice that the resulting coefficients are
 	// independent of N.
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		k[j] = ((double)N * toneSet[j]) / (double)sampleRate;
-		coef[j] = 2.0 * cos((2.0 * M_PI * toneSet[j])/(double)sampleRate);
+		m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
+		m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
 	}
 }
 
@@ -106,12 +106,12 @@ bool AFSquelch::analyze(Real *sample)
 {
 
 	feedback(*sample); // Goertzel feedback
-	samplesProcessed += 1;
+	m_samplesProcessed += 1;
 
-	if (samplesProcessed == N) // completed a block of N
+	if (m_samplesProcessed == m_N) // completed a block of N
 	{
 		feedForward(); // calculate the power at each tone
-		samplesProcessed = 0;
+		m_samplesProcessed = 0;
 		return true; // have a result
 	}
 	else
@@ -126,21 +126,21 @@ void AFSquelch::feedback(Real in)
 	double t;
 
 	// feedback for each tone
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		t = u0[j];
-		u0[j] = in + (coef[j] * u0[j]) - u1[j];
-		u1[j] = t;
+		t = m_u0[j];
+		m_u0[j] = in + (m_coef[j] * m_u0[j]) - m_u1[j];
+		m_u1[j] = t;
 	}
 }
 
 
 void AFSquelch::feedForward()
 {
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		power[j] = (u0[j] * u0[j]) + (u1[j] * u1[j]) - (coef[j] * u0[j] * u1[j]);
-		u0[j] = u1[j] = 0.0; // reset for next block.
+		m_power[j] = (m_u0[j] * m_u0[j]) + (m_u1[j] * m_u1[j]) - (m_coef[j] * m_u0[j] * m_u1[j]);
+		m_u0[j] = m_u1[j] = 0.0; // reset for next block.
 	}
 
 	evaluate();
@@ -149,14 +149,14 @@ void AFSquelch::feedForward()
 
 void AFSquelch::reset()
 {
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		power[j] = u0[j] = u1[j] = 0.0; // reset
+		m_power[j] = m_u0[j] = m_u1[j] = 0.0; // reset
 	}
 
-	samplesProcessed = 0;
-	maxPowerIndex = 0;
-	isOpen = false;
+	m_samplesProcessed = 0;
+	m_maxPowerIndex = 0;
+	m_isOpen = false;
 }
 
 
@@ -166,49 +166,51 @@ void AFSquelch::evaluate()
 	double minPower;
 	int minIndex = 0, maxIndex = 0;
 
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		if (power[j] > maxPower) {
-			maxPower = power[j];
+		if (m_power[j] > maxPower) {
+			maxPower = m_power[j];
 			maxIndex = j;
 		}
 	}
 
 	minPower = maxPower;
 
-	for (int j = 0; j < nTones; ++j)
+	for (int j = 0; j < m_nTones; ++j)
 	{
-		if (power[j] < minPower) {
-			minPower = power[j];
+		if (m_power[j] < minPower) {
+			minPower = m_power[j];
 			minIndex = j;
 		}
 	}
 
 	// principle is to open if power is uneven because noise gives even power
-	bool open = ((maxPower - minPower) > threshold) && (minIndex > maxIndex);
+	bool open = ((maxPower - minPower) > m_threshold); // && (minIndex > maxIndex);
 
 	if (open)
 	{
-		if (samplesAttack && (attackCount < samplesAttack))
+		if (m_samplesAttack && (m_attackCount < m_samplesAttack))
 		{
-			attackCount++;
+			m_isOpen = false;
+			m_attackCount++;
 		}
 		else
 		{
-			isOpen = true;
-			decayCount = 0;
+			m_isOpen = true;
+			m_decayCount = 0;
 		}
 	}
 	else
 	{
-		if (samplesDecay && (decayCount < samplesDecay))
+		if (m_samplesDecay && (m_decayCount < m_samplesDecay))
 		{
-			decayCount++;
+			m_isOpen = true;
+			m_decayCount++;
 		}
 		else
 		{
-			isOpen = false;
-			attackCount = 0;
+			m_isOpen = false;
+			m_attackCount = 0;
 		}
 	}
 }

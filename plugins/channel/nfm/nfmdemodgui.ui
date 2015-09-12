@@ -131,7 +131,7 @@
     <item row="4" column="4">
      <widget class="QSlider" name="squelch">
       <property name="minimum">
-       <number>-60</number>
+       <number>-100</number>
       </property>
       <property name="maximum">
        <number>0</number>

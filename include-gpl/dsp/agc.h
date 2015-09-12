@@ -20,11 +20,8 @@ public:
 
 	void resize(int historySize, Real R);
 	Real getValue();
-	Real getDelayedValue();
+	Real getAverage();
 	virtual void feed(Complex& ci) = 0;
-	virtual Real returnedDelayedValue() const = 0;
-	void openedSquelch();
-	void closedSquelch();
 
 protected:
 	Real m_u0;
@@ -32,7 +29,6 @@ protected:
 	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
 	int m_historySize;
 	int m_count;
-	static const int m_mult = 4; // squelch delay multiplicator
 };
 
 class MagSquaredAGC : public AGC
@@ -42,7 +38,6 @@ public:
 	MagSquaredAGC(int historySize, Real R);
 	virtual ~MagSquaredAGC();
 	virtual void feed(Complex& ci);
-	virtual Real returnedDelayedValue() const { return m_u0; }
 };
 
 class MagAGC : public AGC
@@ -52,7 +47,6 @@ public:
 	MagAGC(int historySize, Real R);
 	virtual ~MagAGC();
 	virtual void feed(Complex& ci);
-	virtual Real returnedDelayedValue() const { return m_u0; }
 };
 
 class AlphaAGC : public AGC
@@ -64,9 +58,6 @@ public:
 	virtual ~AlphaAGC();
     void resize(int historySize, Real R, Real alpha);
 	virtual void feed(Complex& ci);
-	virtual Real returnedDelayedValue() const { return 1; }
-	void openedSquelch();
-	void closedSquelch();
 private:
 	Real m_alpha;
 	bool m_squelchOpen;
@@ -115,20 +106,6 @@ public:
             if (value > m_cutoff)
             {
                     m_moving_average.feed(value);
-            }
-    }
-
-    void openedSquelch()
-    {
-            m_squelchOpen = true;
-    }
-
-    void closedSquelch()
-    {
-            if (m_squelchOpen)
-            {
-                    //m_moving_average.fill(m_fill); // Valgrind optim
-                    m_squelchOpen = false;
             }
     }
 

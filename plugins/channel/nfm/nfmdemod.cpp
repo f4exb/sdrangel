@@ -26,14 +26,13 @@
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 
-static const Real afSqTones[2] = {1200.0, 6000.0}; // {1200.0, 8000.0};
+static const Real afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
 NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
-	m_afSquelch(2, afSqTones),
 	m_squelchOpen(false),
 	m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive)
@@ -54,14 +53,11 @@ NFMDemod::NFMDemod() :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_movingAverage.resize(16, 0);
-	m_agcLevel = 0.0625; // 0.003
-	//m_AGC.resize(480, m_agcLevel, 0, 0.1*m_agcLevel);
-	m_AGC.resize(600, m_agcLevel*m_agcLevel); //, 0.3);
+	m_movingAverage.resize(240, 0);
+	m_agcLevel = 1.0;
+	m_AGC.resize(240, m_agcLevel);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 48000.0, 5, 1); // 4000 Hz span, 250us
-	m_afSquelch.setThreshold(0.001);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -165,7 +161,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Real qp = ci.imag() - m_m2Sample.imag();
 				Real h1 = m_m1Sample.real() * qp;
 				Real h2 = m_m1Sample.imag() * ip;
-				Real demod = (h1 - h2) * 2; // 10000 (multiply by 2^16 after demod)
+				Real demod = (h1 - h2) * 1; // 10000 (multiply by 2^16 after demod)
 
 				m_m2Sample = m_m1Sample;
 				m_m1Sample = ci;
@@ -173,12 +169,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if(m_afSquelch.analyze(&demod))
-				{
-					m_squelchOpen = m_afSquelch.open();
-				}
-
-				if (m_squelchOpen)
+				if (m_AGC.getAverage() > m_squelchLevel)
 				{
 					if (m_running.m_ctcssOn)
 					{
@@ -218,10 +209,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						demod = m_bandpass.filter(demod);
 						demod *= m_running.m_volume;
-						sample = demod * ((1<<18)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
+						sample = demod * 4; // denominator = bandpass filter number of taps
 					}
-
-					m_AGC.openedSquelch();
 				}
 				else
 				{
@@ -231,7 +220,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 						m_ctcssIndex = 0;
 					}
 
-					m_AGC.closedSquelch();
 					sample = 0;
 				}
 
@@ -354,10 +342,11 @@ void NFMDemod::apply()
 
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
-		m_squelchLevel *= m_squelchLevel;
-		m_afSquelch.setThreshold(m_squelchLevel);
-		m_afSquelch.reset();
+		// input is a power level in dB
+		// m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
+		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0); // to magnitude
+
+		//m_squelchLevel *= m_squelchLevel;
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;

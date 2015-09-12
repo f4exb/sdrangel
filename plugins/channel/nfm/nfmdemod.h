@@ -156,14 +156,13 @@ private:
 
 	double m_squelchLevel;
 	//int m_squelchState;
-	AFSquelch m_afSquelch;
 	bool m_squelchOpen;
 
 	Real m_lastArgument;
 	Complex m_m1Sample;
 	Complex m_m2Sample;
 	MovingAverage<Real> m_movingAverage;
-	MagSquaredAGC m_AGC;
+	MagAGC m_AGC;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
 

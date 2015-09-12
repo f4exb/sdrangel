@@ -27,7 +27,10 @@ public:
     // Constructors and Destructor
 	AFSquelch();
     // allows user defined tone pair
-	AFSquelch(unsigned int nbTones, const Real *tones);
+	AFSquelch(unsigned int nbTones,
+			const Real *tones,
+			int samplesAttack = 0,
+			int samplesDecay = 0);
     virtual ~AFSquelch();
 
     // setup the basic parameters and coefficients
@@ -39,7 +42,7 @@ public:
 
     // set the detection threshold
     void setThreshold(double _threshold) {
-    	threshold = _threshold;
+    	m_threshold = _threshold;
     }
 
     // analyze a sample set and optionally filter
@@ -49,11 +52,11 @@ public:
     // get the tone set
     const Real *getToneSet() const
     {
-    	return toneSet;
+    	return m_toneSet;
     }
 
     bool open() const {
-    	return isOpen;
+    	return m_isOpen;
     }
 
     void reset();                       // reset the analysis algorithm
@@ -64,23 +67,23 @@ protected:
     void evaluate();
 
 private:
-    int N;
-    int sampleRate;
-    int samplesProcessed;
-    int maxPowerIndex;
-    int nTones;
-    int samplesAttack;
-    int attackCount;
-    int samplesDecay;
-    int decayCount;
-    bool isOpen;
-    double threshold;
-    double *k;
-    double *coef;
-    Real *toneSet;
-    double *u0;
-    double *u1;
-    double *power;
+    int m_N;
+    int m_sampleRate;
+    int m_samplesProcessed;
+    int m_maxPowerIndex;
+    int m_nTones;
+    int m_samplesAttack;
+    int m_attackCount;
+    int m_samplesDecay;
+    int m_decayCount;
+    bool m_isOpen;
+    double m_threshold;
+    double *m_k;
+    double *m_coef;
+    Real *m_toneSet;
+    double *m_u0;
+    double *m_u1;
+    double *m_power;
 };
 
 

@@ -168,5 +168,5 @@ Assuming Debian Jessie is used:
   - Tx support with the BladeRF
   - Enhance WFM (stereo, RDS?)
   - Even more demods ...
-  - Support for Airspy
+  - Support for Hack-RF
   
