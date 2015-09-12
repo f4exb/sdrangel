@@ -26,7 +26,7 @@
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 
-static const Real afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
+static const Real afSqTones[2] = {1200.0, 6000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
@@ -218,7 +218,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						demod = m_bandpass.filter(demod);
 						demod *= m_running.m_volume;
-						sample = demod * ((1<<19)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
+						sample = demod * ((1<<18)/301) * m_AGC.getDelayedValue(); // denominator = bandpass filter number of taps
 					}
 
 					m_AGC.openedSquelch();

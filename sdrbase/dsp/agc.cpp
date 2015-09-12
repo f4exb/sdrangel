@@ -48,7 +48,7 @@ Real AGC::getDelayedValue()
 	}
 	else
 	{
-		return 1;
+		return returnedDelayedValue();
 	}
 }
 

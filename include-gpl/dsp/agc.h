@@ -22,6 +22,7 @@ public:
 	Real getValue();
 	Real getDelayedValue();
 	virtual void feed(Complex& ci) = 0;
+	virtual Real returnedDelayedValue() const = 0;
 	void openedSquelch();
 	void closedSquelch();
 
@@ -41,6 +42,7 @@ public:
 	MagSquaredAGC(int historySize, Real R);
 	virtual ~MagSquaredAGC();
 	virtual void feed(Complex& ci);
+	virtual Real returnedDelayedValue() const { return m_u0; }
 };
 
 class MagAGC : public AGC
@@ -50,6 +52,7 @@ public:
 	MagAGC(int historySize, Real R);
 	virtual ~MagAGC();
 	virtual void feed(Complex& ci);
+	virtual Real returnedDelayedValue() const { return m_u0; }
 };
 
 class AlphaAGC : public AGC
@@ -61,6 +64,7 @@ public:
 	virtual ~AlphaAGC();
     void resize(int historySize, Real R, Real alpha);
 	virtual void feed(Complex& ci);
+	virtual Real returnedDelayedValue() const { return 1; }
 	void openedSquelch();
 	void closedSquelch();
 private:
