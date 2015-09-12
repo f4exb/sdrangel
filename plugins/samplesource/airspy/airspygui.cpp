@@ -246,7 +246,7 @@ void AirspyGui::on_mix_valueChanged(int value)
 		return;
 
 	ui->mixText->setText(tr("%1dB").arg(value));
-	m_settings.m_lnaGain = value;
+	m_settings.m_mixerGain = value;
 	sendSettings();
 }
 
@@ -256,7 +256,7 @@ void AirspyGui::on_vga_valueChanged(int value)
 		return;
 
 	ui->vgaText->setText(tr("%1dB").arg(value));
-	m_settings.m_lnaGain = value;
+	m_settings.m_vgaGain = value;
 	sendSettings();
 }
 

@@ -32,11 +32,11 @@ AirspyInput::Settings::Settings() :
 	m_centerFrequency(435000*1000),
 	m_devSampleRateIndex(0),
 	m_LOppmTenths(0),
-	m_lnaGain(1),
-	m_mixerGain(5),
-	m_vgaGain(5),
+	m_lnaGain(14),
+	m_mixerGain(15),
+	m_vgaGain(4),
 	m_log2Decim(0),
-	m_fcPos(FC_POS_INFRA),
+	m_fcPos(FC_POS_CENTER),
 	m_biasT(false)
 {
 }
@@ -46,11 +46,11 @@ void AirspyInput::Settings::resetToDefaults()
 	m_centerFrequency = 435000*1000;
 	m_devSampleRateIndex = 0;
 	m_LOppmTenths = 0;
-	m_lnaGain = 1;
-	m_mixerGain = 5;
-	m_vgaGain = 5;
+	m_lnaGain = 14;
+	m_mixerGain = 15;
+	m_vgaGain = 4;
 	m_log2Decim = 0;
-	m_fcPos = FC_POS_INFRA;
+	m_fcPos = FC_POS_CENTER;
 	m_biasT = false;
 }
 

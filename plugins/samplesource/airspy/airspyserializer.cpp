@@ -59,9 +59,9 @@ bool AirspySerializer::readSerializedData(const QByteArray& serializedData, Airs
 		d.readU32(3, &data.m_sampleRateIndex, 0);
 		d.readU32(4, &data.m_log2Decim, 0);
 		d.readS32(5, &data.m_fcPos, 0);
-		d.readU32(6, &data.m_lnaGain, 1);
-		d.readU32(7, &data.m_mixerGain, 5);
-		d.readU32(8, &data.m_vgaGain, 5);
+		d.readU32(6, &data.m_lnaGain, 14);
+		d.readU32(7, &data.m_mixerGain, 15);
+		d.readU32(8, &data.m_vgaGain, 4);
 		d.readBool(9, &data.m_biasT, false);
 
 		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
@@ -79,8 +79,8 @@ void AirspySerializer::setDefaults(AirspyData& data)
 	data.m_sampleRateIndex = 0;
 	data.m_log2Decim = 0;
 	data.m_fcPos = 0;
-	data.m_lnaGain = 1;
-	data.m_mixerGain = 5;
-	data.m_vgaGain = 5;
+	data.m_lnaGain = 14;
+	data.m_mixerGain = 15;
+	data.m_vgaGain = 4;
 	data.m_biasT = false;
 }
