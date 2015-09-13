@@ -18,6 +18,7 @@
 #include "dsp/afsquelch.h"
 
 AFSquelch::AFSquelch() :
+            m_nbAvg(128),
 			m_N(0),
 			m_sampleRate(0),
 			m_samplesProcessed(0),
@@ -36,20 +37,22 @@ AFSquelch::AFSquelch() :
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
+	m_movingAverages.resize(m_nTones, MovingAverage<Real>(m_nbAvg, 0.0));
 
 	m_toneSet[0]  = 2000.0;
 	m_toneSet[1]  = 10000.0;
 }
 
-AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones, int samplesAttack, int samplesDecay) :
+AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
 			m_N(0),
+            m_nbAvg(0),
 			m_sampleRate(0),
 			m_samplesProcessed(0),
 			m_maxPowerIndex(0),
 			m_nTones(nbTones),
-			m_samplesAttack(samplesAttack),
+			m_samplesAttack(0),
 			m_attackCount(0),
-			m_samplesDecay(samplesDecay),
+			m_samplesDecay(0),
 			m_decayCount(0),
 			m_isOpen(false),
 			m_threshold(0.0)
@@ -79,12 +82,14 @@ AFSquelch::~AFSquelch()
 }
 
 
-void AFSquelch::setCoefficients(int _N, int _samplerate, int _samplesAttack, int _samplesDecay )
+void AFSquelch::setCoefficients(int _N, unsigned int nbAvg, int _samplerate, int _samplesAttack, int _samplesDecay )
 {
 	m_N = _N;                   // save the basic parameters for use during analysis
+	m_nbAvg = nbAvg;
 	m_sampleRate = _samplerate;
 	m_samplesAttack = _samplesAttack;
 	m_samplesDecay = _samplesDecay;
+	m_movingAverages.resize(m_nTones, MovingAverage<Real>(m_nbAvg, 0.0));
 
 	// for each of the frequencies (tones) of interest calculate
 	// k and the associated filter coefficient as per the Goertzel
@@ -102,10 +107,10 @@ void AFSquelch::setCoefficients(int _N, int _samplerate, int _samplesAttack, int
 
 
 // Analyze an input signal
-bool AFSquelch::analyze(Real *sample)
+bool AFSquelch::analyze(Real sample)
 {
 
-	feedback(*sample); // Goertzel feedback
+	feedback(sample); // Goertzel feedback
 	m_samplesProcessed += 1;
 
 	if (m_samplesProcessed == m_N) // completed a block of N
@@ -140,6 +145,7 @@ void AFSquelch::feedForward()
 	for (int j = 0; j < m_nTones; ++j)
 	{
 		m_power[j] = (m_u0[j] * m_u0[j]) + (m_u1[j] * m_u1[j]) - (m_coef[j] * m_u0[j] * m_u1[j]);
+		m_movingAverages[j].feed(m_power[j]);
 		m_u0[j] = m_u1[j] = 0.0; // reset for next block.
 	}
 
@@ -152,6 +158,7 @@ void AFSquelch::reset()
 	for (int j = 0; j < m_nTones; ++j)
 	{
 		m_power[j] = m_u0[j] = m_u1[j] = 0.0; // reset
+		m_movingAverages[j].fill(0.0);
 	}
 
 	m_samplesProcessed = 0;
@@ -160,7 +167,7 @@ void AFSquelch::reset()
 }
 
 
-void AFSquelch::evaluate()
+bool AFSquelch::evaluate()
 {
 	double maxPower = 0.0;
 	double minPower;
@@ -168,8 +175,9 @@ void AFSquelch::evaluate()
 
 	for (int j = 0; j < m_nTones; ++j)
 	{
-		if (m_power[j] > maxPower) {
-			maxPower = m_power[j];
+		if (m_movingAverages[j].sum() > maxPower)
+		{
+			maxPower = m_movingAverages[j].sum();
 			maxIndex = j;
 		}
 	}
@@ -178,14 +186,14 @@ void AFSquelch::evaluate()
 
 	for (int j = 0; j < m_nTones; ++j)
 	{
-		if (m_power[j] < minPower) {
-			minPower = m_power[j];
+		if (m_movingAverages[j].sum() < minPower) {
+			minPower = m_movingAverages[j].sum();
 			minIndex = j;
 		}
 	}
 
 	// principle is to open if power is uneven because noise gives even power
-	bool open = ((maxPower - minPower) > m_threshold); // && (minIndex > maxIndex);
+	bool open = (minPower/maxPower < m_threshold) && (minIndex > maxIndex);
 
 	if (open)
 	{
@@ -213,4 +221,12 @@ void AFSquelch::evaluate()
 			m_attackCount = 0;
 		}
 	}
+
+	return m_isOpen;
+}
+
+void AFSquelch::setThreshold(double threshold)
+{
+	qDebug("AFSquelch::setThreshold: threshold: %f", threshold);
+	m_threshold = threshold;
 }

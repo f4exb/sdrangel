@@ -131,7 +131,7 @@ bool AirspyInput::start(int device)
 		stop();
 	}
 
-	if (!m_sampleFifo.setSize(96000 * 4))
+	if (!m_sampleFifo.setSize(1<<19))
 	{
 		qCritical("AirspyInput::start: could not allocate SampleFifo");
 		return false;

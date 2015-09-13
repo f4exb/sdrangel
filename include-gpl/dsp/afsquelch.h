@@ -18,6 +18,7 @@
 #define INCLUDE_GPL_DSP_AFSQUELCH_H_
 
 #include "dsp/dsptypes.h"
+#include "dsp/movingaverage.h"
 
 /** AFSquelch: AF squelch class based on the Modified Goertzel
  * algorithm.
@@ -28,26 +29,24 @@ public:
 	AFSquelch();
     // allows user defined tone pair
 	AFSquelch(unsigned int nbTones,
-			const Real *tones,
-			int samplesAttack = 0,
-			int samplesDecay = 0);
+			const Real *tones);
     virtual ~AFSquelch();
 
     // setup the basic parameters and coefficients
     void setCoefficients(
-    		int N,              // the algorithm "block"  size
-			int SampleRate,     // input signal sample rate
-			int _samplesAttack, // number of results before squelch opens
-			int _samplesDecay); // number of results keeping squelch open
+    		int N,              //!< the algorithm "block"  size
+			unsigned int nbAvg, //!< averaging size
+			int SampleRate,     //!< input signal sample rate
+			int _samplesAttack, //!< number of results before squelch opens
+			int _samplesDecay); //!< number of results keeping squelch open
 
     // set the detection threshold
-    void setThreshold(double _threshold) {
-    	m_threshold = _threshold;
-    }
+    void setThreshold(double _threshold);
 
     // analyze a sample set and optionally filter
     // the tone frequencies.
-    bool analyze(Real *sample); // input signal sample
+    bool analyze(Real sample); // input signal sample
+    bool evaluate(); // evaluate result
 
     // get the tone set
     const Real *getToneSet() const
@@ -64,9 +63,9 @@ public:
 protected:
     void feedback(Real sample);
     void feedForward();
-    void evaluate();
 
 private:
+    unsigned int m_nbAvg; //!< number of power samples taken for moving average
     int m_N;
     int m_sampleRate;
     int m_samplesProcessed;
@@ -84,6 +83,7 @@ private:
     double *m_u0;
     double *m_u1;
     double *m_power;
+    std::vector<MovingAverage<Real> > m_movingAverages;
 };
 
 

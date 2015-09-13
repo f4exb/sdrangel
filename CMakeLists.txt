@@ -55,8 +55,8 @@ set(sdrbase_SOURCES
 	sdrbase/audio/audiofifo.cpp
 	sdrbase/audio/audiooutput.cpp
 
-	sdrbase/dsp/agc.cpp
 	sdrbase/dsp/afsquelch.cpp
+	sdrbase/dsp/agc.cpp
 	sdrbase/dsp/channelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
 	sdrbase/dsp/ctcssdetector.cpp
@@ -127,6 +127,7 @@ set(sdrbase_HEADERS
 	include-gpl/audio/audiofifo.h
 	include-gpl/audio/audiooutput.h
 
+	include-gpl/dsp/afsquelch.h
 	include-gpl/dsp/channelizer.h
 	include/dsp/channelmarker.h
 	include-gpl/dsp/complex.h

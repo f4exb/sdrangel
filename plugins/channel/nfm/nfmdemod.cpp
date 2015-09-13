@@ -33,7 +33,7 @@ MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
-	m_squelchOpen(false),
+	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive)
 {
@@ -53,11 +53,11 @@ NFMDemod::NFMDemod() :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_movingAverage.resize(240, 0);
 	m_agcLevel = 1.0;
 	m_AGC.resize(240, m_agcLevel);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
+	m_afSquelch.setCoefficients(24, 1200, 48000.0, 4, 0); // 4000 Hz span, 250us
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -114,6 +114,7 @@ Real angleDist(Real a, Real b)
 
 void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+	bool squelchOpen;
 	Complex ci;
 
 	m_settingsMutex.lock();
@@ -169,7 +170,13 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if (m_AGC.getAverage() > m_squelchLevel)
+				if (m_afSquelch.analyze(demod))
+				{
+					squelchOpen = m_afSquelch.evaluate();
+				}
+
+				if (squelchOpen)
+				//if (m_AGC.getAverage() > m_squelchLevel)
 				{
 					if (m_running.m_ctcssOn)
 					{
@@ -343,10 +350,9 @@ void NFMDemod::apply()
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a power level in dB
-		// m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0); // to magnitude
-
+		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
 		//m_squelchLevel *= m_squelchLevel;
+		m_afSquelch.setThreshold(m_squelchLevel);
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;

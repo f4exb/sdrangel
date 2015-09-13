@@ -51,6 +51,11 @@ public:
 		return m_sum / (float) m_history.size();
 	}
 
+	Type sum() const
+	{
+		return m_sum;
+	}
+
 protected:
 	std::vector<Type> m_history;
 	Type m_sum;

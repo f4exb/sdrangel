@@ -25,7 +25,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
-#include "dsp/movingaverage.h"
+#include "dsp/afsquelch.h"
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
 #include "dsp/afsquelch.h"
@@ -155,14 +155,12 @@ private:
 	int m_sampleCount;
 
 	double m_squelchLevel;
-	//int m_squelchState;
-	bool m_squelchOpen;
 
 	Real m_lastArgument;
 	Complex m_m1Sample;
 	Complex m_m2Sample;
-	MovingAverage<Real> m_movingAverage;
 	MagAGC m_AGC;
+	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
 
