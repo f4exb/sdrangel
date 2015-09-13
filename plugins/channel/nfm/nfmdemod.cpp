@@ -57,7 +57,7 @@ NFMDemod::NFMDemod() :
 	m_AGC.resize(240, m_agcLevel);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 1200, 48000.0, 4, 0); // 4000 Hz span, 250us
+	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }

@@ -197,7 +197,7 @@ bool AFSquelch::evaluate()
 
 	if (open)
 	{
-		if (m_samplesAttack && (m_attackCount < m_samplesAttack))
+		if ((m_samplesAttack > 0) && (m_attackCount < m_samplesAttack))
 		{
 			m_isOpen = false;
 			m_attackCount++;
@@ -210,7 +210,7 @@ bool AFSquelch::evaluate()
 	}
 	else
 	{
-		if (m_samplesDecay && (m_decayCount < m_samplesDecay))
+		if ((m_samplesDecay > 0) && (m_decayCount < m_samplesDecay))
 		{
 			m_isOpen = true;
 			m_decayCount++;
