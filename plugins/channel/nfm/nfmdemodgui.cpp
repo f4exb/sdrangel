@@ -181,7 +181,7 @@ void NFMDemodGUI::on_volume_valueChanged(int value)
 
 void NFMDemodGUI::on_squelch_valueChanged(int value)
 {
-	ui->squelchText->setText(QString("%1 dB").arg(value));
+	ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
 }
 

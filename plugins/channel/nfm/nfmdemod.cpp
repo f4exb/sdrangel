@@ -349,8 +349,8 @@ void NFMDemod::apply()
 
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
-		// input is a power level in dB
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 10.0);
+		// input is a value in tenths of dB
+		m_squelchLevel = pow(10.0, m_config.m_squelch / 100.0);
 		//m_squelchLevel *= m_squelchLevel;
 		m_afSquelch.setThreshold(m_squelchLevel);
 	}
