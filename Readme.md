@@ -53,6 +53,8 @@ If you use your own location for libairspy install directory you need to specify
 
 Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out. 
 
+Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) are affected by a noise artifact so 10 MS/s is preferable for weak signal work or instrumentation. A decimation by 64 was implemented to facilitate narrow band work at 10 MS/s input rate.
+
 <h2>BladeRF</h2>
 
 BladeRF is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
@@ -60,6 +62,20 @@ BladeRF is supported through the libbladerf library that should be installed in 
 If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
 `-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
+
+<h2>FunCube Dongle</h2>
+
+Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. For the Pro+ the band filter selection is not effective as it is handled by the firmware using the center frequency.
+
+The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support. Library fcdlib is used to store the constants for each dongle type.
+
+<h2>HackRF</h2>
+
+HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install.
+
+If you use your own location for libhackrf install directory you need to specify library and include locations. Example with `/opt/install/libhackrf` with the following defines on `cmake` command line:
+
+`-DLIBHACKRF_LIBRARIES=/opt/install/libhackrf/lib/libhackrf.so -DLIBHACKRF_INCLUDE_DIR=/opt/install/libhackrf/include`
 
 <h2>FunCube Dongle</h2>
 
@@ -163,10 +179,12 @@ Assuming Debian Jessie is used:
   - Many other little things...
     
 <h1>To Do</h1>
+  - Review queue messaging to and from the source plugin to fix performance problems with rates > 4MS/s
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). Allow several sample source plugins to share the same presets
+  - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
+  - Implement polyphase channelizer
   - Level calibration  
   - Tx support with the BladeRF
   - Enhance WFM (stereo, RDS?)
   - Even more demods ...
-  - Support for Hack-RF
   

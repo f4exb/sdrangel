@@ -37,4 +37,9 @@ if(LIBUSB_FOUND AND LIBAIRSPY_FOUND)
 	add_subdirectory(airspy)
 endif(LIBUSB_FOUND AND LIBAIRSPY_FOUND)
 
+find_package(LibHACKRF)
+if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
+	add_subdirectory(hackrf)
+endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
+
 add_subdirectory(filesource)

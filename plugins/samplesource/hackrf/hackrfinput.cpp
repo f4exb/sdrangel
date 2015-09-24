@@ -18,17 +18,18 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "airspygui.h"
-#include "airspyinput.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "airspyserializer.h"
-#include "airspythread.h"
+#include "hackrfinput.h"
 
-MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
-MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
+#include "hackrfgui.h"
+#include "hackrfserializer.h"
+#include "hackrfthread.h"
 
-AirspyInput::Settings::Settings() :
+MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRT, Message)
+MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
+
+HackRFInput::Settings::Settings() :
 	m_centerFrequency(435000*1000),
 	m_devSampleRateIndex(0),
 	m_LOppmTenths(0),
@@ -41,7 +42,7 @@ AirspyInput::Settings::Settings() :
 {
 }
 
-void AirspyInput::Settings::resetToDefaults()
+void HackRFInput::Settings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
 	m_devSampleRateIndex = 0;
@@ -54,9 +55,9 @@ void AirspyInput::Settings::resetToDefaults()
 	m_biasT = false;
 }
 
-QByteArray AirspyInput::Settings::serialize() const
+QByteArray HackRFInput::Settings::serialize() const
 {
-	AirspySerializer::AirspyData data;
+	HackRFSerializer::AirspyData data;
 
 	data.m_data.m_frequency = m_centerFrequency;
 	data.m_LOppmTenths = m_LOppmTenths;
@@ -70,16 +71,16 @@ QByteArray AirspyInput::Settings::serialize() const
 
 	QByteArray byteArray;
 
-	AirspySerializer::writeSerializedData(data, byteArray);
+	HackRFSerializer::writeSerializedData(data, byteArray);
 
 	return byteArray;
 }
 
-bool AirspyInput::Settings::deserialize(const QByteArray& serializedData)
+bool HackRFInput::Settings::deserialize(const QByteArray& serializedData)
 {
-	AirspySerializer::AirspyData data;
+	HackRFSerializer::AirspyData data;
 
-	bool valid = AirspySerializer::readSerializedData(serializedData, data);
+	bool valid = HackRFSerializer::readSerializedData(serializedData, data);
 
 	m_centerFrequency = data.m_data.m_frequency;
 	m_LOppmTenths = data.m_LOppmTenths;
@@ -94,7 +95,7 @@ bool AirspyInput::Settings::deserialize(const QByteArray& serializedData)
 	return valid;
 }
 
-AirspyInput::AirspyInput() :
+HackRFInput::HackRFInput() :
 	m_settings(),
 	m_dev(0),
 	m_airspyThread(0),
@@ -104,17 +105,17 @@ AirspyInput::AirspyInput() :
 	m_sampleRates.push_back(2500000);
 }
 
-AirspyInput::~AirspyInput()
+HackRFInput::~HackRFInput()
 {
 	stop();
 }
 
-bool AirspyInput::init(const Message& cmd)
+bool HackRFInput::init(const Message& cmd)
 {
 	return false;
 }
 
-bool AirspyInput::start(int device)
+bool HackRFInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	airspy_error rc;
@@ -168,13 +169,9 @@ bool AirspyInput::start(int device)
 	}
 
 	delete[] sampleRates;
-#else
-	m_sampleRates.clear();
-	m_sampleRates.push_back(10000000);
-	m_sampleRates.push_back(2500000);
 #endif
 
-	MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
+	MsgReportHackRF *message = MsgReportHackRF::create(m_sampleRates);
 	getOutputMessageQueueToGUI()->push(message);
 
 	rc = (airspy_error) airspy_set_sample_type(m_dev, AIRSPY_SAMPLE_INT16_IQ);
@@ -185,7 +182,7 @@ bool AirspyInput::start(int device)
 		return false;
 	}
 
-	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == 0)
+	if((m_airspyThread = new HackRFThread(m_dev, &m_sampleFifo)) == 0)
 	{
 		qFatal("AirspyInput::start: out of memory");
 		stop();
@@ -203,7 +200,7 @@ bool AirspyInput::start(int device)
 	return true;
 }
 
-void AirspyInput::stop()
+void HackRFInput::stop()
 {
 	qDebug("AirspyInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
@@ -225,27 +222,27 @@ void AirspyInput::stop()
 	airspy_exit();
 }
 
-const QString& AirspyInput::getDeviceDescription() const
+const QString& HackRFInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int AirspyInput::getSampleRate() const
+int HackRFInput::getSampleRate() const
 {
 	int rate = m_sampleRates[m_settings.m_devSampleRateIndex];
 	return (rate / (1<<m_settings.m_log2Decim));
 }
 
-quint64 AirspyInput::getCenterFrequency() const
+quint64 HackRFInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-bool AirspyInput::handleMessage(const Message& message)
+bool HackRFInput::handleMessage(const Message& message)
 {
-	if (MsgConfigureAirspy::match(message))
+	if (MsgConfigureHackRT::match(message))
 	{
-		MsgConfigureAirspy& conf = (MsgConfigureAirspy&) message;
+		MsgConfigureHackRT& conf = (MsgConfigureHackRT&) message;
 		qDebug() << "AirspyInput::handleMessage: MsgConfigureAirspy";
 
 		bool success = applySettings(conf.getSettings(), false);
@@ -263,7 +260,7 @@ bool AirspyInput::handleMessage(const Message& message)
 	}
 }
 
-void AirspyInput::setCenterFrequency(quint64 freq_hz)
+void HackRFInput::setCenterFrequency(quint64 freq_hz)
 {
 	freq_hz += (freq_hz * m_settings.m_LOppmTenths) / 10000000ULL;
 
@@ -279,7 +276,7 @@ void AirspyInput::setCenterFrequency(quint64 freq_hz)
 	}
 }
 
-bool AirspyInput::applySettings(const Settings& settings, bool force)
+bool HackRFInput::applySettings(const Settings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -469,7 +466,7 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 	return true;
 }
 
-struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
+struct airspy_device *HackRFInput::open_airspy_from_sequence(int sequence)
 {
 	airspy_read_partid_serialno_t read_partid_serialno;
 	struct airspy_device *devinfo, *retdev = 0;
