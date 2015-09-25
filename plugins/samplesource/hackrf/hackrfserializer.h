@@ -30,9 +30,11 @@ public:
 		quint32 m_log2Decim;
 		qint32 m_fcPos;
 		quint32 m_lnaGain;
-		quint32 m_mixerGain;
+		quint32 m_imjRejFilterIndex;
+		quint32 m_bandwidthIndex;
 		quint32 m_vgaGain;
 		bool m_biasT;
+		bool m_lnaExt;
 	};
 
 	static void writeSerializedData(const AirspyData& data, QByteArray& serializedData);

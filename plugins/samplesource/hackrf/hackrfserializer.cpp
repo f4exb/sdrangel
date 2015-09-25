@@ -29,9 +29,11 @@ void HackRFSerializer::writeSerializedData(const AirspyData& data, QByteArray& s
 	s.writeU32(4, data.m_log2Decim);
 	s.writeS32(5, data.m_fcPos);
 	s.writeU32(6, data.m_lnaGain);
-	s.writeU32(7, data.m_mixerGain);
-	s.writeU32(8, data.m_vgaGain);
-	s.writeBool(9, data.m_biasT);
+	s.writeU32(7, data.m_imjRejFilterIndex);
+	s.writeU32(8, data.m_bandwidthIndex);
+	s.writeU32(9, data.m_vgaGain);
+	s.writeBool(10, data.m_biasT);
+	s.writeBool(11, data.m_lnaExt);
 
 	serializedData = s.final();
 }
@@ -60,9 +62,11 @@ bool HackRFSerializer::readSerializedData(const QByteArray& serializedData, Airs
 		d.readU32(4, &data.m_log2Decim, 0);
 		d.readS32(5, &data.m_fcPos, 0);
 		d.readU32(6, &data.m_lnaGain, 14);
-		d.readU32(7, &data.m_mixerGain, 15);
-		d.readU32(8, &data.m_vgaGain, 4);
-		d.readBool(9, &data.m_biasT, false);
+		d.readU32(7, &data.m_imjRejFilterIndex, 0);
+		d.readU32(8, &data.m_bandwidthIndex, 0);
+		d.readU32(9, &data.m_vgaGain, 4);
+		d.readBool(10, &data.m_biasT, false);
+		d.readBool(11, &data.m_lnaExt, false);
 
 		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
 	}
@@ -80,7 +84,9 @@ void HackRFSerializer::setDefaults(AirspyData& data)
 	data.m_log2Decim = 0;
 	data.m_fcPos = 0;
 	data.m_lnaGain = 14;
-	data.m_mixerGain = 15;
+	data.m_imjRejFilterIndex = 0;
+	data.m_bandwidthIndex = 0;
 	data.m_vgaGain = 4;
 	data.m_biasT = false;
+	data.m_lnaExt = false;
 }

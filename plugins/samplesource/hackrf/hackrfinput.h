@@ -38,11 +38,11 @@ public:
 		quint32 m_bandwidthIndex;
 		quint32 m_imjRejFilterIndex;
 		quint32 m_lnaGain;
-		quint32 m_mixerGain;
 		quint32 m_vgaGain;
 		quint32 m_log2Decim;
 		fcPos_t m_fcPos;
 		bool m_biasT;
+		bool m_lnaExt;
 
 		Settings();
 		void resetToDefaults();

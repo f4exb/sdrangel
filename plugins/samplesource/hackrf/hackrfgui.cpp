@@ -107,7 +107,7 @@ void HackRFGui::handleSourceMessages()
 
 	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
 	{
-		qDebug("AirspyGui::HandleSourceMessages: message: %s", message->getIdentifier());
+		qDebug("HackRFGui::HandleSourceMessages: message: %s", message->getIdentifier());
 
 		if (handleMessage(*message))
 		{
@@ -132,8 +132,12 @@ void HackRFGui::displaySettings()
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
+	ui->lnaExt->setChecked(m_settings.m_lnaExt);
 	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
+
+	ui->rej->setCurrentIndex(m_settings.m_imjRejFilterIndex);
+	ui->bbFilter->setCurrentIndex(m_settings.m_bandwidthIndex);
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->vga->setValue(m_settings.m_vgaGain);
@@ -233,9 +237,27 @@ void HackRFGui::on_sampleRate_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void HackRFGui::on_rej_currentIndexChanged(int index)
+{
+	m_settings.m_imjRejFilterIndex = index;
+	sendSettings();
+}
+
+void HackRFGui::on_bbFilter_currentIndexChanged(int index)
+{
+	m_settings.m_bandwidthIndex = index;
+	sendSettings();
+}
+
 void HackRFGui::on_biasT_stateChanged(int state)
 {
 	m_settings.m_biasT = (state == Qt::Checked);
+	sendSettings();
+}
+
+void HackRFGui::on_lnaExt_stateChanged(int state)
+{
+	m_settings.m_lnaExt = (state == Qt::Checked);
 	sendSettings();
 }
 

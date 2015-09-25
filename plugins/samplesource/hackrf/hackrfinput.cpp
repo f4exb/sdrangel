@@ -34,11 +34,13 @@ HackRFInput::Settings::Settings() :
 	m_devSampleRateIndex(0),
 	m_LOppmTenths(0),
 	m_lnaGain(14),
-	m_mixerGain(15),
+	m_imjRejFilterIndex(0),
+	m_bandwidthIndex(0),
 	m_vgaGain(4),
 	m_log2Decim(0),
 	m_fcPos(FC_POS_CENTER),
-	m_biasT(false)
+	m_biasT(false),
+	m_lnaExt(false)
 {
 }
 
@@ -48,11 +50,13 @@ void HackRFInput::Settings::resetToDefaults()
 	m_devSampleRateIndex = 0;
 	m_LOppmTenths = 0;
 	m_lnaGain = 14;
-	m_mixerGain = 15;
+	m_imjRejFilterIndex = 0;
+	m_bandwidthIndex = 0;
 	m_vgaGain = 4;
 	m_log2Decim = 0;
 	m_fcPos = FC_POS_CENTER;
 	m_biasT = false;
+	m_lnaExt = false;
 }
 
 QByteArray HackRFInput::Settings::serialize() const
@@ -65,9 +69,11 @@ QByteArray HackRFInput::Settings::serialize() const
 	data.m_log2Decim = m_log2Decim;
 	data.m_fcPos = (qint32) m_fcPos;
 	data.m_lnaGain = m_lnaGain;
-	data.m_mixerGain = m_mixerGain;
+	data.m_imjRejFilterIndex = m_imjRejFilterIndex;
+	data.m_bandwidthIndex = m_bandwidthIndex;
 	data.m_vgaGain = m_vgaGain;
 	data.m_biasT  = m_biasT;
+	data.m_lnaExt  = m_lnaExt;
 
 	QByteArray byteArray;
 
@@ -88,9 +94,11 @@ bool HackRFInput::Settings::deserialize(const QByteArray& serializedData)
 	m_log2Decim = data.m_log2Decim;
 	m_fcPos = (fcPos_t) data.m_fcPos;
 	m_lnaGain = data.m_lnaGain;
-	m_mixerGain = data.m_mixerGain;
+	m_imjRejFilterIndex = data.m_imjRejFilterIndex;
+	m_bandwidthIndex = data.m_bandwidthIndex;
 	m_vgaGain = data.m_vgaGain;
 	m_biasT = data.m_biasT;
+	m_lnaExt = data.m_lnaExt;
 
 	return valid;
 }

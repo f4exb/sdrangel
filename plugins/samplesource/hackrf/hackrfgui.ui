@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>198</width>
-    <height>214</height>
+    <width>215</width>
+    <height>220</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -224,7 +224,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0">
+    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -235,7 +235,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <spacer name="fcPosRightSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -265,6 +265,19 @@
          <string>Cent</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QCheckBox" name="lnaExt">
+       <property name="toolTip">
+        <string>Extra LNA</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>LNA Ext</string>
+       </property>
       </widget>
      </item>
     </layout>

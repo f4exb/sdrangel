@@ -76,7 +76,10 @@ private slots:
 	void on_biasT_stateChanged(int state);
 	void on_decim_valueChanged(int value);
 	void on_fcPos_currentIndexChanged(int index);
+	void on_lnaExt_stateChanged(int state);
 	void on_lna_valueChanged(int value);
+	void on_rej_currentIndexChanged(int index);
+	void on_bbFilter_currentIndexChanged(int index);
 	void on_vga_valueChanged(int value);
 	void updateHardware();
 	void handleSourceMessages();
