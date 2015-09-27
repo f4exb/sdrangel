@@ -259,7 +259,7 @@ void HackRFGui::on_vga_valueChanged(int value)
 
 void HackRFGui::updateHardware()
 {
-	qDebug() << "AirspyGui::updateHardware";
+	qDebug() << "HackRFGui::updateHardware";
 	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create( m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();

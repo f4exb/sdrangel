@@ -103,7 +103,9 @@ void DSPEngine::stopAcquistion()
 {
 	qDebug() << "DSPEngine::stopAcquistion";
 	DSPAcquisitionStop cmd;
-	m_syncMessenger.sendWait(cmd);
+	m_syncMessenger.storeMessage(cmd);
+	handleSynchronousMessages();
+
 
 	if(m_dcOffsetCorrection)
 	{

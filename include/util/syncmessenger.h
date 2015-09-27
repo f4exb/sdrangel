@@ -38,6 +38,7 @@ public:
 
 	int sendWait(Message& message, unsigned long msPollTime = 100); //!< Send message and waits for its process completion
     Message* getMessage() const { return m_message; }
+    void storeMessage(Message& message) { m_message = &message; }
 	void done(int result = 0); //!< Processing of the message is complete
 
 signals:
