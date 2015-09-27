@@ -266,7 +266,8 @@ bool AirspyInput::handleMessage(const Message& message)
 
 void AirspyInput::setCenterFrequency(quint64 freq_hz)
 {
-	freq_hz += (freq_hz * m_settings.m_LOppmTenths) / 10000000ULL;
+	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+	freq_hz += df;
 
 	airspy_error rc = (airspy_error) airspy_set_freq(m_dev, static_cast<uint32_t>(freq_hz));
 

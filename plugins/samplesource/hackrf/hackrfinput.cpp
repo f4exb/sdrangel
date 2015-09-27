@@ -227,7 +227,8 @@ bool HackRFInput::handleMessage(const Message& message)
 
 void HackRFInput::setCenterFrequency(quint64 freq_hz)
 {
-	freq_hz += (freq_hz * m_settings.m_LOppmTenths) / 10000000ULL;
+	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+	freq_hz += df;
 
 	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
 
