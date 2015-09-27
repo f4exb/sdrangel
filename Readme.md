@@ -71,7 +71,7 @@ The control interface is based on qthid and has been built in the software in th
 
 <h2>HackRF</h2>
 
-HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install.
+HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install. Please note that you will need a recent version (2015.07.2 or 2015.07.1 at least) of libhackrf that supports the sequential listing of devices so you might need to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
 
 If you use your own location for libhackrf install directory you need to specify library and include locations. Example with `/opt/install/libhackrf` with the following defines on `cmake` command line:
 

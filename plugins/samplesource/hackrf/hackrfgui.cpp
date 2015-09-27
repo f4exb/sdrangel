@@ -40,7 +40,6 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySampleRates();
 	displayBandwidths();
-	displayImgRejFilters();
 
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
@@ -136,7 +135,6 @@ void HackRFGui::displaySettings()
 	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
 
-	ui->rej->setCurrentIndex(m_settings.m_imjRejFilterIndex);
 	ui->bbFilter->setCurrentIndex(m_settings.m_bandwidthIndex);
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
@@ -151,7 +149,7 @@ void HackRFGui::displaySampleRates()
 
 	for (int i = 0; i < HackRFSampleRates::m_nb_rates; i++)
 	{
-		ui->sampleRate->addItem(QString("%1M").arg(QString::number(HackRFSampleRates::m_rates[i]/1000.0, 'f', 1)));
+		ui->sampleRate->addItem(QString("%1M").arg(QString::number(HackRFSampleRates::m_rates_k[i]/1000.0, 'f', 1)));
 	}
 
 	ui->sampleRate->blockSignals(false);
@@ -174,7 +172,7 @@ void HackRFGui::displayBandwidths()
 
 	for (int i = 0; i < HackRFBandwidths::m_nb_bw; i++)
 	{
-		ui->bbFilter->addItem(QString("%1M").arg(QString::number(HackRFBandwidths::m_bw[i]/1000.0, 'f', 2)));
+		ui->bbFilter->addItem(QString("%1M").arg(QString::number(HackRFBandwidths::m_bw_k[i]/1000.0, 'f', 2)));
 	}
 
 	ui->bbFilter->blockSignals(false);
@@ -186,29 +184,6 @@ void HackRFGui::displayBandwidths()
 	else
 	{
 		ui->bbFilter->setCurrentIndex((int) HackRFBandwidths::m_nb_bw-1);
-	}
-}
-
-void HackRFGui::displayImgRejFilters()
-{
-	int savedIndex = m_settings.m_imjRejFilterIndex;
-	ui->rej->blockSignals(true);
-	ui->rej->clear();
-
-	for (int i = 0; i < HackRFImageRejectFilters::m_nb_rej; i++)
-	{
-		ui->rej->addItem(HackRFImageRejectFilters::m_rejName[i]);
-	}
-
-	ui->rej->blockSignals(false);
-
-	if (savedIndex < HackRFImageRejectFilters::m_nb_rej)
-	{
-		ui->rej->setCurrentIndex(savedIndex);
-	}
-	else
-	{
-		ui->rej->setCurrentIndex((int) HackRFImageRejectFilters::m_nb_rej-1);
 	}
 }
 
@@ -234,12 +209,6 @@ void HackRFGui::on_LOppm_valueChanged(int value)
 void HackRFGui::on_sampleRate_currentIndexChanged(int index)
 {
 	m_settings.m_devSampleRateIndex = index;
-	sendSettings();
-}
-
-void HackRFGui::on_rej_currentIndexChanged(int index)
-{
-	m_settings.m_imjRejFilterIndex = index;
 	sendSettings();
 }
 
@@ -307,22 +276,22 @@ void HackRFGui::on_vga_valueChanged(int value)
 void HackRFGui::updateHardware()
 {
 	qDebug() << "AirspyGui::updateHardware";
-	HackRFInput::MsgConfigureHackRT* message = HackRFInput::MsgConfigureHackRT::create( m_settings);
+	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create( m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
 }
 
-unsigned int HackRFSampleRates::m_rates[] = {2400, 3200, 4800, 6400, 9680, 12800, 19200};
+unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 6400, 9680, 12800, 19200};
 
 unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {
 	if (rate_index < m_nb_rates)
 	{
-		return m_rates[rate_index];
+		return m_rates_k[rate_index];
 	}
 	else
 	{
-		return m_rates[0];
+		return m_rates_k[0];
 	}
 }
 
@@ -330,7 +299,7 @@ unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
 {
 	for (unsigned int i=0; i < m_nb_rates; i++)
 	{
-		if (rate/1000 == m_rates[i])
+		if (rate/1000 == m_rates_k[i])
 		{
 			return i;
 		}
@@ -339,17 +308,17 @@ unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
 	return 0;
 }
 
-unsigned int HackRFBandwidths::m_bw[] = {1750, 2500, 3500, 5000, 5500, 6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 20000, 24000, 28000};
+unsigned int HackRFBandwidths::m_bw_k[] = {1750, 2500, 3500, 5000, 5500, 6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 20000, 24000, 28000};
 
 unsigned int HackRFBandwidths::getBandwidth(unsigned int bandwidth_index)
 {
 	if (bandwidth_index < m_nb_bw)
 	{
-		return m_bw[bandwidth_index];
+		return m_bw_k[bandwidth_index];
 	}
 	else
 	{
-		return m_bw[0];
+		return m_bw_k[0];
 	}
 }
 
@@ -357,25 +326,11 @@ unsigned int HackRFBandwidths::getBandwidthIndex(unsigned int bandwidth)
 {
 	for (unsigned int i=0; i < m_nb_bw; i++)
 	{
-		if (bandwidth == m_bw[i])
+		if (bandwidth == m_bw_k[i])
 		{
 			return i;
 		}
 	}
 
 	return 0;
-}
-
-QString HackRFImageRejectFilters::m_rejName[] = {QString("None"), QString("Low"), QString("Hi")};
-
-QString& HackRFImageRejectFilters::getImageRejectFilterName(unsigned int filter_index)
-{
-	if (filter_index < m_nb_rej)
-	{
-		return m_rejName[filter_index];
-	}
-	else
-	{
-		return m_rejName[0];
-	}
 }

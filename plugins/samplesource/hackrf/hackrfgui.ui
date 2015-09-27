@@ -270,13 +270,13 @@
      <item row="0" column="2">
       <widget class="QCheckBox" name="lnaExt">
        <property name="toolTip">
-        <string>Extra LNA</string>
+        <string>Extra LNA +14dB</string>
        </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="text">
-        <string>LNA Ext</string>
+        <string>RF Amp</string>
        </property>
       </widget>
      </item>
@@ -316,10 +316,16 @@
         <string>LNA gain dB</string>
        </property>
        <property name="maximum">
-        <number>14</number>
+        <number>40</number>
+       </property>
+       <property name="singleStep">
+        <number>8</number>
        </property>
        <property name="pageStep">
-        <number>1</number>
+        <number>8</number>
+       </property>
+       <property name="value">
+        <number>16</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -345,29 +351,32 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_rej_bbf">
+    <layout class="QGridLayout" name="gridLayout_bbf">
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="rej"/>
-     </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="rejLabel">
-       <property name="text">
-        <string>Rej</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
       <widget class="QLabel" name="bbFiltLabel">
        <property name="text">
         <string>BBF</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="1">
       <widget class="QComboBox" name="bbFilter"/>
+     </item>
+     <item row="0" column="2">
+      <spacer name="bbSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -389,16 +398,16 @@
         <string>VGA gain dB</string>
        </property>
        <property name="maximum">
-        <number>15</number>
+        <number>62</number>
        </property>
        <property name="singleStep">
-        <number>1</number>
+        <number>2</number>
        </property>
        <property name="pageStep">
-        <number>1</number>
+        <number>2</number>
        </property>
        <property name="value">
-        <number>5</number>
+        <number>16</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

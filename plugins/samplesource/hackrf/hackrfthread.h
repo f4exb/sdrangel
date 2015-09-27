@@ -30,7 +30,7 @@ class HackRFThread : public QThread {
 	Q_OBJECT
 
 public:
-	HackRFThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	HackRFThread(hackrf_device* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
 	~HackRFThread();
 
 	void startWork();
@@ -44,7 +44,7 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	struct airspy_device* m_dev;
+	hackrf_device* m_dev;
 	qint16 m_buf[2*HACKRF_BLOCKSIZE];
 	SampleVector m_convertBuffer;
 	SampleFifo* m_sampleFifo;
@@ -54,11 +54,11 @@ private:
 	int m_fcPos;
 	static HackRFThread *m_this;
 
-	Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
+	Decimators<qint8, SDR_SAMP_SZ, 8> m_decimators;
 
 	void run();
-	void callback(const qint16* buf, qint32 len);
-	static int rx_callback(airspy_transfer_t* transfer);
+	void callback(const qint8* buf, qint32 len);
+	static int rx_callback(hackrf_transfer* transfer);
 };
 
 #endif // INCLUDE_HACKRFTHREAD_H

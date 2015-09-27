@@ -30,7 +30,6 @@ public:
 		quint32 m_log2Decim;
 		qint32 m_fcPos;
 		quint32 m_lnaGain;
-		quint32 m_imjRejFilterIndex;
 		quint32 m_bandwidthIndex;
 		quint32 m_vgaGain;
 		bool m_biasT;

@@ -22,11 +22,11 @@
 
 HackRFThread *HackRFThread::m_this = 0;
 
-HackRFThread::HackRFThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent) :
+HackRFThread::HackRFThread(hackrf_device* dev, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
-	m_convertBuffer(AIRSPY_BLOCKSIZE),
+	m_convertBuffer(HACKRF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(10),
 	m_log2Decim(0),
@@ -74,41 +74,41 @@ void HackRFThread::setFcPos(int fcPos)
 
 void HackRFThread::run()
 {
-	airspy_error rc;
+	hackrf_error rc;
 
 	m_running = true;
 	m_startWaiter.wakeAll();
 
-	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, NULL);
+	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, NULL);
 
-	if (rc != AIRSPY_SUCCESS)
+	if (rc != HACKRF_SUCCESS)
 	{
-		qCritical("AirspyInput::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
+		qCritical("HackRFThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
 	}
 	else
 	{
-		while ((m_running) && (airspy_is_streaming(m_dev) == AIRSPY_TRUE))
+		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
 			sleep(1);
 		}
 	}
 
-	rc = (airspy_error) airspy_stop_rx(m_dev);
+	rc = (hackrf_error) hackrf_stop_rx(m_dev);
 
-	if (rc == AIRSPY_SUCCESS)
+	if (rc == HACKRF_SUCCESS)
 	{
-		qDebug("AirspyInput::run: stopped Airspy Rx");
+		qDebug("HackRFThread::run: stopped HackRF Rx");
 	}
 	else
 	{
-		qDebug("AirspyInput::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
+		qDebug("HackRFThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
 	}
 
 	m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void HackRFThread::callback(const qint16* buf, qint32 len)
+void HackRFThread::callback(const qint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -202,9 +202,9 @@ void HackRFThread::callback(const qint16* buf, qint32 len)
 }
 
 
-int HackRFThread::rx_callback(airspy_transfer_t* transfer)
+int HackRFThread::rx_callback(hackrf_transfer* transfer)
 {
-	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
-	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
+	qint32 bytes_to_write = transfer->valid_length;
+	m_this->callback((qint8 *) transfer->buffer, bytes_to_write);
 	return 0;
 }

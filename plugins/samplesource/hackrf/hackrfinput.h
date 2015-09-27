@@ -18,7 +18,7 @@
 #define INCLUDE_HACKRFINPUT_H
 
 #include "dsp/samplesource.h"
-#include <libhackrf/hackrf.h>
+#include "libhackrf/hackrf.h"
 #include <QString>
 
 class HackRFThread;
@@ -36,7 +36,6 @@ public:
 		qint32  m_LOppmTenths;
 		quint32 m_devSampleRateIndex;
 		quint32 m_bandwidthIndex;
-		quint32 m_imjRejFilterIndex;
 		quint32 m_lnaGain;
 		quint32 m_vgaGain;
 		quint32 m_log2Decim;
@@ -50,21 +49,21 @@ public:
 		bool deserialize(const QByteArray& data);
 	};
 
-	class MsgConfigureHackRT : public Message {
+	class MsgConfigureHackRF : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const Settings& getSettings() const { return m_settings; }
 
-		static MsgConfigureHackRT* create(const Settings& settings)
+		static MsgConfigureHackRF* create(const Settings& settings)
 		{
-			return new MsgConfigureHackRT(settings);
+			return new MsgConfigureHackRF(settings);
 		}
 
 	private:
 		Settings m_settings;
 
-		MsgConfigureHackRT(const Settings& settings) :
+		MsgConfigureHackRF(const Settings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -74,19 +73,16 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
-		static MsgReportHackRF* create(const std::vector<uint32_t>& sampleRates)
+		static MsgReportHackRF* create()
 		{
-			return new MsgReportHackRF(sampleRates);
+			return new MsgReportHackRF();
 		}
 
 	protected:
-		std::vector<uint32_t> m_sampleRates;
 
-		MsgReportHackRF(const std::vector<uint32_t>& sampleRates) :
-			Message(),
-			m_sampleRates(sampleRates)
+		MsgReportHackRF() :
+			Message()
 		{ }
 	};
 
@@ -100,21 +96,19 @@ public:
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
-	const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
 	virtual bool handleMessage(const Message& message);
 
 private:
 	bool applySettings(const Settings& settings, bool force);
-	struct airspy_device *open_airspy_from_sequence(int sequence);
+	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
 	QMutex m_mutex;
 	Settings m_settings;
-	struct airspy_device* m_dev;
-	HackRFThread* m_airspyThread;
+	struct hackrf_device* m_dev;
+	HackRFThread* m_hackRFThread;
 	QString m_deviceDescription;
-	std::vector<uint32_t> m_sampleRates;
 };
 
 #endif // INCLUDE_HACKRFINPUT_H

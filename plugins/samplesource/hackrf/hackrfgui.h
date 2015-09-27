@@ -66,7 +66,6 @@ private:
 	void displaySettings();
 	void displaySampleRates();
 	void displayBandwidths();
-	void displayImgRejFilters();
 	void sendSettings();
 
 private slots:
@@ -78,7 +77,6 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_lnaExt_stateChanged(int state);
 	void on_lna_valueChanged(int value);
-	void on_rej_currentIndexChanged(int index);
 	void on_bbFilter_currentIndexChanged(int index);
 	void on_vga_valueChanged(int value);
 	void updateHardware();
@@ -90,7 +88,7 @@ public:
 	static unsigned int getRate(unsigned int rate_index);
 	static unsigned int getRateIndex(unsigned int rate);
 	static const unsigned int m_nb_rates = 7;
-	static unsigned int m_rates[m_nb_rates];
+	static unsigned int m_rates_k[m_nb_rates];
 };
 
 class HackRFBandwidths {
@@ -98,14 +96,7 @@ public:
 	static unsigned int getBandwidth(unsigned int bandwidth_index);
 	static unsigned int getBandwidthIndex(unsigned int bandwidth);
 	static const unsigned int m_nb_bw = 16;
-	static unsigned int m_bw[m_nb_bw];
-};
-
-class HackRFImageRejectFilters {
-public:
-	static QString& getImageRejectFilterName(unsigned int filter_index);
-	static const unsigned int m_nb_rej = HackRFGui::HACKRF_IMGREJ_NB;
-	static QString m_rejName[m_nb_rej];
+	static unsigned int m_bw_k[m_nb_bw];
 };
 
 #endif // INCLUDE_HACKRFGUI_H
