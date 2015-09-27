@@ -77,6 +77,8 @@ If you use your own location for libhackrf install directory you need to specify
 
 `-DLIBHACKRF_LIBRARIES=/opt/install/libhackrf/lib/libhackrf.so -DLIBHACKRF_INCLUDE_DIR=/opt/install/libhackrf/include`
 
+HackRF is better used with a sampling frequency over 8 MS/s. You can use the 9.6Ms/s setting that decimates nicely into integer kS/s sample rates. There are quite a few problems with narrowband work with this hardware. You may try various amplifiers settings to limit images and I/Q imbalance with varying success... The cheap RTL-SDR dongles usually do better.
+
 <h2>FunCube Dongle</h2>
 
 Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. For the Pro+ the band filter selection is not effective as it is handled by the firmware using the center frequency.
