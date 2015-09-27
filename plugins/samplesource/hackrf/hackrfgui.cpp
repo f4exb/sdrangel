@@ -41,7 +41,6 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displaySampleRates();
 	displayBandwidths();
 
-	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 }
 
@@ -98,21 +97,6 @@ bool HackRFGui::deserialize(const QByteArray& data)
 bool HackRFGui::handleMessage(const Message& message)
 {
 	return false;
-}
-
-void HackRFGui::handleSourceMessages()
-{
-	Message* message;
-
-	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		qDebug("HackRFGui::HandleSourceMessages: message: %s", message->getIdentifier());
-
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
 }
 
 void HackRFGui::displaySettings()

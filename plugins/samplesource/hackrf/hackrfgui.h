@@ -80,7 +80,6 @@ private slots:
 	void on_bbFilter_currentIndexChanged(int index);
 	void on_vga_valueChanged(int value);
 	void updateHardware();
-	void handleSourceMessages();
 };
 
 class HackRFSampleRates {
