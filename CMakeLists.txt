@@ -33,8 +33,8 @@ ENDIF()
 ##############################################################################
 
 #include(${QT_USE_FILE})
-set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
-#set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+#set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
+set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
 add_definitions(${QT_DEFINITIONS})
 
 if(MSVC)

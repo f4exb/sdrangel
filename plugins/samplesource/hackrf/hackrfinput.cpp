@@ -20,6 +20,7 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "hackrfinput.h"
 
 #include "hackrfgui.h"
@@ -396,7 +397,7 @@ bool HackRFInput::applySettings(const Settings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex]);
+			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex]*1000);
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
@@ -405,7 +406,7 @@ bool HackRFInput::applySettings(const Settings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: Baseband BW gain set to " << HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex];
+				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex] << " kHz";
 			}
 		}
 	}
@@ -452,7 +453,8 @@ bool HackRFInput::applySettings(const Settings& settings, bool force)
 	{
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		getOutputMessageQueue()->push(notif);
+		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		//getOutputMessageQueue()->push(notif);
 	}
 
 	return true;

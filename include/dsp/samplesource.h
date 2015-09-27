@@ -41,7 +41,6 @@ public:
 	virtual bool handleMessage(const Message& message) = 0;
 	
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	MessageQueue *getOutputMessageQueue() { return &m_outputMessageQueue; }
 	MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; }
     SampleFifo* getSampleFifo() { return &m_sampleFifo; }
 
@@ -51,8 +50,7 @@ protected slots:
 protected:
     SampleFifo m_sampleFifo;
 	MessageQueue m_inputMessageQueue; //!< Input queue to the source
-	MessageQueue m_outputMessageQueue; //!< Generic output queue
-	MessageQueue m_outputMessageQueueToGUI; //!< Output queue specialized for the source GUI
+    MessageQueue m_outputMessageQueueToGUI; //!< Output queue specialized for the source GUI
 };
 
 #endif // INCLUDE_SAMPLESOURCE_H

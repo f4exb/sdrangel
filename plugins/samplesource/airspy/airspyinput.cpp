@@ -22,6 +22,7 @@
 #include "airspyinput.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "airspyserializer.h"
 #include "airspythread.h"
 
@@ -463,7 +464,7 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 	{
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		getOutputMessageQueue()->push(notif);
+		DSPEngine::instance()->getInputMessageQueue()->push(notif);
 	}
 
 	return true;

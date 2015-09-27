@@ -21,6 +21,7 @@
 #include <string.h>
 #include <errno.h>
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "fcdproinput.h"
 
 #include "fcdprogui.h"
@@ -417,7 +418,7 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
     if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.centerFrequency);
-		getOutputMessageQueue()->push(notif);        
+		DSPEngine::instance()->getInputMessageQueue()->push(notif);
     }
 }
 

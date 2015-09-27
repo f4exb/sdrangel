@@ -502,7 +502,6 @@ void DSPEngine::handleSetSource(SampleSource* source)
 	if(m_sampleSource != 0)
 	{
 		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
-		disconnect(m_sampleSource->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	}
 
 	m_sampleSource = source;
@@ -511,7 +510,6 @@ void DSPEngine::handleSetSource(SampleSource* source)
 	{
 		qDebug() << "  - set " << source->getDeviceDescription().toStdString().c_str();
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
-		connect(m_sampleSource->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	}
 	else
 	{
@@ -638,21 +636,8 @@ void DSPEngine::handleInputMessages()
 
 			delete message;
 		}
-	}
-}
-
-void DSPEngine::handleSourceMessages()
-{
-	Message *message;
-
-	while ((message = m_sampleSource->getOutputMessageQueue()->pop()) != 0)
-	{
-		qDebug() << "DSPEngine::handleSourceMessages: " << message->getIdentifier();
-
-		if (DSPSignalNotification::match(*message))
+		else if (DSPSignalNotification::match(*message))
 		{
-			qDebug() << "DSPEngine::handleSourceMessages: process DSPSignalNotification";
-
 			DSPSignalNotification *notif = (DSPSignalNotification *) message;
 
 			// update DSP values
@@ -660,13 +645,13 @@ void DSPEngine::handleSourceMessages()
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getCenterFrequency();
 
-			qDebug() << "DSPEngine::handleSourceMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
+			qDebug() << "DSPEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
 
 			// forward source changes to sinks with immediate execution
 
 			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
 			{
-				qDebug() << "DSPEngine::handleSourceMessages: forward message to " << (*it)->objectName().toStdString().c_str();
+				qDebug() << "DSPEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
 				(*it)->handleMessage(*message);
 			}
 

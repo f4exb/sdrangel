@@ -20,6 +20,7 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "bladerfgui.h"
 #include "bladerfinput.h"
 #include "bladerfthread.h"
@@ -475,7 +476,7 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 	{
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		getOutputMessageQueue()->push(notif);
+		DSPEngine::instance()->getInputMessageQueue()->push(notif);
 	}
 
 	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

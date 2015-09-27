@@ -22,6 +22,7 @@
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "rtlsdrserializer.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
@@ -351,7 +352,7 @@ bool RTLSDRInput::applySettings(const Settings& settings, bool force)
     {
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		getOutputMessageQueue()->push(notif);        
+		DSPEngine::instance()->getInputMessageQueue()->push(notif);
     }
 
 	return true;
