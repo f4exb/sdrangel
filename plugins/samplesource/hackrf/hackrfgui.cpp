@@ -255,7 +255,7 @@ void HackRFGui::on_fcPos_currentIndexChanged(int index)
 
 void HackRFGui::on_lna_valueChanged(int value)
 {
-	if ((value < 0) || (value > 14))
+	if ((value < 0) || (value > 40))
 		return;
 
 	ui->lnaGainText->setText(tr("%1dB").arg(value));
@@ -265,7 +265,7 @@ void HackRFGui::on_lna_valueChanged(int value)
 
 void HackRFGui::on_vga_valueChanged(int value)
 {
-	if ((value < 0) || (value > 15))
+	if ((value < 0) || (value > 62))
 		return;
 
 	ui->vgaText->setText(tr("%1dB").arg(value));
@@ -281,7 +281,7 @@ void HackRFGui::updateHardware()
 	m_updateTimer.stop();
 }
 
-unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 6400, 9680, 12800, 19200};
+unsigned int HackRFSampleRates::m_rates_k[] = {2500, 3200, 5000, 6400, 10000, 12800, 19200};
 
 unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {

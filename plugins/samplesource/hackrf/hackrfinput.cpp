@@ -420,11 +420,30 @@ bool HackRFInput::applySettings(const Settings& settings, bool force)
 
 			if(rc != HACKRF_SUCCESS)
 			{
-				qDebug("HackRFInput::applySettings: airspy_set_rf_bias failed: %s", hackrf_error_name(rc));
+				qDebug("HackRFInput::applySettings: hackrf_set_antenna_enable failed: %s", hackrf_error_name(rc));
 			}
 			else
 			{
 				qDebug() << "HackRFInput:applySettings: bias tee set to " << m_settings.m_biasT;
+			}
+		}
+	}
+
+	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
+	{
+		m_settings.m_lnaExt = settings.m_lnaExt;
+
+		if (m_dev != 0)
+		{
+			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (m_settings.m_lnaExt ? 1 : 0));
+
+			if(rc != HACKRF_SUCCESS)
+			{
+				qDebug("HackRFInput::applySettings: hackrf_set_amp_enable failed: %s", hackrf_error_name(rc));
+			}
+			else
+			{
+				qDebug() << "HackRFInput:applySettings: extra LNA set to " << m_settings.m_lnaExt;
 			}
 		}
 	}

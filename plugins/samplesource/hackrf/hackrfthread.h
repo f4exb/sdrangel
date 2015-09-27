@@ -24,7 +24,7 @@
 #include "dsp/samplefifo.h"
 #include "dsp/decimators.h"
 
-#define HACKRF_BLOCKSIZE (1<<17)
+#define HACKRF_BLOCKSIZE (1<<16)
 
 class HackRFThread : public QThread {
 	Q_OBJECT
