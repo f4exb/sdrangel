@@ -38,6 +38,7 @@ ChannelAnalyzer::ChannelAnalyzer(SampleSink* sampleSink) :
 	m_nco.setFreq(m_frequency, m_sampleRate);
 	m_nco_test.setFreq(m_frequency, m_sampleRate);
 	m_undersampleCount = 0;
+	m_sum = 0;
 	m_usb = true;
 	m_ssb = true;
 	SSBFilter = new fftfilt(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate, ssbFftLen);
@@ -62,7 +63,7 @@ void ChannelAnalyzer::configure(MessageQueue* messageQueue,
 
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-	fftfilt::cmplx *sideband, sum;
+	fftfilt::cmplx *sideband;
 	int n_out;
 	int decim = 1<<m_spanLog2;
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
@@ -88,22 +89,22 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
 			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
 			// smart decimation with bit gain using float arithmetic (23 bits significand)
 
-			sum += sideband[i];
+			m_sum += sideband[i];
 
 			if (!(m_undersampleCount++ & decim_mask))
 			{
-				sum /= decim;
+				m_sum /= decim;
 
 				if (m_ssb & !m_usb)
 				{ // invert spectrum for LSB
-					m_sampleBuffer.push_back(Sample(sum.imag() * 32768.0, sum.real() * 32768.0));
+					m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
 				}
 				else
 				{
-					m_sampleBuffer.push_back(Sample(sum.real() * 32768.0, sum.imag() * 32768.0));
+					m_sampleBuffer.push_back(Sample(m_sum.real() * 32768.0, m_sum.imag() * 32768.0));
 				}
 
-				sum = 0;
+				m_sum = 0;
 			}
 		}
 	}

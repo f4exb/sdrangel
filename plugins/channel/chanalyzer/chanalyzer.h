@@ -88,6 +88,7 @@ private:
 	Real m_LowCutoff;
 	int m_spanLog2;
 	int m_undersampleCount;
+	fftfilt::cmplx m_sum;
 	int m_sampleRate;
 	int m_frequency;
 	bool m_usb;

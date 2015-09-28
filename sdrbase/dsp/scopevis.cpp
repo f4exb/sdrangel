@@ -80,15 +80,24 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 		if (m_triggerChannel == TriggerFreeRun)
 		{
 			int count = end - begin;
+
 			if(count > (int)(m_trace.size() - m_fill))
+			{
 				count = m_trace.size() - m_fill;
+			}
+
 			std::vector<Complex>::iterator it = m_trace.begin() + m_fill;
-			for(int i = 0; i < count; ++i) {
+
+			for(int i = 0; i < count; ++i)
+			{
 				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
 				++begin;
 			}
+
 			m_fill += count;
-			if(m_fill >= m_trace.size()) {
+
+			if(m_fill >= m_trace.size())
+			{
 				m_glScope->newTrace(m_trace, m_sampleRate);
 				m_fill = 0;
 			}
@@ -123,6 +132,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
                     }
                 }
             }
+
 			if(m_triggerState == Untriggered)
 			{
 				while(begin < end)
@@ -172,20 +182,31 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 					++begin;
 				}
 			}
+
 			if(m_triggerState == Triggered)
 			{
 				int count = end - begin;
+
 				if(count > (int)(m_trace.size() - m_fill))
+				{
 					count = m_trace.size() - m_fill;
+				}
+
 				std::vector<Complex>::iterator it = m_trace.begin() + m_fill;
-				for(int i = 0; i < count; ++i) {
+
+				for(int i = 0; i < count; ++i)
+				{
 					*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
 					++begin;
 				}
+
 				m_fill += count;
-				if(m_fill >= m_trace.size()) {
+
+				if(m_fill >= m_trace.size())
+				{
 					m_glScope->newTrace(m_trace, m_sampleRate);
 					m_fill = 0;
+
 					if (m_triggerOneShot) {
 						m_triggerState = WaitForReset;
 					} else {
