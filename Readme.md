@@ -119,9 +119,9 @@ Assuming Debian Jessie is used:
 
 <h1>Known Issues</h1>
 
-  - Segfaults in the channelizer seem to be fixed; still under observation. Consequently it is now possible to change critical settings without stopping acquisition.
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
   - As the objects input and output queues can be publicly accessed there is no strict control of which objects post messages on these queues. The correct assumption is that messages can be popped from the input queue only by its holder and that messages can be pushed on the output queue only by its holder.
+  - Objects managing more than one message queue (input + output for example) do not work well under stress conditions. Output queue removed from sample sources but this model has to be revised throughout the application.
 
 <h1>Changes from SDRangelove</h1>
 
@@ -178,11 +178,11 @@ Assuming Debian Jessie is used:
   - Optimizations with Valgrind cachegrind
   - Corrected decimators bit shifting so that the number of effective output bits is constant and fill the internal sample width
   - Separate library to support all flavours of FunCube dongles. Rewritten FCD plugins.
+  - Allow several sample source plugins to share the same presets for what is common
   - Many other little things...
     
 <h1>To Do</h1>
-  - Review queue messaging to and from the source plugin to fix performance problems with rates > 4MS/s
-  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). Allow several sample source plugins to share the same presets
+  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). 
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration  
