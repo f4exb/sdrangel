@@ -41,6 +41,12 @@ qint64 SSBDemodGUI::getCenterFrequency() const
 	return m_channelMarker.getCenterFrequency();
 }
 
+void SSBDemodGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void SSBDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);

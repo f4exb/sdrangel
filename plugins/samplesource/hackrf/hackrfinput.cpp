@@ -60,7 +60,7 @@ void HackRFInput::Settings::resetToDefaults()
 
 QByteArray HackRFInput::Settings::serialize() const
 {
-	HackRFSerializer::AirspyData data;
+	HackRFSerializer::HackRFData data;
 
 	data.m_data.m_frequency = m_centerFrequency;
 	data.m_LOppmTenths = m_LOppmTenths;
@@ -82,7 +82,7 @@ QByteArray HackRFInput::Settings::serialize() const
 
 bool HackRFInput::Settings::deserialize(const QByteArray& serializedData)
 {
-	HackRFSerializer::AirspyData data;
+	HackRFSerializer::HackRFData data;
 
 	bool valid = HackRFSerializer::readSerializedData(serializedData, data);
 

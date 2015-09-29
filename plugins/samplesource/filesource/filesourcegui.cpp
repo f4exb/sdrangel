@@ -87,6 +87,13 @@ qint64 FileSourceGui::getCenterFrequency() const
 	return m_centerFrequency;
 }
 
+void FileSourceGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray FileSourceGui::serialize() const
 {
 	return m_settings.serialize();

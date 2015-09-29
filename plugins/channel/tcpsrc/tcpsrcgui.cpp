@@ -30,6 +30,12 @@ qint64 TCPSrcGUI::getCenterFrequency() const
 	return m_channelMarker.getCenterFrequency();
 }
 
+void TCPSrcGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 QString TCPSrcGUI::getName() const
 {
 	return objectName();

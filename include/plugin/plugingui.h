@@ -20,7 +20,8 @@ public:
 
 	virtual QByteArray serializeGeneral() const;
 	virtual bool deserializeGeneral(const QByteArray& data);
-	virtual qint64 getCenterFrequency() const;
+	virtual qint64 getCenterFrequency() const = 0;
+	virtual void setCenterFrequency(qint64 centerFrequency) = 0;
 
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;

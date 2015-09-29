@@ -16,7 +16,7 @@
 
 #include "hackrfserializer.h"
 
-void HackRFSerializer::writeSerializedData(const AirspyData& data, QByteArray& serializedData)
+void HackRFSerializer::writeSerializedData(const HackRFData& data, QByteArray& serializedData)
 {
 	QByteArray sampleSourceSerialized;
 	SampleSourceSerializer::writeSerializedData(data.m_data, sampleSourceSerialized);
@@ -37,7 +37,7 @@ void HackRFSerializer::writeSerializedData(const AirspyData& data, QByteArray& s
 	serializedData = s.final();
 }
 
-bool HackRFSerializer::readSerializedData(const QByteArray& serializedData, AirspyData& data)
+bool HackRFSerializer::readSerializedData(const QByteArray& serializedData, HackRFData& data)
 {
 	bool valid = SampleSourceSerializer::readSerializedData(serializedData, data.m_data);
 
@@ -75,7 +75,7 @@ bool HackRFSerializer::readSerializedData(const QByteArray& serializedData, Airs
 	}
 }
 
-void HackRFSerializer::setDefaults(AirspyData& data)
+void HackRFSerializer::setDefaults(HackRFData& data)
 {
 	data.m_LOppmTenths = 0;
 	data.m_sampleRateIndex = 0;

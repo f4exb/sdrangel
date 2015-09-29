@@ -55,6 +55,13 @@ qint64 RTLSDRGui::getCenterFrequency() const
 	return m_settings.m_centerFrequency;
 }
 
+void RTLSDRGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_settings.m_centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray RTLSDRGui::serialize() const
 {
 	return m_settings.serialize();

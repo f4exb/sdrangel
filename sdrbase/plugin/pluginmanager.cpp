@@ -144,15 +144,16 @@ void PluginManager::loadSettings(const Preset* preset)
 
 	if(m_sampleSourcePluginGUI != 0)
 	{
-		/* FIXME: remove in pluginGUI and preset
-		qDebug() << "m_sampleSourcePluginGUI->deserializeGeneral (" << m_sampleSourcePluginGUI->getName().toStdString().c_str() << ")";
-		m_sampleSourcePluginGUI->deserializeGeneral(preset->getSourceGeneralConfig());
-	    */
+		// TODO: have one set of source presets per identified source (preset -> find source with name)
 		if(m_sampleSourceName == preset->getSource())
 		{
 			qDebug() << "  - deserializing source " << qPrintable(m_sampleSourceName);
 			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
 		}
+
+		// FIXME: get center frequency from preset center frequency
+		qint64 centerFrequency = preset->getCenterFrequency();
+		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
 	}
 }
 

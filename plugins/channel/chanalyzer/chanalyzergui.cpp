@@ -43,6 +43,12 @@ qint64 ChannelAnalyzerGUI::getCenterFrequency() const
 	return m_channelMarker.getCenterFrequency();
 }
 
+void ChannelAnalyzerGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void ChannelAnalyzerGUI::resetToDefaults()
 {
 	blockApplySettings(true);

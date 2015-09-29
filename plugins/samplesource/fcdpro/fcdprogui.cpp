@@ -151,6 +151,13 @@ qint64 FCDProGui::getCenterFrequency() const
 	return m_settings.centerFrequency;
 }
 
+void FCDProGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_settings.centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray FCDProGui::serialize() const
 {
 	return m_settings.serialize();

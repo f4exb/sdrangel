@@ -42,6 +42,12 @@ qint64 AMDemodGUI::getCenterFrequency() const {
 	return m_channelMarker.getCenterFrequency();
 }
 
+void AMDemodGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void AMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);

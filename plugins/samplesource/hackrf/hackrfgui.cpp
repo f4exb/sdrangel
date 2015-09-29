@@ -77,6 +77,13 @@ qint64 HackRFGui::getCenterFrequency() const
 	return m_settings.m_centerFrequency;
 }
 
+void HackRFGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_settings.m_centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray HackRFGui::serialize() const
 {
 	return m_settings.serialize();

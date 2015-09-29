@@ -76,6 +76,13 @@ qint64 AirspyGui::getCenterFrequency() const
 	return m_settings.m_centerFrequency;
 }
 
+void AirspyGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_settings.m_centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray AirspyGui::serialize() const
 {
 	return m_settings.serialize();

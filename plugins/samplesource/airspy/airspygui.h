@@ -43,7 +43,8 @@ public:
 	QString getName() const;
 
 	void resetToDefaults();
-	qint64 getCenterFrequency() const;
+	virtual qint64 getCenterFrequency() const;
+	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual bool handleMessage(const Message& message);

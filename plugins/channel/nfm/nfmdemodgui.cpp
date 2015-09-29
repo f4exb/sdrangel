@@ -43,6 +43,12 @@ qint64 NFMDemodGUI::getCenterFrequency() const
 	return m_channelMarker.getCenterFrequency();
 }
 
+void NFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void NFMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);

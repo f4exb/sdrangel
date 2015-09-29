@@ -22,7 +22,7 @@
 class HackRFSerializer
 {
 public:
-	struct AirspyData
+	struct HackRFData
 	{
 		SampleSourceSerializer::Data m_data;
 		qint32 m_LOppmTenths;
@@ -36,9 +36,9 @@ public:
 		bool m_lnaExt;
 	};
 
-	static void writeSerializedData(const AirspyData& data, QByteArray& serializedData);
-	static bool readSerializedData(const QByteArray& serializedData, AirspyData& data);
-	static void setDefaults(AirspyData& data);
+	static void writeSerializedData(const HackRFData& data, QByteArray& serializedData);
+	static bool readSerializedData(const QByteArray& serializedData, HackRFData& data);
+	static void setDefaults(HackRFData& data);
 };
 
 

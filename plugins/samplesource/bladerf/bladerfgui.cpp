@@ -73,6 +73,13 @@ qint64 BladerfGui::getCenterFrequency() const
 	return m_settings.m_centerFrequency;
 }
 
+void BladerfGui::setCenterFrequency(qint64 centerFrequency)
+{
+	m_settings.m_centerFrequency = centerFrequency;
+	displaySettings();
+	sendSettings();
+}
+
 QByteArray BladerfGui::serialize() const
 {
 	return m_settings.serialize();

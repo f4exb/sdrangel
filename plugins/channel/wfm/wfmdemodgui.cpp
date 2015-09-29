@@ -53,6 +53,12 @@ qint64 WFMDemodGUI::getCenterFrequency() const
 	return m_channelMarker.getCenterFrequency();
 }
 
+void WFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void WFMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);

@@ -39,6 +39,12 @@ qint64 LoRaDemodGUI::getCenterFrequency() const {
 	return m_channelMarker.getCenterFrequency();
 }
 
+void LoRaDemodGUI::setCenterFrequency(qint64 centerFrequency)
+{
+	m_channelMarker.setCenterFrequency(centerFrequency);
+	applySettings();
+}
+
 void LoRaDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
