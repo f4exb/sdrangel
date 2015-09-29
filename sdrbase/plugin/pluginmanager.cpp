@@ -173,7 +173,7 @@ bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstance
 void PluginManager::saveSettings(Preset* preset)
 {
 	if(m_sampleSourcePluginGUI != NULL) {
-		preset->setSourceConfig(m_sampleSourceName, m_sampleSourcePluginGUI->serializeGeneral(), m_sampleSourcePluginGUI->serialize());
+		//preset->setSourceConfig(m_sampleSourceName, m_sampleSourcePluginGUI->serializeGeneral(), m_sampleSourcePluginGUI->serialize());
 		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
 	} else {
 		preset->setSourceConfig(QString::null, QByteArray(), QByteArray());

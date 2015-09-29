@@ -18,8 +18,6 @@ public:
 
 	virtual void resetToDefaults() = 0;
 
-	virtual QByteArray serializeGeneral() const;
-	virtual bool deserializeGeneral(const QByteArray& data);
 	virtual qint64 getCenterFrequency() const = 0;
 	virtual void setCenterFrequency(qint64 centerFrequency) = 0;
 

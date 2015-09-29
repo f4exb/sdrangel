@@ -102,7 +102,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/samplesource.cpp
 
 	sdrbase/plugin/pluginapi.cpp
-	sdrbase/plugin/plugingui.cpp
+	#sdrbase/plugin/plugingui.cpp
 	sdrbase/plugin/plugininterface.cpp
 	sdrbase/plugin/pluginmanager.cpp
 
