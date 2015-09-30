@@ -73,14 +73,14 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
+PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 {
 	if (!m_pluginAPI)
 	{
 		return 0;
 	}
 
-	if(sourceName == "org.osmocom.sdr.samplesource.bladerf")
+	if(sourceId == "org.osmocom.sdr.samplesource.bladerf")
 	{
 		BladerfGui* gui = new BladerfGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);

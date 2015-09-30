@@ -115,14 +115,14 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
+PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 {
 	if (!m_pluginAPI)
 	{
 		return 0;
 	}
 
-	if(sourceName == "org.osmocom.sdr.samplesource.airspy")
+	if(sourceId == "org.osmocom.sdr.samplesource.airspy")
 	{
 		AirspyGui* gui = new AirspyGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
