@@ -148,12 +148,12 @@ void FCDProGui::resetToDefaults()
 
 qint64 FCDProGui::getCenterFrequency() const
 {
-	return m_settings.centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 void FCDProGui::setCenterFrequency(qint64 centerFrequency)
 {
-	m_settings.centerFrequency = centerFrequency;
+	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
@@ -185,26 +185,28 @@ bool FCDProGui::handleMessage(const Message& message)
 
 void FCDProGui::displaySettings()
 {
-	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
-	ui->ppm->setValue(m_settings.LOppmTenths);
-	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.LOppmTenths/10.0, 'f', 1)));
+	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->ppm->setValue(m_settings.m_LOppmTenths);
+	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-	ui->lnaGain->setCurrentIndex(m_settings.lnaGainIndex);
-	ui->rfFilter->setCurrentIndex(m_settings.rfFilterIndex);
-	ui->lnaEnhance->setCurrentIndex(m_settings.lnaEnhanceIndex);
-	ui->band->setCurrentIndex(m_settings.bandIndex);
-	ui->mixGain->setCurrentIndex(m_settings.mixerGainIndex);
-	ui->mixFilter->setCurrentIndex(m_settings.mixerFilterIndex);
-	ui->bias->setCurrentIndex(m_settings.biasCurrentIndex);
-	ui->mode->setCurrentIndex(m_settings.modeIndex);
-	ui->gain1->setCurrentIndex(m_settings.gain1Index);
-	ui->gain2->setCurrentIndex(m_settings.gain2Index);
-	ui->gain3->setCurrentIndex(m_settings.gain3Index);
-	ui->gain4->setCurrentIndex(m_settings.gain4Index);
-	ui->gain5->setCurrentIndex(m_settings.gain5Index);
-	ui->gain6->setCurrentIndex(m_settings.gain6Index);
-	ui->rcFilter->setCurrentIndex(m_settings.rcFilterIndex);
-	ui->ifFilter->setCurrentIndex(m_settings.ifFilterIndex);
+	ui->lnaGain->setCurrentIndex(m_settings.m_lnaGainIndex);
+	ui->rfFilter->setCurrentIndex(m_settings.m_rfFilterIndex);
+	ui->lnaEnhance->setCurrentIndex(m_settings.m_lnaEnhanceIndex);
+	ui->band->setCurrentIndex(m_settings.m_bandIndex);
+	ui->mixGain->setCurrentIndex(m_settings.m_mixerGainIndex);
+	ui->mixFilter->setCurrentIndex(m_settings.m_mixerFilterIndex);
+	ui->bias->setCurrentIndex(m_settings.m_biasCurrentIndex);
+	ui->mode->setCurrentIndex(m_settings.m_modeIndex);
+	ui->gain1->setCurrentIndex(m_settings.m_gain1Index);
+	ui->gain2->setCurrentIndex(m_settings.m_gain2Index);
+	ui->gain3->setCurrentIndex(m_settings.m_gain3Index);
+	ui->gain4->setCurrentIndex(m_settings.m_gain4Index);
+	ui->gain5->setCurrentIndex(m_settings.m_gain5Index);
+	ui->gain6->setCurrentIndex(m_settings.m_gain6Index);
+	ui->rcFilter->setCurrentIndex(m_settings.m_rcFilterIndex);
+	ui->ifFilter->setCurrentIndex(m_settings.m_ifFilterIndex);
 }
 
 void FCDProGui::sendSettings()
@@ -215,130 +217,142 @@ void FCDProGui::sendSettings()
 
 void FCDProGui::on_centerFrequency_changed(quint64 value)
 {
-	m_settings.centerFrequency = value * 1000;
+	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
 }
 
 void FCDProGui::on_ppm_valueChanged(int value)
 {
-	m_settings.LOppmTenths = value;
+	m_settings.m_LOppmTenths = value;
 	displaySettings();
+	sendSettings();
+}
+
+void FCDProGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void FCDProGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqCorrection = checked;
 	sendSettings();
 }
 
 void FCDProGui::on_lnaGain_currentIndexChanged(int index)
 {
-	m_settings.lnaGainIndex = index;
+	m_settings.m_lnaGainIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_rfFilter_currentIndexChanged(int index)
 {
-	m_settings.rfFilterIndex = index;
+	m_settings.m_rfFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_lnaEnhance_currentIndexChanged(int index)
 {
-	m_settings.lnaEnhanceIndex = index;
+	m_settings.m_lnaEnhanceIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_band_currentIndexChanged(int index)
 {
-	m_settings.bandIndex = index;
+	m_settings.m_bandIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_mixGain_currentIndexChanged(int index)
 {
-	m_settings.mixerGainIndex = index;
+	m_settings.m_mixerGainIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_mixFilter_currentIndexChanged(int index)
 {
-	m_settings.mixerFilterIndex = index;
+	m_settings.m_mixerFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_bias_currentIndexChanged(int index)
 {
-	m_settings.biasCurrentIndex = index;
+	m_settings.m_biasCurrentIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_mode_currentIndexChanged(int index)
 {
-	m_settings.modeIndex = index;
+	m_settings.m_modeIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain1_currentIndexChanged(int index)
 {
-	m_settings.gain1Index = index;
+	m_settings.m_gain1Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_rcFilter_currentIndexChanged(int index)
 {
-	m_settings.rcFilterIndex = index;
+	m_settings.m_rcFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain2_currentIndexChanged(int index)
 {
-	m_settings.gain2Index = index;
+	m_settings.m_gain2Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain3_currentIndexChanged(int index)
 {
-	m_settings.gain3Index = index;
+	m_settings.m_gain3Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain4_currentIndexChanged(int index)
 {
-	m_settings.gain4Index = index;
+	m_settings.m_gain4Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_ifFilter_currentIndexChanged(int index)
 {
-	m_settings.ifFilterIndex = index;
+	m_settings.m_ifFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain5_currentIndexChanged(int index)
 {
-	m_settings.gain5Index = index;
+	m_settings.m_gain5Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_gain6_currentIndexChanged(int index)
 {
-	m_settings.gain6Index = index;
+	m_settings.m_gain6Index = index;
 	sendSettings();
 }
 
 void FCDProGui::on_setDefaults_clicked(bool checked)
 {
-	m_settings.lnaGainIndex = 8;        // +15 dB
+	m_settings.m_lnaGainIndex = 8;        // +15 dB
 	//m_settings.rfFilterIndex = 0;
-	m_settings.mixerGainIndex = 1;      // +12 dB
-	m_settings.mixerFilterIndex = 8;    // 1.9 MHz
-	m_settings.gain1Index = 1;          // +6 dB
-	m_settings.rcFilterIndex = 15;      // 1.0 MHz
-	m_settings.gain2Index = 1;          // +3 dB
-	m_settings.gain3Index = 1;          // +3 dB
-	m_settings.gain4Index = 0;          // 0 dB
-	m_settings.ifFilterIndex = 31;      // 2.15 MHz
-	m_settings.gain5Index = 0;          // +3 dB
-	m_settings.gain6Index = 0;          // +3 dB
-	m_settings.lnaEnhanceIndex = 0;     // Off
-	m_settings.biasCurrentIndex = 3;    // V/U band
-	m_settings.modeIndex = 0;           // Linearity
+	m_settings.m_mixerGainIndex = 1;      // +12 dB
+	m_settings.m_mixerFilterIndex = 8;    // 1.9 MHz
+	m_settings.m_gain1Index = 1;          // +6 dB
+	m_settings.m_rcFilterIndex = 15;      // 1.0 MHz
+	m_settings.m_gain2Index = 1;          // +3 dB
+	m_settings.m_gain3Index = 1;          // +3 dB
+	m_settings.m_gain4Index = 0;          // 0 dB
+	m_settings.m_ifFilterIndex = 31;      // 2.15 MHz
+	m_settings.m_gain5Index = 0;          // +3 dB
+	m_settings.m_gain6Index = 0;          // +3 dB
+	m_settings.m_lnaEnhanceIndex = 0;     // Off
+	m_settings.m_biasCurrentIndex = 3;    // V/U band
+	m_settings.m_modeIndex = 0;           // Linearity
 	displaySettings();
 	sendSettings();
 }

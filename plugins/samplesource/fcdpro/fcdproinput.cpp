@@ -25,97 +25,11 @@
 #include "fcdproinput.h"
 
 #include "fcdprogui.h"
-#include "fcdproserializer.h"
 #include "fcdprothread.h"
 #include "fcdtraits.h"
 #include "fcdproconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCD, Message)
-
-FCDProInput::Settings::Settings()
-{
-	resetToDefaults();
-}
-
-void FCDProInput::Settings::resetToDefaults()
-{
-	centerFrequency = 435000000;
-	LOppmTenths = 0;
-	lnaGainIndex = 0;
-	rfFilterIndex = 0;
-	lnaEnhanceIndex = 0;
-	bandIndex = 0;
-	mixerGainIndex = 0;
-	mixerFilterIndex = 0;
-	biasCurrentIndex = 0;
-	modeIndex = 0;
-	gain1Index = 0;
-	rcFilterIndex = 0;
-	gain2Index = 0;
-	gain3Index = 0;
-	gain4Index = 0;
-	ifFilterIndex = 0;
-	gain5Index = 0;
-	gain6Index = 0;
-}
-
-QByteArray FCDProInput::Settings::serialize() const
-{
-	FCDProSerializer::FCDData data;
-
-	data.m_data.m_frequency = centerFrequency;
-	data.m_LOppmTenths = LOppmTenths;
-	data.m_lnaGainIndex = lnaGainIndex;
-	data.m_rfFilterIndex = rfFilterIndex;
-	data.m_lnaEnhanceIndex = lnaEnhanceIndex;
-	data.m_bandIndex = bandIndex;
-	data.m_mixerGainIndex = mixerGainIndex;
-	data.m_mixerFilterIndex = mixerFilterIndex;
-	data.m_biasCurrentIndex = biasCurrentIndex;
-	data.m_modeIndex = modeIndex;
-	data.m_gain1Index = gain1Index;
-	data.m_rcFilterIndex = rcFilterIndex;
-	data.m_gain2Index = gain2Index;
-	data.m_gain3Index = gain3Index;
-	data.m_gain4Index = gain4Index;
-	data.m_ifFilterIndex = ifFilterIndex;
-	data.m_gain5Index = gain5Index;
-	data.m_gain6Index = gain6Index;
-
-	QByteArray byteArray;
-
-	FCDProSerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-}
-
-bool FCDProInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	FCDProSerializer::FCDData data;
-
-	bool valid = FCDProSerializer::readSerializedData(serializedData, data);
-
-	centerFrequency = data.m_data.m_frequency;
-	LOppmTenths = data.m_LOppmTenths;
-	lnaGainIndex = data.m_lnaGainIndex;
-	rfFilterIndex = data.m_rfFilterIndex;
-	lnaEnhanceIndex = data.m_lnaEnhanceIndex;
-	bandIndex = data.m_bandIndex;
-	mixerGainIndex = data.m_mixerGainIndex;
-	mixerFilterIndex = data.m_mixerFilterIndex;
-	biasCurrentIndex = data.m_biasCurrentIndex;
-	modeIndex = data.m_modeIndex;
-	gain1Index = data.m_gain1Index;
-	rcFilterIndex = data.m_rcFilterIndex;
-	gain2Index = data.m_gain2Index;
-	gain3Index = data.m_gain3Index;
-	gain4Index = data.m_gain4Index;
-	ifFilterIndex = data.m_ifFilterIndex;
-	gain5Index = data.m_gain5Index;
-	gain6Index = data.m_gain6Index;
-
-	return valid;
-}
 
 FCDProInput::FCDProInput() :
 	m_dev(0),
@@ -210,7 +124,7 @@ int FCDProInput::getSampleRate() const
 
 quint64 FCDProInput::getCenterFrequency() const
 {
-	return m_settings.centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 bool FCDProInput::handleMessage(const Message& message)
@@ -228,186 +142,186 @@ bool FCDProInput::handleMessage(const Message& message)
 	}
 }
 
-void FCDProInput::applySettings(const Settings& settings, bool force)
+void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 {
 	bool signalChange = false;
 
-	if ((m_settings.centerFrequency != settings.centerFrequency) || force)
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
 	{
-		qDebug() << "FCDProInput::applySettings: fc: " << settings.centerFrequency;
-		m_settings.centerFrequency = settings.centerFrequency;
+		qDebug() << "FCDProInput::applySettings: fc: " << settings.m_centerFrequency;
+		m_settings.m_centerFrequency = settings.m_centerFrequency;
 
 		if (m_dev != 0)
 		{
-			set_center_freq((double) m_settings.centerFrequency);
+			set_center_freq((double) m_settings.m_centerFrequency);
 		}
 
 		signalChange = true;
 	}
 
-	if ((m_settings.lnaGainIndex != settings.lnaGainIndex) || force)
+	if ((m_settings.m_lnaGainIndex != settings.m_lnaGainIndex) || force)
 	{
-		m_settings.lnaGainIndex = settings.lnaGainIndex;
+		m_settings.m_lnaGainIndex = settings.m_lnaGainIndex;
 
 		if (m_dev != 0)
 		{
-			set_lnaGain(settings.lnaGainIndex);
+			set_lnaGain(settings.m_lnaGainIndex);
 		}
 	}
 
-	if ((m_settings.rfFilterIndex != settings.rfFilterIndex) || force)
+	if ((m_settings.m_rfFilterIndex != settings.m_rfFilterIndex) || force)
 	{
-		m_settings.rfFilterIndex = settings.rfFilterIndex;
+		m_settings.m_rfFilterIndex = settings.m_rfFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_rfFilter(settings.rfFilterIndex);
+			set_rfFilter(settings.m_rfFilterIndex);
 		}
 	}
 
-	if ((m_settings.lnaEnhanceIndex != settings.lnaEnhanceIndex) || force)
+	if ((m_settings.m_lnaEnhanceIndex != settings.m_lnaEnhanceIndex) || force)
 	{
-		m_settings.lnaEnhanceIndex = settings.lnaEnhanceIndex;
+		m_settings.m_lnaEnhanceIndex = settings.m_lnaEnhanceIndex;
 
 		if (m_dev != 0)
 		{
-			set_lnaEnhance(settings.lnaEnhanceIndex);
+			set_lnaEnhance(settings.m_lnaEnhanceIndex);
 		}
 	}
 
-	if ((m_settings.bandIndex != settings.bandIndex) || force)
+	if ((m_settings.m_bandIndex != settings.m_bandIndex) || force)
 	{
-		m_settings.bandIndex = settings.bandIndex;
+		m_settings.m_bandIndex = settings.m_bandIndex;
 
 		if (m_dev != 0)
 		{
-			set_band(settings.bandIndex);
+			set_band(settings.m_bandIndex);
 		}
 	}
 
-	if ((m_settings.mixerGainIndex != settings.mixerGainIndex) || force)
+	if ((m_settings.m_mixerGainIndex != settings.m_mixerGainIndex) || force)
 	{
-		m_settings.mixerGainIndex = settings.mixerGainIndex;
+		m_settings.m_mixerGainIndex = settings.m_mixerGainIndex;
 
 		if (m_dev != 0)
 		{
-			set_mixerGain(settings.mixerGainIndex);
+			set_mixerGain(settings.m_mixerGainIndex);
 		}
 	}
 
-	if ((m_settings.mixerFilterIndex != settings.mixerFilterIndex) || force)
+	if ((m_settings.m_mixerFilterIndex != settings.m_mixerFilterIndex) || force)
 	{
-		m_settings.mixerFilterIndex = settings.mixerFilterIndex;
+		m_settings.m_mixerFilterIndex = settings.m_mixerFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_mixerFilter(settings.mixerFilterIndex);
+			set_mixerFilter(settings.m_mixerFilterIndex);
 		}
 	}
 
-	if ((m_settings.biasCurrentIndex != settings.biasCurrentIndex) || force)
+	if ((m_settings.m_biasCurrentIndex != settings.m_biasCurrentIndex) || force)
 	{
-		m_settings.biasCurrentIndex = settings.biasCurrentIndex;
+		m_settings.m_biasCurrentIndex = settings.m_biasCurrentIndex;
 
 		if (m_dev != 0)
 		{
-			set_biasCurrent(settings.biasCurrentIndex);
+			set_biasCurrent(settings.m_biasCurrentIndex);
 		}
 	}
 
-	if ((m_settings.modeIndex != settings.modeIndex) || force)
+	if ((m_settings.m_modeIndex != settings.m_modeIndex) || force)
 	{
-		m_settings.modeIndex = settings.modeIndex;
+		m_settings.m_modeIndex = settings.m_modeIndex;
 
 		if (m_dev != 0)
 		{
-			set_mode(settings.modeIndex);
+			set_mode(settings.m_modeIndex);
 		}
 	}
 
-	if ((m_settings.gain1Index != settings.gain1Index) || force)
+	if ((m_settings.m_gain1Index != settings.m_gain1Index) || force)
 	{
-		m_settings.gain1Index = settings.gain1Index;
+		m_settings.m_gain1Index = settings.m_gain1Index;
 
 		if (m_dev != 0)
 		{
-			set_gain1(settings.gain1Index);
+			set_gain1(settings.m_gain1Index);
 		}
 	}
 
-	if ((m_settings.rcFilterIndex != settings.rcFilterIndex) || force)
+	if ((m_settings.m_rcFilterIndex != settings.m_rcFilterIndex) || force)
 	{
-		m_settings.rcFilterIndex = settings.rcFilterIndex;
+		m_settings.m_rcFilterIndex = settings.m_rcFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_rcFilter(settings.rcFilterIndex);
+			set_rcFilter(settings.m_rcFilterIndex);
 		}
 	}
 
-	if ((m_settings.gain2Index != settings.gain2Index) || force)
+	if ((m_settings.m_gain2Index != settings.m_gain2Index) || force)
 	{
-		m_settings.gain2Index = settings.gain2Index;
+		m_settings.m_gain2Index = settings.m_gain2Index;
 
 		if (m_dev != 0)
 		{
-			set_gain2(settings.gain2Index);
+			set_gain2(settings.m_gain2Index);
 		}
 	}
 
-	if ((m_settings.gain3Index != settings.gain3Index) || force)
+	if ((m_settings.m_gain3Index != settings.m_gain3Index) || force)
 	{
-		m_settings.gain3Index = settings.gain3Index;
+		m_settings.m_gain3Index = settings.m_gain3Index;
 
 		if (m_dev != 0)
 		{
-			set_gain3(settings.gain3Index);
+			set_gain3(settings.m_gain3Index);
 		}
 	}
 
-	if ((m_settings.gain4Index != settings.gain4Index) || force)
+	if ((m_settings.m_gain4Index != settings.m_gain4Index) || force)
 	{
-		m_settings.gain4Index = settings.gain4Index;
+		m_settings.m_gain4Index = settings.m_gain4Index;
 
 		if (m_dev != 0)
 		{
-			set_gain4(settings.gain4Index);
+			set_gain4(settings.m_gain4Index);
 		}
 	}
 
-	if ((m_settings.ifFilterIndex != settings.ifFilterIndex) || force)
+	if ((m_settings.m_ifFilterIndex != settings.m_ifFilterIndex) || force)
 	{
-		m_settings.ifFilterIndex = settings.ifFilterIndex;
+		m_settings.m_ifFilterIndex = settings.m_ifFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_ifFilter(settings.ifFilterIndex);
+			set_ifFilter(settings.m_ifFilterIndex);
 		}
 	}
 
-	if ((m_settings.gain5Index != settings.gain5Index) || force)
+	if ((m_settings.m_gain5Index != settings.m_gain5Index) || force)
 	{
-		m_settings.gain5Index = settings.gain5Index;
+		m_settings.m_gain5Index = settings.m_gain5Index;
 
 		if (m_dev != 0)
 		{
-			set_gain5(settings.gain5Index);
+			set_gain5(settings.m_gain5Index);
 		}
 	}
 
-	if ((m_settings.gain6Index != settings.gain6Index) || force)
+	if ((m_settings.m_gain6Index != settings.m_gain6Index) || force)
 	{
-		m_settings.gain6Index = settings.gain6Index;
+		m_settings.m_gain6Index = settings.m_gain6Index;
 
 		if (m_dev != 0)
 		{
-			set_gain6(settings.gain6Index);
+			set_gain6(settings.m_gain6Index);
 		}
 	}
 
-	if ((m_settings.LOppmTenths != settings.LOppmTenths) || force)
+	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
 	{
-		m_settings.LOppmTenths = settings.LOppmTenths;
+		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
 		if (m_dev != 0)
 		{
@@ -415,16 +329,28 @@ void FCDProInput::applySettings(const Settings& settings, bool force)
 		}
 	}
 
+	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
+	{
+		m_settings.m_dcBlock = settings.m_dcBlock;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+	}
+
+	if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+	{
+		m_settings.m_iqCorrection = settings.m_iqCorrection;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+	}
+
     if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
 		DSPEngine::instance()->getInputMessageQueue()->push(notif);
     }
 }
 
 void FCDProInput::set_center_freq(double freq)
 {
-	freq += freq*(((double) m_settings.LOppmTenths)/10000000.0);
+	freq += freq*(((double) m_settings.m_LOppmTenths)/10000000.0);
 
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
@@ -684,5 +610,5 @@ void FCDProInput::set_gain6(int index)
 
 void FCDProInput::set_lo_ppm()
 {
-	set_center_freq((double) m_settings.centerFrequency);
+	set_center_freq((double) m_settings.m_centerFrequency);
 }

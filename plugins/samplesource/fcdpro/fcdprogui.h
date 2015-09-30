@@ -35,7 +35,7 @@ private:
 	Ui::FCDProGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	FCDProInput::Settings m_settings;
+	FCDProSettings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
@@ -46,6 +46,8 @@ private:
 private slots:
 	void on_centerFrequency_changed(quint64 value);
 	void on_ppm_valueChanged(int value);
+	void on_dcOffset_toggled(bool checked);
+	void on_iqImbalance_toggled(bool checked);
 	// TOOD: defaults push button
 	void on_lnaGain_currentIndexChanged(int index);
 	void on_rfFilter_currentIndexChanged(int index);

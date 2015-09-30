@@ -10,8 +10,8 @@
 const char *fcd_traits<Pro>::alsaDeviceName = "hw:CARD=V10";
 const char *fcd_traits<ProPlus>::alsaDeviceName = "hw:CARD=V20";
 
-const char *fcd_traits<Pro>::interfaceIID = "org.osmocom.sdr.samplesource.fcdpro";
-const char *fcd_traits<ProPlus>::interfaceIID = "org.osmocom.sdr.samplesource.fcdproplus";
+const char *fcd_traits<Pro>::interfaceIID = "sdrangel.samplesource.fcdpro";
+const char *fcd_traits<ProPlus>::interfaceIID = "sdrangel.samplesource.fcdproplus";
 
 const char *fcd_traits<Pro>::displayedName = "FunCube Dongle Pro";
 const char *fcd_traits<ProPlus>::displayedName = "FunCube Dongle Pro+";

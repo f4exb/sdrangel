@@ -4,10 +4,12 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+#define FCDPRO_DEVICE_TYPE_ID "sdrangel.samplesource.fcdpro"
+
 class FCDProPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.fcdpro")
+	Q_PLUGIN_METADATA(IID FCDPRO_DEVICE_TYPE_ID)
 
 public:
 	explicit FCDProPlugin(QObject* parent = NULL);
@@ -17,6 +19,8 @@ public:
 
 	SampleSourceDevices enumSampleSources();
 	PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address);
+
+	static const QString m_deviceTypeID;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

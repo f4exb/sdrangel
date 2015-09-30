@@ -4,7 +4,7 @@ set(fcdpro_SOURCES
 	fcdprogui.cpp
 	fcdproinput.cpp
 	fcdproplugin.cpp
-	fcdproserializer.cpp
+	fcdprosettings.cpp
 	fcdprothread.cpp
 )
 
@@ -12,7 +12,7 @@ set(fcdpro_HEADERS
 	fcdprogui.h
 	fcdproinput.h
 	fcdproplugin.h
-	fcdproserializer.h
+	fcdprosettings.h
 	fcdprothread.h
 )
 

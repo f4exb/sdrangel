@@ -31,6 +31,8 @@ const PluginDescriptor FCDProPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString FCDProPlugin::m_deviceTypeID = FCDPRO_DEVICE_TYPE_ID;
+
 FCDProPlugin::FCDProPlugin(QObject* parent) :
 	QObject(parent)
 {

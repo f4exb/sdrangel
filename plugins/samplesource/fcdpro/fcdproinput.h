@@ -19,6 +19,7 @@
 #define INCLUDE_FCDPROINPUT_H
 
 #include "dsp/samplesource.h"
+#include "fcdprosettings.h"
 #include "fcdhid.h"
 #include <QString>
 #include <inttypes.h>
@@ -32,46 +33,21 @@ class FCDProThread;
 
 class FCDProInput : public SampleSource {
 public:
-	struct Settings {
-		Settings();
-		quint64 centerFrequency;
-		qint32 LOppmTenths;
-		qint32 lnaGainIndex;
-		qint32 rfFilterIndex;
-		qint32 lnaEnhanceIndex;
-		qint32 bandIndex;
-		qint32 mixerGainIndex;
-		qint32 mixerFilterIndex;
-		qint32 biasCurrentIndex;
-		qint32 modeIndex;
-		qint32 gain1Index;
-		qint32 rcFilterIndex;
-		qint32 gain2Index;
-		qint32 gain3Index;
-		qint32 gain4Index;
-		qint32 ifFilterIndex;
-		qint32 gain5Index;
-		qint32 gain6Index;
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureFCD : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const FCDProSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFCD* create(const Settings& settings)
+		static MsgConfigureFCD* create(const FCDProSettings& settings)
 		{
 			return new MsgConfigureFCD(settings);
 		}
 
 	private:
-		Settings m_settings;
+		FCDProSettings m_settings;
 
-		MsgConfigureFCD(const Settings& settings) :
+		MsgConfigureFCD(const FCDProSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -110,12 +86,12 @@ public:
 	void set_gain6(int index);
 
 private:
-	void applySettings(const Settings& settings, bool force);
+	void applySettings(const FCDProSettings& settings, bool force);
 	void set_lo_ppm();
 
 	hid_device *m_dev;
 	QMutex m_mutex;
-	Settings m_settings;
+	FCDProSettings m_settings;
 	FCDProThread* m_FCDThread;
 	QString m_deviceDescription;
 };
