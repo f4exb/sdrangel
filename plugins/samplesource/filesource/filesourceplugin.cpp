@@ -59,7 +59,11 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 		SimpleSerializer s(1);
 		s.writeS32(1, i);
 		s.writeString(2, "");
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.filesource", s.final()));
+
+		result.append(SampleSourceDevice(displayedName,
+				"org.osmocom.sdr.samplesource.filesource",
+				QString::null,
+				i));
 	}
 
 	return result;

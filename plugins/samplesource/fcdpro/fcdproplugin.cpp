@@ -54,16 +54,18 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 {
 	SampleSourceDevices result;
 
-	int i = 1;
+	int i = 0;
 	struct hid_device_info *device_info = hid_enumerate(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId);
 
 	while (device_info != 0)
 	{
 		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
 		QString displayedName(QString("%1 #%2 %3").arg(fcd_traits<Pro>::displayedName).arg(i).arg(serialNumber));
-		SimpleSerializer s(1);
-		s.writeS32(1, 0);
-		result.append(SampleSourceDevice(displayedName, fcd_traits<Pro>::interfaceIID, s.final()));
+
+		result.append(SampleSourceDevice(displayedName,
+				fcd_traits<Pro>::interfaceIID,
+				QString::null,
+				i));
 
 		device_info = device_info->next;
 		i++;

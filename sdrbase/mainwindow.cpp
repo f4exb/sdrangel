@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
-	int sampleSourceIndex = m_pluginManager->selectSampleSource(m_settings.getCurrent()->getSource()); // select SampleSource from settings
+	int sampleSourceIndex = m_pluginManager->selectFirstSampleSource(m_settings.getCurrent()->getSourceId()); // select SampleSource from settings
 
 	if(sampleSourceIndex >= 0)
 	{
@@ -208,7 +208,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::loadPresetSettings(const Preset* preset)
 {
-	qDebug() << "MainWindow::loadPresetSettings: preset: " << preset->getSource().toStdString().c_str();
+	qDebug() << "MainWindow::loadPresetSettings: preset: " << preset->getSourceId().toStdString().c_str();
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 
@@ -229,7 +229,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::savePresetSettings(Preset* preset)
 {
-	qDebug() << "MainWindow::savePresetSettings: preset: " << preset->getSource().toStdString().c_str();
+	qDebug() << "MainWindow::savePresetSettings: preset: " << preset->getSourceId().toStdString().c_str();
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
     preset->clearChannels();

@@ -17,13 +17,13 @@ void Preset::resetToDefaults()
 	m_layout.clear();
 	m_spectrumConfig.clear();
 	m_channelConfigs.clear();
-	m_source.clear();
+	m_sourceId.clear();
 	m_sourceConfig.clear();
 }
 
 QByteArray Preset::serialize() const
 {
-	qDebug() << "Preset::serialize (" << this->getSource().toStdString().c_str() << ")";
+	qDebug() << "Preset::serialize (" << this->getSourceId().toStdString().c_str() << ")";
 
 	SimpleSerializer s(1);
 	s.writeString(1, m_group);
@@ -31,7 +31,7 @@ QByteArray Preset::serialize() const
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
-	s.writeString(6, m_source);
+	s.writeString(6, m_sourceId);
 	s.writeBlob(7, m_sourceConfig);
 
 	s.writeS32(200, m_channelConfigs.size());
@@ -48,7 +48,7 @@ QByteArray Preset::serialize() const
 
 bool Preset::deserialize(const QByteArray& data)
 {
-	qDebug() << "Preset::deserialize (" << this->getSource().toStdString().c_str() << ")";
+	qDebug() << "Preset::deserialize (" << this->getSourceId().toStdString().c_str() << ")";
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
@@ -62,7 +62,7 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readU64(3, &m_centerFrequency, 0);
 		d.readBlob(4, &m_layout);
 		d.readBlob(5, &m_spectrumConfig);
-		d.readString(6, &m_source);
+		d.readString(6, &m_sourceId);
 		d.readBlob(7, &m_sourceConfig);
 
 		qDebug() << "Preset::deserialize: m_group: " << m_group.toStdString().c_str();

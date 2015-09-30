@@ -48,9 +48,11 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
 			continue;
 		QString displayedName(QString("RTL-SDR #%1 (%2 #%3)").arg(i + 1).arg(product).arg(serial));
-		SimpleSerializer s(1);
-		s.writeS32(1, i);
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.rtl-sdr", s.final()));
+
+		result.append(SampleSourceDevice(displayedName,
+				"org.osmocom.sdr.samplesource.rtl-sdr",
+				QString(serial),
+				i));
 	}
 	return result;
 }

@@ -19,15 +19,21 @@ class PluginGUI;
 
 class PluginInterface {
 public:
-	struct SampleSourceDevice {
+	struct SampleSourceDevice
+	{
 		QString displayedName;
-		QString name;
-		QByteArray address;
+		QString id;
+		QString serial;
+		int sequence;
 
-		SampleSourceDevice(const QString& _displayedName, const QString& _name, const QByteArray& _address) :
+		SampleSourceDevice(const QString& _displayedName,
+				const QString& _id,
+				const QString& _serial,
+				int _sequence) :
 			displayedName(_displayedName),
-			name(_name),
-			address(_address)
+			id(_id),
+			serial(_serial),
+			sequence(_sequence)
 		{ }
 	};
 	typedef QList<SampleSourceDevice> SampleSourceDevices;
@@ -37,10 +43,10 @@ public:
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
-	virtual PluginGUI* createChannel(const QString& channelName) { return NULL; }
+	virtual PluginGUI* createChannel(const QString& channelName) { return 0; }
 
 	virtual SampleSourceDevices enumSampleSources() { return SampleSourceDevices(); }
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address) { return NULL; }
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceSerial, int sourceSequence) { return 0; }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "de.maintech.SDRangelove.PluginInterface/0.1");

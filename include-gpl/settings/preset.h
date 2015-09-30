@@ -42,12 +42,17 @@ public:
 	int getChannelCount() const { return m_channelConfigs.count(); }
 	const ChannelConfig& getChannelConfig(int index) const { return m_channelConfigs.at(index); }
 
-	void setSourceConfig(const QString& source, const QByteArray& config)
+	void setSourceConfig(const QString& sourceId, const QString& sourceSerial, int sourceSequence, const QByteArray& config)
 	{
-		m_source = source;
+		m_sourceId = sourceId;
+		m_sourceSerial = sourceSerial;
+		m_sourceSequence = sourceSequence;
 		m_sourceConfig = config;
 	}
-	const QString& getSource() const { return m_source; }
+
+	const QString& getSourceId() const { return m_sourceId; }
+	const QString& getSourceSerial() const { return m_sourceSerial; }
+	const int getSourceSequence() const { return m_sourceSequence; }
 	const QByteArray& getSourceConfig() const { return m_sourceConfig; }
 
 protected:
@@ -64,7 +69,9 @@ protected:
 	bool m_iqImbalanceCorrection;
 
 	// sample source and sample source configuration
-	QString m_source;
+	QString m_sourceId;
+	QString m_sourceSerial;
+	int m_sourceSequence;
 	QByteArray m_sourceConfig;
 
 	// channels and configurations

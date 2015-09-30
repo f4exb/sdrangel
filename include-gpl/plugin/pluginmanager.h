@@ -57,7 +57,7 @@ public:
 	void updateSampleSourceDevices();
 	void fillSampleSourceSelector(QComboBox* comboBox);
 	int selectSampleSource(int index);
-	int selectSampleSource(const QString& source);
+	int selectFirstSampleSource(const QString& sourceId);
 
 private:
 	struct ChannelRegistration {
@@ -86,10 +86,10 @@ private:
 	typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
 	struct SampleSourceRegistration {
-		QString m_sourceName;
+		QString m_sourceId;
 		PluginInterface* m_plugin;
-		SampleSourceRegistration(const QString& sourceName, PluginInterface* plugin) :
-			m_sourceName(sourceName),
+		SampleSourceRegistration(const QString& sourceId, PluginInterface* plugin) :
+			m_sourceId(sourceId),
 			m_plugin(plugin)
 		{ }
 	};
@@ -98,14 +98,20 @@ private:
 	struct SampleSourceDevice {
 		PluginInterface* m_plugin;
 		QString m_displayName;
-		QString m_sourceName;
-		QByteArray m_address;
+		QString m_sourceId;
+		QString m_sourceSerial;
+		int m_sourceSequence;
 
-		SampleSourceDevice(PluginInterface* plugin, const QString& displayName, const QString& sourceName, const QByteArray& address) :
+		SampleSourceDevice(PluginInterface* plugin,
+				const QString& displayName,
+				const QString& sourceId,
+				const QString& sourceSerial,
+				int sourceSequence) :
 			m_plugin(plugin),
 			m_displayName(displayName),
-			m_sourceName(sourceName),
-			m_address(address)
+			m_sourceId(sourceId),
+			m_sourceSerial(sourceSerial),
+			m_sourceSequence(sourceSequence)
 		{ }
 	};
 	typedef QList<SampleSourceDevice> SampleSourceDevices;
@@ -120,7 +126,9 @@ private:
 	SampleSourceRegistrations m_sampleSourceRegistrations;
 	SampleSourceDevices m_sampleSourceDevices;
 
-	QString m_sampleSourceName;
+	QString m_sampleSourceId;
+	QString m_sampleSourceSerial;
+	int m_sampleSourceSequence;
 	PluginGUI* m_sampleSourcePluginGUI;
 
 	void loadPlugins(const QDir& dir);

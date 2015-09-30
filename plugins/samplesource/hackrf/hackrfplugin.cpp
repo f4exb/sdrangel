@@ -98,7 +98,11 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 			s.writeS32(1, i);
 			s.writeString(2, serial_str);
 			s.writeU64(3, serial_num);
-			result.append(SampleSourceDevice(displayedName, m_deviceTypeID, s.final()));
+
+			result.append(SampleSourceDevice(displayedName, m_deviceTypeID,
+					serial_str,
+					i));
+
 			qDebug("HackRFPlugin::enumSampleSources: enumerated HackRF device #%d", i);
 
 			hackrf_close(hackrf_ptr);

@@ -58,10 +58,11 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 	for(int i = 0; i < count; i++)
 	{
 		QString displayedName(QString("BladeRF #%1 %2 (%3,%4)").arg(devinfo[i].instance).arg(devinfo[i].serial).arg(devinfo[i].usb_bus).arg(devinfo[i].usb_addr));
-		SimpleSerializer s(1);
-		s.writeS32(1, i);
-		s.writeString(2, devinfo[i].serial);
-		result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.bladerf", s.final()));
+
+		result.append(SampleSourceDevice(displayedName,
+				"org.osmocom.sdr.samplesource.bladerf",
+				QString(devinfo[i].serial),
+				i));
 	}
 
 	if (devinfo)
