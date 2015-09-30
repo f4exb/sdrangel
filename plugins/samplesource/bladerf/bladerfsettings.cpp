@@ -49,7 +49,7 @@ QByteArray BladeRFSettings::serialize() const
 	s.writeS32(3, m_vga1);
 	s.writeS32(4, m_vga2);
 	s.writeS32(5, m_bandwidth);
-	s.writeS32(6, m_log2Decim);
+	s.writeU32(6, m_log2Decim);
 	s.writeS32(7, (int) m_fcPos);
 	s.writeBool(8, m_xb200);
 	s.writeS32(9, (int) m_xb200Path);
@@ -70,7 +70,7 @@ bool BladeRFSettings::deserialize(const QByteArray& data)
 		return false;
 	}
 
-	if (d.getVersion() == SampleSourceSerializer::getSerializerVersion())
+	if (d.getVersion() == 1)
 	{
 		int intval;
 
@@ -79,7 +79,7 @@ bool BladeRFSettings::deserialize(const QByteArray& data)
 		d.readS32(3, &m_vga1);
 		d.readS32(4, &m_vga2);
 		d.readS32(5, &m_bandwidth);
-		d.readS32(6, &m_log2Decim);
+		d.readU32(6, &m_log2Decim);
 		d.readS32(7, &intval);
 		m_fcPos = (fcPos_t) intval;
 		d.readBool(8, &m_xb200);

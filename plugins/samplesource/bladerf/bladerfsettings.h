@@ -17,6 +17,8 @@
 #ifndef _BLADERF_BLADERFSETTINGS_H_
 #define _BLADERF_BLADERFSETTINGS_H_
 
+#include <libbladeRF.h>
+
 struct BladeRFSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
