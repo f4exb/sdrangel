@@ -83,9 +83,7 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 
 void PluginManager::loadSettings(const Preset* preset)
 {
-	qDebug() << "PluginManager::loadSettings";
-
-	fprintf(stderr, "Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
 	// copy currently open channels and clear list
 	ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
@@ -100,11 +98,11 @@ void PluginManager::loadSettings(const Preset* preset)
 
 		for(int i = 0; i < openChannels.count(); i++)
 		{
-			qDebug("  - compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+			qDebug("PluginManager::loadSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
 
 			if(openChannels[i].m_channelName == channelConfig.m_channel)
 			{
-				qDebug("channel [%s] found", qPrintable(openChannels[i].m_channelName));
+				qDebug("PluginManager::loadSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
 				reg = openChannels.takeAt(i);
 				m_channelInstanceRegistrations.append(reg);
 				break;
@@ -119,7 +117,7 @@ void PluginManager::loadSettings(const Preset* preset)
 			{
 				if(m_channelRegistrations[i].m_channelName == channelConfig.m_channel)
 				{
-					qDebug("  - creating new channel [%s]", qPrintable(channelConfig.m_channel));
+					qDebug("PluginManager::loadSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
 					reg = ChannelInstanceRegistration(channelConfig.m_channel, m_channelRegistrations[i].m_plugin->createChannel(channelConfig.m_channel));
 					break;
 				}
@@ -128,7 +126,7 @@ void PluginManager::loadSettings(const Preset* preset)
 
 		if(reg.m_gui != NULL)
 		{
-			qDebug("  - deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+			qDebug("PluginManager::loadSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
 			reg.m_gui->deserialize(channelConfig.m_config);
 		}
 	}
@@ -136,7 +134,7 @@ void PluginManager::loadSettings(const Preset* preset)
 	// everything, that is still "available" is not needed anymore
 	for(int i = 0; i < openChannels.count(); i++)
 	{
-		qDebug("destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+		qDebug("PluginManager::loadSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
 		openChannels[i].m_gui->destroy();
 	}
 
@@ -144,10 +142,12 @@ void PluginManager::loadSettings(const Preset* preset)
 
 	if(m_sampleSourcePluginGUI != 0)
 	{
+		qDebug("PluginManager::loadSettings: source compare [%s] vs [%s]", qPrintable(m_sampleSourceName), qPrintable(preset->getSource()));
+
 		// TODO: have one set of source presets per identified source (preset -> find source with name)
 		if(m_sampleSourceName == preset->getSource())
 		{
-			qDebug() << "  - deserializing source " << qPrintable(m_sampleSourceName);
+			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceName);
 			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
 		}
 
@@ -172,14 +172,20 @@ bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstance
 
 void PluginManager::saveSettings(Preset* preset)
 {
-	if(m_sampleSourcePluginGUI != NULL) {
-		//preset->setSourceConfig(m_sampleSourceName, m_sampleSourcePluginGUI->serializeGeneral(), m_sampleSourcePluginGUI->serialize());
+	if(m_sampleSourcePluginGUI != NULL)
+	{
+		preset->setSourceConfig(m_sampleSourceName, m_sampleSourcePluginGUI->serialize());
 		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
-	} else {
-		preset->setSourceConfig(QString::null, QByteArray(), QByteArray());
 	}
+	else
+	{
+		preset->setSourceConfig(QString::null, QByteArray());
+	}
+
 	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
-	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
+
+	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+	{
 		preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
 	}
 }

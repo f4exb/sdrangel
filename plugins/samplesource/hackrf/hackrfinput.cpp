@@ -24,81 +24,10 @@
 #include "hackrfinput.h"
 
 #include "hackrfgui.h"
-#include "hackrfserializer.h"
 #include "hackrfthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
-
-HackRFInput::Settings::Settings() :
-	m_centerFrequency(435000*1000),
-	m_devSampleRateIndex(0),
-	m_LOppmTenths(0),
-	m_lnaGain(14),
-	m_bandwidthIndex(0),
-	m_vgaGain(4),
-	m_log2Decim(0),
-	m_fcPos(FC_POS_CENTER),
-	m_biasT(false),
-	m_lnaExt(false)
-{
-}
-
-void HackRFInput::Settings::resetToDefaults()
-{
-	m_centerFrequency = 435000*1000;
-	m_devSampleRateIndex = 0;
-	m_LOppmTenths = 0;
-	m_lnaGain = 14;
-	m_bandwidthIndex = 0;
-	m_vgaGain = 4;
-	m_log2Decim = 0;
-	m_fcPos = FC_POS_CENTER;
-	m_biasT = false;
-	m_lnaExt = false;
-}
-
-QByteArray HackRFInput::Settings::serialize() const
-{
-	HackRFSerializer::HackRFData data;
-
-	data.m_data.m_frequency = m_centerFrequency;
-	data.m_LOppmTenths = m_LOppmTenths;
-	data.m_sampleRateIndex = m_devSampleRateIndex;
-	data.m_log2Decim = m_log2Decim;
-	data.m_fcPos = (qint32) m_fcPos;
-	data.m_lnaGain = m_lnaGain;
-	data.m_bandwidthIndex = m_bandwidthIndex;
-	data.m_vgaGain = m_vgaGain;
-	data.m_biasT  = m_biasT;
-	data.m_lnaExt  = m_lnaExt;
-
-	QByteArray byteArray;
-
-	HackRFSerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-}
-
-bool HackRFInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	HackRFSerializer::HackRFData data;
-
-	bool valid = HackRFSerializer::readSerializedData(serializedData, data);
-
-	m_centerFrequency = data.m_data.m_frequency;
-	m_LOppmTenths = data.m_LOppmTenths;
-	m_devSampleRateIndex = data.m_sampleRateIndex;
-	m_log2Decim = data.m_log2Decim;
-	m_fcPos = (fcPos_t) data.m_fcPos;
-	m_lnaGain = data.m_lnaGain;
-	m_bandwidthIndex = data.m_bandwidthIndex;
-	m_vgaGain = data.m_vgaGain;
-	m_biasT = data.m_biasT;
-	m_lnaExt = data.m_lnaExt;
-
-	return valid;
-}
 
 HackRFInput::HackRFInput() :
 	m_settings(),
@@ -242,7 +171,7 @@ void HackRFInput::setCenterFrequency(quint64 freq_hz)
 	}
 }
 
-bool HackRFInput::applySettings(const Settings& settings, bool force)
+bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -313,19 +242,19 @@ bool HackRFInput::applySettings(const Settings& settings, bool force)
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == HackRFSettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
-			if (m_settings.m_fcPos == FC_POS_INFRA)
+			if (m_settings.m_fcPos == HackRFSettings::FC_POS_INFRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
-			else if (m_settings.m_fcPos == FC_POS_SUPRA)
+			else if (m_settings.m_fcPos == HackRFSettings::FC_POS_SUPRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;

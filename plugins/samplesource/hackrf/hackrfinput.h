@@ -19,51 +19,29 @@
 
 #include "dsp/samplesource.h"
 #include "libhackrf/hackrf.h"
+#include "hackrfsettings.h"
 #include <QString>
 
 class HackRFThread;
 
 class HackRFInput : public SampleSource {
 public:
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
-
-	struct Settings {
-		quint64 m_centerFrequency;
-		qint32  m_LOppmTenths;
-		quint32 m_devSampleRateIndex;
-		quint32 m_bandwidthIndex;
-		quint32 m_lnaGain;
-		quint32 m_vgaGain;
-		quint32 m_log2Decim;
-		fcPos_t m_fcPos;
-		bool m_biasT;
-		bool m_lnaExt;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
 
 	class MsgConfigureHackRF : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const HackRFSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureHackRF* create(const Settings& settings)
+		static MsgConfigureHackRF* create(const HackRFSettings& settings)
 		{
 			return new MsgConfigureHackRF(settings);
 		}
 
 	private:
-		Settings m_settings;
+		HackRFSettings m_settings;
 
-		MsgConfigureHackRF(const Settings& settings) :
+		MsgConfigureHackRF(const HackRFSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -100,12 +78,12 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	bool applySettings(const Settings& settings, bool force);
+	bool applySettings(const HackRFSettings& settings, bool force);
 	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
 	QMutex m_mutex;
-	Settings m_settings;
+	HackRFSettings m_settings;
 	struct hackrf_device* m_dev;
 	HackRFThread* m_hackRFThread;
 	QString m_deviceDescription;

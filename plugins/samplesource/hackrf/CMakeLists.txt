@@ -4,7 +4,7 @@ set(hackrf_SOURCES
 	hackrfgui.cpp
 	hackrfinput.cpp
 	hackrfplugin.cpp
-	hackrfserializer.cpp
+	hackrfsettings.cpp
 	hackrfthread.cpp
 )
 
@@ -12,7 +12,7 @@ set(hackrf_HEADERS
 	hackrfgui.h
 	hackrfinput.h
 	hackrfplugin.h
-	hackrfserializer.h
+	hackrfsettings.h
 	hackrfthread.h
 )
 

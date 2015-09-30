@@ -14,32 +14,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_HACKRF_HACKRFSERIALIZER_H_
-#define PLUGINS_SAMPLESOURCE_HACKRF_HACKRFSERIALIZER_H_
+#ifndef _HACKRF_HACKRFSETTINGS_H_
+#define _HACKRF_HACKRFSETTINGS_H_
 
-#include "util/samplesourceserializer.h"
+struct HackRFSettings {
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA,
+		FC_POS_CENTER
+	} fcPos_t;
 
-class HackRFSerializer
-{
-public:
-	struct HackRFData
-	{
-		SampleSourceSerializer::Data m_data;
-		qint32 m_LOppmTenths;
-		quint32 m_sampleRateIndex;
-		quint32 m_log2Decim;
-		qint32 m_fcPos;
-		quint32 m_lnaGain;
-		quint32 m_bandwidthIndex;
-		quint32 m_vgaGain;
-		bool m_biasT;
-		bool m_lnaExt;
-	};
+	quint64 m_centerFrequency;
+	qint32  m_LOppmTenths;
+	quint32 m_devSampleRateIndex;
+	quint32 m_bandwidthIndex;
+	quint32 m_lnaGain;
+	quint32 m_vgaGain;
+	quint32 m_log2Decim;
+	fcPos_t m_fcPos;
+	bool m_biasT;
+	bool m_lnaExt;
+	bool m_dcBlock;
+	bool m_iqCorrection;
 
-	static void writeSerializedData(const HackRFData& data, QByteArray& serializedData);
-	static bool readSerializedData(const QByteArray& serializedData, HackRFData& data);
-	static void setDefaults(HackRFData& data);
+	HackRFSettings();
+	void resetToDefaults();
+	QByteArray serialize() const;
+	bool deserialize(const QByteArray& data);
 };
 
-
-#endif /* PLUGINS_SAMPLESOURCE_HACKRF_HACKRFSERIALIZER_H_ */
+#endif /* _HACKRF_HACKRFSETTINGS_H_ */

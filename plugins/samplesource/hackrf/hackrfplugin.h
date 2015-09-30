@@ -20,10 +20,12 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+#define HACKRF_DEVICE_TYPE_ID "sdrangel.samplesource.hackrf"
+
 class HackRFPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.hackrf")
+	Q_PLUGIN_METADATA(IID HACKRF_DEVICE_TYPE_ID)
 
 public:
 	explicit HackRFPlugin(QObject* parent = NULL);
@@ -33,6 +35,8 @@ public:
 
 	SampleSourceDevices enumSampleSources();
 	PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address);
+
+	static const QString m_deviceTypeID;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

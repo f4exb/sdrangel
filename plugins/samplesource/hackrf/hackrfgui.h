@@ -60,7 +60,7 @@ private:
 	Ui::HackRFGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	HackRFInput::Settings m_settings;
+	HackRFSettings m_settings;
 	QTimer m_updateTimer;
 	SampleSource* m_sampleSource;
 

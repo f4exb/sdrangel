@@ -33,6 +33,8 @@ const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString HackRFPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
+
 HackRFPlugin::HackRFPlugin(QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(0)
@@ -47,7 +49,7 @@ const PluginDescriptor& HackRFPlugin::getPluginDescriptor() const
 void HackRFPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.hackrf", this);
+	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
@@ -96,7 +98,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 			s.writeS32(1, i);
 			s.writeString(2, serial_str);
 			s.writeU64(3, serial_num);
-			result.append(SampleSourceDevice(displayedName, "org.osmocom.sdr.samplesource.hackrf", s.final()));
+			result.append(SampleSourceDevice(displayedName, m_deviceTypeID, s.final()));
 			qDebug("HackRFPlugin::enumSampleSources: enumerated HackRF device #%d", i);
 
 			hackrf_close(hackrf_ptr);
@@ -120,7 +122,7 @@ PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceName, 
 		return 0;
 	}
 
-	if(sourceName == "org.osmocom.sdr.samplesource.hackrf")
+	if(sourceName == m_deviceTypeID)
 	{
 		HackRFGui* gui = new HackRFGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
