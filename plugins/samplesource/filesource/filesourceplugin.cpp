@@ -31,6 +31,8 @@ const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString FileSourcePlugin::m_deviceTypeID = FILESOURCE_DEVICE_TYPE_ID;
+
 FileSourcePlugin::FileSourcePlugin(QObject* parent) :
 	QObject(parent)
 {
@@ -44,7 +46,7 @@ const PluginDescriptor& FileSourcePlugin::getPluginDescriptor() const
 void FileSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.filesource", this);
+	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
@@ -55,12 +57,9 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 	for(int i = 0; i < count; i++)
 	{
 		QString displayedName(QString("FileSource #%1 choose file").arg(i));
-		SimpleSerializer s(1);
-		s.writeS32(1, i);
-		s.writeString(2, "");
 
 		result.append(SampleSourceDevice(displayedName,
-				"org.osmocom.sdr.samplesource.filesource",
+				m_deviceTypeID,
 				QString::null,
 				i));
 	}
@@ -70,11 +69,14 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 
 PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId)
 {
-	if(sourceId == "org.osmocom.sdr.samplesource.filesource") {
+	if(sourceId == m_deviceTypeID)
+	{
 		FileSourceGui* gui = new FileSourceGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
 		return gui;
-	} else {
+	}
+	else
+	{
 		return NULL;
 	}
 }

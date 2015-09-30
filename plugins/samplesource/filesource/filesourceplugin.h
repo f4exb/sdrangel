@@ -20,10 +20,12 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+#define FILESOURCE_DEVICE_TYPE_ID "sdrangel.samplesource.filesource"
+
 class FileSourcePlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.filesource")
+	Q_PLUGIN_METADATA(IID FILESOURCE_DEVICE_TYPE_ID)
 
 public:
 	explicit FileSourcePlugin(QObject* parent = NULL);
@@ -33,6 +35,8 @@ public:
 
 	virtual SampleSourceDevices enumSampleSources();
 	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId);
+
+	static const QString m_deviceTypeID;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

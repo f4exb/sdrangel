@@ -94,10 +94,6 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 			QString serial_str = QString::number(serial_msb, 16) + QString::number(serial_lsb, 16);
 			uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 			QString displayedName(QString("HackRF #%1 0x%2").arg(i).arg(serial_str));
-			SimpleSerializer s(1);
-			s.writeS32(1, i);
-			s.writeString(2, serial_str);
-			s.writeU64(3, serial_num);
 
 			result.append(SampleSourceDevice(displayedName, m_deviceTypeID,
 					serial_str,
