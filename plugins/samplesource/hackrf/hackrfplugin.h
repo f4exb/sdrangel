@@ -33,8 +33,8 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	SampleSourceDevices enumSampleSources();
-	PluginGUI* createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address);
+	virtual SampleSourceDevices enumSampleSources();
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId);
 
 	static const QString m_deviceTypeID;
 

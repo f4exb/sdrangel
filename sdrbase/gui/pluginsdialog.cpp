@@ -11,7 +11,7 @@ PluginsDialog::PluginsDialog(PluginManager* pluginManager, QWidget* parent) :
 	const PluginManager::Plugins& plugins = pluginManager->getPlugins();
 	for(PluginManager::Plugins::const_iterator it = plugins.constBegin(); it != plugins.constEnd(); ++it) {
 		QStringList sl;
-		const PluginDescriptor& desc = it->plugin->getPluginDescriptor();
+		const PluginDescriptor& desc = it->pluginInterface->getPluginDescriptor();
 		sl.append(desc.displayedName);
 		sl.append(desc.version);
 		if(desc.licenseIsGPL)

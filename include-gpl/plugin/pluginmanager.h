@@ -23,12 +23,12 @@ public:
 	{
 		QString filename;
 		QPluginLoader* loader;
-		PluginInterface* plugin;
+		PluginInterface* pluginInterface;
 
 		Plugin(const QString& _filename, QPluginLoader* pluginLoader, PluginInterface* _plugin) :
 			filename(_filename),
 			loader(pluginLoader),
-			plugin(_plugin)
+			pluginInterface(_plugin)
 		{ }
 	};
 
@@ -137,7 +137,7 @@ private:
 
 static inline bool operator<(const PluginManager::Plugin& a, const PluginManager::Plugin& b)
 {
-	return a.plugin->getPluginDescriptor().displayedName < b.plugin->getPluginDescriptor().displayedName;
+	return a.pluginInterface->getPluginDescriptor().displayedName < b.pluginInterface->getPluginDescriptor().displayedName;
 }
 
 #endif // INCLUDE_PLUGINMANAGER_H

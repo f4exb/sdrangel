@@ -69,9 +69,9 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceName, const QByteArray& address)
+PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId)
 {
-	if(sourceName == "org.osmocom.sdr.samplesource.filesource") {
+	if(sourceId == "org.osmocom.sdr.samplesource.filesource") {
 		FileSourceGui* gui = new FileSourceGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
 		return gui;

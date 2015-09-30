@@ -182,6 +182,7 @@ Assuming Debian Jessie is used:
   - Many other little things...
     
 <h1>To Do</h1>
+  - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). 
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer

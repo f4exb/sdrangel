@@ -17,6 +17,8 @@ PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObje
 	m_mainWindow(mainWindow),
 	m_dspEngine(dspEngine),
 	m_sampleSourceId(),
+	m_sampleSourceSerial(),
+	m_sampleSourceSequence(0),
 	m_sampleSourcePluginGUI(NULL)
 {
 }
@@ -38,7 +40,7 @@ void PluginManager::loadPlugins()
 
 	for (Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)
 	{
-		it->plugin->initPlugin(&m_pluginAPI);
+		it->pluginInterface->initPlugin(&m_pluginAPI);
 	}
 
 	updateSampleSourceDevices();
@@ -311,9 +313,7 @@ int PluginManager::selectSampleSource(int index)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId,
-			m_sampleSourceSerial,
-			m_sampleSourceSequence);
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
 
 	return index;
 }
@@ -369,9 +369,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId,
-			m_sampleSourceSerial,
-			m_sampleSourceSequence);
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
 
 	return index;
 }
