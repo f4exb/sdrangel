@@ -20,10 +20,9 @@
 
 #include "airspygui.h"
 #include "airspyinput.h"
-#include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "airspyserializer.h"
+#include "airspysettings.h"
 #include "airspythread.h"
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)

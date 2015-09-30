@@ -32,6 +32,8 @@ const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString AirspyPlugin::m_deviceTypeID = AIRSPY_DEVICE_TYPE_ID;
+
 AirspyPlugin::AirspyPlugin(QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(0)
@@ -46,7 +48,7 @@ const PluginDescriptor& AirspyPlugin::getPluginDescriptor() const
 void AirspyPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.airspy", this);
+	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
@@ -93,7 +95,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 				QString displayedName(QString("Airspy #%1 0x%2").arg(i).arg(serial_str));
 
 				result.append(SampleSourceDevice(displayedName,
-						"org.osmocom.sdr.samplesource.airspy",
+						m_deviceTypeID,
 						serial_str,
 						i));
 
@@ -122,7 +124,7 @@ PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 		return 0;
 	}
 
-	if(sourceId == "org.osmocom.sdr.samplesource.airspy")
+	if(sourceId == m_deviceTypeID)
 	{
 		AirspyGui* gui = new AirspyGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
