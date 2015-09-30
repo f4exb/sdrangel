@@ -123,8 +123,6 @@ private slots:
 	void on_action_Stop_triggered();
 	void on_action_Start_Recording_triggered();
 	void on_action_Stop_Recording_triggered();
-	void on_dcOffset_toggled(bool checked);
-	void on_iqImbalance_toggled(bool checked);
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();

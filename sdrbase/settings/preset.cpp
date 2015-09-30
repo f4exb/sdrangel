@@ -14,9 +14,6 @@ void Preset::resetToDefaults()
 	m_description = "no name";
 	m_centerFrequency = 0;
 	m_spectrumConfig.clear();
-	m_scopeConfig.clear();
-	m_dcOffsetCorrection = false;
-	m_iqImbalanceCorrection = false;
 	m_layout.clear();
 	m_spectrumConfig.clear();
 	m_channelConfigs.clear();
@@ -34,11 +31,8 @@ QByteArray Preset::serialize() const
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
-	s.writeBool(6, m_dcOffsetCorrection);
-	s.writeBool(7, m_iqImbalanceCorrection);
-	s.writeBlob(8, m_scopeConfig);
-	s.writeString(9, m_source);
-	s.writeBlob(10, m_sourceConfig);
+	s.writeString(6, m_source);
+	s.writeBlob(7, m_sourceConfig);
 
 	s.writeS32(200, m_channelConfigs.size());
 
@@ -68,13 +62,10 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readU64(3, &m_centerFrequency, 0);
 		d.readBlob(4, &m_layout);
 		d.readBlob(5, &m_spectrumConfig);
-		d.readBool(6, &m_dcOffsetCorrection, false);
-		d.readBool(7, &m_iqImbalanceCorrection, false);
-		d.readBlob(8, &m_scopeConfig);
-		d.readString(9, &m_source);
-		d.readBlob(10, &m_sourceConfig);
+		d.readString(6, &m_source);
+		d.readBlob(7, &m_sourceConfig);
 
-		qDebug() << "  m_group: " << m_group.toStdString().c_str();
+		qDebug() << "Preset::deserialize: m_group: " << m_group.toStdString().c_str();
 
 		qint32 channelCount = 0;
 		d.readS32(200, &channelCount, 0);

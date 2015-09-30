@@ -113,6 +113,9 @@ void HackRFGui::displaySettings()
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
 	ui->biasT->setChecked(m_settings.m_biasT);
@@ -194,6 +197,18 @@ void HackRFGui::on_LOppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+	sendSettings();
+}
+
+void HackRFGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void HackRFGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqCorrection = checked;
 	sendSettings();
 }
 

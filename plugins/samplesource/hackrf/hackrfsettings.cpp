@@ -82,6 +82,8 @@ bool HackRFSettings::deserialize(const QByteArray& data)
 		d.readU32(7, &m_lnaGain, 16);
 		d.readU32(8, &m_bandwidthIndex, 0);
 		d.readU32(9, &m_vgaGain, 16);
+		d.readBool(10, &m_dcBlock, false);
+		d.readBool(11, &m_iqCorrection, false);
 
 		return true;
 	}

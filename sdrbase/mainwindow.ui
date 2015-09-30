@@ -256,9 +256,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="processingDock">
+  <widget class="QDockWidget" name="rxDisplayDock">
    <property name="windowTitle">
-    <string>Processing and Display</string>
+    <string>Rx Display</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -286,45 +286,6 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>3</number>
-       </property>
-       <item>
-        <widget class="ButtonSwitch" name="dcOffset">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string>Compensate DC offset</string>
-         </property>
-         <property name="text">
-          <string>DC Offset Corr</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ButtonSwitch" name="iqImbalance">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string>Compensate I/Q imbalance</string>
-         </property>
-         <property name="text">
-          <string>I/Q Imbal. Corr</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item>
       <widget class="GLSpectrumGUI" name="glSpectrumGUI" native="true"/>
      </item>
@@ -493,11 +454,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ChannelWindow</class>
    <extends>QWidget</extends>
    <header>gui/channelwindow.h</header>
@@ -509,8 +465,6 @@
   <tabstop>presetSave</tabstop>
   <tabstop>presetDelete</tabstop>
   <tabstop>presetLoad</tabstop>
-  <tabstop>dcOffset</tabstop>
-  <tabstop>iqImbalance</tabstop>
  </tabstops>
  <resources>
   <include location="resources/res.qrc"/>

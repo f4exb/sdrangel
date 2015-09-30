@@ -68,21 +68,21 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	// work around broken Qt dock widget ordering
 	removeDockWidget(ui->inputDock);
-	removeDockWidget(ui->processingDock);
+	removeDockWidget(ui->rxDisplayDock);
 	removeDockWidget(ui->presetDock);
 	removeDockWidget(ui->channelDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->inputDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->processingDock);
+	addDockWidget(Qt::LeftDockWidgetArea, ui->rxDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
 	ui->inputDock->show();
-	ui->processingDock->show();
+	ui->rxDisplayDock->show();
 	ui->presetDock->show();
 	ui->channelDock->show();
 
 	ui->menu_Window->addAction(ui->inputDock->toggleViewAction());
-	ui->menu_Window->addAction(ui->processingDock->toggleViewAction());
+	ui->menu_Window->addAction(ui->rxDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
@@ -211,8 +211,6 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	qDebug() << "MainWindow::loadPresetSettings: preset: " << preset->getSource().toStdString().c_str();
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
-	ui->dcOffset->setChecked(preset->getDCOffsetCorrection());
-	ui->iqImbalance->setChecked(preset->getIQImbalanceCorrection());
 
 	m_pluginManager->loadSettings(preset);
 
@@ -431,18 +429,6 @@ void MainWindow::on_action_Stop_Recording_triggered()
 {
 	m_recording->setColor(Qt::gray);
 	m_fileSink->stopRecording();
-}
-
-void MainWindow::on_dcOffset_toggled(bool checked)
-{
-	m_settings.getCurrent()->setDCOffsetCorrection(checked);
-	m_dspEngine->configureCorrections(m_settings.getCurrent()->getDCOffsetCorrection(), m_settings.getCurrent()->getIQImbalanceCorrection());
-}
-
-void MainWindow::on_iqImbalance_toggled(bool checked)
-{
-	m_settings.getCurrent()->setIQImbalanceCorrection(checked);
-	m_dspEngine->configureCorrections(m_settings.getCurrent()->getDCOffsetCorrection(), m_settings.getCurrent()->getIQImbalanceCorrection());
 }
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)

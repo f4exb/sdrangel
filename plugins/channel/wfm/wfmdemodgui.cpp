@@ -214,6 +214,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_basicSettingsShown(false)
 {
 	ui->setupUi(this);
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));

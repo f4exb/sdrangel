@@ -37,15 +37,6 @@ public:
 	void setLayout(const QByteArray& data) { m_layout = data; }
 	const QByteArray& getLayout() const { return m_layout; }
 
-	void setDCOffsetCorrection(bool value) { m_dcOffsetCorrection = value; }
-	bool getDCOffsetCorrection() const { return m_dcOffsetCorrection; }
-
-	void setIQImbalanceCorrection(bool value) { m_iqImbalanceCorrection = value; }
-	bool getIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
-
-	void setScopeConfig(const QByteArray& data) { m_scopeConfig = data; }
-	const QByteArray& getScopeConfig() const { return m_scopeConfig; }
-
 	void clearChannels() { m_channelConfigs.clear(); }
 	void addChannel(const QString& channel, const QByteArray& config) { m_channelConfigs.append(ChannelConfig(channel, config)); }
 	int getChannelCount() const { return m_channelConfigs.count(); }
@@ -67,7 +58,6 @@ protected:
 
 	// general configuration
 	QByteArray m_spectrumConfig;
-	QByteArray m_scopeConfig;
 
 	// dc offset and i/q imbalance correction TODO: move it into the source data
 	bool m_dcOffsetCorrection;

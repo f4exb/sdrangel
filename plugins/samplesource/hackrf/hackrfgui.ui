@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>215</width>
-    <height>220</height>
+    <width>256</width>
+    <height>218</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -137,6 +137,37 @@
     </layout>
    </item>
    <item>
+    <layout class="QGridLayout" name="gridLayout_corr">
+     <item row="0" column="1">
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>DC Offset auto correction</string>
+       </property>
+       <property name="text">
+        <string>DC Offset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>IQ Imbalance auto correction</string>
+       </property>
+       <property name="text">
+        <string>IQ Imbalance</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="corrLabel">
+       <property name="text">
+        <string>Auto corr</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line_freq">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -148,13 +179,6 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="2">
-      <widget class="QCheckBox" name="biasT">
-       <property name="text">
-        <string>Bias T</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="sampleRateLabel">
        <property name="sizePolicy">
@@ -174,6 +198,29 @@
         <string>Device sample rate</string>
        </property>
       </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="bbFiltLabel">
+       <property name="text">
+        <string>BBF</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QComboBox" name="bbFilter"/>
+     </item>
+     <item row="0" column="4">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -224,7 +271,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -234,19 +281,6 @@
         <string>Fc pos</string>
        </property>
       </widget>
-     </item>
-     <item row="0" column="3">
-      <spacer name="fcPosRightSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="fcPos">
@@ -268,6 +302,16 @@
       </widget>
      </item>
      <item row="0" column="2">
+      <widget class="QCheckBox" name="biasT">
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Bias T</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
       <widget class="QCheckBox" name="lnaExt">
        <property name="toolTip">
         <string>Extra LNA +14dB</string>
@@ -351,36 +395,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_bbf">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="bbFiltLabel">
-       <property name="text">
-        <string>BBF</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="bbFilter"/>
-     </item>
-     <item row="0" column="2">
-      <spacer name="bbSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QGridLayout" name="gridLayout_vga" columnstretch="0,0,0">
      <property name="spacing">
       <number>3</number>
@@ -440,6 +454,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
