@@ -18,6 +18,7 @@
 #define INCLUDE_BLADERFINPUT_H
 
 #include "dsp/samplesource.h"
+#include "bladerfsettings.h"
 #include <libbladeRF.h>
 #include <QString>
 
@@ -25,46 +26,21 @@ class BladerfThread;
 
 class BladerfInput : public SampleSource {
 public:
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
-
-	struct Settings {
-		quint64 m_centerFrequency;
-		qint32 m_devSampleRate;
-		qint32 m_lnaGain;
-		qint32 m_vga1;
-		qint32 m_vga2;
-		qint32 m_bandwidth;
-		quint32 m_log2Decim;
-		fcPos_t m_fcPos;
-		bool m_xb200;
-		bladerf_xb200_path m_xb200Path;
-		bladerf_xb200_filter m_xb200Filter;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureBladerf : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const BladeRFSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureBladerf* create(const Settings& settings)
+		static MsgConfigureBladerf* create(const BladeRFSettings& settings)
 		{
 			return new MsgConfigureBladerf(settings);
 		}
 
 	private:
-		Settings m_settings;
+		BladeRFSettings m_settings;
 
-		MsgConfigureBladerf(const Settings& settings) :
+		MsgConfigureBladerf(const BladeRFSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -101,12 +77,12 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	bool applySettings(const Settings& settings, bool force);
+	bool applySettings(const BladeRFSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
 	struct bladerf *open_bladerf_from_serial(const char *serial);
 
 	QMutex m_mutex;
-	Settings m_settings;
+	BladeRFSettings m_settings;
 	struct bladerf* m_dev;
 	BladerfThread* m_bladerfThread;
 	QString m_deviceDescription;

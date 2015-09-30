@@ -29,80 +29,6 @@
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
 
-BladerfInput::Settings::Settings() :
-	m_centerFrequency(435000*1000),
-	m_devSampleRate(3072000),
-	m_lnaGain(0),
-	m_vga1(20),
-	m_vga2(9),
-	m_bandwidth(1500000),
-	m_log2Decim(0),
-	m_fcPos(FC_POS_INFRA),
-	m_xb200(false),
-	m_xb200Path(BLADERF_XB200_MIX),
-	m_xb200Filter(BLADERF_XB200_AUTO_1DB)
-{
-}
-
-void BladerfInput::Settings::resetToDefaults()
-{
-	m_centerFrequency = 435000*1000;
-	m_devSampleRate = 3072000;
-	m_lnaGain = 0;
-	m_vga1 = 20;
-	m_vga2 = 9;
-	m_bandwidth = 1500000;
-	m_log2Decim = 0;
-	m_fcPos = FC_POS_INFRA;
-		m_xb200 = false;
-		m_xb200Path = BLADERF_XB200_MIX;
-		m_xb200Filter = BLADERF_XB200_AUTO_1DB;
-}
-
-QByteArray BladerfInput::Settings::serialize() const
-{
-	BladeRFSerializer::BladeRFData data;
-
-	data.m_data.m_lnaGain = m_lnaGain;
-	data.m_data.m_RxGain1 = m_vga1;
-	data.m_data.m_RxGain2 = m_vga2;
-	data.m_data.m_log2Decim = m_log2Decim;
-	data.m_xb200 = m_xb200;
-	data.m_xb200Path = (int) m_xb200Path;
-	data.m_xb200Filter = (int) m_xb200Filter;
-	data.m_data.m_bandwidth = m_bandwidth;
-	data.m_data.m_fcPosition = (int) m_fcPos;
-	data.m_data.m_frequency = m_centerFrequency;
-	data.m_data.m_rate = m_devSampleRate;
-
-	QByteArray byteArray;
-
-	BladeRFSerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-}
-
-bool BladerfInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	BladeRFSerializer::BladeRFData data;
-
-	bool valid = BladeRFSerializer::readSerializedData(serializedData, data);
-
-	m_lnaGain = data.m_data.m_lnaGain;
-	m_vga1 = data.m_data.m_RxGain1;
-	m_vga2 = data.m_data.m_RxGain2;
-	m_log2Decim = data.m_data.m_log2Decim;
-	m_xb200 = data.m_xb200;
-	m_xb200Path = (bladerf_xb200_path) data.m_xb200Path;
-	m_xb200Filter = (bladerf_xb200_filter) data.m_xb200Filter;
-	m_bandwidth = data.m_data.m_bandwidth;
-	m_fcPos = (fcPos_t) data.m_data.m_fcPosition;
-	m_centerFrequency = data.m_data.m_frequency;
-	m_devSampleRate = data.m_data.m_rate;
-
-	return valid;
-}
-
 BladerfInput::BladerfInput() :
 	m_settings(),
 	m_dev(0),
@@ -245,7 +171,7 @@ bool BladerfInput::handleMessage(const Message& message)
 	}
 }
 
-bool BladerfInput::applySettings(const Settings& settings, bool force)
+bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
 {
 	bool forwardChange = false;
 	QMutexLocker mutexLocker(&m_mutex);
@@ -442,7 +368,7 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 	qint64 f_img = deviceCenterFrequency;
 	qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 
-	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == BladeRFSettings::FC_POS_CENTER))
 	{
 		deviceCenterFrequency = m_settings.m_centerFrequency;
 		f_img = deviceCenterFrequency;
@@ -450,13 +376,13 @@ bool BladerfInput::applySettings(const Settings& settings, bool force)
 	}
 	else
 	{
-		if (m_settings.m_fcPos == FC_POS_INFRA)
+		if (m_settings.m_fcPos == BladeRFSettings::FC_POS_INFRA)
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
 			f_img = deviceCenterFrequency + m_settings.m_devSampleRate/2;
 			f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 		}
-		else if (m_settings.m_fcPos == FC_POS_SUPRA)
+		else if (m_settings.m_fcPos == BladeRFSettings::FC_POS_SUPRA)
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency - (m_settings.m_devSampleRate / 4);
 			f_img = deviceCenterFrequency - m_settings.m_devSampleRate/2;

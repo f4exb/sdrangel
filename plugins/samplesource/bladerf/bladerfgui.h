@@ -51,7 +51,7 @@ private:
 	Ui::BladerfGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	BladerfInput::Settings m_settings;
+	BladeRFSettings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;

@@ -4,7 +4,7 @@ set(bladerf_SOURCES
 	bladerfgui.cpp
 	bladerfinput.cpp
 	bladerfplugin.cpp
-	bladerfserializer.cpp
+	bladerfsettings.cpp
 	bladerfthread.cpp
 )
 
@@ -12,7 +12,7 @@ set(bladerf_HEADERS
 	bladerfgui.h
 	bladerfinput.h
 	bladerfplugin.h
-	bladerfserializer.h
+	bladerfsettings.h
 	bladerfthread.h
 )
 
