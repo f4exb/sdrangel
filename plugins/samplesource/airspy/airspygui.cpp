@@ -226,13 +226,13 @@ void AirspyGui::on_decim_valueChanged(int value)
 void AirspyGui::on_fcPos_currentIndexChanged(int index)
 {
 	if (index == 0) {
-		m_settings.m_fcPos = AirspyInput::FC_POS_INFRA;
+		m_settings.m_fcPos = AirspySettings::FC_POS_INFRA;
 		sendSettings();
 	} else if (index == 1) {
-		m_settings.m_fcPos = AirspyInput::FC_POS_SUPRA;
+		m_settings.m_fcPos = AirspySettings::FC_POS_SUPRA;
 		sendSettings();
 	} else if (index == 2) {
-		m_settings.m_fcPos = AirspyInput::FC_POS_CENTER;
+		m_settings.m_fcPos = AirspySettings::FC_POS_CENTER;
 		sendSettings();
 	}
 }

@@ -55,7 +55,7 @@ private:
 	Ui::AirspyGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	AirspyInput::Settings m_settings;
+	AirspySettings m_settings;
 	QTimer m_updateTimer;
 	std::vector<uint32_t> m_rates;
 	SampleSource* m_sampleSource;

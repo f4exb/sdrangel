@@ -29,72 +29,6 @@
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
-AirspyInput::Settings::Settings() :
-	m_centerFrequency(435000*1000),
-	m_devSampleRateIndex(0),
-	m_LOppmTenths(0),
-	m_lnaGain(14),
-	m_mixerGain(15),
-	m_vgaGain(4),
-	m_log2Decim(0),
-	m_fcPos(FC_POS_CENTER),
-	m_biasT(false)
-{
-}
-
-void AirspyInput::Settings::resetToDefaults()
-{
-	m_centerFrequency = 435000*1000;
-	m_devSampleRateIndex = 0;
-	m_LOppmTenths = 0;
-	m_lnaGain = 14;
-	m_mixerGain = 15;
-	m_vgaGain = 4;
-	m_log2Decim = 0;
-	m_fcPos = FC_POS_CENTER;
-	m_biasT = false;
-}
-
-QByteArray AirspyInput::Settings::serialize() const
-{
-	AirspySerializer::AirspyData data;
-
-	data.m_data.m_frequency = m_centerFrequency;
-	data.m_LOppmTenths = m_LOppmTenths;
-	data.m_sampleRateIndex = m_devSampleRateIndex;
-	data.m_log2Decim = m_log2Decim;
-	data.m_fcPos = (qint32) m_fcPos;
-	data.m_lnaGain = m_lnaGain;
-	data.m_mixerGain = m_mixerGain;
-	data.m_vgaGain = m_vgaGain;
-	data.m_biasT  = m_biasT;
-
-	QByteArray byteArray;
-
-	AirspySerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-}
-
-bool AirspyInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	AirspySerializer::AirspyData data;
-
-	bool valid = AirspySerializer::readSerializedData(serializedData, data);
-
-	m_centerFrequency = data.m_data.m_frequency;
-	m_LOppmTenths = data.m_LOppmTenths;
-	m_devSampleRateIndex = data.m_sampleRateIndex;
-	m_log2Decim = data.m_log2Decim;
-	m_fcPos = (fcPos_t) data.m_fcPos;
-	m_lnaGain = data.m_lnaGain;
-	m_mixerGain = data.m_mixerGain;
-	m_vgaGain = data.m_vgaGain;
-	m_biasT = data.m_biasT;
-
-	return valid;
-}
-
 AirspyInput::AirspyInput() :
 	m_settings(),
 	m_dev(0),
@@ -281,7 +215,7 @@ void AirspyInput::setCenterFrequency(quint64 freq_hz)
 	}
 }
 
-bool AirspyInput::applySettings(const Settings& settings, bool force)
+bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -289,6 +223,18 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 	airspy_error rc;
 
 	qDebug() << "AirspyInput::applySettings";
+
+	if (m_settings.m_dcBlock != settings.m_dcBlock)
+	{
+		m_settings.m_dcBlock = settings.m_dcBlock;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+	}
+
+	if (m_settings.m_iqCorrection != settings.m_iqCorrection)
+	{
+		m_settings.m_iqCorrection = settings.m_iqCorrection;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+	}
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
@@ -352,19 +298,19 @@ bool AirspyInput::applySettings(const Settings& settings, bool force)
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == FC_POS_CENTER))
+		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == AirspySettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
-			if (m_settings.m_fcPos == FC_POS_INFRA)
+			if (m_settings.m_fcPos == AirspySettings::FC_POS_INFRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
-			else if (m_settings.m_fcPos == FC_POS_SUPRA)
+			else if (m_settings.m_fcPos == AirspySettings::FC_POS_SUPRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;

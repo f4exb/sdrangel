@@ -4,7 +4,7 @@ set(airspy_SOURCES
 	airspygui.cpp
 	airspyinput.cpp
 	airspyplugin.cpp
-	airspyserializer.cpp
+	airspysettings.cpp
 	airspythread.cpp
 )
 
@@ -12,7 +12,7 @@ set(airspy_HEADERS
 	airspygui.h
 	airspyinput.h
 	airspyplugin.h
-	airspyserializer.h
+	airspysettings.h
 	airspythread.h
 )
 

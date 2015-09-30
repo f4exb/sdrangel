@@ -18,6 +18,7 @@
 #define INCLUDE_AIRSPYINPUT_H
 
 #include "dsp/samplesource.h"
+#include "airspysettings.h"
 #include <libairspy/airspy.h>
 #include <QString>
 
@@ -25,44 +26,21 @@ class AirspyThread;
 
 class AirspyInput : public SampleSource {
 public:
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
-
-	struct Settings {
-		quint64 m_centerFrequency;
-		qint32  m_LOppmTenths;
-		quint32 m_devSampleRateIndex;
-		quint32 m_lnaGain;
-		quint32 m_mixerGain;
-		quint32 m_vgaGain;
-		quint32 m_log2Decim;
-		fcPos_t m_fcPos;
-		bool m_biasT;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureAirspy : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const AirspySettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureAirspy* create(const Settings& settings)
+		static MsgConfigureAirspy* create(const AirspySettings& settings)
 		{
 			return new MsgConfigureAirspy(settings);
 		}
 
 	private:
-		Settings m_settings;
+		AirspySettings m_settings;
 
-		MsgConfigureAirspy(const Settings& settings) :
+		MsgConfigureAirspy(const AirspySettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -103,12 +81,12 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	bool applySettings(const Settings& settings, bool force);
+	bool applySettings(const AirspySettings& settings, bool force);
 	struct airspy_device *open_airspy_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
 	QMutex m_mutex;
-	Settings m_settings;
+	AirspySettings m_settings;
 	struct airspy_device* m_dev;
 	AirspyThread* m_airspyThread;
 	QString m_deviceDescription;
