@@ -73,7 +73,8 @@ bool AirspySettings::deserialize(const QByteArray& data)
 		d.readS32(1, &m_LOppmTenths, 0);
 		d.readU32(2, &m_devSampleRateIndex, 0);
 		d.readU32(3, &m_log2Decim, 0);
-		d.readS32(4, &m_fcPos, 0);
+		d.readS32(4, &intval, 0);
+		m_fcPos = (fcPos_t) intval;
 		d.readU32(5, &m_lnaGain, 14);
 		d.readU32(6, &m_mixerGain, 15);
 		d.readU32(7, &m_vgaGain, 4);
