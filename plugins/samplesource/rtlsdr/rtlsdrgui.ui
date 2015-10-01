@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>247</width>
-    <height>189</height>
+    <height>219</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -272,6 +272,49 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_fcPos">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="fcPos">
+       <item>
+        <property name="text">
+         <string>Inf</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Sup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cent</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="fcPosLabel">
+       <property name="text">
+        <string>Fc pos</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <spacer name="horizontalSpacer_fcPos">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

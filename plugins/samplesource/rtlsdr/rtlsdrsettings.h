@@ -18,11 +18,18 @@
 #define _RTLSDR_RTLSDRSETTINGS_H_
 
 struct RTLSDRSettings {
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA,
+		FC_POS_CENTER
+	} fcPos_t;
+
 	int m_devSampleRate;
 	quint64 m_centerFrequency;
 	qint32 m_gain;
 	qint32 m_loPpmCorrection;
 	quint32 m_log2Decim;
+	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqImbalance;
 

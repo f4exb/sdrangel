@@ -30,6 +30,7 @@ void RTLSDRSettings::resetToDefaults()
 	m_gain = 0;
 	m_loPpmCorrection = 0;
 	m_log2Decim = 4;
+	m_fcPos = FC_POS_CENTER;
 	m_dcBlock = false;
 	m_iqImbalance = false;
 }
@@ -44,6 +45,7 @@ QByteArray RTLSDRSettings::serialize() const
 	s.writeU32(4, m_log2Decim);
 	s.writeBool(5, m_dcBlock);
 	s.writeBool(6, m_iqImbalance);
+	s.writeS32(7, (int) m_fcPos);
 
 	return s.final();
 }
@@ -60,12 +62,16 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+		int intval;
+
 		d.readS32(1, &m_devSampleRate, 0);
 		d.readS32(2, &m_gain, 0);
 		d.readS32(3, &m_loPpmCorrection, 0);
 		d.readU32(4, &m_log2Decim, 4);
 		d.readBool(5, &m_dcBlock, false);
 		d.readBool(6, &m_iqImbalance, false);
+		d.readS32(7, &intval, 0);
+		m_fcPos = (fcPos_t) intval;
 
 		return true;
 	}

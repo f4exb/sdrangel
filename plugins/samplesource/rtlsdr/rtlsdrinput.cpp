@@ -235,12 +235,13 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 		{
 			if( rtlsdr_set_sample_rate(m_dev, settings.m_devSampleRate) < 0)
 			{
-				qCritical("could not set sample rate: %d", settings.m_devSampleRate);
+				qCritical("RTLSDRInput::applySettings: could not set sample rate: %d", settings.m_devSampleRate);
 			}
 			else
 			{
 				m_settings.m_devSampleRate = settings.m_devSampleRate;
 				m_rtlSDRThread->setSamplerate(settings.m_devSampleRate);
+				qDebug("RTLSDRInput::applySettings: sample rate set to %d", m_settings.m_devSampleRate);
 			}
 		}
 	}
@@ -276,8 +277,63 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         forwardChange = true;
     }
 
-	m_settings.m_centerFrequency = settings.m_centerFrequency;
+	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+	qint64 f_img = deviceCenterFrequency;
+	quint32 devSampleRate = m_settings.m_devSampleRate;
 
+	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+			|| (m_settings.m_fcPos != settings.m_fcPos))
+	{
+		m_settings.m_centerFrequency = settings.m_centerFrequency;
+
+		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == RTLSDRSettings::FC_POS_CENTER))
+		{
+			deviceCenterFrequency = m_settings.m_centerFrequency;
+			f_img = deviceCenterFrequency;
+		}
+		else
+		{
+			if (settings.m_fcPos == RTLSDRSettings::FC_POS_INFRA)
+			{
+				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
+				f_img = deviceCenterFrequency + devSampleRate/2;
+			}
+			else if (settings.m_fcPos == RTLSDRSettings::FC_POS_SUPRA)
+			{
+				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
+				f_img = deviceCenterFrequency - devSampleRate/2;
+			}
+		}
+
+		if(m_dev != 0)
+		{
+			if (rtlsdr_set_center_freq( m_dev, deviceCenterFrequency ) != 0)
+			{
+				qDebug("rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+			}
+			else
+			{
+				qDebug() << "RTLSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+						<< " device center freq: " << deviceCenterFrequency << " Hz"
+						<< " device sample rate: " << devSampleRate << "Hz"
+						<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
+						<< " img: " << f_img << "Hz";
+			}
+		}
+	}
+
+	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	{
+		m_settings.m_fcPos = settings.m_fcPos;
+
+		if(m_dev != 0)
+		{
+			m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
+			qDebug() << "RTLSDRInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+		}
+	}
+
+	/*
 	if(m_dev != 0)
 	{
 		qint64 centerFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
@@ -295,7 +351,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 		{
 			qDebug("rtlsdr_set_center_freq(%lld) failed", m_settings.m_centerFrequency);
 		}
-	}
+	}*/
     
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{

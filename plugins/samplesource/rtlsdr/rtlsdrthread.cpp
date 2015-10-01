@@ -63,6 +63,11 @@ void RTLSDRThread::setLog2Decimation(unsigned int log2_decim)
 	m_log2Decim = log2_decim;
 }
 
+void RTLSDRThread::setFcPos(int fcPos)
+{
+	m_fcPos = fcPos;
+}
+
 void RTLSDRThread::run()
 {
 	int res;
@@ -85,25 +90,72 @@ void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-	switch (m_log2Decim)
+	if (m_log2Decim == 0)
 	{
-	case 0:
 		m_decimators.decimate1(&it, buf, len);
-		break;
-	case 1:
-		m_decimators.decimate2_inf(&it, buf, len);
-		break;
-	case 2:
-		m_decimators.decimate4_inf(&it, buf, len);
-		break;
-	case 3:
-		m_decimators.decimate8_inf(&it, buf, len);
-		break;
-	case 4:
-		m_decimators.decimate16_inf(&it, buf, len);
-		break;
-	default:
-		break;
+	}
+	else
+	{
+		if (m_fcPos == 0) // Infradyne
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimators.decimate2_inf(&it, buf, len);
+				break;
+			case 2:
+				m_decimators.decimate4_inf(&it, buf, len);
+				break;
+			case 3:
+				m_decimators.decimate8_inf(&it, buf, len);
+				break;
+			case 4:
+				m_decimators.decimate16_inf(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
+		else if (m_fcPos == 1) // Supradyne
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimators.decimate2_sup(&it, buf, len);
+				break;
+			case 2:
+				m_decimators.decimate4_sup(&it, buf, len);
+				break;
+			case 3:
+				m_decimators.decimate8_sup(&it, buf, len);
+				break;
+			case 4:
+				m_decimators.decimate16_sup(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
+		else // Centered
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimators.decimate2_cen(&it, buf, len);
+				break;
+			case 2:
+				m_decimators.decimate4_cen(&it, buf, len);
+				break;
+			case 3:
+				m_decimators.decimate8_cen(&it, buf, len);
+				break;
+			case 4:
+				m_decimators.decimate16_cen(&it, buf, len);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);

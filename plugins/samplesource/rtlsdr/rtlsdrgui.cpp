@@ -136,6 +136,7 @@ void RTLSDRGui::displaySettings()
 	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
 	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
 	ui->decim->setValue(m_settings.m_log2Decim);
+	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
 	if (m_gains.size() > 0)
 	{
@@ -189,6 +190,20 @@ void RTLSDRGui::on_decim_valueChanged(int value)
 	m_settings.m_log2Decim = value;
 
 	sendSettings();
+}
+
+void RTLSDRGui::on_fcPos_currentIndexChanged(int index)
+{
+	if (index == 0) {
+		m_settings.m_fcPos = RTLSDRSettings::FC_POS_INFRA;
+		sendSettings();
+	} else if (index == 1) {
+		m_settings.m_fcPos = RTLSDRSettings::FC_POS_SUPRA;
+		sendSettings();
+	} else if (index == 2) {
+		m_settings.m_fcPos = RTLSDRSettings::FC_POS_CENTER;
+		sendSettings();
+	}
 }
 
 void RTLSDRGui::on_ppm_valueChanged(int value)

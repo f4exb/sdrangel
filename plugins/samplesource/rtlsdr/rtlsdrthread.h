@@ -37,6 +37,7 @@ public:
 	void stopWork();
 	void setSamplerate(int samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
+	void setFcPos(int fcPos);
 
 private:
 	QMutex m_startWaitMutex;
@@ -49,6 +50,7 @@ private:
 
 	int m_samplerate;
 	unsigned int m_log2Decim;
+	int m_fcPos;
 
 	Decimators<quint8, SDR_SAMP_SZ, 8> m_decimators;
 

@@ -47,6 +47,7 @@ private slots:
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
 	void on_decim_valueChanged(int value);
+	void on_fcPos_currentIndexChanged(int index);
 	void on_ppm_valueChanged(int value);
 	void on_gain_valueChanged(int value);
 	void on_samplerate_valueChanged(int value);
