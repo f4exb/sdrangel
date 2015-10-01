@@ -31,6 +31,8 @@ const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString BlderfPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
+
 BlderfPlugin::BlderfPlugin(QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(0)
@@ -45,7 +47,7 @@ const PluginDescriptor& BlderfPlugin::getPluginDescriptor() const
 void BlderfPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.bladerf", this);
+	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
@@ -60,7 +62,7 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 		QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
 
 		result.append(SampleSourceDevice(displayedName,
-				"org.osmocom.sdr.samplesource.bladerf",
+				m_deviceTypeID,
 				QString(devinfo[i].serial),
 				i));
 	}
@@ -80,7 +82,7 @@ PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 		return 0;
 	}
 
-	if(sourceId == "org.osmocom.sdr.samplesource.bladerf")
+	if(sourceId == m_deviceTypeID)
 	{
 		BladerfGui* gui = new BladerfGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
