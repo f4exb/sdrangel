@@ -104,6 +104,8 @@ bool FCDProPlusGui::handleMessage(const Message& message)
 void FCDProPlusGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 	ui->checkBoxG->setChecked(m_settings.m_lnaGain);
 	ui->checkBoxB->setChecked(m_settings.m_biasT);
 	ui->mixGain->setChecked(m_settings.m_mixGain);
@@ -124,6 +126,18 @@ void FCDProPlusGui::sendSettings()
 void FCDProPlusGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+	sendSettings();
+}
+
+void FCDProPlusGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void FCDProPlusGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqImbalance = checked;
 	sendSettings();
 }
 

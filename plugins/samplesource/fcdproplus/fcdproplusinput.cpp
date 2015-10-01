@@ -229,6 +229,18 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 		}
 	}
 
+	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
+	{
+		m_settings.m_dcBlock = settings.m_dcBlock;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+	}
+
+	if ((m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
+	{
+		m_settings.m_iqImbalance = settings.m_iqImbalance;
+		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+	}
+
 	if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.m_centerFrequency);

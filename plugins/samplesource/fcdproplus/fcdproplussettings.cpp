@@ -48,6 +48,8 @@ QByteArray FCDProPlusSettings::serialize() const
 	s.writeS32(5, m_rfFilterIndex);
 	s.writeBool(6, m_dcBlock);
 	s.writeBool(7, m_iqImbalance);
+	s.writeS32(8, m_LOppmTenths);
+	s.writeU32(9, m_ifGain);
 
 	return s.final();
 }
@@ -73,6 +75,8 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 		d.readS32(5, &m_rfFilterIndex, 0);
 		d.readBool(6, &m_dcBlock, false);
 		d.readBool(7, &m_iqImbalance, false);
+		d.readS32(8, &m_LOppmTenths, 0);
+		d.readU32(9, &m_ifGain, 0);
 
 		return true;
 	}

@@ -45,6 +45,8 @@ private:
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
+	void on_dcOffset_toggled(bool checked);
+	void on_iqImbalance_toggled(bool checked);
 	void on_checkBoxG_stateChanged(int state);
 	void on_checkBoxB_stateChanged(int state);
 	void on_mixGain_stateChanged(int state);
