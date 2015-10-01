@@ -24,7 +24,6 @@
 #include "bladerfgui.h"
 #include "bladerfinput.h"
 #include "bladerfthread.h"
-#include "bladerfserializer.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
