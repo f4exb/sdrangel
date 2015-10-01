@@ -276,40 +276,30 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-	{
-		m_settings.m_fcPos = settings.m_fcPos;
-
-		if(m_dev != 0)
-		{
-			m_airspyThread->setFcPos((int) m_settings.m_fcPos);
-			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
-		}
-	}
-
 	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
 	qint64 f_img = deviceCenterFrequency;
 	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
+			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
+			(m_settings.m_fcPos != settings.m_fcPos))
 	{
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == AirspySettings::FC_POS_CENTER))
+		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == AirspySettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
-			if (m_settings.m_fcPos == AirspySettings::FC_POS_INFRA)
+			if (settings.m_fcPos == AirspySettings::FC_POS_INFRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
-			else if (m_settings.m_fcPos == AirspySettings::FC_POS_SUPRA)
+			else if (settings.m_fcPos == AirspySettings::FC_POS_SUPRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;
@@ -328,6 +318,17 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 
 		forwardChange = true;
+	}
+
+	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	{
+		m_settings.m_fcPos = settings.m_fcPos;
+
+		if(m_dev != 0)
+		{
+			m_airspyThread->setFcPos((int) m_settings.m_fcPos);
+			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+		}
 	}
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)

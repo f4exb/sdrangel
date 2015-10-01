@@ -233,40 +233,30 @@ bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-	{
-		m_settings.m_fcPos = settings.m_fcPos;
-
-		if(m_dev != 0)
-		{
-			m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
-			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
-		}
-	}
-
 	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
 	qint64 f_img = deviceCenterFrequency;
 	quint32 devSampleRate = HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex] * 1000;
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
+			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
+			(m_settings.m_fcPos != settings.m_fcPos))
 	{
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == HackRFSettings::FC_POS_CENTER))
+		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFSettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
-			if (m_settings.m_fcPos == HackRFSettings::FC_POS_INFRA)
+			if (settings.m_fcPos == HackRFSettings::FC_POS_INFRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
-			else if (m_settings.m_fcPos == HackRFSettings::FC_POS_SUPRA)
+			else if (settings.m_fcPos == HackRFSettings::FC_POS_SUPRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;
@@ -285,6 +275,17 @@ bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 		}
 
 		forwardChange = true;
+	}
+
+	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	{
+		m_settings.m_fcPos = settings.m_fcPos;
+
+		if(m_dev != 0)
+		{
+			m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
+			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+		}
 	}
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
