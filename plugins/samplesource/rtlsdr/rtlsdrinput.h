@@ -19,6 +19,7 @@
 #define INCLUDE_RTLSDRINPUT_H
 
 #include "dsp/samplesource.h"
+#include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
 #include <QString>
 
@@ -26,34 +27,21 @@ class RTLSDRThread;
 
 class RTLSDRInput : public SampleSource {
 public:
-	struct Settings {
-		int m_devSampleRate;
-		quint64 m_centerFrequency;
-		qint32 m_gain;
-		qint32 m_loPpmCorrection;
-		quint32 m_log2Decim;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureRTLSDR : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const RTLSDRSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureRTLSDR* create(const Settings& settings)
+		static MsgConfigureRTLSDR* create(const RTLSDRSettings& settings)
 		{
 			return new MsgConfigureRTLSDR(settings);
 		}
 
 	private:
-		Settings m_settings;
+		RTLSDRSettings m_settings;
 
-		MsgConfigureRTLSDR(const Settings& settings) :
+		MsgConfigureRTLSDR(const RTLSDRSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -96,13 +84,13 @@ public:
 
 private:
 	QMutex m_mutex;
-	Settings m_settings;
+	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;
 	RTLSDRThread* m_rtlSDRThread;
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
 
-	bool applySettings(const Settings& settings, bool force);
+	bool applySettings(const RTLSDRSettings& settings, bool force);
 };
 
 #endif // INCLUDE_RTLSDRINPUT_H

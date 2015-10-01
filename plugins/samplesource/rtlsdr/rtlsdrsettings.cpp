@@ -14,19 +14,66 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_RTLSDR_RTLSDRSERIALIZER_H_
-#define PLUGINS_SAMPLESOURCE_RTLSDR_RTLSDRSERIALIZER_H_
+#include <QtGlobal>
+#include "util/simpleserializer.h"
+#include "rtlsdrsettings.h"
 
-#include "util/samplesourceserializer.h"
-
-class RTLSDRSerializer
+RTLSDRSettings::RTLSDRSettings()
 {
-public:
-	SampleSourceSerializer::Data m_data;
+	resetToDefaults();
+}
 
-	static void writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData);
-	static bool readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data);
-	static void setDefaults(SampleSourceSerializer::Data& data);
-};
+void RTLSDRSettings::resetToDefaults()
+{
+	m_devSampleRate = 1024*1000;
+	m_centerFrequency = 435000*1000;
+	m_gain = 0;
+	m_loPpmCorrection = 0;
+	m_log2Decim = 4;
+	m_dcBlock = false;
+	m_iqImbalance = false;
+}
 
-#endif /* PLUGINS_SAMPLESOURCE_RTLSDR_RTLSDRSERIALIZER_H_ */
+QByteArray RTLSDRSettings::serialize() const
+{
+	SimpleSerializer s(1);
+
+	s.writeS32(1, m_devSampleRate);
+	s.writeS32(2, m_gain);
+	s.writeS32(3, m_loPpmCorrection);
+	s.writeU32(4, m_log2Decim);
+	s.writeBool(5, m_dcBlock);
+	s.writeBool(6, m_iqImbalance);
+
+	return s.final();
+}
+
+bool RTLSDRSettings::deserialize(const QByteArray& data)
+{
+	SimpleDeserializer d(data);
+
+	if (!d.isValid())
+	{
+		resetToDefaults();
+		return false;
+	}
+
+	if (d.getVersion() == 1)
+	{
+		d.readS32(1, &m_devSampleRate, 0);
+		d.readS32(2, &m_gain, 0);
+		d.readS32(3, &m_loPpmCorrection, 0);
+		d.readU32(4, &m_log2Decim, 4);
+		d.readBool(5, &m_dcBlock, false);
+		d.readBool(6, &m_iqImbalance, false);
+
+		return true;
+	}
+	else
+	{
+		resetToDefaults();
+		return false;
+	}
+}
+
+

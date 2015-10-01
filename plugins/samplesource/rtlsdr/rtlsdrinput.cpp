@@ -23,60 +23,9 @@
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "rtlsdrserializer.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
-
-RTLSDRInput::Settings::Settings() :
-	m_devSampleRate(1024*1000),
-	m_centerFrequency(435000*1000),
-	m_gain(0),
-	m_loPpmCorrection(0),
-	m_log2Decim(4)
-{
-}
-
-void RTLSDRInput::Settings::resetToDefaults()
-{
-	m_devSampleRate = 1024*1000;
-	m_centerFrequency = 435000*1000;
-	m_gain = 0;
-	m_loPpmCorrection = 0;
-	m_log2Decim = 4;
-}
-
-QByteArray RTLSDRInput::Settings::serialize() const
-{
-	SampleSourceSerializer::Data data;
-
-	data.m_lnaGain = m_gain;
-	data.m_log2Decim = m_log2Decim;
-	data.m_frequency = m_centerFrequency;
-	data.m_rate = m_devSampleRate;
-	data.m_correction = m_loPpmCorrection;
-
-	QByteArray byteArray;
-
-	RTLSDRSerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-}
-
-bool RTLSDRInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	SampleSourceSerializer::Data data;
-
-	bool valid = RTLSDRSerializer::readSerializedData(serializedData, data);
-
-	m_gain = data.m_lnaGain;
-	m_log2Decim = data.m_log2Decim;
-	m_centerFrequency = data.m_frequency;
-	m_devSampleRate = data.m_rate;
-	m_loPpmCorrection = data.m_correction;
-
-	return valid;
-}
 
 RTLSDRInput::RTLSDRInput() :
 	m_settings(),
@@ -260,7 +209,7 @@ bool RTLSDRInput::handleMessage(const Message& message)
 	}
 }
 
-bool RTLSDRInput::applySettings(const Settings& settings, bool force)
+bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;

@@ -34,7 +34,7 @@ private:
 	Ui::RTLSDRGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	RTLSDRInput::Settings m_settings;
+	RTLSDRSettings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;

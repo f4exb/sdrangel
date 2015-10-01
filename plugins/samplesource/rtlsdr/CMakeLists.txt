@@ -4,7 +4,7 @@ set(rtlsdr_SOURCES
 	rtlsdrgui.cpp
 	rtlsdrinput.cpp
 	rtlsdrplugin.cpp
-	rtlsdrserializer.cpp
+	rtlsdrsettings.cpp
 	rtlsdrthread.cpp
 )
 
@@ -12,7 +12,7 @@ set(rtlsdr_HEADERS
 	rtlsdrgui.h
 	rtlsdrinput.h
 	rtlsdrplugin.h
-	rtlsdrserializer.h
+	rtlsdrsettings.h
 	rtlsdrthread.h
 )
 

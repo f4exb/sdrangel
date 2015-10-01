@@ -14,19 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "rtlsdrserializer.h"
+#ifndef _RTLSDR_RTLSDRSETTINGS_H_
+#define _RTLSDR_RTLSDRSETTINGS_H_
 
-void RTLSDRSerializer::writeSerializedData(const SampleSourceSerializer::Data& data, QByteArray& serializedData)
-{
-	SampleSourceSerializer::writeSerializedData(data, serializedData);
-}
+struct RTLSDRSettings {
+	int m_devSampleRate;
+	quint64 m_centerFrequency;
+	qint32 m_gain;
+	qint32 m_loPpmCorrection;
+	quint32 m_log2Decim;
+	bool m_dcBlock;
+	bool m_iqImbalance;
 
-bool RTLSDRSerializer::readSerializedData(const QByteArray& serializedData, SampleSourceSerializer::Data& data)
-{
-	return SampleSourceSerializer::readSerializedData(serializedData, data);
-}
+	RTLSDRSettings();
+	void resetToDefaults();
+	QByteArray serialize() const;
+	bool deserialize(const QByteArray& data);
+};
 
-void RTLSDRSerializer::setDefaults(SampleSourceSerializer::Data& data)
-{
-	SampleSourceSerializer::setDefaults(data);
-}
+
+
+
+
+#endif /* _RTLSDR_RTLSDRSETTINGS_H_ */
