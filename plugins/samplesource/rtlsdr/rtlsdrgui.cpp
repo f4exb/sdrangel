@@ -62,6 +62,18 @@ void RTLSDRGui::setCenterFrequency(qint64 centerFrequency)
 	sendSettings();
 }
 
+void RTLSDRGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void RTLSDRGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqImbalance = checked;
+	sendSettings();
+}
+
 QByteArray RTLSDRGui::serialize() const
 {
 	return m_settings.serialize();
@@ -115,6 +127,8 @@ void RTLSDRGui::handleSourceMessages()
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
 	unsigned int sampleRateIndex = RTLSDRSampleRates::getRateIndex(m_settings.m_devSampleRate);
 	ui->samplerate->setValue(sampleRateIndex);

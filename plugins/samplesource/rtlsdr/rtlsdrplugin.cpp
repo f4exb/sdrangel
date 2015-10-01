@@ -15,6 +15,8 @@ const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString RTLSDRPlugin::m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
+
 RTLSDRPlugin::RTLSDRPlugin(QObject* parent) :
 	QObject(parent)
 {
@@ -29,7 +31,7 @@ void RTLSDRPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	m_pluginAPI->registerSampleSource("org.osmocom.sdr.samplesource.rtl-sdr", this);
+	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
@@ -47,10 +49,10 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 
 		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
 			continue;
-		QString displayedName(QString("RTL-SDR #%1 (%2 #%3)").arg(i + 1).arg(product).arg(serial));
+		QString displayedName(QString("RTL-SDR #%1 %2").arg(i).arg(serial));
 
 		result.append(SampleSourceDevice(displayedName,
-				"org.osmocom.sdr.samplesource.rtl-sdr",
+				m_deviceTypeID,
 				QString(serial),
 				i));
 	}
@@ -59,7 +61,7 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 
 PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 {
-	if(sourceId == "org.osmocom.sdr.samplesource.rtl-sdr") {
+	if(sourceId == m_deviceTypeID) {
 		RTLSDRGui* gui = new RTLSDRGui(m_pluginAPI);
 		m_pluginAPI->setInputGUI(gui);
 		return gui;

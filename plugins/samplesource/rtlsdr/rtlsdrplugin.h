@@ -4,10 +4,12 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+#define RTLSDR_DEVICE_TYPE_ID "sdrangel.samplesource.rtlsdr"
+
 class RTLSDRPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "org.osmocom.sdr.samplesource.rtl-sdr")
+	Q_PLUGIN_METADATA(IID RTLSDR_DEVICE_TYPE_ID)
 
 public:
 	explicit RTLSDRPlugin(QObject* parent = NULL);
@@ -17,6 +19,8 @@ public:
 
 	virtual SampleSourceDevices enumSampleSources();
 	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId);
+
+	static const QString m_deviceTypeID;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

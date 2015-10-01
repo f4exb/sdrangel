@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>198</width>
-    <height>173</height>
+    <width>247</width>
+    <height>189</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,7 +36,7 @@
     <number>2</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_freq">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -97,6 +97,80 @@
     </layout>
    </item>
    <item>
+    <layout class="QGridLayout" name="gridLayout_ppm">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="1">
+      <widget class="QSlider" name="ppm">
+       <property name="minimum">
+        <number>-99</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="ppmText">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="ppmLabel">
+       <property name="text">
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_corr">
+     <item row="0" column="1">
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>Automatic DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC offset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>Automatic IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ imbalance</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="corrLabel">
+       <property name="text">
+        <string>Auto corr</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line_4">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -104,10 +178,26 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_3">
+    <layout class="QGridLayout" name="gridLayout_rate">
      <property name="spacing">
       <number>3</number>
      </property>
+     <item row="0" column="2">
+      <widget class="QLabel" name="samplerateText">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>1024k</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="QSlider" name="samplerate">
        <property name="toolTip">
@@ -125,7 +215,7 @@
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="samplerateLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -137,8 +227,38 @@
        </property>
       </widget>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_decim">
+       <property name="text">
+        <string>Dec.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QSlider" name="decim">
+       <property name="maximum">
+        <number>4</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>4</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="samplerateText">
+      <widget class="QLabel" name="decimText">
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -146,7 +266,7 @@
         </size>
        </property>
        <property name="text">
-        <string>1024k</string>
+        <string>16</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -163,12 +283,12 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_2">
+    <layout class="QGridLayout" name="gridLayout_gain">
      <property name="spacing">
       <number>3</number>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="gainLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -225,110 +345,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_1">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="ppm">
-       <property name="minimum">
-        <number>-99</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="ppmText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>ppm</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_decim">
-       <property name="text">
-        <string>Dec.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="decim">
-       <property name="maximum">
-        <number>4</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>4</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="decimText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>16</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_direct">
      <item>
       <widget class="QCheckBox" name="checkBox">
        <property name="text">
@@ -364,7 +381,7 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
-  </customwidget>  
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections/>
