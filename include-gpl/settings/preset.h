@@ -18,6 +18,25 @@ public:
 	};
 	typedef QList<ChannelConfig> ChannelConfigs;
 
+	struct SourceConfig
+	{
+		QString m_sourceId;
+		QString m_sourceSerial;
+		int m_sourceSequence;
+		QByteArray m_config;
+
+		SourceConfig(const QString& sourceId,
+				const QString& sourceSerial,
+				int sourceSequence,
+				const QByteArray& config) :
+					m_sourceId(sourceId),
+					m_sourceSerial(sourceSerial),
+					m_sourceSequence(sourceSequence),
+					m_config(config)
+		{ }
+	};
+	typedef QList<SourceConfig> SourceConfigs;
+
 	Preset();
 
 	void resetToDefaults();
@@ -55,6 +74,15 @@ public:
 	const int getSourceSequence() const { return m_sourceSequence; }
 	const QByteArray& getSourceConfig() const { return m_sourceConfig; }
 
+	void addOrUpdateSourceConfig(const QString& sourceId,
+			const QString& sourceSerial,
+			int sourceSequence,
+			const QByteArray& config);
+
+	const QByteArray* findBestSourceConfig(const QString& sourceId,
+			const QString& sourceSerial,
+			int sourceSequence);
+
 protected:
 	// group and preset description
 	QString m_group;
@@ -76,6 +104,9 @@ protected:
 
 	// channels and configurations
 	ChannelConfigs m_channelConfigs;
+
+	// sources and configurations
+	SourceConfigs m_sourceConfigs;
 
 	// screen and dock layout
 	QByteArray m_layout;

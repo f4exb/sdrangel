@@ -83,3 +83,101 @@ bool Preset::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void Preset::addOrUpdateSourceConfig(const QString& sourceId,
+		const QString& sourceSerial,
+		int sourceSequence,
+		const QByteArray& config)
+{
+	SourceConfigs::iterator it = m_sourceConfigs.begin();
+
+	for (; it != m_sourceConfigs.end(); ++it)
+	{
+		if (it->m_sourceId == sourceId)
+		{
+			if (sourceSerial.isNull() || sourceSerial.isEmpty())
+			{
+				if (it->m_sourceSequence == sourceSequence)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (it->m_sourceSerial == sourceSerial)
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	if (it == m_sourceConfigs.end())
+	{
+		m_sourceConfigs.push_back(SourceConfig(sourceId, sourceSerial, sourceSequence, config));
+	}
+	else
+	{
+		it->m_config = config;
+	}
+}
+
+const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
+		const QString& sourceSerial,
+		int sourceSequence)
+{
+	SourceConfigs::const_iterator it = m_sourceConfigs.begin();
+	SourceConfigs::const_iterator itFirstOfKind = m_sourceConfigs.end();
+	SourceConfigs::const_iterator itMatchSequence = m_sourceConfigs.end();
+
+	for (; it != m_sourceConfigs.end(); ++it)
+	{
+		if (it->m_sourceId == sourceId)
+		{
+			if (itFirstOfKind == m_sourceConfigs.end())
+			{
+				itFirstOfKind = it;
+			}
+
+			if (sourceSerial.isNull() || sourceSerial.isEmpty())
+			{
+				if (it->m_sourceSequence == sourceSequence)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (it->m_sourceSerial == sourceSerial)
+				{
+					break;
+				}
+				else if(it->m_sourceSequence == sourceSequence)
+				{
+					itMatchSequence = it;
+				}
+			}
+		}
+	}
+
+	if (it == m_sourceConfigs.end()) // no exact match
+	{
+		if (itMatchSequence != m_sourceConfigs.end()) // match sequence ?
+		{
+			return &(itMatchSequence->m_config);
+		}
+		else if (itFirstOfKind != m_sourceConfigs.end()) // match source type ?
+		{
+			return &(itFirstOfKind->m_config);
+		}
+		else // definitely not found !
+		{
+			return 0;
+		}
+	}
+	else // exact match
+	{
+		return &(it->m_config);
+	}
+}
+
