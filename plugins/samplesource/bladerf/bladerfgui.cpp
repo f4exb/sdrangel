@@ -114,6 +114,9 @@ void BladerfGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+
 	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
 	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_devSampleRate);
 	ui->samplerate->setValue(sampleRateIndex);
@@ -148,6 +151,18 @@ void BladerfGui::sendSettings()
 void BladerfGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+	sendSettings();
+}
+
+void BladerfGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void BladerfGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqCorrection = checked;
 	sendSettings();
 }
 

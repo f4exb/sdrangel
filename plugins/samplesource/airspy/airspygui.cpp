@@ -140,6 +140,8 @@ void AirspyGui::displaySettings()
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
 	ui->biasT->setChecked(m_settings.m_biasT);
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
 	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
 	ui->decim->setValue(m_settings.m_log2Decim);

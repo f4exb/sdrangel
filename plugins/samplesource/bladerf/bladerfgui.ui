@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>198</width>
-    <height>280</height>
+    <width>247</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -93,6 +93,37 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_corr">
+     <item row="0" column="2">
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>Automatic IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ imbalance</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>Automatic DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC offset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="corrLabel">
+       <property name="text">
+        <string>Auto corr</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -605,6 +636,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
