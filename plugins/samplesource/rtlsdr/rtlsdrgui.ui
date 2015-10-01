@@ -360,6 +360,11 @@
    <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>  
  </customwidgets>
  <resources/>
  <connections/>
