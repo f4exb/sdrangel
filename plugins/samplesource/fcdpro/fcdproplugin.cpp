@@ -60,11 +60,11 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 	while (device_info != 0)
 	{
 		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
-		QString displayedName(QString("%1 #%2 %3").arg(fcd_traits<Pro>::displayedName).arg(i).arg(serialNumber));
+		QString displayedName(QString("%1[%2] %3").arg(fcd_traits<Pro>::displayedName).arg(i).arg(serialNumber));
 
 		result.append(SampleSourceDevice(displayedName,
 				fcd_traits<Pro>::interfaceIID,
-				QString::null,
+				serialNumber,
 				i));
 
 		device_info = device_info->next;

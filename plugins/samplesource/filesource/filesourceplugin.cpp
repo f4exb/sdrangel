@@ -56,7 +56,7 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 
 	for(int i = 0; i < count; i++)
 	{
-		QString displayedName(QString("FileSource #%1 choose file").arg(i));
+		QString displayedName(QString("FileSource[%1]").arg(i));
 
 		result.append(SampleSourceDevice(displayedName,
 				m_deviceTypeID,

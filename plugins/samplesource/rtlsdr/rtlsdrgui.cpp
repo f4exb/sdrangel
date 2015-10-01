@@ -14,7 +14,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	ui->centerFrequency->setValueRange(7, 28500U, 1700000U);
+	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
