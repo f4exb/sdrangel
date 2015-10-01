@@ -202,6 +202,18 @@ void AirspyGui::on_LOppm_valueChanged(int value)
 	sendSettings();
 }
 
+void AirspyGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void AirspyGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqCorrection = checked;
+	sendSettings();
+}
+
 void AirspyGui::on_sampleRate_currentIndexChanged(int index)
 {
 	m_settings.m_devSampleRateIndex = index;
