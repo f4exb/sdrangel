@@ -18,6 +18,7 @@
 #ifndef INCLUDE_FCDINPUT_H
 #define INCLUDE_FCDINPUT_H
 
+#include "fcdproplussettings.h"
 #include "dsp/samplesource.h"
 #include "fcdhid.h"
 #include <QString>
@@ -32,37 +33,21 @@ class FCDProPlusThread;
 
 class FCDProPlusInput : public SampleSource {
 public:
-	struct Settings {
-		Settings();
-		quint64 centerFrequency;
-		bool rangeLow;
-		bool lnaGain;
-		bool mixGain;
-		bool biasT;
-		quint32 ifGain;
-		qint32 ifFilterIndex;
-		qint32 rfFilterIndex;
-		qint32 LOppmTenths;
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureFCD : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const FCDProPlusSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFCD* create(const Settings& settings)
+		static MsgConfigureFCD* create(const FCDProPlusSettings& settings)
 		{
 			return new MsgConfigureFCD(settings);
 		}
 
 	private:
-		Settings m_settings;
+		FCDProPlusSettings m_settings;
 
-		MsgConfigureFCD(const Settings& settings) :
+		MsgConfigureFCD(const FCDProPlusSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -91,11 +76,11 @@ public:
 	void set_lo_ppm();
 
 private:
-	void applySettings(const Settings& settings, bool force);
+	void applySettings(const FCDProPlusSettings& settings, bool force);
 
 	hid_device *m_dev;
 	QMutex m_mutex;
-	Settings m_settings;
+	FCDProPlusSettings m_settings;
 	FCDProPlusThread* m_FCDThread;
 	QString m_deviceDescription;
 };

@@ -35,7 +35,7 @@ private:
 	Ui::FCDProPlusGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	FCDProPlusInput::Settings m_settings;
+	FCDProPlusSettings m_settings;
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;

@@ -14,64 +14,72 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "fcdproplusserializer.h"
+#include <QtGlobal>
+#include "util/simpleserializer.h"
+#include "fcdproplussettings.h"
 
-void FCDProPlusSerializer::writeSerializedData(const FCDData& data, QByteArray& serializedData)
+FCDProPlusSettings::FCDProPlusSettings()
 {
-	QByteArray sampleSourceSerialized;
-	SampleSourceSerializer::writeSerializedData(data.m_data, sampleSourceSerialized);
-
-	SimpleSerializer s(1);
-
-	s.writeBlob(1, sampleSourceSerialized);
-	s.writeBool(2, data.m_biasT);
-	s.writeBool(3, data.m_rangeLow);
-	s.writeBool(4, data.m_mixGain);
-	s.writeS32(5, data.m_ifFilterIndex);
-	s.writeS32(6, data.m_rfFilterIndex);
-
-	serializedData = s.final();
+	resetToDefaults();
 }
 
-bool FCDProPlusSerializer::readSerializedData(const QByteArray& serializedData, FCDData& data)
+void FCDProPlusSettings::resetToDefaults()
 {
-	bool valid = SampleSourceSerializer::readSerializedData(serializedData, data.m_data);
+	m_centerFrequency = 435000000;
+	m_rangeLow = true;
+	m_lnaGain = true;
+	m_biasT = false;
+	m_ifGain = 0;
+	m_rfFilterIndex = 0;
+	m_ifFilterIndex = 0;
+	m_LOppmTenths = 0;
+	m_dcBlock = false;
+	m_iqImbalance = false;
+}
 
-	QByteArray sampleSourceSerialized;
+QByteArray FCDProPlusSettings::serialize() const
+{
+	SimpleSerializer s(1);
 
-	SimpleDeserializer d(serializedData);
+	s.writeBool(1, m_biasT);
+	s.writeBool(2, m_rangeLow);
+	s.writeBool(3, m_mixGain);
+	s.writeS32(4, m_ifFilterIndex);
+	s.writeS32(5, m_rfFilterIndex);
+	s.writeBool(6, m_dcBlock);
+	s.writeBool(7, m_iqImbalance);
+
+	return s.final();
+}
+
+bool FCDProPlusSettings::deserialize(const QByteArray& data)
+{
+	SimpleDeserializer d(data);
 
 	if (!d.isValid())
 	{
-		setDefaults(data);
+		resetToDefaults();
 		return false;
 	}
 
-	if (d.getVersion() == SampleSourceSerializer::getSerializerVersion())
+	if (d.getVersion() == 1)
 	{
 		int intval;
 
-		d.readBlob(1, &sampleSourceSerialized);
-		d.readBool(2, &data.m_biasT, false);
-		d.readBool(3, &data.m_rangeLow, false);
-		d.readBool(4, &data.m_mixGain, true);
-		d.readS32(5, &data.m_ifFilterIndex, 0);
-		d.readS32(6, &data.m_rfFilterIndex, 0);
+		d.readBool(1, &m_biasT, false);
+		d.readBool(2, &m_rangeLow, false);
+		d.readBool(3, &m_mixGain, true);
+		d.readS32(4, &m_ifFilterIndex, 0);
+		d.readS32(5, &m_rfFilterIndex, 0);
+		d.readBool(6, &m_dcBlock, false);
+		d.readBool(7, &m_iqImbalance, false);
 
-		return SampleSourceSerializer::readSerializedData(sampleSourceSerialized, data.m_data);
+		return true;
 	}
 	else
 	{
-		setDefaults(data);
+		resetToDefaults();
 		return false;
 	}
 }
 
-void FCDProPlusSerializer::setDefaults(FCDData& data)
-{
-	data.m_rangeLow = false;
-	data.m_biasT = false;
-	data.m_mixGain = true;
-	data.m_ifFilterIndex = 0;
-	data.m_rfFilterIndex = 0;
-}

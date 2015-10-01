@@ -14,29 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_FCD_FCDPROPLUSSERIALIZER_H_
-#define PLUGINS_SAMPLESOURCE_FCD_FCDPROPLUSSERIALIZER_H_
+#ifndef _FCDPROPLUS_FCDPROPLUSSETTINGS_H_
+#define _FCDPROPLUS_FCDPROPLUSSETTINGS_H_
 
-#include "util/samplesourceserializer.h"
+struct FCDProPlusSettings {
+	quint64 m_centerFrequency;
+	bool m_rangeLow;
+	bool m_lnaGain;
+	bool m_mixGain;
+	bool m_biasT;
+	quint32 m_ifGain;
+	qint32 m_ifFilterIndex;
+	qint32 m_rfFilterIndex;
+	qint32 m_LOppmTenths;
+	bool m_dcBlock;
+	bool m_iqImbalance;
 
-class FCDProPlusSerializer
-{
-public:
-	struct FCDData
-	{
-		SampleSourceSerializer::Data m_data;
-		bool m_mixGain;
-		bool m_biasT;
-		bool m_rangeLow;
-		qint32 m_ifFilterIndex;
-		qint32 m_rfFilterIndex;
-	};
-
-	static void writeSerializedData(const FCDData& data, QByteArray& serializedData);
-	static bool readSerializedData(const QByteArray& serializedData, FCDData& data);
-	static void setDefaults(FCDData& data);
+	FCDProPlusSettings();
+	void resetToDefaults();
+	QByteArray serialize() const;
+	bool deserialize(const QByteArray& data);
 };
 
-
-
-#endif /* PLUGINS_SAMPLESOURCE_FCD_FCDPROPLUSSERIALIZER_H_ */
+#endif /* _FCDPROPLUS_FCDPROPLUSSETTINGS_H_ */

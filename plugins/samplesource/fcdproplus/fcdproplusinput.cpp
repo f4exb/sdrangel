@@ -25,106 +25,11 @@
 #include "fcdproplusinput.h"
 
 #include "fcdproplusgui.h"
-#include "fcdproplusserializer.h"
 #include "fcdproplusthread.h"
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
-//MESSAGE_CLASS_DEFINITION(FCDInput::MsgReportFCD, Message)
-
-/*
-const uint16_t FCDInput::m_vendorId  = 0x04D8;
-const uint16_t FCDInput::m_productId = 0xFB31;
-const int FCDInput::m_sampleRate = 192000;
-const std::string FCDInput::m_deviceName("hw:CARD=V20");
-
-const uint16_t FCDInput::m_productId = 0xFB56;
-const int FCDInput::m_sampleRate = 96000;
-const std::string FCDInput::m_deviceName("hw:CARD=V10");
-*/
-
-FCDProPlusInput::Settings::Settings() :
-	centerFrequency(435000000),
-	rangeLow(true),
-	lnaGain(true),
-	mixGain(true),
-	biasT(false),
-	ifGain(0),
-	ifFilterIndex(0),
-	rfFilterIndex(0),
-	LOppmTenths(0)
-{
-}
-
-void FCDProPlusInput::Settings::resetToDefaults()
-{
-	centerFrequency = 435000000;
-	rangeLow = true;
-	lnaGain = true;
-	biasT = false;
-	ifGain = 0;
-	rfFilterIndex = 0;
-	ifFilterIndex = 0;
-	LOppmTenths = 0;
-}
-
-QByteArray FCDProPlusInput::Settings::serialize() const
-{
-	FCDProPlusSerializer::FCDData data;
-
-	data.m_data.m_lnaGain = lnaGain;
-	data.m_data.m_correction = LOppmTenths;
-	data.m_data.m_RxGain1 = ifGain;
-	data.m_data.m_frequency = centerFrequency;
-	data.m_rangeLow = rangeLow;
-	data.m_biasT = biasT;
-
-	QByteArray byteArray;
-
-	FCDProPlusSerializer::writeSerializedData(data, byteArray);
-
-	return byteArray;
-
-	/*
-	SimpleSerializer s(1);
-	s.writeU64(1, centerFrequency);
-	s.writeS32(2, range);
-	s.writeS32(3, gain);
-	s.writeS32(4, bias);
-	return s.final();*/
-}
-
-bool FCDProPlusInput::Settings::deserialize(const QByteArray& serializedData)
-{
-	FCDProPlusSerializer::FCDData data;
-
-	bool valid = FCDProPlusSerializer::readSerializedData(serializedData, data);
-
-	lnaGain = data.m_data.m_lnaGain;
-	LOppmTenths = data.m_data.m_correction;
-	ifGain = data.m_data.m_RxGain1;
-	centerFrequency = data.m_data.m_frequency;
-	rangeLow = data.m_rangeLow;
-	biasT = data.m_biasT;
-
-	return valid;
-
-	/*
-	SimpleDeserializer d(data);
-
-	if (d.isValid() && d.getVersion() == 1)
-	{
-		d.readU64(1, &centerFrequency, 435000000);
-        d.readS32(2, &range, 0);
-		d.readS32(3, &gain, 0);
-		d.readS32(4, &bias, 0);
-		return true;
-	}
-
-	resetToDefaults();
-	return true;*/
-}
 
 FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
@@ -219,7 +124,7 @@ int FCDProPlusInput::getSampleRate() const
 
 quint64 FCDProPlusInput::getCenterFrequency() const
 {
-	return m_settings.centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 bool FCDProPlusInput::handleMessage(const Message& message)
@@ -237,86 +142,86 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 	}
 }
 
-void FCDProPlusInput::applySettings(const Settings& settings, bool force)
+void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool force)
 {
 	bool signalChange = false;
 
-	if ((m_settings.centerFrequency != settings.centerFrequency) || force)
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
 	{
-		qDebug() << "FCDProPlusInput::applySettings: fc: " << settings.centerFrequency;
-		m_settings.centerFrequency = settings.centerFrequency;
+		qDebug() << "FCDProPlusInput::applySettings: fc: " << settings.m_centerFrequency;
+		m_settings.m_centerFrequency = settings.m_centerFrequency;
 
 		if (m_dev != 0)
 		{
-			set_center_freq((double) m_settings.centerFrequency);
+			set_center_freq((double) m_settings.m_centerFrequency);
 		}
 
 		signalChange = true;
 	}
 
-	if ((m_settings.lnaGain != settings.lnaGain) || force)
+	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
-		m_settings.lnaGain = settings.lnaGain;
+		m_settings.m_lnaGain = settings.m_lnaGain;
 
 		if (m_dev != 0)
 		{
-			set_lna_gain(settings.lnaGain);
+			set_lna_gain(settings.m_lnaGain);
 		}
 	}
 
-	if ((m_settings.biasT != settings.biasT) || force)
+	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
-		m_settings.biasT = settings.biasT;
+		m_settings.m_biasT = settings.m_biasT;
 
 		if (m_dev != 0)
 		{
-			set_bias_t(settings.biasT);
+			set_bias_t(settings.m_biasT);
 		}
 	}
     
-	if ((m_settings.mixGain != settings.mixGain) || force)
+	if ((m_settings.m_mixGain != settings.m_mixGain) || force)
 	{
-		m_settings.mixGain = settings.mixGain;
+		m_settings.m_mixGain = settings.m_mixGain;
 
 		if (m_dev != 0)
 		{
-			set_mixer_gain(settings.mixGain);
+			set_mixer_gain(settings.m_mixGain);
 		}
 	}
 
-	if ((m_settings.ifGain != settings.ifGain) || force)
+	if ((m_settings.m_ifGain != settings.m_ifGain) || force)
 	{
-		m_settings.ifGain = settings.ifGain;
+		m_settings.m_ifGain = settings.m_ifGain;
 
 		if (m_dev != 0)
 		{
-			set_if_gain(settings.ifGain);
+			set_if_gain(settings.m_ifGain);
 		}
 	}
 
-	if ((m_settings.ifFilterIndex != settings.ifFilterIndex) || force)
+	if ((m_settings.m_ifFilterIndex != settings.m_ifFilterIndex) || force)
 	{
-		m_settings.ifFilterIndex = settings.ifFilterIndex;
+		m_settings.m_ifFilterIndex = settings.m_ifFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_if_filter(settings.ifFilterIndex);
+			set_if_filter(settings.m_ifFilterIndex);
 		}
 	}
 
-	if ((m_settings.rfFilterIndex != settings.rfFilterIndex) || force)
+	if ((m_settings.m_rfFilterIndex != settings.m_rfFilterIndex) || force)
 	{
-		m_settings.rfFilterIndex = settings.rfFilterIndex;
+		m_settings.m_rfFilterIndex = settings.m_rfFilterIndex;
 
 		if (m_dev != 0)
 		{
-			set_rf_filter(settings.rfFilterIndex);
+			set_rf_filter(settings.m_rfFilterIndex);
 		}
 	}
 
-	if ((m_settings.LOppmTenths != settings.LOppmTenths) || force)
+	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
 	{
-		m_settings.LOppmTenths = settings.LOppmTenths;
+		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
 		if (m_dev != 0)
 		{
@@ -326,14 +231,14 @@ void FCDProPlusInput::applySettings(const Settings& settings, bool force)
 
 	if (signalChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.m_centerFrequency);
 		DSPEngine::instance()->getInputMessageQueue()->push(notif);
     }
 }
 
 void FCDProPlusInput::set_center_freq(double freq)
 {
-	freq += freq*(((double) m_settings.LOppmTenths)/10000000.0);
+	freq += freq*(((double) m_settings.m_LOppmTenths)/10000000.0);
 
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
@@ -410,7 +315,7 @@ void FCDProPlusInput::set_rf_filter(int filterIndex)
 
 void FCDProPlusInput::set_lo_ppm()
 {
-	set_center_freq((double) m_settings.centerFrequency);
+	set_center_freq((double) m_settings.m_centerFrequency);
 }
 
 

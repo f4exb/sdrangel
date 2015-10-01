@@ -66,12 +66,12 @@ void FCDProPlusGui::resetToDefaults()
 
 qint64 FCDProPlusGui::getCenterFrequency() const
 {
-	return m_settings.centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 void FCDProPlusGui::setCenterFrequency(qint64 centerFrequency)
 {
-	m_settings.centerFrequency = centerFrequency;
+	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
@@ -103,16 +103,16 @@ bool FCDProPlusGui::handleMessage(const Message& message)
 
 void FCDProPlusGui::displaySettings()
 {
-	ui->centerFrequency->setValue(m_settings.centerFrequency / 1000);
-	ui->checkBoxG->setChecked(m_settings.lnaGain);
-	ui->checkBoxB->setChecked(m_settings.biasT);
-	ui->mixGain->setChecked(m_settings.mixGain);
-	ui->ifGain->setValue(m_settings.ifGain);
-	ui->ifGainText->setText(QString("%1dB").arg(m_settings.ifGain));
-	ui->filterIF->setCurrentIndex(m_settings.ifFilterIndex);
-	ui->filterRF->setCurrentIndex(m_settings.rfFilterIndex);
-	ui->ppm->setValue(m_settings.LOppmTenths);
-	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.LOppmTenths/10.0, 'f', 1)));
+	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->checkBoxG->setChecked(m_settings.m_lnaGain);
+	ui->checkBoxB->setChecked(m_settings.m_biasT);
+	ui->mixGain->setChecked(m_settings.m_mixGain);
+	ui->ifGain->setValue(m_settings.m_ifGain);
+	ui->ifGainText->setText(QString("%1dB").arg(m_settings.m_ifGain));
+	ui->filterIF->setCurrentIndex(m_settings.m_ifFilterIndex);
+	ui->filterRF->setCurrentIndex(m_settings.m_rfFilterIndex);
+	ui->ppm->setValue(m_settings.m_LOppmTenths);
+	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 }
 
 void FCDProPlusGui::sendSettings()
@@ -123,7 +123,7 @@ void FCDProPlusGui::sendSettings()
 
 void FCDProPlusGui::on_centerFrequency_changed(quint64 value)
 {
-	m_settings.centerFrequency = value * 1000;
+	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
 }
 
@@ -136,44 +136,44 @@ void FCDProPlusGui::updateHardware()
 
 void FCDProPlusGui::on_checkBoxG_stateChanged(int state)
 {
-	m_settings.lnaGain = (state == Qt::Checked);
+	m_settings.m_lnaGain = (state == Qt::Checked);
 	sendSettings();
 }
 
 void FCDProPlusGui::on_checkBoxB_stateChanged(int state)
 {
-	m_settings.biasT = (state == Qt::Checked);
+	m_settings.m_biasT = (state == Qt::Checked);
 	sendSettings();
 }
 
 void FCDProPlusGui::on_mixGain_stateChanged(int state)
 {
-	m_settings.mixGain = (state == Qt::Checked);
+	m_settings.m_mixGain = (state == Qt::Checked);
 	sendSettings();
 }
 
 void FCDProPlusGui::on_filterIF_currentIndexChanged(int index)
 {
-	m_settings.ifFilterIndex = index;
+	m_settings.m_ifFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProPlusGui::on_filterRF_currentIndexChanged(int index)
 {
-	m_settings.rfFilterIndex = index;
+	m_settings.m_rfFilterIndex = index;
 	sendSettings();
 }
 
 void FCDProPlusGui::on_ifGain_valueChanged(int value)
 {
-	m_settings.ifGain = value;
+	m_settings.m_ifGain = value;
 	displaySettings();
 	sendSettings();
 }
 
 void FCDProPlusGui::on_ppm_valueChanged(int value)
 {
-	m_settings.LOppmTenths = value;
+	m_settings.m_LOppmTenths = value;
 	displaySettings();
 	sendSettings();
 }
