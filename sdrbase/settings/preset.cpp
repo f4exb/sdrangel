@@ -19,26 +19,56 @@ void Preset::resetToDefaults()
 	m_channelConfigs.clear();
 	m_sourceId.clear();
 	m_sourceConfig.clear();
+	m_currentSourceConfig = m_sourceConfigs.end();
 }
 
 QByteArray Preset::serialize() const
 {
-	qDebug() << "Preset::serialize (" << this->getSourceId().toStdString().c_str() << ")";
+	qDebug("Preset::serialize:  m_group: %s m_description: %s m_centerFrequency: %llu",
+			qPrintable(m_group),
+			qPrintable(m_description),
+			m_centerFrequency);
 
 	SimpleSerializer s(1);
+
 	s.writeString(1, m_group);
 	s.writeString(2, m_description);
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
-	s.writeString(6, m_sourceId);
-	s.writeBlob(7, m_sourceConfig);
+
+	s.writeS32(20, m_sourceConfigs.size());
+
+	if ( m_currentSourceConfig == m_sourceConfigs.end())
+	{
+		s.writeBool(21, false); // no current source available
+		s.writeString(22, "");
+		s.writeS32(23, 0);
+	}
+	else
+	{
+		s.writeBool(21, true); // current source available
+		s.writeString(22, m_currentSourceConfig->m_sourceId);
+		s.writeS32(23, m_currentSourceConfig->m_sourceSequence);
+	}
+
+	for (int i = 0; i < m_sourceConfigs.size(); i++)
+	{
+		s.writeString(24 + i*4, m_sourceConfigs[i].m_sourceId);
+		s.writeString(25 + i*4, m_sourceConfigs[i].m_sourceSerial);
+		s.writeS32(26 + i*4, m_sourceConfigs[i].m_sourceSequence);
+		s.writeBlob(27 + i*4, m_sourceConfigs[i].m_config);
+
+		if (i >= (200-23)/4) // full!
+		{
+			break;
+		}
+	}
 
 	s.writeS32(200, m_channelConfigs.size());
 
-	qDebug() << "  m_group: " << m_group.toStdString().c_str();
-
-	for(int i = 0; i < m_channelConfigs.size(); i++) {
+	for(int i = 0; i < m_channelConfigs.size(); i++)
+	{
 		s.writeString(201 + i * 2, m_channelConfigs[i].m_channel);
 		s.writeBlob(202 + i * 2, m_channelConfigs[i].m_config);
 	}
@@ -48,7 +78,6 @@ QByteArray Preset::serialize() const
 
 bool Preset::deserialize(const QByteArray& data)
 {
-	qDebug() << "Preset::deserialize (" << this->getSourceId().toStdString().c_str() << ")";
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
@@ -65,20 +94,66 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readString(6, &m_sourceId);
 		d.readBlob(7, &m_sourceConfig);
 
-		qDebug() << "Preset::deserialize: m_group: " << m_group.toStdString().c_str();
+		qDebug("Preset::deserialize: m_group: %s m_description: %s m_centerFrequency: %llu",
+				qPrintable(m_group),
+				qPrintable(m_description),
+				m_centerFrequency);
+
+		qint32 sourcesCount = 0;
+		d.readS32(20, &sourcesCount, 0);
+
+		if (sourcesCount >= (200-20)/4) // limit was hit!
+		{
+			sourcesCount = ((200-20)/4) - 1;
+		}
+
+		bool hasCurrentConfig;
+		QString currentSourceId;
+		int currentSourceSequence;
+		m_currentSourceConfig = m_sourceConfigs.end();
+
+		d.readBool(21, &hasCurrentConfig, false);
+		d.readString(22, &currentSourceId, QString::null);
+		d.readS32(23, &currentSourceSequence);
+
+		for(int i = 0; i < sourcesCount; i++)
+		{
+			QString sourceId, sourceSerial;
+			int sourceSequence;
+			QByteArray sourceConfig;
+
+			d.readString(21 + i*4, &sourceId, "");
+			d.readString(22 + i*4, &sourceSerial, "");
+			d.readS32(23 + i*4, &sourceSequence, 0);
+			d.readBlob(24 + i*4, &sourceConfig);
+
+			m_sourceConfigs.append(SourceConfig(sourceId, sourceSerial, sourceSequence, sourceConfig));
+
+			if (hasCurrentConfig && (sourceId == currentSourceId) && (sourceSequence == currentSourceSequence))
+			{
+				m_currentSourceConfig = m_sourceConfigs.end();
+				m_currentSourceConfig--;
+			}
+		}
 
 		qint32 channelCount = 0;
 		d.readS32(200, &channelCount, 0);
 
-		for(int i = 0; i < channelCount; i++) {
+		for(int i = 0; i < channelCount; i++)
+		{
 			QString channel;
 			QByteArray config;
+
 			d.readString(201 + i * 2, &channel, "unknown-channel");
 			d.readBlob(202 + i * 2, &config);
+
 			m_channelConfigs.append(ChannelConfig(channel, config));
 		}
+
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
@@ -114,11 +189,14 @@ void Preset::addOrUpdateSourceConfig(const QString& sourceId,
 
 	if (it == m_sourceConfigs.end())
 	{
-		m_sourceConfigs.push_back(SourceConfig(sourceId, sourceSerial, sourceSequence, config));
+		m_sourceConfigs.append(SourceConfig(sourceId, sourceSerial, sourceSequence, config));
+		m_currentSourceConfig = m_sourceConfigs.end();
+		--m_currentSourceConfig;
 	}
 	else
 	{
 		it->m_config = config;
+		m_currentSourceConfig = it;
 	}
 }
 
@@ -164,20 +242,42 @@ const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
 	{
 		if (itMatchSequence != m_sourceConfigs.end()) // match sequence ?
 		{
+			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(it->m_sourceId), it->m_sourceSequence);
+			m_currentSourceConfig = itMatchSequence;
 			return &(itMatchSequence->m_config);
 		}
 		else if (itFirstOfKind != m_sourceConfigs.end()) // match source type ?
 		{
+			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(it->m_sourceId));
+			m_currentSourceConfig = itFirstOfKind;
 			return &(itFirstOfKind->m_config);
 		}
 		else // definitely not found !
 		{
+			qDebug("Preset::findBestSourceConfig: no match");
+			m_currentSourceConfig = m_sourceConfigs.end();
 			return 0;
 		}
 	}
 	else // exact match
 	{
+		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %d", qPrintable(it->m_sourceId), qPrintable(it->m_sourceSerial));
+		m_currentSourceConfig = it;
 		return &(it->m_config);
 	}
 }
 
+const QByteArray* Preset::findCurrentSourceConfig(QString& sourceId, QString& sourceSerial, int& sourceSequence) const
+{
+	if (m_currentSourceConfig == m_sourceConfigs.end())
+	{
+		return 0;
+	}
+	else
+	{
+		sourceId = m_currentSourceConfig->m_sourceId;
+		sourceSerial = m_currentSourceConfig->m_sourceSerial;
+		sourceSequence = m_currentSourceConfig->m_sourceSequence;
+		return &m_currentSourceConfig->m_config;
+	}
+}

@@ -47,7 +47,7 @@ public:
 
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void loadSettings(const Preset* preset);
+	void loadSettings(Preset* preset);
 	void saveSettings(Preset* preset);
 
 	void freeAll();
@@ -58,6 +58,7 @@ public:
 	void fillSampleSourceSelector(QComboBox* comboBox);
 	int selectSampleSource(int index);
 	int selectFirstSampleSource(const QString& sourceId);
+	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence);
 
 private:
 	struct ChannelRegistration {

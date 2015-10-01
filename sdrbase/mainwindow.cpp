@@ -115,13 +115,27 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
-	int sampleSourceIndex = m_pluginManager->selectFirstSampleSource(m_settings.getCurrent()->getSourceId()); // select SampleSource from settings
+	Preset *currentPreset = m_settings.getCurrent();
 
-	if(sampleSourceIndex >= 0)
+	if (currentPreset != 0)
 	{
-		bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-		ui->sampleSource->setCurrentIndex(sampleSourceIndex);
-		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+		QString sourceId, sourceSerial;
+		int sourceSequence;
+		const QByteArray *sourceConfig;
+
+		sourceConfig = currentPreset->findCurrentSourceConfig(sourceId, sourceSerial, sourceSequence);
+
+		if (sourceConfig != 0)
+		{
+			int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence(sourceId, sourceSerial, sourceSequence); // select SampleSource from settings
+
+			if(sampleSourceIndex >= 0)
+			{
+				bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
+				ui->sampleSource->setCurrentIndex(sampleSourceIndex);
+				ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+			}
+		}
 	}
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -206,9 +220,12 @@ void MainWindow::loadSettings()
     }
 }
 
-void MainWindow::loadPresetSettings(const Preset* preset)
+void MainWindow::loadPresetSettings(Preset* preset)
 {
-	qDebug() << "MainWindow::loadPresetSettings: preset: " << preset->getSourceId().toStdString().c_str();
+	qDebug("MainWindow::loadPresetSettings: group: %s desc: %s Fcenter: %llu Hz",
+			qPrintable(preset->getGroup()),
+			qPrintable(preset->getDescription()),
+			preset->getCenterFrequency());
 
 	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 
@@ -229,7 +246,10 @@ void MainWindow::saveSettings()
 
 void MainWindow::savePresetSettings(Preset* preset)
 {
-	qDebug() << "MainWindow::savePresetSettings: preset: " << preset->getSourceId().toStdString().c_str();
+	qDebug("MainWindow::savePresetSettings: group: %s desc: %s Fcenter: %llu Hz",
+			qPrintable(preset->getGroup()),
+			qPrintable(preset->getDescription()),
+			preset->getCenterFrequency());
 
 	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
     preset->clearChannels();
@@ -497,7 +517,7 @@ void MainWindow::on_presetLoad_clicked()
 		return;
 	}
 
-	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
+	Preset* preset = qvariant_cast<Preset*>(item->data(0, Qt::UserRole));
 
 	if(preset == 0)
 	{

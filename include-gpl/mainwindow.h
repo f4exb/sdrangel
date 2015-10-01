@@ -103,7 +103,7 @@ private:
 	PluginManager* m_pluginManager;
 
 	void loadSettings();
-	void loadPresetSettings(const Preset* preset);
+	void loadPresetSettings(Preset* preset);
 	void savePresetSettings(Preset* preset);
 	void saveSettings();
 

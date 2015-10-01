@@ -83,7 +83,7 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::loadSettings(const Preset* preset)
+void PluginManager::loadSettings(Preset* preset)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -144,6 +144,14 @@ void PluginManager::loadSettings(const Preset* preset)
 
 	if(m_sampleSourcePluginGUI != 0)
 	{
+		const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
+
+		if (sourceConfig != 0)
+		{
+			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
+			m_sampleSourcePluginGUI->deserialize(*sourceConfig);
+		}
+		/*
 		qDebug("PluginManager::loadSettings: source compare [%s] vs [%s]", qPrintable(m_sampleSourceId), qPrintable(preset->getSourceId()));
 
 		// TODO: have one set of source presets per identified source (preset -> find source with name)
@@ -151,9 +159,8 @@ void PluginManager::loadSettings(const Preset* preset)
 		{
 			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
 			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
-		}
+		}*/
 
-		// FIXME: get center frequency from preset center frequency
 		qint64 centerFrequency = preset->getCenterFrequency();
 		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
 	}
@@ -176,13 +183,15 @@ void PluginManager::saveSettings(Preset* preset)
 {
 	if(m_sampleSourcePluginGUI != NULL)
 	{
-		preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
 		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
 	}
+	/*
 	else
 	{
 		preset->setSourceConfig(QString::null, QString::null, 0, QByteArray());
-	}
+	}*/
 
 	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
@@ -264,7 +273,7 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 
 int PluginManager::selectSampleSource(int index)
 {
-	qDebug() << "PluginManager::selectSampleSource by index";
+	qDebug("PluginManager::selectSampleSource by index: index: %d", index);
 
 	m_dspEngine->stopAcquistion();
 
@@ -296,19 +305,18 @@ int PluginManager::selectSampleSource(int index)
 			{
 				index = 0;
 			}
+			else
+			{
+				return -1;
+			}
 		}
-	}
-
-	if(index == -1)
-	{
-		return -1;
 	}
 
 	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
 	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
 	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
-	qDebug() << "m_sampleSource at index " << index
+	qDebug() << "PluginManager::selectSampleSource by index: m_sampleSource at index " << index
 			<< " id: " << m_sampleSourceId.toStdString().c_str()
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
@@ -320,7 +328,7 @@ int PluginManager::selectSampleSource(int index)
 
 int PluginManager::selectFirstSampleSource(const QString& sourceId)
 {
-	qDebug() << "PluginManager::selectFirstSampleSource by id: " << sourceId.toStdString().c_str();
+	qDebug("PluginManager::selectFirstSampleSource by id: [%s]", qPrintable(sourceId));
 
 	int index = -1;
 
@@ -334,9 +342,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 		m_sampleSourceId.clear();
 	}
 
-	qDebug("finding first sample source [%s]", qPrintable(sourceId));
-
-	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
+	for (int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
 		qDebug("*** %s vs %s", qPrintable(m_sampleSourceDevices[i].m_sourceId), qPrintable(sourceId));
 
@@ -353,11 +359,10 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 		{
 			index = 0;
 		}
-	}
-
-	if(index == -1)
-	{
-		return -1;
+		else
+		{
+			return -1;
+		}
 	}
 
 	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
@@ -367,6 +372,73 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 	qDebug() << "m_sampleSource at index " << index
 			<< " id: " << m_sampleSourceId.toStdString().c_str()
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
+			<< " seq: " << m_sampleSourceSequence;
+
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
+
+	return index;
+}
+
+int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence)
+{
+	qDebug("PluginManager::selectSampleSourceBySequence by sequence: id: %s ser: %s seq: %d", qPrintable(sourceId), qPrintable(sourceSerial), sourceSequence);
+
+	int index = -1;
+	int index_matchingSequence = -1;
+	int index_firstOfKind = -1;
+
+	for (int i = 0; i < m_sampleSourceDevices.count(); i++)
+	{
+		if (m_sampleSourceDevices[i].m_sourceId == sourceId)
+		{
+			index_firstOfKind = i;
+
+			if (m_sampleSourceDevices[i].m_sourceSerial == sourceSerial)
+			{
+				index = i; // exact match
+				break;
+			}
+
+			if (m_sampleSourceDevices[i].m_sourceSequence == sourceSequence)
+			{
+				index_matchingSequence = i;
+			}
+		}
+	}
+
+	if(index == -1) // no exact match
+	{
+		if (index_matchingSequence == -1) // no matching sequence
+		{
+			if (index_firstOfKind == -1) // no matching device type
+			{
+				if(m_sampleSourceDevices.count() > 0) // take first if any
+				{
+					index = 0;
+				}
+				else
+				{
+					return -1; // return if no device attached
+				}
+			}
+			else
+			{
+				index = index_firstOfKind; // take first that matches device type
+			}
+		}
+		else
+		{
+			index = index_matchingSequence; // take the one that matches the sequence in the device type
+		}
+	}
+
+	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
+	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
+	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
+
+	qDebug() << "PluginManager::selectSampleSourceBySequence by sequence:  m_sampleSource at index " << index
+			<< " id: " << qPrintable(m_sampleSourceId)
+			<< " ser: " << qPrintable(m_sampleSourceSerial)
 			<< " seq: " << m_sampleSourceSequence;
 
 	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
