@@ -55,7 +55,7 @@ public:
 	bool handleMessage(const Message& message);
 
 	void updateSampleSourceDevices();
-	void fillSampleSourceSelector(QComboBox* comboBox);
+	int fillSampleSourceSelector(QComboBox* comboBox);
 	int selectSampleSource(int index);
 	int selectFirstSampleSource(const QString& sourceId);
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence);

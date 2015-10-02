@@ -108,7 +108,7 @@ set(sdrbase_SOURCES
 
 	sdrbase/settings/preferences.cpp
 	sdrbase/settings/preset.cpp
-	sdrbase/settings/settings.cpp
+	sdrbase/settings/mainsettings.cpp
 
 	sdrbase/util/message.cpp
 	sdrbase/util/messagequeue.cpp
@@ -186,7 +186,7 @@ set(sdrbase_HEADERS
 
 	include-gpl/settings/preferences.h
 	include-gpl/settings/preset.h
-	include-gpl/settings/settings.h
+	include-gpl/settings/mainsettings.h
 
 	include/util/export.h
 	include/util/message.h

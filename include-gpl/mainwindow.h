@@ -20,7 +20,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include "settings/settings.h"
+#include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 
@@ -75,7 +75,7 @@ private:
 
 	MessageQueue m_inputMessageQueue;
 
-	Settings m_settings;
+	MainSettings m_settings;
 
 	SpectrumVis* m_spectrumVis;
 	FileSink *m_fileSink;

@@ -264,11 +264,13 @@ void PluginManager::updateSampleSourceDevices()
 	}
 }
 
-void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
+int PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 {
 	comboBox->clear();
-	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
+	int i;
+	for(i = 0; i < m_sampleSourceDevices.count(); i++)
 		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, i);
+	return i;
 }
 
 int PluginManager::selectSampleSource(int index)

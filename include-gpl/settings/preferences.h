@@ -15,6 +15,8 @@ public:
 	const QString& getSourceType() const { return m_sourceType; }
 	void setSourceDevice(const QString& value) { m_sourceDevice= value; }
 	const QString& getSourceDevice() const { return m_sourceDevice; }
+	void setSourceIndex(const int value) { m_sourceIndex = value; }
+	int getSourceIndex() const { return m_sourceIndex; }
 
 	void setAudioType(const QString& value) { m_audioType = value; }
 	const QString& getAudioType() const { return m_audioType; }
@@ -24,6 +26,7 @@ public:
 protected:
 	QString m_sourceType;
 	QString m_sourceDevice;
+	int m_sourceIndex;
 
 	QString m_audioType;
 	QString m_audioDevice;

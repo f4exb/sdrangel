@@ -61,15 +61,17 @@ public:
 	int getChannelCount() const { return m_channelConfigs.count(); }
 	const ChannelConfig& getChannelConfig(int index) const { return m_channelConfigs.at(index); }
 
-	/*
 	void setSourceConfig(const QString& sourceId, const QString& sourceSerial, int sourceSequence, const QByteArray& config)
 	{
+		addOrUpdateSourceConfig(sourceId, sourceSerial, sourceSequence, config);
+		/*
 		m_sourceId = sourceId;
 		m_sourceSerial = sourceSerial;
 		m_sourceSequence = sourceSequence;
-		m_sourceConfig = config;
+		m_sourceConfig = config;*/
 	}
 
+	/*
 	const QString& getSourceId() const { return m_sourceId; }
 	const QString& getSourceSerial() const { return m_sourceSerial; }
 	const int getSourceSequence() const { return m_sourceSequence; }
@@ -83,8 +85,6 @@ public:
 	const QByteArray* findBestSourceConfig(const QString& sourceId,
 			const QString& sourceSerial,
 			int sourceSequence);
-
-	const QByteArray* findCurrentSourceConfig(QString& sourceId, QString& sourceSerial, int& sourceSequence) const;
 
 protected:
 	// group and preset description
@@ -110,7 +110,6 @@ protected:
 
 	// sources and configurations
 	SourceConfigs m_sourceConfigs;
-	SourceConfigs::const_iterator m_currentSourceConfig;
 
 	// screen and dock layout
 	QByteArray m_layout;

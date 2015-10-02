@@ -21,6 +21,7 @@ QByteArray Preferences::serialize() const
 	s.writeString(2, m_sourceDevice);
 	s.writeString(3, m_audioType);
 	s.writeString(4, m_audioDevice);
+	s.writeS32(5, m_sourceIndex);
 	return s.final();
 }
 
@@ -38,6 +39,7 @@ bool Preferences::deserialize(const QByteArray& data)
 		d.readString(2, &m_sourceDevice);
 		d.readString(3, &m_audioType);
 		d.readString(4, &m_audioDevice);
+		d.readS32(5, &m_sourceIndex);
 		return true;
 	} else {
 		resetToDefaults();

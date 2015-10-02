@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_pluginManager->loadPlugins();
 
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
+	int nbSources = m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
@@ -115,32 +115,23 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
-	Preset *currentPreset = m_settings.getCurrent();
+	int sampleSourceIndex = m_settings.getSourceIndex();
 
-	if (currentPreset != 0)
+	if(sampleSourceIndex >= nbSources)
 	{
-		QString sourceId, sourceSerial;
-		int sourceSequence;
-		const QByteArray *sourceConfig;
+		sampleSourceIndex = 0;
+	}
 
-		sourceConfig = currentPreset->findCurrentSourceConfig(sourceId, sourceSerial, sourceSequence);
-
-		if (sourceConfig != 0)
-		{
-			int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence(sourceId, sourceSerial, sourceSequence); // select SampleSource from settings
-
-			if(sampleSourceIndex >= 0)
-			{
-				bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-				ui->sampleSource->setCurrentIndex(sampleSourceIndex);
-				ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
-			}
-		}
+	if (nbSources > 0)
+	{
+		//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
+		ui->sampleSource->setCurrentIndex(sampleSourceIndex);
+		//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	}
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
-	loadPresetSettings(m_settings.getCurrent());
+	loadPresetSettings(m_settings.getWorkingPreset());
 
 	qDebug() << "MainWindow::MainWindow: apply settings...";
 
@@ -222,12 +213,9 @@ void MainWindow::loadSettings()
 
 void MainWindow::loadPresetSettings(Preset* preset)
 {
-	qDebug("MainWindow::loadPresetSettings: group: %s desc: %s Fcenter: %llu Hz",
-			qPrintable(preset->getGroup()),
-			qPrintable(preset->getDescription()),
-			preset->getCenterFrequency());
-
-	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
+	qDebug("MainWindow::loadPresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
 
 	m_pluginManager->loadSettings(preset);
 
@@ -239,20 +227,17 @@ void MainWindow::saveSettings()
 {
 	qDebug() << "MainWindow::saveSettings";
 
-	savePresetSettings(m_settings.getCurrent());
+	savePresetSettings(m_settings.getWorkingPreset());
 	m_settings.save();
 
 }
 
 void MainWindow::savePresetSettings(Preset* preset)
 {
-	qDebug("MainWindow::savePresetSettings: group: %s desc: %s Fcenter: %llu Hz",
-			qPrintable(preset->getGroup()),
-			qPrintable(preset->getDescription()),
-			preset->getCenterFrequency());
+	qDebug("MainWindow::savePresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
 
-	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
-    preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
     preset->setLayout(saveState());
@@ -571,7 +556,10 @@ void MainWindow::on_action_Preferences_triggered()
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
+	savePresetSettings(m_settings.getWorkingPreset());
 	m_pluginManager->selectSampleSource(ui->sampleSource->currentIndex());
+	m_settings.setSourceIndex(ui->sampleSource->currentIndex());
+	m_pluginManager->loadSettings(m_settings.getWorkingPreset());
 }
 
 void MainWindow::on_action_About_triggered()
