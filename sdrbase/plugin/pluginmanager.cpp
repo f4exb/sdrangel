@@ -265,7 +265,7 @@ void PluginManager::updateSampleSourceDevices()
 	}
 }
 
-int PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
+void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 {
 	comboBox->clear();
 	int i;
