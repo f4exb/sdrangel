@@ -268,10 +268,11 @@ void PluginManager::updateSampleSourceDevices()
 void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 {
 	comboBox->clear();
-	int i;
-	for(i = 0; i < m_sampleSourceDevices.count(); i++)
+
+	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
+	{
 		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, i);
-	return i;
+	}
 }
 
 int PluginManager::selectSampleSourceByIndex(int index)
