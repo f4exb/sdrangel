@@ -47,8 +47,10 @@ public:
 
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void loadSettings(Preset* preset);
+	void loadSettings(const Preset* preset);
+	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);
+	void saveSourceSettings(Preset* preset);
 
 	void freeAll();
 

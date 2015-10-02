@@ -64,18 +64,7 @@ public:
 	void setSourceConfig(const QString& sourceId, const QString& sourceSerial, int sourceSequence, const QByteArray& config)
 	{
 		addOrUpdateSourceConfig(sourceId, sourceSerial, sourceSequence, config);
-		/*
-		m_sourceId = sourceId;
-		m_sourceSerial = sourceSerial;
-		m_sourceSequence = sourceSequence;
-		m_sourceConfig = config;*/
 	}
-
-	/*
-	const QString& getSourceId() const { return m_sourceId; }
-	const QString& getSourceSerial() const { return m_sourceSerial; }
-	const int getSourceSequence() const { return m_sourceSequence; }
-	const QByteArray& getSourceConfig() const { return m_sourceConfig; }*/
 
 	void addOrUpdateSourceConfig(const QString& sourceId,
 			const QString& sourceSerial,
@@ -84,7 +73,7 @@ public:
 
 	const QByteArray* findBestSourceConfig(const QString& sourceId,
 			const QString& sourceSerial,
-			int sourceSequence);
+			int sourceSequence) const;
 
 protected:
 	// group and preset description

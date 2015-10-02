@@ -124,9 +124,10 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	if (nbSources > 0)
 	{
-		//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
+		m_pluginManager->selectSampleSource(sampleSourceIndex);
+		bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
 		ui->sampleSource->setCurrentIndex(sampleSourceIndex);
-		//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	}
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -211,12 +212,13 @@ void MainWindow::loadSettings()
     }
 }
 
-void MainWindow::loadPresetSettings(Preset* preset)
+void MainWindow::loadPresetSettings(const Preset* preset)
 {
 	qDebug("MainWindow::loadPresetSettings: preset [%s | %s]",
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
+	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
@@ -229,7 +231,6 @@ void MainWindow::saveSettings()
 
 	savePresetSettings(m_settings.getWorkingPreset());
 	m_settings.save();
-
 }
 
 void MainWindow::savePresetSettings(Preset* preset)
@@ -238,6 +239,8 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
+	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
+	preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
     preset->setLayout(saveState());
@@ -498,14 +501,16 @@ void MainWindow::on_presetLoad_clicked()
 
 	if(item == 0)
 	{
+		qDebug("MainWindow::on_presetLoad_clicked: item null");
 		updatePresetControls();
 		return;
 	}
 
-	Preset* preset = qvariant_cast<Preset*>(item->data(0, Qt::UserRole));
+	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
 
 	if(preset == 0)
 	{
+		qDebug("MainWindow::on_presetLoad_clicked: preset null");
 		return;
 	}
 
@@ -556,10 +561,10 @@ void MainWindow::on_action_Preferences_triggered()
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
-	savePresetSettings(m_settings.getWorkingPreset());
+	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
 	m_pluginManager->selectSampleSource(ui->sampleSource->currentIndex());
 	m_settings.setSourceIndex(ui->sampleSource->currentIndex());
-	m_pluginManager->loadSettings(m_settings.getWorkingPreset());
+	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
 }
 
 void MainWindow::on_action_About_triggered()

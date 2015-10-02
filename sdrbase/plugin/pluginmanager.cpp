@@ -83,7 +83,7 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::loadSettings(Preset* preset)
+void PluginManager::loadSettings(const Preset* preset)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -142,6 +142,13 @@ void PluginManager::loadSettings(Preset* preset)
 
 	renameChannelInstances();
 
+	loadSourceSettings(preset);
+}
+
+void PluginManager::loadSourceSettings(const Preset* preset)
+{
+	fprintf(stderr, "PluginManager::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+
 	if(m_sampleSourcePluginGUI != 0)
 	{
 		const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
@@ -151,15 +158,6 @@ void PluginManager::loadSettings(Preset* preset)
 			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
 			m_sampleSourcePluginGUI->deserialize(*sourceConfig);
 		}
-		/*
-		qDebug("PluginManager::loadSettings: source compare [%s] vs [%s]", qPrintable(m_sampleSourceId), qPrintable(preset->getSourceId()));
-
-		// TODO: have one set of source presets per identified source (preset -> find source with name)
-		if(m_sampleSourceId == preset->getSourceId())
-		{
-			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
-			m_sampleSourcePluginGUI->deserialize(preset->getSourceConfig());
-		}*/
 
 		qint64 centerFrequency = preset->getCenterFrequency();
 		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
@@ -181,23 +179,26 @@ bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstance
 
 void PluginManager::saveSettings(Preset* preset)
 {
-	if(m_sampleSourcePluginGUI != NULL)
-	{
-		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
-	}
-	/*
-	else
-	{
-		preset->setSourceConfig(QString::null, QString::null, 0, QByteArray());
-	}*/
+	qDebug("PluginManager::saveSettings");
+	saveSourceSettings(preset);
 
 	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
 	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
 	{
 		preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+	}
+}
+
+void PluginManager::saveSourceSettings(Preset* preset)
+{
+	qDebug("PluginManager::saveSourceSettings");
+
+	if(m_sampleSourcePluginGUI != NULL)
+	{
+		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
 	}
 }
 

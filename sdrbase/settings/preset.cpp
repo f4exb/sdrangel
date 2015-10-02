@@ -34,6 +34,7 @@ QByteArray Preset::serialize() const
 	s.writeString(2, m_description);
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
+	s.writeBlob(5, m_spectrumConfig);
 
 	s.writeS32(20, m_sourceConfigs.size());
 
@@ -44,7 +45,7 @@ QByteArray Preset::serialize() const
 		s.writeS32(26 + i*4, m_sourceConfigs[i].m_sourceSequence);
 		s.writeBlob(27 + i*4, m_sourceConfigs[i].m_config);
 
-		qDebug("Preset::serialize:  source: id: %ss, ser: %s, seq: %d",
+		qDebug("Preset::serialize:  source: id: %s, ser: %s, seq: %d",
 			qPrintable(m_sourceConfigs[i].m_sourceId),
 			qPrintable(m_sourceConfigs[i].m_sourceSerial),
 			m_sourceConfigs[i].m_sourceSequence);
@@ -53,6 +54,16 @@ QByteArray Preset::serialize() const
 		{
 			break;
 		}
+	}
+
+	s.writeS32(200, m_channelConfigs.size());
+
+	for(int i = 0; i < m_channelConfigs.size(); i++)
+	{
+		qDebug("Preset::serialize:  channel: id: %s", qPrintable(m_channelConfigs[i].m_channel));
+
+		s.writeString(201 + i * 2, m_channelConfigs[i].m_channel);
+		s.writeBlob(202 + i * 2, m_channelConfigs[i].m_config);
 	}
 
 	return s.final();
@@ -74,6 +85,7 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readString(2, &m_description, "no name");
 		d.readU64(3, &m_centerFrequency, 0);
 		d.readBlob(4, &m_layout);
+		d.readBlob(5, &m_spectrumConfig);
 
 		qDebug("Preset::deserialize: m_group: %s m_description: %s m_centerFrequency: %llu",
 				qPrintable(m_group),
@@ -88,7 +100,9 @@ bool Preset::deserialize(const QByteArray& data)
 			sourcesCount = ((200-23)/4) - 1;
 		}
 
-		for(int i = 0; i < sourcesCount; i++)
+		m_sourceConfigs.clear();
+
+		for (int i = 0; i < sourcesCount; i++)
 		{
 			QString sourceId, sourceSerial;
 			int sourceSequence;
@@ -110,7 +124,22 @@ bool Preset::deserialize(const QByteArray& data)
 			}
 		}
 
-		return true;
+        qint32 channelCount;
+        d.readS32(200, &channelCount, 0);
+
+		m_channelConfigs.clear();
+
+		for (int i = 0; i < channelCount; i++)
+		{
+			QString channel;
+			QByteArray config;
+
+			d.readString(201 + i * 2, &channel, "unknown-channel");
+			d.readBlob(202 + i * 2, &config);
+
+			qDebug("Preset::deserialize:  channel: id: %s", qPrintable(channel));
+			m_channelConfigs.append(ChannelConfig(channel, config));
+		}
 	}
 	else
 	{
@@ -159,7 +188,7 @@ void Preset::addOrUpdateSourceConfig(const QString& sourceId,
 
 const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
 		const QString& sourceSerial,
-		int sourceSequence)
+		int sourceSequence) const
 {
 	SourceConfigs::const_iterator it = m_sourceConfigs.begin();
 	SourceConfigs::const_iterator itFirstOfKind = m_sourceConfigs.end();
