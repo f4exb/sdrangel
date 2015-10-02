@@ -274,9 +274,9 @@ int PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
 	return i;
 }
 
-int PluginManager::selectSampleSource(int index)
+int PluginManager::selectSampleSourceByIndex(int index)
 {
-	qDebug("PluginManager::selectSampleSource by index: index: %d", index);
+	qDebug("PluginManager::selectSampleSourceByIndex: index: %d", index);
 
 	m_dspEngine->stopAcquistion();
 
@@ -288,31 +288,19 @@ int PluginManager::selectSampleSource(int index)
 		m_sampleSourceId.clear();
 	}
 
-	if(index == -1)
+	if (m_sampleSourceDevices.count() == 0)
 	{
-		if(!m_sampleSourceId.isEmpty())
-		{
-			for(int i = 0; i < m_sampleSourceDevices.count(); i++)
-			{
-				if(m_sampleSourceDevices[i].m_sourceId == m_sampleSourceId)
-				{
-					index = i;
-					break;
-				}
-			}
-		}
+		return -1;
+	}
 
-		if(index == -1)
-		{
-			if(m_sampleSourceDevices.count() > 0)
-			{
-				index = 0;
-			}
-			else
-			{
-				return -1;
-			}
-		}
+	if (index < 0)
+	{
+		return -1;
+	}
+
+	if (index >= m_sampleSourceDevices.count())
+	{
+		index = 0;
 	}
 
 	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;

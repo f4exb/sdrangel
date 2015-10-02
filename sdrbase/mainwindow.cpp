@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_pluginManager->loadPlugins();
 
 	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-	int nbSources = m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
+	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
@@ -116,15 +116,10 @@ MainWindow::MainWindow(QWidget* parent) :
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_settings.getSourceIndex();
+	sampleSourceIndex = m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex);
 
-	if(sampleSourceIndex >= nbSources)
+	if (sampleSourceIndex >= 0)
 	{
-		sampleSourceIndex = 0;
-	}
-
-	if (nbSources > 0)
-	{
-		m_pluginManager->selectSampleSource(sampleSourceIndex);
 		bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
 		ui->sampleSource->setCurrentIndex(sampleSourceIndex);
 		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
@@ -562,7 +557,7 @@ void MainWindow::on_action_Preferences_triggered()
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
 	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-	m_pluginManager->selectSampleSource(ui->sampleSource->currentIndex());
+	m_pluginManager->selectSampleSourceByIndex(ui->sampleSource->currentIndex());
 	m_settings.setSourceIndex(ui->sampleSource->currentIndex());
 	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
 }
