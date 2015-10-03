@@ -251,8 +251,8 @@ void WFMDemod::apply()
 	{
 		m_settingsMutex.lock();
 		qDebug() << "WFMDemod::handleMessage: m_rfFilter->create_filter";
-		Real lowCut = (m_config.m_inputFrequencyOffset - (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
-		Real hiCut  = (m_config.m_inputFrequencyOffset + (m_config.m_rfBandwidth / 2.0)) / m_config.m_inputSampleRate;
+		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
+		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
 		m_settingsMutex.unlock();
 	}
