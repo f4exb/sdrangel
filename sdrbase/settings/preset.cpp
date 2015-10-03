@@ -228,12 +228,12 @@ const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
 	{
 		if (itMatchSequence != m_sourceConfigs.end()) // match sequence ?
 		{
-			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(it->m_sourceId), it->m_sourceSequence);
+			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(itMatchSequence->m_sourceId), itMatchSequence->m_sourceSequence);
 			return &(itMatchSequence->m_config);
 		}
 		else if (itFirstOfKind != m_sourceConfigs.end()) // match source type ?
 		{
-			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(it->m_sourceId));
+			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(itFirstOfKind->m_sourceId));
 			return &(itFirstOfKind->m_config);
 		}
 		else // definitely not found !
