@@ -121,72 +121,72 @@ set(sdrbase_SOURCES
 )
 
 set(sdrbase_HEADERS
-	include-gpl/mainwindow.h
+	include/mainwindow.h
 
-	include-gpl/audio/audiodeviceinfo.h
-	include-gpl/audio/audiofifo.h
-	include-gpl/audio/audiooutput.h
+	include/audio/audiodeviceinfo.h
+	include/audio/audiofifo.h
+	include/audio/audiooutput.h
 
-	include-gpl/dsp/afsquelch.h
-	include-gpl/dsp/channelizer.h
+	include/dsp/afsquelch.h
+	include/dsp/channelizer.h
 	include/dsp/channelmarker.h
-	include-gpl/dsp/complex.h
-	include-gpl/dsp/decimators.h
-	include-gpl/dsp/dspcommands.h
-	include-gpl/dsp/dspengine.h
+	include/dsp/complex.h
+	include/dsp/decimators.h
+	include/dsp/dspcommands.h
+	include/dsp/dspengine.h
 	include/dsp/dsptypes.h
-	include-gpl/dsp/fftengine.h
-	include-gpl/dsp/fftfilt.h
-	include-gpl/dsp/fftwengine.h
-	include-gpl/dsp/fftwindow.h
-	include-gpl/dsp/filesink.h
-	include-gpl/dsp/gfft.h
-	include-gpl/dsp/interpolator.h
-	include-gpl/dsp/inthalfbandfilter.h
+	include/dsp/fftengine.h
+	include/dsp/fftfilt.h
+	include/dsp/fftwengine.h
+	include/dsp/fftwindow.h
+	include/dsp/filesink.h
+	include/dsp/gfft.h
+	include/dsp/interpolator.h
+	include/dsp/inthalfbandfilter.h
 	include/dsp/kissfft.h
-	include-gpl/dsp/kissengine.h
-	include-gpl/dsp/lowpass.h
-	include-gpl/dsp/misc.h
-	include-gpl/dsp/movingaverage.h
-	include-gpl/dsp/nco.h
+	include/dsp/kissengine.h
+	include/dsp/lowpass.h
+	include/dsp/misc.h
+	include/dsp/movingaverage.h
+	include/dsp/nco.h
 	sdrbase/dsp/pidcontroller.h
 	include/dsp/samplefifo.h
 	include/dsp/samplesink.h
-	include-gpl/dsp/nullsink.h
-	include-gpl/dsp/scopevis.h
-	include-gpl/dsp/spectrumvis.h
+	include/dsp/nullsink.h
+	include/dsp/scopevis.h
+	include/dsp/spectrumvis.h
 	include/dsp/threadedsamplesink.h
 
-	include-gpl/gui/aboutdialog.h
-	include-gpl/gui/addpresetdialog.h
+	include/gui/aboutdialog.h
+	include/gui/addpresetdialog.h
 	include/gui/basicchannelsettingswidget.h
-	include-gpl/gui/buttonswitch.h
-	include-gpl/gui/channelwindow.h
-	include-gpl/gui/colormapper.h
-	include-gpl/gui/glscope.h
-	include-gpl/gui/glscopegui.h
-	include-gpl/gui/glspectrum.h
-	include-gpl/gui/glspectrumgui.h
-	include-gpl/gui/indicator.h
-	include-gpl/gui/physicalunit.h
-	include-gpl/gui/pluginsdialog.h
-	include-gpl/gui/preferencesdialog.h
-	include-gpl/gui/presetitem.h
+	include/gui/buttonswitch.h
+	include/gui/channelwindow.h
+	include/gui/colormapper.h
+	include/gui/glscope.h
+	include/gui/glscopegui.h
+	include/gui/glspectrum.h
+	include/gui/glspectrumgui.h
+	include/gui/indicator.h
+	include/gui/physicalunit.h
+	include/gui/pluginsdialog.h
+	include/gui/preferencesdialog.h
+	include/gui/presetitem.h
 	include/gui/rollupwidget.h
-	include-gpl/gui/scale.h
-	include-gpl/gui/scaleengine.h
-	include-gpl/gui/valuedial.h
+	include/gui/scale.h
+	include/gui/scaleengine.h
+	include/gui/valuedial.h
 
 	include/dsp/samplesource.h
 
 	include/plugin/pluginapi.h
 	include/plugin/plugingui.h
 	include/plugin/plugininterface.h
-	include-gpl/plugin/pluginmanager.h
+	include/plugin/pluginmanager.h
 
-	include-gpl/settings/preferences.h
-	include-gpl/settings/preset.h
-	include-gpl/settings/mainsettings.h
+	include/settings/preferences.h
+	include/settings/preset.h
+	include/settings/mainsettings.h
 
 	include/util/export.h
 	include/util/message.h
@@ -227,7 +227,7 @@ if(FFTW3F_FOUND)
 	)
 	set(sdrbase_HEADERS
 		${sdrbase_HEADERS}
-		include-gpl/dsp/fftwengine.h
+		include/dsp/fftwengine.h
 	)
 	add_definitions(-DUSE_FFTW)
 	include_directories(${FFTW3F_INCLUDE_DIRS})
@@ -239,7 +239,7 @@ else(FFTW3F_FOUND)
 	)
 	set(sdrbase_HEADERS
 		${sdrbase_HEADERS}
-		include-gpl/dsp/kissengine.h
+		include/dsp/kissengine.h
 	)
 	add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
@@ -279,7 +279,7 @@ qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
+	${CMAKE_SOURCE_DIR}/include
 	${OPENGL_INCLUDE_DIR}
 )
 

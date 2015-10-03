@@ -181,6 +181,8 @@ Assuming Debian Jessie is used:
   - Corrected decimators bit shifting so that the number of effective output bits is constant and fill the internal sample width
   - Separate library to support all flavours of FunCube dongles. Rewritten FCD plugins.
   - Allow several sample source plugins to share the same presets for what is common
+  - Prepare grounds for future Tx operations with Tx spectrum display in the main window
+  - Merged include-gpl into include and removed GPL dribble in About dialog
   - Many other little things...
     
 <h1>To Do</h1>
