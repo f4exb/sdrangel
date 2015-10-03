@@ -77,7 +77,8 @@ private:
 
 	MainSettings m_settings;
 
-	SpectrumVis* m_spectrumVis;
+	SpectrumVis* m_rxSpectrumVis;
+	SpectrumVis* m_txSpectrumVis;
 	FileSink *m_fileSink;
 
 	DSPEngine* m_dspEngine;

@@ -58,7 +58,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_dspEngine->start();
 
 	ui->setupUi(this);
-	delete ui->mainToolBar;
 	createStatusBar();
 
 	setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -68,21 +67,21 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	// work around broken Qt dock widget ordering
 	removeDockWidget(ui->inputDock);
-	removeDockWidget(ui->rxDisplayDock);
+	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
 	removeDockWidget(ui->channelDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->inputDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->rxDisplayDock);
+	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
 	ui->inputDock->show();
-	ui->rxDisplayDock->show();
+	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
 	ui->channelDock->show();
 
 	ui->menu_Window->addAction(ui->inputDock->toggleViewAction());
-	ui->menu_Window->addAction(ui->rxDisplayDock->toggleViewAction());
+	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
@@ -101,10 +100,19 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
-	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	ui->glSpectrum->connectTimer(m_masterTimer);
-	ui->glSpectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
-	m_dspEngine->addSink(m_spectrumVis);
+	// Disable Tx spectrum by default. Enabled if source supports Tx.
+	ui->tabSpectra->setTabEnabled(1, false);
+	ui->tabSpectraGUI->setTabEnabled(1, false);
+
+	m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
+	ui->rxSpectrum->connectTimer(m_masterTimer);
+	ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
+	m_dspEngine->addSink(m_rxSpectrumVis);
+
+	m_txSpectrumVis = new SpectrumVis(ui->txSpectrum);
+	ui->txSpectrum->connectTimer(m_masterTimer);
+	ui->txSpectrumGUI->setBuddies(m_txSpectrumVis->getInputMessageQueue(), m_txSpectrumVis, ui->txSpectrum);
+	//m_dspEngine->addSink(m_rxSpectrumVis);
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
@@ -149,9 +157,9 @@ MainWindow::~MainWindow()
 	m_pluginManager->freeAll();
 
 	m_dspEngine->removeSink(m_fileSink);
-	m_dspEngine->removeSink(m_spectrumVis);
+	m_dspEngine->removeSink(m_rxSpectrumVis);
 	delete m_fileSink;
-	delete m_spectrumVis;
+	delete m_rxSpectrumVis;
 	delete m_pluginManager;
 
 	m_dspEngine->stop();
@@ -178,12 +186,12 @@ void MainWindow::addViewAction(QAction* action)
 
 void MainWindow::addChannelMarker(ChannelMarker* channelMarker)
 {
-	ui->glSpectrum->addChannelMarker(channelMarker);
+	ui->rxSpectrum->addChannelMarker(channelMarker);
 }
 
 void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	ui->glSpectrum->removeChannelMarker(channelMarker);
+	ui->rxSpectrum->removeChannelMarker(channelMarker);
 }
 
 void MainWindow::setInputGUI(QWidget* gui)
@@ -213,7 +221,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	ui->glSpectrumGUI->deserialize(preset->getSpectrumConfig());
+	ui->rxSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
@@ -234,7 +242,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	preset->setSpectrumConfig(ui->glSpectrumGUI->serialize());
+	preset->setSpectrumConfig(ui->rxSpectrumGUI->serialize());
 	preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
@@ -270,12 +278,12 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::updateCenterFreqDisplay()
 {
-	ui->glSpectrum->setCenterFrequency(m_centerFrequency);
+	ui->rxSpectrum->setCenterFrequency(m_centerFrequency);
 }
 
 void MainWindow::updateSampleRate()
 {
-	ui->glSpectrum->setSampleRate(m_sampleRate);
+	ui->rxSpectrum->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
 
