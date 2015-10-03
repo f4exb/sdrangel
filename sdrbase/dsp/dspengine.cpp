@@ -29,6 +29,7 @@ DSPEngine::DSPEngine(QObject* parent) :
 	QThread(parent),
 	m_state(StNotStarted),
 	m_sampleSource(0),
+	m_sampleSourceSequence(0),
 	m_sampleSinks(),
 	m_sampleRate(0),
 	m_centerFrequency(0),
@@ -118,6 +119,12 @@ void DSPEngine::setSource(SampleSource* source)
 	qDebug() << "DSPEngine::setSource";
 	DSPSetSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
+}
+
+void DSPEngine::setSourceSequence(int sequence)
+{
+	qDebug("DSPEngine::setSourceSequence: seq: %d", sequence);
+	m_sampleSourceSequence = sequence;
 }
 
 void DSPEngine::addSink(SampleSink* sink)
@@ -460,7 +467,7 @@ DSPEngine::State DSPEngine::gotoRunning()
 
 	// Start everything
 
-	if(!m_sampleSource->start(0))
+	if(!m_sampleSource->start(m_sampleSourceSequence))
 	{
 		return gotoError("Could not start sample source");
 	}
@@ -508,12 +515,12 @@ void DSPEngine::handleSetSource(SampleSource* source)
 
 	if(m_sampleSource != 0)
 	{
-		qDebug() << "DSPEngine::handleSetSource: set " << source->getDeviceDescription().toStdString().c_str();
+		qDebug("DSPEngine::handleSetSource: set %s", qPrintable(source->getDeviceDescription()));
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
 	}
 	else
 	{
-		qDebug() << "DSPEngine::handleSetSource: set none";
+		qDebug("DSPEngine::handleSetSource: set none");
 	}
 }
 

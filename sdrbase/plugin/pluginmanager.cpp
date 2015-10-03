@@ -308,12 +308,13 @@ int PluginManager::selectSampleSourceByIndex(int index)
 	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
 	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
-	qDebug() << "PluginManager::selectSampleSource by index: m_sampleSource at index " << index
+	qDebug() << "PluginManager::selectSampleSourceByIndex: m_sampleSource at index " << index
 			<< " id: " << m_sampleSourceId.toStdString().c_str()
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
 	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
+	m_dspEngine->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
 }

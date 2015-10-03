@@ -65,7 +65,8 @@ public:
 	bool startAcquisition(); //!< Start acquisition sequence
 	void stopAcquistion();   //!< Stop acquisition sequence
 
-	void setSource(SampleSource* source); //!< Set the unique sample source
+	void setSource(SampleSource* source); //!< Set the sample source type
+	void setSourceSequence(int sequence); //!< Set the sample source sequence in type
 
 	void addSink(SampleSink* sink); //!< Add a sample sink
 	void removeSink(SampleSink* sink); //!< Remove a sample sink
@@ -94,6 +95,7 @@ private:
 	QString m_deviceDescription;
 
 	SampleSource* m_sampleSource;
+	int m_sampleSourceSequence;
 
 	typedef std::list<SampleSink*> SampleSinks;
 	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)

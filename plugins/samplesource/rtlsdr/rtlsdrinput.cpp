@@ -23,7 +23,6 @@
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "util/prettyprint.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
@@ -48,8 +47,6 @@ bool RTLSDRInput::init(const Message& message)
 
 bool RTLSDRInput::start(int device)
 {
-	qDebug("%sRTLSDRInput::start: device: %d%s", qPrintable(EscapeColors::red),  device, qPrintable(EscapeColors::terminator));
-
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_dev != 0)
