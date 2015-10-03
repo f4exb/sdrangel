@@ -488,6 +488,11 @@ void MainWindow::on_presetUpdate_clicked()
 	}
 }
 
+void MainWindow::on_settingsSave_clicked()
+{
+	saveSettings();
+}
+
 void MainWindow::on_presetLoad_clicked()
 {
 	qDebug() << "MainWindow::on_presetLoad_clicked";

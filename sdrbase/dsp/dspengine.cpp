@@ -497,8 +497,6 @@ DSPEngine::State DSPEngine::gotoError(const QString& errorMessage)
 
 void DSPEngine::handleSetSource(SampleSource* source)
 {
-	qDebug() << "DSPEngine::handleSetSource";
-
 	gotoIdle();
 
 	if(m_sampleSource != 0)
@@ -510,12 +508,12 @@ void DSPEngine::handleSetSource(SampleSource* source)
 
 	if(m_sampleSource != 0)
 	{
-		qDebug() << "  - set " << source->getDeviceDescription().toStdString().c_str();
+		qDebug() << "DSPEngine::handleSetSource: set " << source->getDeviceDescription().toStdString().c_str();
 		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
 	}
 	else
 	{
-		qDebug() << "  - set none";
+		qDebug() << "DSPEngine::handleSetSource: set none";
 	}
 }
 
