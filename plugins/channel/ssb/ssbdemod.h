@@ -41,6 +41,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+	Real getMagSq() const { return m_magsq; }
+
 private:
 	class MsgConfigureSSBDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -85,6 +87,7 @@ private:
 	int m_sampleRate;
 	int m_frequency;
 	bool m_usb;
+	Real m_magsq;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

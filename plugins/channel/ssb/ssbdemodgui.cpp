@@ -11,6 +11,7 @@
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
@@ -131,7 +132,7 @@ void SSBDemodGUI::viewChanged()
 	applySettings();
 }
 
-void SSBDemodGUI::on_deltaMinus_clicked(bool minus)
+void SSBDemodGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -255,7 +256,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(3)
+	m_spanLog2(3),
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -276,6 +278,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(true);
 	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::green);
@@ -388,3 +392,9 @@ void SSBDemodGUI::enterEvent(QEvent*)
 	blockApplySettings(false);
 }
 
+void SSBDemodGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_ssbDemod->getMagSq());
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+}

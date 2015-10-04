@@ -85,7 +85,8 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		//Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
@@ -100,7 +101,8 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		for (int i = 0; i < n_out; i++)
 		{
-			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
+			//Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
+			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
 
 			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
 			// smart decimation with bit gain using float arithmetic (23 bits significand)
@@ -109,7 +111,11 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (!(m_undersampleCount++ & decim_mask))
 			{
-				avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
+				Real avgr = sum.real() / decim;
+				Real avgi = sum.imag() / decim;
+				m_magsq = (avgr * avgr + avgi * avgi) / (1<<30);
+				//avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
+				avg = (avgr + avgi) * 0.7;
 				m_sampleBuffer.push_back(Sample(avg, 0.0));
 				sum.real() = 0.0;
 				sum.imag() = 0.0;

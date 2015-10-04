@@ -4,6 +4,7 @@
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
+#include "dsp/movingaverage.h"
 
 class PluginAPI;
 
@@ -38,13 +39,14 @@ public:
 private slots:
 	void viewChanged();
 	void on_deltaFrequency_changed(quint64 value);
-	void on_deltaMinus_clicked(bool minus);
+	void on_deltaMinus_toggled(bool minus);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
+	void tick();
 
 private:
 	Ui::SSBDemodGUI* ui;
@@ -54,6 +56,7 @@ private:
 	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
+	MovingAverage<Real> m_channelPowerDbAvg;
 
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
