@@ -72,14 +72,17 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
-		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		//Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
 		{
-			m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
+			//m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
+			m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));
 
 			Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+			magsq /= (1<<30);
 			m_movingAverage.feed(magsq);
 			m_magsq = m_movingAverage.average();
 
