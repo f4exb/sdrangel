@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -39,9 +38,8 @@ public:
 			int spanLog2,
 			bool ssb);
 
-	int getSampleRate() const {
-		return m_sampleRate;
-	}
+	int getSampleRate() const {	return m_sampleRate; }
+	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -93,6 +91,7 @@ private:
 	int m_frequency;
 	bool m_usb;
 	bool m_ssb;
+	Real m_magsq;
 
 	NCO m_nco;
 	NCO m_nco_test;

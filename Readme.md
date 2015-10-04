@@ -81,12 +81,6 @@ If you use your own location for libhackrf install directory you need to specify
 
 HackRF is better used with a sampling frequency over 8 MS/s. You can use the 9.6Ms/s setting that decimates nicely into integer kS/s sample rates. There are quite a few problems with narrowband work with this hardware. You may try various amplifiers settings to limit images and I/Q imbalance with varying success... The cheap RTL-SDR dongles usually do better.
 
-<h2>FunCube Dongle</h2>
-
-Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. For the Pro+ the band filter selection is not effective as it is handled by the firmware using the center frequency.
-
-The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support. Library fcdlib is used to store the constants for each dongle type.
-
 <h2>RTL-SDR</h2>
 
 RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
@@ -124,6 +118,7 @@ Assuming Debian Jessie is used:
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
   - As the objects input and output queues can be publicly accessed there is no strict control of which objects post messages on these queues. The correct assumption is that messages can be popped from the input queue only by its holder and that messages can be pushed on the output queue only by its holder.
   - Objects managing more than one message queue (input + output for example) do not work well under stress conditions. Output queue removed from sample sources but this model has to be revised throughout the application.
+  - Tx tabs are just appetizers for the moment and are disabled.
 
 <h1>Changes from SDRangelove</h1>
 

@@ -30,5 +30,7 @@
         <file>stop.png</file>
         <file>sdrangel_logo.png</file>
         <file>sdrangel_icon.png</file>
+        <file>minus.png</file>
+        <file>plus.png</file>
     </qresource>
 </RCC>

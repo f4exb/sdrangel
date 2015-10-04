@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QDockWidget>
 #include <QMainWindow>
 #include "ui_chanalyzergui.h"
@@ -10,6 +26,7 @@
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
@@ -140,12 +157,19 @@ void ChannelAnalyzerGUI::viewChanged()
 	applySettings();
 }
 
+void ChannelAnalyzerGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+}
+
 void ChannelAnalyzerGUI::channelSampleRateChanged()
 {
 	setNewRate(m_spanLog2);
 }
 
-void ChannelAnalyzerGUI::on_deltaMinus_clicked(bool minus)
+void ChannelAnalyzerGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -283,7 +307,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(3)
+	m_spanLog2(3),
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -307,9 +332,10 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(true);
-	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 
+	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::gray);
