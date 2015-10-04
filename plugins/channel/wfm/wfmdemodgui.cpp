@@ -213,7 +213,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_channelMarker(this),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -295,5 +296,6 @@ void WFMDemodGUI::enterEvent(QEvent*)
 void WFMDemodGUI::tick()
 {
 	Real powDb = CalcDb::dbPower(m_wfmDemod->getMagSq());
-	ui->channelPower->setText(QString::number(powDb, 'f', 1));
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }

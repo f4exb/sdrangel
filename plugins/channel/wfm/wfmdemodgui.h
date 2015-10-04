@@ -4,6 +4,7 @@
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
+#include "dsp/movingaverage.h"
 
 class PluginAPI;
 
@@ -55,6 +56,7 @@ private:
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
+	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
 
