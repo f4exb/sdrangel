@@ -48,6 +48,7 @@ AMDemod::AMDemod() :
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
+	m_magsq = 0.0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -80,8 +81,9 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 			Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 			m_movingAverage.feed(magsq);
+			m_magsq = m_movingAverage.average();
 
-			if (m_movingAverage.average() >= m_squelchLevel)
+			if (m_magsq >= m_squelchLevel)
 			{
 				m_squelchState = m_running.m_audioSampleRate / 20;
 			}

@@ -8,8 +8,10 @@
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
+#include "mainwindow.h"
 
 #include "amdemod.h"
 
@@ -132,7 +134,7 @@ void AMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void AMDemodGUI::on_deltaMinus_clicked(bool minus)
+void AMDemodGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -201,7 +203,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
-	m_doApplySettings(true)
+	m_doApplySettings(true),
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -212,6 +215,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelizer = new Channelizer(m_amDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -275,5 +279,12 @@ void AMDemodGUI::enterEvent(QEvent*)
 	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
 	blockApplySettings(false);
+}
+
+void AMDemodGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_amDemod->getMagSq());
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 

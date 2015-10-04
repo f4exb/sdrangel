@@ -41,6 +41,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+	Real getMagSq() const { return m_magsq; }
+
 private:
 	class MsgConfigureAMDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -113,6 +115,7 @@ private:
 
 	Real m_squelchLevel;
 	int m_squelchState;
+	Real m_magsq;
 
 	MovingAverage<Real> m_movingAverage;
 	SimpleAGC m_volumeAGC;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>537</height>
+    <height>544</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -230,22 +230,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="lowCutText">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>0.3k</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QSlider" name="lowCut">
         <property name="minimum">
          <number>-60</number>
@@ -261,6 +245,22 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lowCutText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0.3k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -353,10 +353,7 @@
      </widget>
     </item>
     <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
-      <zorder>glSpectrum</zorder>
-      <zorder>glSpectrum</zorder>
-     </widget>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
     </item>
    </layout>
   </widget>

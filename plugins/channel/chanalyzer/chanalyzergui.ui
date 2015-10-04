@@ -312,7 +312,6 @@
         <property name="toolTip">
          <string>Demod shift frequency from center in Hz</string>
         </property>
-        <zorder>hSpacer1</zorder>
        </widget>
       </item>
       <item>
@@ -410,6 +409,9 @@
       </item>
       <item>
        <widget class="QLabel" name="channelPower">
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -530,9 +532,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GLScope</class>
+   <class>RollupWidget</class>
    <extends>QWidget</extends>
-   <header>gui/glscope.h</header>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -548,15 +556,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>GLScope</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
+   <header>gui/glscope.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
