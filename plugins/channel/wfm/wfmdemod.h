@@ -43,6 +43,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+	Real getMagSq() const { return m_movingAverage.average(); }
+
 private:
 	class MsgConfigureWFMDemod : public Message {
 		MESSAGE_CLASS_DECLARATION

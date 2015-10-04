@@ -36,13 +36,14 @@ public:
 private slots:
 	void viewChanged();
 	void on_deltaFrequency_changed(quint64 value);
-	void on_deltaMinus_clicked(bool minus);
+	void on_deltaMinus_toggled(bool minus);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
+	void tick();
 
 private:
 	Ui::WFMDemodGUI* ui;

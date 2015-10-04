@@ -8,7 +8,9 @@
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "mainwindow.h"
 
 #include "wfmdemod.h"
 #include "wfmdemodgui.h"
@@ -143,7 +145,7 @@ void WFMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void WFMDemodGUI::on_deltaMinus_clicked(bool minus)
+void WFMDemodGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -226,6 +228,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::blue);
 	m_channelMarker.setBandwidth(12500);
@@ -288,3 +292,8 @@ void WFMDemodGUI::enterEvent(QEvent*)
 	blockApplySettings(false);
 }
 
+void WFMDemodGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_wfmDemod->getMagSq());
+	ui->channelPower->setText(QString::number(powDb, 'f', 1));
+}
