@@ -38,6 +38,9 @@ public:
 	MagSquaredAGC(int historySize, Real R);
 	virtual ~MagSquaredAGC();
 	virtual void feed(Complex& ci);
+	Real getMagSq() const { return m_magsq; }
+private:
+	Real m_magsq;
 };
 
 class MagAGC : public AGC
@@ -47,6 +50,9 @@ public:
 	MagAGC(int historySize, Real R);
 	virtual ~MagAGC();
 	virtual void feed(Complex& ci);
+	Real getMagSq() const { return m_magsq; }
+private:
+	Real m_magsq;
 };
 
 class AlphaAGC : public AGC
@@ -58,8 +64,10 @@ public:
 	virtual ~AlphaAGC();
     void resize(int historySize, Real R, Real alpha);
 	virtual void feed(Complex& ci);
+	Real getMagSq() const { return m_magsq; }
 private:
 	Real m_alpha;
+	Real m_magsq;
 	bool m_squelchOpen;
 };
 

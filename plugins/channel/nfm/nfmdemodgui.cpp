@@ -10,8 +10,10 @@
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
+#include "mainwindow.h"
 
 const int NFMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
@@ -143,7 +145,7 @@ void NFMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void NFMDemodGUI::on_deltaMinus_clicked(bool minus)
+void NFMDemodGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -229,7 +231,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
-	m_doApplySettings(true)
+	m_doApplySettings(true),
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -238,6 +241,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_nfmDemod = new NFMDemod();
 	m_nfmDemod->registerGUI(this);
+
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	int ctcss_nbTones;
 	const Real *ctcss_tones = m_nfmDemod->getCtcssToneSet(ctcss_nbTones);
@@ -334,3 +339,9 @@ void NFMDemodGUI::blockApplySettings(bool block)
 	m_doApplySettings = !block;
 }
 
+void NFMDemodGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_nfmDemod->getMagSq());
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+}

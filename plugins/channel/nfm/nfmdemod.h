@@ -64,6 +64,8 @@ public:
 		m_ctcssIndexSelected = selectedCtcssIndex;
 	}
 
+	Real getMagSq() const { return m_magsq; }
+
 private:
 	class MsgConfigureNFMDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -163,6 +165,7 @@ private:
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
+	Real m_magsq;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

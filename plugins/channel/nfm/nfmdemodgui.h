@@ -5,6 +5,7 @@
 #include "plugin/plugingui.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
+#include "dsp/movingaverage.h"
 
 class PluginAPI;
 
@@ -38,7 +39,7 @@ public:
 private slots:
 	void viewChanged();
 	void on_deltaFrequency_changed(quint64 value);
-	void on_deltaMinus_clicked(bool minus);
+	void on_deltaMinus_toggled(bool minus);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
@@ -47,6 +48,7 @@ private slots:
 	void on_ctcssOn_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
+	void tick();
 
 private:
 	Ui::NFMDemodGUI* ui;
@@ -59,6 +61,7 @@ private:
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
 	bool m_ctcssOn;
+	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
 

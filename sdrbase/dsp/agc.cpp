@@ -46,11 +46,13 @@ Real AGC::getAverage()
 }
 
 MagSquaredAGC::MagSquaredAGC() :
-	AGC()
+	AGC(),
+	m_magsq(0.0)
 {}
 
 MagSquaredAGC::MagSquaredAGC(int historySize, Real R) :
-	AGC(historySize, R)
+	AGC(historySize, R),
+	m_magsq(0.0)
 {}
 
 MagSquaredAGC::~MagSquaredAGC()
@@ -58,19 +60,21 @@ MagSquaredAGC::~MagSquaredAGC()
 
 void MagSquaredAGC::feed(Complex& ci)
 {
-	Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
-	m_moving_average.feed(magsq);
+	m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
+	m_moving_average.feed(m_magsq);
 	m_u0 = m_R / m_moving_average.average();
 	ci *= m_u0;
 }
 
 
 MagAGC::MagAGC() :
-	AGC()
+	AGC(),
+	m_magsq(0.0)
 {}
 
 MagAGC::MagAGC(int historySize, Real R) :
-	AGC(historySize, R)
+	AGC(historySize, R),
+	m_magsq(0.0)
 {}
 
 MagAGC::~MagAGC()
@@ -78,8 +82,8 @@ MagAGC::~MagAGC()
 
 void MagAGC::feed(Complex& ci)
 {
-	Real mag = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
-	m_moving_average.feed(mag);
+	m_magsq = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
+	m_moving_average.feed(m_magsq);
 	m_u0 = m_R / m_moving_average.average();
 	ci *= m_u0;
 }
@@ -88,12 +92,14 @@ void MagAGC::feed(Complex& ci)
 AlphaAGC::AlphaAGC() :
 	AGC(),
 	m_alpha(0.5),
+	m_magsq(0.0),
 	m_squelchOpen(true)
 {}
 
 AlphaAGC::AlphaAGC(int historySize, Real R) :
 	AGC(historySize, R),
 	m_alpha(0.5),
+	m_magsq(0.0),
 	m_squelchOpen(true)
 {}
 
@@ -101,6 +107,7 @@ AlphaAGC::AlphaAGC(int historySize, Real R) :
 AlphaAGC::AlphaAGC(int historySize, Real R, Real alpha) :
 	AGC(historySize, R),
 	m_alpha(alpha),
+	m_magsq(0.0),
 	m_squelchOpen(true)
 {}
 
@@ -117,16 +124,16 @@ void AlphaAGC::resize(int historySize, Real R, Real alpha)
 
 void AlphaAGC::feed(Complex& ci)
 {
-	Real magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
+	m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
 
-	if (m_squelchOpen && (magsq))
+	if (m_squelchOpen && (m_magsq))
 	{
-		m_moving_average.feed(m_moving_average.average() - m_alpha*(m_moving_average.average() - magsq));
+		m_moving_average.feed(m_moving_average.average() - m_alpha*(m_moving_average.average() - m_magsq));
 	}
 	else
 	{
 		//m_squelchOpen = true;
-		m_moving_average.feed(magsq);
+		m_moving_average.feed(m_magsq);
 	}
 	ci *= m_u0;
 }

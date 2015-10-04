@@ -55,6 +55,7 @@ NFMDemod::NFMDemod() :
 
 	m_agcLevel = 1.0;
 	m_AGC.resize(240, m_agcLevel);
+	m_magsq = 0;
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
@@ -134,6 +135,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				//ci *= (m_agcLevel / m_AGC.getValue());
 
 				m_AGC.feed(ci);
+				m_magsq = m_AGC.getMagSq();
 
 				// demod
 				/*
