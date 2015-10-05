@@ -50,6 +50,7 @@ SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_undersampleCount = 0;
 
 	m_usb = true;
+	m_magsq = 0.0f;
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
