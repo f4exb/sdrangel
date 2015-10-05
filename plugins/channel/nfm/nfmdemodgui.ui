@@ -370,13 +370,23 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="ctcssSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </item>
    </layout>
   </widget>
-  <zorder>settingsContainer</zorder>
-  <zorder>horizontalLayoutWidget_2</zorder>
-  <zorder>horizontalLayoutWidget_2</zorder>
  </widget>
  <customwidgets>
   <customwidget>

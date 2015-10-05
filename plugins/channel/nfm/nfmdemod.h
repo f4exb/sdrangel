@@ -64,7 +64,7 @@ public:
 		m_ctcssIndexSelected = selectedCtcssIndex;
 	}
 
-	Real getMagSq() const { return m_magsq; }
+	Real getMagSq() { return m_AGC.getAverage(); }
 
 private:
 	class MsgConfigureNFMDemod : public Message {

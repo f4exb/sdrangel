@@ -308,7 +308,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_doApplySettings(true),
 	m_rate(6000),
 	m_spanLog2(3),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(40,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
