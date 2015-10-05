@@ -29,8 +29,8 @@ static int runQtApplication(int argc, char* argv[])
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 */
-	QCoreApplication::setOrganizationName("osmocom");
-	QCoreApplication::setApplicationName("SDRangelove");
+	QCoreApplication::setOrganizationName("f4exb");
+	QCoreApplication::setApplicationName("SDRangel");
 
 #if 1
 	qApp->setStyle(QStyleFactory::create("fusion"));

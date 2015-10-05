@@ -12,6 +12,7 @@ void Preferences::resetToDefaults()
 	m_sourceDevice.clear();
 	m_audioType.clear();
 	m_audioDevice.clear();
+	m_sourceIndex = 0;
 }
 
 QByteArray Preferences::serialize() const
@@ -39,7 +40,7 @@ bool Preferences::deserialize(const QByteArray& data)
 		d.readString(2, &m_sourceDevice);
 		d.readString(3, &m_audioType);
 		d.readString(4, &m_audioDevice);
-		d.readS32(5, &m_sourceIndex);
+		d.readS32(5, &m_sourceIndex, 0);
 		return true;
 	} else {
 		resetToDefaults();
