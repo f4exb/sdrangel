@@ -218,7 +218,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						demod = m_bandpass.filter(demod);
 						demod *= m_running.m_volume;
-						sample = demod * 4; // denominator = bandpass filter number of taps
+						sample = demod * 10;
 					}
 				}
 				else
