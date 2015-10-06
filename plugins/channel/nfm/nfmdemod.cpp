@@ -172,10 +172,13 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
+				squelchOpen = (getMagSq() > m_squelchLevel);
+
+				/*
 				if (m_afSquelch.analyze(demod))
 				{
 					squelchOpen = m_afSquelch.evaluate();
-				}
+				}*/
 
 				if (squelchOpen)
 				//if (m_AGC.getAverage() > m_squelchLevel)

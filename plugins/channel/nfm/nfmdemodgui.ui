@@ -287,7 +287,7 @@
          <string>Threshold min/max in dB</string>
         </property>
         <property name="minimum">
-         <number>-200</number>
+         <number>-1000</number>
         </property>
         <property name="maximum">
          <number>0</number>
