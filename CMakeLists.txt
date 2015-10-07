@@ -8,9 +8,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 project(sdrangel)
 
-set(CMAKE_BUILD_TYPE "Release")
+#set(CMAKE_BUILD_TYPE "Release")
 #set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
-#set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Debug")
 
 set(QT_USE_QTOPENGL TRUE)
 set(CMAKE_AUTOMOC ON)
@@ -33,8 +33,8 @@ ENDIF()
 ##############################################################################
 
 #include(${QT_USE_FILE})
-set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
-#set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+#set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
+set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
 add_definitions(${QT_DEFINITIONS})
 
 if(MSVC)

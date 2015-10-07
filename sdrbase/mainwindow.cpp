@@ -18,6 +18,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
+#include <QComboBox>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "audio/audiodeviceinfo.h"
@@ -99,9 +100,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	m_pluginManager->loadPlugins();
 
-	bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
-	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+	//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
+	//m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
+	//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
 	//m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
 	//ui->rxSpectrum->connectTimer(m_masterTimer);
@@ -109,11 +110,16 @@ MainWindow::MainWindow(QWidget* parent) :
 	//m_dspEngine->
 
 	m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+
 	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
 	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
 	m_dspEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
 	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
 	ui->tabChannels->removeTab(0);
+	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
@@ -129,9 +135,13 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	if (sampleSourceIndex >= 0)
 	{
-		bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-		ui->sampleSource->setCurrentIndex(sampleSourceIndex);
-		ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+		//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
+		//ui->sampleSource->setCurrentIndex(sampleSourceIndex);
+		//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
+
+		bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+		m_deviceUIs.back()->m_sampleSource->setCurrentIndex(sampleSourceIndex);
+		m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	}
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -585,7 +595,8 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
 	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
 	m_pluginManager->selectSampleSourceByIndex(ui->sampleSource->currentIndex());
-	m_settings.setSourceIndex(ui->sampleSource->currentIndex());
+	//m_settings.setSourceIndex(ui->sampleSource->currentIndex());
+	m_settings.setSourceIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
 	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
 }
 
@@ -603,10 +614,12 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_spectrumGUI = new GLSpectrumGUI;
 	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
 	m_channelWindow = new ChannelWindow;
+	m_sampleSource = new QComboBox;
 }
 
 MainWindow::DeviceUISet::~DeviceUISet()
 {
+	delete m_sampleSource;
 	delete m_channelWindow;
 	delete m_spectrumGUI;
 	delete m_spectrumVis;

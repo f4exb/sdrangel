@@ -27,6 +27,7 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
+class QComboBox;
 
 class AudioDeviceInfo;
 class DSPEngine;
@@ -57,6 +58,7 @@ public:
 		GLSpectrum *m_spectrum;
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
+		QComboBox *m_sampleSource;
 
 		DeviceUISet(QTimer& timer);
 		~DeviceUISet();
