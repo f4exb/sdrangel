@@ -58,11 +58,6 @@
         <string>Rx</string>
        </attribute>
       </widget>
-      <widget class="GLSpectrum" name="txSpectrum">
-       <attribute name="title">
-        <string>Tx</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -339,11 +334,6 @@
        <widget class="GLSpectrumGUI" name="rxSpectrumGUI">
         <attribute name="title">
          <string>Rx</string>
-        </attribute>
-       </widget>
-       <widget class="GLSpectrumGUI" name="txSpectrumGUI">
-        <attribute name="title">
-         <string>Tx</string>
         </attribute>
        </widget>
       </widget>

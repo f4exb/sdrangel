@@ -181,12 +181,14 @@ Assuming Debian Jessie is used:
   - Many other little things...
     
 <h1>To Do</h1>
+  - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two devices although the same plugin handles both. This effectively opens Tx support.
+  - Tx channels
+  - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). 
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration  
-  - Tx support with the BladeRF
   - Enhance WFM (stereo, RDS?)
   - Even more demods ...
   

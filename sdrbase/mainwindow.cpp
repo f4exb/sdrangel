@@ -109,11 +109,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
 	m_dspEngine->addSink(m_rxSpectrumVis);
 
-	m_txSpectrumVis = new SpectrumVis(ui->txSpectrum);
-	ui->txSpectrum->connectTimer(m_masterTimer);
-	ui->txSpectrumGUI->setBuddies(m_txSpectrumVis->getInputMessageQueue(), m_txSpectrumVis, ui->txSpectrum);
-	//m_dspEngine->addSink(m_rxSpectrumVis);
-
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
 
