@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1012</width>
-    <height>605</height>
+    <height>621</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -332,6 +332,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="inputDock">
+   <property name="minimumSize">
+    <size>
+     <width>143</width>
+     <height>85</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Sample Source</string>
    </property>
@@ -362,10 +368,51 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QComboBox" name="sampleSource">
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+      <widget class="QTabWidget" name="tabInputs">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="rxTabInput">
+        <attribute name="title">
+         <string>Rx</string>
+        </attribute>
+        <widget class="QComboBox" name="sampleSource">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>262</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>262</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+         </property>
+        </widget>
+       </widget>
       </widget>
      </item>
     </layout>
