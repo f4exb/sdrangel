@@ -382,6 +382,20 @@
          <string>Rx</string>
         </attribute>
         <widget class="QComboBox" name="sampleSource">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>255</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>255</width>
+           <height>0</height>
+          </size>
+         </property>
         </widget>
        </widget>
       </widget>
@@ -396,7 +410,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="ChannelWindow" name="channelWindow">
+   <widget class="QWidget" name="channelWidgetContent">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <property name="spacing">
       <number>3</number>
@@ -413,6 +427,26 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
+     <item>
+      <widget class="QTabWidget" name="tabChannels">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="ChannelWindow" name="rxChannels">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <attribute name="title">
+         <string>Rx</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>

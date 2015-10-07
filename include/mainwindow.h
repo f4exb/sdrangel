@@ -34,6 +34,7 @@ class Indicator;
 class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
+class ChannelWindow;
 class FileSink;
 class SampleSource;
 class PluginAPI;
@@ -50,6 +51,17 @@ class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
+	struct DeviceUISet
+	{
+		SpectrumVis *m_spectrumVis;
+		GLSpectrum *m_spectrum;
+		GLSpectrumGUI *m_spectrumGUI;
+		ChannelWindow *m_channelWindow;
+
+		DeviceUISet(QTimer& timer);
+		~DeviceUISet();
+	};
+
 	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
 
@@ -82,9 +94,7 @@ private:
 	SpectrumVis* m_rxSpectrumVis;
 	FileSink *m_fileSink;
 
-	std::vector<SpectrumVis*> m_spectraVis;
-	std::vector<GLSpectrum*> m_spectra;
-	std::vector<GLSpectrumGUI*> m_spectraGUI;
+	std::vector<DeviceUISet*> m_deviceUIs;
 
 	DSPEngine* m_dspEngine;
 

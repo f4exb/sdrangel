@@ -103,23 +103,16 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
 	ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
-	// Disable Tx spectrum by default. Enabled if source supports Tx.
-	ui->tabSpectra->setTabEnabled(1, false);
-	ui->tabSpectraGUI->setTabEnabled(1, false);
-
 	//m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
 	//ui->rxSpectrum->connectTimer(m_masterTimer);
 	//ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
-	//m_dspEngine->addSink(m_rxSpectrumVis);
+	//m_dspEngine->
 
-	m_spectra.push_back(new GLSpectrum);
-	m_spectraVis.push_back(new SpectrumVis(m_spectra.back()));
-	m_spectra.back()->connectTimer(m_masterTimer);
-	m_spectraGUI.push_back(new GLSpectrumGUI);
-	m_spectraGUI.back()->setBuddies(m_spectraVis.back()->getInputMessageQueue(), m_spectraVis.back(), m_spectra.back());
-	ui->tabSpectra->addTab(m_spectra.back(), "X0");
-	ui->tabSpectraGUI->addTab(m_spectraGUI.back(), "X0");
-	m_dspEngine->addSink(m_spectraVis.back());
+	m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
+	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
+	m_dspEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
@@ -163,20 +156,9 @@ MainWindow::~MainWindow()
 
 	m_pluginManager->freeAll();
 
-	for (int i=0; i<m_spectraGUI.size(); i++)
+	for (int i = 0; i < m_deviceUIs.size(); i++)
 	{
-		delete m_spectraGUI[i];
-	}
-
-	for (int i=0; i<m_spectraVis.size(); i++)
-	{
-		m_dspEngine->removeSink(m_spectraVis[i]);
-		delete m_spectraVis[i];
-	}
-
-	for (int i=0; i<m_spectra.size(); i++)
-	{
-		delete m_spectra[i];
+		delete m_deviceUIs[i];
 	}
 
 	m_dspEngine->removeSink(m_fileSink);
@@ -197,7 +179,9 @@ void MainWindow::addChannelCreateAction(QAction* action)
 
 void MainWindow::addChannelRollup(QWidget* widget)
 {
-	((ChannelWindow*)ui->channelDock->widget())->addRollupWidget(widget);
+	m_deviceUIs.back()->m_channelWindow->addRollupWidget(widget);
+	//((ChannelWindow*)ui->rxChannels)->addRollupWidget(widget);
+	//((ChannelWindow*)ui->channelDock->widget())->addRollupWidget(widget);
 	ui->channelDock->show();
 	ui->channelDock->raise();
 }
@@ -210,13 +194,13 @@ void MainWindow::addViewAction(QAction* action)
 void MainWindow::addChannelMarker(ChannelMarker* channelMarker)
 {
 	//ui->rxSpectrum->addChannelMarker(channelMarker);
-	m_spectra.back()->addChannelMarker(channelMarker);
+	m_deviceUIs.back()->m_spectrum->addChannelMarker(channelMarker);
 }
 
 void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 {
 	//ui->rxSpectrum->removeChannelMarker(channelMarker);
-	m_spectra.back()->removeChannelMarker(channelMarker);
+	m_deviceUIs.back()->m_spectrum->removeChannelMarker(channelMarker);
 }
 
 void MainWindow::setInputGUI(QWidget* gui)
@@ -247,7 +231,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getDescription()));
 
 	//ui->rxSpectrumGUI->deserialize(preset->getSpectrumConfig());
-	m_spectraGUI.back()->deserialize(preset->getSpectrumConfig());
+	m_deviceUIs.back()->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
 	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
@@ -269,7 +253,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getDescription()));
 
 	//preset->setSpectrumConfig(ui->rxSpectrumGUI->serialize());
-	preset->setSpectrumConfig(m_spectraGUI.back()->serialize());
+	preset->setSpectrumConfig(m_deviceUIs.back()->m_spectrumGUI->serialize());
 	preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
@@ -306,13 +290,13 @@ void MainWindow::closeEvent(QCloseEvent*)
 void MainWindow::updateCenterFreqDisplay()
 {
 	//ui->rxSpectrum->setCenterFrequency(m_centerFrequency);
-	m_spectra.back()->setCenterFrequency(m_centerFrequency);
+	m_deviceUIs.back()->m_spectrum->setCenterFrequency(m_centerFrequency);
 }
 
 void MainWindow::updateSampleRate()
 {
 	//ui->rxSpectrum->setSampleRate(m_sampleRate);
-	m_spectra.back()->setSampleRate(m_sampleRate);
+	m_deviceUIs.back()->m_spectrum->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
 
@@ -608,4 +592,22 @@ void MainWindow::on_action_About_triggered()
 {
 	AboutDialog dlg(this);
 	dlg.exec();
+}
+
+MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
+{
+	m_spectrum = new GLSpectrum;
+	m_spectrumVis = new SpectrumVis(m_spectrum);
+	m_spectrum->connectTimer(timer);
+	m_spectrumGUI = new GLSpectrumGUI;
+	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
+	m_channelWindow = new ChannelWindow;
+}
+
+MainWindow::DeviceUISet::~DeviceUISet()
+{
+	delete m_channelWindow;
+	delete m_spectrumGUI;
+	delete m_spectrumVis;
+	delete m_spectrum;
 }
