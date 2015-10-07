@@ -375,29 +375,8 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>-1</number>
        </property>
-       <widget class="QWidget" name="rxTabInput">
-        <attribute name="title">
-         <string>Rx</string>
-        </attribute>
-        <widget class="QComboBox" name="sampleSource">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>255</width>
-           <height>24</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>255</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
-       </widget>
       </widget>
      </item>
     </layout>

@@ -594,8 +594,9 @@ void MainWindow::on_action_Preferences_triggered()
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
 	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-	m_pluginManager->selectSampleSourceByIndex(ui->sampleSource->currentIndex());
+	//m_pluginManager->selectSampleSourceByIndex(ui->sampleSource->currentIndex());
 	//m_settings.setSourceIndex(ui->sampleSource->currentIndex());
+	m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
 	m_settings.setSourceIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
 	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
 }
