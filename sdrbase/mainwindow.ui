@@ -332,12 +332,6 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="inputDock">
-   <property name="minimumSize">
-    <size>
-     <width>143</width>
-     <height>85</height>
-    </size>
-   </property>
    <property name="windowTitle">
     <string>Sample Source</string>
    </property>
@@ -388,29 +382,6 @@
          <string>Rx</string>
         </attribute>
         <widget class="QComboBox" name="sampleSource">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>262</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>262</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="sizeAdjustPolicy">
-          <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-         </property>
         </widget>
        </widget>
       </widget>
