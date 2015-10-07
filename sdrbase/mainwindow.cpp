@@ -113,6 +113,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
 	m_dspEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
 	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
+	ui->tabChannels->removeTab(0);
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
