@@ -48,16 +48,11 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>-1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
       </property>
-      <widget class="GLSpectrum" name="rxSpectrum">
-       <attribute name="title">
-        <string>Rx</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -329,13 +324,8 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>-1</number>
        </property>
-       <widget class="GLSpectrumGUI" name="rxSpectrumGUI">
-        <attribute name="title">
-         <string>Rx</string>
-        </attribute>
-       </widget>
       </widget>
      </item>
     </layout>
@@ -490,18 +480,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
-  <customwidget>
-   <class>GLSpectrum</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrum.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrumGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrumgui.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ChannelWindow</class>
    <extends>QWidget</extends>

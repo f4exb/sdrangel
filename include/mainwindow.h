@@ -32,6 +32,8 @@ class AudioDeviceInfo;
 class DSPEngine;
 class Indicator;
 class SpectrumVis;
+class GLSpectrum;
+class GLSpectrumGUI;
 class FileSink;
 class SampleSource;
 class PluginAPI;
@@ -78,8 +80,11 @@ private:
 	MainSettings m_settings;
 
 	SpectrumVis* m_rxSpectrumVis;
-	SpectrumVis* m_txSpectrumVis;
 	FileSink *m_fileSink;
+
+	std::vector<SpectrumVis*> m_spectraVis;
+	std::vector<GLSpectrum*> m_spectra;
+	std::vector<GLSpectrumGUI*> m_spectraGUI;
 
 	DSPEngine* m_dspEngine;
 

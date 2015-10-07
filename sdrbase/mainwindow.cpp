@@ -36,6 +36,9 @@
 #include "plugin/pluginapi.h"
 #include "plugin/plugingui.h"
 
+#include "gui/glspectrum.h"
+#include "gui/glspectrumgui.h"
+
 #include <string>
 #include <QDebug>
 
@@ -104,10 +107,19 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->tabSpectra->setTabEnabled(1, false);
 	ui->tabSpectraGUI->setTabEnabled(1, false);
 
-	m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
-	ui->rxSpectrum->connectTimer(m_masterTimer);
-	ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
-	m_dspEngine->addSink(m_rxSpectrumVis);
+	//m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
+	//ui->rxSpectrum->connectTimer(m_masterTimer);
+	//ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
+	//m_dspEngine->addSink(m_rxSpectrumVis);
+
+	m_spectra.push_back(new GLSpectrum);
+	m_spectraVis.push_back(new SpectrumVis(m_spectra.back()));
+	m_spectra.back()->connectTimer(m_masterTimer);
+	m_spectraGUI.push_back(new GLSpectrumGUI);
+	m_spectraGUI.back()->setBuddies(m_spectraVis.back()->getInputMessageQueue(), m_spectraVis.back(), m_spectra.back());
+	ui->tabSpectra->addTab(m_spectra.back(), "X0");
+	ui->tabSpectraGUI->addTab(m_spectraGUI.back(), "X0");
+	m_dspEngine->addSink(m_spectraVis.back());
 
 	m_fileSink = new FileSink();
 	m_dspEngine->addSink(m_fileSink);
@@ -151,10 +163,26 @@ MainWindow::~MainWindow()
 
 	m_pluginManager->freeAll();
 
+	for (int i=0; i<m_spectraGUI.size(); i++)
+	{
+		delete m_spectraGUI[i];
+	}
+
+	for (int i=0; i<m_spectraVis.size(); i++)
+	{
+		m_dspEngine->removeSink(m_spectraVis[i]);
+		delete m_spectraVis[i];
+	}
+
+	for (int i=0; i<m_spectra.size(); i++)
+	{
+		delete m_spectra[i];
+	}
+
 	m_dspEngine->removeSink(m_fileSink);
-	m_dspEngine->removeSink(m_rxSpectrumVis);
+	//m_dspEngine->removeSink(m_rxSpectrumVis);
 	delete m_fileSink;
-	delete m_rxSpectrumVis;
+	//delete m_rxSpectrumVis;
 	delete m_pluginManager;
 
 	m_dspEngine->stop();
@@ -181,12 +209,14 @@ void MainWindow::addViewAction(QAction* action)
 
 void MainWindow::addChannelMarker(ChannelMarker* channelMarker)
 {
-	ui->rxSpectrum->addChannelMarker(channelMarker);
+	//ui->rxSpectrum->addChannelMarker(channelMarker);
+	m_spectra.back()->addChannelMarker(channelMarker);
 }
 
 void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	ui->rxSpectrum->removeChannelMarker(channelMarker);
+	//ui->rxSpectrum->removeChannelMarker(channelMarker);
+	m_spectra.back()->removeChannelMarker(channelMarker);
 }
 
 void MainWindow::setInputGUI(QWidget* gui)
@@ -216,7 +246,8 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	ui->rxSpectrumGUI->deserialize(preset->getSpectrumConfig());
+	//ui->rxSpectrumGUI->deserialize(preset->getSpectrumConfig());
+	m_spectraGUI.back()->deserialize(preset->getSpectrumConfig());
 	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
@@ -237,7 +268,8 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	preset->setSpectrumConfig(ui->rxSpectrumGUI->serialize());
+	//preset->setSpectrumConfig(ui->rxSpectrumGUI->serialize());
+	preset->setSpectrumConfig(m_spectraGUI.back()->serialize());
 	preset->clearChannels();
     m_pluginManager->saveSettings(preset);
 
@@ -273,12 +305,14 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::updateCenterFreqDisplay()
 {
-	ui->rxSpectrum->setCenterFrequency(m_centerFrequency);
+	//ui->rxSpectrum->setCenterFrequency(m_centerFrequency);
+	m_spectra.back()->setCenterFrequency(m_centerFrequency);
 }
 
 void MainWindow::updateSampleRate()
 {
-	ui->rxSpectrum->setSampleRate(m_sampleRate);
+	//ui->rxSpectrum->setSampleRate(m_sampleRate);
+	m_spectra.back()->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
 
