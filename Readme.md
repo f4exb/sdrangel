@@ -118,7 +118,10 @@ Assuming Debian Jessie is used:
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
   - As the objects input and output queues can be publicly accessed there is no strict control of which objects post messages on these queues. The correct assumption is that messages can be popped from the input queue only by its holder and that messages can be pushed on the output queue only by its holder.
   - Objects managing more than one message queue (input + output for example) do not work well under stress conditions. Output queue removed from sample sources but this model has to be revised throughout the application.
-  - Tx tabs are just appetizers for the moment and are disabled.
+
+<h1>Limitations</h1>
+
+  - Tabbed panels showing "X0" refer to the only one selected device it is meant to be populated by more tabs when it will support more than one device possibly Rx + Tx.
 
 <h1>Changes from SDRangelove</h1>
 
