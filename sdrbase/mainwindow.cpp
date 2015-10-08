@@ -330,13 +330,18 @@ void MainWindow::updatePresetControls()
 QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 {
 	QTreeWidgetItem* group = 0;
-	for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
-		if(ui->presetTree->topLevelItem(i)->text(0) == preset->getGroup()) {
+
+	for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
+	{
+		if(ui->presetTree->topLevelItem(i)->text(0) == preset->getGroup())
+		{
 			group = ui->presetTree->topLevelItem(i);
 			break;
 		}
 	}
-	if(group == 0) {
+
+	if(group == 0)
+	{
 		QStringList sl;
 		sl.append(preset->getGroup());
 		group = new QTreeWidgetItem(ui->presetTree, sl, PGroup);
@@ -344,6 +349,7 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 		group->setExpanded(true);
 		ui->presetTree->sortByColumn(0, Qt::AscendingOrder);
 	}
+
 	QStringList sl;
 	sl.append(QString("%1 kHz").arg(preset->getCenterFrequency() / 1000));
 	sl.append(preset->getDescription());

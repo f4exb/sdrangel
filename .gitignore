@@ -7,3 +7,4 @@ sdrangelove.supp
 .cproject
 .project
 .settings/
+*.cs

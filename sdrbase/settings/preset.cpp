@@ -115,7 +115,7 @@ bool Preset::deserialize(const QByteArray& data)
 
 			if (!sourceId.isEmpty())
 			{
-				qDebug("Preset::deserialize:  source: id: %ss, ser: %s, seq: %d",
+				qDebug("Preset::deserialize:  source: id: %s, ser: %s, seq: %d",
 					qPrintable(sourceId),
 					qPrintable(sourceSerial),
 					sourceSequence);
@@ -140,6 +140,8 @@ bool Preset::deserialize(const QByteArray& data)
 			qDebug("Preset::deserialize:  channel: id: %s", qPrintable(channel));
 			m_channelConfigs.append(ChannelConfig(channel, config));
 		}
+
+		return true;
 	}
 	else
 	{
