@@ -29,6 +29,7 @@
 #include "gui/preferencesdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
+#include "gui/channelwindow.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/filesink.h"
@@ -115,7 +116,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
 	m_dspEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
 	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
-	ui->tabChannels->removeTab(0);
 	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
 	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);

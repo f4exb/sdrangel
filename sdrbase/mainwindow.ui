@@ -409,21 +409,8 @@
      <item>
       <widget class="QTabWidget" name="tabChannels">
        <property name="currentIndex">
-        <number>0</number>
+        <number>-1</number>
        </property>
-       <widget class="ChannelWindow" name="rxChannels">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <attribute name="title">
-         <string>Rx</string>
-        </attribute>
-       </widget>
       </widget>
      </item>
     </layout>
@@ -510,14 +497,6 @@
   <zorder>channelDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>ChannelWindow</class>
-   <extends>QWidget</extends>
-   <header>gui/channelwindow.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>presetTree</tabstop>
   <tabstop>presetSave</tabstop>
