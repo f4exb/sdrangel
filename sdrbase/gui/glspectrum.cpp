@@ -358,25 +358,41 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 	if(m_decay > 0)
 		sub += m_decay;
 
-	m_histogramHoldoffCount--;
-	if(m_histogramHoldoffCount <= 0) {
-		for(int i = 0; i < fftMulSize; i++) {
-			if((*b>>4) > 0) { // *b > 16
-				*b = *b - sub;
-			} else if(*b > 0) {
-				if(*h >= sub) {
-					*h = *h - sub;
-				} else if(*h > 0) {
-					*h = *h - 1;
-				} else {
-					*b = *b - 1;
-					*h = m_histogramLateHoldoff;
+	if (m_displayHistogram || m_displayMaxHold)
+	{
+		m_histogramHoldoffCount--;
+
+		if(m_histogramHoldoffCount <= 0)
+		{
+			for(int i = 0; i < fftMulSize; i++)
+			{
+				if((*b>>4) > 0) // *b > 16
+				{
+					*b = *b - sub;
 				}
+				else if(*b > 0)
+				{
+					if(*h >= sub)
+					{
+						*h = *h - sub;
+					}
+					else if(*h > 0)
+					{
+						*h = *h - 1;
+					}
+					else
+					{
+						*b = *b - 1;
+						*h = m_histogramLateHoldoff;
+					}
+				}
+
+				b++;
+				h++;
 			}
-			b++;
-			h++;
+
+			m_histogramHoldoffCount = m_histogramHoldoffBase;
 		}
-		m_histogramHoldoffCount = m_histogramHoldoffBase;
 	}
 
 	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display

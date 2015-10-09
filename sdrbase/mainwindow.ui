@@ -408,6 +408,14 @@
      </property>
      <item>
       <widget class="QTabWidget" name="tabChannels">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::East</enum>
+       </property>
        <property name="currentIndex">
         <number>-1</number>
        </property>
