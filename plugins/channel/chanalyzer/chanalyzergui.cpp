@@ -106,7 +106,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
     {
 		QByteArray bytetmp;
 		quint32 u32tmp;
-		qint32 tmp;
+		qint32 tmp, bw, lowCut;
 		bool tmpBool;
         
 		blockApplySettings(true);
@@ -114,8 +114,8 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
         
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 30);
-		ui->BW->setValue(tmp);
+		d.readS32(2, &bw, 30);
+		ui->BW->setValue(bw);
 		d.readBlob(3, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
 
@@ -124,8 +124,8 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 			m_channelMarker.setColor(u32tmp);
 		}
 
-		d.readS32(5, &tmp, 3);
-		ui->lowCut->setValue(tmp);
+		d.readS32(5, &lowCut, 3);
+		ui->lowCut->setValue(lowCut);
 		d.readS32(6, &tmp, 20);
 		ui->spanLog2->setValue(tmp);
 		setNewRate(tmp);
@@ -137,7 +137,9 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
         
-		applySettings();
+		ui->BW->setValue(bw);
+		ui->lowCut->setValue(lowCut); // does applySettings();
+
 		return true;
 	} 
     else 
