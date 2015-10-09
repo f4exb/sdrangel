@@ -80,7 +80,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
-		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
 		c *= m_nco.nextIQ();
 
 		rf_out = m_rfFilter->runFilt(c, &rf); // filter RF before demod

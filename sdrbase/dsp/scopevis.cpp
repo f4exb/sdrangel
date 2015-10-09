@@ -90,7 +90,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 			for(int i = 0; i < count; ++i)
 			{
-				*it++ = Complex(begin->real() / 32768.0, begin->imag() / 32768.0);
+				*it++ = Complex(begin->real() / 32768.0f, begin->imag() / 32768.0f);
 				++begin;
 			}
 

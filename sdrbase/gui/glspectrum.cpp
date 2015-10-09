@@ -353,14 +353,15 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 	quint8* b = m_histogram;
 	quint8* h = m_histogramHoldoff;
 	int sub = 1;
+	int fftMulSize = 100 * m_fftSize;
 
 	if(m_decay > 0)
 		sub += m_decay;
 
 	m_histogramHoldoffCount--;
 	if(m_histogramHoldoffCount <= 0) {
-		for(int i = 0; i < 100 * m_fftSize; i++) {
-			if(*b > 20) {
+		for(int i = 0; i < fftMulSize; i++) {
+			if((*b>>4) > 0) { // *b > 16
 				*b = *b - sub;
 			} else if(*b > 0) {
 				if(*h >= sub) {

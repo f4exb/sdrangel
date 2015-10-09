@@ -71,7 +71,7 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		Complex c(it->real() / 32768.0, it->imag() / 32768.0);
+		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
 		c *= m_nco.nextIQ();
 
 		if (m_ssb)
