@@ -71,7 +71,8 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		if (m_ssb)
@@ -93,15 +94,17 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
 			if (!(m_undersampleCount++ & decim_mask))
 			{
 				m_sum /= decim;
-				m_magsq = m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag();
+				m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);
 
 				if (m_ssb & !m_usb)
 				{ // invert spectrum for LSB
-					m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
+					//m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
+					m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
 				}
 				else
 				{
-					m_sampleBuffer.push_back(Sample(m_sum.real() * 32768.0, m_sum.imag() * 32768.0));
+					//m_sampleBuffer.push_back(Sample(m_sum.real() * 32768.0, m_sum.imag() * 32768.0));
+					m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
 				}
 
 				m_sum = 0;
