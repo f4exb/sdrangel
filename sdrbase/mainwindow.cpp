@@ -110,6 +110,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	//ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
 	//m_dspEngine->
 
+	// TODO: This will go in a create new device tab method:
+
 	m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
 
 	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
@@ -118,6 +120,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
 	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
 	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
