@@ -122,7 +122,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				sum.imag() = 0.0;
 			}
 
-			qint16 sample = (qint16)(demod * m_volume * 10);
+			qint16 sample = (qint16)(demod * m_volume * 100);
 			m_audioBuffer[m_audioBufferFill].l = sample;
 			m_audioBuffer[m_audioBufferFill].r = sample;
 			++m_audioBufferFill;
