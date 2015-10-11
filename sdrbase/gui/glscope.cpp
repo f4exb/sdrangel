@@ -780,7 +780,7 @@ void GLScope::applyConfig()
     float pow_range = 100.0 / m_amp;
     float amp_range = 2.0 / m_amp;
     float amp_ofs = m_ofs;
-    float t_start = (m_timeOfsProMill / 1000.0) * ((float) m_displayTrace->size() / m_sampleRate);
+    float t_start = ((m_timeOfsProMill / 1000.0) - m_triggerPre) * ((float) m_displayTrace->size() / m_sampleRate);
     float t_len = ((float) m_displayTrace->size() / m_sampleRate) / (float) m_timeBase;
 
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
@@ -1418,6 +1418,8 @@ void GLScope::setTriggerLevel(Real triggerLevel)
 void GLScope::setTriggerPre(Real triggerPre)
 {
 	m_triggerPre = triggerPre;
+	m_configChanged = true;
+	update();
 }
 
 void GLScope::connectTimer(const QTimer& timer)
