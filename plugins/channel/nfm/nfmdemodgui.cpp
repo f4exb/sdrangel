@@ -341,7 +341,7 @@ void NFMDemodGUI::blockApplySettings(bool block)
 
 void NFMDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_nfmDemod->getMagSq());
+	Real powDb = CalcDb::dbPower(m_nfmDemod->getMag()) * 2;
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }

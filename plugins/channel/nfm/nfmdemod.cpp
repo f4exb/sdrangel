@@ -122,7 +122,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
-		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		{
@@ -135,7 +136,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				//ci *= (m_agcLevel / m_AGC.getValue());
 
 				m_AGC.feed(ci);
-				m_magsq = m_AGC.getMagSq();
+				//m_magsq = m_AGC.getMagSq() / (1<<30);
 
 				// demod
 				/*
@@ -172,7 +173,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				squelchOpen = (getMagSq() > m_squelchLevel);
+				squelchOpen = (getMag() > m_squelchLevel);
 
 				/*
 				if (m_afSquelch.analyze(demod))
@@ -355,7 +356,7 @@ void NFMDemod::apply()
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a value in tenths of dB
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 100.0);
+		m_squelchLevel = pow(10.0, m_config.m_squelch / 200.0);
 		//m_squelchLevel *= m_squelchLevel;
 		m_afSquelch.setThreshold(m_squelchLevel);
 	}
