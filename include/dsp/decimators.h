@@ -362,7 +362,7 @@ void Decimators<T, SdrBits, InputBits>::decimate32_inf(SampleVector::iterator* i
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
 		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 
 		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
@@ -393,7 +393,7 @@ void Decimators<T, SdrBits, InputBits>::decimate32_sup(SampleVector::iterator* i
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
 		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 
 		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
@@ -424,7 +424,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_inf(SampleVector::iterator* i
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
 		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 		m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
 		m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
@@ -464,7 +464,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_sup(SampleVector::iterator* i
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[3]);
+		m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
 		m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 		m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
 		m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
