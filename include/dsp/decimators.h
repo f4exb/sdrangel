@@ -419,7 +419,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_inf(SampleVector::iterator* i
 		{
 			xreal[i] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre64;
 			yimag[i] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre64;
-			pos += 16;
+			pos += 8;
 		}
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
@@ -459,7 +459,7 @@ void Decimators<T, SdrBits, InputBits>::decimate64_sup(SampleVector::iterator* i
 		{
 			xreal[i] = (buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre32;
 			yimag[i] = (buf[pos+4] + buf[pos+7] - buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre32;
-			pos += 16;
+			pos += 8;
 		}
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
