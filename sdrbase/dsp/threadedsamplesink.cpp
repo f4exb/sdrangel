@@ -21,6 +21,47 @@ void ThreadedSampleFifo::writeToFifo(SampleVector::const_iterator& begin, Sample
 	m_sampleFifo.write(begin, end);
 }
 
+void ThreadedSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
+{
+	bool positiveOnly = false;
+
+	while ((m_sampleFifo.fill() > 0) && (m_sampleSink->getInputMessageQueue()->size() == 0))
+	{
+		SampleVector::iterator part1begin;
+		SampleVector::iterator part1end;
+		SampleVector::iterator part2begin;
+		SampleVector::iterator part2end;
+
+		std::size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
+
+		// first part of FIFO data
+
+		if (count > 0)
+		{
+			// handle data
+			if(m_sampleSink != NULL)
+			{
+				m_sampleSink->feed(part1begin, part1end, positiveOnly);
+			}
+
+			m_sampleFifo.readCommit(part1end - part1begin);
+		}
+
+		// second part of FIFO data (used when block wraps around)
+
+		if(part2begin != part2end)
+		{
+			// handle data
+			if(m_sampleSink != NULL)
+			{
+				m_sampleSink->feed(part2begin, part2end, positiveOnly);
+			}
+
+			m_sampleFifo.readCommit(part2end - part2begin);
+		}
+	}
+}
+
 ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink, QObject *parent) :
 	m_sampleSink(sampleSink)
 {
@@ -78,46 +119,3 @@ QString ThreadedSampleSink::getSampleSinkObjectName() const
 {
 	return m_sampleSink->objectName();
 }
-
-
-void ThreadedSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
-{
-	bool positiveOnly = false;
-
-	while ((m_sampleFifo.fill() > 0) && (m_sampleSink->getInputMessageQueue()->size() == 0))
-	{
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
-
-		std::size_t count = m_sampleFifo.readBegin(m_sampleFifo.fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-		// first part of FIFO data
-
-		if (count > 0)
-		{
-			// handle data
-			if(m_sampleSink != NULL)
-			{
-				m_sampleSink->feed(part1begin, part1end, positiveOnly);
-			}
-
-			m_sampleFifo.readCommit(part1end - part1begin);
-		}
-
-		// second part of FIFO data (used when block wraps around)
-
-		if(part2begin != part2end)
-		{
-			// handle data
-			if(m_sampleSink != NULL)
-			{
-				m_sampleSink->feed(part2begin, part2end, positiveOnly);
-			}
-
-			m_sampleFifo.readCommit(part2end - part2begin);
-		}
-	}
-}
-

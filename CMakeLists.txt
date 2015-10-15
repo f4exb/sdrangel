@@ -33,8 +33,8 @@ ENDIF()
 ##############################################################################
 
 #include(${QT_USE_FILE})
-#set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
-set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
+#set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
 add_definitions(${QT_DEFINITIONS})
 
 if(MSVC)
@@ -62,6 +62,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/ctcssdetector.cpp
 	sdrbase/dsp/dspcommands.cpp
 	sdrbase/dsp/dspengine.cpp
+	sdrbase/dsp/dspdeviceengine.cpp
 	sdrbase/dsp/fftengine.cpp
 	sdrbase/dsp/fftfilt.cxx
 	sdrbase/dsp/fftwindow.cpp
@@ -134,6 +135,7 @@ set(sdrbase_HEADERS
 	include/dsp/decimators.h
 	include/dsp/dspcommands.h
 	include/dsp/dspengine.h
+	include/dsp/dspdeviceengine.h
 	include/dsp/dsptypes.h
 	include/dsp/fftengine.h
 	include/dsp/fftfilt.h

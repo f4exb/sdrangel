@@ -18,48 +18,29 @@
 #ifndef INCLUDE_DSPENGINE_H
 #define INCLUDE_DSPENGINE_H
 
-#include <QThread>
-#include <QTimer>
-#include <QMutex>
-#include <QWaitCondition>
-#include "dsp/dsptypes.h"
-#include "dsp/fftwindow.h"
-#include "dsp/samplefifo.h"
+#include <QObject>
+#include "dsp/dspdeviceengine.h"
 #include "audio/audiooutput.h"
-#include "util/messagequeue.h"
-#include "util/syncmessenger.h"
 #include "util/export.h"
 
-class SampleSource;
-class SampleSink;
+class DSPDeviceEngine;
 class ThreadedSampleSink;
-class AudioFifo;
 
-class SDRANGEL_API DSPEngine : public QThread {
+class SDRANGEL_API DSPEngine : public QObject {
 	Q_OBJECT
-
 public:
-	enum State {
-		StNotStarted,  //!< engine is before initialization
-		StIdle,        //!< engine is idle
-		StReady,       //!< engine is ready to run
-		StRunning,     //!< engine is running
-		StError        //!< engine is in error
-	};
-
-	DSPEngine(QObject* parent = NULL);
+	DSPEngine();
 	~DSPEngine();
 
 	static DSPEngine *instance();
 
-	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
+	MessageQueue* getInputMessageQueue();
+	MessageQueue* getOutputMessageQueue();
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
-	void setAudioSampleRate(uint rate);
 
-	void start(); //!< This thread start
-	void stop();  //!< This thread stop
+	void start(); //!< Device engine(s) start
+	void stop();  //!< Device engine(s) stop
 
 	bool initAcquisition(); //!< Initialize acquisition sequence
 	bool startAcquisition(); //!< Start acquisition sequence
@@ -77,62 +58,17 @@ public:
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
-	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
+ 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
 
-	State state() const { return m_state; } //!< Return DSP engine current state
+ 	DSPDeviceEngine::State state() const;
 
-	QString errorMessage(); //!< Return the current error message
+ 	QString errorMessage(); //!< Return the current error message
 	QString sourceDeviceDescription(); //!< Return the source device description
 
 private:
-	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
-	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
-	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
-
-	State m_state;
-
-	QString m_errorMessage;
-	QString m_deviceDescription;
-
-	SampleSource* m_sampleSource;
-	int m_sampleSourceSequence;
-
-	typedef std::list<SampleSink*> SampleSinks;
-	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
-
-	typedef std::list<ThreadedSampleSink*> ThreadedSampleSinks;
-	ThreadedSampleSinks m_threadedSampleSinks; //!< sample sinks on their own threads (usually channels)
-
+	DSPDeviceEngine *m_deviceEngine;
 	AudioOutput m_audioOutput;
-
-	uint m_sampleRate;
-	quint64 m_centerFrequency;
 	uint m_audioSampleRate;
-
-	bool m_dcOffsetCorrection;
-	bool m_iqImbalanceCorrection;
-	double m_iOffset, m_qOffset;
-	qint32 m_iRange;
-	qint32 m_qRange;
-	qint32 m_imbalance;
-
-	void run();
-
-	void dcOffset(SampleVector::iterator begin, SampleVector::iterator end);
-	void imbalance(SampleVector::iterator begin, SampleVector::iterator end);
-	void work(); //!< transfer samples from source to sinks if in running state
-
-	State gotoIdle();     //!< Go to the idle state
-	State gotoInit();     //!< Go to the acquisition init state from idle
-	State gotoRunning();  //!< Go to the running state from ready state
-	State gotoError(const QString& errorMsg); //!< Go to an error state
-
-	void handleSetSource(SampleSource* source); //!< Manage source setting
-
-private slots:
-	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
-	void handleInputMessages(); //!< Handle input message queue
-	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 };
 
 #endif // INCLUDE_DSPENGINE_H

@@ -165,7 +165,7 @@ Assuming Debian Jessie is used:
   - Trigger line display for all trigger modes
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
-  - File sample source plugin (recording reader) not working
+  - File sample source plugin (recording reader)
   
 <h2>Major redesign</h2>
 
@@ -184,11 +184,14 @@ Assuming Debian Jessie is used:
   - Many other little things...
     
 <h1>To Do</h1>
-  - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two devices although the same plugin handles both. This effectively opens Tx support.
+  - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
-  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON). 
+  - 32 bit samples for the Channel Analyzer
+  - Trace history in the Channel Analyzer
+  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).
+  - Headless mode based on a saved configuration in above human readable form
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration  

@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_audioDeviceInfo(new AudioDeviceInfo),
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
-	m_lastEngineState((DSPEngine::State)-1),
+	m_lastEngineState((DSPDeviceEngine::State)-1),
 	m_startOsmoSDRUpdateAfterStop(false),
 	m_inputGUI(0),
 	m_sampleRate(0),
@@ -418,28 +418,28 @@ void MainWindow::updateStatus()
 	int state = m_dspEngine->state();
 	if(m_lastEngineState != state) {
 		switch(state) {
-			case DSPEngine::StNotStarted:
+			case DSPDeviceEngine::StNotStarted:
 				m_engineIdle->setColor(Qt::gray);
 				m_engineRunning->setColor(Qt::gray);
 				m_engineError->setColor(Qt::gray);
 				statusBar()->clearMessage();
 				break;
 
-			case DSPEngine::StIdle:
+			case DSPDeviceEngine::StIdle:
 				m_engineIdle->setColor(Qt::cyan);
 				m_engineRunning->setColor(Qt::gray);
 				m_engineError->setColor(Qt::gray);
 				statusBar()->clearMessage();
 				break;
 
-			case DSPEngine::StRunning:
+			case DSPDeviceEngine::StRunning:
 				m_engineIdle->setColor(Qt::gray);
 				m_engineRunning->setColor(Qt::green);
 				m_engineError->setColor(Qt::gray);
 				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->sourceDeviceDescription()));
 				break;
 
-			case DSPEngine::StError:
+			case DSPDeviceEngine::StError:
 				m_engineIdle->setColor(Qt::gray);
 				m_engineRunning->setColor(Qt::gray);
 				m_engineError->setColor(Qt::red);

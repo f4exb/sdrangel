@@ -15,39 +15,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <QDebug>
+#include <QGlobalStatic>
+#include <QThread>
 #include "dsp/dspengine.h"
-#include "dsp/channelizer.h"
-#include "dsp/samplefifo.h"
-#include "dsp/samplesink.h"
-#include "dsp/threadedsamplesink.h"
-#include "dsp/dspcommands.h"
-#include "dsp/samplesource.h"
 
-DSPEngine::DSPEngine(QObject* parent) :
-	QThread(parent),
-	m_state(StNotStarted),
-	m_sampleSource(0),
-	m_sampleSourceSequence(0),
-	m_sampleSinks(),
-	m_sampleRate(0),
-	m_centerFrequency(0),
-	m_audioSampleRate(48000),
-	m_dcOffsetCorrection(false),
-	m_iqImbalanceCorrection(false),
-	m_iOffset(0),
-	m_qOffset(0),
-	m_iRange(1 << 16),
-	m_qRange(1 << 16),
-	m_imbalance(65536)
+DSPEngine::DSPEngine() :
+	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
-	moveToThread(this);
+	m_deviceEngine = new DSPDeviceEngine();
 }
 
 DSPEngine::~DSPEngine()
 {
-	wait();
+	delete m_deviceEngine;
 }
 
 Q_GLOBAL_STATIC(DSPEngine, dspEngine)
@@ -56,629 +36,121 @@ DSPEngine *DSPEngine::instance()
 	return dspEngine;
 }
 
-void DSPEngine::run()
+MessageQueue* DSPEngine::getInputMessageQueue()
 {
-	qDebug() << "DSPEngine::run";
+	return m_deviceEngine->getInputMessageQueue();
+}
 
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
-
-	m_state = StIdle;
-
-    m_syncMessenger.done(); // Release start() that is waiting in main trhead
-	exec();
+MessageQueue* DSPEngine::getOutputMessageQueue()
+{
+	return m_deviceEngine->getOutputMessageQueue();
 }
 
 void DSPEngine::start()
 {
-	qDebug() << "DSPEngine::start";
-	DSPPing cmd;
-	QThread::start();
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::start");
+	m_deviceEngine->start();
 }
 
 void DSPEngine::stop()
 {
-	qDebug() << "DSPEngine::stop";
-	DSPExit cmd;
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::stop");
+	m_audioOutput.stop();
+	m_deviceEngine->stop();
 }
 
 bool DSPEngine::initAcquisition()
 {
-	qDebug() << "DSPEngine::initAcquisition";
-	DSPAcquisitionInit cmd;
-
-	return m_syncMessenger.sendWait(cmd) == StReady;
+	qDebug("DSPEngine::initAcquisition");
+	return m_deviceEngine->initAcquisition();
 }
 
 bool DSPEngine::startAcquisition()
 {
-	qDebug() << "DSPEngine::startAcquisition";
-	DSPAcquisitionStart cmd;
+	qDebug("DSPEngine::startAcquisition");
+	bool started = m_deviceEngine->startAcquisition();
 
-	return m_syncMessenger.sendWait(cmd) == StRunning;
+	if (started)
+	{
+		m_audioOutput.start(-1, m_audioSampleRate);
+		m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
+	}
+
+	return started;
 }
 
 void DSPEngine::stopAcquistion()
 {
-	qDebug() << "DSPEngine::stopAcquistion";
-	DSPAcquisitionStop cmd;
-	m_syncMessenger.storeMessage(cmd);
-	handleSynchronousMessages();
-
-
-	if(m_dcOffsetCorrection)
-	{
-		qDebug("DC offset:%f,%f", m_iOffset, m_qOffset);
-	}
+	qDebug("DSPEngine::stopAcquistion");
+	m_audioOutput.stop();
+	m_deviceEngine->stopAcquistion();
 }
 
 void DSPEngine::setSource(SampleSource* source)
 {
-	qDebug() << "DSPEngine::setSource";
-	DSPSetSource cmd(source);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::setSource");
+	m_deviceEngine->setSource(source);
 }
 
 void DSPEngine::setSourceSequence(int sequence)
 {
-	qDebug("DSPEngine::setSourceSequence: seq: %d", sequence);
-	m_sampleSourceSequence = sequence;
+	qDebug("DSPEngine::setSource");
+	m_deviceEngine->setSourceSequence(sequence);
 }
 
 void DSPEngine::addSink(SampleSink* sink)
 {
-	qDebug() << "DSPEngine::addSink: " << sink->objectName().toStdString().c_str();
-	DSPAddSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::setSource");
+	m_deviceEngine->addSink(sink);
 }
 
 void DSPEngine::removeSink(SampleSink* sink)
 {
-	qDebug() << "DSPEngine::removeSink: " << sink->objectName().toStdString().c_str();
-	DSPRemoveSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::removeSink");
+	m_deviceEngine->removeSink(sink);
 }
 
 void DSPEngine::addThreadedSink(ThreadedSampleSink* sink)
 {
-	qDebug() << "DSPEngine::addThreadedSink: " << sink->objectName().toStdString().c_str();
-	DSPAddThreadedSampleSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::addThreadedSink");
+	m_deviceEngine->addThreadedSink(sink);
 }
 
 void DSPEngine::removeThreadedSink(ThreadedSampleSink* sink)
 {
-	qDebug() << "DSPEngine::removeThreadedSink: " << sink->objectName().toStdString().c_str();
-	DSPRemoveThreadedSampleSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::addThreadedSink");
+	m_deviceEngine->removeThreadedSink(sink);
 }
 
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
 {
-	qDebug() << "DSPEngine::addAudioSink";
-	DSPAddAudioSink cmd(audioFifo);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::addAudioSink");
+	m_audioOutput.addFifo(audioFifo);
 }
 
 void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 {
-	qDebug() << "DSPEngine::removeAudioSink";
-	DSPRemoveAudioSink cmd(audioFifo);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPEngine::removeAudioSink");
+	m_audioOutput.removeFifo(audioFifo);
 }
 
 void DSPEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {
-	qDebug() << "DSPEngine::configureCorrections";
-	DSPConfigureCorrection* cmd = new DSPConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection);
-	m_inputMessageQueue.push(cmd);
+	qDebug("DSPEngine::configureCorrections");
+	m_deviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+}
+
+DSPDeviceEngine::State DSPEngine::state() const
+{
+	return m_deviceEngine->state();
 }
 
 QString DSPEngine::errorMessage()
 {
-	qDebug() << "DSPEngine::errorMessage";
-	DSPGetErrorMessage cmd;
-	m_syncMessenger.sendWait(cmd);
-	return cmd.getErrorMessage();
+	return m_deviceEngine->errorMessage();
 }
 
 QString DSPEngine::sourceDeviceDescription()
 {
-	qDebug() << "DSPEngine::sourceDeviceDescription";
-	DSPGetSourceDeviceDescription cmd;
-	m_syncMessenger.sendWait(cmd);
-	return cmd.getDeviceDescription();
-}
-
-void DSPEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
-{
-	double count;
-	int io = 0;
-	int qo = 0;
-	Sample corr((qint16)m_iOffset, (qint16)m_qOffset);
-
-	// sum and correct in one pass
-	for(SampleVector::iterator it = begin; it < end; it++)
-	{
-		io += it->real();
-		qo += it->imag();
-		*it -= corr;
-	}
-
-	// moving average
-	count = end - begin;
-	m_iOffset = (15.0 * m_iOffset + (double)io / count) / 16.0;
-	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
-}
-
-void DSPEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
-{
-	int iMin = 0;
-	int iMax = 0;
-	int qMin = 0;
-	int qMax = 0;
-
-	// find value ranges for both I and Q
-	// both intervals should be same same size (for a perfect circle)
-	for (SampleVector::iterator it = begin; it < end; it++)
-	{
-		if (it != begin)
-		{
-			if (it->real() < iMin) {
-				iMin = it->real();
-			} else if (it->real() > iMax) {
-				iMax = it->real();
-			}
-
-			if (it->imag() < qMin) {
-				qMin = it->imag();
-			} else if (it->imag() > qMax) {
-				qMax = it->imag();
-			}
-		}
-		else
-		{
-			iMin = it->real();
-			iMax = it->real();
-			qMin = it->imag();
-			qMax = it->imag();
-		}
-	}
-
-	// sliding average (el cheapo again)
-	m_iRange = (m_iRange * 15 + (iMax - iMin)) >> 4;
-	m_qRange = (m_qRange * 15 + (qMax - qMin)) >> 4;
-
-	// calculate imbalance as Q15.16
-	if(m_qRange != 0) {
-		m_imbalance = ((uint)m_iRange << 16) / (uint)m_qRange;
-	}
-
-	// correct imbalance and convert back to signed int 16
-	for(SampleVector::iterator it = begin; it < end; it++) {
-		it->m_imag = (it->m_imag * m_imbalance) >> 16;
-	}
-}
-
-void DSPEngine::work()
-{
-	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
-	std::size_t samplesDone = 0;
-	bool positiveOnly = false;
-
-	while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_sampleRate))
-	{
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
-
-		std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-		// first part of FIFO data
-		if (part1begin != part1end)
-		{
-			// correct stuff
-			if (m_dcOffsetCorrection)
-			{
-				dcOffset(part1begin, part1end);
-			}
-
-			if (m_iqImbalanceCorrection)
-			{
-				imbalance(part1begin, part1end);
-			}
-
-			// feed data to direct sinks
-			for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); ++it)
-			{
-				(*it)->feed(part1begin, part1end, positiveOnly);
-			}
-
-			// feed data to threaded sinks
-			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
-			{
-				(*it)->feed(part1begin, part1end, positiveOnly);
-			}
-		}
-
-		// second part of FIFO data (used when block wraps around)
-		if(part2begin != part2end)
-		{
-			// correct stuff
-			if (m_dcOffsetCorrection)
-			{
-				dcOffset(part2begin, part2end);
-			}
-
-			if (m_iqImbalanceCorrection)
-			{
-				imbalance(part2begin, part2end);
-			}
-
-			// feed data to direct sinks
-			for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-			{
-				(*it)->feed(part2begin, part2end, positiveOnly);
-			}
-
-			// feed data to threaded sinks
-			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
-			{
-				(*it)->feed(part2begin, part2end, positiveOnly);
-			}
-		}
-
-		// adjust FIFO pointers
-		sampleFifo->readCommit((unsigned int) count);
-		samplesDone += count;
-	}
-}
-
-// notStarted -> idle -> init -> running -+
-//                ^                       |
-//                +-----------------------+
-
-DSPEngine::State DSPEngine::gotoIdle()
-{
-	qDebug() << "DSPEngine::gotoIdle";
-
-	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
-
-		case StIdle:
-		case StError:
-			return StIdle;
-
-		case StReady:
-		case StRunning:
-			break;
-	}
-
-	if(m_sampleSource == 0)
-	{
-		return StIdle;
-	}
-
-	// stop everything
-
-	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-	{
-		(*it)->stop();
-	}
-
-	m_sampleSource->stop();
-	m_deviceDescription.clear();
-	m_audioOutput.stop();
-	m_sampleRate = 0;
-
-	return StIdle;
-}
-
-DSPEngine::State DSPEngine::gotoInit()
-{
-	qDebug() << "DSPEngine::gotoInit";
-
-	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
-
-		case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
-			return StRunning;
-
-		case StReady:
-			return StReady;
-
-		case StIdle:
-		case StError:
-			break;
-	}
-
-	if (m_sampleSource == 0)
-	{
-		return gotoError("No sample source configured");
-	}
-
-	// init: pass sample rate and center frequency to all sample rate and/or center frequency dependent sinks and wait for completion
-
-	m_iOffset = 0;
-	m_qOffset = 0;
-	m_iRange = 1 << 16;
-	m_qRange = 1 << 16;
-
-	m_deviceDescription = m_sampleSource->getDeviceDescription();
-	m_centerFrequency = m_sampleSource->getCenterFrequency();
-	m_sampleRate = m_sampleSource->getSampleRate();
-
-	qDebug() << "DSPEngine::gotoInit: " << m_deviceDescription.toStdString().c_str() << ": "
-			<< " sampleRate: " << m_sampleRate
-			<< " centerFrequency: " << m_centerFrequency;
-
-	DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
-
-	for (SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); ++it)
-	{
-		qDebug() << "DSPEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
-		(*it)->handleMessage(notif);
-	}
-
-	for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
-	{
-		qDebug() << "DSPEngine::gotoInit: initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-		(*it)->handleSinkMessage(notif);
-	}
-
-	// pass data to listeners
-
-	DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
-	m_outputMessageQueue.push(rep);
-
-	return StReady;
-}
-
-DSPEngine::State DSPEngine::gotoRunning()
-{
-	qDebug() << "DSPEngine::gotoRunning";
-
-	switch(m_state) 
-    {
-		case StNotStarted:
-			return StNotStarted;
-
-		case StIdle:
-			return StIdle;
-
-		case StRunning:
-			return StRunning;
-
-		case StReady:
-		case StError:
-			break;
-	}
-
-	if(m_sampleSource == NULL) {
-		return gotoError("DSPEngine::gotoRunning: No sample source configured");
-	}
-
-	qDebug() << "DSPEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
-
-	// Start everything
-
-	if(!m_sampleSource->start(m_sampleSourceSequence))
-	{
-		return gotoError("Could not start sample source");
-	}
-
-	m_audioOutput.start(-1, 48000); // Use default output device at 48 kHz
-	m_audioSampleRate = m_audioOutput.getRate();
-
-	for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-	{
-        qDebug() << "DSPEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
-		(*it)->start();
-	}
-
-	for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
-	{
-		qDebug() << "DSPEngine::gotoRunning: starting ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-		(*it)->start();
-	}
-
-	qDebug() << "DSPEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
-
-	return StRunning;
-}
-
-DSPEngine::State DSPEngine::gotoError(const QString& errorMessage)
-{
-	qDebug() << "DSPEngine::gotoError";
-
-	m_errorMessage = errorMessage;
-	m_deviceDescription.clear();
-	m_state = StError;
-	return StError;
-}
-
-void DSPEngine::handleSetSource(SampleSource* source)
-{
-	gotoIdle();
-
-	if(m_sampleSource != 0)
-	{
-		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
-	}
-
-	m_sampleSource = source;
-
-	if(m_sampleSource != 0)
-	{
-		qDebug("DSPEngine::handleSetSource: set %s", qPrintable(source->getDeviceDescription()));
-		connect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
-	}
-	else
-	{
-		qDebug("DSPEngine::handleSetSource: set none");
-	}
-}
-
-void DSPEngine::handleData()
-{
-	if(m_state == StRunning)
-	{
-		work();
-	}
-}
-
-void DSPEngine::handleSynchronousMessages()
-{
-    Message *message = m_syncMessenger.getMessage();
-	qDebug() << "DSPEngine::handleSynchronousMessages: " << message->getIdentifier();
-
-	if (DSPExit::match(*message))
-	{
-		gotoIdle();
-		m_state = StNotStarted;
-		exit();
-	}
-	else if (DSPAcquisitionInit::match(*message))
-	{
-		m_state = gotoIdle();
-
-		if(m_state == StIdle) {
-			m_state = gotoInit(); // State goes ready if init is performed
-		}
-	}
-	else if (DSPAcquisitionStart::match(*message))
-	{
-		if(m_state == StReady) {
-			m_state = gotoRunning();
-		}
-	}
-	else if (DSPAcquisitionStop::match(*message))
-	{
-		m_state = gotoIdle();
-	}
-	else if (DSPGetSourceDeviceDescription::match(*message))
-	{
-		((DSPGetSourceDeviceDescription*) message)->setDeviceDescription(m_deviceDescription);
-	}
-	else if (DSPGetErrorMessage::match(*message))
-	{
-		((DSPGetErrorMessage*) message)->setErrorMessage(m_errorMessage);
-	}
-	else if (DSPSetSource::match(*message)) {
-		handleSetSource(((DSPSetSource*) message)->getSampleSource());
-	}
-	else if (DSPAddSink::match(*message))
-	{
-		SampleSink* sink = ((DSPAddSink*) message)->getSampleSink();
-		m_sampleSinks.push_back(sink);
-	}
-	else if (DSPRemoveSink::match(*message))
-	{
-		SampleSink* sink = ((DSPRemoveSink*) message)->getSampleSink();
-
-		if(m_state == StRunning) {
-			sink->stop();
-		}
-
-		m_sampleSinks.remove(sink);
-	}
-	else if (DSPAddThreadedSampleSink::match(*message))
-	{
-		ThreadedSampleSink *threadedSink = ((DSPAddThreadedSampleSink*) message)->getThreadedSampleSink();
-		m_threadedSampleSinks.push_back(threadedSink);
-		threadedSink->start();
-	}
-	else if (DSPRemoveThreadedSampleSink::match(*message))
-	{
-		ThreadedSampleSink* threadedSink = ((DSPRemoveThreadedSampleSink*) message)->getThreadedSampleSink();
-		threadedSink->stop();
-		m_threadedSampleSinks.remove(threadedSink);
-	}
-	else if (DSPAddAudioSink::match(*message))
-	{
-		m_audioOutput.addFifo(((DSPAddAudioSink*) message)->getAudioFifo());
-	}
-	else if (DSPRemoveAudioSink::match(*message))
-	{
-		m_audioOutput.removeFifo(((DSPRemoveAudioSink*) message)->getAudioFifo());
-	}
-
-	m_syncMessenger.done(m_state);
-}
-
-void DSPEngine::handleInputMessages()
-{
-	qDebug() << "DSPEngine::handleInputMessages";
-
-	Message* message;
-
-	while ((message = m_inputMessageQueue.pop()) != 0)
-	{
-		qDebug("DSPEngine::handleInputMessages: message: %s", message->getIdentifier());
-
-		if (DSPConfigureCorrection::match(*message))
-		{
-			DSPConfigureCorrection* conf = (DSPConfigureCorrection*) message;
-			m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
-
-			if(m_dcOffsetCorrection != conf->getDCOffsetCorrection())
-			{
-				m_dcOffsetCorrection = conf->getDCOffsetCorrection();
-				m_iOffset = 0;
-				m_qOffset = 0;
-			}
-
-			if(m_iqImbalanceCorrection != conf->getIQImbalanceCorrection())
-			{
-				m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
-				m_iRange = 1 << 16;
-				m_qRange = 1 << 16;
-				m_imbalance = 65536;
-			}
-
-			delete message;
-		}
-		else if (DSPSignalNotification::match(*message))
-		{
-			DSPSignalNotification *notif = (DSPSignalNotification *) message;
-
-			// update DSP values
-
-			m_sampleRate = notif->getSampleRate();
-			m_centerFrequency = notif->getCenterFrequency();
-
-			qDebug() << "DSPEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
-
-			// forward source changes to sinks with immediate execution
-
-			for(SampleSinks::const_iterator it = m_sampleSinks.begin(); it != m_sampleSinks.end(); it++)
-			{
-				qDebug() << "DSPEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
-				(*it)->handleMessage(*message);
-			}
-
-			for (ThreadedSampleSinks::const_iterator it = m_threadedSampleSinks.begin(); it != m_threadedSampleSinks.end(); ++it)
-			{
-				qDebug() << "DSPEngine::handleSourceMessages: forward message to ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-				(*it)->handleSinkMessage(*message);
-			}
-
-			// forward changes to listeners on DSP output queue
-
-			DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
-			m_outputMessageQueue.push(rep);
-
-			delete message;
-		}
-	}
-}
-
-void DSPEngine::setAudioSampleRate(uint rate)
-{
-	m_audioSampleRate = rate;
+	return m_deviceEngine->sourceDeviceDescription();
 }
