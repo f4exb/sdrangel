@@ -32,5 +32,7 @@
         <file>sdrangel_icon.png</file>
         <file>minus.png</file>
         <file>plus.png</file>
+        <file>record_off.png</file>
+        <file>record_on.png</file>
     </qresource>
 </RCC>
