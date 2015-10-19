@@ -333,7 +333,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, 0.5f);
+			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 			glBegin(GL_LINE_LOOP);
 
 			if (m_triggerChannel == ScopeVis::TriggerChannelI)
@@ -407,7 +407,7 @@ void GLScope::paintGL()
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				//glEnable(GL_LINE_SMOOTH);
 				glLineWidth(1.0f);
-				glColor4f(0, 1, 0, 0.5f);
+				glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 				glBegin(GL_LINE_LOOP);
 
 				float posLimit = 1.0 / m_amp1;
@@ -550,7 +550,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, 0.5f);
+			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, m_triggerLevel);
 			glVertex2f(1, m_triggerLevel);
@@ -612,7 +612,7 @@ void GLScope::paintGL()
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				//glEnable(GL_LINE_SMOOTH);
 				glLineWidth(1.0f);
-				glColor4f(0, 1, 0, 0.5f);
+				glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 				glBegin(GL_LINE_LOOP);
 
 				float posLimit = 1.0 / m_amp2;
