@@ -109,6 +109,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 		}
 	}
 
+	hackrf_device_list_free(hackrf_devices);
 	rc = (hackrf_error) hackrf_exit();
 	qDebug("HackRFPlugin::enumSampleSources: hackrf_exit: %s", hackrf_error_name(rc));
 
