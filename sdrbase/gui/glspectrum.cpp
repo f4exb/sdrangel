@@ -810,7 +810,7 @@ void GLSpectrum::paintGL()
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_LINE_SMOOTH);
+		//glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
 		glColor4f(1, 0, 0, m_displayTraceIntensity / 100.0);
 		Real bottom = -m_powerRange;
@@ -824,7 +824,7 @@ void GLSpectrum::paintGL()
 			glVertex2f(i, v);
 		}
 		glEnd();
-		glDisable(GL_LINE_SMOOTH);
+		//glDisable(GL_LINE_SMOOTH);
 		glPopMatrix();
 	}
 
@@ -835,7 +835,7 @@ void GLSpectrum::paintGL()
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_LINE_SMOOTH);
+		//glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
 		glColor4f(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0); // intense yellow
 		Real bottom = -m_powerRange;
@@ -849,7 +849,7 @@ void GLSpectrum::paintGL()
 			glVertex2f(i, v);
 		}
 		glEnd();
-		glDisable(GL_LINE_SMOOTH);
+		//glDisable(GL_LINE_SMOOTH);
 		glPopMatrix();
 	}
 

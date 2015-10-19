@@ -331,7 +331,7 @@ void GLScope::paintGL()
 			glScalef(m_glScopeRect1.width(), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_LINE_SMOOTH);
+			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, 0.5f);
 			glBegin(GL_LINE_LOOP);
@@ -355,7 +355,7 @@ void GLScope::paintGL()
 			}
 
 			glEnd();
-			glDisable(GL_LINE_SMOOTH);
+			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
 
@@ -366,7 +366,7 @@ void GLScope::paintGL()
 			glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_LINE_SMOOTH);
+			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
@@ -385,7 +385,7 @@ void GLScope::paintGL()
 				glVertex2f(i - start, v);
 			}
 			glEnd();
-			glDisable(GL_LINE_SMOOTH);
+			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
 
@@ -405,7 +405,7 @@ void GLScope::paintGL()
 				glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glEnable(GL_LINE_SMOOTH);
+				//glEnable(GL_LINE_SMOOTH);
 				glLineWidth(1.0f);
 				glColor4f(0, 1, 0, 0.5f);
 				glBegin(GL_LINE_LOOP);
@@ -416,7 +416,7 @@ void GLScope::paintGL()
 				glVertex2f(x, negLimit);
 
 				glEnd();
-				glDisable(GL_LINE_SMOOTH);
+				//glDisable(GL_LINE_SMOOTH);
 				glPopMatrix();
 			}
 		}
@@ -548,7 +548,7 @@ void GLScope::paintGL()
 			glScalef(m_glScopeRect2.width(), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_LINE_SMOOTH);
+			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, 0.5f);
 			glBegin(GL_LINE_LOOP);
@@ -561,7 +561,7 @@ void GLScope::paintGL()
 			glVertex2f(0, m_triggerLevelLow);
 			glVertex2f(1, m_triggerLevelLow);
 			glEnd();*/
-			glDisable(GL_LINE_SMOOTH);
+			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
 
@@ -572,7 +572,7 @@ void GLScope::paintGL()
 			glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glEnable(GL_LINE_SMOOTH);
+			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
 			glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
 			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
@@ -591,7 +591,7 @@ void GLScope::paintGL()
 				glVertex2f(i - start, v);
 			}
 			glEnd();
-			glDisable(GL_LINE_SMOOTH);
+			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
 
@@ -610,7 +610,7 @@ void GLScope::paintGL()
 				glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glEnable(GL_LINE_SMOOTH);
+				//glEnable(GL_LINE_SMOOTH);
 				glLineWidth(1.0f);
 				glColor4f(0, 1, 0, 0.5f);
 				glBegin(GL_LINE_LOOP);
@@ -621,7 +621,7 @@ void GLScope::paintGL()
 				glVertex2f(x, negLimit);
 
 				glEnd();
-				glDisable(GL_LINE_SMOOTH);
+				//glDisable(GL_LINE_SMOOTH);
 				glPopMatrix();
 			}
 		}
