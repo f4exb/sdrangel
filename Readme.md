@@ -8,7 +8,9 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 
 <h2>Repository branches</h2>
 
-- master: the "production" branch
+- master: the production branch
+- dev: the development branch
+- fix: production fixes that can't wait
 - legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
 
 <h2>Unsupported plugins</h2>
@@ -16,6 +18,7 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 These plugins come from the parent code base and are still present in the source tree but are not part of the build:
 
 - Channels:
+  - lorademod
   - tetra 
 - Sample sources:
   - gnuradio
@@ -93,7 +96,7 @@ If you use your own location for librtlsdr install directory you need to specify
 
 <h2>For Ubuntu</h2>
 
-`sudo apt-get install libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev`
+`sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev`
 
 `mkdir build && cd build && cmake ../ && make`
 
@@ -107,7 +110,7 @@ For any version of Debian you will need Qt5.
 
 Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5. 
 
-Assuming Debian Jessie is used:
+For Debian Jessie or Stretch:
 
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev`
 
@@ -169,7 +172,7 @@ Assuming Debian Jessie is used:
   
 <h2>Major redesign</h2>
 
-  - Make the DSP engine global static simplifying access to it
+  - Make the DSP engine global static simplifying access to it. Have a distinct object to handle the thread
   - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
   - Synchronous messaging class to push message to thread and wait for completion relieving the message queuing mechanism from this role
   - Message queuing and handling redesign. Still not completely satisfactory
