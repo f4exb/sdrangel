@@ -390,7 +390,7 @@ void GLScope::paintGL()
 		}
 
 		// paint trigger time line if pretriggered
-
+		/*
 		if ((m_triggerPre > 0.0) &&
 				((m_triggerChannel == ScopeVis::TriggerChannelI)
 				|| (m_triggerChannel == ScopeVis::TriggerMagLin)
@@ -419,7 +419,7 @@ void GLScope::paintGL()
 				//glDisable(GL_LINE_SMOOTH);
 				glPopMatrix();
 			}
-		}
+		}*/
 
 	} // Both displays or primary only
 
@@ -596,7 +596,7 @@ void GLScope::paintGL()
 		}
 
 		// paint trigger time line if pretriggered
-
+		/*
 		if ((m_triggerPre > 0.0) &&
 				((m_triggerChannel == ScopeVis::TriggerPhase)
 				|| (m_triggerChannel == ScopeVis::TriggerChannelQ)))
@@ -624,7 +624,7 @@ void GLScope::paintGL()
 				//glDisable(GL_LINE_SMOOTH);
 				glPopMatrix();
 			}
-		}
+		}*/
 
 	} // Both displays or secondary display only
 
