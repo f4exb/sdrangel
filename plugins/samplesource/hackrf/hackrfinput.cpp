@@ -83,11 +83,11 @@ bool HackRFInput::start(int device)
 		return false;
 	}
 
-	m_hackRFThread->startWork();
-
 	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
+
+	m_hackRFThread->startWork();
 
 	qDebug("HackRFInput::startInput: started");
 

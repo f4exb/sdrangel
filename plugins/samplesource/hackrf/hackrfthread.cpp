@@ -43,16 +43,18 @@ HackRFThread::~HackRFThread()
 
 void HackRFThread::startWork()
 {
-	m_startWaitMutex.lock();
+	//m_startWaitMutex.lock();
+	m_running = true;
 	start();
+	/*
 	while(!m_running)
 		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+	m_startWaitMutex.unlock();*/
 }
 
 void HackRFThread::stopWork()
 {
-	qDebug("AirspyThread::stopWork");
+	qDebug("HackRFThread::stopWork");
 	m_running = false;
 	wait();
 }
@@ -76,7 +78,7 @@ void HackRFThread::run()
 {
 	hackrf_error rc;
 
-	m_running = true;
+	//m_running = true;
 	m_startWaiter.wakeAll();
 
 	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, NULL);
@@ -104,7 +106,7 @@ void HackRFThread::run()
 		qDebug("HackRFThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
 	}
 
-	m_running = false;
+	//m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)

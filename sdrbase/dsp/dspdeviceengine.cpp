@@ -41,6 +41,9 @@ DSPDeviceEngine::DSPDeviceEngine(QObject* parent) :
 	m_qRange(1 << 16),
 	m_imbalance(65536)
 {
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
+
 	moveToThread(this);
 }
 
@@ -53,21 +56,16 @@ void DSPDeviceEngine::run()
 {
 	qDebug() << "DSPDeviceEngine::run";
 
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
-
 	m_state = StIdle;
 
-    m_syncMessenger.done(); // Release start() that is waiting in main trhead
+    m_syncMessenger.done(); // Release start() that is waiting in main thread
 	exec();
 }
 
 void DSPDeviceEngine::start()
 {
 	qDebug() << "DSPDeviceEngine::start";
-	DSPPing cmd;
 	QThread::start();
-	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceEngine::stop()

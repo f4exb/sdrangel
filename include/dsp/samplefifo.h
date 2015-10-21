@@ -48,7 +48,7 @@ public:
 
 	bool setSize(int size);
 	inline uint size() const { return m_size; }
-	inline uint fill() const { return m_fill; }
+	inline uint fill() { QMutexLocker mutexLocker(&m_mutex); uint fill = m_fill; return fill; }
 
 	uint write(const quint8* data, uint count);
 	uint write(SampleVector::const_iterator begin, SampleVector::const_iterator end);

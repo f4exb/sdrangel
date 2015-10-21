@@ -28,10 +28,6 @@ class SampleSink;
 class ThreadedSampleSink;
 class AudioFifo;
 
-class SDRANGEL_API DSPPing : public Message {
-	MESSAGE_CLASS_DECLARATION
-};
-
 class SDRANGEL_API DSPExit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
