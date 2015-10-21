@@ -924,7 +924,7 @@ void Decimators<T, SdrBits, InputBits>::decimate32_cen(SampleVector::iterator* i
 template<typename T, uint SdrBits, uint InputBits>
 void Decimators<T, SdrBits, InputBits>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[63];
+	qint32 intbuf[64];
 
 	for (int pos = 0; pos < len - 127; pos += 128)
 	{
