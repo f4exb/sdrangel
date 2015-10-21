@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.0.2)
 cmake_policy(SET CMP0043 OLD)
 
 option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
