@@ -18,7 +18,6 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 These plugins come from the parent code base and are still present in the source tree but are not part of the build:
 
 - Channels:
-  - lorademod
   - tetra 
 - Sample sources:
   - gnuradio
@@ -26,6 +25,14 @@ These plugins come from the parent code base and are still present in the source
   - v4l-msi
   - v4l-rtl
   
+<h2>Untested plugins</h2>
+
+These plugins come from the parent code base and have been maintained so that they compile but they are not being actively tested:
+
+- Channels:
+  - lora
+  - tcpsrc
+
 <h3>Gnuradio</h3>
 
 The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
