@@ -352,6 +352,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	applySettings();
+	setNewRate(m_spanLog2);
 }
 
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
@@ -370,6 +371,8 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 
 bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 {
+	qDebug("ChannelAnalyzerGUI::setNewRate");
+
 	if ((spanLog2 < 0) || (spanLog2 > 6)) {
 		return false;
 	}
