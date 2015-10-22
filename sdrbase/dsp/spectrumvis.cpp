@@ -21,7 +21,8 @@ SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
 	m_logPowerSpectrum(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
-	m_glSpectrum(glSpectrum)
+	m_glSpectrum(glSpectrum),
+	m_mutex(QMutex::Recursive)
 {
 	setObjectName("SpectrumVis");
 	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
@@ -77,6 +78,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 		if (todo >= samplesNeeded)
 		{
+			QMutexLocker mutexLocker(&m_mutex);
+
 			// fill up the buffer
 			std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill;
 
@@ -174,6 +177,8 @@ bool SpectrumVis::handleMessage(const Message& message)
 
 void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window)
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
 	if (fftSize > MAX_FFT_SIZE)
 	{
 		fftSize = MAX_FFT_SIZE;

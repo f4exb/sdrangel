@@ -1,6 +1,7 @@
 #ifndef INCLUDE_SPECTRUMVIS_H
 #define INCLUDE_SPECTRUMVIS_H
 
+#include <QMutex>
 #include "dsp/samplesink.h"
 #include "dsp/fftengine.h"
 #include "fftwindow.h"
@@ -60,6 +61,8 @@ private:
 	bool m_needMoreSamples;
 
 	GLSpectrum* m_glSpectrum;
+
+	QMutex m_mutex;
 
 	void handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window);
 };
