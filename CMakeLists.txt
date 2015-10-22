@@ -3,14 +3,22 @@ cmake_policy(SET CMP0043 OLD)
 
 option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
 option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
+option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
+option(DEBUG_OUTPUT "Print debug messages" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 project(sdrangel)
 
-set(CMAKE_BUILD_TYPE "Release")
-#set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
-#set(CMAKE_BUILD_TYPE "Debug")
+if (BUILD_TYPE MATCHES RELEASE)
+	set(CMAKE_BUILD_TYPE "Release")
+elseif (BUILD_TYPE MATCHES RELEASEWITHDBGINFO)
+	set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
+elseif (BUILD_TYPE MATCHES DEBUG)
+	set(CMAKE_BUILD_TYPE "Debug")
+else()
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
 
 set(QT_USE_QTOPENGL TRUE)
 set(CMAKE_AUTOMOC ON)
@@ -33,8 +41,13 @@ ENDIF()
 ##############################################################################
 
 #include(${QT_USE_FILE})
-set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
-#set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+
+if (DEBUG_OUTPUT)
+	set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+else()
+	set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
+endif()
+
 add_definitions(${QT_DEFINITIONS})
 
 if(MSVC)

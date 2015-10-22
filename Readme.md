@@ -201,3 +201,15 @@ For Debian Jessie or Stretch:
   - Enhance WFM (stereo, RDS?)
   - Even more demods ...
   
+<h1>Developper's notes</h1>
+
+<h2>Build options</h2>
+
+The release type can be specified with the `-DBUILD_TYPE` cmake option. It takes the following values:
+  - `RELEASE` (default): produces production release code i.e.optimized and no debug symbols
+  - `RELEASEWITHDBGINFO`: optimized with debug info
+  - `DEBUG`: unoptimized with debug info
+
+You can specify whether or not you want to see debug messages printed out to the console with the `-DDEBUG_OUTPUT` cmake option:
+  - `OFF` (default): no debug output
+  - `ON`: debug output
