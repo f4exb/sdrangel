@@ -33,6 +33,8 @@ MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
+	m_squelchCount(0),
+	m_agcAttack(2400),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive)
@@ -54,7 +56,7 @@ NFMDemod::NFMDemod() :
 	m_audioBufferFill = 0;
 
 	m_agcLevel = 1.0;
-	m_AGC.resize(240, m_agcLevel);
+	m_AGC.resize(m_agcAttack, m_agcLevel);
 	m_magsq = 0;
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
@@ -173,7 +175,20 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				squelchOpen = (getMag() > m_squelchLevel);
+				if (getMag() > m_squelchLevel)
+				{
+					if (m_squelchCount < m_agcAttack)
+					{
+						m_squelchCount++;
+					}
+				}
+				else
+				{
+					m_squelchCount = 0;
+				}
+
+				//squelchOpen = (getMag() > m_squelchLevel);
+				squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
 
 				/*
 				if (m_afSquelch.analyze(demod))

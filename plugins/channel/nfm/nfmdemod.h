@@ -155,6 +155,8 @@ private:
 	int m_ctcssIndex; // 0 for nothing detected
 	int m_ctcssIndexSelected;
 	int m_sampleCount;
+	int m_squelchCount;
+	int m_agcAttack;
 
 	double m_squelchLevel;
 
