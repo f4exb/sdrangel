@@ -6,12 +6,13 @@
 #include <algorithm>
 #include <QDebug>
 
+/*
 #ifdef _WIN32
 static double log2f(double n)
 {
 	return log(n) / log(2.0);
 }
-#endif
+#endif*/
 
 GLScope::GLScope(QWidget* parent) :
 	QGLWidget(parent),
@@ -360,7 +361,8 @@ void GLScope::paintGL()
 		}
 
 		// paint trace
-		if(m_displayTrace->size() > 0) {
+		if(m_displayTrace->size() > 0)
+		{
 			glPushMatrix();
 			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
 			glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
@@ -375,18 +377,53 @@ void GLScope::paintGL()
 				start--;
 			float posLimit = 1.0 / m_amp1;
 			float negLimit = -1.0 / m_amp1;
+
 			glBegin(GL_LINE_STRIP);
-			for(int i = start; i < end; i++) {
+
+			for(int i = start; i < end; i++)
+			{
 				float v = (*m_displayTrace)[i].real() + m_ofs1;
 				if(v > posLimit)
 					v = posLimit;
 				else if(v < negLimit)
 					v = negLimit;
 				glVertex2f(i - start, v);
+
+				if (m_mode == ModeMagdBPha)
+				{
+					if (i == start)
+					{
+						m_maxPow = m_powTrace[i];
+						m_sumPow = m_powTrace[i];
+					}
+					else
+					{
+						if (m_powTrace[i] > m_maxPow)
+						{
+							m_maxPow = m_powTrace[i];
+						}
+
+						m_sumPow += m_powTrace[i];
+					}
+				}
 			}
+
+			m_nbPow = end - start;
+
 			glEnd();
+
 			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
+		}
+
+		// Paint powers overlays
+
+		if (m_mode == ModeMagdBPha)
+		{
+			if (m_nbPow > 0)
+			{
+				qDebug("%.1f %.1f", 10.0f * log10f(m_maxPow), 10.0f * log10f(m_sumPow / m_nbPow));
+			}
 		}
 
 		// paint trigger time line if pretriggered
@@ -716,11 +753,15 @@ void GLScope::handleMode()
 		}
 		case ModeMagdBPha: {
 			m_mathTrace.resize(m_rawTrace.size());
+			m_powTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
-			Real mult = (10.0f / log2f(10.0f));
+			std::vector<Real>::iterator powDst = m_powTrace.begin();
+			//Real mult = (10.0f / log2f(10.0f));
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
 				Real v = src->real() * src->real() + src->imag() * src->imag();
-				v = (100.0 - m_ofs*100.0 + (mult * log2f(v))) / 100.0; // TODO: first term is the offset
+				*powDst++ = v;
+				//v = (100.0 - m_ofs*100.0 + (mult * log2f(v))) / 100.0; // TODO: first term is the offset
+				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f; // TODO: first term is the offset
 				*dst++ = Complex(v, arg(*src) / M_PI);
 			}
 			m_displayTrace = &m_mathTrace;
@@ -762,6 +803,11 @@ void GLScope::handleMode()
 			break;
 		}
 	}
+}
+
+void GLScope::drawPowerOverlay()
+{
+
 }
 
 void GLScope::applyConfig()

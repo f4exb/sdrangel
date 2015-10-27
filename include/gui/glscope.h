@@ -91,6 +91,9 @@ private:
 	std::vector<Complex> m_rawTrace;
 	std::vector<Complex> m_mathTrace;
 	std::vector<Complex>* m_displayTrace;
+	std::vector<Real> m_powTrace;
+	Real m_maxPow;
+	Real m_sumPow;
 	int m_oldTraceSize;
 	int m_sampleRate;
 	Real m_amp1;
@@ -110,6 +113,7 @@ private:
 	ScopeVis::TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	Real m_triggerPre;
+	int m_nbPow;
 
 	// graphics stuff
 	QRectF m_glScopeRect1;
@@ -145,6 +149,7 @@ private:
 
 	void handleMode();
 	void applyConfig();
+	void drawPowerOverlay();
 
 protected slots:
 	void tick();
