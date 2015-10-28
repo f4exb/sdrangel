@@ -422,7 +422,9 @@ void GLScope::paintGL()
 		{
 			if (m_nbPow > 0)
 			{
-				qDebug("%.1f %.1f", 10.0f * log10f(m_maxPow), 10.0f * log10f(m_sumPow / m_nbPow));
+				QPainter painter(this);
+				drawPowerOverlay(&painter);
+				painter.end();
 			}
 		}
 
@@ -805,9 +807,21 @@ void GLScope::handleMode()
 	}
 }
 
-void GLScope::drawPowerOverlay()
+void GLScope::drawPowerOverlay(QPainter *painter)
 {
+	//qDebug("%.1f %.1f", 10.0f * log10f(m_maxPow), 10.0f * log10f(m_sumPow / m_nbPow));
+	double maxPow = 10.0f * log10f(m_maxPow);
+	double avgPow = 10.0f * log10f(m_sumPow / m_nbPow);
+	double peakToAvgPow = maxPow - avgPow;
 
+	QString text("test");
+
+	QFontMetrics metrics = QFontMetrics(font());
+	QRect rect = metrics.boundingRect(0, 0, width(), int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
+	painter->setRenderHint(QPainter::TextAntialiasing);
+	painter->fillRect(QRect(0, 0, width(), rect.height()), QColor(0, 0, 0, 127));
+	painter->setPen(Qt::white);
+	painter->drawText(0, 0, rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
 }
 
 void GLScope::applyConfig()
@@ -816,11 +830,14 @@ void GLScope::applyConfig()
 
 	QFontMetrics fm(font());
 	int M = fm.width("-");
+	int H = fm.height();
 
 	int topMargin = 5;
 	int botMargin = 20;
 	int leftMargin = 35;
 	int rightMargin = 5;
+    int powerOverlayWidth = 20*M;
+    int powerOverlayHeight = 2*H;
 
     float pow_floor = -100.0 + m_ofs * 100.0;
     float pow_range = 100.0 / m_amp;
@@ -904,6 +921,12 @@ void GLScope::applyConfig()
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
+			);
+			m_glPowerOverlay1 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) powerOverlayWidth / (float) width(),
+				(float) powerOverlayHeight / (float) height()
 			);
 
 			{ // Y1 scale
@@ -1089,6 +1112,12 @@ void GLScope::applyConfig()
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
+			);
+			m_glPowerOverlay1 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) powerOverlayWidth / (float) width(),
+				(float) powerOverlayHeight / (float) height()
 			);
 
 			{ // Y1 scale

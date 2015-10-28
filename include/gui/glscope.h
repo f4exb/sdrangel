@@ -29,6 +29,7 @@
 
 class DSPEngine;
 class ScopeVis;
+class QPainter;
 
 class SDRANGEL_API GLScope: public QGLWidget {
 	Q_OBJECT
@@ -124,18 +125,22 @@ private:
 	QRectF m_glLeft2ScaleRect;
 	QRectF m_glBot1ScaleRect;
 	QRectF m_glBot2ScaleRect;
+	QRectF m_glPowerOverlay1;
 	QPixmap m_left1ScalePixmap;
 	QPixmap m_left2ScalePixmap;
 	QPixmap m_bot1ScalePixmap;
 	QPixmap m_bot2ScalePixmap;
+	QPixmap m_powerOverlayPixmap1;
 	bool m_left1ScaleTextureAllocated;
 	bool m_left2ScaleTextureAllocated;
 	bool m_bot1ScaleTextureAllocated;
 	bool m_bot2ScaleTextureAllocated;
+	bool m_powerOverlayTextureAllocated1;
 	GLuint m_left1ScaleTexture;
 	GLuint m_left2ScaleTexture;
 	GLuint m_bot1ScaleTexture;
 	GLuint m_bot2ScaleTexture;
+	GLuint m_powerOverlayTexture1;
 	ScaleEngine m_x1Scale;
 	ScaleEngine m_x2Scale;
 	ScaleEngine m_y1Scale;
@@ -149,7 +154,7 @@ private:
 
 	void handleMode();
 	void applyConfig();
-	void drawPowerOverlay();
+	void drawPowerOverlay(QPainter *painter);
 
 protected slots:
 	void tick();
