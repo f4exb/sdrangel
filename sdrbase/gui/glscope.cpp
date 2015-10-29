@@ -42,7 +42,9 @@ GLScope::GLScope(QWidget* parent) :
 	m_left1ScaleTextureAllocated(false),
 	m_left2ScaleTextureAllocated(false),
 	m_bot1ScaleTextureAllocated(false),
-	m_bot2ScaleTextureAllocated(false)
+	m_bot2ScaleTextureAllocated(false),
+	m_powerOverlayTextureAllocated1(false),
+	m_powerOverlayFont(font())
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -55,6 +57,8 @@ GLScope::GLScope(QWidget* parent) :
 	m_x1Scale.setOrientation(Qt::Horizontal);
 	m_x2Scale.setFont(font());
 	m_x2Scale.setOrientation(Qt::Horizontal);
+	m_powerOverlayFont.setBold(true);
+	m_powerOverlayFont.setPointSize(font().pointSize()+1);
 }
 
 GLScope::~GLScope()
@@ -422,9 +426,7 @@ void GLScope::paintGL()
 		{
 			if (m_nbPow > 0)
 			{
-				QPainter painter(this);
-				drawPowerOverlay(&painter);
-				painter.end();
+				drawPowerOverlay();
 			}
 		}
 
@@ -807,21 +809,63 @@ void GLScope::handleMode()
 	}
 }
 
-void GLScope::drawPowerOverlay(QPainter *painter)
+void GLScope::drawPowerOverlay()
 {
-	//qDebug("%.1f %.1f", 10.0f * log10f(m_maxPow), 10.0f * log10f(m_sumPow / m_nbPow));
 	double maxPow = 10.0f * log10f(m_maxPow);
 	double avgPow = 10.0f * log10f(m_sumPow / m_nbPow);
 	double peakToAvgPow = maxPow - avgPow;
 
-	QString text("test");
+	QString text = QString("%1  %2  %3").arg(maxPow, 0, 'f', 1).arg(avgPow, 0, 'f', 1).arg(peakToAvgPow, 0, 'f', 1);
 
-	QFontMetrics metrics = QFontMetrics(font());
-	QRect rect = metrics.boundingRect(0, 0, width(), int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
-	painter->setRenderHint(QPainter::TextAntialiasing);
-	painter->fillRect(QRect(0, 0, width(), rect.height()), QColor(0, 0, 0, 127));
-	painter->setPen(Qt::white);
-	painter->drawText(0, 0, rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
+	QFontMetricsF metrics(m_powerOverlayFont);
+	QRectF rect = metrics.boundingRect(text);
+	m_powerOverlayPixmap1 = QPixmap(rect.width() + 4.0f, rect.height());
+	m_powerOverlayPixmap1.fill(Qt::transparent);
+	QPainter painter(&m_powerOverlayPixmap1);
+	painter.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing, false);
+	painter.fillRect(rect, QColor(0, 0, 0, 0x80));
+	painter.setPen(QColor(0x80, 0xff, 0x80, 0x80));
+	painter.setFont(m_powerOverlayFont);
+	painter.drawText(QPointF(0, rect.height() - 2.0f), text);
+	painter.end();
+
+	if (m_powerOverlayTextureAllocated1)
+		deleteTexture(m_powerOverlayTexture1);
+	m_powerOverlayTexture1 = bindTexture(m_powerOverlayPixmap1,
+		GL_TEXTURE_2D,
+		GL_RGBA,
+		QGLContext::LinearFilteringBindOption |
+		QGLContext::MipmapBindOption);
+	m_powerOverlayTextureAllocated1 = true;
+
+	glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	float shiftX = m_glScopeRect1.width() - ((rect.width() + 4.0f) / width());
+	float shiftY = 6.0f / height();
+
+	glPushMatrix();
+
+	glTranslatef(m_glScopeRect1.x() + shiftX, m_glScopeRect1.y(), 0);
+	glScalef(rect.width() / (float) width(), rect.height() / (float) height(), 1);
+
+	glEnable(GL_TEXTURE_2D);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 1);
+	glVertex2f(0, 1);
+	glTexCoord2f(1, 1);
+	glVertex2f(1, 1);
+	glTexCoord2f(1, 0);
+	glVertex2f(1, 0);
+	glTexCoord2f(0, 0);
+	glVertex2f(0, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
 }
 
 void GLScope::applyConfig()
@@ -830,14 +874,11 @@ void GLScope::applyConfig()
 
 	QFontMetrics fm(font());
 	int M = fm.width("-");
-	int H = fm.height();
 
 	int topMargin = 5;
 	int botMargin = 20;
 	int leftMargin = 35;
 	int rightMargin = 5;
-    int powerOverlayWidth = 20*M;
-    int powerOverlayHeight = 2*H;
 
     float pow_floor = -100.0 + m_ofs * 100.0;
     float pow_range = 100.0 / m_amp;
@@ -921,12 +962,6 @@ void GLScope::applyConfig()
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
-			);
-			m_glPowerOverlay1 = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) topMargin / (float) height(),
-				(float) powerOverlayWidth / (float) width(),
-				(float) powerOverlayHeight / (float) height()
 			);
 
 			{ // Y1 scale
@@ -1112,12 +1147,6 @@ void GLScope::applyConfig()
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
-			);
-			m_glPowerOverlay1 = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) topMargin / (float) height(),
-				(float) powerOverlayWidth / (float) width(),
-				(float) powerOverlayHeight / (float) height()
 			);
 
 			{ // Y1 scale

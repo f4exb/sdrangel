@@ -22,6 +22,7 @@
 #include <QPen>
 #include <QTimer>
 #include <QMutex>
+#include <QFont>
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
@@ -125,7 +126,6 @@ private:
 	QRectF m_glLeft2ScaleRect;
 	QRectF m_glBot1ScaleRect;
 	QRectF m_glBot2ScaleRect;
-	QRectF m_glPowerOverlay1;
 	QPixmap m_left1ScalePixmap;
 	QPixmap m_left2ScalePixmap;
 	QPixmap m_bot1ScalePixmap;
@@ -145,6 +145,7 @@ private:
 	ScaleEngine m_x2Scale;
 	ScaleEngine m_y1Scale;
 	ScaleEngine m_y2Scale;
+	QFont m_powerOverlayFont;
 
 	void initializeGL();
 	void resizeGL(int width, int height);
@@ -154,7 +155,7 @@ private:
 
 	void handleMode();
 	void applyConfig();
-	void drawPowerOverlay(QPainter *painter);
+	void drawPowerOverlay();
 
 protected slots:
 	void tick();
