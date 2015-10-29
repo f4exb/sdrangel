@@ -40,6 +40,8 @@ public:
 		ModeIQ,
 		ModeMagLinPha,
 		ModeMagdBPha,
+		ModeMagLinDPha,
+		ModeMagdBDPha,
 		ModeDerived12,
 		ModeCyclostationary
 	};
@@ -116,6 +118,7 @@ private:
 	Real m_triggerLevel;
 	Real m_triggerPre;
 	int m_nbPow;
+	Real m_prevArg;
 
 	// graphics stuff
 	QRectF m_glScopeRect1;

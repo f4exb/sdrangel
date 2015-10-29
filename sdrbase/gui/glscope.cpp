@@ -37,6 +37,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPre(0.0),
+	m_prevArg(0),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
 	m_left1ScaleTextureAllocated(false),
@@ -393,7 +394,7 @@ void GLScope::paintGL()
 					v = negLimit;
 				glVertex2f(i - start, v);
 
-				if (m_mode == ModeMagdBPha)
+				if ((m_mode == ModeMagdBPha) || (m_mode == ModeMagdBDPha))
 				{
 					if (i == start)
 					{
@@ -422,7 +423,7 @@ void GLScope::paintGL()
 
 		// Paint powers overlays
 
-		if (m_mode == ModeMagdBPha)
+		if ((m_mode == ModeMagdBPha) || (m_mode == ModeMagdBDPha))
 		{
 			if (m_nbPow > 0)
 			{
@@ -760,14 +761,55 @@ void GLScope::handleMode()
 			m_powTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			std::vector<Real>::iterator powDst = m_powTrace.begin();
-			//Real mult = (10.0f / log2f(10.0f));
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
-				//v = (100.0 - m_ofs*100.0 + (mult * log2f(v))) / 100.0; // TODO: first term is the offset
 				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f; // TODO: first term is the offset
 				*dst++ = Complex(v, arg(*src) / M_PI);
 			}
+			m_displayTrace = &m_mathTrace;
+			m_amp1 = 2.0 * m_amp;
+			m_amp2 = 1.0;
+			m_ofs1 = -1.0 / m_amp1;
+			m_ofs2 = 0.0;
+			break;
+		}
+		case ModeMagLinDPha: {
+			m_mathTrace.resize(m_rawTrace.size());
+			std::vector<Complex>::iterator dst = m_mathTrace.begin();
+			Real curArg;
+
+			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
+			{
+				curArg = arg(*src) - m_prevArg;
+				*dst++ = Complex(abs(*src) - m_ofs/2.0, curArg / M_PI);
+				m_prevArg = arg(*src);
+			}
+
+			m_displayTrace = &m_mathTrace;
+			m_amp1 = m_amp;
+			m_amp2 = 1.0;
+			m_ofs1 = -1.0 / m_amp1;
+			m_ofs2 = 0.0;
+			break;
+		}
+		case ModeMagdBDPha: {
+			m_mathTrace.resize(m_rawTrace.size());
+			m_powTrace.resize(m_rawTrace.size());
+			std::vector<Complex>::iterator dst = m_mathTrace.begin();
+			std::vector<Real>::iterator powDst = m_powTrace.begin();
+			Real curArg;
+
+			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
+			{
+				Real v = src->real() * src->real() + src->imag() * src->imag();
+				*powDst++ = v;
+				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f;
+				curArg = arg(*src) - m_prevArg;
+				*dst++ = Complex(v, curArg / M_PI);
+				m_prevArg = arg(*src);
+			}
+
 			m_displayTrace = &m_mathTrace;
 			m_amp1 = 2.0 * m_amp;
 			m_amp2 = 1.0;
@@ -901,7 +943,9 @@ void GLScope::applyConfig()
 			}
 			break;
 		}
-		case ModeMagLinPha: {
+		case ModeMagLinPha:
+		case ModeMagLinDPha:
+		{
 			if (amp_range < 2.0) {
 				m_y1Scale.setRange(Unit::None, amp_ofs * 500.0, amp_range * 1000.0 + amp_ofs * 500.0);
 			} else {
@@ -910,7 +954,9 @@ void GLScope::applyConfig()
 			m_y2Scale.setRange(Unit::None, -1.0, 1.0); // Scale to Pi
 			break;
 		}
-		case ModeMagdBPha: {
+		case ModeMagdBPha:
+		case ModeMagdBDPha:
+		{
 			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
 			m_y2Scale.setRange(Unit::AngleDegrees, -1.0, 1.0); // Scale to Pi
 			break;

@@ -79,17 +79,27 @@
        </property>
        <item>
         <property name="text">
-         <string>1:I 2:Q (linear)</string>
+         <string>1:I 2:Q (lin)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>1:Mag (linear) 2:Phi</string>
+         <string>1:Mag (lin) 2:Phi</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>1:Mag (dB) 2: Phi</string>
+         <string>1:Mag (dB) 2:Phi</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1:Mag (lin) 2:dPhi</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1:Mag(dB) 2:dPhi</string>
         </property>
        </item>
        <item>

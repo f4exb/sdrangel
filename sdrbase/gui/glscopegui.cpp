@@ -262,9 +262,12 @@ void GLScopeGUI::setTrigLevelDisplay()
 
 void GLScopeGUI::setAmpScaleDisplay()
 {
-	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
+	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha) || (m_glScope->getDataMode() == GLScope::ModeMagdBDPha))
+	{
 		ui->ampText->setText(tr("%1\ndB").arg(amps[m_amplification]*500.0, 0, 'f', 1));
-	} else {
+	}
+	else
+	{
 		qreal a = amps[m_amplification]*10.0;
 
 		if(a < 0.000001)
@@ -280,16 +283,20 @@ void GLScopeGUI::setAmpScaleDisplay()
 
 void GLScopeGUI::setAmpOfsDisplay()
 {
-	if (m_glScope->getDataMode() == GLScope::ModeMagdBPha) {
+	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha) || (m_glScope->getDataMode() == GLScope::ModeMagdBDPha))
+	{
 		ui->ampOfsText->setText(tr("%1\ndB").arg(m_ampOffset/10.0 - 100.0, 0, 'f', 1));
 	}
 	else
 	{
 		qreal a;
 
-		if (m_glScope->getDataMode() == GLScope::ModeMagLinPha) {
+		if ((m_glScope->getDataMode() == GLScope::ModeMagLinPha) || (m_glScope->getDataMode() == GLScope::ModeMagLinDPha))
+		{
 			a = m_ampOffset/2000.0;
-		} else {
+		}
+		else
+		{
 			a = m_ampOffset/1000.0;
 		}
 
@@ -498,10 +505,16 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 		case 2: // mag(dB)+pha
 			m_glScope->setMode(GLScope::ModeMagdBPha);
 			break;
-		case 3: // derived1+derived2
+		case 3: // mag(lin)+dPha
+			m_glScope->setMode(GLScope::ModeMagLinDPha);
+			break;
+		case 4: // mag(dB)+dPha
+			m_glScope->setMode(GLScope::ModeMagdBDPha);
+			break;
+		case 5: // derived1+derived2
 			m_glScope->setMode(GLScope::ModeDerived12);
 			break;
-		case 4: // clostationary
+		case 6: // clostationary
 			m_glScope->setMode(GLScope::ModeCyclostationary);
 			break;
 
