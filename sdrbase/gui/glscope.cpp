@@ -782,6 +782,16 @@ void GLScope::handleMode()
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
 			{
 				curArg = arg(*src) - m_prevArg;
+
+				if (curArg < -M_PI)
+				{
+					curArg += 2.0 * M_PI;
+				}
+				else if (curArg > M_PI)
+				{
+					curArg -= 2.0 * M_PI;
+				}
+
 				*dst++ = Complex(abs(*src) - m_ofs/2.0, curArg / M_PI);
 				m_prevArg = arg(*src);
 			}
@@ -806,6 +816,16 @@ void GLScope::handleMode()
 				*powDst++ = v;
 				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f;
 				curArg = arg(*src) - m_prevArg;
+
+				if (curArg < -M_PI)
+				{
+					curArg += 2.0 * M_PI;
+				}
+				else if (curArg > M_PI)
+				{
+					curArg -= 2.0 * M_PI;
+				}
+
 				*dst++ = Complex(v, curArg / M_PI);
 				m_prevArg = arg(*src);
 			}
