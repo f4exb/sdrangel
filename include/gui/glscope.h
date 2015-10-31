@@ -56,8 +56,8 @@ public:
 	~GLScope();
 
 	void setDSPEngine(DSPEngine* dspEngine);
-	void setAmp(Real amp);
-	void setAmpOfs(Real ampOfs);
+	void setAmp1(Real amp);
+	void setAmp1Ofs(Real ampOfs);
 	void setTimeBase(int timeBase);
 	void setTimeOfsProMill(int timeOfsProMill);
 	void setMode(Mode mode);
@@ -117,6 +117,8 @@ private:
 	ScopeVis::TriggerChannel m_triggerChannel;
 	Real m_triggerLevel;
 	Real m_triggerPre;
+	Real m_triggerLevelDis1;
+	Real m_triggerLevelDis2;
 	int m_nbPow;
 	Real m_prevArg;
 

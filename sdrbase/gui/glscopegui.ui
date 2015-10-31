@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>809</width>
-    <height>65</height>
+    <width>811</width>
+    <height>120</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -297,8 +297,7 @@
         </font>
        </property>
        <property name="text">
-        <string>0.1000
-/div</string>
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -356,19 +355,19 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="ampLabel">
+      <widget class="QLabel" name="amp1Label">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>A</string>
+        <string>A1</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="amp">
+      <widget class="QSlider" name="amp1">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -376,7 +375,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Y range</string>
+        <string>Y range for display 1</string>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -402,7 +401,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="ampText">
+      <widget class="QLabel" name="amp1Text">
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -415,8 +414,7 @@
         </font>
        </property>
        <property name="text">
-        <string>0.2000
-/div</string>
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -424,38 +422,58 @@
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="ampOfs">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Y offset</string>
-       </property>
-       <property name="minimum">
-        <number>-1000</number>
-       </property>
-       <property name="maximum">
-        <number>1000</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="tickPosition">
-        <enum>QSlider::NoTicks</enum>
-       </property>
-       <property name="tickInterval">
-        <number>10</number>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="amp1OfsLayout">
+       <item>
+        <widget class="QSlider" name="amp1OfsCoarse">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Y coarse offset for display 1</string>
+         </property>
+         <property name="minimum">
+          <number>-100</number>
+         </property>
+         <property name="maximum">
+          <number>99</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+         <property name="tickInterval">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="amp1OfsFine">
+         <property name="toolTip">
+          <string>Y fine offset for display 1</string>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLabel" name="ampOfsText">
+      <widget class="QLabel" name="amp1OfsText">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -489,6 +507,191 @@
        </property>
        <property name="pageStep">
         <number>1</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="row3Layout">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>60</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="traceLenLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Len</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="traceLen">
+       <property name="toolTip">
+        <string>Trace length</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="traceLenText">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="traceLenLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="amp2Label">
+       <property name="text">
+        <string>A2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="amp2">
+       <property name="toolTip">
+        <string>Y range for display 2</string>
+       </property>
+       <property name="maximum">
+        <number>10</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="amp2Text">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="amp2OfsLayout">
+       <item>
+        <widget class="QSlider" name="amp2OfsCoarse">
+         <property name="toolTip">
+          <string>Y coarse offset for display 2</string>
+         </property>
+         <property name="minimum">
+          <number>-100</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="amp2OfsFine">
+         <property name="toolTip">
+          <string>Y fine offset for display 2</string>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="amp2OfsText">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="traceIntensityLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="traceIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Trace intensity</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
       </widget>
      </item>
@@ -851,88 +1054,6 @@
       <widget class="QLabel" name="trigDelayText">
        <property name="text">
         <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="traceLenLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="traceLenLabel">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Len</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="traceLen">
-       <property name="toolTip">
-        <string>Trace length</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>20</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="traceLenText">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="traceIntensityLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="traceIntensity">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trace intensity</string>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>50</number>
        </property>
       </widget>
      </item>

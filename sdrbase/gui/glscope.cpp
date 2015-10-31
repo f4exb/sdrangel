@@ -37,6 +37,8 @@ GLScope::GLScope(QWidget* parent) :
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevel(0.0),
 	m_triggerPre(0.0),
+	m_triggerLevelDis1(0.0),
+	m_triggerLevelDis2(0.0),
 	m_prevArg(0),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
@@ -86,16 +88,20 @@ void GLScope::setSampleRate(int sampleRate) {
 	emit sampleRateChanged(m_sampleRate);
 }
 
-void GLScope::setAmp(Real amp)
+void GLScope::setAmp1(Real amp)
 {
+	qDebug("GLScope::setAmp1: %f", amp);
 	m_amp = amp;
+	m_amp1 = amp;
 	m_configChanged = true;
 	update();
 }
 
-void GLScope::setAmpOfs(Real ampOfs)
+void GLScope::setAmp1Ofs(Real ampOfs)
 {
+	qDebug("GLScope::setAmp1Ofs: %f", ampOfs);
 	m_ofs = ampOfs;
+	m_ofs1 = ampOfs;
 	m_configChanged = true;
 	update();
 }
@@ -250,13 +256,6 @@ void GLScope::paintGL()
 				}
 			}
 		}
-		/*
-		for(int i = 1; i < 10; i++) {
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, i * 0.1);
-			glVertex2f(1, i * 0.1);
-			glEnd();
-		}*/
 		// Vertical X1
 		tickList = &m_x1Scale.getTickList();
 		for(int i= 0; i < tickList->count(); i++) {
@@ -271,13 +270,6 @@ void GLScope::paintGL()
 				}
 			}
 		}
-		/*
-		for(int i = 1; i < 10; i++) {
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(i * 0.1, 0);
-			glVertex2f(i * 0.1, 1);
-			glEnd();
-		}*/
 		glPopMatrix();
 
 		// paint left #1 scale
@@ -326,7 +318,7 @@ void GLScope::paintGL()
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 
-		// paint trigger level
+		// paint trigger level #1
 		if ((m_triggerChannel == ScopeVis::TriggerChannelI)
 				|| (m_triggerChannel == ScopeVis::TriggerMagLin)
 				|| (m_triggerChannel == ScopeVis::TriggerMagDb)
@@ -342,22 +334,18 @@ void GLScope::paintGL()
 			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 			glBegin(GL_LINE_LOOP);
 
-			if (m_triggerChannel == ScopeVis::TriggerChannelI)
+			float posLimit = 1.0 / m_amp1;
+			float negLimit = -1.0 / m_amp1;
+
+			if ((m_triggerChannel == ScopeVis::TriggerChannelI)
+					|| (m_triggerChannel == ScopeVis::TriggerMagLin)
+					|| (m_triggerChannel == ScopeVis::TriggerMagDb))
 			{
-				glVertex2f(0, m_triggerLevel);
-				glVertex2f(1, m_triggerLevel);
-			}
-			else if (m_triggerChannel == ScopeVis::TriggerMagLin)
-			{
-				Real y = (m_triggerLevel + 1.0 - (m_ofs / 2.0)) * m_amp1;
-				glVertex2f(0, (y - 1.0)/m_amp1);
-				glVertex2f(1, (y - 1.0)/m_amp1);
-			}
-			else if (m_triggerChannel == ScopeVis::TriggerMagDb)
-			{
-				Real y = (m_triggerLevel - m_ofs) * m_amp1;
-				glVertex2f(0, (y - 1.0)/m_amp1);
-				glVertex2f(1, (y - 1.0)/m_amp1);
+				if ((m_triggerLevelDis1 > negLimit) && (m_triggerLevelDis1 < posLimit))
+				{
+					glVertex2f(0, m_triggerLevelDis1);
+					glVertex2f(1, m_triggerLevelDis1);
+				}
 			}
 
 			glEnd();
@@ -365,7 +353,7 @@ void GLScope::paintGL()
 			glPopMatrix();
 		}
 
-		// paint trace
+		// paint trace #1
 		if(m_displayTrace->size() > 0)
 		{
 			glPushMatrix();
@@ -387,7 +375,7 @@ void GLScope::paintGL()
 
 			for(int i = start; i < end; i++)
 			{
-				float v = (*m_displayTrace)[i].real() + m_ofs1;
+				float v = (*m_displayTrace)[i].real();
 				if(v > posLimit)
 					v = posLimit;
 				else if(v < negLimit)
@@ -430,39 +418,6 @@ void GLScope::paintGL()
 				drawPowerOverlay();
 			}
 		}
-
-		// paint trigger time line if pretriggered
-		/*
-		if ((m_triggerPre > 0.0) &&
-				((m_triggerChannel == ScopeVis::TriggerChannelI)
-				|| (m_triggerChannel == ScopeVis::TriggerMagLin)
-				|| (m_triggerChannel == ScopeVis::TriggerMagDb)))
-		{
-			float x = (m_triggerPre - (m_timeOfsProMill/1000.0)) * m_displayTrace->size();
-
-			if ((x >= 0.0) && (x <= (float) m_displayTrace->size() / (float) m_timeBase))
-			{
-				glPushMatrix();
-				glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
-				glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp1, 1);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//glEnable(GL_LINE_SMOOTH);
-				glLineWidth(1.0f);
-				glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
-				glBegin(GL_LINE_LOOP);
-
-				float posLimit = 1.0 / m_amp1;
-				float negLimit = -1.0 / m_amp1;
-				glVertex2f(x, posLimit);
-				glVertex2f(x, negLimit);
-
-				glEnd();
-				//glDisable(GL_LINE_SMOOTH);
-				glPopMatrix();
-			}
-		}*/
-
 	} // Both displays or primary only
 
 	// Q - secondary display
@@ -506,13 +461,6 @@ void GLScope::paintGL()
 				}
 			}
 		}
-		/*
-		for(int i = 1; i < 10; i++) {
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, i * 0.1);
-			glVertex2f(1, i * 0.1);
-			glEnd();
-		}*/
 		// Vertical X2
 		tickList = &m_x2Scale.getTickList();
 		for(int i= 0; i < tickList->count(); i++) {
@@ -527,13 +475,6 @@ void GLScope::paintGL()
 				}
 			}
 		}
-		/*
-		for(int i = 1; i < 10; i++) {
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(i * 0.1, 0);
-			glVertex2f(i * 0.1, 1);
-			glEnd();
-		}*/
 		glPopMatrix();
 
 		// paint left #2 scale
@@ -582,7 +523,7 @@ void GLScope::paintGL()
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 
-		// paint trigger level
+		// paint trigger level #2
 		if ((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
 		{
 			glPushMatrix();
@@ -597,17 +538,11 @@ void GLScope::paintGL()
 			glVertex2f(0, m_triggerLevel);
 			glVertex2f(1, m_triggerLevel);
 			glEnd();
-			/*
-			glColor4f(0, 0.8f, 0.0, 0.3f);
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevelLow);
-			glVertex2f(1, m_triggerLevelLow);
-			glEnd();*/
 			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
 
-		// paint trace
+		// paint trace #2
 		if(m_displayTrace->size() > 0) {
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
@@ -636,38 +571,6 @@ void GLScope::paintGL()
 			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
 		}
-
-		// paint trigger time line if pretriggered
-		/*
-		if ((m_triggerPre > 0.0) &&
-				((m_triggerChannel == ScopeVis::TriggerPhase)
-				|| (m_triggerChannel == ScopeVis::TriggerChannelQ)))
-		{
-			float x = (m_triggerPre - (m_timeOfsProMill/1000.0)) * m_displayTrace->size();
-
-			if ((x >= 0.0) && (x <= (float) m_displayTrace->size() / (float) m_timeBase))
-			{
-				glPushMatrix();
-				glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
-				glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//glEnable(GL_LINE_SMOOTH);
-				glLineWidth(1.0f);
-				glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
-				glBegin(GL_LINE_LOOP);
-
-				float posLimit = 1.0 / m_amp2;
-				float negLimit = -1.0 / m_amp2;
-				glVertex2f(x, posLimit);
-				glVertex2f(x, negLimit);
-
-				glEnd();
-				//glDisable(GL_LINE_SMOOTH);
-				glPopMatrix();
-			}
-		}*/
-
 	} // Both displays or secondary display only
 
 	glPopMatrix();
@@ -730,51 +633,70 @@ void GLScope::mousePressEvent(QMouseEvent* event)
 void GLScope::handleMode()
 {
 	switch(m_mode) {
-		case ModeIQ: {
+		case ModeIQ:
+		{
 			m_mathTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			m_displayTrace = &m_rawTrace;
+
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
-				*dst++ = Complex(src->real() - 2*m_ofs, src->imag() - m_ofs);
+				*dst++ = Complex(src->real() - m_ofs1, src->imag() - m_ofs1);
 			}
+
+			m_triggerLevelDis1 = m_triggerLevel - m_ofs1;
+
 			m_displayTrace = &m_mathTrace;
-			m_amp1 = m_amp;
-			m_amp2 = m_amp;
-			m_ofs1 = m_ofs;
-			m_ofs2 = m_ofs;
+			//m_amp1 = m_amp;
+			//m_amp2 = m_amp;
+			//m_ofs1 = m_ofs;
+			//m_ofs2 = m_ofs;
 			break;
 		}
-		case ModeMagLinPha: {
+		case ModeMagLinPha:
+		{
 			m_mathTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
+
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
-				*dst++ = Complex(abs(*src) - m_ofs/2.0, arg(*src) / M_PI);
+			{
+				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, arg(*src) / M_PI);
+			}
+
+			m_triggerLevelDis1 = (m_triggerLevel + 1) - m_ofs1/2.0 - 1.0/m_amp1;
+
 			m_displayTrace = &m_mathTrace;
-			m_amp1 = m_amp;
+			//m_amp1 = m_amp;
 			m_amp2 = 1.0;
-			m_ofs1 = -1.0 / m_amp1;
+			//m_ofs1 = -1.0 / m_amp1;
 			m_ofs2 = 0.0;
 			break;
 		}
-		case ModeMagdBPha: {
+		case ModeMagdBPha:
+		{
 			m_mathTrace.resize(m_rawTrace.size());
 			m_powTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			std::vector<Real>::iterator powDst = m_powTrace.begin();
+
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
-				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f; // TODO: first term is the offset
+				v = 1.0f + 2.0f*(((10.0f*log10f(v))/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
 				*dst++ = Complex(v, arg(*src) / M_PI);
 			}
+
+			Real tdB = (m_triggerLevel - 1) * 100.0f;
+			m_triggerLevelDis1 = 1.0f + 2.0f*(((tdB)/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
+
 			m_displayTrace = &m_mathTrace;
-			m_amp1 = 2.0 * m_amp;
+			//m_amp1 = 2.0 * m_amp;
 			m_amp2 = 1.0;
-			m_ofs1 = -1.0 / m_amp1;
+			//m_ofs1 = -1.0 / m_amp1;
 			m_ofs2 = 0.0;
 			break;
 		}
-		case ModeMagLinDPha: {
+		case ModeMagLinDPha:
+		{
 			m_mathTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			Real curArg;
@@ -783,27 +705,27 @@ void GLScope::handleMode()
 			{
 				curArg = arg(*src) - m_prevArg;
 
-				if (curArg < -M_PI)
-				{
+				if (curArg < -M_PI) {
 					curArg += 2.0 * M_PI;
-				}
-				else if (curArg > M_PI)
-				{
+				} else if (curArg > M_PI) {
 					curArg -= 2.0 * M_PI;
 				}
 
-				*dst++ = Complex(abs(*src) - m_ofs/2.0, curArg / M_PI);
+				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, curArg / M_PI);
 				m_prevArg = arg(*src);
 			}
 
+			m_triggerLevelDis1 = (m_triggerLevel + 1) - m_ofs1/2.0 - 1.0/m_amp1;
+
 			m_displayTrace = &m_mathTrace;
-			m_amp1 = m_amp;
+			//m_amp1 = m_amp;
 			m_amp2 = 1.0;
-			m_ofs1 = -1.0 / m_amp1;
+			//m_ofs1 = -1.0 / m_amp1;
 			m_ofs2 = 0.0;
 			break;
 		}
-		case ModeMagdBDPha: {
+		case ModeMagdBDPha:
+		{
 			m_mathTrace.resize(m_rawTrace.size());
 			m_powTrace.resize(m_rawTrace.size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
@@ -814,15 +736,12 @@ void GLScope::handleMode()
 			{
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
-				v = (100.0f - m_ofs*100.0f + (10.0f * log10f(v))) / 100.0f;
+				v = 1.0f + 2.0f*(((10.0f*log10f(v))/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
 				curArg = arg(*src) - m_prevArg;
 
-				if (curArg < -M_PI)
-				{
+				if (curArg < -M_PI) {
 					curArg += 2.0 * M_PI;
-				}
-				else if (curArg > M_PI)
-				{
+				} else if (curArg > M_PI) {
 					curArg -= 2.0 * M_PI;
 				}
 
@@ -831,9 +750,9 @@ void GLScope::handleMode()
 			}
 
 			m_displayTrace = &m_mathTrace;
-			m_amp1 = 2.0 * m_amp;
+			//m_amp1 = 2.0 * m_amp;
 			m_amp2 = 1.0;
-			m_ofs1 = -1.0 / m_amp1;
+			//m_ofs1 = -1.0 / m_amp1;
 			m_ofs2 = 0.0;
 			break;
 		}
@@ -847,9 +766,9 @@ void GLScope::handleMode()
 						abs(m_rawTrace[i] - m_rawTrace[i - 1]) - abs(m_rawTrace[i - 2] - m_rawTrace[i - 3]));
 				}
 				m_displayTrace = &m_mathTrace;
-				m_amp1 = m_amp;
+				//m_amp1 = m_amp;
 				m_amp2 = m_amp;
-				m_ofs1 = -1.0 / m_amp1;
+				//m_ofs1 = -1.0 / m_amp1;
 				m_ofs2 = 0.0;
 			}
 			break;
@@ -861,9 +780,9 @@ void GLScope::handleMode()
 				for(uint i = 2; i < m_rawTrace.size() ; i++)
 					*dst++ = Complex(abs(m_rawTrace[i] - conj(m_rawTrace[i - 1])), 0);
 				m_displayTrace = &m_mathTrace;
-				m_amp1 = m_amp;
+				//m_amp1 = m_amp;
 				m_amp2 = m_amp;
-				m_ofs1 = -1.0 / m_amp1;
+				//m_ofs1 = -1.0 / m_amp1;
 				m_ofs2 = 0.0;
 			}
 			break;
@@ -1582,6 +1501,7 @@ void GLScope::setTriggerChannel(ScopeVis::TriggerChannel triggerChannel)
 
 void GLScope::setTriggerLevel(Real triggerLevel)
 {
+	qDebug("GLScope::setTriggerLevel: %f", triggerLevel);
 	m_triggerLevel = triggerLevel;
 }
 

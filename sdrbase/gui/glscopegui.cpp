@@ -21,9 +21,11 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_displays(GLScope::DisplayBoth),
 	m_timeBase(1),
 	m_timeOffset(0),
-	m_amplification(0),
-	m_ampOffset(0),
+	m_amplification1(0),
+	m_amp1OffsetCoarse(0),
+	m_amp1OffsetFine(0),
 	m_displayGridIntensity(1),
+	m_displayTraceIntensity(50),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevelCoarse(0),
 	m_triggerLevelFine(0),
@@ -62,7 +64,7 @@ void GLScopeGUI::resetToDefaults()
 	m_displayOrientation = Qt::Horizontal;
 	m_timeBase = 1;
 	m_timeOffset = 0;
-	m_amplification = 0;
+	m_amplification1 = 0;
 	m_displayGridIntensity = 5;
     m_triggerChannel = ScopeVis::TriggerFreeRun;
     m_triggerLevelCoarse = 0;
@@ -82,9 +84,9 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(2, m_displayOrientation);
 	s.writeS32(3, m_timeBase);
 	s.writeS32(4, m_timeOffset);
-	s.writeS32(5, m_amplification);
+	s.writeS32(5, m_amplification1);
 	s.writeS32(6, m_displayGridIntensity);
-	s.writeS32(7, m_ampOffset);
+	s.writeS32(7, m_amp1OffsetCoarse);
 	s.writeS32(8, m_displays);
 	s.writeS32(9, m_triggerChannel);
 	s.writeS32(10, m_triggerLevelCoarse);
@@ -95,6 +97,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(15, m_triggerDelay);
 	s.writeBool(16, m_triggerBothEdges);
 	s.writeS32(17, m_triggerLevelFine);
+	s.writeS32(18, m_amp1OffsetFine);
 
 	return s.final();
 }
@@ -113,11 +116,11 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(2, &m_displayOrientation, Qt::Horizontal);
 		d.readS32(3, &m_timeBase, 1);
 		d.readS32(4, &m_timeOffset, 0);
-		d.readS32(5, &m_amplification, 0);
+		d.readS32(5, &m_amplification1, 0);
 		d.readS32(6, &m_displayGridIntensity, 5);
 		if(m_timeBase < 0)
 			m_timeBase = 1;
-		d.readS32(7, &m_ampOffset, 0);
+		d.readS32(7, &m_amp1OffsetCoarse, 0);
 		d.readS32(8, &m_displays, GLScope::DisplayBoth);
 		d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
 		ui->trigMode->setCurrentIndex(m_triggerChannel);
@@ -146,6 +149,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		}
 		d.readS32(17, &m_triggerLevelFine, 0);
 		ui->trigLevelFine->setValue(m_triggerLevelFine);
+		d.readS32(18, &m_amp1OffsetFine, 0);
 		setTrigLevelDisplay();
 		applySettings();
 		applyTriggerSettings();
@@ -193,8 +197,9 @@ void GLScopeGUI::applySettings()
 	}
 	ui->time->setValue(m_timeBase);
 	ui->timeOfs->setValue(m_timeOffset);
-	ui->amp->setValue(m_amplification);
-	ui->ampOfs->setValue(m_ampOffset);
+	ui->amp1->setValue(m_amplification1);
+	ui->amp1OfsCoarse->setValue(m_amp1OffsetCoarse);
+	ui->amp1OfsFine->setValue(m_amp1OffsetFine);
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 	ui->traceIntensity->setSliderPosition(m_displayTraceIntensity);
 }
@@ -260,32 +265,34 @@ void GLScopeGUI::setTrigLevelDisplay()
 	}
 }
 
-void GLScopeGUI::setAmpScaleDisplay()
+void GLScopeGUI::setAmp1ScaleDisplay()
 {
 	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha) || (m_glScope->getDataMode() == GLScope::ModeMagdBDPha))
 	{
-		ui->ampText->setText(tr("%1\ndB").arg(amps[m_amplification]*500.0, 0, 'f', 1));
+		ui->amp1Text->setText(tr("%1\ndB").arg(amps[m_amplification1]*500.0, 0, 'f', 1));
 	}
 	else
 	{
-		qreal a = amps[m_amplification]*10.0;
+		qreal a = amps[m_amplification1]*10.0;
 
 		if(a < 0.000001)
-			ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
+			ui->amp1Text->setText(tr("%1\nn").arg(a * 1000000000.0));
 		else if(a < 0.001)
-			ui->ampText->setText(tr("%1\nµ").arg(a * 1000000.0));
+			ui->amp1Text->setText(tr("%1\nµ").arg(a * 1000000.0));
 		else if(a < 1.0)
-			ui->ampText->setText(tr("%1\nm").arg(a * 1000.0));
+			ui->amp1Text->setText(tr("%1\nm").arg(a * 1000.0));
 		else
-			ui->ampText->setText(tr("%1").arg(a * 1.0));
+			ui->amp1Text->setText(tr("%1").arg(a * 1.0));
 	}
 }
 
-void GLScopeGUI::setAmpOfsDisplay()
+void GLScopeGUI::setAmp1OfsDisplay()
 {
+	qreal o = (m_amp1OffsetCoarse * 10.0) + (m_amp1OffsetFine / 20.0);
+
 	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha) || (m_glScope->getDataMode() == GLScope::ModeMagdBDPha))
 	{
-		ui->ampOfsText->setText(tr("%1\ndB").arg(m_ampOffset/10.0 - 100.0, 0, 'f', 1));
+		ui->amp1OfsText->setText(tr("%1\ndB").arg(o/10.0 - 100.0, 0, 'f', 1));
 	}
 	else
 	{
@@ -293,36 +300,45 @@ void GLScopeGUI::setAmpOfsDisplay()
 
 		if ((m_glScope->getDataMode() == GLScope::ModeMagLinPha) || (m_glScope->getDataMode() == GLScope::ModeMagLinDPha))
 		{
-			a = m_ampOffset/2000.0;
+			a = o/2000.0;
 		}
 		else
 		{
-			a = m_ampOffset/1000.0;
+			a = o/1000.0;
 		}
 
 		if(fabs(a) < 0.000001)
-			ui->ampOfsText->setText(tr("%1\nn").arg(a * 1000000000.0));
+			ui->amp1OfsText->setText(tr("%1\nn").arg(a * 1000000000.0));
 		else if(fabs(a) < 0.001)
-			ui->ampOfsText->setText(tr("%1\nµ").arg(a * 1000000.0));
+			ui->amp1OfsText->setText(tr("%1\nµ").arg(a * 1000000.0));
 		else if(fabs(a) < 1.0)
-			ui->ampOfsText->setText(tr("%1\nm").arg(a * 1000.0));
+			ui->amp1OfsText->setText(tr("%1\nm").arg(a * 1000.0));
 		else
-			ui->ampOfsText->setText(tr("%1").arg(a * 1.0));
+			ui->amp1OfsText->setText(tr("%1").arg(a * 1.0));
 	}
 }
 
-void GLScopeGUI::on_amp_valueChanged(int value)
+void GLScopeGUI::on_amp1_valueChanged(int value)
 {
-	m_amplification = value;
-	setAmpScaleDisplay();
-	m_glScope->setAmp(0.2 / amps[m_amplification]);
+	m_amplification1 = value;
+	setAmp1ScaleDisplay();
+	m_glScope->setAmp1(0.2 / amps[m_amplification1]);
 }
 
-void GLScopeGUI::on_ampOfs_valueChanged(int value)
+void GLScopeGUI::on_amp1OfsCoarse_valueChanged(int value)
 {
-	m_ampOffset = value;
-	setAmpOfsDisplay();
-	m_glScope->setAmpOfs(value/1000.0); // scale to [-1.0,1.0]
+	m_amp1OffsetCoarse = value;
+	setAmp1OfsDisplay();
+	qreal o = (m_amp1OffsetCoarse * 10.0) + (m_amp1OffsetFine / 20.0);
+	m_glScope->setAmp1Ofs(o/1000.0); // scale to [-1.0,1.0]
+}
+
+void GLScopeGUI::on_amp1OfsFine_valueChanged(int value)
+{
+	m_amp1OffsetFine = value;
+	setAmp1OfsDisplay();
+	qreal o = (m_amp1OffsetCoarse * 10.0) + (m_amp1OffsetFine / 20.0);
+	m_glScope->setAmp1Ofs(o/1000.0); // scale to [-1.0,1.0]
 }
 
 void GLScopeGUI::on_scope_traceSizeChanged(int)
@@ -522,8 +538,8 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 			break;
 	}
 
-	setAmpScaleDisplay();
-	setAmpOfsDisplay();
+	setAmp1ScaleDisplay();
+	setAmp1OfsDisplay();
 }
 
 void GLScopeGUI::on_horizView_clicked()
