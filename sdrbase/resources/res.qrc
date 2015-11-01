@@ -34,5 +34,8 @@
         <file>plus.png</file>
         <file>record_off.png</file>
         <file>record_on.png</file>
+        <file>mem.png</file>
+        <file>minusw.png</file>
+        <file>plusw.png</file>
     </qresource>
 </RCC>

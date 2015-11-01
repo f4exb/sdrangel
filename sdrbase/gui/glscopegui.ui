@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>811</width>
-    <height>120</height>
+    <height>126</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -513,19 +513,89 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="rowSep1">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="row3Layout">
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="memText">
+       <property name="text">
+        <string>Mem</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="memButton">
+       <property name="toolTip">
+        <string>Trace memory</string>
        </property>
-      </spacer>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/mem.png</normaloff>:/mem.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="memPlayButton">
+       <property name="toolTip">
+        <string>Replay memorized trace</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/play.png</normaloff>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="memMinusButton">
+       <property name="toolTip">
+        <string>Go back one trace in history (newer)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/minusw.png</normaloff>:/minusw.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="memIndexText">
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="memPlusButton">
+       <property name="toolTip">
+        <string>Go one more trace in history (older)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/plusw.png</normaloff>:/plusw.png</iconset>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -539,6 +609,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="traceLenLine">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="traceLenLabel">
@@ -587,7 +664,7 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="traceLenLine">
+      <widget class="Line" name="amp2Line">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -698,7 +775,7 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="rowSep1">
+    <widget class="Line" name="rowSep2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
