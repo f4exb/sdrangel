@@ -47,6 +47,9 @@ private:
 	qint32 m_amplification1;
 	qint32 m_amp1OffsetCoarse;
 	qint32 m_amp1OffsetFine;
+	qint32 m_amplification2;
+	qint32 m_amp2OffsetCoarse;
+	qint32 m_amp2OffsetFine;
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
 	qint32 m_triggerChannel;
@@ -67,6 +70,8 @@ private:
 	void setTimeOfsDisplay();
 	void setAmp1ScaleDisplay();
 	void setAmp1OfsDisplay();
+	void setAmp2ScaleDisplay();
+	void setAmp2OfsDisplay();
 	void setTrigLevelDisplay();
 	void setTrigPreDisplay();
 	void setTrigDelayDisplay();
@@ -75,6 +80,9 @@ private slots:
 	void on_amp1_valueChanged(int value);
 	void on_amp1OfsCoarse_valueChanged(int value);
 	void on_amp1OfsFine_valueChanged(int value);
+	void on_amp2_valueChanged(int value);
+	void on_amp2OfsCoarse_valueChanged(int value);
+	void on_amp2OfsFine_valueChanged(int value);
 	void on_scope_traceSizeChanged(int value);
 	void on_scope_sampleRateChanged(int value);
 	void on_time_valueChanged(int value);

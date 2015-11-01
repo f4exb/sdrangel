@@ -24,6 +24,9 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_amplification1(0),
 	m_amp1OffsetCoarse(0),
 	m_amp1OffsetFine(0),
+	m_amplification2(0),
+	m_amp2OffsetCoarse(0),
+	m_amp2OffsetFine(0),
 	m_displayGridIntensity(1),
 	m_displayTraceIntensity(50),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
@@ -65,6 +68,11 @@ void GLScopeGUI::resetToDefaults()
 	m_timeBase = 1;
 	m_timeOffset = 0;
 	m_amplification1 = 0;
+	m_amp1OffsetCoarse = 0;
+	m_amp1OffsetFine = 0;
+	m_amplification2 = 0;
+	m_amp2OffsetCoarse = 0;
+	m_amp2OffsetFine = 0;
 	m_displayGridIntensity = 5;
     m_triggerChannel = ScopeVis::TriggerFreeRun;
     m_triggerLevelCoarse = 0;
@@ -98,6 +106,9 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeBool(16, m_triggerBothEdges);
 	s.writeS32(17, m_triggerLevelFine);
 	s.writeS32(18, m_amp1OffsetFine);
+	s.writeS32(19, m_amplification2);
+	s.writeS32(20, m_amp2OffsetCoarse);
+	s.writeS32(21, m_amp2OffsetFine);
 
 	return s.final();
 }
@@ -138,6 +149,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		ui->trigDelay->setValue(m_triggerDelay);
 		setTrigDelayDisplay();
 		d.readBool(16, &m_triggerBothEdges, false);
+
 		if (m_triggerBothEdges) {
 			ui->slopePos->setChecked(false);
 			ui->slopeNeg->setChecked(false);
@@ -147,9 +159,14 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			ui->slopePos->setChecked(m_triggerPositiveEdge);
 			ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
 		}
+
 		d.readS32(17, &m_triggerLevelFine, 0);
 		ui->trigLevelFine->setValue(m_triggerLevelFine);
 		d.readS32(18, &m_amp1OffsetFine, 0);
+		d.readS32(19, &m_amplification2, 0);
+		d.readS32(20, &m_amp2OffsetCoarse, 0);
+		d.readS32(21, &m_amp2OffsetFine, 0);
+
 		setTrigLevelDisplay();
 		applySettings();
 		applyTriggerSettings();
@@ -200,6 +217,9 @@ void GLScopeGUI::applySettings()
 	ui->amp1->setValue(m_amplification1);
 	ui->amp1OfsCoarse->setValue(m_amp1OffsetCoarse);
 	ui->amp1OfsFine->setValue(m_amp1OffsetFine);
+	ui->amp2->setValue(m_amplification2);
+	ui->amp2OfsCoarse->setValue(m_amp2OffsetCoarse);
+	ui->amp2OfsFine->setValue(m_amp2OffsetFine);
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 	ui->traceIntensity->setSliderPosition(m_displayTraceIntensity);
 }
@@ -286,6 +306,30 @@ void GLScopeGUI::setAmp1ScaleDisplay()
 	}
 }
 
+void GLScopeGUI::setAmp2ScaleDisplay()
+{
+	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagdBDPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagLinPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagLinDPha))
+	{
+		ui->amp2Text->setText(tr("%1").arg(amps[m_amplification2]*5.0, 0, 'f', 3));
+	}
+	else
+	{
+		qreal a = amps[m_amplification2]*10.0;
+
+		if(a < 0.000001)
+			ui->amp2Text->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(a < 0.001)
+			ui->amp2Text->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(a < 1.0)
+			ui->amp2Text->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->amp2Text->setText(tr("%1").arg(a * 1.0));
+	}
+}
+
 void GLScopeGUI::setAmp1OfsDisplay()
 {
 	qreal o = (m_amp1OffsetCoarse * 10.0) + (m_amp1OffsetFine / 20.0);
@@ -318,6 +362,32 @@ void GLScopeGUI::setAmp1OfsDisplay()
 	}
 }
 
+void GLScopeGUI::setAmp2OfsDisplay()
+{
+	qreal o = (m_amp2OffsetCoarse * 10.0) + (m_amp2OffsetFine / 20.0);
+
+	if ((m_glScope->getDataMode() == GLScope::ModeMagdBPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagdBDPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagLinPha)
+			|| (m_glScope->getDataMode() == GLScope::ModeMagLinDPha))
+	{
+		ui->amp2OfsText->setText(tr("%1").arg(o/1000.0, 0, 'f', 4));
+	}
+	else
+	{
+		qreal a = o/1000.0;
+
+		if(fabs(a) < 0.000001)
+			ui->amp2OfsText->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(fabs(a) < 0.001)
+			ui->amp2OfsText->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(fabs(a) < 1.0)
+			ui->amp2OfsText->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->amp2OfsText->setText(tr("%1").arg(a * 1.0));
+	}
+}
+
 void GLScopeGUI::on_amp1_valueChanged(int value)
 {
 	m_amplification1 = value;
@@ -339,6 +409,29 @@ void GLScopeGUI::on_amp1OfsFine_valueChanged(int value)
 	setAmp1OfsDisplay();
 	qreal o = (m_amp1OffsetCoarse * 10.0) + (m_amp1OffsetFine / 20.0);
 	m_glScope->setAmp1Ofs(o/1000.0); // scale to [-1.0,1.0]
+}
+
+void GLScopeGUI::on_amp2_valueChanged(int value)
+{
+	m_amplification2 = value;
+	setAmp2ScaleDisplay();
+	m_glScope->setAmp2(0.2 / amps[m_amplification2]);
+}
+
+void GLScopeGUI::on_amp2OfsCoarse_valueChanged(int value)
+{
+	m_amp2OffsetCoarse = value;
+	setAmp2OfsDisplay();
+	qreal o = (m_amp2OffsetCoarse * 10.0) + (m_amp2OffsetFine / 20.0);
+	m_glScope->setAmp2Ofs(o/1000.0); // scale to [-1.0,1.0]
+}
+
+void GLScopeGUI::on_amp2OfsFine_valueChanged(int value)
+{
+	m_amp2OffsetFine = value;
+	setAmp2OfsDisplay();
+	qreal o = (m_amp2OffsetCoarse * 10.0) + (m_amp2OffsetFine / 20.0);
+	m_glScope->setAmp2Ofs(o/1000.0); // scale to [-1.0,1.0]
 }
 
 void GLScopeGUI::on_scope_traceSizeChanged(int)

@@ -58,6 +58,8 @@ public:
 	void setDSPEngine(DSPEngine* dspEngine);
 	void setAmp1(Real amp);
 	void setAmp1Ofs(Real ampOfs);
+	void setAmp2(Real amp);
+	void setAmp2Ofs(Real ampOfs);
 	void setTimeBase(int timeBase);
 	void setTimeOfsProMill(int timeOfsProMill);
 	void setMode(Mode mode);
@@ -110,8 +112,8 @@ private:
 	ScopeVis* m_scopeVis;
 
 	// config
-	Real m_amp;
-	Real m_ofs;
+	//Real m_amp;
+	//Real m_ofs;
 	int m_timeBase;
 	int m_timeOfsProMill;
 	ScopeVis::TriggerChannel m_triggerChannel;

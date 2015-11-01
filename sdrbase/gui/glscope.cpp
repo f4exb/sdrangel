@@ -30,8 +30,8 @@ GLScope::GLScope(QWidget* parent) :
 	m_ofs2(0.0),
 	m_dspEngine(NULL),
 	m_scopeVis(NULL),
-	m_amp(1.0),
-	m_ofs(0.0),
+	//m_amp(1.0),
+	//m_ofs(0.0),
 	m_timeBase(1),
 	m_timeOfsProMill(0),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
@@ -91,7 +91,6 @@ void GLScope::setSampleRate(int sampleRate) {
 void GLScope::setAmp1(Real amp)
 {
 	qDebug("GLScope::setAmp1: %f", amp);
-	m_amp = amp;
 	m_amp1 = amp;
 	m_configChanged = true;
 	update();
@@ -100,8 +99,23 @@ void GLScope::setAmp1(Real amp)
 void GLScope::setAmp1Ofs(Real ampOfs)
 {
 	qDebug("GLScope::setAmp1Ofs: %f", ampOfs);
-	m_ofs = ampOfs;
 	m_ofs1 = ampOfs;
+	m_configChanged = true;
+	update();
+}
+
+void GLScope::setAmp2(Real amp)
+{
+	qDebug("GLScope::setAmp2: %f", amp);
+	m_amp2 = amp;
+	m_configChanged = true;
+	update();
+}
+
+void GLScope::setAmp2Ofs(Real ampOfs)
+{
+	qDebug("GLScope::setAmp2Ofs: %f", ampOfs);
+	m_ofs2 = ampOfs;
 	m_configChanged = true;
 	update();
 }
@@ -535,8 +549,20 @@ void GLScope::paintGL()
 			glLineWidth(1.0f);
 			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
 			glBegin(GL_LINE_LOOP);
-			glVertex2f(0, m_triggerLevel);
-			glVertex2f(1, m_triggerLevel);
+
+			float posLimit = 1.0 / m_amp2;
+			float negLimit = -1.0 / m_amp2;
+
+			if ((m_triggerChannel == ScopeVis::TriggerChannelQ)
+					|| (m_triggerChannel == ScopeVis::TriggerPhase))
+			{
+				if ((m_triggerLevelDis2 > negLimit) && (m_triggerLevelDis2 < posLimit))
+				{
+					glVertex2f(0, m_triggerLevelDis2);
+					glVertex2f(1, m_triggerLevelDis2);
+				}
+			}
+
 			glEnd();
 			//glDisable(GL_LINE_SMOOTH);
 			glPopMatrix();
@@ -640,16 +666,14 @@ void GLScope::handleMode()
 			m_displayTrace = &m_rawTrace;
 
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
-				*dst++ = Complex(src->real() - m_ofs1, src->imag() - m_ofs1);
+				*dst++ = Complex(src->real() - m_ofs1, src->imag() - m_ofs2);
 			}
 
 			m_triggerLevelDis1 = m_triggerLevel - m_ofs1;
+			m_triggerLevelDis2 = m_triggerLevel - m_ofs2;
 
 			m_displayTrace = &m_mathTrace;
-			//m_amp1 = m_amp;
-			//m_amp2 = m_amp;
-			//m_ofs1 = m_ofs;
-			//m_ofs2 = m_ofs;
+
 			break;
 		}
 		case ModeMagLinPha:
@@ -659,16 +683,14 @@ void GLScope::handleMode()
 
 			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
 			{
-				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, arg(*src) / M_PI);
+				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, (arg(*src) / M_PI) - m_ofs2);
 			}
 
 			m_triggerLevelDis1 = (m_triggerLevel + 1) - m_ofs1/2.0 - 1.0/m_amp1;
+			m_triggerLevelDis2 = m_triggerLevel - m_ofs2;
 
 			m_displayTrace = &m_mathTrace;
-			//m_amp1 = m_amp;
-			m_amp2 = 1.0;
-			//m_ofs1 = -1.0 / m_amp1;
-			m_ofs2 = 0.0;
+
 			break;
 		}
 		case ModeMagdBPha:
@@ -682,17 +704,15 @@ void GLScope::handleMode()
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
 				v = 1.0f + 2.0f*(((10.0f*log10f(v))/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
-				*dst++ = Complex(v, arg(*src) / M_PI);
+				*dst++ = Complex(v, (arg(*src) / M_PI) - m_ofs2);
 			}
 
 			Real tdB = (m_triggerLevel - 1) * 100.0f;
 			m_triggerLevelDis1 = 1.0f + 2.0f*(((tdB)/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
+			m_triggerLevelDis2 = m_triggerLevel - m_ofs2;
 
 			m_displayTrace = &m_mathTrace;
-			//m_amp1 = 2.0 * m_amp;
-			m_amp2 = 1.0;
-			//m_ofs1 = -1.0 / m_amp1;
-			m_ofs2 = 0.0;
+
 			break;
 		}
 		case ModeMagLinDPha:
@@ -711,17 +731,15 @@ void GLScope::handleMode()
 					curArg -= 2.0 * M_PI;
 				}
 
-				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, curArg / M_PI);
+				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, (curArg / M_PI) - m_ofs2);
 				m_prevArg = arg(*src);
 			}
 
 			m_triggerLevelDis1 = (m_triggerLevel + 1) - m_ofs1/2.0 - 1.0/m_amp1;
+			m_triggerLevelDis2 = m_triggerLevel - m_ofs2;
 
 			m_displayTrace = &m_mathTrace;
-			//m_amp1 = m_amp;
-			m_amp2 = 1.0;
-			//m_ofs1 = -1.0 / m_amp1;
-			m_ofs2 = 0.0;
+
 			break;
 		}
 		case ModeMagdBDPha:
@@ -745,46 +763,50 @@ void GLScope::handleMode()
 					curArg -= 2.0 * M_PI;
 				}
 
-				*dst++ = Complex(v, curArg / M_PI);
+				*dst++ = Complex(v, (curArg / M_PI) - m_ofs2);
 				m_prevArg = arg(*src);
 			}
 
+			Real tdB = (m_triggerLevel - 1) * 100.0f;
+			m_triggerLevelDis1 = 1.0f + 2.0f*(((tdB)/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
+			m_triggerLevelDis2 = m_triggerLevel - m_ofs2;
+
 			m_displayTrace = &m_mathTrace;
-			//m_amp1 = 2.0 * m_amp;
-			m_amp2 = 1.0;
-			//m_ofs1 = -1.0 / m_amp1;
-			m_ofs2 = 0.0;
+
 			break;
 		}
-		case ModeDerived12: {
-			if(m_rawTrace.size() > 3) {
+		case ModeDerived12:
+		{
+			if(m_rawTrace.size() > 3)
+			{
 				m_mathTrace.resize(m_rawTrace.size() - 3);
 				std::vector<Complex>::iterator dst = m_mathTrace.begin();
-				for(uint i = 3; i < m_rawTrace.size() ; i++) {
+
+				for(uint i = 3; i < m_rawTrace.size() ; i++)
+				{
 					*dst++ = Complex(
 						abs(m_rawTrace[i] - m_rawTrace[i - 1]),
 						abs(m_rawTrace[i] - m_rawTrace[i - 1]) - abs(m_rawTrace[i - 2] - m_rawTrace[i - 3]));
 				}
+
 				m_displayTrace = &m_mathTrace;
-				//m_amp1 = m_amp;
-				m_amp2 = m_amp;
-				//m_ofs1 = -1.0 / m_amp1;
-				m_ofs2 = 0.0;
 			}
+
 			break;
 		}
-		case ModeCyclostationary: {
-			if(m_rawTrace.size() > 2) {
+		case ModeCyclostationary:
+		{
+			if(m_rawTrace.size() > 2)
+			{
 				m_mathTrace.resize(m_rawTrace.size() - 2);
 				std::vector<Complex>::iterator dst = m_mathTrace.begin();
+
 				for(uint i = 2; i < m_rawTrace.size() ; i++)
 					*dst++ = Complex(abs(m_rawTrace[i] - conj(m_rawTrace[i - 1])), 0);
+
 				m_displayTrace = &m_mathTrace;
-				//m_amp1 = m_amp;
-				m_amp2 = m_amp;
-				//m_ofs1 = -1.0 / m_amp1;
-				m_ofs2 = 0.0;
 			}
+
 			break;
 		}
 	}
@@ -861,10 +883,12 @@ void GLScope::applyConfig()
 	int leftMargin = 35;
 	int rightMargin = 5;
 
-    float pow_floor = -100.0 + m_ofs * 100.0;
-    float pow_range = 100.0 / m_amp;
-    float amp_range = 2.0 / m_amp;
-    float amp_ofs = m_ofs;
+    float pow_floor = -100.0 + m_ofs1 * 100.0;
+    float pow_range = 100.0 / m_amp1;
+    float amp1_range = 2.0 / m_amp1;
+    float amp1_ofs = m_ofs1;
+    float amp2_range = 2.0 / m_amp2;
+    float amp2_ofs = m_ofs2;
     float t_start = ((m_timeOfsProMill / 1000.0) - m_triggerPre) * ((float) m_displayTrace->size() / m_sampleRate);
     float t_len = ((float) m_displayTrace->size() / m_sampleRate) / (float) m_timeBase;
 
@@ -872,51 +896,64 @@ void GLScope::applyConfig()
     m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len);
 
 	switch(m_mode) {
-		case ModeIQ: {
-			if (amp_range < 2.0) {
-				m_y1Scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);
-				m_y2Scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);
+		case ModeIQ:
+		{
+			if (amp1_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, - amp1_range * 500.0 + amp1_ofs * 1000.0, amp1_range * 500.0 + amp1_ofs * 1000.0);
 			} else {
-				m_y1Scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
-				m_y2Scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
+				m_y1Scale.setRange(Unit::None, - amp1_range * 0.5 + amp1_ofs, amp1_range * 0.5 + amp1_ofs);
 			}
+			if (amp1_range < 2.0) {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 500.0 + amp2_ofs * 1000.0, amp2_range * 500.0 + amp2_ofs * 1000.0);
+			} else {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 0.5 + amp2_ofs, amp2_range * 0.5 + amp2_ofs);
+			}
+
 			break;
 		}
 		case ModeMagLinPha:
 		case ModeMagLinDPha:
 		{
-			if (amp_range < 2.0) {
-				m_y1Scale.setRange(Unit::None, amp_ofs * 500.0, amp_range * 1000.0 + amp_ofs * 500.0);
+			if (amp1_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, amp1_ofs * 500.0, amp1_range * 1000.0 + amp1_ofs * 500.0);
 			} else {
-				m_y1Scale.setRange(Unit::None, amp_ofs/2.0, amp_range + amp_ofs/2.0);
+				m_y1Scale.setRange(Unit::None, amp1_ofs/2.0, amp1_range + amp1_ofs/2.0);
 			}
-			m_y2Scale.setRange(Unit::None, -1.0, 1.0); // Scale to Pi
+
+			m_y2Scale.setRange(Unit::None, -1.0/m_amp2 + amp2_ofs, 1.0/m_amp2 + amp2_ofs); // Scale to Pi*A2
+
 			break;
 		}
 		case ModeMagdBPha:
 		case ModeMagdBDPha:
 		{
 			m_y1Scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
-			m_y2Scale.setRange(Unit::AngleDegrees, -1.0, 1.0); // Scale to Pi
+			m_y2Scale.setRange(Unit::None, -1.0/m_amp2 + amp2_ofs, 1.0/m_amp2 + amp2_ofs); // Scale to Pi*A2
 			break;
 		}
 		case ModeDerived12: {
-			if (amp_range < 2.0) {
-				m_y1Scale.setRange(Unit::None, 0.0, amp_range * 1000.0);
-				m_y2Scale.setRange(Unit::None, - amp_range * 500.0, amp_range * 500.0);
+			if (amp1_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, 0.0, amp1_range * 1000.0);
 			} else {
-				m_y1Scale.setRange(Unit::None, 0.0, amp_range);
-				m_y2Scale.setRange(Unit::None, - amp_range * 0.5, amp_range * 0.5);
+				m_y1Scale.setRange(Unit::None, 0.0, amp1_range);
+			}
+			if (amp2_range < 2.0) {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 500.0, amp2_range * 500.0);
+			} else {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 0.5, amp2_range * 0.5);
 			}
 			break;
 		}
 		case ModeCyclostationary: {
-			if (amp_range < 2.0) {
-				m_y1Scale.setRange(Unit::None, 0.0, amp_range * 1000.0);
-				m_y2Scale.setRange(Unit::None, - amp_range * 500.0, amp_range * 500.0);
+			if (amp1_range < 2.0) {
+				m_y1Scale.setRange(Unit::None, 0.0, amp1_range * 1000.0);
 			} else {
-				m_y1Scale.setRange(Unit::None, 0.0, amp_range);
-				m_y2Scale.setRange(Unit::None, - amp_range * 0.5, amp_range * 0.5);
+				m_y1Scale.setRange(Unit::None, 0.0, amp1_range);
+			}
+			if (amp2_range < 2.0) {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 500.0, amp2_range * 500.0);
+			} else {
+				m_y2Scale.setRange(Unit::None, - amp2_range * 0.5, amp2_range * 0.5);
 			}
 			break;
 		}
