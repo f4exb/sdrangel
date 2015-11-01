@@ -827,7 +827,7 @@ void GLScope::drawPowerOverlay()
 	QPainter painter(&m_powerOverlayPixmap1);
 	painter.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing, false);
 	painter.fillRect(rect, QColor(0, 0, 0, 0x80));
-	painter.setPen(QColor(0x80, 0xff, 0x80, 0x80));
+	painter.setPen(QColor(0xff, 0xff, 0xff, 0x80));
 	painter.setFont(m_powerOverlayFont);
 	painter.drawText(QPointF(0, rect.height() - 2.0f), text);
 	painter.end();
