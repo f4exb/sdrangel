@@ -758,6 +758,35 @@
       </widget>
      </item>
      <item>
+      <widget class="QDial" name="trigIndex">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Navigate through triggers</string>
+       </property>
+       <property name="maximum">
+        <number>9</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="trigIndexText">
+       <property name="toolTip">
+        <string>Current trigger index</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="trigMode">
        <property name="font">
         <font>
@@ -926,6 +955,32 @@
        </property>
        <property name="autoRaise">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="trigCount">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Control number of trigger events </string>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="trigCountText">
+       <property name="toolTip">
+        <string>Number of trigger events before trigger is kicked off</string>
+       </property>
+       <property name="text">
+        <string>00</string>
        </property>
       </widget>
      </item>
