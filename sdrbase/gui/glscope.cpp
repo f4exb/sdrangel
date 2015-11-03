@@ -21,7 +21,10 @@ GLScope::GLScope(QWidget* parent) :
 	m_mode(ModeIQ),
 	m_displays(DisplayBoth),
 	m_orientation(Qt::Horizontal),
-	m_displayTrace(&m_rawTrace),
+	m_memTraceIndex(0),
+	m_memTraceHistory(0),
+	m_memTraceRecall(false),
+	m_displayTrace(&m_rawTrace[0]),
 	m_oldTraceSize(-1),
 	m_sampleRate(0),
 	m_amp1(1.0),
@@ -82,10 +85,10 @@ void GLScope::setDSPEngine(DSPEngine* dspEngine)
 }
 
 void GLScope::setSampleRate(int sampleRate) {
-	m_sampleRate = sampleRate;
+	m_sampleRates[m_memTraceIndex-m_memTraceHistory] = sampleRate;
 	m_configChanged = true;
 	update();
-	emit sampleRateChanged(m_sampleRate);
+	emit sampleRateChanged(m_sampleRates[m_memTraceIndex-m_memTraceHistory]);
 }
 
 void GLScope::setAmp1(Real amp)
@@ -181,19 +184,24 @@ void GLScope::setDisplayTraceIntensity(int intensity)
 
 void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 {
-	if(!m_mutex.tryLock(2))
-		return;
-	if(m_dataChanged) {
+	if (!m_memTraceRecall)
+	{
+		if(!m_mutex.tryLock(2))
+			return;
+		if(m_dataChanged) {
+			m_mutex.unlock();
+			return;
+		}
+
+		m_memTraceIndex++;
+		m_rawTrace[m_memTraceIndex] = trace;
+		m_sampleRates[m_memTraceIndex] = sampleRate;
+
+		//m_sampleRate = sampleRate; // sampleRate comes from scopeVis
+		m_dataChanged = true;
+
 		m_mutex.unlock();
-		return;
 	}
-
-	m_rawTrace = trace;
-
-	m_sampleRate = sampleRate; // sampleRate comes from scopeVis
-	m_dataChanged = true;
-
-	m_mutex.unlock();
 }
 
 void GLScope::initializeGL()
@@ -345,7 +353,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
+			glColor4f(0, 1, 0, 0.4);
 			glBegin(GL_LINE_LOOP);
 
 			float posLimit = 1.0 / m_amp1;
@@ -547,7 +555,7 @@ void GLScope::paintGL()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glEnable(GL_LINE_SMOOTH);
 			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, m_displayTraceIntensity / 100.0);
+			glColor4f(0, 1, 0, 0.4);
 			glBegin(GL_LINE_LOOP);
 
 			float posLimit = 1.0 / m_amp2;
@@ -658,14 +666,16 @@ void GLScope::mousePressEvent(QMouseEvent* event)
 
 void GLScope::handleMode()
 {
+	BitfieldIndex<m_memHistorySizeLog2> memIndex = m_memTraceIndex - m_memTraceHistory;
+
 	switch(m_mode) {
 		case ModeIQ:
 		{
-			m_mathTrace.resize(m_rawTrace.size());
+			m_mathTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
-			m_displayTrace = &m_rawTrace;
+			m_displayTrace = &m_rawTrace[memIndex];
 
-			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
+			for(std::vector<Complex>::const_iterator src = m_rawTrace[memIndex].begin(); src != m_rawTrace[memIndex].end(); ++src) {
 				*dst++ = Complex(src->real() - m_ofs1, src->imag() - m_ofs2);
 			}
 
@@ -678,10 +688,10 @@ void GLScope::handleMode()
 		}
 		case ModeMagLinPha:
 		{
-			m_mathTrace.resize(m_rawTrace.size());
+			m_mathTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 
-			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
+			for(std::vector<Complex>::const_iterator src = m_rawTrace[memIndex].begin(); src != m_rawTrace[memIndex].end(); ++src)
 			{
 				*dst++ = Complex(abs(*src) - m_ofs1/2.0 - 1.0/m_amp1, (arg(*src) / M_PI) - m_ofs2);
 			}
@@ -695,12 +705,12 @@ void GLScope::handleMode()
 		}
 		case ModeMagdBPha:
 		{
-			m_mathTrace.resize(m_rawTrace.size());
-			m_powTrace.resize(m_rawTrace.size());
+			m_mathTrace.resize(m_rawTrace[memIndex].size());
+			m_powTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			std::vector<Real>::iterator powDst = m_powTrace.begin();
 
-			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src) {
+			for(std::vector<Complex>::const_iterator src = m_rawTrace[memIndex].begin(); src != m_rawTrace[memIndex].end(); ++src) {
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
 				v = 1.0f + 2.0f*(((10.0f*log10f(v))/100.0f) - m_ofs1)  + 1.0f - 1.0f/m_amp1;
@@ -717,11 +727,11 @@ void GLScope::handleMode()
 		}
 		case ModeMagLinDPha:
 		{
-			m_mathTrace.resize(m_rawTrace.size());
+			m_mathTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			Real curArg;
 
-			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
+			for(std::vector<Complex>::const_iterator src = m_rawTrace[memIndex].begin(); src != m_rawTrace[memIndex].end(); ++src)
 			{
 				curArg = arg(*src) - m_prevArg;
 
@@ -744,13 +754,13 @@ void GLScope::handleMode()
 		}
 		case ModeMagdBDPha:
 		{
-			m_mathTrace.resize(m_rawTrace.size());
-			m_powTrace.resize(m_rawTrace.size());
+			m_mathTrace.resize(m_rawTrace[memIndex].size());
+			m_powTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
 			std::vector<Real>::iterator powDst = m_powTrace.begin();
 			Real curArg;
 
-			for(std::vector<Complex>::const_iterator src = m_rawTrace.begin(); src != m_rawTrace.end(); ++src)
+			for(std::vector<Complex>::const_iterator src = m_rawTrace[memIndex].begin(); src != m_rawTrace[memIndex].end(); ++src)
 			{
 				Real v = src->real() * src->real() + src->imag() * src->imag();
 				*powDst++ = v;
@@ -777,16 +787,16 @@ void GLScope::handleMode()
 		}
 		case ModeDerived12:
 		{
-			if(m_rawTrace.size() > 3)
+			if(m_rawTrace[memIndex].size() > 3)
 			{
-				m_mathTrace.resize(m_rawTrace.size() - 3);
+				m_mathTrace.resize(m_rawTrace[memIndex].size() - 3);
 				std::vector<Complex>::iterator dst = m_mathTrace.begin();
 
-				for(uint i = 3; i < m_rawTrace.size() ; i++)
+				for(uint i = 3; i < m_rawTrace[memIndex].size() ; i++)
 				{
 					*dst++ = Complex(
-						abs(m_rawTrace[i] - m_rawTrace[i - 1]),
-						abs(m_rawTrace[i] - m_rawTrace[i - 1]) - abs(m_rawTrace[i - 2] - m_rawTrace[i - 3]));
+						abs(m_rawTrace[memIndex][i] - m_rawTrace[memIndex][i - 1]),
+						abs(m_rawTrace[memIndex][i] - m_rawTrace[memIndex][i - 1]) - abs(m_rawTrace[memIndex][i - 2] - m_rawTrace[0][i - 3]));
 				}
 
 				m_displayTrace = &m_mathTrace;
@@ -796,13 +806,13 @@ void GLScope::handleMode()
 		}
 		case ModeCyclostationary:
 		{
-			if(m_rawTrace.size() > 2)
+			if(m_rawTrace[0].size() > 2)
 			{
-				m_mathTrace.resize(m_rawTrace.size() - 2);
+				m_mathTrace.resize(m_rawTrace[memIndex].size() - 2);
 				std::vector<Complex>::iterator dst = m_mathTrace.begin();
 
-				for(uint i = 2; i < m_rawTrace.size() ; i++)
-					*dst++ = Complex(abs(m_rawTrace[i] - conj(m_rawTrace[i - 1])), 0);
+				for(uint i = 2; i < m_rawTrace[memIndex].size() ; i++)
+					*dst++ = Complex(abs(m_rawTrace[memIndex][i] - conj(m_rawTrace[memIndex][i - 1])), 0);
 
 				m_displayTrace = &m_mathTrace;
 			}
@@ -889,8 +899,8 @@ void GLScope::applyConfig()
     float amp1_ofs = m_ofs1;
     float amp2_range = 2.0 / m_amp2;
     float amp2_ofs = m_ofs2;
-    float t_start = ((m_timeOfsProMill / 1000.0) - m_triggerPre) * ((float) m_displayTrace->size() / m_sampleRate);
-    float t_len = ((float) m_displayTrace->size() / m_sampleRate) / (float) m_timeBase;
+    float t_start = ((m_timeOfsProMill / 1000.0) - m_triggerPre) * ((float) m_displayTrace->size() / m_sampleRates[m_memTraceIndex-m_memTraceHistory]);
+    float t_len = ((float) m_displayTrace->size() / m_sampleRates[m_memTraceIndex-m_memTraceHistory]) / (float) m_timeBase;
 
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
     m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len);
@@ -1545,6 +1555,13 @@ void GLScope::setTriggerLevel(Real triggerLevel)
 void GLScope::setTriggerPre(Real triggerPre)
 {
 	m_triggerPre = triggerPre;
+	m_configChanged = true;
+	update();
+}
+
+void GLScope::setMemHistoryShift(int value)
+{
+	m_memTraceHistory = value;
 	m_configChanged = true;
 	update();
 }

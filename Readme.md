@@ -13,6 +13,14 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 - fix: production fixes that can't wait
 - legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
 
+<h2>Untested plugins</h2>
+
+These plugins come from the parent code base and have been maintained so that they compile but they are not being actively tested:
+
+- Channels:
+  - lora
+  - tcpsrc
+
 <h2>Unsupported plugins</h2>
 
 These plugins come from the parent code base and are still present in the source tree but are not part of the build:
@@ -25,14 +33,6 @@ These plugins come from the parent code base and are still present in the source
   - v4l-msi
   - v4l-rtl
   
-<h2>Untested plugins</h2>
-
-These plugins come from the parent code base and have been maintained so that they compile but they are not being actively tested:
-
-- Channels:
-  - lora
-  - tcpsrc
-
 <h3>Gnuradio</h3>
 
 The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
@@ -176,6 +176,7 @@ For Debian Jessie or Stretch:
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
   - File sample source plugin (recording reader)
+  - Trace history in the Channel Analyzer
   
 <h2>Major redesign</h2>
 
@@ -198,8 +199,9 @@ For Debian Jessie or Stretch:
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
+  - Scope: trigger countdown
+  - Scope: multiple trigger chaining
   - 32 bit samples for the Channel Analyzer
-  - Trace history in the Channel Analyzer
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).
   - Headless mode based on a saved configuration in above human readable form
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer

@@ -51,6 +51,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 	m_messageQueue = messageQueue;
 	m_scopeVis = scopeVis;
 	m_glScope = glScope;
+	ui->memHistory->setMaximum((1<<GLScope::m_memHistorySizeLog2)-1);
 	connect(m_glScope, SIGNAL(traceSizeChanged(int)), this, SLOT(on_scope_traceSizeChanged(int)));
 	connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
 	applySettings();
@@ -732,6 +733,18 @@ void GLScopeGUI::on_trigLevelFine_valueChanged(int value)
 	m_triggerLevelFine = value;
 	setTrigLevelDisplay();
 	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_memHistory_valueChanged(int value)
+{
+	QString text;
+	text.sprintf("%02d", value % (1<<GLScope::m_memHistorySizeLog2));
+	ui->memIndexText->setText(text);
+
+	if(m_glScope != NULL)
+	{
+		m_glScope->setMemHistoryShift(value % (1<<GLScope::m_memHistorySizeLog2));
+	}
 }
 
 void GLScopeGUI::on_slopePos_clicked()

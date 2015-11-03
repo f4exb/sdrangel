@@ -27,6 +27,7 @@
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
 #include "util/export.h"
+#include "util/bitfieldindex.h"
 
 class DSPEngine;
 class ScopeVis;
@@ -70,14 +71,17 @@ public:
 	void setTriggerChannel(ScopeVis::TriggerChannel triggerChannel);
 	void setTriggerLevel(Real triggerLevel);
 	void setTriggerPre(Real triggerPre);
+	void setMemHistoryShift(int value);
 
 	void newTrace(const std::vector<Complex>& trace, int sampleRate);
-	int getTraceSize() const { return m_rawTrace.size(); }
+	int getTraceSize() const { return m_rawTrace[m_memTraceIndex - m_memTraceHistory].size(); }
 
 	void setSampleRate(int sampleRate);
 	int getSampleRate() const {	return m_sampleRate; }
 	Mode getDataMode() const { return m_mode; }
 	void connectTimer(const QTimer& timer);
+
+	static const int m_memHistorySizeLog2 = 4;
 
 signals:
 	void traceSizeChanged(int);
@@ -94,7 +98,11 @@ private:
 	Qt::Orientation m_orientation;
 
 	// traces
-	std::vector<Complex> m_rawTrace;
+	std::vector<Complex> m_rawTrace[1<<m_memHistorySizeLog2];
+	int m_sampleRates[16];
+	BitfieldIndex<m_memHistorySizeLog2> m_memTraceIndex;   //!< current index of trace being written
+	BitfieldIndex<m_memHistorySizeLog2> m_memTraceHistory; //!< trace index shift into history
+	bool m_memTraceRecall;
 	std::vector<Complex> m_mathTrace;
 	std::vector<Complex>* m_displayTrace;
 	std::vector<Real> m_powTrace;
