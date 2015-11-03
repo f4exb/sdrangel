@@ -77,7 +77,7 @@ public:
 	int getTraceSize() const { return m_rawTrace[m_memTraceIndex - m_memTraceHistory].size(); }
 
 	void setSampleRate(int sampleRate);
-	int getSampleRate() const {	return m_sampleRate; }
+	int getSampleRate() const {	return m_sampleRates[m_memTraceIndex - m_memTraceHistory]; }
 	Mode getDataMode() const { return m_mode; }
 	void connectTimer(const QTimer& timer);
 
