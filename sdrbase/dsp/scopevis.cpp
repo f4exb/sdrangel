@@ -120,6 +120,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 			{
                 m_glScope->newTrace(m_trace, m_sampleRate); // send a dummy trace
 				m_triggerState = Untriggered;
+				m_triggerIndex = 0;
 			}
             if(m_triggerState == Delay)
             {
@@ -136,7 +137,14 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
                     m_triggerDelayCount--;
                     if (m_triggerDelayCount == 0)
                     {
-                        m_triggerState = Triggered;
+                    	if (nextTrigger())
+                    	{
+                    		m_triggerState = Untriggered;
+                    	}
+                    	else
+                    	{
+                    		m_triggerState = Triggered;
+                    	}
                     }
                 }
             }
@@ -170,13 +178,20 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
                                 }
                                 else
                                 {
-                                    m_triggerState = Triggered;
-                                    m_triggerPoint = begin;
-                                    // fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
-                                    if (m_triggerPre) { // do this process only if there is a pre-trigger delay
-                                        std::copy(m_traceback.end() - m_triggerPre - 1, m_traceback.end() - 1, m_trace.begin());
-                                        m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
-                                    }
+                                	if (nextTrigger())
+                                	{
+                                		m_triggerState = Untriggered;
+                                	}
+                                	else
+                                	{
+										m_triggerState = Triggered;
+										m_triggerPoint = begin;
+										// fill beginning of m_trace with delayed samples from the trace memory FIFO. Increment m_fill accordingly.
+										if (m_triggerPre) { // do this process only if there is a pre-trigger delay
+											std::copy(m_traceback.end() - m_triggerPre - 1, m_traceback.end() - 1, m_trace.begin());
+											m_fill = m_triggerPre; // Increment m_fill accordingly (from 0).
+										}
+                                	}
                                 }
 								break;
 							}
@@ -220,6 +235,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 					} else {
                         m_tracebackCount = 0;
 						m_triggerState = Untriggered;
+						m_triggerIndex = 0;
 					}
 				}
 			}
@@ -339,5 +355,29 @@ void ScopeVis::setOneShot(bool oneShot)
 	if ((m_triggerState == WaitForReset) && !oneShot) {
         m_tracebackCount = 0;
 		m_triggerState = Untriggered;
+		m_triggerIndex = 0;
+	}
+}
+
+bool ScopeVis::nextTrigger()
+{
+	m_triggerIndex++;
+	m_prevTrigger = false;
+	m_triggerDelayCount = 0;
+	m_armed = false;
+
+	if (m_triggerIndex == m_nbTriggers)
+	{
+		m_triggerIndex = 0;
+		return false;
+	}
+	else if (m_triggerChannel[m_triggerIndex] == TriggerFreeRun)
+	{
+		m_triggerIndex = 0;
+		return false;
+	}
+	else
+	{
+		return true;
 	}
 }

@@ -110,7 +110,7 @@ private:
 	};
 
     /**
-     *  TriggerState:
+     *  TriggerState: (repeat at each successive non freerun trigger)
      * 
      *            send a                       Trigger condition                                               +--------------------+
      *          dummy trace                    - Immediate                              m_triggerOneShot       |                    |
@@ -151,6 +151,7 @@ private:
 	SampleVector::const_iterator m_triggerPoint;
 
 	bool triggerCondition(SampleVector::const_iterator& it);
+	bool nextTrigger(); //!< move to next trigger. Returns true if next trigger is active.
 };
 
 #endif // INCLUDE_SCOPEVIS_H
