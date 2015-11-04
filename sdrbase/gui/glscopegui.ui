@@ -828,6 +828,11 @@
          <string>Phi</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>dPhi</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

@@ -21,7 +21,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_triggerDelayCount(0),
 	m_triggerOneShot(false),
 	m_armed(false),
-	m_sampleRate(0)
+	m_sampleRate(0),
+	m_prevArg(0.0),
+	m_firstArg(true)
 {
 	setObjectName("ScopeVis");
 	m_trace.reserve(100*m_traceChunkSize);
@@ -276,6 +278,11 @@ bool ScopeVis::handleMessage(const Message& message)
 		m_triggerBothEdges[index] = conf.getTriggerBothEdges();
 		m_triggerPre = conf.getTriggerPre();
 
+		if (m_triggerChannel[index] == TriggerDPhase)
+		{
+			m_firstArg = true;
+		}
+
         if (m_triggerPre >= m_traceback.size())
         {
         	m_triggerPre = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (pre-trigger delay = 0)
@@ -322,28 +329,56 @@ bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 	Complex c(it->real()/32768.0f, it->imag()/32768.0f);
     m_traceback.push_back(c); // store into trace memory FIFO
     
-    if (m_tracebackCount < m_traceback.size()) { // increment count up to trace memory size
+    if (m_tracebackCount < m_traceback.size())
+    { // increment count up to trace memory size
         m_tracebackCount++;
     }
     
-	if (m_triggerChannel[m_triggerIndex] == TriggerChannelI) {
+	if (m_triggerChannel[m_triggerIndex] == TriggerChannelI)
+	{
 		return c.real() > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel[m_triggerIndex] == TriggerChannelQ) {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerChannelQ)
+	{
 		return c.imag() > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel[m_triggerIndex] == TriggerMagLin) {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerMagLin)
+	{
 		return abs(c) > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel[m_triggerIndex] == TriggerMagDb) {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerMagDb)
+	{
 		Real mult = (10.0f / log2f(10.0f));
 		Real v = c.real() * c.real() + c.imag() * c.imag();
 		return mult * log2f(v) > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel[m_triggerIndex] == TriggerPhase) {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerPhase)
+	{
 		return arg(c) / M_PI > m_triggerLevel[m_triggerIndex];
 	}
-	else {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerDPhase)
+	{
+		Real curArg = arg(c) - m_prevArg;
+		m_prevArg = arg(c);
+
+		if (curArg < -M_PI) {
+			curArg += 2.0 * M_PI;
+		} else if (curArg > M_PI) {
+			curArg -= 2.0 * M_PI;
+		}
+
+		if (m_firstArg)
+		{
+			m_firstArg = false;
+			return false;
+		}
+		else
+		{
+			return curArg / M_PI > m_triggerLevel[m_triggerIndex];
+		}
+	}
+	else
+	{
 		return false;
 	}
 }

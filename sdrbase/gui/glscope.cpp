@@ -546,7 +546,7 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint trigger level #2
-		if ((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
+		if ((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerDPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
 		{
 			glPushMatrix();
 			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
@@ -562,7 +562,8 @@ void GLScope::paintGL()
 			float negLimit = -1.0 / m_amp2;
 
 			if ((m_triggerChannel == ScopeVis::TriggerChannelQ)
-					|| (m_triggerChannel == ScopeVis::TriggerPhase))
+					|| (m_triggerChannel == ScopeVis::TriggerPhase)
+					|| (m_triggerChannel == ScopeVis::TriggerDPhase))
 			{
 				if ((m_triggerLevelDis2 > negLimit) && (m_triggerLevelDis2 < posLimit))
 				{

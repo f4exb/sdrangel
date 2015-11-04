@@ -17,7 +17,8 @@ public:
 		TriggerChannelQ,
 		TriggerMagLin,
 		TriggerMagDb,
-		TriggerPhase
+		TriggerPhase,
+		TriggerDPhase
 	};
 
 	static const uint m_traceChunkSize;
@@ -149,6 +150,8 @@ private:
     uint m_triggerDelayCount; //!< trace sizes delay counter
 	int m_sampleRate;
 	SampleVector::const_iterator m_triggerPoint;
+	Real m_prevArg;
+	bool m_firstArg;
 
 	bool triggerCondition(SampleVector::const_iterator& it);
 	bool nextTrigger(); //!< move to next trigger. Returns true if next trigger is active.
