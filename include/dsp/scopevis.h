@@ -21,11 +21,13 @@ public:
 	};
 
 	static const uint m_traceChunkSize;
+	static const uint m_nbTriggers = 10;
 
 	ScopeVis(GLScope* glScope = NULL);
 	virtual ~ScopeVis();
 
-	void configure(MessageQueue* msgQueue, 
+	void configure(MessageQueue* msgQueue,
+		uint triggerIndex,
         TriggerChannel triggerChannel, 
         Real triggerLevel, 
         bool triggerPositiveEdge, 
@@ -49,6 +51,7 @@ private:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
+		uint getTriggerIndex() const { return m_triggerIndex; }
 		int getTriggerChannel() const { return m_triggerChannel; }
 		Real getTriggerLevel() const { return m_triggerLevel; }
 		Real getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
@@ -57,7 +60,8 @@ private:
         uint getTriggerDelay() const { return m_triggerDelay; }
         uint getTraceSize() const { return m_traceSize; }
 
-		static MsgConfigureScopeVis* create(int triggerChannel, 
+		static MsgConfigureScopeVis* create(uint triggerIndex,
+			int triggerChannel,
             Real triggerLevel, 
             bool triggerPositiveEdge, 
             bool triggerBothEdges,
@@ -65,7 +69,8 @@ private:
             uint triggerDelay, 
             uint traceSize)
 		{
-			return new MsgConfigureScopeVis(triggerChannel,
+			return new MsgConfigureScopeVis(triggerIndex,
+					triggerChannel,
 					triggerLevel,
 					triggerPositiveEdge,
 					triggerBothEdges,
@@ -75,6 +80,7 @@ private:
 		}
 
 	private:
+		uint m_triggerIndex;
 		int m_triggerChannel;
 		Real m_triggerLevel;
 		bool m_triggerPositiveEdge;
@@ -83,7 +89,8 @@ private:
         uint m_triggerDelay;
         uint m_traceSize;
 
-		MsgConfigureScopeVis(int triggerChannel, 
+		MsgConfigureScopeVis(uint triggerIndex,
+				int triggerChannel,
                 Real triggerLevel, 
                 bool triggerPositiveEdge, 
                 bool triggerBothEdges,
@@ -91,6 +98,7 @@ private:
                 uint triggerDelay,
                 uint traceSize) :
 			Message(),
+			m_triggerIndex(triggerIndex),
 			m_triggerChannel(triggerChannel),
 			m_triggerLevel(triggerLevel),
 			m_triggerPositiveEdge(triggerPositiveEdge),
@@ -128,15 +136,16 @@ private:
     uint m_tracebackCount;                       //!< Count of samples stored into trace memory since triggering is active up to trace memory size
 	uint m_fill;
 	TriggerState m_triggerState;
-	TriggerChannel m_triggerChannel;
-	Real m_triggerLevel;
-	bool m_triggerPositiveEdge;
-	bool m_triggerBothEdges;
+	uint m_triggerIndex; //!< current active trigger index
+	TriggerChannel m_triggerChannel[m_nbTriggers];
+	Real m_triggerLevel[m_nbTriggers];
+	bool m_triggerPositiveEdge[m_nbTriggers];
+	bool m_triggerBothEdges[m_nbTriggers];
 	bool m_prevTrigger;
     uint m_triggerPre; //!< Pre-trigger delay in number of samples
 	bool m_triggerOneShot;
 	bool m_armed;
-    uint m_triggerDelay;      //!< Trigger delay in number of trace sizes
+    uint m_triggerDelay[m_nbTriggers];      //!< Trigger delay in number of trace sizes
     uint m_triggerDelayCount; //!< trace sizes delay counter
 	int m_sampleRate;
 	SampleVector::const_iterator m_triggerPoint;

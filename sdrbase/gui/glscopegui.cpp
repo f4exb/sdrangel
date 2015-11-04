@@ -246,6 +246,7 @@ void GLScopeGUI::applyTriggerSettings()
 	m_glScope->setTriggerPre(m_triggerPre/100.0); // [0.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
+			0, // FIXME
 			(ScopeVis::TriggerChannel) m_triggerChannel,
 			triggerLevel,
 			m_triggerPositiveEdge,

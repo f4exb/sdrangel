@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>112</height>
+    <width>583</width>
+    <height>111</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -400,32 +400,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="Line" name="ampLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="gridIntensity">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Grid intensity</string>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -437,6 +411,15 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="row3Layout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
      <item>
       <widget class="QLabel" name="memText">
        <property name="text">
@@ -716,6 +699,25 @@
        </property>
        <property name="value">
         <number>50</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="gridIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Grid intensity</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>

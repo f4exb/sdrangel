@@ -15,12 +15,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_tracebackCount(0),
 	m_fill(0),
 	m_triggerState(Untriggered),
-	m_triggerChannel(TriggerFreeRun),
-	m_triggerLevel(0.0),
-	m_triggerPositiveEdge(true),
-	m_triggerBothEdges(false),
+	m_triggerIndex(0),
+	m_prevTrigger(false),
 	m_triggerPre(0),
-    m_triggerDelay(0),
     m_triggerDelayCount(0),
 	m_triggerOneShot(false),
 	m_armed(false),
@@ -30,13 +27,23 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_trace.reserve(100*m_traceChunkSize);
 	m_trace.resize(20*m_traceChunkSize);
 	m_traceback.resize(20*m_traceChunkSize);
+
+	for (int i = 0; i < m_nbTriggers; i++)
+	{
+		m_triggerChannel[i] = TriggerFreeRun;
+		m_triggerLevel[i] = 0.0;
+		m_triggerPositiveEdge[i] = true;
+		m_triggerBothEdges[i] = false;
+		m_triggerDelay[i] = 0;
+	}
 }
 
 ScopeVis::~ScopeVis()
 {
 }
 
-void ScopeVis::configure(MessageQueue* msgQueue, 
+void ScopeVis::configure(MessageQueue* msgQueue,
+	uint triggerIndex,
     TriggerChannel triggerChannel, 
     Real triggerLevel, 
     bool triggerPositiveEdge, 
@@ -45,7 +52,8 @@ void ScopeVis::configure(MessageQueue* msgQueue,
     uint triggerDelay,
     uint traceSize)
 {
-	Message* cmd = MsgConfigureScopeVis::create(triggerChannel,
+	Message* cmd = MsgConfigureScopeVis::create(triggerIndex,
+			triggerChannel,
 			triggerLevel,
 			triggerPositiveEdge,
 			triggerBothEdges,
@@ -59,7 +67,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 {
 	SampleVector::const_iterator begin(cbegin);
 
-	if (m_triggerChannel == TriggerFreeRun) {
+	if (m_triggerChannel[m_triggerIndex] == TriggerFreeRun) {
 		m_triggerPoint = begin;
 	}
 	else if (m_triggerState == Triggered) {
@@ -77,7 +85,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 	while(begin < end)
 	{
-		if (m_triggerChannel == TriggerFreeRun)
+		if (m_triggerChannel[m_triggerIndex] == TriggerFreeRun)
 		{
 			int count = end - begin;
 
@@ -143,10 +151,10 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
                     {
                         bool trigger;
 
-                        if (m_triggerBothEdges) {
+                        if (m_triggerBothEdges[m_triggerIndex]) {
                         	trigger = m_prevTrigger ^ triggerCdt;
                         } else {
-                        	trigger = triggerCdt ^ !m_triggerPositiveEdge;
+                        	trigger = triggerCdt ^ !m_triggerPositiveEdge[m_triggerIndex];
                         }
 
                         if (trigger)
@@ -154,9 +162,9 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 							if (m_armed)
 							{
 								m_armed = false;
-                                if (m_triggerDelay > 0)
+                                if (m_triggerDelay[m_triggerIndex] > 0)
                                 {
-                                    m_triggerDelayCount = m_triggerDelay;
+                                    m_triggerDelayCount = m_triggerDelay[m_triggerIndex];
                                     m_fill = 0;
                                     m_triggerState = Delay;
                                 }
@@ -245,10 +253,11 @@ bool ScopeVis::handleMessage(const Message& message)
 
 		m_tracebackCount = 0;
 		m_triggerState = Config;
-		m_triggerChannel = (TriggerChannel) conf.getTriggerChannel();
-		m_triggerLevel = conf.getTriggerLevel();
-		m_triggerPositiveEdge = conf.getTriggerPositiveEdge();
-		m_triggerBothEdges = conf.getTriggerBothEdges();
+		uint index = conf.getTriggerIndex();
+		m_triggerChannel[index] = (TriggerChannel) conf.getTriggerChannel();
+		m_triggerLevel[index] = conf.getTriggerLevel();
+		m_triggerPositiveEdge[index] = conf.getTriggerPositiveEdge();
+		m_triggerBothEdges[index] = conf.getTriggerBothEdges();
 		m_triggerPre = conf.getTriggerPre();
 
         if (m_triggerPre >= m_traceback.size())
@@ -256,7 +265,7 @@ bool ScopeVis::handleMessage(const Message& message)
         	m_triggerPre = m_traceback.size() - 1; // top sample in FIFO is always the triggering one (pre-trigger delay = 0)
         }
 
-        m_triggerDelay = conf.getTriggerDelay();
+        m_triggerDelay[index] = conf.getTriggerDelay();
         uint newSize = conf.getTraceSize();
 
         if (newSize != m_trace.size())
@@ -270,12 +279,13 @@ bool ScopeVis::handleMessage(const Message& message)
         }
 
 		qDebug() << "  - MsgConfigureScopeVis:"
-				<< " m_triggerChannel: " << m_triggerChannel
-				<< " m_triggerLevel: " << m_triggerLevel
-				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge ? "edge+" : "edge-")
-				<< " m_triggerBothEdges: " << (m_triggerBothEdges ? "yes" : "no")
+				<< " triggerIndex: " << index
+				<< " m_triggerChannel: " << m_triggerChannel[index]
+				<< " m_triggerLevel: " << m_triggerLevel[index]
+				<< " m_triggerPositiveEdge: " << (m_triggerPositiveEdge[index] ? "edge+" : "edge-")
+				<< " m_triggerBothEdges: " << (m_triggerBothEdges[index] ? "yes" : "no")
 				<< " m_preTrigger: " << m_triggerPre
-				<< " m_triggerDelay: " << m_triggerDelay
+				<< " m_triggerDelay: " << m_triggerDelay[index]
 				<< " m_traceSize: " << m_trace.size();
 
 		return true;
@@ -300,22 +310,22 @@ bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
         m_tracebackCount++;
     }
     
-	if (m_triggerChannel == TriggerChannelI) {
-		return c.real() > m_triggerLevel;
+	if (m_triggerChannel[m_triggerIndex] == TriggerChannelI) {
+		return c.real() > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel == TriggerChannelQ) {
-		return c.imag() > m_triggerLevel;
+	else if (m_triggerChannel[m_triggerIndex] == TriggerChannelQ) {
+		return c.imag() > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel == TriggerMagLin) {
-		return abs(c) > m_triggerLevel;
+	else if (m_triggerChannel[m_triggerIndex] == TriggerMagLin) {
+		return abs(c) > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel == TriggerMagDb) {
+	else if (m_triggerChannel[m_triggerIndex] == TriggerMagDb) {
 		Real mult = (10.0f / log2f(10.0f));
 		Real v = c.real() * c.real() + c.imag() * c.imag();
-		return mult * log2f(v) > m_triggerLevel;
+		return mult * log2f(v) > m_triggerLevel[m_triggerIndex];
 	}
-	else if (m_triggerChannel == TriggerPhase) {
-		return arg(c) / M_PI > m_triggerLevel;
+	else if (m_triggerChannel[m_triggerIndex] == TriggerPhase) {
+		return arg(c) / M_PI > m_triggerLevel[m_triggerIndex];
 	}
 	else {
 		return false;
