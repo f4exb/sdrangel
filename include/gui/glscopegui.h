@@ -52,6 +52,7 @@ private:
 	qint32 m_amp2OffsetFine;
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
+	quint32 m_triggerIndex;
 	qint32 m_triggerChannel;
 	qint32 m_triggerLevelCoarse; // percent of full range
 	qint32 m_triggerLevelFine;   // percent of coarse
@@ -59,6 +60,7 @@ private:
 	bool   m_triggerBothEdges;
 	qint32 m_triggerPre;
     qint32 m_triggerDelay;
+    qint32 m_triggerCounts;
     qint32 m_traceLenMult;
 
 	static const qreal amps[11];
@@ -94,6 +96,7 @@ private slots:
 	void on_trigPre_valueChanged(int value);
 	void on_trigDelay_valueChanged(int value);
 	void on_memHistory_valueChanged(int value);
+	void on_trigCount_valueChanged(int value);
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();

@@ -34,7 +34,8 @@ public:
         bool triggerPositiveEdge, 
         bool triggerBothEdges,
         uint triggerPre,
-        uint triggerDelay, 
+        uint triggerDelay,
+		uint triggerCounts,
         uint traceSize);
 	void setOneShot(bool oneShot);
 
@@ -59,6 +60,7 @@ private:
 		Real getTriggerBothEdges() const { return m_triggerBothEdges; }
         uint getTriggerPre() const { return m_triggerPre; }
         uint getTriggerDelay() const { return m_triggerDelay; }
+        uint getTriggerCounts() const { return m_triggerCounts; }
         uint getTraceSize() const { return m_traceSize; }
 
 		static MsgConfigureScopeVis* create(uint triggerIndex,
@@ -67,7 +69,8 @@ private:
             bool triggerPositiveEdge, 
             bool triggerBothEdges,
             uint triggerPre,
-            uint triggerDelay, 
+            uint triggerDelay,
+			uint triggerCounts,
             uint traceSize)
 		{
 			return new MsgConfigureScopeVis(triggerIndex,
@@ -77,6 +80,7 @@ private:
 					triggerBothEdges,
 					triggerPre,
 					triggerDelay,
+					triggerCounts,
 					traceSize);
 		}
 
@@ -88,6 +92,7 @@ private:
 		bool m_triggerBothEdges;
         uint m_triggerPre;
         uint m_triggerDelay;
+        uint m_triggerCounts;
         uint m_traceSize;
 
 		MsgConfigureScopeVis(uint triggerIndex,
@@ -97,6 +102,7 @@ private:
                 bool triggerBothEdges,
                 uint triggerPre,
                 uint triggerDelay,
+				uint triggerCounts,
                 uint traceSize) :
 			Message(),
 			m_triggerIndex(triggerIndex),
@@ -106,6 +112,7 @@ private:
 			m_triggerBothEdges(triggerBothEdges),
             m_triggerPre(triggerPre),
             m_triggerDelay(triggerDelay),
+			m_triggerCounts(triggerCounts),
             m_traceSize(traceSize)
 		{ }
 	};
@@ -148,6 +155,8 @@ private:
 	bool m_armed;
     uint m_triggerDelay[m_nbTriggers];      //!< Trigger delay in number of trace sizes
     uint m_triggerDelayCount; //!< trace sizes delay counter
+    uint m_triggerCounts[m_nbTriggers]; //!< Number of trigger events before the actual trigger is kicked off
+    uint m_triggerCount;
 	int m_sampleRate;
 	SampleVector::const_iterator m_triggerPoint;
 	Real m_prevArg;

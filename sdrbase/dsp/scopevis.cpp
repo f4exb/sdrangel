@@ -21,6 +21,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_triggerDelayCount(0),
 	m_triggerOneShot(false),
 	m_armed(false),
+	m_triggerCount(0),
 	m_sampleRate(0),
 	m_prevArg(0.0),
 	m_firstArg(true)
@@ -37,6 +38,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 		m_triggerPositiveEdge[i] = true;
 		m_triggerBothEdges[i] = false;
 		m_triggerDelay[i] = 0;
+		m_triggerCounts[i] = 0;
 	}
 }
 
@@ -52,6 +54,7 @@ void ScopeVis::configure(MessageQueue* msgQueue,
     bool triggerBothEdges,
     uint triggerPre,
     uint triggerDelay,
+	uint triggerCounts,
     uint traceSize)
 {
 	Message* cmd = MsgConfigureScopeVis::create(triggerIndex,
@@ -61,6 +64,7 @@ void ScopeVis::configure(MessageQueue* msgQueue,
 			triggerBothEdges,
 			triggerPre,
 			triggerDelay,
+			triggerCounts,
 			traceSize);
 	msgQueue->push(cmd);
 }
@@ -289,6 +293,7 @@ bool ScopeVis::handleMessage(const Message& message)
         }
 
         m_triggerDelay[index] = conf.getTriggerDelay();
+        m_triggerCounts[index] = conf.getTriggerCounts();
         uint newSize = conf.getTraceSize();
 
         if (newSize != m_trace.size())
@@ -309,6 +314,7 @@ bool ScopeVis::handleMessage(const Message& message)
 				<< " m_triggerBothEdges: " << (m_triggerBothEdges[index] ? "yes" : "no")
 				<< " m_preTrigger: " << m_triggerPre
 				<< " m_triggerDelay: " << m_triggerDelay[index]
+				<< " m_triggerCounts: " << m_triggerCounts[index]
 				<< " m_traceSize: " << m_trace.size();
 
 		return true;
@@ -396,23 +402,32 @@ void ScopeVis::setOneShot(bool oneShot)
 
 bool ScopeVis::nextTrigger()
 {
-	m_triggerIndex++;
-	m_prevTrigger = false;
-	m_triggerDelayCount = 0;
-	m_armed = false;
-
-	if (m_triggerIndex == m_nbTriggers)
+	if (m_triggerCount < m_triggerCounts[m_triggerIndex])
 	{
-		m_triggerIndex = 0;
-		return false;
-	}
-	else if (m_triggerChannel[m_triggerIndex] == TriggerFreeRun)
-	{
-		m_triggerIndex = 0;
-		return false;
+		m_triggerCount++;
+		return true;
 	}
 	else
 	{
-		return true;
+		m_triggerIndex++;
+		m_prevTrigger = false;
+		m_triggerDelayCount = 0;
+		m_triggerCount = 0;
+		m_armed = false;
+
+		if (m_triggerIndex == m_nbTriggers)
+		{
+			m_triggerIndex = 0;
+			return false;
+		}
+		else if (m_triggerChannel[m_triggerIndex] == TriggerFreeRun)
+		{
+			m_triggerIndex = 0;
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 }

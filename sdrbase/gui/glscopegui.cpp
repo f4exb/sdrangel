@@ -29,6 +29,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_amp2OffsetFine(0),
 	m_displayGridIntensity(1),
 	m_displayTraceIntensity(50),
+	m_triggerIndex(0),
 	m_triggerChannel(ScopeVis::TriggerFreeRun),
 	m_triggerLevelCoarse(0),
 	m_triggerLevelFine(0),
@@ -36,6 +37,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_triggerBothEdges(false),
     m_triggerPre(0),
     m_triggerDelay(0),
+	m_triggerCounts(0),
 	m_traceLenMult(20)
 {
 	ui->setupUi(this);
@@ -246,13 +248,14 @@ void GLScopeGUI::applyTriggerSettings()
 	m_glScope->setTriggerPre(m_triggerPre/100.0); // [0.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
-			0, // FIXME
+			0, // FIXME: trigger index
 			(ScopeVis::TriggerChannel) m_triggerChannel,
 			triggerLevel,
 			m_triggerPositiveEdge,
 			m_triggerBothEdges,
 			preTriggerSamples,
             m_triggerDelay,
+			m_triggerCounts,
 			m_traceLenMult * ScopeVis::m_traceChunkSize);
 }
 
@@ -746,6 +749,17 @@ void GLScopeGUI::on_memHistory_valueChanged(int value)
 	{
 		m_glScope->setMemHistoryShift(value % (1<<GLScope::m_memHistorySizeLog2));
 	}
+}
+
+void GLScopeGUI::on_trigCount_valueChanged(int value)
+{
+	m_triggerCounts = value;
+
+	QString text;
+	text.sprintf("%02d", value);
+	ui->trigCountText->setText(text);
+
+	applyTriggerSettings();
 }
 
 void GLScopeGUI::on_slopePos_clicked()
