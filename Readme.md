@@ -176,7 +176,9 @@ For Debian Jessie or Stretch:
   - Coarse and fine trigger level sliders
   - Minimalist recording (no file choice)
   - File sample source plugin (recording reader)
-  - Trace history in the Channel Analyzer
+  - Scope: trace history
+  - Scope: trigger countdown
+  - Scope: multiple trigger chaining
   
 <h2>Major redesign</h2>
 
@@ -199,8 +201,6 @@ For Debian Jessie or Stretch:
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
-  - Scope: trigger countdown
-  - Scope: multiple trigger chaining
   - 32 bit samples for the Channel Analyzer
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).
   - Headless mode based on a saved configuration in above human readable form

@@ -202,9 +202,13 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			d.readBool(54 + 10*i, &m_triggerBothEdges[i], false);
 			d.readS32(55 + 10*i, &m_triggerDelay[i], 0);
 			d.readS32(56 + 10*i, &m_triggerCounts[i], 0);
+			m_triggerIndex = i;
+			applyTriggerSettings();
 		}
 
-		setTrigUI(0);
+		m_triggerIndex = 0;
+
+		setTrigUI(m_triggerIndex);
 		setTrigLevelDisplay();
 		applySettings();
 		applyTriggerSettings();
@@ -816,6 +820,16 @@ void GLScopeGUI::on_trigCount_valueChanged(int value)
 	ui->trigCountText->setText(text);
 
 	applyTriggerSettings();
+}
+
+void GLScopeGUI::on_trigIndex_valueChanged(int value)
+{
+	m_triggerIndex = value;
+	QString text;
+	text.sprintf("%d", value);
+	ui->trigIndexText->setText(text);
+	setTrigLevelDisplay();
+	setTrigUI(m_triggerIndex);
 }
 
 void GLScopeGUI::on_slopePos_clicked()

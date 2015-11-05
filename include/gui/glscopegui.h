@@ -98,6 +98,7 @@ private slots:
 	void on_trigDelay_valueChanged(int value);
 	void on_memHistory_valueChanged(int value);
 	void on_trigCount_valueChanged(int value);
+	void on_trigIndex_valueChanged(int value);
 
 	void on_horizView_clicked();
 	void on_vertView_clicked();
