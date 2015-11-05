@@ -30,16 +30,20 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	m_displayGridIntensity(1),
 	m_displayTraceIntensity(50),
 	m_triggerIndex(0),
-	m_triggerChannel(ScopeVis::TriggerFreeRun),
-	m_triggerLevelCoarse(0),
-	m_triggerLevelFine(0),
-	m_triggerPositiveEdge(true),
-	m_triggerBothEdges(false),
     m_triggerPre(0),
-    m_triggerDelay(0),
-	m_triggerCounts(0),
 	m_traceLenMult(20)
 {
+	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	{
+		m_triggerChannel[i] = ScopeVis::TriggerFreeRun;
+		m_triggerLevelCoarse[i] = 0;
+		m_triggerLevelFine[i] = 0;
+		m_triggerPositiveEdge[i] = true;
+		m_triggerBothEdges[i] = false;
+		m_triggerDelay[i] = 0;
+		m_triggerCounts[i] = 0;
+	}
+
 	ui->setupUi(this);
 }
 
@@ -77,13 +81,20 @@ void GLScopeGUI::resetToDefaults()
 	m_amp2OffsetCoarse = 0;
 	m_amp2OffsetFine = 0;
 	m_displayGridIntensity = 5;
-    m_triggerChannel = ScopeVis::TriggerFreeRun;
-    m_triggerLevelCoarse = 0;
-    m_triggerLevelFine = 0;
-    m_triggerPositiveEdge = true;
     m_triggerPre = 0;
-    m_triggerDelay = 0;
     m_traceLenMult = 20;
+
+	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	{
+		m_triggerChannel[i] = ScopeVis::TriggerFreeRun;
+		m_triggerLevelCoarse[i] = 0;
+		m_triggerLevelFine[i] = 0;
+		m_triggerPositiveEdge[i] = true;
+		m_triggerBothEdges[i] = false;
+		m_triggerDelay[i] = 0;
+		m_triggerCounts[i] = 0;
+	}
+
 	applySettings();
 }
 
@@ -99,19 +110,30 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(6, m_displayGridIntensity);
 	s.writeS32(7, m_amp1OffsetCoarse);
 	s.writeS32(8, m_displays);
-	s.writeS32(9, m_triggerChannel);
-	s.writeS32(10, m_triggerLevelCoarse);
-	s.writeBool(11, m_triggerPositiveEdge);
+	//s.writeS32(9, m_triggerChannel);
+	//s.writeS32(10, m_triggerLevelCoarse);
+	//s.writeBool(11, m_triggerPositiveEdge);
 	s.writeS32(12, m_displayTraceIntensity);
 	s.writeS32(13, m_triggerPre);
 	s.writeS32(14, m_traceLenMult);
-	s.writeS32(15, m_triggerDelay);
-	s.writeBool(16, m_triggerBothEdges);
-	s.writeS32(17, m_triggerLevelFine);
+	//s.writeS32(15, m_triggerDelay);
+	//s.writeBool(16, m_triggerBothEdges);
+	//s.writeS32(17, m_triggerLevelFine);
 	s.writeS32(18, m_amp1OffsetFine);
 	s.writeS32(19, m_amplification2);
 	s.writeS32(20, m_amp2OffsetCoarse);
 	s.writeS32(21, m_amp2OffsetFine);
+
+	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	{
+		s.writeS32(50 + 10*i, m_triggerChannel[i]);
+		s.writeS32(51 + 10*i, m_triggerLevelCoarse[i]);
+		s.writeS32(52 + 10*i, m_triggerLevelFine[i]);
+		s.writeBool(53 + 10*i, m_triggerPositiveEdge[i]);
+		s.writeBool(54 + 10*i, m_triggerBothEdges[i]);
+		s.writeS32(55 + 10*i, m_triggerDelay[i]);
+		s.writeS32(56 + 10*i, m_triggerCounts[i]);
+	}
 
 	return s.final();
 }
@@ -136,11 +158,11 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			m_timeBase = 1;
 		d.readS32(7, &m_amp1OffsetCoarse, 0);
 		d.readS32(8, &m_displays, GLScope::DisplayBoth);
-		d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
-		ui->trigMode->setCurrentIndex(m_triggerChannel);
-		d.readS32(10, &m_triggerLevelCoarse, 0);
-		ui->trigLevelCoarse->setValue(m_triggerLevelCoarse);
-		d.readBool(11, &m_triggerPositiveEdge, true);
+		//d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
+		//ui->trigMode->setCurrentIndex(m_triggerChannel);
+		//d.readS32(10, &m_triggerLevelCoarse, 0);
+		//ui->trigLevelCoarse->setValue(m_triggerLevelCoarse);
+		//d.readBool(11, &m_triggerPositiveEdge, true);
 		d.readS32(12, &m_displayTraceIntensity, 50);
 		d.readS32(13, &m_triggerPre, 0);
 		ui->trigPre->setValue(m_triggerPre);
@@ -148,11 +170,12 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(14, &m_traceLenMult, 20);
 		ui->traceLen->setValue(m_traceLenMult);
 		setTraceLenDisplay();
-		d.readS32(15, &m_triggerDelay, 0);
-		ui->trigDelay->setValue(m_triggerDelay);
+		//d.readS32(15, &m_triggerDelay, 0);
+		//ui->trigDelay->setValue(m_triggerDelay);
 		setTrigDelayDisplay();
-		d.readBool(16, &m_triggerBothEdges, false);
+		//d.readBool(16, &m_triggerBothEdges, false);
 
+		/*
 		if (m_triggerBothEdges) {
 			ui->slopePos->setChecked(false);
 			ui->slopeNeg->setChecked(false);
@@ -161,15 +184,27 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			ui->slopeBoth->setChecked(false);
 			ui->slopePos->setChecked(m_triggerPositiveEdge);
 			ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
-		}
+		}*/
 
-		d.readS32(17, &m_triggerLevelFine, 0);
-		ui->trigLevelFine->setValue(m_triggerLevelFine);
+		//d.readS32(17, &m_triggerLevelFine, 0);
+		//ui->trigLevelFine->setValue(m_triggerLevelFine);
 		d.readS32(18, &m_amp1OffsetFine, 0);
 		d.readS32(19, &m_amplification2, 0);
 		d.readS32(20, &m_amp2OffsetCoarse, 0);
 		d.readS32(21, &m_amp2OffsetFine, 0);
 
+		for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+		{
+			d.readS32(50 + 10*i, &m_triggerChannel[i], ScopeVis::TriggerFreeRun);
+			d.readS32(51 + 10*i, &m_triggerLevelCoarse[i], 0);
+			d.readS32(52 + 10*i, &m_triggerLevelFine[i], 0);
+			d.readBool(53 + 10*i, &m_triggerPositiveEdge[i], true);
+			d.readBool(54 + 10*i, &m_triggerBothEdges[i], false);
+			d.readS32(55 + 10*i, &m_triggerDelay[i], 0);
+			d.readS32(56 + 10*i, &m_triggerCounts[i], 0);
+		}
+
+		setTrigUI(0);
 		setTrigLevelDisplay();
 		applySettings();
 		applyTriggerSettings();
@@ -177,6 +212,27 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 	} else {
 		resetToDefaults();
 		return false;
+	}
+}
+
+void GLScopeGUI::setTrigUI(uint index)
+{
+	index %= ScopeVis::m_nbTriggers;
+
+	ui->trigMode->setCurrentIndex(m_triggerChannel[index]);
+	ui->trigLevelCoarse->setValue(m_triggerLevelCoarse[index]);
+	ui->trigLevelFine->setValue(m_triggerLevelFine[index]);
+	ui->trigDelay->setValue(m_triggerDelay[index]);
+	ui->trigCount->setValue(m_triggerCounts[index]);
+
+	if (m_triggerBothEdges[index]) {
+		ui->slopePos->setChecked(false);
+		ui->slopeNeg->setChecked(false);
+		ui->slopeBoth->setChecked(true);
+	} else {
+		ui->slopeBoth->setChecked(false);
+		ui->slopePos->setChecked(m_triggerPositiveEdge[index]);
+		ui->slopeNeg->setChecked(!m_triggerPositiveEdge[index]);
 	}
 }
 
@@ -229,51 +285,51 @@ void GLScopeGUI::applySettings()
 
 void GLScopeGUI::applyTriggerSettings()
 {
-	qreal t = (m_triggerLevelCoarse / 100.0) + (m_triggerLevelFine / 20000.0); // [-1.0, 1.0]
+	qreal t = (m_triggerLevelCoarse[m_triggerIndex] / 100.0) + (m_triggerLevelFine[m_triggerIndex] / 20000.0); // [-1.0, 1.0]
 	qreal triggerLevel;
 	quint32 preTriggerSamples = (m_glScope->getTraceSize() * m_triggerPre) / 100;
 
-	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
+	if (m_triggerChannel[m_triggerIndex] == ScopeVis::TriggerMagDb) {
 		triggerLevel = 100.0 * (t - 1.0); // [-200.0, 0.0]
 	}
-	else if (m_triggerChannel == ScopeVis::TriggerMagLin) {
+	else if (m_triggerChannel[m_triggerIndex] == ScopeVis::TriggerMagLin) {
 		triggerLevel = 1.0 + t; // [0.0, 2.0]
 	}
 	else {
 		triggerLevel = t; // [-1.0, 1.0]
 	}
 
-	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel);
+	m_glScope->setTriggerChannel((ScopeVis::TriggerChannel) m_triggerChannel[m_triggerIndex]);
 	m_glScope->setTriggerLevel(t);  // [-1.0, 1.0]
 	m_glScope->setTriggerPre(m_triggerPre/100.0); // [0.0, 1.0]
 
 	m_scopeVis->configure(m_messageQueue,
-			0, // FIXME: trigger index
-			(ScopeVis::TriggerChannel) m_triggerChannel,
+			m_triggerIndex,
+			(ScopeVis::TriggerChannel) m_triggerChannel[m_triggerIndex],
 			triggerLevel,
-			m_triggerPositiveEdge,
-			m_triggerBothEdges,
+			m_triggerPositiveEdge[m_triggerIndex],
+			m_triggerBothEdges[m_triggerIndex],
 			preTriggerSamples,
-            m_triggerDelay,
-			m_triggerCounts,
+            m_triggerDelay[m_triggerIndex],
+			m_triggerCounts[m_triggerIndex],
 			m_traceLenMult * ScopeVis::m_traceChunkSize);
 }
 
 void GLScopeGUI::setTrigLevelDisplay()
 {
-	qreal t = (m_triggerLevelCoarse / 100.0) + (m_triggerLevelFine / 20000.0);
+	qreal t = (m_triggerLevelCoarse[m_triggerIndex] / 100.0) + (m_triggerLevelFine[m_triggerIndex] / 20000.0);
 
-	ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(m_triggerLevelCoarse));
-	ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(m_triggerLevelFine * 50));
+	ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(m_triggerLevelCoarse[m_triggerIndex]));
+	ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(m_triggerLevelFine[m_triggerIndex] * 50));
 
-	if (m_triggerChannel == ScopeVis::TriggerMagDb) {
+	if (m_triggerChannel[m_triggerIndex] == ScopeVis::TriggerMagDb) {
 		ui->trigText->setText(tr("%1\ndB").arg(100.0 * (t - 1.0), 0, 'f', 1));
 	}
 	else
 	{
 		qreal a;
 
-		if (m_triggerChannel == ScopeVis::TriggerMagLin) {
+		if (m_triggerChannel[m_triggerIndex] == ScopeVis::TriggerMagLin) {
 			a = 1.0 + t;
 		} else {
 			a = t;
@@ -503,7 +559,7 @@ void GLScopeGUI::setTraceLenDisplay()
 
 void GLScopeGUI::setTrigDelayDisplay()
 {
-	uint n_samples_delay = m_traceLenMult * ScopeVis::m_traceChunkSize * m_triggerDelay;
+	uint n_samples_delay = m_traceLenMult * ScopeVis::m_traceChunkSize * m_triggerDelay[m_triggerIndex];
 
 	if (n_samples_delay < 1000) {
 		ui->trigDelayText->setToolTip(tr("%1S").arg(n_samples_delay));
@@ -600,7 +656,7 @@ void GLScopeGUI::on_trigDelay_valueChanged(int value)
 	if ((value < 0) || (value > 100)) {
 		return;
 	}
-	m_triggerDelay = value;
+	m_triggerDelay[m_triggerIndex] = value;
 	setTrigDelayDisplay();
 	applyTriggerSettings();
 }
@@ -720,21 +776,21 @@ void GLScopeGUI::on_traceIntensity_valueChanged(int index)
 
 void GLScopeGUI::on_trigMode_currentIndexChanged(int index)
 {
-	m_triggerChannel = index;
+	m_triggerChannel[m_triggerIndex] = index;
 	setTrigLevelDisplay();
 	applyTriggerSettings();
 }
 
 void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value)
 {
-	m_triggerLevelCoarse = value;
+	m_triggerLevelCoarse[m_triggerIndex] = value;
 	setTrigLevelDisplay();
 	applyTriggerSettings();
 }
 
 void GLScopeGUI::on_trigLevelFine_valueChanged(int value)
 {
-	m_triggerLevelFine = value;
+	m_triggerLevelFine[m_triggerIndex] = value;
 	setTrigLevelDisplay();
 	applyTriggerSettings();
 }
@@ -753,7 +809,7 @@ void GLScopeGUI::on_memHistory_valueChanged(int value)
 
 void GLScopeGUI::on_trigCount_valueChanged(int value)
 {
-	m_triggerCounts = value;
+	m_triggerCounts[m_triggerIndex] = value;
 
 	QString text;
 	text.sprintf("%02d", value);
@@ -764,8 +820,8 @@ void GLScopeGUI::on_trigCount_valueChanged(int value)
 
 void GLScopeGUI::on_slopePos_clicked()
 {
-	m_triggerPositiveEdge = true;
-	m_triggerBothEdges = false;
+	m_triggerPositiveEdge[m_triggerIndex] = true;
+	m_triggerBothEdges[m_triggerIndex] = false;
 
 	ui->slopeBoth->setChecked(false);
 
@@ -780,8 +836,8 @@ void GLScopeGUI::on_slopePos_clicked()
 
 void GLScopeGUI::on_slopeNeg_clicked()
 {
-	m_triggerPositiveEdge = false;
-	m_triggerBothEdges = false;
+	m_triggerPositiveEdge[m_triggerIndex] = false;
+	m_triggerBothEdges[m_triggerIndex] = false;
 
 	ui->slopeBoth->setChecked(false);
 
@@ -800,7 +856,7 @@ void GLScopeGUI::on_slopeBoth_clicked()
 	ui->slopePos->setChecked(false);
 	ui->slopeNeg->setChecked(false);
 	ui->slopeBoth->setChecked(true);
-	m_triggerBothEdges = true;
+	m_triggerBothEdges[m_triggerIndex] = true;
 
 	applyTriggerSettings();
 }

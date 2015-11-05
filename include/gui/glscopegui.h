@@ -5,13 +5,13 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 #include "util/message.h"
+#include "dsp/scopevis.h"
 
 namespace Ui {
 	class GLScopeGUI;
 }
 
 class MessageQueue;
-class ScopeVis;
 class GLScope;
 
 class SDRANGEL_API GLScopeGUI : public QWidget {
@@ -53,14 +53,14 @@ private:
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
 	quint32 m_triggerIndex;
-	qint32 m_triggerChannel;
-	qint32 m_triggerLevelCoarse; // percent of full range
-	qint32 m_triggerLevelFine;   // percent of coarse
-	bool   m_triggerPositiveEdge;
-	bool   m_triggerBothEdges;
+	qint32 m_triggerChannel[ScopeVis::m_nbTriggers];
+	qint32 m_triggerLevelCoarse[ScopeVis::m_nbTriggers]; // percent of full range
+	qint32 m_triggerLevelFine[ScopeVis::m_nbTriggers];   // percent of coarse
+	bool   m_triggerPositiveEdge[ScopeVis::m_nbTriggers];
+	bool   m_triggerBothEdges[ScopeVis::m_nbTriggers];
 	qint32 m_triggerPre;
-    qint32 m_triggerDelay;
-    qint32 m_triggerCounts;
+    qint32 m_triggerDelay[ScopeVis::m_nbTriggers];
+    qint32 m_triggerCounts[ScopeVis::m_nbTriggers];
     qint32 m_traceLenMult;
 
 	static const qreal amps[11];
@@ -77,6 +77,7 @@ private:
 	void setTrigLevelDisplay();
 	void setTrigPreDisplay();
 	void setTrigDelayDisplay();
+	void setTrigUI(uint index);
 
 private slots:
 	void on_amp1_valueChanged(int value);
