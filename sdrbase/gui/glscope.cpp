@@ -996,7 +996,19 @@ void GLScope::applyConfig()
     float t_len = ((float) m_displayTrace->size() / m_sampleRates[m_memTraceIndex-m_memTraceHistory]) / (float) m_timeBase;
 
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len);
-    m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len);
+
+    if (m_mode == ModeIQPolar)
+    {
+		if (amp1_range < 2.0) {
+			m_x2Scale.setRange(Unit::None, - amp1_range * 500.0 + amp1_ofs * 1000.0, amp1_range * 500.0 + amp1_ofs * 1000.0);
+		} else {
+			m_x2Scale.setRange(Unit::None, - amp1_range * 0.5 + amp1_ofs, amp1_range * 0.5 + amp1_ofs);
+		}
+    }
+    else
+    {
+    	m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len);
+    }
 
 	switch(m_mode) {
 		case ModeIQ:
@@ -1007,7 +1019,7 @@ void GLScope::applyConfig()
 			} else {
 				m_y1Scale.setRange(Unit::None, - amp1_range * 0.5 + amp1_ofs, amp1_range * 0.5 + amp1_ofs);
 			}
-			if (amp1_range < 2.0) {
+			if (amp2_range < 2.0) {
 				m_y2Scale.setRange(Unit::None, - amp2_range * 500.0 + amp2_ofs * 1000.0, amp2_range * 500.0 + amp2_ofs * 1000.0);
 			} else {
 				m_y2Scale.setRange(Unit::None, - amp2_range * 0.5 + amp2_ofs, amp2_range * 0.5 + amp2_ofs);
