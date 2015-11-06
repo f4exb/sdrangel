@@ -1185,24 +1185,50 @@ void GLScope::applyConfig()
 				m_bot1ScaleTextureAllocated = true;
 			} // X1 scale
 
-			m_glScopeRect2 = QRectF(
-				(float) leftMargin / (float)width(),
-				(float) (botMargin + topMargin + scopeHeight) / (float)height(),
-				(float) scopeWidth / (float)width(),
-				(float) scopeHeight / (float)height()
-			);
-			m_glLeft2ScaleRect = QRectF(
-				0,
-				(float) (topMargin + scopeHeight + botMargin) / (float) height(),
-				(float) (leftMargin-1) / (float) width(),
-				(float) scopeHeight / (float) height()
-			);
-			m_glBot2ScaleRect = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) (scopeHeight + topMargin + scopeHeight + botMargin + 1) / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) (botMargin - 1) / (float) height()
-			);
+			if (m_mode == ModeIQPolar)
+			{
+				int scopeDim = std::min(scopeWidth, scopeHeight);
+
+				m_glScopeRect2 = QRectF(
+					(float) leftMargin / (float)width(),
+					(float) (botMargin + topMargin + scopeDim) / (float)height(),
+					(float) scopeDim / (float)width(),
+					(float) scopeDim / (float)height()
+				);
+				m_glLeft2ScaleRect = QRectF(
+					0,
+					(float) (topMargin + scopeDim + botMargin) / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeDim / (float) height()
+				);
+				m_glBot2ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeDim + topMargin + scopeDim + botMargin + 1) / (float) height(),
+					(float) scopeDim / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
+			else
+			{
+				m_glScopeRect2 = QRectF(
+					(float) leftMargin / (float)width(),
+					(float) (botMargin + topMargin + scopeHeight) / (float)height(),
+					(float) scopeWidth / (float)width(),
+					(float) scopeHeight / (float)height()
+				);
+				m_glLeft2ScaleRect = QRectF(
+					0,
+					(float) (topMargin + scopeHeight + botMargin) / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot2ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeHeight + topMargin + scopeHeight + botMargin + 1) / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
 			{ // Y2 scale
 				m_y2Scale.setSize(scopeHeight);
 
@@ -1239,12 +1265,24 @@ void GLScope::applyConfig()
 				m_left2ScaleTextureAllocated = true;
 			} // Y2 scale
 			{ // X2 scale
-				m_x2Scale.setSize(scopeWidth);
+				if (m_mode == ModeIQPolar)
+				{
+					int scopeDim = std::min(scopeWidth, scopeHeight);
 
-				m_bot2ScalePixmap = QPixmap(
-					scopeWidth,
-					botMargin - 1
-				);
+					m_x2Scale.setSize(scopeDim);
+					m_bot2ScalePixmap = QPixmap(
+							scopeDim,
+						botMargin - 1
+					);
+				}
+				else
+				{
+					m_x2Scale.setSize(scopeWidth);
+					m_bot2ScalePixmap = QPixmap(
+						scopeWidth,
+						botMargin - 1
+					);
+				}
 
 				const ScaleEngine::TickList* tickList;
 				const ScaleEngine::Tick* tick;
@@ -1273,7 +1311,6 @@ void GLScope::applyConfig()
 					QGLContext::MipmapBindOption);
 				m_bot2ScaleTextureAllocated = true;
 			} // X2 scale
-
 		}
 		else // Horizontal
 		{
@@ -1394,25 +1431,50 @@ void GLScope::applyConfig()
 				m_bot1ScaleTextureAllocated = true;
 			} // X1 scale
 
-			m_glScopeRect2 = QRectF(
-				(float)(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float)width(),
-				(float)topMargin / (float)height(),
-				(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
-				(float)(height() - topMargin - botMargin) / (float)height()
-			);
-			m_glLeft2ScaleRect = QRectF(
-				(float) (leftMargin + scopeWidth) / (float) width(),
-				(float) topMargin / (float) height(),
-				(float) (leftMargin-1) / (float) width(),
-				(float) scopeHeight / (float) height()
-			);
-			m_glBot2ScaleRect = QRectF(
-				(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
-				(float) (scopeHeight + topMargin + 1) / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) (botMargin - 1) / (float) height()
-			);
+			if (m_mode == ModeIQPolar)
+			{
+				int scopeDim = std::min(scopeWidth, scopeHeight);
 
+				m_glScopeRect2 = QRectF(
+					(float)(leftMargin + scopeWidth + leftMargin) / (float)width(),
+					(float)topMargin / (float)height(),
+					(float) scopeDim / (float)width(),
+					(float)(height() - topMargin - botMargin) / (float)height()
+				);
+				m_glLeft2ScaleRect = QRectF(
+					(float) (leftMargin + scopeWidth) / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot2ScaleRect = QRectF(
+					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) scopeDim / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
+			else
+			{
+				m_glScopeRect2 = QRectF(
+					(float)(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float)width(),
+					(float)topMargin / (float)height(),
+					(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
+					(float)(height() - topMargin - botMargin) / (float)height()
+				);
+				m_glLeft2ScaleRect = QRectF(
+					(float) (leftMargin + scopeWidth) / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot2ScaleRect = QRectF(
+					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
 			{ // Y2 scale
 				m_y2Scale.setSize(scopeHeight);
 
@@ -1449,12 +1511,24 @@ void GLScope::applyConfig()
 				m_left2ScaleTextureAllocated = true;
 			} // Y2 scale
 			{ // X2 scale
-				m_x2Scale.setSize(scopeWidth);
+				if (m_mode == ModeIQPolar)
+				{
+					int scopeDim = std::min(scopeWidth, scopeHeight);
 
-				m_bot2ScalePixmap = QPixmap(
-					scopeWidth,
-					botMargin - 1
-				);
+					m_x2Scale.setSize(scopeDim);
+					m_bot2ScalePixmap = QPixmap(
+						scopeDim,
+						botMargin - 1
+					);
+				}
+				else
+				{
+					m_x2Scale.setSize(scopeWidth);
+					m_bot2ScalePixmap = QPixmap(
+						scopeWidth,
+						botMargin - 1
+					);
+				}
 
 				const ScaleEngine::TickList* tickList;
 				const ScaleEngine::Tick* tick;
@@ -1648,24 +1722,50 @@ void GLScope::applyConfig()
 		int scopeHeight = height() - topMargin - botMargin;
 		int scopeWidth = width() - leftMargin - rightMargin;
 
-		m_glScopeRect2 = QRectF(
-			(float) leftMargin / (float) width(),
-			(float) topMargin / (float) height(),
-			(float) scopeWidth / (float) width(),
-			(float) scopeHeight / (float) height()
-		);
-		m_glLeft2ScaleRect = QRectF(
-			0,
-			(float) topMargin / (float) height(),
-			(float) (leftMargin-1) / (float) width(),
-			(float) scopeHeight / (float) height()
-		);
-		m_glBot2ScaleRect = QRectF(
-			(float) leftMargin / (float) width(),
-			(float) (scopeHeight + topMargin + 1) / (float) height(),
-			(float) scopeWidth / (float) width(),
-			(float) (botMargin - 1) / (float) height()
-		);
+		if (m_mode == ModeIQPolar)
+		{
+			int scopeDim = std::min(scopeWidth, scopeHeight);
+
+			m_glScopeRect2 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) scopeDim / (float) width(),
+				(float) scopeDim / (float) height()
+			);
+			m_glLeft2ScaleRect = QRectF(
+				0,
+				(float) topMargin / (float) height(),
+				(float) (leftMargin-1) / (float) width(),
+				(float) scopeDim / (float) height()
+			);
+			m_glBot2ScaleRect = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) (scopeDim + topMargin + 1) / (float) height(),
+				(float) scopeDim / (float) width(),
+				(float) (botMargin - 1) / (float) height()
+			);
+		}
+		else
+		{
+			m_glScopeRect2 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) scopeWidth / (float) width(),
+				(float) scopeHeight / (float) height()
+			);
+			m_glLeft2ScaleRect = QRectF(
+				0,
+				(float) topMargin / (float) height(),
+				(float) (leftMargin-1) / (float) width(),
+				(float) scopeHeight / (float) height()
+			);
+			m_glBot2ScaleRect = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) (scopeHeight + topMargin + 1) / (float) height(),
+				(float) scopeWidth / (float) width(),
+				(float) (botMargin - 1) / (float) height()
+			);
+		}
 
 		{ // Y2 scale
 			m_y2Scale.setSize(scopeHeight);
@@ -1703,12 +1803,24 @@ void GLScope::applyConfig()
 			m_left2ScaleTextureAllocated = true;
 		} // Y2 scale
 		{ // X2 scale
-			m_x2Scale.setSize(scopeWidth);
+			if (m_mode == ModeIQPolar)
+			{
+				int scopeDim = std::min(scopeWidth, scopeHeight);
 
-			m_bot2ScalePixmap = QPixmap(
-				scopeWidth,
-				botMargin - 1
-			);
+				m_x2Scale.setSize(scopeDim);
+				m_bot2ScalePixmap = QPixmap(
+					scopeDim,
+					botMargin - 1
+				);
+			}
+			else
+			{
+				m_x2Scale.setSize(scopeWidth);
+				m_bot2ScalePixmap = QPixmap(
+					scopeWidth,
+					botMargin - 1
+				);
+			}
 
 			const ScaleEngine::TickList* tickList;
 			const ScaleEngine::Tick* tick;
