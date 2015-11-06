@@ -179,6 +179,7 @@ For Debian Jessie or Stretch:
   - Scope: trace history
   - Scope: trigger countdown
   - Scope: multiple trigger chaining
+  - Scope: new mode with linear IQ (two traces) on the primary display and polar IQ on the secondary display
   
 <h2>Major redesign</h2>
 

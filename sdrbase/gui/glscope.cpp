@@ -670,32 +670,71 @@ void GLScope::paintGL()
 
 		// paint trace #2
 		if(m_displayTrace->size() > 0) {
-			glPushMatrix();
-			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
-			glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			//glEnable(GL_LINE_SMOOTH);
-			glLineWidth(1.0f);
-			glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
-			int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
-			int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
-			if(end - start < 2)
-				start--;
-			float posLimit = 1.0 / m_amp2;
-			float negLimit = -1.0 / m_amp2;
-			glBegin(GL_LINE_STRIP);
-			for(int i = start; i < end; i++) {
-				float v = (*m_displayTrace)[i].imag();
-				if(v > posLimit)
-					v = posLimit;
-				else if(v < negLimit)
-					v = negLimit;
-				glVertex2f(i - start, v);
+			if (m_mode == ModeIQPolar)
+			{
+				glPushMatrix();
+				glTranslatef(m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0, m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
+				glScalef(m_glScopeRect2.width() / 2, -(m_glScopeRect2.height() / 2), 1);
+
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glLineWidth(1.0f);
+				glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
+
+				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
+				if(end - start < 2)
+					start--;
+
+				glBegin(GL_LINE_STRIP);
+
+				for(int i = start; i < end; i++)
+				{
+					float x = (*m_displayTrace)[i].real() * m_amp1;
+					float y = (*m_displayTrace)[i].imag() * m_amp2;
+					if(x > 1.0f)
+						x = 1.0f;
+					else if(x < -1.0f)
+						x = -1.0f;
+					if(y > 1.0f)
+						y = 1.0f;
+					else if(y < -1.0f)
+						y = -1.0f;
+					glVertex2f(x, y);
+				}
+
+				glEnd();
+				glPopMatrix();
 			}
-			glEnd();
-			//glDisable(GL_LINE_SMOOTH);
-			glPopMatrix();
+			else
+			{
+				glPushMatrix();
+				glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
+				glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				//glEnable(GL_LINE_SMOOTH);
+				glLineWidth(1.0f);
+				glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
+				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
+				if(end - start < 2)
+					start--;
+				float posLimit = 1.0 / m_amp2;
+				float negLimit = -1.0 / m_amp2;
+				glBegin(GL_LINE_STRIP);
+				for(int i = start; i < end; i++) {
+					float v = (*m_displayTrace)[i].imag();
+					if(v > posLimit)
+						v = posLimit;
+					else if(v < negLimit)
+						v = negLimit;
+					glVertex2f(i - start, v);
+				}
+				glEnd();
+				//glDisable(GL_LINE_SMOOTH);
+				glPopMatrix();
+			}
 		}
 	} // Both displays or secondary display only
 

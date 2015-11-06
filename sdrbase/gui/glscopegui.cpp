@@ -110,15 +110,9 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(6, m_displayGridIntensity);
 	s.writeS32(7, m_amp1OffsetCoarse);
 	s.writeS32(8, m_displays);
-	//s.writeS32(9, m_triggerChannel);
-	//s.writeS32(10, m_triggerLevelCoarse);
-	//s.writeBool(11, m_triggerPositiveEdge);
 	s.writeS32(12, m_displayTraceIntensity);
 	s.writeS32(13, m_triggerPre);
 	s.writeS32(14, m_traceLenMult);
-	//s.writeS32(15, m_triggerDelay);
-	//s.writeBool(16, m_triggerBothEdges);
-	//s.writeS32(17, m_triggerLevelFine);
 	s.writeS32(18, m_amp1OffsetFine);
 	s.writeS32(19, m_amplification2);
 	s.writeS32(20, m_amp2OffsetCoarse);
@@ -158,11 +152,6 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 			m_timeBase = 1;
 		d.readS32(7, &m_amp1OffsetCoarse, 0);
 		d.readS32(8, &m_displays, GLScope::DisplayBoth);
-		//d.readS32(9, &m_triggerChannel, ScopeVis::TriggerFreeRun);
-		//ui->trigMode->setCurrentIndex(m_triggerChannel);
-		//d.readS32(10, &m_triggerLevelCoarse, 0);
-		//ui->trigLevelCoarse->setValue(m_triggerLevelCoarse);
-		//d.readBool(11, &m_triggerPositiveEdge, true);
 		d.readS32(12, &m_displayTraceIntensity, 50);
 		d.readS32(13, &m_triggerPre, 0);
 		ui->trigPre->setValue(m_triggerPre);
@@ -170,24 +159,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(14, &m_traceLenMult, 20);
 		ui->traceLen->setValue(m_traceLenMult);
 		setTraceLenDisplay();
-		//d.readS32(15, &m_triggerDelay, 0);
-		//ui->trigDelay->setValue(m_triggerDelay);
 		setTrigDelayDisplay();
-		//d.readBool(16, &m_triggerBothEdges, false);
-
-		/*
-		if (m_triggerBothEdges) {
-			ui->slopePos->setChecked(false);
-			ui->slopeNeg->setChecked(false);
-			ui->slopeBoth->setChecked(true);
-		} else {
-			ui->slopeBoth->setChecked(false);
-			ui->slopePos->setChecked(m_triggerPositiveEdge);
-			ui->slopeNeg->setChecked(!m_triggerPositiveEdge);
-		}*/
-
-		//d.readS32(17, &m_triggerLevelFine, 0);
-		//ui->trigLevelFine->setValue(m_triggerLevelFine);
 		d.readS32(18, &m_amp1OffsetFine, 0);
 		d.readS32(19, &m_amplification2, 0);
 		d.readS32(20, &m_amp2OffsetCoarse, 0);
@@ -673,26 +645,26 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 		case 0: // i+q
 			m_glScope->setMode(GLScope::ModeIQ);
 			break;
-		case 1: // mag(lin)+pha
+		case 1: // clostationary
+			m_glScope->setMode(GLScope::ModeIQPolar);
+			break;
+		case 2: // mag(lin)+pha
 			m_glScope->setMode(GLScope::ModeMagLinPha);
 			break;
-		case 2: // mag(dB)+pha
+		case 3: // mag(dB)+pha
 			m_glScope->setMode(GLScope::ModeMagdBPha);
 			break;
-		case 3: // mag(lin)+dPha
+		case 4: // mag(lin)+dPha
 			m_glScope->setMode(GLScope::ModeMagLinDPha);
 			break;
-		case 4: // mag(dB)+dPha
+		case 5: // mag(dB)+dPha
 			m_glScope->setMode(GLScope::ModeMagdBDPha);
 			break;
-		case 5: // derived1+derived2
+		case 6: // derived1+derived2
 			m_glScope->setMode(GLScope::ModeDerived12);
 			break;
-		case 6: // clostationary
-			m_glScope->setMode(GLScope::ModeCyclostationary);
-			break;
 		case 7: // clostationary
-			m_glScope->setMode(GLScope::ModeIQPolar);
+			m_glScope->setMode(GLScope::ModeCyclostationary);
 			break;
 
 		default:
