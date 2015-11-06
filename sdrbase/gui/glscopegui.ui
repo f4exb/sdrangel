@@ -794,6 +794,39 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="trigLine1">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="trigCount">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Control number of trigger events </string>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="trigCountText">
+       <property name="toolTip">
+        <string>Number of trigger events before trigger is kicked off</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="trigMode">
        <property name="font">
         <font>
@@ -838,13 +871,6 @@
          <string>dPhi</string>
         </property>
        </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="trigLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
       </widget>
      </item>
      <item>
@@ -971,33 +997,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDial" name="trigCount">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Control number of trigger events </string>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="trigCountText">
-       <property name="toolTip">
-        <string>Number of trigger events before trigger is kicked off</string>
-       </property>
-       <property name="text">
-        <string>00</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="slopeLine">
+      <widget class="Line" name="trigLine2_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -1082,6 +1082,40 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="trigDelayLabel">
+       <property name="text">
+        <string> Dly</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="trigDelay">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="trigDelayText">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="trigLine2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="trigPreLabel">
        <property name="font">
         <font>
@@ -1116,33 +1150,6 @@
          <pointsize>8</pointsize>
         </font>
        </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="trigDelayLabel">
-       <property name="text">
-        <string> Dly</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="trigDelay">
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="trigDelayText">
        <property name="text">
         <string>0</string>
        </property>
