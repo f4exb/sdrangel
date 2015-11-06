@@ -23,6 +23,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_orientation(Qt::Horizontal),
 	m_memTraceIndex(0),
 	m_memTraceHistory(0),
+	m_memTraceIndexMax(0),
 	m_memTraceRecall(false),
 	m_displayTrace(&m_rawTrace[0]),
 	m_oldTraceSize(-1),
@@ -196,6 +197,11 @@ void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 		m_memTraceIndex++;
 		m_rawTrace[m_memTraceIndex] = trace;
 		m_sampleRates[m_memTraceIndex] = sampleRate;
+
+		if(m_memTraceIndexMax < (1<<m_memHistorySizeLog2))
+		{
+			m_memTraceIndexMax++;
+		}
 
 		//m_sampleRate = sampleRate; // sampleRate comes from scopeVis
 		m_dataChanged = true;
@@ -1929,9 +1935,12 @@ void GLScope::setTriggerPre(Real triggerPre)
 
 void GLScope::setMemHistoryShift(int value)
 {
-	m_memTraceHistory = value;
-	m_configChanged = true;
-	update();
+	if (value < m_memTraceIndexMax)
+	{
+		m_memTraceHistory = value;
+		m_configChanged = true;
+		update();
+	}
 }
 
 void GLScope::connectTimer(const QTimer& timer)

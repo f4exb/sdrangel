@@ -103,6 +103,7 @@ private:
 	int m_sampleRates[16];
 	BitfieldIndex<m_memHistorySizeLog2> m_memTraceIndex;   //!< current index of trace being written
 	BitfieldIndex<m_memHistorySizeLog2> m_memTraceHistory; //!< trace index shift into history
+	int m_memTraceIndexMax;
 	bool m_memTraceRecall;
 	std::vector<Complex> m_mathTrace;
 	std::vector<Complex>* m_displayTrace;
