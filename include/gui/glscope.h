@@ -44,7 +44,8 @@ public:
 		ModeMagLinDPha,
 		ModeMagdBDPha,
 		ModeDerived12,
-		ModeCyclostationary
+		ModeCyclostationary,
+		ModeIQPolar
 	};
 
 	enum Displays {
@@ -138,6 +139,7 @@ private:
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
 	QRectF m_glLeft1ScaleRect;
+	QRectF m_glRight1ScaleRect;
 	QRectF m_glLeft2ScaleRect;
 	QRectF m_glBot1ScaleRect;
 	QRectF m_glBot2ScaleRect;

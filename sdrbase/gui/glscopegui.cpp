@@ -691,6 +691,9 @@ void GLScopeGUI::on_dataMode_currentIndexChanged(int index)
 		case 6: // clostationary
 			m_glScope->setMode(GLScope::ModeCyclostationary);
 			break;
+		case 7: // clostationary
+			m_glScope->setMode(GLScope::ModeIQPolar);
+			break;
 
 		default:
 			break;

@@ -112,6 +112,11 @@
          <string>1,2:Cyclostationary</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>1:IQ (lin) 2:IQ (pol)</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

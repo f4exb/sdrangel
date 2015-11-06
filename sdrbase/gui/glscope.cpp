@@ -263,7 +263,11 @@ void GLScope::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+		if (m_mode == ModeIQPolar) {
+			glColor4f(1, 1, 0.25f, m_displayGridIntensity / 100.0);
+		} else {
+			glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+		}
 		// Horizontal Y1
 		tickList = &m_y1Scale.getTickList();
 		for(int i= 0; i < tickList->count(); i++) {
@@ -279,6 +283,7 @@ void GLScope::paintGL()
 			}
 		}
 		// Vertical X1
+		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 		tickList = &m_x1Scale.getTickList();
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
@@ -439,6 +444,92 @@ void GLScope::paintGL()
 			{
 				drawPowerOverlay();
 			}
+		}
+
+		if (m_mode == ModeIQPolar)
+		{
+			// Paint trace 2 (Q) over
+			if (m_displayTrace->size() > 0)
+			{
+				glPushMatrix();
+				glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
+				glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp2, 1);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glLineWidth(1.0f);
+				glColor4f(0.25f, 1, 1, m_displayTraceIntensity / 100.0);
+				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
+				if(end - start < 2)
+					start--;
+				float posLimit = 1.0 / m_amp2;
+				float negLimit = -1.0 / m_amp2;
+
+				glBegin(GL_LINE_STRIP);
+
+				for(int i = start; i < end; i++)
+				{
+					float v = (*m_displayTrace)[i].imag();
+					if(v > posLimit)
+						v = posLimit;
+					else if(v < negLimit)
+						v = negLimit;
+					glVertex2f(i - start, v);
+				}
+
+				glEnd();
+				glPopMatrix();
+			}
+
+			// Paint secondary grid
+			// draw rect around
+			glPushMatrix();
+			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
+			glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glLineWidth(1.0f);
+			glColor4f(0.25f, 1, 1, m_displayGridIntensity / 100.0);
+			// Horizontal Y2
+			tickList = &m_y2Scale.getTickList();
+			for(int i= 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						float y = 1 - (tick->pos / m_y2Scale.getSize());
+						glBegin(GL_LINE_LOOP);
+						glVertex2f(0, y);
+						glVertex2f(1, y);
+						glEnd();
+					}
+				}
+			}
+			glPopMatrix();
+
+			// Paint secondary scale
+			glBindTexture(GL_TEXTURE_2D, m_left2ScaleTexture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glPushMatrix();
+			glTranslatef(m_glRight1ScaleRect.x(), m_glRight1ScaleRect.y(), 0);
+			glScalef(m_glRight1ScaleRect.width(), m_glRight1ScaleRect.height(), 1);
+			glEnable(GL_TEXTURE_2D);
+			glBegin(GL_QUADS);
+			glTexCoord2f(0, 1);
+			glVertex2f(0, 1);
+			glTexCoord2f(1, 1);
+			glVertex2f(1, 1);
+			glTexCoord2f(1, 0);
+			glVertex2f(1, 0);
+			glTexCoord2f(0, 0);
+			glVertex2f(0, 0);
+			glEnd();
+			glDisable(GL_TEXTURE_2D);
+			glPopMatrix();
 		}
 	} // Both displays or primary only
 
@@ -671,6 +762,7 @@ void GLScope::handleMode()
 
 	switch(m_mode) {
 		case ModeIQ:
+		case ModeIQPolar:
 		{
 			m_mathTrace.resize(m_rawTrace[memIndex].size());
 			std::vector<Complex>::iterator dst = m_mathTrace.begin();
@@ -908,6 +1000,7 @@ void GLScope::applyConfig()
 
 	switch(m_mode) {
 		case ModeIQ:
+		case ModeIQPolar:
 		{
 			if (amp1_range < 2.0) {
 				m_y1Scale.setRange(Unit::None, - amp1_range * 500.0 + amp1_ofs * 1000.0, amp1_range * 500.0 + amp1_ofs * 1000.0);
@@ -978,23 +1071,47 @@ void GLScope::applyConfig()
 			int scopeHeight = (height() - topMargin) / 2 - botMargin;
 			int scopeWidth = width() - leftMargin - rightMargin;
 
-			m_glScopeRect1 = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) topMargin / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) scopeHeight / (float) height()
-			);
+			if (m_mode == ModeIQPolar)
+			{
+				m_glScopeRect1 = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (width() - 2*leftMargin - rightMargin) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot1ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) (width() - 2*leftMargin - rightMargin) / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+				m_glRight1ScaleRect = QRectF(
+					(float) (width() - leftMargin) / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+			}
+			else
+			{
+				m_glScopeRect1 = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot1ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
-			);
-			m_glBot1ScaleRect = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) (scopeHeight + topMargin + 1) / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) (botMargin - 1) / (float) height()
 			);
 
 			{ // Y1 scale
@@ -1163,23 +1280,47 @@ void GLScope::applyConfig()
 			int scopeHeight = height() - topMargin - botMargin;
 			int scopeWidth = (width() - rightMargin)/2 - leftMargin;
 
-			m_glScopeRect1 = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) topMargin / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) scopeHeight / (float) height()
-			);
+			if (m_mode == ModeIQPolar)
+			{
+				m_glScopeRect1 = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (scopeWidth-leftMargin) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot1ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) (scopeWidth-leftMargin) / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+				m_glRight1ScaleRect = QRectF(
+					(float) (scopeWidth) / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) (leftMargin-1) / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+			}
+			else
+			{
+				m_glScopeRect1 = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) topMargin / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) scopeHeight / (float) height()
+				);
+				m_glBot1ScaleRect = QRectF(
+					(float) leftMargin / (float) width(),
+					(float) (scopeHeight + topMargin + 1) / (float) height(),
+					(float) scopeWidth / (float) width(),
+					(float) (botMargin - 1) / (float) height()
+				);
+			}
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
-			);
-			m_glBot1ScaleRect = QRectF(
-				(float) leftMargin / (float) width(),
-				(float) (scopeHeight + topMargin + 1) / (float) height(),
-				(float) scopeWidth / (float) width(),
-				(float) (botMargin - 1) / (float) height()
 			);
 
 			{ // Y1 scale
@@ -1349,23 +1490,47 @@ void GLScope::applyConfig()
 		int scopeHeight = height() - topMargin - botMargin;
 		int scopeWidth = width() - leftMargin - rightMargin;
 
-		m_glScopeRect1 = QRectF(
-			(float) leftMargin / (float) width(),
-			(float) topMargin / (float) height(),
-			(float) scopeWidth / (float) width(),
-			(float) scopeHeight / (float) height()
-		);
+		if (m_mode == ModeIQPolar)
+		{
+			m_glScopeRect1 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) (scopeWidth-leftMargin) / (float) width(),
+				(float) scopeHeight / (float) height()
+			);
+			m_glBot1ScaleRect = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) (scopeHeight + topMargin + 1) / (float) height(),
+				(float) (scopeWidth-leftMargin) / (float) width(),
+				(float) (botMargin - 1) / (float) height()
+			);
+			m_glRight1ScaleRect = QRectF(
+				(float) (width() - leftMargin) / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) (leftMargin-1) / (float) width(),
+				(float) scopeHeight / (float) height()
+			);
+		}
+		else
+		{
+			m_glScopeRect1 = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) topMargin / (float) height(),
+				(float) scopeWidth / (float) width(),
+				(float) scopeHeight / (float) height()
+			);
+			m_glBot1ScaleRect = QRectF(
+				(float) leftMargin / (float) width(),
+				(float) (scopeHeight + topMargin + 1) / (float) height(),
+				(float) scopeWidth / (float) width(),
+				(float) (botMargin - 1) / (float) height()
+			);
+		}
 		m_glLeft1ScaleRect = QRectF(
 			0,
 			(float) topMargin / (float) height(),
 			(float) (leftMargin-1) / (float) width(),
 			(float) scopeHeight / (float) height()
-		);
-		m_glBot1ScaleRect = QRectF(
-			(float) leftMargin / (float) width(),
-			(float) (scopeHeight + topMargin + 1) / (float) height(),
-			(float) scopeWidth / (float) width(),
-			(float) (botMargin - 1) / (float) height()
 		);
 
 		{ // Y1 scale
@@ -1381,7 +1546,11 @@ void GLScope::applyConfig()
 
 			m_left1ScalePixmap.fill(Qt::black);
 			QPainter painter(&m_left1ScalePixmap);
-			painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			if (m_mode == ModeIQPolar) {
+				painter.setPen(QColor(0xff, 0xff, 0x80));
+			} else {
+				painter.setPen(QColor(0xf0, 0xf0, 0xff));
+			}
 			painter.setFont(font());
 			tickList = &m_y1Scale.getTickList();
 
@@ -1403,6 +1572,41 @@ void GLScope::applyConfig()
 				QGLContext::MipmapBindOption);
 			m_left1ScaleTextureAllocated = true;
 		} // Y1 scale
+		if (m_mode == ModeIQPolar) { // Y2 scale
+			m_y2Scale.setSize(scopeHeight);
+
+			m_left2ScalePixmap = QPixmap(
+				leftMargin - 1,
+				scopeHeight
+			);
+
+			const ScaleEngine::TickList* tickList;
+			const ScaleEngine::Tick* tick;
+
+			m_left2ScalePixmap.fill(Qt::black);
+			QPainter painter(&m_left2ScalePixmap);
+			painter.setPen(QColor(0x80, 0xff, 0xff));
+			painter.setFont(font());
+			tickList = &m_y2Scale.getTickList();
+
+			for(int i = 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						painter.drawText(QPointF(leftMargin - M - tick->textSize, topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
+					}
+				}
+			}
+
+			if (m_left2ScaleTextureAllocated)
+				deleteTexture(m_left2ScaleTextureAllocated);
+			m_left2ScaleTexture = bindTexture(m_left2ScalePixmap,
+				GL_TEXTURE_2D,
+				GL_RGBA,
+				QGLContext::LinearFilteringBindOption |
+				QGLContext::MipmapBindOption);
+			m_left2ScaleTextureAllocated = true;
+		} // Y2 scale
 		{ // X1 scale
 			m_x1Scale.setSize(scopeWidth);
 
