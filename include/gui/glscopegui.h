@@ -96,7 +96,7 @@ private slots:
 	void on_traceIntensity_valueChanged(int index);
 	void on_trigPre_valueChanged(int value);
 	void on_trigDelay_valueChanged(int value);
-	void on_memHistory_valueChanged(int value);
+	void on_memIndex_valueChanged(int value);
 	void on_trigCount_valueChanged(int value);
 	void on_trigIndex_valueChanged(int value);
 

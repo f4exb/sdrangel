@@ -433,7 +433,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDial" name="memHistory">
+      <widget class="QDial" name="memIndex">
        <property name="maximumSize">
         <size>
          <width>24</width>

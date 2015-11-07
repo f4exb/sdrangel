@@ -12,9 +12,9 @@ const qreal GLScopeGUI::amps[11] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::GLScopeGUI),
-	m_messageQueue(NULL),
-	m_scopeVis(NULL),
-	m_glScope(NULL),
+	m_messageQueue(0),
+	m_scopeVis(0),
+	m_glScope(0),
 	m_sampleRate(1),
 	m_displayData(GLScope::ModeIQ),
 	m_displayOrientation(Qt::Horizontal),
@@ -57,7 +57,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 	m_messageQueue = messageQueue;
 	m_scopeVis = scopeVis;
 	m_glScope = glScope;
-	ui->memHistory->setMaximum((1<<GLScope::m_memHistorySizeLog2)-1);
+	ui->memIndex->setMaximum((1<<GLScope::m_memHistorySizeLog2)-1);
 	connect(m_glScope, SIGNAL(traceSizeChanged(int)), this, SLOT(on_scope_traceSizeChanged(int)));
 	connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
 	applySettings();
@@ -741,7 +741,7 @@ void GLScopeGUI::on_gridIntensity_valueChanged(int index)
 {
 	m_displayGridIntensity = index;
 	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
-	if(m_glScope != NULL)
+	if(m_glScope != 0)
 		m_glScope->setDisplayGridIntensity(m_displayGridIntensity);
 }
 
@@ -749,7 +749,7 @@ void GLScopeGUI::on_traceIntensity_valueChanged(int index)
 {
 	m_displayTraceIntensity = index;
 	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
-	if(m_glScope != NULL)
+	if(m_glScope != 0)
 		m_glScope->setDisplayTraceIntensity(m_displayTraceIntensity);
 }
 
@@ -774,15 +774,15 @@ void GLScopeGUI::on_trigLevelFine_valueChanged(int value)
 	applyTriggerSettings();
 }
 
-void GLScopeGUI::on_memHistory_valueChanged(int value)
+void GLScopeGUI::on_memIndex_valueChanged(int value)
 {
 	QString text;
 	text.sprintf("%02d", value % (1<<GLScope::m_memHistorySizeLog2));
 	ui->memIndexText->setText(text);
 
-	if(m_glScope != NULL)
+	if(m_glScope != 0)
 	{
-		m_glScope->setMemHistoryShift(value % (1<<GLScope::m_memHistorySizeLog2));
+		m_glScope->setMemHistoryShift(value);
 	}
 }
 

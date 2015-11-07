@@ -82,7 +82,7 @@ public:
 	Mode getDataMode() const { return m_mode; }
 	void connectTimer(const QTimer& timer);
 
-	static const int m_memHistorySizeLog2 = 4;
+	static const int m_memHistorySizeLog2 = 5;
 
 signals:
 	void traceSizeChanged(int);
@@ -100,7 +100,7 @@ private:
 
 	// traces
 	std::vector<Complex> m_rawTrace[1<<m_memHistorySizeLog2];
-	int m_sampleRates[16];
+	int m_sampleRates[1<<m_memHistorySizeLog2];
 	BitfieldIndex<m_memHistorySizeLog2> m_memTraceIndex;   //!< current index of trace being written
 	BitfieldIndex<m_memHistorySizeLog2> m_memTraceHistory; //!< trace index shift into history
 	int m_memTraceIndexMax;
