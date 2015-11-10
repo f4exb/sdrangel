@@ -157,6 +157,8 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 			if(m_triggerState == Untriggered)
 			{
+				m_firstArg = true;
+
 				while(begin < end)
 				{
                     bool triggerCdt = triggerCondition(begin);
