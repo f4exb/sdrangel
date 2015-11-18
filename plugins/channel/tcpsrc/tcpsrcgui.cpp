@@ -67,6 +67,7 @@ QByteArray TCPSrcGUI::serialize() const
 	s.writeS32(6, m_tcpPort);
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, (qint32)m_boost);
+	s.writeS32(9, m_channelMarker.getCenterFrequency());
 	return s.final();
 }
 
@@ -118,6 +119,8 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->spectrumGUI->deserialize(bytetmp);
 		d.readS32(8, &s32tmp, 1);
 		ui->boost->setValue(s32tmp);
+		d.readS32(9, &s32tmp, 0);
+		m_channelMarker.setCenterFrequency(s32tmp);
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -187,6 +190,9 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+
 	ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
 	ui->glSpectrum->setDisplayWaterfall(true);
@@ -253,6 +259,8 @@ void TCPSrcGUI::applySettings()
 		int boost = ui->boost->value();
 
 		setTitleColor(m_channelMarker.getColor());
+		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
+		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
 		ui->tcpPort->setText(QString("%1").arg(tcpPort));
@@ -301,6 +309,26 @@ void TCPSrcGUI::applySettings()
 	}
 }
 
+void TCPSrcGUI::on_deltaMinus_toggled(bool minus)
+{
+	int deltaFrequency = m_channelMarker.getCenterFrequency();
+	bool minusDelta = (deltaFrequency < 0);
+
+	if (minus ^ minusDelta) // sign change
+	{
+		m_channelMarker.setCenterFrequency(-deltaFrequency);
+	}
+}
+
+void TCPSrcGUI::on_deltaFrequency_changed(quint64 value)
+{
+	if (ui->deltaMinus->isChecked()) {
+		m_channelMarker.setCenterFrequency(-value);
+	} else {
+		m_channelMarker.setCenterFrequency(value);
+	}
+}
+
 void TCPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 {
 	ui->applyBtn->setEnabled(true);
@@ -329,6 +357,7 @@ void TCPSrcGUI::on_applyBtn_clicked()
 void TCPSrcGUI::on_boost_valueChanged(int value)
 {
 	ui->boost->setValue(value);
+	ui->boostText->setText(QString("%1").arg(value));
 	ui->applyBtn->setEnabled(true);
 }
 
