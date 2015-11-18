@@ -7,7 +7,7 @@
 class TCPSrcPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "de.maintech.sdrangelove.demod.tcpsrc")
+	Q_PLUGIN_METADATA(IID "sdrangel.demod.tcpsrc")
 
 public:
 	explicit TCPSrcPlugin(QObject* parent = NULL);

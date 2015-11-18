@@ -6,8 +6,10 @@
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "ui_tcpsrcgui.h"
+#include "mainwindow.h"
 
 TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI)
 {
@@ -169,12 +171,20 @@ void TCPSrcGUI::channelMarkerChanged()
 	applySettings();
 }
 
+void TCPSrcGUI::tick()
+{
+	Real powDb = CalcDb::dbPower(m_tcpSrc->getMagSq());
+	m_channelPowerDbAvg.feed(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+}
+
 TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
-	m_tcpSrc(NULL),
+	m_tcpSrc(0),
 	m_channelMarker(this),
+	m_channelPowerDbAvg(40,0),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true)
 {
@@ -198,6 +208,9 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
+
+	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setBandwidth(16000);

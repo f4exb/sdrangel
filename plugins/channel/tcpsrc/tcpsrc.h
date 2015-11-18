@@ -31,6 +31,7 @@ public:
 
 	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
+	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -128,6 +129,7 @@ protected:
 	Real m_rfBandwidth;
 	int m_tcpPort;
 	int m_boost;
+	Real m_magsq;
 
 	Real m_scale;
 	Complex m_last, m_this;

@@ -5,6 +5,7 @@
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
+#include "dsp/movingaverage.h"
 #include "tcpsrc.h"
 
 class PluginAPI;
@@ -47,11 +48,14 @@ private slots:
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void on_boost_valueChanged(int value);
+	void tick();
+
 private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
+	MovingAverage<Real> m_channelPowerDbAvg;
 
 	// settings
 	TCPSrc::SampleFormat m_sampleFormat;
@@ -67,7 +71,7 @@ private:
 	Channelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
-	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = 0);
 	virtual ~TCPSrcGUI();
 
     void blockApplySettings(bool block);

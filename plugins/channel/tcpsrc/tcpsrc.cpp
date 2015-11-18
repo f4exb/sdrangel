@@ -49,6 +49,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_this = 0;
 	m_scale = 0;
 	m_boost = 0;
+	m_magsq = 0;
 	m_sampleBufferSSB.resize(tcpFftLen);
 	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
 	// if (!TCPFilter) segfault;
@@ -82,32 +83,43 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 	m_settingsMutex.lock();
 
 	// Rtl-Sdr uses full 16-bit scale; FCDPP does not
-	int rescale = 30000 * (1 << m_boost);
+	//int rescale = 32768 * (1 << m_boost);
+	int rescale = (1 << m_boost);
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci)) {
+		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		{
+			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (1<<30);
 			m_sampleBuffer.push_back(Sample(ci.real() * rescale, ci.imag() * rescale));
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 		}
 	}
 
-	if((m_spectrum != NULL) && (m_spectrumEnabled))
+	if((m_spectrum != 0) && (m_spectrumEnabled))
+	{
 		m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
+	}
 
 	for(int i = 0; i < m_s16leSockets.count(); i++)
+	{
 		m_s16leSockets[i].socket->write((const char*)&m_sampleBuffer[0], m_sampleBuffer.size() * 4);
+	}
 
 	if((m_sampleFormat == FormatSSB) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
-			Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
+			//Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
+			Complex cj(it->real(), it->imag());
 			int n_out = TCPFilter->runSSB(cj, &sideband, true);
 			if (n_out) {
 				for (int i = 0; i < n_out; i+=2) {
-					l = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
-					r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 32000.0;
+					//l = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
+					//r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 32000.0;
+					l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+					r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7;
 					m_sampleBufferSSB.push_back(Sample(l, r));
 				}
 				for(int i = 0; i < m_ssbSockets.count(); i++)
@@ -119,7 +131,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 	if((m_sampleFormat == FormatNFM) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
-			Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
+			Complex cj(it->real() / 32768.0f, it->imag() / 32768.0f);
 			// An FFT filter here is overkill, but was already set up for SSB
 			int n_out = TCPFilter->runFilt(cj, &sideband);
 			if (n_out) {
