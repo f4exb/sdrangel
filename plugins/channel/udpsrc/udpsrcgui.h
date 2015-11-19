@@ -1,5 +1,5 @@
-#ifndef INCLUDE_TCPSRCGUI_H
-#define INCLUDE_TCPSRCGUI_H
+#ifndef INCLUDE_UDPSRCGUI_H
+#define INCLUDE_UDPSRCGUI_H
 
 #include <QHostAddress>
 #include "gui/rollupwidget.h"
@@ -54,7 +54,7 @@ private slots:
 private:
 	Ui::UDPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
-	UDPSrc* m_tcpSrc;
+	UDPSrc* m_udpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
@@ -63,7 +63,7 @@ private:
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_boost;
-	int m_tcpPort;
+	int m_udpPort;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
@@ -82,4 +82,4 @@ private:
 	void delConnection(quint32 id);
 };
 
-#endif // INCLUDE_TCPSRCGUI_H
+#endif // INCLUDE_UDPSRCGUI_H

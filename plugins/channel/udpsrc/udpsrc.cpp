@@ -26,21 +26,21 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
-UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* tcpSrcGUI, SampleSink* spectrum) :
+UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("TCPSrc");
+	setObjectName("UDPSrc");
 
 	m_inputSampleRate = 96000;
 	m_sampleFormat = FormatSSB;
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
-	m_tcpPort = 9999;
+	m_udpPort = 9999;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 	m_uiMessageQueue = uiMessageQueue;
-	m_tcpSrcGUI = tcpSrcGUI;
+	m_udpSrcGUI = udpSrcGUI;
 	m_spectrum = spectrum;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
@@ -51,19 +51,19 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* tcpSrcGUI, SampleSink* s
 	m_scale = 0;
 	m_boost = 0;
 	m_magsq = 0;
-	m_sampleBufferSSB.resize(tcpFftLen);
-	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
+	m_sampleBufferSSB.resize(udpFftLen);
+	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpFftLen);
 	// if (!TCPFilter) segfault;
 }
 
 UDPSrc::~UDPSrc()
 {
-	if (TCPFilter) delete TCPFilter;
+	if (UDPFilter) delete UDPFilter;
 }
 
-void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
+void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost)
 {
-	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, tcpPort, boost);
+	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, udpPort, boost);
 	messageQueue->push(cmd);
 }
 
@@ -114,7 +114,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			//Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
 			Complex cj(it->real(), it->imag());
-			int n_out = TCPFilter->runSSB(cj, &sideband, true);
+			int n_out = UDPFilter->runSSB(cj, &sideband, true);
 			if (n_out) {
 				for (int i = 0; i < n_out; i+=2) {
 					//l = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
@@ -134,7 +134,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			Complex cj(it->real() / 32768.0f, it->imag() / 32768.0f);
 			// An FFT filter here is overkill, but was already set up for SSB
-			int n_out = TCPFilter->runFilt(cj, &sideband);
+			int n_out = UDPFilter->runFilt(cj, &sideband);
 			if (n_out) {
 				Real sum = 1.0;
 				for (int i = 0; i < n_out; i+=2) {
@@ -148,7 +148,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag(); 
 				}
 				// TODO: correct levels
-				m_scale = 24000 * tcpFftLen / sum;
+				m_scale = 24000 * udpFftLen / sum;
 				for(int i = 0; i < m_ssbSockets.count(); i++)
 					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
 				m_sampleBufferSSB.clear();
@@ -161,10 +161,10 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 void UDPSrc::start()
 {
-	m_tcpServer = new QTcpServer();
-	connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-	connect(m_tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onTcpServerError(QAbstractSocket::SocketError)));
-	m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
+	m_udpServer = new QTcpServer();
+	connect(m_udpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+	connect(m_udpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onUdpServerError(QAbstractSocket::SocketError)));
+	m_udpServer->listen(QHostAddress::Any, m_udpPort);
 }
 
 void UDPSrc::stop()
@@ -172,9 +172,9 @@ void UDPSrc::stop()
 	closeAllSockets(&m_ssbSockets);
 	closeAllSockets(&m_s16leSockets);
 
-	if(m_tcpServer->isListening())
-		m_tcpServer->close();
-	delete m_tcpServer;
+	if(m_udpServer->isListening())
+		m_udpServer->close();
+	delete m_udpServer;
 }
 
 bool UDPSrc::handleMessage(const Message& cmd)
@@ -194,7 +194,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "TCPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_inputSampleRate
+		qDebug() << "UDPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_inputSampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;
@@ -209,16 +209,16 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_outputSampleRate = cfg.getOutputSampleRate();
 		m_rfBandwidth = cfg.getRFBandwidth();
 
-		if (cfg.getTCPPort() != m_tcpPort)
+		if (cfg.getUDPPort() != m_udpPort)
 		{
-			m_tcpPort = cfg.getTCPPort();
+			m_udpPort = cfg.getUDPPort();
 
-			if(m_tcpServer->isListening())
+			if(m_udpServer->isListening())
 			{
-				m_tcpServer->close();
+				m_udpServer->close();
 			}
 
-			m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
+			m_udpServer->listen(QHostAddress::Any, m_udpPort);
 		}
 
 		m_boost = cfg.getBoost();
@@ -227,16 +227,16 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		if (m_sampleFormat == FormatSSB)
 		{
-			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+			UDPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
 		else
 		{
-			TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+			UDPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "  - MsgTCPSrcConfigure: m_sampleFormat: " << m_sampleFormat
+		qDebug() << "  - MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
 				<< " m_outputSampleRate: " << m_outputSampleRate
 				<< " m_rfBandwidth: " << m_rfBandwidth
 				<< " m_boost: " << m_boost;
@@ -249,7 +249,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_spectrumEnabled = spc.getEnabled();
 
-		qDebug() << "  - MsgTCPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+		qDebug() << "  - MsgUDPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
 		return true;
 	}
@@ -280,10 +280,10 @@ void UDPSrc::onNewConnection()
 {
 	qDebug("UDPSrc::onNewConnection");
 
-	while(m_tcpServer->hasPendingConnections())
+	while(m_udpServer->hasPendingConnections())
 	{
 		qDebug("UDPSrc::onNewConnection: has a pending connection");
-		QTcpSocket* connection = m_tcpServer->nextPendingConnection();
+		QTcpSocket* connection = m_udpServer->nextPendingConnection();
 		connection->setSocketOption(QAbstractSocket:: KeepAliveOption, 1);
 		connect(connection, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
 
@@ -362,7 +362,7 @@ void UDPSrc::onDisconnected()
 	}
 }
 
-void UDPSrc::onTcpServerError(QAbstractSocket::SocketError socketError)
+void UDPSrc::onUdpServerError(QAbstractSocket::SocketError socketError)
 {
-	qDebug("UDPSrc::onTcpServerError: %s", qPrintable(m_tcpServer->errorString()));
+	qDebug("UDPSrc::onUdpServerError: %s", qPrintable(m_udpServer->errorString()));
 }

@@ -67,7 +67,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
 	s.writeReal(5, m_rfBandwidth);
-	s.writeS32(6, m_tcpPort);
+	s.writeS32(6, m_udpPort);
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, (qint32)m_boost);
 	s.writeS32(9, m_channelMarker.getCenterFrequency());
@@ -140,7 +140,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 
 bool UDPSrcGUI::handleMessage(const Message& message)
 {
-	qDebug() << "TCPSrcGUI::handleMessage";
+	qDebug() << "UDPSrcGUI::handleMessage";
 
 	if (UDPSrc::MsgUDPSrcConnection::match(message))
 	{
@@ -155,7 +155,7 @@ bool UDPSrcGUI::handleMessage(const Message& message)
 			delConnection(con.getID());
 		}
 
-		qDebug() << "UDPSrcGUI::handleMessage: TCPSrc::MsgTCPSrcConnection: " << con.getConnect()
+		qDebug() << "UDPSrcGUI::handleMessage: UDPSrc::MsgUDPSrcConnection: " << con.getConnect()
 				<< " ID: " << con.getID()
 				<< " peerAddress: " << con.getPeerAddress()
 				<< " peerPort: " << con.getPeerPort();
@@ -175,7 +175,7 @@ void UDPSrcGUI::channelMarkerChanged()
 
 void UDPSrcGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_tcpSrc->getMagSq());
+	Real powDb = CalcDb::dbPower(m_udpSrc->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
@@ -184,7 +184,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::UDPSrcGUI),
 	m_pluginAPI(pluginAPI),
-	m_tcpSrc(0),
+	m_udpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
 	m_basicSettingsShown(false),
@@ -197,8 +197,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_tcpSrc = new UDPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
-	m_channelizer = new Channelizer(m_tcpSrc);
+	m_udpSrc = new UDPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
+	m_channelizer = new Channelizer(m_udpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
@@ -233,7 +233,7 @@ UDPSrcGUI::~UDPSrcGUI()
 	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
-	delete m_tcpSrc;
+	delete m_udpSrc;
 	delete m_spectrumVis;
 	//delete m_channelMarker;
 	delete ui;
@@ -264,11 +264,11 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth = outputSampleRate;
 		}
 
-		int tcpPort = ui->udpPort->text().toInt(&ok);
+		int udpPort = ui->udpPort->text().toInt(&ok);
 
-		if((!ok) || (tcpPort < 1) || (tcpPort > 65535))
+		if((!ok) || (udpPort < 1) || (udpPort > 65535))
 		{
-			tcpPort = 9999;
+			udpPort = 9999;
 		}
 
 		int boost = ui->boost->value();
@@ -278,7 +278,7 @@ void UDPSrcGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-		ui->udpPort->setText(QString("%1").arg(tcpPort));
+		ui->udpPort->setText(QString("%1").arg(udpPort));
 		ui->boost->setValue(boost);
 		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
 		m_channelMarker.setBandwidth((int)rfBandwidth);
@@ -310,14 +310,14 @@ void UDPSrcGUI::applySettings()
 		m_sampleFormat = sampleFormat;
 		m_outputSampleRate = outputSampleRate;
 		m_rfBandwidth = rfBandwidth;
-		m_tcpPort = tcpPort;
+		m_udpPort = udpPort;
 		m_boost = boost;
 
-		m_tcpSrc->configure(m_tcpSrc->getInputMessageQueue(),
+		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
 			sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
-			tcpPort,
+			udpPort,
 			boost);
 
 		ui->applyBtn->setEnabled(false);
@@ -378,9 +378,9 @@ void UDPSrcGUI::on_boost_valueChanged(int value)
 
 void UDPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-	if ((widget == ui->spectrumBox) && (m_tcpSrc != 0))
+	if ((widget == ui->spectrumBox) && (m_udpSrc != 0))
 	{
-		m_tcpSrc->setSpectrum(m_tcpSrc->getInputMessageQueue(), rollDown);
+		m_udpSrc->setSpectrum(m_udpSrc->getInputMessageQueue(), rollDown);
 	}
 }
 

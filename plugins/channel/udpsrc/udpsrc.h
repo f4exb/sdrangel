@@ -1,5 +1,5 @@
-#ifndef INCLUDE_TCPSRC_H
-#define INCLUDE_TCPSRC_H
+#ifndef INCLUDE_UDPSRC_H
+#define INCLUDE_UDPSRC_H
 
 #include <QMutex>
 #include <QHostAddress>
@@ -9,7 +9,7 @@
 #include "dsp/interpolator.h"
 #include "util/message.h"
 
-#define tcpFftLen 2048
+#define udpFftLen 2048
 
 class QTcpServer;
 class QTcpSocket;
@@ -29,7 +29,7 @@ public:
 	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum);
 	virtual ~UDPSrc();
 
-	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
+	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	Real getMagSq() const { return m_magsq; }
 
@@ -75,27 +75,27 @@ protected:
 		SampleFormat getSampleFormat() const { return m_sampleFormat; }
 		Real getOutputSampleRate() const { return m_outputSampleRate; }
 		Real getRFBandwidth() const { return m_rfBandwidth; }
-		int getTCPPort() const { return m_tcpPort; }
+		int getUDPPort() const { return m_udpPort; }
 		int getBoost() const { return m_boost; }
 
-		static MsgUDPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int tcpPort, int boost)
+		static MsgUDPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int udpPort, int boost)
 		{
-			return new MsgUDPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, tcpPort, boost);
+			return new MsgUDPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, udpPort, boost);
 		}
 
 	private:
 		SampleFormat m_sampleFormat;
 		Real m_outputSampleRate;
 		Real m_rfBandwidth;
-		int m_tcpPort;
+		int m_udpPort;
 		int m_boost;
 
-		MsgUDPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost) :
+		MsgUDPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
 			m_rfBandwidth(rfBandwidth),
-			m_tcpPort(tcpPort),
+			m_udpPort(udpPort),
 			m_boost(boost)
 		{ }
 	};
@@ -120,14 +120,14 @@ protected:
 	};
 
 	MessageQueue* m_uiMessageQueue;
-	UDPSrcGUI* m_tcpSrcGUI;
+	UDPSrcGUI* m_udpSrcGUI;
 
 	int m_inputSampleRate;
 
 	int m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
-	int m_tcpPort;
+	int m_udpPort;
 	int m_boost;
 	Real m_magsq;
 
@@ -137,14 +137,14 @@ protected:
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
-	fftfilt* TCPFilter;
+	fftfilt* UDPFilter;
 
 	SampleVector m_sampleBuffer;
 	SampleVector m_sampleBufferSSB;
 	SampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 
-	QTcpServer* m_tcpServer;
+	QTcpServer* m_udpServer;
 	struct Socket {
 		quint32 id;
 		QTcpSocket* socket;
@@ -166,7 +166,7 @@ protected:
 protected slots:
 	void onNewConnection();
 	void onDisconnected();
-	void onTcpServerError(QAbstractSocket::SocketError socketError);
+	void onUdpServerError(QAbstractSocket::SocketError socketError);
 };
 
-#endif // INCLUDE_TCPSRC_H
+#endif // INCLUDE_UDPSRC_H
