@@ -166,6 +166,7 @@ protected:
 protected slots:
 	void onNewConnection();
 	void onDisconnected();
+	void onTcpServerError(QAbstractSocket::SocketError socketError);
 };
 
 #endif // INCLUDE_TCPSRC_H

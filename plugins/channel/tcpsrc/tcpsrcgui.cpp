@@ -154,7 +154,8 @@ bool TCPSrcGUI::handleMessage(const Message& message)
 			delConnection(con.getID());
 		}
 
-		qDebug() << "  - TCPSrc::MsgTCPSrcConnection: ID: " << con.getID()
+		qDebug() << "TCPSrcGUI::handleMessage: TCPSrc::MsgTCPSrcConnection: " << con.getConnect()
+				<< " ID: " << con.getID()
 				<< " peerAddress: " << con.getPeerAddress()
 				<< " peerPort: " << con.getPeerPort();
 

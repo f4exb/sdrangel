@@ -162,6 +162,7 @@ void TCPSrc::start()
 {
 	m_tcpServer = new QTcpServer();
 	connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+	connect(m_tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onTcpServerError(QAbstractSocket::SocketError)));
 	m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
 }
 
@@ -276,15 +277,20 @@ void TCPSrc::closeAllSockets(Sockets* sockets)
 
 void TCPSrc::onNewConnection()
 {
+	qDebug("TCPSrc::onNewConnection");
+
 	while(m_tcpServer->hasPendingConnections())
 	{
+		qDebug("TCPSrc::onNewConnection: has a pending connection");
 		QTcpSocket* connection = m_tcpServer->nextPendingConnection();
+		connection->setSocketOption(QAbstractSocket:: KeepAliveOption, 1);
 		connect(connection, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
 
 		switch(m_sampleFormat) {
 
 			case FormatNFM:
-			case FormatSSB: {
+			case FormatSSB:
+			{
 				quint32 id = (FormatSSB << 24) | m_nextSSBId;
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
@@ -293,7 +299,9 @@ void TCPSrc::onNewConnection()
 				break;
 			}
 
-			case FormatS16LE: {
+			case FormatS16LE:
+			{
+				qDebug("TCPSrc::onNewConnection: establish new S16LE connection");
 				quint32 id = (FormatS16LE << 24) | m_nextS16leId;
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextS16leId = (m_nextS16leId + 1) & 0xffffff;
@@ -314,12 +322,15 @@ void TCPSrc::onDisconnected()
 	quint32 id;
 	QTcpSocket* socket = 0;
 
+	qDebug("TCPSrc::onDisconnected");
+
 	for(int i = 0; i < m_ssbSockets.count(); i++)
 	{
 		if(m_ssbSockets[i].socket == sender())
 		{
 			id = m_ssbSockets[i].id;
 			socket = m_ssbSockets[i].socket;
+			socket->close();
 			m_ssbSockets.removeAt(i);
 			break;
 		}
@@ -331,8 +342,11 @@ void TCPSrc::onDisconnected()
 		{
 			if(m_s16leSockets[i].socket == sender())
 			{
+				qDebug("TCPSrc::onDisconnected: remove S16LE socket #%d", i);
+
 				id = m_s16leSockets[i].id;
 				socket = m_s16leSockets[i].socket;
+				socket->close();
 				m_s16leSockets.removeAt(i);
 				break;
 			}
@@ -345,4 +359,9 @@ void TCPSrc::onDisconnected()
 		m_uiMessageQueue->push(msg);
 		socket->deleteLater();
 	}
+}
+
+void TCPSrc::onTcpServerError(QAbstractSocket::SocketError socketError)
+{
+	qDebug("TCPSrc::onTcpServerError: %s", qPrintable(m_tcpServer->errorString()));
 }
