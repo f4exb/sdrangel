@@ -118,6 +118,25 @@ protected:
 			m_enabled(enabled)
 		{ }
 	};
+	class MsgTCPConnection : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		bool getConnect() const { return m_connect; }
+
+		static MsgTCPConnection* create(bool connect)
+		{
+			return new MsgTCPConnection(connect);
+		}
+
+	private:
+		bool m_connect;
+
+		MsgTCPConnection(bool connect) :
+			Message(),
+			m_connect(connect)
+		{ }
+	};
 
 	MessageQueue* m_uiMessageQueue;
 	TCPSrcGUI* m_tcpSrcGUI;
@@ -162,6 +181,8 @@ protected:
 	QMutex m_settingsMutex;
 
 	void closeAllSockets(Sockets* sockets);
+	void processNewConnection();
+	void processDeconnection();
 
 protected slots:
 	void onNewConnection();
