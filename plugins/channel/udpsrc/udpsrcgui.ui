@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>443</height>
+    <width>294</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>5</y>
-     <width>201</width>
+     <width>241</width>
      <height>142</height>
     </rect>
    </property>
@@ -44,83 +44,84 @@
     <item row="1" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Sample Format</string>
+       <string>Format</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QComboBox" name="sampleFormat">
-      <property name="currentIndex">
-       <number>2</number>
-      </property>
+    <item row="0" column="1">
+     <layout class="QHBoxLayout" name="ChannelPowerLayout">
       <item>
-       <property name="text">
-        <string>S16LE SSB</string>
-       </property>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
-       <property name="text">
-        <string>S16LE NFM</string>
-       </property>
+       <widget class="QLabel" name="channelPower">
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>0.0</string>
+        </property>
+       </widget>
       </item>
       <item>
-       <property name="text">
-        <string>S16LE I/Q</string>
-       </property>
+       <widget class="QLabel" name="channelPowerUnits">
+        <property name="text">
+         <string> dB</string>
+        </property>
+       </widget>
       </item>
-     </widget>
-    </item>
-    <item row="4" column="1">
-     <widget class="QLineEdit" name="rfBandwidth">
-      <property name="text">
-       <string>32000</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>RF Bandwidth (Hz)</string>
-      </property>
-     </widget>
+     </layout>
     </item>
     <item row="1" column="1">
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>Samplerate (Hz)</string>
+       <string>Rate (Hz)</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>UDP Port</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="sampleRate">
-      <property name="text">
-       <string>48000</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLineEdit" name="udpPort">
-      <property name="text">
-       <string>9999</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QPushButton" name="applyBtn">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Apply</string>
-      </property>
-     </widget>
+    <item row="7" column="1">
+     <layout class="QHBoxLayout" name="BoostLayout">
+      <item>
+       <widget class="QLabel" name="boostLabel">
+        <property name="text">
+         <string>Boost</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="boost">
+        <property name="maximum">
+         <number>3</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="boostText">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
@@ -252,69 +253,90 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="1">
-     <layout class="QHBoxLayout" name="ChannelPowerLayout">
+    <item row="5" column="0">
+     <layout class="QHBoxLayout" name="PortLayout">
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="channelPower">
-        <property name="toolTip">
-         <string>Channel power</string>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
+       <widget class="QLabel" name="udpPortlabel">
         <property name="text">
-         <string>0.0</string>
+         <string>Port</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="channelPowerUnits">
+       <widget class="QLineEdit" name="udpPort">
         <property name="text">
-         <string> dB</string>
+         <string>9999</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item row="5" column="1">
-     <layout class="QHBoxLayout" name="BoostLayout">
+     <widget class="QLineEdit" name="rfBandwidth">
+      <property name="text">
+       <string>32000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QPushButton" name="applyBtn">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Apply</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>RF BW (Hz)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="sampleRate">
+      <property name="text">
+       <string>48000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QComboBox" name="sampleFormat">
+      <property name="currentIndex">
+       <number>2</number>
+      </property>
       <item>
-       <widget class="QLabel" name="boostLabel">
+       <property name="text">
+        <string>S16LE SSB</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE NFM</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE I/Q</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="AddressLayout">
+      <item>
+       <widget class="QLabel" name="Addresslabel">
         <property name="text">
-         <string>Boost</string>
+         <string>Addr</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="boost">
-        <property name="maximum">
-         <number>3</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="boostText">
+       <widget class="QLineEdit" name="udpAddress">
         <property name="text">
-         <string>0</string>
+         <string>127.0.0.1</string>
         </property>
        </widget>
       </item>

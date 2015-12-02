@@ -51,6 +51,7 @@ void UDPSrcGUI::resetToDefaults()
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
+	ui->udpAddress->setText("127.0.0.1");
 	ui->udpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	ui->boost->setValue(1);
@@ -71,6 +72,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, (qint32)m_boost);
 	s.writeS32(9, m_channelMarker.getCenterFrequency());
+	s.writeString(10, m_udpAddress);
 	return s.final();
 }
 
@@ -87,6 +89,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		QByteArray bytetmp;
+		QString strtmp;
 		qint32 s32tmp;
 		Real realtmp;
         
@@ -124,6 +127,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->boost->setValue(s32tmp);
 		d.readS32(9, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
+		d.readString(10, &strtmp, "127.0.0.1");
+		ui->udpAddress->setText(strtmp);
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -141,31 +146,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 bool UDPSrcGUI::handleMessage(const Message& message)
 {
 	qDebug() << "UDPSrcGUI::handleMessage";
-
-	if (UDPSrc::MsgUDPSrcConnection::match(message))
-	{
-		UDPSrc::MsgUDPSrcConnection& con = (UDPSrc::MsgUDPSrcConnection&) message;
-
-		if(con.getConnect())
-		{
-			addConnection(con.getID(), con.getPeerAddress(), con.getPeerPort());
-		}
-		else
-		{
-			delConnection(con.getID());
-		}
-
-		qDebug() << "UDPSrcGUI::handleMessage: UDPSrc::MsgUDPSrcConnection: " << con.getConnect()
-				<< " ID: " << con.getID()
-				<< " peerAddress: " << con.getPeerAddress()
-				<< " peerPort: " << con.getPeerPort();
-
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void UDPSrcGUI::channelMarkerChanged()
@@ -264,6 +245,7 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth = outputSampleRate;
 		}
 
+		m_udpAddress = ui->udpAddress->text();
 		int udpPort = ui->udpPort->text().toInt(&ok);
 
 		if((!ok) || (udpPort < 1) || (udpPort > 65535))
@@ -278,6 +260,7 @@ void UDPSrcGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
+		//ui->udpAddress->setText(m_udpAddress);
 		ui->udpPort->setText(QString("%1").arg(udpPort));
 		ui->boost->setValue(boost);
 		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
@@ -317,6 +300,7 @@ void UDPSrcGUI::applySettings()
 			sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
+			m_udpAddress,
 			udpPort,
 			boost);
 
@@ -391,26 +375,5 @@ void UDPSrcGUI::onMenuDoubleClicked()
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
-	}
-}
-
-void UDPSrcGUI::addConnection(quint32 id, const QHostAddress& peerAddress, int peerPort)
-{
-	QStringList l;
-	l.append(QString("%1:%2").arg(peerAddress.toString()).arg(peerPort));
-	new QTreeWidgetItem(ui->connections, l, id);
-	ui->connectedClientsBox->setWindowTitle(tr("Connected Clients (%1)").arg(ui->connections->topLevelItemCount()));
-}
-
-void UDPSrcGUI::delConnection(quint32 id)
-{
-	for(int i = 0; i < ui->connections->topLevelItemCount(); i++)
-	{
-		if(ui->connections->topLevelItem(i)->type() == (int)id)
-		{
-			delete ui->connections->topLevelItem(i);
-			ui->connectedClientsBox->setWindowTitle(tr("Connected Clients (%1)").arg(ui->connections->topLevelItemCount()));
-			return;
-		}
 	}
 }

@@ -44,6 +44,7 @@ private slots:
 	void on_sampleFormat_currentIndexChanged(int index);
 	void on_sampleRate_textEdited(const QString& arg1);
 	void on_rfBandwidth_textEdited(const QString& arg1);
+	void on_udpAddress_textEdited(const QString& arg1);
 	void on_udpPort_textEdited(const QString& arg1);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
@@ -63,6 +64,7 @@ private:
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_boost;
+	QString m_udpAddress;
 	int m_udpPort;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -77,9 +79,6 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
-
-	void addConnection(quint32 id, const QHostAddress& peerAddress, int peerPort);
-	void delConnection(quint32 id);
 };
 
 #endif // INCLUDE_UDPSRCGUI_H

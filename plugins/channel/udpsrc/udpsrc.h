@@ -11,8 +11,7 @@
 
 #define udpFftLen 2048
 
-class QTcpServer;
-class QTcpSocket;
+class QUdpSocket;
 class UDPSrcGUI;
 
 class UDPSrc : public SampleSink {
@@ -29,7 +28,7 @@ public:
 	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum);
 	virtual ~UDPSrc();
 
-	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost);
+	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	Real getMagSq() const { return m_magsq; }
 
@@ -37,35 +36,6 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
-
-	class MsgUDPSrcConnection : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool getConnect() const { return m_connect; }
-		quint32 getID() const { return m_id; }
-		const QHostAddress& getPeerAddress() const { return m_peerAddress; }
-		int getPeerPort() const { return m_peerPort; }
-
-		static MsgUDPSrcConnection* create(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort)
-		{
-			return new MsgUDPSrcConnection(connect, id, peerAddress, peerPort);
-		}
-
-	private:
-		bool m_connect;
-		quint32 m_id;
-		QHostAddress m_peerAddress;
-		int m_peerPort;
-
-		MsgUDPSrcConnection(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort) :
-			Message(),
-			m_connect(connect),
-			m_id(id),
-			m_peerAddress(peerAddress),
-			m_peerPort(peerPort)
-		{ }
-	};
 
 protected:
 	class MsgUDPSrcConfigure : public Message {
@@ -75,26 +45,29 @@ protected:
 		SampleFormat getSampleFormat() const { return m_sampleFormat; }
 		Real getOutputSampleRate() const { return m_outputSampleRate; }
 		Real getRFBandwidth() const { return m_rfBandwidth; }
+		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
 		int getBoost() const { return m_boost; }
 
-		static MsgUDPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int udpPort, int boost)
+		static MsgUDPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost)
 		{
-			return new MsgUDPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, udpPort, boost);
+			return new MsgUDPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, udpAddress, udpPort, boost);
 		}
 
 	private:
 		SampleFormat m_sampleFormat;
 		Real m_outputSampleRate;
 		Real m_rfBandwidth;
+		QString m_udpAddress;
 		int m_udpPort;
 		int m_boost;
 
-		MsgUDPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost) :
+		MsgUDPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
 			m_rfBandwidth(rfBandwidth),
+			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
 			m_boost(boost)
 		{ }
@@ -121,13 +94,15 @@ protected:
 
 	MessageQueue* m_uiMessageQueue;
 	UDPSrcGUI* m_udpSrcGUI;
+	QUdpSocket *m_socket;
 
 	int m_inputSampleRate;
 
 	int m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
-	int m_udpPort;
+	QHostAddress m_udpAddress;
+	quint16 m_udpPort;
 	int m_boost;
 	Real m_magsq;
 
@@ -144,29 +119,10 @@ protected:
 	SampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 
-	QTcpServer* m_udpServer;
-	struct Socket {
-		quint32 id;
-		QTcpSocket* socket;
-		Socket(quint32 _id, QTcpSocket* _socket) :
-			id(_id),
-			socket(_socket)
-		{ }
-	};
-	typedef QList<Socket> Sockets;
-	Sockets m_ssbSockets;
-	Sockets m_s16leSockets;
 	quint32 m_nextSSBId;
 	quint32 m_nextS16leId;
 
 	QMutex m_settingsMutex;
-
-	void closeAllSockets(Sockets* sockets);
-
-protected slots:
-	void onNewConnection();
-	void onDisconnected();
-	void onUdpServerError(QAbstractSocket::SocketError socketError);
 };
 
 #endif // INCLUDE_UDPSRC_H

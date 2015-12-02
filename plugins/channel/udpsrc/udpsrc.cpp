@@ -16,20 +16,20 @@
 
 #include "udpsrc.h"
 
-#include <QTcpServer>
-#include <QTcpSocket>
+#include <QUdpSocket>
 #include <QThread>
 #include "dsp/channelizer.h"
 #include "udpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("UDPSrc");
+
+	m_socket = new QUdpSocket(this);
 
 	m_inputSampleRate = 96000;
 	m_sampleFormat = FormatSSB;
@@ -58,12 +58,13 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 
 UDPSrc::~UDPSrc()
 {
+	delete m_socket;
 	if (UDPFilter) delete UDPFilter;
 }
 
-void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int udpPort, int boost)
+void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost)
 {
-	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, udpPort, boost);
+	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, udpAddress, udpPort, boost);
 	messageQueue->push(cmd);
 }
 
@@ -105,39 +106,43 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
 	}
 
-	for(int i = 0; i < m_s16leSockets.count(); i++)
+	if (m_sampleFormat == FormatSSB)
 	{
-		m_s16leSockets[i].socket->write((const char*)&m_sampleBuffer[0], m_sampleBuffer.size() * 4);
-	}
-
-	if((m_sampleFormat == FormatSSB) && (m_ssbSockets.count() > 0)) {
-		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
+		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it)
+		{
 			//Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
 			Complex cj(it->real(), it->imag());
 			int n_out = UDPFilter->runSSB(cj, &sideband, true);
-			if (n_out) {
-				for (int i = 0; i < n_out; i+=2) {
+
+			if (n_out)
+			{
+				for (int i = 0; i < n_out; i+=2)
+				{
 					//l = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
 					//r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 32000.0;
 					l = (sideband[i].real() + sideband[i].imag()) * 0.7;
 					r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7;
 					m_sampleBufferSSB.push_back(Sample(l, r));
 				}
-				for(int i = 0; i < m_ssbSockets.count(); i++)
-					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
+
+				m_socket->writeDatagram((const char*)&m_sampleBufferSSB[0], (qint64 ) (n_out * 2), m_udpAddress, m_udpPort);
 				m_sampleBufferSSB.clear();
 			}
 		}
 	}
-
-	if((m_sampleFormat == FormatNFM) && (m_ssbSockets.count() > 0)) {
-		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
+	else if (m_sampleFormat == FormatNFM)
+	{
+		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it)
+		{
 			Complex cj(it->real() / 32768.0f, it->imag() / 32768.0f);
 			// An FFT filter here is overkill, but was already set up for SSB
 			int n_out = UDPFilter->runFilt(cj, &sideband);
-			if (n_out) {
+
+			if (n_out)
+			{
 				Real sum = 1.0;
-				for (int i = 0; i < n_out; i+=2) {
+				for (int i = 0; i < n_out; i+=2)
+				{
 					l = m_this.real() * (m_last.imag() - sideband[i].imag())
 					  - m_this.imag() * (m_last.real() - sideband[i].real());
 					m_last = sideband[i];
@@ -149,11 +154,14 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				}
 				// TODO: correct levels
 				m_scale = 24000 * udpFftLen / sum;
-				for(int i = 0; i < m_ssbSockets.count(); i++)
-					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
+				m_socket->writeDatagram((const char*)&m_sampleBufferSSB[0], (qint64 ) (n_out * 2), m_udpAddress, m_udpPort);
 				m_sampleBufferSSB.clear();
 			}
 		}
+	}
+	else
+	{
+		m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_sampleBuffer.size() * 4), m_udpAddress, m_udpPort);
 	}
 
 	m_settingsMutex.unlock();
@@ -161,20 +169,10 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 void UDPSrc::start()
 {
-	m_udpServer = new QTcpServer();
-	connect(m_udpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-	connect(m_udpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(onUdpServerError(QAbstractSocket::SocketError)));
-	m_udpServer->listen(QHostAddress::Any, m_udpPort);
 }
 
 void UDPSrc::stop()
 {
-	closeAllSockets(&m_ssbSockets);
-	closeAllSockets(&m_s16leSockets);
-
-	if(m_udpServer->isListening())
-		m_udpServer->close();
-	delete m_udpServer;
 }
 
 bool UDPSrc::handleMessage(const Message& cmd)
@@ -209,16 +207,14 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_outputSampleRate = cfg.getOutputSampleRate();
 		m_rfBandwidth = cfg.getRFBandwidth();
 
+		if (cfg.getUDPAddress() != m_udpAddress.toString())
+		{
+			m_udpAddress.setAddress(cfg.getUDPAddress());
+		}
+
 		if (cfg.getUDPPort() != m_udpPort)
 		{
 			m_udpPort = cfg.getUDPPort();
-
-			if(m_udpServer->isListening())
-			{
-				m_udpServer->close();
-			}
-
-			m_udpServer->listen(QHostAddress::Any, m_udpPort);
 		}
 
 		m_boost = cfg.getBoost();
@@ -239,7 +235,9 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		qDebug() << "  - MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
 				<< " m_outputSampleRate: " << m_outputSampleRate
 				<< " m_rfBandwidth: " << m_rfBandwidth
-				<< " m_boost: " << m_boost;
+				<< " m_boost: " << m_boost
+				<< " m_udpAddress: " << cfg.getUDPAddress()
+				<< " m_udpPort: " << m_udpPort;
 
 		return true;
 	}
@@ -264,105 +262,4 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			return false;
 		}
 	}
-}
-
-void UDPSrc::closeAllSockets(Sockets* sockets)
-{
-	for(int i = 0; i < sockets->count(); ++i)
-	{
-		MsgUDPSrcConnection* msg = MsgUDPSrcConnection::create(false, sockets->at(i).id, QHostAddress(), 0);
-		m_uiMessageQueue->push(msg);
-		sockets->at(i).socket->close();
-	}
-}
-
-void UDPSrc::onNewConnection()
-{
-	qDebug("UDPSrc::onNewConnection");
-
-	while(m_udpServer->hasPendingConnections())
-	{
-		qDebug("UDPSrc::onNewConnection: has a pending connection");
-		QTcpSocket* connection = m_udpServer->nextPendingConnection();
-		connection->setSocketOption(QAbstractSocket:: KeepAliveOption, 1);
-		connect(connection, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
-
-		switch(m_sampleFormat) {
-
-			case FormatNFM:
-			case FormatSSB:
-			{
-				quint32 id = (FormatSSB << 24) | m_nextSSBId;
-				MsgUDPSrcConnection* msg = MsgUDPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
-				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
-				m_ssbSockets.push_back(Socket(id, connection));
-				m_uiMessageQueue->push(msg);
-				break;
-			}
-
-			case FormatS16LE:
-			{
-				qDebug("UDPSrc::onNewConnection: establish new S16LE connection");
-				quint32 id = (FormatS16LE << 24) | m_nextS16leId;
-				MsgUDPSrcConnection* msg = MsgUDPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
-				m_nextS16leId = (m_nextS16leId + 1) & 0xffffff;
-				m_s16leSockets.push_back(Socket(id, connection));
-				m_uiMessageQueue->push(msg);
-				break;
-			}
-
-			default:
-				delete connection;
-				break;
-		}
-	}
-}
-
-void UDPSrc::onDisconnected()
-{
-	quint32 id;
-	QTcpSocket* socket = 0;
-
-	qDebug("UDPSrc::onDisconnected");
-
-	for(int i = 0; i < m_ssbSockets.count(); i++)
-	{
-		if(m_ssbSockets[i].socket == sender())
-		{
-			id = m_ssbSockets[i].id;
-			socket = m_ssbSockets[i].socket;
-			socket->close();
-			m_ssbSockets.removeAt(i);
-			break;
-		}
-	}
-
-	if(socket == 0)
-	{
-		for(int i = 0; i < m_s16leSockets.count(); i++)
-		{
-			if(m_s16leSockets[i].socket == sender())
-			{
-				qDebug("UDPSrc::onDisconnected: remove S16LE socket #%d", i);
-
-				id = m_s16leSockets[i].id;
-				socket = m_s16leSockets[i].socket;
-				socket->close();
-				m_s16leSockets.removeAt(i);
-				break;
-			}
-		}
-	}
-
-	if(socket != 0)
-	{
-		MsgUDPSrcConnection* msg = MsgUDPSrcConnection::create(false, id, QHostAddress(), 0);
-		m_uiMessageQueue->push(msg);
-		socket->deleteLater();
-	}
-}
-
-void UDPSrc::onUdpServerError(QAbstractSocket::SocketError socketError)
-{
-	qDebug("UDPSrc::onUdpServerError: %s", qPrintable(m_udpServer->errorString()));
 }
