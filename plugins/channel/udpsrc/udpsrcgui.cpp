@@ -172,7 +172,6 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_doApplySettings(true)
 {
 	ui->setupUi(this);
-	ui->connectedClientsBox->hide();
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 	setAttribute(Qt::WA_DeleteOnClose, true);
