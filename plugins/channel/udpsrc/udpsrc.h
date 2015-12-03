@@ -8,6 +8,8 @@
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
+#include "audio/audiofifo.h"
+
 
 #define udpFftLen 2048
 
@@ -25,6 +27,13 @@ public:
 		FormatNone
 	};
 
+	struct AudioSample {
+		qint16 l;
+		qint16 r;
+	};
+
+	typedef std::vector<AudioSample> AudioVector;
+
 	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum);
 	virtual ~UDPSrc();
 
@@ -36,6 +45,9 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+public slots:
+    void audioReadyRead();
 
 protected:
 	class MsgUDPSrcConfigure : public Message {
@@ -95,6 +107,7 @@ protected:
 	MessageQueue* m_uiMessageQueue;
 	UDPSrcGUI* m_udpSrcGUI;
 	QUdpSocket *m_socket;
+	QUdpSocket *m_audioSocket;
 
 	int m_inputSampleRate;
 
@@ -116,6 +129,11 @@ protected:
 
 	SampleVector m_sampleBuffer;
 	SampleVector m_sampleBufferSSB;
+
+	AudioVector m_audioBuffer;
+	uint m_audioBufferFill;
+	AudioFifo m_audioFifo;
+
 	SampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 

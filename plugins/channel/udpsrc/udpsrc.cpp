@@ -18,18 +18,25 @@
 
 #include <QUdpSocket>
 #include <QThread>
+#include <QHostAddress>
 #include "dsp/channelizer.h"
+#include "dsp/dspengine.h"
 #include "udpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum) :
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+	m_audioFifo(4, 24000)
 {
 	setObjectName("UDPSrc");
 
 	m_socket = new QUdpSocket(this);
+	m_audioSocket = new QUdpSocket(this);
+
+	m_audioBuffer.resize(1<<9);
+	m_audioBufferFill = 0;
 
 	m_inputSampleRate = 96000;
 	m_sampleFormat = FormatSSB;
@@ -53,13 +60,26 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_magsq = 0;
 	m_sampleBufferSSB.resize(udpFftLen);
 	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpFftLen);
-	// if (!TCPFilter) segfault;
+
+	if (m_audioSocket->bind(QHostAddress::LocalHost, m_udpPort-1))
+	{
+		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_udpPort - 1);
+		connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+	}
+	else
+	{
+		qWarning("UDPSrc::UDPSrc: cannot bind audio port");
+	}
+
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 UDPSrc::~UDPSrc()
 {
+	delete m_audioSocket;
 	delete m_socket;
 	if (UDPFilter) delete UDPFilter;
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
 void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost)
@@ -215,6 +235,11 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		if (cfg.getUDPPort() != m_udpPort)
 		{
 			m_udpPort = cfg.getUDPPort();
+
+			if (!m_audioSocket->bind(QHostAddress::Any, m_udpPort-1))
+			{
+				qWarning("UDPSrc::handleMessage: cannot bind audio socket");
+			}
 		}
 
 		m_boost = cfg.getBoost();
@@ -232,7 +257,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "  - MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
+		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
 				<< " m_outputSampleRate: " << m_outputSampleRate
 				<< " m_rfBandwidth: " << m_rfBandwidth
 				<< " m_boost: " << m_boost
@@ -247,7 +272,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_spectrumEnabled = spc.getEnabled();
 
-		qDebug() << "  - MsgUDPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
 		return true;
 	}
@@ -262,4 +287,46 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			return false;
 		}
 	}
+}
+
+void UDPSrc::audioReadyRead()
+{
+	QByteArray buffer;
+
+	while (m_audioSocket->hasPendingDatagrams())
+	{
+		buffer.resize(m_audioSocket->pendingDatagramSize());
+		m_audioSocket->readDatagram(buffer.data(), buffer.size(), 0, 0);
+		//qDebug("UDPSrc::audioReadyRead: %d", buffer.size());
+
+		for (int i = 0; i < buffer.size() - 3; i += 4)
+	    {
+	    	qint16 l_sample = (qint16) *(&buffer.data()[i]);
+	    	qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
+	    	m_audioBuffer[m_audioBufferFill].l  = l_sample * 100;
+	    	m_audioBuffer[m_audioBufferFill].r  = r_sample * 100;
+	    	++m_audioBufferFill;
+
+			if (m_audioBufferFill >= m_audioBuffer.size())
+			{
+				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
+				if (res != m_audioBufferFill)
+				{
+					qDebug("UDPSrc::audioReadyRead: lost %u samples", m_audioBufferFill - res);
+				}
+
+				m_audioBufferFill = 0;
+			}
+	    }
+
+		if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+		{
+			qDebug("UDPSrc::audioReadyRead: lost samples");
+		}
+
+		m_audioBufferFill = 0;
+	}
+
+	//qDebug("UDPSrc::audioReadyRead: done");
 }
