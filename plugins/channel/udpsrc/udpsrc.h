@@ -43,6 +43,7 @@ public:
 			Real rfBandwidth,
 			QString& udpAddress,
 			int udpPort,
+			int audioPort,
 			bool audioActive);
 	void configureImmediate(MessageQueue* messageQueue,
 			int boost,
@@ -68,6 +69,7 @@ protected:
 		Real getRFBandwidth() const { return m_rfBandwidth; }
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
+		int getAudioPort() const { return m_audioPort; }
 		bool getAudioActive() const { return m_audioActive; }
 
 		static MsgUDPSrcConfigure* create(SampleFormat
@@ -76,6 +78,7 @@ protected:
 				Real rfBandwidth,
 				QString& udpAddress,
 				int udpPort,
+				int audioPort,
 				bool audioActive)
 		{
 			return new MsgUDPSrcConfigure(sampleFormat,
@@ -83,6 +86,7 @@ protected:
 					rfBandwidth,
 					udpAddress,
 					udpPort,
+					audioPort,
 					audioActive);
 		}
 
@@ -92,6 +96,7 @@ protected:
 		Real m_rfBandwidth;
 		QString m_udpAddress;
 		int m_udpPort;
+		int m_audioPort;
 		bool m_audioActive;
 
 		MsgUDPSrcConfigure(SampleFormat sampleFormat,
@@ -99,6 +104,7 @@ protected:
 				Real rfBandwidth,
 				QString& udpAddress,
 				int udpPort,
+				int audioPort,
 				bool audioActive) :
 			Message(),
 			m_sampleFormat(sampleFormat),
@@ -106,6 +112,7 @@ protected:
 			m_rfBandwidth(rfBandwidth),
 			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
+			m_audioPort(audioPort),
 			m_audioActive(audioActive)
 		{ }
 	};
@@ -171,6 +178,7 @@ protected:
 	Real m_rfBandwidth;
 	QHostAddress m_udpAddress;
 	quint16 m_udpPort;
+	quint16 m_audioPort;
 	int m_boost;
 	bool m_audioActive;
 	int m_volume;

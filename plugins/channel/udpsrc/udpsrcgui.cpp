@@ -331,6 +331,7 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth,
 			m_udpAddress,
 			udpPort,
+			udpPort - 1, // TODO: replace with the audio port
 			audioActive);
 
 		ui->applyBtn->setEnabled(false);

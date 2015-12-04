@@ -46,6 +46,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
 	m_udpPort = 9999;
+	m_audioPort = m_udpPort - 1;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
@@ -64,9 +65,9 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_sampleBufferSSB.resize(udpFftLen);
 	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpFftLen);
 
-	if (m_audioSocket->bind(QHostAddress::LocalHost, m_udpPort-1))
+	if (m_audioSocket->bind(QHostAddress::LocalHost, m_audioPort))
 	{
-		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_udpPort - 1);
+		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_audioPort);
 		connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
 	}
 	else
@@ -91,6 +92,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		QString& udpAddress,
 		int udpPort,
+		int audioPort,
 		bool audioActive)
 {
 	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat,
@@ -98,6 +100,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 			rfBandwidth,
 			udpAddress,
 			udpPort,
+			audioPort,
 			audioActive);
 	messageQueue->push(cmd);
 }
@@ -284,12 +287,15 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		if (cfg.getUDPPort() != m_udpPort)
 		{
 			m_udpPort = cfg.getUDPPort();
+		}
 
+		if (cfg.getAudioPort() != m_audioPort)
+		{
 			disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
 			delete m_audioSocket;
 			m_audioSocket = new QUdpSocket(this);
 
-			if (m_audioSocket->bind(QHostAddress::Any, m_udpPort-1))
+			if (m_audioSocket->bind(QHostAddress::Any, m_audioPort))
 			{
 				connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
 			}
@@ -334,7 +340,8 @@ bool UDPSrc::handleMessage(const Message& cmd)
 				<< " m_boost: " << m_boost
 				<< " m_udpAddress: " << cfg.getUDPAddress()
 				<< " m_udpPort: " << m_udpPort
-				<< " m+audioActive: " << m_audioActive;
+				<< " m_audioPort: " << m_audioPort
+				<< " m_audioActive: " << m_audioActive;
 
 		return true;
 	}
