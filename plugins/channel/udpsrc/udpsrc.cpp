@@ -285,7 +285,15 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		{
 			m_udpPort = cfg.getUDPPort();
 
-			if (!m_audioSocket->bind(QHostAddress::Any, m_udpPort-1))
+			disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+			delete m_audioSocket;
+			m_audioSocket = new QUdpSocket(this);
+
+			if (m_audioSocket->bind(QHostAddress::Any, m_udpPort-1))
+			{
+				connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+			}
+			else
 			{
 				qWarning("UDPSrc::handleMessage: cannot bind audio socket");
 			}

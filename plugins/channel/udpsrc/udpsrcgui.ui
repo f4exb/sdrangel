@@ -319,7 +319,7 @@
       <item>
        <widget class="QLabel" name="audioPortlabel">
         <property name="text">
-         <string>Audio</string>
+         <string>Audio on</string>
         </property>
        </widget>
       </item>
@@ -334,14 +334,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="audioPort">
-        <property name="toolTip">
-         <string>Audio input port</string>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>9998</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </item>
