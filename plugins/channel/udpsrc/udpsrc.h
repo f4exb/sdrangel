@@ -37,7 +37,16 @@ public:
 	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum);
 	virtual ~UDPSrc();
 
-	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost);
+	void configure(MessageQueue* messageQueue,
+			SampleFormat sampleFormat,
+			Real outputSampleRate,
+			Real rfBandwidth,
+			QString& udpAddress,
+			int udpPort,
+			bool audioActive);
+	void configureImmediate(MessageQueue* messageQueue,
+			int boost,
+			int volume);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	Real getMagSq() const { return m_magsq; }
 
@@ -59,11 +68,22 @@ protected:
 		Real getRFBandwidth() const { return m_rfBandwidth; }
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
-		int getBoost() const { return m_boost; }
+		bool getAudioActive() const { return m_audioActive; }
 
-		static MsgUDPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost)
+		static MsgUDPSrcConfigure* create(SampleFormat
+				sampleFormat,
+				Real sampleRate,
+				Real rfBandwidth,
+				QString& udpAddress,
+				int udpPort,
+				bool audioActive)
 		{
-			return new MsgUDPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, udpAddress, udpPort, boost);
+			return new MsgUDPSrcConfigure(sampleFormat,
+					sampleRate,
+					rfBandwidth,
+					udpAddress,
+					udpPort,
+					audioActive);
 		}
 
 	private:
@@ -72,18 +92,53 @@ protected:
 		Real m_rfBandwidth;
 		QString m_udpAddress;
 		int m_udpPort;
-		int m_boost;
+		bool m_audioActive;
 
-		MsgUDPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost) :
+		MsgUDPSrcConfigure(SampleFormat sampleFormat,
+				Real outputSampleRate,
+				Real rfBandwidth,
+				QString& udpAddress,
+				int udpPort,
+				bool audioActive) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
 			m_rfBandwidth(rfBandwidth),
 			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
-			m_boost(boost)
+			m_audioActive(audioActive)
 		{ }
 	};
+
+	class MsgUDPSrcConfigureImmediate : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getBoost() const { return m_boost; }
+		int getVolume() const { return m_volume; }
+
+		static MsgUDPSrcConfigureImmediate* create(
+				int boost,
+				int volume)
+		{
+			return new MsgUDPSrcConfigureImmediate(
+					boost,
+					volume);
+		}
+
+	private:
+		int m_boost;
+		int m_volume;
+
+		MsgUDPSrcConfigureImmediate(
+				int boost,
+				int volume) :
+			Message(),
+			m_boost(boost),
+			m_volume(volume)
+		{ }
+	};
+
 	class MsgUDPSrcSpectrum : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -117,6 +172,8 @@ protected:
 	QHostAddress m_udpAddress;
 	quint16 m_udpPort;
 	int m_boost;
+	bool m_audioActive;
+	int m_volume;
 	Real m_magsq;
 
 	Real m_scale;

@@ -24,11 +24,14 @@
 #include "udpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
+MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive),
-	m_audioFifo(4, 24000)
+	m_audioFifo(4, 24000),
+	m_audioActive(false),
+	m_volume(20)
 {
 	setObjectName("UDPSrc");
 
@@ -71,7 +74,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 		qWarning("UDPSrc::UDPSrc: cannot bind audio port");
 	}
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 UDPSrc::~UDPSrc()
@@ -79,12 +82,33 @@ UDPSrc::~UDPSrc()
 	delete m_audioSocket;
 	delete m_socket;
 	if (UDPFilter) delete UDPFilter;
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	if (m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void UDPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, QString& udpAddress, int udpPort, int boost)
+void UDPSrc::configure(MessageQueue* messageQueue,
+		SampleFormat sampleFormat,
+		Real outputSampleRate,
+		Real rfBandwidth,
+		QString& udpAddress,
+		int udpPort,
+		bool audioActive)
 {
-	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, udpAddress, udpPort, boost);
+	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat,
+			outputSampleRate,
+			rfBandwidth,
+			udpAddress,
+			udpPort,
+			audioActive);
+	messageQueue->push(cmd);
+}
+
+void UDPSrc::configureImmediate(MessageQueue* messageQueue,
+		int boost,
+		int volume)
+{
+	Message* cmd = MsgUDPSrcConfigureImmediate::create(
+			boost,
+			volume);
 	messageQueue->push(cmd);
 }
 
@@ -217,6 +241,31 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		return true;
 	}
+	else if (MsgUDPSrcConfigureImmediate::match(cmd))
+	{
+		MsgUDPSrcConfigureImmediate& cfg = (MsgUDPSrcConfigureImmediate&) cmd;
+
+		m_settingsMutex.lock();
+
+		if (cfg.getBoost() != m_boost)
+		{
+			m_boost = cfg.getBoost();
+		}
+
+		if (cfg.getVolume() != m_volume)
+		{
+			m_volume = cfg.getVolume();
+		}
+
+		m_settingsMutex.unlock();
+
+		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
+				<< " m_boost: " << m_boost
+				<< " m_volume: " << m_volume;
+
+		return true;
+
+	}
 	else if (MsgUDPSrcConfigure::match(cmd))
 	{
 		MsgUDPSrcConfigure& cfg = (MsgUDPSrcConfigure&) cmd;
@@ -242,7 +291,6 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			}
 		}
 
-		m_boost = cfg.getBoost();
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 
@@ -255,6 +303,21 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			UDPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
 
+		if (cfg.getAudioActive() != m_audioActive)
+		{
+			m_audioActive = cfg.getAudioActive();
+
+			if (m_audioActive)
+			{
+				m_audioBufferFill = 0;
+				DSPEngine::instance()->addAudioSink(&m_audioFifo);
+			}
+			else
+			{
+				DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+			}
+		}
+
 		m_settingsMutex.unlock();
 
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
@@ -262,7 +325,8 @@ bool UDPSrc::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_rfBandwidth
 				<< " m_boost: " << m_boost
 				<< " m_udpAddress: " << cfg.getUDPAddress()
-				<< " m_udpPort: " << m_udpPort;
+				<< " m_udpPort: " << m_udpPort
+				<< " m+audioActive: " << m_audioActive;
 
 		return true;
 	}
@@ -299,33 +363,36 @@ void UDPSrc::audioReadyRead()
 		m_audioSocket->readDatagram(buffer.data(), buffer.size(), 0, 0);
 		//qDebug("UDPSrc::audioReadyRead: %d", buffer.size());
 
-		for (int i = 0; i < buffer.size() - 3; i += 4)
-	    {
-	    	qint16 l_sample = (qint16) *(&buffer.data()[i]);
-	    	qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
-	    	m_audioBuffer[m_audioBufferFill].l  = l_sample * 100;
-	    	m_audioBuffer[m_audioBufferFill].r  = r_sample * 100;
-	    	++m_audioBufferFill;
-
-			if (m_audioBufferFill >= m_audioBuffer.size())
-			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-
-				if (res != m_audioBufferFill)
-				{
-					qDebug("UDPSrc::audioReadyRead: lost %u samples", m_audioBufferFill - res);
-				}
-
-				m_audioBufferFill = 0;
-			}
-	    }
-
-		if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+		if (m_audioActive)
 		{
-			qDebug("UDPSrc::audioReadyRead: lost samples");
-		}
+			for (int i = 0; i < buffer.size() - 3; i += 4)
+			{
+				qint16 l_sample = (qint16) *(&buffer.data()[i]);
+				qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
+				m_audioBuffer[m_audioBufferFill].l  = l_sample * 10 * m_volume;
+				m_audioBuffer[m_audioBufferFill].r  = r_sample * 10 * m_volume;
+				++m_audioBufferFill;
 
-		m_audioBufferFill = 0;
+				if (m_audioBufferFill >= m_audioBuffer.size())
+				{
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
+					if (res != m_audioBufferFill)
+					{
+						qDebug("UDPSrc::audioReadyRead: lost %u samples", m_audioBufferFill - res);
+					}
+
+					m_audioBufferFill = 0;
+				}
+			}
+
+			if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+			{
+				qDebug("UDPSrc::audioReadyRead: lost samples");
+			}
+
+			m_audioBufferFill = 0;
+		}
 	}
 
 	//qDebug("UDPSrc::audioReadyRead: done");

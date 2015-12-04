@@ -46,10 +46,12 @@ private slots:
 	void on_rfBandwidth_textEdited(const QString& arg1);
 	void on_udpAddress_textEdited(const QString& arg1);
 	void on_udpPort_textEdited(const QString& arg1);
+	void on_audioActive_toggled(bool checked);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void on_boost_valueChanged(int value);
+	void on_volume_valueChanged(int value);
 	void tick();
 
 private:
@@ -64,6 +66,8 @@ private:
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_boost;
+	bool m_audioActive;
+	int m_volume;
 	QString m_udpAddress;
 	int m_udpPort;
 	bool m_basicSettingsShown;
@@ -79,6 +83,7 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
+	void applySettingsImmediate();
 };
 
 #endif // INCLUDE_UDPSRCGUI_H

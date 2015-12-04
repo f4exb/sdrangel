@@ -55,8 +55,11 @@ void UDPSrcGUI::resetToDefaults()
 	ui->udpPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	ui->boost->setValue(1);
+	ui->volume->setValue(20);
+	ui->audioActive->setChecked(false);
 
 	blockApplySettings(false);
+	applySettingsImmediate();
 	applySettings();
 }
 
@@ -73,6 +76,8 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(8, (qint32)m_boost);
 	s.writeS32(9, m_channelMarker.getCenterFrequency());
 	s.writeString(10, m_udpAddress);
+	s.writeBool(11, m_audioActive);
+	s.writeS32(12, (qint32)m_volume);
 	return s.final();
 }
 
@@ -92,6 +97,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		QString strtmp;
 		qint32 s32tmp;
 		Real realtmp;
+		bool booltmp;
         
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -129,10 +135,15 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readString(10, &strtmp, "127.0.0.1");
 		ui->udpAddress->setText(strtmp);
+		d.readBool(11, &booltmp, false);
+		ui->audioActive->setChecked(booltmp);
+		d.readS32(12, &s32tmp, 20);
+		ui->volume->setValue(s32tmp);
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
         
+		applySettingsImmediate();
 		applySettings();
 		return true;
 	}
@@ -169,7 +180,9 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
 	m_basicSettingsShown(false),
-	m_doApplySettings(true)
+	m_doApplySettings(true),
+	m_boost(1),
+	m_volume(20)
 {
 	ui->setupUi(this);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -204,6 +217,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
+	applySettingsImmediate();
 	applySettings();
 }
 
@@ -223,6 +237,20 @@ void UDPSrcGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
+
+void UDPSrcGUI::applySettingsImmediate()
+{
+	if (m_doApplySettings)
+	{
+		m_boost = ui->boost->value();
+		m_volume = ui->volume->value();
+
+		m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
+			m_boost,
+			m_volume);
+	}
+}
+
 
 void UDPSrcGUI::applySettings()
 {
@@ -253,6 +281,7 @@ void UDPSrcGUI::applySettings()
 		}
 
 		int boost = ui->boost->value();
+		bool audioActive = ui->audioActive->isChecked();
 
 		setTitleColor(m_channelMarker.getColor());
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
@@ -294,6 +323,7 @@ void UDPSrcGUI::applySettings()
 		m_rfBandwidth = rfBandwidth;
 		m_udpPort = udpPort;
 		m_boost = boost;
+		m_audioActive = audioActive;
 
 		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
 			sampleFormat,
@@ -301,7 +331,7 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth,
 			m_udpAddress,
 			udpPort,
-			boost);
+			audioActive);
 
 		ui->applyBtn->setEnabled(false);
 	}
@@ -352,11 +382,23 @@ void UDPSrcGUI::on_applyBtn_clicked()
 	applySettings();
 }
 
+void UDPSrcGUI::on_audioActive_toggled(bool checked)
+{
+	ui->applyBtn->setEnabled(true);
+}
+
 void UDPSrcGUI::on_boost_valueChanged(int value)
 {
 	ui->boost->setValue(value);
 	ui->boostText->setText(QString("%1").arg(value));
-	ui->applyBtn->setEnabled(true);
+	applySettingsImmediate();
+}
+
+void UDPSrcGUI::on_volume_valueChanged(int value)
+{
+	ui->volume->setValue(value);
+	ui->volumeText->setText(QString("%1").arg(value));
+	applySettingsImmediate();
 }
 
 void UDPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)

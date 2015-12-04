@@ -155,7 +155,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="volimeText">
+       <widget class="QLabel" name="volumeText">
         <property name="text">
          <string>20</string>
         </property>
@@ -324,7 +324,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="audioActive">
         <property name="toolTip">
          <string>Activate audio</string>
         </property>
