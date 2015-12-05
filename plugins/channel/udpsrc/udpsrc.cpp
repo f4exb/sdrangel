@@ -291,6 +291,8 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		if (cfg.getAudioPort() != m_audioPort)
 		{
+			m_audioPort = cfg.getAudioPort();
+
 			disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
 			delete m_audioSocket;
 			m_audioSocket = new QUdpSocket(this);
