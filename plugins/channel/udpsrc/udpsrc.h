@@ -46,6 +46,7 @@ public:
 			int audioPort);
 	void configureImmediate(MessageQueue* messageQueue,
 			bool audioActive,
+			bool audioStereo,
 			int boost,
 			int volume);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -118,14 +119,17 @@ protected:
 		int getBoost() const { return m_boost; }
 		int getVolume() const { return m_volume; }
 		bool getAudioActive() const { return m_audioActive; }
+		bool getAudioStereo() const { return m_audioStereo; }
 
 		static MsgUDPSrcConfigureImmediate* create(
 				bool audioActive,
+				bool audioStereo,
 				int boost,
 				int volume)
 		{
 			return new MsgUDPSrcConfigureImmediate(
 					audioActive,
+					audioStereo,
 					boost,
 					volume);
 		}
@@ -134,13 +138,16 @@ protected:
 		int m_boost;
 		int m_volume;
 		bool m_audioActive;
+		bool m_audioStereo;
 
 		MsgUDPSrcConfigureImmediate(
 				bool audioActive,
+				bool audioStereo,
 				int boost,
 				int volume) :
 			Message(),
 			m_audioActive(audioActive),
+			m_audioStereo(audioStereo),
 			m_boost(boost),
 			m_volume(volume)
 		{ }

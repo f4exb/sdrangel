@@ -106,11 +106,13 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 
 void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 		bool audioActive,
+		bool audioStereo,
 		int boost,
 		int volume)
 {
 	Message* cmd = MsgUDPSrcConfigureImmediate::create(
 			audioActive,
+			audioStereo,
 			boost,
 			volume);
 	messageQueue->push(cmd);
@@ -266,6 +268,11 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			}
 		}
 
+		if (cfg.getAudioStereo() != m_audioStereo)
+		{
+			m_audioStereo = cfg.getAudioStereo();
+		}
+
 		if (cfg.getBoost() != m_boost)
 		{
 			m_boost = cfg.getBoost();
@@ -280,6 +287,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
 				<< " m_audioActive: " << m_audioActive
+				<< " m_audioStereo: " << m_audioStereo
 				<< " m_boost: " << m_boost
 				<< " m_volume: " << m_volume;
 

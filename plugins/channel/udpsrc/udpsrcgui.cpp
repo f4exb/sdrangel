@@ -58,6 +58,7 @@ void UDPSrcGUI::resetToDefaults()
 	ui->boost->setValue(1);
 	ui->volume->setValue(20);
 	ui->audioActive->setChecked(false);
+	ui->audioStereo->setChecked(false);
 
 	blockApplySettings(false);
 	applySettingsImmediate();
@@ -80,6 +81,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeBool(11, m_audioActive);
 	s.writeS32(12, (qint32)m_volume);
 	s.writeS32(13, m_audioPort);
+	s.writeBool(14, m_audioStereo);
 	return s.final();
 }
 
@@ -143,6 +145,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(s32tmp);
 		d.readS32(13, &s32tmp, 9998);
 		ui->audioPort->setText(QString("%1").arg(s32tmp));
+		d.readBool(14, &booltmp, false);
+		ui->audioStereo->setChecked(booltmp);
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -247,11 +251,13 @@ void UDPSrcGUI::applySettingsImmediate()
 	if (m_doApplySettings)
 	{
 		m_audioActive = ui->audioActive->isChecked();
+		m_audioStereo = ui->audioStereo->isChecked();
 		m_boost = ui->boost->value();
 		m_volume = ui->volume->value();
 
 		m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
 			m_audioActive,
+		    m_audioStereo,
 			m_boost,
 			m_volume);
 	}
@@ -402,6 +408,11 @@ void UDPSrcGUI::on_applyBtn_clicked()
 }
 
 void UDPSrcGUI::on_audioActive_toggled(bool active)
+{
+	applySettingsImmediate();
+}
+
+void UDPSrcGUI::on_audioStereo_toggled(bool stereo)
 {
 	applySettingsImmediate();
 }

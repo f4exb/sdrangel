@@ -48,6 +48,7 @@ private slots:
 	void on_udpPort_textEdited(const QString& arg1);
 	void on_audioPort_textEdited(const QString& arg1);
 	void on_audioActive_toggled(bool active);
+	void on_audioStereo_toggled(bool stereo);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
@@ -68,6 +69,7 @@ private:
 	Real m_rfBandwidth;
 	int m_boost;
 	bool m_audioActive;
+	bool m_audioStereo;
 	int m_volume;
 	QString m_udpAddress;
 	int m_udpPort;
