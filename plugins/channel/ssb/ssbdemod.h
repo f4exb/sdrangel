@@ -34,7 +34,12 @@ public:
 	SSBDemod(SampleSink* sampleSink);
 	virtual ~SSBDemod();
 
-	void configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2);
+	void configure(MessageQueue* messageQueue,
+			Real Bandwidth,
+			Real LowCutoff,
+			Real volume,
+			int spanLog2,
+			bool audioBinaural);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -52,10 +57,15 @@ private:
 		Real getLoCutoff() const { return m_LowCutoff; }
 		Real getVolume() const { return m_volume; }
 		int  getSpanLog2() const { return m_spanLog2; }
+		bool getAudioBinaural() const { return m_audioBinaural; }
 
-		static MsgConfigureSSBDemod* create(Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
+		static MsgConfigureSSBDemod* create(Real Bandwidth,
+				Real LowCutoff,
+				Real volume,
+				int spanLog2,
+				bool audioBinaural)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2);
+			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural);
 		}
 
 	private:
@@ -63,13 +73,19 @@ private:
 		Real m_LowCutoff;
 		Real m_volume;
 		int  m_spanLog2;
+		bool m_audioBinaural;
 
-		MsgConfigureSSBDemod(Real Bandwidth, Real LowCutoff, Real volume, int spanLog2) :
+		MsgConfigureSSBDemod(Real Bandwidth,
+				Real LowCutoff,
+				Real volume,
+				int spanLog2,
+				bool audioBinaural) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
 			m_volume(volume),
-			m_spanLog2(spanLog2)
+			m_spanLog2(spanLog2),
+			m_audioBinaural(audioBinaural)
 		{ }
 	};
 
@@ -77,6 +93,7 @@ private:
 		qint16 l;
 		qint16 r;
 	};
+
 	typedef std::vector<AudioSample> AudioVector;
 
 	Real m_Bandwidth;
@@ -86,6 +103,7 @@ private:
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
+	bool m_audioBinaual;
 	bool m_usb;
 	Real m_magsq;
 

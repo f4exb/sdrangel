@@ -29,7 +29,8 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 24000),
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+	m_audioBinaual(false)
 {
 	setObjectName("SSBDemod");
 
@@ -66,9 +67,14 @@ SSBDemod::~SSBDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void SSBDemod::configure(MessageQueue* messageQueue, Real Bandwidth, Real LowCutoff, Real volume, int spanLog2)
+void SSBDemod::configure(MessageQueue* messageQueue,
+		Real Bandwidth,
+		Real LowCutoff,
+		Real volume,
+		int spanLog2,
+		bool audioBinaural)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural);
 	messageQueue->push(cmd);
 }
 
@@ -102,9 +108,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		for (int i = 0; i < n_out; i++)
 		{
-			//Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32768.0;
-			Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-
 			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
 			// smart decimation with bit gain using float arithmetic (23 bits significand)
 
@@ -122,9 +125,19 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				sum.imag() = 0.0;
 			}
 
-			qint16 sample = (qint16)(demod * m_volume * 100);
-			m_audioBuffer[m_audioBufferFill].l = sample;
-			m_audioBuffer[m_audioBufferFill].r = sample;
+			if (m_audioBinaual)
+			{
+				m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
+				m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
+			}
+			else
+			{
+				Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
+				qint16 sample = (qint16)(demod * m_volume * 100);
+				m_audioBuffer[m_audioBufferFill].l = sample;
+				m_audioBuffer[m_audioBufferFill].r = sample;
+			}
+
 			++m_audioBufferFill;
 
 			if (m_audioBufferFill >= m_audioBuffer.size())
@@ -220,13 +233,15 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_volume *= m_volume * 0.1;
 
 		m_spanLog2 = cfg.getSpanLog2();
+		m_audioBinaual = cfg.getAudioBinaural();
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "  - MsgConfigureSSBDemod: m_Bandwidth: " << m_Bandwidth
+		qDebug() << "SBDemod::handleMessage: MsgConfigureSSBDemod: m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff
 				<< " m_volume: " << m_volume
-				<< " m_spanLog2: " << m_spanLog2;
+				<< " m_spanLog2: " << m_spanLog2
+				<< " m_audioBinaual: " << m_audioBinaual;
 
 		return true;
 	}

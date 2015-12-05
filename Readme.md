@@ -19,7 +19,7 @@ These plugins come from the parent code base and have been maintained so that th
 
 - Channels:
   - lora
-  - tcpsrc
+  - tcpsrc (although it has evolved please use the udpsrc plugin instead)
 
 <h2>Unsupported plugins</h2>
 
@@ -180,6 +180,9 @@ For Debian Jessie or Stretch:
   - Scope: trigger countdown
   - Scope: multiple trigger chaining
   - Scope: new mode with linear IQ (two traces) on the primary display and polar IQ on the secondary display
+  - New USB source plugin to connect to an external demodulator (ex: GNU radio) via USB ports
+  - Binaural option for SSB demod
+  - DSB option for SSB
   
 <h2>Major redesign</h2>
 

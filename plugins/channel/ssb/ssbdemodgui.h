@@ -40,6 +40,7 @@ private slots:
 	void viewChanged();
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
+	void on_audioBinaural_toggled(bool binaural);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
@@ -56,6 +57,7 @@ private:
 	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
+	bool m_audioBinaural;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	ThreadedSampleSink* m_threadedChannelizer;
