@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>483</height>
+    <height>461</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -22,8 +22,8 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>5</x>
-     <y>35</y>
+     <x>10</x>
+     <y>10</y>
      <width>281</width>
      <height>151</height>
     </rect>
@@ -154,6 +154,42 @@
            <iconset resource="../../../sdrbase/resources/res.qrc">
             <normaloff>:/mono.png</normaloff>
             <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="audioFlipChannels">
+          <property name="toolTip">
+           <string>Flip left/right audio channels</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/flip_lr.png</normaloff>
+            <normalon>:/flip_rl.png</normalon>:/flip_lr.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="dsb">
+          <property name="toolTip">
+           <string>DSB/SSB toggle</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/usb.png</normaloff>
+            <normalon>:/dsb.png</normalon>:/usb.png</iconset>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -350,8 +386,8 @@
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>190</y>
+     <x>10</x>
+     <y>170</y>
      <width>218</width>
      <height>284</height>
     </rect>

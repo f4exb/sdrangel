@@ -41,5 +41,9 @@
         <file>stereo.png</file>
         <file>sound_off.png</file>
         <file>sound_on.png</file>
+        <file>dsb.png</file>
+        <file>usb.png</file>
+        <file>flip_lr.png</file>
+        <file>flip_rl.png</file>
     </qresource>
 </RCC>
