@@ -74,9 +74,10 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		Real volume,
 		int spanLog2,
 		bool audioBinaural,
-		bool audioFlipChannel)
+		bool audioFlipChannel,
+		bool dsb)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel, dsb);
 	messageQueue->push(cmd);
 }
 
@@ -245,6 +246,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_spanLog2 = cfg.getSpanLog2();
 		m_audioBinaual = cfg.getAudioBinaural();
 		m_audioFlipChannels = cfg.getAudioFlipChannels();
+		m_dsb = cfg.getDSB();
 
 		m_settingsMutex.unlock();
 
@@ -253,7 +255,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_volume: " << m_volume
 				<< " m_spanLog2: " << m_spanLog2
 				<< " m_audioBinaual: " << m_audioBinaual
-				<< " m_audioFlipChannels: " << m_audioFlipChannels;
+				<< " m_audioFlipChannels: " << m_audioFlipChannels
+				<< " m_dsb: " << m_dsb;
 
 		return true;
 	}
