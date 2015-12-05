@@ -167,6 +167,9 @@
      <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
       <item>
        <widget class="QToolButton" name="deltaMinus">
+        <property name="toolTip">
+         <string>Frequency shift direction</string>
+        </property>
         <property name="text">
          <string>...</string>
         </property>
@@ -324,22 +327,30 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="audioActive">
-        <property name="toolTip">
-         <string>Activate audio</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLineEdit" name="audioPort">
         <property name="toolTip">
          <string>Audio input port</string>
         </property>
         <property name="text">
          <string>9998</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="audioActive">
+        <property name="toolTip">
+         <string>Toggle audio input</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/sound_off.png</normaloff>
+          <normalon>:/sound_on.png</normalon>:/sound_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

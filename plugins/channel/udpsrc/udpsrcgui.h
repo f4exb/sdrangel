@@ -47,7 +47,7 @@ private slots:
 	void on_udpAddress_textEdited(const QString& arg1);
 	void on_udpPort_textEdited(const QString& arg1);
 	void on_audioPort_textEdited(const QString& arg1);
-	void on_audioActive_toggled(bool checked);
+	void on_audioActive_toggled(bool active);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();

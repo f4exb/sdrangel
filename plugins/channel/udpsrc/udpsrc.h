@@ -181,6 +181,7 @@ protected:
 	quint16 m_audioPort;
 	int m_boost;
 	bool m_audioActive;
+	bool m_audioStereo;
 	int m_volume;
 	Real m_magsq;
 

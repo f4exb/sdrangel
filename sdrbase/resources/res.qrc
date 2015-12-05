@@ -37,5 +37,9 @@
         <file>mem.png</file>
         <file>minusw.png</file>
         <file>plusw.png</file>
+        <file>mono.png</file>
+        <file>stereo.png</file>
+        <file>sound_off.png</file>
+        <file>sound_on.png</file>
     </qresource>
 </RCC>

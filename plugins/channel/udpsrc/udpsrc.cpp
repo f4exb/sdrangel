@@ -31,6 +31,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_settingsMutex(QMutex::Recursive),
 	m_audioFifo(4, 24000),
 	m_audioActive(false),
+	m_audioStereo(false),
 	m_volume(20)
 {
 	setObjectName("UDPSrc");
@@ -382,24 +383,49 @@ void UDPSrc::audioReadyRead()
 
 		if (m_audioActive)
 		{
-			for (int i = 0; i < buffer.size() - 3; i += 4)
+			if (m_audioStereo)
 			{
-				qint16 l_sample = (qint16) *(&buffer.data()[i]);
-				qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
-				m_audioBuffer[m_audioBufferFill].l  = l_sample * 10 * m_volume;
-				m_audioBuffer[m_audioBufferFill].r  = r_sample * 10 * m_volume;
-				++m_audioBufferFill;
-
-				if (m_audioBufferFill >= m_audioBuffer.size())
+				for (int i = 0; i < buffer.size() - 3; i += 4)
 				{
-					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+					qint16 l_sample = (qint16) *(&buffer.data()[i]);
+					qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
+					m_audioBuffer[m_audioBufferFill].l  = l_sample * 10 * m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = r_sample * 10 * m_volume;
+					++m_audioBufferFill;
 
-					if (res != m_audioBufferFill)
+					if (m_audioBufferFill >= m_audioBuffer.size())
 					{
-						qDebug("UDPSrc::audioReadyRead: lost %u samples", m_audioBufferFill - res);
-					}
+						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-					m_audioBufferFill = 0;
+						if (res != m_audioBufferFill)
+						{
+							qDebug("UDPSrc::audioReadyRead: (stereo) lost %u samples", m_audioBufferFill - res);
+						}
+
+						m_audioBufferFill = 0;
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < buffer.size() - 1; i += 2)
+				{
+					qint16 sample = (qint16) *(&buffer.data()[i]);
+					m_audioBuffer[m_audioBufferFill].l  = sample * 10 * m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = sample * 10 * m_volume;
+					++m_audioBufferFill;
+
+					if (m_audioBufferFill >= m_audioBuffer.size())
+					{
+						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
+						if (res != m_audioBufferFill)
+						{
+							qDebug("UDPSrc::audioReadyRead: (mono) lost %u samples", m_audioBufferFill - res);
+						}
+
+						m_audioBufferFill = 0;
+					}
 				}
 			}
 

@@ -402,7 +402,7 @@ void UDPSrcGUI::on_applyBtn_clicked()
 	applySettings();
 }
 
-void UDPSrcGUI::on_audioActive_toggled(bool checked)
+void UDPSrcGUI::on_audioActive_toggled(bool active)
 {
 	ui->applyBtn->setEnabled(true);
 }
