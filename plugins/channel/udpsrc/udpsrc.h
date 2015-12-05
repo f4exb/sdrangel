@@ -43,9 +43,9 @@ public:
 			Real rfBandwidth,
 			QString& udpAddress,
 			int udpPort,
-			int audioPort,
-			bool audioActive);
+			int audioPort);
 	void configureImmediate(MessageQueue* messageQueue,
+			bool audioActive,
 			int boost,
 			int volume);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -70,7 +70,6 @@ protected:
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
 		int getAudioPort() const { return m_audioPort; }
-		bool getAudioActive() const { return m_audioActive; }
 
 		static MsgUDPSrcConfigure* create(SampleFormat
 				sampleFormat,
@@ -78,16 +77,14 @@ protected:
 				Real rfBandwidth,
 				QString& udpAddress,
 				int udpPort,
-				int audioPort,
-				bool audioActive)
+				int audioPort)
 		{
 			return new MsgUDPSrcConfigure(sampleFormat,
 					sampleRate,
 					rfBandwidth,
 					udpAddress,
 					udpPort,
-					audioPort,
-					audioActive);
+					audioPort);
 		}
 
 	private:
@@ -97,23 +94,20 @@ protected:
 		QString m_udpAddress;
 		int m_udpPort;
 		int m_audioPort;
-		bool m_audioActive;
 
 		MsgUDPSrcConfigure(SampleFormat sampleFormat,
 				Real outputSampleRate,
 				Real rfBandwidth,
 				QString& udpAddress,
 				int udpPort,
-				int audioPort,
-				bool audioActive) :
+				int audioPort) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
 			m_rfBandwidth(rfBandwidth),
 			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
-			m_audioPort(audioPort),
-			m_audioActive(audioActive)
+			m_audioPort(audioPort)
 		{ }
 	};
 
@@ -123,12 +117,15 @@ protected:
 	public:
 		int getBoost() const { return m_boost; }
 		int getVolume() const { return m_volume; }
+		bool getAudioActive() const { return m_audioActive; }
 
 		static MsgUDPSrcConfigureImmediate* create(
+				bool audioActive,
 				int boost,
 				int volume)
 		{
 			return new MsgUDPSrcConfigureImmediate(
+					audioActive,
 					boost,
 					volume);
 		}
@@ -136,11 +133,14 @@ protected:
 	private:
 		int m_boost;
 		int m_volume;
+		bool m_audioActive;
 
 		MsgUDPSrcConfigureImmediate(
+				bool audioActive,
 				int boost,
 				int volume) :
 			Message(),
+			m_audioActive(audioActive),
 			m_boost(boost),
 			m_volume(volume)
 		{ }

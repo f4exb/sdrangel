@@ -93,24 +93,24 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		QString& udpAddress,
 		int udpPort,
-		int audioPort,
-		bool audioActive)
+		int audioPort)
 {
 	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
 			udpAddress,
 			udpPort,
-			audioPort,
-			audioActive);
+			audioPort);
 	messageQueue->push(cmd);
 }
 
 void UDPSrc::configureImmediate(MessageQueue* messageQueue,
+		bool audioActive,
 		int boost,
 		int volume)
 {
 	Message* cmd = MsgUDPSrcConfigureImmediate::create(
+			audioActive,
 			boost,
 			volume);
 	messageQueue->push(cmd);
@@ -251,6 +251,21 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_settingsMutex.lock();
 
+		if (cfg.getAudioActive() != m_audioActive)
+		{
+			m_audioActive = cfg.getAudioActive();
+
+			if (m_audioActive)
+			{
+				m_audioBufferFill = 0;
+				DSPEngine::instance()->addAudioSink(&m_audioFifo);
+			}
+			else
+			{
+				DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+			}
+		}
+
 		if (cfg.getBoost() != m_boost)
 		{
 			m_boost = cfg.getBoost();
@@ -264,6 +279,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_settingsMutex.unlock();
 
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
+				<< " m_audioActive: " << m_audioActive
 				<< " m_boost: " << m_boost
 				<< " m_volume: " << m_volume;
 
@@ -320,21 +336,6 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			UDPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
 
-		if (cfg.getAudioActive() != m_audioActive)
-		{
-			m_audioActive = cfg.getAudioActive();
-
-			if (m_audioActive)
-			{
-				m_audioBufferFill = 0;
-				DSPEngine::instance()->addAudioSink(&m_audioFifo);
-			}
-			else
-			{
-				DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-			}
-		}
-
 		m_settingsMutex.unlock();
 
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
@@ -343,8 +344,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 				<< " m_boost: " << m_boost
 				<< " m_udpAddress: " << cfg.getUDPAddress()
 				<< " m_udpPort: " << m_udpPort
-				<< " m_audioPort: " << m_audioPort
-				<< " m_audioActive: " << m_audioActive;
+				<< " m_audioPort: " << m_audioPort;
 
 		return true;
 	}

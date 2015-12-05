@@ -246,10 +246,12 @@ void UDPSrcGUI::applySettingsImmediate()
 {
 	if (m_doApplySettings)
 	{
+		m_audioActive = ui->audioActive->isChecked();
 		m_boost = ui->boost->value();
 		m_volume = ui->volume->value();
 
 		m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
+			m_audioActive,
 			m_boost,
 			m_volume);
 	}
@@ -293,7 +295,6 @@ void UDPSrcGUI::applySettings()
 		}
 
 		int boost = ui->boost->value();
-		bool audioActive = ui->audioActive->isChecked();
 
 		setTitleColor(m_channelMarker.getColor());
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
@@ -337,7 +338,6 @@ void UDPSrcGUI::applySettings()
 		m_udpPort = udpPort;
 		m_audioPort = audioPort;
 		m_boost = boost;
-		m_audioActive = audioActive;
 
 		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
 			sampleFormat,
@@ -345,8 +345,7 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth,
 			m_udpAddress,
 			udpPort,
-			audioPort,
-			audioActive);
+			audioPort);
 
 		ui->applyBtn->setEnabled(false);
 	}
@@ -404,7 +403,7 @@ void UDPSrcGUI::on_applyBtn_clicked()
 
 void UDPSrcGUI::on_audioActive_toggled(bool active)
 {
-	ui->applyBtn->setEnabled(true);
+	applySettingsImmediate();
 }
 
 void UDPSrcGUI::on_boost_valueChanged(int value)
