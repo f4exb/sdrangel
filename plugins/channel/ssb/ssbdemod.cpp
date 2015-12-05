@@ -30,7 +30,8 @@ SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 24000),
 	m_settingsMutex(QMutex::Recursive),
-	m_audioBinaual(false)
+	m_audioBinaual(false),
+	m_audioFlipChannels(false)
 {
 	setObjectName("SSBDemod");
 
@@ -72,9 +73,10 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		Real LowCutoff,
 		Real volume,
 		int spanLog2,
-		bool audioBinaural)
+		bool audioBinaural,
+		bool audioFlipChannel)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel);
 	messageQueue->push(cmd);
 }
 
@@ -127,8 +129,16 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_audioBinaual)
 			{
-				m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
-				m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
+				if (m_audioFlipChannels)
+				{
+					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * 100);
+					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * 100);
+				}
+				else
+				{
+					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
+					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
+				}
 			}
 			else
 			{
@@ -234,6 +244,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_audioBinaual = cfg.getAudioBinaural();
+		m_audioFlipChannels = cfg.getAudioFlipChannels();
 
 		m_settingsMutex.unlock();
 
@@ -241,7 +252,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_LowCutoff: " << m_LowCutoff
 				<< " m_volume: " << m_volume
 				<< " m_spanLog2: " << m_spanLog2
-				<< " m_audioBinaual: " << m_audioBinaual;
+				<< " m_audioBinaual: " << m_audioBinaual
+				<< " m_audioFlipChannels: " << m_audioFlipChannels;
 
 		return true;
 	}

@@ -39,7 +39,8 @@ public:
 			Real LowCutoff,
 			Real volume,
 			int spanLog2,
-			bool audioBinaural);
+			bool audioBinaural,
+			bool audioFlipChannels);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -58,14 +59,16 @@ private:
 		Real getVolume() const { return m_volume; }
 		int  getSpanLog2() const { return m_spanLog2; }
 		bool getAudioBinaural() const { return m_audioBinaural; }
+		bool getAudioFlipChannels() const { return m_audioFlipChannels; }
 
 		static MsgConfigureSSBDemod* create(Real Bandwidth,
 				Real LowCutoff,
 				Real volume,
 				int spanLog2,
-				bool audioBinaural)
+				bool audioBinaural,
+				bool audioFlipChannels)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural);
+			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannels);
 		}
 
 	private:
@@ -74,18 +77,21 @@ private:
 		Real m_volume;
 		int  m_spanLog2;
 		bool m_audioBinaural;
+		bool m_audioFlipChannels;
 
 		MsgConfigureSSBDemod(Real Bandwidth,
 				Real LowCutoff,
 				Real volume,
 				int spanLog2,
-				bool audioBinaural) :
+				bool audioBinaural,
+				bool audioFlipChannels) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
 			m_volume(volume),
 			m_spanLog2(spanLog2),
-			m_audioBinaural(audioBinaural)
+			m_audioBinaural(audioBinaural),
+			m_audioFlipChannels(audioFlipChannels)
 		{ }
 	};
 
@@ -104,6 +110,7 @@ private:
 	int m_sampleRate;
 	int m_frequency;
 	bool m_audioBinaual;
+	bool m_audioFlipChannels;
 	bool m_usb;
 	Real m_magsq;
 

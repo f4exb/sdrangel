@@ -41,6 +41,7 @@ private slots:
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
 	void on_audioBinaural_toggled(bool binaural);
+	void on_audioFlipChannels_toggled(bool flip);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
@@ -58,6 +59,7 @@ private:
 	int m_rate;
 	int m_spanLog2;
 	bool m_audioBinaural;
+	bool m_audioFlipChannels;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	ThreadedSampleSink* m_threadedChannelizer;

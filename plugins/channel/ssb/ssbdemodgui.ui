@@ -143,9 +143,16 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="audioVLine">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QToolButton" name="audioBinaural">
           <property name="toolTip">
-           <string>Binaural audio</string>
+           <string>Binaural I/Q audio</string>
           </property>
           <property name="text">
            <string>...</string>

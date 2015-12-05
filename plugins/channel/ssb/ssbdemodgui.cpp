@@ -72,6 +72,7 @@ QByteArray SSBDemodGUI::serialize() const
 	s.writeS32(6, ui->lowCut->value());
 	s.writeS32(7, ui->spanLog2->value());
 	s.writeBool(8, m_audioBinaural);
+	s.writeBool(9, m_audioFlipChannels);
 	return s.final();
 }
 
@@ -111,6 +112,8 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		setNewRate(tmp);
 		d.readBool(8, &m_audioBinaural);
 		ui->audioBinaural->setChecked(m_audioBinaural);
+		d.readBool(9, &m_audioFlipChannels);
+		ui->audioFlipChannels->setChecked(m_audioFlipChannels);
         
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -149,6 +152,12 @@ void SSBDemodGUI::on_deltaMinus_toggled(bool minus)
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
+	applySettings();
+}
+
+void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
+{
+	m_audioFlipChannels = flip;
 	applySettings();
 }
 
@@ -267,6 +276,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_rate(6000),
 	m_spanLog2(3),
 	m_audioBinaural(false),
+	m_audioFlipChannels(false),
 	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
@@ -385,7 +395,8 @@ void SSBDemodGUI::applySettings()
 			ui->lowCut->value() * 100.0,
 			ui->volume->value() / 10.0,
 			m_spanLog2,
-			m_audioBinaural);
+			m_audioBinaural,
+			m_audioFlipChannels);
 	}
 }
 
