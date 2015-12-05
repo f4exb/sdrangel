@@ -53,6 +53,7 @@ void UDPSrcGUI::resetToDefaults()
 	ui->rfBandwidth->setText("32000");
 	ui->udpAddress->setText("127.0.0.1");
 	ui->udpPort->setText("9999");
+	ui->audioPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	ui->boost->setValue(1);
 	ui->volume->setValue(20);
@@ -78,6 +79,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeString(10, m_udpAddress);
 	s.writeBool(11, m_audioActive);
 	s.writeS32(12, (qint32)m_volume);
+	s.writeS32(13, m_audioPort);
 	return s.final();
 }
 
@@ -139,6 +141,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->audioActive->setChecked(booltmp);
 		d.readS32(12, &s32tmp, 20);
 		ui->volume->setValue(s32tmp);
+		d.readS32(13, &s32tmp, 9998);
+		ui->audioPort->setText(QString("%1").arg(s32tmp));
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -273,11 +277,19 @@ void UDPSrcGUI::applySettings()
 		}
 
 		m_udpAddress = ui->udpAddress->text();
+
 		int udpPort = ui->udpPort->text().toInt(&ok);
 
 		if((!ok) || (udpPort < 1) || (udpPort > 65535))
 		{
 			udpPort = 9999;
+		}
+
+		int audioPort = ui->audioPort->text().toInt(&ok);
+
+		if((!ok) || (audioPort < 1) || (audioPort > 65535) || (audioPort == udpPort))
+		{
+			audioPort = udpPort - 1;
 		}
 
 		int boost = ui->boost->value();
@@ -290,6 +302,7 @@ void UDPSrcGUI::applySettings()
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
 		//ui->udpAddress->setText(m_udpAddress);
 		ui->udpPort->setText(QString("%1").arg(udpPort));
+		ui->audioPort->setText(QString("%1").arg(audioPort));
 		ui->boost->setValue(boost);
 		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
 		m_channelMarker.setBandwidth((int)rfBandwidth);
@@ -322,6 +335,7 @@ void UDPSrcGUI::applySettings()
 		m_outputSampleRate = outputSampleRate;
 		m_rfBandwidth = rfBandwidth;
 		m_udpPort = udpPort;
+		m_audioPort = audioPort;
 		m_boost = boost;
 		m_audioActive = audioActive;
 
@@ -331,7 +345,7 @@ void UDPSrcGUI::applySettings()
 			rfBandwidth,
 			m_udpAddress,
 			udpPort,
-			udpPort - 1, // TODO: replace with the audio port
+			audioPort,
 			audioActive);
 
 		ui->applyBtn->setEnabled(false);
@@ -374,6 +388,11 @@ void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1)
 }
 
 void UDPSrcGUI::on_udpPort_textEdited(const QString& arg1)
+{
+	ui->applyBtn->setEnabled(true);
+}
+
+void UDPSrcGUI::on_audioPort_textEdited(const QString& arg1)
 {
 	ui->applyBtn->setEnabled(true);
 }
