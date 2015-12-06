@@ -1,0 +1,46 @@
+project(bfm)
+
+set(bfm_SOURCES
+	bfmdemod.cpp
+	bfmdemodgui.cpp
+	bfmplugin.cpp
+)
+
+set(bfm_HEADERS
+	bfmdemod.h
+	bfmdemodgui.h
+	bfmplugin.h
+)
+
+set(bfm_FORMS
+	bfmdemodgui.ui
+)
+
+include_directories(
+	.
+	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_SOURCE_DIR}/include-gpl
+	${OPENGL_INCLUDE_DIR}
+)
+
+#include(${QT_USE_FILE})
+add_definitions(${QT_DEFINITIONS})
+add_definitions(-DQT_PLUGIN)
+add_definitions(-DQT_SHARED)
+
+qt5_wrap_ui(bfm_FORMS_HEADERS ${bfm_FORMS})
+
+add_library(demodbfm SHARED
+	${bfm_SOURCES}
+	${bfm_HEADERS_MOC}
+	${bfm_FORMS_HEADERS}
+)
+
+target_link_libraries(demodbfm
+	${QT_LIBRARIES}
+	${OPENGL_LIBRARIES}
+	sdrbase
+)
+
+qt5_use_modules(demodbfm Core Widgets OpenGL Multimedia)

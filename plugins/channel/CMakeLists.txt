@@ -2,6 +2,7 @@ project(demod)
 
 add_subdirectory(lora)
 add_subdirectory(am)
+add_subdirectory(bfm)
 add_subdirectory(nfm)
 add_subdirectory(ssb)
 add_subdirectory(tcpsrc)
