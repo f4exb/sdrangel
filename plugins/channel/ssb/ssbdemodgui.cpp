@@ -369,26 +369,26 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_ssbDemod->getSampleRate() / (1<<spanLog2);
 
-	if (ui->BW->value() < -m_rate/100) {
-		ui->BW->setValue(-m_rate/100);
+	if (ui->BW->value() < -m_rate/200) {
+		ui->BW->setValue(-m_rate/200);
 		m_channelMarker.setBandwidth(-m_rate*2);
-	} else if (ui->BW->value() > m_rate/100) {
-		ui->BW->setValue(m_rate/100);
+	} else if (ui->BW->value() > m_rate/200) {
+		ui->BW->setValue(m_rate/200);
 		m_channelMarker.setBandwidth(m_rate*2);
 	}
 
-	if (ui->lowCut->value() < -m_rate/100) {
-		ui->lowCut->setValue(-m_rate/100);
+	if (ui->lowCut->value() < -m_rate/200) {
+		ui->lowCut->setValue(-m_rate/200);
 		m_channelMarker.setLowCutoff(-m_rate);
-	} else if (ui->lowCut->value() > m_rate/100) {
-		ui->lowCut->setValue(m_rate/100);
+	} else if (ui->lowCut->value() > m_rate/200) {
+		ui->lowCut->setValue(m_rate/200);
 		m_channelMarker.setLowCutoff(m_rate);
 	}
 
-	ui->BW->setMinimum(-m_rate/100);
-	ui->lowCut->setMinimum(-m_rate/100);
-	ui->BW->setMaximum(m_rate/100);
-	ui->lowCut->setMaximum(m_rate/100);
+	ui->BW->setMinimum(-m_rate/200);
+	ui->lowCut->setMinimum(-m_rate/200);
+	ui->BW->setMaximum(m_rate/200);
+	ui->lowCut->setMaximum(m_rate/200);
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1k").arg(s));
