@@ -46,6 +46,7 @@ private slots:
 	void on_squelch_valueChanged(int value);
 	void on_ctcss_currentIndexChanged(int index);
 	void on_ctcssOn_toggled(bool checked);
+	void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();
@@ -61,6 +62,7 @@ private:
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
 	bool m_ctcssOn;
+	bool m_audioMute;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];

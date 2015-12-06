@@ -183,6 +183,7 @@ For Debian Jessie or Stretch:
   - New USB source plugin to connect to an external demodulator (ex: GNU radio) via USB ports
   - Binaural option for SSB demod
   - DSB option for SSB
+  - Mute option for NFM channel
   
 <h2>Major redesign</h2>
 

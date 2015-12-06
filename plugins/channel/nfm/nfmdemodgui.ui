@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>281</width>
-    <height>433</height>
+    <height>162</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>6</x>
-     <y>35</y>
-     <width>235</width>
-     <height>395</height>
+     <x>0</x>
+     <y>0</y>
+     <width>271</width>
+     <height>131</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -382,6 +382,24 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="audioMute">
+        <property name="toolTip">
+         <string>Mute/Unmute audio</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/sound_on.png</normaloff>
+          <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

@@ -61,6 +61,7 @@ void NFMDemodGUI::resetToDefaults()
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
 	ui->ctcssOn->setChecked(false);
+	ui->audioMute->setChecked(false);
 
 	blockApplySettings(false);
 	applySettings();
@@ -77,6 +78,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeS32(8, ui->ctcss->currentIndex());
 	s.writeBool(9, ui->ctcssOn->isChecked());
+	s.writeBool(10, ui->audioMute->isChecked());
 	return s.final();
 }
 
@@ -118,9 +120,10 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readS32(8, &tmp, 0);
 		ui->ctcss->setCurrentIndex(tmp);
-
 		d.readBool(9, &boolTmp, false);
 		ui->ctcssOn->setChecked(boolTmp);
+		d.readBool(10, &boolTmp, false);
+		ui->audioMute->setChecked(boolTmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -196,6 +199,12 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
 void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
 {
 	m_ctcssOn = checked;
+	applySettings();
+}
+
+void NFMDemodGUI::on_audioMute_toggled(bool checked)
+{
+	m_audioMute = checked;
 	applySettings();
 }
 
@@ -304,7 +313,8 @@ void NFMDemodGUI::applySettings()
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
-			ui->ctcssOn->isChecked());
+			ui->ctcssOn->isChecked(),
+			ui->audioMute->isChecked());
 	}
 }
 

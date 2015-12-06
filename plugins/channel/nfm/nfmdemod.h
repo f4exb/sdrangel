@@ -44,7 +44,8 @@ public:
 			Real afBandwidth,
 			Real volume,
 			Real squelch,
-			bool ctcssOn);
+			bool ctcssOn,
+			bool audioMute);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -76,14 +77,16 @@ private:
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
 		bool getCtcssOn() const { return m_ctcssOn; }
+		bool getAudioMute() const { return m_audioMute; }
 
 		static MsgConfigureNFMDemod* create(Real rfBandwidth,
 				Real afBandwidth,
 				Real volume,
 				Real squelch,
-				bool ctcssOn)
+				bool ctcssOn,
+				bool audioMute)
 		{
-			return new MsgConfigureNFMDemod(rfBandwidth, afBandwidth, volume, squelch, ctcssOn);
+			return new MsgConfigureNFMDemod(rfBandwidth, afBandwidth, volume, squelch, ctcssOn, audioMute);
 		}
 
 	private:
@@ -92,18 +95,21 @@ private:
 		Real m_volume;
 		Real m_squelch;
 		bool m_ctcssOn;
+		bool m_audioMute;
 
 		MsgConfigureNFMDemod(Real rfBandwidth,
 				Real afBandwidth,
 				Real volume,
 				Real squelch,
-				bool ctcssOn) :
+				bool ctcssOn,
+				bool audioMute) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
-			m_ctcssOn(ctcssOn)
+			m_ctcssOn(ctcssOn),
+			m_audioMute(audioMute)
 		{ }
 	};
 
@@ -126,6 +132,7 @@ private:
 		Real m_squelch;
 		Real m_volume;
 		bool m_ctcssOn;
+		bool m_audioMute;
 		int  m_ctcssIndex;
 		quint32 m_audioSampleRate;
 
@@ -137,6 +144,7 @@ private:
 			m_squelch(0),
 			m_volume(0),
 			m_ctcssOn(false),
+			m_audioMute(false),
 			m_ctcssIndex(0),
 			m_audioSampleRate(0)
 		{ }
@@ -157,6 +165,7 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_agcAttack;
+	bool m_audioMute;
 
 	double m_squelchLevel;
 

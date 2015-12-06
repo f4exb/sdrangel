@@ -35,6 +35,7 @@ NFMDemod::NFMDemod() :
 	m_sampleCount(0),
 	m_squelchCount(0),
 	m_agcAttack(2400),
+	m_audioMute(false),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive)
@@ -48,6 +49,7 @@ NFMDemod::NFMDemod() :
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 2.0;
 	m_config.m_ctcssOn = false;
+	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -75,13 +77,15 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		Real afBandwidth,
 		Real volume,
 		Real squelch,
-		bool ctcssOn)
+		bool ctcssOn,
+		bool audioMute)
 {
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
 			afBandwidth,
 			volume,
 			squelch,
-			ctcssOn);
+			ctcssOn,
+			audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -196,7 +200,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					squelchOpen = m_afSquelch.evaluate();
 				}*/
 
-				if (squelchOpen)
+				if ((squelchOpen) && !m_running.m_audioMute)
 				//if (m_AGC.getAverage() > m_squelchLevel)
 				{
 					if (m_running.m_ctcssOn)
@@ -324,14 +328,16 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_ctcssOn = cfg.getCtcssOn();
+		m_config.m_audioMute = cfg.getAudioMute();
 
 		apply();
 
-		qDebug() << "  - MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
-				<< " m_ctcssOn: " << m_config.m_ctcssOn;
+				<< " m_ctcssOn: " << m_config.m_ctcssOn
+				<< " m_audioMute: " << m_config.m_audioMute;
 
 		return true;
 	}
@@ -384,4 +390,5 @@ void NFMDemod::apply()
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_ctcssOn = m_config.m_ctcssOn;
+	m_running.m_audioMute = m_config.m_audioMute;
 }
