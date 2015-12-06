@@ -50,20 +50,20 @@ SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
+	m_sum = 0;
 
 	m_usb = true;
 	m_magsq = 0.0f;
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt((2*m_Bandwidth) / m_sampleRate, 2*ssbFftLen);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 SSBDemod::~SSBDemod()
 {
-	if (SSBFilter)
-	{
-		delete SSBFilter;
-	}
+	if (SSBFilter)	delete SSBFilter;
+	if (DSBFilter) delete DSBFilter;
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
@@ -84,7 +84,7 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	Complex ci;
-	fftfilt::cmplx *sideband, sum;
+	fftfilt::cmplx *sideband;
 	Real avg;
 	int n_out;
 
@@ -101,67 +101,80 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
 		{
-			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+			if (m_dsb)
+			{
+				n_out = DSBFilter->runDSB(ci, &sideband);
+			}
+			else
+			{
+				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+			}
+
+			for (int i = 0; i < n_out; i++)
+			{
+				// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+				// smart decimation with bit gain using float arithmetic (23 bits significand)
+
+				m_sum += sideband[i];
+
+				if (!(m_undersampleCount++ & decim_mask))
+				{
+					m_sum /= decim;
+					m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);
+
+					if (!m_dsb & !m_usb)
+					{ // invert spectrum for LSB
+						m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
+					}
+					else
+					{
+						m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
+					}
+
+					m_sum = 0;
+				}
+
+				if (m_audioBinaual)
+				{
+					if (m_audioFlipChannels)
+					{
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * 100);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * 100);
+					}
+					else
+					{
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
+					}
+				}
+				else
+				{
+					Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
+					qint16 sample = (qint16)(demod * m_volume * 100);
+					m_audioBuffer[m_audioBufferFill].l = sample;
+					m_audioBuffer[m_audioBufferFill].r = sample;
+				}
+
+				++m_audioBufferFill;
+
+				if (m_audioBufferFill >= m_audioBuffer.size())
+				{
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+
+					if (res != m_audioBufferFill)
+					{
+						qDebug("lost %u samples", m_audioBufferFill - res);
+					}
+
+					m_audioBufferFill = 0;
+				}
+			}
+
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_audioSampleRate;
 		}
 		else
 		{
 			n_out = 0;
-		}
-
-		for (int i = 0; i < n_out; i++)
-		{
-			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-			// smart decimation with bit gain using float arithmetic (23 bits significand)
-
-			sum += sideband[i];
-
-			if (!(m_undersampleCount++ & decim_mask))
-			{
-				Real avgr = sum.real() / decim;
-				Real avgi = sum.imag() / decim;
-				m_magsq = (avgr * avgr + avgi * avgi) / (1<<30);
-				//avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
-				avg = (avgr + avgi) * 0.7;
-				m_sampleBuffer.push_back(Sample(avg, 0.0));
-				sum.real() = 0.0;
-				sum.imag() = 0.0;
-			}
-
-			if (m_audioBinaual)
-			{
-				if (m_audioFlipChannels)
-				{
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * 100);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * 100);
-				}
-				else
-				{
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
-				}
-			}
-			else
-			{
-				Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-				qint16 sample = (qint16)(demod * m_volume * 100);
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
-			}
-
-			++m_audioBufferFill;
-
-			if (m_audioBufferFill >= m_audioBuffer.size())
-			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-
-				if (res != m_audioBufferFill)
-				{
-					qDebug("lost %u samples", m_audioBufferFill - res);
-				}
-
-				m_audioBufferFill = 0;
-			}
 		}
 	}
 
@@ -173,7 +186,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	if(m_sampleSink != 0)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
 	}
 
 	m_sampleBuffer.clear();
@@ -239,6 +252,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 		m_interpolator.create(16, m_sampleRate, band * 2.0f);
 		SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
+		DSBFilter->create_dsb_filter((2*m_Bandwidth) / m_sampleRate);
 
 		m_volume = cfg.getVolume();
 		m_volume *= m_volume * 0.1;

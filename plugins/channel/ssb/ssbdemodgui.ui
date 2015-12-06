@@ -201,6 +201,9 @@
           <property name="checkable">
            <bool>true</bool>
           </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
        </layout>
