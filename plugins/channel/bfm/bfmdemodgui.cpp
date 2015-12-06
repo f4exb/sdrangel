@@ -1,9 +1,27 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
+#include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -17,7 +35,7 @@
 #include "bfmdemod.h"
 
 const int BFMDemodGUI::m_rfBW[] = {
-	48000, 80000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
+	80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
 
 int requiredBW(int rfBW)
@@ -85,6 +103,7 @@ QByteArray BFMDemodGUI::serialize() const
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
+	s.writeBlob(8, ui->spectrumGUI->serialize());
 	return s.final();
 }
 
@@ -122,6 +141,9 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		{
 			m_channelMarker.setColor(u32tmp);
 		}
+
+		d.readBlob(8, &bytetmp);
+		ui->spectrumGUI->deserialize(bytetmp);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -225,11 +247,22 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_wfmDemod = new BFMDemod(0);
-	m_channelizer = new Channelizer(m_wfmDemod);
+	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	m_bfmDemod = new BFMDemod(m_spectrumVis);
+	m_channelizer = new Channelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
+	//ui->glSpectrum->setCenterFrequency(BFMDemodGUI::m_rfBW[ui->rfBW->value()] / 4);
+	//ui->glSpectrum->setSampleRate(BFMDemodGUI::m_rfBW[ui->rfBW->value()] / 2);
+	ui->glSpectrum->setCenterFrequency(625000 / 4);
+	ui->glSpectrum->setSampleRate(625000 / 2);
+	//ui->glSpectrum->setCenterFrequency(48000 / 4);
+	//ui->glSpectrum->setSampleRate(48000 / 2);
+	ui->glSpectrum->setDisplayWaterfall(false);
+	ui->glSpectrum->setDisplayMaxHold(false);
+	ui->glSpectrum->setSsbSpectrum(true);
+	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
@@ -240,6 +273,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+
 	applySettings();
 }
 
@@ -249,7 +284,7 @@ BFMDemodGUI::~BFMDemodGUI()
 	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
-	delete m_wfmDemod;
+	delete m_bfmDemod;
 	//delete m_channelMarker;
 	delete ui;
 }
@@ -272,7 +307,7 @@ void BFMDemodGUI::applySettings()
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
-		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
+		m_bfmDemod->configure(m_bfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
@@ -296,7 +331,7 @@ void BFMDemodGUI::enterEvent(QEvent*)
 
 void BFMDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_wfmDemod->getMagSq());
+	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -41,7 +41,7 @@ BFMDemod::BFMDemod(SampleSink* sampleSink) :
 	m_config.m_afBandwidth = 15000;
 	m_config.m_squelch = -60.0;
 	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate(); // normally 48 kHz
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 
 	apply();
@@ -76,6 +76,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	fftfilt::cmplx *rf;
 	int rf_out;
 	Real msq, demod;
+
+	m_sampleBuffer.clear();
 
 	m_settingsMutex.lock();
 
@@ -116,12 +118,13 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m2Sample = m_m1Sample;
 			m_m1Sample = rf[i];
 
+			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
 			Complex e(demod, 0);
 
 			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
-				m_sampleBuffer.push_back(Sample(sample, sample));
+				//m_sampleBuffer.push_back(Sample(sample, sample));
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
 				++m_audioBufferFill;
@@ -157,7 +160,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	if(m_sampleSink != 0)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	}
 
 	m_sampleBuffer.clear();
@@ -251,11 +254,15 @@ void BFMDemod::apply()
 		(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset))
 	{
 		m_settingsMutex.lock();
-		qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter";
 		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
 		m_settingsMutex.unlock();
+
+		qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
+				<< m_config.m_inputSampleRate
+				<< " lowCut: " << lowCut * m_config.m_inputSampleRate
+				<< " hiCut: " << hiCut * m_config.m_inputSampleRate;
 	}
 
 	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||

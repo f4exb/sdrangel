@@ -86,6 +86,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/movingaverage.cpp
 	sdrbase/dsp/nco.cpp
 	sdrbase/dsp/pidcontroller.cpp
+    sdrbase/dsp/phaselock.cpp
 	sdrbase/dsp/samplefifo.cpp
 	sdrbase/dsp/samplesink.cpp
 	sdrbase/dsp/nullsink.cpp
@@ -164,7 +165,8 @@ set(sdrbase_HEADERS
 	include/dsp/misc.h
 	include/dsp/movingaverage.h
 	include/dsp/nco.h
-	sdrbase/dsp/pidcontroller.h
+	include/dsp/phaselock.h
+    sdrbase/dsp/pidcontroller.h
 	include/dsp/samplefifo.h
 	include/dsp/samplesink.h
 	include/dsp/nullsink.h
