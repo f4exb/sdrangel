@@ -222,6 +222,8 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 	{
 		ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
+
+	applySettings();
 }
 
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -318,7 +320,8 @@ void BFMDemodGUI::applySettings()
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
-			ui->squelch->value());
+			ui->squelch->value(),
+			ui->audioStereo->isChecked());
 	}
 }
 

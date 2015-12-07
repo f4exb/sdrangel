@@ -65,9 +65,9 @@ BFMDemod::~BFMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void BFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+void BFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioStereo)
 {
-	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
+	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioStereo);
 	messageQueue->push(cmd);
 }
 
@@ -119,29 +119,42 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m2Sample = m_m1Sample;
 			m_m1Sample = rf[i];
 
-			// TODO: conditional to stereo mode selected
-			Real pilotSample;
-			m_pilotPLL.process(demod, pilotSample);
 			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
-			//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
-
-			Complex s(demod*2.0*pilotSample, 0);
 			quint16 sampleStereo;
 
-			if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
-			{
-				sampleStereo = (qint16)(cs.real() * 3000 * m_running.m_volume);
-			}
+			// Process stereo if stereo mode is selected
 
+			if (m_running.m_audioStereo)
+			{
+				Real pilotSample;
+				m_pilotPLL.process(demod, pilotSample);
+				//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
+
+				Complex s(demod*2.0*pilotSample, 0);
+
+				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+				{
+					sampleStereo = (qint16)(cs.real() * 3000 * m_running.m_volume);
+				}
+			}
 
 			Complex e(demod, 0);
 
-			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
+			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
-				//m_sampleBuffer.push_back(Sample(sample, sample));
-				m_audioBuffer[m_audioBufferFill].l = sample + sampleStereo;
-				m_audioBuffer[m_audioBufferFill].r = sample - sampleStereo;
+
+				if (m_running.m_audioStereo)
+				{
+					m_audioBuffer[m_audioBufferFill].l = sample + sampleStereo;
+					m_audioBuffer[m_audioBufferFill].r = sample - sampleStereo;
+				}
+				else
+				{
+					m_audioBuffer[m_audioBufferFill].l = sample;
+					m_audioBuffer[m_audioBufferFill].r = sample;
+				}
+
 				++m_audioBufferFill;
 
 				if(m_audioBufferFill >= m_audioBuffer.size())
@@ -220,13 +233,15 @@ bool BFMDemod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
+		m_config.m_audioStereo = cfg.getAudioStereo();
 
 		apply();
 
 		qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch;
+				<< " m_squelch: " << m_config.m_squelch
+				<< " m_audioStereo: " << m_config.m_audioStereo;
 
 		return true;
 	}
@@ -245,7 +260,8 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
 void BFMDemod::apply()
 {
-	if (m_config.m_inputSampleRate != m_running.m_inputSampleRate)
+	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate)
+		|| (m_config.m_audioStereo && (m_config.m_audioStereo != m_running.m_audioStereo)))
 	{
 		m_pilotPLL.configure(19000.0/m_config.m_inputSampleRate, 50.0/m_config.m_inputSampleRate, 0.01);
 	}
@@ -309,5 +325,6 @@ void BFMDemod::apply()
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
+	m_running.m_audioStereo = m_config.m_audioStereo;
 
 }
