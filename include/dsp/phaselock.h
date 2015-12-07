@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <vector>
 #include "dsp/dsptypes.h"
 
 /** Phase-locked loop mainly for broadcadt FM stereo pilot. */
@@ -43,6 +44,9 @@ public:
      */
     PhaseLock(Real freq, Real bandwidth, Real minsignal);
 
+    virtual ~PhaseLock()
+    {}
+
     /**
      * Change phase locked loop parameters
      *
@@ -61,11 +65,20 @@ public:
     void process(const std::vector<Real>& samples_in, std::vector<Real>& samples_out);
 
     /**
-     * Process samples and extract 19 kHz pilot tone.
-     * Generate phase-locked 38 kHz tone with unit amplitude.
+     * Process samples and extract pilot tone. Generate phase-locked twice
+     * the frequency tone with unit amplitude. Mostly useful for 19 kHz stereo
+     * pilot tone on broadcast FM.
      * In flow version
      */
     void process(const Real& sample_in, Real& sample_out);
+
+    /**
+     * Process samples and track a pilot tone. Generate samples for multiple phase-locked
+     * signals. Implement the processPhase virtual method to produce the output samples.
+     * In flow version. Ex: Use 19 kHz stereo pilot tone to generate 38 kHz (stereo) and 57 kHz
+     * pilots (see RDSPhaseLock class below).
+     */
+    void process(const Real& sample_in, std::vector<Real>& samples_out);
 
     /** Return true if the phase-locked loop is locked. */
     bool locked() const
@@ -79,13 +92,23 @@ public:
         return 2 * m_pilot_level;
     }
 
+protected:
+    Real    m_phase;
+    Real    m_psin;
+    Real    m_pcos;
+    /**
+     * Callback method to produce multiple outputs from the current phase value in m_phase
+     * and/or the sin and cos values in m_psin and m_pcos
+     */
+    virtual void processPhase(std::vector<Real>& samples_out) const {};
+
 private:
     Real    m_minfreq, m_maxfreq;
     Real    m_phasor_b0, m_phasor_a1, m_phasor_a2;
     Real    m_phasor_i1, m_phasor_i2, m_phasor_q1, m_phasor_q2;
     Real    m_loopfilter_b0, m_loopfilter_b1;
     Real    m_loopfilter_x1;
-    Real    m_freq, m_phase;
+    Real    m_freq;
     Real    m_minsignal;
     Real    m_pilot_level;
     int     m_lock_delay;
@@ -96,4 +119,46 @@ private:
     quint64 m_pps_cnt;
     quint64 m_sample_cnt;
     std::vector<PpsEvent> m_pps_events;
+};
+
+class StereoPhaseLock : public PhaseLock
+{
+public:
+	StereoPhaseLock(Real freq, Real bandwidth, Real minsignal) :
+		PhaseLock(freq, bandwidth, minsignal)
+    {}
+
+    virtual ~StereoPhaseLock()
+    {}
+
+protected:
+    virtual void processPhase(std::vector<Real>& samples_out) const
+    {
+    	samples_out[0] = m_psin; // f Pilot
+        // Generate double-frequency output.
+        // sin(2*x) = 2 * sin(x) * cos(x)
+    	samples_out[1] = 2.0 * m_psin * m_pcos; // 2f Pilot
+    }
+};
+
+
+class RDSPhaseLock : public PhaseLock
+{
+public:
+	RDSPhaseLock(Real freq, Real bandwidth, Real minsignal) :
+		PhaseLock(freq, bandwidth, minsignal)
+    {}
+
+    virtual ~RDSPhaseLock()
+    {}
+
+protected:
+    virtual void processPhase(std::vector<Real>& samples_out) const
+    {
+    	samples_out[0] = m_psin; // f Pilot
+        // Generate double-frequency output.
+        // sin(2*x) = 2 * sin(x) * cos(x)
+    	samples_out[1] = 2.0 * m_psin * m_pcos; // 2f Pilot
+    	samples_out[2] = sin(3.0 * m_phase); // 3f pilot
+    }
 };

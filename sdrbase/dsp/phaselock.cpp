@@ -45,6 +45,8 @@ PhaseLock::PhaseLock(Real freq, Real bandwidth, Real minsignal)
     m_lock_cnt   = 0;
     m_unlock_cnt = 0;
     m_pilot_level = 0;
+    m_psin = 0.0;
+    m_pcos = 1.0;
 
     // Create 2nd order filter for I/Q representation of phase error.
     // Filter has two poles, unit DC gain.
@@ -342,6 +344,111 @@ void PhaseLock::process(const Real& sample_in, Real& sample_out)
             }
         }
     }
+
+    // Update lock status.
+    if (2 * m_pilot_level > m_minsignal)
+    {
+        if (m_lock_cnt < m_lock_delay)
+        {
+            m_lock_cnt += 1; // n
+        }
+        else
+        {
+        	m_unlock_cnt = 0;
+        }
+    }
+    else
+    {
+    	if (m_unlock_cnt < m_unlock_delay)
+    	{
+    		m_unlock_cnt += 1;
+    	}
+    	else
+    	{
+    		m_lock_cnt = 0;
+    	}
+    }
+
+    // Drop PPS events when pilot not locked.
+    if (m_lock_cnt < m_lock_delay) {
+        m_pilot_periods = 0;
+        m_pps_cnt = 0;
+        m_pps_events.clear();
+    }
+
+    // Update sample counter.
+    m_sample_cnt += 1; // n
+}
+
+// Process samples. Multiple output
+void PhaseLock::process(const Real& sample_in, std::vector<Real>& samples_out)
+{
+    bool was_locked = (m_lock_cnt >= m_lock_delay);
+    m_pps_events.clear();
+
+	// Generate locked pilot tone.
+	m_psin = sin(m_phase);
+	m_pcos = cos(m_phase);
+
+	// Generate output
+	processPhase(samples_out);
+
+	// Multiply locked tone with input.
+	Real x = sample_in;
+	Real phasor_i = m_psin * x;
+	Real phasor_q = m_pcos * x;
+
+	// Run IQ phase error through low-pass filter.
+	phasor_i = m_phasor_b0 * phasor_i
+			   - m_phasor_a1 * m_phasor_i1
+			   - m_phasor_a2 * m_phasor_i2;
+	phasor_q = m_phasor_b0 * phasor_q
+			   - m_phasor_a1 * m_phasor_q1
+			   - m_phasor_a2 * m_phasor_q2;
+	m_phasor_i2 = m_phasor_i1;
+	m_phasor_i1 = phasor_i;
+	m_phasor_q2 = m_phasor_q1;
+	m_phasor_q1 = phasor_q;
+
+	// Convert I/Q ratio to estimate of phase error.
+	Real phase_err;
+	if (phasor_i > abs(phasor_q)) {
+		// We are within +/- 45 degrees from lock.
+		// Use simple linear approximation of arctan.
+		phase_err = phasor_q / phasor_i;
+	} else if (phasor_q > 0) {
+		// We are lagging more than 45 degrees behind the input.
+		phase_err = 1;
+	} else {
+		// We are more than 45 degrees ahead of the input.
+		phase_err = -1;
+	}
+
+	// Detect pilot level (conservative).
+	// m_pilot_level = std::min(m_pilot_level, phasor_i);
+	m_pilot_level = phasor_i;
+
+	// Run phase error through loop filter and update frequency estimate.
+	m_freq += m_loopfilter_b0 * phase_err
+			  + m_loopfilter_b1 * m_loopfilter_x1;
+	m_loopfilter_x1 = phase_err;
+
+	// Limit frequency to allowable range.
+	m_freq = std::max(m_minfreq, std::min(m_maxfreq, m_freq));
+
+	// Update locked phase.
+	m_phase += m_freq;
+	if (m_phase > 2.0 * M_PI)
+	{
+		m_phase -= 2.0 * M_PI;
+		m_pilot_periods++;
+
+		// Generate pulse-per-second.
+		if (m_pilot_periods == pilot_frequency)
+		{
+			m_pilot_periods = 0;
+		}
+	}
 
     // Update lock status.
     if (2 * m_pilot_level > m_minsignal)
