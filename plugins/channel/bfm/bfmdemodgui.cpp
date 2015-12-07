@@ -216,6 +216,13 @@ void BFMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
+{
+	if (!stereo)
+	{
+		ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+	}
+}
 
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
@@ -334,5 +341,21 @@ void BFMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+	if (m_bfmDemod->getPilotLock())
+	{
+		if (ui->audioStereo->isChecked())
+		{
+			ui->audioStereo->setStyleSheet("QToolButton { background-color : green; }");
+		}
+	}
+	else
+	{
+		if (ui->audioStereo->isChecked())
+		{
+			ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+		}
+	}
+
 	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
 }

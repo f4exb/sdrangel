@@ -19,7 +19,7 @@
      <x>10</x>
      <y>20</y>
      <width>235</width>
-     <height>121</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -133,6 +133,27 @@
          <widget class="QLabel" name="channelPowerUnits">
           <property name="text">
            <string> dB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="audioStereo">
+          <property name="toolTip">
+           <string>Mono/Stereo toggle and pilot lock indicator</string>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/mono.png</normaloff>
+            <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

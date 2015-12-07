@@ -119,10 +119,11 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m2Sample = m_m1Sample;
 			m_m1Sample = rf[i];
 
+			// TODO: conditional to stereo mode selected
 			Real pilotSample;
 			m_pilotPLL.process(demod, pilotSample);
-			//m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
-			m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0));
+			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+			//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
 			Complex e(demod, 0);
 
 			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))

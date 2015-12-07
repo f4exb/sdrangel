@@ -60,6 +60,7 @@ private slots:
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+	void on_audioStereo_toggled(bool stereo);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();
