@@ -144,7 +144,8 @@ private:
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 
-	PhaseLock m_pilotPLL;
+	StereoPhaseLock m_pilotPLL;
+	Real m_pilotPLLSamples[2];
 
 	void apply();
 };

@@ -126,11 +126,12 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_running.m_audioStereo)
 			{
-				Real pilotSample;
-				m_pilotPLL.process(demod, pilotSample);
+				//Real pilotSample;
+				//m_pilotPLL.process(demod, pilotSample);
+				m_pilotPLL.process(demod, m_pilotPLLSamples);
 				//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
 
-				Complex s(demod*2.0*pilotSample, 0);
+				Complex s(demod*2.0*m_pilotPLLSamples[1], 0);
 
 				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
 				{

@@ -65,20 +65,13 @@ public:
     void process(const std::vector<Real>& samples_in, std::vector<Real>& samples_out);
 
     /**
-     * Process samples and extract pilot tone. Generate phase-locked twice
-     * the frequency tone with unit amplitude. Mostly useful for 19 kHz stereo
-     * pilot tone on broadcast FM.
-     * In flow version
-     */
-    void process(const Real& sample_in, Real& sample_out);
-
-    /**
-     * Process samples and track a pilot tone. Generate samples for multiple phase-locked
+     * Process samples and track a pilot tone. Generate samples for single or multiple phase-locked
      * signals. Implement the processPhase virtual method to produce the output samples.
      * In flow version. Ex: Use 19 kHz stereo pilot tone to generate 38 kHz (stereo) and 57 kHz
      * pilots (see RDSPhaseLock class below).
+     * This is the in flow version
      */
-    void process(const Real& sample_in, std::vector<Real>& samples_out);
+    void process(const Real& sample_in, Real *samples_out);
 
     /** Return true if the phase-locked loop is locked. */
     bool locked() const
@@ -100,7 +93,7 @@ protected:
      * Callback method to produce multiple outputs from the current phase value in m_phase
      * and/or the sin and cos values in m_psin and m_pcos
      */
-    virtual void processPhase(std::vector<Real>& samples_out) const {};
+    virtual void processPhase(Real *samples_out) const {};
 
 private:
     Real    m_minfreq, m_maxfreq;
@@ -132,7 +125,7 @@ public:
     {}
 
 protected:
-    virtual void processPhase(std::vector<Real>& samples_out) const
+    virtual void processPhase(Real *samples_out) const
     {
     	samples_out[0] = m_psin; // f Pilot
         // Generate double-frequency output.
@@ -153,7 +146,7 @@ public:
     {}
 
 protected:
-    virtual void processPhase(std::vector<Real>& samples_out) const
+    virtual void processPhase(Real *samples_out) const
     {
     	samples_out[0] = m_psin; // f Pilot
         // Generate double-frequency output.
