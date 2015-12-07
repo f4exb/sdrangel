@@ -73,7 +73,7 @@ void BFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBa
 
 void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
-	Complex ci;
+	Complex ci, cs;
 	fftfilt::cmplx *rf;
 	int rf_out;
 	Real msq, demod;
@@ -124,14 +124,24 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_pilotPLL.process(demod, pilotSample);
 			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
 			//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
+
+			Complex s(demod*2.0*pilotSample, 0);
+			quint16 sampleStereo;
+
+			if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+			{
+				sampleStereo = (qint16)(cs.real() * 3000 * m_running.m_volume);
+			}
+
+
 			Complex e(demod, 0);
 
 			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
 				//m_sampleBuffer.push_back(Sample(sample, sample));
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
+				m_audioBuffer[m_audioBufferFill].l = sample + sampleStereo;
+				m_audioBuffer[m_audioBufferFill].r = sample - sampleStereo;
 				++m_audioBufferFill;
 
 				if(m_audioBufferFill >= m_audioBuffer.size())
@@ -255,6 +265,9 @@ void BFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_interpolatorStereo.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
+		m_interpolatorStereoDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
+		m_interpolatorStereoDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
 		m_settingsMutex.unlock();
 	}
 
