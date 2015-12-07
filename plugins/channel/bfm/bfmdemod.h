@@ -26,6 +26,7 @@
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
+#include "dsp/phaselock.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -45,6 +46,8 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
 	Real getMagSq() const { return m_movingAverage.average(); }
+	bool getPilotLock() const { return m_pilotPLL.locked(); }
+	Real getPilotLevel() const { return m_pilotPLL.get_pilot_level(); }
 
 private:
 	class MsgConfigureBFMDemod : public Message {
@@ -132,6 +135,8 @@ private:
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
+
+	PhaseLock m_pilotPLL;
 
 	void apply();
 };

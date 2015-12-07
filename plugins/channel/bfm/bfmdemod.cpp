@@ -31,7 +31,8 @@ MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 BFMDemod::BFMDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 250000),
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+	m_pilotPLL(19000/384000, 50/384000, 0.01)
 {
 	setObjectName("BFMDemod");
 
@@ -118,7 +119,10 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m2Sample = m_m1Sample;
 			m_m1Sample = rf[i];
 
-			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+			Real pilotSample;
+			m_pilotPLL.process(demod, pilotSample);
+			//m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+			m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0));
 			Complex e(demod, 0);
 
 			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
@@ -230,6 +234,10 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
 void BFMDemod::apply()
 {
+	if (m_config.m_inputSampleRate != m_running.m_inputSampleRate)
+	{
+		m_pilotPLL.configure(19000.0/m_config.m_inputSampleRate, 50.0/m_config.m_inputSampleRate, 0.01);
+	}
 
 	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))

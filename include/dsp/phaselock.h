@@ -25,6 +25,14 @@ public:
     /** Expected pilot frequency (used for PPS events). */
     static const int pilot_frequency = 19000;
 
+    /** Timestamp event produced once every 19000 pilot periods. */
+    struct PpsEvent
+    {
+        quint64   pps_index;
+        quint64   sample_index;
+        double    block_position;
+    };
+
     /**
      * Construct phase-locked loop.
      *
@@ -36,10 +44,28 @@ public:
     PhaseLock(Real freq, Real bandwidth, Real minsignal);
 
     /**
+     * Change phase locked loop parameters
+     *
+     * freq       :: 19 kHz center frequency relative to sample freq
+     *               (0.5 is Nyquist)
+     * bandwidth  :: bandwidth relative to sample frequency
+     * minsignal  :: minimum pilot amplitude
+     */
+    void configure(Real freq, Real bandwidth, Real minsignal);
+
+    /**
      * Process samples and extract 19 kHz pilot tone.
      * Generate phase-locked 38 kHz tone with unit amplitude.
+     * Bufferized version with input and output vectors
      */
     void process(const std::vector<Real>& samples_in, std::vector<Real>& samples_out);
+
+    /**
+     * Process samples and extract 19 kHz pilot tone.
+     * Generate phase-locked 38 kHz tone with unit amplitude.
+     * In flow version
+     */
+    void process(const Real& sample_in, Real& sample_out);
 
     /** Return true if the phase-locked loop is locked. */
     bool locked() const
@@ -64,4 +90,10 @@ private:
     Real    m_pilot_level;
     int     m_lock_delay;
     int     m_lock_cnt;
+    int     m_unlock_cnt;
+    int     m_unlock_delay;
+    int     m_pilot_periods;
+    quint64 m_pps_cnt;
+    quint64 m_sample_cnt;
+    std::vector<PpsEvent> m_pps_events;
 };

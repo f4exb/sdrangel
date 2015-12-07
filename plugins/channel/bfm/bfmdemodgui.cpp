@@ -334,4 +334,5 @@ void BFMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
 }
