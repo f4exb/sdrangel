@@ -232,6 +232,11 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 	applySettings();
 }
 
+void BFMDemodGUI::on_showPilot_clicked()
+{
+	applySettings();
+}
+
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 }
@@ -325,7 +330,8 @@ void BFMDemodGUI::applySettings()
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
-			ui->audioStereo->isChecked());
+			ui->audioStereo->isChecked(),
+			ui->showPilot->isChecked());
 	}
 }
 
@@ -348,6 +354,11 @@ void BFMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
+	QString pilotPowDbStr;
+	pilotPowDbStr.sprintf("%+02.1f", pilotPowDb);
+	ui->pilotPower->setText(pilotPowDbStr);
 
 	if (m_bfmDemod->getPilotLock())
 	{

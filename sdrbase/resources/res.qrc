@@ -45,5 +45,6 @@
         <file>usb.png</file>
         <file>flip_lr.png</file>
         <file>flip_rl.png</file>
+        <file>carrier.png</file>
     </qresource>
 </RCC>

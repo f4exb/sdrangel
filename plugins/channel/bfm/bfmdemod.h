@@ -38,7 +38,13 @@ public:
 	BFMDemod(SampleSink* sampleSink);
 	virtual ~BFMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioStereo);
+	void configure(MessageQueue* messageQueue,
+			Real rfBandwidth,
+			Real afBandwidth,
+			Real volume,
+			Real squelch,
+			bool audioStereo,
+			bool showPilot);
 
 	int getSampleRate() const { return m_config.m_inputSampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -60,10 +66,16 @@ private:
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioStereo() const { return m_audioStereo; }
+		bool getShowPilot() const { return m_showPilot; }
 
-		static MsgConfigureBFMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioStereo)
+		static MsgConfigureBFMDemod* create(Real rfBandwidth,
+				Real afBandwidth,
+				Real volume,
+				Real squelch,
+				bool audioStereo,
+				bool showPilot)
 		{
-			return new MsgConfigureBFMDemod(rfBandwidth, afBandwidth, volume, squelch, audioStereo);
+			return new MsgConfigureBFMDemod(rfBandwidth, afBandwidth, volume, squelch, audioStereo, showPilot);
 		}
 
 	private:
@@ -72,14 +84,21 @@ private:
 		Real m_volume;
 		Real m_squelch;
 		bool m_audioStereo;
+		bool m_showPilot;
 
-		MsgConfigureBFMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioStereo) :
+		MsgConfigureBFMDemod(Real rfBandwidth,
+				Real afBandwidth,
+				Real volume,
+				Real squelch,
+				bool audioStereo,
+				bool showPilot) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
-			m_audioStereo(audioStereo)
+			m_audioStereo(audioStereo),
+			m_showPilot(showPilot)
 		{ }
 	};
 
@@ -103,6 +122,7 @@ private:
 		Real m_volume;
 		quint32 m_audioSampleRate;
 		bool m_audioStereo;
+		bool m_showPilot;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -112,7 +132,8 @@ private:
 			m_squelch(0),
 			m_volume(0),
 			m_audioSampleRate(0),
-			m_audioStereo(false)
+			m_audioStereo(false),
+			m_showPilot(false)
 		{ }
 	};
 

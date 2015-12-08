@@ -69,9 +69,15 @@ BFMDemod::~BFMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void BFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioStereo)
+void BFMDemod::configure(MessageQueue* messageQueue,
+		Real rfBandwidth,
+		Real afBandwidth,
+		Real volume,
+		Real squelch,
+		bool audioStereo,
+		bool showPilot)
 {
-	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioStereo);
+	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioStereo, showPilot);
 	messageQueue->push(cmd);
 }
 
@@ -123,17 +129,23 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m2Sample = m_m1Sample;
 			m_m1Sample = rf[i];
 
-			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+			if (!m_running.m_showPilot)
+			{
+				m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+			}
+
 			Real sampleStereo;
 
 			// Process stereo if stereo mode is selected
 
 			if (m_running.m_audioStereo)
 			{
-				//Real pilotSample;
-				//m_pilotPLL.process(demod, pilotSample);
 				m_pilotPLL.process(demod, m_pilotPLLSamples);
-				//m_sampleBuffer.push_back(Sample(pilotSample * (1<<15), 0.0)); // debug pilot
+
+				if (m_running.m_showPilot)
+				{
+					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
+				}
 
 				Complex s(demod*2.0*m_pilotPLLSamples[1], 0);
 
@@ -243,6 +255,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioStereo = cfg.getAudioStereo();
+		m_config.m_showPilot = cfg.getShowPilot();
 
 		apply();
 
@@ -250,7 +263,8 @@ bool BFMDemod::handleMessage(const Message& cmd)
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioStereo: " << m_config.m_audioStereo;
+				<< " m_audioStereo: " << m_config.m_audioStereo
+				<< " m_showPilot: " << m_config.m_showPilot;
 
 		return true;
 	}
@@ -341,5 +355,6 @@ void BFMDemod::apply()
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioStereo = m_config.m_audioStereo;
+	m_running.m_showPilot = m_config.m_showPilot;
 
 }

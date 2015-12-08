@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>252</width>
+    <width>308</width>
     <height>333</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>235</width>
+     <width>281</width>
      <height>121</height>
     </rect>
    </property>
@@ -157,6 +157,49 @@
           </property>
           <property name="checkable">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="showPilot">
+          <property name="toolTip">
+           <string>Toggle demod/pilot spectrum display</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="pilotPower">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Pilot power</string>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="pilotPowerUnits">
+          <property name="text">
+           <string>dB</string>
           </property>
          </widget>
         </item>
@@ -343,8 +386,8 @@
     <rect>
      <x>10</x>
      <y>160</y>
-     <width>231</width>
-     <height>156</height>
+     <width>281</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -376,6 +419,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
   <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
