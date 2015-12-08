@@ -78,6 +78,7 @@ private:
 
 	BFMDemod* m_bfmDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
+	int m_rate;
 
 	static const int m_rfBW[];
 

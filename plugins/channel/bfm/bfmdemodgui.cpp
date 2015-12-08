@@ -252,7 +252,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(20,0),
+	m_rate(625000)
 {
 	ui->setupUi(this);
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -268,12 +269,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
-	//ui->glSpectrum->setCenterFrequency(BFMDemodGUI::m_rfBW[ui->rfBW->value()] / 4);
-	//ui->glSpectrum->setSampleRate(BFMDemodGUI::m_rfBW[ui->rfBW->value()] / 2);
-	ui->glSpectrum->setCenterFrequency(625000 / 4);
-	ui->glSpectrum->setSampleRate(625000 / 2);
-	//ui->glSpectrum->setCenterFrequency(48000 / 4);
-	//ui->glSpectrum->setSampleRate(48000 / 2);
+	ui->glSpectrum->setCenterFrequency(m_rate / 4);
+	ui->glSpectrum->setSampleRate(m_rate / 2);
 	ui->glSpectrum->setDisplayWaterfall(false);
 	ui->glSpectrum->setDisplayMaxHold(false);
 	ui->glSpectrum->setSsbSpectrum(true);
@@ -364,6 +361,13 @@ void BFMDemodGUI::tick()
 		{
 			ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+	}
+
+	if ((m_bfmDemod) && (m_rate != m_bfmDemod->getSampleRate()))
+	{
+		m_rate = m_bfmDemod->getSampleRate();
+		ui->glSpectrum->setCenterFrequency(m_rate / 4);
+		ui->glSpectrum->setSampleRate(m_rate / 2);
 	}
 
 	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
