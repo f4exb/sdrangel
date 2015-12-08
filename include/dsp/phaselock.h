@@ -106,8 +106,6 @@ private:
     Real    m_pilot_level;
     int     m_lock_delay;
     int     m_lock_cnt;
-    int     m_unlock_cnt;
-    int     m_unlock_delay;
     int     m_pilot_periods;
     quint64 m_pps_cnt;
     quint64 m_sample_cnt;

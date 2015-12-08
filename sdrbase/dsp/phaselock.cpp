@@ -41,9 +41,7 @@ PhaseLock::PhaseLock(Real freq, Real bandwidth, Real minsignal)
     // Set valid signal threshold.
     m_minsignal  = minsignal;
     m_lock_delay = int(20.0 / bandwidth);
-    m_unlock_delay = int(10.0 / bandwidth);
     m_lock_cnt   = 0;
-    m_unlock_cnt = 0;
     m_pilot_level = 0;
     m_psin = 0.0;
     m_pcos = 1.0;
@@ -105,9 +103,7 @@ void PhaseLock::configure(Real freq, Real bandwidth, Real minsignal)
     // Set valid signal threshold.
     m_minsignal  = minsignal;
     m_lock_delay = int(20.0 / bandwidth);
-    m_unlock_delay = int(10.0 / bandwidth);
     m_lock_cnt   = 0;
-    m_unlock_cnt = 0;
     m_pilot_level = 0;
 
     // Create 2nd order filter for I/Q representation of phase error.
@@ -327,21 +323,10 @@ void PhaseLock::process(const Real& sample_in, Real *samples_out)
         {
             m_lock_cnt += 1; // n
         }
-        else
-        {
-        	m_unlock_cnt = 0;
-        }
     }
     else
     {
-    	if (m_unlock_cnt < m_unlock_delay)
-    	{
-    		m_unlock_cnt += 1;
-    	}
-    	else
-    	{
-    		m_lock_cnt = 0;
-    	}
+    	m_lock_cnt = 0;
     }
 
     // Drop PPS events when pilot not locked.
