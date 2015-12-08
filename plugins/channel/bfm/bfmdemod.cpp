@@ -158,7 +158,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				else
 				{
 					Real deemph;
-					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph);
+					m_deemphasisFilterX.process(ci.real(), deemph);
 					quint16 sample = (qint16)(deemph * 3000 * m_running.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
