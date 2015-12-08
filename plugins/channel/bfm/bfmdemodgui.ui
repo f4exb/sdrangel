@@ -7,11 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>252</width>
-    <height>324</height>
+    <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Broadcast FM Demod</string>
+  </property>
+  <property name="toolTip">
+   <string/>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
@@ -19,7 +22,7 @@
      <x>10</x>
      <y>20</y>
      <width>235</width>
-     <height>111</height>
+     <height>121</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -339,7 +342,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>150</y>
+     <y>160</y>
      <width>231</width>
      <height>156</height>
     </rect>

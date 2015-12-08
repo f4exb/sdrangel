@@ -108,12 +108,18 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
+
 		d.readS32(2, &tmp, 4);
 		ui->rfBW->setValue(tmp);
+		ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[tmp] / 1000.0));
+		m_channelMarker.setBandwidth(m_rfBW[tmp]);
+
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
+
 		d.readS32(4, &tmp, 20);
 		ui->volume->setValue(tmp);
+
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
 
