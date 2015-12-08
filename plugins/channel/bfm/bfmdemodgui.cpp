@@ -267,6 +267,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_bfmDemod = new BFMDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
@@ -363,12 +364,13 @@ void BFMDemodGUI::tick()
 		}
 	}
 
-	if ((m_bfmDemod) && (m_rate != m_bfmDemod->getSampleRate()))
-	{
-		m_rate = m_bfmDemod->getSampleRate();
-		ui->glSpectrum->setCenterFrequency(m_rate / 4);
-		ui->glSpectrum->setSampleRate(m_rate / 2);
-	}
-
 	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
 }
+
+void BFMDemodGUI::channelSampleRateChanged()
+{
+	m_rate = m_bfmDemod->getSampleRate();
+	ui->glSpectrum->setCenterFrequency(m_rate / 4);
+	ui->glSpectrum->setSampleRate(m_rate / 2);
+}
+
