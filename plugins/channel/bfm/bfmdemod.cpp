@@ -32,7 +32,9 @@ BFMDemod::BFMDemod(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 250000),
 	m_settingsMutex(QMutex::Recursive),
-	m_pilotPLL(19000/384000, 50/384000, 0.01)
+	m_pilotPLL(19000/384000, 50/384000, 0.01),
+	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
+	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6)
 {
 	setObjectName("BFMDemod");
 
@@ -43,6 +45,8 @@ BFMDemod::BFMDemod(SampleSink* sampleSink) :
 	m_config.m_squelch = -60.0;
 	m_config.m_volume = 2.0;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate(); // normally 48 kHz
+	m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 
 	apply();
@@ -120,7 +124,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			m_m1Sample = rf[i];
 
 			m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
-			quint16 sampleStereo;
+			Real sampleStereo;
 
 			// Process stereo if stereo mode is selected
 
@@ -135,7 +139,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
 				{
-					sampleStereo = (qint16)(cs.real() * 3000 * m_running.m_volume);
+					sampleStereo = cs.real();
 				}
 			}
 
@@ -143,15 +147,19 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
 			{
-				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
-
 				if (m_running.m_audioStereo)
 				{
-					m_audioBuffer[m_audioBufferFill].l = sample + sampleStereo;
-					m_audioBuffer[m_audioBufferFill].r = sample - sampleStereo;
+					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
+					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
+					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
+					m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * 3000 * m_running.m_volume);
+					m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * 3000 * m_running.m_volume);
 				}
 				else
 				{
+					Real deemph;
+					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph);
+					quint16 sample = (qint16)(deemph * 3000 * m_running.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}
@@ -317,6 +325,12 @@ void BFMDemod::apply()
 		qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
 		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
 		m_squelchLevel *= m_squelchLevel;
+	}
+
+	if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
+	{
+		m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
+		m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;

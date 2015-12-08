@@ -27,6 +27,7 @@
 #include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselock.h"
+#include "dsp/filterrc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -146,6 +147,10 @@ private:
 
 	StereoPhaseLock m_pilotPLL;
 	Real m_pilotPLLSamples[2];
+
+	LowPassFilterRC m_deemphasisFilterX;
+	LowPassFilterRC m_deemphasisFilterY;
+	static const Real default_deemphasis = 50.0; // 50 us
 
 	void apply();
 };

@@ -79,6 +79,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/fftengine.cpp
 	sdrbase/dsp/fftfilt.cxx
 	sdrbase/dsp/fftwindow.cpp
+	sdrbase/dsp/filterrc.cpp
 	sdrbase/dsp/filesink.cpp
 	sdrbase/dsp/interpolator.cpp
 	sdrbase/dsp/inthalfbandfilter.cpp
@@ -155,6 +156,7 @@ set(sdrbase_HEADERS
 	include/dsp/fftfilt.h
 	include/dsp/fftwengine.h
 	include/dsp/fftwindow.h
+	include/dsp/filterrc.h
 	include/dsp/filesink.h
 	include/dsp/gfft.h
 	include/dsp/interpolator.h

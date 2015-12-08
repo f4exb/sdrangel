@@ -81,6 +81,7 @@ PhaseLock::PhaseLock(Real freq, Real bandwidth, Real minsignal)
     m_sample_cnt    = 0;
 }
 
+
 void PhaseLock::configure(Real freq, Real bandwidth, Real minsignal)
 {
 	qDebug("PhaseLock::configure: freq: %f bandwidth: %f minsignal: %f", freq, bandwidth, minsignal);
@@ -141,6 +142,7 @@ void PhaseLock::configure(Real freq, Real bandwidth, Real minsignal)
     m_pps_cnt       = 0;
     m_sample_cnt    = 0;
 }
+
 
 // Process samples. Bufferized version
 void PhaseLock::process(const std::vector<Real>& samples_in, std::vector<Real>& samples_out)
@@ -246,21 +248,6 @@ void PhaseLock::process(const std::vector<Real>& samples_in, std::vector<Real>& 
     // Update sample counter.
     m_sample_cnt += n;
 }
-
-/*
-void PhaseLock::process(const Real& sample_in, Real& sample_out)
-{
-	m_phase += m_freq;
-
-	if (m_phase > 2.0 * M_PI) {
-		m_phase -= 2.0 * M_PI;
-	}
-
-	Real psin = sin(m_phase);
-	Real pcos = cos(m_phase);
-
-	sample_out = 2 * psin * pcos;
-}*/
 
 
 // Process samples. Multiple output
