@@ -145,10 +145,11 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
 
+		/*
 		if(d.readU32(7, &u32tmp))
 		{
 			m_channelMarker.setColor(u32tmp);
-		}
+		}*/
 
 		d.readBlob(8, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
@@ -289,7 +290,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
-	m_channelMarker.setColor(Qt::blue);
+	//m_channelMarker.setColor(Qt::blue);
+	m_channelMarker.setColor(QColor(80, 120, 228));
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
