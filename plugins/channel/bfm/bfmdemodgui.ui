@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>308</width>
+    <width>335</width>
     <height>333</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>281</width>
+     <width>311</width>
      <height>121</height>
     </rect>
    </property>
@@ -200,6 +200,20 @@
          <widget class="QLabel" name="pilotPowerUnits">
           <property name="text">
            <string>dB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="rds">
+          <property name="toolTip">
+           <string>Toggle RDS subsystem activation</string>
+          </property>
+          <property name="text">
+           <string>.</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/rds.png</normaloff>:/rds.png</iconset>
           </property>
          </widget>
         </item>
@@ -386,12 +400,12 @@
     <rect>
      <x>10</x>
      <y>160</y>
-     <width>281</width>
+     <width>311</width>
      <height>151</height>
     </rect>
    </property>
    <property name="windowTitle">
-    <string>Channel Spectrum</string>
+    <string>Baseband Spectrum</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="spacing">

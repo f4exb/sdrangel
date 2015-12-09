@@ -44,7 +44,8 @@ public:
 			Real volume,
 			Real squelch,
 			bool audioStereo,
-			bool showPilot);
+			bool showPilot,
+			bool rdsActive);
 
 	int getSampleRate() const { return m_config.m_inputSampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -67,15 +68,23 @@ private:
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioStereo() const { return m_audioStereo; }
 		bool getShowPilot() const { return m_showPilot; }
+		bool getRDSActive() const { return m_rdsActive; }
 
 		static MsgConfigureBFMDemod* create(Real rfBandwidth,
 				Real afBandwidth,
 				Real volume,
 				Real squelch,
 				bool audioStereo,
-				bool showPilot)
+				bool showPilot,
+				bool rdsActive)
 		{
-			return new MsgConfigureBFMDemod(rfBandwidth, afBandwidth, volume, squelch, audioStereo, showPilot);
+			return new MsgConfigureBFMDemod(rfBandwidth,
+					afBandwidth,
+					volume,
+					squelch,
+					audioStereo,
+					showPilot,
+					rdsActive);
 		}
 
 	private:
@@ -85,20 +94,23 @@ private:
 		Real m_squelch;
 		bool m_audioStereo;
 		bool m_showPilot;
+		bool m_rdsActive;
 
 		MsgConfigureBFMDemod(Real rfBandwidth,
 				Real afBandwidth,
 				Real volume,
 				Real squelch,
 				bool audioStereo,
-				bool showPilot) :
+				bool showPilot,
+				bool rdsActive) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
 			m_audioStereo(audioStereo),
-			m_showPilot(showPilot)
+			m_showPilot(showPilot),
+			m_rdsActive(rdsActive)
 		{ }
 	};
 
@@ -123,6 +135,7 @@ private:
 		quint32 m_audioSampleRate;
 		bool m_audioStereo;
 		bool m_showPilot;
+		bool m_rdsActive;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -133,7 +146,8 @@ private:
 			m_volume(0),
 			m_audioSampleRate(0),
 			m_audioStereo(false),
-			m_showPilot(false)
+			m_showPilot(false),
+			m_rdsActive(false)
 		{ }
 	};
 

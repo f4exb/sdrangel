@@ -63,6 +63,7 @@ private slots:
 	void on_squelch_valueChanged(int value);
 	void on_audioStereo_toggled(bool stereo);
 	void on_showPilot_clicked();
+	void on_rds_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();

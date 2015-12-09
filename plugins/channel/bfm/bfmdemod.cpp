@@ -75,9 +75,16 @@ void BFMDemod::configure(MessageQueue* messageQueue,
 		Real volume,
 		Real squelch,
 		bool audioStereo,
-		bool showPilot)
+		bool showPilot,
+		bool rdsActive)
 {
-	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioStereo, showPilot);
+	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth,
+			afBandwidth,
+			volume,
+			squelch,
+			audioStereo,
+			showPilot,
+			rdsActive);
 	messageQueue->push(cmd);
 }
 
@@ -256,6 +263,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioStereo = cfg.getAudioStereo();
 		m_config.m_showPilot = cfg.getShowPilot();
+		m_config.m_rdsActive = cfg.getRDSActive();
 
 		apply();
 
@@ -264,7 +272,8 @@ bool BFMDemod::handleMessage(const Message& cmd)
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioStereo: " << m_config.m_audioStereo
-				<< " m_showPilot: " << m_config.m_showPilot;
+				<< " m_showPilot: " << m_config.m_showPilot
+				<< " m_rdsActive: " << m_config.m_rdsActive;
 
 		return true;
 	}
@@ -356,5 +365,5 @@ void BFMDemod::apply()
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioStereo = m_config.m_audioStereo;
 	m_running.m_showPilot = m_config.m_showPilot;
-
+	m_running.m_rdsActive = m_config.m_rdsActive;
 }

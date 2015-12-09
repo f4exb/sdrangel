@@ -46,5 +46,6 @@
         <file>flip_lr.png</file>
         <file>flip_rl.png</file>
         <file>carrier.png</file>
+        <file>rds.png</file>
     </qresource>
 </RCC>

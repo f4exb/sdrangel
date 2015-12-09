@@ -243,6 +243,11 @@ void BFMDemodGUI::on_showPilot_clicked()
 	applySettings();
 }
 
+void BFMDemodGUI::on_rds_clicked()
+{
+	applySettings();
+}
+
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 }
@@ -338,7 +343,8 @@ void BFMDemodGUI::applySettings()
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
 			ui->audioStereo->isChecked(),
-			ui->showPilot->isChecked());
+			ui->showPilot->isChecked(),
+			ui->rds->isChecked());
 	}
 }
 
