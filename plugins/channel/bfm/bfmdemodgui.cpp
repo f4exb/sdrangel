@@ -104,6 +104,7 @@ QByteArray BFMDemodGUI::serialize() const
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeBlob(8, ui->spectrumGUI->serialize());
+	s.writeBool(9, ui->audioStereo->isChecked());
 	return s.final();
 }
 
@@ -122,6 +123,7 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool booltmp;
 
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
@@ -150,6 +152,9 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readBlob(8, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
+
+		d.readBool(9, &booltmp, false);
+		ui->audioStereo->setChecked(booltmp);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
