@@ -338,7 +338,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <widget class="QLabel" name="lnaGainText">
        <property name="minimumSize">
         <size>
@@ -346,11 +346,24 @@
          <height>0</height>
         </size>
        </property>
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
        <property name="text">
         <string>0dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QCheckBox" name="lnaAGC">
+       <property name="toolTip">
+        <string>Toggle LNA AGC</string>
+       </property>
+       <property name="text">
+        <string>AGC</string>
        </property>
       </widget>
      </item>
@@ -403,6 +416,16 @@
       <widget class="QLabel" name="mixLabel">
        <property name="text">
         <string>Mixer</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QCheckBox" name="mixAGC">
+       <property name="toolTip">
+        <string>Toggle mixer AGC</string>
+       </property>
+       <property name="text">
+        <string>AGC</string>
        </property>
       </widget>
      </item>
@@ -464,15 +487,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

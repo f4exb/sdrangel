@@ -30,6 +30,8 @@ struct AirspySettings {
 	quint32 m_lnaGain;
 	quint32 m_mixerGain;
 	quint32 m_vgaGain;
+	bool m_lnaAGC;
+	bool m_mixerAGC;
 	quint32 m_log2Decim;
 	fcPos_t m_fcPos;
 	bool m_biasT;

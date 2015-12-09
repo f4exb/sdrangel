@@ -76,6 +76,8 @@ private slots:
 	void on_lna_valueChanged(int value);
 	void on_mix_valueChanged(int value);
 	void on_vga_valueChanged(int value);
+	void on_lnaAGC_stateChanged(int state);
+	void on_mixAGC_stateChanged(int state);
 	void updateHardware();
 	void handleSourceMessages();
 };

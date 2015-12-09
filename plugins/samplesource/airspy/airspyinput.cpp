@@ -350,6 +350,25 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
+	if ((m_settings.m_lnaAGC != settings.m_lnaAGC) || force)
+	{
+		m_settings.m_lnaAGC = settings.m_lnaAGC;
+
+		if (m_dev != 0)
+		{
+			rc = (airspy_error) airspy_set_lna_agc(m_dev, (m_settings.m_lnaAGC ? 1 : 0));
+		}
+
+		if(rc != AIRSPY_SUCCESS)
+		{
+			qDebug("AirspyInput::applySettings: airspy_set_lna_agc failed: %s", airspy_error_name(rc));
+		}
+		else
+		{
+			qDebug() << "AirspyInput:applySettings: LNA AGC set to " << m_settings.m_lnaAGC;
+		}
+	}
+
 	if ((m_settings.m_mixerGain != settings.m_mixerGain) || force)
 	{
 		m_settings.m_mixerGain = settings.m_mixerGain;
@@ -366,6 +385,25 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 			{
 				qDebug() << "AirspyInput:applySettings: mixer gain set to " << m_settings.m_mixerGain;
 			}
+		}
+	}
+
+	if ((m_settings.m_mixerAGC != settings.m_mixerAGC) || force)
+	{
+		m_settings.m_mixerAGC = settings.m_mixerAGC;
+
+		if (m_dev != 0)
+		{
+			rc = (airspy_error) airspy_set_mixer_agc(m_dev, (m_settings.m_mixerAGC ? 1 : 0));
+		}
+
+		if(rc != AIRSPY_SUCCESS)
+		{
+			qDebug("AirspyInput::applySettings: airspy_set_mixer_agc failed: %s", airspy_error_name(rc));
+		}
+		else
+		{
+			qDebug() << "AirspyInput:applySettings: Mixer AGC set to " << m_settings.m_mixerAGC;
 		}
 	}
 

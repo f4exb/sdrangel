@@ -28,7 +28,7 @@ AirspyGui::AirspyGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::AirspyGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
-	m_sampleSource(NULL)
+	m_sampleSource(0)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -156,6 +156,9 @@ void AirspyGui::displaySettings()
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->vga->setValue(m_settings.m_vgaGain);
+
+	ui->lnaAGC->setChecked(m_settings.m_lnaAGC);
+	ui->mixAGC->setChecked(m_settings.m_mixerAGC);
 }
 
 void AirspyGui::displaySampleRates()
@@ -225,6 +228,18 @@ void AirspyGui::on_sampleRate_currentIndexChanged(int index)
 void AirspyGui::on_biasT_stateChanged(int state)
 {
 	m_settings.m_biasT = (state == Qt::Checked);
+	sendSettings();
+}
+
+void AirspyGui::on_lnaAGC_stateChanged(int state)
+{
+	m_settings.m_lnaAGC = (state == Qt::Checked);
+	sendSettings();
+}
+
+void AirspyGui::on_mixAGC_stateChanged(int state)
+{
+	m_settings.m_mixerAGC = (state == Qt::Checked);
 	sendSettings();
 }
 

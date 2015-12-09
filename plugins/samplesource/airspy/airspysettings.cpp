@@ -31,6 +31,8 @@ void AirspySettings::resetToDefaults()
 	m_lnaGain = 14;
 	m_mixerGain = 15;
 	m_vgaGain = 4;
+	m_lnaAGC = false;
+	m_mixerAGC = false;
 	m_log2Decim = 0;
 	m_fcPos = FC_POS_CENTER;
 	m_biasT = false;
@@ -52,6 +54,8 @@ QByteArray AirspySettings::serialize() const
 	s.writeBool(8, m_biasT);
 	s.writeBool(9, m_dcBlock);
 	s.writeBool(10, m_iqCorrection);
+	s.writeBool(11, m_lnaAGC);
+	s.writeBool(12, m_mixerAGC);
 
 	return s.final();
 }
@@ -81,6 +85,8 @@ bool AirspySettings::deserialize(const QByteArray& data)
 		d.readBool(8, &m_biasT, false);
 		d.readBool(9, &m_dcBlock, false);
 		d.readBool(10, &m_iqCorrection, false);
+		d.readBool(11, &m_lnaAGC, false);
+		d.readBool(12, &m_mixerAGC, false);
 
 		return true;
 	}
