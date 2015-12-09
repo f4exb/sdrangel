@@ -151,7 +151,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_running.m_showPilot)
 				{
-					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
+					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[2] * (1<<15), 0.0)); // debug 57 kHz pilot
 				}
 
 				Complex s(demod*2.0*m_pilotPLLSamples[1], 0);

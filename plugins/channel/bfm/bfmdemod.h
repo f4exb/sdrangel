@@ -180,8 +180,8 @@ private:
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 
-	StereoPhaseLock m_pilotPLL;
-	Real m_pilotPLLSamples[2];
+	RDSPhaseLock m_pilotPLL;
+	Real m_pilotPLLSamples[3];
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
