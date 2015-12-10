@@ -146,10 +146,10 @@ public:
 protected:
     virtual void processPhase(Real *samples_out) const
     {
-    	samples_out[0] = m_psin; // f Pilot
+        samples_out[0] = m_psin; // Pilot signal (f)
         // Generate double-frequency output.
         // sin(2*x) = 2 * sin(x) * cos(x)
-    	samples_out[1] = 2.0 * m_psin * m_pcos; // 2f Pilot
-    	samples_out[2] = sin(3.0 * m_phase); // 3f pilot
+        samples_out[1] = 2.0 * m_psin * m_pcos; // Pilot signal (2f)
+        samples_out[2] = m_phase; // Pilot phase
     }
 };

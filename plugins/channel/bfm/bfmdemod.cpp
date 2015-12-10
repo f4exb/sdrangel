@@ -141,6 +141,11 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
 			}
 
+			if (m_running.m_rdsActive)
+			{
+				m_rdsDemod.process(demod, m_pilotPLLSamples[2]);
+			}
+
 			Real sampleStereo;
 
 			// Process stereo if stereo mode is selected
@@ -151,7 +156,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_running.m_showPilot)
 				{
-					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[2] * (1<<15), 0.0)); // debug 57 kHz pilot
+					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
 				}
 
 				Complex s(demod*2.0*m_pilotPLLSamples[1], 0);

@@ -30,6 +30,7 @@
 #include "dsp/filterrc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "rdsdemod.h"
 
 #define rfFilterFftLength 1024
 
@@ -186,6 +187,8 @@ private:
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
 	static const Real default_deemphasis = 50.0; // 50 us
+
+	RDSDemod m_rdsDemod;
 
 	void apply();
 };
