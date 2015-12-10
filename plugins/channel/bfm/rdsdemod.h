@@ -19,6 +19,8 @@
 #ifndef PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
 #define PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
 
+#include "dsp/dsptypes.h"
+
 class RDSDemod
 {
 public:
@@ -26,7 +28,13 @@ public:
 	~RDSDemod();
 
 	void process(Real rdsSample, Real pilotSample);
+
+protected:
 	Real filter_lp_2400_iq(Real in, int iqIndex);
+	int sign(Real a);
+	void biphase(Real acc);
+	void print_delta(char b);
+	void output_bit(char b);
 
 private:
 	Real m_xv[2][2+1];
@@ -36,6 +44,14 @@ private:
 	Real m_rdsClockPhase;
 	Real m_rdsClockOffset;
 	Real m_rdsClockLO;
+	Real m_rdsClockLO_1;
+	int m_numSamples;
+	Real m_acc;
+	Real m_acc_1;
+	int m_counter;
+	int m_readingFrame;
+	int m_totErrors[2];
+	int m_dbit;
 };
 
 #endif /* PLUGINS_CHANNEL_BFM_RDSDEMOD_H_ */

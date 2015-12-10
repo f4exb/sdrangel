@@ -4,12 +4,14 @@ set(bfm_SOURCES
 	bfmdemod.cpp
 	bfmdemodgui.cpp
 	bfmplugin.cpp
+	rdsdemod.cpp
 )
 
 set(bfm_HEADERS
 	bfmdemod.h
 	bfmdemodgui.h
 	bfmplugin.h
+	rdsdemod.h
 )
 
 set(bfm_FORMS
