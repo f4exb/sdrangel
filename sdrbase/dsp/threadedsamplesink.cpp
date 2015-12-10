@@ -110,7 +110,7 @@ void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::
 	m_threadedSampleFifo->writeToFifo(begin, end);
 }
 
-bool ThreadedSampleSink::handleSinkMessage(Message& cmd)
+bool ThreadedSampleSink::handleSinkMessage(const Message& cmd)
 {
 	return m_sampleSink->handleMessage(cmd);
 }
