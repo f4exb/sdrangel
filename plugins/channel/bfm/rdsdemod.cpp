@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +79,8 @@ void RDSDemod::process(Real rdsSample, Real pilotPhaseSample)
 
 		m_rdsClockLO_1 = m_rdsClockLO;
 	}
+
+	m_numSamples++;
 }
 
 Real RDSDemod::filter_lp_2400_iq(Real input, int iqIndex)
@@ -102,23 +105,24 @@ int RDSDemod::sign(Real a)
 
 void RDSDemod::biphase(Real acc)
 {
-	static int reading_frame = 0;
-
 	if (sign(acc) != sign(m_acc_1)) // two successive of different sign: error detected
 	{
 		m_totErrors[m_counter % 2]++;
 	}
 
-	if (m_counter % 2 == reading_frame) // two successive of the same sing: OK
+	if (m_counter % 2 == m_readingFrame) // two successive of the same sign: OK
 	{
 		print_delta(sign(acc + m_acc_1));
 	}
 
 	if (m_counter == 0)
 	{
-		if (m_totErrors[1 - reading_frame] < m_totErrors[reading_frame])
+		if (m_totErrors[1 - m_readingFrame] < m_totErrors[m_readingFrame])
 		{
-			reading_frame = 1 - reading_frame;
+			m_readingFrame = 1 - m_readingFrame;
+
+			double qua = (1.0 * abs(m_totErrors[0] - m_totErrors[1]) /	(m_totErrors[0] + m_totErrors[1])) * 100;
+			qDebug("RDSDemod::biphase: frame: %d  errs: %3d %3d  qual: %3.0f%%\n", m_readingFrame, m_totErrors[0], m_totErrors[1], qua);
 		}
 
 		m_totErrors[0] = 0;
