@@ -27,7 +27,7 @@ public:
 	RDSDemod();
 	~RDSDemod();
 
-	void process(Real rdsSample, Real pilotSample);
+	void process(Real rdsSample, Real pilotPhaseSample);
 
 protected:
 	Real filter_lp_2400_iq(Real in, int iqIndex);

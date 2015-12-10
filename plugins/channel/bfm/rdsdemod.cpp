@@ -43,12 +43,12 @@ RDSDemod::~RDSDemod()
 {
 }
 
-void RDSDemod::process(Real rdsSample, Real pilotSample)
+void RDSDemod::process(Real rdsSample, Real pilotPhaseSample)
 {
 	m_rdsBB = filter_lp_2400_iq(rdsSample, 0); // working on real part only
 
-	// 1187.5 Hz clock
-	m_rdsClockPhase = (pilotSample / 48.0) + m_rdsClockOffset;
+	// 1187.5 Hz clock from 19 kHz pilot
+	m_rdsClockPhase = (pilotPhaseSample / 16.0) + m_rdsClockOffset;
 	m_rdsClockLO = (fmod(m_rdsClockPhase, 2 * M_PI) < M_PI ? 1 : -1);
 
 	// Clock phase recovery
