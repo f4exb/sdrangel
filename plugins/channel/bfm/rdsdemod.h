@@ -27,20 +27,28 @@ public:
 	RDSDemod();
 	~RDSDemod();
 
+	void setSampleRate(int srate);
 	void process(Real rdsSample, Real pilotPhaseSample);
 
 protected:
 	Real filter_lp_2400_iq(Real in, int iqIndex);
+	Real filter_lp_pll(Real input);
 	int sign(Real a);
-	void biphase(Real acc);
+	void biphase(Real acc, Real fsc);
 	void print_delta(char b);
 	void output_bit(char b);
 
 private:
+	int m_srate;
+	Real m_fsc;
 	Real m_xv[2][2+1];
 	Real m_yv[2][2+1];
-	Real m_rdsBB;
-	Real m_rdsBB_1;
+	Real m_xw[2];
+	Real m_yw[2];
+	Real m_subcarrPhi;
+	Real m_subcarrBB[2];
+	Real m_dPhiSc;
+	Real m_subcarrBB_1;
 	Real m_rdsClockPhase;
 	Real m_rdsClockOffset;
 	Real m_rdsClockLO;
@@ -52,6 +60,8 @@ private:
 	int m_readingFrame;
 	int m_totErrors[2];
 	int m_dbit;
+
+	static const Real m_pllBeta;
 };
 
 #endif /* PLUGINS_CHANNEL_BFM_RDSDEMOD_H_ */

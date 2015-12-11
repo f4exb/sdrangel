@@ -22,10 +22,15 @@
 
 #include "rdsdemod.h"
 
+const Real RDSDemod::m_pllBeta = 50;
+
 RDSDemod::RDSDemod()
 {
-	m_rdsBB = 0.0;
-	m_rdsBB_1 = 0.0;
+	m_srate = 250000;
+	m_fsc = 57000.0;
+	m_subcarrPhi = 0;
+	m_dPhiSc = 0;
+	m_subcarrBB_1 = 0.0;
 	m_rdsClockPhase = 0.0;
 	m_rdsClockOffset = 0.0;
 	m_rdsClockLO = 0.0;
@@ -44,16 +49,32 @@ RDSDemod::~RDSDemod()
 {
 }
 
-void RDSDemod::process(Real rdsSample, Real pilotPhaseSample)
+void RDSDemod::setSampleRate(int srate)
 {
-	m_rdsBB = filter_lp_2400_iq(rdsSample, 0); // working on real part only
+	m_srate = srate;
+	m_fsc = 57000.0;
+}
 
-	// 1187.5 Hz clock from 19 kHz pilot
-	m_rdsClockPhase = (pilotPhaseSample / 16.0) + m_rdsClockOffset;
+void RDSDemod::process(Real demod, Real pilotPhaseSample)
+{
+	/*
+	// Subcarrier downmix & phase recovery
+	m_subcarrPhi += 2 * M_PI * m_fsc * (1.0 / m_srate);
+	m_subcarrBB[0] = filter_lp_2400_iq(demod * cos(m_subcarrPhi), 0);
+	m_subcarrBB[1] = filter_lp_2400_iq(demod * sin(m_subcarrPhi), 1);
+
+	m_dPhiSc = 2 * filter_lp_pll(m_subcarrBB[1] * m_subcarrBB[0]);
+	m_subcarrPhi -= m_pllBeta * m_dPhiSc; //prev_loop;
+	m_fsc -= .5 * m_pllBeta * m_dPhiSc; //prev_loop;
+
+	// 1187.5 Hz clock
+
+	m_rdsClockPhase = m_subcarrPhi / 48.0 + m_rdsClockOffset;
 	m_rdsClockLO = (fmod(m_rdsClockPhase, 2 * M_PI) < M_PI ? 1 : -1);
 
 	// Clock phase recovery
-	if (sign(m_rdsBB_1) != sign(m_rdsBB))
+
+	if (sign(m_subcarrBB_1) != sign(m_subcarrBB[0]))
 	{
 		Real d_cphi = fmod(m_rdsClockPhase, M_PI);
 
@@ -68,12 +89,49 @@ void RDSDemod::process(Real rdsSample, Real pilotPhaseSample)
 	// Decimate band-limited signal
 	if (m_numSamples % 8 == 0)
 	{
-		/* biphase symbol integrate & dump */
-		m_acc += m_rdsBB * m_rdsClockLO;
+		// biphase symbol integrate & dump
+		m_acc += m_subcarrBB[0] * m_rdsClockLO;
 
 		if (sign(m_rdsClockLO) != sign(m_rdsClockLO_1))
 		{
-			biphase(m_acc);
+			biphase(m_acc, m_fsc);
+			m_acc = 0;
+		}
+
+		m_rdsClockLO_1 = m_rdsClockLO;
+	}
+
+	m_subcarrBB_1 = m_subcarrBB[0];
+	*/
+
+	m_subcarrBB[0] = filter_lp_2400_iq(demod, 0); // working on real part only
+
+	// 1187.5 Hz clock from 19 kHz pilot
+	m_rdsClockPhase = (pilotPhaseSample / 16.0) + m_rdsClockOffset;
+	m_rdsClockLO = (m_rdsClockPhase > 0.0 ? 1.0 : -1.0);
+
+	// Clock phase recovery
+	if (sign(m_subcarrBB_1) != sign(m_subcarrBB[0]))
+	{
+		Real d_cphi = fmod(m_rdsClockPhase, M_PI);
+
+		if (d_cphi >= M_PI_2)
+		{
+			d_cphi -= M_PI;
+		}
+
+		m_rdsClockOffset -= 0.005 * d_cphi;
+	}
+
+	// Decimate band-limited signal
+	if (m_numSamples % 8 == 0)
+	{
+		// biphase symbol integrate & dump
+		m_acc += m_subcarrBB[0] * m_rdsClockLO;
+
+		if (sign(m_rdsClockLO) != sign(m_rdsClockLO_1))
+		{
+			biphase(m_acc, 57000.0);
 			m_acc = 0;
 		}
 
@@ -98,12 +156,22 @@ Real RDSDemod::filter_lp_2400_iq(Real input, int iqIndex)
 	return m_yv[iqIndex][2];
 }
 
+Real RDSDemod::filter_lp_pll(Real input)
+{
+	  m_xw[0] = m_xw[1];
+	  m_xw[1] = input / 3.716236217e+01;
+	  m_yw[0] = m_yw[1];
+	  m_yw[1] =   (m_xw[0] + m_xw[1])
+	    + (  0.9461821078 * m_yw[0]);
+	  return m_yw[1];
+}
+
 int RDSDemod::sign(Real a)
 {
 	return (a >= 0 ? 1 : 0);
 }
 
-void RDSDemod::biphase(Real acc)
+void RDSDemod::biphase(Real acc, Real fsc)
 {
 	if (sign(acc) != sign(m_acc_1)) // two successive of different sign: error detected
 	{
@@ -122,7 +190,13 @@ void RDSDemod::biphase(Real acc)
 			m_readingFrame = 1 - m_readingFrame;
 
 			double qua = (1.0 * abs(m_totErrors[0] - m_totErrors[1]) /	(m_totErrors[0] + m_totErrors[1])) * 100;
-			qDebug("RDSDemod::biphase: frame: %d  errs: %3d %3d  qual: %3.0f%%\n", m_readingFrame, m_totErrors[0], m_totErrors[1], qua);
+			qDebug("RDSDemod::biphase: frame: %d  errs: %3d %3d  qual: %3.0f%% pll: %.1f (%.1f ppm)",
+					m_readingFrame,
+					m_totErrors[0],
+					m_totErrors[1],
+					qua,
+					fsc,
+					(57000.0-fsc)/57000.0*1000000);
 		}
 
 		m_totErrors[0] = 0;
@@ -141,6 +215,7 @@ void RDSDemod::print_delta(char b)
 
 void RDSDemod::output_bit(char b)
 {
-	printf("%d", b);
+	// TODO: return value instead of spitting out
+	//printf("%d", b);
 }
 

@@ -143,7 +143,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_running.m_rdsActive)
 			{
-				m_rdsDemod.process(demod, m_pilotPLLSamples[2]);
+				m_rdsDemod.process(demod * 2.0 * cos(3.0 * m_pilotPLLSamples[2]), m_pilotPLLSamples[2]);
+				//m_rdsDemod.process(demod, m_pilotPLLSamples[2]);
 			}
 
 			Real sampleStereo;
@@ -297,6 +298,11 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
 void BFMDemod::apply()
 {
+	if (m_config.m_inputSampleRate != m_running.m_inputSampleRate)
+	{
+		m_rdsDemod.setSampleRate(m_config.m_inputSampleRate);
+	}
+
 	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate)
 		|| (m_config.m_audioStereo && (m_config.m_audioStereo != m_running.m_audioStereo)))
 	{
