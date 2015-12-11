@@ -34,7 +34,7 @@ protected:
 	Real filter_lp_2400_iq(Real in, int iqIndex);
 	Real filter_lp_pll(Real input);
 	int sign(Real a);
-	void biphase(Real acc, Real fsc);
+	void biphase(Real acc, Real dPhiClock);
 	void print_delta(char b);
 	void output_bit(char b);
 
@@ -45,11 +45,12 @@ private:
 	Real m_yv[2][2+1];
 	Real m_xw[2];
 	Real m_yw[2];
-	Real m_subcarrPhi;
+	Real m_subcarrPhi_1;
 	Real m_subcarrBB[2];
 	Real m_dPhiSc;
 	Real m_subcarrBB_1;
 	Real m_rdsClockPhase;
+	Real m_rdsClockPhase_1;
 	Real m_rdsClockOffset;
 	Real m_rdsClockLO;
 	Real m_rdsClockLO_1;
