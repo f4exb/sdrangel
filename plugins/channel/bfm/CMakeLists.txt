@@ -5,6 +5,7 @@ set(bfm_SOURCES
 	bfmdemodgui.cpp
 	bfmplugin.cpp
 	rdsdemod.cpp
+	rdsdecoder.cpp
 )
 
 set(bfm_HEADERS
@@ -12,6 +13,7 @@ set(bfm_HEADERS
 	bfmdemodgui.h
 	bfmplugin.h
 	rdsdemod.h
+	rdsdecoder.h
 )
 
 set(bfm_FORMS
