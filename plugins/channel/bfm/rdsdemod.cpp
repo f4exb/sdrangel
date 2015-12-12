@@ -23,77 +23,164 @@
 #include "rdsdemod.h"
 
 const Real RDSDemod::m_pllBeta = 50;
+const int RDSDemod::m_udpSize = 1472;
 
 RDSDemod::RDSDemod()
 {
 	m_srate = 250000;
-	m_fsc = 57000.0;
-	m_subcarrPhi_1 = 0;
-	m_dPhiSc = 0;
-	m_subcarrBB_1 = 0.0;
-	m_rdsClockPhase = 0.0;
-	m_rdsClockPhase_1 = 0.0;
-	m_rdsClockOffset = 0.0;
-	m_rdsClockLO = 0.0;
-	m_rdsClockLO_1 = 0.0;
-	m_numSamples = 0;
-	m_acc = 0.0;
-	m_acc_1 = 0.0;
-	m_counter = 0;
-	m_readingFrame = 0;
-	m_totErrors[0] = 0;
-	m_totErrors[1] = 0;
-	m_dbit = 0;
+
+	m_parms.subcarr_phi = 0;
+	m_parms.clock_offset = 0;
+	m_parms.clock_phi = 0;
+	m_parms.prev_clock_phi = 0;
+	m_parms.lo_clock = 0;
+	m_parms.prevclock = 0;
+	m_parms.prev_bb = 0;
+	m_parms.d_phi_sc = 0;
+	m_parms.d_cphi = 0;
+	m_parms.acc = 0;
+	m_parms.subcarr_sample = 0;
+	m_parms.c = 0;
+	m_parms.fmfreq = 0;
+	m_parms.bytesread;
+	m_parms.numsamples = 0;
+	m_parms.loop_out = 0;
+	m_parms.prev_loop = 0;
+
+	m_parms.prev_acc = 0;
+	m_parms.counter = 0;
+	m_parms.reading_frame = 0;
+
+	m_socket = new QUdpSocket(this);
+	m_sampleBufferIndex = 0;
 }
 
 RDSDemod::~RDSDemod()
 {
+	delete m_socket;
 }
 
 void RDSDemod::setSampleRate(int srate)
 {
 	m_srate = srate;
-	m_fsc = 57000.0;
 }
 
-void RDSDemod::process(Real demod, Real pilotPhaseSample)
+void RDSDemod::process(Real demod, Real pilot)
 {
-	pilotPhaseSample = fmod(pilotPhaseSample, M_PI);
 
-	m_dPhiSc = pilotPhaseSample - m_subcarrPhi_1;
+	double fsc = 57000;
 
-	if (m_dPhiSc < 0)
+	Real dPilot = pilot - m_pilotPrev;
+
+	if (dPilot < 0)
 	{
-		m_dPhiSc += M_PI;
+		dPilot += 2 * M_PI;
 	}
 
-	m_subcarrBB[0] = filter_lp_2400_iq(demod, 0); // working on real part only
+	if (m_sampleBufferIndex < m_udpSize)
+	{
+		m_sampleBufferIndex++;
+	}
+	else
+	{
+		m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_udpSize * sizeof(Real)), QHostAddress::LocalHost, 9995);
+		m_sampleBufferIndex = 0;
+	}
 
-	// 1187.5 Hz clock from 19 kHz pilot
+	// Subcarrier downmix & phase recovery
 
-	m_rdsClockPhase += (m_dPhiSc / 16.0) + m_rdsClockOffset;
-	m_rdsClockPhase = fmod(m_rdsClockPhase, M_PI);
-	m_rdsClockLO = (m_rdsClockPhase < 0.0 ? -1.0 : 1.0);
+	m_parms.subcarr_phi += 2 * M_PI * fsc * (1.0 / m_srate);
+
+	/*
+	if (m_parms.subcarr_phi > 48 * 2 * M_PI)
+	{
+		m_parms.subcarr_phi -= 48 * 2 * M_PI;
+	}*/
+
+	m_parms.subcarr_bb[0] = filter_lp_2400_iq(demod, 0);
+	//m_parms.subcarr_bb[1] = filter_lp_2400_iq(demod * std::sin(m_parms.subcarr_phi), 1);
+
+	m_parms.clock_phi += dPilot / 16.0;
+	m_parms.clock_phi = std::fmod(m_parms.clock_phi, 2 * M_PI);
+	m_parms.lo_clock = (m_parms.clock_phi < M_PI ? 1 : -1);
+
+	m_sampleBuffer[m_sampleBufferIndex] =  m_parms.lo_clock * m_parms.subcarr_bb[0]; // UDP debug
+
+	// 1187.5 Hz clock
+
+	m_parms.clock_phi = (m_parms.subcarr_phi / 48.0) + m_parms.clock_offset;
 
 	// Clock phase recovery
 
-	if (sign(m_subcarrBB_1) != sign(m_subcarrBB[0]))
+	if (sign(m_parms.prev_bb) != sign(m_parms.subcarr_bb[0]))
 	{
-		Real d_cphi = m_rdsClockPhase;
+		m_parms.d_cphi = std::fmod(m_parms.clock_phi, M_PI);
 
-		if (d_cphi >= M_PI_2)
+		if (m_parms.d_cphi >= M_PI_2)
 		{
-			d_cphi -= M_PI;
+			m_parms.d_cphi -= M_PI;
 		}
 
-		m_rdsClockOffset -= 0.005 * d_cphi;
+		m_parms.clock_offset -= 0.005 * m_parms.d_cphi;
 	}
 
-	biphase(m_acc, m_rdsClockPhase - m_rdsClockPhase_1);
+	/* Decimate band-limited signal */
+	if (m_parms.numsamples % 8 == 0)
+	{
+		/* biphase symbol integrate & dump */
+		m_parms.acc += m_parms.subcarr_bb[0] * m_parms.lo_clock;
 
-	m_numSamples++;
-	m_subcarrPhi_1 = pilotPhaseSample;
-	m_rdsClockPhase_1 = m_rdsClockPhase;
+		if (sign(m_parms.lo_clock) != sign(m_parms.prevclock))
+		{
+			biphase(m_parms.acc, m_parms.clock_phi - m_parms.prev_clock_phi);
+			m_parms.acc = 0;
+		}
+
+		m_parms.prevclock = m_parms.lo_clock;
+	}
+
+	m_parms.numsamples++;
+	m_parms.prev_bb = m_parms.subcarr_bb[0];
+	m_parms.prev_clock_phi = m_parms.clock_phi;
+	m_prev = demod;
+	m_pilotPrev - pilot;
+}
+
+void RDSDemod::biphase(Real acc, Real d_cphi)
+{
+
+	if (sign(acc) != sign(m_parms.prev_acc)) // two successive of different sign: error detected
+	{
+		m_parms.tot_errs[m_parms.counter % 2]++;
+	}
+
+	if (m_parms.counter % 2 == m_parms.reading_frame) // two successive of the same sing: OK
+	{
+		// TODO: take action print_delta(sign(acc + prev_acc));
+	}
+
+	if (m_parms.counter == 0)
+	{
+		if (m_parms.tot_errs[1 - m_parms.reading_frame] < m_parms.tot_errs[m_parms.reading_frame])
+		{
+			m_parms.reading_frame = 1 - m_parms.reading_frame;
+		}
+
+		Real qua = (1.0 * abs(m_parms.tot_errs[0] - m_parms.tot_errs[1]) / (m_parms.tot_errs[0] + m_parms.tot_errs[1])) * 100;
+		qDebug("RDSDemod::biphase: frame: %d  acc: %+6.3f errs: %3d %3d  qual: %3.0f%%  clk: %7.2f\n",
+				m_parms.reading_frame,
+				acc,
+				m_parms.tot_errs[0],
+				m_parms.tot_errs[1],
+				qua,
+				(d_cphi / (2 * M_PI)) * m_srate);
+
+		m_parms.tot_errs[0] = 0;
+		m_parms.tot_errs[1] = 0;
+	}
+
+	m_parms.prev_acc = acc; // memorize (z^-1)
+	m_parms.counter = (m_parms.counter + 1) % 800;
 }
 
 Real RDSDemod::filter_lp_2400_iq(Real input, int iqIndex)
@@ -125,38 +212,3 @@ int RDSDemod::sign(Real a)
 {
 	return (a >= 0 ? 1 : 0);
 }
-
-void RDSDemod::biphase(Real acc, Real clockDPhi)
-{
-	if (clockDPhi < 0)
-	{
-		clockDPhi += M_PI;
-	}
-
-	double fsc = (m_dPhiSc / (2.0 * M_PI)) * m_srate;
-	double fclk = (clockDPhi / (2.0 * M_PI)) * m_srate;
-
-	if (m_counter == 0)
-	{
-		qDebug("RDSDemod::biphase: frame: %d pll: %.3f (ppm: %+8.3f) clk: %8.1f",
-				m_readingFrame,
-				fsc,
-				((fsc - 19000.0) / 19000.0) * 1000000,
-				fclk);
-	}
-
-	m_counter = (m_counter + 1) % 800;
-}
-
-void RDSDemod::print_delta(char b)
-{
-	output_bit(b ^ m_dbit);
-	m_dbit = b;
-}
-
-void RDSDemod::output_bit(char b)
-{
-	// TODO: return value instead of spitting out
-	//printf("%d", b);
-}
-

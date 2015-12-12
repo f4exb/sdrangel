@@ -92,7 +92,7 @@ void BFMDemod::configure(MessageQueue* messageQueue,
 
 void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
-	Complex ci, cs;
+	Complex ci, cs, cr;
 	fftfilt::cmplx *rf;
 	int rf_out;
 	Real msq, demod;
@@ -136,8 +136,15 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_running.m_rdsActive)
 			{
-				m_rdsDemod.process(demod * 2.0 * cos(3.0 * m_pilotPLLSamples[2]), m_pilotPLLSamples[2]);
-				//m_rdsDemod.process(demod, m_pilotPLLSamples[2]);
+				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), 0.0);
+				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), m_pilotPLLSamples[2]);
+
+				if (m_interpolatorRDS.interpolate(&m_interpolatorRDSDistanceRemain, r, &cr))
+				{
+					m_rdsDemod.process(cr.real(), cr.imag());
+					m_interpolatorRDSDistanceRemain += m_interpolatorRDSDistance;
+				}
+
 			}
 
 			Real sampleStereo;
@@ -158,6 +165,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
 				{
 					sampleStereo = cs.real();
+					m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
 				}
 			}
 
@@ -291,11 +299,6 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
 void BFMDemod::apply()
 {
-	if (m_config.m_inputSampleRate != m_running.m_inputSampleRate)
-	{
-		m_rdsDemod.setSampleRate(m_config.m_inputSampleRate);
-	}
-
 	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate)
 		|| (m_config.m_audioStereo && (m_config.m_audioStereo != m_running.m_audioStereo)))
 	{
@@ -314,12 +317,19 @@ void BFMDemod::apply()
 	{
 		m_settingsMutex.lock();
 		qDebug() << "BFMDemod::handleMessage: m_interpolator.create";
+
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+
 		m_interpolatorStereo.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
 		m_interpolatorStereoDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
 		m_interpolatorStereoDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+
+		m_interpolatorRDS.create(4, m_config.m_inputSampleRate, 600.0);
+		m_interpolatorRDSDistanceRemain = (Real) m_config.m_inputSampleRate / 250000.0;
+		m_interpolatorRDSDistance =  (Real) m_config.m_inputSampleRate / 250000.0;
+
 		m_settingsMutex.unlock();
 	}
 

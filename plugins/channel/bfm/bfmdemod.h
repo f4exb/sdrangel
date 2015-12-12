@@ -159,9 +159,15 @@ private:
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
+
 	Interpolator m_interpolatorStereo; //!< Twin Interpolator for stereo subcarrier
 	Real m_interpolatorStereoDistance;
 	Real m_interpolatorStereoDistanceRemain;
+
+	Interpolator m_interpolatorRDS; //!< Twin Interpolator for stereo subcarrier
+	Real m_interpolatorRDSDistance;
+	Real m_interpolatorRDSDistanceRemain;
+
 	Lowpass<Real> m_lowpass;
 	fftfilt* m_rfFilter;
 
