@@ -74,8 +74,6 @@ private:
 	Real m_yw[1+1];
 	Real m_prev;
 
-	Real m_pilotPrev;
-
 	int m_srate;
 
 	QUdpSocket *m_socket;
@@ -84,6 +82,7 @@ private:
 
 	static const int m_udpSize;
 	static const Real m_pllBeta;
+	static const Real m_fsc;
 };
 
 #endif /* PLUGINS_CHANNEL_BFM_RDSDEMOD_H_ */

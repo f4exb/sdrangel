@@ -24,6 +24,7 @@
 
 const Real RDSDemod::m_pllBeta = 50;
 const int RDSDemod::m_udpSize = 1472;
+const Real RDSDemod::m_fsc = 1187.5;
 
 RDSDemod::RDSDemod()
 {
@@ -46,7 +47,6 @@ RDSDemod::RDSDemod()
 	m_parms.numsamples = 0;
 	m_parms.loop_out = 0;
 	m_parms.prev_loop = 0;
-
 	m_parms.prev_acc = 0;
 	m_parms.counter = 0;
 	m_parms.reading_frame = 0;
@@ -60,22 +60,13 @@ RDSDemod::~RDSDemod()
 	delete m_socket;
 }
 
-void RDSDemod::setSampleRate(int srate)
+void RDSDemod::setSampleRate(int srate) /// FIXME: fix rate for now
 {
-	m_srate = srate;
 }
 
 void RDSDemod::process(Real demod, Real pilot)
 {
-
-	double fsc = 57000;
-
-	Real dPilot = pilot - m_pilotPrev;
-
-	if (dPilot < 0)
-	{
-		dPilot += 2 * M_PI;
-	}
+	m_sampleBuffer[m_sampleBufferIndex] =  m_parms.lo_clock * m_parms.subcarr_bb[0]; // UDP debug
 
 	if (m_sampleBufferIndex < m_udpSize)
 	{
@@ -89,26 +80,12 @@ void RDSDemod::process(Real demod, Real pilot)
 
 	// Subcarrier downmix & phase recovery
 
-	m_parms.subcarr_phi += 2 * M_PI * fsc * (1.0 / m_srate);
-
-	/*
-	if (m_parms.subcarr_phi > 48 * 2 * M_PI)
-	{
-		m_parms.subcarr_phi -= 48 * 2 * M_PI;
-	}*/
-
 	m_parms.subcarr_bb[0] = filter_lp_2400_iq(demod, 0);
-	//m_parms.subcarr_bb[1] = filter_lp_2400_iq(demod * std::sin(m_parms.subcarr_phi), 1);
-
-	m_parms.clock_phi += dPilot / 16.0;
-	m_parms.clock_phi = std::fmod(m_parms.clock_phi, 2 * M_PI);
-	m_parms.lo_clock = (m_parms.clock_phi < M_PI ? 1 : -1);
-
-	m_sampleBuffer[m_sampleBufferIndex] =  m_parms.lo_clock * m_parms.subcarr_bb[0]; // UDP debug
 
 	// 1187.5 Hz clock
 
-	m_parms.clock_phi = (m_parms.subcarr_phi / 48.0) + m_parms.clock_offset;
+	m_parms.subcarr_phi += (2 * M_PI * m_fsc) / (Real) m_srate;
+	m_parms.clock_phi = m_parms.subcarr_phi + m_parms.clock_offset;
 
 	// Clock phase recovery
 
@@ -123,6 +100,9 @@ void RDSDemod::process(Real demod, Real pilot)
 
 		m_parms.clock_offset -= 0.005 * m_parms.d_cphi;
 	}
+
+	m_parms.clock_phi = std::fmod(m_parms.clock_phi, 2 * M_PI);
+	m_parms.lo_clock = (m_parms.clock_phi < M_PI ? 1 : -1);
 
 	/* Decimate band-limited signal */
 	if (m_parms.numsamples % 8 == 0)
@@ -143,7 +123,6 @@ void RDSDemod::process(Real demod, Real pilot)
 	m_parms.prev_bb = m_parms.subcarr_bb[0];
 	m_parms.prev_clock_phi = m_parms.clock_phi;
 	m_prev = demod;
-	m_pilotPrev - pilot;
 }
 
 void RDSDemod::biphase(Real acc, Real d_cphi)
@@ -167,7 +146,7 @@ void RDSDemod::biphase(Real acc, Real d_cphi)
 		}
 
 		Real qua = (1.0 * abs(m_parms.tot_errs[0] - m_parms.tot_errs[1]) / (m_parms.tot_errs[0] + m_parms.tot_errs[1])) * 100;
-		qDebug("RDSDemod::biphase: frame: %d  acc: %+6.3f errs: %3d %3d  qual: %3.0f%%  clk: %7.2f\n",
+		qDebug("RDSDemod::biphase: frame: %d  acc: %+6.3f errs: %3d %3d  qual: %3.0f%%  clk: %7.2f",
 				m_parms.reading_frame,
 				acc,
 				m_parms.tot_errs[0],
