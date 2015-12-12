@@ -168,9 +168,10 @@ private:
 	Real m_squelchLevel;
 	int m_squelchState;
 
-	Real m_lastArgument;
-	Complex m_m1Sample; //!< x^-1 sample
-	Complex m_m2Sample; //!< x^-1 sample
+	Complex m_m1Sample; //!< x^-1 complex sample
+	Complex m_m2Sample; //!< x^-2 complex sample
+	Real m_m1Arg; //!> x^-1 real sample
+
 	MovingAverage<Real> m_movingAverage;
 
 	AudioVector m_audioBuffer;
@@ -184,11 +185,44 @@ private:
 	RDSPhaseLock m_pilotPLL;
 	Real m_pilotPLLSamples[3];
 
+	RDSDemod m_rdsDemod;
+
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
 	static const Real default_deemphasis = 50.0; // 50 us
 
-	RDSDemod m_rdsDemod;
+	Real m_fmExcursion;
+	Real m_fmScaling;
+	static const int default_excursion = 750000; // +/- 75 kHz
+
+	/**
+	 * Standard discriminator using atan2. On modern processors this is as efficient as the non atan2 one.
+	 * This is better for high fidelity.
+	 */
+	Real phaseDiscriminator(const Complex& sample)
+	{
+		Complex d(std::conj(m_m1Sample) * sample);
+		m_m1Sample = sample;
+		return (std::atan2(d.imag(), d.real()) / M_PI_2) * m_fmScaling;
+	}
+
+	/**
+	 * Alternative without atan at the expense of a slight distorsion on very wideband signals
+	 * http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+	 * in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
+	 */
+	Real phaseDiscriminator2(const Complex& sample, Real msq)
+	{
+		Real ip = sample.real() - m_m2Sample.real();
+		Real qp = sample.imag() - m_m2Sample.imag();
+		Real h1 = m_m1Sample.real() * qp;
+		Real h2 = m_m1Sample.imag() * ip;
+
+		m_m2Sample = m_m1Sample;
+		m_m1Sample = sample;
+
+		return ((h1 - h2) / (msq * M_PI)) * m_fmScaling;
+	}
 
 	void apply();
 };

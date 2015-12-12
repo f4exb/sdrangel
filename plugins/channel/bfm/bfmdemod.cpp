@@ -34,7 +34,9 @@ BFMDemod::BFMDemod(SampleSink* sampleSink) :
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
 	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
-	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6)
+	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
+	m_fmExcursion(default_excursion),
+	m_fmScaling(384000/m_fmExcursion)
 {
 	setObjectName("BFMDemod");
 
@@ -119,22 +121,13 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			{
 				m_squelchState--;
 
-				// Alternative without atan
-				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
-				// in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
-				Real ip = rf[i].real() - m_m2Sample.real();
-				Real qp = rf[i].imag() - m_m2Sample.imag();
-				Real h1 = m_m1Sample.real() * qp;
-				Real h2 = m_m1Sample.imag() * ip;
-				demod = (h1 - h2) / (msq * 10.0);
+				//demod = phaseDiscriminator2(rf[i], msq);
+				demod = phaseDiscriminator(rf[i]);
 			}
 			else
 			{
 				demod = 0;
 			}
-
-			m_m2Sample = m_m1Sample;
-			m_m1Sample = rf[i];
 
 			if (!m_running.m_showPilot)
 			{
@@ -177,14 +170,14 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
 					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * 3000 * m_running.m_volume);
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * 3000 * m_running.m_volume);
+					m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
+					m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
 				}
 				else
 				{
 					Real deemph;
 					m_deemphasisFilterX.process(ci.real(), deemph);
-					quint16 sample = (qint16)(deemph * 3000 * m_running.m_volume);
+					quint16 sample = (qint16)(deemph * (1<<12) * m_running.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}
@@ -243,8 +236,6 @@ void BFMDemod::stop()
 
 bool BFMDemod::handleMessage(const Message& cmd)
 {
-	qDebug() << "BFMDemod::handleMessage";
-
 	if (Channelizer::MsgChannelizerNotification::match(cmd))
 	{
 		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
@@ -285,6 +276,8 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	}
 	else
 	{
+		qDebug() << "BFMDemod::handleMessage: none";
+
 		if (m_sampleSink != 0)
 		{
 		    return m_sampleSink->handleMessage(cmd);
@@ -338,6 +331,7 @@ void BFMDemod::apply()
 		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
+		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
 		m_settingsMutex.unlock();
 
 		qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
@@ -357,7 +351,7 @@ void BFMDemod::apply()
 
 	if(m_config.m_squelch != m_running.m_squelch) {
 		qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
+		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 20.0);
 		m_squelchLevel *= m_squelchLevel;
 	}
 
