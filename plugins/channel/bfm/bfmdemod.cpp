@@ -140,11 +140,12 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
 				}
 
-				Complex s(demod*2.0*m_pilotPLLSamples[1], 0);
+				Complex s(demod * 1.17 * m_pilotPLLSamples[1], 0);
 
 				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
 				{
 					sampleStereo = cs.real();
+					m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
 				}
 			}
 
