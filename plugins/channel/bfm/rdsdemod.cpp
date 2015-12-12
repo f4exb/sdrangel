@@ -26,7 +26,8 @@ const Real RDSDemod::m_pllBeta = 50;
 const int RDSDemod::m_udpSize = 1472;
 const Real RDSDemod::m_fsc = 1187.5;
 
-RDSDemod::RDSDemod()
+RDSDemod::RDSDemod() :
+	m_udpDebug(this, 1472, 9995)
 {
 	m_srate = 250000;
 
@@ -35,29 +36,19 @@ RDSDemod::RDSDemod()
 	m_parms.clock_phi = 0;
 	m_parms.prev_clock_phi = 0;
 	m_parms.lo_clock = 0;
-	m_parms.prevclock = 0;
+	m_parms.prev_lo_clock = 0;
 	m_parms.prev_bb = 0;
-	m_parms.d_phi_sc = 0;
 	m_parms.d_cphi = 0;
 	m_parms.acc = 0;
-	m_parms.subcarr_sample = 0;
-	m_parms.c = 0;
-	m_parms.fmfreq = 0;
-	m_parms.bytesread;
 	m_parms.numsamples = 0;
-	m_parms.loop_out = 0;
-	m_parms.prev_loop = 0;
 	m_parms.prev_acc = 0;
 	m_parms.counter = 0;
 	m_parms.reading_frame = 0;
-
-	m_socket = new QUdpSocket(this);
-	m_sampleBufferIndex = 0;
 }
 
 RDSDemod::~RDSDemod()
 {
-	delete m_socket;
+	//delete m_socket;
 }
 
 void RDSDemod::setSampleRate(int srate) /// FIXME: fix rate for now
@@ -66,23 +57,21 @@ void RDSDemod::setSampleRate(int srate) /// FIXME: fix rate for now
 
 void RDSDemod::process(Real demod, Real pilot)
 {
-	m_sampleBuffer[m_sampleBufferIndex] =  m_parms.lo_clock * m_parms.subcarr_bb[0]; // UDP debug
-
-	if (m_sampleBufferIndex < m_udpSize)
-	{
-		m_sampleBufferIndex++;
-	}
-	else
-	{
-		m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_udpSize * sizeof(Real)), QHostAddress::LocalHost, 9995);
-		m_sampleBufferIndex = 0;
-	}
+	m_udpDebug.write(m_parms.lo_clock * m_parms.subcarr_bb[0]);
 
 	// Subcarrier downmix & phase recovery
 
 	m_parms.subcarr_bb[0] = filter_lp_2400_iq(demod, 0);
 
 	// 1187.5 Hz clock
+
+	/*
+	if (m_parms.subcarr_phi > 1e9) // ~ every 37 hours =>  not really useful
+	{
+		qDebug("RDSDemod::process: reset 1187.5 Hz clock");
+		m_parms.subcarr_phi = 0;
+		m_parms.clock_offset = 0;
+	}*/
 
 	m_parms.subcarr_phi += (2 * M_PI * m_fsc) / (Real) m_srate;
 	m_parms.clock_phi = m_parms.subcarr_phi + m_parms.clock_offset;
@@ -110,13 +99,13 @@ void RDSDemod::process(Real demod, Real pilot)
 		/* biphase symbol integrate & dump */
 		m_parms.acc += m_parms.subcarr_bb[0] * m_parms.lo_clock;
 
-		if (sign(m_parms.lo_clock) != sign(m_parms.prevclock))
+		if (sign(m_parms.lo_clock) != sign(m_parms.prev_lo_clock))
 		{
 			biphase(m_parms.acc, m_parms.clock_phi - m_parms.prev_clock_phi);
 			m_parms.acc = 0;
 		}
 
-		m_parms.prevclock = m_parms.lo_clock;
+		m_parms.prev_lo_clock = m_parms.lo_clock;
 	}
 
 	m_parms.numsamples++;

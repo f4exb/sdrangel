@@ -15,64 +15,67 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
-#define PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
+#ifndef INCLUDE_UTIL_UDPSINK_H_
+#define INCLUDE_UTIL_UDPSINK_H_
 
 #include <QObject>
-#include "util/udpsink.h"
+#include <QUdpSocket>
+#include <QHostAddress>
 
-#include "dsp/dsptypes.h"
-
-class RDSDemod : public QObject
+template<typename T>
+class UDPSink
 {
-    Q_OBJECT
 public:
-	RDSDemod();
-	~RDSDemod();
+	UDPSink(QObject *parent, unsigned int udpSize, unsigned int port) :
+		m_udpSize(udpSize),
+		m_address(QHostAddress::LocalHost),
+		m_port(port),
+		m_sampleBufferIndex(0)
+	{
+		m_sampleBuffer = new T[m_udpSize];
+		m_socket = new QUdpSocket(parent);
+	}
 
-	void setSampleRate(int srate);
-	void process(Real rdsSample, Real pilotSample);
+	UDPSink (QObject *parent, unsigned int udpSize, QHostAddress& address, unsigned int port) :
+		m_udpSize(udpSize),
+		m_address(address),
+		m_port(port),
+		m_sampleBufferIndex(0)
+	{
+		m_sampleBuffer = new T[m_udpSize];
+		m_socket = new QUdpSocket(parent);
+	}
 
-protected:
-	void biphase(Real acc, Real d_cphi);
-	Real filter_lp_2400_iq(Real in, int iqIndex);
-	Real filter_lp_pll(Real input);
-	int sign(Real a);
+	~UDPSink()
+	{
+		delete[] m_sampleBuffer;
+		delete m_socket;
+	}
+
+	void write(T sample)
+	{
+		m_sampleBuffer[m_sampleBufferIndex] = sample;
+
+		if (m_sampleBufferIndex < m_udpSize)
+		{
+			m_sampleBufferIndex++;
+		}
+		else
+		{
+			m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_udpSize * sizeof(T)), m_address, m_port);
+			m_sampleBufferIndex = 0;
+		}
+	}
 
 private:
-	struct
-	{
-		double subcarr_phi;
-		Real subcarr_bb[2];
-		double clock_offset;
-		double clock_phi;
-		double prev_clock_phi;
-		Real lo_clock;
-		Real prev_lo_clock;
-		Real prev_bb;
-		double d_cphi;
-		Real acc;
-		int numsamples;
-		Real prev_acc;
-		int counter;
-		int reading_frame;
-		int tot_errs[2];
-	} m_parms;
-
-	Real m_xv[2][2+1];
-	Real m_yv[2][2+1];
-	Real m_xw[1+1];
-	Real m_yw[1+1];
-	Real m_prev;
-
-	int m_srate;
-
-	UDPSink<Real> m_udpDebug;
-
-	static const int m_udpSize;
-	static const Real m_pllBeta;
-	static const Real m_fsc;
+	unsigned int m_udpSize;
+	QHostAddress m_address;
+	unsigned int m_port;
+	QUdpSocket *m_socket;
+	T *m_sampleBuffer;;
+	int m_sampleBufferIndex;
 };
 
-#endif /* PLUGINS_CHANNEL_BFM_RDSDEMOD_H_ */
+
+
+#endif /* INCLUDE_UTIL_UDPSINK_H_ */
