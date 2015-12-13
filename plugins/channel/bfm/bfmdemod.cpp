@@ -137,11 +137,17 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			if (m_running.m_rdsActive)
 			{
 				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), 0.0);
-				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), m_pilotPLLSamples[2]);
+				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), 0.0);
 
 				if (m_interpolatorRDS.interpolate(&m_interpolatorRDSDistanceRemain, r, &cr))
 				{
-					m_rdsDemod.process(cr.real(), cr.imag());
+					bool bit;
+
+					if (m_rdsDemod.process(cr.real(), bit))
+					{
+						m_rdsDecoder.frameSync(bit);
+					}
+
 					m_interpolatorRDSDistanceRemain += m_interpolatorRDSDistance;
 				}
 			}

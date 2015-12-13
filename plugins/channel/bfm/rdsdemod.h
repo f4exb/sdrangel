@@ -32,10 +32,10 @@ public:
 	~RDSDemod();
 
 	void setSampleRate(int srate);
-	void process(Real rdsSample, Real pilotSample);
+	bool process(Real rdsSample, bool &bit);
 
 protected:
-	void biphase(Real acc, Real d_cphi);
+	bool biphase(Real acc, bool &bit, Real d_cphi);
 	Real filter_lp_2400_iq(Real in, int iqIndex);
 	Real filter_lp_pll(Real input);
 	int sign(Real a);
@@ -58,6 +58,7 @@ private:
 		int counter;
 		int reading_frame;
 		int tot_errs[2];
+		int dbit;
 	} m_parms;
 
 	Real m_xv[2][2+1];

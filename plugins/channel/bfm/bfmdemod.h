@@ -31,6 +31,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "rdsdemod.h"
+#include "rdsdecoder.h"
 
 #define rfFilterFftLength 1024
 
@@ -192,6 +193,7 @@ private:
 	Real m_pilotPLLSamples[3];
 
 	RDSDemod m_rdsDemod;
+	RDSDecoder m_rdsDecoder;
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;

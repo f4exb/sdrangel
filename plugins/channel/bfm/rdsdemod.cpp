@@ -44,6 +44,7 @@ RDSDemod::RDSDemod() :
 	m_parms.prev_acc = 0;
 	m_parms.counter = 0;
 	m_parms.reading_frame = 0;
+	m_parms.dbit = 0;
 }
 
 RDSDemod::~RDSDemod()
@@ -55,8 +56,10 @@ void RDSDemod::setSampleRate(int srate) /// FIXME: fix rate for now
 {
 }
 
-void RDSDemod::process(Real demod, Real pilot)
+bool RDSDemod::process(Real demod, bool& bit)
 {
+	bool ret = false;
+
 	m_udpDebug.write(m_parms.lo_clock * m_parms.subcarr_bb[0]);
 
 	// Subcarrier downmix & phase recovery
@@ -101,7 +104,7 @@ void RDSDemod::process(Real demod, Real pilot)
 
 		if (sign(m_parms.lo_clock) != sign(m_parms.prev_lo_clock))
 		{
-			biphase(m_parms.acc, m_parms.clock_phi - m_parms.prev_clock_phi);
+			ret = biphase(m_parms.acc, bit, m_parms.clock_phi - m_parms.prev_clock_phi);
 			m_parms.acc = 0;
 		}
 
@@ -112,10 +115,13 @@ void RDSDemod::process(Real demod, Real pilot)
 	m_parms.prev_bb = m_parms.subcarr_bb[0];
 	m_parms.prev_clock_phi = m_parms.clock_phi;
 	m_prev = demod;
+
+	return ret;
 }
 
-void RDSDemod::biphase(Real acc, Real d_cphi)
+bool RDSDemod::biphase(Real acc, bool& bit, Real d_cphi)
 {
+	bool ret = false;
 
 	if (sign(acc) != sign(m_parms.prev_acc)) // two successive of different sign: error detected
 	{
@@ -124,7 +130,11 @@ void RDSDemod::biphase(Real acc, Real d_cphi)
 
 	if (m_parms.counter % 2 == m_parms.reading_frame) // two successive of the same sing: OK
 	{
-		// TODO: take action print_delta(sign(acc + prev_acc));
+		// new bit found
+		int b = sign(m_parms.acc + m_parms.prev_acc);
+		bit = b ^ m_parms.dbit;
+		m_parms.dbit = b;
+		ret = true;
 	}
 
 	if (m_parms.counter == 0)
@@ -149,6 +159,8 @@ void RDSDemod::biphase(Real acc, Real d_cphi)
 
 	m_parms.prev_acc = acc; // memorize (z^-1)
 	m_parms.counter = (m_parms.counter + 1) % 800;
+
+	return ret;
 }
 
 Real RDSDemod::filter_lp_2400_iq(Real input, int iqIndex)
