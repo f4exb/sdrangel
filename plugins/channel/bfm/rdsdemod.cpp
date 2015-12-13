@@ -23,11 +23,10 @@
 #include "rdsdemod.h"
 
 const Real RDSDemod::m_pllBeta = 50;
-const int RDSDemod::m_udpSize = 1472;
 const Real RDSDemod::m_fsc = 1187.5;
 
-RDSDemod::RDSDemod() :
-	m_udpDebug(this, 1472, 9995)
+RDSDemod::RDSDemod()
+	// : m_udpDebug(this, 1472, 9995) // UDP debug
 {
 	m_srate = 250000;
 
@@ -60,7 +59,7 @@ bool RDSDemod::process(Real demod, bool& bit)
 {
 	bool ret = false;
 
-	m_udpDebug.write(m_parms.lo_clock * m_parms.subcarr_bb[0]);
+	//m_udpDebug.write(m_parms.lo_clock * m_parms.subcarr_bb[0]); // UDP debug
 
 	// Subcarrier downmix & phase recovery
 

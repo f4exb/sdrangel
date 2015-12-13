@@ -45,8 +45,9 @@ RDSDecoder::~RDSDecoder()
 {
 }
 
-void RDSDecoder::frameSync(bool bit)
+bool RDSDecoder::frameSync(bool bit)
 {
+	bool group_ready = false;
 	unsigned int reg_syndrome;
 	unsigned long bit_distance, block_distance;
 	unsigned int block_calculated_crc, block_received_crc, checkword, dataword;
@@ -170,7 +171,7 @@ void RDSDecoder::frameSync(bool bit)
 
 				if (m_groupGoodBlocksCounter == 5)
 				{
-					//decode_group(group); TODO: pass on to the group parser
+					group_ready = true; //decode_group(group); pass on to the group parser
 				}
 			}
 
@@ -205,6 +206,8 @@ void RDSDecoder::frameSync(bool bit)
 	}
 
 	m_bitCounter++;
+
+	return group_ready;
 }
 
 ////////////////////////// HELPER FUNTIONS /////////////////////////

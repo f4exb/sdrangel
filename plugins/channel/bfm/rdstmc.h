@@ -15,64 +15,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef PLUGINS_CHANNEL_BFM_RDSTMC_H_
+#define PLUGINS_CHANNEL_BFM_RDSTMC_H_
 
-#ifndef PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
-#define PLUGINS_CHANNEL_BFM_RDSDEMOD_H_
+#include <string>
 
-#include <QObject>
-//#include "util/udpsink.h" // UDP debug
-
-#include "dsp/dsptypes.h"
-
-class RDSDemod : public QObject
+class RDSTMC
 {
-    Q_OBJECT
 public:
-	RDSDemod();
-	~RDSDemod();
-
-	void setSampleRate(int srate);
-	bool process(Real rdsSample, bool &bit);
-
-protected:
-	bool biphase(Real acc, bool &bit, Real d_cphi);
-	Real filter_lp_2400_iq(Real in, int iqIndex);
-	Real filter_lp_pll(Real input);
-	int sign(Real a);
-
-private:
-	struct
-	{
-		double subcarr_phi;
-		Real subcarr_bb[2];
-		double clock_offset;
-		double clock_phi;
-		double prev_clock_phi;
-		Real lo_clock;
-		Real prev_lo_clock;
-		Real prev_bb;
-		double d_cphi;
-		Real acc;
-		int numsamples;
-		Real prev_acc;
-		int counter;
-		int reading_frame;
-		int tot_errs[2];
-		int dbit;
-	} m_parms;
-
-	Real m_xv[2][2+1];
-	Real m_yv[2][2+1];
-	Real m_xw[1+1];
-	Real m_yw[1+1];
-	Real m_prev;
-
-	int m_srate;
-
-	//UDPSink<Real> m_udpDebug; // UDP debug
-
-	static const Real m_pllBeta;
-	static const Real m_fsc;
+	static std::string get_tmc_events(unsigned int i, unsigned int j);
+	static int get_tmc_event_code_index(unsigned int i, unsigned int j);
 };
 
-#endif /* PLUGINS_CHANNEL_BFM_RDSDEMOD_H_ */
+#endif /* PLUGINS_CHANNEL_BFM_RDSTMC_H_ */

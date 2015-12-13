@@ -280,7 +280,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_bfmDemod = new BFMDemod(m_spectrumVis);
+	m_bfmDemod = new BFMDemod(m_spectrumVis, &m_rdsParser);
 	m_channelizer = new Channelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));

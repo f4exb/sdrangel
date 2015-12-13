@@ -22,6 +22,7 @@
 #include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "rdsparser.h"
 
 class PluginAPI;
 
@@ -78,6 +79,7 @@ private:
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
+	RDSParser m_rdsParser;
 
 	BFMDemod* m_bfmDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;

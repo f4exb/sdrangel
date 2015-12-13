@@ -24,7 +24,8 @@ public:
 	RDSDecoder();
 	~RDSDecoder();
 
-	void frameSync(bool bit);
+	bool frameSync(bool bit);
+	unsigned int *getGroup() { return m_group; }
 
 protected:
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen);

@@ -35,9 +35,11 @@
 
 #define rfFilterFftLength 1024
 
+class RDSParser;
+
 class BFMDemod : public SampleSink {
 public:
-	BFMDemod(SampleSink* sampleSink);
+	BFMDemod(SampleSink* sampleSink, RDSParser* rdsParser);
 	virtual ~BFMDemod();
 
 	void configure(MessageQueue* messageQueue,
@@ -194,6 +196,7 @@ private:
 
 	RDSDemod m_rdsDemod;
 	RDSDecoder m_rdsDecoder;
+	RDSParser *m_rdsParser;
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;

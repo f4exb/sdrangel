@@ -23,13 +23,15 @@
 #include "dsp/dspengine.h"
 #include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
+#include "rdsparser.h"
 
 #include "bfmdemod.h"
 
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
-BFMDemod::BFMDemod(SampleSink* sampleSink) :
+BFMDemod::BFMDemod(SampleSink* sampleSink, RDSParser *rdsParser) :
 	m_sampleSink(sampleSink),
+	m_rdsParser(rdsParser),
 	m_audioFifo(4, 250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
@@ -145,7 +147,13 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 					if (m_rdsDemod.process(cr.real(), bit))
 					{
-						m_rdsDecoder.frameSync(bit);
+						if (m_rdsDecoder.frameSync(bit))
+						{
+							if (m_rdsParser)
+							{
+								m_rdsParser->parseGroup(m_rdsDecoder.getGroup());
+							}
+						}
 					}
 
 					m_interpolatorRDSDistanceRemain += m_interpolatorRDSDistance;
