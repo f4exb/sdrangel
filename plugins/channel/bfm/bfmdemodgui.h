@@ -93,7 +93,8 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
-	void rdsUpdate();
+	void rdsUpdate(bool force);
+	void rdsUpdateFixedFields();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

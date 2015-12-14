@@ -48,7 +48,7 @@ public:
 	bool           m_g0_updated;
 	bool           m_g0_af_updated;
 	unsigned int   m_g0_count;
-	char           m_g0_program_service_name[9];
+	char           m_g0_program_service_name[8+1];
 	bool           m_g0_traffic_announcement;
 	bool           m_g0_music_speech;
 	bool           m_g0_mono_stereo;
@@ -56,6 +56,24 @@ public:
 	bool           m_g0_compressed;
 	bool           m_g0_static_pty;
 	std::set<double> m_g0_alt_freq;
+
+	// G1 data
+	bool           m_g1_updated;
+	unsigned int   m_g1_count;
+	int            m_g1_country_page_index; //!< negative if not received
+	int   		   m_g1_country_index;      //!< negative if not received
+	int            m_g1_language_index;     //!< negative if not received
+	unsigned int   m_g1_pin_day;
+	unsigned int   m_g1_pin_hour;
+	unsigned int   m_g1_pin_minute;
+
+	// G2 data
+	bool           m_g2_updated;
+	unsigned int   m_g2_count;
+	char           m_g2_radiotext[64+1];
+
+	// G3 data
+	unsigned int   m_g3_count;
 
 	// G4 data
 	bool           m_g4_updated;
@@ -68,6 +86,22 @@ public:
 	unsigned int   m_g4_day;
 	double         m_g4_local_time_offset;
 
+    // G5..G7 data
+	unsigned int   m_g5_count;
+	unsigned int   m_g6_count;
+	unsigned int   m_g7_count;
+
+	// G8 data
+	bool           m_g8_updated;
+	unsigned int   m_g8_count;
+	bool           m_g8_diversion_recommended;
+	unsigned int   m_g8_dp_ci;
+	bool           m_g8_sign;
+	unsigned int   m_g8_extent;
+	unsigned int   m_g8_event;
+	int            m_g8_label_index; //!< negative if not received
+	int            m_g8_content;
+
 	// Static tables
 	static const unsigned int offset_pos[5];
 	static const unsigned int offset_word[5];
@@ -77,6 +111,7 @@ public:
 	static const std::string pi_country_codes[15][5];
 	static const std::string coverage_area_codes[16];
 	static const std::string rds_group_acronyms[16];
+	static const std::string rds_group_acronym_tags[16];
 	static const std::string language_codes[44];
 	static const std::string tmc_duration[8][2];
 	static const int optional_content_lengths[16];
@@ -104,7 +139,6 @@ private:
 
 	unsigned char  pi_country_identification;
 	unsigned char  pi_program_reference_number;
-	char           radiotext[64+1];
 
 	bool           radiotext_AB_flag;
 	bool           debug;

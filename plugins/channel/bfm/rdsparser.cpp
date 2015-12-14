@@ -124,6 +124,25 @@ const std::string RDSParser::rds_group_acronyms[16] = {
 	"___"
 };
 
+const std::string RDSParser::rds_group_acronym_tags[16] = {
+	"BAS",
+	"PIN",
+	"RTX",
+	"AID",
+	"TIM",
+	"TDC",
+	"IH_",
+	"RP_",
+	"TMC",
+	"EWS",
+	"___",
+	"___",
+	"___",
+	"___",
+	"EON",
+	"___"
+};
+
 /* page 74, Annex E, table E.1 in the standard: that's the ASCII table!!! */
 
 /* see page 84, Annex J in the standard */
@@ -224,7 +243,9 @@ void RDSParser::clearUpdateFlags()
 	m_pi_updated = false;
 	m_g0_updated = false;
 	m_g0_af_updated = false;
+	m_g2_updated = false;
 	m_g4_updated = false;
+	m_g8_updated = false;
 }
 
 void RDSParser::clearAllFields()
@@ -238,7 +259,7 @@ void RDSParser::clearAllFields()
 	// Group 00 data
 	m_g0_count = 0;
 	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
-	radiotext[sizeof(m_g0_program_service_name) - 1] = '\0';
+	m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
 	m_g0_traffic_announcement = false;
 	m_g0_music_speech = false;
 	m_g0_mono_stereo = false;
@@ -247,12 +268,47 @@ void RDSParser::clearAllFields()
 	m_g0_static_pty = false;
 	m_g0_alt_freq.clear();
 
+	// Group 01 data
+	m_g1_count = 0;
+	m_g1_country_page_index = -1;
+	m_g1_country_index = -1;
+	m_g1_language_index = -1;
+	m_g1_pin_day = 0;
+	m_g1_pin_hour = 0;
+	m_g1_pin_minute = 0;
+
 	// Group 02 data
-	std::memset(radiotext, ' ', sizeof(radiotext));
-	radiotext[sizeof(radiotext) - 1] = '\0';
+	m_g2_count = 0;
+	std::memset(m_g2_radiotext, ' ', sizeof(m_g2_radiotext));
+	m_g2_radiotext[sizeof(m_g2_radiotext) - 1] = '\0';
+
+	// Group 03 data
+	m_g3_count = 0;
 
 	// Group 04 data
 	m_g4_count = 0;
+	m_g4_hours = 0;
+	m_g4_minutes = 0;
+	m_g4_seconds = 0;
+	m_g4_year = 0;
+	m_g4_month = 0;
+	m_g4_day = 0;
+	m_g4_local_time_offset = 0.0;
+
+	// Group 05..07 data
+	m_g5_count = 0;
+	m_g6_count = 0;
+	m_g7_count = 0;
+
+	// Group 08 data
+	m_g8_count = 0;
+	m_g8_diversion_recommended = false;
+	m_g8_dp_ci = 0;
+	m_g8_sign = false;
+	m_g8_extent = 0;
+	m_g8_event = 0;
+	m_g8_label_index = -1;
+	m_g8_content = 0;
 
 	clearUpdateFlags();
 }
@@ -513,17 +569,21 @@ void RDSParser::decode_type1(unsigned int *group, bool B)
 	char radio_paging_codes     =  group[1]        & 0x1f;
 	int variant_code            = (group[2] >> 12) & 0x7;
 	unsigned int slow_labelling =  group[2]        & 0xfff;
-	int day    = (int)((group[3] >> 11) & 0x1f);
-	int hour   = (int)((group[3] >>  6) & 0x1f);
-	int minute = (int) (group[3]        & 0x3f);
+	m_g1_pin_day    = (unsigned int)((group[3] >> 11) & 0x1f);
+	m_g1_pin_hour   = (unsigned int)((group[3] >>  6) & 0x1f);
+	m_g1_pin_minute = (unsigned int) (group[3]        & 0x3f);
+
+	m_g1_count++;
 
 	if (radio_paging_codes) {
-		qDebug() << "RDSParser::decode_type1: paging codes: " << int(radio_paging_codes) << " ";
+		//qDebug() << "RDSParser::decode_type1: paging codes: " << int(radio_paging_codes) << " ";
 	}
 
-	if (day || hour || minute) {
+	if (m_g1_pin_day || m_g1_pin_hour || m_g1_pin_minute) {
+		m_g1_updated = true;
+		/*
 		std::string s = str(boost::format("program item: %id, %i, %i ") % day % hour % minute);
-		qDebug() << "RDSParser::decode_type1: " << s.c_str();
+		qDebug() << "RDSParser::decode_type1: " << s.c_str();*/
 	}
 
 	if (!B)
@@ -534,24 +594,30 @@ void RDSParser::decode_type1(unsigned int *group, bool B)
 				paging = (slow_labelling >> 8) & 0x0f;
 				ecc    =  slow_labelling       & 0xff;
 				if (paging) {
-					qDebug() << "RDSParser::decode_type1: " << "paging: " << paging << " ";
+					//qDebug() << "RDSParser::decode_type1: " << "paging: " << paging << " ";
 				}
 				if ((ecc > 223) && (ecc < 229)) {
+					m_g1_updated = true;
+					m_g1_country_page_index = country_code - 1;
+					m_g1_country_index = ecc - 224;
+					/*
 					qDebug() << "RDSParser::decode_type1: " << "extended country code: "
-						<< (pi_country_codes[country_code-1][ecc-224]).c_str();
+						<< (pi_country_codes[country_code-1][ecc-224]).c_str();*/
 				} else {
 					qDebug() << "RDSParser::decode_type1: " << "invalid extended country code: " << ecc;
 				}
 				break;
 			case 1: // TMC identification
-				qDebug() << "RDSParser::decode_type1: TMC identification code received";
+				//qDebug() << "RDSParser::decode_type1: TMC identification code received";
 				break;
 			case 2: // Paging identification
-				qDebug() << "RDSParser::decode_type1: Paging identification code received";
+				//qDebug() << "RDSParser::decode_type1: Paging identification code received";
 				break;
 			case 3: // language codes
 				if (slow_labelling < 44) {
-					qDebug() << "RDSParser::decode_type1: " << "language: " << language_codes[slow_labelling].c_str();
+					m_g1_updated = true;
+					m_g1_language_index = slow_labelling;
+					//qDebug() << "RDSParser::decode_type1: " << "language: " << language_codes[slow_labelling].c_str();
 				} else {
 					qDebug() << "RDSParser::decode_type1: " << "language: invalid language code " << slow_labelling;
 				}
@@ -566,38 +632,40 @@ void RDSParser::decode_type2(unsigned int *group, bool B)
 {
 	unsigned char text_segment_address_code = group[1] & 0x0f;
 
+	m_g2_updated = true;
+	m_g2_count++;
+
 	// when the A/B flag is toggled, flush your current radiotext
 	if (radiotext_AB_flag != ((group[1] >> 4) & 0x01))
 	{
-		std::memset(radiotext, ' ', sizeof(radiotext));
-		radiotext[sizeof(radiotext) - 1] = '\0';
+		std::memset(m_g2_radiotext, ' ', sizeof(m_g2_radiotext));
+		m_g2_radiotext[sizeof(m_g2_radiotext) - 1] = '\0';
 	}
 
 	radiotext_AB_flag = (group[1] >> 4) & 0x01;
 
 	if (!B)
 	{
-		radiotext[text_segment_address_code * 4    ] = (group[2] >> 8) & 0xff;
-		radiotext[text_segment_address_code * 4 + 1] =  group[2]       & 0xff;
-		radiotext[text_segment_address_code * 4 + 2] = (group[3] >> 8) & 0xff;
-		radiotext[text_segment_address_code * 4 + 3] =  group[3]       & 0xff;
+		m_g2_radiotext[text_segment_address_code * 4    ] = (group[2] >> 8) & 0xff;
+		m_g2_radiotext[text_segment_address_code * 4 + 1] =  group[2]       & 0xff;
+		m_g2_radiotext[text_segment_address_code * 4 + 2] = (group[3] >> 8) & 0xff;
+		m_g2_radiotext[text_segment_address_code * 4 + 3] =  group[3]       & 0xff;
 	}
 	else
 	{
-		radiotext[text_segment_address_code * 2    ] = (group[3] >> 8) & 0xff;
-		radiotext[text_segment_address_code * 2 + 1] =  group[3]       & 0xff;
+		m_g2_radiotext[text_segment_address_code * 2    ] = (group[3] >> 8) & 0xff;
+		m_g2_radiotext[text_segment_address_code * 2 + 1] =  group[3]       & 0xff;
 	}
 
+	/*
 	qDebug() << "RDSParser::decode_type2: " << "Radio Text " << (radiotext_AB_flag ? 'B' : 'A')
-		<< ": " << std::string(radiotext, sizeof(radiotext)).c_str();
-
-	//send_message(4,std::string(radiotext, sizeof(radiotext)));
+		<< ": " << std::string(m_g2_radiotext, sizeof(m_g2_radiotext)).c_str();*/
 }
 
 void RDSParser::decode_type3(unsigned int *group, bool B)
 {
 	if (B) {
-		qDebug() << "RDSParser::decode_type2: type 3B not implemented yet";
+		qDebug() << "RDSParser::decode_type3: type 3B not implemented yet";
 		return;
 	}
 
@@ -702,9 +770,13 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 		return;
 	}
 
+	m_g8_updated = true;
+	m_g8_count++;
+
 	bool T = (group[1] >> 4) & 0x1; // 0 = user message, 1 = tuning info
 	bool F = (group[1] >> 3) & 0x1; // 0 = multi-group, 1 = single-group
 	bool D = (group[2] > 15) & 0x1; // 1 = diversion recommended
+	m_g8_diversion_recommended = D;
 
 	static unsigned long int free_format[4];
 	static int no_groups = 0;
@@ -724,24 +796,24 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 	}
 	else if (F || D)
 	{ // single-group or 1st of multi-group
-		unsigned int dp_ci    =  group[1]        & 0x7;   // duration & persistence or continuity index
-		bool sign             = (group[2] >> 14) & 0x1;   // event direction, 0 = +, 1 = -
-		unsigned int extent   = (group[2] >> 11) & 0x7;   // number of segments affected
-		unsigned int event    =  group[2]        & 0x7ff; // event code, defined in ISO 14819-2
+		m_g8_dp_ci            =  group[1]        & 0x7;   // duration & persistence or continuity index
+		m_g8_sign             = (group[2] >> 14) & 0x1;   // event direction, 0 = +, 1 = -
+		m_g8_extent           = (group[2] >> 11) & 0x7;   // number of segments affected
+		m_g8_event            =  group[2]        & 0x7ff; // event code, defined in ISO 14819-2
 		unsigned int location =  group[3];                // location code, defined in ISO 14819-3
 
 		qDebug() << "RDSParser::decode_type8: #user msg# " << (D ? "diversion recommended, " : "");
 
 		if (F) {
-			qDebug() << "RDSParser::decode_type8: single-grp, duration:" << (tmc_duration[dp_ci][0]).c_str();
+			qDebug() << "RDSParser::decode_type8: single-grp, duration:" << (tmc_duration[m_g8_dp_ci][0]).c_str();
 		} else {
-			qDebug() << "RDSParser::decode_type8: multi-grp, continuity index:" << dp_ci;
+			qDebug() << "RDSParser::decode_type8: multi-grp, continuity index:" << m_g8_dp_ci;
 		}
 
-		int event_line = RDSTMC::get_tmc_event_code_index(event, 1);
+		int event_line = RDSTMC::get_tmc_event_code_index(m_g8_event, 1);
 
-		qDebug() << "RDSParser::decode_type8: extent:" << (sign ? "-" : "") << extent + 1 << " segments"
-			<< ", event" << event << ":" << RDSTMC::get_tmc_events(event_line, 1).c_str()
+		qDebug() << "RDSParser::decode_type8: extent:" << (m_g8_sign ? "-" : "") << m_g8_extent + 1 << " segments"
+			<< ", event" << m_g8_event << ":" << RDSTMC::get_tmc_events(event_line, 1).c_str()
 			<< ", location:" << location;
 
 	}
@@ -772,8 +844,6 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 
 void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_format)
 {
-	int label          = 0;
-	int content        = 0;
 	int content_length = 0;
 	int ff_pointer     = 0;
 
@@ -784,13 +854,13 @@ void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_f
 		while(ff_pointer > 0)
 		{
 			ff_pointer -= 4;
-			label = (free_format[i] && (0xf << ff_pointer));
-			content_length = optional_content_lengths[label];
+			m_g8_label_index = (free_format[i] && (0xf << ff_pointer));
+			content_length = optional_content_lengths[m_g8_label_index];
 			ff_pointer -= content_length;
-			content = (free_format[i] && (int(std::pow(2, content_length) - 1) << ff_pointer));
+			m_g8_content = (free_format[i] && (int(std::pow(2, content_length) - 1) << ff_pointer));
 
-			qDebug() << "RDSParser::decode_optional_content: TMC optional content (" << label_descriptions[label].c_str()
-				<< "):" << content;
+			qDebug() << "RDSParser::decode_optional_content: TMC optional content (" << label_descriptions[m_g8_label_index].c_str()
+				<< "):" << m_g8_content;
 		}
 	}
 }

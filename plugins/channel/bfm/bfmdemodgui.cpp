@@ -250,6 +250,7 @@ void BFMDemodGUI::on_showPilot_clicked()
 void BFMDemodGUI::on_rds_clicked()
 {
 	m_rdsParser.clearAllFields();
+	rdsUpdate(true);
 	applySettings();
 }
 
@@ -310,6 +311,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+
+	rdsUpdateFixedFields();
+	rdsUpdate(true);
 
 	applySettings();
 }
@@ -396,7 +400,7 @@ void BFMDemodGUI::tick()
 
 	if (ui->rds->isChecked() && (m_rdsTimerCount == 0))
 	{
-		rdsUpdate();
+		rdsUpdate(false);
 	}
 
 	m_rdsTimerCount = (m_rdsTimerCount + 1) % 25;
@@ -411,7 +415,34 @@ void BFMDemodGUI::channelSampleRateChanged()
 	ui->glSpectrum->setSampleRate(m_rate / 2);
 }
 
-void BFMDemodGUI::rdsUpdate()
+void BFMDemodGUI::rdsUpdateFixedFields()
+{
+	ui->g00Label->setText(m_rdsParser.rds_group_acronym_tags[0].c_str());
+	//ui->g01Label->setText(m_rdsParser.rds_group_acronym_tags[1].c_str());
+	//ui->g02Label->setText(m_rdsParser.rds_group_acronym_tags[2].c_str());
+	//ui->g03Label->setText(m_rdsParser.rds_group_acronym_tags[3].c_str());
+	ui->g04Label->setText(m_rdsParser.rds_group_acronym_tags[4].c_str());
+	//ui->g05Label->setText(m_rdsParser.rds_group_acronym_tags[5].c_str());
+	//ui->g06Label->setText(m_rdsParser.rds_group_acronym_tags[6].c_str());
+	//ui->g07Label->setText(m_rdsParser.rds_group_acronym_tags[7].c_str());
+	//ui->g08Label->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
+	//ui->g09Label->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
+	//ui->g14Label->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
+
+	ui->g00CountLabel->setText(m_rdsParser.rds_group_acronym_tags[0].c_str());
+	ui->g01CountLabel->setText(m_rdsParser.rds_group_acronym_tags[1].c_str());
+	ui->g02CountLabel->setText(m_rdsParser.rds_group_acronym_tags[2].c_str());
+	ui->g03CountLabel->setText(m_rdsParser.rds_group_acronym_tags[3].c_str());
+	ui->g04CountLabel->setText(m_rdsParser.rds_group_acronym_tags[4].c_str());
+	ui->g05CountLabel->setText(m_rdsParser.rds_group_acronym_tags[5].c_str());
+	ui->g06CountLabel->setText(m_rdsParser.rds_group_acronym_tags[6].c_str());
+	ui->g07CountLabel->setText(m_rdsParser.rds_group_acronym_tags[7].c_str());
+	ui->g08CountLabel->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
+	ui->g09CountLabel->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
+	ui->g14CountLabel->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
+}
+
+void BFMDemodGUI::rdsUpdate(bool force)
 {
 	// Quality metrics
 	ui->demodQText->setText(QString("%1 %").arg(m_bfmDemod->getDemodQua(), 0, 'f', 0));
@@ -421,7 +452,7 @@ void BFMDemodGUI::rdsUpdate()
 	ui->fclkText->setText(QString("%1 Hz").arg(m_bfmDemod->getDemodFclk(), 0, 'f', 2));
 
 	// PI group
-	if (m_rdsParser.m_pi_updated)
+	if (m_rdsParser.m_pi_updated || force)
 	{
 		ui->piLabel->setStyleSheet("QLabel { background-color : green; }");
 		ui->piCountText->setNum((int) m_rdsParser.m_pi_count);
@@ -443,7 +474,7 @@ void BFMDemodGUI::rdsUpdate()
 	}
 
 	// G0 group
-	if (m_rdsParser.m_g0_updated)
+	if (m_rdsParser.m_g0_updated || force)
 	{
 		ui->g00Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g00CountText->setNum((int) m_rdsParser.m_g0_count);
@@ -486,7 +517,7 @@ void BFMDemodGUI::rdsUpdate()
 	}
 
 	// G4 group
-	if (m_rdsParser.m_g4_updated)
+	if (m_rdsParser.m_g4_updated || force)
 	{
 		ui->g04Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g04CountText->setNum((int) m_rdsParser.m_g4_count);
