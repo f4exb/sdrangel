@@ -437,7 +437,7 @@
      <x>10</x>
      <y>150</y>
      <width>500</width>
-     <height>141</height>
+     <height>201</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -1080,6 +1080,56 @@
          <string/>
         </property>
        </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="g04DataLayout">
+      <item>
+       <widget class="QLabel" name="g04Label">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G04</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="g04Sep1">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g04Time">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>../../.. ..:..:..</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="g04Spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

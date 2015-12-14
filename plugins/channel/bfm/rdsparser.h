@@ -57,6 +57,17 @@ public:
 	bool           m_g0_static_pty;
 	std::set<double> m_g0_alt_freq;
 
+	// G4 data
+	bool           m_g4_updated;
+	unsigned int   m_g4_count;
+	unsigned int   m_g4_hours;
+	unsigned int   m_g4_minutes;
+	unsigned int   m_g4_seconds;
+	unsigned int   m_g4_year;
+	unsigned int   m_g4_month;
+	unsigned int   m_g4_day;
+	double         m_g4_local_time_offset;
+
 	// Static tables
 	static const unsigned int offset_pos[5];
 	static const unsigned int offset_word[5];

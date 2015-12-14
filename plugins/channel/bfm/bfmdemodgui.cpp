@@ -485,7 +485,19 @@ void BFMDemodGUI::rdsUpdate()
 		ui->g00Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 	}
 
-	// G1 group
+	// G4 group
+	if (m_rdsParser.m_g4_updated)
+	{
+		ui->g04Label->setStyleSheet("QLabel { background-color : green; }");
+		ui->g04CountText->setNum((int) m_rdsParser.m_g4_count);
+		std::string time = str(boost::format("%02i.%02i.%4i, %02i:%02i (%+.1fh)")\
+			% m_rdsParser.m_g4_day % m_rdsParser.m_g4_month % (1900 + m_rdsParser.m_g4_year) % m_rdsParser.m_g4_hours % m_rdsParser.m_g4_minutes % m_rdsParser.m_g4_local_time_offset);
+	    ui->g04Time->setText(QString(time.c_str()));
+	}
+	else
+	{
+		ui->g04Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
 
 	m_rdsParser.clearUpdateFlags();
 }

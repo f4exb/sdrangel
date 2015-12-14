@@ -224,6 +224,7 @@ void RDSParser::clearUpdateFlags()
 	m_pi_updated = false;
 	m_g0_updated = false;
 	m_g0_af_updated = false;
+	m_g4_updated = false;
 }
 
 void RDSParser::clearAllFields()
@@ -249,6 +250,9 @@ void RDSParser::clearAllFields()
 	// Group 02 data
 	std::memset(radiotext, ' ', sizeof(radiotext));
 	radiotext[sizeof(radiotext) - 1] = '\0';
+
+	// Group 04 data
+	m_g4_count = 0;
 
 	clearUpdateFlags();
 }
@@ -649,27 +653,31 @@ void RDSParser::decode_type4(unsigned int *group, bool B)
 		return;
 	}
 
-	unsigned int hours   = ((group[2] & 0x1) << 4) | ((group[3] >> 12) & 0x0f);
-	unsigned int minutes =  (group[3] >> 6) & 0x3f;
-	double local_time_offset = .5 * (group[3] & 0x1f);
+	m_g4_updated = true;
+	m_g4_count++;
+
+	m_g4_hours   = ((group[2] & 0x1) << 4) | ((group[3] >> 12) & 0x0f);
+	m_g4_minutes =  (group[3] >> 6) & 0x3f;
+	m_g4_local_time_offset = .5 * (group[3] & 0x1f);
 
 	if ((group[3] >> 5) & 0x1) {
-		local_time_offset *= -1;
+		m_g4_local_time_offset *= -1;
 	}
 
 	double modified_julian_date = ((group[1] & 0x03) << 15) | ((group[2] >> 1) & 0x7fff);
 
-	unsigned int year  = int((modified_julian_date - 15078.2) / 365.25);
-	unsigned int month = int((modified_julian_date - 14956.1 - int(year * 365.25)) / 30.6001);
-	unsigned int day   =               modified_julian_date - 14956 - int(year * 365.25) - int(month * 30.6001);
-	bool K = ((month == 14) || (month == 15)) ? 1 : 0;
-	year += K;
-	month -= 1 + K * 12;
+	m_g4_year  = int((modified_julian_date - 15078.2) / 365.25);
+	m_g4_month = int((modified_julian_date - 14956.1 - int(m_g4_year * 365.25)) / 30.6001);
+	m_g4_day   =               modified_julian_date - 14956 - int(m_g4_year * 365.25) - int(m_g4_month * 30.6001);
+	bool K = ((m_g4_month == 14) || (m_g4_month == 15)) ? 1 : 0;
+	m_g4_year += K;
+	m_g4_month -= 1 + K * 12;
 
+	/*
 	std::string time = str(boost::format("%02i.%02i.%4i, %02i:%02i (%+.1fh)")\
-		% day % month % (1900 + year) % hours % minutes % local_time_offset);
+		% m_g4_day % m_g4_month % (1900 + m_g4_year) % m_g4_hours % m_g4_minutes % m_g4_local_time_offset);
 
-	qDebug() << "RDSParser::decode_type4: Clocktime: " << time.c_str();
+	qDebug() << "RDSParser::decode_type4: Clocktime: " << time.c_str();*/
 
 	//send_message(5,time);
 }
