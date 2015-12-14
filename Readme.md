@@ -185,6 +185,7 @@ For Debian Jessie or Stretch:
   - DSB option for SSB
   - Mute option for NFM channel
   - New Broadcast FM demodulator with stereo support
+  - RDS support in Broadcast FM demodulator
   
 <h2>Major redesign</h2>
 
@@ -213,7 +214,6 @@ For Debian Jessie or Stretch:
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration  
-  - Enhance Broadcast FM with RDS
   - Even more demods ...
   
 <h1>Developper's notes</h1>
