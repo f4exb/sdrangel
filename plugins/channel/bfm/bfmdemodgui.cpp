@@ -18,6 +18,11 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include "boost/format.hpp"
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
@@ -30,7 +35,6 @@
 #include "mainwindow.h"
 
 #include "bfmdemodgui.h"
-
 #include "ui_bfmdemodgui.h"
 #include "bfmdemod.h"
 
@@ -245,6 +249,7 @@ void BFMDemodGUI::on_showPilot_clicked()
 
 void BFMDemodGUI::on_rds_clicked()
 {
+	m_rdsParser.clearAllFields();
 	applySettings();
 }
 
@@ -268,6 +273,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
+	m_rdsTimerCount(0),
 	m_channelPowerDbAvg(20,0),
 	m_rate(625000)
 {
@@ -388,6 +394,13 @@ void BFMDemodGUI::tick()
 		}
 	}
 
+	if (ui->rds->isChecked() && (m_rdsTimerCount == 0))
+	{
+		rdsUpdate();
+	}
+
+	m_rdsTimerCount = (m_rdsTimerCount + 1) % 25;
+
 	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
 }
 
@@ -398,3 +411,75 @@ void BFMDemodGUI::channelSampleRateChanged()
 	ui->glSpectrum->setSampleRate(m_rate / 2);
 }
 
+void BFMDemodGUI::rdsUpdate()
+{
+	// PI group
+	if (m_rdsParser.m_pi_updated)
+	{
+		ui->piLabel->setStyleSheet("QLabel { background-color : green; }");
+		ui->piCountText->setNum((int) m_rdsParser.m_pi_count);
+		QString pistring(str(boost::format("%04X") % m_rdsParser.m_pi_program_identification).c_str());
+		ui->piText->setText(pistring);
+
+		if (m_rdsParser.m_pi_traffic_program) {
+			ui->piTPIndicator->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->piTPIndicator->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+		}
+
+		ui->piType->setText(QString(m_rdsParser.pty_table[m_rdsParser.m_pi_program_type].c_str()));
+		ui->piCoverage->setText(QString(m_rdsParser.coverage_area_codes[m_rdsParser.m_pi_area_coverage_index].c_str()));
+	}
+	else
+	{
+		ui->piLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G0 group
+	if (m_rdsParser.m_g0_updated)
+	{
+		ui->g00Label->setStyleSheet("QLabel { background-color : green; }");
+		ui->g00CountText->setNum((int) m_rdsParser.m_g0_count);
+		ui->g00ProgServiceName->setText(QString(m_rdsParser.m_g0_program_service_name));
+
+		if (m_rdsParser.m_g0_traffic_announcement) {
+			ui->g00TrafficAnnouncement->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->g00TrafficAnnouncement->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+		}
+
+		ui->g00MusicSpeech->setText(QString((m_rdsParser.m_g0_music_speech ? "Music" : "Speech")));
+		ui->g00MonoStereo->setText(QString((m_rdsParser.m_g0_mono_stereo ? "Mono" : "Stereo")));
+
+		if (m_rdsParser.m_g0_af_updated)
+		{
+			bool isFirst = true;
+			std::ostringstream os;
+			os << std::fixed << std::showpoint << std::setprecision(2);
+
+			for (std::set<double>::iterator it = m_rdsParser.m_g0_alt_freq.begin(); it != m_rdsParser.m_g0_alt_freq.end(); ++it)
+			{
+				if (*it > 76.0)
+				{
+					if (!isFirst)
+					{
+						os << ", ";
+					}
+
+					os << *it;
+					isFirst = false;
+				}
+			}
+
+			ui->g00AltFrequencies->setText(QString(os.str().c_str()));
+		}
+	}
+	else
+	{
+		ui->g00Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G1 group
+
+	m_rdsParser.clearUpdateFlags();
+}

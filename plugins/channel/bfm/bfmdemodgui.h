@@ -75,6 +75,7 @@ private:
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
+	int m_rdsTimerCount;
 
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;
@@ -92,6 +93,7 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
+	void rdsUpdate();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

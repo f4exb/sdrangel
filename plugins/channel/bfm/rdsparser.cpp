@@ -212,12 +212,45 @@ const std::string RDSParser::label_descriptions[16] = {
 
 RDSParser::RDSParser()
 {
-	std::memset(radiotext, ' ', sizeof(radiotext));
-	radiotext[sizeof(radiotext) - 1] = '\0';
+	clearAllFields();
 }
 
 RDSParser::~RDSParser()
 {
+}
+
+void RDSParser::clearUpdateFlags()
+{
+	m_pi_updated = false;
+	m_g0_updated = false;
+	m_g0_af_updated = false;
+}
+
+void RDSParser::clearAllFields()
+{
+	// PI data
+	m_pi_count = 0;
+	m_pi_program_identification = 0;
+	m_pi_program_type = 0;
+	m_pi_traffic_program = false;
+
+	// Group 00 data
+	m_g0_count = 0;
+	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
+	radiotext[sizeof(m_g0_program_service_name) - 1] = '\0';
+	m_g0_traffic_announcement = false;
+	m_g0_music_speech = false;
+	m_g0_mono_stereo = false;
+	m_g0_artificial_head = false;
+	m_g0_compressed = false;
+	m_g0_static_pty = false;
+	m_g0_alt_freq.clear();
+
+	// Group 02 data
+	std::memset(radiotext, ' ', sizeof(radiotext));
+	radiotext[sizeof(radiotext) - 1] = '\0';
+
+	clearUpdateFlags();
 }
 
 void RDSParser::parseGroup(unsigned int *group)
@@ -229,26 +262,29 @@ void RDSParser::parseGroup(unsigned int *group)
 			<< " type: " << group_type << (ab ? 'B' :'A')
 			<< " (" << rds_group_acronyms[group_type].c_str() << ")";
 
-	program_identification = group[0];     // "PI"
-	program_type = (group[1] >> 5) & 0x1f; // "PTY"
-	int pi_country_identification = (program_identification >> 12) & 0xf;
-	int pi_area_coverage = (program_identification >> 8) & 0xf;
-	unsigned char pi_program_reference_number = program_identification & 0xff;
+	m_pi_count++;
+	m_pi_updated = true;
 
-	std::string pistring = str(boost::format("%04X") % program_identification);
-	//send_message(0, pistring);
-	//send_message(2, pty_table[program_type]);
+	m_pi_program_identification = group[0];                // "PI"
+	m_pi_traffic_program        = (group[1] >> 10) & 0x01; // "TP"
+	m_pi_program_type           = (group[1] >> 5) & 0x1f;  // "PTY"
+	m_pi_country_identification = (m_pi_program_identification >> 12) & 0xf;
+	m_pi_area_coverage_index = (m_pi_program_identification >> 8) & 0xf;
+	unsigned char pi_program_reference_number = m_pi_program_identification & 0xff;
+
+	/*
+	std::string pistring = str(boost::format("%04X") % m_pi_program_identification);
 
 	qDebug() << "RDSParser::parseGroup:"
 			<< " PI:" << pistring.c_str()
-			<< " - " << "PTY:" << pty_table[program_type].c_str()
-			<< " (country:" << (pi_country_codes[pi_country_identification - 1][0]).c_str()
-			<< "/" << (pi_country_codes[pi_country_identification - 1][1]).c_str()
-			<< "/" << (pi_country_codes[pi_country_identification - 1][2]).c_str()
-			<< "/" << (pi_country_codes[pi_country_identification - 1][3]).c_str()
-			<< "/" << (pi_country_codes[pi_country_identification - 1][4]).c_str()
-			<< ", area:" << coverage_area_codes[pi_area_coverage].c_str()
-			<< ", program:" << int(pi_program_reference_number) << ")";
+			<< " - " << "PTY:" << pty_table[m_pi_program_type].c_str()
+			<< " (country:" << (pi_country_codes[m_pi_country_identification - 1][0]).c_str()
+			<< "/" << (pi_country_codes[m_pi_country_identification - 1][1]).c_str()
+			<< "/" << (pi_country_codes[m_pi_country_identification - 1][2]).c_str()
+			<< "/" << (pi_country_codes[m_pi_country_identification - 1][3]).c_str()
+			<< "/" << (pi_country_codes[m_pi_country_identification - 1][4]).c_str()
+			<< ", area:" << coverage_area_codes[m_pi_area_coverage_index].c_str()
+			<< ", program:" << int(pi_program_reference_number) << ")";*/
 
 	switch (group_type) {
 		case 0:
@@ -319,40 +355,47 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 	double af_2            = 0;
 	char flagstring[8]     = "0000000";
 
-	traffic_program        = (group[1] >> 10) & 0x01;       // "TP"
-	traffic_announcement   = (group[1] >>  4) & 0x01;       // "TA"
-	music_speech           = (group[1] >>  3) & 0x01;       // "MuSp"
+	m_g0_count++;
+	m_g0_updated = true;
+
+	m_pi_traffic_program      = (group[1] >> 10) & 0x01;       // "TP"
+	m_g0_traffic_announcement = (group[1] >>  4) & 0x01;       // "TA"
+	m_g0_music_speech         = (group[1] >>  3) & 0x01;       // "MuSp"
 
 	bool decoder_control_bit      = (group[1] >> 2) & 0x01; // "DI"
 	unsigned char segment_address =  group[1] & 0x03;       // "DI segment"
 
-	program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
-	program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
+	m_g0_program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
+	m_g0_program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
 
 	/* see page 41, table 9 of the standard */
-	switch (segment_address) {
+	switch (segment_address)
+	{
 		case 0:
-			mono_stereo=decoder_control_bit;
-		break;
+			m_g0_mono_stereo = decoder_control_bit;
+			break;
 		case 1:
-			artificial_head=decoder_control_bit;
-		break;
+			m_g0_artificial_head = decoder_control_bit;
+			break;
 		case 2:
-			compressed=decoder_control_bit;
-		break;
+			m_g0_compressed = decoder_control_bit;
+			break;
 		case 3:
-			static_pty=decoder_control_bit;
-		break;
+			m_g0_static_pty = decoder_control_bit;
+			break;
 		default:
-		break;
+			break;
 	}
-	flagstring[0] = traffic_program        ? '1' : '0';
-	flagstring[1] = traffic_announcement   ? '1' : '0';
-	flagstring[2] = music_speech           ? '1' : '0';
-	flagstring[3] = mono_stereo            ? '1' : '0';
-	flagstring[4] = artificial_head        ? '1' : '0';
-	flagstring[5] = compressed             ? '1' : '0';
-	flagstring[6] = static_pty             ? '1' : '0';
+
+	/* unused
+	flagstring[0] = m_pi_traffic_program        ? '1' : '0';
+	flagstring[1] = m_g0_traffic_announcement   ? '1' : '0';
+	flagstring[2] = m_g0_music_speech           ? '1' : '0';
+	flagstring[3] = m_g0_mono_stereo            ? '1' : '0';
+	flagstring[4] = m_g0_artificial_head        ? '1' : '0';
+	flagstring[5] = m_g0_compressed             ? '1' : '0';
+	flagstring[6] = m_g0_static_pty             ? '1' : '0';*/
+
 	static std::string af_string;
 
 	if (!B)
@@ -362,17 +405,25 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 		af_1 = decode_af(af_code_1);
 		af_2 = decode_af(af_code_2);
 
-		if(af_1) {
+		if (af_1)
+		{
+			std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_1/1e3);
+			m_g0_af_updated = m_g0_af_updated || res.second;
 			no_af += 1;
 		}
-		if(af_2) {
+
+		if (af_2)
+		{
+			std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_2/1e3);
+			m_g0_af_updated = m_g0_af_updated || res.second;
 			no_af += 2;
 		}
 
+		/*
 		std::string af1_string;
 		std::string af2_string;
 
-		/* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
+		// only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3
 		if(no_af)
 		{
 			if(af_1 > 80e3) {
@@ -394,20 +445,17 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 			af_string = af2_string;
 		} else if(no_af == 3) {
 			af_string = str(boost::format("%s, %s") % af1_string %af2_string);
-		}
+		}*/
 	}
 
+	/*
 	qDebug() << "RDSParser::decode_type0: "
-			<< "\"" << std::string(program_service_name, 8).c_str()
-			<< "\" -" << (traffic_program ? "TP" : "!TP")
-			<< '-' << (traffic_announcement ? "TA" : "!TA")
-			<< '-' << (music_speech ? "Music" : "Speech")
-			<< '-' << (mono_stereo ? "MONO" : "STEREO")
-			<< " - AF:" << af_string.c_str();
-
-	//send_message(1, std::string(program_service_name, 8));
-	//send_message(3, flagstring);
-	//send_message(6, af_string);
+			<< "\"" << std::string(m_g0_program_service_name, 8).c_str()
+			<< "\" -" << (m_pi_traffic_program ? "TP" : "!TP")
+			<< '-' << (m_g0_traffic_announcement ? "TA" : "!TA")
+			<< '-' << (m_g0_music_speech ? "Music" : "Speech")
+			<< '-' << (m_g0_mono_stereo ? "MONO" : "STEREO")
+			<< " - AF:" << af_string.c_str();*/
 }
 
 double RDSParser::decode_af(unsigned int af_code)
