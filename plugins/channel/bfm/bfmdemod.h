@@ -58,8 +58,14 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
 	Real getMagSq() const { return m_movingAverage.average(); }
+
 	bool getPilotLock() const { return m_pilotPLL.locked(); }
 	Real getPilotLevel() const { return m_pilotPLL.get_pilot_level(); }
+
+	Real getDecoderQua() const { return m_rdsDecoder.m_qua; }
+	Real getDemodAcc() const { return m_rdsDemod.m_report.acc; }
+	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
+	Real getDemodFclk() const { return m_rdsDemod.m_report.fclk; }
 
 private:
 	class MsgConfigureBFMDemod : public Message {

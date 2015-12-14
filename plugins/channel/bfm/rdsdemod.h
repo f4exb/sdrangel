@@ -34,6 +34,12 @@ public:
 	void setSampleRate(int srate);
 	bool process(Real rdsSample, bool &bit);
 
+	struct{
+		Real acc;
+		Real qua;
+		Real fclk;
+	} m_report;
+
 protected:
 	bool biphase(Real acc, bool &bit, Real d_cphi);
 	Real filter_lp_2400_iq(Real in, int iqIndex);

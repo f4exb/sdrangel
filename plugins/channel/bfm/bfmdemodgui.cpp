@@ -413,6 +413,13 @@ void BFMDemodGUI::channelSampleRateChanged()
 
 void BFMDemodGUI::rdsUpdate()
 {
+	// Quality metrics
+	ui->demodQText->setText(QString::number(m_bfmDemod->getDemodQua(), 'f', 0));
+	ui->decoderQText->setText(QString("%1").arg(m_bfmDemod->getDecoderQua()));
+	Real accDb = CalcDb::dbPower(std::fabs(m_bfmDemod->getDemodAcc()));
+	ui->accumText->setText(QString::number(accDb, 'f', 1));
+	ui->fclkText->setText(QString::number(m_bfmDemod->getDemodFclk(), 'f', 2));
+
 	// PI group
 	if (m_rdsParser.m_pi_updated)
 	{
@@ -461,8 +468,7 @@ void BFMDemodGUI::rdsUpdate()
 			{
 				if (*it > 76.0)
 				{
-					if (!isFirst)
-					{
+					if (!isFirst) {
 						os << ", ";
 					}
 

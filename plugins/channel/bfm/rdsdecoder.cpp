@@ -184,18 +184,21 @@ bool RDSDecoder::frameSync(bool bit)
 			{
 				if (m_wrongBlocksCounter > 35)
 				{
+					/*
 					qDebug() << "RDSDecoder::frameSync: Lost Sync (Got " << m_wrongBlocksCounter
 						<< " bad blocks on " << m_blocksCounter
-						<< " total)";
+						<< " total)";*/
 					enter_no_sync();
 				}
 				else
 				{
+					/*
 					qDebug() << "RDSDecoder::frameSync: Still Sync-ed (Got " << m_wrongBlocksCounter
 						<< " bad blocks on " << m_blocksCounter
-						<< " total)";
+						<< " total)";*/
 				}
 
+				m_qua = 2.0 * (50 - m_wrongBlocksCounter);
 				m_blocksCounter = 0;
 				m_wrongBlocksCounter = 0;
 			}

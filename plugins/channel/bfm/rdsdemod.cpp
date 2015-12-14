@@ -143,14 +143,18 @@ bool RDSDemod::biphase(Real acc, bool& bit, Real d_cphi)
 			m_parms.reading_frame = 1 - m_parms.reading_frame;
 		}
 
-		Real qua = (1.0 * abs(m_parms.tot_errs[0] - m_parms.tot_errs[1]) / (m_parms.tot_errs[0] + m_parms.tot_errs[1])) * 100;
+		m_report.qua = (1.0 * abs(m_parms.tot_errs[0] - m_parms.tot_errs[1]) / (m_parms.tot_errs[0] + m_parms.tot_errs[1])) * 100;
+		m_report.acc = acc;
+		m_report.fclk = (d_cphi / (2 * M_PI)) * m_srate;
+
+		/*
 		qDebug("RDSDemod::biphase: frame: %d  acc: %+6.3f errs: %3d %3d  qual: %3.0f%%  clk: %7.2f",
 				m_parms.reading_frame,
 				acc,
 				m_parms.tot_errs[0],
 				m_parms.tot_errs[1],
-				qua,
-				(d_cphi / (2 * M_PI)) * m_srate);
+				m_report.qua,
+				m_report.fclk);*/
 
 		m_parms.tot_errs[0] = 0;
 		m_parms.tot_errs[1] = 0;

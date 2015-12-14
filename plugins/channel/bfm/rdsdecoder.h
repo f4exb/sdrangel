@@ -27,6 +27,8 @@ public:
 	bool frameSync(bool bit);
 	unsigned int *getGroup() { return m_group; }
 
+	float          m_qua;
+
 protected:
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen);
 	void enter_sync(unsigned int sync_block_number);
