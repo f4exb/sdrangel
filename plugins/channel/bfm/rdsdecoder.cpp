@@ -88,7 +88,7 @@ bool RDSDecoder::frameSync(bool bit)
 					}
 					else
 					{
-						qDebug("RDSDecoder::frameSync: Sync State Detected");
+						//qDebug("RDSDecoder::frameSync: Sync State Detected");
 						enter_sync(j);
 					}
 				}

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>676</width>
     <height>729</height>
    </rect>
   </property>
@@ -436,8 +436,8 @@
     <rect>
      <x>10</x>
      <y>150</y>
-     <width>500</width>
-     <height>201</height>
+     <width>561</width>
+     <height>301</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -678,6 +678,12 @@
      <layout class="QGridLayout" name="countersLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="piCountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>PI</string>
         </property>
@@ -695,6 +701,12 @@
       </item>
       <item row="0" column="1">
        <widget class="QLabel" name="g00CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G00</string>
         </property>
@@ -712,6 +724,12 @@
       </item>
       <item row="0" column="4">
        <widget class="QLabel" name="g03CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G03</string>
         </property>
@@ -719,6 +737,12 @@
       </item>
       <item row="0" column="2">
        <widget class="QLabel" name="g01CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G01</string>
         </property>
@@ -736,6 +760,12 @@
       </item>
       <item row="0" column="3">
        <widget class="QLabel" name="g02CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G02</string>
         </property>
@@ -753,6 +783,12 @@
       </item>
       <item row="0" column="9">
        <widget class="QLabel" name="g08CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G08</string>
         </property>
@@ -760,6 +796,12 @@
       </item>
       <item row="0" column="8">
        <widget class="QLabel" name="g07CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G07</string>
         </property>
@@ -777,6 +819,12 @@
       </item>
       <item row="0" column="5">
        <widget class="QLabel" name="g04CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G04</string>
         </property>
@@ -794,6 +842,12 @@
       </item>
       <item row="0" column="6">
        <widget class="QLabel" name="g05CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G05</string>
         </property>
@@ -811,6 +865,12 @@
       </item>
       <item row="0" column="7">
        <widget class="QLabel" name="g06CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G06</string>
         </property>
@@ -848,6 +908,12 @@
       </item>
       <item row="0" column="10">
        <widget class="QLabel" name="g09CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G09</string>
         </property>
@@ -865,6 +931,12 @@
       </item>
       <item row="0" column="11">
        <widget class="QLabel" name="g14CountLabel">
+        <property name="maximumSize">
+         <size>
+          <width>34</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>G14</string>
         </property>
@@ -890,7 +962,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="piDataLayout">
+     <layout class="QHBoxLayout" name="row1DataLayout">
       <item>
        <widget class="QLabel" name="piLabel">
         <property name="maximumSize">
@@ -908,7 +980,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="piSeparator1">
+       <widget class="Line" name="row1Separator1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -918,7 +990,7 @@
        <widget class="QLabel" name="piText">
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>40</width>
           <height>16777215</height>
          </size>
         </property>
@@ -931,7 +1003,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="piSeparator2">
+       <widget class="Line" name="row1Separator2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -955,6 +1027,18 @@
       </item>
       <item>
        <widget class="QLabel" name="piType">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Program type</string>
         </property>
@@ -965,6 +1049,18 @@
       </item>
       <item>
        <widget class="QLabel" name="piCoverage">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Program coverage</string>
         </property>
@@ -973,10 +1069,107 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="row1Separator3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g01Label">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G01</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row1Separator4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g01CountryCode">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>__</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g01Language">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>___</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g01DHM">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0d 00:00</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="g00DataLayout">
+     <layout class="QHBoxLayout" name="row2DataLayout">
       <item>
        <widget class="QLabel" name="g00Label">
         <property name="maximumSize">
@@ -994,7 +1187,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="g00Separator1">
+       <widget class="Line" name="row2Separator1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -1012,12 +1205,12 @@
          <string>Program Service Name</string>
         </property>
         <property name="text">
-         <string>........</string>
+         <string>PSN</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="Line" name="g00Separator2">
+       <widget class="Line" name="row2Separator2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -1077,14 +1270,45 @@
          <string>Alternate frequencies (MHz)</string>
         </property>
         <property name="text">
-         <string/>
+         <string>00.00</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="g04DataLayout">
+     <layout class="QHBoxLayout" name="row4DataLayout">
+      <item>
+       <widget class="QLabel" name="g02Label">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G02</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row4Separator1">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="go2Text">
+        <property name="text">
+         <string>Radiotext</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="row3DataLayout">
       <item>
        <widget class="QLabel" name="g04Label">
         <property name="minimumSize">
@@ -1099,7 +1323,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="g04Sep1">
+       <widget class="Line" name="row3Sep1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -1109,8 +1333,14 @@
        <widget class="QLabel" name="g04Time">
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>0</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -1130,6 +1360,77 @@
          </size>
         </property>
        </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="row5DataLayout">
+      <item>
+       <widget class="QLabel" name="g08Label">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G08</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row5Separator1">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g08Extent">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>+0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g08TMCEvent">
+        <property name="text">
+         <string>___</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g08Location">
+        <property name="text">
+         <string>___</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g08Description">
+        <property name="text">
+         <string>___</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g08Content">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

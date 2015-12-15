@@ -127,7 +127,7 @@ const std::string RDSParser::rds_group_acronyms[16] = {
 const std::string RDSParser::rds_group_acronym_tags[16] = {
 	"BAS",
 	"PIN",
-	"RTX",
+	"TXT",
 	"AID",
 	"TIM",
 	"TDC",
@@ -147,7 +147,7 @@ const std::string RDSParser::rds_group_acronym_tags[16] = {
 
 /* see page 84, Annex J in the standard */
 const std::string RDSParser::language_codes[44] = {
-	"Unkown/not applicable",
+	"N/A",
 	"Albanian",
 	"Breton",
 	"Catalan",
@@ -243,9 +243,20 @@ void RDSParser::clearUpdateFlags()
 	m_pi_updated = false;
 	m_g0_updated = false;
 	m_g0_af_updated = false;
+	m_g1_updated = false;
 	m_g2_updated = false;
 	m_g4_updated = false;
+	m_g5_updated = false;
+	m_g6_updated = false;
+	m_g7_updated = false;
 	m_g8_updated = false;
+	m_g9_updated = false;
+	m_g10_updated = false;
+	m_g11_updated = false;
+	m_g12_updated = false;
+	m_g13_updated = false;
+	m_g14_updated = false;
+	m_g15_updated = false;
 }
 
 void RDSParser::clearAllFields()
@@ -310,6 +321,15 @@ void RDSParser::clearAllFields()
 	m_g8_label_index = -1;
 	m_g8_content = 0;
 
+	// Group 09..15 data
+	m_g9_count = 0;
+	m_g10_count = 0;
+	m_g11_count = 0;
+	m_g12_count = 0;
+	m_g13_count = 0;
+	m_g14_count = 0;
+	m_g15_count = 0;
+
 	clearUpdateFlags();
 }
 
@@ -318,9 +338,10 @@ void RDSParser::parseGroup(unsigned int *group)
 	unsigned int group_type = (unsigned int)((group[1] >> 12) & 0xf);
 	bool ab = (group[1] >> 11 ) & 0x1;
 
+	/*
 	qDebug() << "RDSParser::parseGroup:"
 			<< " type: " << group_type << (ab ? 'B' :'A')
-			<< " (" << rds_group_acronyms[group_type].c_str() << ")";
+			<< " (" << rds_group_acronyms[group_type].c_str() << ")";*/
 
 	m_pi_count++;
 	m_pi_updated = true;
@@ -674,6 +695,10 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 	int message           =  group[2];
 	int aid               =  group[3];
 
+
+	m_g3_updated = true;
+	m_g3_count++;
+
 	qDebug() << "RDSParser::decode_type3: aid group: " << application_group
 		<< " " << (group_type ? 'B' : 'A');
 
@@ -752,14 +777,20 @@ void RDSParser::decode_type4(unsigned int *group, bool B)
 
 void RDSParser::decode_type5(unsigned int *group, bool B) {
 	qDebug() << "RDSParser::decode_type5: type5 not implemented yet";
+	m_g5_updated = true;
+	m_g5_count++;
 }
 
 void RDSParser::decode_type6(unsigned int *group, bool B) {
 	qDebug() << "RDSParser::decode_type6: type 6 not implemented yet";
+	m_g6_updated = true;
+	m_g6_count++;
 }
 
 void RDSParser::decode_type7(unsigned int *group, bool B) {
 	qDebug() << "RDSParser::decode_type7: type 7 not implemented yet";
+	m_g7_updated = true;
+	m_g7_count++;
 }
 
 void RDSParser::decode_type8(unsigned int *group, bool B)
@@ -800,7 +831,7 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 		m_g8_sign             = (group[2] >> 14) & 0x1;   // event direction, 0 = +, 1 = -
 		m_g8_extent           = (group[2] >> 11) & 0x7;   // number of segments affected
 		m_g8_event            =  group[2]        & 0x7ff; // event code, defined in ISO 14819-2
-		unsigned int location =  group[3];                // location code, defined in ISO 14819-3
+		m_g8_location         =  group[3];                // location code, defined in ISO 14819-3
 
 		qDebug() << "RDSParser::decode_type8: #user msg# " << (D ? "diversion recommended, " : "");
 
@@ -814,7 +845,7 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 
 		qDebug() << "RDSParser::decode_type8: extent:" << (m_g8_sign ? "-" : "") << m_g8_extent + 1 << " segments"
 			<< ", event" << m_g8_event << ":" << RDSTMC::get_tmc_events(event_line, 1).c_str()
-			<< ", location:" << location;
+			<< ", location:" << m_g8_location;
 
 	}
 	else
@@ -859,30 +890,41 @@ void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_f
 			ff_pointer -= content_length;
 			m_g8_content = (free_format[i] && (int(std::pow(2, content_length) - 1) << ff_pointer));
 
+			/*
 			qDebug() << "RDSParser::decode_optional_content: TMC optional content (" << label_descriptions[m_g8_label_index].c_str()
-				<< "):" << m_g8_content;
+				<< "):" << m_g8_content;*/
 		}
 	}
 }
 
 void RDSParser::decode_type9(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type9: type 9 not implemented yet";
+	m_g9_updated = true;
+	m_g9_count++;
 }
 
 void RDSParser::decode_type10(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type10: type 10 not implemented yet";
+	m_g10_updated = true;
+	m_g10_count++;
 }
 
 void RDSParser::decode_type11(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type11: type 11 not implemented yet";
+	m_g11_updated = true;
+	m_g11_count++;
 }
 
 void RDSParser::decode_type12(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type12: type 12 not implemented yet";
+	m_g12_updated = true;
+	m_g12_count++;
 }
 
 void RDSParser::decode_type13(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type13: type 13 not implemented yet";
+	m_g13_updated = true;
+	m_g13_count++;
 }
 
 void RDSParser::decode_type14(unsigned int *group, bool B)
@@ -897,6 +939,9 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 	static char ps_on[8] = {' ',' ',' ',' ',' ',' ',' ',' '};
 	double af_1 = 0;
 	double af_2 = 0;
+
+	m_g14_updated = true;
+	m_g14_count++;
 
 	if (!B)
 	{
@@ -975,7 +1020,8 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 
 	if (pi_on)
 	{
-		qDebug() << "RDSParser::decode_type14: PI(ON):" << pi_on;
+		std::string pistring = str(boost::format("%04X") % pi_on);
+		qDebug() << "RDSParser::decode_type14: PI(ON):" << pistring.c_str();
 
 		if (tp_on) {
 			qDebug() << "RDSParser::decode_type14: TP(ON)";
@@ -985,5 +1031,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 
 void RDSParser::decode_type15(unsigned int *group, bool B){
 	qDebug() << "RDSParser::decode_type5: type 15 not implemented yet";
+	m_g15_updated = true;
+	m_g15_count++;
 }
 

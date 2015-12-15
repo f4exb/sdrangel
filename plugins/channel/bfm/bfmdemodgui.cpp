@@ -37,6 +37,7 @@
 #include "bfmdemodgui.h"
 #include "ui_bfmdemodgui.h"
 #include "bfmdemod.h"
+#include "rdstmc.h"
 
 const int BFMDemodGUI::m_rfBW[] = {
 	80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
@@ -249,8 +250,11 @@ void BFMDemodGUI::on_showPilot_clicked()
 
 void BFMDemodGUI::on_rds_clicked()
 {
-	m_rdsParser.clearAllFields();
-	rdsUpdate(true);
+	if (ui->rds->isChecked()) {
+		m_rdsParser.clearAllFields();
+		rdsUpdate(true);
+	}
+
 	applySettings();
 }
 
@@ -418,14 +422,14 @@ void BFMDemodGUI::channelSampleRateChanged()
 void BFMDemodGUI::rdsUpdateFixedFields()
 {
 	ui->g00Label->setText(m_rdsParser.rds_group_acronym_tags[0].c_str());
-	//ui->g01Label->setText(m_rdsParser.rds_group_acronym_tags[1].c_str());
-	//ui->g02Label->setText(m_rdsParser.rds_group_acronym_tags[2].c_str());
+	ui->g01Label->setText(m_rdsParser.rds_group_acronym_tags[1].c_str());
+	ui->g02Label->setText(m_rdsParser.rds_group_acronym_tags[2].c_str());
 	//ui->g03Label->setText(m_rdsParser.rds_group_acronym_tags[3].c_str());
 	ui->g04Label->setText(m_rdsParser.rds_group_acronym_tags[4].c_str());
 	//ui->g05Label->setText(m_rdsParser.rds_group_acronym_tags[5].c_str());
 	//ui->g06Label->setText(m_rdsParser.rds_group_acronym_tags[6].c_str());
 	//ui->g07Label->setText(m_rdsParser.rds_group_acronym_tags[7].c_str());
-	//ui->g08Label->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
+	ui->g08Label->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
 	//ui->g09Label->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
 	//ui->g14Label->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
 
@@ -450,6 +454,12 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	Real accDb = CalcDb::dbPower(std::fabs(m_bfmDemod->getDemodAcc()));
 	ui->accumText->setText(QString("%1 dB").arg(accDb, 0, 'f', 1));
 	ui->fclkText->setText(QString("%1 Hz").arg(m_bfmDemod->getDemodFclk(), 0, 'f', 2));
+
+	if (m_bfmDemod->getDecoderSynced()) {
+		ui->decoderQLabel->setStyleSheet("QLabel { background-color : green; }");
+	} else {
+		ui->decoderQLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
 
 	// PI group
 	if (m_rdsParser.m_pi_updated || force)
@@ -516,6 +526,45 @@ void BFMDemodGUI::rdsUpdate(bool force)
 		ui->g00Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 	}
 
+	// G1 group
+	if (m_rdsParser.m_g1_updated || force)
+	{
+		ui->g01Label->setStyleSheet("QLabel { background-color : green; }");
+		ui->g01CountText->setNum((int) m_rdsParser.m_g1_count);
+
+		if ((m_rdsParser.m_g1_country_page_index >= 0) && (m_rdsParser.m_g1_country_index >= 0)) {
+			ui->g01CountryCode->setText(QString((m_rdsParser.pi_country_codes[m_rdsParser.m_g1_country_page_index][m_rdsParser.m_g1_country_index]).c_str()));
+		}
+
+		if (m_rdsParser.m_g1_language_index >= 0) {
+			ui->g01Language->setText(QString(m_rdsParser.language_codes[m_rdsParser.m_g1_language_index].c_str()));
+		}
+
+		ui->g01DHM->setText(QString(str(boost::format("%id:%i:%i") % m_rdsParser.m_g1_pin_day % m_rdsParser.m_g1_pin_hour % m_rdsParser.m_g1_pin_minute).c_str()));
+	}
+	else
+	{
+		ui->g01Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G2 group
+	if (m_rdsParser.m_g2_updated || force)
+	{
+		ui->g02Label->setStyleSheet("QLabel { background-color : green; }");
+		ui->g02CountText->setNum((int) m_rdsParser.m_g2_count);
+		ui->go2Text->setText(QString(m_rdsParser.m_g2_radiotext));
+	}
+	else
+	{
+		ui->g02Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G3 group
+	if (m_rdsParser.m_g3_updated || force)
+	{
+		ui->g03CountText->setNum((int) m_rdsParser.m_g3_count);
+	}
+
 	// G4 group
 	if (m_rdsParser.m_g4_updated || force)
 	{
@@ -528,6 +577,60 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	else
 	{
 		ui->g04Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G5 group
+	if (m_rdsParser.m_g5_updated || force)
+	{
+		ui->g05CountText->setNum((int) m_rdsParser.m_g5_count);
+	}
+
+	// G6 group
+	if (m_rdsParser.m_g6_updated || force)
+	{
+		ui->g06CountText->setNum((int) m_rdsParser.m_g6_count);
+	}
+
+	// G7 group
+	if (m_rdsParser.m_g7_updated || force)
+	{
+		ui->g07CountText->setNum((int) m_rdsParser.m_g7_count);
+	}
+
+	// G8 group
+	if (m_rdsParser.m_g8_updated || force)
+	{
+		ui->g08Label->setStyleSheet("QLabel { background-color : green; }");
+		ui->g08CountText->setNum((int) m_rdsParser.m_g8_count);
+
+		std::ostringstream os;
+		os << (m_rdsParser.m_g8_sign ? "-" : "+") << m_rdsParser.m_g8_extent + 1;
+		ui->g08Extent->setText(QString(os.str().c_str()));
+		int event_line = RDSTMC::get_tmc_event_code_index(m_rdsParser.m_g8_event, 1);
+		ui->g08TMCEvent->setText(QString(RDSTMC::get_tmc_events(event_line, 1).c_str()));
+		ui->g08Location->setNum((int) m_rdsParser.m_g8_location);
+
+		if (m_rdsParser.m_g8_label_index >= 0) {
+			ui->g08Description->setText(QString(m_rdsParser.label_descriptions[m_rdsParser.m_g8_label_index].c_str()));
+		}
+
+		ui->g08Content->setNum(m_rdsParser.m_g8_content);
+	}
+	else
+	{
+		ui->g08Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	}
+
+	// G9 group
+	if (m_rdsParser.m_g9_updated || force)
+	{
+		ui->g09CountText->setNum((int) m_rdsParser.m_g9_count);
+	}
+
+	// G14 group
+	if (m_rdsParser.m_g14_updated || force)
+	{
+		ui->g14CountText->setNum((int) m_rdsParser.m_g14_count);
 	}
 
 	m_rdsParser.clearUpdateFlags();

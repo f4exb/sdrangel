@@ -73,6 +73,7 @@ public:
 	char           m_g2_radiotext[64+1];
 
 	// G3 data
+	bool           m_g3_updated;
 	unsigned int   m_g3_count;
 
 	// G4 data
@@ -87,6 +88,9 @@ public:
 	double         m_g4_local_time_offset;
 
     // G5..G7 data
+	bool           m_g5_updated;
+	bool           m_g6_updated;
+	bool           m_g7_updated;
 	unsigned int   m_g5_count;
 	unsigned int   m_g6_count;
 	unsigned int   m_g7_count;
@@ -99,8 +103,25 @@ public:
 	bool           m_g8_sign;
 	unsigned int   m_g8_extent;
 	unsigned int   m_g8_event;
+	unsigned int   m_g8_location;
 	int            m_g8_label_index; //!< negative if not received
 	int            m_g8_content;
+
+	// G9..G15 data
+	bool           m_g9_updated;
+	bool           m_g10_updated;
+	bool           m_g11_updated;
+	bool           m_g12_updated;
+	bool           m_g13_updated;
+	bool           m_g14_updated;
+	bool           m_g15_updated;
+	unsigned int   m_g9_count;
+	unsigned int   m_g10_count;
+	unsigned int   m_g11_count;
+	unsigned int   m_g12_count;
+	unsigned int   m_g13_count;
+	unsigned int   m_g14_count;
+	unsigned int   m_g15_count;
 
 	// Static tables
 	static const unsigned int offset_pos[5];

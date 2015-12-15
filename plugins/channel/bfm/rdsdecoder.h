@@ -26,6 +26,7 @@ public:
 
 	bool frameSync(bool bit);
 	unsigned int *getGroup() { return m_group; }
+	bool synced() const { return m_sync == SYNC; }
 
 	float          m_qua;
 
