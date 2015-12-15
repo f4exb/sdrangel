@@ -20,10 +20,16 @@
 
 #include <string>
 #include <set>
+#include <map>
 
 class RDSParser
 {
 public:
+	typedef std::map<unsigned int, std::string> psns_map_t;
+	typedef std::pair<unsigned int, std::string> psns_map_kv_t;
+	typedef std::map<unsigned int, std::set<double> > freqs_map_t;
+	typedef std::pair<unsigned int, std::set<double> > freqs_map_kv_t;
+
 	RDSParser();
 	~RDSParser();
 
@@ -107,20 +113,32 @@ public:
 	int            m_g8_label_index; //!< negative if not received
 	int            m_g8_content;
 
-	// G9..G15 data
+	// G9..G13 data
 	bool           m_g9_updated;
 	bool           m_g10_updated;
 	bool           m_g11_updated;
 	bool           m_g12_updated;
 	bool           m_g13_updated;
-	bool           m_g14_updated;
-	bool           m_g15_updated;
 	unsigned int   m_g9_count;
 	unsigned int   m_g10_count;
 	unsigned int   m_g11_count;
 	unsigned int   m_g12_count;
 	unsigned int   m_g13_count;
+
+	// G14 data
+	bool           m_g14_updated;
 	unsigned int   m_g14_count;
+	psns_map_t     m_g14_program_service_names; //!< key: PI, value: PSN
+	freqs_map_t    m_g14_alt_freqs;             //!< key: PI, value: set of alternate frequencies (MHz)
+	freqs_map_t    m_g14_mapped_freqs;          //!< key: PI, value: set of mapped frequencies (MHz)
+	char           m_g14_program_service_name[8+1];
+	std::set<double> m_g14_alt_freq_set;
+	std::set<double> m_g14_mapped_freq_set;
+	bool           m_g14_psn_updated;
+	bool           m_g14_data_available;
+
+	// G15 data
+	bool           m_g15_updated;
 	unsigned int   m_g15_count;
 
 	// Static tables

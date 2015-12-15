@@ -256,6 +256,7 @@ void RDSParser::clearUpdateFlags()
 	m_g12_updated = false;
 	m_g13_updated = false;
 	m_g14_updated = false;
+	m_g14_data_available = false;
 	m_g15_updated = false;
 }
 
@@ -321,13 +322,25 @@ void RDSParser::clearAllFields()
 	m_g8_label_index = -1;
 	m_g8_content = 0;
 
-	// Group 09..15 data
+	// Group 09..13 data
 	m_g9_count = 0;
 	m_g10_count = 0;
 	m_g11_count = 0;
 	m_g12_count = 0;
 	m_g13_count = 0;
+
+	// Group 14
 	m_g14_count = 0;
+	m_g14_program_service_names.clear();
+	m_g14_alt_freqs.clear();
+	m_g14_mapped_freqs.clear();
+	std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
+	m_g14_alt_freq_set.clear();
+	m_g14_mapped_freq_set.clear();
+	m_g14_psn_updated = false;
+	m_g14_data_available = false;
+
+	// Group 15
 	m_g15_count = 0;
 
 	clearUpdateFlags();
@@ -952,15 +965,18 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			case 2: // PS(ON)
 			case 3: // PS(ON)
 			{
-				ps_on[variant_code * 2    ] = (information >> 8) & 0xff;
-				ps_on[variant_code * 2 + 1] =  information       & 0xff;
-				qDebug() << "RDSParser::decode_type14: PS(ON): \"" << std::string(ps_on, 8).c_str() << "\"";
+				m_g14_program_service_name[variant_code * 2    ] = (information >> 8) & 0xff;
+				m_g14_program_service_name[variant_code * 2 + 1] =  information       & 0xff;
+				m_g14_psn_updated = true;
+				qDebug() << "RDSParser::decode_type14: PS(ON): \"" << std::string(m_g14_program_service_name, 8).c_str() << "\"";
 				break;
 			}
 			case 4: // AF
 			{
 				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
 				af_2 = 100.0 * ((information & 0xff) + 875);
+				m_g14_alt_freq_set.insert(af_1/1000.0);
+				m_g14_alt_freq_set.insert(af_2/1000.0);
 				std::string s = str(boost::format("AF:%3.2fMHz %3.2fMHz") % (af_1/1000) % (af_2/1000));
 				qDebug() << "RDSParser::decode_type14: " << s.c_str();
 				break;
@@ -972,6 +988,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			{
 				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
 				af_2 = 100.0 * ((information & 0xff) + 875);
+				m_g14_mapped_freq_set.insert(af_2/1000.0);
 				std::string s = str(boost::format("TN:%3.2fMHz - ON:%3.2fMHz") % (af_1/1000) % (af_2/1000));
 				qDebug() << "RDSParser::decode_type14: " << s.c_str();
 				break;
@@ -980,6 +997,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			{
 				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
 				af_2 = 9.0 * ((information & 0xff) - 16) + 531;
+				m_g14_mapped_freq_set.insert(af_2/1000.0);
 				std::string s = str(boost::format("TN:%3.2fMHz - ON:%ikHz") % (af_1/1000) % int(af_2));
 				qDebug() << "RDSParser::decode_type14: " << s.c_str();
 				break;
@@ -990,6 +1008,28 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				break;
 			case 12: // linkage information
 			{
+				if (m_g14_psn_updated)
+				{
+					std::pair<psns_map_t::iterator, bool> ret = m_g14_program_service_names.insert(psns_map_kv_t(pi_on, std::string(m_g14_program_service_name)));
+					std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
+					m_g14_psn_updated = false;
+					m_g14_data_available = ret.second;
+				}
+
+				if (m_g14_alt_freq_set.size() > 0)
+				{
+					std::pair<freqs_map_t::iterator, bool> ret = m_g14_alt_freqs.insert(freqs_map_kv_t(pi_on, m_g14_alt_freq_set));
+					m_g14_alt_freq_set.clear();
+					m_g14_data_available = ret.second;
+				}
+
+				if (m_g14_mapped_freq_set.size() > 0)
+				{
+					std::pair<freqs_map_t::iterator, bool> ret = m_g14_mapped_freqs.insert(freqs_map_kv_t(pi_on, m_g14_mapped_freq_set));
+					m_g14_mapped_freq_set.clear();
+					m_g14_data_available = ret.second;
+				}
+
 				std::string s = str(boost::format("Linkage information: %x%x") % ((information >> 8) & 0xff) % (information & 0xff));
 				qDebug() << "RDSParser::decode_type14: " << s.c_str();
 				break;
