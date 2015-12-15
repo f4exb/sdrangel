@@ -501,24 +501,17 @@ void BFMDemodGUI::rdsUpdate(bool force)
 
 		if (m_rdsParser.m_g0_af_updated)
 		{
-			bool isFirst = true;
-			std::ostringstream os;
-			os << std::fixed << std::showpoint << std::setprecision(2);
+			ui->g00AltFrequenciesBox->clear();
 
 			for (std::set<double>::iterator it = m_rdsParser.m_g0_alt_freq.begin(); it != m_rdsParser.m_g0_alt_freq.end(); ++it)
 			{
 				if (*it > 76.0)
 				{
-					if (!isFirst) {
-						os << ", ";
-					}
-
-					os << *it;
-					isFirst = false;
+					std::ostringstream os;
+					os << std::fixed << std::showpoint << std::setprecision(2) << *it;
+					ui->g00AltFrequenciesBox->addItem(QString(os.str().c_str()));
 				}
 			}
-
-			ui->g00AltFrequencies->setText(QString(os.str().c_str()));
 		}
 	}
 	else
@@ -608,7 +601,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 		ui->g08Extent->setText(QString(os.str().c_str()));
 		int event_line = RDSTMC::get_tmc_event_code_index(m_rdsParser.m_g8_event, 1);
 		ui->g08TMCEvent->setText(QString(RDSTMC::get_tmc_events(event_line, 1).c_str()));
-		ui->g08Location->setNum((int) m_rdsParser.m_g8_location);
+		QString pistring(str(boost::format("%04X") % m_rdsParser.m_g8_location).c_str());
+		ui->g08Location->setText(pistring);
 
 		if (m_rdsParser.m_g8_label_index >= 0) {
 			ui->g08Description->setText(QString(m_rdsParser.label_descriptions[m_rdsParser.m_g8_label_index].c_str()));

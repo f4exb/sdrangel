@@ -1234,9 +1234,15 @@
       </item>
       <item>
        <widget class="QLabel" name="g00MusicSpeech">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
           <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1250,9 +1256,15 @@
       </item>
       <item>
        <widget class="QLabel" name="g00MonoStereo">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
           <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1265,14 +1277,36 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="g00AltFrequencies">
-        <property name="toolTip">
-         <string>Alternate frequencies (MHz)</string>
+       <widget class="QComboBox" name="g00AltFrequenciesBox">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
         </property>
-        <property name="text">
-         <string>00.00</string>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Alternalte frequencies (MHz)</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -1386,12 +1420,31 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="g08Location">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Location code</string>
+        </property>
+        <property name="text">
+         <string>0000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="g08Extent">
         <property name="maximumSize">
          <size>
           <width>40</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Extent</string>
         </property>
         <property name="text">
          <string>+0</string>
@@ -1400,13 +1453,9 @@
       </item>
       <item>
        <widget class="QLabel" name="g08TMCEvent">
-        <property name="text">
-         <string>___</string>
+        <property name="toolTip">
+         <string>TMC event</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="g08Location">
         <property name="text">
          <string>___</string>
         </property>
@@ -1414,6 +1463,9 @@
       </item>
       <item>
        <widget class="QLabel" name="g08Description">
+        <property name="toolTip">
+         <string>Description</string>
+        </property>
         <property name="text">
          <string>___</string>
         </property>
@@ -1426,6 +1478,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Content</string>
         </property>
         <property name="text">
          <string>0</string>
