@@ -509,7 +509,7 @@ void BFMDemodGUI::rdsUpdateFixedFields()
 	//ui->g06Label->setText(m_rdsParser.rds_group_acronym_tags[6].c_str());
 	//ui->g07Label->setText(m_rdsParser.rds_group_acronym_tags[7].c_str());
 	ui->g08Label->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
-	//ui->g09Label->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
+	ui->g09Label->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
 	ui->g14Label->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
 
 	ui->g00CountLabel->setText(m_rdsParser.rds_group_acronym_tags[0].c_str());
@@ -699,7 +699,14 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	// G9 group
 	if (m_rdsParser.m_g9_updated || force)
 	{
+		ui->g09Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g09CountText->setNum((int) m_rdsParser.m_g9_count);
+		std::string g9str = str(boost::format("%02X %04X %04X %02X %04X") % m_rdsParser.m_g9_varA % m_rdsParser.m_g9_cA % m_rdsParser.m_g9_dA % m_rdsParser.m_g9_varB % m_rdsParser.m_g9_dB);
+		ui->g09Data->setText(QString(g9str.c_str()));
+	}
+	else
+	{
+		ui->g09Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 	}
 
 	// G14 group

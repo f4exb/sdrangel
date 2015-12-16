@@ -322,7 +322,14 @@ void RDSParser::clearAllFields()
 	m_g8_label_index = -1;
 	m_g8_content = 0;
 
-	// Group 09..13 data
+	// Group 09 data
+	m_g9_varA = 0;
+	m_g9_cA = 0;
+	m_g9_dA = 0;
+	m_g9_varB = 0;
+	m_g9_dB = 0;
+
+	// Group 10..13 data
 	m_g9_count = 0;
 	m_g10_count = 0;
 	m_g11_count = 0;
@@ -910,7 +917,19 @@ void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_f
 }
 
 void RDSParser::decode_type9(unsigned int *group, bool B){
-	qDebug() << "RDSParser::decode_type9: type 9 not implemented yet";
+
+	if (B)
+	{
+		m_g9_varB = group[1] & 0x1f;
+		m_g9_dB   = group[3];
+	}
+	else
+	{
+		m_g9_varA = group[1] & 0x1f;
+		m_g9_cA   = group[2];
+		m_g9_dA   = group[3];
+	}
+
 	m_g9_updated = true;
 	m_g9_count++;
 }

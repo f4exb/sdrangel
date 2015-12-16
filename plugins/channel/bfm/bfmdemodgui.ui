@@ -1186,9 +1186,15 @@
      <layout class="QHBoxLayout" name="row2DataLayout">
       <item>
        <widget class="QLabel" name="g00Label">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
           <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1327,6 +1333,46 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="g09Label">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G09</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row2Separator3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g09Data">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>00 0000 0000 00 0000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row2Separator4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

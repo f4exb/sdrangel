@@ -114,13 +114,20 @@ public:
 	int            m_g8_label_index; //!< negative if not received
 	int            m_g8_content;
 
-	// G9..G13 data
+	// G9 data
 	bool           m_g9_updated;
+	unsigned int   m_g9_count;
+	unsigned int   m_g9_varA;
+	unsigned int   m_g9_cA;
+	unsigned int   m_g9_dA;
+	unsigned int   m_g9_varB;
+	unsigned int   m_g9_dB;
+
+	// G10..G13 data
 	bool           m_g10_updated;
 	bool           m_g11_updated;
 	bool           m_g12_updated;
 	bool           m_g13_updated;
-	unsigned int   m_g9_count;
 	unsigned int   m_g10_count;
 	unsigned int   m_g11_count;
 	unsigned int   m_g12_count;
