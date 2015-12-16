@@ -29,6 +29,7 @@
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
 #include "dsp/afsquelch.h"
+#include "dsp/phasediscri.hpp"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -170,15 +171,15 @@ private:
 	double m_squelchLevel;
 
 	Real m_lastArgument;
-	Complex m_m1Sample;
-	Complex m_m2Sample;
+	//Complex m_m1Sample;
+	//Complex m_m2Sample;
 	MagAGC m_AGC;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
 
 	Real m_fmExcursion;
-	Real m_fmScaling;
+	//Real m_fmScaling;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -188,7 +189,7 @@ private:
 	NFMDemodGUI *m_nfmDemodGUI;
 	QMutex m_settingsMutex;
 
-#include "dsp/phasediscri.hpp"
+    PhaseDiscriminators m_phaseDiscri;
 
 	void apply();
 };

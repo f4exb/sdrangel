@@ -39,7 +39,6 @@ NFMDemod::NFMDemod() :
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_fmExcursion(2400),
-	m_fmScaling(384000/2400),
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");
@@ -49,10 +48,11 @@ NFMDemod::NFMDemod() :
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
 	m_config.m_squelch = -30.0;
-	m_config.m_volume = 2.0;
+	m_config.m_volume = 1.0;
 	m_config.m_ctcssOn = false;
 	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+	m_phaseDiscri.setFMScaling(384000/2400);
 
 	apply();
 
@@ -141,10 +141,10 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				m_AGC.feed(ci);
 
-				Real demod = phaseDiscriminator2(ci);
+				Real demod = m_phaseDiscri.phaseDiscriminator2(ci);
 
-				m_m2Sample = m_m1Sample;
-				m_m1Sample = ci;
+				//m_m2Sample = m_m1Sample;
+				//m_m1Sample = ci;
 				m_sampleCount++;
 
 				// AF processing
@@ -263,7 +263,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 void NFMDemod::start()
 {
 	m_audioFifo.clear();
-	m_m1Sample = 0;
+	m_phaseDiscri.reset();
 }
 
 void NFMDemod::stop()
@@ -331,7 +331,7 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
+		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
 
@@ -342,14 +342,14 @@ void NFMDemod::apply()
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 		m_fmExcursion = m_config.m_afBandwidth / 2.0f;
-		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
+		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
 
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a value in tenths of dB
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 200.0);
+		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 200.0);
 		//m_squelchLevel *= m_squelchLevel;
 		m_afSquelch.setThreshold(m_squelchLevel);
 	}

@@ -244,7 +244,10 @@
       <item>
        <widget class="QSlider" name="volume">
         <property name="maximum">
-         <number>100</number>
+         <number>40</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
         </property>
         <property name="value">
          <number>20</number>

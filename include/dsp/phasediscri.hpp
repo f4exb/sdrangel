@@ -18,33 +18,59 @@
 #ifndef INCLUDE_DSP_PHASEDISCRI_H_
 #define INCLUDE_DSP_PHASEDISCRI_H_
 
-/**
- * Standard discriminator using atan2. On modern processors this is as efficient as the non atan2 one.
- * This is better for high fidelity.
- */
-Real phaseDiscriminator(const Complex& sample)
+class PhaseDiscriminators
 {
-	Complex d(std::conj(m_m1Sample) * sample);
-	m_m1Sample = sample;
-	return (std::atan2(d.imag(), d.real()) / M_PI_2) * m_fmScaling;
-}
+public:
+	/**
+	 * Reset stored values
+	 */
+	void reset()
+	{
+		m_m1Sample = 0;
+		m_m2Sample = 0;
+	}
 
-/**
- * Alternative without atan at the expense of a slight distorsion on very wideband signals
- * http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
- * in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
- */
-Real phaseDiscriminator2(const Complex& sample)
-{
-	Real ip = sample.real() - m_m2Sample.real();
-	Real qp = sample.imag() - m_m2Sample.imag();
-	Real h1 = m_m1Sample.real() * qp;
-	Real h2 = m_m1Sample.imag() * ip;
+	/**
+	 * Scaling factor so that resulting excursion maps to [-1,+1]
+	 */
+	void setFMScaling(Real fmScaling)
+	{
+		m_fmScaling = fmScaling;
+	}
 
-	m_m2Sample = m_m1Sample;
-	m_m1Sample = sample;
+	/**
+	 * Standard discriminator using atan2. On modern processors this is as efficient as the non atan2 one.
+	 * This is better for high fidelity.
+	 */
+	Real phaseDiscriminator(const Complex& sample)
+	{
+		Complex d(std::conj(m_m1Sample) * sample);
+		m_m1Sample = sample;
+		return (std::atan2(d.imag(), d.real()) / M_PI_2) * m_fmScaling;
+	}
 
-	return ((h1 - h2) / M_PI) * m_fmScaling;
-}
+	/**
+	 * Alternative without atan at the expense of a slight distorsion on very wideband signals
+	 * http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+	 * in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
+	 */
+	Real phaseDiscriminator2(const Complex& sample)
+	{
+		Real ip = sample.real() - m_m2Sample.real();
+		Real qp = sample.imag() - m_m2Sample.imag();
+		Real h1 = m_m1Sample.real() * qp;
+		Real h2 = m_m1Sample.imag() * ip;
+
+		m_m2Sample = m_m1Sample;
+		m_m1Sample = sample;
+
+		return ((h1 - h2) / M_PI) * m_fmScaling;
+	}
+
+private:
+	Complex m_m1Sample;
+	Complex m_m2Sample;
+	Real m_fmScaling;
+};
 
 #endif /* INCLUDE_DSP_PHASEDISCRI_H_ */
