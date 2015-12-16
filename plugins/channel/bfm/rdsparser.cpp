@@ -245,6 +245,7 @@ void RDSParser::clearUpdateFlags()
 	m_g0_af_updated = false;
 	m_g1_updated = false;
 	m_g2_updated = false;
+	m_g3_updated = false;
 	m_g4_updated = false;
 	m_g5_updated = false;
 	m_g6_updated = false;
@@ -296,6 +297,11 @@ void RDSParser::clearAllFields()
 
 	// Group 03 data
 	m_g3_count = 0;
+	m_g3_groupB = false;
+	m_g3_appGroup = 0;
+	m_g3_message = 0;
+	m_g3_aid = 0;
+
 
 	// Group 04 data
 	m_g4_count = 0;
