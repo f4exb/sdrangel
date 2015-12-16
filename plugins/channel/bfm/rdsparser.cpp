@@ -718,8 +718,9 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 	m_g3_updated = true;
 	m_g3_count++;
 
+	/*
 	qDebug() << "RDSParser::decode_type3: aid group: " << application_group
-		<< " " << (group_type ? 'B' : 'A');
+		<< " " << (group_type ? 'B' : 'A');*/
 
 	if ((application_group == 8) && (group_type == false))
 	{ // 8A
@@ -735,6 +736,7 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 			bool R   = (message >> 1) & 0x1;  // regional
 			bool U   =  message       & 0x1;  // urban
 
+			/*
 			qDebug() << "RDSParser::decode_type3: location table: " << ltn << " - "
 				<< (afi ? "AFI-ON" : "AFI-OFF") << " - "
 				<< (M   ? "enhanced mode" : "basic mode") << " - "
@@ -742,19 +744,25 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 				<< (N   ? "national " : "")
 				<< (R   ? "regional " : "")
 				<< (U   ? "urban" : "")
-				<< " aid: " << aid;
+				<< " aid: " << aid;*/
 		}
 		else if (variant_code==1)
 		{
 			int G   = (message >> 12) & 0x3;  // gap
 			int sid = (message >>  6) & 0x3f; // service identifier
 			int gap_no[4] = {3, 5, 8, 11};
+			/*
 			qDebug() << "RDSParser::decode_type3: gap: " << gap_no[G] << " groups, SID: "
-				<< sid << " ";
+				<< sid << " ";*/
 		}
 	}
 
-	qDebug() << "RDSParser::decode_type3: message: " << message << " - aid: " << aid;
+	m_g3_groupB = group_type;
+	m_g3_appGroup = application_group;
+	m_g3_message = message;
+	m_g3_aid = aid;
+
+	//qDebug() << "RDSParser::decode_type3: message: " << message << " - aid: " << aid;
 }
 
 void RDSParser::decode_type4(unsigned int *group, bool B)

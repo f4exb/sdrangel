@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>712</width>
+    <width>846</width>
     <height>729</height>
    </rect>
   </property>
@@ -436,7 +436,7 @@
     <rect>
      <x>10</x>
      <y>150</y>
-     <width>661</width>
+     <width>791</width>
      <height>301</height>
     </rect>
    </property>
@@ -979,9 +979,15 @@
      <layout class="QHBoxLayout" name="row1DataLayout">
       <item>
        <widget class="QLabel" name="piLabel">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>30</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1025,9 +1031,15 @@
       </item>
       <item>
        <widget class="QLabel" name="piTPIndicator">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
           <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1244,9 +1256,15 @@
       </item>
       <item>
        <widget class="QLabel" name="g00TrafficAnnouncement">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
           <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1306,7 +1324,7 @@
        <widget class="QComboBox" name="g00AltFrequenciesBox">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>70</width>
           <height>0</height>
          </size>
         </property>
@@ -1335,12 +1353,68 @@
        </spacer>
       </item>
       <item>
+       <widget class="Line" name="row2Separator6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g03Label">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 3 updated</string>
+        </property>
+        <property name="text">
+         <string>G03</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row2Separator5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g03Data">
+        <property name="minimumSize">
+         <size>
+          <width>85</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Application Information data for Open Data</string>
+        </property>
+        <property name="text">
+         <string>00A 0000 0000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row2Separator7">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="g09Label">
         <property name="minimumSize">
          <size>
           <width>30</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 9 updated</string>
         </property>
         <property name="text">
          <string>G09</string>
@@ -1358,19 +1432,15 @@
        <widget class="QLabel" name="g09Data">
         <property name="minimumSize">
          <size>
-          <width>150</width>
+          <width>130</width>
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Emergency Warning System raw data</string>
+        </property>
         <property name="text">
          <string>00 0000 0000 00 0000</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="row2Separator4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -1385,6 +1455,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 2 updated</string>
         </property>
         <property name="text">
          <string>G02</string>
@@ -1416,6 +1489,9 @@
           <width>30</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 4 updated</string>
         </property>
         <property name="text">
          <string>G04</string>
@@ -1472,15 +1548,18 @@
        <widget class="QLabel" name="g14Label">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>30</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 14 updated</string>
         </property>
         <property name="text">
          <string>G14</string>
@@ -1544,6 +1623,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Group 8 updated</string>
         </property>
         <property name="text">
          <string>G08</string>

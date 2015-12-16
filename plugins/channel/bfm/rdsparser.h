@@ -82,6 +82,10 @@ public:
 	// G3 data
 	bool           m_g3_updated;
 	unsigned int   m_g3_count;
+	bool           m_g3_groupB;
+	unsigned int   m_g3_appGroup;
+	unsigned int   m_g3_message;
+	unsigned int   m_g3_aid;
 
 	// G4 data
 	bool           m_g4_updated;
