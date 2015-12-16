@@ -176,7 +176,9 @@ private:
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
-	Real m_magsq;
+
+	Real m_fmExcursion;
+	Real m_fmScaling;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -185,6 +187,35 @@ private:
 
 	NFMDemodGUI *m_nfmDemodGUI;
 	QMutex m_settingsMutex;
+
+	/**
+	 * Standard discriminator using atan2. On modern processors this is as efficient as the non atan2 one.
+	 * This is better for high fidelity.
+	 */
+	Real phaseDiscriminator(const Complex& sample)
+	{
+		Complex d(std::conj(m_m1Sample) * sample);
+		m_m1Sample = sample;
+		return (std::atan2(d.imag(), d.real()) / M_PI_2) * m_fmScaling;
+	}
+
+	/**
+	 * Alternative without atan at the expense of a slight distorsion on very wideband signals
+	 * http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
+	 * in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
+	 */
+	Real phaseDiscriminator2(const Complex& sample, Real msq)
+	{
+		Real ip = sample.real() - m_m2Sample.real();
+		Real qp = sample.imag() - m_m2Sample.imag();
+		Real h1 = m_m1Sample.real() * qp;
+		Real h2 = m_m1Sample.imag() * ip;
+
+		m_m2Sample = m_m1Sample;
+		m_m1Sample = sample;
+
+		return ((h1 - h2) / (msq * M_PI)) * m_fmScaling;
+	}
 
 	void apply();
 };

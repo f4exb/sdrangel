@@ -38,6 +38,8 @@ NFMDemod::NFMDemod() :
 	m_audioMute(false),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
+	m_fmExcursion(4800),
+	m_fmScaling(384000/4800),
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");
@@ -59,7 +61,6 @@ NFMDemod::NFMDemod() :
 
 	m_agcLevel = 1.0;
 	m_AGC.resize(m_agcAttack, m_agcLevel);
-	m_magsq = 0;
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
@@ -138,40 +139,9 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				qint16 sample;
 
-				//m_AGC.feed(abs(ci));
-				//ci *= (m_agcLevel / m_AGC.getValue());
-
 				m_AGC.feed(ci);
-				//m_magsq = m_AGC.getMagSq() / (1<<30);
 
-				// demod
-				/*
-				Real argument = arg(ci);
-				Real demod = argument - m_lastArgument;
-				m_lastArgument = argument;
-				*/
-
-				/*
-				// Original NFM
-				Complex d = conj(m_m1Sample) * ci;
-				Real demod = atan2(d.imag(), d.real());
-				demod /= M_PI;
-				*/
-
-				/*
-				Real argument1 = arg(ci);//atan2(ci.imag(), ci.real());
-				Real argument2 = m_lastSample.real();
-				Real demod = angleDist(argument2, argument1);
-				m_lastSample = Complex(argument1, 0);
-				*/
-
-				// Alternative without atan - needs AGC
-				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
-				Real ip = ci.real() - m_m2Sample.real();
-				Real qp = ci.imag() - m_m2Sample.imag();
-				Real h1 = m_m1Sample.real() * qp;
-				Real h2 = m_m1Sample.imag() * ip;
-				Real demod = (h1 - h2) * 1; // 10000 (multiply by 2^16 after demod)
+				Real demod = phaseDiscriminator2(ci, 0.5);
 
 				m_m2Sample = m_m1Sample;
 				m_m1Sample = ci;
@@ -240,8 +210,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					else
 					{
 						demod = m_bandpass.filter(demod);
-						demod *= m_running.m_volume;
-						sample = demod * 10;
+						sample = demod * m_running.m_volume;
 					}
 				}
 				else
@@ -362,6 +331,7 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
 		m_settingsMutex.unlock();
 	}
 
@@ -371,6 +341,8 @@ void NFMDemod::apply()
 		m_settingsMutex.lock();
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
+		m_fmExcursion = m_config.m_afBandwidth;
+		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
 		m_settingsMutex.unlock();
 	}
 
