@@ -38,8 +38,8 @@ NFMDemod::NFMDemod() :
 	m_audioMute(false),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
-	m_fmExcursion(4800),
-	m_fmScaling(384000/4800),
+	m_fmExcursion(2400),
+	m_fmScaling(384000/2400),
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");
@@ -141,7 +141,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				m_AGC.feed(ci);
 
-				Real demod = phaseDiscriminator2(ci, 0.5);
+				Real demod = phaseDiscriminator2(ci);
 
 				m_m2Sample = m_m1Sample;
 				m_m1Sample = ci;
@@ -341,7 +341,7 @@ void NFMDemod::apply()
 		m_settingsMutex.lock();
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
-		m_fmExcursion = m_config.m_afBandwidth;
+		m_fmExcursion = m_config.m_afBandwidth / 2.0f;
 		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
 		m_settingsMutex.unlock();
 	}
