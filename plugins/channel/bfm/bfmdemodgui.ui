@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>676</width>
+    <width>712</width>
     <height>729</height>
    </rect>
   </property>
@@ -436,7 +436,7 @@
     <rect>
      <x>10</x>
      <y>150</y>
-     <width>561</width>
+     <width>661</width>
      <height>301</height>
     </rect>
    </property>
@@ -664,6 +664,20 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearData">
+        <property name="toolTip">
+         <string>Clear RDS data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -1195,9 +1209,15 @@
       </item>
       <item>
        <widget class="QLabel" name="g00ProgServiceName">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1280,7 +1300,7 @@
        <widget class="QComboBox" name="g00AltFrequenciesBox">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>50</width>
           <height>0</height>
          </size>
         </property>
@@ -1357,7 +1377,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="row3Sep1">
+       <widget class="Line" name="row3Separator1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -1367,13 +1387,13 @@
        <widget class="QLabel" name="g04Time">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>160</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -1394,6 +1414,78 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="row3Separator2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="g14Label">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>G14</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row3Separator3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="g14ProgServiceNames">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Stations (PI and Program service names)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="g14MappedFrequencies">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Station mapped frequencies</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="g14AltFrequencies">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Station altermate freqiuencies</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

@@ -65,6 +65,8 @@ private slots:
 	void on_audioStereo_toggled(bool stereo);
 	void on_showPilot_clicked();
 	void on_rds_clicked();
+	void on_g14ProgServiceNames_currentIndexChanged(int index);
+	void on_clearData_clicked(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();
@@ -85,6 +87,7 @@ private:
 	BFMDemod* m_bfmDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
 	int m_rate;
+	std::vector<unsigned int> m_g14ComboIndex;
 
 	static const int m_rfBW[];
 

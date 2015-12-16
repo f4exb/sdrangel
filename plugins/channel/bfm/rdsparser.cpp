@@ -338,7 +338,6 @@ void RDSParser::clearAllFields()
 	m_g14_alt_freq_set.clear();
 	m_g14_mapped_freq_set.clear();
 	m_g14_psn_updated = false;
-	m_g14_data_available = false;
 
 	// Group 15
 	m_g15_count = 0;
@@ -968,7 +967,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				m_g14_program_service_name[variant_code * 2    ] = (information >> 8) & 0xff;
 				m_g14_program_service_name[variant_code * 2 + 1] =  information       & 0xff;
 				m_g14_psn_updated = true;
-				qDebug() << "RDSParser::decode_type14: PS(ON): \"" << std::string(m_g14_program_service_name, 8).c_str() << "\"";
+				//qDebug() << "RDSParser::decode_type14: PS(ON): \"" << std::string(m_g14_program_service_name, 8).c_str() << "\"";
 				break;
 			}
 			case 4: // AF
@@ -977,8 +976,9 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				af_2 = 100.0 * ((information & 0xff) + 875);
 				m_g14_alt_freq_set.insert(af_1/1000.0);
 				m_g14_alt_freq_set.insert(af_2/1000.0);
+				/*
 				std::string s = str(boost::format("AF:%3.2fMHz %3.2fMHz") % (af_1/1000) % (af_2/1000));
-				qDebug() << "RDSParser::decode_type14: " << s.c_str();
+				qDebug() << "RDSParser::decode_type14: " << s.c_str();*/
 				break;
 			}
 			case 5: // mapped frequencies
@@ -989,8 +989,9 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
 				af_2 = 100.0 * ((information & 0xff) + 875);
 				m_g14_mapped_freq_set.insert(af_2/1000.0);
+				/*
 				std::string s = str(boost::format("TN:%3.2fMHz - ON:%3.2fMHz") % (af_1/1000) % (af_2/1000));
-				qDebug() << "RDSParser::decode_type14: " << s.c_str();
+				qDebug() << "RDSParser::decode_type14: " << s.c_str();*/
 				break;
 			}
 			case 9: // mapped frequencies (AM)
@@ -998,8 +999,9 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
 				af_2 = 9.0 * ((information & 0xff) - 16) + 531;
 				m_g14_mapped_freq_set.insert(af_2/1000.0);
+				/*
 				std::string s = str(boost::format("TN:%3.2fMHz - ON:%ikHz") % (af_1/1000) % int(af_2));
-				qDebug() << "RDSParser::decode_type14: " << s.c_str();
+				qDebug() << "RDSParser::decode_type14: " << s.c_str();*/
 				break;
 			}
 			case 10: // unallocated
@@ -1010,6 +1012,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			{
 				if (m_g14_psn_updated)
 				{
+					qDebug("RDSParser::decode_type14: m_g14_psn_updated");
 					std::pair<psns_map_t::iterator, bool> ret = m_g14_program_service_names.insert(psns_map_kv_t(pi_on, std::string(m_g14_program_service_name)));
 					std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
 					m_g14_psn_updated = false;
@@ -1018,36 +1021,87 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 
 				if (m_g14_alt_freq_set.size() > 0)
 				{
-					std::pair<freqs_map_t::iterator, bool> ret = m_g14_alt_freqs.insert(freqs_map_kv_t(pi_on, m_g14_alt_freq_set));
+					qDebug("RDSParser::decode_type14: m_g14_alt_freq_set updated");
+
+					std::pair<freqs_map_t::iterator, bool> retMap;
+					std::pair<freqs_set_t::iterator, bool> retSet;
+					bool updated = false;
+
+					freqs_map_t::iterator mIt = m_g14_alt_freqs.find(pi_on);
+
+					if (mIt == m_g14_alt_freqs.end()) // key does not exist yet => insert the whole set
+					{
+						retMap = m_g14_alt_freqs.insert(freqs_map_kv_t(pi_on, m_g14_alt_freq_set));
+						updated |= retMap.second;
+					}
+					else // merge sets
+					{
+						freqs_set_t::iterator sIt = m_g14_alt_freq_set.begin();
+						const freqs_set_t::iterator sItEnd = m_g14_alt_freq_set.end();
+
+						for (sIt; sIt != sItEnd; ++sIt)
+						{
+							retSet = (mIt->second).insert(*sIt);
+							updated |= retSet.second;
+						}
+					}
+
 					m_g14_alt_freq_set.clear();
-					m_g14_data_available = ret.second;
+					m_g14_data_available |= updated;
 				}
 
 				if (m_g14_mapped_freq_set.size() > 0)
 				{
-					std::pair<freqs_map_t::iterator, bool> ret = m_g14_mapped_freqs.insert(freqs_map_kv_t(pi_on, m_g14_mapped_freq_set));
+					qDebug("RDSParser::decode_type14: m_g14_mapped_freq_set updated");
+
+					std::pair<freqs_map_t::iterator, bool> retMap;
+					std::pair<freqs_set_t::iterator, bool> retSet;
+					bool updated = false;
+
+					freqs_map_t::iterator mIt = m_g14_mapped_freqs.find(pi_on);
+
+					if (mIt == m_g14_mapped_freqs.end()) // key does not exist yet => insert the whole set
+					{
+						retMap = m_g14_mapped_freqs.insert(freqs_map_kv_t(pi_on, m_g14_mapped_freq_set));
+						updated |= retMap.second;
+					}
+					else // merge sets
+					{
+						freqs_set_t::iterator sIt = m_g14_mapped_freq_set.begin();
+						const freqs_set_t::iterator sItEnd = m_g14_mapped_freq_set.end();
+
+						for (sIt; sIt != sItEnd; ++sIt)
+						{
+							retSet = (mIt->second).insert(*sIt);
+							updated |= retSet.second;
+						}
+					}
+
 					m_g14_mapped_freq_set.clear();
-					m_g14_data_available = ret.second;
+					m_g14_data_available |= updated;
 				}
 
+				/*
 				std::string s = str(boost::format("Linkage information: %x%x") % ((information >> 8) & 0xff) % (information & 0xff));
-				qDebug() << "RDSParser::decode_type14: " << s.c_str();
+				qDebug() << "RDSParser::decode_type14: " << s.c_str();*/
 				break;
 			}
 			case 13: // PTY(ON), TA(ON)
 			{
 				ta_on = information & 0x01;
 				pty_on = (information >> 11) & 0x1f;
+				/*
 				qDebug() << "RDSParser::decode_type14: PTY(ON):" << pty_table[int(pty_on)].c_str();
 				if(ta_on) {
 					qDebug() << "RDSParser::decode_type14:  - TA";
-				}
+				}*/
 				break;
 			}
 			case 14: // PIN(ON)
 			{
+				/*
 				std::string s = str(boost::format("PIN(ON):%x%x") % ((information >> 8) & 0xff) % (information & 0xff));
-				qDebug() << "RDSParser::decode_type14: " << s.c_str();
+				qDebug() << "RDSParser::decode_type14: " << s.c_str();*/
 				break;
 			}
 			case 15: // Reserved for broadcasters use
@@ -1058,6 +1112,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 		}
 	}
 
+	/*
 	if (pi_on)
 	{
 		std::string pistring = str(boost::format("%04X") % pi_on);
@@ -1066,7 +1121,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 		if (tp_on) {
 			qDebug() << "RDSParser::decode_type14: TP(ON)";
 		}
-	}
+	}*/
 }
 
 void RDSParser::decode_type15(unsigned int *group, bool B){

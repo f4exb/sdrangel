@@ -29,6 +29,7 @@ public:
 	typedef std::pair<unsigned int, std::string> psns_map_kv_t;
 	typedef std::map<unsigned int, std::set<double> > freqs_map_t;
 	typedef std::pair<unsigned int, std::set<double> > freqs_map_kv_t;
+	typedef std::set<double> freqs_set_t;
 
 	RDSParser();
 	~RDSParser();

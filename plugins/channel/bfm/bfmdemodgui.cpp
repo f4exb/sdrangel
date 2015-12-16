@@ -250,12 +250,60 @@ void BFMDemodGUI::on_showPilot_clicked()
 
 void BFMDemodGUI::on_rds_clicked()
 {
-	if (ui->rds->isChecked()) {
+	applySettings();
+}
+
+void BFMDemodGUI::on_clearData_clicked(bool checked)
+{
+	if (ui->rds->isChecked())
+	{
 		m_rdsParser.clearAllFields();
+
+		ui->g14ProgServiceNames->clear();
+		ui->g14MappedFrequencies->clear();
+		ui->g14AltFrequencies->clear();
+
 		rdsUpdate(true);
 	}
+}
 
-	applySettings();
+void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
+{
+	if (index < m_g14ComboIndex.size())
+	{
+		unsigned int piKey = m_g14ComboIndex[index];
+		RDSParser::freqs_map_t::const_iterator mIt = m_rdsParser.m_g14_mapped_freqs.find(piKey);
+
+		if (mIt != m_rdsParser.m_g14_mapped_freqs.end())
+		{
+			ui->g14MappedFrequencies->clear();
+			RDSParser::freqs_set_t::iterator sIt = (mIt->second).begin();
+			const RDSParser::freqs_set_t::iterator sItEnd = (mIt->second).end();
+
+			for (sIt; sIt != sItEnd; ++sIt)
+			{
+				std::ostringstream os;
+				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
+				ui->g14MappedFrequencies->addItem(os.str().c_str());
+			}
+		}
+
+		mIt = m_rdsParser.m_g14_alt_freqs.find(piKey);
+
+		if (mIt != m_rdsParser.m_g14_alt_freqs.end())
+		{
+			ui->g14AltFrequencies->clear();
+			RDSParser::freqs_set_t::iterator sIt = (mIt->second).begin();
+			const RDSParser::freqs_set_t::iterator sItEnd = (mIt->second).end();
+
+			for (sIt; sIt != sItEnd; ++sIt)
+			{
+				std::ostringstream os;
+				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
+				ui->g14AltFrequencies->addItem(os.str().c_str());
+			}
+		}
+	}
 }
 
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -431,7 +479,7 @@ void BFMDemodGUI::rdsUpdateFixedFields()
 	//ui->g07Label->setText(m_rdsParser.rds_group_acronym_tags[7].c_str());
 	ui->g08Label->setText(m_rdsParser.rds_group_acronym_tags[8].c_str());
 	//ui->g09Label->setText(m_rdsParser.rds_group_acronym_tags[9].c_str());
-	//ui->g14Label->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
+	ui->g14Label->setText(m_rdsParser.rds_group_acronym_tags[14].c_str());
 
 	ui->g00CountLabel->setText(m_rdsParser.rds_group_acronym_tags[0].c_str());
 	ui->g01CountLabel->setText(m_rdsParser.rds_group_acronym_tags[1].c_str());
@@ -625,6 +673,28 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	if (m_rdsParser.m_g14_updated || force)
 	{
 		ui->g14CountText->setNum((int) m_rdsParser.m_g14_count);
+
+		if (m_rdsParser.m_g14_data_available)
+		{
+			ui->g14Label->setStyleSheet("QLabel { background-color : green; }");
+			m_g14ComboIndex.clear();
+			ui->g14ProgServiceNames->clear();
+
+			RDSParser::psns_map_t::iterator it = m_rdsParser.m_g14_program_service_names.begin();
+			const RDSParser::psns_map_t::iterator itEnd = m_rdsParser.m_g14_program_service_names.end();
+			int i = 0;
+
+			for (it; it != itEnd; ++it, i++)
+			{
+				m_g14ComboIndex.push_back(it->first);
+				QString pistring(str(boost::format("%04X:%s") % it->first % it->second).c_str());
+				ui->g14ProgServiceNames->addItem(pistring);
+			}
+		}
+		else
+		{
+			ui->g14Label->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+		}
 	}
 
 	m_rdsParser.clearUpdateFlags();
