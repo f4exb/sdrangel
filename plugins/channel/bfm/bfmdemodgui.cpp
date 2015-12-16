@@ -263,6 +263,10 @@ void BFMDemodGUI::on_clearData_clicked(bool checked)
 		ui->g14MappedFrequencies->clear();
 		ui->g14AltFrequencies->clear();
 
+		ui->g00AltFrequenciesBox->setEnabled(false);
+		ui->g14MappedFrequencies->setEnabled(false);
+		ui->g14AltFrequencies->setEnabled(false);
+
 		rdsUpdate(true);
 	}
 }
@@ -286,6 +290,8 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
 				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
 				ui->g14MappedFrequencies->addItem(os.str().c_str());
 			}
+
+			ui->g14MappedFrequencies->setEnabled(ui->g14MappedFrequencies->count() > 0);
 		}
 
 		mIt = m_rdsParser.m_g14_alt_freqs.find(piKey);
@@ -302,9 +308,30 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
 				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
 				ui->g14AltFrequencies->addItem(os.str().c_str());
 			}
+
+			ui->g14AltFrequencies->setEnabled(ui->g14AltFrequencies->count() > 0);
 		}
 	}
 }
+
+void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index)
+{
+	qint64 f = (qint64) ((ui->g00AltFrequenciesBox->currentText()).toDouble() * 1e6);
+	changeFrequency(f);
+}
+
+void BFMDemodGUI::on_g14MappedFrequencies_activated(int index)
+{
+	qint64 f = (qint64) ((ui->g14MappedFrequencies->currentText()).toDouble() * 1e6);
+	changeFrequency(f);
+}
+
+void BFMDemodGUI::on_g14AltFrequencies_activated(int index)
+{
+	qint64 f = (qint64) ((ui->g14AltFrequencies->currentText()).toDouble() * 1e6);
+	changeFrequency(f);
+}
+
 
 void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
@@ -363,6 +390,10 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI->addChannelMarker(&m_channelMarker);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+
+	ui->g00AltFrequenciesBox->setEnabled(false);
+	ui->g14MappedFrequencies->setEnabled(false);
+	ui->g14AltFrequencies->setEnabled(false);
 
 	rdsUpdateFixedFields();
 	rdsUpdate(true);
@@ -560,6 +591,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 					ui->g00AltFrequenciesBox->addItem(QString(os.str().c_str()));
 				}
 			}
+
+			ui->g00AltFrequenciesBox->setEnabled(ui->g00AltFrequenciesBox->count() > 0);
 		}
 	}
 	else
@@ -698,4 +731,11 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	}
 
 	m_rdsParser.clearUpdateFlags();
+}
+
+void BFMDemodGUI::changeFrequency(qint64 f)
+{
+	qint64 df = m_channelMarker.getCenterFrequency();
+	qDebug() << "BFMDemodGUI::changeFrequency: " << f - df;
+	// TODO: in the future it should be able to set the center frequency of the sample source this channel plugin is linked to
 }

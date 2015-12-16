@@ -67,6 +67,9 @@ private slots:
 	void on_rds_clicked();
 	void on_g14ProgServiceNames_currentIndexChanged(int index);
 	void on_clearData_clicked(bool checked);
+	void on_g00AltFrequenciesBox_activated(int index);
+	void on_g14MappedFrequencies_activated(int index);
+	void on_g14AltFrequencies_activated(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();
@@ -101,6 +104,8 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+	void changeFrequency(qint64 f);
 };
 
 #endif // INCLUDE_BFMDEMODGUI_H
