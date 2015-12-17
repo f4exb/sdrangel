@@ -18,6 +18,7 @@
 #ifndef INCLUDE_NFMDEMOD_H
 #define INCLUDE_NFMDEMOD_H
 
+#include <dsp/phasediscri.h>
 #include <QMutex>
 #include <vector>
 #include "dsp/samplesink.h"
@@ -29,7 +30,6 @@
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
 #include "dsp/afsquelch.h"
-#include "dsp/phasediscri.hpp"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 

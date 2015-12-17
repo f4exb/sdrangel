@@ -331,6 +331,7 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_fmExcursion = m_config.m_rfBandwidth / 2.0f;
 		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
@@ -341,8 +342,6 @@ void NFMDemod::apply()
 		m_settingsMutex.lock();
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
-		m_fmExcursion = m_config.m_afBandwidth / 2.0f;
-		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
 

@@ -26,6 +26,7 @@
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
+#include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -120,9 +121,8 @@ private:
 	int m_squelchState;
 
 	Real m_lastArgument;
-	Complex m_m1Sample; //!< x^-1 sample
-	Complex m_m2Sample; //!< x^-1 sample
 	MovingAverage<Real> m_movingAverage;
+	Real m_fmExcursion;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -131,6 +131,8 @@ private:
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
+
+	PhaseDiscriminators m_phaseDiscri;
 
 	void apply();
 };

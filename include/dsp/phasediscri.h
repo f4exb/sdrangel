@@ -18,6 +18,8 @@
 #ifndef INCLUDE_DSP_PHASEDISCRI_H_
 #define INCLUDE_DSP_PHASEDISCRI_H_
 
+#include "dsp/dsptypes.h"
+
 class PhaseDiscriminators
 {
 public:

@@ -42,6 +42,7 @@ WFMDemod::WFMDemod(SampleSink* sampleSink) :
 	m_config.m_volume = 2.0;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
+	m_phaseDiscri.setFMScaling(384000/75000);
 
 	apply();
 
@@ -101,19 +102,18 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				// Alternative without atan
 				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
 				// in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
+				/*
 				Real ip = rf[i].real() - m_m2Sample.real();
 				Real qp = rf[i].imag() - m_m2Sample.imag();
 				Real h1 = m_m1Sample.real() * qp;
 				Real h2 = m_m1Sample.imag() * ip;
-				demod = (h1 - h2) / (msq * 10.0);
+				demod = (h1 - h2) / (msq * 10.0);*/
+				demod = m_phaseDiscri.phaseDiscriminator2(rf[i]);
 			}
 			else
 			{
 				demod = 0;
 			}
-
-			m_m2Sample = m_m1Sample;
-			m_m1Sample = rf[i];
 
 			Complex e(demod, 0);
 
@@ -168,7 +168,7 @@ void WFMDemod::start()
 {
 	m_squelchState = 0;
 	m_audioFifo.clear();
-	m_m1Sample = 0;
+	m_phaseDiscri.reset();
 }
 
 void WFMDemod::stop()
@@ -254,6 +254,8 @@ void WFMDemod::apply()
 		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
+		m_fmExcursion = m_config.m_rfBandwidth / 2.0;
+		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
 
