@@ -37,8 +37,7 @@ BFMDemod::BFMDemod(SampleSink* sampleSink, RDSParser *rdsParser) :
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
 	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
 	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
-	m_fmExcursion(default_excursion),
-	m_fmScaling(384000/m_fmExcursion)
+	m_fmExcursion(default_excursion)
 {
 	setObjectName("BFMDemod");
 
@@ -52,6 +51,7 @@ BFMDemod::BFMDemod(SampleSink* sampleSink, RDSParser *rdsParser) :
 	m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
+	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
 	apply();
 
@@ -124,7 +124,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_squelchState--;
 
 				//demod = phaseDiscriminator2(rf[i], msq);
-				demod = phaseDiscriminator(rf[i]);
+				demod = m_phaseDiscri.phaseDiscriminator(rf[i]);
 			}
 			else
 			{
@@ -248,7 +248,7 @@ void BFMDemod::start()
 {
 	m_squelchState = 0;
 	m_audioFifo.clear();
-	m_m1Sample = 0;
+	m_phaseDiscri.reset();
 }
 
 void BFMDemod::stop()
@@ -354,7 +354,7 @@ void BFMDemod::apply()
 		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
 		m_rfFilter->create_filter(lowCut, hiCut);
-		m_fmScaling = m_config.m_inputSampleRate / m_fmExcursion;
+		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
 		m_settingsMutex.unlock();
 
 		qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
