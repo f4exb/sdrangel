@@ -146,7 +146,7 @@ public:
 	char           m_g14_program_service_name[8+1];
 	std::set<double> m_g14_alt_freq_set;
 	std::set<double> m_g14_mapped_freq_set;
-	bool           m_g14_psn_updated;
+	unsigned int   m_g14_psn_counter;
 	bool           m_g14_data_available;
 
 	// G15 data

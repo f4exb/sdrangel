@@ -351,7 +351,7 @@ void RDSParser::clearAllFields()
 	std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
 	m_g14_alt_freq_set.clear();
 	m_g14_mapped_freq_set.clear();
-	m_g14_psn_updated = false;
+	m_g14_psn_counter = 0;
 
 	// Group 15
 	m_g15_count = 0;
@@ -1000,7 +1000,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			{
 				m_g14_program_service_name[variant_code * 2    ] = (information >> 8) & 0xff;
 				m_g14_program_service_name[variant_code * 2 + 1] =  information       & 0xff;
-				m_g14_psn_updated = true;
+				m_g14_psn_counter++;
 				//qDebug() << "RDSParser::decode_type14: PS(ON): \"" << std::string(m_g14_program_service_name, 8).c_str() << "\"";
 				break;
 			}
@@ -1044,18 +1044,18 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 				break;
 			case 12: // linkage information
 			{
-				if (m_g14_psn_updated)
+				if (m_g14_psn_counter == 4)
 				{
-					qDebug("RDSParser::decode_type14: m_g14_psn_updated");
+					//qDebug("RDSParser::decode_type14: m_g14_psn_updated: %d", m_g14_psn_counter);
 					std::pair<psns_map_t::iterator, bool> ret = m_g14_program_service_names.insert(psns_map_kv_t(pi_on, std::string(m_g14_program_service_name)));
 					std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
-					m_g14_psn_updated = false;
+					m_g14_psn_counter = 0;
 					m_g14_data_available = ret.second;
 				}
 
 				if (m_g14_alt_freq_set.size() > 0)
 				{
-					qDebug("RDSParser::decode_type14: m_g14_alt_freq_set updated");
+					//qDebug("RDSParser::decode_type14: m_g14_alt_freq_set updated");
 
 					std::pair<freqs_map_t::iterator, bool> retMap;
 					std::pair<freqs_set_t::iterator, bool> retSet;
@@ -1086,7 +1086,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 
 				if (m_g14_mapped_freq_set.size() > 0)
 				{
-					qDebug("RDSParser::decode_type14: m_g14_mapped_freq_set updated");
+					//qDebug("RDSParser::decode_type14: m_g14_mapped_freq_set updated");
 
 					std::pair<freqs_map_t::iterator, bool> retMap;
 					std::pair<freqs_set_t::iterator, bool> retSet;
