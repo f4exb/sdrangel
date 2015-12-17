@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include "boost/format.hpp"
 #include "rdsdecoder.h"
 
 const unsigned int RDSDecoder::offset_pos[5] = {0,1,2,3,2};
@@ -31,14 +32,32 @@ RDSDecoder::RDSDecoder()
 	m_bitCounter = 0;
 	m_lastseenOffset = 0;
 	m_wrongBlocksCounter   = 0;
+	m_correctedBlocksCounter = 0;
 	m_blocksCounter        = 0;
 	m_blockBitCounter      = 0;
 	m_blockNumber          = 0;
 	m_groupAssemblyStarted = false;
 	m_sync                 = SYNC;
 	m_groupGoodBlocksCounter = 0;
-	m_wrongBlocksCounter   = 0;
 	m_goodBlock            = false;
+
+	m_error_lut[0x200] = 0b1000000000000000;
+	m_error_lut[0x300] = 0b1100000000000000;
+	m_error_lut[0x180] = 0b0110000000000000;
+	m_error_lut[0x0c0] = 0b0011000000000000;
+	m_error_lut[0x060] = 0b0001100000000000;
+	m_error_lut[0x030] = 0b1000110000000000;
+	m_error_lut[0x018] = 0b1000011000000000;
+	m_error_lut[0x00c] = 0b1000001100000000;
+	m_error_lut[0x006] = 0b1000000110000000;
+	m_error_lut[0x003] = 0b1000000011000000;
+	m_error_lut[0x2dd] = 0b1000000001100000;
+	m_error_lut[0x3b2] = 0b1000000000110000;
+	m_error_lut[0x1d9] = 0b1000000000011000;
+	m_error_lut[0x230] = 0b1000000000001100;
+	m_error_lut[0x118] = 0b1000000000000110;
+	m_error_lut[0x08c] = 0b1000000000000011;
+	m_error_lut[0x046] = 0b1000000000000001;
 }
 
 RDSDecoder::~RDSDecoder()
@@ -130,8 +149,15 @@ bool RDSDecoder::frameSync(bool bit)
 					}
 					else
 					{
-						m_wrongBlocksCounter++;
-						m_goodBlock = false;
+						if (err_corr(block_received_crc, block_calculated_crc, dataword))
+						{
+							m_correctedBlocksCounter++;
+						}
+						else
+						{
+							m_wrongBlocksCounter++;
+							m_goodBlock = false;
+						}
 					}
 				}
 			}
@@ -145,8 +171,15 @@ bool RDSDecoder::frameSync(bool bit)
 				}
 				else
 				{
-					m_wrongBlocksCounter++;
-					m_goodBlock = false;
+					if (err_corr(block_received_crc, block_calculated_crc, dataword))
+					{
+						m_correctedBlocksCounter++;
+					}
+					else
+					{
+						m_wrongBlocksCounter++;
+						m_goodBlock = false;
+					}
 				}
 			}
 
@@ -199,8 +232,10 @@ bool RDSDecoder::frameSync(bool bit)
 				}
 
 				m_qua = 2.0 * (50 - m_wrongBlocksCounter);
+				m_corr = 2.0 * m_correctedBlocksCounter;
 				m_blocksCounter = 0;
 				m_wrongBlocksCounter = 0;
+				m_correctedBlocksCounter = 0;
 			}
 		}
 		break;
@@ -258,3 +293,25 @@ unsigned int RDSDecoder::calc_syndrome(unsigned long message, unsigned char mlen
 	return (reg & ((1<<plen)-1));	// select the bottom plen bits of reg
 }
 
+bool RDSDecoder::err_corr(unsigned int received_crc, unsigned int calculated_crc, unsigned int& symbol)
+{
+	unsigned int syn = received_crc ^ calculated_crc;
+	ui_lut_t::iterator lutIt = m_error_lut.find(syn);
+
+	if (lutIt != m_error_lut.end())
+	{
+		symbol ^= lutIt->second;
+		/*
+		unsigned int syncorr = calc_syndrome(symbol, 16);
+		std::string recstring = str(boost::format("%03X") % received_crc);
+		std::string calstring = str(boost::format("%03X") % calculated_crc);
+		std::string synstring = str(boost::format("%03X") % syn);
+		std::string corstring = str(boost::format("%03X") % syncorr);
+		qDebug() << "RDSDecoder::err_corr: " << recstring.c_str() << ":" << calstring.c_str() << ":" << synstring.c_str() << ":" << corstring.c_str();*/
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

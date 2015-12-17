@@ -64,6 +64,7 @@ public:
 	Real getPilotLevel() const { return m_pilotPLL.get_pilot_level(); }
 
 	Real getDecoderQua() const { return m_rdsDecoder.m_qua; }
+	Real getDecoderCorr() const { return m_rdsDecoder.m_corr; }
 	bool getDecoderSynced() const { return m_rdsDecoder.synced(); }
 	Real getDemodAcc() const { return m_rdsDemod.m_report.acc; }
 	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
