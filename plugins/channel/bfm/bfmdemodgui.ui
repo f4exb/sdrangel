@@ -520,6 +520,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Lits if synchronized</string>
+        </property>
         <property name="text">
          <string>Dec</string>
         </property>
@@ -992,7 +995,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>PI updated</string>
+         <string>Lits if PI is updated</string>
         </property>
         <property name="text">
          <string>PI</string>
@@ -1123,6 +1126,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Lits if group 1 is updated</string>
+        </property>
         <property name="text">
          <string>G01</string>
         </property>
@@ -1149,6 +1155,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Country code</string>
+        </property>
         <property name="text">
          <string>__</string>
         </property>
@@ -1168,6 +1177,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Language</string>
+        </property>
         <property name="text">
          <string>___</string>
         </property>
@@ -1186,6 +1198,9 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Day Hour Minutes</string>
         </property>
         <property name="text">
          <string>0d 00:00</string>
@@ -1211,7 +1226,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 0 updated</string>
+         <string>Lits if group 0 is updated</string>
         </property>
         <property name="text">
          <string>G00</string>
@@ -1368,7 +1383,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 3 updated</string>
+         <string>Lits if group 3 updated is updated</string>
         </property>
         <property name="text">
          <string>G03</string>
@@ -1414,7 +1429,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 9 updated</string>
+         <string>Lits if group 9 is updated</string>
         </property>
         <property name="text">
          <string>G09</string>
@@ -1457,7 +1472,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 2 updated</string>
+         <string>Lits if group 2 is updated</string>
         </property>
         <property name="text">
          <string>G02</string>
@@ -1491,7 +1506,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 4 updated</string>
+         <string>Lits if group 4 is updated</string>
         </property>
         <property name="text">
          <string>G04</string>
@@ -1559,7 +1574,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 14 updated</string>
+         <string>Lits if group 14 is updated</string>
         </property>
         <property name="text">
          <string>G14</string>
@@ -1625,7 +1640,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Group 8 updated</string>
+         <string>Lits if group 8 is updated</string>
         </property>
         <property name="text">
          <string>G08</string>

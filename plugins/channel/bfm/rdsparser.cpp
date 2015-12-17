@@ -325,6 +325,7 @@ void RDSParser::clearAllFields()
 	m_g8_sign = false;
 	m_g8_extent = 0;
 	m_g8_event = 0;
+	m_g8_location = 0;
 	m_g8_label_index = -1;
 	m_g8_content = 0;
 
