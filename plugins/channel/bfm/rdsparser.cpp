@@ -349,6 +349,7 @@ void RDSParser::clearAllFields()
 	m_g14_alt_freqs.clear();
 	m_g14_mapped_freqs.clear();
 	std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
+	m_g14_program_service_name[8] = '\0';
 	m_g14_alt_freq_set.clear();
 	m_g14_mapped_freq_set.clear();
 	m_g14_psn_counter = 0;
@@ -1049,6 +1050,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 					//qDebug("RDSParser::decode_type14: m_g14_psn_updated: %d", m_g14_psn_counter);
 					std::pair<psns_map_t::iterator, bool> ret = m_g14_program_service_names.insert(psns_map_kv_t(pi_on, std::string(m_g14_program_service_name)));
 					std::memset(m_g14_program_service_name, ' ', sizeof(m_g14_program_service_name));
+					m_g14_program_service_name[8] = '\0';
 					m_g14_psn_counter = 0;
 					m_g14_data_available = ret.second;
 				}
@@ -1124,11 +1126,10 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			{
 				ta_on = information & 0x01;
 				pty_on = (information >> 11) & 0x1f;
-				/*
-				qDebug() << "RDSParser::decode_type14: PTY(ON):" << pty_table[int(pty_on)].c_str();
+				//qDebug() << "RDSParser::decode_type14: PTY(ON):" << pty_table[int(pty_on)].c_str();
 				if(ta_on) {
 					qDebug() << "RDSParser::decode_type14:  - TA";
-				}*/
+				}
 				break;
 			}
 			case 14: // PIN(ON)
@@ -1141,7 +1142,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			case 15: // Reserved for broadcasters use
 				break;
 			default:
-				qDebug() << "RDSParser::decode_type14: invalid variant code:" << variant_code;
+				//qDebug() << "RDSParser::decode_type14: invalid variant code:" << variant_code;
 				break;
 		}
 	}
