@@ -554,25 +554,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="decoderCorrText">
-        <property name="minimumSize">
-         <size>
-          <width>40</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Corrected blocks percentage</string>
-        </property>
-        <property name="text">
-         <string>0%</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="Line" name="sep2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

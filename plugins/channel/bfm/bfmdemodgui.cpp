@@ -530,7 +530,6 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	// Quality metrics
 	ui->demodQText->setText(QString("%1 %").arg(m_bfmDemod->getDemodQua(), 0, 'f', 0));
 	ui->decoderQText->setText(QString("%1 %").arg(m_bfmDemod->getDecoderQua(), 0, 'f', 0));
-	ui->decoderCorrText->setText(QString("%1 %").arg(m_bfmDemod->getDecoderCorr(), 0, 'f', 0));
 	Real accDb = CalcDb::dbPower(std::fabs(m_bfmDemod->getDemodAcc()));
 	ui->accumText->setText(QString("%1 dB").arg(accDb, 0, 'f', 1));
 	ui->fclkText->setText(QString("%1 Hz").arg(m_bfmDemod->getDemodFclk(), 0, 'f', 2));

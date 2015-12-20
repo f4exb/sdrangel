@@ -18,8 +18,6 @@
 #ifndef PLUGINS_CHANNEL_BFM_RDSDECODER_H_
 #define PLUGINS_CHANNEL_BFM_RDSDECODER_H_
 
-#include <map>
-
 class RDSDecoder
 {
 public:
@@ -31,16 +29,13 @@ public:
 	bool synced() const { return m_sync == SYNC; }
 
 	float          m_qua;
-	float          m_corr;
 
 protected:
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen);
-	bool err_corr(unsigned int received_crc, unsigned int calculated_crc, unsigned int& symbol);
 	void enter_sync(unsigned int sync_block_number);
 	void enter_no_sync();
 
 private:
-	typedef std::map<unsigned int, unsigned int> ui_lut_t;
 	unsigned long m_reg;
 	enum { NO_SYNC, SYNC } m_sync;
 	bool m_presync;
@@ -49,14 +44,12 @@ private:
 	unsigned char  m_lastseenOffset;
 	unsigned int   m_blockBitCounter;
 	unsigned int   m_wrongBlocksCounter;
-	unsigned int   m_correctedBlocksCounter;
 	unsigned int   m_blocksCounter;
 	unsigned int   m_groupGoodBlocksCounter;
 	unsigned char  m_blockNumber;
 	bool           m_groupAssemblyStarted;
 	bool           m_goodBlock;
 	unsigned int   m_group[4];
-	ui_lut_t m_error_lut;
 
 	/* see page 59, Annex C, table C.1 in the standard
 	 * offset word C' has been put at the end */
