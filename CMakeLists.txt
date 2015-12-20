@@ -167,9 +167,9 @@ set(sdrbase_HEADERS
 	include/dsp/misc.h
 	include/dsp/movingaverage.h
 	include/dsp/nco.h
-	include/dsp/phasediscri.hpp
+	include/dsp/phasediscri.h
 	include/dsp/phaselock.h
-        sdrbase/dsp/pidcontroller.h
+    sdrbase/dsp/pidcontroller.h
 	include/dsp/samplefifo.h
 	include/dsp/samplesink.h
 	include/dsp/nullsink.h
