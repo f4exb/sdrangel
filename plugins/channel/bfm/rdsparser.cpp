@@ -273,6 +273,7 @@ void RDSParser::clearAllFields()
 	m_g0_count = 0;
 	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
 	m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
+	m_g0_psn_complete = false;
 	m_g0_traffic_announcement = false;
 	m_g0_music_speech = false;
 	m_g0_mono_stereo = false;
@@ -473,8 +474,15 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 	bool decoder_control_bit      = (group[1] >> 2) & 0x01; // "DI"
 	unsigned char segment_address =  group[1] & 0x03;       // "DI segment"
 
+	if (segment_address == 0)
+	{
+		std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
+		m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
+	}
+
 	m_g0_program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
 	m_g0_program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
+	m_g0_psn_complete = (segment_address == 3);
 
 	/* see page 41, table 9 of the standard */
 	switch (segment_address)

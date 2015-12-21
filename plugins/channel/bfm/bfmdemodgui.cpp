@@ -567,7 +567,10 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	{
 		ui->g00Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g00CountText->setNum((int) m_rdsParser.m_g0_count);
-		ui->g00ProgServiceName->setText(QString(m_rdsParser.m_g0_program_service_name));
+
+		if (m_rdsParser.m_g0_psn_complete) {
+			ui->g00ProgServiceName->setText(QString(m_rdsParser.m_g0_program_service_name));
+		}
 
 		if (m_rdsParser.m_g0_traffic_announcement) {
 			ui->g00TrafficAnnouncement->setStyleSheet("QLabel { background-color : green; }");
