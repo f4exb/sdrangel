@@ -273,7 +273,7 @@ void RDSParser::clearAllFields()
 	m_g0_count = 0;
 	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
 	m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
-	m_g0_psn_complete = false;
+	m_g0_psn_complete = true;
 	m_g0_traffic_announcement = false;
 	m_g0_music_speech = false;
 	m_g0_mono_stereo = false;
