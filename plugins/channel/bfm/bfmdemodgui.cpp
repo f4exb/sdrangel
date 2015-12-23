@@ -568,7 +568,7 @@ void BFMDemodGUI::rdsUpdate(bool force)
 		ui->g00Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g00CountText->setNum((int) m_rdsParser.m_g0_count);
 
-		if (m_rdsParser.m_g0_psn_complete) {
+		if (m_rdsParser.m_g0_psn_bitmap == 0b1111) {
 			ui->g00ProgServiceName->setText(QString(m_rdsParser.m_g0_program_service_name));
 		}
 

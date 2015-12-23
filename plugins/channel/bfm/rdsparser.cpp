@@ -273,7 +273,7 @@ void RDSParser::clearAllFields()
 	m_g0_count = 0;
 	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
 	m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
-	m_g0_psn_complete = true;
+	m_g0_psn_bitmap = 0;
 	m_g0_traffic_announcement = false;
 	m_g0_music_speech = false;
 	m_g0_mono_stereo = false;
@@ -478,11 +478,12 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 	{
 		std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
 		m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
+		m_g0_psn_bitmap = 0;
 	}
 
 	m_g0_program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
 	m_g0_program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
-	m_g0_psn_complete = (segment_address == 3);
+	m_g0_psn_bitmap |= 1<<segment_address;
 
 	/* see page 41, table 9 of the standard */
 	switch (segment_address)
@@ -1083,7 +1084,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 						freqs_set_t::iterator sIt = m_g14_alt_freq_set.begin();
 						const freqs_set_t::iterator sItEnd = m_g14_alt_freq_set.end();
 
-						for (sIt; sIt != sItEnd; ++sIt)
+						for (; sIt != sItEnd; ++sIt)
 						{
 							retSet = (mIt->second).insert(*sIt);
 							updated |= retSet.second;
@@ -1114,7 +1115,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 						freqs_set_t::iterator sIt = m_g14_mapped_freq_set.begin();
 						const freqs_set_t::iterator sItEnd = m_g14_mapped_freq_set.end();
 
-						for (sIt; sIt != sItEnd; ++sIt)
+						for (; sIt != sItEnd; ++sIt)
 						{
 							retSet = (mIt->second).insert(*sIt);
 							updated |= retSet.second;

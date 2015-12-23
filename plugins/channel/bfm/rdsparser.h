@@ -56,7 +56,7 @@ public:
 	bool           m_g0_af_updated;
 	unsigned int   m_g0_count;
 	char           m_g0_program_service_name[8+1];
-	bool           m_g0_psn_complete;
+	unsigned char  m_g0_psn_bitmap;
 	bool           m_g0_traffic_announcement;
 	bool           m_g0_music_speech;
 	bool           m_g0_mono_stereo;
