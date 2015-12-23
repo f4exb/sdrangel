@@ -34,8 +34,6 @@
 #include "rdsdemod.h"
 #include "rdsdecoder.h"
 
-#define rfFilterFftLength 1024
-
 class RDSParser;
 
 class BFMDemod : public SampleSink {
@@ -49,6 +47,7 @@ public:
 			Real volume,
 			Real squelch,
 			bool audioStereo,
+			bool lsbStereo,
 			bool showPilot,
 			bool rdsActive);
 
@@ -79,6 +78,7 @@ private:
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioStereo() const { return m_audioStereo; }
+		bool getLsbStereo() const { return m_lsbStereo; }
 		bool getShowPilot() const { return m_showPilot; }
 		bool getRDSActive() const { return m_rdsActive; }
 
@@ -87,6 +87,7 @@ private:
 				Real volume,
 				Real squelch,
 				bool audioStereo,
+				bool lsbStereo,
 				bool showPilot,
 				bool rdsActive)
 		{
@@ -95,6 +96,7 @@ private:
 					volume,
 					squelch,
 					audioStereo,
+					lsbStereo,
 					showPilot,
 					rdsActive);
 		}
@@ -105,6 +107,7 @@ private:
 		Real m_volume;
 		Real m_squelch;
 		bool m_audioStereo;
+		bool m_lsbStereo;
 		bool m_showPilot;
 		bool m_rdsActive;
 
@@ -113,6 +116,7 @@ private:
 				Real volume,
 				Real squelch,
 				bool audioStereo,
+				bool lsbStereo,
 				bool showPilot,
 				bool rdsActive) :
 			Message(),
@@ -121,6 +125,7 @@ private:
 			m_volume(volume),
 			m_squelch(squelch),
 			m_audioStereo(audioStereo),
+			m_lsbStereo(lsbStereo),
 			m_showPilot(showPilot),
 			m_rdsActive(rdsActive)
 		{ }
@@ -146,6 +151,7 @@ private:
 		Real m_volume;
 		quint32 m_audioSampleRate;
 		bool m_audioStereo;
+		bool m_lsbStereo;
 		bool m_showPilot;
 		bool m_rdsActive;
 
@@ -158,6 +164,7 @@ private:
 			m_volume(0),
 			m_audioSampleRate(0),
 			m_audioStereo(false),
+			m_lsbStereo(false),
 			m_showPilot(false),
 			m_rdsActive(false)
 		{ }
@@ -181,6 +188,7 @@ private:
 
 	Lowpass<Real> m_lowpass;
 	fftfilt* m_rfFilter;
+	static const int filtFftLen = 1024;
 
 	Real m_squelchLevel;
 	int m_squelchState;
@@ -198,7 +206,7 @@ private:
 	QMutex m_settingsMutex;
 
 	RDSPhaseLock m_pilotPLL;
-	Real m_pilotPLLSamples[3];
+	Real m_pilotPLLSamples[4];
 
 	RDSDemod m_rdsDemod;
 	RDSDecoder m_rdsDecoder;
