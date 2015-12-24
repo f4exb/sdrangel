@@ -208,8 +208,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
 					if (m_running.m_lsbStereo)
 					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume * 0.93);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume * 1.075);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
 					}
 					else
 					{
