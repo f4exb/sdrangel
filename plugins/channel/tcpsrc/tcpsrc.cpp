@@ -252,9 +252,9 @@ bool TCPSrc::handleMessage(const Message& cmd)
 
 		return true;
 	}
-	else if (MsgTCPConnection::match(cmd))
+	else if (MsgTCPSrcConnection::match(cmd))
 	{
-		MsgTCPConnection& con = (MsgTCPConnection&) cmd;
+		MsgTCPSrcConnection& con = (MsgTCPSrcConnection&) cmd;
 
 		if (con.getConnect())
 		{
@@ -292,8 +292,7 @@ void TCPSrc::closeAllSockets(Sockets* sockets)
 void TCPSrc::onNewConnection()
 {
 	qDebug("TCPSrc::onNewConnection");
-	MsgTCPConnection *cmd = MsgTCPConnection::create(true);
-	getInputMessageQueue()->push(cmd);
+	processNewConnection();
 }
 
 void TCPSrc::processNewConnection()
@@ -341,7 +340,7 @@ void TCPSrc::processNewConnection()
 void TCPSrc::onDisconnected()
 {
 	qDebug("TCPSrc::onDisconnected");
-	MsgTCPConnection *cmd = MsgTCPConnection::create(false);
+	MsgTCPSrcConnection *cmd = MsgTCPSrcConnection::create(false, 0, QHostAddress::Any, 0);
 	getInputMessageQueue()->push(cmd);
 }
 
