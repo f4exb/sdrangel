@@ -177,8 +177,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_running.m_lsbStereo)
 				{
-					// 1.17 * 0.7 = 0.819
-					Complex s(demod * m_pilotPLLSamples[1], demod * m_pilotPLLSamples[2]);
+					Complex s(demod * 1.21 * m_pilotPLLSamples[1], demod * 1.21 * m_pilotPLLSamples[2]);
 
 					if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
 					{
@@ -209,8 +208,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
 					if (m_running.m_lsbStereo)
 					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume * 0.9);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume * 1.11);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume * 0.93);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume * 1.075);
 					}
 					else
 					{
