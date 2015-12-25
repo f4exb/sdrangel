@@ -110,7 +110,6 @@ QByteArray BFMDemodGUI::serialize() const
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeBlob(8, ui->spectrumGUI->serialize());
 	s.writeBool(9, ui->audioStereo->isChecked());
-	s.writeBool(10, ui->lsbStereo->isChecked());
 	return s.final();
 }
 
@@ -162,9 +161,6 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readBool(9, &booltmp, false);
 		ui->audioStereo->setChecked(booltmp);
-
-		d.readBool(10, &booltmp, false);
-		ui->lsbStereo->setChecked(booltmp);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -244,11 +240,6 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 		ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
 
-	applySettings();
-}
-
-void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
-{
 	applySettings();
 }
 
@@ -445,7 +436,6 @@ void BFMDemodGUI::applySettings()
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
 			ui->audioStereo->isChecked(),
-			ui->lsbStereo->isChecked(),
 			ui->showPilot->isChecked(),
 			ui->rds->isChecked());
 	}
