@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>395</height>
+    <width>257</width>
+    <height>143</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -19,10 +19,10 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>35</x>
-     <y>35</y>
+     <x>10</x>
+     <y>10</y>
      <width>235</width>
-     <height>349</height>
+     <height>121</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -246,6 +246,9 @@
         <property name="maximum">
          <number>100</number>
         </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
         <property name="value">
          <number>20</number>
         </property>
@@ -288,6 +291,9 @@
         </property>
         <property name="maximum">
          <number>0</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
         </property>
         <property name="value">
          <number>-40</number>
