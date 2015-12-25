@@ -50,7 +50,7 @@ BFMDemod::BFMDemod(SampleSink* sampleSink, RDSParser *rdsParser) :
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate(); // normally 48 kHz
 	m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
-	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
+	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
 	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
 	apply();
@@ -79,6 +79,7 @@ void BFMDemod::configure(MessageQueue* messageQueue,
 		Real volume,
 		Real squelch,
 		bool audioStereo,
+		bool lsbStereo,
 		bool showPilot,
 		bool rdsActive)
 {
@@ -87,6 +88,7 @@ void BFMDemod::configure(MessageQueue* messageQueue,
 			volume,
 			squelch,
 			audioStereo,
+			lsbStereo,
 			showPilot,
 			rdsActive);
 	messageQueue->push(cmd);
@@ -138,8 +140,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_running.m_rdsActive)
 			{
-				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), 0.0);
-				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[2]), 0.0);
+				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
+				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
 
 				if (m_interpolatorRDS.interpolate(&m_interpolatorRDSDistanceRemain, r, &cr))
 				{
@@ -173,12 +175,26 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
 				}
 
-				Complex s(demod * 1.17 * m_pilotPLLSamples[1], 0);
-
-				if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+				if (m_running.m_lsbStereo)
 				{
-					sampleStereo = cs.real();
-					m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
+					// 1.17 * 0.7 = 0.819
+					Complex s(demod * m_pilotPLLSamples[1], demod * m_pilotPLLSamples[2]);
+
+					if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+					{
+						sampleStereo = cs.real() + cs.imag();
+						m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
+					}
+				}
+				else
+				{
+					Complex s(demod * 1.17 * m_pilotPLLSamples[1], 0);
+
+					if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+					{
+						sampleStereo = cs.real();
+						m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
+					}
 				}
 			}
 
@@ -191,8 +207,16 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
 					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
+					if (m_running.m_lsbStereo)
+					{
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
+					}
+					else
+					{
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
+					}
 				}
 				else
 				{
@@ -280,6 +304,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioStereo = cfg.getAudioStereo();
+		m_config.m_lsbStereo = cfg.getLsbStereo();
 		m_config.m_showPilot = cfg.getShowPilot();
 		m_config.m_rdsActive = cfg.getRDSActive();
 
@@ -290,6 +315,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioStereo: " << m_config.m_audioStereo
+				<< " m_lsbStereo: " << m_config.m_lsbStereo
 				<< " m_showPilot: " << m_config.m_showPilot
 				<< " m_rdsActive: " << m_config.m_rdsActive;
 
@@ -392,6 +418,7 @@ void BFMDemod::apply()
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioStereo = m_config.m_audioStereo;
+	m_running.m_lsbStereo = m_config.m_lsbStereo;
 	m_running.m_showPilot = m_config.m_showPilot;
 	m_running.m_rdsActive = m_config.m_rdsActive;
 }

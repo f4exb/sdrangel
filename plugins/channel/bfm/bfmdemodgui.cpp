@@ -445,6 +445,7 @@ void BFMDemodGUI::applySettings()
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
 			ui->audioStereo->isChecked(),
+			ui->lsbStereo->isChecked(),
 			ui->showPilot->isChecked(),
 			ui->rds->isChecked());
 	}
