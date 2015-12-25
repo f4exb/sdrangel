@@ -48,5 +48,6 @@
         <file>carrier.png</file>
         <file>rds.png</file>
         <file>recycle.png</file>
+        <file>lsb.png</file>
     </qresource>
 </RCC>

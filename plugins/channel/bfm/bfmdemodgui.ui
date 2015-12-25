@@ -21,7 +21,7 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>311</width>
+     <width>411</width>
      <height>121</height>
     </rect>
    </property>
@@ -156,6 +156,26 @@
             <normalon>:/stereo.png</normalon>:/mono.png</iconset>
           </property>
           <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="lsbStereo">
+          <property name="toolTip">
+           <string>Use only LSB from stereo subcarrier </string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/lsb.png</normaloff>:/lsb.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise">
            <bool>true</bool>
           </property>
          </widget>

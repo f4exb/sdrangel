@@ -63,6 +63,7 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioStereo_toggled(bool stereo);
+	void on_lsbStereo_toggled(bool lsb);
 	void on_showPilot_clicked();
 	void on_rds_clicked();
 	void on_g14ProgServiceNames_currentIndexChanged(int index);
