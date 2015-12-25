@@ -273,8 +273,8 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
-unsigned int RTLSDRSampleRates::m_rates[] = {288, 1152, 1536, 2304};
-unsigned int RTLSDRSampleRates::m_nb_rates = 4;
+unsigned int RTLSDRSampleRates::m_rates[] = {250, 1000, 1152, 1536, 2304, 2400};
+unsigned int RTLSDRSampleRates::m_nb_rates = 6;
 
 unsigned int RTLSDRSampleRates::getRate(unsigned int rate_index)
 {
