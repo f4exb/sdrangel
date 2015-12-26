@@ -112,6 +112,7 @@ private:
 	Real m_LowCutoff;
 	Real m_volume;
 	int m_spanLog2;
+	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;

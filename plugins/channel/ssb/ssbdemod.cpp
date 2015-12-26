@@ -50,6 +50,7 @@ SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
+	m_sum = 0;
 
 	m_usb = true;
 	m_magsq = 0.0f;
@@ -83,7 +84,7 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	Complex ci;
-	fftfilt::cmplx *sideband, sum;
+	fftfilt::cmplx *sideband;
 	Real avg;
 	int n_out;
 
@@ -113,18 +114,18 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
 			// smart decimation with bit gain using float arithmetic (23 bits significand)
 
-			sum += sideband[i];
+			m_sum += sideband[i];
 
 			if (!(m_undersampleCount++ & decim_mask))
 			{
-				Real avgr = sum.real() / decim;
-				Real avgi = sum.imag() / decim;
+				Real avgr = m_sum.real() / decim;
+				Real avgi = m_sum.imag() / decim;
 				m_magsq = (avgr * avgr + avgi * avgi) / (1<<30);
 				//avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
 				avg = (avgr + avgi) * 0.7;
 				m_sampleBuffer.push_back(Sample(avg, 0.0));
-				sum.real() = 0.0;
-				sum.imag() = 0.0;
+				m_sum.real() = 0.0;
+				m_sum.imag() = 0.0;
 			}
 
 			if (m_audioBinaual)
