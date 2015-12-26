@@ -95,9 +95,9 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 			}
 			else
 			{
-				if (m_squelchCount > 0)
+				if (m_squelchCount > 1)
 				{
-					m_squelchCount--;
+					m_squelchCount -= 2;
 				}
 			}
 
