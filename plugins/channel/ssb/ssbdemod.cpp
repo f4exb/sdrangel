@@ -54,16 +54,15 @@ SSBDemod::SSBDemod(SampleSink* sampleSink) :
 	m_usb = true;
 	m_magsq = 0.0f;
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
 SSBDemod::~SSBDemod()
 {
-	if (SSBFilter)
-	{
-		delete SSBFilter;
-	}
+	if (SSBFilter) delete SSBFilter;
+	if (DSBFilter) delete DSBFilter;
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
@@ -239,6 +238,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 		m_interpolator.create(16, m_sampleRate, band * 2.0f);
 		SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
+		DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
 
 		m_volume = cfg.getVolume();
 		m_volume *= m_volume * 0.1;

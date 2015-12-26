@@ -125,6 +125,7 @@ private:
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 	fftfilt* SSBFilter;
+	fftfilt* DSBFilter;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
