@@ -34,7 +34,7 @@ public:
 	AMDemod();
 	~AMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
+	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -52,10 +52,11 @@ private:
 		Real getAFBandwidth() const { return m_afBandwidth; }
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
+		bool getAudioMute() const { return m_audioMute; }
 
-		static MsgConfigureAMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+		static MsgConfigureAMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute)
 		{
-			return new MsgConfigureAMDemod(rfBandwidth, afBandwidth, volume, squelch);
+			return new MsgConfigureAMDemod(rfBandwidth, afBandwidth, volume, squelch, audioMute);
 		}
 
 	private:
@@ -63,13 +64,15 @@ private:
 		Real m_afBandwidth;
 		Real m_volume;
 		Real m_squelch;
+		bool m_audioMute;
 
-		MsgConfigureAMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch) :
+		MsgConfigureAMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
 			m_volume(volume),
-			m_squelch(squelch)
+			m_squelch(squelch),
+			m_audioMute(audioMute)
 		{ }
 	};
 
@@ -92,6 +95,7 @@ private:
 		Real m_squelch;
 		Real m_volume;
 		quint32 m_audioSampleRate;
+		bool m_audioMute;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -100,7 +104,8 @@ private:
 			m_afBandwidth(-1),
 			m_squelch(0),
 			m_volume(0),
-			m_audioSampleRate(0)
+			m_audioSampleRate(0),
+			m_audioMute(false)
 		{ }
 	};
 

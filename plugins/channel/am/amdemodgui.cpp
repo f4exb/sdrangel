@@ -179,6 +179,10 @@ void AMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void AMDemodGUI::on_audioMute_toggled(bool checked)
+{
+	applySettings();
+}
 
 void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
@@ -263,7 +267,8 @@ void AMDemodGUI::applySettings()
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
-			ui->squelch->value());
+			ui->squelch->value(),
+			ui->audioMute->isChecked());
 	}
 }
 

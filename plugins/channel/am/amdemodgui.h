@@ -42,6 +42,7 @@ private slots:
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+	void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();

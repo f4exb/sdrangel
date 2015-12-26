@@ -58,9 +58,9 @@ AMDemod::~AMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute)
 {
-	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
+	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -103,7 +103,7 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 			qint16 sample;
 
-			if (m_squelchCount >= m_running.m_audioSampleRate / 20)
+			if ((m_squelchCount >= m_running.m_audioSampleRate / 20) && !m_running.m_audioMute)
 			{
 				Real demod = sqrt(magsq);
 
@@ -208,6 +208,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
+		m_config.m_audioMute = cfg.getAudioMute();
 
 		apply();
 
@@ -215,7 +216,8 @@ bool AMDemod::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch;
+				<< " m_squelch: " << m_config.m_squelch
+				<< " m_audioMute: " << m_config.m_audioMute;
 
 		return true;
 	}
@@ -265,4 +267,5 @@ void AMDemod::apply()
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
+	m_running.m_audioMute = m_config.m_audioMute;
 }
