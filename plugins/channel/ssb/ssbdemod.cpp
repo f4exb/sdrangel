@@ -101,7 +101,15 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
 		{
-			n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+			if (m_dsb)
+			{
+				n_out = DSBFilter->runDSB(ci, &sideband);
+			}
+			else
+			{
+				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+			}
+
 			m_sampleDistanceRemain += (Real)m_sampleRate / m_audioSampleRate;
 		}
 		else
@@ -121,9 +129,16 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Real avgr = m_sum.real() / decim;
 				Real avgi = m_sum.imag() / decim;
 				m_magsq = (avgr * avgr + avgi * avgi) / (1<<30);
-				//avg = (sum.real() + sum.imag()) * 0.7 * 32768.0 / decim;
-				avg = (avgr + avgi) * 0.7;
-				m_sampleBuffer.push_back(Sample(avg, 0.0));
+
+				if (!m_dsb & !m_usb)
+				{ // invert spectrum for LSB
+					m_sampleBuffer.push_back(Sample(avgi, avgr));
+				}
+				else
+				{
+					m_sampleBuffer.push_back(Sample(avgr, avgi));
+				}
+
 				m_sum.real() = 0.0;
 				m_sum.imag() = 0.0;
 			}
@@ -171,9 +186,9 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	}
 	m_audioBufferFill = 0;
 
-	if(m_sampleSink != 0)
+	if (m_sampleSink != 0)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
 	}
 
 	m_sampleBuffer.clear();

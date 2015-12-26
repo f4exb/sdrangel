@@ -167,7 +167,32 @@ void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 void SSBDemodGUI::on_dsb_toggled(bool dsb)
 {
 	m_dsb = dsb;
+
+	if (!m_dsb)
+	{
+		if (ui->BW->value() < 0) {
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
+		} else {
+			m_channelMarker.setSidebands(ChannelMarker::usb);
+		}
+
+		ui->glSpectrum->setCenterFrequency(m_rate/4);
+		ui->glSpectrum->setSampleRate(m_rate/2);
+		ui->glSpectrum->setSsbSpectrum(true);
+
+		on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
+	}
+	else
+	{
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+		ui->glSpectrum->setCenterFrequency(0);
+		ui->glSpectrum->setSampleRate(m_rate);
+		ui->glSpectrum->setSsbSpectrum(false);
+	}
+
 	applySettings();
+	setNewRate(m_spanLog2);
 }
 
 void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
@@ -188,14 +213,22 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker.setBandwidth(value * 100 * 2);
 
-	if (value < 0)
+	if (!m_dsb)
 	{
-		m_channelMarker.setSidebands(ChannelMarker::lsb);
+		if (value < 0)
+		{
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
+		}
+		else
+		{
+			m_channelMarker.setSidebands(ChannelMarker::usb);
+		}
 	}
 	else
 	{
-		m_channelMarker.setSidebands(ChannelMarker::usb);
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
 	}
+
 
 	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 }
@@ -323,6 +356,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
+	setNewRate(m_spanLog2);
 }
 
 SSBDemodGUI::~SSBDemodGUI()
@@ -377,8 +411,28 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1k").arg(s));
 
-	ui->glSpectrum->setCenterFrequency(m_rate/2);
-	ui->glSpectrum->setSampleRate(m_rate);
+	//ui->glSpectrum->setCenterFrequency(m_rate/2);
+	//ui->glSpectrum->setSampleRate(m_rate);
+	if (!m_dsb)
+	{
+		if (ui->BW->value() < 0) {
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
+		} else {
+			m_channelMarker.setSidebands(ChannelMarker::usb);
+		}
+
+		ui->glSpectrum->setCenterFrequency(m_rate/2);
+		ui->glSpectrum->setSampleRate(m_rate);
+		ui->glSpectrum->setSsbSpectrum(true);
+	}
+	else
+	{
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+		ui->glSpectrum->setCenterFrequency(0);
+		ui->glSpectrum->setSampleRate(2*m_rate);
+		ui->glSpectrum->setSsbSpectrum(false);
+	}
 
 	return true;
 }
