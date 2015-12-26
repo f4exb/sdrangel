@@ -167,31 +167,7 @@ void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 void SSBDemodGUI::on_dsb_toggled(bool dsb)
 {
 	m_dsb = dsb;
-
-	if (!m_dsb)
-	{
-		if (ui->BW->value() < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
-
-		ui->glSpectrum->setCenterFrequency(m_rate/4);
-		ui->glSpectrum->setSampleRate(m_rate/2);
-		ui->glSpectrum->setSsbSpectrum(true);
-
-		on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-	}
-	else
-	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(m_rate);
-		ui->glSpectrum->setSsbSpectrum(false);
-
-		applySettings();
-	}
+	applySettings();
 }
 
 void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
@@ -212,17 +188,13 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
 	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker.setBandwidth(value * 100 * 2);
 
-	if (!m_dsb)
+	if (value < 0)
 	{
-		if (value < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
+		m_channelMarker.setSidebands(ChannelMarker::lsb);
 	}
 	else
 	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
+		m_channelMarker.setSidebands(ChannelMarker::usb);
 	}
 
 	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
@@ -234,18 +206,25 @@ int SSBDemodGUI::getEffectiveLowCutoff(int lowCutoff)
 	int effectiveLowCutoff = lowCutoff;
 	const int guard = 100;
 
-	if (ssbBW < 0) {
-		if (effectiveLowCutoff < ssbBW + guard) {
+	if (ssbBW < 0)
+	{
+		if (effectiveLowCutoff < ssbBW + guard)
+		{
 			effectiveLowCutoff = ssbBW + guard;
 		}
-		if (effectiveLowCutoff > 0)	{
+		if (effectiveLowCutoff > 0)
+		{
 			effectiveLowCutoff = 0;
 		}
-	} else {
-		if (effectiveLowCutoff > ssbBW - guard)	{
+	}
+	else
+	{
+		if (effectiveLowCutoff > ssbBW - guard)
+		{
 			effectiveLowCutoff = ssbBW - guard;
 		}
-		if (effectiveLowCutoff < 0)	{
+		if (effectiveLowCutoff < 0)
+		{
 			effectiveLowCutoff = 0;
 		}
 	}
@@ -344,7 +323,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
-	setNewRate(m_spanLog2);
 }
 
 SSBDemodGUI::~SSBDemodGUI()
@@ -361,27 +339,33 @@ SSBDemodGUI::~SSBDemodGUI()
 
 bool SSBDemodGUI::setNewRate(int spanLog2)
 {
-	if ((spanLog2 < 0) || (spanLog2 > 6)) {
+	if ((spanLog2 < 1) || (spanLog2 > 5))
+	{
 		return false;
 	}
 
 	m_spanLog2 = spanLog2;
-	//m_rate = 48000 / (1<<spanLog2);
-	m_rate = m_ssbDemod->getSampleRate() / (1<<spanLog2);
+	m_rate = 48000 / (1<<spanLog2);
 
-	if (ui->BW->value() < -m_rate/200) {
-		ui->BW->setValue(-m_rate/200);
+	if (ui->BW->value() < -m_rate/100)
+	{
+		ui->BW->setValue(-m_rate/100);
 		m_channelMarker.setBandwidth(-m_rate*2);
-	} else if (ui->BW->value() > m_rate/200) {
-		ui->BW->setValue(m_rate/200);
+	}
+	else if (ui->BW->value() > m_rate/100)
+	{
+		ui->BW->setValue(m_rate/100);
 		m_channelMarker.setBandwidth(m_rate*2);
 	}
 
-	if (ui->lowCut->value() < -m_rate/200) {
-		ui->lowCut->setValue(-m_rate/200);
+	if (ui->lowCut->value() < -m_rate/100)
+	{
+		ui->lowCut->setValue(-m_rate/100);
 		m_channelMarker.setLowCutoff(-m_rate);
-	} else if (ui->lowCut->value() > m_rate/200) {
-		ui->lowCut->setValue(m_rate/200);
+	}
+	else if (ui->lowCut->value() > m_rate/100)
+	{
+		ui->lowCut->setValue(m_rate/100);
 		m_channelMarker.setLowCutoff(m_rate);
 	}
 
@@ -393,26 +377,8 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1k").arg(s));
 
-	if (!m_dsb)
-	{
-		if (ui->BW->value() < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
-
-		ui->glSpectrum->setCenterFrequency(m_rate/4);
-		ui->glSpectrum->setSampleRate(m_rate/2);
-		ui->glSpectrum->setSsbSpectrum(true);
-	}
-	else
-	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(m_rate);
-		ui->glSpectrum->setSsbSpectrum(false);
-	}
+	ui->glSpectrum->setCenterFrequency(m_rate/2);
+	ui->glSpectrum->setSampleRate(m_rate);
 
 	return true;
 }

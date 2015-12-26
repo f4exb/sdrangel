@@ -43,7 +43,6 @@ public:
 			bool audioFlipChannels,
 			bool dsb);
 
-	int getSampleRate() const {	return m_sampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
@@ -113,7 +112,6 @@ private:
 	Real m_LowCutoff;
 	Real m_volume;
 	int m_spanLog2;
-	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_sampleRate;
 	int m_frequency;
@@ -127,7 +125,6 @@ private:
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
 
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
