@@ -369,10 +369,10 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 		m_channelMarker.setLowCutoff(m_rate);
 	}
 
-	ui->BW->setMinimum(-m_rate/200);
-	ui->lowCut->setMinimum(-m_rate/200);
-	ui->BW->setMaximum(m_rate/200);
-	ui->lowCut->setMaximum(m_rate/200);
+	ui->BW->setMinimum(-m_rate/100);
+	ui->lowCut->setMinimum(-m_rate/100);
+	ui->BW->setMaximum(m_rate/100);
+	ui->lowCut->setMaximum(m_rate/100);
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1k").arg(s));
