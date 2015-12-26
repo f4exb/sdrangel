@@ -88,14 +88,23 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 			if (m_magsq >= m_squelchLevel)
 			{
-				m_squelchState = m_running.m_audioSampleRate / 20;
+				if (m_squelchCount <= m_running.m_audioSampleRate / 10)
+				{
+					m_squelchCount++;
+				}
+			}
+			else
+			{
+				if (m_squelchCount > 0)
+				{
+					m_squelchCount--;
+				}
 			}
 
 			qint16 sample;
 
-			if (m_squelchState > 0)
+			if (m_squelchCount >= m_running.m_audioSampleRate / 20)
 			{
-				m_squelchState--;
 				Real demod = sqrt(magsq);
 
 				demod = m_lowpass.filter(demod);
@@ -111,7 +120,8 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 				m_volumeAGC.feed(demod);
 
-				demod *= (0.003 / m_volumeAGC.getValue());
+				Real attack = (m_squelchCount - (m_running.m_audioSampleRate / 20)) / (Real) (m_running.m_audioSampleRate / 20);
+				demod *= ((0.003 * attack) / m_volumeAGC.getValue());
 				demod *= m_running.m_volume;
 				sample = demod * 32700 * 16;
 
@@ -163,7 +173,7 @@ void AMDemod::start()
 	qDebug() << "AMDemod::start: m_inputSampleRate: " << m_config.m_inputSampleRate
 			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
-	m_squelchState = 0;
+	m_squelchCount = 0;
 	m_audioFifo.clear();
 }
 

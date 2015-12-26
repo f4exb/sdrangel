@@ -114,7 +114,7 @@ private:
 	Lowpass<Real> m_lowpass;
 
 	Real m_squelchLevel;
-	int m_squelchState;
+	int m_squelchCount;
 	Real m_magsq;
 
 	MovingAverage<Real> m_movingAverage;
