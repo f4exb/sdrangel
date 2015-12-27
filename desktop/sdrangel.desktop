@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=sdrangel
+GenericName=SDR/Analyzer frontend
+Comment=SDR/Analyzer frontend for Airspy, BladeRF, HackRF, RTL-SDR and FunCube
+Exec=sdrangel
+Icon=sdrangel
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Network;HamRadio;
