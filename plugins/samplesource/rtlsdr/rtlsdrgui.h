@@ -61,7 +61,7 @@ public:
 	static unsigned int getRate(unsigned int rate_index);
 	static unsigned int getRateIndex(unsigned int rate);
 private:
-	static unsigned int m_rates[6];
+	static unsigned int m_rates[7];
 	static unsigned int m_nb_rates;
 };
 
