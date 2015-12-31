@@ -96,6 +96,6 @@ static int runQtApplication(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
 	int res = runQtApplication(argc, argv);
-	qWarning("SDRangelove quit.");
+	qWarning("SDRangel quit.");
 	return res;
 }
