@@ -103,10 +103,20 @@ If you use your own location for librtlsdr install directory you need to specify
 
 <h2>For Ubuntu</h2>
 
-On 14.04 LTS do this first:
+<h3>Specific to 14.04 LTS</h3>
+
+Prerequisite to install Qt5 libraries properly:
 `sudo apt-get install libgles2-mesa-dev`
 
-Then:
+Install cmake version 3:
+  - `sudo apt-get install software-properties-common`
+  - `sudo add-apt-repository ppa:george-edison55/cmake-3.x`
+  - `sudo apt-get update`
+  - `sudo apt-get remove cmake` (if already installed)
+  - `sudo apt-get install cmake`
+
+<h3>With newer versions directly</h3>
+
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev`
 
 `mkdir build && cd build && cmake ../ && make`
