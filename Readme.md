@@ -103,6 +103,10 @@ If you use your own location for librtlsdr install directory you need to specify
 
 <h2>For Ubuntu</h2>
 
+On 14.04 LTS do this first:
+`sudo apt-get install libgles2-mesa-dev`
+
+Then:
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev`
 
 `mkdir build && cd build && cmake ../ && make`
