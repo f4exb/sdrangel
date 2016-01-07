@@ -137,6 +137,16 @@ For Debian Jessie or Stretch:
 
 `mkdir build && cd build && cmake ../ && make`
 
+<h2>For Fedora 22</h2>
+
+This might also work for Fedora 23.
+
+  - `sudo dnf groupinstall "C Development Tools and Libraries"`
+  - `sudo dnf install mesa-libGL-devel`
+  - `sudo dnf install cmake.x86_64 gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
+
+`mkdir build && cd build && cmake ../ && make` if no special options 
+
 <h1>Known Issues</h1>
 
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
@@ -242,3 +252,5 @@ The release type can be specified with the `-DBUILD_TYPE` cmake option. It takes
 You can specify whether or not you want to see debug messages printed out to the console with the `-DDEBUG_OUTPUT` cmake option:
   - `OFF` (default): no debug output
   - `ON`: debug output
+
+Tou can add `-Wno-dev` on the `cmake` command line to avoid warnings. 
