@@ -101,9 +101,9 @@ If you use your own location for librtlsdr install directory you need to specify
 
 <h1>Software build</h1>
 
-<h2>For Ubuntu</h2>
+<h2>Ubuntu</h2>
 
-<h3>Specific to 14.04 LTS</h3>
+<h3>Prerequisites for 14.04 LTS</h3>
 
 Prerequisite to install Qt5 libraries properly:
 `sudo apt-get install libgles2-mesa-dev`
@@ -115,7 +115,7 @@ Install cmake version 3:
   - `sudo apt-get remove cmake` (if already installed)
   - `sudo apt-get install cmake`
 
-<h3>With newer versions directly</h3>
+<h3>With newer versions just do:</h3>
 
 `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio`
 
@@ -125,11 +125,11 @@ Install cmake version 3:
 
 There is no installation procedure the executable is at the root of the build directory
 
-<h2>For Mint</h2>
+<h2>Mint</h2>
 
-Tested with Cinnamon 17.2. Since it is based on Ubintu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).
+Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).
 
-<h2>For Debian</h2>
+<h2>Debian</h2>
 
 For any version of Debian you will need Qt5.
 
@@ -141,19 +141,27 @@ For Debian Jessie or Stretch:
 
 `mkdir build && cd build && cmake ../ && make`
 
-<h2>For Fedora 23 or 22</h2>
+<h2>openSUSE</h2>
 
-Install the prerequiste packages:
+This has been tested with the bleeding edge "Thumbleweed" distribution:
+
+`sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio`
+
+Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
+
+Note for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+
+<h2>Fedora</h2>
+
+This has been tested with Fedora 23 and 22:
 
   - `sudo dnf groupinstall "C Development Tools and Libraries"`
   - `sudo dnf install mesa-libGL-devel`
-  - `sudo dnf install cmake.x86_64 gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
+  - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
 
-Build with no special options discussed elsewhere in this page:
+Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-`mkdir build && cd build && cmake ../ && make` 
-
-Note for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in Fedora. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
 <h1>Known Issues</h1>
 
