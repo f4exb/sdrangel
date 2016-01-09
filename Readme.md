@@ -137,15 +137,19 @@ For Debian Jessie or Stretch:
 
 `mkdir build && cd build && cmake ../ && make`
 
-<h2>For Fedora 22</h2>
+<h2>For Fedora 23 or 22</h2>
 
-This might also work for Fedora 23.
+Install the prerequiste packages:
 
   - `sudo dnf groupinstall "C Development Tools and Libraries"`
   - `sudo dnf install mesa-libGL-devel`
   - `sudo dnf install cmake.x86_64 gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
 
-`mkdir build && cd build && cmake ../ && make` if no special options 
+Build with no special options discussed elsewhere in this page:
+
+`mkdir build && cd build && cmake ../ && make` 
+
+Note for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in Fedora. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
 
 <h1>Known Issues</h1>
 
