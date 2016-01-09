@@ -125,6 +125,10 @@ Install cmake version 3:
 
 There is no installation procedure the executable is at the root of the build directory
 
+<h2>For Mint</h2>
+
+Tested with Cinnamon 17.2. Since it is based on Ubintu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).
+
 <h2>For Debian</h2>
 
 For any version of Debian you will need Qt5.
