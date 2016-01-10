@@ -163,6 +163,16 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
+<h2>Manjaro</h2>
+
+Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment shold not matter anyway:
+
+ `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio` 
+
+Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
+
+Note for udev rules: the same as for openSUSE and Fedora applies.
+
 <h1>Known Issues</h1>
 
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
