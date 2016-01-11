@@ -183,77 +183,13 @@ Note for udev rules: the same as for openSUSE and Fedora applies.
 
   - Tabbed panels showing "X0" refer to the only one selected device it is meant to be populated by more tabs when it will support more than one device possibly Rx + Tx.
 
-<h1>Changes from SDRangelove</h1>
+<h1>Features</h1>
 
-<h2>New features, enhancements and fixes</h2>
+<h2>Changes from SDRangelove</h2>
 
-  - Added ppm correction for the LO of RTL-SDR. This uses the corresponding function in the librtlsdr interface (range -99..99 ppm)
-  - Added a preset update button (the diskette with the yellow corner) to be able to save the current settings on an existing preset
-  - Added variable decimation in log2 increments from 2^0=1 to 2^4=16 allowing to see the full 2048 kHz of spectrum if so you wish
-  - Better handling of rtlsdr GUI display when settings change (initial load, load of presets)
-  - Added display and precise control of the shift frequency from center frequency of the NFM receivers.
-  - Removed useless spectrum visualizer in NFM receivers. Created a null sink class to fit corresponding parameter in NFMDemod class constructor.
-  - Added display and precise control of the shift frequency from center frequency of the SSB receivers.
-  - SSB filter bounds are tunable so that filter can be set off from center frequency allowing aural decoding of CW
-  - Make the sidebands appear correctly on SSB channel overlay. Limit to +/- 6 kHz to fit channel spectrum analyzer window
-  - SSB bandwidth can now be tuned in steps of 100 Hz
-  - NFM and SSB receiver in focus trigger the display of the central frequency line on the spectrum frequency scale thus facilitating its identification
-  - Added AM demod so now you can listen to air traffic!
-  - Added the possibility to change the brightness and/or color of the grid.
-  - Make the low cutoff frequency of the SSB filter variable so it can be used for CW also.
-  - NFM demodulation without using atan and smooth squelch with AGC suppressing most clicks on low level signals and hiss on carrier tails. Only useful modulation comes through.
-  - Added working WFM demodulation. Optimized for no atan2.
-  - OsmoSDR and GNURadio plugins removed from the build as they have too many bugs that are too difficult to correct
-  - New plugin for BladeRF interfacing libbladeRF directly
-  - Corrected the nasty audio band resampling bug preventing use of sample rates that are not power of 2 multiples of 48kHz. This was because the resampling ratio was calculated with an integer division instead of a float division. 
-  - As a consequence of the above added more interesting values for the available sampling rates of the BladeRF plugin
-  - Variable span for the SSB demod down to 1.5 kHz
-  - Filter out CTCSS tones for audio and full CTCSS support in NFMDemod
-  - Enhancement of the NFM squelch mimicking professional analog squelch circuits (based on balance between two AF filters)
-  - Added a channel analyzer plugin focusing on measurement (DSA/DSO functionnality). Basic functions.
-  - Added a scope widget in the channel analyzer plugin
-  - Channel analyzer bandwidth up to half the available RF (IF) bandwidth (was 48k fixed)
-  - Enhanced scope display and controls: scale display, better X (time) and Y scales control, grid fit to scale, effectively implementing triggers, trigger on magnitude and phase, properly handling time shift, ...
-  - Enhanced spectrum display: Histogram: wider decay range, make stroke and late holdoff adjustable. Added option to show live spectrum (had only max hold before).
-  - Enhanced channel analyzer: enhanced scope and spectrum displays as mentioned above, make the spectrum display synchronous to scope (hence triggerable a la E4406A).
-  - Sort channel plugins by delta frequency and type before saving to preset
-  - Implemented scope pre-trigger delay
-  - Implemented variable scope memory depth
-  - Implemented trigger delay
-  - Trigger on both edges
-  - Spectrum histogram clear
-  - Trigger line display for all trigger modes
-  - Coarse and fine trigger level sliders
-  - Minimalist recording (no file choice)
-  - File sample source plugin (recording reader)
-  - Scope: trace history
-  - Scope: trigger countdown
-  - Scope: multiple trigger chaining
-  - Scope: new mode with linear IQ (two traces) on the primary display and polar IQ on the secondary display
-  - New USB source plugin to connect to an external demodulator (ex: GNU radio) via USB ports
-  - Binaural option for SSB demod
-  - DSB option for SSB
-  - Mute option for NFM channel
-  - New Broadcast FM demodulator with stereo support
-  - RDS support in Broadcast FM demodulator
-  
-<h2>Major redesign</h2>
+See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
 
-  - Make the DSP engine global static simplifying access to it. Have a distinct object to handle the thread
-  - Fixed startup initialization sequence. New initialization phase in DSP engine and new ready state
-  - Synchronous messaging class to push message to thread and wait for completion relieving the message queuing mechanism from this role
-  - Message queuing and handling redesign. Still not completely satisfactory
-  - Objects have their own input and output message queues
-  - Dedicated message queue to communicate to the GUI for objects coupled with a GUI
-  - Optimizations with Valgrind cachegrind
-  - Corrected decimators bit shifting so that the number of effective output bits is constant and fill the internal sample width
-  - Separate library to support all flavours of FunCube dongles. Rewritten FCD plugins.
-  - Allow several sample source plugins to share the same presets for what is common
-  - Prepare grounds for future Tx operations with Tx spectrum display in the main window
-  - Merged include-gpl into include and removed GPL dribble in About dialog
-  - Many other little things...
-    
-<h1>To Do</h1>
+<h2>To Do</h2>
   - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
@@ -313,3 +249,4 @@ The `plugins` subdirectory contains the associated plugins used to manage device
     <td><i>channelsink</i></td>
   </tr>
 </table>
+
