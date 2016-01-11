@@ -165,9 +165,9 @@ Note for udev rules: the same as for openSUSE applies. This is detailed in the p
 
 <h2>Manjaro</h2>
 
-Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment shold not matter anyway:
+Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Since Manjaro is Arch Linux based prerequisites should be similar for Arch and all derivatives.
 
- `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio` 
+`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio` 
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
@@ -279,4 +279,37 @@ You can specify whether or not you want to see debug messages printed out to the
   - `OFF` (default): no debug output
   - `ON`: debug output
 
-Tou can add `-Wno-dev` on the `cmake` command line to avoid warnings. 
+You can add `-Wno-dev` on the `cmake` command line to avoid warnings.
+
+<h2>Code organization</h2>
+
+At the first subdirectory level `indclude` and `sdrbase` contain the common core components include and source files respectively. They are further broken down in subdirectories corresponding to a specific area:
+  - `audio` contains the interface with the audio device(s)
+  - `dsp` contains the common blocks for Digital Signal Processing like filters, scope and spectrum analyzer internals
+  - `gui` contains the common Graphical User Interface components like the scope and spectrum analyzer controls and display
+  - `plugin` contains the common blocks for managing plugins
+  - `settings` contains components to manage presets and preferences
+  - `util` contains common utilities such as the message queue
+  
+The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is yet to be created.
+
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Usage</th>
+    <th>Rx</th>
+    <th>Tx</th>
+  </tr>
+  <tr>
+    <td>Subdirectory</td>
+    <td>Device interfaces</td>
+    <td>samplesource</td>
+    <td><i>samplesink</i></td>
+  </tr>
+  <tr>
+    <td>Subdirectory</td>
+    <td>Channel component</td>
+    <td>channel</td>
+    <td><i>channelsink</i></td>
+  </tr>
+</table>
