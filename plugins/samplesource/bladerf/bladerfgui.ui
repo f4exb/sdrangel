@@ -16,6 +16,12 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>BladeRF</string>
   </property>
@@ -23,16 +29,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -154,7 +151,7 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="xb200">
-       <property name="currentText">
+       <property name="currentText" stdset="0">
         <string>None</string>
        </property>
        <property name="currentIndex">
