@@ -41,7 +41,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -221,6 +230,9 @@
       </item>
       <item>
        <widget class="QSlider" name="spanLog2">
+        <property name="toolTip">
+         <string>Channel sample rate</string>
+        </property>
         <property name="minimum">
          <number>0</number>
         </property>
@@ -259,6 +271,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="ssb">
+        <property name="toolTip">
+         <string>SSB/DSB togggle</string>
+        </property>
         <property name="text">
          <string>SSB</string>
         </property>
@@ -277,6 +292,9 @@
       </item>
       <item>
        <widget class="QSlider" name="BW">
+        <property name="toolTip">
+         <string>Lowpass filter cutoff frequency</string>
+        </property>
         <property name="minimum">
          <number>-60</number>
         </property>
@@ -323,6 +341,9 @@
       </item>
       <item>
        <widget class="QSlider" name="lowCut">
+        <property name="toolTip">
+         <string>Highpass filter cutoff frequency (SSB)</string>
+        </property>
         <property name="minimum">
          <number>-60</number>
         </property>
@@ -376,7 +397,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>
@@ -416,7 +446,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>

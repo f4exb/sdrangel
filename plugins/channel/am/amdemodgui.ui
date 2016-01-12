@@ -178,6 +178,9 @@
       </item>
       <item>
        <widget class="QSlider" name="rfBW">
+        <property name="toolTip">
+         <string>Demodulator (RF) bandwidth</string>
+        </property>
         <property name="maximum">
          <number>8</number>
         </property>
@@ -221,6 +224,9 @@
       </item>
       <item>
        <widget class="QSlider" name="afBW">
+        <property name="toolTip">
+         <string>Audio bandwidth</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
@@ -267,6 +273,9 @@
       </item>
       <item>
        <widget class="QSlider" name="volume">
+        <property name="toolTip">
+         <string>Volume</string>
+        </property>
         <property name="maximum">
          <number>100</number>
         </property>
@@ -310,6 +319,9 @@
       </item>
       <item>
        <widget class="QSlider" name="squelch">
+        <property name="toolTip">
+         <string>Squelch</string>
+        </property>
         <property name="minimum">
          <number>-100</number>
         </property>

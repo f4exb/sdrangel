@@ -258,6 +258,9 @@
       </item>
       <item>
        <widget class="QSlider" name="rfBW">
+        <property name="toolTip">
+         <string>Demodulator (RF) bandwidth</string>
+        </property>
         <property name="maximum">
          <number>8</number>
         </property>
@@ -301,6 +304,9 @@
       </item>
       <item>
        <widget class="QSlider" name="afBW">
+        <property name="toolTip">
+         <string>Audio bandwidth</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
@@ -311,7 +317,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>3</number>
+         <number>15</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -327,7 +333,7 @@
          </size>
         </property>
         <property name="text">
-         <string>3 kHz</string>
+         <string>15 kHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -347,6 +353,9 @@
       </item>
       <item>
        <widget class="QSlider" name="volume">
+        <property name="toolTip">
+         <string>Volume</string>
+        </property>
         <property name="maximum">
          <number>100</number>
         </property>
@@ -387,6 +396,9 @@
       </item>
       <item>
        <widget class="QSlider" name="squelch">
+        <property name="toolTip">
+         <string>Squelch</string>
+        </property>
         <property name="minimum">
          <number>-100</number>
         </property>
@@ -1762,11 +1774,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
@@ -1777,6 +1784,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>GLSpectrum</class>
