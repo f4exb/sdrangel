@@ -126,6 +126,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="LOppm">
+       <property name="toolTip">
+        <string>Local Oscillator frequency correction (ppm)</string>
+       </property>
        <property name="minimum">
         <number>-100</number>
        </property>
@@ -153,6 +156,9 @@
     <layout class="QGridLayout" name="gridLayout_corr">
      <item row="0" column="1">
       <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>DC offset auto correction</string>
+       </property>
        <property name="text">
         <string>DC offset</string>
        </property>
@@ -160,6 +166,9 @@
      </item>
      <item row="0" column="2">
       <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>IQ imbalance auto correction</string>
+       </property>
        <property name="text">
         <string>IQ imbalance</string>
        </property>
@@ -188,6 +197,9 @@
      </property>
      <item row="0" column="2">
       <widget class="QCheckBox" name="biasT">
+       <property name="toolTip">
+        <string>Antenna bias ON/OFF</string>
+       </property>
        <property name="text">
         <string>Bias T</string>
        </property>
@@ -229,6 +241,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="decim">
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
        <property name="maximum">
         <number>6</number>
        </property>
@@ -288,6 +303,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="fcPos">
+       <property name="toolTip">
+        <string>Relative position of device center frequency</string>
+       </property>
        <item>
         <property name="text">
          <string>Inf</string>
@@ -500,15 +518,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

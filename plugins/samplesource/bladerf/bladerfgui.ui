@@ -29,7 +29,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -76,7 +85,6 @@
        <property name="toolTip">
         <string>Tuner center frequency in kHz</string>
        </property>
-       <zorder>freqRightlSpacer</zorder>
       </widget>
      </item>
      <item>
@@ -159,7 +167,10 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="xb200">
-       <property name="currentText" stdset="0">
+       <property name="toolTip">
+        <string>XB200 board mode</string>
+       </property>
+       <property name="currentText">
         <string>None</string>
        </property>
        <property name="currentIndex">
@@ -296,7 +307,7 @@
      <item row="0" column="1">
       <widget class="QSlider" name="bandwidth">
        <property name="toolTip">
-        <string>Device Samplerate</string>
+        <string>RF filter bandwidth</string>
        </property>
        <property name="maximum">
         <number>15</number>
@@ -361,6 +372,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="decim">
+       <property name="toolTip">
+        <string>Decimation log2 factor</string>
+       </property>
        <property name="maximum">
         <number>5</number>
        </property>
@@ -427,6 +441,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="fcPos">
+       <property name="toolTip">
+        <string>Relative position of device center frequency</string>
+       </property>
        <item>
         <property name="text">
          <string>Inf</string>
@@ -477,7 +494,7 @@
         <bool>true</bool>
        </property>
        <property name="toolTip">
-        <string>LNA amplification</string>
+        <string>LNA gain (dB)</string>
        </property>
        <property name="maximum">
         <number>2</number>
@@ -523,7 +540,7 @@
      <item row="0" column="1">
       <widget class="QSlider" name="vga1">
        <property name="toolTip">
-        <string>Amplifier before filtering</string>
+        <string>Amplifier before filtering gain (dB)</string>
        </property>
        <property name="minimum">
         <number>5</number>
@@ -589,7 +606,7 @@
      <item row="0" column="1">
       <widget class="QSlider" name="vga2">
        <property name="toolTip">
-        <string>Amplifier before ADC</string>
+        <string>Amplifier before ADC gain (dB)</string>
        </property>
        <property name="maximum">
         <number>30</number>

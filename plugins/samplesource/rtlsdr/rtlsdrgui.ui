@@ -116,6 +116,9 @@
      </property>
      <item row="0" column="1">
       <widget class="QSlider" name="ppm">
+       <property name="toolTip">
+        <string>Local Oscillator ppm correction</string>
+       </property>
        <property name="minimum">
         <number>-99</number>
        </property>
@@ -256,6 +259,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="decim">
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
        <property name="maximum">
         <number>4</number>
        </property>
@@ -292,6 +298,9 @@
     <layout class="QGridLayout" name="gridLayout_fcPos">
      <item row="0" column="1">
       <widget class="QComboBox" name="fcPos">
+       <property name="toolTip">
+        <string>Relative postion of device center frequency</string>
+       </property>
        <item>
         <property name="text">
          <string>Inf</string>
@@ -362,7 +371,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>LNA amplification</string>
+        <string>LNA amplification (dB)</string>
        </property>
        <property name="maximum">
         <number>0</number>
@@ -404,6 +413,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_direct">
      <item>
       <widget class="QCheckBox" name="checkBox">
+       <property name="toolTip">
+        <string>RTLSDR special direct sampling mode (HF Bands)</string>
+       </property>
        <property name="text">
         <string>No-mod Direct Sampling</string>
        </property>
@@ -428,15 +440,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

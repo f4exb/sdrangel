@@ -118,7 +118,7 @@
      <item>
       <widget class="QSlider" name="ppm">
        <property name="toolTip">
-        <string>LO ppm correction</string>
+        <string>Local Oscillator ppm correction</string>
        </property>
        <property name="minimum">
         <number>-100</number>
@@ -196,7 +196,7 @@
      <item>
       <widget class="QCheckBox" name="mixGain">
        <property name="toolTip">
-        <string>Activate mixer gain</string>
+        <string>Activate mixer amplifier</string>
        </property>
        <property name="text">
         <string>Mix</string>
@@ -206,7 +206,7 @@
      <item>
       <widget class="QCheckBox" name="checkBoxB">
        <property name="toolTip">
-        <string>Activate bias tee</string>
+        <string>Activate antenna bias tee</string>
        </property>
        <property name="text">
         <string>Bias T</string>
@@ -226,6 +226,9 @@
      </item>
      <item>
       <widget class="QSlider" name="ifGain">
+       <property name="toolTip">
+        <string>Intermediate Frequency stages gain</string>
+       </property>
        <property name="maximum">
         <number>59</number>
        </property>
@@ -295,15 +298,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

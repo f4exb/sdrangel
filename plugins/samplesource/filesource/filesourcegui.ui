@@ -135,6 +135,9 @@
          <height>24</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Open file</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -148,6 +151,9 @@
       <widget class="QLabel" name="fileNameText">
        <property name="enabled">
         <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>File currently opened</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -322,15 +328,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

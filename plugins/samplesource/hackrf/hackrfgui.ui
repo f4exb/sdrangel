@@ -126,6 +126,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="LOppm">
+       <property name="toolTip">
+        <string>Local Oscullator ppm correction</string>
+       </property>
        <property name="minimum">
         <number>-100</number>
        </property>
@@ -220,7 +223,11 @@
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QComboBox" name="bbFilter"/>
+      <widget class="QComboBox" name="bbFilter">
+       <property name="toolTip">
+        <string>RF bandpas filter</string>
+       </property>
+      </widget>
      </item>
      <item row="0" column="4">
       <spacer name="horizontalSpacer">
@@ -251,6 +258,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QSlider" name="decim">
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
        <property name="maximum">
         <number>6</number>
        </property>
@@ -297,6 +307,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="fcPos">
+       <property name="toolTip">
+        <string>Relative position of device center frequency</string>
+       </property>
        <item>
         <property name="text">
          <string>Inf</string>
@@ -316,6 +329,9 @@
      </item>
      <item row="0" column="2">
       <widget class="QCheckBox" name="biasT">
+       <property name="toolTip">
+        <string>Activate antenna bias tee</string>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
@@ -463,15 +479,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

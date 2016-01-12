@@ -118,7 +118,7 @@
      <item>
       <widget class="QSlider" name="ppm">
        <property name="toolTip">
-        <string>LO ppm correction</string>
+        <string>Local Oscillator ppm correction</string>
        </property>
        <property name="minimum">
         <number>-2000</number>
@@ -185,6 +185,9 @@
     <layout class="QHBoxLayout" name="layoutBiasT">
      <item>
       <widget class="QPushButton" name="setDefaults">
+       <property name="toolTip">
+        <string>Set all values to typical defaults</string>
+       </property>
        <property name="text">
         <string>Defaults</string>
        </property>
@@ -388,15 +391,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
