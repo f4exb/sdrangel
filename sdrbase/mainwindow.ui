@@ -27,6 +27,12 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="margin">
      <number>0</number>
@@ -62,6 +68,12 @@
      <width>1012</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
@@ -112,7 +124,14 @@
    <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </widget>
   <widget class="QDockWidget" name="presetDock">
    <property name="windowTitle">
     <string>Presets</string>
