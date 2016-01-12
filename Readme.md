@@ -47,7 +47,7 @@ If you use your own location for gr.osmocom install directory you need to specif
 
 `-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so -DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
 
-<h3>v4l-*</h3>
+<h3>v4l-\*</h3>
 
 Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
 
@@ -109,6 +109,7 @@ Prerequisite to install Qt5 libraries properly:
 `sudo apt-get install libgles2-mesa-dev`
 
 Install cmake version 3:
+
   - `sudo apt-get install software-properties-common`
   - `sudo add-apt-repository ppa:george-edison55/cmake-3.x`
   - `sudo apt-get update`
@@ -117,9 +118,8 @@ Install cmake version 3:
 
 <h3>With newer versions just do:</h3>
 
-`sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio`
-
-`mkdir build && cd build && cmake ../ && make`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio`
+  - `mkdir build && cd build && cmake ../ && make`
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
 
@@ -190,6 +190,7 @@ Note for udev rules: the same as for openSUSE and Fedora applies.
 See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
 
 <h2>To Do</h2>
+
   - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
@@ -207,11 +208,13 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 <h2>Build options</h2>
 
 The release type can be specified with the `-DBUILD_TYPE` cmake option. It takes the following values:
+
   - `RELEASE` (default): produces production release code i.e.optimized and no debug symbols
   - `RELEASEWITHDBGINFO`: optimized with debug info
   - `DEBUG`: unoptimized with debug info
 
 You can specify whether or not you want to see debug messages printed out to the console with the `-DDEBUG_OUTPUT` cmake option:
+
   - `OFF` (default): no debug output
   - `ON`: debug output
 
@@ -220,6 +223,7 @@ You can add `-Wno-dev` on the `cmake` command line to avoid warnings.
 <h2>Code organization</h2>
 
 At the first subdirectory level `indclude` and `sdrbase` contain the common core components include and source files respectively. They are further broken down in subdirectories corresponding to a specific area:
+
   - `audio` contains the interface with the audio device(s)
   - `dsp` contains the common blocks for Digital Signal Processing like filters, scope and spectrum analyzer internals
   - `gui` contains the common Graphical User Interface components like the scope and spectrum analyzer controls and display
@@ -229,24 +233,74 @@ At the first subdirectory level `indclude` and `sdrbase` contain the common core
   
 The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is yet to be created.
 
-<table>
-  <tr>
-    <th>Item</th>
-    <th>Usage</th>
-    <th>Rx</th>
-    <th>Tx</th>
-  </tr>
-  <tr>
-    <td>Subdirectory</td>
-    <td>Device interfaces</td>
-    <td>samplesource</td>
-    <td><i>samplesink</i></td>
-  </tr>
-  <tr>
-    <td>Subdirectory</td>
-    <td>Channel component</td>
-    <td>channel</td>
-    <td><i>channelsink</i></td>
-  </tr>
-</table>
+Present:
 
+  - Receiver functions (Rx):
+    - `samplesource`: Device managers:
+      - `xxx` : Device manager (e.g. xxx = airspy)
+        - `xxxinput.h/cpp` : Device interface 
+        - `xxxgui.h/cpp` : GUI
+        - `xxxplugin.h/cpp` : Plugin interface
+        - `xxxsettings.h/cpp` : Configuration manager
+        - `xxxthread.h/cpp` : Reading samples
+    - `channel`: Channel handlers:
+      - `xxx` : Demodulator internal handler (e.g xxx = am)
+        - `xxxdemod.h/cpp` : Demodulator core
+        - `xxxdemodgui.h/cpp` : Demodulator GUI
+        - `xxxplugin.h/cpp` : Plugin interface
+      - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
+        - `xxxanalyzer.h/cpp` : Analyzer core
+        - `xxxanalyzergui.h/cpp` : Analyzer GUI
+        ` `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
+      - `xxxsrc` : Interface to the outside (e.g xxx = udp):
+        - `xxxsrc.h/cpp` : Inteface core
+        - `xxxsrcgui.h/cpp` : Interface GUI
+        - `xxxsrcplugin/h/cpp` : Interface plugin manager
+        
+Future:
+
+  - Receiver functions (Rx):
+    - `samplesource`: Device managers:
+      - `xxxinput` : Device manager (e.g. xxx = airspy)
+        - `xxxinput.h/cpp` : Device interface 
+        - `xxxinputgui.h/cpp` : GUI
+        - `xxxinputplugin.h/cpp` : Plugin interface
+        - `xxxinputsettings.h/cpp` : Configuration manager
+        - `xxxinputthread.h/cpp` : Reading samples
+    - `channelsource`: Channel handlers:
+      - `xxxdemod` : Demodulator internal handler (e.g xxx = am)
+        - `xxxdemod.h/cpp` : Demodulator core
+        - `xxxdemodgui.h/cpp` : Demodulator GUI
+        - `xxxdemodplugin.h/cpp` : Plugin interface
+      - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
+        - `xxxanalyzer.h/cpp` : Analyzer core
+        - `xxxanalyzergui.h/cpp` : Analyzer GUI
+        ` `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
+      - `xxxsrc` : Interface to the outside (e.g xxx = udp):
+        - `xxxsrc.h/cpp` : Inteface core
+        - `xxxsrcgui.h/cpp` : Interface GUI
+        - `xxxsrcplugin/h/cpp` : Interface plugin manager
+        
+  - Transmitter functions (Tx):
+    - `samplesink`: Device managers:
+      - `xxxoutput` : Device manager (e.g. xxx = airspy)
+        - `xxxoutput.h/cpp` : Device interface 
+        - `xxxoutputgui.h/cpp` : GUI
+        - `xxxoutputplugin.h/cpp` : Plugin interface
+        - `xxxoutputsettings.h/cpp` : Configuration manager
+        - `xxxoutputthread.h/cpp` : Reading samples
+    - `channelsink`: Channel handlers:
+      - `xxxmod` : Modulator internal handler (e.g xxx = am)
+        - `xxxmod.h/cpp` : Modulator core
+        - `xxxmodgui.h/cpp` : Modulator GUI
+        - `xxxmodplugin.h/cpp` : Plugin interface
+      - `xxxgenerator` : Generator internal handler (e.g xxx = channel)
+        - `xxxgenerator.h/cpp` : Analyzer core
+        - `xxxgeneratorgui.h/cpp` : Analyzer GUI
+        ` `xxxgeneratorplugin.h/cpp` : Analyzer plugin manager
+      - `xxxsink` : Interface from the outside (e.g xxx = udp):
+        - `xxxsink.h/cpp` : Inteface core
+        - `xxxsinkgui.h/cpp` : Interface GUI
+        - `xxxsinkplugin/h/cpp` : Interface plugin manager
+        
+        
