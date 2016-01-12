@@ -16,6 +16,12 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>BladeRF</string>
   </property>
@@ -85,6 +91,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="freqUnits">
+       <property name="text">
+        <string> kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="freqRightlSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -135,11 +148,6 @@
       <widget class="QLabel" name="fileNameText">
        <property name="enabled">
         <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
        </property>
        <property name="text">
         <string>...</string>
@@ -199,11 +207,6 @@
       <widget class="QLabel" name="absTimeText">
        <property name="enabled">
         <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
        </property>
        <property name="toolTip">
         <string>Record absolute time</string>
@@ -305,11 +308,6 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
        <property name="toolTip">
         <string>Record time from start</string>
        </property>
@@ -324,15 +322,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>
