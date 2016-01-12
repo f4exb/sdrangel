@@ -1,6 +1,6 @@
 ![SDR Angel banner](/doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware. 
+**SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware.
 
 Although it keeps the same look and feel as its parent application **SDRangelove** it is a major redesign from it hitting more than half the lines of the code. Therefore the code base cannot be kept in sync anymore with its parent. It also contains enhancements and major differences. So it should now fly with its own wings and with its own name: **SDRangel**
 
@@ -26,13 +26,13 @@ These plugins come from the parent code base and have been maintained so that th
 These plugins come from the parent code base and are still present in the source tree but are not part of the build:
 
 - Channels:
-  - tetra 
+  - tetra
 - Sample sources:
   - gnuradio
   - osmosdr
   - v4l-msi
   - v4l-rtl
-  
+
 <h3>Gnuradio</h3>
 
 The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
@@ -61,7 +61,7 @@ If you use your own location for libairspy install directory you need to specify
 
 `-DLIBAIRSPY_LIBRARIES=/opt/install/libairspy/lib/libairspy.so -DLIBAIRSPY_INCLUDE_DIR=/opt/install/libairspy/include`
 
-Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out. 
+Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out.
 
 Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) are affected by a noise artifact so 10 MS/s is preferable for weak signal work or instrumentation. A decimation by 64 was implemented to facilitate narrow band work at 10 MS/s input rate.
 
@@ -133,7 +133,7 @@ Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS pleae follow in
 
 For any version of Debian you will need Qt5.
 
-Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5. 
+Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5.
 
 For Debian Jessie or Stretch:
 
@@ -149,7 +149,8 @@ This has been tested with the bleeding edge "Thumbleweed" distribution:
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-Note for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+  - Note1 for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+  - Note2: A package has been created (thanks Martin!), see: [sdrangel](http://software.opensuse.org/download.html?project=home%3Amnhauke%3Asdr&package=sdrangel). It is based on the 1.0.1 tagged version.
 
 <h2>Fedora</h2>
 
@@ -161,17 +162,18 @@ This has been tested with Fedora 23 and 22:
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
+  - Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
 <h2>Manjaro</h2>
 
 Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Since Manjaro is Arch Linux based prerequisites should be similar for Arch and all derivatives.
 
-`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio` 
+`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-Note for udev rules: the same as for openSUSE and Fedora applies.
+  - Note1 for udev rules: the same as for openSUSE and Fedora applies.
+  - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
 
 <h1>Known Issues</h1>
 
@@ -202,7 +204,7 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
   - Implement polyphase channelizer
   - Level calibration  
   - Even more demods ...
-  
+
 <h1>Developper's notes</h1>
 
 <h2>Build options</h2>
@@ -230,15 +232,13 @@ At the first subdirectory level `indclude` and `sdrbase` contain the common core
   - `plugin` contains the common blocks for managing plugins
   - `settings` contains components to manage presets and preferences
   - `util` contains common utilities such as the message queue
-  
-The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is yet to be created.
 
-Present:
+The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is yet to be created.
 
   - Receiver functions (Rx):
     - `samplesource`: Device managers:
       - `xxx` : Device manager (e.g. xxx = airspy)
-        - `xxxinput.h/cpp` : Device interface 
+        - `xxxinput.h/cpp` : Device interface
         - `xxxgui.h/cpp` : GUI
         - `xxxplugin.h/cpp` : Plugin interface
         - `xxxsettings.h/cpp` : Configuration manager
@@ -251,56 +251,8 @@ Present:
       - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
         - `xxxanalyzer.h/cpp` : Analyzer core
         - `xxxanalyzergui.h/cpp` : Analyzer GUI
-        ` `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
+        - `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
       - `xxxsrc` : Interface to the outside (e.g xxx = udp):
         - `xxxsrc.h/cpp` : Inteface core
         - `xxxsrcgui.h/cpp` : Interface GUI
         - `xxxsrcplugin/h/cpp` : Interface plugin manager
-        
-Future:
-
-  - Receiver functions (Rx):
-    - `samplesource`: Device managers:
-      - `xxxinput` : Device manager (e.g. xxx = airspy)
-        - `xxxinput.h/cpp` : Device interface 
-        - `xxxinputgui.h/cpp` : GUI
-        - `xxxinputplugin.h/cpp` : Plugin interface
-        - `xxxinputsettings.h/cpp` : Configuration manager
-        - `xxxinputthread.h/cpp` : Reading samples
-    - `channelsource`: Channel handlers:
-      - `xxxdemod` : Demodulator internal handler (e.g xxx = am)
-        - `xxxdemod.h/cpp` : Demodulator core
-        - `xxxdemodgui.h/cpp` : Demodulator GUI
-        - `xxxdemodplugin.h/cpp` : Plugin interface
-      - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
-        - `xxxanalyzer.h/cpp` : Analyzer core
-        - `xxxanalyzergui.h/cpp` : Analyzer GUI
-        ` `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
-      - `xxxsrc` : Interface to the outside (e.g xxx = udp):
-        - `xxxsrc.h/cpp` : Inteface core
-        - `xxxsrcgui.h/cpp` : Interface GUI
-        - `xxxsrcplugin/h/cpp` : Interface plugin manager
-        
-  - Transmitter functions (Tx):
-    - `samplesink`: Device managers:
-      - `xxxoutput` : Device manager (e.g. xxx = airspy)
-        - `xxxoutput.h/cpp` : Device interface 
-        - `xxxoutputgui.h/cpp` : GUI
-        - `xxxoutputplugin.h/cpp` : Plugin interface
-        - `xxxoutputsettings.h/cpp` : Configuration manager
-        - `xxxoutputthread.h/cpp` : Reading samples
-    - `channelsink`: Channel handlers:
-      - `xxxmod` : Modulator internal handler (e.g xxx = am)
-        - `xxxmod.h/cpp` : Modulator core
-        - `xxxmodgui.h/cpp` : Modulator GUI
-        - `xxxmodplugin.h/cpp` : Plugin interface
-      - `xxxgenerator` : Generator internal handler (e.g xxx = channel)
-        - `xxxgenerator.h/cpp` : Analyzer core
-        - `xxxgeneratorgui.h/cpp` : Analyzer GUI
-        ` `xxxgeneratorplugin.h/cpp` : Analyzer plugin manager
-      - `xxxsink` : Interface from the outside (e.g xxx = udp):
-        - `xxxsink.h/cpp` : Inteface core
-        - `xxxsinkgui.h/cpp` : Interface GUI
-        - `xxxsinkplugin/h/cpp` : Interface plugin manager
-        
-        
