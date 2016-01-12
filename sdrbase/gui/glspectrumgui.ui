@@ -6,24 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
+    <width>331</width>
     <height>60</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Oscilloscope</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <property name="spacing">

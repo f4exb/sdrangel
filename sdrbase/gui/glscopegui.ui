@@ -7,8 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>583</width>
-    <height>111</height>
+    <height>112</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Oscilloscope</string>
@@ -17,16 +23,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
