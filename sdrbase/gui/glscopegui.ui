@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>583</width>
-    <height>112</height>
+    <height>118</height>
    </rect>
   </property>
   <property name="font">
@@ -23,7 +23,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -970,7 +979,7 @@
      <item>
       <widget class="ButtonSwitch" name="oneShot">
        <property name="toolTip">
-        <string>One shot</string>
+        <string>One shot trigger</string>
        </property>
        <property name="text">
         <string/>
@@ -1087,6 +1096,9 @@
      </item>
      <item>
       <widget class="QSlider" name="trigDelay">
+       <property name="toolTip">
+        <string>Trigger delay</string>
+       </property>
        <property name="maximum">
         <number>100</number>
        </property>
