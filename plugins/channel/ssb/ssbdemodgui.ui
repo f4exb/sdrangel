@@ -98,7 +98,7 @@
         <item>
          <widget class="QLabel" name="deltaUnits">
           <property name="text">
-           <string>Hz </string>
+           <string> Hz </string>
           </property>
          </widget>
         </item>

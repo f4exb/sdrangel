@@ -76,6 +76,14 @@
        <property name="toolTip">
         <string>Tuner center frequency in kHz</string>
        </property>
+       <zorder>freqRightlSpacer</zorder>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="freqUnits">
+       <property name="text">
+        <string> kHz</string>
+       </property>
       </widget>
      </item>
      <item>
