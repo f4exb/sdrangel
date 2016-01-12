@@ -10,6 +10,12 @@
     <height>410</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>LoRa Demodulator</string>
   </property>
@@ -26,7 +32,16 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -134,7 +149,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>
@@ -144,6 +168,12 @@
         <width>200</width>
         <height>150</height>
        </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>9</pointsize>
+       </font>
       </property>
      </widget>
     </item>
@@ -155,6 +185,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -164,12 +200,6 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

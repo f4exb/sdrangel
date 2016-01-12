@@ -10,6 +10,12 @@
     <height>143</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="focusPolicy">
    <enum>Qt::StrongFocus</enum>
   </property>

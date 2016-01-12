@@ -10,6 +10,12 @@
     <height>324</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>UDP Sample Source</string>
   </property>
@@ -491,7 +497,14 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="GLSpectrum" name="glSpectrum" native="true"/>
+     <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
@@ -500,6 +513,12 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
@@ -516,12 +535,6 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

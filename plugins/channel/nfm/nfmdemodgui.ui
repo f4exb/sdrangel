@@ -10,6 +10,12 @@
     <height>162</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>NFM Demodulator</string>
   </property>
