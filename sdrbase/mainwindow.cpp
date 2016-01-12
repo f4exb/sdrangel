@@ -625,6 +625,13 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
 	m_channelWindow = new ChannelWindow;
 	m_sampleSource = new QComboBox;
+
+	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
+	QFont font;
+    font.setFamily(QStringLiteral("Sans Serif"));
+    font.setPointSize(9);
+    m_spectrum->setFont(font);
+
 }
 
 MainWindow::DeviceUISet::~DeviceUISet()
