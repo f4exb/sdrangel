@@ -30,7 +30,6 @@
    <property name="font">
     <font>
      <family>Sans Serif</family>
-     <pointsize>9</pointsize>
     </font>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -39,11 +38,6 @@
     </property>
     <item>
      <widget class="QTabWidget" name="tabSpectra">
-      <property name="font">
-       <font>
-        <pointsize>8</pointsize>
-       </font>
-      </property>
       <property name="tabPosition">
        <enum>QTabWidget::East</enum>
       </property>
@@ -68,12 +62,6 @@
      <width>1012</width>
      <height>20</height>
     </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
@@ -128,7 +116,6 @@
    <property name="font">
     <font>
      <family>Sans Serif</family>
-     <pointsize>9</pointsize>
     </font>
    </property>
   </widget>
@@ -316,11 +303,6 @@
      </property>
      <item>
       <widget class="QTabWidget" name="tabSpectraGUI">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
        <property name="currentIndex">
         <number>-1</number>
        </property>
@@ -358,11 +340,6 @@
          <height>50</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
        <property name="currentIndex">
         <number>-1</number>
        </property>
@@ -388,11 +365,6 @@
      </property>
      <item>
       <widget class="QTabWidget" name="tabChannels">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
        <property name="tabPosition">
         <enum>QTabWidget::East</enum>
        </property>
