@@ -219,7 +219,7 @@
       <item>
        <widget class="QSlider" name="spanLog2">
         <property name="toolTip">
-         <string>Channel sample rate</string>
+         <string>Demod frequency span</string>
         </property>
         <property name="minimum">
          <number>1</number>
