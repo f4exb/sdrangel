@@ -43,3 +43,4 @@ if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
 add_subdirectory(filesource)
+add_subdirectory(sdrdaemon)
