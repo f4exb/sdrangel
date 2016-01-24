@@ -3,6 +3,7 @@ project(sdrdaemon)
 find_package(LZ4)
 
 set(sdrdaemon_SOURCES
+    sdrdaemonbuffer.cpp
 	sdrdaemongui.cpp
 	sdrdaemoninput.cpp
 	sdrdaemonplugin.cpp
@@ -10,6 +11,7 @@ set(sdrdaemon_SOURCES
 )
 
 set(sdrdaemon_HEADERS
+    sdrdaemonbuffer.h
 	sdrdaemongui.h
 	sdrdaemoninput.h
 	sdrdaemonplugin.h

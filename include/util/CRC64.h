@@ -14,58 +14,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONTHREAD_H
-#define INCLUDE_SDRDAEMONTHREAD_H
+#ifndef INCLUDE_CRC64_H_
+#define INCLUDE_CRC64_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QTimer>
+#include <stdint.h>
 
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include "dsp/samplefifo.h"
-#include "dsp/inthalfbandfilter.h"
-
-#define SDRDAEMON_THROTTLE_MS 50
-
-class QUdpSocket;
-
-class SDRdaemonThread : public QThread {
-	Q_OBJECT
-
+class CRC64
+{
 public:
-	SDRdaemonThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent = NULL);
-	~SDRdaemonThread();
-
-	void startWork();
-	void stopWork();
-	void setSamplerate(int samplerate);
-	bool isRunning() const { return m_running; }
-	std::size_t getSamplesCount() const { return m_samplesCount; }
-
-	void connectTimer(const QTimer& timer);
+    CRC64();
+    ~CRC64();
+    uint64_t calculate_crc(uint8_t *stream, int length);
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
-	bool m_running;
+    void build_crc_table();
 
-	std::ifstream* m_ifstream;
-	QUdpSocket *m_dataSocket;
-	quint8  *m_buf;
-	std::size_t m_bufsize;
-	std::size_t m_chunksize;
-	SampleFifo* m_sampleFifo;
-	std::size_t m_samplesCount;
-
-	int m_samplerate;
-	static const int m_rateDivider;
-
-	void run();
-private slots:
-	void tick();
+    uint64_t m_crcTable[256];
+    static const uint64_t m_poly;
 };
 
-#endif // INCLUDE_SDRDAEMONTHREAD_H
+
+
+#endif /* INCLUDE_CRC64_H_ */

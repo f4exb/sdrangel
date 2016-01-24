@@ -126,6 +126,7 @@ set(sdrbase_SOURCES
 	sdrbase/settings/preset.cpp
 	sdrbase/settings/mainsettings.cpp
 
+    sdrbase/util/CRC64.cpp
 	sdrbase/util/db.cpp
 	sdrbase/util/message.cpp
 	sdrbase/util/messagequeue.cpp
@@ -208,7 +209,8 @@ set(sdrbase_HEADERS
 	include/settings/preset.h
 	include/settings/mainsettings.h
 
-	include/util/db.h
+	include/util/CRC64.h
+    include/util/db.h
 	include/util/export.h
 	include/util/message.h
 	include/util/messagequeue.h
