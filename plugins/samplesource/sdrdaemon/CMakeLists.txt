@@ -1,5 +1,7 @@
 project(sdrdaemon)
 
+find_package(LZ4)
+
 set(sdrdaemon_SOURCES
 	sdrdaemongui.cpp
 	sdrdaemoninput.cpp
@@ -40,9 +42,14 @@ add_library(inputsdrdaemon SHARED
 	${sdrdaemon_FORMS_HEADERS}
 )
 
+target_include_directories(inputsdrdaemon PUBLIC
+    ${LZ4_INCLUDE_DIRS}
+)
+
 target_link_libraries(inputsdrdaemon
 	${QT_LIBRARIES}
 	${LIBUSB_LIBRARIES}
+	${LZ4_LIBRARIES}
 	sdrbase
 )
 
