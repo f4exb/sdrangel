@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <lz4.h>
 #include "util/CRC64.h"
+#include "dsp/samplefifo.h"
 
 class SDRdaemonBuffer
 {
@@ -87,6 +88,7 @@ private:
     uint32_t m_nbCRCOK;
     uint64_t m_dataCRC;
 
+    SampleVector m_convertBuffer;
 };
 
 
