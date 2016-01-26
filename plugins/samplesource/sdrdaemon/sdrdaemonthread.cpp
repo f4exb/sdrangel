@@ -18,30 +18,43 @@
 #include <errno.h>
 #include <assert.h>
 #include "dsp/samplefifo.h"
+#include <QUdpSocket>
 #include <QDebug>
 
 #include "sdrdaemonthread.h"
 
 const int SDRdaemonThread::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
+const int SDRdaemonThread::m_udpPayloadSize = 512;
 
 SDRdaemonThread::SDRdaemonThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
+	m_dataSocket(0),
+	m_dataAddress(QHostAddress::LocalHost),
+	m_dataPort(9090),
+	m_dataConnected(false),
 	m_ifstream(samplesStream),
 	m_buf(0),
+	m_udpBuf(0),
 	m_bufsize(0),
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
+	m_sdrDaemonBuffer(m_udpPayloadSize),
 	m_samplerate(0)
 {
     assert(m_ifstream != 0);
+    m_udpBuf = new char[m_udpPayloadSize];
 }
 
 SDRdaemonThread::~SDRdaemonThread()
 {
 	if (m_running) {
 		stopWork();
+	}
+
+	if (m_udpBuf != 0) {
+		free(m_udpBuf);
 	}
 
 	if (m_buf != 0) {
@@ -52,30 +65,48 @@ SDRdaemonThread::~SDRdaemonThread()
 void SDRdaemonThread::startWork()
 {
 	qDebug() << "SDRdaemonThread::startWork: ";
+
+	if (!m_dataSocket) {
+		m_dataSocket = new QUdpSocket(this);
+	}
     
-    if (m_ifstream->is_open())
-    {
-        qDebug() << "  - file stream open, starting...";
-        m_startWaitMutex.lock();
-        start();
-        while(!m_running)
-            m_startWaiter.wait(&m_startWaitMutex, 100);
-        m_startWaitMutex.unlock();
-    }
+	if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+	{
+		qDebug("SDRdaemonThread::startWork: bind data socket to port %d", m_dataPort);
+		connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+
+		m_startWaitMutex.lock();
+		start();
+		while(!m_running)
+			m_startWaiter.wait(&m_startWaitMutex, 100);
+		m_startWaitMutex.unlock();
+		m_dataConnected = true;
+	}
     else
     {
-        qDebug() << "  - file stream closed, not starting.";
+    	qWarning("SDRdaemonThread::startWork: cannot bind data port %d", m_dataPort);
+    	m_dataConnected = false;
     }
 }
 
 void SDRdaemonThread::stopWork()
 {
 	qDebug() << "SDRdaemonThread::stopWork";
+
+	if (m_dataConnected) {
+		disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+	}
+
+	if (m_dataSocket) {
+		delete m_dataSocket;
+		m_dataSocket = 0;
+	}
+
 	m_running = false;
 	wait();
 }
 
-void SDRdaemonThread::setSamplerate(int samplerate)
+void SDRdaemonThread::setSamplerate(uint32_t samplerate)
 {
 	qDebug() << "SDRdaemonThread::setSamplerate:"
 			<< " new:" << samplerate
@@ -149,5 +180,30 @@ void SDRdaemonThread::tick()
             m_sampleFifo->write(m_buf, m_chunksize);
     		m_samplesCount += m_chunksize / 4;
         }
+	}
+}
+
+void SDRdaemonThread::dataReadyRead()
+{
+	while (m_dataSocket->hasPendingDatagrams())
+	{
+		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
+		qint64 readBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, 0, 0);
+
+		if (readBytes < 0)
+		{
+			qDebug() << "SDRdaemonThread::dataReadyRead: read failed";
+		}
+		else if (readBytes > 0)
+		{
+			if (m_sdrDaemonBuffer.readMeta(m_udpBuf, readBytes))
+			{
+				setSamplerate(m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate);
+			}
+			else if (m_sdrDaemonBuffer.isSync())
+			{
+				m_sdrDaemonBuffer.writeData(m_udpBuf, readBytes);
+			}
+		}
 	}
 }

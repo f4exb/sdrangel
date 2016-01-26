@@ -63,12 +63,14 @@ public:
 
 	SDRdaemonBuffer(std::size_t blockSize);
 	~SDRdaemonBuffer();
-	bool writeAndRead(uint8_t *array, std::size_t length, uint8_t *data, std::size_t& dataLength);
+	bool readMeta(char *array, std::size_t length);  //!< Attempt to read meta. Returns true if meta block
+	void writeData(char *array, std::size_t length); //!< Write data into buffer.
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
+	bool isSync() const { return m_sync; }
 
 private:
-	bool writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_t *data, std::size_t& dataLength);
-	void updateSizes(MetaData *metaData);
+	void updateLZ4Sizes(MetaData *metaData);
+	void writeDataLZ4(char *array, std::size_t length);
 	void updateBufferSize();
     void printMeta(MetaData *metaData);
 

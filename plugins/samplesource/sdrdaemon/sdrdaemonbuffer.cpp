@@ -38,6 +38,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 	m_rawBuffer(0)
 {
 	m_buf = new uint8_t[blockSize];
+	updateBufferSize();
 	m_currentMeta.init();
 }
 
@@ -50,19 +51,18 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
     delete[] m_buf;
 }
 
-bool SDRdaemonBuffer::writeAndRead(uint8_t *array, std::size_t length, uint8_t *data, std::size_t& dataLength)
+bool SDRdaemonBuffer::readMeta(char *array, std::size_t length)
 {
-	assert(length == m_blockSize); // TODO: allow fragmented blocks with larger size
+	assert(length >= sizeof(MetaData) + 8);
 	MetaData *metaData = (MetaData *) array;
 
-	if (m_crc64.calculate_crc(array, sizeof(MetaData) - 8) == metaData->m_crc)
+	if (m_crc64.calculate_crc((uint8_t *)array, sizeof(MetaData) - 8) == metaData->m_crc)
 	{
-		dataLength = 0;
 		memcpy((void *) &m_dataCRC, (const void *) &array[sizeof(MetaData)], 8);
 
 		if (!(m_currentMeta == *metaData))
 		{
-			std::cerr << "SDRdaemonBuffer::writeAndRead: ";
+			std::cerr << "SDRdaemonBuffer::readMeta: ";
 			printMeta(metaData);
 		}
 
@@ -74,7 +74,7 @@ bool SDRdaemonBuffer::writeAndRead(uint8_t *array, std::size_t length, uint8_t *
 			if (metaData->m_sampleBytes & 0x10)
 			{
 				m_lz4 = true;
-				updateSizes(metaData);
+				updateLZ4Sizes(metaData);
 			}
 			else
 			{
@@ -87,38 +87,30 @@ bool SDRdaemonBuffer::writeAndRead(uint8_t *array, std::size_t length, uint8_t *
 		{
 			m_sync = false;
 		}
-
-		return false;
 	}
-	else
+
+	return m_sync;
+}
+
+void SDRdaemonBuffer::writeData(char *array, std::size_t length)
+{
+	if (m_sync)
 	{
-		if (m_sync)
+		if (m_lz4)
 		{
-			if (m_lz4)
-			{
-				return writeAndReadLZ4(array, length, data, dataLength);
-			}
-			else
-			{
-				std::memcpy((void *) data, (const void *) array, length);
-				dataLength = length;
-				return true;
-			}
+			writeDataLZ4(array, length);
 		}
 		else
 		{
-			dataLength = 0;
-			return false;
+			// TODO: uncompressed case
 		}
 	}
 }
 
-bool SDRdaemonBuffer::writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_t *data, std::size_t& dataLength)
+void SDRdaemonBuffer::writeDataLZ4(char *array, std::size_t length)
 {
     if (m_lz4InCount + length < m_lz4InSize)
     {
-        std::memcpy((void *) &m_lz4InBuffer[m_lz4InCount], (const void *) array, length); // copy data in compressed Buffer
-        dataLength = 0;
         m_lz4InCount += length;
     }
     else
@@ -162,8 +154,6 @@ bool SDRdaemonBuffer::writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_
 					<< " out: " << m_lz4OutSize
 					<< std::endl;
             */
-    		std::memcpy((void *) data, (const void *) m_lz4OutBuffer, m_lz4OutSize); // send what is in buffer
-        	dataLength = m_lz4OutSize;
         	m_nbSuccessfulDecodes++;
     	}
     	else
@@ -176,8 +166,6 @@ bool SDRdaemonBuffer::writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_
 
     		//if (compressedSize > 0)
     		//{
-				std::memcpy((void *) data, (const void *) m_lz4OutBuffer, m_lz4OutSize); // send what is in buffer
-				dataLength = m_lz4OutSize;
     		//}
     		//else
     		//{
@@ -187,11 +175,9 @@ bool SDRdaemonBuffer::writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_
 
 		m_lz4InCount = 0;
     }
-
-    return dataLength != 0;
 }
 
-void SDRdaemonBuffer::updateSizes(MetaData *metaData)
+void SDRdaemonBuffer::updateLZ4Sizes(MetaData *metaData)
 {
 	m_lz4InSize = metaData->m_nbBytes; // compressed input size
 	uint32_t sampleBytes = metaData->m_sampleBytes & 0x0F;
