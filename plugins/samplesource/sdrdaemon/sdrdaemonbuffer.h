@@ -69,6 +69,7 @@ public:
 private:
 	bool writeAndReadLZ4(uint8_t *array, std::size_t length, uint8_t *data, std::size_t& dataLength);
 	void updateSizes(MetaData *metaData);
+	void updateBufferSize();
     void printMeta(MetaData *metaData);
 
 	std::size_t m_blockSize; //!< UDP block (payload) size
@@ -78,17 +79,21 @@ private:
 	CRC64 m_crc64;           //!< CRC64 calculator
 	uint8_t *m_buf;          //!< UDP block buffer
 
-    uint8_t *m_lz4InBuffer;           //!< Buffer for LZ4 compressed input
-    uint32_t m_lz4InCount;            //!< Current position in LZ4 input buffer
-    uint32_t m_lz4InSize;             //!< Size in bytes of the LZ4 input data
-    uint8_t *m_lz4OutBuffer;          //!< Buffer for LZ4 uncompressed output
-    uint32_t m_lz4OutSize;            //!< Size in bytes of the LZ4 output data (original uncomressed data)
+    uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
+    uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
+    uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
+    uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
+    uint32_t m_lz4OutSize;   //!< Size in bytes of the LZ4 output data (original uncomressed data)
     uint32_t m_nbDecodes;
     uint32_t m_nbSuccessfulDecodes;
     uint32_t m_nbCRCOK;
     uint64_t m_dataCRC;
 
-    SampleVector m_convertBuffer;
+    uint32_t m_sampleRate;   //!< Current sample rate in Hz
+	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
+	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
+
+    uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
 };
 
 

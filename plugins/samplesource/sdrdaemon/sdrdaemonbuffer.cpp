@@ -31,7 +31,11 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 	m_nbDecodes(0),
 	m_nbSuccessfulDecodes(0),
 	m_nbCRCOK(0),
-	m_dataCRC(0)
+	m_dataCRC(0),
+	m_sampleRate(1000000),
+	m_sampleBytes(2),
+	m_sampleBits(12),
+	m_rawBuffer(0)
 {
 	m_buf = new uint8_t[blockSize];
 	m_currentMeta.init();
@@ -39,6 +43,10 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 
 SDRdaemonBuffer::~SDRdaemonBuffer()
 {
+	if (m_rawBuffer) {
+		delete[] m_rawBuffer;
+	}
+
     delete[] m_buf;
 }
 
@@ -210,6 +218,14 @@ void SDRdaemonBuffer::updateSizes(MetaData *metaData)
 	m_lz4InCount = 0;
 }
 
+void SDRdaemonBuffer::updateBufferSize()
+{
+	if (m_rawBuffer) {
+		delete[] m_rawBuffer;
+	}
+
+	m_rawBuffer = new uint8_t[m_sampleRate * 2 * m_sampleBytes]; // store 1 second of samples
+}
 
 void SDRdaemonBuffer::printMeta(MetaData *metaData)
 {
@@ -226,7 +242,4 @@ void SDRdaemonBuffer::printMeta(MetaData *metaData)
 			<< ":" << metaData->m_tv_usec
 			<< std::endl;
 }
-
-
-
 
