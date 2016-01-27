@@ -71,6 +71,7 @@ public:
 private:
 	void updateLZ4Sizes(uint32_t frameSize);
 	void writeDataLZ4(char *array, std::size_t length);
+	void writeDataUncompressed(char *array, std::size_t length);
 	void updateBufferSize(uint32_t frameSize);
     void printMeta(MetaData *metaData);
 
@@ -80,6 +81,7 @@ private:
 	MetaData m_currentMeta;  //!< Stored current meta data
 	CRC64 m_crc64;           //!< CRC64 calculator
 
+	uint32_t m_inCount;      //!< Current position of uncompressed input
     uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
     uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
@@ -94,6 +96,7 @@ private:
 	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
 	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
 
+	uint32_t m_rawCount;     //!< Current position in the raw samples buffer
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
 };
 

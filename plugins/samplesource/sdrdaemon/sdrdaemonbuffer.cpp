@@ -117,8 +117,27 @@ void SDRdaemonBuffer::writeData(char *array, std::size_t length)
 		}
 		else
 		{
-			// TODO: uncompressed case
+			writeDataUncompressed(array, length);
 		}
+	}
+}
+
+void SDRdaemonBuffer::writeDataUncompressed(char *array, std::size_t length)
+{
+	if (m_inCount + length < m_frameSize)
+	{
+		std::memcpy((void *) &m_rawBuffer[m_inCount], (const void *) array, length);
+		m_inCount += length;
+	}
+	else
+	{
+		std::memcpy((void *) &m_rawBuffer[m_inCount], (const void *) array, m_frameSize - m_inCount); // copy rest of data in compressed Buffer
+		m_inCount += length;
+	}
+
+	if (m_inCount >= m_frameSize) // full block retrieved
+	{
+		// TODO: to do?
 	}
 }
 
@@ -126,6 +145,7 @@ void SDRdaemonBuffer::writeDataLZ4(char *array, std::size_t length)
 {
     if (m_lz4InCount + length < m_lz4InSize)
     {
+    	std::memcpy((void *) &m_lz4InBuffer[m_lz4InCount], (const void *) array, length);
         m_lz4InCount += length;
     }
     else
@@ -162,30 +182,7 @@ void SDRdaemonBuffer::writeDataLZ4(char *array, std::size_t length)
 
         if (compressedSize == m_lz4InSize)
     	{
-    		/*
-    		std::cerr << "SDRdaemonBuffer::writeAndReadLZ4: decoding OK:"
-    				<< " read: " << compressedSize
-					<< " expected: " << m_lz4InSize
-					<< " out: " << m_lz4OutSize
-					<< std::endl;
-            */
         	m_nbSuccessfulDecodes++;
-    	}
-    	else
-    	{
-//    		std::cerr << "SDRdaemonBuffer::writeAndReadLZ4: decoding error:"
-//    				<< " read: " << compressedSize
-//					<< " expected: " << m_lz4InSize
-//					<< " out: " << m_lz4OutSize
-//					<< std::endl;
-
-    		//if (compressedSize > 0)
-    		//{
-    		//}
-    		//else
-    		//{
-    		//	dataLength = 0;
-    		//}
     	}
 
 		m_lz4InCount = 0;
