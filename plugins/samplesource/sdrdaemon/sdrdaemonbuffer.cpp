@@ -27,7 +27,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 	m_lz4InCount(0),
 	m_lz4InSize(0),
 	m_lz4OutBuffer(0),
-	m_lz4OutSize(0),
+	m_frameSize(0),
 	m_nbDecodes(0),
 	m_nbSuccessfulDecodes(0),
 	m_nbCRCOK(0),
@@ -37,8 +37,6 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 	m_sampleBits(12),
 	m_rawBuffer(0)
 {
-	m_buf = new uint8_t[blockSize];
-	updateBufferSize();
 	m_currentMeta.init();
 }
 
@@ -48,7 +46,9 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 		delete[] m_rawBuffer;
 	}
 
-    delete[] m_buf;
+	if (m_lz4InBuffer) {
+		delete[] m_lz4InBuffer;
+	}
 }
 
 bool SDRdaemonBuffer::readMeta(char *array, std::size_t length)
@@ -71,16 +71,31 @@ bool SDRdaemonBuffer::readMeta(char *array, std::size_t length)
 		// sanity checks
 		if (metaData->m_blockSize == m_blockSize) // sent blocksize matches given blocksize
 		{
+			uint32_t sampleBytes = metaData->m_sampleBytes & 0x0F;
+			uint32_t frameSize = sampleBytes * 2 * metaData->m_nbSamples * metaData->m_nbBlocks;
+
 			if (metaData->m_sampleBytes & 0x10)
 			{
 				m_lz4 = true;
-				updateLZ4Sizes(metaData);
+				m_lz4InSize = metaData->m_nbBytes; // compressed input size
+				m_lz4InCount = 0;
+
+				if (frameSize != m_frameSize)
+				{
+					updateLZ4Sizes(frameSize);
+				}
 			}
 			else
 			{
 				m_lz4 = false;
 			}
 
+			if (frameSize != m_frameSize)
+			{
+				updateBufferSize(frameSize);
+			}
+
+			m_frameSize = frameSize;
 			m_sync = true;
 		}
 		else
@@ -142,7 +157,7 @@ void SDRdaemonBuffer::writeDataLZ4(char *array, std::size_t length)
             m_nbCRCOK++;
         }
 
-        int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) m_lz4OutBuffer, m_lz4OutSize);
+        int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) m_lz4OutBuffer, m_frameSize);
         m_nbDecodes++;
 
         if (compressedSize == m_lz4InSize)
@@ -177,40 +192,37 @@ void SDRdaemonBuffer::writeDataLZ4(char *array, std::size_t length)
     }
 }
 
-void SDRdaemonBuffer::updateLZ4Sizes(MetaData *metaData)
+void SDRdaemonBuffer::updateLZ4Sizes(uint32_t frameSize)
 {
-	m_lz4InSize = metaData->m_nbBytes; // compressed input size
-	uint32_t sampleBytes = metaData->m_sampleBytes & 0x0F;
-	uint32_t originalSize = sampleBytes * 2 * metaData->m_nbSamples * metaData->m_nbBlocks;
+	uint32_t masInputSize = LZ4_compressBound(frameSize);
 
-	if (originalSize != m_lz4OutSize)
-	{
-		uint32_t masInputSize = LZ4_compressBound(originalSize);
-
-		if (m_lz4InBuffer) {
-			delete[] m_lz4InBuffer;
-		}
-
-		m_lz4InBuffer = new uint8_t[m_lz4InSize]; // provide extra space for a full UDP block
-
-		if (m_lz4OutBuffer) {
-			delete[] m_lz4OutBuffer;
-		}
-
-		m_lz4OutBuffer = new uint8_t[originalSize];
-		m_lz4OutSize = originalSize;
+	if (m_lz4InBuffer) {
+		delete[] m_lz4InBuffer;
 	}
 
-	m_lz4InCount = 0;
+	m_lz4InBuffer = new uint8_t[m_lz4InSize]; // provide extra space for a full UDP block
+
+	if (m_lz4OutBuffer) {
+		delete[] m_lz4OutBuffer;
+	}
+
+	m_lz4OutBuffer = new uint8_t[frameSize];
 }
 
-void SDRdaemonBuffer::updateBufferSize()
+void SDRdaemonBuffer::updateBufferSize(uint32_t frameSize)
 {
+	uint32_t nbFrames = ((m_sampleRate * 2 * m_sampleBytes) / frameSize) + 1; // store at least 1 second of samples
+
+	std::cerr << "SDRdaemonBuffer::updateBufferSize:"
+		<< " frameSize: " << frameSize
+		<< " nbFrames: " << nbFrames
+		<< std::endl;
+
 	if (m_rawBuffer) {
 		delete[] m_rawBuffer;
 	}
 
-	m_rawBuffer = new uint8_t[m_sampleRate * 2 * m_sampleBytes]; // store 1 second of samples
+	m_rawBuffer = new uint8_t[nbFrames * frameSize];
 }
 
 void SDRdaemonBuffer::printMeta(MetaData *metaData)

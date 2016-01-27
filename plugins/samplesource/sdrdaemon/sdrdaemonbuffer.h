@@ -69,9 +69,9 @@ public:
 	bool isSync() const { return m_sync; }
 
 private:
-	void updateLZ4Sizes(MetaData *metaData);
+	void updateLZ4Sizes(uint32_t frameSize);
 	void writeDataLZ4(char *array, std::size_t length);
-	void updateBufferSize();
+	void updateBufferSize(uint32_t frameSize);
     void printMeta(MetaData *metaData);
 
 	std::size_t m_blockSize; //!< UDP block (payload) size
@@ -79,13 +79,12 @@ private:
 	bool m_lz4;              //!< Stream is compressed with LZ4
 	MetaData m_currentMeta;  //!< Stored current meta data
 	CRC64 m_crc64;           //!< CRC64 calculator
-	uint8_t *m_buf;          //!< UDP block buffer
 
     uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
     uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
     uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
-    uint32_t m_lz4OutSize;   //!< Size in bytes of the LZ4 output data (original uncomressed data)
+    uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
     uint32_t m_nbDecodes;
     uint32_t m_nbSuccessfulDecodes;
     uint32_t m_nbCRCOK;
