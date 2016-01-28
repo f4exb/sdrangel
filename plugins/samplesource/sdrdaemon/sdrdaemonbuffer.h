@@ -61,19 +61,21 @@ public:
 	};
 #pragma pack(pop)
 
-	SDRdaemonBuffer(std::size_t blockSize);
+	SDRdaemonBuffer(uint32_t blockSize);
 	~SDRdaemonBuffer();
-	bool readMeta(char *array, std::size_t length);  //!< Attempt to read meta. Returns true if meta block
-	void writeData(char *array, std::size_t length); //!< Write data into buffer.
+	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
+	void writeData(char *array, uint32_t length); //!< Write data into buffer.
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
+	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
 
 private:
 	void updateLZ4Sizes(uint32_t frameSize);
-	void writeDataLZ4(char *array, std::size_t length);
-	void writeDataUncompressed(char *array, std::size_t length);
+	void writeDataLZ4(const char *array, uint32_t length);
+	void writeDataUncompressed(const char *array, uint32_t length);
+	void writeToRawBufferLZ4(const char *array, uint32_t originalLength);
+	void writeToRawBufferUncompressed(const char *array, uint32_t length);
 	void updateBufferSize(uint32_t frameSize);
-	void updateBlockCounts(uint32_t nbBytesReceived);
     void printMeta(MetaData *metaData);
 
 	std::size_t m_blockSize; //!< UDP block (payload) size
@@ -97,7 +99,9 @@ private:
 	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
 	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
 
-	uint32_t m_rawCount;     //!< Current position in the raw samples buffer
+	uint32_t m_rawCount;     //!< Current write position in the raw samples buffer
+	uint32_t m_readCount;    //!< Current read position in the raw samples buffer
+	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame

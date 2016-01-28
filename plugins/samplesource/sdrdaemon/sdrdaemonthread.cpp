@@ -196,6 +196,8 @@ void SDRdaemonThread::dataReadyRead()
 		}
 		else if (readBytes > 0)
 		{
+			m_sdrDaemonBuffer.updateBlockCounts(readBytes);
+
 			if (m_sdrDaemonBuffer.readMeta(m_udpBuf, readBytes))
 			{
 				setSamplerate(m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate);
