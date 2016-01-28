@@ -73,6 +73,7 @@ private:
 	void writeDataLZ4(char *array, std::size_t length);
 	void writeDataUncompressed(char *array, std::size_t length);
 	void updateBufferSize(uint32_t frameSize);
+	void updateBlockCounts(uint32_t nbBytesReceived);
     void printMeta(MetaData *metaData);
 
 	std::size_t m_blockSize; //!< UDP block (payload) size
@@ -98,6 +99,8 @@ private:
 
 	uint32_t m_rawCount;     //!< Current position in the raw samples buffer
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
+    uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
+    uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
 };
 
 

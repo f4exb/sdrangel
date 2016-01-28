@@ -35,7 +35,9 @@ SDRdaemonBuffer::SDRdaemonBuffer(std::size_t blockSize) :
 	m_sampleRate(1000000),
 	m_sampleBytes(2),
 	m_sampleBits(12),
-	m_rawBuffer(0)
+	m_rawBuffer(0),
+	m_bytesInBlock(0),
+	m_nbBlocks(0)
 {
 	m_currentMeta.init();
 }
@@ -55,10 +57,12 @@ bool SDRdaemonBuffer::readMeta(char *array, std::size_t length)
 {
 	assert(length >= sizeof(MetaData) + 8);
 	MetaData *metaData = (MetaData *) array;
+	updateBlockCounts(length);
 
 	if (m_crc64.calculate_crc((uint8_t *)array, sizeof(MetaData) - 8) == metaData->m_crc)
 	{
 		memcpy((void *) &m_dataCRC, (const void *) &array[sizeof(MetaData)], 8);
+		m_nbBlocks = 0;
 
 		if (!(m_currentMeta == *metaData))
 		{
@@ -220,6 +224,12 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t frameSize)
 	}
 
 	m_rawBuffer = new uint8_t[nbFrames * frameSize];
+}
+
+void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)
+{
+	m_nbBlocks += m_bytesInBlock + nbBytesReceived > m_blockSize ? 1 : 0;
+	m_bytesInBlock = m_bytesInBlock + nbBytesReceived > m_blockSize ? nbBytesReceived : m_bytesInBlock + nbBytesReceived;
 }
 
 void SDRdaemonBuffer::printMeta(MetaData *metaData)
