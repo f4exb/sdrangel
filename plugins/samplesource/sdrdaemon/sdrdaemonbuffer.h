@@ -65,6 +65,7 @@ public:
 	~SDRdaemonBuffer();
 	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
+	uint8_t *readData(uint32_t length);           //!< Read data from buffer
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
@@ -103,6 +104,7 @@ private:
 	uint32_t m_readCount;    //!< Current read position in the raw samples buffer
 	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
+    uint8_t *m_frameBuffer;  //!< Buffer to build a frame length of raw samples
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
 };

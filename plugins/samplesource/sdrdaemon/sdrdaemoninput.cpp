@@ -88,28 +88,6 @@ SDRdaemonInput::~SDRdaemonInput()
 	stop();
 }
 
-void SDRdaemonInput::openFileStream()
-{
-	qDebug() << "SDRdaemonInput::openFileStream: " << m_fileName.toStdString().c_str();
-
-	//stopInput();
-
-	if (m_ifstream.is_open()) {
-		m_ifstream.close();
-	}
-
-	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
-	FileSink::Header header;
-	FileSink::readHeader(m_ifstream, header);
-
-	m_sampleRate = header.sampleRate;
-	m_centerFrequency = header.centerFrequency;
-	m_startingTimeStamp = header.startTimeStamp;
-
-	MsgReportSDRdaemonStreamData *report = MsgReportSDRdaemonStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp); // file stream data
-	getOutputMessageQueueToGUI()->push(report);
-}
-
 bool SDRdaemonInput::init(const Message& message)
 {
 	return false;
@@ -120,19 +98,12 @@ bool SDRdaemonInput::start(int device)
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "SDRdaemonInput::startInput";
 
-	if (m_ifstream.tellg() != 0) {
-		m_ifstream.clear();
-		m_ifstream.seekg(0, std::ios::beg);
-	}
-
 	if(!m_sampleFifo.setSize(96000 * 4)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	//openFileStream();
-
-	if((m_SDRdaemonThread = new SDRdaemonThread(&m_ifstream, &m_sampleFifo)) == NULL) {
+	if((m_SDRdaemonThread = new SDRdaemonThread(&m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
 		stop();
 		return false;
@@ -197,7 +168,6 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 	{
 		MsgConfigureSDRdaemonName& conf = (MsgConfigureSDRdaemonName&) message;
 		m_fileName = conf.getFileName();
-		openFileStream();
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonWork::match(message))
@@ -259,13 +229,6 @@ bool SDRdaemonInput::applySettings(const Settings& settings, bool force)
 			}
 		}
 
-		if (m_ifstream.is_open())
-		{
-			m_ifstream.close();
-		}
-
-		openFileStream();
-
 		if (m_SDRdaemonThread != 0)
 		{
 			m_SDRdaemonThread->setSamplerate(m_sampleRate);
@@ -280,7 +243,6 @@ bool SDRdaemonInput::applySettings(const Settings& settings, bool force)
 		DSPEngine::instance()->getInputMessageQueue()->push(notif);
 
 		qDebug() << "SDRdaemonInput::applySettings:"
-				<< " file name: " << settings.m_fileName.toStdString().c_str()
 				<< " center freq: " << m_centerFrequency << " Hz"
 				<< " sample rate: " << m_sampleRate
 				<< " Unix timestamp: " << m_startingTimeStamp;

@@ -24,7 +24,6 @@
 #include <QHostAddress>
 
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
@@ -38,7 +37,7 @@ class SDRdaemonThread : public QThread {
 	Q_OBJECT
 
 public:
-	SDRdaemonThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent = NULL);
+	SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent = NULL);
 	~SDRdaemonThread();
 
 	void startWork();
@@ -57,7 +56,6 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	std::ifstream* m_ifstream;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
 	int m_dataPort;

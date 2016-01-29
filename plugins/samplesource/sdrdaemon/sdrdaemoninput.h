@@ -22,7 +22,6 @@
 #include <QTimer>
 #include <ctime>
 #include <iostream>
-#include <fstream>
 
 class SDRdaemonThread;
 
@@ -197,7 +196,6 @@ public:
 private:
 	QMutex m_mutex;
 	Settings m_settings;
-	std::ifstream m_ifstream;
 	SDRdaemonThread* m_SDRdaemonThread;
 	QString m_deviceDescription;
 	QString m_fileName;
@@ -207,7 +205,6 @@ private:
 	const QTimer& m_masterTimer;
 
 	bool applySettings(const Settings& settings, bool force);
-	void openFileStream();
 };
 
 #endif // INCLUDE_SDRDAEMONINPUT_H

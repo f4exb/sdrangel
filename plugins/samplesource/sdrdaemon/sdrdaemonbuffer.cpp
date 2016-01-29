@@ -40,6 +40,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t blockSize) :
 	m_readCount(0),
 	m_rawSize(0),
 	m_rawBuffer(0),
+	m_frameBuffer(0),
 	m_bytesInBlock(0),
 	m_nbBlocks(0)
 {
@@ -58,6 +59,10 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 
 	if (m_lz4OutBuffer) {
 		delete[] m_lz4OutBuffer;
+	}
+
+	if (m_frameBuffer) {
+		delete[] m_frameBuffer;
 	}
 }
 
@@ -227,6 +232,24 @@ void SDRdaemonBuffer::writeToRawBufferLZ4(const char *array, uint32_t length)
     writeToRawBufferUncompressed((const char *) m_lz4OutBuffer, m_frameSize);
 }
 
+uint8_t *SDRdaemonBuffer::readData(uint32_t length)
+{
+	uint32_t readCount = m_readCount;
+
+	if (m_readCount + length < m_rawSize)
+	{
+		m_readCount += length;
+		return &m_rawBuffer[readCount];
+	}
+	else
+	{
+		std::memcpy((void *) m_frameBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_rawCount);
+		m_readCount = length - (m_rawSize - m_rawCount);
+		std::memcpy((void *) m_frameBuffer, (const void *) &m_frameBuffer[m_rawSize - m_rawCount], m_readCount);
+		return m_frameBuffer;
+	}
+}
+
 void SDRdaemonBuffer::updateLZ4Sizes(uint32_t frameSize)
 {
 	uint32_t maxInputSize = LZ4_compressBound(frameSize);
@@ -259,6 +282,12 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t frameSize)
 
 	m_rawSize = nbFrames * frameSize;
 	m_rawBuffer = new uint8_t[m_rawSize];
+
+	if (m_frameBuffer) {
+		delete[] m_frameBuffer;
+	}
+
+	m_frameBuffer = new uint8_t[frameSize];
 }
 
 void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)

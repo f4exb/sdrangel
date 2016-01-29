@@ -26,14 +26,13 @@
 const int SDRdaemonThread::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
 const int SDRdaemonThread::m_udpPayloadSize = 512;
 
-SDRdaemonThread::SDRdaemonThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent) :
+SDRdaemonThread::SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
 	m_dataConnected(false),
-	m_ifstream(samplesStream),
 	m_buf(0),
 	m_udpBuf(0),
 	m_bufsize(0),
@@ -43,7 +42,6 @@ SDRdaemonThread::SDRdaemonThread(std::ifstream *samplesStream, SampleFifo* sampl
 	m_sdrDaemonBuffer(m_udpPayloadSize),
 	m_samplerate(0)
 {
-    assert(m_ifstream != 0);
     m_udpBuf = new char[m_udpPayloadSize];
 }
 
@@ -163,23 +161,8 @@ void SDRdaemonThread::tick()
 	if (m_running)
 	{
 		// read samples directly feeding the SampleFifo (no callback)
-		m_ifstream->read(reinterpret_cast<char*>(m_buf), m_chunksize);
-        
-        if (m_ifstream->eof())
-        {
-            m_sampleFifo->write(m_buf, m_ifstream->gcount());
-            // TODO: handle loop playback situation
-    		m_ifstream->clear();
-    		m_ifstream->seekg(0, std::ios::beg);
-    		m_samplesCount = 0;
-            //stopWork();
-            //m_ifstream->close();
-        }
-        else
-        {
-            m_sampleFifo->write(m_buf, m_chunksize);
-    		m_samplesCount += m_chunksize / 4;
-        }
+		m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_chunksize)), m_chunksize);
+		m_samplesCount += m_chunksize / 4;
 	}
 }
 
