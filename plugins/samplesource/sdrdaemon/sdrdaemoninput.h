@@ -27,52 +27,26 @@ class SDRdaemonThread;
 
 class SDRdaemonInput : public SampleSource {
 public:
-	struct Settings {
-		QString m_fileName;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
-	class MsgConfigureSDRdaemon : public Message {
+	class MsgConfigureSDRdaemonUDPLink : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const QString& getAddress() const { return m_address; }
+		quint16 getPort() const { return m_port; }
 
-		static MsgConfigureSDRdaemon* create(const Settings& settings)
+		static MsgConfigureSDRdaemonUDPLink* create(const QString& address, quint16 port)
 		{
-			return new MsgConfigureSDRdaemon(settings);
+			return new MsgConfigureSDRdaemonUDPLink(address, port);
 		}
 
 	private:
-		Settings m_settings;
+		QString m_address;
+		quint16 m_port;
 
-		MsgConfigureSDRdaemon(const Settings& settings) :
+		MsgConfigureSDRdaemonUDPLink(const QString& address, quint16 port) :
 			Message(),
-			m_settings(settings)
-		{ }
-	};
-
-	class MsgConfigureSDRdaemonName : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const QString& getFileName() const { return m_fileName; }
-
-		static MsgConfigureSDRdaemonName* create(const QString& fileName)
-		{
-			return new MsgConfigureSDRdaemonName(fileName);
-		}
-
-	private:
-		QString m_fileName;
-
-		MsgConfigureSDRdaemonName(const QString& fileName) :
-			Message(),
-			m_fileName(fileName)
+			m_address(address),
+			m_port(port)
 		{ }
 	};
 
@@ -195,16 +169,17 @@ public:
 
 private:
 	QMutex m_mutex;
-	Settings m_settings;
+	QString m_address;
+	quint16 m_port;
 	SDRdaemonThread* m_SDRdaemonThread;
 	QString m_deviceDescription;
-	QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
-	bool applySettings(const Settings& settings, bool force);
+	void updateLink(const QString& address, quint16 port);
+	void updateSampleRate(int sampleRate);
 };
 
 #endif // INCLUDE_SDRDAEMONINPUT_H

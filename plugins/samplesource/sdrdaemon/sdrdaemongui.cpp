@@ -20,11 +20,13 @@
 #include <QDateTime>
 #include <QString>
 #include <QFileDialog>
+#include <stdint.h>
 #include "ui_sdrdaemongui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+#include "util/simpleserializer.h"
 
 #include "sdrdaemongui.h"
 
@@ -32,10 +34,8 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonGui),
 	m_pluginAPI(pluginAPI),
-	m_settings(),
 	m_sampleSource(NULL),
 	m_acquisition(false),
-	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
@@ -45,14 +45,14 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
-	ui->fileNameText->setText(m_fileName);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
-	displaySettings();
 
 	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+	displaySettings();
 }
 
 SDRdaemonGui::~SDRdaemonGui()
@@ -77,10 +77,53 @@ QString SDRdaemonGui::getName() const
 
 void SDRdaemonGui::resetToDefaults()
 {
-	m_settings.resetToDefaults();
 	displaySettings();
-	sendSettings();
 }
+
+QByteArray SDRdaemonGui::serialize() const
+{
+	bool ok;
+	SimpleSerializer s(1);
+	s.writeString(1, ui->address->text());
+	uint32_t uintval = ui->port->text().toInt(&ok);
+	if((!ok) || (uintval < 1024) || (uintval > 65535)) {
+		uintval = 9090;
+	}
+	s.writeU32(2, uintval);
+	return s.final();
+}
+
+bool SDRdaemonGui::deserialize(const QByteArray& data)
+{
+	SimpleDeserializer d(data);
+	QString address;
+	uint32_t uintval;
+	quint16 port;
+
+	if(!d.isValid()) {
+		resetToDefaults();
+		return false;
+	}
+
+	if(d.getVersion() == 1) {
+		uint32_t uintval;
+		d.readString(1, &address, "127.0.0.1");
+		d.readU32(2, &uintval, 9090);
+		if ((uintval > 1024) && (uintval < 65536)) {
+			port = uintval;
+		} else {
+			port = 9090;
+		}
+		return true;
+	} else {
+		resetToDefaults();
+		return false;
+	}
+
+	ui->address->setText(address);
+	ui->port->setText(QString::number(port));
+}
+
 
 qint64 SDRdaemonGui::getCenterFrequency() const
 {
@@ -91,24 +134,6 @@ void SDRdaemonGui::setCenterFrequency(qint64 centerFrequency)
 {
 	m_centerFrequency = centerFrequency;
 	displaySettings();
-	sendSettings();
-}
-
-QByteArray SDRdaemonGui::serialize() const
-{
-	return m_settings.serialize();
-}
-
-bool SDRdaemonGui::deserialize(const QByteArray& data)
-{
-	if(m_settings.deserialize(data)) {
-		displaySettings();
-		sendSettings();
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
 }
 
 bool SDRdaemonGui::handleMessage(const Message& message)
@@ -158,45 +183,37 @@ void SDRdaemonGui::displaySettings()
 {
 }
 
-void SDRdaemonGui::sendSettings()
-{
-}
-
-void SDRdaemonGui::updateHardware()
-{
-}
-
 void SDRdaemonGui::on_play_toggled(bool checked)
 {
 	SDRdaemonInput::MsgConfigureSDRdaemonWork* message = SDRdaemonInput::MsgConfigureSDRdaemonWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonGui::on_showFileDialog_clicked(bool checked)
+void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
-	QString fileName = QFileDialog::getOpenFileName(this,
-	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
-
-	if (fileName != "")
-	{
-		m_fileName = fileName;
-		ui->fileNameText->setText(m_fileName);
-		configureFileName();
-	}
+	configureUDPLink();
 }
 
-void SDRdaemonGui::configureFileName()
+void SDRdaemonGui::configureUDPLink()
 {
-	qDebug() << "SDRdaemonGui::configureFileName: " << m_fileName.toStdString().c_str();
-	SDRdaemonInput::MsgConfigureSDRdaemonName* message = SDRdaemonInput::MsgConfigureSDRdaemonName::create(m_fileName);
+	bool ok;
+	QString udpAddress = ui->address->text();
+	int udpPort = ui->port->text().toInt(&ok);
+
+	if((!ok) || (udpPort < 1024) || (udpPort > 65535))
+	{
+		udpPort = 9090;
+	}
+
+	qDebug() << "SDRdaemonGui::configureUDPLink: " << udpAddress.toStdString().c_str()
+			<< " : " << udpPort;
+
+	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(udpAddress, udpPort);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void SDRdaemonGui::updateWithAcquisition()
 {
-	ui->play->setEnabled(m_acquisition);
-	ui->play->setChecked(m_acquisition);
-	ui->showFileDialog->setEnabled(!m_acquisition);
 }
 
 void SDRdaemonGui::updateWithStreamData()
@@ -204,7 +221,6 @@ void SDRdaemonGui::updateWithStreamData()
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
 	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
 	ui->sampleRateText->setText(tr("%1k").arg(s));
-	ui->play->setEnabled(m_acquisition);
 	updateWithStreamTime(); // TODO: remove when time data is implemented
 }
 
@@ -222,7 +238,6 @@ void SDRdaemonGui::updateWithStreamTime()
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
 	QString s_time = t.toString("hh:mm:ss.zzz");
-	ui->relTimeText->setText(s_time);
 
 	quint64 startingTimeStampMsec = m_startingTimeStamp * 1000;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);

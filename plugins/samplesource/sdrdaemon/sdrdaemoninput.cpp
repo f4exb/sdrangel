@@ -27,55 +27,18 @@
 #include "sdrdaemoninput.h"
 #include "sdrdaemonthread.h"
 
-MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemon, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonName, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message)
 
-SDRdaemonInput::Settings::Settings() :
-	m_fileName("./test.sdriq")
-{
-}
-
-void SDRdaemonInput::Settings::resetToDefaults()
-{
-	m_fileName = "./test.sdriq";
-}
-
-QByteArray SDRdaemonInput::Settings::serialize() const
-{
-	SimpleSerializer s(1);
-	s.writeString(1, m_fileName);
-	return s.final();
-}
-
-bool SDRdaemonInput::Settings::deserialize(const QByteArray& data)
-{
-	SimpleDeserializer d(data);
-
-	if(!d.isValid()) {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1) {
-		int intval;
-		d.readString(1, &m_fileName, "./test.sdriq");
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
-
 SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
-	m_settings(),
+	m_address("127.0.0.1"),
+	m_port(9090),
 	m_SDRdaemonThread(NULL),
 	m_deviceDescription(),
-	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
@@ -164,10 +127,10 @@ std::time_t SDRdaemonInput::getStartingTimeStamp() const
 
 bool SDRdaemonInput::handleMessage(const Message& message)
 {
-	if (MsgConfigureSDRdaemonName::match(message))
+	if (MsgConfigureSDRdaemonUDPLink::match(message))
 	{
-		MsgConfigureSDRdaemonName& conf = (MsgConfigureSDRdaemonName&) message;
-		m_fileName = conf.getFileName();
+		MsgConfigureSDRdaemonUDPLink& conf = (MsgConfigureSDRdaemonUDPLink&) message;
+		updateLink(conf.getAddress(), conf.getPort());
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonWork::match(message))
@@ -210,14 +173,50 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 	}
 }
 
-bool SDRdaemonInput::applySettings(const Settings& settings, bool force)
+void SDRdaemonInput::updateLink(const QString& address, quint16 port)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	bool wasRunning = false;
 
-	if((m_settings.m_fileName != settings.m_fileName) || force)
+	if ((m_address != address) || (m_port != port))
 	{
-		m_settings.m_fileName = settings.m_fileName;
+		if (m_SDRdaemonThread != 0)
+		{
+			wasRunning = m_SDRdaemonThread->isRunning();
+
+			if (wasRunning)
+			{
+				m_SDRdaemonThread->stopWork();
+			}
+		}
+
+		if (m_SDRdaemonThread != 0)
+		{
+			m_SDRdaemonThread->updateLink(address, port);
+
+			if (wasRunning)
+			{
+				m_SDRdaemonThread->startWork();
+			}
+		}
+
+		m_address = address;
+		m_port = port;
+
+		qDebug() << "SDRdaemonInput::updateLink:"
+				<< " address: " << m_address.toStdString().c_str()
+				<< "port: " << m_port;
+	}
+}
+
+void SDRdaemonInput:: updateSampleRate(int sampleRate)
+{
+	QMutexLocker mutexLocker(&m_mutex);
+	bool wasRunning = false;
+
+	if (m_sampleRate != sampleRate)
+	{
+		m_sampleRate = sampleRate;
 
 		if (m_SDRdaemonThread != 0)
 		{
@@ -242,11 +241,7 @@ bool SDRdaemonInput::applySettings(const Settings& settings, bool force)
 		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
 		DSPEngine::instance()->getInputMessageQueue()->push(notif);
 
-		qDebug() << "SDRdaemonInput::applySettings:"
-				<< " center freq: " << m_centerFrequency << " Hz"
-				<< " sample rate: " << m_sampleRate
-				<< " Unix timestamp: " << m_startingTimeStamp;
+		qDebug() << "SDRdaemonInput::updateSampleRate:"
+				<< " sample rate: " << m_sampleRate;
 	}
-
-	return true;
 }

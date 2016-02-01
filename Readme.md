@@ -193,6 +193,7 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 
 <h2>To Do</h2>
 
+  - UDP source plugin: add the possibility to launch an external command that will process the samples like a GNUradio headless flowgraph
   - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
@@ -202,7 +203,7 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
   - Headless mode based on a saved configuration in above human readable form
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
-  - Level calibration  
+  - Level calibration 
   - Even more demods ...
 
 <h1>Developper's notes</h1>

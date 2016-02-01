@@ -147,7 +147,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addressApplyButton">
+      <widget class="QPushButton" name="applyButton">
        <property name="maximumSize">
         <size>
          <width>30</width>
@@ -236,108 +236,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="decimLayout">
-     <item>
-      <widget class="QLabel" name="label_decim">
-       <property name="text">
-        <string>Dec.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="decim">
-       <property name="toolTip">
-        <string>Decimation factor</string>
-       </property>
-       <property name="maximum">
-        <number>6</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="decimText">
-       <property name="text">
-        <string>1</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="decimRate">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0k</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="fileSelectionLayout">
-     <item>
-      <widget class="QPushButton" name="showFileDialog">
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Open file</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="fileNameText">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>File currently opened</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="Line" name="line_file">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -345,104 +243,7 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line_rate">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="playControllLayout">
-     <item>
-      <widget class="ButtonSwitch" name="playLoop">
-       <property name="toolTip">
-        <string>Play in a loop</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="play">
-       <property name="toolTip">
-        <string>Stopped / Play / Pause</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/play.png</normaloff>
-         <normalon>:/pause.png</normalon>
-         <disabledoff>:/stop.png</disabledoff>
-         <disabledon>:/stop.png</disabledon>
-         <activeoff>:/play.png</activeoff>
-         <activeon>:/pause.png</activeon>
-         <selectedoff>:/play.png</selectedoff>
-         <selectedon>:/pause.png</selectedon>:/play.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="Line" name="relTimeLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="relTimeText">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Record time from start</string>
-       </property>
-       <property name="text">
-        <string>00:00:00.000</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <layout class="QHBoxLayout" name="statusLayout"/>
    </item>
   </layout>
  </widget>
@@ -452,11 +253,6 @@
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

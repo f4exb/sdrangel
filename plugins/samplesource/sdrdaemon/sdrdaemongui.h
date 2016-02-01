@@ -40,22 +40,19 @@ public:
 	QString getName() const;
 
 	void resetToDefaults();
-	virtual qint64 getCenterFrequency() const;
-	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+	virtual qint64 getCenterFrequency() const;
+	virtual void setCenterFrequency(qint64 centerFrequency);
 	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::SDRdaemonGui* ui;
 
 	PluginAPI* m_pluginAPI;
-	SDRdaemonInput::Settings m_settings;
 	QTimer m_updateTimer;
-	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
-    QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
@@ -64,9 +61,7 @@ private:
 
 	void displaySettings();
 	void displayTime();
-	void sendSettings();
-	void updateHardware();
-	void configureFileName();
+	void configureUDPLink();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
@@ -75,7 +70,7 @@ private slots:
 	void handleSourceMessages();
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
-	void on_showFileDialog_clicked(bool checked);
+	void on_applyButton_clicked(bool checked);
 	void tick();
 };
 

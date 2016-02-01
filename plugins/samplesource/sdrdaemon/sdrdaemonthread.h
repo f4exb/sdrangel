@@ -43,6 +43,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(uint32_t samplerate);
+	void updateLink(const QString& address, quint16 port);
 	bool isRunning() const { return m_running; }
 	std::size_t getSamplesCount() const { return m_samplesCount; }
 
