@@ -76,7 +76,7 @@ private:
 	void writeDataUncompressed(const char *array, uint32_t length);
 	void writeToRawBufferLZ4(const char *array, uint32_t originalLength);
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
-	void updateBufferSize(uint32_t frameSize);
+	void updateBufferSize(uint32_t sampleRate, uint32_t frameSize);
     void printMeta(MetaData *metaData);
 
 	std::size_t m_blockSize; //!< UDP block (payload) size

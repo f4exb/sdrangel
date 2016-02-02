@@ -90,6 +90,7 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 		{
 			m_sampleBytes = metaData->m_sampleBytes & 0x0F;
 			uint32_t frameSize = 2 * 2 * metaData->m_nbSamples * metaData->m_nbBlocks;
+			uint32_t sampleRate = metaData->m_sampleRate;
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
@@ -109,9 +110,10 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 
 			if (frameSize != m_frameSize)
 			{
-				updateBufferSize(frameSize);
+				updateBufferSize(sampleRate, frameSize);
 			}
 
+			m_sampleRate = sampleRate;
 			m_frameSize = frameSize;
 			m_sync = true;
 		}
@@ -267,11 +269,12 @@ void SDRdaemonBuffer::updateLZ4Sizes(uint32_t frameSize)
 	m_lz4OutBuffer = new uint8_t[frameSize];
 }
 
-void SDRdaemonBuffer::updateBufferSize(uint32_t frameSize)
+void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate, uint32_t frameSize)
 {
-	uint32_t nbFrames = ((m_sampleRate * 2 * 2) / frameSize) + 1; // store at least 1 second of samples
+	uint32_t nbFrames = ((sampleRate * 2 * 2) / frameSize) + 1; // store at least 1 second of samples
 
 	std::cerr << "SDRdaemonBuffer::updateBufferSize:"
+		<< " sampleRate: " << sampleRate
 		<< " frameSize: " << frameSize
 		<< " nbFrames: " << nbFrames
 		<< std::endl;
