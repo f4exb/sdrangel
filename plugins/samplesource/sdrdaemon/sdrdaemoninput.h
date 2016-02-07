@@ -179,7 +179,6 @@ private:
 	const QTimer& m_masterTimer;
 
 	void updateLink(const QString& address, quint16 port);
-	void updateSampleRate(int sampleRate);
 };
 
 #endif // INCLUDE_SDRDAEMONINPUT_H

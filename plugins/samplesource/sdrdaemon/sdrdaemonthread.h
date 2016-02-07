@@ -42,7 +42,6 @@ public:
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(uint32_t samplerate);
 	void updateLink(const QString& address, quint16 port);
 	bool isRunning() const { return m_running; }
 	std::size_t getSamplesCount() const { return m_samplesCount; }
@@ -59,7 +58,7 @@ private:
 
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
-	int m_dataPort;
+	quint16 m_dataPort;
 	bool m_dataConnected;
 	quint8 *m_buf;
 	char *m_udpBuf;
@@ -74,6 +73,7 @@ private:
 	static const int m_rateDivider;
 	static const int m_udpPayloadSize;
 
+	void setSamplerate(uint32_t samplerate);
 	void run();
 private slots:
 	void tick();

@@ -240,14 +240,14 @@ uint8_t *SDRdaemonBuffer::readData(uint32_t length)
 
 	if (m_readCount + length < m_rawSize)
 	{
-		m_readCount += length;
 		return &m_rawBuffer[readCount];
+		m_readCount += length;
 	}
 	else
 	{
-		std::memcpy((void *) m_frameBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_rawCount);
-		m_readCount = length - (m_rawSize - m_rawCount);
-		std::memcpy((void *) m_frameBuffer, (const void *) &m_frameBuffer[m_rawSize - m_rawCount], m_readCount);
+		std::memcpy((void *) m_frameBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_readCount); // read last bit from raw buffer
+		m_readCount = length - (m_rawSize - m_readCount);
+		std::memcpy((void *) &m_frameBuffer[m_rawSize - m_readCount], (const void *) m_frameBuffer, m_readCount); // read the rest at start of raw buffer
 		return m_frameBuffer;
 	}
 }

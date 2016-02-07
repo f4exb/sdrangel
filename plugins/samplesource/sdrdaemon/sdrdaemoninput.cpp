@@ -29,6 +29,42 @@
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
+void SDRdaemonInput::updateLink(const QString& address, quint16 port)
+{
+	QMutexLocker mutexLocker(&m_mutex);
+	bool wasRunning = false;
+
+	if ((m_address != address) || (m_port != port))
+	{
+		if (m_SDRdaemonThread != 0)
+		{
+			wasRunning = m_SDRdaemonThread->isRunning();
+
+			if (wasRunning)
+			{
+				m_SDRdaemonThread->stopWork();
+			}
+		}
+
+		if (m_SDRdaemonThread != 0)
+		{
+			m_SDRdaemonThread->updateLink(address, port);
+
+			if (wasRunning)
+			{
+				m_SDRdaemonThread->startWork();
+			}
+		}
+
+		m_address = address;
+		m_port = port;
+
+		qDebug() << "SDRdaemonInput::updateLink:"
+				<< " address: " << m_address.toStdString().c_str()
+				<< "port: " << m_port;
+	}
+}
+
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
@@ -72,7 +108,6 @@ bool SDRdaemonInput::start(int device)
 		return false;
 	}
 
-	m_SDRdaemonThread->setSamplerate(m_sampleRate);
 	m_SDRdaemonThread->connectTimer(m_masterTimer);
 	m_SDRdaemonThread->startWork();
 	m_deviceDescription = "SDRdaemon";
@@ -173,75 +208,3 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonInput::updateLink(const QString& address, quint16 port)
-{
-	QMutexLocker mutexLocker(&m_mutex);
-	bool wasRunning = false;
-
-	if ((m_address != address) || (m_port != port))
-	{
-		if (m_SDRdaemonThread != 0)
-		{
-			wasRunning = m_SDRdaemonThread->isRunning();
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->stopWork();
-			}
-		}
-
-		if (m_SDRdaemonThread != 0)
-		{
-			m_SDRdaemonThread->updateLink(address, port);
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->startWork();
-			}
-		}
-
-		m_address = address;
-		m_port = port;
-
-		qDebug() << "SDRdaemonInput::updateLink:"
-				<< " address: " << m_address.toStdString().c_str()
-				<< "port: " << m_port;
-	}
-}
-
-void SDRdaemonInput:: updateSampleRate(int sampleRate)
-{
-	QMutexLocker mutexLocker(&m_mutex);
-	bool wasRunning = false;
-
-	if (m_sampleRate != sampleRate)
-	{
-		m_sampleRate = sampleRate;
-
-		if (m_SDRdaemonThread != 0)
-		{
-			wasRunning = m_SDRdaemonThread->isRunning();
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->stopWork();
-			}
-		}
-
-		if (m_SDRdaemonThread != 0)
-		{
-			m_SDRdaemonThread->setSamplerate(m_sampleRate);
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->startWork();
-			}
-		}
-        
-		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
-
-		qDebug() << "SDRdaemonInput::updateSampleRate:"
-				<< " sample rate: " << m_sampleRate;
-	}
-}

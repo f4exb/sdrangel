@@ -43,6 +43,19 @@ SDRdaemonThread::SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent) :
 	m_samplerate(0)
 {
     m_udpBuf = new char[m_udpPayloadSize];
+    m_dataSocket = new QUdpSocket(this);
+
+	if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+	{
+		qDebug("SDRdaemonThread::SDRdaemonThread: bind data socket to port %d", m_dataPort);
+		connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+		m_dataConnected = true;
+	}
+    else
+    {
+    	qWarning("SDRdaemonThread::SDRdaemonThread: cannot bind data port %d", m_dataPort);
+    	m_dataConnected = false;
+    }
 }
 
 SDRdaemonThread::~SDRdaemonThread()
@@ -64,27 +77,17 @@ void SDRdaemonThread::startWork()
 {
 	qDebug() << "SDRdaemonThread::startWork: ";
 
-	if (!m_dataSocket) {
-		m_dataSocket = new QUdpSocket(this);
-	}
-    
-	if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+	if (!m_dataConnected)
 	{
-		qDebug("SDRdaemonThread::startWork: bind data socket to port %d", m_dataPort);
 		connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
-
-		m_startWaitMutex.lock();
-		start();
-		while(!m_running)
-			m_startWaiter.wait(&m_startWaitMutex, 100);
-		m_startWaitMutex.unlock();
 		m_dataConnected = true;
 	}
-    else
-    {
-    	qWarning("SDRdaemonThread::startWork: cannot bind data port %d", m_dataPort);
-    	m_dataConnected = false;
-    }
+
+	m_startWaitMutex.lock();
+	start();
+	while(!m_running)
+		m_startWaiter.wait(&m_startWaitMutex, 100);
+	m_startWaitMutex.unlock();
 }
 
 void SDRdaemonThread::stopWork()
@@ -93,11 +96,7 @@ void SDRdaemonThread::stopWork()
 
 	if (m_dataConnected) {
 		disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
-	}
-
-	if (m_dataSocket) {
-		delete m_dataSocket;
-		m_dataSocket = 0;
+		m_dataConnected = false;
 	}
 
 	m_running = false;
@@ -106,33 +105,69 @@ void SDRdaemonThread::stopWork()
 
 void SDRdaemonThread::setSamplerate(uint32_t samplerate)
 {
+	bool wasRunning = m_running;
+
 	qDebug() << "SDRdaemonThread::setSamplerate:"
 			<< " new:" << samplerate
 			<< " old:" << m_samplerate;
 
-	if (samplerate != m_samplerate)
+	if (m_running)
 	{
-		if (m_running) {
-			stopWork();
-		}
-
-		m_samplerate = samplerate;
-		m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
-		m_bufsize = m_chunksize;
-
-		if (m_buf == 0)	{
-			qDebug() << "  - Allocate buffer";
-			m_buf = (quint8*) malloc(m_bufsize);
-		} else {
-			qDebug() << "  - Re-allocate buffer";
-			m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
-		}
-
-		qDebug() << "  - size: " << m_bufsize
-				<< " #samples: " << (m_bufsize/4);
+		stopWork();
+		m_running = false;
 	}
 
-	//m_samplerate = samplerate;
+	m_samplerate = samplerate;
+	m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
+	m_bufsize = m_chunksize;
+
+	if (m_buf == 0)	{
+		qDebug() << "  - Allocate buffer";
+		m_buf = (quint8*) malloc(m_bufsize);
+	} else {
+		qDebug() << "  - Re-allocate buffer";
+		m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
+	}
+
+	qDebug() << "  - size: " << m_bufsize
+			<< " #samples: " << (m_bufsize/4);
+
+	if (wasRunning)
+	{
+		startWork();
+		m_running = true;
+	}
+}
+
+void SDRdaemonThread::updateLink(const QString& address, quint16 port)
+{
+	if (m_dataSocket) {
+		delete m_dataSocket;
+		m_dataSocket = 0;
+	}
+
+	m_dataSocket = new QUdpSocket(this);
+	m_dataPort = port;
+
+	if (m_dataAddress.setAddress(address))
+	{
+		if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+		{
+			qDebug("SDRdaemonThread::startWork: bind data socket to port %d", m_dataPort);
+			connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+			m_dataConnected = true;
+		}
+		else
+		{
+			qWarning("SDRdaemonThread::updateLink: cannot bind data port %d", m_dataPort);
+			m_dataConnected = false;
+		}
+	}
+	else
+	{
+		qWarning("SDRdaemonThread::updateLink: cannot set data address: %s", qPrintable(address));
+		m_dataConnected = false;
+	}
 }
 
 void SDRdaemonThread::run()
@@ -183,7 +218,13 @@ void SDRdaemonThread::dataReadyRead()
 
 			if (m_sdrDaemonBuffer.readMeta(m_udpBuf, readBytes))
 			{
-				setSamplerate(m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate);
+				uint32_t sampleRate = m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate;
+
+				if (m_samplerate != sampleRate)
+				{
+					setSamplerate(sampleRate);
+					m_samplerate = sampleRate;
+				}
 			}
 			else if (m_sdrDaemonBuffer.isSync())
 			{
