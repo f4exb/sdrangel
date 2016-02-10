@@ -206,7 +206,6 @@ private:
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
-	bool applySettings(const Settings& settings, bool force);
 	void openFileStream();
 };
 
