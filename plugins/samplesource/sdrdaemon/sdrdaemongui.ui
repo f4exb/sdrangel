@@ -177,6 +177,13 @@
    <item>
     <layout class="QHBoxLayout" name="rateTimeLayout">
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Rate: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="sampleRateText">
        <property name="minimumSize">
         <size>

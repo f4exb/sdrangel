@@ -38,10 +38,11 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_acquisition(false),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0)
 {
+	m_startingTimeStamp.tv_sec = 0;
+	m_startingTimeStamp.tv_usec = 0;
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
@@ -148,7 +149,8 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 	{
 		m_sampleRate = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getSampleRate();
 		m_centerFrequency = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getCenterFrequency();
-		m_startingTimeStamp = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getStartingTimeStamp();
+		m_startingTimeStamp.tv_sec = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).get_tv_sec();
+		m_startingTimeStamp.tv_usec = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).get_tv_usec();
 		updateWithStreamData();
 		return true;
 	}
@@ -183,11 +185,12 @@ void SDRdaemonGui::displaySettings()
 {
 }
 
+/*
 void SDRdaemonGui::on_play_toggled(bool checked)
 {
 	SDRdaemonInput::MsgConfigureSDRdaemonWork* message = SDRdaemonInput::MsgConfigureSDRdaemonWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
-}
+}*/
 
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
@@ -218,7 +221,7 @@ void SDRdaemonGui::updateWithAcquisition()
 
 void SDRdaemonGui::updateWithStreamData()
 {
-	ui->centerFrequency->setValue(m_centerFrequency/1000);
+	ui->centerFrequency->setValue(m_centerFrequency);
 	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
 	ui->sampleRateText->setText(tr("%1k").arg(s));
 	updateWithStreamTime(); // TODO: remove when time data is implemented
@@ -226,6 +229,11 @@ void SDRdaemonGui::updateWithStreamData()
 
 void SDRdaemonGui::updateWithStreamTime()
 {
+	quint64 startingTimeStampMsec = (m_startingTimeStamp.tv_sec * 1000) + (m_startingTimeStamp.tv_usec / 1000);
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
+	ui->absTimeText->setText(s_date);
+	/*
 	int t_sec = 0;
 	int t_msec = 0;
 
@@ -244,7 +252,7 @@ void SDRdaemonGui::updateWithStreamTime()
 	dt = dt.addSecs(t_sec);
 	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
-	ui->absTimeText->setText(s_date);
+	ui->absTimeText->setText(s_date);*/
 }
 
 void SDRdaemonGui::tick()

@@ -32,12 +32,13 @@
 #define SDRDAEMON_THROTTLE_MS 50
 
 class QUdpSocket;
+class MessageQueue;
 
 class SDRdaemonThread : public QThread {
 	Q_OBJECT
 
 public:
-	SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent = NULL);
+	SDRdaemonThread(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, QObject* parent = NULL);
 	~SDRdaemonThread();
 
 	void startWork();
@@ -70,6 +71,8 @@ private:
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 
 	uint32_t m_samplerate;
+	uint32_t m_centerFrequency;
+	MessageQueue *m_outputMessageQueueToGUI;
 	static const int m_rateDivider;
 	static const int m_udpPayloadSize;
 

@@ -31,7 +31,7 @@ public:
 	struct MetaData
 	{
         // critical data
-		uint64_t m_centerFrequency;   //!< center frequency in Hz
+		uint32_t m_centerFrequency;   //!< center frequency in kHz
 		uint32_t m_sampleRate;        //!< sample rate in Hz
 		uint8_t  m_sampleBytes;       //!< MSB(4): indicators, LSB(4) number of bytes per sample
 		uint8_t  m_sampleBits;        //!< number of effective bits per sample

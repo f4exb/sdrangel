@@ -18,6 +18,7 @@
 #define INCLUDE_SDRDAEMONGUI_H
 
 #include <QTimer>
+#include <sys/time.h>
 #include "plugin/plugingui.h"
 
 #include "sdrdaemoninput.h"
@@ -55,7 +56,7 @@ private:
     bool m_acquisition;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
-	std::time_t m_startingTimeStamp;
+	struct timeval m_startingTimeStamp;
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
@@ -68,8 +69,6 @@ private:
 
 private slots:
 	void handleSourceMessages();
-	void on_playLoop_toggled(bool checked);
-	void on_play_toggled(bool checked);
 	void on_applyButton_clicked(bool checked);
 	void tick();
 };

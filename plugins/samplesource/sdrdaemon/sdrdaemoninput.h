@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <ctime>
 #include <iostream>
+#include <stdint.h>
 
 class SDRdaemonThread;
 
@@ -113,23 +114,26 @@ public:
 	public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
-		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
+		uint32_t get_tv_sec() const { return m_tv_sec; }
+		uint32_t get_tv_usec() const { return m_tv_usec; }
 
-		static MsgReportSDRdaemonStreamData* create(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp)
+		static MsgReportSDRdaemonStreamData* create(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec)
 		{
-			return new MsgReportSDRdaemonStreamData(sampleRate, centerFrequency, startingTimeStamp);
+			return new MsgReportSDRdaemonStreamData(sampleRate, centerFrequency, tv_sec, tv_usec);
 		}
 
 	protected:
 		int m_sampleRate;
 		quint64 m_centerFrequency;
-		std::time_t m_startingTimeStamp;
+		uint32_t m_tv_sec;
+		uint32_t m_tv_usec;
 
-		MsgReportSDRdaemonStreamData(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp) :
+		MsgReportSDRdaemonStreamData(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp)
+			m_tv_sec(tv_sec),
+			m_tv_usec(tv_usec)
 		{ }
 	};
 

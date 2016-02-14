@@ -73,7 +73,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message
 SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
 	m_address("127.0.0.1"),
 	m_port(9090),
-	m_SDRdaemonThread(NULL),
+	m_SDRdaemonThread(0),
 	m_deviceDescription(),
 	m_sampleRate(0),
 	m_centerFrequency(0),
@@ -97,12 +97,12 @@ bool SDRdaemonInput::start(int device)
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "SDRdaemonInput::startInput";
 
-	if(!m_sampleFifo.setSize(96000 * 4)) {
+	if (!m_sampleFifo.setSize(96000 * 4)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	if((m_SDRdaemonThread = new SDRdaemonThread(&m_sampleFifo)) == NULL) {
+	if ((m_SDRdaemonThread = new SDRdaemonThread(&m_sampleFifo, getOutputMessageQueueToGUI())) == NULL) {
 		qFatal("out of memory");
 		stop();
 		return false;

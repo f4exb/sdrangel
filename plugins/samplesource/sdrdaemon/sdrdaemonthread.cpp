@@ -18,6 +18,8 @@
 #include <errno.h>
 #include <assert.h>
 #include "dsp/samplefifo.h"
+#include "util/messagequeue.h"
+#include "sdrdaemoninput.h"
 #include <QUdpSocket>
 #include <QDebug>
 
@@ -26,7 +28,7 @@
 const int SDRdaemonThread::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
 const int SDRdaemonThread::m_udpPayloadSize = 512;
 
-SDRdaemonThread::SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent) :
+SDRdaemonThread::SDRdaemonThread(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dataSocket(0),
@@ -40,7 +42,9 @@ SDRdaemonThread::SDRdaemonThread(SampleFifo* sampleFifo, QObject* parent) :
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
 	m_sdrDaemonBuffer(m_udpPayloadSize),
-	m_samplerate(0)
+	m_samplerate(0),
+	m_centerFrequency(0),
+	m_outputMessageQueueToGUI(outputMessageQueueToGUI)
 {
     m_udpBuf = new char[m_udpPayloadSize];
     m_dataSocket = new QUdpSocket(this);
@@ -218,12 +222,30 @@ void SDRdaemonThread::dataReadyRead()
 
 			if (m_sdrDaemonBuffer.readMeta(m_udpBuf, readBytes))
 			{
-				uint32_t sampleRate = m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate;
+				const SDRdaemonBuffer::MetaData& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+				bool change = false;
 
-				if (m_samplerate != sampleRate)
+				if (m_samplerate != metaData.m_sampleRate)
 				{
-					setSamplerate(sampleRate);
-					m_samplerate = sampleRate;
+					setSamplerate(metaData.m_sampleRate);
+					m_samplerate = metaData.m_sampleRate;
+					change = true;
+				}
+
+				if (m_centerFrequency != metaData.m_centerFrequency)
+				{
+					m_centerFrequency = metaData.m_centerFrequency;
+					change = true;
+				}
+
+				if (change)
+				{
+					SDRdaemonInput::MsgReportSDRdaemonStreamData *report = SDRdaemonInput::MsgReportSDRdaemonStreamData::create(
+						metaData.m_sampleRate,
+						metaData.m_centerFrequency,
+						metaData.m_tv_sec,
+						metaData.m_tv_usec);
+					m_outputMessageQueueToGUI->push(report);
 				}
 			}
 			else if (m_sdrDaemonBuffer.isSync())
