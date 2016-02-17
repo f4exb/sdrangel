@@ -285,7 +285,6 @@ add_library(sdrbase SHARED
 target_link_libraries(sdrbase
 	${QT_LIBRARIES}
 	${OPENGL_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 )
 
 if(FFTW3F_FOUND)
@@ -351,5 +350,8 @@ qt5_use_modules(sdrangel Widgets Multimedia)
 ##############################################################################
 
 add_subdirectory(plugins)
-add_subdirectory(fcdhid)
-add_subdirectory(fcdlib)
+
+if(LIBUSB_FOUND AND UNIX)
+	add_subdirectory(fcdhid)
+	add_subdirectory(fcdlib)
+endif(LIBUSB_FOUND AND UNIX)
