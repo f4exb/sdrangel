@@ -17,6 +17,8 @@
 #include <QUdpSocket>
 #include <QDebug>
 #include <unistd.h>
+#include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "sdrdaemonudphandler.h"
 #include "sdrdaemoninput.h"
 
@@ -25,7 +27,7 @@ const int SDRdaemonUDPHandler::m_udpPayloadSize = 512;
 
 SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI) :
 	m_mutex(QMutex::Recursive),
-	m_sdrDaemonBuffer(m_udpPayloadSize),
+	m_sdrDaemonBuffer(m_udpPayloadSize, m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
@@ -140,11 +142,13 @@ void SDRdaemonUDPHandler::processData()
 
 			if (change)
 			{
+				DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency);
+				DSPEngine::instance()->getInputMessageQueue()->push(notif);
 				SDRdaemonInput::MsgReportSDRdaemonStreamData *report = SDRdaemonInput::MsgReportSDRdaemonStreamData::create(
-					metaData.m_sampleRate,
-					metaData.m_centerFrequency,
-					metaData.m_tv_sec,
-					metaData.m_tv_usec);
+					m_samplerate,
+					m_centerFrequency,
+					m_tv_sec,
+					m_tv_usec);
 				m_outputMessageQueueToGUI->push(report);
 			}
 		}

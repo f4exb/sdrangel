@@ -61,7 +61,7 @@ public:
 	};
 #pragma pack(pop)
 
-	SDRdaemonBuffer(uint32_t blockSize);
+	SDRdaemonBuffer(uint32_t blockSize, uint32_t rateDivider);
 	~SDRdaemonBuffer();
 	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
@@ -79,7 +79,8 @@ private:
 	void updateBufferSize(uint32_t sampleRate, uint32_t frameSize);
     void printMeta(MetaData *metaData);
 
-	std::size_t m_blockSize; //!< UDP block (payload) size
+    uint32_t m_blockSize;    //!< UDP block (payload) size
+	uint32_t m_rateDivider;  //!< Number of times per seconds the samples are fetched
 	bool m_sync;             //!< Meta data acquired (Stream synchronized)
 	bool m_lz4;              //!< Stream is compressed with LZ4
 	MetaData m_currentMeta;  //!< Stored current meta data
@@ -104,7 +105,8 @@ private:
 	uint32_t m_readCount;    //!< Current read position in the raw samples buffer
 	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
-    uint8_t *m_frameBuffer;  //!< Buffer to build a frame length of raw samples
+    uint8_t *m_chunkBuffer;  //!< Buffer to build a chunk length of raw samples
+    uint32_t m_chunkSize;    //!< Size of a chunk of samples in bytes
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
 };

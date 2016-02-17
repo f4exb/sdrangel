@@ -19,8 +19,9 @@
 #include <iostream>
 #include "sdrdaemonbuffer.h"
 
-SDRdaemonBuffer::SDRdaemonBuffer(uint32_t blockSize) :
+SDRdaemonBuffer::SDRdaemonBuffer(uint32_t blockSize, uint32_t rateDivider) :
 	m_blockSize(blockSize),
+	m_rateDivider(rateDivider),
 	m_sync(false),
 	m_lz4(false),
 	m_inCount(0),
@@ -40,7 +41,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t blockSize) :
 	m_readCount(0),
 	m_rawSize(0),
 	m_rawBuffer(0),
-	m_frameBuffer(0),
+	m_chunkBuffer(0),
 	m_bytesInBlock(0),
 	m_nbBlocks(0)
 {
@@ -61,8 +62,8 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 		delete[] m_lz4OutBuffer;
 	}
 
-	if (m_frameBuffer) {
-		delete[] m_frameBuffer;
+	if (m_chunkBuffer) {
+		delete[] m_chunkBuffer;
 	}
 }
 
@@ -140,7 +141,8 @@ void SDRdaemonBuffer::writeData(char *array, uint32_t length)
 		}
 		else
 		{
-			writeDataUncompressed(array, length);
+			//writeDataUncompressed(array, length);
+			writeToRawBufferUncompressed(array, length);
 		}
 	}
 }
@@ -249,10 +251,11 @@ uint8_t *SDRdaemonBuffer::readData(uint32_t length)
 	}
 	else
 	{
-		std::memcpy((void *) m_frameBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_readCount); // read last bit from raw buffer
-		m_readCount = length - (m_rawSize - m_readCount);
-		std::memcpy((void *) &m_frameBuffer[m_rawSize - m_readCount], (const void *) m_frameBuffer, m_readCount); // read the rest at start of raw buffer
-		return m_frameBuffer;
+		uint32_t retLength = std::min(length, m_chunkSize);
+		std::memcpy((void *) m_chunkBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_readCount); // read last bit from raw buffer
+		m_readCount = retLength - (m_rawSize - m_readCount);
+		std::memcpy((void *) &m_chunkBuffer[m_rawSize - m_readCount], (const void *) m_rawBuffer, m_readCount); // read the rest at start of raw buffer
+		return m_chunkBuffer;
 	}
 }
 
@@ -290,11 +293,12 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate, uint32_t frameSize)
 	m_rawSize = nbFrames * frameSize;
 	m_rawBuffer = new uint8_t[m_rawSize];
 
-	if (m_frameBuffer) {
-		delete[] m_frameBuffer;
+	if (m_chunkBuffer) {
+		delete[] m_chunkBuffer;
 	}
 
-	m_frameBuffer = new uint8_t[frameSize];
+	m_chunkSize = (sampleRate * 2 * 2) / m_rateDivider;
+	m_chunkBuffer = new uint8_t[m_chunkSize];
 }
 
 void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)
