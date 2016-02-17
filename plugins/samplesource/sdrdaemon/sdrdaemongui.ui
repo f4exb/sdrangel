@@ -172,7 +172,7 @@
         <string>Record absolute time</string>
        </property>
        <property name="text">
-        <string>20150101 00:00:00.000</string>
+        <string>2015-01-01  00:00:00.000</string>
        </property>
       </widget>
      </item>
@@ -240,6 +240,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="text">
+        <string>127.0.0.1</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -256,6 +259,9 @@
          <width>50</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="text">
+        <string>9090</string>
        </property>
       </widget>
      </item>

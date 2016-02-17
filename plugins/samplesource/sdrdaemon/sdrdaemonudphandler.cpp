@@ -142,11 +142,11 @@ void SDRdaemonUDPHandler::processData()
 
 			if (change)
 			{
-				DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency);
+				DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
 				DSPEngine::instance()->getInputMessageQueue()->push(notif);
 				SDRdaemonInput::MsgReportSDRdaemonStreamData *report = SDRdaemonInput::MsgReportSDRdaemonStreamData::create(
 					m_samplerate,
-					m_centerFrequency,
+					m_centerFrequency, // Frequency in kHz for the GUI
 					m_tv_sec,
 					m_tv_usec);
 				m_outputMessageQueueToGUI->push(report);
