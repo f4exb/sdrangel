@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdint.h>
 
-class SDRdaemonThread;
+class SDRdaemonUDPHandler;
 
 class SDRdaemonInput : public SampleSource {
 public:
@@ -141,19 +141,22 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		std::size_t getSamplesCount() const { return m_samplesCount; }
+		uint32_t get_tv_sec() const { return m_tv_sec; }
+		uint32_t get_tv_usec() const { return m_tv_usec; }
 
-		static MsgReportSDRdaemonStreamTiming* create(std::size_t samplesCount)
+		static MsgReportSDRdaemonStreamTiming* create(uint32_t tv_sec, uint32_t tv_usec)
 		{
-			return new MsgReportSDRdaemonStreamTiming(samplesCount);
+			return new MsgReportSDRdaemonStreamTiming(tv_sec, tv_usec);
 		}
 
 	protected:
-		std::size_t m_samplesCount;
+		uint32_t m_tv_sec;
+		uint32_t m_tv_usec;
 
-		MsgReportSDRdaemonStreamTiming(std::size_t samplesCount) :
+		MsgReportSDRdaemonStreamTiming(uint32_t tv_sec, uint32_t tv_usec) :
 			Message(),
-			m_samplesCount(samplesCount)
+			m_tv_sec(tv_sec),
+			m_tv_usec(tv_usec)
 		{ }
 	};
 
@@ -175,14 +178,12 @@ private:
 	QMutex m_mutex;
 	QString m_address;
 	quint16 m_port;
-	SDRdaemonThread* m_SDRdaemonThread;
+	SDRdaemonUDPHandler* m_SDRdaemonUDPHandler;
 	QString m_deviceDescription;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
-
-	void updateLink(const QString& address, quint16 port);
 };
 
 #endif // INCLUDE_SDRDAEMONINPUT_H

@@ -8,6 +8,7 @@ set(sdrdaemon_SOURCES
 	sdrdaemoninput.cpp
 	sdrdaemonplugin.cpp
 	sdrdaemonthread.cpp
+	sdrdaemonudphandler.cpp
 )
 
 set(sdrdaemon_HEADERS
@@ -16,6 +17,7 @@ set(sdrdaemon_HEADERS
 	sdrdaemoninput.h
 	sdrdaemonplugin.h
 	sdrdaemonthread.h
+	sdrdaemonudphandler.h
 )
 
 set(sdrdaemon_FORMS

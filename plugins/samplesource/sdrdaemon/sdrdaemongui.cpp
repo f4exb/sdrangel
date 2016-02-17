@@ -156,7 +156,8 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonInput::MsgReportSDRdaemonStreamTiming::match(message))
 	{
-		m_samplesCount = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getSamplesCount();
+		m_startingTimeStamp.tv_sec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_sec();
+		m_startingTimeStamp.tv_usec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_usec();
 		updateWithStreamTime();
 		return true;
 	}

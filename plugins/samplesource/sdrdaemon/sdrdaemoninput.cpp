@@ -25,46 +25,10 @@
 
 #include "sdrdaemongui.h"
 #include "sdrdaemoninput.h"
-#include "sdrdaemonthread.h"
+#include "sdrdaemonudphandler.h"
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
-void SDRdaemonInput::updateLink(const QString& address, quint16 port)
-{
-	QMutexLocker mutexLocker(&m_mutex);
-	bool wasRunning = false;
-
-	if ((m_address != address) || (m_port != port))
-	{
-		if (m_SDRdaemonThread != 0)
-		{
-			wasRunning = m_SDRdaemonThread->isRunning();
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->stopWork();
-			}
-		}
-
-		if (m_SDRdaemonThread != 0)
-		{
-			m_SDRdaemonThread->updateLink(address, port);
-
-			if (wasRunning)
-			{
-				m_SDRdaemonThread->startWork();
-			}
-		}
-
-		m_address = address;
-		m_port = port;
-
-		qDebug() << "SDRdaemonInput::updateLink:"
-				<< " address: " << m_address.toStdString().c_str()
-				<< "port: " << m_port;
-	}
-}
-
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
@@ -73,71 +37,43 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message
 SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
 	m_address("127.0.0.1"),
 	m_port(9090),
-	m_SDRdaemonThread(0),
+	m_SDRdaemonUDPHandler(0),
 	m_deviceDescription(),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
 	m_masterTimer(masterTimer)
 {
+	m_sampleFifo.setSize(96000 * 4);
+	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI());
+	m_SDRdaemonUDPHandler->connectTimer(m_masterTimer);
 }
 
 SDRdaemonInput::~SDRdaemonInput()
 {
 	stop();
+	delete m_SDRdaemonUDPHandler;
 }
 
 bool SDRdaemonInput::init(const Message& message)
 {
+	qDebug() << "SDRdaemonInput::init";
 	return false;
 }
 
 bool SDRdaemonInput::start(int device)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	qDebug() << "SDRdaemonInput::startInput";
-
-	if (!m_sampleFifo.setSize(96000 * 4)) {
-		qCritical("Could not allocate SampleFifo");
-		return false;
-	}
-
-	if ((m_SDRdaemonThread = new SDRdaemonThread(&m_sampleFifo, getOutputMessageQueueToGUI())) == NULL) {
-		qFatal("out of memory");
-		stop();
-		return false;
-	}
-
-	m_SDRdaemonThread->connectTimer(m_masterTimer);
-	m_SDRdaemonThread->startWork();
-	m_deviceDescription = "SDRdaemon";
-
-	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
-	qDebug("SDRdaemonInput::startInput: started");
-
-	MsgReportSDRdaemonAcquisition *report = MsgReportSDRdaemonAcquisition::create(true); // acquisition on
-	getOutputMessageQueueToGUI()->push(report);
-
+	qDebug() << "SDRdaemonInput::start";
+	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(true);
+	getInputMessageQueue()->push(command);
 	return true;
 }
 
 void SDRdaemonInput::stop()
 {
 	qDebug() << "SDRdaemonInput::stop";
-	QMutexLocker mutexLocker(&m_mutex);
-
-	if(m_SDRdaemonThread != 0)
-	{
-		m_SDRdaemonThread->stopWork();
-		delete m_SDRdaemonThread;
-		m_SDRdaemonThread = 0;
-	}
-
-	m_deviceDescription.clear();
-
-	MsgReportSDRdaemonAcquisition *report = MsgReportSDRdaemonAcquisition::create(false); // acquisition off
-	getOutputMessageQueueToGUI()->push(report);
+	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(false);
+	getInputMessageQueue()->push(command);
 }
 
 const QString& SDRdaemonInput::getDeviceDescription() const
@@ -164,8 +100,6 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureSDRdaemonUDPLink::match(message))
 	{
-		MsgConfigureSDRdaemonUDPLink& conf = (MsgConfigureSDRdaemonUDPLink&) message;
-		updateLink(conf.getAddress(), conf.getPort());
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonWork::match(message))
@@ -173,33 +107,16 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 		MsgConfigureSDRdaemonWork& conf = (MsgConfigureSDRdaemonWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_SDRdaemonThread != 0)
-		{
-			if (working)
-			{
-				m_SDRdaemonThread->startWork();
-				MsgReportSDRdaemonStreamTiming *report =
-						MsgReportSDRdaemonStreamTiming::create(m_SDRdaemonThread->getSamplesCount());
-				getOutputMessageQueueToGUI()->push(report);
-			}
-			else
-			{
-				m_SDRdaemonThread->stopWork();
-			}
+		if (working) {
+			m_SDRdaemonUDPHandler->start();
+		} else {
+			m_SDRdaemonUDPHandler->stop();
 		}
 
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonStreamTiming::match(message))
 	{
-		MsgReportSDRdaemonStreamTiming *report;
-
-		if (m_SDRdaemonThread != 0)
-		{
-			report = MsgReportSDRdaemonStreamTiming::create(m_SDRdaemonThread->getSamplesCount());
-			getOutputMessageQueueToGUI()->push(report);
-		}
-
 		return true;
 	}
 	else
