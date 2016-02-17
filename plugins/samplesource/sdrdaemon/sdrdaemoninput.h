@@ -51,6 +51,28 @@ public:
 		{ }
 	};
 
+	class MsgConfigureSDRdaemonAutoCorr : public Message {
+		MESSAGE_CLASS_DECLARATION
+	public:
+		bool getDCBlock() const { return m_dcBlock; }
+		bool getIQImbalance() const { return m_iqCorrection; }
+
+		static MsgConfigureSDRdaemonAutoCorr* create(bool dcBlock, bool iqImbalance)
+		{
+			return new MsgConfigureSDRdaemonAutoCorr(dcBlock, iqImbalance);
+		}
+
+	private:
+		bool m_dcBlock;
+		bool m_iqCorrection;
+
+		MsgConfigureSDRdaemonAutoCorr(bool dcBlock, bool iqImbalance) :
+			Message(),
+			m_dcBlock(dcBlock),
+			m_iqCorrection(iqImbalance)
+		{ }
+	};
+
 	class MsgConfigureSDRdaemonWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 

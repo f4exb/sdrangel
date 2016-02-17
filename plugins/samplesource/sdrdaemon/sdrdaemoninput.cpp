@@ -28,6 +28,7 @@
 #include "sdrdaemonudphandler.h"
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
@@ -100,6 +101,15 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureSDRdaemonUDPLink::match(message))
 	{
+		// TODO: change UDP settings
+		return true;
+	}
+	else if (MsgConfigureSDRdaemonAutoCorr::match(message))
+	{
+		MsgConfigureSDRdaemonAutoCorr& conf = (MsgConfigureSDRdaemonAutoCorr&) message;
+		bool dcBlock = conf.getDCBlock();
+		bool iqImbalance = conf.getIQImbalance();
+		DSPEngine::instance()->configureCorrections(dcBlock, iqImbalance);
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonWork::match(message))

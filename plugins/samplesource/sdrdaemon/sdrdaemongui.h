@@ -60,6 +60,9 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
+	bool m_dcBlock;
+	bool m_iqCorrection;
+
 	void displaySettings();
 	void displayTime();
 	void configureUDPLink();
@@ -70,6 +73,8 @@ private:
 private slots:
 	void handleSourceMessages();
 	void on_applyButton_clicked(bool checked);
+	void on_dcOffset_toggled(bool checked);
+	void on_iqImbalance_toggled(bool checked);
 	void tick();
 };
 

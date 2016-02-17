@@ -39,7 +39,9 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_samplesCount(0),
-	m_tickCount(0)
+	m_tickCount(0),
+	m_dcBlock(false),
+	m_iqCorrection(false)
 {
 	m_startingTimeStamp.tv_sec = 0;
 	m_startingTimeStamp.tv_usec = 0;
@@ -173,7 +175,7 @@ void SDRdaemonGui::handleSourceMessages()
 
 	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
 	{
-		qDebug("SDRdaemonGui::handleSourceMessages: message: %s", message->getIdentifier());
+		//qDebug("SDRdaemonGui::handleSourceMessages: message: %s", message->getIdentifier());
 
 		if (handleMessage(*message))
 		{
@@ -184,6 +186,8 @@ void SDRdaemonGui::handleSourceMessages()
 
 void SDRdaemonGui::displaySettings()
 {
+	ui->dcOffset->setChecked(m_dcBlock);
+	ui->iqImbalance->setChecked(m_iqCorrection);
 }
 
 /*
@@ -196,6 +200,26 @@ void SDRdaemonGui::on_play_toggled(bool checked)
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
 	configureUDPLink();
+}
+
+void SDRdaemonGui::on_dcOffset_toggled(bool checked)
+{
+	if (m_dcBlock != checked)
+	{
+		m_dcBlock = checked;
+		SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
+		m_sampleSource->getInputMessageQueue()->push(message);
+	}
+}
+
+void SDRdaemonGui::on_iqImbalance_toggled(bool checked)
+{
+	if (m_iqCorrection != checked)
+	{
+		m_iqCorrection = checked;
+		SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
+		m_sampleSource->getInputMessageQueue()->push(message);
+	}
 }
 
 void SDRdaemonGui::configureUDPLink()
@@ -232,28 +256,8 @@ void SDRdaemonGui::updateWithStreamTime()
 {
 	quint64 startingTimeStampMsec = (m_startingTimeStamp.tv_sec * 1000) + (m_startingTimeStamp.tv_usec / 1000);
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
+	QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
-	/*
-	int t_sec = 0;
-	int t_msec = 0;
-
-	if (m_sampleRate > 0){
-		t_msec = ((m_samplesCount * 1000) / m_sampleRate) % 1000;
-		t_sec = m_samplesCount / m_sampleRate;
-	}
-
-	QTime t(0, 0, 0, 0);
-	t = t.addSecs(t_sec);
-	t = t.addMSecs(t_msec);
-	QString s_time = t.toString("hh:mm:ss.zzz");
-
-	quint64 startingTimeStampMsec = m_startingTimeStamp * 1000;
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-	dt = dt.addSecs(t_sec);
-	dt = dt.addMSecs(t_msec);
-	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
-	ui->absTimeText->setText(s_date);*/
 }
 
 void SDRdaemonGui::tick()
