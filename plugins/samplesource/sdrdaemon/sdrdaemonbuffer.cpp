@@ -121,9 +121,13 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 		{
 			m_sync = false;
 		}
-	}
 
-	return m_sync;
+		return m_sync;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void SDRdaemonBuffer::writeData(char *array, uint32_t length)
