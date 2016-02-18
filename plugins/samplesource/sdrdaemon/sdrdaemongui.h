@@ -60,12 +60,15 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
+	QString m_address;
+	quint16 m_port;
 	bool m_dcBlock;
 	bool m_iqCorrection;
 
 	void displaySettings();
 	void displayTime();
 	void configureUDPLink();
+	void configureAutoCorrections();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();

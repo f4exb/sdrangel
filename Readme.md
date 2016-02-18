@@ -99,6 +99,22 @@ If you use your own location for librtlsdr install directory you need to specify
 
 `-DLIBRTLSDR_LIBRARIES=/opt/install/librtlsdr/lib/librtlsdr.so -DLIBRTLSDR_INCLUDE_DIR=/opt/install/librtlsdr/include`
 
+<h1>Plugins for special devices</h1>
+
+<h2>File input</h2>
+
+The file input plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Press F7 to start recording and F8 to stop. The file has a fixed name `test.sdriq` created in the current directory.
+
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
+
+<h2>SDRdaemon input</h2>
+
+Warning: this is experimental is buggy (algorithm to retrieve samples is flawed).
+
+This is the client side of the SDRdaemon server. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the address and UDP port to which the server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency.
+
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
+
 <h1>Software build</h1>
 
 <h2>Ubuntu</h2>

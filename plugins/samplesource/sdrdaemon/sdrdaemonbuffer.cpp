@@ -223,7 +223,7 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 	{
 		std::memcpy((void *) &m_rawBuffer[m_rawCount], (const void *) array, m_rawSize - m_rawCount);
 		m_rawCount = length - (m_rawSize - m_rawCount);
-		std::memcpy((void *) m_rawBuffer, (const void *) array, m_rawCount);
+		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_rawCount], m_rawCount);
 	}
 }
 

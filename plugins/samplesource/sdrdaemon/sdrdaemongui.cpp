@@ -40,6 +40,8 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_centerFrequency(0),
 	m_samplesCount(0),
 	m_tickCount(0),
+	m_address("127.0.0.1"),
+	m_port(9090),
 	m_dcBlock(false),
 	m_iqCorrection(false)
 {
@@ -80,6 +82,10 @@ QString SDRdaemonGui::getName() const
 
 void SDRdaemonGui::resetToDefaults()
 {
+	m_address = "127.0.0.1";
+	m_port = 9090;
+	m_dcBlock = false;
+	m_iqCorrection = false;
 	displaySettings();
 }
 
@@ -87,12 +93,18 @@ QByteArray SDRdaemonGui::serialize() const
 {
 	bool ok;
 	SimpleSerializer s(1);
+
 	s.writeString(1, ui->address->text());
 	uint32_t uintval = ui->port->text().toInt(&ok);
+
 	if((!ok) || (uintval < 1024) || (uintval > 65535)) {
 		uintval = 9090;
 	}
+
 	s.writeU32(2, uintval);
+	s.writeBool(3, m_dcBlock);
+	s.writeBool(4, m_iqCorrection);
+
 	return s.final();
 }
 
@@ -110,23 +122,26 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 
 	if(d.getVersion() == 1) {
 		uint32_t uintval;
-		d.readString(1, &address, "127.0.0.1");
+		d.readString(1, &m_address, "127.0.0.1");
 		d.readU32(2, &uintval, 9090);
+
 		if ((uintval > 1024) && (uintval < 65536)) {
-			port = uintval;
+			m_port = uintval;
 		} else {
-			port = 9090;
+			m_port = 9090;
 		}
+
+		d.readBool(3, &m_dcBlock, false);
+		d.readBool(4, &m_iqCorrection, false);
+
 		return true;
 	} else {
 		resetToDefaults();
 		return false;
 	}
 
-	ui->address->setText(address);
-	ui->port->setText(QString::number(port));
+	displaySettings();
 }
-
 
 qint64 SDRdaemonGui::getCenterFrequency() const
 {
@@ -186,16 +201,11 @@ void SDRdaemonGui::handleSourceMessages()
 
 void SDRdaemonGui::displaySettings()
 {
+	ui->address->setText(m_address);
+	ui->port->setText(QString::number(m_port));
 	ui->dcOffset->setChecked(m_dcBlock);
 	ui->iqImbalance->setChecked(m_iqCorrection);
 }
-
-/*
-void SDRdaemonGui::on_play_toggled(bool checked)
-{
-	SDRdaemonInput::MsgConfigureSDRdaemonWork* message = SDRdaemonInput::MsgConfigureSDRdaemonWork::create(checked);
-	m_sampleSource->getInputMessageQueue()->push(message);
-}*/
 
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
@@ -207,8 +217,7 @@ void SDRdaemonGui::on_dcOffset_toggled(bool checked)
 	if (m_dcBlock != checked)
 	{
 		m_dcBlock = checked;
-		SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
-		m_sampleSource->getInputMessageQueue()->push(message);
+		configureAutoCorrections();
 	}
 }
 
@@ -217,8 +226,7 @@ void SDRdaemonGui::on_iqImbalance_toggled(bool checked)
 	if (m_iqCorrection != checked)
 	{
 		m_iqCorrection = checked;
-		SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
-		m_sampleSource->getInputMessageQueue()->push(message);
+		configureAutoCorrections();
 	}
 }
 
@@ -237,6 +245,12 @@ void SDRdaemonGui::configureUDPLink()
 			<< " : " << udpPort;
 
 	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(udpAddress, udpPort);
+	m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void SDRdaemonGui::configureAutoCorrections()
+{
+	SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
@@ -267,3 +281,4 @@ void SDRdaemonGui::tick()
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }
+
