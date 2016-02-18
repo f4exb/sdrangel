@@ -73,7 +73,6 @@ public:
 private:
 	void updateLZ4Sizes(uint32_t frameSize);
 	void writeDataLZ4(const char *array, uint32_t length);
-	void writeDataUncompressed(const char *array, uint32_t length);
 	void writeToRawBufferLZ4(const char *array, uint32_t originalLength);
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
 	void updateBufferSize(uint32_t sampleRate, uint32_t frameSize);
@@ -101,7 +100,7 @@ private:
 	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
 	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
 
-	uint32_t m_rawCount;     //!< Current write position in the raw samples buffer
+	uint32_t m_writeCount;   //!< Current write position in the raw samples buffer
 	uint32_t m_readCount;    //!< Current read position in the raw samples buffer
 	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)

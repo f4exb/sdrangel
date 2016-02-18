@@ -37,7 +37,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t blockSize, uint32_t rateDivider) :
 	m_sampleRate(1000000),
 	m_sampleBytes(2),
 	m_sampleBits(12),
-	m_rawCount(0),
+	m_writeCount(0),
 	m_readCount(0),
 	m_rawSize(0),
 	m_rawBuffer(0),
@@ -141,23 +141,8 @@ void SDRdaemonBuffer::writeData(char *array, uint32_t length)
 		}
 		else
 		{
-			//writeDataUncompressed(array, length);
 			writeToRawBufferUncompressed(array, length);
 		}
-	}
-}
-
-void SDRdaemonBuffer::writeDataUncompressed(const char *array, uint32_t length)
-{
-	if (m_inCount + length < m_frameSize)
-	{
-		std::memcpy((void *) &m_rawBuffer[m_rawCount], (const void *) array, length);
-		m_inCount += length;
-	}
-	else if (m_inCount < m_frameSize)
-	{
-		std::memcpy((void *) &m_rawBuffer[m_rawCount], (const void *) array, m_frameSize - m_inCount); // copy rest of data in compressed Buffer
-		m_inCount += m_frameSize - m_inCount;
 	}
 }
 
@@ -197,7 +182,7 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
             m_nbCRCOK++;
         }
 
-        int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) &m_rawBuffer[m_rawCount], m_frameSize);
+        int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) &m_rawBuffer[m_writeCount], m_frameSize);
         m_nbDecodes++;
 
         if (compressedSize == m_lz4InSize)
@@ -214,16 +199,16 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
 void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t length)
 {
 	// TODO: handle the 1 byte per I or Q sample
-	if (m_rawCount + length < m_rawSize)
+	if (m_writeCount + length < m_rawSize)
 	{
-		std::memcpy((void *) &m_rawBuffer[m_rawCount], (const void *) array, length);
-		m_rawCount += length;
+		std::memcpy((void *) &m_rawBuffer[m_writeCount], (const void *) array, length);
+		m_writeCount += length;
 	}
 	else
 	{
-		std::memcpy((void *) &m_rawBuffer[m_rawCount], (const void *) array, m_rawSize - m_rawCount);
-		m_rawCount = length - (m_rawSize - m_rawCount);
-		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_rawCount], m_rawCount);
+		std::memcpy((void *) &m_rawBuffer[m_writeCount], (const void *) array, m_rawSize - m_writeCount);
+		m_writeCount = length - (m_rawSize - m_writeCount);
+		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeCount], m_writeCount);
 	}
 }
 
@@ -242,17 +227,16 @@ void SDRdaemonBuffer::writeToRawBufferLZ4(const char *array, uint32_t length)
 
 uint8_t *SDRdaemonBuffer::readData(uint32_t length)
 {
-	uint32_t readCount = m_readCount;
-
 	if (m_readCount + length < m_rawSize)
 	{
-		return &m_rawBuffer[readCount];
+		uint32_t readCount = m_readCount;
 		m_readCount += length;
+		return &m_rawBuffer[readCount];
 	}
 	else
 	{
 		uint32_t retLength = std::min(length, m_chunkSize);
-		std::memcpy((void *) m_chunkBuffer, (const void *) &m_rawBuffer[readCount], m_rawSize - m_readCount); // read last bit from raw buffer
+		std::memcpy((void *) m_chunkBuffer, (const void *) &m_rawBuffer[m_readCount], m_rawSize - m_readCount); // read last bit from raw buffer
 		m_readCount = retLength - (m_rawSize - m_readCount);
 		std::memcpy((void *) &m_chunkBuffer[m_rawSize - m_readCount], (const void *) m_rawBuffer, m_readCount); // read the rest at start of raw buffer
 		return m_chunkBuffer;

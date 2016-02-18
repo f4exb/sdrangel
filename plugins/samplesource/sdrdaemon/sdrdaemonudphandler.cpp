@@ -26,7 +26,6 @@ const int SDRdaemonUDPHandler::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
 const int SDRdaemonUDPHandler::m_udpPayloadSize = 512;
 
 SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI) :
-	m_mutex(QMutex::Recursive),
 	m_sdrDaemonBuffer(m_udpPayloadSize, m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
@@ -67,7 +66,6 @@ void SDRdaemonUDPHandler::start()
 		if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
 			qDebug("SDRdaemonUDPHandler::start: bind data socket to port %d", m_dataPort);
-			connect(this, SIGNAL(dataReady()), this, SLOT(processData()));
 			connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
 			m_dataConnected = true;
 		}
@@ -85,7 +83,6 @@ void SDRdaemonUDPHandler::stop()
 
 	if (m_dataConnected) {
 		disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
-		disconnect(this, SIGNAL(dataReady()), this, SLOT(processData));
 		m_dataConnected = false;
 	}
 
@@ -104,7 +101,7 @@ void SDRdaemonUDPHandler::dataReadyRead()
 	{
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, 0, 0);
-		emit dataReady();
+		processData();
 	}
 }
 
@@ -116,8 +113,6 @@ void SDRdaemonUDPHandler::processData()
 	}
 	else if (m_udpReadBytes > 0)
 	{
-		QMutexLocker ml(&m_mutex);
-
 		m_sdrDaemonBuffer.updateBlockCounts(m_udpReadBytes);
 
 		if (m_sdrDaemonBuffer.readMeta(m_udpBuf, m_udpReadBytes))
@@ -164,8 +159,6 @@ void SDRdaemonUDPHandler::setSamplerate(uint32_t samplerate)
 	qDebug() << "SDRdaemonUDPHandler::setSamplerate:"
 			<< " new:" << samplerate
 			<< " old:" << m_samplerate;
-
-	QMutexLocker ml(&m_mutex);
 
 	m_samplerate = samplerate;
 	m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed

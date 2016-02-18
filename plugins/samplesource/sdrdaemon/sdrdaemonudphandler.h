@@ -41,13 +41,8 @@ public:
 
 public slots:
 	void dataReadyRead();
-	void processData();
-
-signals:
-	void dataReady();
 
 private:
-	QMutex m_mutex;
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
@@ -71,6 +66,7 @@ private:
 	static const int m_udpPayloadSize;
 
 	void setSamplerate(uint32_t samplerate);
+	void processData();
 
 private slots:
 	void tick();
