@@ -233,9 +233,14 @@ uint8_t *SDRdaemonBuffer::readData(uint32_t length)
 		m_readCount += length;
 		return &m_rawBuffer[readCount];
 	}
+	//else if (m_readCount > 0)
 	else
 	{
+		if (length > m_chunkSize) {
+			qDebug("SDRdaemonBuffer::readData: length: %d", length);
+		}
 		uint32_t retLength = std::min(length, m_chunkSize);
+		//uint32_t retLength = length;
 		std::memcpy((void *) m_chunkBuffer, (const void *) &m_rawBuffer[m_readCount], m_rawSize - m_readCount); // read last bit from raw buffer
 		m_readCount = retLength - (m_rawSize - m_readCount);
 		std::memcpy((void *) &m_chunkBuffer[m_rawSize - m_readCount], (const void *) m_rawBuffer, m_readCount); // read the rest at start of raw buffer

@@ -41,8 +41,13 @@ public:
 
 public slots:
 	void dataReadyRead();
+//	void processData();
+
+//signals:
+//	void dataReady();
 
 private:
+	//QMutex m_mutex;
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
