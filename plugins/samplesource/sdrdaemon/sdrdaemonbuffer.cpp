@@ -45,6 +45,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_readChunkIndex(0),
 	m_rawSize(0),
 	m_rawBuffer(0),
+	m_chunkSize(0),
 	m_bytesInBlock(0),
 	m_nbBlocks(0)
 {
@@ -174,7 +175,6 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
         }
 
         uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
-        //uint64_t crc64 = 0x0123456789ABCDEF;
 
         if (memcmp(&crc64, &m_dataCRC, 8) == 0)
         {
