@@ -23,19 +23,16 @@
 #include "sdrdaemoninput.h"
 
 const int SDRdaemonUDPHandler::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
-const int SDRdaemonUDPHandler::m_udpPayloadSize = 512;
 
 SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI) :
 	//m_mutex(QMutex::Recursive),
-	m_sdrDaemonBuffer(m_udpPayloadSize, m_rateDivider),
+	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
 	m_dataConnected(false),
 	m_udpBuf(0),
 	m_udpReadBytes(0),
-	m_buf(0),
-	m_bufsize(0),
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(0),
@@ -46,7 +43,7 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_tickCount(0),
 	m_samplesCount(0)
 {
-    m_udpBuf = new char[m_udpPayloadSize];
+    m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
 
 SDRdaemonUDPHandler::~SDRdaemonUDPHandler()
@@ -169,20 +166,11 @@ void SDRdaemonUDPHandler::setSamplerate(uint32_t samplerate)
 	//QMutexLocker ml(&m_mutex);
 
 	m_samplerate = samplerate;
-	m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
-	m_bufsize = m_chunksize;
-
-	if (m_buf == 0)	{
-		qDebug() << "  - Allocate buffer";
-		m_buf = (quint8*) malloc(m_bufsize);
-	} else {
-		qDebug() << "  - Re-allocate buffer";
-		m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
-	}
+	m_chunksize = (m_samplerate / m_rateDivider) * SDRdaemonBuffer::m_iqSampleSize;
 
 	qDebug() << "SDRdaemonUDPHandler::setSamplerate:"
-			<< " size: " << m_bufsize
-			<< " #samples: " << (m_bufsize/4);
+			<< " chunk size: " << m_chunksize
+			<< " #samples per chunk: " << (m_chunksize/SDRdaemonBuffer::m_iqSampleSize);
 }
 
 void SDRdaemonUDPHandler::connectTimer(const QTimer& timer)
@@ -194,8 +182,8 @@ void SDRdaemonUDPHandler::connectTimer(const QTimer& timer)
 void SDRdaemonUDPHandler::tick()
 {
 	// read samples directly feeding the SampleFifo (no callback)
-	m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_chunksize)), m_chunksize);
-	m_samplesCount += m_chunksize / 4;
+	m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readDataChunk()), m_chunksize);
+	m_samplesCount += m_chunksize / SDRdaemonBuffer::m_iqSampleSize;
 
 	if (m_tickCount < m_rateDivider)
 	{

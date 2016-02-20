@@ -55,8 +55,6 @@ private:
 	bool m_dataConnected;
 	char *m_udpBuf;
 	qint64 m_udpReadBytes;
-	quint8 *m_buf;
-	std::size_t m_bufsize;
 	std::size_t m_chunksize;
 	SampleFifo *m_sampleFifo;
 	uint32_t m_samplerate;
@@ -68,7 +66,6 @@ private:
 	std::size_t m_samplesCount;
 
 	static const int m_rateDivider;
-	static const int m_udpPayloadSize;
 
 	void setSamplerate(uint32_t samplerate);
 	void processData();

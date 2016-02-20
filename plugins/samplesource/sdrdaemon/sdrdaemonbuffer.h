@@ -61,24 +61,27 @@ public:
 	};
 #pragma pack(pop)
 
-	SDRdaemonBuffer(uint32_t blockSize, uint32_t rateDivider);
+	SDRdaemonBuffer(uint32_t rateDivider);
 	~SDRdaemonBuffer();
 	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
-	uint8_t *readData(uint32_t length);           //!< Read data from buffer
+	uint8_t *readDataChunk();                     //!< Read a chunk of data from buffer
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
+
+	static const int m_udpPayloadSize;
+	static const int m_sampleSize;
+	static const int m_iqSampleSize;
 
 private:
 	void updateLZ4Sizes(uint32_t frameSize);
 	void writeDataLZ4(const char *array, uint32_t length);
 	void writeToRawBufferLZ4(const char *array, uint32_t originalLength);
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
-	void updateBufferSize(uint32_t sampleRate, uint32_t frameSize);
+	void updateBufferSize(uint32_t sampleRate);
     void printMeta(MetaData *metaData);
 
-    uint32_t m_blockSize;    //!< UDP block (payload) size
 	uint32_t m_rateDivider;  //!< Number of times per seconds the samples are fetched
 	bool m_sync;             //!< Meta data acquired (Stream synchronized)
 	bool m_lz4;              //!< Stream is compressed with LZ4
@@ -100,11 +103,10 @@ private:
 	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
 	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
 
-	uint32_t m_writeCount;   //!< Current write position in the raw samples buffer
-	uint32_t m_readCount;    //!< Current read position in the raw samples buffer
+	uint32_t m_writeIndex;   //!< Current write position in the raw samples buffer
+	uint32_t m_readChunkIndex; //!< Current read chunk index in the raw samples buffer
 	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
     uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
-    uint8_t *m_chunkBuffer;  //!< Buffer to build a chunk length of raw samples
     uint32_t m_chunkSize;    //!< Size of a chunk of samples in bytes
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
