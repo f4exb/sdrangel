@@ -47,7 +47,7 @@ SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
 {
 	m_sampleFifo.setSize(96000 * 4);
 	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI());
-	m_SDRdaemonUDPHandler->connectTimer(m_masterTimer);
+	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 }
 
 SDRdaemonInput::~SDRdaemonInput()
@@ -101,7 +101,8 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureSDRdaemonUDPLink::match(message))
 	{
-		// TODO: change UDP settings
+		MsgConfigureSDRdaemonUDPLink& conf = (MsgConfigureSDRdaemonUDPLink&) message;
+		m_SDRdaemonUDPHandler->configureUDPLink(conf.getAddress(), conf.getPort());
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonAutoCorr::match(message))

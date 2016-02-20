@@ -94,9 +94,9 @@ private:
     uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
     uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
     uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
-    uint32_t m_nbDecodes;
-    uint32_t m_nbSuccessfulDecodes;
-    uint32_t m_nbCRCOK;
+    uint32_t m_nbLz4Decodes;
+    uint32_t m_nbLz4SuccessfulDecodes;
+    uint32_t m_nbLz4CRCOK;
     uint64_t m_dataCRC;
 
     uint32_t m_sampleRate;   //!< Current sample rate in Hz

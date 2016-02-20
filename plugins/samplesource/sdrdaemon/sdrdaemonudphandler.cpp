@@ -16,6 +16,7 @@
 
 #include <QUdpSocket>
 #include <QDebug>
+#include <QTimer>
 #include <unistd.h>
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -40,7 +41,8 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_tv_usec(0),
 	m_outputMessageQueueToGUI(outputMessageQueueToGUI),
 	m_tickCount(0),
-	m_samplesCount(0)
+	m_samplesCount(0),
+	m_timer(0)
 {
     m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
@@ -53,6 +55,8 @@ SDRdaemonUDPHandler::~SDRdaemonUDPHandler()
 
 void SDRdaemonUDPHandler::start()
 {
+	qDebug("SDRdaemonUDPHandler::start");
+
 	if (!m_dataSocket)
 	{
 		m_dataSocket = new QUdpSocket(this);
@@ -62,7 +66,7 @@ void SDRdaemonUDPHandler::start()
 	{
 		if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
-			qDebug("SDRdaemonUDPHandler::start: bind data socket to port %d", m_dataPort);
+			qDebug("SDRdaemonUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
 			connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
 			m_dataConnected = true;
 		}
@@ -88,6 +92,22 @@ void SDRdaemonUDPHandler::stop()
 		delete m_dataSocket;
 		m_dataSocket = 0;
 	}
+}
+
+void SDRdaemonUDPHandler::configureUDPLink(const QString& address, quint16 port)
+{
+	qDebug("SDRdaemonUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
+	bool addressOK = m_dataAddress.setAddress(address);
+
+	if (!addressOK)
+	{
+		qWarning("SDRdaemonUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+		m_dataAddress = QHostAddress::LocalHost;
+	}
+
+	stop();
+	m_dataPort = port;
+	start();
 }
 
 void SDRdaemonUDPHandler::dataReadyRead()
@@ -163,10 +183,11 @@ void SDRdaemonUDPHandler::setSamplerate(uint32_t samplerate)
 			<< " #samples per chunk: " << (m_chunksize/SDRdaemonBuffer::m_iqSampleSize);
 }
 
-void SDRdaemonUDPHandler::connectTimer(const QTimer& timer)
+void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 {
 	qDebug() << "SDRdaemonUDPHandler::connectTimer";
-	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+	m_timer = timer;
+	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void SDRdaemonUDPHandler::tick()

@@ -234,11 +234,17 @@
      </item>
      <item>
       <widget class="QLineEdit" name="address">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>120</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Data connection IP address</string>
        </property>
        <property name="text">
         <string>127.0.0.1</string>
@@ -254,11 +260,17 @@
      </item>
      <item>
       <widget class="QLineEdit" name="port">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>50</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Data connection port</string>
        </property>
        <property name="text">
         <string>9090</string>
@@ -267,6 +279,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="applyButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="maximumSize">
         <size>
          <width>30</width>

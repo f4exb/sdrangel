@@ -34,9 +34,9 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_lz4InSize(0),
 	m_lz4OutBuffer(0),
 	m_frameSize(0),
-	m_nbDecodes(0),
-	m_nbSuccessfulDecodes(0),
-	m_nbCRCOK(0),
+	m_nbLz4Decodes(0),
+	m_nbLz4SuccessfulDecodes(0),
+	m_nbLz4CRCOK(0),
 	m_dataCRC(0),
 	m_sampleRate(1000000),
 	m_sampleBytes(2),
@@ -161,32 +161,32 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
 
     if (m_lz4InCount >= m_lz4InSize) // full input compressed block retrieved
     {
-        if (m_nbDecodes == 100)
+        if (m_nbLz4Decodes == 100)
         {
             std::cerr << "SDRdaemonBuffer::writeAndReadLZ4:"
-               << " decoding: " << m_nbCRCOK
-               << ":" << m_nbSuccessfulDecodes
-               << "/" <<  m_nbDecodes
+               << " decoding: " << m_nbLz4CRCOK
+               << ":" << m_nbLz4SuccessfulDecodes
+               << "/" <<  m_nbLz4Decodes
                << std::endl;
 
-        	m_nbDecodes = 0;
-        	m_nbSuccessfulDecodes = 0;
-            m_nbCRCOK = 0;
+        	m_nbLz4Decodes = 0;
+        	m_nbLz4SuccessfulDecodes = 0;
+            m_nbLz4CRCOK = 0;
         }
 
         uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
 
         if (memcmp(&crc64, &m_dataCRC, 8) == 0)
         {
-            m_nbCRCOK++;
+            m_nbLz4CRCOK++;
         }
 
         int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) &m_rawBuffer[m_writeIndex], m_frameSize);
-        m_nbDecodes++;
+        m_nbLz4Decodes++;
 
         if (compressedSize == m_lz4InSize)
     	{
-        	m_nbSuccessfulDecodes++;
+        	m_nbLz4SuccessfulDecodes++;
     	}
 
         writeToRawBufferLZ4((const char *) m_lz4InBuffer, m_frameSize);
@@ -214,11 +214,11 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 void SDRdaemonBuffer::writeToRawBufferLZ4(const char *array, uint32_t length)
 {
     int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) m_lz4OutBuffer, m_frameSize);
-    m_nbDecodes++;
+    m_nbLz4Decodes++;
 
     if (compressedSize == m_lz4InSize)
 	{
-    	m_nbSuccessfulDecodes++;
+    	m_nbLz4SuccessfulDecodes++;
 	}
 
     writeToRawBufferUncompressed((const char *) m_lz4OutBuffer, m_frameSize);

@@ -35,9 +35,10 @@ class SDRdaemonUDPHandler : public QObject
 public:
 	SDRdaemonUDPHandler(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI);
 	~SDRdaemonUDPHandler();
-	void connectTimer(const QTimer& timer);
+	void connectTimer(const QTimer* timer);
 	void start();
 	void stop();
+	void configureUDPLink(const QString& address, quint16 port);
 
 public slots:
 	void dataReadyRead();
@@ -59,6 +60,7 @@ private:
 	MessageQueue *m_outputMessageQueueToGUI;
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;
+	const QTimer *m_timer;
 
 	static const int m_rateDivider;
 
