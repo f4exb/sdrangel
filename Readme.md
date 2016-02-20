@@ -109,8 +109,6 @@ Note that this plugin does not require any of the hardware support libraries nor
 
 <h2>SDRdaemon input</h2>
 
-Warning: this is experimental and not fulle debugged yet.
-
 This is the client side of the SDRdaemon server. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the address and UDP port to which the server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.

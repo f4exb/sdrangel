@@ -114,33 +114,54 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 	QString address;
 	uint32_t uintval;
 	quint16 port;
+	bool dcBlock;
+	bool iqCorrection;
 
-	if(!d.isValid()) {
+	if (!d.isValid())
+	{
 		resetToDefaults();
+		displaySettings();
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+	{
 		uint32_t uintval;
-		d.readString(1, &m_address, "127.0.0.1");
+		d.readString(1, &address, "127.0.0.1");
 		d.readU32(2, &uintval, 9090);
 
 		if ((uintval > 1024) && (uintval < 65536)) {
-			m_port = uintval;
+			port = uintval;
 		} else {
-			m_port = 9090;
+			port = 9090;
 		}
 
-		d.readBool(3, &m_dcBlock, false);
-		d.readBool(4, &m_iqCorrection, false);
+		d.readBool(3, &dcBlock, false);
+		d.readBool(4, &iqCorrection, false);
 
+		if ((address != m_address) || (port != m_port))
+		{
+			m_address = address;
+			m_port = port;
+			configureUDPLink();
+		}
+
+		if ((dcBlock != m_dcBlock) || (iqCorrection != m_iqCorrection))
+		{
+			m_dcBlock = dcBlock;
+			m_iqCorrection = iqCorrection;
+			configureAutoCorrections();
+		}
+
+		displaySettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
+		displaySettings();
 		return false;
 	}
-
-	displaySettings();
 }
 
 qint64 SDRdaemonGui::getCenterFrequency() const
@@ -260,7 +281,7 @@ void SDRdaemonGui::updateWithAcquisition()
 
 void SDRdaemonGui::updateWithStreamData()
 {
-	ui->centerFrequency->setValue(m_centerFrequency);
+	ui->centerFrequency->setValue(m_centerFrequency / 1000);
 	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
 	ui->sampleRateText->setText(tr("%1k").arg(s));
 	updateWithStreamTime(); // TODO: remove when time data is implemented

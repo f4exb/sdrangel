@@ -136,7 +136,7 @@ void SDRdaemonUDPHandler::processData()
 				DSPEngine::instance()->getInputMessageQueue()->push(notif);
 				SDRdaemonInput::MsgReportSDRdaemonStreamData *report = SDRdaemonInput::MsgReportSDRdaemonStreamData::create(
 					m_samplerate,
-					m_centerFrequency, // Frequency in kHz for the GUI
+					m_centerFrequency * 1000, // Frequency in Hz for the GUI
 					m_tv_sec,
 					m_tv_usec);
 				m_outputMessageQueueToGUI->push(report);
