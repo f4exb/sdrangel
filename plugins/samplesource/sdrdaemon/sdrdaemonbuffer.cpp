@@ -27,6 +27,7 @@ const int SDRdaemonBuffer::m_iqSampleSize = 2 * m_sampleSize;
 SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_rateDivider(rateDivider),
 	m_sync(false),
+	m_syncLock(false),
 	m_lz4(false),
 	m_inCount(0),
 	m_lz4InBuffer(0),
@@ -74,6 +75,18 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 
 	if (m_crc64.calculate_crc((uint8_t *)array, sizeof(MetaData) - 8) == metaData->m_crc)
 	{
+		// sync condition:
+		if (m_currentMeta.m_blockSize > 0)
+		{
+			uint32_t nbBlocks = m_currentMeta.m_nbBytes / m_currentMeta.m_blockSize;
+			m_syncLock = nbBlocks + (m_lz4 ? 2 : 1) == m_nbBlocks;
+			//qDebug("SDRdaemonBuffer::readMeta: m_nbBlocks: %d:%d %s", nbBlocks, m_nbBlocks, (m_syncLock ? "locked" : "unlocked"));
+		}
+		else
+		{
+			m_syncLock = false;
+		}
+
 		memcpy((void *) &m_dataCRC, (const void *) &array[sizeof(MetaData)], 8);
 		m_nbBlocks = 0;
 		m_inCount = 0;

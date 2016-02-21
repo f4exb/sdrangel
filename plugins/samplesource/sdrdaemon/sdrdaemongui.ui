@@ -235,7 +235,7 @@
      <item>
       <widget class="QLineEdit" name="address">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="minimumSize">
         <size>
@@ -261,7 +261,7 @@
      <item>
       <widget class="QLineEdit" name="port">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="minimumSize">
         <size>
@@ -280,7 +280,7 @@
      <item>
       <widget class="QPushButton" name="applyButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="maximumSize">
         <size>
@@ -289,7 +289,7 @@
         </size>
        </property>
        <property name="text">
-        <string>OK</string>
+        <string>Set</string>
        </property>
       </widget>
      </item>

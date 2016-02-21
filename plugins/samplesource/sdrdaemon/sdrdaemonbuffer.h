@@ -69,6 +69,7 @@ public:
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
+	bool isSyncLocked() const { return m_syncLock; }
 
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;
@@ -83,7 +84,8 @@ private:
     void printMeta(MetaData *metaData);
 
 	uint32_t m_rateDivider;  //!< Number of times per seconds the samples are fetched
-	bool m_sync;             //!< Meta data acquired (Stream synchronized)
+	bool m_sync;             //!< Meta data acquired
+	bool m_syncLock;         //!< Meta data expected (Stream synchronized)
 	bool m_lz4;              //!< Stream is compressed with LZ4
 	MetaData m_currentMeta;  //!< Stored current meta data
 	CRC64 m_crc64;           //!< CRC64 calculator
