@@ -37,6 +37,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_acquisition(false),
 	m_sampleRate(0),
+	m_sampleRateStream(0),
 	m_centerFrequency(0),
 	m_samplesCount(0),
 	m_tickCount(0),
@@ -185,6 +186,7 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonInput::MsgReportSDRdaemonStreamData::match(message))
 	{
+		m_sampleRateStream = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getSampleRateStream();
 		m_sampleRate = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getSampleRate();
 		m_centerFrequency = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).getCenterFrequency();
 		m_startingTimeStamp.tv_sec = ((SDRdaemonInput::MsgReportSDRdaemonStreamData&)message).get_tv_sec();
@@ -282,9 +284,14 @@ void SDRdaemonGui::updateWithAcquisition()
 void SDRdaemonGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency / 1000);
-	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
-	ui->sampleRateText->setText(tr("%1k").arg(s));
-	updateWithStreamTime(); // TODO: remove when time data is implemented
+	QString s0 = QString::number(m_sampleRateStream/1000.0, 'f', 0);
+	ui->sampleRateStreamText->setText(tr("%1").arg(s0));
+	QString s1 = QString::number(m_sampleRate/1000.0, 'f', 3);
+	ui->sampleRateText->setText(tr("%1").arg(s1));
+	float skewPerCent = (float) ((m_sampleRate - m_sampleRateStream) * 100) / (float) m_sampleRateStream;
+	QString s2 = QString::number(skewPerCent, 'f', 2);
+	ui->skewRateText->setText(tr("%1").arg(s2));
+	updateWithStreamTime();
 }
 
 void SDRdaemonGui::updateWithStreamTime()

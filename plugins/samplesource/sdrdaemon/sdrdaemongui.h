@@ -55,6 +55,7 @@ private:
 	SampleSource* m_sampleSource;
     bool m_acquisition;
 	int m_sampleRate;
+	int m_sampleRateStream;
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
 	int m_samplesCount;

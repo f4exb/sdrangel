@@ -67,6 +67,7 @@ public:
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
 	uint8_t *readDataChunk();                     //!< Read a chunk of data from buffer
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
+	uint32_t getSampleRateStream() const { return m_sampleRateStream; }
 	uint32_t getSampleRate() const { return m_sampleRate; }
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }

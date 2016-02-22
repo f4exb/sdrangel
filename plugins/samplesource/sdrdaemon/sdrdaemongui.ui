@@ -113,14 +113,7 @@
    <item>
     <layout class="QHBoxLayout" name="rateTimeLayout">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Rate: </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sampleRateText">
+      <widget class="QLabel" name="sampleRateStreamText">
        <property name="minimumSize">
         <size>
          <width>50</width>
@@ -133,10 +126,62 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Record sample rate</string>
+        <string>Nominal sample rate from stream data (kS/s)</string>
        </property>
        <property name="text">
-        <string>0k</string>
+        <string>00000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="sampleRateLine1">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sampleRateText">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Actual sample rate (kS/s)</string>
+       </property>
+       <property name="text">
+        <string>0000.000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="sampleRateLine2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="skewRateText">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Sample rate skew from stream nominal rate (%)</string>
+       </property>
+       <property name="text">
+        <string>-00.00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -213,6 +258,19 @@
         <string>IQ Imbalance</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
