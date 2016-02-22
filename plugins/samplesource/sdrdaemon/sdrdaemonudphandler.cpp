@@ -137,10 +137,12 @@ void SDRdaemonUDPHandler::processData()
 			m_tv_sec = metaData.m_tv_sec;
 			m_tv_usec = metaData.m_tv_usec;
 
-			if (m_samplerate != metaData.m_sampleRate)
+			uint32_t sampleRate = m_sdrDaemonBuffer.getSampleRate();
+
+			if (m_samplerate != sampleRate)
 			{
-				setSamplerate(metaData.m_sampleRate);
-				m_samplerate = metaData.m_sampleRate;
+				setSamplerate(sampleRate);
+				m_samplerate = sampleRate;
 				change = true;
 			}
 

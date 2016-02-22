@@ -39,7 +39,8 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_nbLz4SuccessfulDecodes(0),
 	m_nbLz4CRCOK(0),
 	m_dataCRC(0),
-	m_sampleRate(1000000),
+	m_sampleRateStream(0),
+	m_sampleRate(0),
 	m_sampleBytes(2),
 	m_sampleBits(12),
 	m_writeIndex(0),
@@ -48,7 +49,11 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_rawBuffer(0),
 	m_chunkSize(0),
 	m_bytesInBlock(0),
-	m_nbBlocks(0)
+	m_nbBlocks(0),
+	m_readCycles(0),
+	m_lastWriteIndex(0),
+	m_skewRateSum(0.0),
+	m_skewRate(0.0)
 {
 	m_currentMeta.init();
 }
@@ -105,6 +110,13 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			m_sampleBytes = metaData->m_sampleBytes & 0x0F;
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
 			uint32_t sampleRate = metaData->m_sampleRate;
+
+			if (sampleRate != m_sampleRateStream)
+			{
+				m_sampleRateStream = sampleRate;
+			}
+
+			sampleRate += (((int) (sampleRate * m_skewRate)) / m_rateDivider) * m_rateDivider;
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
@@ -240,18 +252,32 @@ void SDRdaemonBuffer::writeToRawBufferLZ4(const char *array, uint32_t length)
 uint8_t *SDRdaemonBuffer::readDataChunk()
 {
 	// relies on the fact that we always have an integer number of chunks in the raw buffer
-
-	if (m_readChunkIndex == m_rateDivider * 2) // go back to start or middle of raw buffer
+	if (m_readChunkIndex == m_rateDivider * 2) // go back to start of raw buffer
 	{
-		// make sure the read and write pointers are not in the same half of the raw buffer
-		if (m_writeIndex < m_rateDivider * m_chunkSize - 1)
+		double oneCycleSkew = 0;
+
+		if (m_readCycles > 0)
 		{
-			m_readChunkIndex = m_rateDivider; // go to middle
+			oneCycleSkew = (double) ((int) m_writeIndex - (int) m_lastWriteIndex) / (double) m_rawSize;
+			m_skewRateSum += oneCycleSkew;
 		}
-		else
+
+		//qDebug("SDRdaemonBuffer::readDataChunk: %d / %d (%lf)", m_writeIndex, m_rawSize, oneCycleSkew);
+
+		if (m_readCycles && ((m_writeIndex < m_rawSize / 10) || (m_rawSize - m_writeIndex < m_rawSize / 10)))
 		{
-			m_readChunkIndex = 0; // go to start
+			m_skewRate = m_skewRateSum / m_readCycles;
+			if (m_skewRate > 0.04) {
+				m_skewRate = 0.04;
+			} else if (m_skewRate < -0.04) {
+				m_skewRate = -0.04;
+			}
+			qDebug("SDRdaemonBuffer::readDataChunk: m_skewRate: %lf", m_skewRate);
 		}
+
+		m_readChunkIndex = 0; // go to start
+		m_lastWriteIndex = m_writeIndex;
+		m_readCycles++;
 	}
 
 	uint32_t readIndex = m_readChunkIndex;
@@ -292,6 +318,8 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 
 	m_writeIndex = 0;
 	m_readChunkIndex = m_rateDivider;
+	m_readCycles = 0;
+	m_skewRateSum = 0;
 
 	std::cerr << "SDRdaemonBuffer::updateBufferSize:"
 		<< " sampleRate: " << sampleRate

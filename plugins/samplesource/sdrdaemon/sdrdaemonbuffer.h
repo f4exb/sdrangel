@@ -67,6 +67,7 @@ public:
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
 	uint8_t *readDataChunk();                     //!< Read a chunk of data from buffer
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
+	uint32_t getSampleRate() const { return m_sampleRate; }
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
 	bool isSyncLocked() const { return m_syncLock; }
@@ -101,9 +102,10 @@ private:
     uint32_t m_nbLz4CRCOK;
     uint64_t m_dataCRC;
 
-    uint32_t m_sampleRate;   //!< Current sample rate in Hz
-	uint8_t  m_sampleBytes;  //!< Current number of bytes per I or Q sample
-	uint8_t  m_sampleBits;   //!< Current number of effective bits per sample
+    uint32_t m_sampleRateStream; //!< Current sample rate from the stream
+    uint32_t m_sampleRate;       //!< Current actual sample rate in Hz
+	uint8_t  m_sampleBytes;      //!< Current number of bytes per I or Q sample
+	uint8_t  m_sampleBits;       //!< Current number of effective bits per sample
 
 	uint32_t m_writeIndex;   //!< Current write position in the raw samples buffer
 	uint32_t m_readChunkIndex; //!< Current read chunk index in the raw samples buffer
@@ -112,6 +114,11 @@ private:
     uint32_t m_chunkSize;    //!< Size of a chunk of samples in bytes
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
+
+    uint32_t m_readCycles;     //!< Count of read cycles over raw buiffer
+    uint32_t m_lastWriteIndex; //!< Write index at last skew estimation
+    double   m_skewRateSum;
+    double   m_skewRate;
 };
 
 
