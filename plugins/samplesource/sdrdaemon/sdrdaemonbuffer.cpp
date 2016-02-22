@@ -271,10 +271,10 @@ uint8_t *SDRdaemonBuffer::readDataChunk()
 		if (m_readCycles && ((m_writeIndex < m_rawSize / 10) || (m_rawSize - m_writeIndex < m_rawSize / 10)))
 		{
 			m_skewRate = m_skewRateSum / m_readCycles;
-			if (m_skewRate > 0.04) {
-				m_skewRate = 0.04;
-			} else if (m_skewRate < -0.04) {
-				m_skewRate = -0.04;
+			if (m_skewRate > 0.2) {
+				m_skewRate = 0.2;
+			} else if (m_skewRate < -0.2) {
+				m_skewRate = -0.2;
 			}
 			qDebug("SDRdaemonBuffer::readDataChunk: m_skewRate: %lf", m_skewRate);
 		}
