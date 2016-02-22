@@ -115,6 +115,10 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			{
 				m_sampleRateStream = sampleRate;
 			}
+			else
+			{
+				sampleRate = m_sampleRate;
+			}
 
 			sampleRate += (((int) (sampleRate * m_skewRate)) / m_rateDivider) * m_rateDivider;
 
@@ -320,6 +324,7 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 	m_readChunkIndex = m_rateDivider;
 	m_readCycles = 0;
 	m_skewRateSum = 0;
+	m_skewRate = 0;
 
 	std::cerr << "SDRdaemonBuffer::updateBufferSize:"
 		<< " sampleRate: " << sampleRate
