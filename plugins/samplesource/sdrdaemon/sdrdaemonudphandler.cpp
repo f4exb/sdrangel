@@ -76,6 +76,10 @@ void SDRdaemonUDPHandler::start()
 			m_dataConnected = false;
 		}
 	}
+
+	// Need to notify the DSP engine to actually start
+	DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
+	DSPEngine::instance()->getInputMessageQueue()->push(notif);
 }
 
 void SDRdaemonUDPHandler::stop()
