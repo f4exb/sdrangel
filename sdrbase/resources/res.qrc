@@ -1,8 +1,9 @@
 <RCC>
   <qresource prefix="/">
+    <file>compressed.png</file>
     <file>locked.png</file>
-    <file>unlocked.png</file>
     <file>appicon.png</file>
+    <file>unlocked.png</file>
     <file>histogram.png</file>
     <file>waterfall.png</file>
     <file>preset-load.png</file>
