@@ -210,7 +210,8 @@ void SDRdaemonUDPHandler::tick()
 			m_tv_sec,
 			m_tv_usec,
 			m_sdrDaemonBuffer.isSyncLocked(),
-			m_sdrDaemonBuffer.getFrameSize());
+			m_sdrDaemonBuffer.getFrameSize(),
+			m_sdrDaemonBuffer.isLz4Compressed());
 		m_outputMessageQueueToGUI->push(report);
 	}
 }

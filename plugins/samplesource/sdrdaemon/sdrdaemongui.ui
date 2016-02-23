@@ -314,7 +314,7 @@
    <item>
     <layout class="QHBoxLayout" name="lz4Layout">
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="lz4Compressed">
        <property name="enabled">
         <bool>false</bool>
        </property>
