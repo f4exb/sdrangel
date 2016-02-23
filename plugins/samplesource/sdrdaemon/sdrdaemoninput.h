@@ -176,13 +176,15 @@ public:
 				uint32_t tv_usec,
 				bool syncLock,
 				uint32_t frameSize,
-				bool lz4)
+				bool lz4,
+				float compressionRatio)
 		{
 			return new MsgReportSDRdaemonStreamTiming(tv_sec,
 					tv_usec,
 					syncLock,
 					frameSize,
-					lz4);
+					lz4,
+					compressionRatio);
 		}
 
 	protected:
@@ -191,18 +193,21 @@ public:
 		bool m_syncLock;
 		uint32_t m_frameSize;
 		bool m_lz4;
+		float m_compressionRatio;
 
 		MsgReportSDRdaemonStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
 				bool syncLock,
 				uint32_t frameSize,
-				bool lz4) :
+				bool lz4,
+				float compressionRatio) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
 			m_syncLock(syncLock),
 			m_frameSize(frameSize),
-			m_lz4(lz4)
+			m_lz4(lz4),
+			m_compressionRatio(compressionRatio)
 		{ }
 	};
 

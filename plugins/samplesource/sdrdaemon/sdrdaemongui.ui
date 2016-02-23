@@ -4,7 +4,7 @@
  <widget class="QWidget" name="SDRdaemonGui">
   <property name="minimumSize">
    <size>
-    <width>360</width>
+    <width>340</width>
     <height>0</height>
    </size>
   </property>
@@ -472,7 +472,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>80</width>
          <height>16777215</height>
         </size>
        </property>

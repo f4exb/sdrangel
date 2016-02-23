@@ -62,6 +62,7 @@ private:
 	bool m_syncLocked;
 	uint32_t m_frameSize;
 	bool m_lz4;
+	float m_compressionRatio;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;

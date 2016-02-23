@@ -74,6 +74,7 @@ public:
 	bool isSyncLocked() const { return m_syncLock; }
 	uint32_t getFrameSize() const { return m_frameSize; }
 	bool isLz4Compressed() const { return m_lz4; }
+	float getCompressionRatio() const { return (m_frameSize ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
 
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;

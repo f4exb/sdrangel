@@ -202,6 +202,7 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 		m_syncLocked = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getSyncLock();
 		m_frameSize = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getFrameSize();
 		m_lz4 = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4Compression();
+		m_compressionRatio = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4Compression();
 		updateWithStreamTime();
 		return true;
 	}
@@ -319,6 +320,9 @@ void SDRdaemonGui::updateWithStreamTime()
 	} else {
 		ui->lz4Compressed->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
+
+	s = QString::number(m_compressionRatio, 'f', 2);
+	ui->compressionRatioText->setText(tr("%1").arg(s));
 }
 
 void SDRdaemonGui::tick()
