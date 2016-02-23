@@ -40,6 +40,11 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleRateStream(0),
 	m_centerFrequency(0),
 	m_syncLocked(false),
+	m_frameSize(0),
+	m_lz4(false),
+	m_compressionRatio(1.0),
+	m_nbLz4DataCRCOK(0),
+	m_nbLz4SuccessfulDecodes(0),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_address("127.0.0.1"),
@@ -202,7 +207,16 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 		m_syncLocked = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getSyncLock();
 		m_frameSize = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getFrameSize();
 		m_lz4 = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4Compression();
-		m_compressionRatio = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4Compression();
+
+		if (m_lz4) {
+			m_compressionRatio = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4CompressionRatio();
+		} else {
+			m_compressionRatio = 1.0;
+		}
+
+		m_nbLz4DataCRCOK = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4DataCRCOK();
+		m_nbLz4SuccessfulDecodes = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4SuccessfulDecodes();
+
 		updateWithStreamTime();
 		return true;
 	}
@@ -323,6 +337,12 @@ void SDRdaemonGui::updateWithStreamTime()
 
 	s = QString::number(m_compressionRatio, 'f', 2);
 	ui->compressionRatioText->setText(tr("%1").arg(s));
+
+	s = QString::number(m_nbLz4DataCRCOK, 'f', 0);
+	ui->dataCRCOKText->setText(tr("%1").arg(s));
+
+	s = QString::number(m_nbLz4SuccessfulDecodes, 'f', 0);
+	ui->lz4DecodesOKText->setText(tr("%1").arg(s));
 }
 
 void SDRdaemonGui::tick()

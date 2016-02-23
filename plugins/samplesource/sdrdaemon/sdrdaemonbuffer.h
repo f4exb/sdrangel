@@ -74,7 +74,9 @@ public:
 	bool isSyncLocked() const { return m_syncLock; }
 	uint32_t getFrameSize() const { return m_frameSize; }
 	bool isLz4Compressed() const { return m_lz4; }
-	float getCompressionRatio() const { return (m_frameSize ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
+	float getCompressionRatio() const { return (m_frameSize > 0 ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
+	uint32_t getLz4DataCRCOK() const { return m_nbLastLz4CRCOK; }
+	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
 
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;
@@ -104,6 +106,8 @@ private:
     uint32_t m_nbLz4Decodes;
     uint32_t m_nbLz4SuccessfulDecodes;
     uint32_t m_nbLz4CRCOK;
+    uint32_t m_nbLastLz4SuccessfulDecodes;
+    uint32_t m_nbLastLz4CRCOK;
     uint64_t m_dataCRC;
 
     uint32_t m_sampleRateStream; //!< Current sample rate from the stream

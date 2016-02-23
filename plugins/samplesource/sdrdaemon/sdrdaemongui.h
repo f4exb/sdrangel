@@ -63,6 +63,8 @@ private:
 	uint32_t m_frameSize;
 	bool m_lz4;
 	float m_compressionRatio;
+	uint32_t m_nbLz4DataCRCOK;
+	uint32_t m_nbLz4SuccessfulDecodes;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;

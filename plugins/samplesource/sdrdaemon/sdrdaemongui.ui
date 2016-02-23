@@ -368,7 +368,7 @@
         <string>Data CRC OK (%)</string>
        </property>
        <property name="text">
-        <string>100</string>
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -394,7 +394,7 @@
         <string>LZ4 successful decodes (%)</string>
        </property>
        <property name="text">
-        <string>100</string>
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -38,6 +38,8 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_nbLz4Decodes(0),
 	m_nbLz4SuccessfulDecodes(0),
 	m_nbLz4CRCOK(0),
+	m_nbLastLz4SuccessfulDecodes(0),
+	m_nbLastLz4CRCOK(0),
 	m_dataCRC(0),
 	m_sampleRateStream(0),
 	m_sampleRate(0),
@@ -199,6 +201,8 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
                << "/" <<  m_nbLz4Decodes
                << std::endl;
 
+            m_nbLastLz4SuccessfulDecodes = m_nbLz4SuccessfulDecodes;
+            m_nbLastLz4CRCOK = m_nbLz4CRCOK;
         	m_nbLz4Decodes = 0;
         	m_nbLz4SuccessfulDecodes = 0;
             m_nbLz4CRCOK = 0;
