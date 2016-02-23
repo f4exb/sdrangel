@@ -80,7 +80,7 @@ public:
 private:
 	void updateLZ4Sizes(uint32_t frameSize);
 	void writeDataLZ4(const char *array, uint32_t length);
-	void writeToRawBufferLZ4(const char *array, uint32_t originalLength);
+	void writeToRawBufferLZ4();
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
 	void updateBufferSize(uint32_t sampleRate);
     void printMeta(MetaData *metaData);

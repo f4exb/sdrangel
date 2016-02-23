@@ -96,7 +96,7 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 		m_nbBlocks = 0;
 		m_inCount = 0;
 
-		if (!(m_currentMeta == *metaData))
+		if (!m_lz4 && !(m_currentMeta == *metaData))
 		{
 			std::cerr << "SDRdaemonBuffer::readMeta: ";
 			printMeta(metaData);
@@ -203,23 +203,7 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
             m_nbLz4CRCOK = 0;
         }
 
-        uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
-
-        if (memcmp(&crc64, &m_dataCRC, 8) == 0)
-        {
-            m_nbLz4CRCOK++;
-        }
-
-        int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) &m_rawBuffer[m_writeIndex], m_frameSize);
-        m_nbLz4Decodes++;
-
-        if (compressedSize == m_lz4InSize)
-    	{
-        	m_nbLz4SuccessfulDecodes++;
-    	}
-
-        writeToRawBufferLZ4((const char *) m_lz4InBuffer, m_frameSize);
-
+        writeToRawBufferLZ4();
 		m_lz4InCount = 0;
     }
 }
@@ -235,22 +219,33 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 	else
 	{
 		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, m_rawSize - m_writeIndex);
-		m_writeIndex = length - (m_rawSize - m_writeIndex);
-		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], m_writeIndex);
+		length -= m_rawSize - m_writeIndex;
+		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], length);
+		m_writeIndex = length;
 	}
 }
 
-void SDRdaemonBuffer::writeToRawBufferLZ4(const char *array, uint32_t length)
+void SDRdaemonBuffer::writeToRawBufferLZ4()
 {
+    uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
+
+    if (memcmp(&crc64, &m_dataCRC, 8) == 0)
+    {
+        m_nbLz4CRCOK++;
+    }
+    else
+    {
+    	return;
+    }
+
     int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) m_lz4OutBuffer, m_frameSize);
     m_nbLz4Decodes++;
 
     if (compressedSize == m_lz4InSize)
 	{
     	m_nbLz4SuccessfulDecodes++;
+    	writeToRawBufferUncompressed((const char *) m_lz4OutBuffer, m_frameSize);
 	}
-
-    writeToRawBufferUncompressed((const char *) m_lz4OutBuffer, m_frameSize);
 }
 
 uint8_t *SDRdaemonBuffer::readDataChunk()
