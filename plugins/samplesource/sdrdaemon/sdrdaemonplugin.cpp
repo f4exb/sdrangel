@@ -23,7 +23,7 @@
 #include "sdrdaemonplugin.h"
 
 const PluginDescriptor SDRdaemonPlugin::m_pluginDescriptor = {
-	QString("File source input"),
+	QString("SDRdaemon input"),
 	QString("---"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),

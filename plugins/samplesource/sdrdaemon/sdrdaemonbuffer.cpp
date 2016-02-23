@@ -122,7 +122,6 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 
 			sampleRate += sampleRate * m_skewRate;
 			sampleRate = (sampleRate / m_rateDivider) * m_rateDivider;
-			//sampleRate += (((int) (sampleRate * m_skewRate)) / m_rateDivider) * m_rateDivider;
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
