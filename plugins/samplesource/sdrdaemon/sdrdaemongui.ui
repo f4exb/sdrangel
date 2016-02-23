@@ -215,7 +215,7 @@
       <widget class="QLabel" name="sampleRateStreamText">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
@@ -223,7 +223,7 @@
         <string>Nominal sample rate from stream data (kS/s)</string>
        </property>
        <property name="text">
-        <string>00000</string>
+        <string>0000.00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

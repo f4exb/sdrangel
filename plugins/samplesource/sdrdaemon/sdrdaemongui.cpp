@@ -303,7 +303,7 @@ void SDRdaemonGui::updateWithAcquisition()
 void SDRdaemonGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency / 1000);
-	QString s0 = QString::number(m_sampleRateStream/1000.0, 'f', 0);
+	QString s0 = QString::number(m_sampleRateStream/1000.0, 'f', 2);
 	ui->sampleRateStreamText->setText(tr("%1").arg(s0));
 	QString s1 = QString::number(m_sampleRate/1000.0, 'f', 3);
 	ui->sampleRateText->setText(tr("%1").arg(s1));
