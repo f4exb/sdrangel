@@ -54,10 +54,13 @@ private:
 	QTimer m_updateTimer;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
+
 	int m_sampleRate;
 	int m_sampleRateStream;
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
+	bool m_syncLocked;
+
 	int m_samplesCount;
 	std::size_t m_tickCount;
 

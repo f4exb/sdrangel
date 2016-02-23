@@ -39,6 +39,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_sampleRateStream(0),
 	m_centerFrequency(0),
+	m_syncLocked(false),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_address("127.0.0.1"),
@@ -198,6 +199,7 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 	{
 		m_startingTimeStamp.tv_sec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_usec();
+		m_syncLocked = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getSyncLock();
 		updateWithStreamTime();
 		return true;
 	}
@@ -300,6 +302,12 @@ void SDRdaemonGui::updateWithStreamTime()
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
 	QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
+
+	if (m_syncLocked) {
+		ui->streamLocked->setStyleSheet("QToolButton { background-color : green; }");
+	} else {
+		ui->streamLocked->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+	}
 }
 
 void SDRdaemonGui::tick()
