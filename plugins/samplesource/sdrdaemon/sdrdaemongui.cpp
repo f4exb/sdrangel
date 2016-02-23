@@ -200,6 +200,7 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 		m_startingTimeStamp.tv_sec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_usec();
 		m_syncLocked = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getSyncLock();
+		m_frameSize = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getFrameSize();
 		updateWithStreamTime();
 		return true;
 	}
@@ -308,6 +309,9 @@ void SDRdaemonGui::updateWithStreamTime()
 	} else {
 		ui->streamLocked->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
+
+	QString s = QString::number(m_frameSize / 1024.0, 'f', 0);
+	ui->frameSizeText->setText(tr("%1").arg(s));
 }
 
 void SDRdaemonGui::tick()

@@ -169,28 +169,34 @@ public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
 		bool getSyncLock() const { return m_syncLock; }
+		uint32_t getFrameSize() const { return m_frameSize; }
 
 		static MsgReportSDRdaemonStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
-				bool syncLock)
+				bool syncLock,
+				uint32_t frameSize)
 		{
 			return new MsgReportSDRdaemonStreamTiming(tv_sec,
 					tv_usec,
-					syncLock);
+					syncLock,
+					frameSize);
 		}
 
 	protected:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
 		bool m_syncLock;
+		uint32_t m_frameSize;
 
 		MsgReportSDRdaemonStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
-				bool syncLock) :
+				bool syncLock,
+				uint32_t frameSize) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
-			m_syncLock(syncLock)
+			m_syncLock(syncLock),
+			m_frameSize(frameSize)
 		{ }
 	};
 

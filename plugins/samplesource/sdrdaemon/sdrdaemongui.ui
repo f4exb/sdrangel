@@ -2,19 +2,11 @@
 <ui version="4.0">
  <class>SDRdaemonGui</class>
  <widget class="QWidget" name="SDRdaemonGui">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>375</width>
-    <height>207</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
+  <property name="minimumSize">
+   <size>
+    <width>360</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -104,87 +96,43 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_freq_2">
+    <widget class="Line" name="line_address">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="rateTimeLayout">
+    <layout class="QHBoxLayout" name="gridLayout_corr">
      <item>
-      <widget class="QLabel" name="sampleRateStreamText">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Auto Corr</string>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcOffset">
        <property name="toolTip">
-        <string>Nominal sample rate from stream data (kS/s)</string>
+        <string>DC Offset auto correction</string>
        </property>
        <property name="text">
-        <string>00000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>DC</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="Line" name="sampleRateLine1">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sampleRateText">
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="ButtonSwitch" name="iqImbalance">
        <property name="toolTip">
-        <string>Actual sample rate (kS/s)</string>
+        <string>IQ Imbalance auto correction</string>
        </property>
        <property name="text">
-        <string>0000.000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>IQ</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="Line" name="sampleRateLine2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="skewRateText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Sample rate skew from stream nominal rate (%)</string>
-       </property>
-       <property name="text">
-        <string>-00.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -195,13 +143,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="Line" name="absTimeLine">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QLabel" name="absTimeText">
@@ -219,14 +160,14 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_rateTime">
+    <widget class="Line" name="line_freq_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="statusLayout">
+    <layout class="QHBoxLayout" name="streamLayout">
      <item>
       <widget class="QToolButton" name="streamLocked">
        <property name="enabled">
@@ -264,12 +205,114 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="lineLocked">
+      <widget class="Line" name="lineStream1">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="sampleRateStreamText">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Nominal sample rate from stream data (kS/s)</string>
+       </property>
+       <property name="text">
+        <string>00000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sampleRateText">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Actual sample rate (kS/s)</string>
+       </property>
+       <property name="text">
+        <string>0000.000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="skewRateText">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Sample rate skew from stream nominal rate (%)</string>
+       </property>
+       <property name="text">
+        <string>-00.00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_rateTime">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="lz4Layout">
      <item>
       <widget class="QToolButton" name="toolButton">
        <property name="enabled">
@@ -291,7 +334,7 @@
       <widget class="QLabel" name="compressionRatioText">
        <property name="minimumSize">
         <size>
-         <width>40</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
@@ -303,6 +346,13 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineLz41">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -326,6 +376,13 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="lineLz42">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="lz4DecodesOKText">
        <property name="minimumSize">
         <size>
@@ -345,58 +402,14 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_3">
+      <widget class="Line" name="lineLz43">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_address">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="gridLayout_corr">
-     <item>
-      <widget class="QLabel" name="corrLabel">
-       <property name="text">
-        <string>Auto corr</string>
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="dcOffset">
-       <property name="toolTip">
-        <string>DC Offset auto correction</string>
-       </property>
-       <property name="text">
-        <string>DC Offset</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="iqImbalance">
-       <property name="toolTip">
-        <string>IQ Imbalance auto correction</string>
-       </property>
-       <property name="text">
-        <string>IQ Imbalance</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -433,7 +446,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>120</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -457,10 +470,10 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="minimumSize">
+       <property name="maximumSize">
         <size>
          <width>50</width>
-         <height>0</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="toolTip">
@@ -468,6 +481,9 @@
        </property>
        <property name="text">
         <string>9090</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

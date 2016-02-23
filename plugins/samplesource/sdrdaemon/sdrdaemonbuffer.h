@@ -72,6 +72,7 @@ public:
 	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
 	bool isSyncLocked() const { return m_syncLock; }
+	uint32_t getFrameSize() const { return m_frameSize; }
 
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;

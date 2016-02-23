@@ -60,6 +60,7 @@ private:
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
 	bool m_syncLocked;
+	uint32_t m_frameSize;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;

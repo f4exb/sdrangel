@@ -209,7 +209,8 @@ void SDRdaemonUDPHandler::tick()
 		SDRdaemonInput::MsgReportSDRdaemonStreamTiming *report = SDRdaemonInput::MsgReportSDRdaemonStreamTiming::create(
 			m_tv_sec,
 			m_tv_usec,
-			m_sdrDaemonBuffer.isSyncLocked());
+			m_sdrDaemonBuffer.isSyncLocked(),
+			m_sdrDaemonBuffer.getFrameSize());
 		m_outputMessageQueueToGUI->push(report);
 	}
 }
