@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>343</width>
+    <width>375</width>
     <height>207</height>
    </rect>
   </property>
@@ -120,11 +120,6 @@
          <height>0</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
        <property name="toolTip">
         <string>Nominal sample rate from stream data (kS/s)</string>
        </property>
@@ -214,7 +209,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Record absolute time</string>
+        <string>Stream timestamp</string>
        </property>
        <property name="text">
         <string>2015-01-01  00:00:00.000</string>

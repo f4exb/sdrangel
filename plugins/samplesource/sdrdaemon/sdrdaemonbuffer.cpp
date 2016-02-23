@@ -109,7 +109,7 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 		{
 			m_sampleBytes = metaData->m_sampleBytes & 0x0F;
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
-			uint32_t sampleRate = metaData->m_sampleRate;
+			int sampleRate = metaData->m_sampleRate;
 
 			if (sampleRate != m_sampleRateStream)
 			{
@@ -120,7 +120,9 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 				sampleRate = m_sampleRate;
 			}
 
-			sampleRate += (((int) (sampleRate * m_skewRate)) / m_rateDivider) * m_rateDivider;
+			sampleRate += sampleRate * m_skewRate;
+			sampleRate = (sampleRate / m_rateDivider) * m_rateDivider;
+			//sampleRate += (((int) (sampleRate * m_skewRate)) / m_rateDivider) * m_rateDivider;
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
