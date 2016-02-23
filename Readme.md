@@ -109,8 +109,6 @@ Note that this plugin does not require any of the hardware support libraries nor
 
 <h2>SDRdaemon input</h2>
 
-Warning: this is experimental and not fully debugged yet.
-
 This is the client side of the SDRdaemon server. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the address and UDP port to which the server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency.
 
 There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second. 
@@ -211,7 +209,6 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 
 <h2>To Do</h2>
 
-  - UDP source plugin: add the possibility to launch an external command that will process the samples like a GNUradio headless flowgraph
   - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
   - Tx channels
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.

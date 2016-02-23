@@ -251,6 +251,18 @@ void SDRdaemonGui::displaySettings()
 
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
+	bool ok;
+	QString udpAddress = ui->address->text();
+	int udpPort = ui->port->text().toInt(&ok);
+
+	if((!ok) || (udpPort < 1024) || (udpPort > 65535))
+	{
+		udpPort = 9090;
+	}
+
+	m_address = udpAddress;
+	m_port = udpPort;
+
 	configureUDPLink();
 }
 
@@ -274,19 +286,10 @@ void SDRdaemonGui::on_iqImbalance_toggled(bool checked)
 
 void SDRdaemonGui::configureUDPLink()
 {
-	bool ok;
-	QString udpAddress = ui->address->text();
-	int udpPort = ui->port->text().toInt(&ok);
+	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_address.toStdString().c_str()
+			<< " : " << m_port;
 
-	if((!ok) || (udpPort < 1024) || (udpPort > 65535))
-	{
-		udpPort = 9090;
-	}
-
-	qDebug() << "SDRdaemonGui::configureUDPLink: " << udpAddress.toStdString().c_str()
-			<< " : " << udpPort;
-
-	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(udpAddress, udpPort);
+	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(m_address, m_port);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
