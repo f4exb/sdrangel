@@ -139,8 +139,6 @@ Install cmake version 3:
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
 
-There is no installation procedure the executable is at the root of the build directory
-
 <h2>Mint</h2>
 
 Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).

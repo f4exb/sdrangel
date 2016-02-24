@@ -409,6 +409,11 @@ void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1)
 	ui->applyBtn->setEnabled(true);
 }
 
+void UDPSrcGUI::on_udpAddress_textEdited(const QString& arg1)
+{
+	ui->applyBtn->setEnabled(true);
+}
+
 void UDPSrcGUI::on_udpPort_textEdited(const QString& arg1)
 {
 	ui->applyBtn->setEnabled(true);
