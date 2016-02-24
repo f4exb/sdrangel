@@ -30,11 +30,15 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins()
 {
-	qDebug() << "PluginManager::loadPlugins: " << qPrintable(QApplication::instance()->applicationDirPath());
+	QString applicationDirPath = QApplication::instance()->applicationDirPath();
+	QString applicationLibPath = applicationDirPath + "/../lib";
+	qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationDirPath) << ", " << qPrintable(applicationLibPath);
 
-	QDir pluginsDir = QDir(QApplication::instance()->applicationDirPath());
+	QDir pluginsBinDir = QDir(applicationDirPath);
+	QDir pluginsLibDir = QDir(applicationLibPath);
 
-	loadPlugins(pluginsDir);
+	loadPlugins(pluginsBinDir);
+	loadPlugins(pluginsLibDir);
 
 	qSort(m_plugins);
 

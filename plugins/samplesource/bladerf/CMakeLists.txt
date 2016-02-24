@@ -50,3 +50,5 @@ target_link_libraries(inputbladerf
 )
 
 qt5_use_modules(inputbladerf Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputbladerf DESTINATION lib/plugins/samplesource)

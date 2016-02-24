@@ -54,3 +54,5 @@ target_link_libraries(inputsdrdaemon
 )
 
 qt5_use_modules(inputsdrdaemon Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputsdrdaemon DESTINATION lib/plugins/samplesource)

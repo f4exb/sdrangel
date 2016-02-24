@@ -52,3 +52,5 @@ target_link_libraries(demodbfm
 )
 
 qt5_use_modules(demodbfm Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodbfm DESTINATION lib/plugins/channel)

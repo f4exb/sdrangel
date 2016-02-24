@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 3.0.2)
 cmake_policy(SET CMP0043 OLD)
 
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing, but only if it's not a system directory
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif("${isSystemDir}" STREQUAL "-1")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
 option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
 option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
@@ -357,3 +374,20 @@ if(LIBUSB_FOUND AND UNIX)
 	add_subdirectory(fcdhid)
 	add_subdirectory(fcdlib)
 endif(LIBUSB_FOUND AND UNIX)
+
+##############################################################################
+
+#install targets
+install(TARGETS sdrangel DESTINATION bin)
+install(TARGETS sdrbase DESTINATION lib)
+
+##############################################################################
+
+# uninstall target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)

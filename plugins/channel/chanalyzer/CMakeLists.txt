@@ -45,3 +45,5 @@ target_link_libraries(chanalyzer
 )
 
 qt5_use_modules(chanalyzer Core Widgets OpenGL Multimedia)
+
+install(TARGETS chanalyzer DESTINATION lib/plugins/channel)

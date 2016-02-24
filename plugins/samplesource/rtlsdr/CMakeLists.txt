@@ -50,3 +50,5 @@ target_link_libraries(inputrtlsdr
 )
 
 qt5_use_modules(inputrtlsdr Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputrtlsdr DESTINATION lib/plugins/samplesource)

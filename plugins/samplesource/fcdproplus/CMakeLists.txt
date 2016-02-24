@@ -53,3 +53,5 @@ target_link_libraries(inputfcdproplus
 )
 
 qt5_use_modules(inputfcdproplus Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputfcdproplus DESTINATION lib/plugins/samplesource)
