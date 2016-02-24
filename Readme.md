@@ -193,9 +193,9 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 <h1>Software installation</h1>
 
-Simply do `make install` or `sudo make install` depending on you user rights on the target installation directory. On most systems the default installation directory is `/usr/local` a custom installation directory can be specified with the `-DCMAKE_INSTALL_PREFIX` on the `cmake` command line as usual with cmake.
+Simply do `make install` or `sudo make install` depending on you user rights on the target installation directory. On most systems the default installation directory is `/usr/local` a custom installation directory can be specified with the `-DCMAKE_INSTALL_PREFIX=...` option on the `cmake` command line as usual with cmake.
 
-You can uninstall the software with `make uninstall` or `sudo make uninstall` from the build directory (it needs the `install_manifest.txt` file in the same directory. It is automatically created by the `make install`command). Note that this will not remove the possible empty directories.
+You can uninstall the software with `make uninstall` or `sudo make uninstall` from the build directory (it needs the `install_manifest.txt` file in the same directory and is automatically created by the `make install`command). Note that this will not remove the possible empty directories.
 
 <h1>Known Issues</h1>
 
