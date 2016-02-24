@@ -45,3 +45,5 @@ target_link_libraries(demodssb
 )
 
 qt5_use_modules(demodssb Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodssb DESTINATION lib/plugins/channel)

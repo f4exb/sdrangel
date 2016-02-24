@@ -28,3 +28,5 @@ add_library(fcdhid SHARED
 target_link_libraries(fcdhid
 	${LIBUSB_LIBRARIES}
 )
+
+install(TARGETS fcdhid DESTINATION lib)

@@ -45,3 +45,5 @@ target_link_libraries(demodudpsrc
 )
 
 qt5_use_modules(demodudpsrc Core Widgets OpenGL Network)
+
+install(TARGETS demodudpsrc DESTINATION lib/plugins/channel)

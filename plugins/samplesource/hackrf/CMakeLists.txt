@@ -51,3 +51,5 @@ target_link_libraries(inputhackrf
 )
 
 qt5_use_modules(inputhackrf Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputhackrf DESTINATION lib/plugins/samplesource)

@@ -45,3 +45,5 @@ target_link_libraries(demodwfm
 )
 
 qt5_use_modules(demodwfm Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodwfm DESTINATION lib/plugins/channel)

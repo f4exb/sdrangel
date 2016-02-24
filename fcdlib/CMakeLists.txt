@@ -27,3 +27,5 @@ add_library(fcdlib SHARED
 )
 
 target_link_libraries(fcdlib)
+
+install(TARGETS fcdlib DESTINATION lib)

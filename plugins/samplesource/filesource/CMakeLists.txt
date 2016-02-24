@@ -45,3 +45,5 @@ target_link_libraries(inputfilesource
 )
 
 qt5_use_modules(inputfilesource Core Widgets OpenGL Multimedia)
+
+install(TARGETS inputfilesource DESTINATION lib/plugins/samplesource)

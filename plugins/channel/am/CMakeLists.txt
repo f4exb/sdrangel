@@ -45,3 +45,5 @@ target_link_libraries(demodam
 )
 
 qt5_use_modules(demodam Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodam DESTINATION lib/plugins/channel)

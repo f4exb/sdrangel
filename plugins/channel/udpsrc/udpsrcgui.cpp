@@ -305,7 +305,7 @@ void UDPSrcGUI::applySettings()
 
 		int udpPort = ui->udpPort->text().toInt(&ok);
 
-		if((!ok) || (udpPort < 1) || (udpPort > 65535))
+		if((!ok) || (udpPort < 1024) || (udpPort > 65535))
 		{
 			udpPort = 9999;
 		}

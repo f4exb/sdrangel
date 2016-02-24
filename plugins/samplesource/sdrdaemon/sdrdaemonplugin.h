@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,53 +14,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SCOPEWINDOW_H
-#define INCLUDE_SCOPEWINDOW_H
+#ifndef INCLUDE_SDRDAEMONPLUGIN_H
+#define INCLUDE_SDRDAEMONPLUGIN_H
 
-#include <QWidget>
-#include "dsp/dsptypes.h"
-#include "util/export.h"
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-class DSPEngine;
+#define SDRDAEMON_DEVICE_TYPE_ID "sdrangel.samplesource.sdrdaemon"
 
-namespace Ui {
-	class ScopeWindow;
-}
-
-class SDRANGEL_API ScopeWindow : public QWidget {
+class SDRdaemonPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID SDRDAEMON_DEVICE_TYPE_ID)
 
 public:
-	explicit ScopeWindow(DSPEngine* dspEngine, QWidget* parent = NULL);
-	~ScopeWindow();
+	explicit SDRdaemonPlugin(QObject* parent = NULL);
 
-	void setSampleRate(int sampleRate);
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
 
-	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
+	virtual SampleSourceDevices enumSampleSources();
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId);
 
-private slots:
-	void on_amp_valueChanged(int value);
-	void on_scope_traceSizeChanged(int value);
-	void on_time_valueChanged(int value);
-	void on_timeOfs_valueChanged(int value);
-	void on_displayMode_currentIndexChanged(int index);
-
-	void on_horizView_clicked();
-	void on_vertView_clicked();
+	static const QString m_deviceTypeID;
 
 private:
-	Ui::ScopeWindow *ui;
-	int m_sampleRate;
+	static const PluginDescriptor m_pluginDescriptor;
 
-	qint32 m_displayData;
-	qint32 m_displayOrientation;
-	qint32 m_timeBase;
-	qint32 m_timeOffset;
-	qint32 m_amplification;
-
-	void applySettings();
+	PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_SCOPEWINDOW_H
+#endif // INCLUDE_SDRDAEMONPLUGIN_H

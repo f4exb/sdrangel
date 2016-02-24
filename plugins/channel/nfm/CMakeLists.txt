@@ -45,3 +45,5 @@ target_link_libraries(demodnfm
 )
 
 qt5_use_modules(demodnfm Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodnfm DESTINATION lib/plugins/channel)

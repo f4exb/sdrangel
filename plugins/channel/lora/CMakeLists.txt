@@ -45,3 +45,5 @@ target_link_libraries(demodlora
 )
 
 qt5_use_modules(demodlora Core Widgets OpenGL Multimedia)
+
+install(TARGETS demodlora DESTINATION lib/plugins/channel)
