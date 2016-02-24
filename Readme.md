@@ -134,7 +134,7 @@ Install cmake version 3:
 
 <h3>With newer versions just do:</h3>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio liblz4-dev`
   - `mkdir build && cd build && cmake ../ && make`
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
@@ -161,7 +161,7 @@ For Debian Jessie or Stretch:
 
 This has been tested with the bleeding edge "Thumbleweed" distribution:
 
-`sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio`
+`sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio liblz4 liblz4-devel`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
@@ -174,7 +174,7 @@ This has been tested with Fedora 23 and 22:
 
   - `sudo dnf groupinstall "C Development Tools and Libraries"`
   - `sudo dnf install mesa-libGL-devel`
-  - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
+  - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel liblz4 liblz4-devel`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
@@ -184,7 +184,7 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Since Manjaro is Arch Linux based prerequisites should be similar for Arch and all derivatives.
 
-`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
+`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio lz4`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
