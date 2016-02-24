@@ -191,6 +191,12 @@ Then you should be all set to build the software with `cmake` and `make` as disc
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
   - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
 
+<h1>Software installation</h1>
+
+Simply do `make install` or `sudo make install` depending on you user rights on the target installation directory. On most systems the default installation directory is `/usr/local` a custom installation directory can be specified with the `-DCMAKE_INSTALL_PREFIX` on the `cmake` command line as usual with cmake.
+
+You can uninstall the software with `make uninstall` or `sudo make uninstall` from the build directory (it needs the `install_manifest.txt` file in the same directory. It is automatically created by the `make install`command). Note that this will not remove the possible empty directories.
+
 <h1>Known Issues</h1>
 
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
