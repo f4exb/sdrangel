@@ -50,6 +50,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	displaySettings();
+	ui->navTimeSlider->setEnabled(false);
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -227,8 +228,9 @@ void FileSourceGui::updateWithStreamTime()
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
-	QString s_time = t.toString("hh:mm:ss.zzz");
-	ui->relTimeText->setText(s_time);
+	QString s_timems = t.toString("hh:mm:ss.zzz");
+	QString s_time = t.toString("hh:mm:ss");
+	ui->relTimeText->setText(s_timems);
 
 	quint64 startingTimeStampMsec = m_startingTimeStamp * 1000;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
@@ -236,6 +238,9 @@ void FileSourceGui::updateWithStreamTime()
 	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
+	float posRatio = (float) t_sec / (float) m_recordLength;
+	ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+	ui->navTimeText->setText(s_time);
 }
 
 void FileSourceGui::tick()

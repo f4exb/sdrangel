@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>289</width>
-    <height>133</height>
+    <height>227</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -361,6 +361,69 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_rate2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_nav">
+     <item>
+      <widget class="QSlider" name="navTimeSlider">
+       <property name="toolTip">
+        <string>Time navigator</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="navTimeText">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Navigate time</string>
+       </property>
+       <property name="text">
+        <string>00:00:00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_nav">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
