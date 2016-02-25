@@ -87,6 +87,8 @@ private slots:
 	void on_applyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
+	void on_address_textEdited(const QString& arg1);
+	void on_port_textEdited(const QString& arg1);
 	void tick();
 };
 

@@ -65,6 +65,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	DSPEngine::instance()->setSource(m_sampleSource);
 
 	displaySettings();
+	ui->applyButton->setEnabled(false);
 }
 
 SDRdaemonGui::~SDRdaemonGui()
@@ -264,6 +265,18 @@ void SDRdaemonGui::on_applyButton_clicked(bool checked)
 	m_port = udpPort;
 
 	configureUDPLink();
+
+	ui->applyButton->setEnabled(false);
+}
+
+void SDRdaemonGui::on_address_textEdited(const QString& arg1)
+{
+	ui->applyButton->setEnabled(true);
+}
+
+void SDRdaemonGui::on_port_textEdited(const QString& arg1)
+{
+	ui->applyButton->setEnabled(true);
 }
 
 void SDRdaemonGui::on_dcOffset_toggled(bool checked)
