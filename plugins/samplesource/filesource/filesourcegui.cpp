@@ -41,7 +41,8 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_recordLength(0),
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
-	m_tickCount(0)
+	m_tickCount(0),
+	m_enableNavTime(false)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -180,6 +181,23 @@ void FileSourceGui::on_play_toggled(bool checked)
 {
 	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	ui->navTimeSlider->setEnabled(!checked);
+	m_enableNavTime = !checked;
+}
+
+void FileSourceGui::on_navTimeSlider_valueChanged(int value)
+{
+	if (m_enableNavTime && ((value >= 0) && (value <= 100)))
+	{
+		int t_sec = (m_recordLength * value) / 100;
+		QTime t(0, 0, 0, 0);
+		t = t.addSecs(t_sec);
+		QString s_time = t.toString("hh:mm:ss");
+		ui->navTimeText->setText(s_time);
+
+		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
+		m_sampleSource->getInputMessageQueue()->push(message);
+	}
 }
 
 void FileSourceGui::on_showFileDialog_clicked(bool checked)
@@ -245,9 +263,13 @@ void FileSourceGui::updateWithStreamTime()
 	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
-	float posRatio = (float) t_sec / (float) m_recordLength;
-	ui->navTimeSlider->setValue((int) (posRatio * 100.0));
-	ui->navTimeText->setText(s_time);
+
+	if (!m_enableNavTime)
+	{
+		float posRatio = (float) t_sec / (float) m_recordLength;
+		ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+		ui->navTimeText->setText(s_time);
+	}
 }
 
 void FileSourceGui::tick()

@@ -41,6 +41,7 @@ public:
 	void setSamplerate(int samplerate);
 	bool isRunning() const { return m_running; }
 	std::size_t getSamplesCount() const { return m_samplesCount; }
+	void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
 
 	void connectTimer(const QTimer& timer);
 

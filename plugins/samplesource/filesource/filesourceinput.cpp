@@ -30,6 +30,7 @@
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
@@ -122,6 +123,20 @@ void FileSourceInput::openFileStream()
 			m_startingTimeStamp,
 			m_recordLength); // file stream data
 	getOutputMessageQueueToGUI()->push(report);
+}
+
+void FileSourceInput::seekFileStream(int seekPercentage)
+{
+	QMutexLocker mutexLocker(&m_mutex);
+
+	if ((m_ifstream.is_open()) && !m_fileSourceThread->isRunning())
+	{
+		int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+		m_fileSourceThread->setSamplesCount(seekPoint);
+		seekPoint *= 4; // + sizeof(FileSink::Header)
+		m_ifstream.clear();
+		m_ifstream.seekg(seekPoint, std::ios::beg);
+	}
 }
 
 bool FileSourceInput::init(const Message& message)
@@ -224,15 +239,24 @@ bool FileSourceInput::handleMessage(const Message& message)
 			if (working)
 			{
 				m_fileSourceThread->startWork();
+				/*
 				MsgReportFileSourceStreamTiming *report =
 						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-				getOutputMessageQueueToGUI()->push(report);
+				getOutputMessageQueueToGUI()->push(report);*/
 			}
 			else
 			{
 				m_fileSourceThread->stopWork();
 			}
 		}
+
+		return true;
+	}
+	else if (MsgConfigureFileSourceSeek::match(message))
+	{
+		MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) message;
+		int seekPercentage = conf.getPercentage();
+		seekFileStream(seekPercentage);
 
 		return true;
 	}

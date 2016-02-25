@@ -62,6 +62,7 @@ private:
 	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
 	std::size_t m_tickCount;
+	bool m_enableNavTime;
 
 	void displaySettings();
 	void displayTime();
@@ -76,6 +77,7 @@ private slots:
 	void handleSourceMessages();
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
+	void on_navTimeSlider_valueChanged(int value);
 	void on_showFileDialog_clicked(bool checked);
 	void tick();
 };

@@ -114,6 +114,26 @@ public:
 		{ }
 	};
 
+	class MsgConfigureFileSourceSeek : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getPercentage() const { return m_seekPercentage; }
+
+		static MsgConfigureFileSourceSeek* create(int seekPercentage)
+		{
+			return new MsgConfigureFileSourceSeek(seekPercentage);
+		}
+
+	protected:
+		int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
+
+		MsgConfigureFileSourceSeek(int seekPercentage) :
+			Message(),
+			m_seekPercentage(seekPercentage)
+		{ }
+	};
+
 	class MsgReportFileSourceAcquisition : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -217,6 +237,7 @@ private:
 	const QTimer& m_masterTimer;
 
 	void openFileStream();
+	void seekFileStream(int seekPercentage);
 };
 
 #endif // INCLUDE_FILESOURCEINPUT_H

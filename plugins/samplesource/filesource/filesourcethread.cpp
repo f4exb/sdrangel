@@ -55,7 +55,7 @@ void FileSourceThread::startWork()
     
     if (m_ifstream->is_open())
     {
-        qDebug() << "  - file stream open, starting...";
+        qDebug() << "FileSourceThread::startWork: file stream open, starting...";
         m_startWaitMutex.lock();
         start();
         while(!m_running)
@@ -64,7 +64,7 @@ void FileSourceThread::startWork()
     }
     else
     {
-        qDebug() << "  - file stream closed, not starting.";
+        qDebug() << "FileSourceThread::startWork: file stream closed, not starting.";
     }
 }
 
@@ -151,27 +151,3 @@ void FileSourceThread::tick()
         }
 	}
 }
-
-
-/*
-void FileSourceThread::decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len)
-{
-	qint16 xreal, yimag;
-
-	for (int pos = 0; pos < len; pos += 2) {
-		xreal = buf[pos+0];
-		yimag = buf[pos+1];
-		Sample s( xreal * 16, yimag * 16 ); // shift by 4 bit positions (signed)
-		**it = s;
-		(*it)++;
-	}
-}
-
-//  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void FileSourceThread::callback(const qint16* buf, qint32 len)
-{
-	SampleVector::iterator it = m_convertBuffer.begin();
-	decimate1(&it, buf, len);
-	m_sampleFifo->write(m_convertBuffer.begin(), it);
-}
-*/
