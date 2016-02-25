@@ -228,7 +228,7 @@ void FileSourceGui::updateWithStreamTime()
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
 	dt = dt.addSecs(t_sec);
 	dt = dt.addMSecs(t_msec);
-	QString s_date = dt.toString("yyyyMMdd hh.mm.ss.zzz");
+	QString s_date = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 }
 
