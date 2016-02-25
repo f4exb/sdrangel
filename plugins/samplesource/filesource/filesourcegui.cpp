@@ -38,6 +38,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
+	m_recordLength(0),
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0)
@@ -124,6 +125,7 @@ bool FileSourceGui::handleMessage(const Message& message)
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleRate();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getCenterFrequency();
 		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
+		m_recordLength = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getRecordLength();
 		updateWithStreamData();
 		return true;
 	}
@@ -205,6 +207,10 @@ void FileSourceGui::updateWithStreamData()
 	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
 	ui->sampleRateText->setText(tr("%1k").arg(s));
 	ui->play->setEnabled(m_acquisition);
+	QTime recordLength(0, 0, 0, 0);
+	recordLength = recordLength.addSecs(m_recordLength);
+	QString s_time = recordLength.toString("hh:mm:ss");
+	ui->recordLengthText->setText(s_time);
 	updateWithStreamTime(); // TODO: remove when time data is implemented
 }
 

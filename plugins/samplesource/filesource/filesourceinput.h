@@ -141,22 +141,31 @@ public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
 		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
+		quint32 getRecordLength() const { return m_recordLength; }
 
-		static MsgReportFileSourceStreamData* create(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp)
+		static MsgReportFileSourceStreamData* create(int sampleRate,
+				quint64 centerFrequency,
+				std::time_t startingTimeStamp,
+				quint32 recordLength)
 		{
-			return new MsgReportFileSourceStreamData(sampleRate, centerFrequency, startingTimeStamp);
+			return new MsgReportFileSourceStreamData(sampleRate, centerFrequency, startingTimeStamp, recordLength);
 		}
 
 	protected:
 		int m_sampleRate;
 		quint64 m_centerFrequency;
 		std::time_t m_startingTimeStamp;
+		quint32 m_recordLength;
 
-		MsgReportFileSourceStreamData(int sampleRate, quint64 centerFrequency, std::time_t startingTimeStamp) :
+		MsgReportFileSourceStreamData(int sampleRate,
+				quint64 centerFrequency,
+				std::time_t startingTimeStamp,
+				quint32 recordLength) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp)
+			m_startingTimeStamp(startingTimeStamp),
+			m_recordLength(recordLength)
 		{ }
 	};
 
@@ -203,6 +212,7 @@ private:
 	QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
+	quint32 m_recordLength; //!< record length in seconds computed from file size
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 

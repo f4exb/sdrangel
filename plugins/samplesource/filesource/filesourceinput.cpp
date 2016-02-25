@@ -78,6 +78,7 @@ FileSourceInput::FileSourceInput(const QTimer& masterTimer) :
 	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
+	m_recordLength(0),
 	m_startingTimeStamp(0),
 	m_masterTimer(masterTimer)
 {
@@ -90,15 +91,15 @@ FileSourceInput::~FileSourceInput()
 
 void FileSourceInput::openFileStream()
 {
-	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str();
-
 	//stopInput();
 
 	if (m_ifstream.is_open()) {
 		m_ifstream.close();
 	}
 
-	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
+	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
+	quint64 fileSize = m_ifstream.tellg();
+	m_ifstream.seekg(0,std::ios_base::beg);
 	FileSink::Header header;
 	FileSink::readHeader(m_ifstream, header);
 
@@ -106,7 +107,20 @@ void FileSourceInput::openFileStream()
 	m_centerFrequency = header.centerFrequency;
 	m_startingTimeStamp = header.startTimeStamp;
 
-	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate, m_centerFrequency, m_startingTimeStamp); // file stream data
+	if (fileSize > sizeof(FileSink::Header)) {
+		m_recordLength = (fileSize - sizeof(FileSink::Header)) / (4 * m_sampleRate);
+	} else {
+		m_recordLength = 0;
+	}
+
+	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str()
+			<< " fileSize: " << fileSize << "bytes"
+			<< " length: " << m_recordLength << " seconds";
+
+	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
+			m_centerFrequency,
+			m_startingTimeStamp,
+			m_recordLength); // file stream data
 	getOutputMessageQueueToGUI()->push(report);
 }
 

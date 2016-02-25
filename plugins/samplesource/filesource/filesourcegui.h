@@ -58,6 +58,7 @@ private:
     QString m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;
+	quint32 m_recordLength;
 	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
 	std::size_t m_tickCount;
