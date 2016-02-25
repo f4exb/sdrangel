@@ -51,6 +51,8 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	displaySettings();
 	ui->navTimeSlider->setEnabled(false);
+	ui->playLoop->setChecked(true); // FIXME: always play in a loop
+	ui->playLoop->setEnabled(false);
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -167,6 +169,11 @@ void FileSourceGui::sendSettings()
 
 void FileSourceGui::updateHardware()
 {
+}
+
+void FileSourceGui::on_playLoop_toggled(bool checked)
+{
+	// TODO: do something about it!
 }
 
 void FileSourceGui::on_play_toggled(bool checked)
