@@ -82,9 +82,9 @@ AFSquelch::~AFSquelch()
 }
 
 
-void AFSquelch::setCoefficients(int _N, unsigned int nbAvg, int _samplerate, int _samplesAttack, int _samplesDecay )
+void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int _samplesAttack, int _samplesDecay )
 {
-	m_N = _N;                   // save the basic parameters for use during analysis
+	m_N = N;                   // save the basic parameters for use during analysis
 	m_nbAvg = nbAvg;
 	m_sampleRate = _samplerate;
 	m_samplesAttack = _samplesAttack;

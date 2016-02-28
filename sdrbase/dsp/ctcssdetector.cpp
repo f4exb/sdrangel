@@ -92,9 +92,9 @@ CTCSSDetector::~CTCSSDetector()
 }
 
 
-void CTCSSDetector::setCoefficients(int _N, int _samplerate )
+void CTCSSDetector::setCoefficients(int zN, int _samplerate )
 {
-	N = _N;                   // save the basic parameters for use during analysis
+	N = zN;                   // save the basic parameters for use during analysis
 	sampleRate = _samplerate;
 
 	// for each of the frequencies (tones) of interest calculate

@@ -18,6 +18,8 @@
 #ifdef USE_SIMD
 #include <immintrin.h>
 #endif
+
+#include "util/gleshelp.h"
 #include <QMouseEvent>
 #include "gui/glspectrum.h"
 

@@ -1,3 +1,4 @@
+#include "util/gleshelp.h"
 #include <QPainter>
 #include <QMouseEvent>
 #include "gui/glscope.h"

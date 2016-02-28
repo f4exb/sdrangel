@@ -25,7 +25,7 @@ public:
 
     // setup the basic parameters and coefficients
     void setCoefficients(
-    		int N,            // the algorithm "block"  size
+    		int zN,            // the algorithm "block"  size
 			int SampleRate);  // input signal sample rate
 
     // set the detection threshold
