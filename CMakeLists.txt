@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1.0)
 cmake_policy(SET CMP0043 OLD)
 
 # use, i.e. don't skip the full RPATH for the build tree
@@ -307,6 +307,7 @@ if(FFTW3F_FOUND)
 endif(FFTW3F_FOUND)
 
 set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
+target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
 qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
 

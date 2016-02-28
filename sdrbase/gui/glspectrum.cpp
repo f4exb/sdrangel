@@ -19,7 +19,6 @@
 #include <immintrin.h>
 #endif
 
-#include "util/gleshelp.h"
 #include <QMouseEvent>
 #include "gui/glspectrum.h"
 
@@ -542,6 +541,7 @@ void GLSpectrum::paintGL()
 		float prop_y = m_waterfallTexturePos / (m_waterfallTextureHeight - 1.0);
 		float off = 1.0 / (m_waterfallTextureHeight - 1.0);
 		glEnable(GL_TEXTURE_2D);
+#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, prop_y + 1 - off);
 		glVertex2f(0, m_invertedWaterfall ? 0 : 1);
@@ -552,8 +552,30 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, prop_y);
 		glVertex2f(0, m_invertedWaterfall ? 1 : 0);
 		glEnd();
+#else
+		{
+			GLfloat vtx1[] = {
+					0, m_invertedWaterfall ? 0.0f : 1.0f,
+		    		1, m_invertedWaterfall ? 0.0f : 1.0f,
+		    		1, m_invertedWaterfall ? 1.0f : 0.0f,
+		    		0, m_invertedWaterfall ? 1.0f : 0.0f
+		    };
+			GLfloat tex1[] = {
+		    		0, prop_y + 1 - off,
+					1, prop_y + 1 - off,
+					1, prop_y,
+					0, prop_y
+		    };
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, vtx1);
+			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		}
+#endif
 		glDisable(GL_TEXTURE_2D);
-
 		// paint channels
 		if(m_mouseInside) {
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
@@ -565,12 +587,28 @@ void GLSpectrum::paintGL()
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+#ifdef GL_DEPRECATED
 					glBegin(GL_QUADS);
 					glVertex2f(0, 0);
 					glVertex2f(1, 0);
 					glVertex2f(1, 1);
 					glVertex2f(0, 1);
 					glEnd();
+#else
+					{
+						GLfloat q3[] {
+							0, 0,
+							1, 0,
+							1, 1,
+							0, 1
+						};
+
+					    glEnableClientState(GL_VERTEX_ARRAY);
+					    glVertexPointer(2, GL_FLOAT, 0, q3);
+					    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+					    glDisableClientState(GL_VERTEX_ARRAY);
+					}
+#endif
 					glDisable(GL_BLEND);
 					glPopMatrix();
 				}
@@ -582,12 +620,28 @@ void GLSpectrum::paintGL()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
+#ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
 		glVertex2f(0, 1);
 		glVertex2f(0, 0);
 		glVertex2f(1, 0);
 		glEnd();
+#else
+		{
+			GLfloat q3[] {
+				1, 1,
+				0, 1,
+				0, 0,
+				1, 0
+			};
+
+		    glEnableClientState(GL_VERTEX_ARRAY);
+		    glVertexPointer(2, GL_FLOAT, 0, q3);
+		    glDrawArrays(GL_LINE_LOOP, 0, 4);
+		    glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		glDisable(GL_BLEND);
 
 		glPopMatrix();
@@ -621,6 +675,7 @@ void GLSpectrum::paintGL()
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_fftSize, 100, GL_RGBA, GL_UNSIGNED_BYTE, m_histogramBuffer->scanLine(0));
 			glEnable(GL_TEXTURE_2D);
+#ifdef GL_DEPRECATED
 			glBegin(GL_QUADS);
 			glTexCoord2f(0, 0);
 			glVertex2f(0, 0);
@@ -631,6 +686,29 @@ void GLSpectrum::paintGL()
 			glTexCoord2f(0, 1);
 			glVertex2f(0, 1);
 			glEnd();
+#else
+			{
+				GLfloat vtx1[] = {
+						0, 0,
+			    		1, 0,
+			    		1, 1,
+			    		0, 1
+			    };
+				GLfloat tex1[] = {
+						0, 0,
+			    		1, 0,
+			    		1, 1,
+			    		0, 1
+			    };
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glVertexPointer(2, GL_FLOAT, 0, vtx1);
+				glTexCoordPointer(2, GL_FLOAT, 0, tex1);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+				glDisableClientState(GL_VERTEX_ARRAY);
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			}
+#endif
 			glDisable(GL_TEXTURE_2D);
 		}
 
@@ -646,12 +724,28 @@ void GLSpectrum::paintGL()
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+#ifdef GL_DEPRECATED
 					glBegin(GL_QUADS);
 					glVertex2f(0, 0);
 					glVertex2f(1, 0);
 					glVertex2f(1, 1);
 					glVertex2f(0, 1);
 					glEnd();
+#else
+					{
+						GLfloat q3[] {
+							0, 0,
+							1, 0,
+							1, 1,
+							0, 1
+						};
+
+					    glEnableClientState(GL_VERTEX_ARRAY);
+					    glVertexPointer(2, GL_FLOAT, 0, q3);
+					    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+					    glDisableClientState(GL_VERTEX_ARRAY);
+					}
+#endif
 					glPopMatrix();
 				}
 			}
@@ -665,10 +759,24 @@ void GLSpectrum::paintGL()
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
+#ifdef GL_DEPRECATED
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0.5, 0);
 					glVertex2f(0.5, 1);
 					glEnd();
+#else
+					{
+						GLfloat q3[] {
+							0.5, 0,
+							0.5, 1
+						};
+
+					    glEnableClientState(GL_VERTEX_ARRAY);
+					    glVertexPointer(2, GL_FLOAT, 0, q3);
+					    glDrawArrays(GL_LINES, 0, 2);
+					    glDisableClientState(GL_VERTEX_ARRAY);
+					}
+#endif
 					glPopMatrix();
 				}
 			}
@@ -679,12 +787,28 @@ void GLSpectrum::paintGL()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
+#ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
 		glVertex2f(0, 1);
 		glVertex2f(0, 0);
 		glVertex2f(1, 0);
 		glEnd();
+#else
+		{
+			GLfloat q3[] {
+				1, 1,
+				0, 1,
+				0, 0,
+				1, 0
+			};
+
+		    glEnableClientState(GL_VERTEX_ARRAY);
+		    glVertexPointer(2, GL_FLOAT, 0, q3);
+		    glDrawArrays(GL_LINE_LOOP, 0, 4);
+		    glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		glDisable(GL_BLEND);
 		glPopMatrix();
 	}
@@ -701,6 +825,7 @@ void GLSpectrum::paintGL()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_TEXTURE_2D);
+#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
 		glVertex2f(0, 1);
@@ -711,6 +836,29 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, 0);
 		glVertex2f(0, 0);
 		glEnd();
+#else
+		{
+			GLfloat vtx1[] = {
+					0, 1,
+		    		1, 1,
+		    		1, 0,
+		    		0, 0
+		    };
+			GLfloat tex1[] = {
+					0, 1,
+		    		1, 1,
+		    		1, 0,
+		    		0, 0
+		    };
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, vtx1);
+			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		}
+#endif
 		glDisable(GL_TEXTURE_2D);
 
 		glPopMatrix();
@@ -730,6 +878,7 @@ void GLSpectrum::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
+#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
 		glVertex2f(0, 1);
@@ -740,6 +889,29 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, 0);
 		glVertex2f(0, 0);
 		glEnd();
+#else
+		{
+			GLfloat vtx1[] = {
+					0, 1,
+		    		1, 1,
+		    		1, 0,
+		    		0, 0
+		    };
+			GLfloat tex1[] = {
+					0, 1,
+		    		1, 1,
+		    		1, 0,
+		    		0, 0
+		    };
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, vtx1);
+			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		}
+#endif
 		glDisable(GL_TEXTURE_2D);
 
 		glPopMatrix();
@@ -759,12 +931,28 @@ void GLSpectrum::paintGL()
 				glPushMatrix();
 				glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 				glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+#ifdef GL_DEPRECATED
 				glBegin(GL_QUADS);
 				glVertex2f(0, 0);
 				glVertex2f(1, 0);
 				glVertex2f(1, 0.5);
 				glVertex2f(0, 0.5);
 				glEnd();
+#else
+				{
+					GLfloat q3[] {
+						0, 0,
+						1, 0,
+						1, 0.5,
+						0, 0.5
+					};
+
+				    glEnableClientState(GL_VERTEX_ARRAY);
+				    glVertexPointer(2, GL_FLOAT, 0, q3);
+				    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+				    glDisableClientState(GL_VERTEX_ARRAY);
+				}
+#endif
 				glDisable(GL_BLEND);
 				glPopMatrix();
 			}
@@ -779,10 +967,24 @@ void GLSpectrum::paintGL()
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
+#ifdef GL_DEPRECATED
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0.5, 0);
 					glVertex2f(0.5, 1);
 					glEnd();
+#else
+					{
+						GLfloat q3[] {
+							0.5, 0,
+							0.5, 1
+						};
+
+					    glEnableClientState(GL_VERTEX_ARRAY);
+					    glVertexPointer(2, GL_FLOAT, 0, q3);
+					    glDrawArrays(GL_LINES, 0, 2);
+					    glDisableClientState(GL_VERTEX_ARRAY);
+					}
+#endif
 					glPopMatrix();
 				}
 			}
@@ -810,12 +1012,15 @@ void GLSpectrum::paintGL()
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
+
+		Real bottom = -m_powerRange;
+		glColor4f(1, 0, 0, m_displayTraceIntensity / 100.0);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
-		glColor4f(1, 0, 0, m_displayTraceIntensity / 100.0);
-		Real bottom = -m_powerRange;
+
+#ifdef GL_DEPRECATED
+		//glEnable(GL_LINE_SMOOTH);
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
 			Real v = m_maxHold[i] - m_referenceLevel;
@@ -826,6 +1031,26 @@ void GLSpectrum::paintGL()
 			glVertex2f(i, v);
 		}
 		glEnd();
+#else
+		{
+			GLfloat q3[2*m_fftSize];
+
+			for(int i = 0; i < m_fftSize; i++) {
+				Real v = m_maxHold[i] - m_referenceLevel;
+				if(v > 0)
+					v = 0;
+				else if(v < bottom)
+					v = bottom;
+				q3[2*i] = (Real) i;
+				q3[2*i+1] = v;
+			}
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		//glDisable(GL_LINE_SMOOTH);
 		glPopMatrix();
 	}
@@ -835,12 +1060,15 @@ void GLSpectrum::paintGL()
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
 		glColor4f(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0); // intense yellow
 		Real bottom = -m_powerRange;
+
+#ifdef GL_DEPRECATED
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
 			Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
@@ -851,6 +1079,26 @@ void GLSpectrum::paintGL()
 			glVertex2f(i, v);
 		}
 		glEnd();
+#else
+		{
+			GLfloat q3[2*m_fftSize];
+
+			for(int i = 0; i < m_fftSize; i++) {
+				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
+				if(v > 0)
+					v = 0;
+				else if(v < bottom)
+					v = bottom;
+				q3[2*i] = (Real) i;
+				q3[2*i+1] = v;
+			}
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		//glDisable(GL_LINE_SMOOTH);
 		glPopMatrix();
 	}
@@ -871,6 +1119,7 @@ void GLSpectrum::paintGL()
 		const ScaleEngine::Tick* tick;
 
 		tickList = &m_timeScale.getTickList();
+#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -883,8 +1132,32 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+#else
+		{
+			GLfloat q3[4*tickList->count()];
+			int effectiveTicks = 0;
+			for(int i= 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						float y = tick->pos / m_timeScale.getSize();
+						q3[4*effectiveTicks] = 0;
+						q3[4*effectiveTicks+1] = y;
+						q3[4*effectiveTicks+2] = 1;
+						q3[4*effectiveTicks+3] = y;
+						effectiveTicks++;
+					}
+				}
+			}
 
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		tickList = &m_frequencyScale.getTickList();
+#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -897,6 +1170,30 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+#else
+		{
+			GLfloat q3[4*tickList->count()];
+			int effectiveTicks = 0;
+			for(int i= 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						float x = tick->pos / m_frequencyScale.getSize();
+						q3[4*effectiveTicks] = x;
+						q3[4*effectiveTicks+1] = 0;
+						q3[4*effectiveTicks+2] = x;
+						q3[4*effectiveTicks+3] = 1;
+						effectiveTicks++;
+					}
+				}
+			}
+
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 
 		glPopMatrix();
 	}
@@ -916,6 +1213,7 @@ void GLSpectrum::paintGL()
 		const ScaleEngine::Tick* tick;
 
 		tickList = &m_powerScale.getTickList();
+#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -928,8 +1226,32 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+#else
+		{
+			GLfloat q3[4*tickList->count()];
+			int effectiveTicks = 0;
+			for(int i= 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						float y = tick->pos / m_powerScale.getSize();
+						q3[4*effectiveTicks] = 0;
+						q3[4*effectiveTicks+1] = 1-y;
+						q3[4*effectiveTicks+2] = 1;
+						q3[4*effectiveTicks+3] = 1-y;
+						effectiveTicks++;
+					}
+				}
+			}
 
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		tickList = &m_frequencyScale.getTickList();
+#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -942,7 +1264,30 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+#else
+		{
+			GLfloat q3[4*tickList->count()];
+			int effectiveTicks = 0;
+			for(int i= 0; i < tickList->count(); i++) {
+				tick = &(*tickList)[i];
+				if(tick->major) {
+					if(tick->textSize > 0) {
+						float x = tick->pos / m_frequencyScale.getSize();
+						q3[4*effectiveTicks] = x;
+						q3[4*effectiveTicks+1] = 0;
+						q3[4*effectiveTicks+2] = x;
+						q3[4*effectiveTicks+3] = 1;
+						effectiveTicks++;
+					}
+				}
+			}
 
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(2, GL_FLOAT, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
+#endif
 		glPopMatrix();
 	}
 
