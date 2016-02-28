@@ -691,16 +691,15 @@ void GLSpectrum::paintGL()
 
 	// paint left scales (time and power)
 	if(m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram ) {
+		glPushMatrix();
+		glTranslatef(m_glLeftScaleRect.x(), m_glLeftScaleRect.y(), 0);
+		glScalef(m_glLeftScaleRect.width(), m_glLeftScaleRect.height(), 1);
+
 		glBindTexture(GL_TEXTURE_2D, m_leftMarginTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-		glPushMatrix();
-		glTranslatef(m_glLeftScaleRect.x(), m_glLeftScaleRect.y(), 0);
-		glScalef(m_glLeftScaleRect.width(), m_glLeftScaleRect.height(), 1);
-
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -713,11 +712,16 @@ void GLSpectrum::paintGL()
 		glVertex2f(0, 0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
+
 		glPopMatrix();
 	}
 
 	// paint frequency scale
 	if(m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram ) {
+		glPushMatrix();
+		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
+		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
+
 		glBindTexture(GL_TEXTURE_2D, m_frequencyTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -725,11 +729,6 @@ void GLSpectrum::paintGL()
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glPushMatrix();
-		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
-		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
-
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -742,6 +741,7 @@ void GLSpectrum::paintGL()
 		glVertex2f(0, 0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
+
 		glPopMatrix();
 
 		// paint channels

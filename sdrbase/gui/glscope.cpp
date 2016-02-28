@@ -307,14 +307,14 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint left #1 scale
+		glPushMatrix();
+		glTranslatef(m_glLeft1ScaleRect.x(), m_glLeft1ScaleRect.y(), 0);
+		glScalef(m_glLeft1ScaleRect.width(), m_glLeft1ScaleRect.height(), 1);
 		glBindTexture(GL_TEXTURE_2D, m_left1ScaleTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glPushMatrix();
-		glTranslatef(m_glLeft1ScaleRect.x(), m_glLeft1ScaleRect.y(), 0);
-		glScalef(m_glLeft1ScaleRect.width(), m_glLeft1ScaleRect.height(), 1);
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -330,14 +330,14 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint bottom #1 scale
+		glPushMatrix();
+		glTranslatef(m_glBot1ScaleRect.x(), m_glBot1ScaleRect.y(), 0);
+		glScalef(m_glBot1ScaleRect.width(), m_glBot1ScaleRect.height(), 1);
 		glBindTexture(GL_TEXTURE_2D, m_bot1ScaleTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glPushMatrix();
-		glTranslatef(m_glBot1ScaleRect.x(), m_glBot1ScaleRect.y(), 0);
-		glScalef(m_glBot1ScaleRect.width(), m_glBot1ScaleRect.height(), 1);
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -516,14 +516,14 @@ void GLScope::paintGL()
 			glPopMatrix();
 
 			// Paint secondary scale
+			glPushMatrix();
+			glTranslatef(m_glRight1ScaleRect.x(), m_glRight1ScaleRect.y(), 0);
+			glScalef(m_glRight1ScaleRect.width(), m_glRight1ScaleRect.height(), 1);
 			glBindTexture(GL_TEXTURE_2D, m_left2ScaleTexture);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glPushMatrix();
-			glTranslatef(m_glRight1ScaleRect.x(), m_glRight1ScaleRect.y(), 0);
-			glScalef(m_glRight1ScaleRect.width(), m_glRight1ScaleRect.height(), 1);
 			glEnable(GL_TEXTURE_2D);
 			glBegin(GL_QUADS);
 			glTexCoord2f(0, 1);
@@ -598,14 +598,14 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint left #2 scale
+		glPushMatrix();
+		glTranslatef(m_glLeft2ScaleRect.x(), m_glLeft2ScaleRect.y(), 0);
+		glScalef(m_glLeft2ScaleRect.width(), m_glLeft2ScaleRect.height(), 1);
 		glBindTexture(GL_TEXTURE_2D, m_left2ScaleTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glPushMatrix();
-		glTranslatef(m_glLeft2ScaleRect.x(), m_glLeft2ScaleRect.y(), 0);
-		glScalef(m_glLeft2ScaleRect.width(), m_glLeft2ScaleRect.height(), 1);
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -621,14 +621,14 @@ void GLScope::paintGL()
 		glPopMatrix();
 
 		// paint bottom #2 scale
+		glPushMatrix();
+		glTranslatef(m_glBot2ScaleRect.x(), m_glBot2ScaleRect.y(), 0);
+		glScalef(m_glBot2ScaleRect.width(), m_glBot2ScaleRect.height(), 1);
 		glBindTexture(GL_TEXTURE_2D, m_bot2ScaleTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glPushMatrix();
-		glTranslatef(m_glBot2ScaleRect.x(), m_glBot2ScaleRect.y(), 0);
-		glScalef(m_glBot2ScaleRect.width(), m_glBot2ScaleRect.height(), 1);
 		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -990,12 +990,6 @@ void GLScope::drawPowerOverlay()
 		QGLContext::MipmapBindOption);
 	m_powerOverlayTextureAllocated1 = true;
 
-	glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 	float shiftX = m_glScopeRect1.width() - ((rect.width() + 4.0f) / width());
 	float shiftY = 6.0f / height();
 
@@ -1004,6 +998,11 @@ void GLScope::drawPowerOverlay()
 	glTranslatef(m_glScopeRect1.x() + shiftX, m_glScopeRect1.y(), 0);
 	glScalef(rect.width() / (float) width(), rect.height() / (float) height(), 1);
 
+	glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 1);
