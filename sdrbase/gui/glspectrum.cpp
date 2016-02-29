@@ -24,6 +24,10 @@
 
 #include <QDebug>
 
+#ifdef GL_ANDROID
+#include "util/gleshelp.h"
+#endif
+
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
@@ -566,6 +570,16 @@ void GLSpectrum::paintGL()
 					1, prop_y,
 					0, prop_y
 		    };
+
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
+			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, vtx1);
@@ -573,6 +587,7 @@ void GLSpectrum::paintGL()
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 		}
 #endif
 		glDisable(GL_TEXTURE_2D);
@@ -603,10 +618,17 @@ void GLSpectrum::paintGL()
 							0, 1
 						};
 
+#ifdef GL_ANDROID
+						glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+						glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+						glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+						glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 					    glEnableClientState(GL_VERTEX_ARRAY);
 					    glVertexPointer(2, GL_FLOAT, 0, q3);
 					    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 					    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 					}
 #endif
 					glDisable(GL_BLEND);
@@ -636,10 +658,17 @@ void GLSpectrum::paintGL()
 				1, 0
 			};
 
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINE_LOOP, 0, 4);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 		    glEnableClientState(GL_VERTEX_ARRAY);
 		    glVertexPointer(2, GL_FLOAT, 0, q3);
 		    glDrawArrays(GL_LINE_LOOP, 0, 4);
 		    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		glDisable(GL_BLEND);
@@ -700,6 +729,15 @@ void GLSpectrum::paintGL()
 			    		1, 1,
 			    		0, 1
 			    };
+#ifdef GL_ANDROID
+				glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+				glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+				glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
+				glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+				glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+				glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+#else
 				glEnableClientState(GL_VERTEX_ARRAY);
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				glVertexPointer(2, GL_FLOAT, 0, vtx1);
@@ -707,6 +745,7 @@ void GLSpectrum::paintGL()
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 			}
 #endif
 			glDisable(GL_TEXTURE_2D);
@@ -740,10 +779,17 @@ void GLSpectrum::paintGL()
 							0, 1
 						};
 
+#ifdef GL_ANDROID
+						glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+						glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+						glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+						glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 					    glEnableClientState(GL_VERTEX_ARRAY);
 					    glVertexPointer(2, GL_FLOAT, 0, q3);
 					    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 					    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 					}
 #endif
 					glPopMatrix();
@@ -770,11 +816,17 @@ void GLSpectrum::paintGL()
 							0.5, 0,
 							0.5, 1
 						};
-
+#ifdef GL_ANDROID
+						glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+						glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+						glDrawArrays(GL_LINES, 0, 2);
+						glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 					    glEnableClientState(GL_VERTEX_ARRAY);
 					    glVertexPointer(2, GL_FLOAT, 0, q3);
 					    glDrawArrays(GL_LINES, 0, 2);
 					    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 					}
 #endif
 					glPopMatrix();
@@ -802,11 +854,17 @@ void GLSpectrum::paintGL()
 				0, 0,
 				1, 0
 			};
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINE_LOOP, 0, 4);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 		    glEnableClientState(GL_VERTEX_ARRAY);
 		    glVertexPointer(2, GL_FLOAT, 0, q3);
 		    glDrawArrays(GL_LINE_LOOP, 0, 4);
 		    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		glDisable(GL_BLEND);
@@ -850,6 +908,15 @@ void GLSpectrum::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
+			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, vtx1);
@@ -857,6 +924,7 @@ void GLSpectrum::paintGL()
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 		}
 #endif
 		glDisable(GL_TEXTURE_2D);
@@ -903,6 +971,15 @@ void GLSpectrum::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
+			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, vtx1);
@@ -910,6 +987,7 @@ void GLSpectrum::paintGL()
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 		}
 #endif
 		glDisable(GL_TEXTURE_2D);
@@ -946,11 +1024,17 @@ void GLSpectrum::paintGL()
 						1, 0.5,
 						0, 0.5
 					};
-
+#ifdef GL_ANDROID
+					glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+					glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+					glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+					glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 				    glEnableClientState(GL_VERTEX_ARRAY);
 				    glVertexPointer(2, GL_FLOAT, 0, q3);
 				    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 				    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 				}
 #endif
 				glDisable(GL_BLEND);
@@ -978,11 +1062,17 @@ void GLSpectrum::paintGL()
 							0.5, 0,
 							0.5, 1
 						};
-
+#ifdef GL_ANDROID
+						glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+						glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+						glDrawArrays(GL_LINES, 0, 2);
+						glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 					    glEnableClientState(GL_VERTEX_ARRAY);
 					    glVertexPointer(2, GL_FLOAT, 0, q3);
 					    glDrawArrays(GL_LINES, 0, 2);
 					    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 					}
 #endif
 					glPopMatrix();
@@ -1044,11 +1134,17 @@ void GLSpectrum::paintGL()
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		//glDisable(GL_LINE_SMOOTH);
@@ -1092,11 +1188,17 @@ void GLSpectrum::paintGL()
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		//glDisable(GL_LINE_SMOOTH);
@@ -1149,11 +1251,17 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		tickList = &m_frequencyScale.getTickList();
@@ -1187,11 +1295,17 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 
@@ -1243,11 +1357,17 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		tickList = &m_frequencyScale.getTickList();
@@ -1281,11 +1401,17 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-
+#ifdef GL_ANDROID
+			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
+			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
+#else
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
 			glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 		}
 #endif
 		glPopMatrix();

@@ -19,15 +19,13 @@
 #ifndef INCLUDE_UTIL_GLESHELP_H_
 #define INCLUDE_UTIL_GLESHELP_H_
 
-#define GLdouble     GLfloat
-#define GL_CLAMP     GL_CLAMP_TO_EDGE
-#define glClearDepth glClearDepthf
-#define glOrtho      glOrthof
-#define glFrustum    glFrustumf
+#define GL_VERTEX_ARRAY 0        // We like submitting vertices on stream 0 for no special reason (GL: 0x8074)
+#define GL_NORMAL_ARRAY 1        // We like submitting normals on stream 1 for no special reason (GL: 0x8075)
+#define GL_TEXTURE_COORD_ARRAY 2 // We like submitting texcoords on stream 2 for no special reason (GL: 0x8078)
 
 #define glColor4fv(a) glColor4f(a[0], a[1], a[2], a[3])
 #define glColor3fv(a) glColor4f(a[0], a[1], a[2], 1.0f)
-#define glColor3f(a,b,c) glColor4f(a, b, c, 1.0f
+#define glColor3f(a,b,c) glColor4f(a, b, c, 1.0f)
 
 
 #endif /* INCLUDE_UTIL_GLESHELP_H_ */
