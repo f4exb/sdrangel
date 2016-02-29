@@ -519,12 +519,12 @@ void GLSpectrum::paintGL()
 		return;
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	glPushMatrix();
 	glScalef(2.0, -2.0, 1.0);
 	glTranslatef(-0.50, -0.5, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	// paint waterfall
 	if(m_displayWaterfall) {
@@ -596,12 +596,12 @@ void GLSpectrum::paintGL()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
 #ifdef GL_DEPRECATED
 					glBegin(GL_QUADS);
 					glVertex2f(0, 0);
@@ -757,12 +757,12 @@ void GLSpectrum::paintGL()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.3f);
 #ifdef GL_DEPRECATED
 					glBegin(GL_QUADS);
 					glVertex2f(0, 0);
@@ -800,11 +800,11 @@ void GLSpectrum::paintGL()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 				if(dv->m_channelMarker->getVisible()) {
-					glDisable(GL_BLEND);
-					glColor3f(0.8f, 0.8f, 0.6f);
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
+					glDisable(GL_BLEND);
+					glColor3f(0.8f, 0.8f, 0.6f);
 #ifdef GL_DEPRECATED
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0.5, 0);
@@ -1003,12 +1003,12 @@ void GLSpectrum::paintGL()
 		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
 			if(dv->m_channelMarker->getVisible()) {
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.5f);
 				glPushMatrix();
 				glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 				glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glColor4f(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.5f);
 #ifdef GL_DEPRECATED
 				glBegin(GL_QUADS);
 				glVertex2f(0, 0);
@@ -1047,10 +1047,10 @@ void GLSpectrum::paintGL()
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
 			if(dv->m_channelMarker->getVisible()) {
 				if (dv->m_channelMarker->getHighlighted()) {
-					glColor3f(0.8f, 0.8f, 0.6f);
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
+					glColor3f(0.8f, 0.8f, 0.6f);
 #ifdef GL_DEPRECATED
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0.5, 0);
@@ -1207,15 +1207,15 @@ void GLSpectrum::paintGL()
 
 	// paint waterfall grid
 	if(m_displayWaterfall && m_displayGrid) {
+		glPushMatrix();
+		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		//glColor4f(1, 1, 1, 0.05f);
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
-
-		glPushMatrix();
-		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
-		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
 
 		const ScaleEngine::TickList* tickList;
 		const ScaleEngine::Tick* tick;
@@ -1314,14 +1314,14 @@ void GLSpectrum::paintGL()
 
 	// TODO: paint histogram grid
 	if((m_displayHistogram || m_displayMaxHold || m_displayCurrent) && (m_displayGrid)) {
+		glPushMatrix();
+		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
-
-		glPushMatrix();
-		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
-		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
 
 		const ScaleEngine::TickList* tickList;
 		const ScaleEngine::Tick* tick;

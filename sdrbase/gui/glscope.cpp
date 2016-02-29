@@ -240,12 +240,12 @@ void GLScope::paintGL()
 		emit traceSizeChanged(m_displayTrace->size());
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	glPushMatrix();
 	glScalef(2.0, -2.0, 1.0);
 	glTranslatef(-0.50, -0.5, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	// I - primary display
 
