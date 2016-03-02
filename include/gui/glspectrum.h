@@ -23,6 +23,7 @@
 #include <QMutex>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QMatrix4x4>
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
 #include "dsp/channelmarker.h"
@@ -150,7 +151,7 @@ private:
 	int m_histogramLateHoldoff;
 	int m_histogramStroke;
 	QRectF m_glHistogramRect;
-	QRectF m_glHistogramRect2;
+	QMatrix4x4 m_glHistogramMatrix;
 	bool m_displayHistogram;
 
 	bool m_displayChanged;
