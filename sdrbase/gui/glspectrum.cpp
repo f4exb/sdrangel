@@ -1247,9 +1247,9 @@ void GLSpectrum::paintGL()
 			QMatrix4x4 tsMatrix;
 			tsMatrix.setToIdentity();
 			//qDebug("GLSpectrum::paintGL: %f %f %f %f", m_glHistogramRect.x(), m_glHistogramRect.y(), m_glHistogramRect.width(), m_glHistogramRect.height());
-			//tsMatrix.translate(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 			tsMatrix.translate(m_glHistogramRect2.x(), m_glHistogramRect2.y(), 0);
-			tsMatrix.scale((2.0f * m_glHistogramRect.width()) / (float)(m_fftSize - 1), (2.0f * m_glHistogramRect.height()) / m_powerRange, 1);
+			//tsMatrix.scale((2.0f * m_glHistogramRect.width()) / (float)(m_fftSize - 1), m_glHistogramRect2.height() / m_powerRange, 1);
+			tsMatrix.scale((2.0f * m_glHistogramRect.width()) / (float)(m_fftSize - 1), m_glHistogramRect2.height() / m_powerRange, 1);
 			m_program->setUniformValue(m_matrixLoc, tsMatrix);
 			m_program->setUniformValue(m_colorLoc, color);
 			f->glEnable(GL_BLEND);
@@ -1592,7 +1592,7 @@ void GLSpectrum::applyChanges()
 		m_glHistogramRect2 = QRectF(
 			-1.0f + ((float)leftMargin / width2),
 			1.0f - ((float)histogramTop / height2),
-			1.0f - ((float)(width2 - leftMargin - rightMargin) / width2),
+			-1.0f + (((float) (width() - leftMargin - rightMargin)) / width2),
 			1.0f - ((float)histogramHeight / height2)
 		);
 
