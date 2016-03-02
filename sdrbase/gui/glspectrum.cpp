@@ -1122,6 +1122,7 @@ void GLSpectrum::paintGL()
 			m_maxHold[i] = (j * m_powerRange) / 99.0 + m_referenceLevel;
 		}
 
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
@@ -1132,7 +1133,6 @@ void GLSpectrum::paintGL()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 
-#ifdef GL_DEPRECATED
 		//glEnable(GL_LINE_SMOOTH);
 		glBegin(GL_LINE_STRIP);
 		for(int i = 0; i < m_fftSize; i++) {
@@ -1144,9 +1144,12 @@ void GLSpectrum::paintGL()
 			glVertex2f(i, v);
 		}
 		glEnd();
+		//glDisable(GL_LINE_SMOOTH);
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[2*m_fftSize];
+			Real bottom = -m_powerRange;
 
 			for(int i = 0; i < m_fftSize; i++) {
 				Real v = m_maxHold[i] - m_referenceLevel;
@@ -1157,21 +1160,11 @@ void GLSpectrum::paintGL()
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
+			m_glShaderSimplePolyline.draw(m_glHistogramMatrix, color, q3, m_fftSize);
 		}
 #endif
-		//glDisable(GL_LINE_SMOOTH);
-		glPopMatrix();
 	}
 
 	// paint current spectrum line on top of histogram
