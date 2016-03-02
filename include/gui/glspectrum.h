@@ -150,12 +150,13 @@ private:
 	int m_histogramLateHoldoff;
 	int m_histogramStroke;
 	QRectF m_glHistogramRect;
+	QRectF m_glHistogramRect2;
 	bool m_displayHistogram;
 
 	bool m_displayChanged;
 
-	QOpenGLVertexArrayObject m_vao;
-	QOpenGLBuffer m_vbo;
+	//QOpenGLVertexArrayObject m_vao; don't know what to do with this shit
+	//QOpenGLBuffer m_vbo;
 	QOpenGLShaderProgram *m_program;
 	int m_matrixLoc;
 	int m_colorLoc;

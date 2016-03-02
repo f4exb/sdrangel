@@ -21,6 +21,7 @@
 
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions>
 #include "gui/glspectrum.h"
 #include "gui/glshadersources.h"
 
@@ -113,12 +114,6 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_frequencyScale.setFont(font());
 	m_frequencyScale.setOrientation(Qt::Horizontal);
 
-	m_vao.create();
-	QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
-	m_vbo.create();
-	m_vbo.bind();
-	// TODO: allocate VBO
-
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.start(50);
 }
@@ -163,10 +158,6 @@ GLSpectrum::~GLSpectrum()
 		deleteTexture(m_frequencyTexture);
 		m_frequencyTextureAllocated = false;
 	}
-
-    makeCurrent(); // TODO: move to cleanup() wnem inheriting from QOpenGLWidget
-    m_vbo.destroy();
-    doneCurrent();
 }
 
 void GLSpectrum::setCenterFrequency(quint64 frequency)
@@ -497,7 +488,24 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 void GLSpectrum::initializeGL()
 {
-	//connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
+	QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
+
+	if (glCurrentContext) {
+		if (QOpenGLContext::currentContext()->isValid()) {
+			qDebug() << "GLSpectrum::initializeGL: context:"
+				<< " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
+				<< " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
+				<< " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
+		}
+		else {
+			qDebug() << "GLSpectrum::initializeGL: current context is invalid";
+		}
+	} else {
+		qCritical() << "GLSpectrum::initializeGL: no current context";
+		return;
+	}
+
+	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
 	glDisable(GL_DEPTH_TEST);
 
 	m_program = new QOpenGLShaderProgram;
@@ -507,7 +515,7 @@ void GLSpectrum::initializeGL()
 	m_program->link();
 	m_program->bind();
 	m_matrixLoc = m_program->uniformLocation("uMatrix");
-	m_colorLoc = m_program->uniformLocation("uColor");
+	m_colorLoc = m_program->uniformLocation("uColour");
 	m_program->release();
 }
 
@@ -1177,29 +1185,17 @@ void GLSpectrum::paintGL()
 
 	// paint current spectrum line on top of histogram
 	if ((m_displayCurrent) && m_currentSpectrum) {
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width() / (float)(m_fftSize - 1), -m_glHistogramRect.height() / m_powerRange, 1);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_LINE_SMOOTH);
 		glLineWidth(1.0f);
 		glColor4f(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0); // intense yellow
 		Real bottom = -m_powerRange;
 
-#ifdef GL_DEPRECATED
-		glBegin(GL_LINE_STRIP);
-		for(int i = 0; i < m_fftSize; i++) {
-			Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
-			if(v > 0)
-				v = 0;
-			else if(v < bottom)
-				v = bottom;
-			glVertex2f(i, v);
-		}
-		glEnd();
-#else
 		{
 			GLfloat q3[2*m_fftSize];
 
@@ -1212,21 +1208,61 @@ void GLSpectrum::paintGL()
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
+
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
 			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+		}
+		/*
+		glBegin(GL_LINE_STRIP);
+		for(int i = 0; i < m_fftSize; i++) {
+			Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
+			if(v > 0)
+				v = 0;
+			else if(v < bottom)
+				v = bottom;
+			glVertex2f(i, v);
+		}
+		glEnd();*/
+		glPopMatrix();
+#else
+		{
+			Real bottom = -m_powerRange;
+			GLfloat q3[2*m_fftSize];
+
+			for(int i = 0; i < m_fftSize; i++) {
+				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
+				if(v > 0)
+					v = 0;
+				else if(v < bottom)
+					v = bottom;
+				q3[2*i] = (Real) i;
+				q3[2*i+1] = v;
+			}
+
+			QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+			m_program->bind();
+			QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+			QMatrix4x4 tsMatrix;
+			tsMatrix.setToIdentity();
+			//qDebug("GLSpectrum::paintGL: %f %f %f %f", m_glHistogramRect.x(), m_glHistogramRect.y(), m_glHistogramRect.width(), m_glHistogramRect.height());
+			//tsMatrix.translate(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+			tsMatrix.translate(m_glHistogramRect2.x(), m_glHistogramRect2.y(), 0);
+			tsMatrix.scale((2.0f * m_glHistogramRect.width()) / (float)(m_fftSize - 1), (2.0f * m_glHistogramRect.height()) / m_powerRange, 1);
+			m_program->setUniformValue(m_matrixLoc, tsMatrix);
+			m_program->setUniformValue(m_colorLoc, color);
+			f->glEnable(GL_BLEND);
+			f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			f->glLineWidth(1.0f);
+			f->glEnableVertexAttribArray(0); // vertex
+			f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, q3);
+			f->glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
+			f->glDisableVertexAttribArray(0);
+			m_program->release();
+			//QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 		}
 #endif
-		//glDisable(GL_LINE_SMOOTH);
-		glPopMatrix();
 	}
 
 	// paint waterfall grid
@@ -1548,6 +1584,16 @@ void GLSpectrum::applyChanges()
 			(float)histogramTop / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)histogramHeight / (float)height()
+		);
+
+		float width2  = (float) width() / 2.0f;
+		float height2 = (float) height() / 2.0f;
+
+		m_glHistogramRect2 = QRectF(
+			-1.0f + ((float)leftMargin / width2),
+			1.0f - ((float)histogramTop / height2),
+			1.0f - ((float)(width2 - leftMargin - rightMargin) / width2),
+			1.0f - ((float)histogramHeight / height2)
 		);
 
 		m_frequencyScaleRect = QRect(
@@ -2073,6 +2119,5 @@ void GLSpectrum::cleanup()
     	delete m_program;
     	m_program = 0;
     }
-    m_program = 0;
     doneCurrent();
 }
