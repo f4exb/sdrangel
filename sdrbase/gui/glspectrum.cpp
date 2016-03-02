@@ -20,7 +20,9 @@
 #endif
 
 #include <QMouseEvent>
+#include <QOpenGLShaderProgram>
 #include "gui/glspectrum.h"
+#include "gui/glshadersources.h"
 
 #include <QDebug>
 
@@ -58,7 +60,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_histogramHoldoff(NULL),
 	m_histogramTextureAllocated(false),
 	m_displayHistogram(true),
-	m_displayChanged(false)
+	m_displayChanged(false),
+	m_program(0)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -110,6 +113,12 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_frequencyScale.setFont(font());
 	m_frequencyScale.setOrientation(Qt::Horizontal);
 
+	m_vao.create();
+	QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
+	m_vbo.create();
+	m_vbo.bind();
+	// TODO: allocate VBO
+
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.start(50);
 }
@@ -154,6 +163,10 @@ GLSpectrum::~GLSpectrum()
 		deleteTexture(m_frequencyTexture);
 		m_frequencyTextureAllocated = false;
 	}
+
+    makeCurrent(); // TODO: move to cleanup() wnem inheriting from QOpenGLWidget
+    m_vbo.destroy();
+    doneCurrent();
 }
 
 void GLSpectrum::setCenterFrequency(quint64 frequency)
@@ -484,7 +497,18 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 void GLSpectrum::initializeGL()
 {
-	 glDisable(GL_DEPTH_TEST);
+	//connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
+	glDisable(GL_DEPTH_TEST);
+
+	m_program = new QOpenGLShaderProgram;
+	m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, GLShaderSources::getVertexShaderSourceSimple());
+	m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, GLShaderSources::getFragmentShaderSourceColored());
+	m_program->bindAttributeLocation("vertex", 0);
+	m_program->link();
+	m_program->bind();
+	m_matrixLoc = m_program->uniformLocation("uMatrix");
+	m_colorLoc = m_program->uniformLocation("uColor");
+	m_program->release();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -2040,4 +2064,15 @@ void GLSpectrum::connectTimer(const QTimer& timer)
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.stop();
+}
+
+void GLSpectrum::cleanup()
+{
+	makeCurrent();
+    if (m_program) {
+    	delete m_program;
+    	m_program = 0;
+    }
+    m_program = 0;
+    doneCurrent();
 }

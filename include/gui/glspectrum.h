@@ -21,10 +21,14 @@
 #include <QGLWidget>
 #include <QTimer>
 #include <QMutex>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
 #include "dsp/channelmarker.h"
 #include "util/export.h"
+
+class QOpenGLShaderProgram;
 
 class SDRANGEL_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
@@ -150,6 +154,12 @@ private:
 
 	bool m_displayChanged;
 
+	QOpenGLVertexArrayObject m_vao;
+	QOpenGLBuffer m_vbo;
+	QOpenGLShaderProgram *m_program;
+	int m_matrixLoc;
+	int m_colorLoc;
+
 	void updateWaterfall(const std::vector<Real>& spectrum);
 	void updateHistogram(const std::vector<Real>& spectrum);
 
@@ -166,6 +176,8 @@ private:
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
+
+	void cleanup();
 
 private slots:
 	void tick();

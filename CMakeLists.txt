@@ -117,7 +117,8 @@ set(sdrbase_SOURCES
 	sdrbase/gui/colormapper.cpp
 	sdrbase/gui/glscope.cpp
 	sdrbase/gui/glscopegui.cpp
-	sdrbase/gui/glspectrum.cpp
+	sdrbase/gui/glshadersources.cpp
+    sdrbase/gui/glspectrum.cpp
 	sdrbase/gui/glspectrumgui.cpp
 	sdrbase/gui/indicator.cpp
 	sdrbase/gui/pluginsdialog.cpp
@@ -199,7 +200,8 @@ set(sdrbase_HEADERS
 	include/gui/colormapper.h
 	include/gui/glscope.h
 	include/gui/glscopegui.h
-	include/gui/glspectrum.h
+	include/gui/glshadersources.h
+    include/gui/glspectrum.h
 	include/gui/glspectrumgui.h
 	include/gui/indicator.h
 	include/gui/physicalunit.h

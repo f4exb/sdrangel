@@ -23,13 +23,11 @@
 class GLShaderSources
 {
 public:
-	static const QString& getVertexShaderSourceSimple();
-	static const QString& getFragmentShaderSourceColored();
+	static const QString& getVertexShaderSourceSimple() { return m_vertexShaderSourceSimple; }
+	static const QString& getFragmentShaderSourceColored() { return m_fragmentShaderSourceColored; }
 private:
 	static const QString m_vertexShaderSourceSimple;
 	static const QString m_fragmentShaderSourceColored;
 };
-
-
 
 #endif /* INCLUDE_GUI_GLSHADERSOURCES_H_ */

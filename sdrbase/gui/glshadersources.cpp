@@ -18,16 +18,14 @@
 #include "gui/glshadersources.h"
 
 const QString GLShaderSources::m_vertexShaderSourceSimple = QString(
-	    "#version 150\n"
 		"uniform mat4 uMatrix;\n"
-		"in vec4 vertex\n"
+		"attribute vec4 vertex;\n"
 		"void main() {\n"
 		"    gl_Position = uMatrix * vertex;\n"
 		"}\n"
 		);
 
 const QString GLShaderSources::m_fragmentShaderSourceColored = QString(
-	    "#version 150\n"
 		"uniform mediump vec4 uColour;\n"
 		"void main() {\n"
 		"    gl_FragColor = uColour;\n"
