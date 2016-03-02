@@ -23,7 +23,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 #include "gui/glspectrum.h"
-#include "gui/glshadersources.h"
+#include <gui/glshadersimplepolyline.h>
 
 #include <QDebug>
 
@@ -507,16 +507,7 @@ void GLSpectrum::initializeGL()
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
 	glDisable(GL_DEPTH_TEST);
-
-	m_program = new QOpenGLShaderProgram;
-	m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, GLShaderSources::getVertexShaderSourceSimple());
-	m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, GLShaderSources::getFragmentShaderSourceColored());
-	m_program->bindAttributeLocation("vertex", 0);
-	m_program->link();
-	m_program->bind();
-	m_matrixLoc = m_program->uniformLocation("uMatrix");
-	m_colorLoc = m_program->uniformLocation("uColour");
-	m_program->release();
+	m_glShaderSimplePolyline.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -1241,20 +1232,8 @@ void GLSpectrum::paintGL()
 				q3[2*i+1] = v;
 			}
 
-			QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-			m_program->bind();
 			QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
-			m_program->setUniformValue(m_matrixLoc, m_glHistogramMatrix);
-			m_program->setUniformValue(m_colorLoc, color);
-			f->glEnable(GL_BLEND);
-			f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			f->glLineWidth(1.0f);
-			f->glEnableVertexAttribArray(0); // vertex
-			f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			f->glDrawArrays(GL_LINE_STRIP, 0, m_fftSize);
-			f->glDisableVertexAttribArray(0);
-			m_program->release();
-			//QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
+			m_glShaderSimplePolyline.draw(m_glHistogramMatrix, color, q3, m_fftSize);
 		}
 #endif
 	}
@@ -2109,9 +2088,6 @@ void GLSpectrum::connectTimer(const QTimer& timer)
 void GLSpectrum::cleanup()
 {
 	makeCurrent();
-    if (m_program) {
-    	delete m_program;
-    	m_program = 0;
-    }
+	m_glShaderSimplePolyline.cleanup();
     doneCurrent();
 }

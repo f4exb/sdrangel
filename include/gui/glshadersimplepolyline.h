@@ -15,19 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GUI_GLSHADERSOURCES_H_
-#define INCLUDE_GUI_GLSHADERSOURCES_H_
+#ifndef INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_
+#define INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_
 
 #include <QString>
 
-class GLShaderSources
+class QOpenGLShaderProgram;
+class QMatrix4x4;
+class QVector4D;
+
+class GLShaderSimplePolyline
 {
 public:
-	static const QString& getVertexShaderSourceSimple() { return m_vertexShaderSourceSimple; }
-	static const QString& getFragmentShaderSourceColored() { return m_fragmentShaderSourceColored; }
+	GLShaderSimplePolyline();
+	~GLShaderSimplePolyline();
+
+	void initializeGL();
+	void draw(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+	void cleanup();
+
 private:
+	QOpenGLShaderProgram *m_program;
+	int m_matrixLoc;
+	int m_colorLoc;
 	static const QString m_vertexShaderSourceSimple;
 	static const QString m_fragmentShaderSourceColored;
 };
 
-#endif /* INCLUDE_GUI_GLSHADERSOURCES_H_ */
+#endif /* INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_ */
