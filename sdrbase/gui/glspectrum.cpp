@@ -1406,11 +1406,11 @@ void GLSpectrum::paintGL()
 #endif
 		tickList = &m_frequencyScale.getTickList();
 
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
 
-#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -1423,14 +1423,21 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
-			for(int i= 0; i < tickList->count(); i++) {
+
+			for(int i= 0; i < tickList->count(); i++)
+			{
 				tick = &(*tickList)[i];
-				if(tick->major) {
-					if(tick->textSize > 0) {
+
+				if(tick->major)
+				{
+					if(tick->textSize > 0)
+					{
 						float x = tick->pos / m_frequencyScale.getSize();
 						q3[4*effectiveTicks] = x;
 						q3[4*effectiveTicks+1] = 0;
@@ -1440,24 +1447,14 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, q3, 2*effectiveTicks);
 		}
 #endif
-		glPopMatrix();
 	}
 
 	glPopMatrix();
-
 	m_mutex.unlock();
 }
 
@@ -1493,6 +1490,7 @@ void GLSpectrum::applyChanges()
 	int leftMargin;
 	int rightMargin = fm.width("000");
 
+	// displays both histogram and waterfall
 	if(m_displayWaterfall && (m_displayHistogram | m_displayMaxHold | m_displayCurrent))
 	{
 		waterfallHeight = height() * m_waterfallShare - 1;
@@ -1558,21 +1556,21 @@ void GLSpectrum::applyChanges()
 			(float)waterfallHeight / (float)height()
 		);
 
+		m_glWaterfallBoxMatrix.setToIdentity();
+		m_glWaterfallBoxMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*waterfallTop) / (float) height())
+		);
+		m_glWaterfallBoxMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			(float) (-2*waterfallHeight) / (float) height()
+		);
+
 		m_glHistogramRect = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)histogramTop / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)histogramHeight / (float)height()
-		);
-
-		m_glHistogramSpectrumMatrix.setToIdentity();
-		m_glHistogramSpectrumMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
-			 1.0f - ((float)(2*histogramTop) / (float) height())
-		);
-		m_glHistogramSpectrumMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
-			((float) 2*histogramHeight / height()) / m_powerRange
 		);
 
 		m_glHistogramBoxMatrix.setToIdentity();
@@ -1583,6 +1581,16 @@ void GLSpectrum::applyChanges()
 		m_glHistogramBoxMatrix.scale(
 			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*histogramHeight) / (float) height()
+		);
+
+		m_glHistogramSpectrumMatrix.setToIdentity();
+		m_glHistogramSpectrumMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*histogramTop) / (float) height())
+		);
+		m_glHistogramSpectrumMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2*histogramHeight / height()) / m_powerRange
 		);
 
 		m_frequencyScaleRect = QRect(
@@ -1598,13 +1606,31 @@ void GLSpectrum::applyChanges()
 			(float)frequencyScaleHeight / (float)height()
 		);
 
+		m_glFrequencyScaleBoxMatrix.setToIdentity();
+		m_glFrequencyScaleBoxMatrix.translate (
+			-1.0f,
+			 1.0f - ((float) 2*frequencyScaleTop / (float) height())
+		);
+		m_glFrequencyScaleBoxMatrix.scale (
+			2.0f,
+			(float) -2*frequencyScaleHeight / (float) height()
+		);
+
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
+
+		m_glLeftScaleBoxMatrix.setToIdentity();
+		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
+		m_glLeftScaleBoxMatrix.scale(
+			(float)(2*(leftMargin - 1)) / (float) width(),
+			-2.0f
+		);
 	}
+	// displays waterfall only
 	else if(m_displayWaterfall)
 	{
 		bottomMargin = frequencyScaleHeight;
@@ -1653,6 +1679,16 @@ void GLSpectrum::applyChanges()
 			(float)waterfallHeight / (float)height()
 		);
 
+		m_glWaterfallBoxMatrix.setToIdentity();
+		m_glWaterfallBoxMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*topMargin) / (float) height())
+		);
+		m_glWaterfallBoxMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			(float) (-2*waterfallHeight) / (float) height()
+		);
+
 		m_frequencyScaleRect = QRect(
 			0,
 			frequencyScaleTop,
@@ -1666,13 +1702,31 @@ void GLSpectrum::applyChanges()
 			(float)frequencyScaleHeight / (float)height()
 		);
 
+		m_glFrequencyScaleBoxMatrix.setToIdentity();
+		m_glFrequencyScaleBoxMatrix.translate (
+			-1.0f,
+			 1.0f - ((float) 2*frequencyScaleTop / (float) height())
+		);
+		m_glFrequencyScaleBoxMatrix.scale (
+			2.0f,
+			(float) -2*frequencyScaleHeight / (float) height()
+		);
+
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
+
+		m_glLeftScaleBoxMatrix.setToIdentity();
+		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
+		m_glLeftScaleBoxMatrix.scale(
+			(float)(2*(leftMargin - 1)) / (float) width(),
+			-2.0f
+		);
 	}
+	// displays histogram only
 	else if(m_displayHistogram || m_displayMaxHold || m_displayCurrent)
 	{
 		bottomMargin = frequencyScaleHeight;
@@ -1696,6 +1750,26 @@ void GLSpectrum::applyChanges()
 			(float)(height() - topMargin - frequencyScaleHeight) / (float)height()
 		);
 
+		m_glHistogramSpectrumMatrix.setToIdentity();
+		m_glHistogramSpectrumMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*histogramTop) / (float) height())
+		);
+		m_glHistogramSpectrumMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2*(height() - topMargin - frequencyScaleHeight) / height()) / m_powerRange
+		);
+
+		m_glHistogramBoxMatrix.setToIdentity();
+		m_glHistogramBoxMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*histogramTop) / (float) height())
+		);
+		m_glHistogramBoxMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			(float) (-2*(height() - topMargin - frequencyScaleHeight)) / (float) height()
+		);
+
 		m_frequencyScaleRect = QRect(
 			0,
 			frequencyScaleTop,
@@ -1709,11 +1783,28 @@ void GLSpectrum::applyChanges()
 			(float)frequencyScaleHeight / (float)height()
 		);
 
+		m_glFrequencyScaleBoxMatrix.setToIdentity();
+		m_glFrequencyScaleBoxMatrix.translate (
+			-1.0f,
+			 1.0f - ((float) 2*frequencyScaleTop / (float) height())
+		);
+		m_glFrequencyScaleBoxMatrix.scale (
+			2.0f,
+			(float) -2*frequencyScaleHeight / (float) height()
+		);
+
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
+		);
+
+		m_glLeftScaleBoxMatrix.setToIdentity();
+		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
+		m_glLeftScaleBoxMatrix.scale(
+			(float)(2*(leftMargin - 1)) / (float) width(),
+			-2.0f
 		);
 	}
 	else

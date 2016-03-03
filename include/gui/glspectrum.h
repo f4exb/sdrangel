@@ -129,6 +129,8 @@ private:
 	QRectF m_glLeftScaleRect;
 	QRectF m_glFrequencyScaleRect;
 	QRect m_frequencyScaleRect;
+	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
+	QMatrix4x4 m_glLeftScaleBoxMatrix;
 
 	QRgb m_waterfallPalette[240];
 	QImage* m_waterfallBuffer;
@@ -138,6 +140,7 @@ private:
 	int m_waterfallTextureHeight;
 	int m_waterfallTexturePos;
 	QRectF m_glWaterfallRect;
+	QMatrix4x4 m_glWaterfallBoxMatrix;
 	bool m_displayWaterfall;
 	bool m_ssbSpectrum;
 
@@ -154,13 +157,11 @@ private:
 	QRectF m_glHistogramRect;
 	QMatrix4x4 m_glHistogramSpectrumMatrix;
 	QMatrix4x4 m_glHistogramBoxMatrix;
-	GLShaderSimple m_glShaderSimple;
 	bool m_displayHistogram;
 
 	bool m_displayChanged;
 
-	//QOpenGLVertexArrayObject m_vao; don't know what to do with this shit
-	//QOpenGLBuffer m_vbo;
+	GLShaderSimple m_glShaderSimple;
 	QOpenGLShaderProgram *m_program;
 	int m_matrixLoc;
 	int m_colorLoc;
