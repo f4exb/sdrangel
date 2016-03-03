@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2016-02-27T19:24:40
+# Pro file for Android build with Qt Creator
 #
 #-------------------------------------------------
 
@@ -11,13 +11,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = sdrangel
 TEMPLATE = app
 INCLUDEPATH += $$PWD/include
-INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtGui
-INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtMultimedia
-INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGL
-INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGLExtensions
+
+CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtGui
+CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtMultimedia
+CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGL
+CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGLExtensions
 #INCLUDEPATH += $$(BOOST_PATH)
-INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
-INCLUDEPATH += /opt/install/android-ndk-r10e/platforms/android-21/arch-arm/usr/include
+CONFIG(ANDROID):INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
+CONFIG(ANDROID):INCLUDEPATH += /opt/install/android-ndk-r10e/platforms/android-21/arch-arm/usr/include
+
+CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_55_0"
+CONFIG(MINGW32):QT += multimedia
+CONFIG(MINGW32):QT += opengl
 
 SOURCES += main.cpp\
         sdrbase/mainwindow.cpp\
@@ -181,6 +186,5 @@ FORMS    += sdrbase/mainwindow.ui\
         plugins/channel/bfm/bfmdemodgui.ui\
         plugins/channel/am/amdemodgui.ui
 
-CONFIG += mobility
-MOBILITY = 
-DEFINES += GL_ANDROID
+CONFIG(ANDROID):CONFIG += mobility
+CONFIG(ANDROID):MOBILITY =
