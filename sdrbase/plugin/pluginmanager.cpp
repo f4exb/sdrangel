@@ -9,7 +9,6 @@
 #include "dsp/samplesource.h"
 
 #include <QDebug>
-#include "util/stacktrace.h"
 
 PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent) :
 	QObject(parent),
