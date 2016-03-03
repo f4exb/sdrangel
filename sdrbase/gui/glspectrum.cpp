@@ -675,22 +675,25 @@ void GLSpectrum::paintGL()
 
 		glPopMatrix();
 
+		// draw rect around
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
 		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
 
-		// draw rect around
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
-#ifdef GL_DEPRECATED
+
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
 		glVertex2f(0, 1);
 		glVertex2f(0, 0);
 		glVertex2f(1, 0);
 		glEnd();
+		glDisable(GL_BLEND);
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[] {
@@ -700,22 +703,11 @@ void GLSpectrum::paintGL()
 				1, 0
 			};
 
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_LOOP, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-		    glEnableClientState(GL_VERTEX_ARRAY);
-		    glVertexPointer(2, GL_FLOAT, 0, q3);
-		    glDrawArrays(GL_LINE_LOOP, 0, 4);
-		    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+			QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+			m_glShaderSimple.drawContour(m_glWaterfallBoxMatrix, color, q3, 4);
 		}
 #endif
-		glDisable(GL_BLEND);
 
-		glPopMatrix();
 	}
 
 	// paint histogram
