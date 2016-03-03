@@ -24,17 +24,22 @@ class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QVector4D;
 
-class GLShaderSimplePolyline
+class GLShaderSimple
 {
 public:
-	GLShaderSimplePolyline();
-	~GLShaderSimplePolyline();
+	GLShaderSimple();
+	~GLShaderSimple();
 
 	void initializeGL();
-	void draw(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+	void drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+	void drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+	void drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+	void drawSurface(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void cleanup();
 
 private:
+	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
+
 	QOpenGLShaderProgram *m_program;
 	int m_matrixLoc;
 	int m_colorLoc;

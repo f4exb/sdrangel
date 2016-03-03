@@ -26,7 +26,7 @@
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
-#include "gui/glshadersimplepolyline.h"
+#include "gui/glshadersimple.h"
 #include "dsp/channelmarker.h"
 #include "util/export.h"
 
@@ -153,7 +153,7 @@ private:
 	int m_histogramStroke;
 	QRectF m_glHistogramRect;
 	QMatrix4x4 m_glHistogramMatrix;
-	GLShaderSimplePolyline m_glShaderSimplePolyline;
+	GLShaderSimple m_glShaderSimple;
 	bool m_displayHistogram;
 
 	bool m_displayChanged;

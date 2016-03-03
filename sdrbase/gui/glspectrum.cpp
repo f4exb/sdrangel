@@ -23,7 +23,6 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 #include "gui/glspectrum.h"
-#include <gui/glshadersimplepolyline.h>
 
 #include <QDebug>
 
@@ -507,7 +506,7 @@ void GLSpectrum::initializeGL()
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
 	glDisable(GL_DEPTH_TEST);
-	m_glShaderSimplePolyline.initializeGL();
+	m_glShaderSimple.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -1162,7 +1161,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimplePolyline.draw(m_glHistogramMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramMatrix, color, q3, m_fftSize);
 		}
 #endif
 	}
@@ -1226,7 +1225,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimplePolyline.draw(m_glHistogramMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramMatrix, color, q3, m_fftSize);
 		}
 #endif
 	}
@@ -2081,6 +2080,6 @@ void GLSpectrum::connectTimer(const QTimer& timer)
 void GLSpectrum::cleanup()
 {
 	makeCurrent();
-	m_glShaderSimplePolyline.cleanup();
+	m_glShaderSimple.cleanup();
     doneCurrent();
 }

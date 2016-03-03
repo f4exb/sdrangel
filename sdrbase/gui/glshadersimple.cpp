@@ -21,18 +21,18 @@
 #include <QMatrix4x4>
 #include <QVector4D>
 
-#include <gui/glshadersimplepolyline.h>
+#include "gui/glshadersimple.h"
 
-GLShaderSimplePolyline::GLShaderSimplePolyline() :
+GLShaderSimple::GLShaderSimple() :
 	m_program(0)
 { }
 
-GLShaderSimplePolyline::~GLShaderSimplePolyline()
+GLShaderSimple::~GLShaderSimple()
 {
 	cleanup();
 }
 
-void GLShaderSimplePolyline::initializeGL()
+void GLShaderSimple::initializeGL()
 {
 	m_program = new QOpenGLShaderProgram;
 	m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceSimple);
@@ -45,7 +45,27 @@ void GLShaderSimplePolyline::initializeGL()
 	m_program->release();
 }
 
-void GLShaderSimplePolyline::draw(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+{
+	draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices);
+}
+
+void GLShaderSimple::drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+{
+	draw(GL_LINES, transformMatrix, color, vertices, nbVertices);
+}
+
+void GLShaderSimple::drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+{
+	draw(GL_LINE_LOOP, transformMatrix, color, vertices, nbVertices);
+}
+
+void GLShaderSimple::drawSurface(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+{
+	draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices);
+}
+
+void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
 {
 	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 	m_program->bind();
@@ -56,12 +76,12 @@ void GLShaderSimplePolyline::draw(const QMatrix4x4& transformMatrix, const QVect
 	f->glLineWidth(1.0f);
 	f->glEnableVertexAttribArray(0); // vertex
 	f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-	f->glDrawArrays(GL_LINE_STRIP, 0, nbVertices);
+	f->glDrawArrays(mode, 0, nbVertices);
 	f->glDisableVertexAttribArray(0);
 	m_program->release();
 }
 
-void GLShaderSimplePolyline::cleanup()
+void GLShaderSimple::cleanup()
 {
 	if (m_program)
 	{
@@ -70,7 +90,7 @@ void GLShaderSimplePolyline::cleanup()
 	}
 }
 
-const QString GLShaderSimplePolyline::m_vertexShaderSourceSimple = QString(
+const QString GLShaderSimple::m_vertexShaderSourceSimple = QString(
 		"uniform mat4 uMatrix;\n"
 		"attribute vec4 vertex;\n"
 		"void main() {\n"
@@ -78,7 +98,7 @@ const QString GLShaderSimplePolyline::m_vertexShaderSourceSimple = QString(
 		"}\n"
 		);
 
-const QString GLShaderSimplePolyline::m_fragmentShaderSourceColored = QString(
+const QString GLShaderSimple::m_fragmentShaderSourceColored = QString(
 		"uniform mediump vec4 uColour;\n"
 		"void main() {\n"
 		"    gl_FragColor = uColour;\n"
