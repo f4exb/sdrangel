@@ -856,18 +856,25 @@ void GLSpectrum::paintGL()
 			}
 		}
 
+		glPopMatrix();
+
 		// draw rect around
+#ifdef GL_DEPRECATED
+		glPushMatrix();
+		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
-#ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
 		glVertex2f(0, 1);
 		glVertex2f(0, 0);
 		glVertex2f(1, 0);
 		glEnd();
+		glDisable(GL_BLEND);
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[] {
@@ -876,21 +883,11 @@ void GLSpectrum::paintGL()
 				0, 0,
 				1, 0
 			};
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_LOOP, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-		    glEnableClientState(GL_VERTEX_ARRAY);
-		    glVertexPointer(2, GL_FLOAT, 0, q3);
-		    glDrawArrays(GL_LINE_LOOP, 0, 4);
-		    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+			m_glShaderSimple.drawContour(m_glHistogramBoxMatrix, color, q3, 4);
 		}
 #endif
-		glDisable(GL_BLEND);
-		glPopMatrix();
 	}
 
 	// paint left scales (time and power)
@@ -1161,7 +1158,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimple.drawPolyline(m_glHistogramMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_fftSize);
 		}
 #endif
 	}
@@ -1225,7 +1222,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimple.drawPolyline(m_glHistogramMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_fftSize);
 		}
 #endif
 	}
@@ -1551,14 +1548,24 @@ void GLSpectrum::applyChanges()
 			(float)histogramHeight / (float)height()
 		);
 
-		m_glHistogramMatrix.setToIdentity();
-		m_glHistogramMatrix.translate(
+		m_glHistogramSpectrumMatrix.setToIdentity();
+		m_glHistogramSpectrumMatrix.translate(
 			-1.0f + ((float)(2*leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
-		m_glHistogramMatrix.scale(
+		m_glHistogramSpectrumMatrix.scale(
 			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
 			((float) 2*histogramHeight / height()) / m_powerRange
+		);
+
+		m_glHistogramBoxMatrix.setToIdentity();
+		m_glHistogramBoxMatrix.translate(
+			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			 1.0f - ((float)(2*histogramTop) / (float) height())
+		);
+		m_glHistogramBoxMatrix.scale(
+			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			(float) (-2*histogramHeight) / (float) height()
 		);
 
 		m_frequencyScaleRect = QRect(

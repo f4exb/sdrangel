@@ -152,7 +152,8 @@ private:
 	int m_histogramLateHoldoff;
 	int m_histogramStroke;
 	QRectF m_glHistogramRect;
-	QMatrix4x4 m_glHistogramMatrix;
+	QMatrix4x4 m_glHistogramSpectrumMatrix;
+	QMatrix4x4 m_glHistogramBoxMatrix;
 	GLShaderSimple m_glShaderSimple;
 	bool m_displayHistogram;
 
