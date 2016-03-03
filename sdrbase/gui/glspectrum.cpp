@@ -1334,26 +1334,25 @@ void GLSpectrum::paintGL()
 		glPopMatrix();
 	}
 
-	// TODO: paint histogram grid
-	if((m_displayHistogram || m_displayMaxHold || m_displayCurrent) && (m_displayGrid)) {
+	// paint histogram grid
+	if((m_displayHistogram || m_displayMaxHold || m_displayCurrent) && (m_displayGrid))
+	{
+		const ScaleEngine::TickList* tickList;
+		const ScaleEngine::Tick* tick;
+		tickList = &m_powerScale.getTickList();
+
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
-
-		const ScaleEngine::TickList* tickList;
-		const ScaleEngine::Tick* tick;
-
-		tickList = &m_powerScale.getTickList();
-#ifdef GL_DEPRECATED
-		for(int i= 0; i < tickList->count(); i++) {
+		for (int i= 0; i < tickList->count(); i++)
+		{
 			tick = &(*tickList)[i];
-			if(tick->major) {
-				if(tick->textSize > 0) {
+			if(tick->major)
+			{
+				if(tick->textSize > 0)
+				{
 					float y = tick->pos / m_powerScale.getSize();
 					glBegin(GL_LINE_LOOP);
 					glVertex2f(0, 1-y);
@@ -1362,14 +1361,35 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glLineWidth(1.0f);
+		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+
+		glPopMatrix();
 #else
+		for (int i= 0; i < tickList->count(); i++)
+		{
+			tick = &(*tickList)[i];
+
+			if(tick->major)	{
+				if(tick->textSize > 0) {
+					float y = tick->pos / m_powerScale.getSize();
+				}
+			}
+		}
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
-			for(int i= 0; i < tickList->count(); i++) {
+
+			for(int i= 0; i < tickList->count(); i++)
+			{
 				tick = &(*tickList)[i];
-				if(tick->major) {
-					if(tick->textSize > 0) {
+				if(tick->major)
+				{
+					if(tick->textSize > 0)
+					{
 						float y = tick->pos / m_powerScale.getSize();
 						q3[4*effectiveTicks] = 0;
 						q3[4*effectiveTicks+1] = 1-y;
@@ -1379,20 +1399,17 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, q3, 2*effectiveTicks);
 		}
 #endif
 		tickList = &m_frequencyScale.getTickList();
+
+		glPushMatrix();
+		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
+
 #ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
