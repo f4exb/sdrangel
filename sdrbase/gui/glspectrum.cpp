@@ -1324,21 +1324,8 @@ void GLSpectrum::paintGL()
 				}
 			}
 
-			glPushMatrix();
-			glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
-			glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
-
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glLineWidth(1.0f);
-			glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
-
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-
-			glPopMatrix();
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, color, q3, 2*effectiveTicks);
 		}
 #endif
 		tickList = &m_frequencyScale.getTickList();
@@ -1386,17 +1373,6 @@ void GLSpectrum::paintGL()
 
 			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
 			m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, color, q3, 2*effectiveTicks);
-
-//			glPushMatrix();
-//			glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
-//			glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
-//
-//			glEnableClientState(GL_VERTEX_ARRAY);
-//			glVertexPointer(2, GL_FLOAT, 0, q3);
-//			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-//			glDisableClientState(GL_VERTEX_ARRAY);
-//
-//			glPopMatrix();
 		}
 #endif
 	}
