@@ -549,7 +549,8 @@ void GLSpectrum::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// paint waterfall
-	if(m_displayWaterfall) {
+	if (m_displayWaterfall)
+	{
 		glPushMatrix();
 		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
 		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
@@ -559,14 +560,18 @@ void GLSpectrum::paintGL()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 		for(int i = 0; i < m_waterfallBufferPos; i++) {
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, m_waterfallTexturePos, m_fftSize, 1, GL_RGBA, GL_UNSIGNED_BYTE, m_waterfallBuffer->scanLine(i));
 			m_waterfallTexturePos = (m_waterfallTexturePos + 1) % m_waterfallTextureHeight;
 		}
+
 		m_waterfallBufferPos = 0;
+
 		float prop_y = m_waterfallTexturePos / (m_waterfallTextureHeight - 1.0);
 		float off = 1.0 / (m_waterfallTextureHeight - 1.0);
 		glEnable(GL_TEXTURE_2D);
+
 #ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, prop_y + 1 - off);
@@ -613,11 +618,20 @@ void GLSpectrum::paintGL()
 		}
 #endif
 		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
 		// paint channels
-		if(m_mouseInside) {
-			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+		if (m_mouseInside)
+		{
+			for (int i = 0; i < m_channelMarkerStates.size(); ++i)
+			{
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
-				if(dv->m_channelMarker->getVisible()) {
+				if (dv->m_channelMarker->getVisible())
+				{
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
@@ -659,6 +673,12 @@ void GLSpectrum::paintGL()
 			}
 		}
 
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
 		// draw rect around
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -699,11 +719,14 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint histogram
-	if(m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
+	if(m_displayHistogram || m_displayMaxHold || m_displayCurrent)
+	{
 		glPushMatrix();
 		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
 		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
-		if(m_displayHistogram) {
+
+		if(m_displayHistogram)
+		{
 			// import new lines into the texture
 			quint32* pix;
 			quint8* bs = m_histogram;
@@ -773,12 +796,21 @@ void GLSpectrum::paintGL()
 			glDisable(GL_TEXTURE_2D);
 		}
 
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
+
 		// paint channels
-		if(m_mouseInside) {
+		if(m_mouseInside)
+		{
 			// Effective BW overlays
-			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+			for(int i = 0; i < m_channelMarkerStates.size(); ++i)
+			{
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
-				if(dv->m_channelMarker->getVisible()) {
+				if(dv->m_channelMarker->getVisible())
+				{
 					glPushMatrix();
 					glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 					glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
@@ -819,9 +851,11 @@ void GLSpectrum::paintGL()
 			}
 
 			// Center line overlays based on DSB enveloppe
-			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+			for(int i = 0; i < m_channelMarkerStates.size(); ++i)
+			{
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
-				if(dv->m_channelMarker->getVisible()) {
+				if(dv->m_channelMarker->getVisible())
+				{
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
@@ -891,7 +925,8 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint left scales (time and power)
-	if(m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram ) {
+	if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram )
+	{
 		glPushMatrix();
 		glTranslatef(m_glLeftScaleRect.x(), m_glLeftScaleRect.y(), 0);
 		glScalef(m_glLeftScaleRect.width(), m_glLeftScaleRect.height(), 1);
@@ -952,7 +987,8 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint frequency scale
-	if(m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram ) {
+	if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram )
+	{
 		glPushMatrix();
 		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
 		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
@@ -1019,9 +1055,11 @@ void GLSpectrum::paintGL()
 		glScalef(m_glWaterfallRect.width(), m_glFrequencyScaleRect.height(), 1);
 
 		// Effective bandwidth overlays
-		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+		for(int i = 0; i < m_channelMarkerStates.size(); ++i)
+		{
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
-			if(dv->m_channelMarker->getVisible()) {
+			if(dv->m_channelMarker->getVisible())
+			{
 				glPushMatrix();
 				glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
 				glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
@@ -1062,10 +1100,13 @@ void GLSpectrum::paintGL()
 		}
 
 		// Center frequency mark on highlighted channels based on DSB enveloppe
-		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+		for(int i = 0; i < m_channelMarkerStates.size(); ++i)
+		{
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
-			if(dv->m_channelMarker->getVisible()) {
-				if (dv->m_channelMarker->getHighlighted()) {
+			if(dv->m_channelMarker->getVisible())
+			{
+				if (dv->m_channelMarker->getHighlighted())
+				{
 					glPushMatrix();
 					glTranslatef(dv->m_glRectDsb.x(), dv->m_glRectDsb.y(), 0);
 					glScalef(dv->m_glRectDsb.width(), dv->m_glRectDsb.height(), 1);
@@ -1103,10 +1144,13 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint max hold lines on top of histogram
-	if(m_displayMaxHold) {
-		if(m_maxHold.size() < (uint)m_fftSize)
+	if (m_displayMaxHold)
+	{
+		if (m_maxHold.size() < (uint)m_fftSize)
 			m_maxHold.resize(m_fftSize);
-		for(int i = 0; i < m_fftSize; i++) {
+
+		for(int i = 0; i < m_fftSize; i++)
+		{
 			int j;
 			quint8* bs = m_histogram + i * 100;
 			for(j = 99; j > 1; j--) {
@@ -1228,7 +1272,13 @@ void GLSpectrum::paintGL()
 	}
 
 	// paint waterfall grid
-	if(m_displayWaterfall && m_displayGrid) {
+	if(m_displayWaterfall && m_displayGrid)
+	{
+		const ScaleEngine::TickList* tickList;
+		const ScaleEngine::Tick* tick;
+		tickList = &m_timeScale.getTickList();
+
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
 		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
@@ -1236,14 +1286,8 @@ void GLSpectrum::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
-		//glColor4f(1, 1, 1, 0.05f);
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 
-		const ScaleEngine::TickList* tickList;
-		const ScaleEngine::Tick* tick;
-
-		tickList = &m_timeScale.getTickList();
-#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -1256,14 +1300,20 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
-			for(int i= 0; i < tickList->count(); i++) {
+
+			for (int i= 0; i < tickList->count(); i++)
+			{
 				tick = &(*tickList)[i];
-				if(tick->major) {
-					if(tick->textSize > 0) {
+				if (tick->major)
+				{
+					if(tick->textSize > 0)
+					{
 						float y = tick->pos / m_timeScale.getSize();
 						q3[4*effectiveTicks] = 0;
 						q3[4*effectiveTicks+1] = y;
@@ -1273,21 +1323,31 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
+
+			glPushMatrix();
+			glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+			glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glLineWidth(1.0f);
+			glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_FLOAT, 0, q3);
 			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
 			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			glPopMatrix();
 		}
 #endif
 		tickList = &m_frequencyScale.getTickList();
+
 #ifdef GL_DEPRECATED
+		glPushMatrix();
+		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -1300,14 +1360,20 @@ void GLSpectrum::paintGL()
 				}
 			}
 		}
+
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
-			for(int i= 0; i < tickList->count(); i++) {
+
+			for (int i= 0; i < tickList->count(); i++)
+			{
 				tick = &(*tickList)[i];
-				if(tick->major) {
-					if(tick->textSize > 0) {
+				if (tick->major)
+				{
+					if (tick->textSize > 0)
+					{
 						float x = tick->pos / m_frequencyScale.getSize();
 						q3[4*effectiveTicks] = x;
 						q3[4*effectiveTicks+1] = 0;
@@ -1317,21 +1383,22 @@ void GLSpectrum::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, color, q3, 2*effectiveTicks);
+
+//			glPushMatrix();
+//			glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+//			glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+//
+//			glEnableClientState(GL_VERTEX_ARRAY);
+//			glVertexPointer(2, GL_FLOAT, 0, q3);
+//			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
+//			glDisableClientState(GL_VERTEX_ARRAY);
+//
+//			glPopMatrix();
 		}
 #endif
-
-		glPopMatrix();
 	}
 
 	// paint histogram grid
@@ -1369,16 +1436,6 @@ void GLSpectrum::paintGL()
 
 		glPopMatrix();
 #else
-		for (int i= 0; i < tickList->count(); i++)
-		{
-			tick = &(*tickList)[i];
-
-			if(tick->major)	{
-				if(tick->textSize > 0) {
-					float y = tick->pos / m_powerScale.getSize();
-				}
-			}
-		}
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
