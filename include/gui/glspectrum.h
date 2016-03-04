@@ -73,6 +73,7 @@ private:
 		QRectF m_glRectDsb;
 		QMatrix4x4 m_glMatrixWaterfall;
 		QMatrix4x4 m_glMatrixDsbWaterfall;
+		QMatrix4x4 m_glMatrixFreqScale;
 		QRect m_rect;
 
 		ChannelMarkerState(ChannelMarker* channelMarker) :
