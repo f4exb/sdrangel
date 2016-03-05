@@ -27,6 +27,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QMatrix4x4>
+#include <QGLWidget>
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
@@ -36,7 +37,7 @@
 
 class QOpenGLShaderProgram;
 
-class SDRANGEL_API GLSpectrum : public QOpenGLWidget {
+class SDRANGEL_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
 
 public:

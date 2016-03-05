@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QMutex>
 #include <QFont>
+#include <QMatrix4x4>
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
@@ -137,32 +138,47 @@ private:
 	// graphics stuff
 	QRectF m_glScopeRect1;
 	QRectF m_glScopeRect2;
+	QMatrix4x4 m_glScopeMatrix1;
+	QMatrix4x4 m_glScopeMatrix2;
+
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
+
 	QRectF m_glLeft1ScaleRect;
 	QRectF m_glRight1ScaleRect;
 	QRectF m_glLeft2ScaleRect;
 	QRectF m_glBot1ScaleRect;
 	QRectF m_glBot2ScaleRect;
+
+	QMatrix4x4 m_glLeft1ScaleMatrix;
+	QMatrix4x4 m_glRight1ScaleMatrix;
+	QMatrix4x4 m_glLeft2ScaleMatrix;
+	QMatrix4x4 m_glBot1ScaleMatrix;
+	QMatrix4x4 m_glBot2ScaleMatrix;
+
 	QPixmap m_left1ScalePixmap;
 	QPixmap m_left2ScalePixmap;
 	QPixmap m_bot1ScalePixmap;
 	QPixmap m_bot2ScalePixmap;
 	QPixmap m_powerOverlayPixmap1;
+
 	bool m_left1ScaleTextureAllocated;
 	bool m_left2ScaleTextureAllocated;
 	bool m_bot1ScaleTextureAllocated;
 	bool m_bot2ScaleTextureAllocated;
 	bool m_powerOverlayTextureAllocated1;
+
 	GLuint m_left1ScaleTexture;
 	GLuint m_left2ScaleTexture;
 	GLuint m_bot1ScaleTexture;
 	GLuint m_bot2ScaleTexture;
 	GLuint m_powerOverlayTexture1;
+
 	ScaleEngine m_x1Scale;
 	ScaleEngine m_x2Scale;
 	ScaleEngine m_y1Scale;
 	ScaleEngine m_y2Scale;
+
 	QFont m_powerOverlayFont;
 
 	void initializeGL();

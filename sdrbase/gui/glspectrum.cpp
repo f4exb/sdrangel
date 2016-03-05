@@ -28,6 +28,7 @@
 #include <QDebug>
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
+	QGLWidget(parent),
 	m_cursorState(CSNormal),
 	m_mouseInside(false),
 	m_changesPending(true),
@@ -2219,14 +2220,14 @@ void GLSpectrum::enterEvent(QEvent* event)
 {
 	m_mouseInside = true;
 	update();
-	QOpenGLWidget::enterEvent(event);
+	QGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::leaveEvent(QEvent* event)
 {
 	m_mouseInside = false;
 	update();
-	QOpenGLWidget::enterEvent(event);
+	QGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::tick()

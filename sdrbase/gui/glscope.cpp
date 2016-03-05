@@ -255,10 +255,12 @@ void GLScope::paintGL()
 		glPushMatrix();
 		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
 		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
+
 #ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
@@ -274,27 +276,28 @@ void GLScope::paintGL()
 				0, 0,
 				1, 0
 			};
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_LOOP, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-		    glEnableClientState(GL_VERTEX_ARRAY);
+
+			glEnableClientState(GL_VERTEX_ARRAY);
 		    glVertexPointer(2, GL_FLOAT, 0, q3);
 		    glDrawArrays(GL_LINE_LOOP, 0, 4);
 		    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
 		}
 #endif
 		glDisable(GL_BLEND);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
+		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
 
 		// paint grid
 		const ScaleEngine::TickList* tickList;
 		const ScaleEngine::Tick* tick;
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glLineWidth(1.0f);
+
 		if (m_mode == ModeIQPolar) {
 			glColor4f(1, 1, 0.25f, m_displayGridIntensity / 100.0);
 		} else {
@@ -302,6 +305,7 @@ void GLScope::paintGL()
 		}
 		// Horizontal Y1
 		tickList = &m_y1Scale.getTickList();
+
 #ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
@@ -345,9 +349,16 @@ void GLScope::paintGL()
 #endif
 		}
 #endif
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
+		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
+
 		// Vertical X1
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 		tickList = &m_x1Scale.getTickList();
+
 #ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
@@ -1723,17 +1734,46 @@ void GLScope::applyConfig()
 					(float) (width() - 2*leftMargin - rightMargin) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glScopeMatrix1.setToIdentity();
+				m_glScopeMatrix1.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix1.scale (
+					(float) 2*(width() - 2*leftMargin - rightMargin) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) (width() - 2*leftMargin - rightMargin) / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+				m_glBot1ScaleMatrix.setToIdentity();
+				m_glBot1ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot1ScaleMatrix.scale (
+					(float) 2*(width() - 2*leftMargin - rightMargin) / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
+				);
+
 				m_glRight1ScaleRect = QRectF(
 					(float) (width() - leftMargin) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
+				);
+				m_glRight1ScaleMatrix.setToIdentity();
+				m_glRight1ScaleMatrix.translate (
+					-1.0f + ((float)(2*(width() - leftMargin)) / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glRight1ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
 				);
 			}
 			else
@@ -1744,18 +1784,48 @@ void GLScope::applyConfig()
 					(float) scopeWidth / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glScopeMatrix1.setToIdentity();
+				m_glScopeMatrix1.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix1.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+				m_glBot1ScaleMatrix.setToIdentity();
+				m_glBot1ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot1ScaleMatrix.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
+				);
 			}
+
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
+			);
+
+			m_glLeft1ScaleMatrix.setToIdentity();
+			m_glLeft1ScaleMatrix.translate (
+				-1.0f,
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glLeft1ScaleMatrix.scale (
+				(float) 2*(leftMargin-1) / (float) width(),
+				(float) -2*scopeHeight / (float) height()
 			);
 
 			{ // Y1 scale
@@ -1839,17 +1909,46 @@ void GLScope::applyConfig()
 					(float) scopeDim / (float)width(),
 					(float) scopeDim / (float)height()
 				);
+				m_glScopeMatrix2.setToIdentity();
+				m_glScopeMatrix2.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(botMargin + topMargin + scopeDim) / (float) height())
+				);
+				m_glScopeMatrix2.scale (
+					(float) 2*scopeDim / (float) width(),
+					(float) -2*scopeDim / (float) height()
+				);
+
 				m_glLeft2ScaleRect = QRectF(
 					0,
 					(float) (topMargin + scopeDim + botMargin) / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeDim / (float) height()
 				);
+				m_glLeft2ScaleMatrix.setToIdentity();
+				m_glLeft2ScaleMatrix.translate (
+					-1.0f,
+					 1.0f - ((float) 2*(topMargin + scopeDim + botMargin) / (float) height())
+				);
+				m_glLeft2ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeDim / (float) height()
+				);
+
 				m_glBot2ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeDim + topMargin + scopeDim + botMargin + 1) / (float) height(),
 					(float) scopeDim / (float) width(),
 					(float) (botMargin - 1) / (float) height()
+				);
+				m_glBot2ScaleMatrix.setToIdentity();
+				m_glBot2ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeDim + topMargin + scopeDim + botMargin + 1) / (float) height())
+				);
+				m_glBot2ScaleMatrix.scale (
+					(float) 2*scopeDim / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
 			else
@@ -1860,17 +1959,46 @@ void GLScope::applyConfig()
 					(float) scopeWidth / (float)width(),
 					(float) scopeHeight / (float)height()
 				);
+				m_glScopeMatrix2.setToIdentity();
+				m_glScopeMatrix2.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(botMargin + topMargin + scopeHeight) / (float) height())
+				);
+				m_glScopeMatrix2.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glLeft2ScaleRect = QRectF(
 					0,
 					(float) (topMargin + scopeHeight + botMargin) / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glLeft2ScaleMatrix.setToIdentity();
+				m_glLeft2ScaleMatrix.translate (
+					-1.0f,
+					 1.0f - ((float) 2*(topMargin + scopeHeight + botMargin) / (float) height())
+				);
+				m_glLeft2ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot2ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + scopeHeight + botMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
+				);
+				m_glBot2ScaleMatrix.setToIdentity();
+				m_glBot2ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + scopeHeight + botMargin + 1) / (float) height())
+				);
+				m_glBot2ScaleMatrix.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
 			{ // Y2 scale
@@ -1969,17 +2097,46 @@ void GLScope::applyConfig()
 					(float) (scopeWidth-leftMargin) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glScopeMatrix1.setToIdentity();
+				m_glScopeMatrix1.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix1.scale (
+					(float) 2*(scopeWidth-leftMargin) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) (scopeWidth-leftMargin) / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+				m_glBot1ScaleMatrix.setToIdentity();
+				m_glBot1ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot1ScaleMatrix.scale (
+					(float) 2*(scopeWidth-leftMargin) / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
+				);
+
 				m_glRight1ScaleRect = QRectF(
 					(float) (scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
+				);
+				m_glRight1ScaleMatrix.setToIdentity();
+				m_glRight1ScaleMatrix.translate (
+					-1.0f + ((float) 2*scopeWidth / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glRight1ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
 				);
 			}
 			else
@@ -1990,18 +2147,48 @@ void GLScope::applyConfig()
 					(float) scopeWidth / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glScopeMatrix1.setToIdentity();
+				m_glScopeMatrix1.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix1.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+				m_glBot1ScaleMatrix.setToIdentity();
+				m_glBot1ScaleMatrix.translate (
+					-1.0f + ((float) 2*leftMargin / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot1ScaleMatrix.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
+				);
 			}
+
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
+			);
+
+			m_glLeft1ScaleMatrix.setToIdentity();
+			m_glLeft1ScaleMatrix.translate (
+				-1.0f,
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glLeft1ScaleMatrix.scale (
+				(float) 2*(leftMargin-1) / (float) width(),
+				(float) -2*scopeHeight / (float) height()
 			);
 
 			{ // Y1 scale
@@ -2085,17 +2272,46 @@ void GLScope::applyConfig()
 					(float) scopeDim / (float)width(),
 					(float)(height() - topMargin - botMargin) / (float)height()
 				);
+				m_glScopeMatrix2.setToIdentity();
+				m_glScopeMatrix2.translate (
+					-1.0f + ((float) 2*(leftMargin + scopeWidth + leftMargin) / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix2.scale (
+					(float) 2*scopeDim / (float) width(),
+					(float) -2*(height() - topMargin - botMargin) / (float) height()
+				);
+
 				m_glLeft2ScaleRect = QRectF(
 					(float) (leftMargin + scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glLeft2ScaleMatrix.setToIdentity();
+				m_glLeft2ScaleMatrix.translate (
+					-1.0f + (float) 2*(leftMargin + scopeWidth) / (float) width(),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glLeft2ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot2ScaleRect = QRectF(
 					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeDim / (float) width(),
 					(float) (botMargin - 1) / (float) height()
+				);
+				m_glBot2ScaleMatrix.setToIdentity();
+				m_glBot2ScaleMatrix.translate (
+					-1.0f + ((float) 2*(leftMargin + leftMargin + scopeWidth) / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot2ScaleMatrix.scale (
+					(float) 2*scopeDim / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
 			else
@@ -2106,17 +2322,46 @@ void GLScope::applyConfig()
 					(float)((width() - leftMargin - leftMargin - rightMargin) / 2) / (float)width(),
 					(float)(height() - topMargin - botMargin) / (float)height()
 				);
+				m_glScopeMatrix2.setToIdentity();
+				m_glScopeMatrix2.translate (
+					-1.0f + ((float) 2*(leftMargin + leftMargin + ((width() - leftMargin - leftMargin - rightMargin) / 2)) / (float) width()),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glScopeMatrix2.scale (
+					(float) 2*((width() - leftMargin - leftMargin - rightMargin) / 2) / (float) width(),
+					(float) -2*(height() - topMargin - botMargin) / (float) height()
+				);
+
 				m_glLeft2ScaleRect = QRectF(
 					(float) (leftMargin + scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+				m_glLeft2ScaleMatrix.setToIdentity();
+				m_glLeft2ScaleMatrix.translate (
+					-1.0f + (float) 2*(leftMargin + scopeWidth) / (float) width(),
+					 1.0f - ((float) 2*topMargin / (float) height())
+				);
+				m_glLeft2ScaleMatrix.scale (
+					(float) 2*(leftMargin-1) / (float) width(),
+					(float) -2*scopeHeight / (float) height()
+				);
+
 				m_glBot2ScaleRect = QRectF(
 					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
+				);
+				m_glBot2ScaleMatrix.setToIdentity();
+				m_glBot2ScaleMatrix.translate (
+					-1.0f + ((float) 2*(leftMargin + leftMargin + scopeWidth) / (float) width()),
+					 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+				);
+				m_glBot2ScaleMatrix.scale (
+					(float) 2*scopeWidth / (float) width(),
+					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
 			{ // Y2 scale
@@ -2216,17 +2461,46 @@ void GLScope::applyConfig()
 				(float) (scopeWidth-leftMargin) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+			m_glScopeMatrix1.setToIdentity();
+			m_glScopeMatrix1.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glScopeMatrix1.scale (
+				(float) 2*(scopeWidth-leftMargin) / (float) width(),
+				(float) -2*scopeHeight / (float) height()
+			);
+
 			m_glBot1ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) (scopeWidth-leftMargin) / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+			m_glBot1ScaleMatrix.setToIdentity();
+			m_glBot1ScaleMatrix.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+			);
+			m_glBot1ScaleMatrix.scale (
+				(float) 2*(scopeWidth-leftMargin) / (float) width(),
+				(float) -2*(botMargin - 1) / (float) height()
+			);
+
 			m_glRight1ScaleRect = QRectF(
 				(float) (width() - leftMargin) / (float) width(),
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
+			);
+			m_glRight1ScaleMatrix.setToIdentity();
+			m_glRight1ScaleMatrix.translate (
+				-1.0f + ((float) (2*width() - leftMargin) / (float) width()),
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glRight1ScaleMatrix.scale (
+				(float) 2*(leftMargin-1) / (float) width(),
+				(float) -2*scopeHeight / (float) height()
 			);
 		}
 		else
@@ -2237,18 +2511,48 @@ void GLScope::applyConfig()
 				(float) scopeWidth / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+			m_glScopeMatrix1.setToIdentity();
+			m_glScopeMatrix1.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glScopeMatrix1.scale (
+				(float) 2*scopeWidth / (float) width(),
+				(float) -2*scopeHeight / (float) height()
+			);
+
 			m_glBot1ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+			m_glBot1ScaleMatrix.setToIdentity();
+			m_glBot1ScaleMatrix.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+			);
+			m_glBot1ScaleMatrix.scale (
+				(float) 2*scopeWidth / (float) width(),
+				(float) -2*(botMargin - 1) / (float) height()
+			);
 		}
+
 		m_glLeft1ScaleRect = QRectF(
 			0,
 			(float) topMargin / (float) height(),
 			(float) (leftMargin-1) / (float) width(),
 			(float) scopeHeight / (float) height()
+		);
+
+		m_glLeft1ScaleMatrix.setToIdentity();
+		m_glLeft1ScaleMatrix.translate (
+			-1.0f,
+			 1.0f - ((float) 2*topMargin / (float) height())
+		);
+		m_glLeft1ScaleMatrix.scale (
+			(float) 2*(leftMargin-1) / (float) width(),
+			(float) -2*scopeHeight / (float) height()
 		);
 
 		{ // Y1 scale
@@ -2376,17 +2680,46 @@ void GLScope::applyConfig()
 				(float) scopeDim / (float) width(),
 				(float) scopeDim / (float) height()
 			);
+			m_glScopeMatrix2.setToIdentity();
+			m_glScopeMatrix2.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glScopeMatrix2.scale (
+				(float) 2*scopeDim / (float) width(),
+				(float) -2*scopeDim / (float) height()
+			);
+
 			m_glLeft2ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeDim / (float) height()
 			);
+			m_glLeft2ScaleMatrix.setToIdentity();
+			m_glLeft2ScaleMatrix.translate (
+				-1.0f,
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glLeft2ScaleMatrix.scale (
+				(float) 2*(leftMargin-1) / (float) width(),
+				(float) -2*scopeDim / (float) height()
+			);
+
 			m_glBot2ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeDim + topMargin + 1) / (float) height(),
 				(float) scopeDim / (float) width(),
 				(float) (botMargin - 1) / (float) height()
+			);
+			m_glBot2ScaleMatrix.setToIdentity();
+			m_glBot2ScaleMatrix.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*(scopeDim + topMargin + 1) / (float) height())
+			);
+			m_glBot2ScaleMatrix.scale (
+				(float) 2*scopeDim / (float) width(),
+				(float) -2*(botMargin - 1) / (float) height()
 			);
 		}
 		else
@@ -2397,17 +2730,46 @@ void GLScope::applyConfig()
 				(float) scopeWidth / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+			m_glScopeMatrix2.setToIdentity();
+			m_glScopeMatrix2.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glScopeMatrix2.scale (
+				(float) 2*scopeWidth / (float) width(),
+				(float) -2*scopeHeight / (float) height()
+			);
+
 			m_glLeft2ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+			m_glLeft2ScaleMatrix.setToIdentity();
+			m_glLeft2ScaleMatrix.translate (
+				-1.0f,
+				 1.0f - ((float) 2*topMargin / (float) height())
+			);
+			m_glLeft2ScaleMatrix.scale (
+				(float) 2*(leftMargin-1) / (float) width(),
+				(float) -2*scopeHeight / (float) height()
+			);
+
 			m_glBot2ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
+			);
+			m_glBot2ScaleMatrix.setToIdentity();
+			m_glBot2ScaleMatrix.translate (
+				-1.0f + ((float) 2*leftMargin / (float) width()),
+				 1.0f - ((float) 2*(scopeHeight + topMargin + 1) / (float) height())
+			);
+			m_glBot2ScaleMatrix.scale (
+				(float) 2*scopeWidth / (float) width(),
+				(float) -2*(botMargin - 1) / (float) height()
 			);
 		}
 
