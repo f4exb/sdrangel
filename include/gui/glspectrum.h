@@ -151,11 +151,13 @@ private:
 	QRgb m_waterfallPalette[240];
 	QImage* m_waterfallBuffer;
 	int m_waterfallBufferPos;
+#ifdef GL_DEPRECATED
 	bool m_waterfallTextureAllocated;
 	GLuint m_waterfallTexture;
+	QRectF m_glWaterfallRect;
+#endif
 	int m_waterfallTextureHeight;
 	int m_waterfallTexturePos;
-	QRectF m_glWaterfallRect;
 	QMatrix4x4 m_glWaterfallBoxMatrix;
 	bool m_displayWaterfall;
 	bool m_ssbSpectrum;

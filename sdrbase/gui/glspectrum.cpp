@@ -51,9 +51,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 #ifdef GL_DEPRECATED
 	m_leftMarginTextureAllocated(false),
 	m_frequencyTextureAllocated(false),
+	m_waterfallTextureAllocated(false),
 #endif
 	m_waterfallBuffer(NULL),
-	m_waterfallTextureAllocated(false),
 	m_waterfallTextureHeight(-1),
 	m_displayWaterfall(true),
 	m_ssbSpectrum(false),
@@ -128,11 +128,13 @@ GLSpectrum::~GLSpectrum()
 		delete m_waterfallBuffer;
 		m_waterfallBuffer = NULL;
 	}
+#ifdef GL_DEPRECATED
 	if(m_waterfallTextureAllocated) {
 		makeCurrent();
 		deleteTexture(m_waterfallTexture);
 		m_waterfallTextureAllocated = false;
 	}
+#endif
 	if(m_histogramBuffer != NULL) {
 		delete m_histogramBuffer;
 		m_histogramBuffer = NULL;
@@ -1477,12 +1479,14 @@ void GLSpectrum::applyChanges()
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
 
+#ifdef GL_DEPRECATED
 		m_glWaterfallRect = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)waterfallTop / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)waterfallHeight / (float)height()
 		);
+#endif
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
@@ -1602,14 +1606,14 @@ void GLSpectrum::applyChanges()
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2.0, m_centerFrequency + m_sampleRate / 2.0);
-
+#ifdef GL_DEPRECATED
 		m_glWaterfallRect = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)topMargin / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)waterfallHeight / (float)height()
 		);
-
+#endif
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
 			-1.0f + ((float)(2*leftMargin)   / (float) width()),
@@ -1996,10 +2000,12 @@ void GLSpectrum::applyChanges()
 		m_glShaderFrequencyScale.initTexture(m_frequencyPixmap.toImage());
 	}
 
+#ifdef GL_DEPRECATED
 	if(!m_waterfallTextureAllocated) {
 		glGenTextures(1, &m_waterfallTexture);
 		m_waterfallTextureAllocated = true;
 	}
+#endif
 	if(!m_histogramTextureAllocated) {
 		glGenTextures(1, &m_histogramTexture);
 		m_histogramTextureAllocated = true;
@@ -2090,8 +2096,10 @@ void GLSpectrum::applyChanges()
 		m_waterfallTextureHeight = waterfallHeight;
 		quint8* data = new quint8[m_fftSize * m_waterfallTextureHeight * 4];
 		memset(data, 0x00, m_fftSize * m_waterfallTextureHeight * 4);
+#ifdef GL_DEPRECATED
 		glBindTexture(GL_TEXTURE_2D, m_waterfallTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fftSize, m_waterfallTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+#endif
 		delete[] data;
 		m_waterfallTexturePos = 0;
 	}
