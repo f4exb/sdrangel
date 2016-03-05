@@ -550,10 +550,11 @@ void GLSpectrum::paintGL()
 		return;
 	}
 
+#ifdef GL_DEPRECATED
 	glPushMatrix();
 	glScalef(2.0, -2.0, 1.0);
 	glTranslatef(-0.50, -0.5, 0);
-
+#endif
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -1391,8 +1392,9 @@ void GLSpectrum::paintGL()
 		}
 #endif
 	}
-
+#ifdef GL_DEPRECATGED
 	glPopMatrix();
+#endif
 	m_mutex.unlock();
 }
 
