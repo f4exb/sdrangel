@@ -21,7 +21,7 @@
 #ifndef INCLUDE_GLSPECTRUM_H
 #define INCLUDE_GLSPECTRUM_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QTimer>
 #include <QMutex>
 #include <QOpenGLBuffer>
@@ -36,7 +36,7 @@
 
 class QOpenGLShaderProgram;
 
-class SDRANGEL_API GLSpectrum : public QGLWidget {
+class SDRANGEL_API GLSpectrum : public QOpenGLWidget {
 	Q_OBJECT
 
 public:

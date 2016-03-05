@@ -22,16 +22,12 @@
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
+#include <QPainter>
 #include "gui/glspectrum.h"
 
 #include <QDebug>
 
-#ifdef GL_ANDROID
-#include "util/gleshelp.h"
-#endif
-
 GLSpectrum::GLSpectrum(QWidget* parent) :
-	QGLWidget(parent),
 	m_cursorState(CSNormal),
 	m_mouseInside(false),
 	m_changesPending(true),
@@ -2223,14 +2219,14 @@ void GLSpectrum::enterEvent(QEvent* event)
 {
 	m_mouseInside = true;
 	update();
-	QGLWidget::enterEvent(event);
+	QOpenGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::leaveEvent(QEvent* event)
 {
 	m_mouseInside = false;
 	update();
-	QGLWidget::enterEvent(event);
+	QOpenGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::tick()
