@@ -27,6 +27,8 @@
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
+#include "gui/glshadersimple.h"
+#include "gui/glshadertextured.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
@@ -180,6 +182,9 @@ private:
 	ScaleEngine m_y2Scale;
 
 	QFont m_powerOverlayFont;
+
+	GLShaderSimple m_glShaderSimple;
+	GLShaderTextured m_glShaderLeft1Scale;
 
 	void initializeGL();
 	void resizeGL(int width, int height);

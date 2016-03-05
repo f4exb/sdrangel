@@ -217,6 +217,7 @@ void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 void GLScope::initializeGL()
 {
 	glDisable(GL_DEPTH_TEST);
+	m_glShaderSimple.initializeGL();
 }
 
 void GLScope::resizeGL(int width, int height)
@@ -252,6 +253,7 @@ void GLScope::paintGL()
 	if ((m_displays == DisplayBoth) || (m_displays == DisplayFirstOnly))
 	{
 		// draw rect around
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
 		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
@@ -261,13 +263,15 @@ void GLScope::paintGL()
 		glLineWidth(1.0f);
 		glColor4f(1, 1, 1, 0.5);
 
-#ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
 		glVertex2f(0, 1);
 		glVertex2f(0, 0);
 		glVertex2f(1, 0);
 		glEnd();
+
+		glDisable(GL_BLEND);
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[] {
@@ -277,22 +281,23 @@ void GLScope::paintGL()
 				1, 0
 			};
 
-			glEnableClientState(GL_VERTEX_ARRAY);
-		    glVertexPointer(2, GL_FLOAT, 0, q3);
-		    glDrawArrays(GL_LINE_LOOP, 0, 4);
-		    glDisableClientState(GL_VERTEX_ARRAY);
+			QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+			m_glShaderSimple.drawContour(m_glScopeMatrix1, color, q3, 4);
+
 		}
 #endif
-		glDisable(GL_BLEND);
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
-		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
 
 		// paint grid
 		const ScaleEngine::TickList* tickList;
 		const ScaleEngine::Tick* tick;
+
+		// Horizontal Y1
+		tickList = &m_y1Scale.getTickList();
+
+#ifdef GL_DEPRECATED
+		glPushMatrix();
+		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
+		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -303,10 +308,7 @@ void GLScope::paintGL()
 		} else {
 			glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 		}
-		// Horizontal Y1
-		tickList = &m_y1Scale.getTickList();
 
-#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -319,14 +321,21 @@ void GLScope::paintGL()
 				}
 			}
 		}
+
+		glPopMatrix();
 #else
 		{
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
-			for(int i= 0; i < tickList->count(); i++) {
+
+			for (int i= 0; i < tickList->count(); i++)
+			{
 				tick = &(*tickList)[i];
-				if(tick->major) {
-					if(tick->textSize > 0) {
+
+				if (tick->major)
+				{
+					if (tick->textSize > 0)
+					{
 						float y = 1 - (tick->pos / m_y1Scale.getSize());
 						q3[4*effectiveTicks] = 0;
 						q3[4*effectiveTicks+1] = y;
@@ -336,21 +345,20 @@ void GLScope::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			if (m_mode == ModeIQPolar) {
+				QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+				m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+			}
+			else
+			{
+				QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+				m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+			}
 		}
 #endif
-		glPopMatrix();
 
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
 		glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
@@ -359,7 +367,6 @@ void GLScope::paintGL()
 		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
 		tickList = &m_x1Scale.getTickList();
 
-#ifdef GL_DEPRECATED
 		for(int i= 0; i < tickList->count(); i++) {
 			tick = &(*tickList)[i];
 			if(tick->major) {
@@ -372,8 +379,13 @@ void GLScope::paintGL()
 				}
 			}
 		}
+
+		glPopMatrix();
 #else
 		{
+			// Vertical X1
+			tickList = &m_x1Scale.getTickList();
+
 			GLfloat q3[4*tickList->count()];
 			int effectiveTicks = 0;
 			for(int i= 0; i < tickList->count(); i++) {
@@ -389,20 +401,11 @@ void GLScope::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
 		}
 #endif
-		glPopMatrix();
 
 		// paint left #1 scale
 		glPushMatrix();
