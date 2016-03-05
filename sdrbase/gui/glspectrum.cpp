@@ -50,8 +50,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayCurrent(false),
 #ifdef GL_DEPRECATED
 	m_leftMarginTextureAllocated(false),
-#endif
 	m_frequencyTextureAllocated(false),
+#endif
 	m_waterfallBuffer(NULL),
 	m_waterfallTextureAllocated(false),
 	m_waterfallTextureHeight(-1),
@@ -155,11 +155,11 @@ GLSpectrum::~GLSpectrum()
 		deleteTexture(m_leftMarginTexture);
 		m_leftMarginTextureAllocated = false;
 	}
-#endif
 	if(m_frequencyTextureAllocated) {
 		deleteTexture(m_frequencyTexture);
 		m_frequencyTextureAllocated = false;
 	}
+#endif
 }
 
 void GLSpectrum::setCenterFrequency(quint64 frequency)
@@ -511,6 +511,7 @@ void GLSpectrum::initializeGL()
 	glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeftScale.initializeGL();
+	m_glShaderFrequencyScale.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -927,6 +928,7 @@ void GLSpectrum::paintGL()
 	// paint frequency scale
 	if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram )
 	{
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
 		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
@@ -939,7 +941,6 @@ void GLSpectrum::paintGL()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_TEXTURE_2D);
-#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
 		glVertex2f(0, 1);
@@ -950,6 +951,9 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, 0);
 		glVertex2f(0, 0);
 		glEnd();
+		glDisable(GL_TEXTURE_2D);
+
+		glPopMatrix();
 #else
 		{
 			GLfloat vtx1[] = {
@@ -964,28 +968,10 @@ void GLSpectrum::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, vtx1);
-			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+			m_glShaderFrequencyScale.drawSurface(m_glFrequencyScaleBoxMatrix, tex1, vtx1, 4);
 		}
 #endif
-		glDisable(GL_TEXTURE_2D);
-
-		glPopMatrix();
 
 		// paint channels
 
@@ -1533,13 +1519,14 @@ void GLSpectrum::applyChanges()
 			width(),
 			frequencyScaleHeight
 		);
+#ifdef GL_DEPRECATED
 		m_glFrequencyScaleRect = QRectF(
 			(float)0,
 			(float)frequencyScaleTop / (float)height(),
 			(float)1,
 			(float)frequencyScaleHeight / (float)height()
 		);
-
+#endif
 		m_glFrequencyScaleBoxMatrix.setToIdentity();
 		m_glFrequencyScaleBoxMatrix.translate (
 			-1.0f,
@@ -1631,13 +1618,14 @@ void GLSpectrum::applyChanges()
 			width(),
 			frequencyScaleHeight
 		);
+#ifdef GL_DEPRECATED
 		m_glFrequencyScaleRect = QRectF(
 			(float)0,
 			(float)frequencyScaleTop / (float)height(),
 			(float)1,
 			(float)frequencyScaleHeight / (float)height()
 		);
-
+#endif
 		m_glFrequencyScaleBoxMatrix.setToIdentity();
 		m_glFrequencyScaleBoxMatrix.translate (
 			-1.0f,
@@ -1714,13 +1702,14 @@ void GLSpectrum::applyChanges()
 			width(),
 			frequencyScaleHeight
 		);
+#ifdef GL_DEPRECATED
 		m_glFrequencyScaleRect = QRectF(
 			(float)0,
 			(float)frequencyScaleTop / (float)height(),
 			(float)1,
 			(float)frequencyScaleHeight / (float)height()
 		);
-
+#endif
 		m_glFrequencyScaleBoxMatrix.setToIdentity();
 		m_glFrequencyScaleBoxMatrix.translate (
 			-1.0f,
@@ -1986,6 +1975,7 @@ void GLSpectrum::applyChanges()
 			}
 
 		}
+#ifdef GL_DEPRECATED
 		if(m_frequencyTextureAllocated)
 			deleteTexture(m_frequencyTexture);
 		m_frequencyTexture = bindTexture(m_frequencyPixmap,
@@ -1994,6 +1984,8 @@ void GLSpectrum::applyChanges()
 			QGLContext::LinearFilteringBindOption |
 			QGLContext::MipmapBindOption);
 		m_frequencyTextureAllocated = true;
+#endif
+		m_glShaderFrequencyScale.initTexture(m_frequencyPixmap.toImage());
 	}
 
 	if(!m_waterfallTextureAllocated) {

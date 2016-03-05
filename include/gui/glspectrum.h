@@ -132,18 +132,18 @@ private:
 	Real m_waterfallShare;
 
 	QPixmap m_leftMarginPixmap;
+	QPixmap m_frequencyPixmap;
 #ifdef GL_DEPRECATED
 	bool m_leftMarginTextureAllocated;
 	GLuint m_leftMarginTexture;
 	QRectF m_glLeftScaleRect;
-#endif
-	QPixmap m_frequencyPixmap;
 	bool m_frequencyTextureAllocated;
 	GLuint m_frequencyTexture;
+	QRectF m_glFrequencyScaleRect;
+#endif
 	ScaleEngine m_timeScale;
 	ScaleEngine m_powerScale;
 	ScaleEngine m_frequencyScale;
-	QRectF m_glFrequencyScaleRect;
 	QRect m_frequencyScaleRect;
 	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
 	QMatrix4x4 m_glLeftScaleBoxMatrix;
@@ -179,6 +179,7 @@ private:
 
 	GLShaderSimple m_glShaderSimple;
 	GLShaderTextured m_glShaderLeftScale;
+	GLShaderTextured m_glShaderFrequencyScale;
 	int m_matrixLoc;
 	int m_colorLoc;
 
