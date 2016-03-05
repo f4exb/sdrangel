@@ -3,6 +3,7 @@
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // See: http://glslstudio.com/primer/#gl2frag                                    //
+//      https://gitlab.com/pteam/korvins-qtbase/blob/5.4/examples/opengl/cube/mainwidget.cpp //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //

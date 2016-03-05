@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_
-#define INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_
+#ifndef INCLUDE_GUI_GLSHADERSIMPLE_H_
+#define INCLUDE_GUI_GLSHADERSIMPLE_H_
 
 #include <QString>
 
@@ -47,4 +47,4 @@ private:
 	static const QString m_fragmentShaderSourceColored;
 };
 
-#endif /* INCLUDE_GUI_GLSHADERSIMPLEPOLYLINE_H_ */
+#endif /* INCLUDE_GUI_GLSHADERSIMPLE_H_ */

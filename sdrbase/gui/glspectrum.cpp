@@ -1774,20 +1774,14 @@ void GLSpectrum::applyChanges()
 		}
 
 
-		// draw the effective BW rectangle
-		dv->m_glRect.setRect(
-			m_frequencyScale.getPosFromValue(xc + nw) / (float)(width() - leftMargin - rightMargin),
-			0,
-			(pw-nw) / (float)m_sampleRate,
-			1);
-
 		// draw the DSB rectangle
+#ifdef GL_DEPRECATED
 		dv->m_glRectDsb.setRect(
 			m_frequencyScale.getPosFromValue(xc - (dsbw/2)) / (float)(width() - leftMargin - rightMargin),
 			0,
 			dsbw / (float)m_sampleRate,
 			1);
-
+#endif
 		QMatrix4x4 glMatrixDsb;
 		glMatrixDsb.setToIdentity();
 		glMatrixDsb.translate(
@@ -1829,6 +1823,14 @@ void GLSpectrum::applyChanges()
 			(float) frequencyScaleHeight / (float) height()
 		);
 
+		// draw the effective BW rectangle
+#ifdef GL_DEPRECATED
+		dv->m_glRect.setRect(
+			m_frequencyScale.getPosFromValue(xc + nw) / (float)(width() - leftMargin - rightMargin),
+			0,
+			(pw-nw) / (float)m_sampleRate,
+			1);
+#endif
 		QMatrix4x4 glMatrix;
 		glMatrix.setToIdentity();
 		glMatrix.translate(

@@ -73,8 +73,10 @@ public:
 private:
 	struct ChannelMarkerState {
 		ChannelMarker* m_channelMarker;
+#ifdef GL_DEPRECATED
 		QRectF m_glRect;
 		QRectF m_glRectDsb;
+#endif
 		QMatrix4x4 m_glMatrixWaterfall;
 		QMatrix4x4 m_glMatrixDsbWaterfall;
 		QMatrix4x4 m_glMatrixFreqScale;
@@ -84,9 +86,11 @@ private:
 		QRect m_rect;
 
 		ChannelMarkerState(ChannelMarker* channelMarker) :
-			m_channelMarker(channelMarker),
+			m_channelMarker(channelMarker)
+#ifdef GL_DEPRECATED
 			m_glRect(),
 			m_glRectDsb()
+#endif
 		{ }
 	};
 	QList<ChannelMarkerState*> m_channelMarkerStates;
