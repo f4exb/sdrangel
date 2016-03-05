@@ -18,7 +18,6 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 #include <QOpenGLContext>
-#include <QOpenGLTexture>
 #include <QImage>
 #include <QMatrix4x4>
 #include <QVector4D>
@@ -61,7 +60,7 @@ void GLShaderTextured::initializeGL()
 	m_program->release();
 }
 
-void GLShaderTextured::initTexture(const QImage& image)
+void GLShaderTextured::initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode)
 {
 	if (m_texture) {
 		delete m_texture;
@@ -71,7 +70,7 @@ void GLShaderTextured::initTexture(const QImage& image)
 
 	m_texture->setMinificationFilter(QOpenGLTexture::Linear);
 	m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
-	m_texture->setWrapMode(QOpenGLTexture::Repeat);
+	m_texture->setWrapMode(wrapMode);
 }
 
 void GLShaderTextured::subTexture(int xOffset, int yOffset, int width, int height, const void *pixels)

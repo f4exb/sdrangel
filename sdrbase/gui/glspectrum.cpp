@@ -52,6 +52,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_leftMarginTextureAllocated(false),
 	m_frequencyTextureAllocated(false),
 	m_waterfallTextureAllocated(false),
+	m_histogramTextureAllocated(false),
 #endif
 	m_waterfallBuffer(NULL),
 	m_waterfallTextureHeight(-1),
@@ -60,7 +61,6 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_histogramBuffer(NULL),
 	m_histogram(NULL),
 	m_histogramHoldoff(NULL),
-	m_histogramTextureAllocated(false),
 	m_displayHistogram(true),
 	m_displayChanged(false)
 {
@@ -147,12 +147,12 @@ GLSpectrum::~GLSpectrum()
 		delete[] m_histogramHoldoff;
 		m_histogramHoldoff = NULL;
 	}
+#ifdef GL_DEPRECATED
 	if(m_histogramTextureAllocated) {
 		makeCurrent();
 		deleteTexture(m_histogramTexture);
 		m_histogramTextureAllocated = false;
 	}
-#ifdef GL_DEPRECATED
 	if(m_leftMarginTextureAllocated) {
 		deleteTexture(m_leftMarginTexture);
 		m_leftMarginTextureAllocated = false;
@@ -515,6 +515,7 @@ void GLSpectrum::initializeGL()
 	m_glShaderLeftScale.initializeGL();
 	m_glShaderFrequencyScale.initializeGL();
 	m_glShaderWaterfall.initializeGL();
+	m_glShaderHistogram.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -725,12 +726,13 @@ void GLSpectrum::paintGL()
 	// paint histogram
 	if(m_displayHistogram || m_displayMaxHold || m_displayCurrent)
 	{
-		glPushMatrix();
-		glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
-		glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
-
 		if(m_displayHistogram)
 		{
+#ifdef GL_DEPRECATED
+			glPushMatrix();
+			glTranslatef(m_glHistogramRect.x(), m_glHistogramRect.y(), 0);
+			glScalef(m_glHistogramRect.width(), m_glHistogramRect.height(), 1);
+
 			// import new lines into the texture
 			quint32* pix;
 			quint8* bs = m_histogram;
@@ -753,7 +755,7 @@ void GLSpectrum::paintGL()
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_fftSize, 100, GL_RGBA, GL_UNSIGNED_BYTE, m_histogramBuffer->scanLine(0));
 			glEnable(GL_TEXTURE_2D);
-#ifdef GL_DEPRECATED
+
 			glBegin(GL_QUADS);
 			glTexCoord2f(0, 0);
 			glVertex2f(0, 0);
@@ -764,8 +766,30 @@ void GLSpectrum::paintGL()
 			glTexCoord2f(0, 1);
 			glVertex2f(0, 1);
 			glEnd();
+
+			glDisable(GL_TEXTURE_2D);
+			glPopMatrix();
 #else
 			{
+				// import new lines into the texture
+				quint32* pix;
+				quint8* bs = m_histogram;
+
+				for (int y = 0; y < 100; y++)
+				{
+					quint8* b = bs;
+					pix = (quint32*)m_histogramBuffer->scanLine(99 - y);
+
+					for (int x = 0; x < m_fftSize; x++)
+					{
+						*pix = m_histogramPalette[*b];
+						pix++;
+						b += 100;
+					}
+
+					bs++;
+				}
+
 				GLfloat vtx1[] = {
 						0, 0,
 			    		1, 0,
@@ -778,29 +802,13 @@ void GLSpectrum::paintGL()
 			    		1, 1,
 			    		0, 1
 			    };
-#ifdef GL_ANDROID
-				glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-				glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-				glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-				glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-				glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-				glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glVertexPointer(2, GL_FLOAT, 0, vtx1);
-				glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-				glDisableClientState(GL_VERTEX_ARRAY);
-				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+				m_glShaderHistogram.subTexture(0, 0, m_fftSize, 100,  m_histogramBuffer->scanLine(0));
+				m_glShaderHistogram.drawSurface(m_glHistogramBoxMatrix, tex1, vtx1, 4);
 			}
 #endif
-			glDisable(GL_TEXTURE_2D);
 		}
 
-		glPopMatrix();
 
 		// paint channels
 		if(m_mouseInside)
@@ -1497,14 +1505,14 @@ void GLSpectrum::applyChanges()
 			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*waterfallHeight) / (float) height()
 		);
-
+#ifdef GL_DEPRACATED
 		m_glHistogramRect = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)histogramTop / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)histogramHeight / (float)height()
 		);
-
+#endif
 		m_glHistogramBoxMatrix.setToIdentity();
 		m_glHistogramBoxMatrix.translate(
 			-1.0f + ((float)(2*leftMargin)   / (float) width()),
@@ -1680,14 +1688,14 @@ void GLSpectrum::applyChanges()
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
-
+#ifdef GL_DEPRECATED
 		m_glHistogramRect = QRectF(
 			(float)leftMargin / (float)width(),
 			(float)histogramTop / (float)height(),
 			(float)(width() - leftMargin - rightMargin) / (float)width(),
 			(float)(height() - topMargin - frequencyScaleHeight) / (float)height()
 		);
-
+#endif
 		m_glHistogramSpectrumMatrix.setToIdentity();
 		m_glHistogramSpectrumMatrix.translate(
 			-1.0f + ((float)(2*leftMargin)   / (float) width()),
@@ -2005,11 +2013,11 @@ void GLSpectrum::applyChanges()
 		glGenTextures(1, &m_waterfallTexture);
 		m_waterfallTextureAllocated = true;
 	}
-#endif
 	if(!m_histogramTextureAllocated) {
 		glGenTextures(1, &m_histogramTexture);
 		m_histogramTextureAllocated = true;
 	}
+#endif
 
 	bool fftSizeChanged = true;
 
@@ -2072,9 +2080,14 @@ void GLSpectrum::applyChanges()
 		}
 
 		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);
-		if(m_histogramBuffer != NULL) {
+
+		if(m_histogramBuffer != NULL)
+		{
 			m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
-		} else {
+			m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
+		}
+		else
+		{
 			m_fftSize = 0;
 			m_changesPending = true;
 			return;
@@ -2085,22 +2098,24 @@ void GLSpectrum::applyChanges()
 		m_histogramHoldoff = new quint8[100 * m_fftSize];
 		memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
 
+#ifdef GL_DEPRECATED
 		quint8* data = new quint8[m_fftSize * 100 * 4];
 		memset(data, 0x00, m_fftSize * 100 * 4);
 		glBindTexture(GL_TEXTURE_2D, m_histogramTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fftSize, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
+#endif
 	}
 
 	if(fftSizeChanged || windowSizeChanged) {
 		m_waterfallTextureHeight = waterfallHeight;
+#ifdef GL_DEPRECATED
 		quint8* data = new quint8[m_fftSize * m_waterfallTextureHeight * 4];
 		memset(data, 0x00, m_fftSize * m_waterfallTextureHeight * 4);
-#ifdef GL_DEPRECATED
 		glBindTexture(GL_TEXTURE_2D, m_waterfallTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fftSize, m_waterfallTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-#endif
 		delete[] data;
+#endif
 		m_waterfallTexturePos = 0;
 	}
 }

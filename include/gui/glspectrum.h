@@ -166,13 +166,15 @@ private:
 	QImage* m_histogramBuffer;
 	quint8* m_histogram;
 	quint8* m_histogramHoldoff;
+#ifdef GL_DEPRECATED
 	bool m_histogramTextureAllocated;
 	GLuint m_histogramTexture;
+	QRectF m_glHistogramRect;
+#endif
 	int m_histogramHoldoffBase;
 	int m_histogramHoldoffCount;
 	int m_histogramLateHoldoff;
 	int m_histogramStroke;
-	QRectF m_glHistogramRect;
 	QMatrix4x4 m_glHistogramSpectrumMatrix;
 	QMatrix4x4 m_glHistogramBoxMatrix;
 	bool m_displayHistogram;
@@ -183,6 +185,7 @@ private:
 	GLShaderTextured m_glShaderLeftScale;
 	GLShaderTextured m_glShaderFrequencyScale;
 	GLShaderTextured m_glShaderWaterfall;
+	GLShaderTextured m_glShaderHistogram;
 	int m_matrixLoc;
 	int m_colorLoc;
 

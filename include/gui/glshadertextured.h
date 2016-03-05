@@ -22,10 +22,10 @@
 #define INCLUDE_GUI_GLSHADERTEXTURED_H_
 
 #include <QString>
+#include <QOpenGLTexture>
 
 class QOpenGLShaderProgram;
 class QMatrix4x4;
-class QOpenGLTexture;
 class QImage;
 
 class GLShaderTextured
@@ -35,7 +35,7 @@ public:
 	~GLShaderTextured();
 
 	void initializeGL();
-	void initTexture(const QImage& image);
+	void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
 	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
 	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices);
 	void cleanup();
