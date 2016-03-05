@@ -603,10 +603,18 @@ void GLSpectrum::paintGL()
 		    };
 
 
-			for (int i = 0; i < m_waterfallBufferPos; i++)
+			if (m_waterfallTexturePos + m_waterfallBufferPos < m_waterfallTextureHeight)
 			{
-				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, 1,  m_waterfallBuffer->scanLine(i));
-				m_waterfallTexturePos = (m_waterfallTexturePos + 1) % m_waterfallTextureHeight;
+				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, m_waterfallBufferPos,  m_waterfallBuffer->scanLine(0));
+				m_waterfallTexturePos += m_waterfallBufferPos;
+			}
+			else
+			{
+				int breakLine = m_waterfallTextureHeight - m_waterfallTexturePos;
+				int linesLeft = m_waterfallTexturePos + m_waterfallBufferPos - m_waterfallTextureHeight;
+				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, breakLine,  m_waterfallBuffer->scanLine(0));
+				m_glShaderWaterfall.subTexture(0, 0, m_fftSize, linesLeft,  m_waterfallBuffer->scanLine(breakLine));
+				m_waterfallTexturePos = linesLeft;
 			}
 
 			m_waterfallBufferPos = 0;
