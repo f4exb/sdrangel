@@ -30,6 +30,7 @@
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
+#include "gui/glshadertextured.h"
 #include "dsp/channelmarker.h"
 #include "util/export.h"
 
@@ -127,15 +128,17 @@ private:
 	Real m_waterfallShare;
 
 	QPixmap m_leftMarginPixmap;
+#ifdef GL_DEPRECATED
 	bool m_leftMarginTextureAllocated;
 	GLuint m_leftMarginTexture;
+	QRectF m_glLeftScaleRect;
+#endif
 	QPixmap m_frequencyPixmap;
 	bool m_frequencyTextureAllocated;
 	GLuint m_frequencyTexture;
 	ScaleEngine m_timeScale;
 	ScaleEngine m_powerScale;
 	ScaleEngine m_frequencyScale;
-	QRectF m_glLeftScaleRect;
 	QRectF m_glFrequencyScaleRect;
 	QRect m_frequencyScaleRect;
 	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
@@ -171,7 +174,7 @@ private:
 	bool m_displayChanged;
 
 	GLShaderSimple m_glShaderSimple;
-	QOpenGLShaderProgram *m_program;
+	GLShaderTextured m_glShaderLeftScale;
 	int m_matrixLoc;
 	int m_colorLoc;
 

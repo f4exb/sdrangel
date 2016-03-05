@@ -48,7 +48,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayMaxHold(false),
 	m_currentSpectrum(0),
 	m_displayCurrent(false),
+#ifdef GL_DEPRECATED
 	m_leftMarginTextureAllocated(false),
+#endif
 	m_frequencyTextureAllocated(false),
 	m_waterfallBuffer(NULL),
 	m_waterfallTextureAllocated(false),
@@ -60,8 +62,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_histogramHoldoff(NULL),
 	m_histogramTextureAllocated(false),
 	m_displayHistogram(true),
-	m_displayChanged(false),
-	m_program(0)
+	m_displayChanged(false)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -149,10 +150,12 @@ GLSpectrum::~GLSpectrum()
 		deleteTexture(m_histogramTexture);
 		m_histogramTextureAllocated = false;
 	}
+#ifdef GL_DEPRECATED
 	if(m_leftMarginTextureAllocated) {
 		deleteTexture(m_leftMarginTexture);
 		m_leftMarginTextureAllocated = false;
 	}
+#endif
 	if(m_frequencyTextureAllocated) {
 		deleteTexture(m_frequencyTexture);
 		m_frequencyTextureAllocated = false;
@@ -507,6 +510,7 @@ void GLSpectrum::initializeGL()
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
 	glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
+	m_glShaderLeftScale.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -876,6 +880,7 @@ void GLSpectrum::paintGL()
 	// paint left scales (time and power)
 	if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram )
 	{
+#ifdef GL_DEPRECATED
 		glPushMatrix();
 		glTranslatef(m_glLeftScaleRect.x(), m_glLeftScaleRect.y(), 0);
 		glScalef(m_glLeftScaleRect.width(), m_glLeftScaleRect.height(), 1);
@@ -886,7 +891,6 @@ void GLSpectrum::paintGL()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_TEXTURE_2D);
-#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
 		glVertex2f(0, 1);
@@ -897,6 +901,9 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, 0);
 		glVertex2f(0, 0);
 		glEnd();
+		glDisable(GL_TEXTURE_2D);
+
+		glPopMatrix();
 #else
 		{
 			GLfloat vtx1[] = {
@@ -911,28 +918,10 @@ void GLSpectrum::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, vtx1);
-			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+			m_glShaderLeftScale.drawSurface(m_glLeftScaleBoxMatrix, tex1, vtx1, 4);
 		}
 #endif
-		glDisable(GL_TEXTURE_2D);
-
-		glPopMatrix();
 	}
 
 	// paint frequency scale
@@ -1561,12 +1550,14 @@ void GLSpectrum::applyChanges()
 			(float) -2*frequencyScaleHeight / (float) height()
 		);
 
+#ifdef GL_DEPRECATED
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
+#endif
 
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
@@ -1657,12 +1648,14 @@ void GLSpectrum::applyChanges()
 			(float) -2*frequencyScaleHeight / (float) height()
 		);
 
+#ifdef GL_DEPRECATED
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
+#endif
 
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
@@ -1738,13 +1731,14 @@ void GLSpectrum::applyChanges()
 			(float) -2*frequencyScaleHeight / (float) height()
 		);
 
+#ifdef GL_DEPRECATED
 		m_glLeftScaleRect = QRectF(
 			(float)0,
 			(float)0,
 			(float)(leftMargin - 1) / (float)width(),
 			(float)1
 		);
-
+#endif
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
 		m_glLeftScaleBoxMatrix.scale(
@@ -1934,6 +1928,7 @@ void GLSpectrum::applyChanges()
 				}
 			}
 		}
+#ifdef GL_DEPRECATED
 		if(m_leftMarginTextureAllocated)
 			deleteTexture(m_leftMarginTexture);
 		m_leftMarginTexture = bindTexture(m_leftMarginPixmap,
@@ -1942,6 +1937,8 @@ void GLSpectrum::applyChanges()
 			QGLContext::LinearFilteringBindOption |
 			QGLContext::MipmapBindOption);
 		m_leftMarginTextureAllocated = true;
+#endif
+		m_glShaderLeftScale.initTexture(m_leftMarginPixmap.toImage());
 	}
 	// prepare frequency scale
 	if(m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent){

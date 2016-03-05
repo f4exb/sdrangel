@@ -1,8 +1,8 @@
-#-------------------------------------------------
+#--------------------------------------------------------
 #
-# Pro file for Android build with Qt Creator
+# Pro file for Android and Windows builds with Qt Creator
 #
-#-------------------------------------------------
+#--------------------------------------------------------
 
 QT       += core gui
 
@@ -64,6 +64,8 @@ SOURCES += main.cpp\
         sdrbase/gui/colormapper.cpp\
         sdrbase/gui/glscope.cpp\
         sdrbase/gui/glscopegui.cpp\
+        sdrbase/gui/glshadersimple.cpp\
+        sdrbase/gui/glshadertextured.cpp\        
         sdrbase/gui/glspectrum.cpp\
         sdrbase/gui/glspectrumgui.cpp\
         sdrbase/gui/indicator.cpp\
@@ -135,6 +137,8 @@ HEADERS  += include/mainwindow.h\
         include/gui/colormapper.h\
         include/gui/glscope.h\
         include/gui/glscopegui.h\
+        include/gui/glshadersimple.h\
+        include/gui/glshadertextured.h\        
         include/gui/glspectrum.h\
         include/gui/glspectrumgui.h\
         include/gui/indicator.h\
