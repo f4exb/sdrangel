@@ -180,8 +180,11 @@ private:
 	GLShaderSimple m_glShaderSimple;
 	GLShaderTextured m_glShaderLeftScale;
 	GLShaderTextured m_glShaderFrequencyScale;
+	GLShaderTextured m_glShaderWaterfall;
 	int m_matrixLoc;
 	int m_colorLoc;
+
+	static const int m_waterfallBufferHeight = 256;
 
 	void updateWaterfall(const std::vector<Real>& spectrum);
 	void updateHistogram(const std::vector<Real>& spectrum);

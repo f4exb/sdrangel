@@ -36,6 +36,7 @@ public:
 
 	void initializeGL();
 	void initTexture(const QImage& image);
+	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
 	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices);
 	void cleanup();
 

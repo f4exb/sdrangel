@@ -512,6 +512,7 @@ void GLSpectrum::initializeGL()
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeftScale.initializeGL();
 	m_glShaderFrequencyScale.initializeGL();
+	m_glShaderWaterfall.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -556,10 +557,7 @@ void GLSpectrum::paintGL()
 	// paint waterfall
 	if (m_displayWaterfall)
 	{
-		glPushMatrix();
-		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
-		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
-
+#ifdef GL_DEPRECATED
 		glBindTexture(GL_TEXTURE_2D, m_waterfallTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -575,9 +573,13 @@ void GLSpectrum::paintGL()
 
 		float prop_y = m_waterfallTexturePos / (m_waterfallTextureHeight - 1.0);
 		float off = 1.0 / (m_waterfallTextureHeight - 1.0);
+
+		glPushMatrix();
+		glTranslatef(m_glWaterfallRect.x(), m_glWaterfallRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glWaterfallRect.height(), 1);
+
 		glEnable(GL_TEXTURE_2D);
 
-#ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, prop_y + 1 - off);
 		glVertex2f(0, m_invertedWaterfall ? 0 : 1);
@@ -588,6 +590,9 @@ void GLSpectrum::paintGL()
 		glTexCoord2f(0, prop_y);
 		glVertex2f(0, m_invertedWaterfall ? 1 : 0);
 		glEnd();
+
+		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
 #else
 		{
 			GLfloat vtx1[] = {
@@ -596,6 +601,19 @@ void GLSpectrum::paintGL()
 		    		1, m_invertedWaterfall ? 1.0f : 0.0f,
 		    		0, m_invertedWaterfall ? 1.0f : 0.0f
 		    };
+
+
+			for (int i = 0; i < m_waterfallBufferPos; i++)
+			{
+				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, 1,  m_waterfallBuffer->scanLine(i));
+				m_waterfallTexturePos = (m_waterfallTexturePos + 1) % m_waterfallTextureHeight;
+			}
+
+			m_waterfallBufferPos = 0;
+
+			float prop_y = m_waterfallTexturePos / (m_waterfallTextureHeight - 1.0);
+			float off = 1.0 / (m_waterfallTextureHeight - 1.0);
+
 			GLfloat tex1[] = {
 		    		0, prop_y + 1 - off,
 					1, prop_y + 1 - off,
@@ -603,27 +621,9 @@ void GLSpectrum::paintGL()
 					0, prop_y
 		    };
 
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, vtx1);
-			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+			m_glShaderWaterfall.drawSurface(m_glWaterfallBoxMatrix, tex1, vtx1, 4);
 		}
 #endif
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
 
 		// paint channels
 		if (m_mouseInside)
@@ -1998,25 +1998,52 @@ void GLSpectrum::applyChanges()
 	}
 
 	bool fftSizeChanged = true;
-	if(m_waterfallBuffer != NULL)
+
+	if(m_waterfallBuffer != NULL) {
 		fftSizeChanged = m_waterfallBuffer->width() != m_fftSize;
+	}
+
 	bool windowSizeChanged = m_waterfallTextureHeight != waterfallHeight;
 
+	if (fftSizeChanged || windowSizeChanged)
+	{
+		if(m_waterfallBuffer != 0) {
+			delete m_waterfallBuffer;
+		}
+
+		m_waterfallBuffer = new QImage(m_fftSize, waterfallHeight, QImage::Format_ARGB32);
+
+		if(m_waterfallBuffer != 0)
+		{
+			m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
+			m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
+			m_waterfallBufferPos = 0;
+		}
+		else
+		{
+			m_fftSize = 0;
+			m_changesPending = true;
+			return;
+		}
+	}
+
 	if(fftSizeChanged) {
+#ifdef GL_DEPRECATED
 		if(m_waterfallBuffer != NULL) {
 			delete m_waterfallBuffer;
 			m_waterfallBuffer = NULL;
 		}
-		m_waterfallBuffer = new QImage(m_fftSize, 256, QImage::Format_ARGB32);
+		m_waterfallBuffer = new QImage(m_fftSize, m_waterfallBufferHeight, QImage::Format_ARGB32);
 		if(m_waterfallBuffer != NULL) {
 			m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
+			m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
 			m_waterfallBufferPos = 0;
 		} else {
 			m_fftSize = 0;
 			m_changesPending = true;
 			return;
 		}
-
+#endif
 		if(m_histogramBuffer != NULL) {
 			delete m_histogramBuffer;
 			m_histogramBuffer = NULL;

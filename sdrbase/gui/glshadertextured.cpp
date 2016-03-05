@@ -74,6 +74,18 @@ void GLShaderTextured::initTexture(const QImage& image)
 	m_texture->setWrapMode(QOpenGLTexture::Repeat);
 }
 
+void GLShaderTextured::subTexture(int xOffset, int yOffset, int width, int height, const void *pixels)
+{
+	if (!m_texture) {
+		qDebug("GLShaderTextured::subTexture: no texture defined. Doing nothing");
+		return;
+	}
+
+	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+	m_texture->bind();
+	f->glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+}
+
 void GLShaderTextured::drawSurface(const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
 {
 	draw(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices);
