@@ -200,6 +200,7 @@ private:
 	void drawPowerOverlay();
 
 protected slots:
+	void cleanup();
 	void tick();
 };
 

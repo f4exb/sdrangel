@@ -2274,5 +2274,9 @@ void GLSpectrum::cleanup()
 {
 	makeCurrent();
 	m_glShaderSimple.cleanup();
+	m_glShaderFrequencyScale.cleanup();
+	m_glShaderHistogram.cleanup();
+	m_glShaderLeftScale.cleanup();
+	m_glShaderWaterfall.cleanup();
     doneCurrent();
 }

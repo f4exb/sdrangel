@@ -19,15 +19,12 @@
 
 #include <QPainter>
 #include <QMouseEvent>
+#include <QOpenGLContext>
 #include "gui/glscope.h"
 #include "dsp/dspengine.h"
 
 #include <algorithm>
 #include <QDebug>
-
-#ifdef GL_ANDROID
-#include "util/gleshelp.h"
-#endif
 
 /*
 #ifdef _WIN32
@@ -237,6 +234,25 @@ void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 
 void GLScope::initializeGL()
 {
+	QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
+
+	if (glCurrentContext) {
+		if (QOpenGLContext::currentContext()->isValid()) {
+			qDebug() << "GLScope::initializeGL: context:"
+				<< " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
+				<< " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
+				<< " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
+		}
+		else {
+			qDebug() << "GLScope::initializeGL: current context is invalid";
+		}
+	} else {
+		qCritical() << "GLScope::initializeGL: no current context";
+		return;
+	}
+
+	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup); // TODO: when migrating to QOpenGLWidget
+
 	glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeft1Scale.initializeGL();
@@ -2797,3 +2813,15 @@ void GLScope::connectTimer(const QTimer& timer)
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_timer.stop();
 }
+
+void GLScope::cleanup()
+{
+	makeCurrent();
+	m_glShaderSimple.cleanup();
+	m_glShaderBottom1Scale.cleanup();
+	m_glShaderBottom2Scale.cleanup();
+	m_glShaderLeft1Scale.cleanup();
+	m_glShaderPowerOverlay.cleanup();
+    doneCurrent();
+}
+

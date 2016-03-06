@@ -209,9 +209,8 @@ private:
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
 
-	void cleanup();
-
 private slots:
+	void cleanup();
 	void tick();
 	void channelMarkerChanged();
 	void channelMarkerDestroyed(QObject* object);
