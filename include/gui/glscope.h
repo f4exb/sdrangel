@@ -157,23 +157,6 @@ private:
 
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
-#ifdef GL_DEPRECATED
-	QRectF m_glLeft1ScaleRect;
-	QRectF m_glRight1ScaleRect;
-	QRectF m_glLeft2ScaleRect;
-	QRectF m_glBot1ScaleRect;
-	QRectF m_glBot2ScaleRect;
-	bool m_left1ScaleTextureAllocated;
-	bool m_left2ScaleTextureAllocated;
-	bool m_bot1ScaleTextureAllocated;
-	bool m_bot2ScaleTextureAllocated;
-	bool m_powerOverlayTextureAllocated1;
-	GLuint m_left1ScaleTexture;
-	GLuint m_left2ScaleTexture;
-	GLuint m_bot1ScaleTexture;
-	GLuint m_bot2ScaleTexture;
-	GLuint m_powerOverlayTexture1;
-#endif
 
 	ScaleEngine m_x1Scale;
 	ScaleEngine m_x2Scale;

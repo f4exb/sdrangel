@@ -74,10 +74,6 @@ public:
 private:
 	struct ChannelMarkerState {
 		ChannelMarker* m_channelMarker;
-#ifdef GL_DEPRECATED
-		QRectF m_glRect;
-		QRectF m_glRectDsb;
-#endif
 		QMatrix4x4 m_glMatrixWaterfall;
 		QMatrix4x4 m_glMatrixDsbWaterfall;
 		QMatrix4x4 m_glMatrixFreqScale;
@@ -88,10 +84,6 @@ private:
 
 		ChannelMarkerState(ChannelMarker* channelMarker) :
 			m_channelMarker(channelMarker)
-#ifdef GL_DEPRECATED
-			m_glRect(),
-			m_glRectDsb()
-#endif
 		{ }
 	};
 	QList<ChannelMarkerState*> m_channelMarkerStates;
@@ -134,14 +126,6 @@ private:
 
 	QPixmap m_leftMarginPixmap;
 	QPixmap m_frequencyPixmap;
-#ifdef GL_DEPRECATED
-	bool m_leftMarginTextureAllocated;
-	GLuint m_leftMarginTexture;
-	QRectF m_glLeftScaleRect;
-	bool m_frequencyTextureAllocated;
-	GLuint m_frequencyTexture;
-	QRectF m_glFrequencyScaleRect;
-#endif
 	ScaleEngine m_timeScale;
 	ScaleEngine m_powerScale;
 	ScaleEngine m_frequencyScale;
@@ -152,11 +136,6 @@ private:
 	QRgb m_waterfallPalette[240];
 	QImage* m_waterfallBuffer;
 	int m_waterfallBufferPos;
-#ifdef GL_DEPRECATED
-	bool m_waterfallTextureAllocated;
-	GLuint m_waterfallTexture;
-	QRectF m_glWaterfallRect;
-#endif
 	int m_waterfallTextureHeight;
 	int m_waterfallTexturePos;
 	QMatrix4x4 m_glWaterfallBoxMatrix;
@@ -167,11 +146,6 @@ private:
 	QImage* m_histogramBuffer;
 	quint8* m_histogram;
 	quint8* m_histogramHoldoff;
-#ifdef GL_DEPRECATED
-	bool m_histogramTextureAllocated;
-	GLuint m_histogramTexture;
-	QRectF m_glHistogramRect;
-#endif
 	int m_histogramHoldoffBase;
 	int m_histogramHoldoffCount;
 	int m_histogramLateHoldoff;
