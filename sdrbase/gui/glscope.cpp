@@ -20,6 +20,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QOpenGLContext>
+#include <QOpenGLFunctions>
 #include "gui/glscope.h"
 #include "dsp/dspengine.h"
 
@@ -256,7 +257,10 @@ void GLScope::initializeGL()
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup); // TODO: when migrating to QOpenGLWidget
 
-	glDisable(GL_DEPTH_TEST);
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
+	glFunctions->initializeOpenGLFunctions();
+
+	//glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeft1Scale.initializeGL();
 	m_glShaderBottom1Scale.initializeGL();
@@ -267,7 +271,8 @@ void GLScope::initializeGL()
 
 void GLScope::resizeGL(int width, int height)
 {
-	glViewport(0, 0, width, height);
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
+	glFunctions->glViewport(0, 0, width, height);
 	m_configChanged = true;
 }
 
@@ -289,9 +294,10 @@ void GLScope::paintGL()
 //	glPushMatrix();
 //	glScalef(2.0, -2.0, 1.0);
 //	glTranslatef(-0.50, -0.5, 0);
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
 	// I - primary display
 
@@ -1181,7 +1187,7 @@ void GLScope::paintGL()
 		}
 	} // Both displays or secondary display only
 
-	glPopMatrix();
+//	glPopMatrix();
 	m_dataChanged = false;
 	m_mutex.unlock();
 }

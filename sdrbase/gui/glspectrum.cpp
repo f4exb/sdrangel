@@ -509,7 +509,7 @@ void GLSpectrum::initializeGL()
 	}
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeftScale.initializeGL();
 	m_glShaderFrequencyScale.initializeGL();
