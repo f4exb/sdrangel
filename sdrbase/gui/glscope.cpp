@@ -21,6 +21,7 @@
 #include <QMouseEvent>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QSurface>
 #include "gui/glscope.h"
 #include "dsp/dspengine.h"
 
@@ -239,6 +240,7 @@ void GLScope::newTrace(const std::vector<Complex>& trace, int sampleRate)
 void GLScope::initializeGL()
 {
 	QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
+	//QOpenGLContext *glCurrentContext =  context();
 
 	if (glCurrentContext) {
 		if (QOpenGLContext::currentContext()->isValid()) {
@@ -253,6 +255,28 @@ void GLScope::initializeGL()
 	} else {
 		qCritical() << "GLScope::initializeGL: no current context";
 		return;
+	}
+
+	QSurface *surface = glCurrentContext->surface();
+
+	if (surface == 0)
+	{
+		qCritical() << "GLScope::initializeGL: no surface attached";
+		return;
+	}
+	else
+	{
+		if (surface->surfaceType() != QSurface::OpenGLSurface)
+		{
+			qCritical() << "GLScope::initializeGL: surface is not an OpenGLSurface: " << surface->surfaceType()
+				<< " cannot use an OpenGL context";
+			return;
+		}
+		else
+		{
+			qDebug() << "GLScope::initializeGL: OpenGL surface:"
+				<< " class: " << (surface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
+		}
 	}
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup); // TODO: when migrating to QOpenGLWidget
@@ -2825,12 +2849,12 @@ void GLScope::connectTimer(const QTimer& timer)
 
 void GLScope::cleanup()
 {
-	makeCurrent();
+	//makeCurrent();
 	m_glShaderSimple.cleanup();
 	m_glShaderBottom1Scale.cleanup();
 	m_glShaderBottom2Scale.cleanup();
 	m_glShaderLeft1Scale.cleanup();
 	m_glShaderPowerOverlay.cleanup();
-    doneCurrent();
+    //doneCurrent();
 }
 

@@ -19,6 +19,7 @@
 #define INCLUDE_GUI_GLSHADERSIMPLE_H_
 
 #include <QString>
+#include <QOpenGLFunctions>
 
 class QOpenGLShaderProgram;
 class QMatrix4x4;
