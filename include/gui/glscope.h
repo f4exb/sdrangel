@@ -1,6 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2016 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// OpenGL interface modernization.                                               //
+// See: http://doc.qt.io/qt-5/qopenglshaderprogram.html                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -125,8 +128,6 @@ private:
 	ScopeVis* m_scopeVis;
 
 	// config
-	//Real m_amp;
-	//Real m_ofs;
 	int m_timeBase;
 	int m_timeOfsProMill;
 	ScopeVis::TriggerChannel m_triggerChannel;
@@ -142,16 +143,6 @@ private:
 	QRectF m_glScopeRect2;
 	QMatrix4x4 m_glScopeMatrix1;
 	QMatrix4x4 m_glScopeMatrix2;
-
-	int m_displayGridIntensity;
-	int m_displayTraceIntensity;
-
-	QRectF m_glLeft1ScaleRect;
-	QRectF m_glRight1ScaleRect;
-	QRectF m_glLeft2ScaleRect;
-	QRectF m_glBot1ScaleRect;
-	QRectF m_glBot2ScaleRect;
-
 	QMatrix4x4 m_glLeft1ScaleMatrix;
 	QMatrix4x4 m_glRight1ScaleMatrix;
 	QMatrix4x4 m_glLeft2ScaleMatrix;
@@ -164,17 +155,25 @@ private:
 	QPixmap m_bot2ScalePixmap;
 	QPixmap m_powerOverlayPixmap1;
 
+	int m_displayGridIntensity;
+	int m_displayTraceIntensity;
+#ifdef GL_DEPRECATED
+	QRectF m_glLeft1ScaleRect;
+	QRectF m_glRight1ScaleRect;
+	QRectF m_glLeft2ScaleRect;
+	QRectF m_glBot1ScaleRect;
+	QRectF m_glBot2ScaleRect;
 	bool m_left1ScaleTextureAllocated;
 	bool m_left2ScaleTextureAllocated;
 	bool m_bot1ScaleTextureAllocated;
 	bool m_bot2ScaleTextureAllocated;
 	bool m_powerOverlayTextureAllocated1;
-
 	GLuint m_left1ScaleTexture;
 	GLuint m_left2ScaleTexture;
 	GLuint m_bot1ScaleTexture;
 	GLuint m_bot2ScaleTexture;
 	GLuint m_powerOverlayTexture1;
+#endif
 
 	ScaleEngine m_x1Scale;
 	ScaleEngine m_x2Scale;

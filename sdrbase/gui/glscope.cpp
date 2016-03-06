@@ -1,3 +1,22 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// OpenGL interface modernization.                                               //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QPainter>
 #include <QMouseEvent>
 #include "gui/glscope.h"
@@ -50,11 +69,13 @@ GLScope::GLScope(QWidget* parent) :
 	m_prevArg(0),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
+#ifdef GL_DEPRECATED
 	m_left1ScaleTextureAllocated(false),
 	m_left2ScaleTextureAllocated(false),
 	m_bot1ScaleTextureAllocated(false),
 	m_bot2ScaleTextureAllocated(false),
 	m_powerOverlayTextureAllocated1(false),
+#endif
 	m_powerOverlayFont(font())
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
@@ -243,12 +264,12 @@ void GLScope::paintGL()
 
 	if(m_displayTrace->size() - m_oldTraceSize != 0) {
 		m_oldTraceSize = m_displayTrace->size();
-		emit traceSizeChanged(m_displayTrace->size());
+		emit traceSizeChanged((int) m_displayTrace->size());
 	}
 
-	glPushMatrix();
-	glScalef(2.0, -2.0, 1.0);
-	glTranslatef(-0.50, -0.5, 0);
+//	glPushMatrix();
+//	glScalef(2.0, -2.0, 1.0);
+//	glTranslatef(-0.50, -0.5, 0);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -1377,6 +1398,7 @@ void GLScope::drawPowerOverlay()
 	painter.drawText(QPointF(0, rect.height() - 2.0f), text);
 	painter.end();
 
+#ifdef GL_DEPRECATED
 	if (m_powerOverlayTextureAllocated1)
 		deleteTexture(m_powerOverlayTexture1);
 	m_powerOverlayTexture1 = bindTexture(m_powerOverlayPixmap1,
@@ -1385,7 +1407,7 @@ void GLScope::drawPowerOverlay()
 		QGLContext::LinearFilteringBindOption |
 		QGLContext::MipmapBindOption);
 	m_powerOverlayTextureAllocated1 = true;
-
+#endif
 	m_glShaderPowerOverlay.initTexture(m_powerOverlayPixmap1.toImage());
 
 #ifdef GL_DEPRECATED
@@ -1427,27 +1449,8 @@ void GLScope::drawPowerOverlay()
 		m_glShaderPowerOverlay.drawSurface(mat, tex1, vtx1, 4);
 
 //		glPushMatrix();
-//
 //		glTranslatef(m_glScopeRect1.x() + shiftX, m_glScopeRect1.y(), 0);
 //		glScalef(rect.width() / (float) width(), rect.height() / (float) height(), 1);
-//
-//		glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//		glEnable(GL_TEXTURE_2D);
-//
-//		glEnableClientState(GL_VERTEX_ARRAY);
-//		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-//		glVertexPointer(2, GL_FLOAT, 0, vtx1);
-//		glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-//		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-//		glDisableClientState(GL_VERTEX_ARRAY);
-//		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//		glDisable(GL_TEXTURE_2D);
-//
-//		glPopMatrix();
 	}
 #endif
 }
@@ -1578,13 +1581,14 @@ void GLScope::applyConfig()
 					(float) 2*(width() - 2*leftMargin - rightMargin) / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) (width() - 2*leftMargin - rightMargin) / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot1ScaleMatrix.setToIdentity();
 				m_glBot1ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -1594,13 +1598,14 @@ void GLScope::applyConfig()
 					(float) 2*(width() - 2*leftMargin - rightMargin) / (float) width(),
 					(float) -2*(botMargin - 1) / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glRight1ScaleRect = QRectF(
 					(float) (width() - leftMargin) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+#endif
 				m_glRight1ScaleMatrix.setToIdentity();
 				m_glRight1ScaleMatrix.translate (
 					-1.0f + ((float)(2*(width() - leftMargin)) / (float) width()),
@@ -1628,13 +1633,14 @@ void GLScope::applyConfig()
 					(float) 2*scopeWidth / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot1ScaleMatrix.setToIdentity();
 				m_glBot1ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -1645,14 +1651,14 @@ void GLScope::applyConfig()
 					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
-
+#ifdef GL_DEPRECATED
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
-
+#endif
 			m_glLeft1ScaleMatrix.setToIdentity();
 			m_glLeft1ScaleMatrix.translate (
 				-1.0f,
@@ -1688,7 +1694,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_left1ScaleTextureAllocated)
 					deleteTexture(m_left1ScaleTexture);
 				m_left1ScaleTexture = bindTexture(m_left1ScalePixmap,
@@ -1697,7 +1703,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left1ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
 
 			} // Y1 scale
@@ -1726,7 +1732,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_bot1ScaleTextureAllocated)
 					deleteTexture(m_bot1ScaleTexture);
 				m_bot1ScaleTexture = bindTexture(m_bot1ScalePixmap,
@@ -1735,7 +1741,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot1ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
 
 			} // X1 scale
@@ -1759,13 +1765,14 @@ void GLScope::applyConfig()
 					(float) 2*scopeDim / (float) width(),
 					(float) -2*scopeDim / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glLeft2ScaleRect = QRectF(
 					0,
 					(float) (topMargin + scopeDim + botMargin) / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeDim / (float) height()
 				);
+#endif
 				m_glLeft2ScaleMatrix.setToIdentity();
 				m_glLeft2ScaleMatrix.translate (
 					-1.0f,
@@ -1775,13 +1782,14 @@ void GLScope::applyConfig()
 					(float) 2*(leftMargin-1) / (float) width(),
 					(float) -2*scopeDim / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot2ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeDim + topMargin + scopeDim + botMargin + 1) / (float) height(),
 					(float) scopeDim / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot2ScaleMatrix.setToIdentity();
 				m_glBot2ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -1809,13 +1817,14 @@ void GLScope::applyConfig()
 					(float) 2*scopeWidth / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glLeft2ScaleRect = QRectF(
 					0,
 					(float) (topMargin + scopeHeight + botMargin) / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+#endif
 				m_glLeft2ScaleMatrix.setToIdentity();
 				m_glLeft2ScaleMatrix.translate (
 					-1.0f,
@@ -1825,13 +1834,14 @@ void GLScope::applyConfig()
 					(float) 2*(leftMargin-1) / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot2ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + scopeHeight + botMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot2ScaleMatrix.setToIdentity();
 				m_glBot2ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -1867,7 +1877,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_left2ScaleTextureAllocated)
 					deleteTexture(m_left2ScaleTexture);
 				m_left2ScaleTexture = bindTexture(m_left2ScalePixmap,
@@ -1876,7 +1886,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left2ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
 
 			} // Y2 scale
@@ -1917,7 +1927,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_bot2ScaleTextureAllocated)
 					deleteTexture(m_bot2ScaleTexture);
 				m_bot2ScaleTexture = bindTexture(m_bot2ScalePixmap,
@@ -1926,7 +1936,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot2ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
 
 			} // X2 scale
@@ -1953,13 +1963,14 @@ void GLScope::applyConfig()
 					(float) 2*(scopeWidth-leftMargin) / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) (scopeWidth-leftMargin) / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot1ScaleMatrix.setToIdentity();
 				m_glBot1ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -1969,13 +1980,14 @@ void GLScope::applyConfig()
 					(float) 2*(scopeWidth-leftMargin) / (float) width(),
 					(float) -2*(botMargin - 1) / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glRight1ScaleRect = QRectF(
 					(float) (scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+#endif
 				m_glRight1ScaleMatrix.setToIdentity();
 				m_glRight1ScaleMatrix.translate (
 					-1.0f + ((float) 2*scopeWidth / (float) width()),
@@ -2003,13 +2015,14 @@ void GLScope::applyConfig()
 					(float) 2*scopeWidth / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot1ScaleRect = QRectF(
 					(float) leftMargin / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot1ScaleMatrix.setToIdentity();
 				m_glBot1ScaleMatrix.translate (
 					-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -2020,14 +2033,14 @@ void GLScope::applyConfig()
 					(float) -2*(botMargin - 1) / (float) height()
 				);
 			}
-
+#ifdef GL_DEPRECATED
 			m_glLeft1ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
-
+#endif
 			m_glLeft1ScaleMatrix.setToIdentity();
 			m_glLeft1ScaleMatrix.translate (
 				-1.0f,
@@ -2063,7 +2076,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_left1ScaleTextureAllocated)
 					deleteTexture(m_left1ScaleTextureAllocated);
 				m_left1ScaleTexture = bindTexture(m_left1ScalePixmap,
@@ -2072,7 +2085,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left1ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
 
 			} // Y1 scale
@@ -2101,7 +2114,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_bot1ScaleTextureAllocated)
 					deleteTexture(m_bot1ScaleTexture);
 				m_bot1ScaleTexture = bindTexture(m_bot1ScalePixmap,
@@ -2110,7 +2123,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot1ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
 
 			} // X1 scale
@@ -2134,13 +2147,14 @@ void GLScope::applyConfig()
 					(float) 2*scopeDim / (float) width(),
 					(float) -2*(height() - topMargin - botMargin) / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glLeft2ScaleRect = QRectF(
 					(float) (leftMargin + scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+#endif
 				m_glLeft2ScaleMatrix.setToIdentity();
 				m_glLeft2ScaleMatrix.translate (
 					-1.0f + (float) 2*(leftMargin + scopeWidth) / (float) width(),
@@ -2150,13 +2164,14 @@ void GLScope::applyConfig()
 					(float) 2*(leftMargin-1) / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot2ScaleRect = QRectF(
 					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeDim / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot2ScaleMatrix.setToIdentity();
 				m_glBot2ScaleMatrix.translate (
 					-1.0f + ((float) 2*(leftMargin + leftMargin + scopeWidth) / (float) width()),
@@ -2184,13 +2199,14 @@ void GLScope::applyConfig()
 					(float) 2*((width() - leftMargin - leftMargin - rightMargin) / 2) / (float) width(),
 					(float) -2*(height() - topMargin - botMargin) / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glLeft2ScaleRect = QRectF(
 					(float) (leftMargin + scopeWidth) / (float) width(),
 					(float) topMargin / (float) height(),
 					(float) (leftMargin-1) / (float) width(),
 					(float) scopeHeight / (float) height()
 				);
+#endif
 				m_glLeft2ScaleMatrix.setToIdentity();
 				m_glLeft2ScaleMatrix.translate (
 					-1.0f + (float) 2*(leftMargin + scopeWidth) / (float) width(),
@@ -2200,13 +2216,14 @@ void GLScope::applyConfig()
 					(float) 2*(leftMargin-1) / (float) width(),
 					(float) -2*scopeHeight / (float) height()
 				);
-
+#ifdef GL_DEPRECATED
 				m_glBot2ScaleRect = QRectF(
 					(float) (leftMargin + leftMargin + scopeWidth) / (float) width(),
 					(float) (scopeHeight + topMargin + 1) / (float) height(),
 					(float) scopeWidth / (float) width(),
 					(float) (botMargin - 1) / (float) height()
 				);
+#endif
 				m_glBot2ScaleMatrix.setToIdentity();
 				m_glBot2ScaleMatrix.translate (
 					-1.0f + ((float) 2*(leftMargin + leftMargin + scopeWidth) / (float) width()),
@@ -2242,7 +2259,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_left2ScaleTextureAllocated)
 					deleteTexture(m_left2ScaleTexture);
 				m_left2ScaleTexture = bindTexture(m_left2ScalePixmap,
@@ -2251,7 +2268,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left2ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
 
 			} // Y2 scale
@@ -2292,7 +2309,7 @@ void GLScope::applyConfig()
 						}
 					}
 				}
-
+#ifdef GL_DEPRECATED
 				if (m_bot2ScaleTextureAllocated)
 					deleteTexture(m_bot2ScaleTexture);
 				m_bot2ScaleTexture = bindTexture(m_bot2ScalePixmap,
@@ -2301,7 +2318,7 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot2ScaleTextureAllocated = true;
-
+#endif
 				m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
 
 			} // X2 scale
@@ -2329,13 +2346,14 @@ void GLScope::applyConfig()
 				(float) 2*(scopeWidth-leftMargin) / (float) width(),
 				(float) -2*scopeHeight / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glBot1ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) (scopeWidth-leftMargin) / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+#endif
 			m_glBot1ScaleMatrix.setToIdentity();
 			m_glBot1ScaleMatrix.translate (
 				-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -2345,13 +2363,14 @@ void GLScope::applyConfig()
 				(float) 2*(scopeWidth-leftMargin) / (float) width(),
 				(float) -2*(botMargin - 1) / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glRight1ScaleRect = QRectF(
 				(float) (width() - leftMargin) / (float) width(),
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+#endif
 			m_glRight1ScaleMatrix.setToIdentity();
 			m_glRight1ScaleMatrix.translate (
 				-1.0f + ((float) (2*width() - leftMargin) / (float) width()),
@@ -2379,13 +2398,14 @@ void GLScope::applyConfig()
 				(float) 2*scopeWidth / (float) width(),
 				(float) -2*scopeHeight / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glBot1ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+#endif
 			m_glBot1ScaleMatrix.setToIdentity();
 			m_glBot1ScaleMatrix.translate (
 				-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -2396,14 +2416,14 @@ void GLScope::applyConfig()
 				(float) -2*(botMargin - 1) / (float) height()
 			);
 		}
-
+#ifdef GL_DEPRECATED
 		m_glLeft1ScaleRect = QRectF(
 			0,
 			(float) topMargin / (float) height(),
 			(float) (leftMargin-1) / (float) width(),
 			(float) scopeHeight / (float) height()
 		);
-
+#endif
 		m_glLeft1ScaleMatrix.setToIdentity();
 		m_glLeft1ScaleMatrix.translate (
 			-1.0f,
@@ -2443,7 +2463,7 @@ void GLScope::applyConfig()
 					}
 				}
 			}
-
+#ifdef GL_DEPRECATED
 			if (m_left1ScaleTextureAllocated)
 				deleteTexture(m_left1ScaleTextureAllocated);
 			m_left1ScaleTexture = bindTexture(m_left1ScalePixmap,
@@ -2452,7 +2472,7 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left1ScaleTextureAllocated = true;
-
+#endif
 			m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
 
 		} // Y1 scale
@@ -2481,7 +2501,7 @@ void GLScope::applyConfig()
 					}
 				}
 			}
-
+#ifdef GL_DEPRECATED
 			if (m_left2ScaleTextureAllocated)
 				deleteTexture(m_left2ScaleTextureAllocated);
 			m_left2ScaleTexture = bindTexture(m_left2ScalePixmap,
@@ -2490,7 +2510,7 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left2ScaleTextureAllocated = true;
-
+#endif
 			m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
 
 		} // Y2 scale
@@ -2519,7 +2539,7 @@ void GLScope::applyConfig()
 					}
 				}
 			}
-
+#ifdef GL_DEPRECATED
 			if (m_bot1ScaleTextureAllocated)
 				deleteTexture(m_bot1ScaleTexture);
 			m_bot1ScaleTexture = bindTexture(m_bot1ScalePixmap,
@@ -2528,7 +2548,7 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_bot1ScaleTextureAllocated = true;
-
+#endif
 			m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
 
 		} // X1 scale
@@ -2557,13 +2577,14 @@ void GLScope::applyConfig()
 				(float) 2*scopeDim / (float) width(),
 				(float) -2*scopeDim / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glLeft2ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeDim / (float) height()
 			);
+#endif
 			m_glLeft2ScaleMatrix.setToIdentity();
 			m_glLeft2ScaleMatrix.translate (
 				-1.0f,
@@ -2573,13 +2594,14 @@ void GLScope::applyConfig()
 				(float) 2*(leftMargin-1) / (float) width(),
 				(float) -2*scopeDim / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glBot2ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeDim + topMargin + 1) / (float) height(),
 				(float) scopeDim / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+#endif
 			m_glBot2ScaleMatrix.setToIdentity();
 			m_glBot2ScaleMatrix.translate (
 				-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -2607,13 +2629,14 @@ void GLScope::applyConfig()
 				(float) 2*scopeWidth / (float) width(),
 				(float) -2*scopeHeight / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glLeft2ScaleRect = QRectF(
 				0,
 				(float) topMargin / (float) height(),
 				(float) (leftMargin-1) / (float) width(),
 				(float) scopeHeight / (float) height()
 			);
+#endif
 			m_glLeft2ScaleMatrix.setToIdentity();
 			m_glLeft2ScaleMatrix.translate (
 				-1.0f,
@@ -2623,13 +2646,14 @@ void GLScope::applyConfig()
 				(float) 2*(leftMargin-1) / (float) width(),
 				(float) -2*scopeHeight / (float) height()
 			);
-
+#ifdef GL_DEPRECATED
 			m_glBot2ScaleRect = QRectF(
 				(float) leftMargin / (float) width(),
 				(float) (scopeHeight + topMargin + 1) / (float) height(),
 				(float) scopeWidth / (float) width(),
 				(float) (botMargin - 1) / (float) height()
 			);
+#endif
 			m_glBot2ScaleMatrix.setToIdentity();
 			m_glBot2ScaleMatrix.translate (
 				-1.0f + ((float) 2*leftMargin / (float) width()),
@@ -2666,7 +2690,7 @@ void GLScope::applyConfig()
 					}
 				}
 			}
-
+#ifdef GL_DEPRECATED
 			if (m_left2ScaleTextureAllocated)
 				deleteTexture(m_left2ScaleTextureAllocated);
 			m_left2ScaleTexture = bindTexture(m_left2ScalePixmap,
@@ -2675,7 +2699,7 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left2ScaleTextureAllocated = true;
-
+#endif
 			m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
 
 		} // Y2 scale
@@ -2716,7 +2740,7 @@ void GLScope::applyConfig()
 					}
 				}
 			}
-
+#ifdef GL_DEPRECATED
 			if (m_bot2ScaleTextureAllocated)
 				deleteTexture(m_bot2ScaleTexture);
 			m_bot2ScaleTexture = bindTexture(m_bot2ScalePixmap,
@@ -2725,7 +2749,7 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_bot2ScaleTextureAllocated = true;
-
+#endif
 			m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
 
 		} // X2 scale
