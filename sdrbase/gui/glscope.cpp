@@ -220,6 +220,9 @@ void GLScope::initializeGL()
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeft1Scale.initializeGL();
 	m_glShaderBottom1Scale.initializeGL();
+	m_glShaderLeft2Scale.initializeGL();
+	m_glShaderBottom2Scale.initializeGL();
+	m_glShaderPowerOverlay.initializeGL();
 }
 
 void GLScope::resizeGL(int width, int height)
@@ -348,15 +351,9 @@ void GLScope::paintGL()
 				}
 			}
 
-			if (m_mode == ModeIQPolar) {
-				QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
-				m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
-			}
-			else
-			{
-				QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
-				m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
-			}
+			float blue = (m_mode == ModeIQPolar ? 0.25f : 1.0f);
+			QVector4D color(1.0f, 1.0f, blue, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
 		}
 #endif
 
@@ -642,7 +639,7 @@ void GLScope::paintGL()
 				float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1);
 				float rectH = -(m_glScopeRect1.height() / 2.0f) * m_amp1;
 
-				QVector4D color(1.0f, 1.0f, 0.25f, 0.4f);
+				QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
 				QMatrix4x4 mat;
 				mat.setToIdentity();
 				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
@@ -672,20 +669,6 @@ void GLScope::paintGL()
 			// Paint trace 2 (Q) over
 			if (m_displayTrace->size() > 0)
 			{
-				glPushMatrix();
-				glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
-				glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp2, 1);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glLineWidth(1.0f);
-				glColor4f(0.25f, 1, 1, m_displayTraceIntensity / 100.0);
-				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
-				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
-				if(end - start < 2)
-					start--;
-				float posLimit = 1.0 / m_amp2;
-				float negLimit = -1.0 / m_amp2;
-
 #ifdef GL_DEPRECATED
 				glBegin(GL_LINE_STRIP);
 
@@ -702,6 +685,16 @@ void GLScope::paintGL()
 				glEnd();
 #else
 				{
+					int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+					int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
+
+					if(end - start < 2) {
+						start--;
+					}
+
+					float posLimit = 1.0 / m_amp2;
+					float negLimit = -1.0 / m_amp2;
+
 					GLfloat q3[2*(end - start)];
 
 					for(int i = start; i < end; i++)
@@ -714,33 +707,30 @@ void GLScope::paintGL()
 						q3[2*i] = i - start;
 						q3[2*i + 1] = v;
 					}
-#ifdef GL_ANDROID
-					glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-					glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glVertexPointer(2, GL_FLOAT, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+					float rectX = m_glScopeRect1.x();
+					float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
+					float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1);
+					float rectH = -(m_glScopeRect1.height() / 2.0f) * m_amp2;
+
+					QVector4D color(0.25f, 1.0f, 1.0f, m_displayTraceIntensity / 100.0);
+					QMatrix4x4 mat;
+					mat.setToIdentity();
+					mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+					mat.scale(2.0f * rectW, -2.0f * rectH);
+					m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
+
+//					glPushMatrix();
+//					glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0, 0);
+//					glScalef(m_glScopeRect1.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect1.height() / 2) * m_amp2, 1);
 				}
 #endif
-				glPopMatrix();
 			}
 
 			// Paint secondary grid
 			// draw rect around
-			glPushMatrix();
-			glTranslatef(m_glScopeRect1.x(), m_glScopeRect1.y(), 0);
-			glScalef(m_glScopeRect1.width(), m_glScopeRect1.height(), 1);
 			const ScaleEngine::TickList* tickList;
 			const ScaleEngine::Tick* tick;
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glLineWidth(1.0f);
-			glColor4f(0.25f, 1, 1, m_displayGridIntensity / 100.0);
 			// Horizontal Y2
 			tickList = &m_y2Scale.getTickList();
 #ifdef GL_DEPRECATED
@@ -774,24 +764,11 @@ void GLScope::paintGL()
 					}
 				}
 
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glVertexPointer(2, GL_FLOAT, 0, q3);
-				glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-				glDisableClientState(GL_VERTEX_ARRAY);
+				QVector4D color(0.25f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+				m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
 			}
 #endif
-			glPopMatrix();
-
 			// Paint secondary scale
-			glPushMatrix();
-			glTranslatef(m_glRight1ScaleRect.x(), m_glRight1ScaleRect.y(), 0);
-			glScalef(m_glRight1ScaleRect.width(), m_glRight1ScaleRect.height(), 1);
-			glBindTexture(GL_TEXTURE_2D, m_left2ScaleTexture);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glEnable(GL_TEXTURE_2D);
 #ifdef GL_DEPRECATED
 			glBegin(GL_QUADS);
 			glTexCoord2f(0, 1);
@@ -817,27 +794,10 @@ void GLScope::paintGL()
 			    		1, 0,
 			    		0, 0
 			    };
-#ifdef GL_ANDROID
-				glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-				glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-				glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-				glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-				glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-				glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glVertexPointer(2, GL_FLOAT, 0, vtx1);
-				glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-				glDisableClientState(GL_VERTEX_ARRAY);
-				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+				m_glShaderLeft2Scale.drawSurface(m_glRight1ScaleMatrix, tex1, vtx1, 4);
 			}
 #endif
-			glDisable(GL_TEXTURE_2D);
-			glPopMatrix();
 		}
 	} // Both displays or primary only
 
@@ -846,13 +806,6 @@ void GLScope::paintGL()
 	if ((m_displays == DisplayBoth) || (m_displays == DisplaySecondOnly))
 	{
 		// draw rect around
-		glPushMatrix();
-		glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y(), 0);
-		glScalef(m_glScopeRect2.width(), m_glScopeRect2.height(), 1);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, 0.5);
 #ifdef GL_DEPRECATED
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(1, 1);
@@ -868,28 +821,16 @@ void GLScope::paintGL()
 				0, 0,
 				1, 0
 			};
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINE_LOOP, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-		    glEnableClientState(GL_VERTEX_ARRAY);
-		    glVertexPointer(2, GL_FLOAT, 0, q3);
-		    glDrawArrays(GL_LINE_LOOP, 0, 4);
-		    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+			m_glShaderSimple.drawContour(m_glScopeMatrix2, color, q3, 4);
 		}
 #endif
-		glDisable(GL_BLEND);
 
 		// paint grid
 		const ScaleEngine::TickList* tickList;
 		const ScaleEngine::Tick* tick;
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glLineWidth(1.0f);
-		glColor4f(1, 1, 1, m_displayGridIntensity / 100.0);
+
 		// Horizontal Y2
 		tickList = &m_y2Scale.getTickList();
 #ifdef GL_DEPRECATED
@@ -922,19 +863,12 @@ void GLScope::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
 		}
 #endif
+
 		// Vertical X2
 		tickList = &m_x2Scale.getTickList();
 #ifdef GL_DEPRECATED
@@ -967,31 +901,13 @@ void GLScope::paintGL()
 					}
 				}
 			}
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, q3);
-			glDrawArrays(GL_LINES, 0, 2*effectiveTicks);
-			glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+			QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+			m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
 		}
 #endif
-		glPopMatrix();
 
 		// paint left #2 scale
-		glPushMatrix();
-		glTranslatef(m_glLeft2ScaleRect.x(), m_glLeft2ScaleRect.y(), 0);
-		glScalef(m_glLeft2ScaleRect.width(), m_glLeft2ScaleRect.height(), 1);
-		glBindTexture(GL_TEXTURE_2D, m_left2ScaleTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glEnable(GL_TEXTURE_2D);
 #ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -1017,38 +933,12 @@ void GLScope::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, vtx1);
-			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+			m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
 		}
 #endif
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
 
 		// paint bottom #2 scale
-		glPushMatrix();
-		glTranslatef(m_glBot2ScaleRect.x(), m_glBot2ScaleRect.y(), 0);
-		glScalef(m_glBot2ScaleRect.width(), m_glBot2ScaleRect.height(), 1);
-		glBindTexture(GL_TEXTURE_2D, m_bot2ScaleTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glEnable(GL_TEXTURE_2D);
 #ifdef GL_DEPRECATED
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 1);
@@ -1074,43 +964,16 @@ void GLScope::paintGL()
 		    		1, 0,
 		    		0, 0
 		    };
-#ifdef GL_ANDROID
-			glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-			glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-			glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-			glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, 0, vtx1);
-			glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+			m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
 		}
 #endif
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
 
 		// paint trigger level #2
-		if ((m_triggerChannel == ScopeVis::TriggerPhase) || (m_triggerChannel == ScopeVis::TriggerDPhase) || (m_triggerChannel == ScopeVis::TriggerChannelQ))
+		if ((m_triggerChannel == ScopeVis::TriggerPhase)
+				|| (m_triggerChannel == ScopeVis::TriggerDPhase)
+				|| (m_triggerChannel == ScopeVis::TriggerChannelQ))
 		{
-			glPushMatrix();
-			glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
-			glScalef(m_glScopeRect2.width(), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			//glEnable(GL_LINE_SMOOTH);
-			glLineWidth(1.0f);
-			glColor4f(0, 1, 0, 0.4);
-
-			float posLimit = 1.0 / m_amp2;
-			float negLimit = -1.0 / m_amp2;
-
 #ifdef GL_DEPRECATED
 			glBegin(GL_LINE_LOOP);
 			if ((m_triggerChannel == ScopeVis::TriggerChannelQ)
@@ -1125,51 +988,42 @@ void GLScope::paintGL()
 			}
 			glEnd();
 #else
-			if ((m_triggerChannel == ScopeVis::TriggerChannelQ)
-					|| (m_triggerChannel == ScopeVis::TriggerPhase)
-					|| (m_triggerChannel == ScopeVis::TriggerDPhase))
+			float posLimit = 1.0 / m_amp2;
+			float negLimit = -1.0 / m_amp2;
+
+			if ((m_triggerLevelDis2 > negLimit) && (m_triggerLevelDis2 < posLimit))
 			{
-				if ((m_triggerLevelDis2 > negLimit) && (m_triggerLevelDis2 < posLimit))
-				{
-					GLfloat q3[] {
-						0, m_triggerLevelDis2,
-						1, m_triggerLevelDis2
-					};
-#ifdef GL_ANDROID
-					glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-					glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-					glDrawArrays(GL_LINES, 0, 2);
-					glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-				    glEnableClientState(GL_VERTEX_ARRAY);
-				    glVertexPointer(2, GL_FLOAT, 0, q3);
-				    glDrawArrays(GL_LINES, 0, 2);
-				    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
-				}
+				GLfloat q3[] {
+					0, m_triggerLevelDis2,
+					1, m_triggerLevelDis2
+				};
+
+				float rectX = m_glScopeRect2.x();
+				float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+				float rectW = m_glScopeRect2.width();
+				float rectH = -(m_glScopeRect2.height() / 2.0f) * m_amp2;
+
+				QVector4D color(0.0f, 1.0f, 0.0f, 0.4f);
+				QMatrix4x4 mat;
+				mat.setToIdentity();
+				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+				mat.scale(2.0f * rectW, -2.0f * rectH);
+				m_glShaderSimple.drawSegments(mat, color, q3, 2);
 			}
 #endif
-			//glDisable(GL_LINE_SMOOTH);
-			glPopMatrix();
 		}
 
 		// paint trace #2
-		if(m_displayTrace->size() > 0) {
+		if(m_displayTrace->size() > 0)
+		{
 			if (m_mode == ModeIQPolar)
 			{
-				glPushMatrix();
-				glTranslatef(m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0, m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
-				glScalef(m_glScopeRect2.width() / 2, -(m_glScopeRect2.height() / 2), 1);
-
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glLineWidth(1.0f);
-				glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
-
 				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
-				if(end - start < 2)
+
+				if (end - start < 2) {
 					start--;
+				}
 
 #ifdef GL_DEPRECATED
 				glBegin(GL_LINE_STRIP);
@@ -1209,37 +1063,27 @@ void GLScope::paintGL()
 						q3[2*i] = x;
 						q3[2*i+1] = y;
 					}
-#ifdef GL_ANDROID
-					glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-					glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glVertexPointer(2, GL_FLOAT, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+					float rectX = m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0f;
+					float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+					float rectW = m_glScopeRect2.width() / 2.0f;
+					float rectH = -(m_glScopeRect2.height() / 2.0f);
+
+					QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+					QMatrix4x4 mat;
+					mat.setToIdentity();
+					mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+					mat.scale(2.0f * rectW, -2.0f * rectH);
+					m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
+
+//					glPushMatrix();
+//					glTranslatef(m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0, m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
+//					glScalef(m_glScopeRect2.width() / 2, -(m_glScopeRect2.height() / 2), 1);
 				}
 #endif
-				glPopMatrix();
 			}
 			else
 			{
-				glPushMatrix();
-				glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
-				glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//glEnable(GL_LINE_SMOOTH);
-				glLineWidth(1.0f);
-				glColor4f(1, 1, 0.25f, m_displayTraceIntensity / 100.0);
-				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
-				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
-				if(end - start < 2)
-					start--;
-				float posLimit = 1.0 / m_amp2;
-				float negLimit = -1.0 / m_amp2;
 #ifdef GL_DEPRECATED
 				glBegin(GL_LINE_STRIP);
 				for(int i = start; i < end; i++) {
@@ -1253,6 +1097,16 @@ void GLScope::paintGL()
 				glEnd();
 #else
 				{
+					int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
+					int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
+
+					if (end - start < 2) {
+						start--;
+					}
+
+					float posLimit = 1.0 / m_amp2;
+					float negLimit = -1.0 / m_amp2;
+
 					GLfloat q3[2*(end - start)];
 
 					for(int i = start; i < end; i++) {
@@ -1265,21 +1119,24 @@ void GLScope::paintGL()
 						q3[2*i] = i - start;
 						q3[2*i+1] = v;
 					}
-#ifdef GL_ANDROID
-					glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-					glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-#else
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glVertexPointer(2, GL_FLOAT, 0, q3);
-					glDrawArrays(GL_LINE_STRIP, 0, end - start);
-					glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+
+					float rectX = m_glScopeRect2.x();
+					float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+					float rectW = m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1);
+					float rectH = -(m_glScopeRect2.height() / 2.0f) * m_amp2;
+
+					QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+					QMatrix4x4 mat;
+					mat.setToIdentity();
+					mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+					mat.scale(2.0f * rectW, -2.0f * rectH);
+					m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
+
+//					glPushMatrix();
+//					glTranslatef(m_glScopeRect2.x(), m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0, 0);
+//					glScalef(m_glScopeRect2.width() * (float)m_timeBase / (float)(m_displayTrace->size() - 1), -(m_glScopeRect2.height() / 2) * m_amp2, 1);
 				}
 #endif
-				//glDisable(GL_LINE_SMOOTH);
-				glPopMatrix();
 			}
 		}
 	} // Both displays or secondary display only
@@ -1529,20 +1386,8 @@ void GLScope::drawPowerOverlay()
 		QGLContext::MipmapBindOption);
 	m_powerOverlayTextureAllocated1 = true;
 
-	float shiftX = m_glScopeRect1.width() - ((rect.width() + 4.0f) / width());
-	float shiftY = 6.0f / height();
+	m_glShaderPowerOverlay.initTexture(m_powerOverlayPixmap1.toImage());
 
-	glPushMatrix();
-
-	glTranslatef(m_glScopeRect1.x() + shiftX, m_glScopeRect1.y(), 0);
-	glScalef(rect.width() / (float) width(), rect.height() / (float) height(), 1);
-
-	glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glEnable(GL_TEXTURE_2D);
 #ifdef GL_DEPRECATED
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 1);
@@ -1568,28 +1413,43 @@ void GLScope::drawPowerOverlay()
 	    		1, 0,
 	    		0, 0
 	    };
-#ifdef GL_ANDROID
-		glEnableVertexAttribArray(GL_VERTEX_ARRAY);
-		glEnableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-		glVertexAttribPointer(GL_VERTEX_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, vtx1);
-		glVertexAttribPointer(GL_TEXTURE_COORD_ARRAY, 2, GL_FLOAT, GL_FALSE, 0, tex1);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-		glDisableVertexAttribArray(GL_VERTEX_ARRAY);
-		glDisableVertexAttribArray(GL_TEXTURE_COORD_ARRAY);
-#else
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, vtx1);
-		glTexCoordPointer(2, GL_FLOAT, 0, tex1);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
+
+		float shiftX = m_glScopeRect1.width() - ((rect.width() + 4.0f) / width());
+		float rectX = m_glScopeRect1.x() + shiftX;
+		float rectY = 0;
+		float rectW = rect.width() / (float) width();
+		float rectH = rect.height() / (float) height();
+
+		QMatrix4x4 mat;
+		mat.setToIdentity();
+		mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+		mat.scale(2.0f * rectW, -2.0f * rectH);
+		m_glShaderPowerOverlay.drawSurface(mat, tex1, vtx1, 4);
+
+//		glPushMatrix();
+//
+//		glTranslatef(m_glScopeRect1.x() + shiftX, m_glScopeRect1.y(), 0);
+//		glScalef(rect.width() / (float) width(), rect.height() / (float) height(), 1);
+//
+//		glBindTexture(GL_TEXTURE_2D, m_powerOverlayTexture1);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//		glEnable(GL_TEXTURE_2D);
+//
+//		glEnableClientState(GL_VERTEX_ARRAY);
+//		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+//		glVertexPointer(2, GL_FLOAT, 0, vtx1);
+//		glTexCoordPointer(2, GL_FLOAT, 0, tex1);
+//		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+//		glDisableClientState(GL_VERTEX_ARRAY);
+//		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+//		glDisable(GL_TEXTURE_2D);
+//
+//		glPopMatrix();
 	}
 #endif
-	glDisable(GL_TEXTURE_2D);
-
-	glPopMatrix();
 }
 
 void GLScope::applyConfig()
@@ -2016,6 +1876,9 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left2ScaleTextureAllocated = true;
+
+				m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+
 			} // Y2 scale
 			{ // X2 scale
 				if (m_mode == ModeIQPolar)
@@ -2063,6 +1926,9 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot2ScaleTextureAllocated = true;
+
+				m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
+
 			} // X2 scale
 		}
 		else // Horizontal
@@ -2385,6 +2251,9 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_left2ScaleTextureAllocated = true;
+
+				m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+
 			} // Y2 scale
 			{ // X2 scale
 				if (m_mode == ModeIQPolar)
@@ -2432,6 +2301,9 @@ void GLScope::applyConfig()
 					QGLContext::LinearFilteringBindOption |
 					QGLContext::MipmapBindOption);
 				m_bot2ScaleTextureAllocated = true;
+
+				m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
+
 			} // X2 scale
 		}
 	} // Both displays
@@ -2618,6 +2490,9 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left2ScaleTextureAllocated = true;
+
+			m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+
 		} // Y2 scale
 		{ // X1 scale
 			m_x1Scale.setSize(scopeWidth);
@@ -2800,6 +2675,9 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_left2ScaleTextureAllocated = true;
+
+			m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+
 		} // Y2 scale
 		{ // X2 scale
 			if (m_mode == ModeIQPolar)
@@ -2847,6 +2725,9 @@ void GLScope::applyConfig()
 				QGLContext::LinearFilteringBindOption |
 				QGLContext::MipmapBindOption);
 			m_bot2ScaleTextureAllocated = true;
+
+			m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
+
 		} // X2 scale
 	} // Secondary display only
 }

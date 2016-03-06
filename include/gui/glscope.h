@@ -186,6 +186,9 @@ private:
 	GLShaderSimple m_glShaderSimple;
 	GLShaderTextured m_glShaderLeft1Scale;
 	GLShaderTextured m_glShaderBottom1Scale;
+	GLShaderTextured m_glShaderLeft2Scale;
+	GLShaderTextured m_glShaderBottom2Scale;
+	GLShaderTextured m_glShaderPowerOverlay;
 
 	void initializeGL();
 	void resizeGL(int width, int height);
