@@ -6,6 +6,13 @@
 
 #include <QDebug>
 
+#ifndef LINUX
+inline double log2f(double n)
+{
+	return log(n) / log(2.0);
+}
+#endif
+
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 
 const uint ScopeVis::m_traceChunkSize = 4800;

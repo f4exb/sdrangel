@@ -5,8 +5,8 @@
 
 #define MAX_FFT_SIZE 4096
 
-#ifdef _WIN32
-double log2f(double n)
+#ifndef LINUX
+inline double log2f(double n)
 {
 	return log(n) / log(2.0);
 }

@@ -4,7 +4,7 @@
 #
 #--------------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,17 +12,8 @@ TARGET = sdrangel
 TEMPLATE = app
 INCLUDEPATH += $$PWD/include
 
-CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtGui
-CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtMultimedia
-CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGL
-CONFIG(ANDROID):INCLUDEPATH += /opt/install/Qt/5.5/android_armv7/include/QtOpenGLExtensions
-#INCLUDEPATH += $$(BOOST_PATH)
 CONFIG(ANDROID):INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
-CONFIG(ANDROID):INCLUDEPATH += /opt/install/android-ndk-r10e/platforms/android-21/arch-arm/usr/include
-
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_55_0"
-CONFIG(MINGW32):QT += multimedia
-CONFIG(MINGW32):QT += opengl
 
 SOURCES += main.cpp\
         sdrbase/mainwindow.cpp\

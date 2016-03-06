@@ -14,6 +14,8 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+add_definitions(-DLINUX) # for compatibility with Android and Windows builds with QtCretino
+
 option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
 option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
 option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
