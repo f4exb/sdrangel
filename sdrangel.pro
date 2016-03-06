@@ -184,5 +184,7 @@ FORMS    += sdrbase/mainwindow.ui\
         plugins/channel/bfm/bfmdemodgui.ui\
         plugins/channel/am/amdemodgui.ui
 
+RESOURCES = sdrbase/resources/res.qrc
+
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
