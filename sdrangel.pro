@@ -12,6 +12,8 @@ TARGET = sdrangel
 TEMPLATE = app
 INCLUDEPATH += $$PWD/include
 
+DEFINES += USE_KISSFFT=1
+
 CONFIG(ANDROID):INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_55_0"
 
@@ -29,6 +31,7 @@ SOURCES += main.cpp\
         sdrbase/dsp/dspengine.cpp\
         sdrbase/dsp/dspdeviceengine.cpp\
         sdrbase/dsp/fftengine.cpp\
+        sdrbase/dsp/kissengine.cpp\
         sdrbase/dsp/fftfilt.cxx\
         sdrbase/dsp/fftwindow.cpp\
         sdrbase/dsp/filterrc.cpp\
