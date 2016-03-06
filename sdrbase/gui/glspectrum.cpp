@@ -509,6 +509,10 @@ void GLSpectrum::initializeGL()
 	}
 
 	connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
+
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
+	glFunctions->initializeOpenGLFunctions();
+
 	//glDisable(GL_DEPTH_TEST);
 	m_glShaderSimple.initializeGL();
 	m_glShaderLeftScale.initializeGL();
@@ -519,8 +523,8 @@ void GLSpectrum::initializeGL()
 
 void GLSpectrum::resizeGL(int width, int height)
 {
-	glViewport(0, 0, width, height);
-
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
+	glFunctions->glViewport(0, 0, width, height);
 	m_changesPending = true;
 }
 
@@ -554,8 +558,9 @@ void GLSpectrum::paintGL()
 	glScalef(2.0, -2.0, 1.0);
 	glTranslatef(-0.50, -0.5, 0);
 #endif
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
+	glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
 	// paint waterfall
 	if (m_displayWaterfall)
@@ -2274,11 +2279,11 @@ void GLSpectrum::connectTimer(const QTimer& timer)
 
 void GLSpectrum::cleanup()
 {
-	makeCurrent();
+	//makeCurrent();
 	m_glShaderSimple.cleanup();
 	m_glShaderFrequencyScale.cleanup();
 	m_glShaderHistogram.cleanup();
 	m_glShaderLeftScale.cleanup();
 	m_glShaderWaterfall.cleanup();
-    doneCurrent();
+    //doneCurrent();
 }

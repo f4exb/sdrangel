@@ -23,6 +23,7 @@
 
 #include <QString>
 #include <QOpenGLTexture>
+#include <QOpenGLFunctions>
 
 class QOpenGLShaderProgram;
 class QMatrix4x4;
