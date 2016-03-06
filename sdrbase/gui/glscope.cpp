@@ -92,7 +92,10 @@ GLScope::GLScope(QWidget* parent) :
 
 GLScope::~GLScope()
 {
-	if(m_dspEngine != NULL) {
+	cleanup();
+
+	if(m_dspEngine != 0)
+	{
 		m_dspEngine->removeSink(m_scopeVis);
 		delete m_scopeVis;
 	}
