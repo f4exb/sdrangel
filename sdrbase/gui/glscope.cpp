@@ -1839,7 +1839,7 @@ void GLScope::applyConfig()
 
 			m_glRight1ScaleMatrix.setToIdentity();
 			m_glRight1ScaleMatrix.translate (
-				-1.0f + ((float) (2*width() - leftMargin) / (float) width()),
+				-1.0f + ((float) 2*(width() - leftMargin) / (float) width()),
 				 1.0f - ((float) 2*topMargin / (float) height())
 			);
 			m_glRight1ScaleMatrix.scale (
