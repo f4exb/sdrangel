@@ -287,7 +287,7 @@ void HackRFGui::updateHardware()
 	m_updateTimer.stop();
 }
 
-unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 6400, 9600, 12800, 19200};
+unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200};
 
 unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {
