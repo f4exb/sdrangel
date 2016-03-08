@@ -5,7 +5,6 @@
 #include "ui_amdemodgui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
-#include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
