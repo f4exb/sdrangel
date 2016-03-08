@@ -103,8 +103,8 @@ void GLShaderSimple::cleanup()
 }
 
 const QString GLShaderSimple::m_vertexShaderSourceSimple = QString(
-		"uniform mat4 uMatrix;\n"
-		"attribute vec4 vertex;\n"
+		"uniform highp mat4 uMatrix;\n"
+		"attribute highp vec4 vertex;\n"
 		"void main() {\n"
 		"    gl_Position = uMatrix * vertex;\n"
 		"}\n"

@@ -125,10 +125,10 @@ void GLShaderTextured::cleanup()
 }
 
 const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
-		"uniform mat4 uMatrix;\n"
-		"attribute vec4 vertex;\n"
-		"attribute vec2 texCoord;\n"
-		"varying vec2 texCoordVar;\n"
+		"uniform highp mat4 uMatrix;\n"
+		"attribute highp vec4 vertex;\n"
+		"attribute highp vec2 texCoord;\n"
+		"varying mediump vec2 texCoordVar;\n"
 		"void main() {\n"
 		"    gl_Position = uMatrix * vertex;\n"
 		"    texCoordVar = texCoord;\n"
@@ -136,8 +136,8 @@ const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
 		);
 
 const QString GLShaderTextured::m_fragmentShaderSourceTextured = QString(
-		"uniform sampler2D uTexture;\n"
-		"varying vec2 texCoordVar;\n"
+		"uniform lowp sampler2D uTexture;\n"
+		"varying mediump vec2 texCoordVar;\n"
 		"void main() {\n"
 		"    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
 		"}\n"
