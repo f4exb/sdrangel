@@ -155,89 +155,89 @@ set(sdrbase_SOURCES
 )
 
 set(sdrbase_HEADERS
-	include/mainwindow.h
+	sdrbase/mainwindow.h
 
-	include/audio/audiodeviceinfo.h
-	include/audio/audiofifo.h
-	include/audio/audiooutput.h
+	sdrbase/audio/audiodeviceinfo.h
+	sdrbase/audio/audiofifo.h
+	sdrbase/audio/audiooutput.h
 
-	include/dsp/afsquelch.h
-	include/dsp/channelizer.h
-	include/dsp/channelmarker.h
-	include/dsp/complex.h
-	include/dsp/decimators.h
-	include/dsp/dspcommands.h
-	include/dsp/dspengine.h
-	include/dsp/dspdeviceengine.h
-	include/dsp/dsptypes.h
-	include/dsp/fftengine.h
-	include/dsp/fftfilt.h
-	include/dsp/fftwengine.h
-	include/dsp/fftwindow.h
-	include/dsp/filterrc.h
-	include/dsp/filesink.h
-	include/dsp/gfft.h
-	include/dsp/interpolator.h
-	include/dsp/inthalfbandfilter.h
-	include/dsp/kissfft.h
-	include/dsp/kissengine.h
-	include/dsp/lowpass.h
-	include/dsp/misc.h
-	include/dsp/movingaverage.h
-	include/dsp/nco.h
-	include/dsp/phasediscri.h
-	include/dsp/phaselock.h
+	sdrbase/dsp/afsquelch.h
+	sdrbase/dsp/channelizer.h
+	sdrbase/dsp/channelmarker.h
+	sdrbase/dsp/complex.h
+	sdrbase/dsp/decimators.h
+	sdrbase/dsp/dspcommands.h
+	sdrbase/dsp/dspengine.h
+	sdrbase/dsp/dspdeviceengine.h
+	sdrbase/dsp/dsptypes.h
+	sdrbase/dsp/fftengine.h
+	sdrbase/dsp/fftfilt.h
+	sdrbase/dsp/fftwengine.h
+	sdrbase/dsp/fftwindow.h
+	sdrbase/dsp/filterrc.h
+	sdrbase/dsp/filesink.h
+	sdrbase/dsp/gfft.h
+	sdrbase/dsp/interpolator.h
+	sdrbase/dsp/inthalfbandfilter.h
+	sdrbase/dsp/kissfft.h
+	sdrbase/dsp/kissengine.h
+	sdrbase/dsp/lowpass.h
+	sdrbase/dsp/misc.h
+	sdrbase/dsp/movingaverage.h
+	sdrbase/dsp/nco.h
+	sdrbase/dsp/phasediscri.h
+	sdrbase/dsp/phaselock.h
     sdrbase/dsp/pidcontroller.h
-	include/dsp/samplefifo.h
-	include/dsp/samplesink.h
-	include/dsp/nullsink.h
-	include/dsp/scopevis.h
-	include/dsp/spectrumvis.h
-	include/dsp/threadedsamplesink.h
+	sdrbase/dsp/samplefifo.h
+	sdrbase/dsp/samplesink.h
+	sdrbase/dsp/nullsink.h
+	sdrbase/dsp/scopevis.h
+	sdrbase/dsp/spectrumvis.h
+	sdrbase/dsp/threadedsamplesink.h
 
-	include/gui/aboutdialog.h
-	include/gui/addpresetdialog.h
-	include/gui/basicchannelsettingswidget.h
-	include/gui/buttonswitch.h
-	include/gui/channelwindow.h
-	include/gui/colormapper.h
-	include/gui/glscope.h
-	include/gui/glscopegui.h
-	include/gui/glshadersimple.h
-	include/gui/glshadertextured.h
-    include/gui/glspectrum.h
-	include/gui/glspectrumgui.h
-	include/gui/indicator.h
-	include/gui/physicalunit.h
-	include/gui/pluginsdialog.h
-	include/gui/preferencesdialog.h
-	include/gui/presetitem.h
-	include/gui/rollupwidget.h
-	include/gui/scale.h
-	include/gui/scaleengine.h
-	include/gui/valuedial.h
+	sdrbase/gui/aboutdialog.h
+	sdrbase/gui/addpresetdialog.h
+	sdrbase/gui/basicchannelsettingswidget.h
+	sdrbase/gui/buttonswitch.h
+	sdrbase/gui/channelwindow.h
+	sdrbase/gui/colormapper.h
+	sdrbase/gui/glscope.h
+	sdrbase/gui/glscopegui.h
+	sdrbase/gui/glshadersimple.h
+	sdrbase/gui/glshadertextured.h
+    sdrbase/gui/glspectrum.h
+	sdrbase/gui/glspectrumgui.h
+	sdrbase/gui/indicator.h
+	sdrbase/gui/physicalunit.h
+	sdrbase/gui/pluginsdialog.h
+	sdrbase/gui/preferencesdialog.h
+	sdrbase/gui/presetitem.h
+	sdrbase/gui/rollupwidget.h
+	sdrbase/gui/scale.h
+	sdrbase/gui/scaleengine.h
+	sdrbase/gui/valuedial.h
 
-	include/dsp/samplesource.h
+	sdrbase/dsp/samplesource.h
 
-	include/plugin/pluginapi.h
-	include/plugin/plugingui.h
-	include/plugin/plugininterface.h
-	include/plugin/pluginmanager.h
+	sdrbase/plugin/pluginapi.h
+	sdrbase/plugin/plugingui.h
+	sdrbase/plugin/plugininterface.h
+	sdrbase/plugin/pluginmanager.h
 
-	include/settings/preferences.h
-	include/settings/preset.h
-	include/settings/mainsettings.h
+	sdrbase/settings/preferences.h
+	sdrbase/settings/preset.h
+	sdrbase/settings/mainsettings.h
 
-	include/util/CRC64.h
-    include/util/db.h
-	include/util/export.h
-	include/util/message.h
-	include/util/messagequeue.h
-	include/util/prettyprint.h
-	include/util/syncmessenger.h
-	include/util/samplesourceserializer.h
-	include/util/simpleserializer.h
-	#include/util/spinlock.h
+	sdrbase/util/CRC64.h
+    sdrbase/util/db.h
+	sdrbase/util/export.h
+	sdrbase/util/message.h
+	sdrbase/util/messagequeue.h
+	sdrbase/util/prettyprint.h
+	sdrbase/util/syncmessenger.h
+	sdrbase/util/samplesourceserializer.h
+	sdrbase/util/simpleserializer.h
+	#sdrbase/util/spinlock.h
 )
 
 set(sdrbase_SOURCES
@@ -268,7 +268,7 @@ if(FFTW3F_FOUND)
 	)
 	set(sdrbase_HEADERS
 		${sdrbase_HEADERS}
-		include/dsp/fftwengine.h
+		sdrbase/dsp/fftwengine.h
 	)
 	add_definitions(-DUSE_FFTW)
 	include_directories(${FFTW3F_INCLUDE_DIRS})
@@ -276,11 +276,11 @@ else(FFTW3F_FOUND)
 	set(sdrbase_SOURCES
 		${sdrbase_SOURCES}
 		sdrbase/dsp/kissengine.cpp
-		include/dsp/kissfft.h
+		sdrbase/dsp/kissfft.h
 	)
 	set(sdrbase_HEADERS
 		${sdrbase_HEADERS}
-		include/dsp/kissengine.h
+		sdrbase/dsp/kissengine.h
 	)
 	add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
@@ -319,8 +319,7 @@ qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_SOURCE_DIR}/sdrbase
 	${OPENGL_INCLUDE_DIR}
 )
 
@@ -341,7 +340,7 @@ endif()
 ##############################################################################
 
 set(sdrangel_SOURCES
-	main.cpp
+	app/main.cpp
 )
 
 if(WIN32)
