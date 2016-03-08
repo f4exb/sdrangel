@@ -13,8 +13,8 @@ TARGET = inputfilesource
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 
-CONFIG(release): build_subdir = release
-CONFIG(debug): build_subdir = debug
+CONFIG(Release):build_subdir = release
+CONFIG(Debug):build_subdir = debug
 
 SOURCES += filesourcegui.cpp\
 	filesourceinput.cpp\

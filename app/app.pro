@@ -11,8 +11,8 @@ TEMPLATE = app
 TARGET = sdrangel
 INCLUDEPATH += $$PWD/../sdrbase
 
-CONFIG(release): build_subdir = release
-CONFIG(debug): build_subdir = debug
+CONFIG(Release):build_subdir = release
+CONFIG(Debug):build_subdir = debug
 
 SOURCES += main.cpp
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
