@@ -479,8 +479,8 @@ void GLScope::paintGL()
 					else if(v < negLimit)
 						v = negLimit;
 
-					q3[2*i] = i - start;
-					q3[2*i + 1] = v;
+					q3[2*(i-start)] = i - start;
+					q3[2*(i-start) + 1] = v;
 
 					if ((m_mode == ModeMagdBPha) || (m_mode == ModeMagdBDPha))
 					{
@@ -555,8 +555,8 @@ void GLScope::paintGL()
 							v = posLimit;
 						else if(v < negLimit)
 							v = negLimit;
-						q3[2*i] = i - start;
-						q3[2*i + 1] = v;
+						q3[2*(i-start)] = i - start;
+						q3[2*(i-start) + 1] = v;
 					}
 
 					float rectX = m_glScopeRect1.x();
@@ -782,8 +782,8 @@ void GLScope::paintGL()
 							y = 1.0f;
 						else if(y < -1.0f)
 							y = -1.0f;
-						q3[2*i] = x;
-						q3[2*i+1] = y;
+						q3[2*(i-start)] = x;
+						q3[2*(i-start)+1] = y;
 					}
 
 					float rectX = m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0f;
@@ -825,8 +825,8 @@ void GLScope::paintGL()
 						else if(v < negLimit)
 							v = negLimit;
 
-						q3[2*i] = i - start;
-						q3[2*i+1] = v;
+						q3[2*(i-start)] = i - start;
+						q3[2*(i-start)+1] = v;
 					}
 
 					float rectX = m_glScopeRect2.x();
@@ -2187,4 +2187,3 @@ void GLScope::cleanup()
 	m_glShaderPowerOverlay.cleanup();
     //doneCurrent();
 }
-
