@@ -7,7 +7,9 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += plugins/samplesource/filesource
-SUBDIRS += plugins/channel/am
+SUBDIRS += plugins/samplesource/sdrdaemon
+SUBDIRS += plugins/channel/demodam
+SUBDIRS += plugins/channel/chanalyzer
 
 # Main app must be last
 CONFIG += ordered

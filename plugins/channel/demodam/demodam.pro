@@ -29,6 +29,3 @@ FORMS += amdemodgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 
 RESOURCES = ../../../sdrbase/resources/res.qrc
-
-target.path = ../../../dist/$${build_subdir}/plugins/channel
-CONFIG(MINGW32):INSTALLS += target
