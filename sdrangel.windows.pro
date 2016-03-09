@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += plugins/samplesource/filesource
-SUBDIRS += plugins/samplesource/sdrdaemon
+#SUBDIRS += plugins/samplesource/sdrdaemon
 SUBDIRS += plugins/channel/demodam
 SUBDIRS += plugins/channel/chanalyzer
 

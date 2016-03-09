@@ -14,7 +14,7 @@ INCLUDEPATH += $$PWD
 DEFINES += USE_KISSFFT=1
 
 CONFIG(ANDROID):INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_55_0"
+CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
 
 SOURCES += mainwindow.cpp\
         audio/audiodeviceinfo.cpp\
