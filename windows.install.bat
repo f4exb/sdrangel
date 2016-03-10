@@ -13,5 +13,5 @@ copy plugins\channel\demodssb\%1\demodssb.dll %2\plugins\channel
 copy plugins\channel\demodwfm\%1\demodwfm.dll %2\plugins\channel
 copy plugins\channel\tcpsrc\%1\tcpsrc.dll %2\plugins\channel
 copy plugins\channel\udpsrc\%1\udpsrc.dll %2\plugins\channel
-copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\sammplesource
-copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\sammplesource
+copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
+copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesource
