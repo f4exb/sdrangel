@@ -5,7 +5,6 @@
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
-#include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
