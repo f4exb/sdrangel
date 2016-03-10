@@ -16,6 +16,7 @@ SUBDIRS += plugins/channel/demodlora
 SUBDIRS += plugins/channel/demodnfm
 SUBDIRS += plugins/channel/demodssb
 SUBDIRS += plugins/channel/demodwfm
+SUBDIRS += plugins/channel/tcpsrc
 
 # Main app must be last
 CONFIG += ordered
