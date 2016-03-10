@@ -62,7 +62,7 @@ static const int LZ4HC_compressionLevel_default = 9;
 *  Common LZ4 definition
 **************************************/
 #define LZ4_COMMONDEFS_ONLY
-#include "lz4.c"
+#include "lz4core.c"
 
 
 /**************************************
