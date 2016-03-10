@@ -11,6 +11,7 @@ SUBDIRS += plugins/samplesource/filesource
 SUBDIRS += plugins/samplesource/sdrdaemon
 SUBDIRS += plugins/channel/demodam
 SUBDIRS += plugins/channel/chanalyzer
+SUBDIRS += plugins/channel/demodbfm
 
 # Main app must be last
 CONFIG += ordered
