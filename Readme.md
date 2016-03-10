@@ -188,8 +188,30 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
   - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
+  
+<h2>Windows</h2>
 
-<h1>Software installation</h1>
+This is new in version 1.1.3 and also experimental. Use at your own risk! It was tested successfully in native Windows 7 and 10 however it does not work in a Virtualbox guest supposedly because it implements OpenGL ES 2.0 instead of the desktop version (OpenGL 4.3) when running native and I think the OpenGL code in SDRangel is still mot quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
+
+There are no plugins to interface to SDR hardware directly you have either to use an IQ record file with the File input plugin or receive live samples with the SDRdaemon input plugin from a SDRdaemon utility running on a machine somewhere on the network. For example you can have an instance of SDRdaemon running on a Raspberry Pi that interfaces with a RTL-SDR dongle.
+
+The audio is quite choppy however the channel analyzer and the main spectrum display work correctly.
+
+You will have to use QtCreator and its environment for that purpose. Build was done with the `Desktop_Qt_5_5_1_MinGW_32bit` toolchain. Some other flavours might work. Please refer to Qt documentation for Qt Creator details. Basically you open the project by selecting the `sdrangel.windows.pro` file in the source root directory and run the `build` command from the menu. This will eventually produce the `sdrangel.exe` executable and dependent library and plugin DLLs in various parts of the build directory.
+
+Then comes the tedious part of packaging everything in a single place so that you will just have to click on `sdrangel.exe` in the file explorer to start. Please follow the next steps for this purpose.
+
+  - Make yourself an installation directory say `D:\Programs\sdrangel`
+  - Assume the build directory is `D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release` (assuming you compiled SDRangel for release)
+  - Assume the source directory is `D:\development\sdrangel`
+  - From the Qt group in the Windows start menu select the `Qt 5.5 for Desktop (Mingw...` console box
+  - In this console type: `bin\windeployqt.exe --dir D:\Programs\sdrangel D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release\app\release\sdrangel.exe D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release\sdrbase\release\sdrbase.dll`
+  - This copies all dependencies for Qt but alas nothing from our software so you will have to do this yourself. In the same console cd to the root of the build directory and type:
+    - `D:\development\sdrangel\windows.install.bat release D:\Programs\sdrangel`
+    - use `debug` in the place of `release` if you built the debug version
+
+
+<h1>Software installation on Linux flavours</h1>
 
 Simply do `make install` or `sudo make install` depending on you user rights on the target installation directory. On most systems the default installation directory is `/usr/local` a custom installation directory can be specified with the `-DCMAKE_INSTALL_PREFIX=...` option on the `cmake` command line as usual with cmake.
 
