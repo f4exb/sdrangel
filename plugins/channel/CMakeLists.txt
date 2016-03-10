@@ -1,13 +1,13 @@
 project(demod)
 
-add_subdirectory(lora)
+add_subdirectory(demodlora)
 add_subdirectory(demodam)
-add_subdirectory(bfm)
-add_subdirectory(nfm)
-add_subdirectory(ssb)
+add_subdirectory(demodbfm)
+add_subdirectory(demodnfm)
+add_subdirectory(demodssb)
 add_subdirectory(tcpsrc)
 add_subdirectory(udpsrc)
-add_subdirectory(wfm)
+add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 
 #add_subdirectory(tetra)

@@ -263,16 +263,21 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxplugin.h/cpp` : Plugin interface
         - `xxxsettings.h/cpp` : Configuration manager
         - `xxxthread.h/cpp` : Reading samples
+        - `xxx.pro` : Qt .pro file for Windows/Android build        
     - `channel`: Channel handlers:
-      - `xxx` : Demodulator internal handler (e.g xxx = am)
+      - `demodxxx` : Demodulator internal handler (e.g xxx = demodam)
         - `xxxdemod.h/cpp` : Demodulator core
         - `xxxdemodgui.h/cpp` : Demodulator GUI
         - `xxxplugin.h/cpp` : Plugin interface
+        - `demodxxx.pro` : Qt .pro file for Windows/Android build
       - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
         - `xxxanalyzer.h/cpp` : Analyzer core
         - `xxxanalyzergui.h/cpp` : Analyzer GUI
         - `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
+        - `xxxanalyzer.pro` : Qt .pro file for Windows/Android build
       - `xxxsrc` : Interface to the outside (e.g xxx = udp):
         - `xxxsrc.h/cpp` : Inteface core
         - `xxxsrcgui.h/cpp` : Interface GUI
         - `xxxsrcplugin/h/cpp` : Interface plugin manager
+        - `xxxsrc.pro` : Qt .pro file for Windows/Android build
+        
