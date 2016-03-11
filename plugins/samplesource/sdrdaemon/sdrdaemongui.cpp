@@ -50,7 +50,8 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_address("127.0.0.1"),
 	m_port(9090),
 	m_dcBlock(false),
-	m_iqCorrection(false)
+	m_iqCorrection(false),
+	m_autoFollowRate(false)
 {
 	m_startingTimeStamp.tv_sec = 0;
 	m_startingTimeStamp.tv_usec = 0;
@@ -94,6 +95,7 @@ void SDRdaemonGui::resetToDefaults()
 	m_port = 9090;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+	m_autoFollowRate = false;
 	displaySettings();
 }
 
@@ -112,6 +114,7 @@ QByteArray SDRdaemonGui::serialize() const
 	s.writeU32(2, uintval);
 	s.writeBool(3, m_dcBlock);
 	s.writeBool(4, m_iqCorrection);
+	s.writeBool(5, m_autoFollowRate);
 
 	return s.final();
 }
@@ -124,6 +127,7 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 	quint16 port;
 	bool dcBlock;
 	bool iqCorrection;
+	bool autoFollowRate;
 
 	if (!d.isValid())
 	{
@@ -146,6 +150,7 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 
 		d.readBool(3, &dcBlock, false);
 		d.readBool(4, &iqCorrection, false);
+		d.readBool(5, &autoFollowRate, false);
 
 		if ((address != m_address) || (port != m_port))
 		{
@@ -159,6 +164,11 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 			m_dcBlock = dcBlock;
 			m_iqCorrection = iqCorrection;
 			configureAutoCorrections();
+		}
+
+		if (m_autoFollowRate != autoFollowRate) {
+			m_autoFollowRate = autoFollowRate;
+			configureAutoFollowRate();
 		}
 
 		displaySettings();
@@ -248,6 +258,7 @@ void SDRdaemonGui::displaySettings()
 	ui->port->setText(QString::number(m_port));
 	ui->dcOffset->setChecked(m_dcBlock);
 	ui->iqImbalance->setChecked(m_iqCorrection);
+	ui->autoFollowRate->setChecked(m_autoFollowRate);
 }
 
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
@@ -297,6 +308,14 @@ void SDRdaemonGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
+void SDRdaemonGui::on_autoFollowRate_toggled(bool checked)
+{
+	if (m_autoFollowRate != checked) {
+		m_autoFollowRate = checked;
+		configureAutoFollowRate();
+	}
+}
+
 void SDRdaemonGui::configureUDPLink()
 {
 	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_address.toStdString().c_str()
@@ -309,6 +328,12 @@ void SDRdaemonGui::configureUDPLink()
 void SDRdaemonGui::configureAutoCorrections()
 {
 	SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
+	m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void SDRdaemonGui::configureAutoFollowRate()
+{
+	SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate::create(m_autoFollowRate);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 

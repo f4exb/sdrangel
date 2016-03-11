@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SDRdaemonGui</class>
  <widget class="QWidget" name="SDRdaemonGui">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>398</width>
+    <height>156</height>
+   </rect>
+  </property>
   <property name="minimumSize">
    <size>
     <width>340</width>
@@ -169,23 +177,6 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
-      <widget class="QToolButton" name="streamLocked">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Stream locked status i.e. synced with meta data</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="frameSizeText">
        <property name="minimumSize">
         <size>
@@ -302,6 +293,16 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="ButtonSwitch" name="autoFollowRate">
+       <property name="toolTip">
+        <string>Follow stream sample rate automatically</string>
+       </property>
+       <property name="text">
+        <string>Auto</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -327,6 +328,23 @@
        <property name="icon">
         <iconset resource="../../../sdrbase/resources/res.qrc">
          <normaloff>:/compressed.png</normaloff>:/compressed.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="streamLocked">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Stream locked status i.e. synced with meta data</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
        </property>
       </widget>
      </item>

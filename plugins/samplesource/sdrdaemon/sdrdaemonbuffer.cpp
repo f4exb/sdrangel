@@ -55,7 +55,8 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t rateDivider) :
 	m_readCycles(0),
 	m_lastWriteIndex(0),
 	m_skewRateSum(0.0),
-	m_skewRate(0.0)
+	m_skewRate(0.0),
+	m_autoFollowRate(false)
 {
 	m_currentMeta.init();
 }
@@ -113,17 +114,24 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
 			int sampleRate = metaData->m_sampleRate;
 
-			if (sampleRate != m_sampleRateStream)
+			if (m_autoFollowRate)
 			{
-				m_sampleRateStream = sampleRate;
+				if (sampleRate != m_sampleRateStream)
+				{
+					m_sampleRateStream = sampleRate;
+				}
+				else
+				{
+					sampleRate = m_sampleRate;
+				}
+
+				sampleRate += sampleRate * m_skewRate;
+				sampleRate = (sampleRate / m_rateDivider) * m_rateDivider;
 			}
 			else
 			{
-				sampleRate = m_sampleRate;
+				m_sampleRateStream = sampleRate;
 			}
-
-			sampleRate += sampleRate * m_skewRate;
-			sampleRate = (sampleRate / m_rateDivider) * m_rateDivider;
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
@@ -268,7 +276,11 @@ uint8_t *SDRdaemonBuffer::readDataChunk()
 
 		//qDebug("SDRdaemonBuffer::readDataChunk: %d / %d (%lf)", m_writeIndex, m_rawSize, oneCycleSkew);
 
-		if (m_readCycles && ((m_writeIndex < m_rawSize / 10) || (m_rawSize - m_writeIndex < m_rawSize / 10)))
+		if (!m_autoFollowRate)
+		{
+			m_skewRate = 0.0;
+		}
+		else if (m_readCycles && ((m_writeIndex < m_rawSize / 10) || (m_rawSize - m_writeIndex < m_rawSize / 10)))
 		{
 			m_skewRate = m_skewRateSum / m_readCycles;
 			if (m_skewRate > 0.2) {

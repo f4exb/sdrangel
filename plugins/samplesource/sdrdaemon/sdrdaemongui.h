@@ -73,11 +73,13 @@ private:
 	quint16 m_port;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	bool m_autoFollowRate;
 
 	void displaySettings();
 	void displayTime();
 	void configureUDPLink();
 	void configureAutoCorrections();
+	void configureAutoFollowRate();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
@@ -87,6 +89,7 @@ private slots:
 	void on_applyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
+	void on_autoFollowRate_toggled(bool checked);
 	void on_address_textEdited(const QString& arg1);
 	void on_port_textEdited(const QString& arg1);
 	void tick();

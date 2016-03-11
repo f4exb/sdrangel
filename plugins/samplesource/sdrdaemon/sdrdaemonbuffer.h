@@ -77,6 +77,7 @@ public:
 	float getCompressionRatio() const { return (m_frameSize > 0 ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
 	uint32_t getLz4DataCRCOK() const { return m_nbLastLz4CRCOK; }
 	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
+	void setAutoFollowRate(bool autoFollowRate) { m_autoFollowRate = autoFollowRate; }
 
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;
@@ -127,6 +128,7 @@ private:
     uint32_t m_lastWriteIndex; //!< Write index at last skew estimation
     double   m_skewRateSum;
     double   m_skewRate;
+    bool     m_autoFollowRate; //!< Aito follow stream sample rate else stick with meta data sample rate
 };
 
 

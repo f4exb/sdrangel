@@ -30,6 +30,7 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
@@ -111,6 +112,13 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 		bool dcBlock = conf.getDCBlock();
 		bool iqImbalance = conf.getIQImbalance();
 		DSPEngine::instance()->configureCorrections(dcBlock, iqImbalance);
+		return true;
+	}
+	else if (MsgConfigureSDRdaemonAutoFollowRate::match(message))
+	{
+		MsgConfigureSDRdaemonAutoFollowRate& conf = (MsgConfigureSDRdaemonAutoFollowRate&) message;
+		bool autoFollowRate = conf.autoFollowRate();
+		m_SDRdaemonUDPHandler->setAutoFollowRate(autoFollowRate);
 		return true;
 	}
 	else if (MsgConfigureSDRdaemonWork::match(message))

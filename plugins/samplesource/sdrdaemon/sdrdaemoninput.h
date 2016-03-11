@@ -93,6 +93,26 @@ public:
 		{ }
 	};
 
+	class MsgConfigureSDRdaemonAutoFollowRate : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		bool autoFollowRate() const { return m_autoFollowRate; }
+
+		static MsgConfigureSDRdaemonAutoFollowRate* create(bool autoFollowRate)
+		{
+			return new MsgConfigureSDRdaemonAutoFollowRate(autoFollowRate);
+		}
+
+	private:
+		bool m_autoFollowRate;
+
+		MsgConfigureSDRdaemonAutoFollowRate(bool autoFollowRate) :
+			Message(),
+			m_autoFollowRate(autoFollowRate)
+		{ }
+	};
+
 	class MsgConfigureSDRdaemonStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
