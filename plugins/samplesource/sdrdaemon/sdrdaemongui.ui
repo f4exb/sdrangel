@@ -177,6 +177,16 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
+      <widget class="ButtonSwitch" name="autoFollowRate">
+       <property name="toolTip">
+        <string>Follow stream sample rate automatically</string>
+       </property>
+       <property name="text">
+        <string>Auto</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="frameSizeText">
        <property name="minimumSize">
         <size>
@@ -211,7 +221,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Nominal sample rate from stream data (kS/s)</string>
+        <string>Nominal sample rate from stream meta data (kS/s)</string>
        </property>
        <property name="text">
         <string>0000.00</string>
@@ -293,16 +303,6 @@
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="ButtonSwitch" name="autoFollowRate">
-       <property name="toolTip">
-        <string>Follow stream sample rate automatically</string>
-       </property>
-       <property name="text">
-        <string>Auto</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -314,23 +314,6 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="lz4Layout">
-     <item>
-      <widget class="QToolButton" name="lz4Compressed">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Stream is compressed with LZ4</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/compressed.png</normaloff>:/compressed.png</iconset>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QToolButton" name="streamLocked">
        <property name="enabled">
@@ -345,6 +328,23 @@
        <property name="icon">
         <iconset resource="../../../sdrbase/resources/res.qrc">
          <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="lz4Compressed">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Stream is compressed with LZ4</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/compressed.png</normaloff>:/compressed.png</iconset>
        </property>
       </widget>
      </item>
