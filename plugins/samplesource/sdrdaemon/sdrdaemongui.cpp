@@ -331,9 +331,9 @@ void SDRdaemonGui::updateWithStreamData()
 
 void SDRdaemonGui::updateWithStreamTime()
 {
-	quint64 startingTimeStampMsec = (m_startingTimeStamp.tv_sec * 1000) + (m_startingTimeStamp.tv_usec / 1000);
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-	QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
+    quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
 	if (m_syncLocked) {
