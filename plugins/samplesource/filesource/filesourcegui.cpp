@@ -192,8 +192,6 @@ void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 		int t_sec = (m_recordLength * value) / 100;
 		QTime t(0, 0, 0, 0);
 		t = t.addSecs(t_sec);
-		QString s_time = t.toString("hh:mm:ss");
-		ui->navTimeText->setText(s_time);
 
 		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
 		m_sampleSource->getInputMessageQueue()->push(message);
@@ -268,7 +266,6 @@ void FileSourceGui::updateWithStreamTime()
 	{
 		float posRatio = (float) t_sec / (float) m_recordLength;
 		ui->navTimeSlider->setValue((int) (posRatio * 100.0));
-		ui->navTimeText->setText(s_time);
 	}
 }
 
