@@ -54,22 +54,18 @@ void HackRFPlugin::initPlugin(PluginAPI* pluginAPI)
 
 PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
-	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
-	hackrf_device *hackrf_ptr;
-	read_partid_serialno_t read_partid_serialno;
-	hackrf_error rc;
-	int i;
-
-	rc = (hackrf_error) hackrf_init();
+	hackrf_error rc = (hackrf_error) hackrf_init();
 
 	if (rc != HACKRF_SUCCESS)
 	{
 		qCritical("HackRFPlugin::SampleSourceDevices: failed to initiate HackRF library: %s", hackrf_error_name(rc));
 	}
 
-
-
+	SampleSourceDevices result;
+	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
+	hackrf_device *hackrf_ptr;
+	read_partid_serialno_t read_partid_serialno;
+	int i;
 
 	for (i=0; i < hackrf_devices->devicecount; i++)
 	{
