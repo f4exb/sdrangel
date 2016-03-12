@@ -7,8 +7,10 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += lz4
+SUBDIRS += librtlsdr
 SUBDIRS += plugins/samplesource/filesource
 SUBDIRS += plugins/samplesource/sdrdaemon
+SUBDIRS += plugins/samplesource/rtlsdr
 SUBDIRS += plugins/channel/chanalyzer
 SUBDIRS += plugins/channel/demodam
 SUBDIRS += plugins/channel/demodbfm

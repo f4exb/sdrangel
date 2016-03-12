@@ -1,6 +1,9 @@
+SET libusbdir="D:\libusb-1.0.20\MinGW32"
+
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy lz4\%1\lz4.dll %2
+copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channel
 mkdir %2\plugins\samplesource
@@ -15,3 +18,4 @@ copy plugins\channel\tcpsrc\%1\tcpsrc.dll %2\plugins\channel
 copy plugins\channel\udpsrc\%1\udpsrc.dll %2\plugins\channel
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesource
+copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
