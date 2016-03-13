@@ -5,6 +5,7 @@ copy sdrbase\%1\sdrbase.dll %2
 copy lz4\%1\lz4.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
+copy libairspy\%1\libairspy.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channel
@@ -22,3 +23,4 @@ copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesou
 copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrf\%1\inputhackrf.dll %2\plugins\samplesource
+copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
