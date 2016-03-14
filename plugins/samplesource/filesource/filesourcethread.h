@@ -21,6 +21,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -39,6 +40,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
+    void setBuffer(int chunksize);
 	bool isRunning() const { return m_running; }
 	std::size_t getSamplesCount() const { return m_samplesCount; }
 	void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
@@ -58,7 +60,9 @@ private:
 	std::size_t m_samplesCount;
 
 	int m_samplerate;
-	static const int m_rateDivider;
+    int m_throttlems;
+    QElapsedTimer m_elapsedTimer;
+    bool m_throttleToggle;
 
 	void run();
 	//void decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len);

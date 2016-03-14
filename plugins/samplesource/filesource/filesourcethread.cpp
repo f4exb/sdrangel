@@ -22,8 +22,6 @@
 
 #include "filesourcethread.h"
 
-const int FileSourceThread::m_rateDivider = 1000/FILESOURCE_THROTTLE_MS;
-
 FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
@@ -33,7 +31,9 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleFifo* sam
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
-	m_samplerate(0)
+    m_samplerate(0),
+    m_throttlems(FILESOURCE_THROTTLE_MS),
+    m_throttleToggle(false)
 {
     assert(m_ifstream != 0);
 }
@@ -57,6 +57,7 @@ void FileSourceThread::startWork()
     {
         qDebug() << "FileSourceThread::startWork: file stream open, starting...";
         m_startWaitMutex.lock();
+        m_elapsedTimer.start();
         start();
         while(!m_running)
             m_startWaiter.wait(&m_startWaitMutex, 100);
@@ -88,22 +89,35 @@ void FileSourceThread::setSamplerate(int samplerate)
 		}
 
 		m_samplerate = samplerate;
-		m_chunksize = (m_samplerate / m_rateDivider)*4; // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
-		m_bufsize = m_chunksize;
+        // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
+        m_chunksize = (m_samplerate * 4 * m_throttlems) / 1000;
 
-		if (m_buf == 0)	{
-			qDebug() << "  - Allocate buffer";
-			m_buf = (quint8*) malloc(m_bufsize);
-		} else {
-			qDebug() << "  - Re-allocate buffer";
-			m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
-		}
-
-		qDebug() << "  - size: " << m_bufsize
-				<< " #samples: " << (m_bufsize/4);
+        setBuffer(m_chunksize);
 	}
 
 	//m_samplerate = samplerate;
+}
+
+void FileSourceThread::setBuffer(int chunksize)
+{
+    if (chunksize > m_bufsize)
+    {
+        m_bufsize = chunksize;
+
+        if (m_buf == 0)
+        {
+            qDebug() << "FileSourceThread::setBuffer: Allocate buffer";
+            m_buf = (quint8*) malloc(m_bufsize);
+        }
+        else
+        {
+            qDebug() << "FileSourceThread::setBuffer: Re-allocate buffer";
+            m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
+        }
+
+        qDebug() << "FileSourceThread::setBuffer: size: " << m_bufsize
+                << " #samples: " << (m_bufsize/4);
+    }
 }
 
 void FileSourceThread::run()
@@ -131,6 +145,16 @@ void FileSourceThread::tick()
 {
 	if (m_running)
 	{
+        qint64 throttlems = m_elapsedTimer.restart();
+
+        if (throttlems != m_throttlems)
+        {
+            m_throttlems = throttlems;
+            m_chunksize = (m_samplerate * 4 * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+            m_throttleToggle = !m_throttleToggle;
+            setBuffer(m_chunksize);
+        }
+
 		// read samples directly feeding the SampleFifo (no callback)
 		m_ifstream->read(reinterpret_cast<char*>(m_buf), m_chunksize);
         
