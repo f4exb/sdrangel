@@ -98,7 +98,7 @@ void FileSourceThread::setSamplerate(int samplerate)
 	//m_samplerate = samplerate;
 }
 
-void FileSourceThread::setBuffer(int chunksize)
+void FileSourceThread::setBuffer(std::size_t chunksize)
 {
     if (chunksize > m_bufsize)
     {

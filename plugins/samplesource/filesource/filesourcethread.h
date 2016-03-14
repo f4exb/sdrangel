@@ -40,7 +40,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
-    void setBuffer(int chunksize);
+    void setBuffer(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
 	std::size_t getSamplesCount() const { return m_samplesCount; }
 	void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
