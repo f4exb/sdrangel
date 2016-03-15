@@ -88,6 +88,10 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 {
 	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
 
+	if (rawSize < (1<<24)) {
+		rawSize = (1<<24);
+	}
+
 	if (rawSize != m_rawSize)
 	{
 		m_rawSize = rawSize;
