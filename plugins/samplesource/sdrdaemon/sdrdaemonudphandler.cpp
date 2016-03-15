@@ -43,7 +43,10 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_tickCount(0),
 	m_samplesCount(0),
 	m_timer(0),
-	m_throttlems(SDRDAEMON_THROTTLE_MS)
+    m_throttlems(SDRDAEMON_THROTTLE_MS),
+    m_readLengthSamples(0),
+    m_readLength(0),
+    m_throttleToggle(false)
 {
     m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
@@ -81,6 +84,7 @@ void SDRdaemonUDPHandler::start()
 	// Need to notify the DSP engine to actually start
 	DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
 	DSPEngine::instance()->getInputMessageQueue()->push(notif);
+    m_elapsedTimer.start();
 }
 
 void SDRdaemonUDPHandler::stop()
@@ -200,13 +204,20 @@ void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 
 void SDRdaemonUDPHandler::tick()
 {
-	// TOOD: auto throttling
-	uint32_t readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * m_throttlems) / 1000;
-	uint32_t readLength = readLengthSamples * SDRdaemonBuffer::m_iqSampleSize;
+    // auto throttling
+    int throttlems = m_elapsedTimer.restart();
+
+    if (throttlems != m_throttlems)
+    {
+        m_throttlems = throttlems;
+        m_readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+        m_readLength = m_readLengthSamples * SDRdaemonBuffer::m_iqSampleSize;
+        m_throttleToggle = !m_throttleToggle;
+    }
 
 	// read samples directly feeding the SampleFifo (no callback)
-	m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(readLength)), readLength);
-	m_samplesCount += readLengthSamples;
+    m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
+    m_samplesCount += m_readLengthSamples;
 
 	if (m_tickCount < m_rateDivider)
 	{

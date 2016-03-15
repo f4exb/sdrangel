@@ -65,6 +65,9 @@ private:
 	const QTimer *m_timer;
 	QElapsedTimer m_elapsedTimer;
 	int m_throttlems;
+    uint32_t m_readLengthSamples;
+    uint32_t m_readLength;
+    bool m_throttleToggle;
 
 	static const int m_rateDivider;
 
