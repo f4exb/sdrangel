@@ -56,7 +56,11 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_readIndex(0),
 	m_readSize(0),
 	m_readBuffer(0),
-	m_autoFollowRate(false)
+    m_autoFollowRate(false),
+    m_skewTest(false),
+    m_skewCorrection(false),
+    m_readCount(0),
+    m_writeCount(0)
 {
 	m_currentMeta.init();
 }
@@ -93,8 +97,7 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 		}
 
 		m_rawBuffer = new uint8_t[m_rawSize];
-		m_writeIndex = 0;
-		m_readIndex = m_rawSize / 2;
+        resetIndexes();
 
 		qDebug() << "SDRdaemonBuffer::updateBufferSize:"
 			<< " sampleRate: " << sampleRate
@@ -165,13 +168,20 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
 			int sampleRate = metaData->m_sampleRate;
 
-			if (sampleRate != m_sampleRateStream)
+            if (sampleRate != m_sampleRateStream) // change of nominal stream sample rate
 			{
 				updateBufferSize(sampleRate);
 				m_sampleRateStream = sampleRate;
 				m_sampleRate = sampleRate;
-				// TODO: auto skew rate compensation
 			}
+
+            // auto skew rate compensation
+            if (m_skewCorrection)
+            {
+                uint64_t newRate = (m_sampleRate * m_writeCount) / (m_readCount * m_iqSampleSize);
+                m_sampleRate = newRate * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
+                resetIndexes();
+            }
 
 			if (metaData->m_sampleBytes & 0x10)
 			{
@@ -222,6 +232,15 @@ void SDRdaemonBuffer::writeData(char *array, uint32_t length)
 
 uint8_t *SDRdaemonBuffer::readData(int32_t length)
 {
+    if (m_skewTest && ((m_readIndex + length) > (m_rawSize / 2)))
+    {
+        int dIndex = (m_readIndex - m_writeIndex > 0 ? m_readIndex - m_writeIndex : m_writeIndex - m_readIndex); // absolute delta
+        m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
+        m_skewTest = false;
+    }
+
+    m_readCount += length;
+
 	if (m_readIndex + length < m_rawSize)
 	{
 		uint32_t readIndex = m_readIndex;
@@ -232,6 +251,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
 	{
 		uint32_t readIndex = m_readIndex;
 		m_readIndex = 0;
+        m_skewTest = true;
 		return &m_rawBuffer[readIndex];
 	}
 	else
@@ -248,7 +268,8 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
 		length -= m_rawSize - m_readIndex;
 		std::memcpy((void *) &m_readBuffer[m_rawSize - m_readIndex], (const void *) m_rawBuffer, length);
 		m_readIndex = length;
-		return m_readBuffer;
+        m_skewTest = true;
+        return m_readBuffer;
 	}
 }
 
@@ -329,6 +350,18 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], length);
 		m_writeIndex = length;
 	}
+
+    m_writeCount += length;
+}
+
+void SDRdaemonBuffer::resetIndexes()
+{
+    m_writeIndex = 0;
+    m_readIndex = m_rawSize / 2;
+    m_readCount = 0;
+    m_writeCount = 0;
+    m_skewTest = false;
+    m_skewCorrection = false;
 }
 
 void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)

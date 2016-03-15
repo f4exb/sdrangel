@@ -92,6 +92,7 @@ private:
 	void writeDataLZ4(const char *array, uint32_t length);
 	void writeToRawBufferLZ4();
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
+    void resetIndexes();
 
     static void printMeta(const QString& header, MetaData *metaData);
 
@@ -129,7 +130,10 @@ private:
 	uint8_t  *m_readBuffer;  //!< Read buffer to hold samples when looping back to beginning of raw buffer
 
     bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate
-
+    bool     m_skewTest;
+    bool     m_skewCorrection; //!< Do a skew rate correction at next meta data reception
+    uint64_t m_readCount;
+    uint64_t m_writeCount;
 };
 
 

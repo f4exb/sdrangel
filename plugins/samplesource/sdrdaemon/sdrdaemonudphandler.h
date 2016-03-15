@@ -63,6 +63,7 @@ private:
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;
 	const QTimer *m_timer;
+
 	QElapsedTimer m_elapsedTimer;
 	int m_throttlems;
     uint32_t m_readLengthSamples;
