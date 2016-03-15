@@ -176,11 +176,18 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			}
 
             // auto skew rate compensation
-            if (m_skewCorrection)
+            if (m_autoFollowRate)
             {
-                uint64_t newRate = (m_sampleRate * m_writeCount) / (m_readCount * m_iqSampleSize);
-                m_sampleRate = newRate * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
-                resetIndexes();
+				if (m_skewCorrection)
+				{
+					uint64_t newRate = (m_sampleRate * m_writeCount) / (m_readCount * m_iqSampleSize);
+					m_sampleRate = newRate * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
+					resetIndexes();
+				}
+            }
+            else
+            {
+            	m_sampleRate = sampleRate;
             }
 
 			if (metaData->m_sampleBytes & 0x10)
