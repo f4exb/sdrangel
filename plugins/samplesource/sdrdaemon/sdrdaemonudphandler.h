@@ -21,6 +21,8 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 #include <QMutex>
+#include <QElapsedTimer>
+
 #include "sdrdaemonbuffer.h"
 
 #define SDRDAEMON_THROTTLE_MS 50
@@ -61,6 +63,8 @@ private:
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;
 	const QTimer *m_timer;
+	QElapsedTimer m_elapsedTimer;
+	int m_throttlems;
 
 	static const int m_rateDivider;
 

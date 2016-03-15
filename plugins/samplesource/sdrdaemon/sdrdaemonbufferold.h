@@ -14,17 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFER_H_
-#define PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFER_H_
+#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFEROLD_H_
+#define PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFEROLD_H_
 
-#include <QString>
-#include <cstdlib>
-
+#include <stdint.h>
+#include <cstring>
+#include <cstddef>
+#include <lz4.h>
 #include "util/CRC64.h"
+#include "dsp/samplefifo.h"
 
-class SDRdaemonBuffer
+class SDRdaemonBufferOld
 {
-public:
 public:
 #pragma pack(push, 1)
 	struct MetaData
@@ -60,17 +61,15 @@ public:
 	};
 #pragma pack(pop)
 
-	SDRdaemonBuffer(uint32_t throttlems);
-	~SDRdaemonBuffer();
-
+	SDRdaemonBufferOld(uint32_t rateDivider);
+	~SDRdaemonBufferOld();
 	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
-	uint8_t *readData(int32_t length);
-	void updateBlockCounts(uint32_t nbBytesReceived);
-
+	uint8_t *readDataChunk();                     //!< Read a chunk of data from buffer
 	const MetaData& getCurrentMeta() const { return m_currentMeta; }
 	uint32_t getSampleRateStream() const { return m_sampleRateStream; }
 	uint32_t getSampleRate() const { return m_sampleRate; }
+	void updateBlockCounts(uint32_t nbBytesReceived);
 	bool isSync() const { return m_sync; }
 	bool isSyncLocked() const { return m_syncLock; }
 	uint32_t getFrameSize() const { return m_frameSize; }
@@ -83,38 +82,26 @@ public:
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;
-	static const int m_rawBufferLengthSeconds;
 
 private:
-	void updateBufferSize(uint32_t sampleRate);
 	void updateLZ4Sizes(uint32_t frameSize);
-	void updateReadBufferSize(uint32_t length);
 	void writeDataLZ4(const char *array, uint32_t length);
 	void writeToRawBufferLZ4();
 	void writeToRawBufferUncompressed(const char *array, uint32_t length);
+	void updateBufferSize(uint32_t sampleRate);
+    void printMeta(MetaData *metaData);
 
-    static void printMeta(const QString& header, MetaData *metaData);
-
-	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
-	uint32_t m_rawSize;            //!< Size of the raw samples buffer in bytes
-    uint8_t  *m_rawBuffer;         //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
-    uint32_t m_sampleRateStream;   //!< Current sample rate from the stream meta data
-    uint32_t m_sampleRate;         //!< Current actual sample rate in Hz
-	uint8_t  m_sampleBytes;        //!< Current number of bytes per I or Q sample
-	uint8_t  m_sampleBits;         //!< Current number of effective bits per sample
-
+	uint32_t m_rateDivider;  //!< Number of times per seconds the samples are fetched
 	bool m_sync;             //!< Meta data acquired
 	bool m_syncLock;         //!< Meta data expected (Stream synchronized)
 	bool m_lz4;              //!< Stream is compressed with LZ4
 	MetaData m_currentMeta;  //!< Stored current meta data
 	CRC64 m_crc64;           //!< CRC64 calculator
-    uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
-    uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
-    uint64_t m_dataCRC;      //!< CRC64 of the data block
+
 	uint32_t m_inCount;      //!< Current position of uncompressed input
+    uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
     uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
-    uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
     uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
     uint32_t m_nbLz4Decodes;
@@ -122,16 +109,28 @@ private:
     uint32_t m_nbLz4CRCOK;
     uint32_t m_nbLastLz4SuccessfulDecodes;
     uint32_t m_nbLastLz4CRCOK;
+    uint64_t m_dataCRC;
 
-	int32_t  m_writeIndex;   //!< Current write position in the raw samples buffer
-	int32_t  m_readIndex;    //!< Current read position in the raw samples buffer
-	uint32_t m_readSize;     //!< Read buffer size
-	uint8_t  *m_readBuffer;  //!< Read buffer to hold samples when looping back to beginning of raw buffer
+    uint32_t m_sampleRateStream; //!< Current sample rate from the stream
+    uint32_t m_sampleRate;       //!< Current actual sample rate in Hz
+	uint8_t  m_sampleBytes;      //!< Current number of bytes per I or Q sample
+	uint8_t  m_sampleBits;       //!< Current number of effective bits per sample
 
-    bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate
+	uint32_t m_writeIndex;   //!< Current write position in the raw samples buffer
+	uint32_t m_readChunkIndex; //!< Current read chunk index in the raw samples buffer
+	uint32_t m_rawSize;      //!< Size of the raw samples buffer in bytes
+    uint8_t *m_rawBuffer;    //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
+    uint32_t m_chunkSize;    //!< Size of a chunk of samples in bytes
+    uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
+    uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
 
+    uint32_t m_readCycles;     //!< Count of read cycles over raw buiffer
+    uint32_t m_lastWriteIndex; //!< Write index at last skew estimation
+    double   m_skewRateSum;
+    double   m_skewRate;
+    bool     m_autoFollowRate; //!< Aito follow stream sample rate else stick with meta data sample rate
 };
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFER_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMON_SDRDAEMONBUFFEROLD_H_ */

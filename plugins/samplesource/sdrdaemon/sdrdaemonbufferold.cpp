@@ -14,37 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "sdrdaemonbuffer.h"
+#include "sdrdaemonbufferold.h"
 
-#include <QDebug>
 #include <cassert>
 #include <cstring>
-#include <lz4.h>
+#include <cstdlib>
+#include <iostream>
 
+const int SDRdaemonBufferOld::m_udpPayloadSize = 512;
+const int SDRdaemonBufferOld::m_sampleSize = 2;
+const int SDRdaemonBufferOld::m_iqSampleSize = 2 * m_sampleSize;
 
-const int SDRdaemonBuffer::m_udpPayloadSize = 512;
-const int SDRdaemonBuffer::m_sampleSize = 2;
-const int SDRdaemonBuffer::m_iqSampleSize = 2 * m_sampleSize;
-const int SDRdaemonBuffer::m_rawBufferLengthSeconds = 4; // should be even
-
-SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
-	m_throttlemsNominal(throttlems),
-	m_rawSize(0),
-	m_rawBuffer(0),
-	m_sampleRateStream(0),
-	m_sampleRate(0),
-	m_sampleBytes(2),
-	m_sampleBits(12),
+SDRdaemonBufferOld::SDRdaemonBufferOld(uint32_t rateDivider) :
+	m_rateDivider(rateDivider),
 	m_sync(false),
 	m_syncLock(false),
 	m_lz4(false),
-	m_nbBlocks(0),
-	m_bytesInBlock(0),
-	m_dataCRC(0),
 	m_inCount(0),
+	m_lz4InBuffer(0),
 	m_lz4InCount(0),
 	m_lz4InSize(0),
-	m_lz4InBuffer(0),
 	m_lz4OutBuffer(0),
 	m_frameSize(0),
 	m_nbLz4Decodes(0),
@@ -52,16 +41,28 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_nbLz4CRCOK(0),
 	m_nbLastLz4SuccessfulDecodes(0),
 	m_nbLastLz4CRCOK(0),
+	m_dataCRC(0),
+	m_sampleRateStream(0),
+	m_sampleRate(0),
+	m_sampleBytes(2),
+	m_sampleBits(12),
 	m_writeIndex(0),
-	m_readIndex(0),
-	m_readSize(0),
-	m_readBuffer(0),
+	m_readChunkIndex(0),
+	m_rawSize(0),
+	m_rawBuffer(0),
+	m_chunkSize(0),
+	m_bytesInBlock(0),
+	m_nbBlocks(0),
+	m_readCycles(0),
+	m_lastWriteIndex(0),
+	m_skewRateSum(0.0),
+	m_skewRate(0.0),
 	m_autoFollowRate(false)
 {
 	m_currentMeta.init();
 }
 
-SDRdaemonBuffer::~SDRdaemonBuffer()
+SDRdaemonBufferOld::~SDRdaemonBufferOld()
 {
 	if (m_rawBuffer) {
 		delete[] m_rawBuffer;
@@ -74,66 +75,14 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 	if (m_lz4OutBuffer) {
 		delete[] m_lz4OutBuffer;
 	}
-
-	if (m_readBuffer) {
-		delete[] m_readBuffer;
-	}
 }
 
-void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
-{
-	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
-
-	if (rawSize != m_rawSize)
-	{
-		m_rawSize = rawSize;
-
-		if (m_rawBuffer) {
-			delete[] m_rawBuffer;
-		}
-
-		m_rawBuffer = new uint8_t[m_rawSize];
-		m_writeIndex = 0;
-		m_readIndex = m_rawSize / 2;
-
-		qDebug() << "SDRdaemonBuffer::updateBufferSize:"
-			<< " sampleRate: " << sampleRate
-			<< " m_rawSize: " << m_rawSize;
-	}
-}
-
-void SDRdaemonBuffer::updateLZ4Sizes(uint32_t frameSize)
-{
-	uint32_t maxInputSize = LZ4_compressBound(frameSize);
-
-	if (m_lz4InBuffer) {
-		delete[] m_lz4InBuffer;
-	}
-
-	m_lz4InBuffer = new uint8_t[maxInputSize];
-
-	if (m_lz4OutBuffer) {
-		delete[] m_lz4OutBuffer;
-	}
-
-	m_lz4OutBuffer = new uint8_t[frameSize];
-}
-
-void SDRdaemonBuffer::updateReadBufferSize(uint32_t length)
-{
-	if (m_readBuffer) {
-		delete[] m_readBuffer;
-	}
-
-	m_readBuffer = new uint8_t[length];
-}
-
-bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
+bool SDRdaemonBufferOld::readMeta(char *array, uint32_t length)
 {
 	assert(length >= sizeof(MetaData) + 8);
 	MetaData *metaData = (MetaData *) array;
 
-	if (m_crc64.calculate_crc((uint8_t *) array, sizeof(MetaData) - 8) == metaData->m_crc)
+	if (m_crc64.calculate_crc((uint8_t *)array, sizeof(MetaData) - 8) == metaData->m_crc)
 	{
 		// sync condition:
 		if (m_currentMeta.m_blockSize > 0)
@@ -153,7 +102,8 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 
 		if (!m_lz4 && !(m_currentMeta == *metaData))
 		{
-			printMeta(QString("SDRdaemonBuffer::readMeta"), metaData);
+			std::cerr << "SDRdaemonBuffer::readMeta: ";
+			printMeta(metaData);
 		}
 
 		m_currentMeta = *metaData;
@@ -165,12 +115,23 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
 			int sampleRate = metaData->m_sampleRate;
 
-			if (sampleRate != m_sampleRateStream)
+			if (m_autoFollowRate)
 			{
-				updateBufferSize(sampleRate);
+				if (sampleRate != m_sampleRateStream)
+				{
+					m_sampleRateStream = sampleRate;
+				}
+				else
+				{
+					sampleRate = m_sampleRate;
+				}
+
+				sampleRate += sampleRate * m_skewRate;
+				sampleRate = (sampleRate / m_rateDivider) * m_rateDivider;
+			}
+			else
+			{
 				m_sampleRateStream = sampleRate;
-				m_sampleRate = sampleRate;
-				// TODO: auto skew rate compensation
 			}
 
 			if (metaData->m_sampleBytes & 0x10)
@@ -189,6 +150,12 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 				m_lz4 = false;
 			}
 
+			if (sampleRate != m_sampleRate)
+			{
+				updateBufferSize(sampleRate);
+			}
+
+			m_sampleRate = sampleRate;
 			m_frameSize = frameSize;
 			m_sync = true;
 		}
@@ -205,7 +172,7 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 	}
 }
 
-void SDRdaemonBuffer::writeData(char *array, uint32_t length)
+void SDRdaemonBufferOld::writeData(char *array, uint32_t length)
 {
 	if ((m_sync) && (m_nbBlocks > 0))
 	{
@@ -220,39 +187,7 @@ void SDRdaemonBuffer::writeData(char *array, uint32_t length)
 	}
 }
 
-uint8_t *SDRdaemonBuffer::readData(int32_t length)
-{
-	if (m_readIndex + length < m_rawSize)
-	{
-		uint32_t readIndex = m_readIndex;
-		m_readIndex += length;
-		return &m_rawBuffer[readIndex];
-	}
-	else if (m_readIndex + length == m_rawSize)
-	{
-		uint32_t readIndex = m_readIndex;
-		m_readIndex = 0;
-		return &m_rawBuffer[readIndex];
-	}
-	else
-	{
-		// TODO: implement auto skew rate compensation calculation
-
-		if (length > m_readSize)
-		{
-			updateReadBufferSize(length);
-			m_readSize = length;
-		}
-
-		std::memcpy((void *) m_readBuffer, (const void *) &m_rawBuffer[m_readIndex], m_rawSize - m_readIndex);
-		length -= m_rawSize - m_readIndex;
-		std::memcpy((void *) &m_readBuffer[m_rawSize - m_readIndex], (const void *) m_rawBuffer, length);
-		m_readIndex = length;
-		return m_readBuffer;
-	}
-}
-
-void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
+void SDRdaemonBufferOld::writeDataLZ4(const char *array, uint32_t length)
 {
     if (m_lz4InCount + length < m_lz4InSize)
     {
@@ -269,10 +204,11 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
     {
         if (m_nbLz4Decodes == 100)
         {
-            qDebug() << "SDRdaemonBuffer::writeAndReadLZ4:"
+            std::cerr << "SDRdaemonBuffer::writeAndReadLZ4:"
                << " decoding: " << m_nbLz4CRCOK
                << ":" << m_nbLz4SuccessfulDecodes
-               << "/" <<  m_nbLz4Decodes;
+               << "/" <<  m_nbLz4Decodes
+               << std::endl;
 
             m_nbLastLz4SuccessfulDecodes = m_nbLz4SuccessfulDecodes;
             m_nbLastLz4CRCOK = m_nbLz4CRCOK;
@@ -286,7 +222,24 @@ void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
     }
 }
 
-void SDRdaemonBuffer::writeToRawBufferLZ4()
+void SDRdaemonBufferOld::writeToRawBufferUncompressed(const char *array, uint32_t length)
+{
+	// TODO: handle the 1 byte per I or Q sample
+	if (m_writeIndex + length < m_rawSize)
+	{
+		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, length);
+		m_writeIndex += length;
+	}
+	else
+	{
+		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, m_rawSize - m_writeIndex);
+		length -= m_rawSize - m_writeIndex;
+		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], length);
+		m_writeIndex = length;
+	}
+}
+
+void SDRdaemonBufferOld::writeToRawBufferLZ4()
 {
     uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
 
@@ -309,46 +262,109 @@ void SDRdaemonBuffer::writeToRawBufferLZ4()
 	}
 }
 
-void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t length)
+uint8_t *SDRdaemonBufferOld::readDataChunk()
 {
-	// TODO: handle the 1 byte per I or Q sample
-	if (m_writeIndex + length < m_rawSize)
+	// relies on the fact that we always have an integer number of chunks in the raw buffer
+	if (m_readChunkIndex == m_rateDivider * 2) // go back to start of raw buffer
 	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, length);
-		m_writeIndex += length;
+		double oneCycleSkew = 0;
+
+		if (m_readCycles > 0)
+		{
+			oneCycleSkew = (double) ((int) m_writeIndex - (int) m_lastWriteIndex) / (double) m_rawSize;
+			m_skewRateSum += oneCycleSkew;
+		}
+
+		//qDebug("SDRdaemonBuffer::readDataChunk: %d / %d (%lf)", m_writeIndex, m_rawSize, oneCycleSkew);
+
+		if (!m_autoFollowRate)
+		{
+			m_skewRate = 0.0;
+		}
+		else if (m_readCycles && ((m_writeIndex < m_rawSize / 10) || (m_rawSize - m_writeIndex < m_rawSize / 10)))
+		{
+			m_skewRate = m_skewRateSum / m_readCycles;
+			if (m_skewRate > 0.2) {
+				m_skewRate = 0.2;
+			} else if (m_skewRate < -0.2) {
+				m_skewRate = -0.2;
+			}
+			qDebug("SDRdaemonBuffer::readDataChunk: m_skewRate: %lf", m_skewRate);
+		}
+
+		m_readChunkIndex = 0; // go to start
+		m_lastWriteIndex = m_writeIndex;
+		m_readCycles++;
 	}
-	else if (m_writeIndex + length == m_rawSize)
-	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, length);
-		m_writeIndex = 0;
-	}
-	else
-	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, m_rawSize - m_writeIndex);
-		length -= m_rawSize - m_writeIndex;
-		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], length);
-		m_writeIndex = length;
-	}
+
+	uint32_t readIndex = m_readChunkIndex;
+	m_readChunkIndex++;
+	return &m_rawBuffer[readIndex * m_chunkSize];
 }
 
-void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)
+void SDRdaemonBufferOld::updateLZ4Sizes(uint32_t frameSize)
+{
+	uint32_t maxInputSize = LZ4_compressBound(frameSize);
+
+	if (m_lz4InBuffer) {
+		delete[] m_lz4InBuffer;
+	}
+
+	m_lz4InBuffer = new uint8_t[maxInputSize];
+
+	if (m_lz4OutBuffer) {
+		delete[] m_lz4OutBuffer;
+	}
+
+	m_lz4OutBuffer = new uint8_t[frameSize];
+}
+
+void SDRdaemonBufferOld::updateBufferSize(uint32_t sampleRate)
+{
+	assert(sampleRate % m_rateDivider == 0); // make sure we get an integer number of samples in a chunk
+
+	// Store 2 seconds long of samples so we have two one second long half buffers
+	m_chunkSize = (sampleRate * m_iqSampleSize) / m_rateDivider;
+	m_rawSize = m_chunkSize * m_rateDivider * 2;
+
+	if (m_rawBuffer) {
+		delete[] m_rawBuffer;
+	}
+
+	m_rawBuffer = new uint8_t[m_rawSize];
+
+	m_writeIndex = 0;
+	m_readChunkIndex = m_rateDivider;
+	m_readCycles = 0;
+	m_skewRateSum = 0;
+	m_skewRate = 0;
+
+	std::cerr << "SDRdaemonBuffer::updateBufferSize:"
+		<< " sampleRate: " << sampleRate
+		<< " m_chunkSize: " << m_chunkSize
+		<< " m_rawSize: " << m_rawSize
+		<< std::endl;
+}
+
+void SDRdaemonBufferOld::updateBlockCounts(uint32_t nbBytesReceived)
 {
 	m_nbBlocks += m_bytesInBlock + nbBytesReceived > m_udpPayloadSize ? 1 : 0;
 	m_bytesInBlock = m_bytesInBlock + nbBytesReceived > m_udpPayloadSize ? nbBytesReceived : m_bytesInBlock + nbBytesReceived;
 }
 
-void SDRdaemonBuffer::printMeta(const QString& header, MetaData *metaData)
+void SDRdaemonBufferOld::printMeta(MetaData *metaData)
 {
-	qDebug() << header << ": "
-		<< "|" << metaData->m_centerFrequency
-		<< ":" << metaData->m_sampleRate
-		<< ":" << (int) (metaData->m_sampleBytes & 0xF)
-		<< ":" << (int) metaData->m_sampleBits
-		<< ":" << metaData->m_blockSize
-		<< ":" << metaData->m_nbSamples
-		<< "||" << metaData->m_nbBlocks
-		<< ":" << metaData->m_nbBytes
-		<< "|" << metaData->m_tv_sec
-		<< ":" << metaData->m_tv_usec;
+	std::cerr
+			<< "|" << metaData->m_centerFrequency
+			<< ":" << metaData->m_sampleRate
+			<< ":" << (int) (metaData->m_sampleBytes & 0xF)
+			<< ":" << (int) metaData->m_sampleBits
+			<< ":" << metaData->m_blockSize
+			<< ":" << metaData->m_nbSamples
+			<< "||" << metaData->m_nbBlocks
+			<< ":" << metaData->m_nbBytes
+	        << "|" << metaData->m_tv_sec
+			<< ":" << metaData->m_tv_usec
+			<< std::endl;
 }
 

@@ -42,7 +42,8 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_outputMessageQueueToGUI(outputMessageQueueToGUI),
 	m_tickCount(0),
 	m_samplesCount(0),
-	m_timer(0)
+	m_timer(0),
+	m_throttlems(SDRDAEMON_THROTTLE_MS)
 {
     m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
@@ -199,9 +200,13 @@ void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 
 void SDRdaemonUDPHandler::tick()
 {
+	// TOOD: auto throttling
+	uint32_t readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * m_throttlems) / 1000;
+	uint32_t readLength = readLengthSamples * SDRdaemonBuffer::m_iqSampleSize;
+
 	// read samples directly feeding the SampleFifo (no callback)
-	m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readDataChunk()), m_chunksize);
-	m_samplesCount += m_chunksize / SDRdaemonBuffer::m_iqSampleSize;
+	m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(readLength)), readLength);
+	m_samplesCount += readLengthSamples;
 
 	if (m_tickCount < m_rateDivider)
 	{
