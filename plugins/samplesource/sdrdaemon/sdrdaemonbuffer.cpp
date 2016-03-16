@@ -25,7 +25,7 @@
 const int SDRdaemonBuffer::m_udpPayloadSize = 512;
 const int SDRdaemonBuffer::m_sampleSize = 2;
 const int SDRdaemonBuffer::m_iqSampleSize = 2 * m_sampleSize;
-const int SDRdaemonBuffer::m_rawBufferLengthSeconds = 4; // should be even
+const int SDRdaemonBuffer::m_rawBufferLengthSeconds = 8; // should be even
 
 SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_throttlemsNominal(throttlems),
@@ -87,10 +87,6 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 {
 	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
-
-	if (rawSize < (1<<24)) {
-		rawSize = (1<<24);
-	}
 
 	if (rawSize != m_rawSize)
 	{
