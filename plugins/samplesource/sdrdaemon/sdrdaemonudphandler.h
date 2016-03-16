@@ -53,7 +53,6 @@ private:
 	bool m_dataConnected;
 	char *m_udpBuf;
 	qint64 m_udpReadBytes;
-	std::size_t m_chunksize;
 	SampleFifo *m_sampleFifo;
 	uint32_t m_samplerate;
 	uint32_t m_centerFrequency;

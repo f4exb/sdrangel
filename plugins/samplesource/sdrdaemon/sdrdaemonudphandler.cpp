@@ -33,7 +33,6 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_dataConnected(false),
 	m_udpBuf(0),
 	m_udpReadBytes(0),
-	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(0),
 	m_centerFrequency(0),
@@ -188,17 +187,13 @@ void SDRdaemonUDPHandler::setSamplerate(uint32_t samplerate)
 			<< " old:" << m_samplerate;
 
 	m_samplerate = samplerate;
-	m_chunksize = (m_samplerate / m_rateDivider) * SDRdaemonBuffer::m_iqSampleSize;
-
-	qDebug() << "SDRdaemonUDPHandler::setSamplerate:"
-			<< " chunk size: " << m_chunksize
-			<< " #samples per chunk: " << (m_chunksize/SDRdaemonBuffer::m_iqSampleSize);
 }
 
 void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 {
 	qDebug() << "SDRdaemonUDPHandler::connectTimer";
 	m_timer = timer;
+    m_throttlems = timer->interval();
 	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
