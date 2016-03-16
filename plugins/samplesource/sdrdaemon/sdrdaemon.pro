@@ -35,3 +35,5 @@ LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../lz4/$${build_subdir} -llz4
 
 RESOURCES = ../../../sdrbase/resources/res.qrc
+
+CONFIG(MINGW32):DEFINES += USE_INTERNAL_TIMER=1

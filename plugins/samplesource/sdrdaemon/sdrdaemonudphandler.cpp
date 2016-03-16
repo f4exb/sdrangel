@@ -23,8 +23,6 @@
 #include "sdrdaemonudphandler.h"
 #include "sdrdaemoninput.h"
 
-const int SDRdaemonUDPHandler::m_rateDivider = 1000/SDRDAEMON_THROTTLE_MS;
-
 SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI) :
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
@@ -45,7 +43,8 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
     m_throttlems(SDRDAEMON_THROTTLE_MS),
     m_readLengthSamples(0),
     m_readLength(0),
-    m_throttleToggle(false)
+    m_throttleToggle(false),
+    m_rateDivider(1000/SDRDAEMON_THROTTLE_MS)
 {
     m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
@@ -54,6 +53,11 @@ SDRdaemonUDPHandler::~SDRdaemonUDPHandler()
 {
 	stop();
 	delete[] m_udpBuf;
+#ifdef USE_INTERNAL_TIMER
+    if (m_timer) {
+        delete m_timer;
+    }
+#endif
 }
 
 void SDRdaemonUDPHandler::start()
@@ -192,9 +196,16 @@ void SDRdaemonUDPHandler::setSamplerate(uint32_t samplerate)
 void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 {
 	qDebug() << "SDRdaemonUDPHandler::connectTimer";
+#ifdef USE_INTERNAL_TIMER
+#warning "Uses internal timer"
+    m_timer = new QTimer();
+    m_timer->start(100);
+#else
 	m_timer = timer;
-    m_throttlems = timer->interval();
-	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
+#endif
+    m_throttlems = m_timer->interval();
+    m_rateDivider = 1000 / m_throttlems;
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void SDRdaemonUDPHandler::tick()

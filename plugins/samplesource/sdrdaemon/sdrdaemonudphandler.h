@@ -61,15 +61,14 @@ private:
 	MessageQueue *m_outputMessageQueueToGUI;
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;
-	const QTimer *m_timer;
+    QTimer *m_timer;
 
 	QElapsedTimer m_elapsedTimer;
 	int m_throttlems;
     uint32_t m_readLengthSamples;
     uint32_t m_readLength;
     bool m_throttleToggle;
-
-	static const int m_rateDivider;
+    int m_rateDivider;
 
 	void setSamplerate(uint32_t samplerate);
 	void processData();
