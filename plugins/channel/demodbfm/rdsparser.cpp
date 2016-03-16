@@ -267,6 +267,8 @@ void RDSParser::clearAllFields()
 	m_pi_count = 0;
 	m_pi_program_identification = 0;
 	m_pi_program_type = 0;
+	m_pi_area_coverage_index = 0;
+	m_pi_country_identification = 0;
 	m_pi_traffic_program = false;
 
 	// Group 00 data
