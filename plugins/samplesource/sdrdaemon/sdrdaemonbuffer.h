@@ -132,8 +132,9 @@ private:
     bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate
     bool     m_skewTest;
     bool     m_skewCorrection; //!< Do a skew rate correction at next meta data reception
-    uint64_t m_readCount;
-    uint64_t m_writeCount;
+    int64_t  m_readCount;
+    int64_t  m_writeCount;
+    uint32_t m_nbCycles;     //!< Number of buffer cycles since start of byte counting
 };
 
 

@@ -60,7 +60,8 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
     m_skewTest(false),
     m_skewCorrection(false),
     m_readCount(0),
-    m_writeCount(0)
+    m_writeCount(0),
+	m_nbCycles(0)
 {
 	m_currentMeta.init();
 }
@@ -180,8 +181,8 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
             {
 				if (m_skewCorrection)
 				{
-					uint64_t newRate = (m_sampleRate * m_writeCount) / (m_readCount * m_iqSampleSize);
-					m_sampleRate = newRate * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
+					int64_t deltaRate = (m_writeCount - m_readCount) / (m_nbCycles * m_rawBufferLengthSeconds * m_iqSampleSize);
+					m_sampleRate = ((m_sampleRate + deltaRate) / m_iqSampleSize) * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
 					resetIndexes();
 				}
             }
@@ -243,6 +244,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
     {
         int dIndex = (m_readIndex - m_writeIndex > 0 ? m_readIndex - m_writeIndex : m_writeIndex - m_readIndex); // absolute delta
         m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
+        m_nbCycles++;
         m_skewTest = false;
     }
 
@@ -367,6 +369,7 @@ void SDRdaemonBuffer::resetIndexes()
     m_readIndex = m_rawSize / 2;
     m_readCount = 0;
     m_writeCount = 0;
+    m_nbCycles = 0;
     m_skewTest = false;
     m_skewCorrection = false;
 }
