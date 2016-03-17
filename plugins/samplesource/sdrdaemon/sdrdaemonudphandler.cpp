@@ -199,7 +199,7 @@ void SDRdaemonUDPHandler::connectTimer(const QTimer* timer)
 #ifdef USE_INTERNAL_TIMER
 #warning "Uses internal timer"
     m_timer = new QTimer();
-    m_timer->start(60);
+    m_timer->start(50);
     m_throttlems = m_timer->interval();
     connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 #else
