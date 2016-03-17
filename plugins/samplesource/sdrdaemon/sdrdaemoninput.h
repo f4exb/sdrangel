@@ -194,6 +194,7 @@ public:
 		float getLz4CompressionRatio() const { return m_compressionRatio; }
 		uint32_t getLz4DataCRCOK() const  { return m_nbLz4CRCOK; }
 		uint32_t getLz4SuccessfulDecodes() const { return m_nbLz4SuccessfulDecodes; }
+        int32_t getBufferGauge() const { return m_bufferGauge; }
 
 		static MsgReportSDRdaemonStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -202,7 +203,8 @@ public:
 				bool lz4,
 				float compressionRatio,
 				uint32_t nbLz4CRCOK,
-				uint32_t nbLz4SuccessfulDecodes)
+                uint32_t nbLz4SuccessfulDecodes,
+                int32_t bufferGauge)
 		{
 			return new MsgReportSDRdaemonStreamTiming(tv_sec,
 					tv_usec,
@@ -211,7 +213,8 @@ public:
 					lz4,
 					compressionRatio,
 					nbLz4CRCOK,
-					nbLz4SuccessfulDecodes);
+                    nbLz4SuccessfulDecodes,
+                    bufferGauge);
 		}
 
 	protected:
@@ -223,6 +226,7 @@ public:
 		float m_compressionRatio;
 		uint32_t m_nbLz4CRCOK;
 		uint32_t m_nbLz4SuccessfulDecodes;
+        int32_t m_bufferGauge;
 
 		MsgReportSDRdaemonStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -231,7 +235,8 @@ public:
 				bool lz4,
 				float compressionRatio,
 				uint32_t nbLz4CRCOK,
-				uint32_t nbLz4SuccessfulDecodes) :
+                uint32_t nbLz4SuccessfulDecodes,
+                int32_t bufferGauge) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
@@ -240,7 +245,8 @@ public:
 			m_lz4(lz4),
 			m_compressionRatio(compressionRatio),
 			m_nbLz4CRCOK(nbLz4CRCOK),
-			m_nbLz4SuccessfulDecodes(nbLz4SuccessfulDecodes)
+            m_nbLz4SuccessfulDecodes(nbLz4SuccessfulDecodes),
+            m_bufferGauge(bufferGauge)
 		{ }
 	};
 

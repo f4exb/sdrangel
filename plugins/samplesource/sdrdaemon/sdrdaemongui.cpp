@@ -45,6 +45,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_compressionRatio(1.0),
 	m_nbLz4DataCRCOK(0),
 	m_nbLz4SuccessfulDecodes(0),
+    m_bufferGauge(-50),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_address("127.0.0.1"),
@@ -227,6 +228,7 @@ bool SDRdaemonGui::handleMessage(const Message& message)
 
 		m_nbLz4DataCRCOK = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4DataCRCOK();
 		m_nbLz4SuccessfulDecodes = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getLz4SuccessfulDecodes();
+        m_bufferGauge = ((SDRdaemonInput::MsgReportSDRdaemonStreamTiming&)message).getBufferGauge();
 
 		updateWithStreamTime();
 		return true;
@@ -384,6 +386,9 @@ void SDRdaemonGui::updateWithStreamTime()
 
 	s = QString::number(m_nbLz4SuccessfulDecodes, 'f', 0);
 	ui->lz4DecodesOKText->setText(tr("%1").arg(s));
+
+    ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? 50 + m_bufferGauge : 0));
+    ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : 50 - m_bufferGauge));
 }
 
 void SDRdaemonGui::tick()

@@ -66,6 +66,7 @@ private:
 	uint32_t m_nbLz4DataCRCOK;
 	uint32_t m_nbLz4SuccessfulDecodes;
 
+    int32_t m_bufferGauge;
 	int m_samplesCount;
 	std::size_t m_tickCount;
 

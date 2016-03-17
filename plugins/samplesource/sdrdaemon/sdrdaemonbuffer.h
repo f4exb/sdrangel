@@ -80,6 +80,28 @@ public:
 	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
 	void setAutoFollowRate(bool autoFollowRate) { m_autoFollowRate = autoFollowRate; }
 
+    /** Get buffer gauge value in % of buffer size ([-50:50])
+     *  [-50:0] : write leads or read lags
+     *  [0:50]  : read leads or write lags
+     */
+    inline int32_t getBufferGauge() const
+    {
+        if (m_rawSize)
+        {
+            int32_t val = ((m_writeIndex - m_readIndex) * 100) / m_rawSize;
+
+            if (val < 0) {
+                return (val < -50 ? 100 - val : val);
+            } else {
+                return (val > 50 ? val - 100 : val);
+            }
+        }
+        else
+        {
+            return -50;
+        }
+    }
+
 	static const int m_udpPayloadSize;
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;

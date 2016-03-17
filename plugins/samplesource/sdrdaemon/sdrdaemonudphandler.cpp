@@ -241,7 +241,8 @@ void SDRdaemonUDPHandler::tick()
 			m_sdrDaemonBuffer.isLz4Compressed(),
 			m_sdrDaemonBuffer.getCompressionRatio(),
 			m_sdrDaemonBuffer.getLz4DataCRCOK(),
-			m_sdrDaemonBuffer.getLz4SuccessfulDecodes());
+            m_sdrDaemonBuffer.getLz4SuccessfulDecodes(),
+            m_sdrDaemonBuffer.getBufferGauge());
 		m_outputMessageQueueToGUI->push(report);
 	}
 }

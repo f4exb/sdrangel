@@ -61,7 +61,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
     m_skewCorrection(false),
     m_readCount(0),
     m_writeCount(0),
-	m_nbCycles(0)
+    m_nbCycles(0)
 {
 	m_currentMeta.init();
 }
