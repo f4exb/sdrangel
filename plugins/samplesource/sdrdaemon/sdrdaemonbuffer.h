@@ -88,16 +88,14 @@ public:
     {
         if (m_rawSize)
         {
-            int32_t val = ((m_writeIndex - m_readIndex) * 100) / m_rawSize;
+            int32_t val = ((m_writeIndex - m_readIndex) * 100) / (int32_t) m_rawSize;
 
             if (val < -50) {
-            	return val + 100; // read leads (positive)
-            } else if (val < 0) {
-            	return val;       // write leads (negative)
-            } else if (val < 0.5) {
-            	return val;       // read leads (positive)
+                return val + 100; // read leads (positive)
+            } else if (val < 50) {
+                return val;       // read leads (positive) or write leads (negative)
             } else {
-            	return val - 100; // write leads (negative)
+                return val - 100; // write leads (negative)
             }
         }
         else
