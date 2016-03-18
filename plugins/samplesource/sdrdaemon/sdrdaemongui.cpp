@@ -154,7 +154,7 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 		d.readBool(3, &dcBlock, false);
 		d.readBool(4, &iqCorrection, false);
 		d.readBool(5, &autoFollowRate, false);
-        d.readBool(5, &autoCorrBuffer, false);
+        d.readBool(6, &autoCorrBuffer, false);
 
 		if ((address != m_address) || (port != m_port))
 		{
