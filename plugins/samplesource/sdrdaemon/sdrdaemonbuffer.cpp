@@ -57,11 +57,16 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_readSize(0),
 	m_readBuffer(0),
     m_autoFollowRate(false),
+    m_autoCorrBuffer(false),
     m_skewTest(false),
     m_skewCorrection(false),
+    m_resetIndexes(false),
     m_readCount(0),
     m_writeCount(0),
-    m_nbCycles(0)
+    m_nbCycles(0),
+    m_readCountBal(0),
+    m_writeCountBal(0),
+    m_nbReadsBal(0)
 {
 	m_currentMeta.init();
 }
@@ -191,6 +196,13 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
             	m_sampleRate = sampleRate;
             }
 
+            // Reset indexes if requested
+            if (m_resetIndexes)
+            {
+                resetIndexes();
+                m_resetIndexes = false;
+            }
+
 			if (metaData->m_sampleBytes & 0x10)
 			{
 				m_lz4 = true;
@@ -240,15 +252,33 @@ void SDRdaemonBuffer::writeData(char *array, uint32_t length)
 
 uint8_t *SDRdaemonBuffer::readData(int32_t length)
 {
+    // auto compensation calculations
     if (m_skewTest && ((m_readIndex + length) > (m_rawSize / 2)))
     {
+        // auto follow sample rate calculation
         int dIndex = (m_readIndex - m_writeIndex > 0 ? m_readIndex - m_writeIndex : m_writeIndex - m_readIndex); // absolute delta
         m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
         m_nbCycles++;
+        // auto R/W balance calculation
+        if (m_nbReadsBal && m_autoCorrBuffer)
+        {
+            int32_t dBytes = (m_writeCountBal - m_readCountBal) / m_nbReadsBal;
+            m_balCorrection += dBytes / (int32_t) m_iqSampleSize;
+            m_readCountBal = 0;
+            m_writeCountBal = 0;
+            m_nbReadsBal = 0;
+        }
+        else
+        {
+            m_balCorrection = 0;
+        }
+        // un-arm
         m_skewTest = false;
     }
 
     m_readCount += length;
+    m_readCountBal += length;
+    m_nbReadsBal++;
 
 	if (m_readIndex + length < m_rawSize)
 	{
@@ -260,13 +290,11 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
 	{
 		uint32_t readIndex = m_readIndex;
 		m_readIndex = 0;
-        m_skewTest = true;
+        m_skewTest = true; // re-arm
 		return &m_rawBuffer[readIndex];
 	}
 	else
 	{
-		// TODO: implement auto skew rate compensation calculation
-
 		if (length > m_readSize)
 		{
 			updateReadBufferSize(length);
@@ -277,7 +305,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
 		length -= m_rawSize - m_readIndex;
 		std::memcpy((void *) &m_readBuffer[m_rawSize - m_readIndex], (const void *) m_rawBuffer, length);
 		m_readIndex = length;
-        m_skewTest = true;
+        m_skewTest = true; // re-arm
         return m_readBuffer;
 	}
 }
@@ -361,6 +389,7 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 	}
 
     m_writeCount += length;
+    m_writeCountBal += length;
 }
 
 void SDRdaemonBuffer::resetIndexes()
@@ -372,6 +401,10 @@ void SDRdaemonBuffer::resetIndexes()
     m_nbCycles = 0;
     m_skewTest = false;
     m_skewCorrection = false;
+    m_readCountBal = 0;
+    m_writeCountBal = 0;
+    m_nbReadsBal = 0;
+    m_balCorrection = 0;
 }
 
 void SDRdaemonBuffer::updateBlockCounts(uint32_t nbBytesReceived)

@@ -93,25 +93,42 @@ public:
 		{ }
 	};
 
-	class MsgConfigureSDRdaemonAutoFollowRate : public Message {
+    class MsgConfigureSDRdaemonAutoFollowPolicy : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool autoFollowRate() const { return m_autoFollowRate; }
+        bool autoCorrBuffer() const { return m_autoCorrBuffer; }
 
-		static MsgConfigureSDRdaemonAutoFollowRate* create(bool autoFollowRate)
+        static MsgConfigureSDRdaemonAutoFollowPolicy* create(bool autoFollowRate, bool autoCorrBuffer)
 		{
-			return new MsgConfigureSDRdaemonAutoFollowRate(autoFollowRate);
+            return new MsgConfigureSDRdaemonAutoFollowPolicy(autoFollowRate, autoCorrBuffer);
 		}
 
 	private:
 		bool m_autoFollowRate;
+        bool m_autoCorrBuffer;
 
-		MsgConfigureSDRdaemonAutoFollowRate(bool autoFollowRate) :
+        MsgConfigureSDRdaemonAutoFollowPolicy(bool autoFollowRate, bool autoCorrBuffer) :
 			Message(),
-			m_autoFollowRate(autoFollowRate)
+            m_autoFollowRate(autoFollowRate),
+            m_autoCorrBuffer(autoCorrBuffer)
 		{ }
 	};
+
+    class MsgConfigureSDRdaemonResetIndexes : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgConfigureSDRdaemonResetIndexes* create()
+        {
+            return new MsgConfigureSDRdaemonResetIndexes();
+        }
+
+    private:
+        MsgConfigureSDRdaemonResetIndexes() :
+            Message()
+        { }
+    };
 
 	class MsgConfigureSDRdaemonStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -274,6 +291,8 @@ private:
 	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
+    bool m_autoFollowRate;
+    bool m_autoCorrBuffer;
 };
 
 #endif // INCLUDE_SDRDAEMONINPUT_H

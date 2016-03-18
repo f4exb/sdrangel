@@ -116,6 +116,7 @@ QByteArray SDRdaemonGui::serialize() const
 	s.writeBool(3, m_dcBlock);
 	s.writeBool(4, m_iqCorrection);
 	s.writeBool(5, m_autoFollowRate);
+    s.writeBool(6, m_autoCorrBuffer);
 
 	return s.final();
 }
@@ -129,6 +130,7 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 	bool dcBlock;
 	bool iqCorrection;
 	bool autoFollowRate;
+    bool autoCorrBuffer;
 
 	if (!d.isValid())
 	{
@@ -152,6 +154,7 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 		d.readBool(3, &dcBlock, false);
 		d.readBool(4, &iqCorrection, false);
 		d.readBool(5, &autoFollowRate, false);
+        d.readBool(5, &autoCorrBuffer, false);
 
 		if ((address != m_address) || (port != m_port))
 		{
@@ -167,9 +170,11 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 			configureAutoCorrections();
 		}
 
-		if (m_autoFollowRate != autoFollowRate) {
+        if ((m_autoFollowRate != autoFollowRate) || (m_autoCorrBuffer != autoCorrBuffer))
+        {
 			m_autoFollowRate = autoFollowRate;
-			configureAutoFollowRate();
+            m_autoCorrBuffer = autoCorrBuffer;
+            configureAutoFollowPolicy();
 		}
 
 		displaySettings();
@@ -261,6 +266,7 @@ void SDRdaemonGui::displaySettings()
 	ui->dcOffset->setChecked(m_dcBlock);
 	ui->iqImbalance->setChecked(m_iqCorrection);
 	ui->autoFollowRate->setChecked(m_autoFollowRate);
+    ui->autoCorrBuffer->setChecked(m_autoCorrBuffer);
 }
 
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
@@ -314,8 +320,22 @@ void SDRdaemonGui::on_autoFollowRate_toggled(bool checked)
 {
 	if (m_autoFollowRate != checked) {
 		m_autoFollowRate = checked;
-		configureAutoFollowRate();
+        configureAutoFollowPolicy();
 	}
+}
+
+void SDRdaemonGui::on_autoCorrBuffer_toggled(bool checked)
+{
+    if (m_autoCorrBuffer != checked) {
+        m_autoCorrBuffer = checked;
+        configureAutoFollowPolicy();
+    }
+}
+
+void SDRdaemonGui::on_resetIndexes_clicked(bool checked)
+{
+    SDRdaemonInput::MsgConfigureSDRdaemonResetIndexes* message = SDRdaemonInput::MsgConfigureSDRdaemonResetIndexes::create();
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void SDRdaemonGui::configureUDPLink()
@@ -333,9 +353,9 @@ void SDRdaemonGui::configureAutoCorrections()
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonGui::configureAutoFollowRate()
+void SDRdaemonGui::configureAutoFollowPolicy()
 {
-	SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate::create(m_autoFollowRate);
+    SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowPolicy* message = SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowPolicy::create(m_autoFollowRate, m_autoCorrBuffer);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 

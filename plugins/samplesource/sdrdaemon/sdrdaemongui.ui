@@ -187,7 +187,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Main buffer gauge: write leads read lags</string>
+        <string>Main buffer pointer positions: write leads read lags</string>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -218,7 +218,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Main buffer gauge: read leads write lags</string>
+        <string>Main buffer pointer positions: read leads write lags</string>
        </property>
        <property name="maximum">
         <number>50</number>
@@ -243,12 +243,19 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
-      <widget class="ButtonSwitch" name="autoFollowRate">
+      <widget class="QToolButton" name="streamLocked">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="toolTip">
-        <string>Follow stream sample rate automatically</string>
+        <string>Stream locked status i.e. synced with meta data</string>
        </property>
        <property name="text">
-        <string>Auto</string>
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
        </property>
       </widget>
      </item>
@@ -381,23 +388,6 @@
    <item>
     <layout class="QHBoxLayout" name="lz4Layout">
      <item>
-      <widget class="QToolButton" name="streamLocked">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Stream locked status i.e. synced with meta data</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QToolButton" name="lz4Compressed">
        <property name="enabled">
         <bool>false</bool>
@@ -504,6 +494,46 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetIndexes">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reset buffer indexes</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="autoCorrBuffer">
+       <property name="toolTip">
+        <string>Auto maintain buffer read / write balance</string>
+       </property>
+       <property name="text">
+        <string>B</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="autoFollowRate">
+       <property name="toolTip">
+        <string>Auto follow actual stream sample rate</string>
+       </property>
+       <property name="text">
+        <string>R</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -618,6 +648,20 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
  </resources>
  <connections/>

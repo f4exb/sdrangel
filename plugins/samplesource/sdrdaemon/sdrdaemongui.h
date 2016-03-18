@@ -75,12 +75,13 @@ private:
 	bool m_dcBlock;
 	bool m_iqCorrection;
 	bool m_autoFollowRate;
+    bool m_autoCorrBuffer;
 
 	void displaySettings();
 	void displayTime();
 	void configureUDPLink();
 	void configureAutoCorrections();
-	void configureAutoFollowRate();
+    void configureAutoFollowPolicy();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
@@ -91,6 +92,8 @@ private slots:
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
 	void on_autoFollowRate_toggled(bool checked);
+    void on_autoCorrBuffer_toggled(bool checked);
+    void on_resetIndexes_clicked(bool checked);
 	void on_address_textEdited(const QString& arg1);
 	void on_port_textEdited(const QString& arg1);
 	void tick();

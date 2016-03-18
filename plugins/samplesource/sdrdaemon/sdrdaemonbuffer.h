@@ -79,6 +79,9 @@ public:
 	uint32_t getLz4DataCRCOK() const { return m_nbLastLz4CRCOK; }
 	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
 	void setAutoFollowRate(bool autoFollowRate) { m_autoFollowRate = autoFollowRate; }
+    void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; }
+    void setResetIndexes() { m_resetIndexes = true; }
+    int32_t getRWBalanceCorrection() const { return m_balCorrection; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
      *  [-50:0] : write leads or read lags
@@ -154,11 +157,19 @@ private:
 	uint8_t  *m_readBuffer;  //!< Read buffer to hold samples when looping back to beginning of raw buffer
 
     bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate
+    bool     m_autoCorrBuffer; //!< Auto correct buffer read / write balance (attempt to ...)
     bool     m_skewTest;
     bool     m_skewCorrection; //!< Do a skew rate correction at next meta data reception
-    int64_t  m_readCount;
-    int64_t  m_writeCount;
-    uint32_t m_nbCycles;     //!< Number of buffer cycles since start of byte counting
+    bool     m_resetIndexes;   //!< Do a reset indexes at next meta data reception
+
+    int64_t  m_readCount;    //!< Number of bytes read for auto skew compensation
+    int64_t  m_writeCount;   //!< Number of bytes written for auto skew compensation
+    uint32_t m_nbCycles;     //!< Number of buffer cycles since start of auto skew compensation byte counting
+
+    int64_t  m_readCountBal;  //!< Number of bytes read for auto R/W balance
+    int64_t  m_writeCountBal; //!< Number of bytes written for auto R/W balance
+    uint32_t m_nbReadsBal;    //!< Number of buffer reads since start of auto R/W balance byte counting
+    int32_t  m_balCorrection; //!< R/W balance correction in number of samples
 };
 
 

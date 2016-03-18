@@ -30,7 +30,8 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoCorr, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonWork, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowRate, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonAutoFollowPolicy, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonResetIndexes, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
@@ -44,7 +45,9 @@ SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
-	m_masterTimer(masterTimer)
+    m_masterTimer(masterTimer),
+    m_autoFollowRate(false),
+    m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
 	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI());
@@ -114,13 +117,26 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 		DSPEngine::instance()->configureCorrections(dcBlock, iqImbalance);
 		return true;
 	}
-	else if (MsgConfigureSDRdaemonAutoFollowRate::match(message))
+    else if (MsgConfigureSDRdaemonAutoFollowPolicy::match(message))
 	{
-		MsgConfigureSDRdaemonAutoFollowRate& conf = (MsgConfigureSDRdaemonAutoFollowRate&) message;
+        MsgConfigureSDRdaemonAutoFollowPolicy& conf = (MsgConfigureSDRdaemonAutoFollowPolicy&) message;
 		bool autoFollowRate = conf.autoFollowRate();
-		m_SDRdaemonUDPHandler->setAutoFollowRate(autoFollowRate);
+        bool autoCorrBuffer = conf.autoCorrBuffer();
+        if (autoFollowRate != m_autoFollowRate) {
+            m_SDRdaemonUDPHandler->setAutoFollowRate(autoFollowRate);
+            m_autoFollowRate = autoFollowRate;
+        }
+        if (autoCorrBuffer != m_autoCorrBuffer) {
+            m_SDRdaemonUDPHandler->setAutoCorrBuffer(autoCorrBuffer);
+            m_autoCorrBuffer = autoCorrBuffer;
+        }
 		return true;
 	}
+    else if (MsgConfigureSDRdaemonResetIndexes::match(message))
+    {
+        m_SDRdaemonUDPHandler->resetIndexes();
+        return true;
+    }
 	else if (MsgConfigureSDRdaemonWork::match(message))
 	{
 		MsgConfigureSDRdaemonWork& conf = (MsgConfigureSDRdaemonWork&) message;

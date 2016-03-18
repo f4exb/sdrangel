@@ -218,6 +218,7 @@ void SDRdaemonUDPHandler::tick()
     {
         m_throttlems = throttlems;
         m_readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+        m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
         m_readLength = m_readLengthSamples * SDRdaemonBuffer::m_iqSampleSize;
         m_throttleToggle = !m_throttleToggle;
     }
