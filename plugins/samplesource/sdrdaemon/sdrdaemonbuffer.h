@@ -90,15 +90,19 @@ public:
         {
             int32_t val = ((m_writeIndex - m_readIndex) * 100) / m_rawSize;
 
-            if (val < 0) {
-                return (val < -50 ? 100 - val : val);
+            if (val < -50) {
+            	return val + 100; // read leads (positive)
+            } else if (val < 0) {
+            	return val;       // write leads (negative)
+            } else if (val < 0.5) {
+            	return val;       // read leads (positive)
             } else {
-                return (val > 50 ? val - 100 : val);
+            	return val - 100; // write leads (negative)
             }
         }
         else
         {
-            return -50;
+            return -50; // default position
         }
     }
 
