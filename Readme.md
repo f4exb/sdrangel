@@ -47,7 +47,7 @@ If you use your own location for gr.osmocom install directory you need to specif
 
 `-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so -DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
 
-<h3>v4l-*</h3>
+<h3>v4l*</h3>
 
 Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
 
@@ -111,7 +111,7 @@ Note that this plugin does not require any of the hardware support libraries nor
 
 This is the client side of the SDRdaemon server. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the address and UDP port to which the server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency.
 
-There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second. 
+There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
 
@@ -188,16 +188,91 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
   - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
-  
+
 <h2>Windows</h2>
 
-This is new in version 1.1.3 and also experimental. Use at your own risk! It was tested successfully in native Windows 7 and 10 however it does not work in a Virtualbox guest supposedly because it implements OpenGL ES 2.0 instead of the desktop version (OpenGL 4.3) when running native and I think the OpenGL code in SDRangel is still mot quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
+<h3>Introduction</h3>
 
-There are no plugins to interface to SDR hardware directly you have either to use an IQ record file with the File input plugin or receive live samples with the SDRdaemon input plugin from a SDRdaemon utility running on a machine somewhere on the network. For example you can have an instance of SDRdaemon running on a Raspberry Pi that interfaces with a RTL-SDR dongle.
+This is new in version 1.1.3 and also experimental. Use at your own risk! It was tested successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it implements OpenGL ES 2.0 instead of the desktop version (OpenGL 4.3) when running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
 
-The audio is quite choppy however the channel analyzer and the main spectrum display work correctly.
+There is no plugin   to interface to BladeRF hardware directly due to the complexity of building `libbladerf` for Windows. You will have to receive live samples with the SDRdaemon input plug-in from a SDRdaemon utility running on a machine somewhere on the network. For example you can have an instance of SDRdaemon running on a Raspberry Pi that interfaces with BladeRF. This will also work with any SDRdaemon supported hardware.
 
-You will have to use QtCreator and its environment for that purpose. Build was done with the `Desktop_Qt_5_5_1_MinGW_32bit` toolchain. Some other flavours might work. Please refer to Qt documentation for Qt Creator details. Basically you open the project by selecting the `sdrangel.windows.pro` file in the source root directory and run the `build` command from the menu. This will eventually produce the `sdrangel.exe` executable and dependent library and plugin DLLs in various parts of the build directory.
+The SDRdaemon plug-in does not work as smoothly as it does in Linux. This is mainly due to the fact that the scheduler of Windows (any version) is not as good as the Linux one even when not running a real time version. You will have to experiment with the auto read/write balance (`B` button in the GUI) and your mileage may also vary.
+
+<h3>Build environment</h3>
+
+You will have to use QtCreator and its environment for that purpose. Build was done with the `Desktop_Qt_5_5_1_MinGW_32bit` tool-chain. Some other flavors might work. Please refer to Qt documentation for Qt Creator details.
+
+You will need to add `CONFIG+=MINGW32` to the `qmake` options. In QtCreator open the `Projects` menu (the file icon on the left bar) and in the `Build steps` section open the `qmake` details collapsed section (click on the caret icon). Choose the build configuration for which you run the build (`debug` or `release`) and add `CONFIG+=MINGW32` to the `Additional arguments` line.
+
+<h3>Dependencies</h3>
+
+<h4>Boost</h4>
+
+You only really need the Boost headers so there is no need to compile Boost itself. Just download an archive from the Boost website and unpack it somewhere. In our example it will be installed in `D:\boost_1_58_0`.
+
+You then need to update the .pro files that depend on Boost. They are:
+
+  - `sdrbase\sdrbase.pro`
+  - `plugins\channel\chanalyzer\chanalyzer.pro`
+
+Just update the following line with the location of your Boost installation:
+
+  - `CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"`
+
+<h4>USB support (libusb)</h4>
+
+You have to download an archive of libusb that supports MinGW32 from the following [location](https://sourceforge.net/projects/libusb/files/libusb-1.0/). You will have the choice among various versions and various archive formats in each version folder. It works with version `1.0.19` and is untested with later version(s). In our example it will be installed in `D:\libusb-1.0.19`.
+
+You then need to update the .pro files that depend on libusb. They are:
+
+  - `libairspy\libairspy.pro`
+  - `libhackrf\libhackrf.pro`
+  - `librtlsdr\librtlsdr.pro`
+
+Just update the following lines with the location of your libusb installation:
+
+  - `CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"`
+  - `CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0`
+
+<h4>Airspy library (libairspy)</h4>
+
+Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\libairspy`. Copy the header files (`*.h`) from `D:\softs\libairspy\libairspy\src` to the directory above (`D:\softs\libairspy\libairspy`).
+
+You then need to update the .pro files that depend on libairspy. They are:
+
+  - `libairspy\libairspy.pro`. Update the following line with the location of your libiarspy installation:
+    - `CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"`
+  - `plugins\samplesource\airspy\airspy.pro`. Update the following line with the location of your libiarspy installation:
+    - `CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy"`
+
+<h4>HackRF library (libhackrf)</h4>
+
+Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\hackrf`. Copy the header files (`*.h`) from `D:\softs\hackrf\host\libhackrf\src` to the directory above (`D:\softs\hackrf\host\libhackrf`).
+
+You then need to update the .pro files that depend on libhackrf. They are:
+
+  - `libhackrf\libhackrf.pro`. Update the following line with the location of your libhackrf installation:
+    - `CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host\libhackrf"`
+  - `plugins\samplesource\hackrf\hackrf.pro`. Update the following line with the location of your libhackrf installation:
+    - `CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"`
+
+<h4>RTL-SDR library (librtlsdr)</h4>
+
+Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\librtlsdr`.
+
+You then need to update the .pro files that depend on librtlsdr. They are:
+
+  - `librtlsdr\librtlsdr.pro`. Update the following line with the location of your librtlsdr installation:
+    - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
+  - `plugins\samplesource\rtlsdr\rtlsdr.pro`. Update the following line with the location of your librtlsdr installation:
+    - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
+
+<h3>Build</h3>
+
+Basically you open the project in QtCreator by selecting the `sdrangel.windows.pro` file in the source root directory and run the `build` command from the menu. This will eventually produce the `sdrangel.exe` executable and dependent library and plug-in DLLs in various parts of the build directory. See the Installation paragraph next for details on installing all files in a single place.
+
+<h3>Installation</h3>
 
 Then comes the tedious part of packaging everything in a single place so that you will just have to click on `sdrangel.exe` in the file explorer to start. Please follow the next steps for this purpose.
 
@@ -209,6 +284,10 @@ Then comes the tedious part of packaging everything in a single place so that yo
   - This copies all dependencies for Qt but alas nothing from our software so you will have to do this yourself. In the same console cd to the root of the build directory and type:
     - `D:\development\sdrangel\windows.install.bat release D:\Programs\sdrangel`
     - use `debug` in the place of `release` if you built the debug version
+
+<h3>Running</h3>
+
+You will need to install Zadig to get USB support for hardware devices. Please refer to [Zadig website](http://zadig.akeo.ie/) for details. Basically if you get things working for SDR# or HDSDR then it will work with SDRangel.
 
 
 <h1>Software installation on Linux flavours</h1>
@@ -244,7 +323,7 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
   - Headless mode based on a saved configuration in above human readable form
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
-  - Level calibration 
+  - Level calibration
   - Even more demods ...
 
 <h1>Developper's notes</h1>
@@ -302,4 +381,3 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxsrcgui.h/cpp` : Interface GUI
         - `xxxsrcplugin/h/cpp` : Interface plugin manager
         - `xxxsrc.pro` : Qt .pro file for Windows/Android build
-        
