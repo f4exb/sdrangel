@@ -191,13 +191,15 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 <h2>Windows</h2>
 
-<h3>Introduction</h3>
+<h3>Introduction, limitations, warnings...</h3>
 
-This is new in version 1.1.3 and also experimental. Use at your own risk! It was tested successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it implements OpenGL ES 2.0 instead of the desktop version (OpenGL 4.3) when running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
+This is new in version 1.1.3 and also experimental. Use at your own risk! This may or may not work on your machine and version of Windows. It was tested more or less successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it uses OpenGL ES 2.0 instead of the OpenGL desktop version (OpenGL 4.3) when it is running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
 
-There is no plugin   to interface to BladeRF hardware directly due to the complexity of building `libbladerf` for Windows. You will have to receive live samples with the SDRdaemon input plug-in from a SDRdaemon utility running on a machine somewhere on the network. For example you can have an instance of SDRdaemon running on a Raspberry Pi that interfaces with BladeRF. This will also work with any SDRdaemon supported hardware.
+You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned!
 
-The SDRdaemon plug-in does not work as smoothly as it does in Linux. This is mainly due to the fact that the scheduler of Windows (any version) is not as good as the Linux one even when not running a real time version. You will have to experiment with the auto read/write balance (`B` button in the GUI) and your mileage may also vary.
+There is no plug-in to interface to BladeRF hardware due to the complexity of building `libbladerf` for Windows.
+
+The SDRdaemon plug-in does not work correctly mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). This plug-in cannot rely on the pace of incoming UDP packets so it will use a timer (QTimer) to get the right pace for the given sample rate. Since the timing is not reliable on Windows this translates into a large read/write drift on the incoming data buffer (watch the buffer gauges in the GUI) and eventually the read pointer walks over the buffer tail or head which is the same since it is a circular buffer. If you can't live with this drift you will have to experiment with the auto read/write balance (`B` button in the GUI) and your mileage may vary in some cases it can even crash (Pipo-X8 with Windows 8).
 
 <h3>Build environment</h3>
 

@@ -42,7 +42,7 @@ public:
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void setAutoFollowRate(bool autoFollowRate) { m_sdrDaemonBuffer.setAutoFollowRate(autoFollowRate); }
-    void setAutoCorrBuffer(bool autoCorrBuffer) { m_sdrDaemonBuffer.setAutoCorrBuffer(autoCorrBuffer); }
+    void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; m_sdrDaemonBuffer.setAutoCorrBuffer(autoCorrBuffer); }
     void resetIndexes() { m_sdrDaemonBuffer.setResetIndexes(); }
 public slots:
 	void dataReadyRead();
@@ -71,6 +71,7 @@ private:
     uint32_t m_readLength;
     bool m_throttleToggle;
     int m_rateDivider;
+    bool m_autoCorrBuffer;
 
 	void setSamplerate(uint32_t samplerate);
 	void processData();

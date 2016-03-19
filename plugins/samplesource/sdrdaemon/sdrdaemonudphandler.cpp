@@ -44,7 +44,8 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
     m_readLengthSamples(0),
     m_readLength(0),
     m_throttleToggle(false),
-    m_rateDivider(1000/SDRDAEMON_THROTTLE_MS)
+    m_rateDivider(1000/SDRDAEMON_THROTTLE_MS),
+	m_autoCorrBuffer(false)
 {
     m_udpBuf = new char[SDRdaemonBuffer::m_udpPayloadSize];
 }
@@ -221,6 +222,10 @@ void SDRdaemonUDPHandler::tick()
         m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
         m_readLength = m_readLengthSamples * SDRdaemonBuffer::m_iqSampleSize;
         m_throttleToggle = !m_throttleToggle;
+    }
+
+    if (m_autoCorrBuffer) {
+    	m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
 	// read samples directly feeding the SampleFifo (no callback)
