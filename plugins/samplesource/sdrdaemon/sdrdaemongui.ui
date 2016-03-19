@@ -241,6 +241,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_freq_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
       <widget class="QToolButton" name="streamLocked">
@@ -396,13 +403,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_freq_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="Line" name="line_rateTime">

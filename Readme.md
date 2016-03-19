@@ -195,7 +195,7 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 This is new in version 1.1.3 and also experimental. Use at your own risk! This may or may not work on your machine and version of Windows. It was tested more or less successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it uses OpenGL ES 2.0 instead of the OpenGL desktop version (OpenGL 4.3) when it is running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
 
-You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned!
+You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel process does not take more than 35% of the global CPU (check with Task Manager). Unload channel plugins if necessary. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned! 
 
 There is no plug-in to interface to BladeRF hardware due to the complexity of building `libbladerf` for Windows.
 

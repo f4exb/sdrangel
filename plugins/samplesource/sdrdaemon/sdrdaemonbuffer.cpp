@@ -269,6 +269,15 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
             }
 
             m_balCorrection += dBytes / (int32_t) (m_nbReads * m_iqSampleSize); // correction is in number of samples
+            int32_t limit = (int32_t) m_rawSize / (int32_t) (5 * m_rawBufferLengthSeconds * m_iqSampleSize);
+
+            if (m_balCorrection < -limit) {
+            	m_balCorrection = -limit;
+            } else if (m_balCorrection > limit) {
+            	m_balCorrection = limit;
+            }
+
+
             m_nbReads = 0;
         }
         else
