@@ -64,9 +64,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
     m_readCount(0),
     m_writeCount(0),
     m_nbCycles(0),
-    m_readCountBal(0),
-    m_writeCountBal(0),
-    m_nbReadsBal(0)
+    m_nbReads(0)
 {
 	m_currentMeta.init();
 }
@@ -260,13 +258,18 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
         m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
         m_nbCycles++;
         // auto R/W balance calculation
-        if (m_nbReadsBal && m_autoCorrBuffer)
+        if (m_nbReads && m_autoCorrBuffer)
         {
-            int32_t dBytes = (m_writeCountBal - m_readCountBal) / m_nbReadsBal;
-            m_balCorrection += dBytes / (int32_t) m_iqSampleSize;
-            m_readCountBal = 0;
-            m_writeCountBal = 0;
-            m_nbReadsBal = 0;
+            int32_t dBytes;
+
+            if (m_readIndex > m_writeIndex) { // write leads
+                dBytes = m_writeIndex; // positive from start of buffer
+            } else { // read leads
+                dBytes = m_writeIndex - (int32_t) m_rawSize; // negative from end of buffer
+            }
+
+            m_balCorrection += dBytes / (int32_t) (m_nbReads * m_iqSampleSize); // correction is in number of samples
+            m_nbReads = 0;
         }
         else
         {
@@ -277,8 +280,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
     }
 
     m_readCount += length;
-    m_readCountBal += length;
-    m_nbReadsBal++;
+    m_nbReads++;
 
 	if (m_readIndex + length < m_rawSize)
 	{
@@ -389,7 +391,6 @@ void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t l
 	}
 
     m_writeCount += length;
-    m_writeCountBal += length;
 }
 
 void SDRdaemonBuffer::resetIndexes()
@@ -401,9 +402,7 @@ void SDRdaemonBuffer::resetIndexes()
     m_nbCycles = 0;
     m_skewTest = false;
     m_skewCorrection = false;
-    m_readCountBal = 0;
-    m_writeCountBal = 0;
-    m_nbReadsBal = 0;
+    m_nbReads = 0;
     m_balCorrection = 0;
 }
 

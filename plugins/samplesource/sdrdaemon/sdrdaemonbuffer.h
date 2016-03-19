@@ -166,9 +166,7 @@ private:
     int64_t  m_writeCount;   //!< Number of bytes written for auto skew compensation
     uint32_t m_nbCycles;     //!< Number of buffer cycles since start of auto skew compensation byte counting
 
-    int64_t  m_readCountBal;  //!< Number of bytes read for auto R/W balance
-    int64_t  m_writeCountBal; //!< Number of bytes written for auto R/W balance
-    uint32_t m_nbReadsBal;    //!< Number of buffer reads since start of auto R/W balance byte counting
+    uint32_t m_nbReads;      //!< Number of buffer reads since start of auto R/W balance correction period
     int32_t  m_balCorrection; //!< R/W balance correction in number of samples
 };
 
