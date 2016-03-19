@@ -64,7 +64,9 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
     m_readCount(0),
     m_writeCount(0),
     m_nbCycles(0),
-    m_nbReads(0)
+    m_nbReads(0),
+    m_balCorrection(0),
+    m_balCorrLimit(0)
 {
 	m_currentMeta.init();
 }
@@ -95,6 +97,7 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 	if (rawSize != m_rawSize)
 	{
 		m_rawSize = rawSize;
+        m_balCorrLimit = sampleRate / 50; // +/- 20 ms correction max per read
 
 		if (m_rawBuffer) {
 			delete[] m_rawBuffer;
@@ -269,14 +272,13 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
             }
 
             m_balCorrection += dBytes / (int32_t) (m_nbReads * m_iqSampleSize); // correction is in number of samples
-            int32_t limit = (int32_t) m_rawSize / (int32_t) (5 * m_rawBufferLengthSeconds * m_iqSampleSize);
+            int32_t corrLimit = (int32_t) m_rawSize / (int32_t) (10 * m_rawBufferLengthSeconds * m_iqSampleSize);
 
-            if (m_balCorrection < -limit) {
-            	m_balCorrection = -limit;
-            } else if (m_balCorrection > limit) {
-            	m_balCorrection = limit;
+            if (m_balCorrection < -m_balCorrLimit) {
+                m_balCorrection = -m_balCorrLimit;
+            } else if (m_balCorrection > m_balCorrLimit) {
+                m_balCorrection = m_balCorrLimit;
             }
-
 
             m_nbReads = 0;
         }

@@ -168,6 +168,7 @@ private:
 
     uint32_t m_nbReads;      //!< Number of buffer reads since start of auto R/W balance correction period
     int32_t  m_balCorrection; //!< R/W balance correction in number of samples
+    int32_t  m_balCorrLimit; //!< Correction absolute value limit in number of samples
 };
 
 
