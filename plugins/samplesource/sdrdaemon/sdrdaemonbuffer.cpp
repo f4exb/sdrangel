@@ -258,7 +258,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
         m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
         m_nbCycles++;
         // auto R/W balance calculation
-        if (m_nbReads && m_autoCorrBuffer)
+        if ((m_nbReads > 5*m_rawBufferLengthSeconds) && m_autoCorrBuffer)
         {
             int32_t dBytes;
 
