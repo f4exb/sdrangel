@@ -29,16 +29,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -187,7 +178,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Main buffer pointer positions: write leads read lags</string>
+        <string>Main buffer read/write positions unbalance: write leads read lags</string>
        </property>
        <property name="minimum">
         <number>0</number>
@@ -210,6 +201,22 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="bufferGaugeCenterDot">
+       <property name="maximumSize">
+        <size>
+         <width>2</width>
+         <height>10</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QProgressBar" name="bufferGaugePositive">
        <property name="maximumSize">
         <size>
@@ -218,7 +225,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Main buffer pointer positions: read leads write lags</string>
+        <string>Main buffer read/write positions unbalance: read leads write lags</string>
        </property>
        <property name="maximum">
         <number>50</number>
@@ -232,13 +239,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_freq_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
@@ -364,6 +364,25 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="bufferRWBalanceText">
+       <property name="minimumSize">
+        <size>
+         <width>22</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Main buffer read/write positions unbalance (%): positive means read leads</string>
+       </property>
+       <property name="text">
+        <string>-00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -377,6 +396,13 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_freq_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_rateTime">

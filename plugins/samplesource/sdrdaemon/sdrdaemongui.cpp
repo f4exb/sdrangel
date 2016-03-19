@@ -407,6 +407,9 @@ void SDRdaemonGui::updateWithStreamTime()
 	s = QString::number(m_nbLz4SuccessfulDecodes, 'f', 0);
 	ui->lz4DecodesOKText->setText(tr("%1").arg(s));
 
+	s = QString::number((m_bufferGauge < 0 ? 50 + m_bufferGauge : 50 - m_bufferGauge), 'f', 0);
+	ui->bufferRWBalanceText->setText(tr("%1").arg(s));
+
     ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? 50 + m_bufferGauge : 0));
     ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : 50 - m_bufferGauge));
 }
