@@ -111,6 +111,7 @@ public:
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;
 	static const int m_rawBufferLengthSeconds;
+	static const int m_rawBufferMinNbFrames; //!< Minimum number of frames for the length of buffer
 
 private:
 	void updateBufferSize(uint32_t sampleRate);

@@ -27,6 +27,7 @@ const int SDRdaemonBuffer::m_udpPayloadSize = 512;
 const int SDRdaemonBuffer::m_sampleSize = 2;
 const int SDRdaemonBuffer::m_iqSampleSize = 2 * m_sampleSize;
 const int SDRdaemonBuffer::m_rawBufferLengthSeconds = 8; // should be even
+const int SDRdaemonBuffer::m_rawBufferMinNbFrames = 50;
 
 SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_throttlemsNominal(throttlems),
@@ -95,6 +96,11 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 {
 	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
 
+	if ((m_frameSize > 0) && (rawSize / m_frameSize < m_rawBufferMinNbFrames))
+	{
+		rawSize = m_rawBufferMinNbFrames * m_frameSize; // ensure a minimal size of this times the write block size so that auto follow ups work fine
+	}
+
 	if (rawSize != m_rawSize)
 	{
 		m_rawSize = rawSize;
@@ -109,6 +115,7 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 
 		qDebug() << "SDRdaemonBuffer::updateBufferSize:"
 			<< " sampleRate: " << sampleRate
+			<< " m_frameSize: " << m_frameSize
 			<< " m_rawSize: " << m_rawSize;
 	}
 }
@@ -221,7 +228,11 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 				m_lz4 = false;
 			}
 
-			m_frameSize = frameSize;
+			if (frameSize != m_frameSize) {
+				m_frameSize = frameSize;
+				updateBufferSize(m_sampleRate);
+			}
+
 			m_sync = true;
 		}
 		else
