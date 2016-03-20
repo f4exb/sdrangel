@@ -207,6 +207,7 @@ public:
 		uint32_t get_tv_usec() const { return m_tv_usec; }
 		bool getSyncLock() const { return m_syncLock; }
 		uint32_t getFrameSize() const { return m_frameSize; }
+		float getBufferLengthInSecs() const { return m_bufferLenSec; }
 		bool getLz4Compression() const { return m_lz4; }
 		float getLz4CompressionRatio() const { return m_compressionRatio; }
 		uint32_t getLz4DataCRCOK() const  { return m_nbLz4CRCOK; }
@@ -217,6 +218,7 @@ public:
 				uint32_t tv_usec,
 				bool syncLock,
 				uint32_t frameSize,
+				float bufferLenSec,
 				bool lz4,
 				float compressionRatio,
 				uint32_t nbLz4CRCOK,
@@ -227,6 +229,7 @@ public:
 					tv_usec,
 					syncLock,
 					frameSize,
+					bufferLenSec,
 					lz4,
 					compressionRatio,
 					nbLz4CRCOK,
@@ -239,6 +242,7 @@ public:
 		uint32_t m_tv_usec;
 		bool m_syncLock;
 		uint32_t m_frameSize;
+		float m_bufferLenSec;
 		bool m_lz4;
 		float m_compressionRatio;
 		uint32_t m_nbLz4CRCOK;
@@ -249,6 +253,7 @@ public:
 				uint32_t tv_usec,
 				bool syncLock,
 				uint32_t frameSize,
+				float bufferLenSec,
 				bool lz4,
 				float compressionRatio,
 				uint32_t nbLz4CRCOK,
@@ -259,6 +264,7 @@ public:
 			m_tv_usec(tv_usec),
 			m_syncLock(syncLock),
 			m_frameSize(frameSize),
+			m_bufferLenSec(bufferLenSec),
 			m_lz4(lz4),
 			m_compressionRatio(compressionRatio),
 			m_nbLz4CRCOK(nbLz4CRCOK),

@@ -78,6 +78,7 @@ public:
 	float getCompressionRatio() const { return (m_frameSize > 0 ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
 	uint32_t getLz4DataCRCOK() const { return m_nbLastLz4CRCOK; }
 	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
+	float getBufferLengthInSecs() const { return m_bufferLenSec; }
 	void setAutoFollowRate(bool autoFollowRate) { m_autoFollowRate = autoFollowRate; }
     void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; }
     void setResetIndexes() { m_resetIndexes = true; }
@@ -146,6 +147,7 @@ private:
     uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
     uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
+    float    m_bufferLenSec; //!< Raw buffer length in seconds
     uint32_t m_nbLz4Decodes;
     uint32_t m_nbLz4SuccessfulDecodes;
     uint32_t m_nbLz4CRCOK;

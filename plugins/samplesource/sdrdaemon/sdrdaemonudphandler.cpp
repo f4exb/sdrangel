@@ -244,6 +244,7 @@ void SDRdaemonUDPHandler::tick()
 			m_tv_usec,
 			m_sdrDaemonBuffer.isSyncLocked(),
 			m_sdrDaemonBuffer.getFrameSize(),
+			m_sdrDaemonBuffer.getBufferLengthInSecs(),
 			m_sdrDaemonBuffer.isLz4Compressed(),
 			m_sdrDaemonBuffer.getCompressionRatio(),
 			m_sdrDaemonBuffer.getLz4DataCRCOK(),

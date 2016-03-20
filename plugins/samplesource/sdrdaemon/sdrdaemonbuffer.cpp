@@ -49,6 +49,7 @@ SDRdaemonBuffer::SDRdaemonBuffer(uint32_t throttlems) :
 	m_lz4InBuffer(0),
 	m_lz4OutBuffer(0),
 	m_frameSize(0),
+	m_bufferLenSec(0.0),
 	m_nbLz4Decodes(0),
 	m_nbLz4SuccessfulDecodes(0),
 	m_nbLz4CRCOK(0),
@@ -105,6 +106,7 @@ void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 	{
 		m_rawSize = rawSize;
         m_balCorrLimit = sampleRate / 50; // +/- 20 ms correction max per read
+        m_bufferLenSec = m_rawSize / (sampleRate * m_iqSampleSize);
 
 		if (m_rawBuffer) {
 			delete[] m_rawBuffer;

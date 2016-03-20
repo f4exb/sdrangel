@@ -65,6 +65,7 @@ private:
 	float m_compressionRatio;
 	uint32_t m_nbLz4DataCRCOK;
 	uint32_t m_nbLz4SuccessfulDecodes;
+	float m_bufferLengthInSecs;
 
     int32_t m_bufferGauge;
 	int m_samplesCount;
