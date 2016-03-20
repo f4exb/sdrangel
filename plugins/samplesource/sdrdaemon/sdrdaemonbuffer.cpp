@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <cassert>
 #include <cstring>
+#include <cmath>
 #include <lz4.h>
 
 
@@ -264,28 +265,28 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
         if ((m_nbReads > 5*m_rawBufferLengthSeconds) && m_autoCorrBuffer)
         {
             int32_t dBytes;
+            int32_t dI = (m_rawSize / 2) - m_readIndex; // delta of read index to the middle of buffer (positive)
 
             if (m_readIndex > m_writeIndex) { // write leads
-                dBytes = m_writeIndex; // positive from start of buffer
+                dBytes = m_writeIndex + dI; // positive from start of buffer + delta read index
             } else { // read leads
-                dBytes = m_writeIndex - (int32_t) m_rawSize; // negative from end of buffer
+                dBytes = m_writeIndex - (int32_t) m_rawSize + dI; // negative from end of buffer minus delta read index
             }
 
-            m_balCorrection += dBytes / (int32_t) (m_nbReads * m_iqSampleSize); // correction is in number of samples
-            int32_t corrLimit = (int32_t) m_rawSize / (int32_t) (10 * m_rawBufferLengthSeconds * m_iqSampleSize);
+            m_balCorrection = (m_balCorrection / 4) + ((int32_t) dBytes / (int32_t) (m_nbReads * m_iqSampleSize)); // correction is in number of samples. Alpha = 0.25
 
             if (m_balCorrection < -m_balCorrLimit) {
                 m_balCorrection = -m_balCorrLimit;
             } else if (m_balCorrection > m_balCorrLimit) {
                 m_balCorrection = m_balCorrLimit;
             }
-
-            m_nbReads = 0;
         }
         else
         {
             m_balCorrection = 0;
         }
+
+        m_nbReads = 0;
         // un-arm
         m_skewTest = false;
     }
