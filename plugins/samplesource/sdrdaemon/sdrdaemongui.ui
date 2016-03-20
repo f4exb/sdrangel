@@ -516,6 +516,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Main buffer lenth in seconds</string>
+       </property>
        <property name="text">
         <string>00.0</string>
        </property>
