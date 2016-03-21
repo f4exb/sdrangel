@@ -29,6 +29,8 @@
 
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
+const Real BFMDemod::default_deemphasis = 50.0; // 50 us
+
 BFMDemod::BFMDemod(SampleSink* sampleSink, RDSParser *rdsParser) :
 	m_sampleSink(sampleSink),
 	m_rdsParser(rdsParser),
