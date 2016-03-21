@@ -139,8 +139,8 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_sampleBuffer.push_back(Sample(avgr, avgi));
 				}
 
-				m_sum.real() = 0.0;
-				m_sum.imag() = 0.0;
+                m_sum.real(0.0);
+                m_sum.imag(0.0);
 			}
 
 			if (m_audioBinaual)
