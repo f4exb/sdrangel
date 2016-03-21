@@ -214,7 +214,7 @@ private:
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
-    static constexpr Real default_deemphasis = 50.0; // 50 us
+    static const Real default_deemphasis = 50.0; // 50 us
 
 	Real m_fmExcursion;
 	static const int default_excursion = 750000; // +/- 75 kHz
