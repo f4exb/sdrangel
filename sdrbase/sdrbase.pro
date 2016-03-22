@@ -13,7 +13,7 @@ INCLUDEPATH += $$PWD
 
 DEFINES += USE_KISSFFT=1
 
-CONFIG(ANDROID):INCLUDEPATH += /opt/build/Boost-for-Android-Prebuilt/boost_1_53_0/include
+CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
 
 SOURCES += mainwindow.cpp\
