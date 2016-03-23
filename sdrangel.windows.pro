@@ -10,6 +10,7 @@ SUBDIRS += lz4
 SUBDIRS += librtlsdr
 SUBDIRS += libhackrf
 SUBDIRS += libairspy
+SUBDIRS += libbladerf
 SUBDIRS += plugins/samplesource/filesource
 SUBDIRS += plugins/samplesource/sdrdaemon
 SUBDIRS += plugins/samplesource/rtlsdr
