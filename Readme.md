@@ -197,7 +197,7 @@ This is new in version 1.1.3 and also experimental. Use at your own risk! This m
 
 You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel.exe process does not take more than 35% of the global CPU (check this with Task Manager). Unload channel plugins if necessary. Promoting sdrangel.exe process to real time via Task Manager may or may not help but usually not. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned! 
 
-There is no plug-in to interface to BladeRF hardware due to the complexity of building `libbladerf` for Windows. There are no plugins for both flavours of Funcubes either since it uses Alsa interface which is Linux exclusively.
+There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
 
 The SDRdaemon plug-in does not work mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). It is kept there only to demonstrate how a crippled OS is Windows. If you want to use this plugin get yourself a decent OS first i.e. Linux.
 
@@ -231,6 +231,7 @@ You then need to update the .pro files that depend on libusb. They are:
   - `libairspy\libairspy.pro`
   - `libhackrf\libhackrf.pro`
   - `librtlsdr\librtlsdr.pro`
+  - `libbladerf\libbladerf.pro`
 
 Just update the following lines with the location of your libusb installation:
 
@@ -269,6 +270,17 @@ You then need to update the .pro files that depend on librtlsdr. They are:
     - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
   - `plugins\samplesource\rtlsdr\rtlsdr.pro`. Update the following line with the location of your librtlsdr installation:
     - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
+
+<h4>BladeRF library (libbladerf)</h4>
+
+You need to download the 1.5.1 version specifically that is found [here](https://github.com/Nuand/bladeRF/archive/libbladeRF_v1.5.1.zip). Unzip it somewhere say in `D:\softs` So it will be installed in `D:\softs\bladeRF-libbladeRF_v1.5.1`. If you installation directory is different you need to update the dependent .pro files:
+
+  - `libbladerf\libbladerf.pro`, update the following lines with the location of your bladeRF installation:
+    - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1"`
+    - `CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1\host\common"`
+    - `CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1\host\libraries\libbladeRF"`
+  - `plugins\samplesource\bladerf\bladerf.pro`. Update the following line with the location of your BladeRF installation:
+    - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"`
 
 <h3>Build</h3>
 
