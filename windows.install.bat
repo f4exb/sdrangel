@@ -25,3 +25,4 @@ copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesourc
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrf\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
+copy plugins\samplesource\bladerf\%1\inputbladerf.dll %2\plugins\samplesource
