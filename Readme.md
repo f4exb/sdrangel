@@ -197,7 +197,7 @@ This is new in version 1.1.3 and also experimental. Use at your own risk! This m
 
 You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel.exe process does not take more than 35% of the global CPU (check this with Task Manager). Unload channel plugins if necessary. Promoting sdrangel.exe process to real time via Task Manager may or may not help but usually not. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned! 
 
-There is no plug-in to interface to BladeRF hardware due to the complexity of building `libbladerf` for Windows.
+There is no plug-in to interface to BladeRF hardware due to the complexity of building `libbladerf` for Windows. There are no plugins for both flavours of Funcubes either since it uses Alsa interface which is Linux exclusively.
 
 The SDRdaemon plug-in does not work mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). It is kept there only to demonstrate how a crippled OS is Windows. If you want to use this plugin get yourself a decent OS first i.e. Linux.
 
@@ -290,6 +290,11 @@ Then comes the tedious part of packaging everything in a single place so that yo
 <h3>Running</h3>
 
 You will need to install Zadig to get USB support for hardware devices. Please refer to [Zadig website](http://zadig.akeo.ie/) for details. Basically if you get things working for SDR# or HDSDR then it will work with SDRangel.
+
+
+<h1>Android</h1>
+
+Despite several attempts and the presence of Android related stuff still present in the .pro files there is NO and will NEVER be any support for Android. An APK can be built but Qt fails miserably at porting applications other than its ridiculously simple examples. When multi-threading is involved a lot like in SDRangel this simply crashes at the very beginning of the application when starting the event loop.
 
 
 <h1>Software installation on Linux flavours</h1>
