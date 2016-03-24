@@ -7,6 +7,8 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += lz4
+SUBDIRS += fcdhid
+SUBDIRS += fcdlib
 SUBDIRS += librtlsdr
 SUBDIRS += libhackrf
 SUBDIRS += libairspy
