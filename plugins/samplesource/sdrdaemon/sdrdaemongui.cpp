@@ -14,13 +14,21 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDebug>
+#include <stdint.h>
+#include <sstream>
+#include <iostream>
+#include <cassert>
 
+#include <QDebug>
+#include <QMessageBox>
 #include <QTime>
 #include <QDateTime>
 #include <QString>
 #include <QFileDialog>
-#include <stdint.h>
+
+#include <nanomsg/nn.h>
+#include <nanomsg/pair.h>
+
 #include "ui_sdrdaemongui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
@@ -50,7 +58,11 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_address("127.0.0.1"),
-	m_port(9090),
+	m_dataPort(9090),
+	m_controlPort(9091),
+	m_addressEdited(false),
+	m_dataPortEdited(false),
+	m_initSendConfiguration(false),
 	m_dcBlock(false),
 	m_iqCorrection(false),
 	m_autoFollowRate(false)
@@ -69,6 +81,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 	ui->applyButton->setEnabled(false);
+	ui->sendButton->setEnabled(false);
 }
 
 SDRdaemonGui::~SDRdaemonGui()
@@ -94,7 +107,9 @@ QString SDRdaemonGui::getName() const
 void SDRdaemonGui::resetToDefaults()
 {
 	m_address = "127.0.0.1";
-	m_port = 9090;
+	m_remoteAddress = "127.0.0.1";
+	m_dataPort = 9090;
+	m_controlPort = 9091;
 	m_dcBlock = false;
 	m_iqCorrection = false;
 	m_autoFollowRate = false;
@@ -107,7 +122,7 @@ QByteArray SDRdaemonGui::serialize() const
 	SimpleSerializer s(1);
 
 	s.writeString(1, ui->address->text());
-	uint32_t uintval = ui->port->text().toInt(&ok);
+	uint32_t uintval = ui->dataPort->text().toInt(&ok);
 
 	if((!ok) || (uintval < 1024) || (uintval > 65535)) {
 		uintval = 9090;
@@ -119,6 +134,31 @@ QByteArray SDRdaemonGui::serialize() const
 	s.writeBool(5, m_autoFollowRate);
     s.writeBool(6, m_autoCorrBuffer);
 
+	uintval = ui->controlPort->text().toInt(&ok);
+
+	if((!ok) || (uintval < 1024) || (uintval > 65535)) {
+		uintval = 9091;
+	}
+
+	s.writeU32(7, uintval);
+
+	uint32_t confFrequency = ui->freq->text().toInt(&ok);
+
+	if (ok) {
+		s.writeU32(8, confFrequency);
+	}
+
+	s.writeU32(9,  ui->decim->currentIndex());
+	s.writeU32(10,  ui->fcPos->currentIndex());
+
+	uint32_t sampleRate = ui->sampleRate->text().toInt(&ok);
+
+	if (ok) {
+		s.writeU32(11, sampleRate);
+	}
+
+	s.writeString(12, ui->specificParms->text());
+
 	return s.final();
 }
 
@@ -127,11 +167,16 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 	SimpleDeserializer d(data);
 	QString address;
 	uint32_t uintval;
-	quint16 port;
+	quint16 dataPort;
 	bool dcBlock;
 	bool iqCorrection;
 	bool autoFollowRate;
     bool autoCorrBuffer;
+    uint32_t confFrequency;
+    uint32_t confSampleRate;
+    uint32_t confDecim;
+    uint32_t confFcPos;
+    QString confSpecificParms;
 
 	if (!d.isValid())
 	{
@@ -147,20 +192,33 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 		d.readU32(2, &uintval, 9090);
 
 		if ((uintval > 1024) && (uintval < 65536)) {
-			port = uintval;
+			dataPort = uintval;
 		} else {
-			port = 9090;
+			dataPort = 9090;
 		}
 
 		d.readBool(3, &dcBlock, false);
 		d.readBool(4, &iqCorrection, false);
 		d.readBool(5, &autoFollowRate, false);
         d.readBool(6, &autoCorrBuffer, false);
+		d.readU32(7, &uintval, 9091);
 
-		if ((address != m_address) || (port != m_port))
+		if ((uintval > 1024) && (uintval < 65536)) {
+			m_controlPort = uintval;
+		} else {
+			m_controlPort = 9091;
+		}
+
+		d.readU32(8, &confFrequency, 435000);
+		d.readU32(9, &confDecim, 3);
+		d.readU32(10, &confFcPos, 2);
+		d.readU32(11, &confSampleRate, 1000);
+		d.readString(12, &confSpecificParms, "");
+
+		if ((address != m_address) || (dataPort != m_dataPort))
 		{
 			m_address = address;
-			m_port = port;
+			m_dataPort = dataPort;
 			configureUDPLink();
 		}
 
@@ -179,12 +237,17 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 		}
 
 		displaySettings();
+		displayConfigurationParameters(confFrequency, confDecim, confFcPos, confSampleRate, confSpecificParms);
+		m_initSendConfiguration = true;
 		return true;
 	}
 	else
 	{
 		resetToDefaults();
 		displaySettings();
+		QString defaultSpecificParameters("");
+		displayConfigurationParameters(435000, 3, 2, 1000, defaultSpecificParameters);
+		m_initSendConfiguration = true;
 		return false;
 	}
 }
@@ -264,38 +327,119 @@ void SDRdaemonGui::handleSourceMessages()
 void SDRdaemonGui::displaySettings()
 {
 	ui->address->setText(m_address);
-	ui->port->setText(QString::number(m_port));
+	ui->dataPort->setText(QString::number(m_dataPort));
+	ui->controlPort->setText(QString::number(m_controlPort));
 	ui->dcOffset->setChecked(m_dcBlock);
 	ui->iqImbalance->setChecked(m_iqCorrection);
 	ui->autoFollowRate->setChecked(m_autoFollowRate);
     ui->autoCorrBuffer->setChecked(m_autoCorrBuffer);
 }
 
+void SDRdaemonGui::displayConfigurationParameters(uint32_t freq,
+		uint32_t log2Decim,
+		uint32_t fcPos,
+		uint32_t sampleRate,
+		QString& specParms)
+{
+	ui->freq->setText(QString::number(freq));
+	ui->decim->setCurrentIndex(log2Decim);
+	ui->fcPos->setCurrentIndex(fcPos);
+	ui->sampleRate->setText(QString::number(sampleRate));
+	ui->specificParms->setText(specParms);
+	ui->specificParms->setCursorPosition(0);
+}
+
 void SDRdaemonGui::on_applyButton_clicked(bool checked)
 {
-	bool ok;
+	bool dataOk, ctlOk;
 	QString udpAddress = ui->address->text();
-	int udpPort = ui->port->text().toInt(&ok);
+	int udpDataPort = ui->dataPort->text().toInt(&dataOk);
+	int tcpCtlPort = ui->controlPort->text().toInt(&ctlOk);
 
-	if((!ok) || (udpPort < 1024) || (udpPort > 65535))
+	if((!dataOk) || (udpDataPort < 1024) || (udpDataPort > 65535))
 	{
-		udpPort = 9090;
+		udpDataPort = 9090;
+	}
+
+	if((!ctlOk) || (tcpCtlPort < 1024) || (tcpCtlPort > 65535))
+	{
+		tcpCtlPort = 9091;
 	}
 
 	m_address = udpAddress;
-	m_port = udpPort;
+	m_dataPort = udpDataPort;
+	m_controlPort = tcpCtlPort;
 
-	configureUDPLink();
+	if (m_addressEdited || m_dataPortEdited)
+	{
+		configureUDPLink();
+		m_addressEdited = false;
+		m_dataPortEdited = false;
+	}
 
 	ui->applyButton->setEnabled(false);
+}
+
+void SDRdaemonGui::on_sendButton_clicked(bool checked)
+{
+	sendConfiguration();
+	ui->sendButton->setEnabled(false);
+}
+
+void SDRdaemonGui::sendConfiguration()
+{
+	QString remoteAddress;
+	((SDRdaemonInput *) m_sampleSource)->getRemoteAddress(remoteAddress);
+
+	if (remoteAddress != m_remoteAddress)
+	{
+		m_remoteAddress = remoteAddress;
+	}
+
+	std::ostringstream os;
+	bool ok;
+
+	os << "decim=" << ui->decim->currentIndex()
+	   << ",fcpos=" << ui->fcPos->currentIndex();
+
+	uint64_t freq = ui->freq->text().toInt(&ok);
+
+	if (ok) {
+		os << ",freq=" << freq*1000LL;
+	} else {
+		QMessageBox::information(this, tr("Message"), tr("Invalid frequency"));
+	}
+
+	uint32_t srate = ui->sampleRate->text().toInt(&ok);
+
+	if (ok) {
+		os << ",srate=" << srate*1000;
+	} else {
+		QMessageBox::information(this,  tr("Message"), tr("invalid sample rate"));
+	}
+
+	if ((ui->specificParms->text()).size() > 0) {
+		os << "," << ui->specificParms->text().toStdString();
+	}
+
+	qDebug() << "SDRdaemonGui::sendConfiguration:"
+		<< " remoteAddress: " << remoteAddress
+		<< " message: " << os.str().c_str();
 }
 
 void SDRdaemonGui::on_address_textEdited(const QString& arg1)
 {
 	ui->applyButton->setEnabled(true);
+	m_addressEdited = true;
 }
 
-void SDRdaemonGui::on_port_textEdited(const QString& arg1)
+void SDRdaemonGui::on_dataPort_textEdited(const QString& arg1)
+{
+	ui->applyButton->setEnabled(true);
+	m_dataPortEdited = true;
+}
+
+void SDRdaemonGui::on_controlPort_textEdited(const QString& arg1)
 {
 	ui->applyButton->setEnabled(true);
 }
@@ -340,12 +484,38 @@ void SDRdaemonGui::on_resetIndexes_clicked(bool checked)
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
+void SDRdaemonGui::on_freq_textEdited(const QString& arg1)
+{
+	ui->sendButton->setEnabled(true);
+}
+
+void SDRdaemonGui::on_sampleRate_textEdited(const QString& arg1)
+{
+	ui->sendButton->setEnabled(true);
+}
+
+void SDRdaemonGui::on_specificParms_textEdited(const QString& arg1)
+{
+	ui->sendButton->setEnabled(true);
+}
+
+void SDRdaemonGui::on_decim_currentIndexChanged(int index)
+{
+	ui->sendButton->setEnabled(true);
+}
+
+void SDRdaemonGui::on_fcPos_currentIndexChanged(int index)
+{
+	ui->sendButton->setEnabled(true);
+}
+
+
 void SDRdaemonGui::configureUDPLink()
 {
 	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_address.toStdString().c_str()
-			<< " : " << m_port;
+			<< " : " << m_dataPort;
 
-	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(m_address, m_port);
+	SDRdaemonInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonInput::MsgConfigureSDRdaemonUDPLink::create(m_address, m_dataPort);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
@@ -376,6 +546,12 @@ void SDRdaemonGui::updateWithStreamData()
 	QString s2 = QString::number(skewPerCent, 'f', 2);
 	ui->skewRateText->setText(tr("%1").arg(s2));
 	updateWithStreamTime();
+
+	if (m_initSendConfiguration)
+	{
+		sendConfiguration();
+		m_initSendConfiguration = false;
+	}
 }
 
 void SDRdaemonGui::updateWithStreamTime()

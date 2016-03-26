@@ -72,13 +72,26 @@ private:
 	std::size_t m_tickCount;
 
 	QString m_address;
-	quint16 m_port;
+	QString m_remoteAddress;
+	quint16 m_dataPort;
+	quint16 m_controlPort;
+	bool m_addressEdited;
+	bool m_dataPortEdited;
+	bool m_initSendConfiguration;
+
 	bool m_dcBlock;
 	bool m_iqCorrection;
 	bool m_autoFollowRate;
     bool m_autoCorrBuffer;
 
 	void displaySettings();
+
+	void displayConfigurationParameters(uint32_t freq,
+			uint32_t log2Decim,
+			uint32_t fcPos,
+			uint32_t sampleRate,
+			QString& specParms);
+
 	void displayTime();
 	void configureUDPLink();
 	void configureAutoCorrections();
@@ -86,6 +99,7 @@ private:
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
+	void sendConfiguration();
 
 private slots:
 	void handleSourceMessages();
@@ -96,7 +110,14 @@ private slots:
     void on_autoCorrBuffer_toggled(bool checked);
     void on_resetIndexes_clicked(bool checked);
 	void on_address_textEdited(const QString& arg1);
-	void on_port_textEdited(const QString& arg1);
+	void on_dataPort_textEdited(const QString& arg1);
+	void on_controlPort_textEdited(const QString& arg1);
+	void on_sendButton_clicked(bool checked);
+	void on_freq_textEdited(const QString& arg1);
+	void on_sampleRate_textEdited(const QString& arg1);
+	void on_specificParms_textEdited(const QString& arg1);
+	void on_decim_currentIndexChanged(int index);
+	void on_fcPos_currentIndexChanged(int index);
 	void tick();
 };
 

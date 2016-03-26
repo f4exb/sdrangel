@@ -27,6 +27,7 @@ SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *o
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
+	m_remoteAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
 	m_dataConnected(false),
 	m_udpBuf(0),
@@ -128,7 +129,7 @@ void SDRdaemonUDPHandler::dataReadyRead()
 	while (m_dataSocket->hasPendingDatagrams())
 	{
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
-		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, 0, 0);
+		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
 		processData();
 	}
 }

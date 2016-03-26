@@ -101,6 +101,14 @@ std::time_t SDRdaemonInput::getStartingTimeStamp() const
 	return m_startingTimeStamp;
 }
 
+void SDRdaemonInput::getRemoteAddress(QString &s)
+{
+	if (m_SDRdaemonUDPHandler) {
+		m_SDRdaemonUDPHandler->getRemoteAddress(s);
+	}
+}
+
+
 bool SDRdaemonInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureSDRdaemonUDPLink::match(message))

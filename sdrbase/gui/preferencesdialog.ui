@@ -25,22 +25,6 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>Receiver Hardware</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QTreeWidget" name="treeWidget">
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Audio Output</string>
@@ -74,7 +58,6 @@
  <tabstops>
   <tabstop>buttonBox</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>treeWidget</tabstop>
   <tabstop>audioTree</tabstop>
  </tabstops>
  <resources/>

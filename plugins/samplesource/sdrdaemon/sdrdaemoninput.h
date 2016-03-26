@@ -284,6 +284,7 @@ public:
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
 	std::time_t getStartingTimeStamp() const;
+	void getRemoteAddress(QString &s);
 
 	virtual bool handleMessage(const Message& message);
 

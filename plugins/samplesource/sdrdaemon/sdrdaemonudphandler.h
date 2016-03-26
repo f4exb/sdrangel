@@ -41,6 +41,7 @@ public:
 	void start();
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
+	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
 	void setAutoFollowRate(bool autoFollowRate) { m_sdrDaemonBuffer.setAutoFollowRate(autoFollowRate); }
     void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; m_sdrDaemonBuffer.setAutoCorrBuffer(autoCorrBuffer); }
     void resetIndexes() { m_sdrDaemonBuffer.setResetIndexes(); }
@@ -51,6 +52,7 @@ private:
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
+	QHostAddress m_remoteAddress;
 	quint16 m_dataPort;
 	bool m_dataConnected;
 	char *m_udpBuf;
