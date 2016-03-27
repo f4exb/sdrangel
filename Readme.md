@@ -195,7 +195,7 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 This is new in version 1.1.3 and also experimental. Use at your own risk! This may or may not work on your machine and version of Windows. It was tested more or less successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it uses OpenGL ES 2.0 instead of the OpenGL desktop version (OpenGL 4.3) when it is running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
 
-You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel.exe process does not take more than 35% of the global CPU (check this with Task Manager). Unload channel plugins if necessary. Promoting sdrangel.exe process to real time via Task Manager may or may not help but usually not. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned! 
+You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel.exe process does not take more than 35% of the global CPU (check this with Task Manager). Unload channel plugins if necessary. Promoting sdrangel.exe process to real time via Task Manager may or may not help but usually not. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned!
 
 There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
 
@@ -303,6 +303,27 @@ Then comes the tedious part of packaging everything in a single place so that yo
 
 You will need to install Zadig to get USB support for hardware devices. Please refer to [Zadig website](http://zadig.akeo.ie/) for details. Basically if you get things working for SDR# or HDSDR then it will work with SDRangel.
 
+<h3>MinGW64 tool-chain</h3>
+
+It is possible to use a MinGW64 tool-chain by following these steps:
+
+  - Install MSys2 from [this page](http://msys2.github.io/). Follow all the steps.
+  - Install Qt5 from MSys2 command line:
+    - `pacman -Sy  mingw-w64-x86_64-qt5`
+  - Install gcc/g++ from MSys2 command line:
+    - `pacman -Sy mingw64/mingw-w64-x86_64-gcc`
+  - Create a new "kit" in Qt Creator:
+    - Go to "Projects" sub-menu from the left menu bar
+    - Click on "Manage kits"
+    - In "Compilers" tab add a compiler naming it "MinGW64" for example. In the compiler path specify the path to `g++` in your MSys2 installation (ex: `D:\msys64\mingw64\bin\g++.exe`)
+    - In "Qt versions" tab add a Qt version and specify the path to the `qmake.exe` in your MSys2 installation (ex: `D:\msys64\mingw64\bin\qmake.exe`)
+    - In "Kits" tab add a new kit and name it "MinGW64" for example.
+      - In "Compiler" select the "MinGW64" compiler you created previously
+      - In "Qt version" select the Qt version you created previously
+    - You should now be able to use this "kit" for your build
+    - In the "Build steps" section add `CONFIG+=MINGW64` in the "Additional arguments"
+
+The final packaging in a similar way to the MinGW32 build does not seem to work. Presently it is only possible to run it from Qt Creator copying the .dll files close to the `sdrangel.exe` file in the build tree. Therefore this build is considered experimental and not provided in the releases.
 
 <h1>Android</h1>
 
