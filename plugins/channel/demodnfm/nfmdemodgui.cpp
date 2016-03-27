@@ -240,6 +240,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
+	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
@@ -353,4 +354,16 @@ void NFMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_nfmDemod->getMag()) * 2;
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	bool squelchOpen = m_nfmDemod->getSquelchOpen();
+
+	if (squelchOpen != m_squelchOpen)
+	{
+		m_squelchOpen = squelchOpen;
+
+		if (m_squelchOpen) {
+			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+		} else {
+			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+		}
+	}
 }

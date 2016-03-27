@@ -63,6 +63,7 @@ private:
 	NFMDemod* m_nfmDemod;
 	bool m_ctcssOn;
 	bool m_audioMute;
+	bool m_squelchOpen;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];

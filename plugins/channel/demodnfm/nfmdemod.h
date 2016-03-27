@@ -67,6 +67,7 @@ public:
 	}
 
 	Real getMag() { return m_AGC.getAverage() / (1<<15); }
+	bool getSquelchOpen() const { return m_squelchOpen; }
 
 private:
 	class MsgConfigureNFMDemod : public Message {
@@ -169,6 +170,7 @@ private:
 	bool m_audioMute;
 
 	double m_squelchLevel;
+	bool m_squelchOpen;
 
 	Real m_lastArgument;
 	//Complex m_m1Sample;

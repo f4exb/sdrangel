@@ -36,6 +36,7 @@ NFMDemod::NFMDemod() :
 	m_squelchCount(0),
 	m_agcAttack(2400),
 	m_audioMute(false),
+	m_squelchOpen(false),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_fmExcursion(2400),
@@ -122,7 +123,6 @@ Real angleDist(Real a, Real b)
 
 void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
-	bool squelchOpen;
 	Complex ci;
 
 	m_settingsMutex.lock();
@@ -162,7 +162,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				}
 
 				//squelchOpen = (getMag() > m_squelchLevel);
-				squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
+				m_squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
 
 				/*
 				if (m_afSquelch.analyze(demod))
@@ -170,7 +170,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					squelchOpen = m_afSquelch.evaluate();
 				}*/
 
-				if ((squelchOpen) && !m_running.m_audioMute)
+				if ((m_squelchOpen) && !m_running.m_audioMute)
 				//if (m_AGC.getAverage() > m_squelchLevel)
 				{
 					if (m_running.m_ctcssOn)
