@@ -42,6 +42,7 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
 	Real getMagSq() const { return m_magsq; }
+	bool getSquelchOpen() const { return m_squelchOpen; }
 
 private:
 	class MsgConfigureAMDemod : public Message {
@@ -120,6 +121,7 @@ private:
 
 	Real m_squelchLevel;
 	int m_squelchCount;
+	bool m_squelchOpen;
 	Real m_magsq;
 
 	MovingAverage<Real> m_movingAverage;

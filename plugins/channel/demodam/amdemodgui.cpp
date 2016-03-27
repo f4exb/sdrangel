@@ -207,7 +207,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(20,0),
+	m_squelchOpen(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -290,5 +291,17 @@ void AMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_amDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	bool squelchOpen = m_amDemod->getSquelchOpen();
+
+	if (squelchOpen != m_squelchOpen)
+	{
+		m_squelchOpen = squelchOpen;
+
+		if (m_squelchOpen) {
+			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+		} else {
+			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+		}
+	}
 }
 

@@ -28,6 +28,7 @@
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
 AMDemod::AMDemod() :
+    m_squelchOpen(false),
 	m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive)
 {
@@ -124,11 +125,12 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 				demod *= ((0.003 * attack) / m_volumeAGC.getValue());
 				demod *= m_running.m_volume;
 				sample = demod * 32700 * 16;
-
+				m_squelchOpen = true;
 			}
 			else
 			{
 				sample = 0;
+				m_squelchOpen = false;
 			}
 
 			m_audioBuffer[m_audioBufferFill].l = sample;

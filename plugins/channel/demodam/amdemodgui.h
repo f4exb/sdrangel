@@ -58,6 +58,7 @@ private:
 	Channelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
+	bool m_squelchOpen;
 
 	static const int m_rfBW[];
 
