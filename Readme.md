@@ -199,7 +199,7 @@ You should take note that the Windows scheduler is just a piece of crap and not 
 
 There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
 
-The SDRdaemon plug-in does not work mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). It is kept there only to demonstrate how a crippled OS is Windows. If you want to use this plugin get yourself a decent OS first i.e. Linux.
+The SDRdaemon plug-in has been removed since version 1.1.4 in fact it is present only in version 1.1.3. It was not working well anyway mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). With the implementation of the remote control of the SDRdaemon instance it is not working at all. I don't want to bother anymore with this. For now on it will be present in the Linux version on;y where it works beautifully.
 
 <h3>Build environment</h3>
 
