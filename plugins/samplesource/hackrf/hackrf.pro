@@ -12,6 +12,7 @@ QT += core gui widgets multimedia
 TARGET = inputhackrf
 
 CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
+CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += $$LIBHACKRFSRC

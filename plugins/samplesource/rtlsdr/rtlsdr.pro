@@ -12,6 +12,7 @@ QT += core gui widgets multimedia
 TARGET = inputrtlsdr
 
 CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"
+CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += $$LIBRTLSDRSRC/include

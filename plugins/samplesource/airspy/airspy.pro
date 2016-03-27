@@ -12,6 +12,7 @@ QT += core gui widgets multimedia
 TARGET = inputairspy
 
 CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy"
+CONFIG(MINGW64):LIBAIRSPYSRC = "D:\softs\libairspy"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += $$LIBAIRSPYSRC

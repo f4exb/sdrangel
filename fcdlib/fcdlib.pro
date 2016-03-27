@@ -10,6 +10,7 @@ TEMPLATE = lib
 TARGET = fcdlib
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include"
+CONFIG(MINGW64):INCLUDEPATH += "D:\libusb-1.0.19\include"
 
 SOURCES = $$PWD/fcdtraits.cpp\
     $$PWD/fcdproplusconst.cpp\
@@ -20,3 +21,4 @@ HEADERS = $$PWD/fcdtraits.h\
     $$PWD/fcdproconst.h
 
 CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LD:\libusb-1.0.19\MinGW64\dll -llibusb-1.0

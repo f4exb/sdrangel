@@ -12,6 +12,9 @@ TARGET = fcdhid
 CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include"
 CONFIG(MINGW32):DEFINES += MINGW32=1
 
+CONFIG(MINGW64):INCLUDEPATH += "D:\libusb-1.0.19\include"
+CONFIG(MINGW64):DEFINES += MINGW32=1
+
 SOURCES = $$PWD/hid-libusb.c\
     $$PWD/fcdhid.c
 
@@ -20,3 +23,4 @@ HEADERS = $$PWD/fcdhid.h\
     $$PWD/hidapi.h
 
 CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0 -liconv
+CONFIG(MINGW64):LIBS += -LD:\libusb-1.0.19\MinGW64\dll -llibusb-1.0 -liconv

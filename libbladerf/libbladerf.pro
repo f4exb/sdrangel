@@ -12,6 +12,9 @@ TARGET = libbladerf
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF"
 CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
 CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
+CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF"
+CONFIG(MINGW64):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
+CONFIG(MINGW64):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
 INCLUDEPATH += $$LIBBLADERFLIBSRC/include
 INCLUDEPATH += $$LIBBLADERFLIBSRC/src
 INCLUDEPATH += $$LIBBLADERFSRC/firmware_common
@@ -21,6 +24,7 @@ INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include/windows
 INCLUDEPATH += $$PWD/include
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"
 
 SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
     $$LIBBLADERFLIBSRC/src/bladerf_priv.c\
@@ -91,6 +95,7 @@ HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$PWD/include/version.h
 
 CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LD:\libusb-1.0.19\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

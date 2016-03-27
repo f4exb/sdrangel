@@ -10,9 +10,11 @@ TEMPLATE = lib
 TARGET = libairspy
 
 CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"
+CONFIG(MINGW64):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"
 INCLUDEPATH += $$LIBAIRSPYSRC/src
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"
 
 SOURCES = $$LIBAIRSPYSRC/src/airspy.c\
   $$LIBAIRSPYSRC/src/iqconverter_float.c\
@@ -25,6 +27,7 @@ HEADERS = $$LIBAIRSPYSRC/src/airspy.h\
   $$LIBAIRSPYSRC/src/filters.h
 
 CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LD:\libusb-1.0.19\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
