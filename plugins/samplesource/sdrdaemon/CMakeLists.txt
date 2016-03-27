@@ -1,6 +1,7 @@
 project(sdrdaemon)
 
 find_package(LZ4)
+find_package(LibNANOMSG)
 
 set(sdrdaemon_SOURCES
     sdrdaemonbuffer.cpp
@@ -45,11 +46,13 @@ add_library(inputsdrdaemon SHARED
 
 target_include_directories(inputsdrdaemon PUBLIC
     ${LZ4_INCLUDE_DIRS}
+    ${LIBNANOMSG_INCLUDE_DIR}
 )
 
 target_link_libraries(inputsdrdaemon
 	${QT_LIBRARIES}
 	${LZ4_LIBRARIES}
+	${LIBNANOMSG_LIBRARIES}
 	sdrbase
 )
 

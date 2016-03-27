@@ -67,6 +67,12 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_iqCorrection(false),
 	m_autoFollowRate(false)
 {
+	m_sender = nn_socket(AF_SP, NN_PAIR);
+	assert(m_sender != -1);
+	int millis = 500;
+    int rc = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    assert (rc == 0);
+
 	m_startingTimeStamp.tv_sec = 0;
 	m_startingTimeStamp.tv_usec = 0;
 	ui->setupUi(this);
@@ -383,6 +389,7 @@ void SDRdaemonGui::on_applyButton_clicked(bool checked)
 void SDRdaemonGui::on_sendButton_clicked(bool checked)
 {
 	sendConfiguration();
+	ui->specificParms->setCursorPosition(0);
 	ui->sendButton->setEnabled(false);
 }
 
@@ -394,6 +401,16 @@ void SDRdaemonGui::sendConfiguration()
 	if (remoteAddress != m_remoteAddress)
 	{
 		m_remoteAddress = remoteAddress;
+		std::ostringstream os;
+		os << "tcp://" << m_remoteAddress.toStdString() << ":" << m_controlPort;
+		std::string addrstrng = os.str();
+	    int rc = nn_connect(m_sender, addrstrng.c_str());
+
+	    if (rc < 0) {
+	    	QMessageBox::information(this, tr("Message"), tr("Cannot connect to remote control port"));
+	    } else {
+	    	qDebug() << "SDRdaemonGui::sendConfiguration: connexion to " << addrstrng.c_str() << " successful";
+	    }
 	}
 
 	std::ostringstream os;
@@ -422,9 +439,19 @@ void SDRdaemonGui::sendConfiguration()
 		os << "," << ui->specificParms->text().toStdString();
 	}
 
-	qDebug() << "SDRdaemonGui::sendConfiguration:"
-		<< " remoteAddress: " << remoteAddress
-		<< " message: " << os.str().c_str();
+    int config_size = os.str().size();
+    int rc = nn_send(m_sender, (void *) os.str().c_str(), config_size, 0);
+
+    if (rc != config_size)
+    {
+    	QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
+    }
+    else
+    {
+    	qDebug() << "SDRdaemonGui::sendConfiguration:"
+    		<< " remoteAddress: " << remoteAddress
+    		<< " message: " << os.str().c_str();
+    }
 }
 
 void SDRdaemonGui::on_address_textEdited(const QString& arg1)
@@ -546,16 +573,16 @@ void SDRdaemonGui::updateWithStreamData()
 	QString s2 = QString::number(skewPerCent, 'f', 2);
 	ui->skewRateText->setText(tr("%1").arg(s2));
 	updateWithStreamTime();
+}
 
+void SDRdaemonGui::updateWithStreamTime()
+{
 	if (m_initSendConfiguration)
 	{
 		sendConfiguration();
 		m_initSendConfiguration = false;
 	}
-}
 
-void SDRdaemonGui::updateWithStreamTime()
-{
     quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");

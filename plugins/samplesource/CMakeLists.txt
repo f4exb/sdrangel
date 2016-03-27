@@ -42,5 +42,11 @@ if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 	add_subdirectory(hackrf)
 endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
+#find_package(LibNANOMSG)
+#if(LIBNANOMSG_FOUND)
+#    add_subdirectory(sdrdaemon)    
+#endif(LIBNANOMSG_FOUND)
+
 add_subdirectory(filesource)
 add_subdirectory(sdrdaemon)
+

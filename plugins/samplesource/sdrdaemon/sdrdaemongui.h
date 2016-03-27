@@ -78,6 +78,7 @@ private:
 	bool m_addressEdited;
 	bool m_dataPortEdited;
 	bool m_initSendConfiguration;
+	int m_sender;
 
 	bool m_dcBlock;
 	bool m_iqCorrection;
