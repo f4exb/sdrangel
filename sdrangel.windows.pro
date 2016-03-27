@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += lz4
-SUBDIRS += nanomsg
+#SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
 SUBDIRS += librtlsdr
@@ -15,7 +15,7 @@ SUBDIRS += libhackrf
 SUBDIRS += libairspy
 SUBDIRS += libbladerf
 SUBDIRS += plugins/samplesource/filesource
-SUBDIRS += plugins/samplesource/sdrdaemon
+#SUBDIRS += plugins/samplesource/sdrdaemon
 SUBDIRS += plugins/samplesource/rtlsdr
 SUBDIRS += plugins/samplesource/hackrf
 SUBDIRS += plugins/samplesource/airspy

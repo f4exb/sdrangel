@@ -261,4 +261,5 @@ $$LIBNANOMSGSRC/src/utils/thread_win.inc\
 $$LIBNANOMSGSRC/src/transports/utils/dns_getaddrinfo.inc\
 $$LIBNANOMSGSRC/src/transports/utils/dns_getaddrinfo_a.inc
 
-CONFIG(MINGW32):LIBS += -lws2_32 -lmswsock -ladvapi32
+#CONFIG(MINGW32):LIBS += -lws2_32 -lmswsock -ladvapi32
+CONFIG(MINGW32):LIBS += -lws2_32 -lmswsock

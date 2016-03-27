@@ -8,3 +8,4 @@ sdrangelove.supp
 .project
 .settings/
 *.cs
+*.pro.user
