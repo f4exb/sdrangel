@@ -10,18 +10,18 @@ This input sample source plugin gets its samples over tbe network from a SDRdaem
 
 <h3>1: Frequency</h3>
 
-This is the center frequency in the distant receiver sent over in the meta data
+This is the center frequency in kHz sent in the meta data from the distant SDRdaemon instance and corresponds to the center frequency of reception.
 
 <h3>2: Auto correction options</h3>
 
-These buttons control the DSP auto correction options:
+These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance
   
 <h3>3: Date/time</h3>
 
-This is the current timestamp of the block of data sent from the receiver. It is refreshed about every second. This may not and is usually not the timestamp of the samples currently shown in the displays and in the audio since there is a failty large buffer in place to damper the network varying speed (see: 5.5: Main buffer length in seconds).
+This is the current timestamp of the block of data sent from the receiver. It is refreshed about every second. This may not and is usually not the timestamp of the samples currently shown in the displays and in the audio since there is a failty large buffer in place to damper the variations of data receiving speed due to the network (see: 5.5: Main buffer length in seconds).
 
 <h3>9: Main buffer R/W pointers gauge</h3>
 
@@ -103,17 +103,17 @@ This is rarely necessary. Only use it when you suspect that the sender data samp
 
 ![SDR Daemon status3 GUI](/doc/img/SDRdaemon_plugin_06.png)
 
-<h4>6.1: Interface IP address</h4>
+<h4>6.1: Local interface IP address</h4>
 
 Address of the network interface on the local (your) machine to which the SDRdaemon server sends samples to.
 
-<h4>6.2: Data port</h4>
+<h4>6.2: Local data port</h4>
 
 UDP port on the local (your) machine to which the SDRdaemon server sends samples to.
 
-<h4>6.3 Configuration port<h4>
+<h4>6.3 Distant configuration port</h4>
 
-TCP port on the distant machine hosting the SDRdaemon instance to send control messages to.
+TCP port on the distant machine hosting the SDRdaemon instance to send control messages to. The IP address of the host where the SDRdaemon instance runs is guessed from the address sending the data blocks hence it does not need to be specified.
 
 <h4>6.4: Validation button</h4>
 
@@ -133,7 +133,7 @@ These are successive powers of two from 0 (1) to 6 (64). The SDRdaemon instance 
 
 <h4>7.3: Center frequency position</h4>
 
-The center frequency in the passband is either:
+The center frequency in the passband wil be set either:
 
   - below the local oscillator (NCO) or infradyne. Actually -1/4th the bandwidth.
   - above the local oscillator (NCO) or supradyne. Actually +1/4th the bandwidth.
@@ -141,12 +141,12 @@ The center frequency in the passband is either:
   
 <h4>7.4: Send data to the distant SDRdaemon instance</h4>
 
-Whenever any of the parameters change this button gets enabled. When clicked a message is sent on the configuration port of the distance machine to which the SDRdaemon listens for instructions. Leave time for the buffering system to stabilize to get the samples flow through normally.
+Whenever any of the parameters change this button gets enabled. When clicked a message is sent on the configuration port of the distant machine to which the SDRdaemon listens for instructions. Leave time for the buffering system to stabilize to get the samples flow through normally.
 
 <h4>7.5: Sample rate in kS/s</h4>
 
-This is the sample rate in kS/s of the samples sent from the hardware device to the SDRdaemon instance
+The sample rate of the hardware device attached to the SDRdaemon instance will be set to this value in kS/s.
 
 <h4>7.6: Other parameters hardware specific</h4>
 
-THese are the parameters that are specific to the hardware attached to the distant SDRdaemon instance. You have to know which device is attached to send the proper parameters. Please refer to the SDRdaemon documentation or on line help to get information on these parameters.
+THese are the parameters that are specific to the hardware attached to the distant SDRdaemon instance. You have to know which device is attached to send the proper parameters. Please refer to the SDRdaemon documentation or its line help to get information on these parameters.
