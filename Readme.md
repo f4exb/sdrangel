@@ -199,7 +199,7 @@ You should take note that the Windows scheduler is just a piece of crap and not 
 
 There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
 
-The SDRdaemon plug-in has been removed since version 1.1.4 in fact it is present only in version 1.1.3. It was not working well anyway mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). With the implementation of the remote control of the SDRdaemon instance it is not working at all. I don't want to bother anymore with this. For now on it will be present in the Linux version on;y where it works beautifully.
+The SDRdaemon plug-in is present only in the 64 bit build version since version 1.1.4. The messaging system based on nanomsg works only in the 64 bit environment. However please be aware that the SDRdaemon plugin is not working well mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). In fact depending on the case your mileage may vary however the Linux version works always beautifully so you know the options if you really want to use it!
 
 <h3>Build environment</h3>
 
@@ -323,7 +323,9 @@ It is possible to use a MinGW64 tool-chain by following these steps:
     - You should now be able to use this "kit" for your build
     - In the "Build steps" section add `CONFIG+=MINGW64` in the "Additional arguments"
 
-The final packaging in a similar way to the MinGW32 build does not seem to work. Presently it is only possible to run it from Qt Creator copying the .dll files close to the `sdrangel.exe` file in the build tree. Therefore this build is considered experimental and not provided in the releases.
+Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to your target installation directory in a similar way as this is done for MinGW32 (see above).
+
+The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\libusb-1.0.19\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.
 
 <h1>Android</h1>
 

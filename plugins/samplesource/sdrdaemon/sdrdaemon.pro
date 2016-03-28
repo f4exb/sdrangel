@@ -12,6 +12,7 @@ QT += core gui widgets multimedia network
 TARGET = inputsdrdaemon
 
 CONFIG(MINGW32):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
+CONFIG(MINGW64):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
