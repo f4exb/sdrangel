@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>247</width>
-    <height>308</height>
+    <width>300</width>
+    <height>172</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,16 +29,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -110,6 +101,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QGridLayout" name="gridLayout_corr">
      <item row="0" column="2">
       <widget class="ButtonSwitch" name="iqImbalance">
@@ -117,7 +115,7 @@
         <string>Automatic IQ imbalance correction</string>
        </property>
        <property name="text">
-        <string>IQ imbalance</string>
+        <string>IQ</string>
        </property>
       </widget>
      </item>
@@ -127,33 +125,19 @@
         <string>Automatic DC offset removal</string>
        </property>
        <property name="text">
-        <string>DC offset</string>
+        <string>DC</string>
        </property>
       </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="corrLabel">
        <property name="text">
-        <string>Auto corr</string>
+        <string>Auto</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_freq">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_xb200">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="2">
-      <spacer name="xb200Spacer">
+     <item row="0" column="3">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -165,12 +149,19 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="1">
+     <item row="0" column="4">
+      <widget class="QLabel" name="xb200Label">
+       <property name="text">
+        <string>xb200</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
       <widget class="QComboBox" name="xb200">
        <property name="toolTip">
         <string>XB200 board mode</string>
        </property>
-       <property name="currentText">
+       <property name="currentText" stdset="0">
         <string>None</string>
        </property>
        <property name="currentIndex">
@@ -221,17 +212,10 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="xb200Label">
-       <property name="text">
-        <string>xb200</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_dial">
+    <widget class="Line" name="line_freq">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -242,25 +226,6 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="samplerate">
-       <property name="toolTip">
-        <string>Device Samplerate</string>
-       </property>
-       <property name="maximum">
-        <number>13</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>3</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="samplerateLabel">
        <property name="sizePolicy">
@@ -270,57 +235,57 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Rate</string>
+        <string>SR</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="samplerate">
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Sample rate in kS/s</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="samplerateText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="samplerateUnit">
        <property name="text">
-        <string>---</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>k</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_rate">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_bandwidth">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="bandwidth">
+     <item row="0" column="5">
+      <widget class="QComboBox" name="bandwidth">
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>RF filter bandwidth</string>
+        <string>IF bandwidth in kHz</string>
        </property>
-       <property name="maximum">
-        <number>15</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
-     <item row="0" column="0">
+     <item row="0" column="4">
       <widget class="QLabel" name="bandwidthLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -333,101 +298,15 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="bandwidthText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
+     <item row="0" column="6">
+      <widget class="QLabel" name="bandwidthUnit">
        <property name="text">
-        <string>---</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>k</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_decim">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_decim">
-       <property name="text">
-        <string>Dec.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="decim">
-       <property name="toolTip">
-        <string>Decimation factor</string>
-       </property>
-       <property name="maximum">
-        <number>5</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="decimText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>1</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_bandwidth">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_fcPos" columnstretch="0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_fcPos">
-       <property name="text">
-        <string>Fc pos</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <spacer name="fcPosRightSpacer">
+     <item row="0" column="7">
+      <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -439,7 +318,74 @@
        </property>
       </spacer>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0,0,0,0">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_decim">
+       <property name="text">
+        <string>Dec</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
+      <widget class="QComboBox" name="decim">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
+       <property name="currentIndex">
+        <number>3</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="label_fcPos">
+       <property name="text">
+        <string>Fp</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
       <widget class="QComboBox" name="fcPos">
        <property name="toolTip">
         <string>Relative position of device center frequency</string>
@@ -456,26 +402,12 @@
        </item>
        <item>
         <property name="text">
-         <string>Cent</string>
+         <string>Cen</string>
         </property>
        </item>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_fcPos">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_lna">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
+     <item row="0" column="6">
       <widget class="QLabel" name="lnaGainLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -488,40 +420,63 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="lna">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>LNA gain (dB)</string>
-       </property>
-       <property name="maximum">
-        <number>2</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
+     <item row="0" column="5">
+      <spacer name="fcPosRightSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="7">
+      <widget class="QComboBox" name="lna">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>6</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="8">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>dB</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="lnaGainText">
-       <property name="minimumSize">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
-         <height>0</height>
+         <height>20</height>
         </size>
        </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
+      </spacer>
      </item>
     </layout>
    </item>

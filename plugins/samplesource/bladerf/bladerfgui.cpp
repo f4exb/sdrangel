@@ -33,6 +33,19 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
+
+	ui->samplerate->clear();
+	for (int i = 0; i < BladerfSampleRates::getNbRates(); i++)
+	{
+		ui->samplerate->addItem(QString::number(BladerfSampleRates::getRate(i)));
+	}
+
+	ui->bandwidth->clear();
+	for (int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
+	{
+		ui->bandwidth->addItem(QString::number(BladerfBandwidths::getBandwidth(i)));
+	}
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -117,21 +130,17 @@ void BladerfGui::displaySettings()
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
 	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->samplerate->setValue(sampleRateIndex);
+	ui->samplerate->setCurrentIndex(sampleRateIndex);
 
-	ui->bandwidthText->setText(tr("%1k").arg(m_settings.m_bandwidth / 1000));
 	unsigned int bandwidthIndex = BladerfBandwidths::getBandwidthIndex(m_settings.m_bandwidth);
-	ui->bandwidth->setValue(bandwidthIndex);
+	ui->bandwidth->setCurrentIndex(bandwidthIndex);
 
-	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
-	ui->decim->setValue(m_settings.m_log2Decim);
+	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain*3));
-	ui->lna->setValue(m_settings.m_lnaGain);
+	ui->lna->setCurrentIndex(m_settings.m_lnaGain);
 
 	ui->vga1Text->setText(tr("%1dB").arg(m_settings.m_vga1));
 	ui->vga1->setValue(m_settings.m_vga1);
@@ -166,28 +175,25 @@ void BladerfGui::on_iqImbalance_toggled(bool checked)
 	sendSettings();
 }
 
-void BladerfGui::on_samplerate_valueChanged(int value)
+void BladerfGui::on_samplerate_currentIndexChanged(int index)
 {
-	int newrate = BladerfSampleRates::getRate(value);
-	ui->samplerateText->setText(tr("%1k").arg(newrate));
+	int newrate = BladerfSampleRates::getRate(index);
 	m_settings.m_devSampleRate = newrate * 1000;
 	sendSettings();
 }
 
-void BladerfGui::on_bandwidth_valueChanged(int value)
+void BladerfGui::on_bandwidth_currentIndexChanged(int index)
 {
-	int newbw = BladerfBandwidths::getBandwidth(value);
-	ui->bandwidthText->setText(tr("%1k").arg(newbw));
+	int newbw = BladerfBandwidths::getBandwidth(index);
 	m_settings.m_bandwidth = newbw * 1000;
 	sendSettings();
 }
 
-void BladerfGui::on_decim_valueChanged(int value)
+void BladerfGui::on_decim_currentIndexChanged(int index)
 {
-	if ((value <0) || (value > 5))
+	if ((index <0) || (index > 5))
 		return;
-	ui->decimText->setText(tr("%1").arg(1<<value));
-	m_settings.m_log2Decim = value;
+	m_settings.m_log2Decim = index;
 	sendSettings();
 }
 
@@ -205,15 +211,14 @@ void BladerfGui::on_fcPos_currentIndexChanged(int index)
 	}
 }
 
-void BladerfGui::on_lna_valueChanged(int value)
+void BladerfGui::on_lna_currentIndexChanged(int index)
 {
-	qDebug() << "BladerfGui: LNA gain = " << value;
+	qDebug() << "BladerfGui: LNA gain = " << index * 3 << " dB";
 
-	if ((value < 0) || (value > 2))
+	if ((index < 0) || (index > 2))
 		return;
 
-	ui->lnaGainText->setText(tr("%1dB").arg(value*3));
-	m_settings.m_lnaGain = value;
+	m_settings.m_lnaGain = index;
 	sendSettings();
 }
 
@@ -379,6 +384,11 @@ unsigned int BladerfSampleRates::getRateIndex(unsigned int rate)
 	return 0;
 }
 
+unsigned int BladerfSampleRates::getNbRates()
+{
+	return BladerfSampleRates::m_nb_rates;
+}
+
 unsigned int BladerfBandwidths::m_halfbw[] = {750, 875, 1250, 1375, 1500, 1920, 2500, 2750, 3000, 3500, 4375, 5000, 6000, 7000, 10000, 14000};
 unsigned int BladerfBandwidths::m_nb_halfbw = 16;
 
@@ -406,3 +416,9 @@ unsigned int BladerfBandwidths::getBandwidthIndex(unsigned int bandwidth)
 
 	return 0;
 }
+
+unsigned int BladerfBandwidths::getNbBandwidths()
+{
+	return BladerfBandwidths::m_nb_halfbw;
+}
+

@@ -23,7 +23,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>BladeRF</string>
+   <string>Airspy</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
