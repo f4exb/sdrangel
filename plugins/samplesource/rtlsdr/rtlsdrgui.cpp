@@ -15,6 +15,14 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
+
+	ui->sampleRate->clear();
+
+	for (int i = 0; i < RTLSDRSampleRates::getNbRates(); i++)
+	{
+		ui->sampleRate->addItem(QString::number(RTLSDRSampleRates::getRate(i)));
+	}
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -129,13 +137,11 @@ void RTLSDRGui::displaySettings()
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
-	ui->samplerateText->setText(tr("%1k").arg(m_settings.m_devSampleRate / 1000));
 	unsigned int sampleRateIndex = RTLSDRSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->samplerate->setValue(sampleRateIndex);
+	ui->sampleRate->setCurrentIndex(sampleRateIndex);
 	ui->ppm->setValue(m_settings.m_loPpmCorrection);
 	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
-	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
-	ui->decim->setValue(m_settings.m_log2Decim);
+	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
 	if (m_gains.size() > 0)
@@ -179,15 +185,14 @@ void RTLSDRGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void RTLSDRGui::on_decim_valueChanged(int value)
+void RTLSDRGui::on_decim_currentIndexChanged(int index)
 {
-	if ((value <0) || (value > 4))
+	if ((index <0) || (index > 4))
 	{
 		return;
 	}
 
-	ui->decimText->setText(tr("%1").arg(1<<value));
-	m_settings.m_log2Decim = value;
+	m_settings.m_log2Decim = index;
 
 	sendSettings();
 }
@@ -233,10 +238,9 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 	sendSettings();
 }
 
-void RTLSDRGui::on_samplerate_valueChanged(int value)
+void RTLSDRGui::on_sampleRate_currentIndexChanged(int index)
 {
-	int newrate = RTLSDRSampleRates::getRate(value);
-	ui->samplerateText->setText(tr("%1k").arg(newrate));
+	int newrate = RTLSDRSampleRates::getRate(index);
 	m_settings.m_devSampleRate = newrate * 1000;
 
 	sendSettings();
@@ -299,4 +303,9 @@ unsigned int RTLSDRSampleRates::getRateIndex(unsigned int rate)
 	}
 
 	return 0;
+}
+
+unsigned int RTLSDRSampleRates::getNbRates()
+{
+	return RTLSDRSampleRates::m_nb_rates;
 }

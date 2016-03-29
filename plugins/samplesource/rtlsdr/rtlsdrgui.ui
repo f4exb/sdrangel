@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
+    <width>287</width>
     <height>271</height>
    </rect>
   </property>
@@ -29,16 +29,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -194,42 +185,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_rate">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="2">
-      <widget class="QLabel" name="samplerateText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>1024k</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="samplerate">
-       <property name="toolTip">
-        <string>Device Samplerate</string>
-       </property>
-       <property name="maximum">
-        <number>6</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
+    <layout class="QGridLayout" name="gridLayout_rateDecimPos">
      <item row="0" column="0">
       <widget class="QLabel" name="samplerateLabel">
        <property name="sizePolicy">
@@ -239,67 +195,30 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Rate</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_decim">
-       <property name="text">
-        <string>Dec.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="decim">
-       <property name="toolTip">
-        <string>Decimation factor</string>
-       </property>
-       <property name="maximum">
-        <number>4</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>4</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <string>SR</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="decimText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="sampleRateUnit">
        <property name="text">
-        <string>16</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>k</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_fcPos">
-     <item row="0" column="1">
+     <item row="0" column="8">
       <widget class="QComboBox" name="fcPos">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Relative postion of device center frequency</string>
+       </property>
+       <property name="currentIndex">
+        <number>2</number>
        </property>
        <item>
         <property name="text">
@@ -313,20 +232,101 @@
        </item>
        <item>
         <property name="text">
-         <string>Cent</string>
+         <string>Cen</string>
         </property>
        </item>
       </widget>
      </item>
-     <item row="0" column="0">
+     <item row="0" column="7">
       <widget class="QLabel" name="fcPosLabel">
        <property name="text">
-        <string>Fc pos</string>
+        <string>Fp</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="0" column="9">
       <spacer name="horizontalSpacer_fcPos">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="3">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="sampleRate">
+       <property name="toolTip">
+        <string>Sample rate in kS/s</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QComboBox" name="decim">
+       <property name="maximumSize">
+        <size>
+         <width>45</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_decim">
+       <property name="text">
+        <string>Dec</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

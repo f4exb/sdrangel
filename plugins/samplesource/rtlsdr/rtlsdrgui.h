@@ -46,11 +46,11 @@ private slots:
 	void on_centerFrequency_changed(quint64 value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	void on_decim_valueChanged(int value);
+	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);
 	void on_ppm_valueChanged(int value);
 	void on_gain_valueChanged(int value);
-	void on_samplerate_valueChanged(int value);
+	void on_sampleRate_currentIndexChanged(int index);
 	void on_checkBox_stateChanged(int state);
 	void updateHardware();
 	void handleSourceMessages();
@@ -60,6 +60,7 @@ class RTLSDRSampleRates {
 public:
 	static unsigned int getRate(unsigned int rate_index);
 	static unsigned int getRateIndex(unsigned int rate);
+	static unsigned int getNbRates();
 private:
 	static unsigned int m_rates[7];
 	static unsigned int m_nb_rates;
