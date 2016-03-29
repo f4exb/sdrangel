@@ -120,8 +120,7 @@ void HackRFGui::displaySettings()
 
 	ui->biasT->setChecked(m_settings.m_biasT);
 
-	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
-	ui->decim->setValue(m_settings.m_log2Decim);
+	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
@@ -236,12 +235,11 @@ void HackRFGui::on_lnaExt_stateChanged(int state)
 	sendSettings();
 }
 
-void HackRFGui::on_decim_valueChanged(int value)
+void HackRFGui::on_decim_currentIndexChanged(int index)
 {
-	if ((value <0) || (value > 6))
+	if ((index <0) || (index > 6))
 		return;
-	ui->decimText->setText(tr("%1").arg(1<<value));
-	m_settings.m_log2Decim = value;
+	m_settings.m_log2Decim = index;
 	sendSettings();
 }
 
