@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>365</height>
+    <width>350</width>
+    <height>366</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>340</width>
+    <width>350</width>
     <height>0</height>
    </size>
   </property>
@@ -270,7 +270,7 @@
       <widget class="QLabel" name="frameSizeText">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -296,7 +296,7 @@
       <widget class="QLabel" name="sampleRateStreamText">
        <property name="minimumSize">
         <size>
-         <width>70</width>
+         <width>65</width>
          <height>0</height>
         </size>
        </property>
@@ -304,7 +304,7 @@
         <string>Nominal sample rate from stream meta data (kS/s)</string>
        </property>
        <property name="text">
-        <string>0000.00</string>
+        <string>00000.00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -330,7 +330,7 @@
         <string>Actual sample rate (kS/s)</string>
        </property>
        <property name="text">
-        <string>0000.000</string>
+        <string>00000.000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -726,7 +726,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>90</width>
+         <width>100</width>
          <height>16777215</height>
         </size>
        </property>
@@ -742,17 +742,43 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="freqUnitLabel">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="decimLabel">
        <property name="text">
-        <string>k Dec:</string>
+        <string>Dec:</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QComboBox" name="decim">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -836,19 +862,6 @@
         </property>
        </item>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="sendButton">

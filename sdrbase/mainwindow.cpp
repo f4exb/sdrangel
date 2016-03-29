@@ -601,12 +601,13 @@ void MainWindow::on_presetImport_clicked()
 				instream >> base64Str;
 				exportFile.close();
 
-				Preset* preset = new Preset();
+				Preset* preset = m_settings.newPreset("", "");
 				preset->deserialize(QByteArray::fromBase64(base64Str));
-				preset->setGroup(group);
+				preset->setGroup(group); // override with current group
 
-				savePresetSettings(preset);
 				ui->presetTree->setCurrentItem(addPresetToTree(preset));
+//				loadPresetSettings(preset);
+//				applySettings();
 			}
 			else
 			{
