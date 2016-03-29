@@ -19,6 +19,10 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QComboBox>
+#include <QFile>
+#include <QFileDialog>
+#include <QTextStream>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "audio/audiodeviceinfo.h"
@@ -524,6 +528,82 @@ void MainWindow::on_presetUpdate_clicked()
 			if (preset != 0) {
 				Preset* preset_mod = const_cast<Preset*>(preset);
 				savePresetSettings(preset_mod);
+			}
+		}
+	}
+}
+
+void MainWindow::on_presetExport_clicked()
+{
+	QTreeWidgetItem* item = ui->presetTree->currentItem();
+
+	if(item != 0) {
+		if(item->type() == PItem)
+		{
+			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
+			QString base64Str = preset->serialize().toBase64();
+			QString fileName = QFileDialog::getSaveFileName(this,
+			    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"));
+
+			if (fileName != "")
+			{
+				QFile exportFile(fileName);
+
+				if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
+				{
+					QTextStream outstream(&exportFile);
+					outstream << base64Str;
+					exportFile.close();
+				}
+				else
+				{
+			    	QMessageBox::information(this, tr("Message"), tr("Cannot open file for writing"));
+				}
+			}
+		}
+	}
+}
+
+void MainWindow::on_presetImport_clicked()
+{
+	QTreeWidgetItem* item = ui->presetTree->currentItem();
+
+	if(item != 0)
+	{
+		QString group;
+
+		if (item->type() == PGroup)	{
+			group = item->text(0);
+		} else if (item->type() == PItem) {
+			group = item->parent()->text(0);
+		} else {
+			return;
+		}
+
+		QString fileName = QFileDialog::getOpenFileName(this,
+		    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"));
+
+		if (fileName != "")
+		{
+			QFile exportFile(fileName);
+
+			if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
+			{
+				QByteArray base64Str;
+				QTextStream instream(&exportFile);
+				instream >> base64Str;
+				exportFile.close();
+
+				Preset* preset = new Preset();
+				preset->deserialize(QByteArray::fromBase64(base64Str));
+				preset->setGroup(group);
+
+				savePresetSettings(preset);
+				ui->presetTree->setCurrentItem(addPresetToTree(preset));
+			}
+			else
+			{
+				QMessageBox::information(this, tr("Message"), tr("Cannot open file for reading"));
 			}
 		}
 	}

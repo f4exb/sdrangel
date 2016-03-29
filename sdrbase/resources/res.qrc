@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/">
+    <file>res.qrc</file>
+    <file>export.png</file>
+    <file>import.png</file>
     <file>compressed.png</file>
     <file>locked.png</file>
     <file>appicon.png</file>

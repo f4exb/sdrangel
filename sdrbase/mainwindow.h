@@ -144,6 +144,8 @@ private slots:
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();
+	void on_presetExport_clicked();
+	void on_presetImport_clicked();
 	void on_settingsSave_clicked();
 	void on_presetLoad_clicked();
 	void on_presetDelete_clicked();

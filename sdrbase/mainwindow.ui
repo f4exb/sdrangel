@@ -33,16 +33,7 @@
     </font>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>0</number>
     </property>
     <item>
@@ -75,7 +66,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -180,16 +171,7 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_6">
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
+     <property name="margin">
       <number>2</number>
      </property>
      <property name="spacing">
@@ -215,7 +197,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="9">
+     <item row="5" column="12">
       <widget class="QToolButton" name="presetLoad">
        <property name="toolTip">
         <string>Load selected preset</string>
@@ -235,7 +217,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="7" colspan="2">
+     <item row="5" column="10" colspan="2">
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -248,7 +230,7 @@
        </property>
       </spacer>
      </item>
-     <item row="5" column="5">
+     <item row="5" column="8">
       <widget class="QToolButton" name="presetDelete">
        <property name="toolTip">
         <string>Delete selected preset</string>
@@ -268,7 +250,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1" rowspan="4" colspan="9">
+     <item row="1" column="1" rowspan="4" colspan="12">
       <widget class="QTreeWidget" name="presetTree">
        <property name="allColumnsShowFocus">
         <bool>true</bool>
@@ -305,7 +287,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="4">
+     <item row="5" column="7">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -338,6 +320,47 @@
        </property>
       </widget>
      </item>
+     <item row="5" column="5">
+      <widget class="QToolButton" name="presetExport">
+       <property name="toolTip">
+        <string>Export current preset to file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/export.png</normaloff>:/export.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="4">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="5" column="6">
+      <widget class="QToolButton" name="presetImport">
+       <property name="toolTip">
+        <string>Import preset from file into current group</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/import.png</normaloff>:/import.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -359,16 +382,7 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
+     <property name="margin">
       <number>2</number>
      </property>
      <item>
@@ -399,16 +413,7 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
+     <property name="margin">
       <number>2</number>
      </property>
      <item>
@@ -439,16 +444,7 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
+     <property name="margin">
       <number>2</number>
      </property>
      <item>
@@ -469,10 +465,7 @@
     <string>E&amp;xit</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -483,10 +476,7 @@
     <string>&amp;Start</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -497,10 +487,7 @@
     <string>&amp;Stop</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>F6</string>
@@ -514,10 +501,7 @@
     <string>&amp;Fullscreen</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>F11</string>
@@ -539,10 +523,7 @@
     <string>&amp;About SDRangel...</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="action_Preferences">
@@ -550,10 +531,7 @@
     <string>&amp;Preferences...</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="action_Loaded_Plugins">
@@ -561,10 +539,7 @@
     <string>Loaded &amp;Plugins...</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="action_Start_Recording">
@@ -572,10 +547,7 @@
     <string>Start Recording</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>F7</string>
@@ -586,10 +558,7 @@
     <string>Stop Recording</string>
    </property>
    <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>F8</string>

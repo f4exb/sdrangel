@@ -2,6 +2,7 @@ CMakeLists.txt.user*
 build/*
 qtbuild/*
 sdriq/*
+presets/*
 LOCAL/*
 sdrangelove.supp
 .cproject
