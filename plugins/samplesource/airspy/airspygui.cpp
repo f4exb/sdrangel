@@ -143,8 +143,7 @@ void AirspyGui::displaySettings()
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-	ui->decimText->setText(tr("%1").arg(1<<m_settings.m_log2Decim));
-	ui->decim->setValue(m_settings.m_log2Decim);
+	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
@@ -172,7 +171,7 @@ void AirspyGui::displaySampleRates()
 
 		for (int i = 0; i < m_rates.size(); i++)
 		{
-			ui->sampleRate->addItem(QString("%1M").arg(QString::number(m_rates[i]/1000000.0, 'f', 3)));
+			ui->sampleRate->addItem(QString("%1").arg(QString::number(m_rates[i]/1000000.0, 'f', 1)));
 		}
 	}
 
@@ -243,12 +242,11 @@ void AirspyGui::on_mixAGC_stateChanged(int state)
 	sendSettings();
 }
 
-void AirspyGui::on_decim_valueChanged(int value)
+void AirspyGui::on_decim_currentIndexChanged(int index)
 {
-	if ((value <0) || (value > 6))
+	if ((index <0) || (index > 6))
 		return;
-	ui->decimText->setText(tr("%1").arg(1<<value));
-	m_settings.m_log2Decim = value;
+	m_settings.m_log2Decim = index;
 	sendSettings();
 }
 
