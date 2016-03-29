@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
+// This is a pure Qt (non ALSA) FCD sound card reader for Windows build          //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -14,17 +16,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-// FIXME: FCD is handled very badly!
-
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "fcdproplusinput.h"
+#include "fcdproplusinputqt.h"
 
 #include "fcdproplusgui.h"
-#include "fcdproplusthread.h"
+#include "fcdproplusreader.h"
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
 
@@ -33,14 +33,15 @@ MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
 	m_settings(),
-	m_FCDThread(0),
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName)
 {
+	m_FCDReader = new FCDProPlusReader(&m_sampleFifo);
 }
 
 FCDProPlusInput::~FCDProPlusInput()
 {
 	stop();
+	delete m_FCDReader;
 }
 
 bool FCDProPlusInput::init(const Message& cmd)
@@ -53,11 +54,6 @@ bool FCDProPlusInput::start(int device)
 	qDebug() << "FCDProPlusInput::start with device #" << device;
 
 	QMutexLocker mutexLocker(&m_mutex);
-
-	if (m_FCDThread)
-	{
-		return false;
-	}
 
 	m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
 
@@ -80,13 +76,7 @@ bool FCDProPlusInput::start(int device)
 		return false;
 	}
 
-	if ((m_FCDThread = new FCDProPlusThread(&m_sampleFifo)) == NULL)
-	{
-		qFatal("out of memory");
-		return false;
-	}
-
-	m_FCDThread->startWork();
+	m_FCDReader->startWork();
 
 	mutexLocker.unlock();
 	applySettings(m_settings, true);
@@ -99,13 +89,7 @@ void FCDProPlusInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_FCDThread)
-	{
-		m_FCDThread->stopWork();
-		// wait for thread to quit ?
-		delete m_FCDThread;
-		m_FCDThread = 0;
-	}
+	m_FCDReader->stopWork();
 
 	fcdClose(m_dev);
 	m_dev = 0;

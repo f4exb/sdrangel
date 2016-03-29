@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
+// This is a pure Qt (non ALSA) FCD sound card reader for Windows build          //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -28,7 +30,7 @@ struct fcd_buffer {
 	std::size_t length;
 };
 
-class FCDProPlusThread;
+class FCDProPlusReader;
 
 class FCDProPlusInput : public SampleSource {
 public:
@@ -80,7 +82,7 @@ private:
 	hid_device *m_dev;
 	QMutex m_mutex;
 	FCDProPlusSettings m_settings;
-	FCDProPlusThread* m_FCDThread;
+	FCDProPlusReader* m_FCDReader;
 	QString m_deviceDescription;
 };
 

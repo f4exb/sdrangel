@@ -23,6 +23,7 @@ struct fcd_traits
 	static const uint16_t productId = 0x0;
 	static const int sampleRate = 48000;
 	static const int convBufSize = (1<<11);
+	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
     static const char *interfaceIID;
     static const char *displayedName;
@@ -37,6 +38,7 @@ struct fcd_traits<Pro>
 	static const uint16_t productId = 0xFB56;
 	static const int sampleRate = 96000;
 	static const int convBufSize = (1<<11);
+	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
     static const char *interfaceIID;
     static const char *displayedName;
@@ -51,6 +53,7 @@ struct fcd_traits<ProPlus>
 	static const uint16_t productId = 0xFB31;
 	static const int sampleRate = 192000;
 	static const int convBufSize = (1<<12);
+	static const int fcdBufSize = (1<<18);
 	static const char *alsaDeviceName;
     static const char *interfaceIID;
     static const char *displayedName;
