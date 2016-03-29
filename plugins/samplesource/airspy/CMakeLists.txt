@@ -23,8 +23,6 @@ set(airspy_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 	${LIBAIRSPY_INCLUDE_DIR}
 )
 
@@ -46,7 +44,6 @@ add_library(inputairspy SHARED
 target_link_libraries(inputairspy
 	${QT_LIBRARIES}
 	${LIBAIRSPY_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 	sdrbase
 )
 

@@ -26,8 +26,6 @@ set(sdrdaemon_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 )
 
 #include(${QT_USE_FILE})

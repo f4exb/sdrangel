@@ -19,9 +19,6 @@ set(udpsrc_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
-	${OPENGL_INCLUDE_DIR}
 )
 
 #include(${QT_USE_FILE})
@@ -40,7 +37,6 @@ add_library(demodudpsrc SHARED
 
 target_link_libraries(demodudpsrc
 	${QT_LIBRARIES}
-	${OPENGL_LIBRARIES}
 	sdrbase
 )
 

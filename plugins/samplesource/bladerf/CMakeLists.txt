@@ -23,8 +23,6 @@ set(bladerf_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 	${LIBBLADERF_INCLUDE_DIR}
 )
 
@@ -45,7 +43,6 @@ add_library(inputbladerf SHARED
 target_link_libraries(inputbladerf
 	${QT_LIBRARIES}
 	${LIBBLADERF_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 	sdrbase
 )
 

@@ -23,8 +23,6 @@ set(rtlsdr_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 	${LIBRTLSDR_INCLUDE_DIR}
 )
 
@@ -45,7 +43,6 @@ add_library(inputrtlsdr SHARED
 target_link_libraries(inputrtlsdr
 	${QT_LIBRARIES}
 	${LIBRTLSDR_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 	sdrbase
 )
 

@@ -23,8 +23,6 @@ set(hackrf_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 	${LIBHACKRF_INCLUDE_DIR}
 )
 
@@ -46,7 +44,6 @@ add_library(inputhackrf SHARED
 target_link_libraries(inputhackrf
 	${QT_LIBRARIES}
 	${LIBHACKRF_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 	sdrbase
 )
 

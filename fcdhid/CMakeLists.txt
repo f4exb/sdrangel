@@ -14,8 +14,6 @@ set(fcdhid_HEADERS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 )
 
 #add_definitions(-DQT_PLUGIN)

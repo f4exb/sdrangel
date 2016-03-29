@@ -23,8 +23,6 @@ set(fcdproplus_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/include-gpl
 	${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
@@ -45,7 +43,6 @@ add_library(inputfcdproplus SHARED
 
 target_link_libraries(inputfcdproplus
 	${QT_LIBRARIES}
-	${LIBUSB_LIBRARIES}
 	asound
 	fcdhid
 	fcdlib
