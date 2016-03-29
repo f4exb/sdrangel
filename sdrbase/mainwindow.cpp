@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QFile>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QTextStream>
 
@@ -547,6 +548,12 @@ void MainWindow::on_presetExport_clicked()
 
 			if (fileName != "")
 			{
+				QFileInfo fileInfo(fileName);
+
+				if (fileInfo.suffix() != "prex") {
+					fileName += ".prex";
+				}
+
 				QFile exportFile(fileName);
 
 				if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
