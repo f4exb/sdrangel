@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>295</width>
-    <height>189</height>
+    <width>287</width>
+    <height>156</height>
    </rect>
   </property>
   <property name="font">
@@ -24,8 +24,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>281</width>
-     <height>181</height>
+     <width>271</width>
+     <height>141</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -254,7 +254,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="volumeLayout">
+     <layout class="QHBoxLayout" name="squelchLayout">
       <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
@@ -263,9 +263,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="volume">
-        <property name="toolTip">
-         <string>Volume</string>
+       <widget class="QDial" name="volume">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
         </property>
         <property name="maximum">
          <number>100</number>
@@ -276,17 +279,20 @@
         <property name="value">
          <number>20</number>
         </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="volumeText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>0</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -297,10 +303,19 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="squelchLayout">
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QLabel" name="squelchLabel">
         <property name="text">
@@ -309,9 +324,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="squelch">
-        <property name="toolTip">
-         <string>Squelch threshold (dB)</string>
+       <widget class="QDial" name="squelch">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
         </property>
         <property name="minimum">
          <number>-1000</number>
@@ -319,14 +337,14 @@
         <property name="maximum">
          <number>0</number>
         </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
          <number>-150</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -334,8 +352,14 @@
        <widget class="QLabel" name="squelchText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>0</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
