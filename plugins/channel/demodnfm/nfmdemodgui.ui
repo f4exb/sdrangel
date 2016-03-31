@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>279</width>
-    <height>172</height>
+    <width>295</width>
+    <height>189</height>
    </rect>
   </property>
   <property name="font">
@@ -24,8 +24,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>271</width>
-     <height>161</height>
+     <width>281</width>
+     <height>181</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -148,7 +148,7 @@
       <item>
        <widget class="QLabel" name="rfBWLabel">
         <property name="text">
-         <string>RF BW</string>
+         <string>RFBW</string>
         </property>
        </widget>
       </item>
@@ -175,7 +175,7 @@
        <widget class="QLabel" name="rfBWText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>40</width>
           <height>0</height>
          </size>
         </property>
@@ -187,19 +187,34 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="afBWLayout">
+      <item>
+       <widget class="QLabel" name="bwSpacer">
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="afLabel">
         <property name="text">
-         <string>AF BW</string>
+         <string>AFBW</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QSlider" name="afBW">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Audio bandwidth</string>
         </property>
@@ -224,7 +239,7 @@
        <widget class="QLabel" name="afBWText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>25</width>
           <height>0</height>
          </size>
         </property>
@@ -467,6 +482,9 @@
     </item>
    </layout>
   </widget>
+  <zorder>settingsContainer</zorder>
+  <zorder>afBW</zorder>
+  <zorder>afBWText</zorder>
  </widget>
  <customwidgets>
   <customwidget>
