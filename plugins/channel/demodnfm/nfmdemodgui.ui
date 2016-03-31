@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>281</width>
-    <height>162</height>
+    <width>279</width>
+    <height>172</height>
    </rect>
   </property>
   <property name="font">
@@ -25,7 +25,7 @@
      <x>0</x>
      <y>0</y>
      <width>271</width>
-     <height>131</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -243,7 +243,7 @@
       <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
-         <string>Volume</string>
+         <string>Vol</string>
         </property>
        </widget>
       </item>
@@ -289,14 +289,14 @@
       <item>
        <widget class="QLabel" name="squelchLabel">
         <property name="text">
-         <string>Squelch</string>
+         <string>Sq</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QSlider" name="squelch">
         <property name="toolTip">
-         <string>Squelch</string>
+         <string>Squelch threshold (dB)</string>
         </property>
         <property name="minimum">
          <number>-1000</number>
@@ -323,8 +323,58 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Squelch threshold (dB)</string>
+        </property>
         <property name="text">
          <string>-15.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="squelchGate">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch gate (ms)</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+        <property name="sliderPosition">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchGateText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch gate (ms)</string>
+        </property>
+        <property name="text">
+         <string>000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -48,6 +48,7 @@ NFMDemod::NFMDemod() :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
+	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
 	m_config.m_ctcssOn = false;
@@ -78,6 +79,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real afBandwidth,
 		Real volume,
+		int  squelchGate,
 		Real squelch,
 		bool ctcssOn,
 		bool audioMute)
@@ -85,6 +87,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
 			afBandwidth,
 			volume,
+			squelchGate,
 			squelch,
 			ctcssOn,
 			audioMute);
@@ -295,6 +298,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
+		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_ctcssOn = cfg.getCtcssOn();
 		m_config.m_audioMute = cfg.getAudioMute();
@@ -304,6 +308,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
+				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
 				<< " m_audioMute: " << m_config.m_audioMute;
@@ -345,6 +350,12 @@ void NFMDemod::apply()
 		m_settingsMutex.unlock();
 	}
 
+	if (m_config.m_squelchGate != m_running.m_squelchGate)
+	{
+		m_agcAttack = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
+		m_AGC.resize(m_agcAttack, m_agcLevel);
+	}
+
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a value in tenths of dB
@@ -357,6 +368,7 @@ void NFMDemod::apply()
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
+	m_running.m_squelchGate = m_config.m_squelchGate;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
