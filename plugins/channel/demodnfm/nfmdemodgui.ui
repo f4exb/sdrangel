@@ -153,37 +153,34 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="rfBW">
+       <widget class="QComboBox" name="rfBW">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>Demodulator (RF) bandwidth</string>
+         <string>RF demodulator bandwidth (kHz)</string>
         </property>
-        <property name="maximum">
-         <number>8</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+        <property name="currentIndex">
+         <number>-1</number>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="rfBWText">
+       <widget class="QLabel" name="rfBWUnitText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>10</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>12.5 k</string>
+         <string>k</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -201,6 +198,19 @@
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QLabel" name="afLabel">
         <property name="text">
          <string>AFBW</string>
@@ -216,7 +226,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio bandwidth</string>
+         <string>Audio bandwidth (kHz)</string>
         </property>
         <property name="minimum">
          <number>1</number>
@@ -270,6 +280,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Sound volume</string>
+        </property>
         <property name="maximum">
          <number>100</number>
         </property>
@@ -294,6 +307,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Sound volume</string>
         </property>
         <property name="text">
          <string>2.0</string>
@@ -330,6 +346,9 @@
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch threshold (dB)</string>
         </property>
         <property name="minimum">
          <number>-1000</number>

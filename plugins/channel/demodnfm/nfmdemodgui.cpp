@@ -55,7 +55,7 @@ void NFMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
-	ui->rfBW->setValue(4);
+	ui->rfBW->setCurrentIndex(4);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelchGate->setValue(5);
@@ -72,7 +72,7 @@ QByteArray NFMDemodGUI::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
+	s.writeS32(2, ui->rfBW->currentIndex());
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
@@ -107,7 +107,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
+		ui->rfBW->setCurrentIndex(tmp);
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
 		d.readS32(4, &tmp, 20);
@@ -175,10 +175,11 @@ void NFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 	}
 }
 
-void NFMDemodGUI::on_rfBW_valueChanged(int value)
+void NFMDemodGUI::on_rfBW_currentIndexChanged(int index)
 {
-	ui->rfBWText->setText(QString("%1 k").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker.setBandwidth(m_rfBW[value]);
+	qDebug() << "NFMDemodGUI::on_rfBW_currentIndexChanged" << index;
+	//ui->rfBWText->setText(QString("%1 k").arg(m_rfBW[value] / 1000.0));
+	m_channelMarker.setBandwidth(m_rfBW[index]);
 	applySettings();
 }
 
@@ -256,6 +257,14 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
+
+	blockApplySettings(true);
+	ui->rfBW->clear();
+	for (int i = 0; i < m_nbRfBW; i++) {
+		ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+	}
+	blockApplySettings(false);
+
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
@@ -320,7 +329,7 @@ void NFMDemodGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->value()],
+			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
 			ui->squelchGate->value(), // in 10ths of ms
