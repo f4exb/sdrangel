@@ -255,7 +255,7 @@
      <item row="0" column="2">
       <widget class="QLabel" name="samplerateUnit">
        <property name="text">
-        <string>k</string>
+        <string>kS/s</string>
        </property>
       </widget>
      </item>
@@ -301,7 +301,7 @@
      <item row="0" column="6">
       <widget class="QLabel" name="bandwidthUnit">
        <property name="text">
-        <string>k</string>
+        <string>kHz</string>
        </property>
       </widget>
      </item>
