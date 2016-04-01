@@ -782,7 +782,20 @@ void GLScopeGUI::on_memIndex_valueChanged(int value)
 
 	if(m_glScope != 0)
 	{
+		// If entering memory history block new triggers and all trigger controls
 		m_scopeVis->blockTrigger(value != 0);
+		ui->traceLen->setDisabled(value != 0);
+		ui->trigIndex->setDisabled(value != 0);
+		ui->trigCount->setDisabled(value != 0);
+		ui->trigMode->setDisabled(value != 0);
+		ui->slopePos->setDisabled(value != 0);
+		ui->slopeNeg->setDisabled(value != 0);
+		ui->slopeBoth->setDisabled(value != 0);
+		ui->oneShot->setDisabled(value != 0);
+		ui->trigLevelCoarse->setDisabled(value != 0);
+		ui->trigLevelFine->setDisabled(value != 0);
+		ui->trigDelay->setDisabled(value != 0);
+		ui->trigPre->setDisabled(value != 0);
 		m_glScope->setMemHistoryShift(value);
 		emit traceMemoryChanged(value);
 	}
