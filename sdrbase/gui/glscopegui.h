@@ -30,9 +30,6 @@ public:
 
 	bool handleMessage(Message* message);
 
-signals:
-	void traceMemoryChanged(int);
-
 private:
 	Ui::GLScopeGUI* ui;
 

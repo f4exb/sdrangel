@@ -800,7 +800,6 @@ void GLScopeGUI::on_memIndex_valueChanged(int value)
 		// Set value
 		m_glScope->setMemHistoryShift(value);
 		ui->sampleRateText->setText(tr("%1\nkS/s").arg(m_glScope->getSampleRate() / 1000.0f, 0, 'f', 2));
-		emit traceMemoryChanged(value);
 	}
 }
 
