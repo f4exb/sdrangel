@@ -485,6 +485,7 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 void GLScopeGUI::on_scope_sampleRateChanged(int)
 {
 	m_sampleRate = m_glScope->getSampleRate();
+	ui->sampleRateText->setText(tr("%1\nkS/s").arg(m_sampleRate / 1000.0f, 0, 'f', 2));
 	setTimeScaleDisplay();
 	setTraceLenDisplay();
 	setTimeOfsDisplay();
@@ -796,6 +797,7 @@ void GLScopeGUI::on_memIndex_valueChanged(int value)
 		ui->trigLevelFine->setDisabled(value != 0);
 		ui->trigDelay->setDisabled(value != 0);
 		ui->trigPre->setDisabled(value != 0);
+		// Set value
 		m_glScope->setMemHistoryShift(value);
 		emit traceMemoryChanged(value);
 	}

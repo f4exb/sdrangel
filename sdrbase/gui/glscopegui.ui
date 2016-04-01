@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>583</width>
-    <height>118</height>
+    <width>656</width>
+    <height>214</height>
    </rect>
   </property>
   <property name="font">
@@ -23,16 +23,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -408,6 +399,33 @@
        </property>
        <property name="text">
         <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sampleRateText">
+       <property name="minimumSize">
+        <size>
+         <width>52</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Currently displayed trace sample rate (kS/s)</string>
+       </property>
+       <property name="text">
+        <string>00000.00
+kS/s</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
