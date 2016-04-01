@@ -409,6 +409,22 @@ void ScopeVis::setOneShot(bool oneShot)
 	}
 }
 
+void ScopeVis::blockTrigger(bool blocked)
+{
+	if (blocked)
+	{
+		m_triggerState = WaitForReset;
+	}
+	else
+	{
+		if (!m_triggerOneShot) {
+	        m_tracebackCount = 0;
+			m_triggerState = Untriggered;
+			m_triggerIndex = 0;
+		}
+	}
+}
+
 bool ScopeVis::nextTrigger()
 {
 	if (m_triggerCount < m_triggerCounts[m_triggerIndex])

@@ -38,6 +38,7 @@ public:
 		uint triggerCounts,
         uint traceSize);
 	void setOneShot(bool oneShot);
+	void blockTrigger(bool blecked);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();

@@ -782,7 +782,9 @@ void GLScopeGUI::on_memIndex_valueChanged(int value)
 
 	if(m_glScope != 0)
 	{
+		m_scopeVis->blockTrigger(value != 0);
 		m_glScope->setMemHistoryShift(value);
+		emit traceMemoryChanged(value);
 	}
 }
 
