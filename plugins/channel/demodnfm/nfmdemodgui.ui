@@ -163,9 +163,6 @@
         <property name="toolTip">
          <string>RF demodulator bandwidth (kHz)</string>
         </property>
-        <property name="currentIndex">
-         <number>-1</number>
-        </property>
        </widget>
       </item>
       <item>
