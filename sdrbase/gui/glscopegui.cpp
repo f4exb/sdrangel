@@ -479,7 +479,6 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 	setTrigPreDisplay();
     setTrigDelayDisplay();
 	applySettings();
-	applyTriggerSettings();
 }
 
 void GLScopeGUI::on_scope_sampleRateChanged(int)
@@ -492,7 +491,6 @@ void GLScopeGUI::on_scope_sampleRateChanged(int)
 	setTrigPreDisplay();
     setTrigDelayDisplay();
 	applySettings();
-	applyTriggerSettings();
 }
 
 void GLScopeGUI::setTimeScaleDisplay()
