@@ -183,12 +183,24 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		setTrigUI(m_triggerIndex);
 		setTrigLevelDisplay();
 		applySettings();
-		applyTriggerSettings();
 		return true;
 	} else {
 		resetToDefaults();
 		return false;
 	}
+}
+
+void GLScopeGUI::applyAllTriggerSettings()
+{
+	quint32 currentTriggerIndex = m_triggerIndex;
+
+	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	{
+		m_triggerIndex = i;
+		applyTriggerSettings();
+	}
+
+	m_triggerIndex = currentTriggerIndex;
 }
 
 void GLScopeGUI::setTrigUI(uint index)
@@ -479,6 +491,10 @@ void GLScopeGUI::on_scope_traceSizeChanged(int)
 	setTrigPreDisplay();
     setTrigDelayDisplay();
 	applySettings();
+
+	if (m_triggerPre > 0) {
+		applyAllTriggerSettings(); // change of trace size changes number of pre-trigger samples
+	}
 }
 
 void GLScopeGUI::on_scope_sampleRateChanged(int)

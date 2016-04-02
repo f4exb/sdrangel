@@ -67,6 +67,7 @@ private:
 
 	void applySettings();
 	void applyTriggerSettings();
+	void applyAllTriggerSettings();
 	void setTimeScaleDisplay();
 	void setTraceLenDisplay();
 	void setTimeOfsDisplay();
