@@ -30,6 +30,7 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive),
+	m_udpPort(9999),
 	m_audioFifo(4, 24000),
 	m_audioActive(false),
 	m_audioStereo(false),
@@ -37,7 +38,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 {
 	setObjectName("UDPSrc");
 
-	m_socket = new QUdpSocket(this);
+	m_udpBuffer = new UDPSink<Sample>(this, udpBLockSampleSize, m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 
 	m_audioBuffer.resize(1<<9);
@@ -47,7 +48,6 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_sampleFormat = FormatSSB;
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
-	m_udpPort = 9999;
 	m_audioPort = m_udpPort - 1;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
@@ -64,8 +64,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_scale = 0;
 	m_boost = 0;
 	m_magsq = 0;
-	m_sampleBufferSSB.resize(udpFftLen);
-	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpFftLen);
+	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpBLockSampleSize * sizeof(Sample));
 
 	if (m_audioSocket->bind(QHostAddress::LocalHost, m_audioPort))
 	{
@@ -83,7 +82,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 UDPSrc::~UDPSrc()
 {
 	delete m_audioSocket;
-	delete m_socket;
+	delete m_udpBuffer;
 	if (UDPFilter) delete UDPFilter;
 	if (m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
@@ -132,87 +131,69 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 	Real l, r;
 
 	m_sampleBuffer.clear();
-
 	m_settingsMutex.lock();
-
-	// Rtl-Sdr uses full 16-bit scale; FCDPP does not
-	//int rescale = 32768 * (1 << m_boost);
 	int rescale = (1 << m_boost);
 
-	for(SampleVector::const_iterator it = begin; it < end; ++it) {
-		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+	for(SampleVector::const_iterator it = begin; it < end; ++it)
+	{
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
 		{
 			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (1<<30);
-			m_sampleBuffer.push_back(Sample(ci.real() * rescale, ci.imag() * rescale));
+			Sample s(ci.real() * rescale, ci.imag() * rescale);
+			m_sampleBuffer.push_back(s);
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
+
+			if (m_sampleFormat == FormatSSB)
+			{
+				int n_out = UDPFilter->runSSB(ci, &sideband, true);
+
+				if (n_out)
+				{
+					for (int i = 0; i < n_out; i+=2)
+					{
+						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+						r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7;
+						m_udpBuffer->write(Sample(l, r));
+					}
+				}
+			}
+			else if (m_sampleFormat == FormatNFM)
+			{
+				int n_out = UDPFilter->runFilt(ci, &sideband);
+
+				if (n_out)
+				{
+					Real sum = 1.0;
+					for (int i = 0; i < n_out; i+=2)
+					{
+						l = m_this.real() * (m_last.imag() - sideband[i].imag())
+						  - m_this.imag() * (m_last.real() - sideband[i].real());
+						m_last = sideband[i];
+						r = m_last.real() * (m_this.imag() - sideband[i+1].imag())
+						  - m_last.imag() * (m_this.real() - sideband[i+1].real());
+						m_this = sideband[i+1];
+						m_udpBuffer->write(Sample(l*m_scale, r*m_scale));
+						sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag();
+					}
+
+					m_scale = (24000 * udpBLockSampleSize * sizeof(Sample)) / sum; // TODO: correct levels
+				}
+			}
+			else // Raw I/Q samples
+			{
+				m_udpBuffer->write(s);
+			}
 		}
 	}
+
+	qDebug() << "UDPSrc::feed: " << m_sampleBuffer.size() * 4;
 
 	if((m_spectrum != 0) && (m_spectrumEnabled))
 	{
 		m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
-	}
-
-	if (m_sampleFormat == FormatSSB)
-	{
-		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it)
-		{
-			//Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
-			Complex cj(it->real(), it->imag());
-			int n_out = UDPFilter->runSSB(cj, &sideband, true);
-
-			if (n_out)
-			{
-				for (int i = 0; i < n_out; i+=2)
-				{
-					//l = (sideband[i].real() + sideband[i].imag()) * 0.7 * 32000.0;
-					//r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7 * 32000.0;
-					l = (sideband[i].real() + sideband[i].imag()) * 0.7;
-					r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7;
-					m_sampleBufferSSB.push_back(Sample(l, r));
-				}
-
-				m_socket->writeDatagram((const char*)&m_sampleBufferSSB[0], (qint64 ) (n_out * 2), m_udpAddress, m_udpPort);
-				m_sampleBufferSSB.clear();
-			}
-		}
-	}
-	else if (m_sampleFormat == FormatNFM)
-	{
-		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it)
-		{
-			Complex cj(it->real() / 32768.0f, it->imag() / 32768.0f);
-			// An FFT filter here is overkill, but was already set up for SSB
-			int n_out = UDPFilter->runFilt(cj, &sideband);
-
-			if (n_out)
-			{
-				Real sum = 1.0;
-				for (int i = 0; i < n_out; i+=2)
-				{
-					l = m_this.real() * (m_last.imag() - sideband[i].imag())
-					  - m_this.imag() * (m_last.real() - sideband[i].real());
-					m_last = sideband[i];
-					r = m_last.real() * (m_this.imag() - sideband[i+1].imag())
-					  - m_last.imag() * (m_this.real() - sideband[i+1].real());
-					m_this = sideband[i+1];
-					m_sampleBufferSSB.push_back(Sample(l * m_scale, r * m_scale));
-					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag(); 
-				}
-				// TODO: correct levels
-				m_scale = 24000 * udpFftLen / sum;
-				m_socket->writeDatagram((const char*)&m_sampleBufferSSB[0], (qint64 ) (n_out * 2), m_udpAddress, m_udpPort);
-				m_sampleBufferSSB.clear();
-			}
-		}
-	}
-	else
-	{
-		m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_sampleBuffer.size() * 4), m_udpAddress, m_udpPort);
 	}
 
 	m_settingsMutex.unlock();
@@ -305,14 +286,16 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_outputSampleRate = cfg.getOutputSampleRate();
 		m_rfBandwidth = cfg.getRFBandwidth();
 
-		if (cfg.getUDPAddress() != m_udpAddress.toString())
+		if (cfg.getUDPAddress() != m_udpAddressStr)
 		{
-			m_udpAddress.setAddress(cfg.getUDPAddress());
+			m_udpAddressStr = cfg.getUDPAddress();
+			m_udpBuffer->setAddress(m_udpAddressStr);
 		}
 
 		if (cfg.getUDPPort() != m_udpPort)
 		{
 			m_udpPort = cfg.getUDPPort();
+			m_udpBuffer->setPort(m_udpPort);
 		}
 
 		if (cfg.getAudioPort() != m_audioPort)
@@ -351,7 +334,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 				<< " m_outputSampleRate: " << m_outputSampleRate
 				<< " m_rfBandwidth: " << m_rfBandwidth
 				<< " m_boost: " << m_boost
-				<< " m_udpAddress: " << cfg.getUDPAddress()
+				<< " m_udpAddressStr: " << m_udpAddressStr
 				<< " m_udpPort: " << m_udpPort
 				<< " m_audioPort: " << m_audioPort;
 

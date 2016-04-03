@@ -24,11 +24,10 @@
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
+#include "util/udpsink.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
 
-
-#define udpFftLen 2048
 
 class QUdpSocket;
 class UDPSrcGUI;
@@ -73,6 +72,8 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+	static const int udpBLockSampleSize = 512; // UDP block size in number of samples
 
 public slots:
     void audioReadyRead();
@@ -192,7 +193,6 @@ protected:
 
 	MessageQueue* m_uiMessageQueue;
 	UDPSrcGUI* m_udpSrcGUI;
-	QUdpSocket *m_socket;
 	QUdpSocket *m_audioSocket;
 
 	int m_inputSampleRate;
@@ -200,7 +200,7 @@ protected:
 	int m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
-	QHostAddress m_udpAddress;
+	QString m_udpAddressStr;
 	quint16 m_udpPort;
 	quint16 m_audioPort;
 	int m_boost;
@@ -218,7 +218,7 @@ protected:
 	fftfilt* UDPFilter;
 
 	SampleVector m_sampleBuffer;
-	SampleVector m_sampleBufferSSB;
+	UDPSink<Sample> *m_udpBuffer;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

@@ -22,6 +22,8 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 
+#include <cassert>
+
 template<typename T>
 class UDPSink
 {
@@ -42,6 +44,7 @@ public:
 		m_port(port),
 		m_sampleBufferIndex(0)
 	{
+		assert(m_udpSize > 2);
 		m_sampleBuffer = new T[m_udpSize];
 		m_socket = new QUdpSocket(parent);
 	}
@@ -52,18 +55,21 @@ public:
 		delete m_socket;
 	}
 
+	void setAddress(QString& address) { m_address.setAddress(address); }
+	void setPort(unsigned int port) { m_port = port; }
+
 	void write(T sample)
 	{
-		m_sampleBuffer[m_sampleBufferIndex] = sample;
-
 		if (m_sampleBufferIndex < m_udpSize)
 		{
+			m_sampleBuffer[m_sampleBufferIndex] = sample;
 			m_sampleBufferIndex++;
 		}
 		else
 		{
 			m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_udpSize * sizeof(T)), m_address, m_port);
-			m_sampleBufferIndex = 0;
+			m_sampleBuffer[0] = sample;
+			m_sampleBufferIndex = 1;
 		}
 	}
 
