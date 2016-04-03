@@ -11,7 +11,7 @@ copy %msys2dir%\mingw64\bin\libpcre-1.dll %2
 copy %msys2dir%\mingw64\bin\libpcre16-0.dll %2
 copy %msys2dir%\mingw64\bin\libpng16-16.dll %2
 copy %msys2dir%\mingw64\bin\zlib1.dll %2
-copy %2\icudt56.dll %2\libicudt56.dll
+move %2\icudt56.dll %2\libicudt56.dll
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy lz4\%1\lz4.dll %2
