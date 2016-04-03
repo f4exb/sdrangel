@@ -470,3 +470,19 @@ void UDPSrcGUI::onMenuDoubleClicked()
 		bcsw->show();
 	}
 }
+
+void UDPSrcGUI::leaveEvent(QEvent*)
+{
+	blockApplySettings(true);
+	m_channelMarker.setHighlighted(false);
+	blockApplySettings(false);
+}
+
+void UDPSrcGUI::enterEvent(QEvent*)
+{
+	blockApplySettings(true);
+	m_channelMarker.setHighlighted(true);
+	blockApplySettings(false);
+}
+
+

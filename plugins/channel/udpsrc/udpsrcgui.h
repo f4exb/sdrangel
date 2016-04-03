@@ -105,6 +105,9 @@ private:
     void blockApplySettings(bool block);
 	void applySettings();
 	void applySettingsImmediate();
+
+	void leaveEvent(QEvent*);
+	void enterEvent(QEvent*);
 };
 
 #endif // INCLUDE_UDPSRCGUI_H
