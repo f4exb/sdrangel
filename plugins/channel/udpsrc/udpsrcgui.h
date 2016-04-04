@@ -64,6 +64,7 @@ private slots:
 	void on_udpAddress_textEdited(const QString& arg1);
 	void on_udpPort_textEdited(const QString& arg1);
 	void on_audioPort_textEdited(const QString& arg1);
+	void on_fmDeviation_textEdited(const QString& arg1);
 	void on_audioActive_toggled(bool active);
 	void on_audioStereo_toggled(bool stereo);
 	void on_applyBtn_clicked();
@@ -84,6 +85,7 @@ private:
 	UDPSrc::SampleFormat m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
+	int m_fmDeviation;
 	int m_boost;
 	bool m_audioActive;
 	bool m_audioStereo;

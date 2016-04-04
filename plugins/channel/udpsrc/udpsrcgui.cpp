@@ -68,6 +68,7 @@ void UDPSrcGUI::resetToDefaults()
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
+	ui->fmDeviation->setText("2500");
 	ui->udpAddress->setText("127.0.0.1");
 	ui->udpPort->setText("9999");
 	ui->audioPort->setText("9999");
@@ -99,6 +100,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(12, (qint32)m_volume);
 	s.writeS32(13, m_audioPort);
 	s.writeBool(14, m_audioStereo);
+	s.writeS32(15, m_fmDeviation);
 	return s.final();
 }
 
@@ -164,6 +166,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->audioPort->setText(QString("%1").arg(s32tmp));
 		d.readBool(14, &booltmp, false);
 		ui->audioStereo->setChecked(booltmp);
+		d.readS32(15, &s32tmp, 2500);
+		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
         
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -317,6 +321,13 @@ void UDPSrcGUI::applySettings()
 			audioPort = udpPort - 1;
 		}
 
+		int fmDeviation = ui->fmDeviation->text().toInt(&ok);
+
+		if ((!ok) || (fmDeviation < 1))
+		{
+			fmDeviation = 2500;
+		}
+
 		int boost = ui->boost->value();
 
 		setTitleColor(m_channelMarker.getColor());
@@ -327,6 +338,7 @@ void UDPSrcGUI::applySettings()
 		//ui->udpAddress->setText(m_udpAddress);
 		ui->udpPort->setText(QString("%1").arg(udpPort));
 		ui->audioPort->setText(QString("%1").arg(audioPort));
+		ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
 		ui->boost->setValue(boost);
 		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
 		m_channelMarker.setBandwidth((int)rfBandwidth);
@@ -358,6 +370,7 @@ void UDPSrcGUI::applySettings()
 		m_sampleFormat = sampleFormat;
 		m_outputSampleRate = outputSampleRate;
 		m_rfBandwidth = rfBandwidth;
+		m_fmDeviation = fmDeviation;
 		m_udpPort = udpPort;
 		m_audioPort = audioPort;
 		m_boost = boost;
@@ -366,6 +379,7 @@ void UDPSrcGUI::applySettings()
 			sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
+			fmDeviation,
 			m_udpAddress,
 			udpPort,
 			audioPort);
@@ -405,6 +419,11 @@ void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1)
 }
 
 void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1)
+{
+	ui->applyBtn->setEnabled(true);
+}
+
+void UDPSrcGUI::on_fmDeviation_textEdited(const QString& arg1)
 {
 	ui->applyBtn->setEnabled(true);
 }

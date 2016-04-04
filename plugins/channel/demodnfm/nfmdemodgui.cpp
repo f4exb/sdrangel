@@ -17,6 +17,9 @@
 const int NFMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
+const int NFMDemodGUI::m_fmDev[] = { // corresponding FM deviations
+    1000, 1500, 2000, 2000,  2000,  2500,  3000,  3500,  5000
+};
 const int NFMDemodGUI::m_nbRfBW = 9;
 
 NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI)
@@ -331,6 +334,7 @@ void NFMDemodGUI::applySettings()
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
+			m_fmDev[ui->rfBW->currentIndex()],
 			ui->volume->value() / 10.0,
 			ui->squelchGate->value(), // in 10ths of ms
 			ui->squelch->value(),

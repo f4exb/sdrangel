@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>257</width>
-    <height>324</height>
+    <width>290</width>
+    <height>158</height>
    </rect>
   </property>
   <property name="font">
@@ -24,9 +24,15 @@
     <rect>
      <x>10</x>
      <y>5</y>
-     <width>241</width>
+     <width>270</width>
      <height>142</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>270</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -298,17 +304,34 @@
       <item>
        <widget class="QLabel" name="udpPortlabel">
         <property name="text">
-         <string>Port</string>
+         <string>D</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="udpPort">
         <property name="toolTip">
-         <string>Destination port</string>
+         <string>Remote data port</string>
         </property>
         <property name="text">
          <string>9999</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="audioPortlabel">
+        <property name="text">
+         <string>A</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="audioPort">
+        <property name="toolTip">
+         <string>Local audio input port</string>
+        </property>
+        <property name="text">
+         <string>9998</string>
         </property>
        </widget>
       </item>
@@ -317,19 +340,19 @@
     <item row="6" column="0">
      <layout class="QHBoxLayout" name="AudioPortLayout">
       <item>
-       <widget class="QLabel" name="audioPortlabel">
+       <widget class="QLabel" name="fmDevLabel">
         <property name="text">
-         <string>Audio</string>
+         <string>FMd (Hz)</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="audioPort">
+       <widget class="QLineEdit" name="fmDeviation">
         <property name="toolTip">
-         <string>Audio input port</string>
+         <string>FM deviation in Hz (for S16LE NFM format)</string>
         </property>
         <property name="text">
-         <string>9998</string>
+         <string>2500</string>
         </property>
        </widget>
       </item>
@@ -448,7 +471,7 @@
       <item>
        <widget class="QLineEdit" name="udpAddress">
         <property name="toolTip">
-         <string>Destination address</string>
+         <string>Remote address</string>
         </property>
         <property name="text">
          <string>127.0.0.1</string>
@@ -522,7 +545,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>sampleFormat</tabstop>
-  <tabstop>udpPort</tabstop>
   <tabstop>sampleRate</tabstop>
   <tabstop>rfBandwidth</tabstop>
   <tabstop>applyBtn</tabstop>

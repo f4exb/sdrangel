@@ -48,13 +48,13 @@ NFMDemod::NFMDemod() :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
+	m_config.m_fmDeviation = 2000;
 	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
 	m_config.m_ctcssOn = false;
 	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-	m_phaseDiscri.setFMScaling(384000/2400);
 
 	apply();
 
@@ -78,6 +78,7 @@ NFMDemod::~NFMDemod()
 void NFMDemod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real afBandwidth,
+		int  fmDeviation,
 		Real volume,
 		int  squelchGate,
 		Real squelch,
@@ -86,6 +87,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 {
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
 			afBandwidth,
+			fmDeviation,
 			volume,
 			squelchGate,
 			squelch,
@@ -297,6 +299,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
+		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_squelch = cfg.getSquelch();
@@ -307,6 +310,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
+				<< " m_fmDeviation: " << m_config.m_fmDeviation
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
@@ -336,9 +340,13 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_fmExcursion = m_config.m_rfBandwidth / 2.0f;
-		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
+		m_phaseDiscri.setFMScaling(m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
 		m_settingsMutex.unlock();
+	}
+
+	if (m_config.m_fmDeviation != m_running.m_fmDeviation)
+	{
+		m_phaseDiscri.setFMScaling(m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
 	}
 
 	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
@@ -368,6 +376,7 @@ void NFMDemod::apply()
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
+	m_running.m_fmDeviation = m_config.m_fmDeviation;
 	m_running.m_squelchGate = m_config.m_squelchGate;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;

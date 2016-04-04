@@ -43,6 +43,7 @@ public:
 	void configure(MessageQueue* messageQueue,
 			Real rfBandwidth,
 			Real afBandwidth,
+			int  fmDeviation,
 			Real volume,
 			int  squelchGate,
 			Real squelch,
@@ -77,6 +78,7 @@ private:
 	public:
 		Real getRFBandwidth() const { return m_rfBandwidth; }
 		Real getAFBandwidth() const { return m_afBandwidth; }
+		int  getFMDeviation() const { return m_fmDeviation; }
 		Real getVolume() const { return m_volume; }\
 		int  getSquelchGate() const { return m_squelchGate; }
 		Real getSquelch() const { return m_squelch; }
@@ -85,18 +87,20 @@ private:
 
 		static MsgConfigureNFMDemod* create(Real rfBandwidth,
 				Real afBandwidth,
+				int  fmDeviation,
 				Real volume,
 				int  squelchGate,
 				Real squelch,
 				bool ctcssOn,
 				bool audioMute)
 		{
-			return new MsgConfigureNFMDemod(rfBandwidth, afBandwidth, volume, squelchGate, squelch, ctcssOn, audioMute);
+			return new MsgConfigureNFMDemod(rfBandwidth, afBandwidth, fmDeviation, volume, squelchGate, squelch, ctcssOn, audioMute);
 		}
 
 	private:
 		Real m_rfBandwidth;
 		Real m_afBandwidth;
+		int  m_fmDeviation;
 		Real m_volume;
 		int  m_squelchGate;
 		Real m_squelch;
@@ -105,6 +109,7 @@ private:
 
 		MsgConfigureNFMDemod(Real rfBandwidth,
 				Real afBandwidth,
+				int  fmDeviation,
 				Real volume,
 				int  squelchGate,
 				Real squelch,
@@ -113,6 +118,7 @@ private:
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
+			m_fmDeviation(fmDeviation),
 			m_volume(volume),
 			m_squelchGate(squelchGate),
 			m_squelch(squelch),
@@ -137,6 +143,7 @@ private:
 		qint64 m_inputFrequencyOffset;
 		Real m_rfBandwidth;
 		Real m_afBandwidth;
+		int  m_fmDeviation;
 		int  m_squelchGate;
 		Real m_squelch;
 		Real m_volume;
@@ -150,7 +157,8 @@ private:
 			m_inputFrequencyOffset(0),
 			m_rfBandwidth(-1),
 			m_afBandwidth(-1),
-			m_squelchGate(50),
+			m_fmDeviation(1),
+			m_squelchGate(1),
 			m_squelch(0),
 			m_volume(0),
 			m_ctcssOn(false),

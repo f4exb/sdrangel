@@ -68,6 +68,7 @@ private:
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
+	static const int m_fmDev[];
 	static const int m_nbRfBW;
 
 	explicit NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);

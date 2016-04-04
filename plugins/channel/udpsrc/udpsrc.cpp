@@ -34,7 +34,8 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_audioFifo(4, 24000),
 	m_audioActive(false),
 	m_audioStereo(false),
-	m_volume(20)
+	m_volume(20),
+	m_fmDeviation(2500)
 {
 	setObjectName("UDPSrc");
 
@@ -66,6 +67,8 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_magsq = 0;
 	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpBLockSampleSize * sizeof(Sample));
 
+	m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
+
 	if (m_audioSocket->bind(QHostAddress::LocalHost, m_audioPort))
 	{
 		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_audioPort);
@@ -91,6 +94,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 		SampleFormat sampleFormat,
 		Real outputSampleRate,
 		Real rfBandwidth,
+		int fmDeviation,
 		QString& udpAddress,
 		int udpPort,
 		int audioPort)
@@ -98,6 +102,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
+			fmDeviation,
 			udpAddress,
 			udpPort,
 			audioPort);
@@ -162,25 +167,8 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_sampleFormat == FormatNFM)
 			{
-				int n_out = UDPFilter->runFilt(ci, &sideband);
-
-				if (n_out)
-				{
-					Real sum = 1.0;
-					for (int i = 0; i < n_out; i+=2)
-					{
-						l = m_this.real() * (m_last.imag() - sideband[i].imag())
-						  - m_this.imag() * (m_last.real() - sideband[i].real());
-						m_last = sideband[i];
-						r = m_last.real() * (m_this.imag() - sideband[i+1].imag())
-						  - m_last.imag() * (m_this.real() - sideband[i+1].real());
-						m_this = sideband[i+1];
-						m_udpBuffer->write(Sample(l*m_scale, r*m_scale));
-						sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag();
-					}
-
-					m_scale = (24000 * udpBLockSampleSize * sizeof(Sample)) / sum; // TODO: correct levels
-				}
+				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci);
+				m_udpBuffer->write(Sample(demod, 0.0));
 			}
 			else // Raw I/Q samples
 			{
@@ -189,7 +177,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		}
 	}
 
-	qDebug() << "UDPSrc::feed: " << m_sampleBuffer.size() * 4;
+	//qDebug() << "UDPSrc::feed: " << m_sampleBuffer.size() * 4;
 
 	if((m_spectrum != 0) && (m_spectrumEnabled))
 	{
@@ -201,6 +189,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 void UDPSrc::start()
 {
+	m_phaseDiscri.reset();
 }
 
 void UDPSrc::stop()
@@ -314,6 +303,12 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			{
 				qWarning("UDPSrc::handleMessage: cannot bind audio socket");
 			}
+		}
+
+		if (cfg.getFMDeviation() != m_fmDeviation)
+		{
+			m_fmDeviation = cfg.getFMDeviation();
+			m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
 		}
 
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);

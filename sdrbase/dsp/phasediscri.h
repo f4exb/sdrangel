@@ -48,7 +48,7 @@ public:
 	{
 		Complex d(std::conj(m_m1Sample) * sample);
 		m_m1Sample = sample;
-		return (std::atan2(d.imag(), d.real()) / M_PI_2) * m_fmScaling;
+		return (std::atan2(d.imag(), d.real()) / M_PI) * m_fmScaling;
 	}
 
 	/**
@@ -66,7 +66,8 @@ public:
 		m_m2Sample = m_m1Sample;
 		m_m1Sample = sample;
 
-		return ((h1 - h2) / M_PI_2) * m_fmScaling;
+		//return ((h1 - h2) / M_PI_2) * m_fmScaling;
+		return (h1 - h2) * m_fmScaling;
 	}
 
 private:

@@ -24,6 +24,7 @@
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
+#include "dsp/phasediscri.h"
 #include "util/udpsink.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
@@ -57,6 +58,7 @@ public:
 			SampleFormat sampleFormat,
 			Real outputSampleRate,
 			Real rfBandwidth,
+			int fmDeviation,
 			QString& udpAddress,
 			int udpPort,
 			int audioPort);
@@ -86,6 +88,7 @@ protected:
 		SampleFormat getSampleFormat() const { return m_sampleFormat; }
 		Real getOutputSampleRate() const { return m_outputSampleRate; }
 		Real getRFBandwidth() const { return m_rfBandwidth; }
+		int getFMDeviation() const { return m_fmDeviation; }
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
 		int getAudioPort() const { return m_audioPort; }
@@ -94,6 +97,7 @@ protected:
 				sampleFormat,
 				Real sampleRate,
 				Real rfBandwidth,
+				int fmDeviation,
 				QString& udpAddress,
 				int udpPort,
 				int audioPort)
@@ -101,6 +105,7 @@ protected:
 			return new MsgUDPSrcConfigure(sampleFormat,
 					sampleRate,
 					rfBandwidth,
+					fmDeviation,
 					udpAddress,
 					udpPort,
 					audioPort);
@@ -110,6 +115,7 @@ protected:
 		SampleFormat m_sampleFormat;
 		Real m_outputSampleRate;
 		Real m_rfBandwidth;
+		int m_fmDeviation;
 		QString m_udpAddress;
 		int m_udpPort;
 		int m_audioPort;
@@ -117,6 +123,7 @@ protected:
 		MsgUDPSrcConfigure(SampleFormat sampleFormat,
 				Real outputSampleRate,
 				Real rfBandwidth,
+				int fmDeviation,
 				QString& udpAddress,
 				int udpPort,
 				int audioPort) :
@@ -124,6 +131,7 @@ protected:
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
 			m_rfBandwidth(rfBandwidth),
+			m_fmDeviation(fmDeviation),
 			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
 			m_audioPort(audioPort)
@@ -207,6 +215,7 @@ protected:
 	bool m_audioActive;
 	bool m_audioStereo;
 	int m_volume;
+	int m_fmDeviation;
 	Real m_magsq;
 
 	Real m_scale;
@@ -229,6 +238,8 @@ protected:
 
 	quint32 m_nextSSBId;
 	quint32 m_nextS16leId;
+
+    PhaseDiscriminators m_phaseDiscri;
 
 	QMutex m_settingsMutex;
 };
