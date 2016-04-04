@@ -22,9 +22,9 @@ Total power in dB relative to a +/- 1.0 amplitude signal received in the pass ba
 
 Combo box to specify the type of samples that are sent over UDP.
 
-  - `S16LE I/Q`: Raw I/Q samples on signed 16 bits integers with Little Endian layout. Use it with software that accepts I/Q data as input like GNUradio with the `UDP source` block
-  - `S16LE SSB`: AF of SSB demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio.
-  - `S16LE NFM`: AF of FM demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs.
+  - `S16LE I/Q`: Raw I/Q samples on signed 16 bits integers with Little Endian layout. Use it with software that accepts I/Q data as input like GNUradio with the `UDP source` block. The output is interleaved I and Q samples
+  - `S16LE SSB`: AF of SSB demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is interleaved samples of the USB (on real part) and LSB signals (on imaginary part).
+  - `S16LE NFM`: AF of FM demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs. The output is interleaved samples of NFM samples (on real part) and zeros (on imaginary part).
   
 <h3>4: Signal sample rate</h3>
 
@@ -54,9 +54,9 @@ This turns on or off the audio samples feedback
 
 This toggles between mono or stereo audio feedback
 
-<h3>11: Apply (validation) button</h3>
+<h3>11: FM deviation</h3>
 
-When any item of connection or stream configuration changes this button becomes active to make the changes effective when pressed. 
+This is the FM deviation in Hz for NFM demodulated samples. Therefore it is active only if `S16LE NFM` is selected as the sample format. A positive deviation of this amount from the central carrier will result in a sample output value of 32767 (0x7FFF) corresponding to the +1.0 real value. A negative deviation of this amount from the central carrier will result in a sample output value of -32768 (0x8000) corresponding to the -1.0 real value.  
 
 <h3>12: Boost</h3>
 
@@ -66,7 +66,11 @@ Amplify the signal being sent over UDP from the original. There are 4 levels of 
 
 Volume of the audio feedback (when used).
 
-<h3>14: Spectrum display</h3>
+<h3>14: Apply (validation) button</h3>
+
+When any item of connection or stream configuration changes this button becomes active to make the changes effective when pressed. 
+
+<h3>15: Spectrum display</h3>
 
 This is the spectrum display of the channel signal after bandpass filtering. Please refer to the Spectrum display description for details. 
 

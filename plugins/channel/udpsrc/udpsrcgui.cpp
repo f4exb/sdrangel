@@ -224,6 +224,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
 
+	ui->fmDeviation->setEnabled(false);
+
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
@@ -355,15 +357,19 @@ void UDPSrcGUI::applySettings()
 		{
 			case 0:
 				sampleFormat = UDPSrc::FormatSSB;
+				ui->fmDeviation->setEnabled(false);
 				break;
 			case 1:
 				sampleFormat = UDPSrc::FormatNFM;
+				ui->fmDeviation->setEnabled(true);
 				break;
 			case 2:
 				sampleFormat = UDPSrc::FormatS16LE;
+				ui->fmDeviation->setEnabled(false);
 				break;
 			default:
 				sampleFormat = UDPSrc::FormatSSB;
+				ui->fmDeviation->setEnabled(false);
 				break;
 		}
 
@@ -410,6 +416,12 @@ void UDPSrcGUI::on_deltaFrequency_changed(quint64 value)
 
 void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 {
+	if (index == 1) {
+		ui->fmDeviation->setEnabled(true);
+	} else {
+		ui->fmDeviation->setEnabled(false);
+	}
+
 	ui->applyBtn->setEnabled(true);
 }
 
