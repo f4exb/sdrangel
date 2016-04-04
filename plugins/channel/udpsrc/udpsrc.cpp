@@ -168,7 +168,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			else if (m_sampleFormat == FormatNFM)
 			{
 				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci);
-				m_udpBuffer->write(Sample(demod, 0.0));
+				m_udpBuffer->write(Sample(demod, demod));
 			}
 			else // Raw I/Q samples
 			{
