@@ -75,9 +75,10 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		int spanLog2,
 		bool audioBinaural,
 		bool audioFlipChannel,
-		bool dsb)
+		bool dsb,
+		bool audioMute)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel, dsb);
+	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel, dsb, audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -143,25 +144,33 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_sum.imag(0.0);
 			}
 
-			if (m_audioBinaual)
+			if (m_audioMute)
 			{
-				if (m_audioFlipChannels)
-				{
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * 100);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * 100);
-				}
-				else
-				{
-					m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
-					m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
-				}
+				m_audioBuffer[m_audioBufferFill].r = 0;
+				m_audioBuffer[m_audioBufferFill].l = 0;
 			}
 			else
 			{
-				Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-				qint16 sample = (qint16)(demod * m_volume * 100);
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
+				if (m_audioBinaual)
+				{
+					if (m_audioFlipChannels)
+					{
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * 100);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * 100);
+					}
+					else
+					{
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * 100);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * 100);
+					}
+				}
+				else
+				{
+					Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
+					qint16 sample = (qint16)(demod * m_volume * 100);
+					m_audioBuffer[m_audioBufferFill].l = sample;
+					m_audioBuffer[m_audioBufferFill].r = sample;
+				}
 			}
 
 			++m_audioBufferFill;
@@ -263,6 +272,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_audioBinaual = cfg.getAudioBinaural();
 		m_audioFlipChannels = cfg.getAudioFlipChannels();
 		m_dsb = cfg.getDSB();
+		m_audioMute = cfg.getAudioMute();
 
 		m_settingsMutex.unlock();
 
@@ -272,7 +282,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_spanLog2: " << m_spanLog2
 				<< " m_audioBinaual: " << m_audioBinaual
 				<< " m_audioFlipChannels: " << m_audioFlipChannels
-				<< " m_dsb: " << m_dsb;
+				<< " m_dsb: " << m_dsb
+				<< "m_audioMute: " << m_audioMute;
 
 		return true;
 	}

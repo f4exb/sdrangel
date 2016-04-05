@@ -46,6 +46,7 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
+	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
@@ -62,6 +63,7 @@ private:
 	bool m_audioBinaural;
 	bool m_audioFlipChannels;
 	bool m_dsb;
+	bool m_audioMute;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	ThreadedSampleSink* m_threadedChannelizer;

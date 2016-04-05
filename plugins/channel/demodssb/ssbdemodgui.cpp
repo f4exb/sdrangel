@@ -281,6 +281,12 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 	applySettings();
 }
 
+void SSBDemodGUI::on_audioMute_toggled(bool checked)
+{
+	m_audioMute = checked;
+	applySettings();
+}
+
 void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 {
 	if (setNewRate(value))
@@ -319,6 +325,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_spanLog2(3),
 	m_audioBinaural(false),
 	m_audioFlipChannels(false),
+	m_audioMute(false),
 	m_dsb(false),
 	m_channelPowerDbAvg(20,0)
 {
@@ -461,7 +468,8 @@ void SSBDemodGUI::applySettings()
 			m_spanLog2,
 			m_audioBinaural,
 			m_audioFlipChannels,
-			m_dsb);
+			m_dsb,
+			ui->audioMute->isChecked());
 	}
 }
 

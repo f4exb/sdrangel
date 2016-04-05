@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>461</height>
+    <width>334</width>
+    <height>199</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -395,6 +395,24 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="audioMute">
+        <property name="toolTip">
+         <string>Mute/Unmute audio</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/sound_on.png</normaloff>
+          <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

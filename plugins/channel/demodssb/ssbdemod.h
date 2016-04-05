@@ -41,7 +41,8 @@ public:
 			int spanLog2,
 			bool audioBinaural,
 			bool audioFlipChannels,
-			bool dsb);
+			bool dsb,
+			bool audioMute);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -62,6 +63,7 @@ private:
 		bool getAudioBinaural() const { return m_audioBinaural; }
 		bool getAudioFlipChannels() const { return m_audioFlipChannels; }
 		bool getDSB() const { return m_dsb; }
+		bool getAudioMute() const { return m_audioMute; }
 
 		static MsgConfigureSSBDemod* create(Real Bandwidth,
 				Real LowCutoff,
@@ -69,9 +71,10 @@ private:
 				int spanLog2,
 				bool audioBinaural,
 				bool audioFlipChannels,
-				bool dsb)
+				bool dsb,
+				bool audioMute)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannels, dsb);
+			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannels, dsb, audioMute);
 		}
 
 	private:
@@ -82,6 +85,7 @@ private:
 		bool m_audioBinaural;
 		bool m_audioFlipChannels;
 		bool m_dsb;
+		bool m_audioMute;
 
 		MsgConfigureSSBDemod(Real Bandwidth,
 				Real LowCutoff,
@@ -89,7 +93,8 @@ private:
 				int spanLog2,
 				bool audioBinaural,
 				bool audioFlipChannels,
-				bool dsb) :
+				bool dsb,
+				bool audioMute) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
@@ -97,7 +102,8 @@ private:
 			m_spanLog2(spanLog2),
 			m_audioBinaural(audioBinaural),
 			m_audioFlipChannels(audioFlipChannels),
-			m_dsb(dsb)
+			m_dsb(dsb),
+			m_audioMute(audioMute)
 		{ }
 	};
 
@@ -120,6 +126,7 @@ private:
 	bool m_audioFlipChannels;
 	bool m_usb;
 	bool m_dsb;
+	bool m_audioMute;
 	Real m_magsq;
 
 	NCO m_nco;
