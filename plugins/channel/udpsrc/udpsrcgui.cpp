@@ -129,16 +129,31 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
-		d.readS32(3, &s32tmp, UDPSrc::FormatSSB);
+		d.readS32(3, &s32tmp, UDPSrc::FormatS16LE);
 		switch(s32tmp) {
-			case UDPSrc::FormatSSB:
+			case UDPSrc::FormatS16LE:
 				ui->sampleFormat->setCurrentIndex(0);
 				break;
 			case UDPSrc::FormatNFM:
 				ui->sampleFormat->setCurrentIndex(1);
 				break;
-			case UDPSrc::FormatS16LE:
+			case UDPSrc::FormatNFMMono:
 				ui->sampleFormat->setCurrentIndex(2);
+				break;
+			case UDPSrc::FormatLSB:
+				ui->sampleFormat->setCurrentIndex(3);
+				break;
+			case UDPSrc::FormatUSB:
+				ui->sampleFormat->setCurrentIndex(4);
+				break;
+			case UDPSrc::FormatLSBMono:
+				ui->sampleFormat->setCurrentIndex(5);
+				break;
+			case UDPSrc::FormatUSBMono:
+				ui->sampleFormat->setCurrentIndex(6);
+				break;
+			case UDPSrc::FormatAMMono:
+				ui->sampleFormat->setCurrentIndex(7);
 				break;
 			default:
 				ui->sampleFormat->setCurrentIndex(0);
@@ -356,7 +371,7 @@ void UDPSrcGUI::applySettings()
 		switch(ui->sampleFormat->currentIndex())
 		{
 			case 0:
-				sampleFormat = UDPSrc::FormatSSB;
+				sampleFormat = UDPSrc::FormatS16LE;
 				ui->fmDeviation->setEnabled(false);
 				break;
 			case 1:
@@ -364,11 +379,31 @@ void UDPSrcGUI::applySettings()
 				ui->fmDeviation->setEnabled(true);
 				break;
 			case 2:
-				sampleFormat = UDPSrc::FormatS16LE;
+				sampleFormat = UDPSrc::FormatNFMMono;
+				ui->fmDeviation->setEnabled(true);
+				break;
+			case 3:
+				sampleFormat = UDPSrc::FormatLSB;
+				ui->fmDeviation->setEnabled(false);
+				break;
+			case 4:
+				sampleFormat = UDPSrc::FormatUSB;
+				ui->fmDeviation->setEnabled(false);
+				break;
+			case 5:
+				sampleFormat = UDPSrc::FormatLSBMono;
+				ui->fmDeviation->setEnabled(false);
+				break;
+			case 6:
+				sampleFormat = UDPSrc::FormatUSBMono;
+				ui->fmDeviation->setEnabled(false);
+				break;
+			case 7:
+				sampleFormat = UDPSrc::FormatAMMono;
 				ui->fmDeviation->setEnabled(false);
 				break;
 			default:
-				sampleFormat = UDPSrc::FormatSSB;
+				sampleFormat = UDPSrc::FormatS16LE;
 				ui->fmDeviation->setEnabled(false);
 				break;
 		}
@@ -416,7 +451,7 @@ void UDPSrcGUI::on_deltaFrequency_changed(quint64 value)
 
 void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 {
-	if (index == 1) {
+	if ((index == 1) || (index == 2)) {
 		ui->fmDeviation->setEnabled(true);
 	} else {
 		ui->fmDeviation->setEnabled(false);

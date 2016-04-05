@@ -40,13 +40,14 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	setObjectName("UDPSrc");
 
 	m_udpBuffer = new UDPSink<Sample>(this, udpBLockSampleSize, m_udpPort);
+	m_udpBufferMono = new UDPSink<FixReal>(this, udpBLockSampleSize, m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 
 	m_inputSampleRate = 96000;
-	m_sampleFormat = FormatSSB;
+	m_sampleFormat = FormatS16LE;
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
 	m_audioPort = m_udpPort - 1;
@@ -65,7 +66,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_scale = 0;
 	m_boost = 0;
 	m_magsq = 0;
-	UDPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, udpBLockSampleSize * sizeof(Sample));
+	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBLockSampleSize * sizeof(Sample));
 
 	m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
 
@@ -86,6 +87,7 @@ UDPSrc::~UDPSrc()
 {
 	delete m_audioSocket;
 	delete m_udpBuffer;
+	delete m_udpBufferMono;
 	if (UDPFilter) delete UDPFilter;
 	if (m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
@@ -151,16 +153,30 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			m_sampleBuffer.push_back(s);
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 
-			if (m_sampleFormat == FormatSSB)
+			if (m_sampleFormat == FormatLSB)
+			{
+				int n_out = UDPFilter->runSSB(ci, &sideband, false);
+
+				if (n_out)
+				{
+					for (int i = 0; i < n_out; i++)
+					{
+						l = sideband[i].real();
+						r = sideband[i].imag();
+						m_udpBuffer->write(Sample(l, r));
+					}
+				}
+			}
+			if (m_sampleFormat == FormatUSB)
 			{
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
 
 				if (n_out)
 				{
-					for (int i = 0; i < n_out; i+=2)
+					for (int i = 0; i < n_out; i++)
 					{
-						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
-						r = (sideband[i+1].real() + sideband[i+1].imag()) * 0.7;
+						l = sideband[i].real();
+						r = sideband[i].imag();
 						m_udpBuffer->write(Sample(l, r));
 					}
 				}
@@ -169,6 +185,42 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			{
 				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci);
 				m_udpBuffer->write(Sample(demod, demod));
+			}
+			else if (m_sampleFormat == FormatNFMMono)
+			{
+				FixReal demod = (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci));
+				m_udpBufferMono->write(demod);
+			}
+			else if (m_sampleFormat == FormatLSBMono)
+			{
+				int n_out = UDPFilter->runSSB(ci, &sideband, false);
+
+				if (n_out)
+				{
+					for (int i = 0; i < n_out; i++)
+					{
+						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+						m_udpBufferMono->write(l);
+					}
+				}
+			}
+			else if (m_sampleFormat == FormatUSBMono)
+			{
+				int n_out = UDPFilter->runSSB(ci, &sideband, true);
+
+				if (n_out)
+				{
+					for (int i = 0; i < n_out; i++)
+					{
+						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+						m_udpBufferMono->write(l);
+					}
+				}
+			}
+			else if (m_sampleFormat == FormatAMMono)
+			{
+				FixReal demod = (FixReal) (32768.0f * sqrt(m_magsq));
+				m_udpBufferMono->write(demod);
 			}
 			else // Raw I/Q samples
 			{
@@ -279,12 +331,14 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		{
 			m_udpAddressStr = cfg.getUDPAddress();
 			m_udpBuffer->setAddress(m_udpAddressStr);
+			m_udpBufferMono->setAddress(m_udpAddressStr);
 		}
 
 		if (cfg.getUDPPort() != m_udpPort)
 		{
 			m_udpPort = cfg.getUDPPort();
 			m_udpBuffer->setPort(m_udpPort);
+			m_udpBufferMono->setPort(m_udpPort);
 		}
 
 		if (cfg.getAudioPort() != m_audioPort)
@@ -313,15 +367,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
-
-		if (m_sampleFormat == FormatSSB)
-		{
-			UDPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
-		}
-		else
-		{
-			UDPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
-		}
+		UDPFilter->create_filter(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate);
 
 		m_settingsMutex.unlock();
 

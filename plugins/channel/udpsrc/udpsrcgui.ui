@@ -440,11 +440,11 @@
        <string>Samples format</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <property name="text">
-        <string>S16LE SSB</string>
+        <string>S16LE I/Q</string>
        </property>
       </item>
       <item>
@@ -454,7 +454,32 @@
       </item>
       <item>
        <property name="text">
-        <string>S16LE I/Q</string>
+        <string>S16LE NFM Mono</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE LSB</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE USB</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE LSB Mono</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE USB Mono</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>S16LE AM Mono</string>
        </property>
       </item>
      </widget>

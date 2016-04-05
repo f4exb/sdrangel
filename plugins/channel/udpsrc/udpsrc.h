@@ -38,9 +38,14 @@ class UDPSrc : public SampleSink {
 
 public:
 	enum SampleFormat {
-		FormatSSB,
-		FormatNFM,
 		FormatS16LE,
+		FormatNFM,
+		FormatNFMMono,
+		FormatLSB,
+		FormatUSB,
+		FormatLSBMono,
+		FormatUSBMono,
+		FormatAMMono,
 		FormatNone
 	};
 
@@ -228,6 +233,7 @@ protected:
 
 	SampleVector m_sampleBuffer;
 	UDPSink<Sample> *m_udpBuffer;
+	UDPSink<FixReal> *m_udpBufferMono;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
