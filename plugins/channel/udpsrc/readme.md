@@ -4,7 +4,12 @@
 
 By "source" one should undetstand a source of samples for the outside of SDRangel application. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
 
-The block size is fixed to 512 samples that is 2048 bytes. The receiving application must make sure it acknowledges this block size. UDP may fragment the block but there will be a point when the last UDP block will fill up a complete block of 2048 bytes. In particular in GNUradio the UDP source block must be configured with a 2048 bytes payload size.
+The UDP block size or UDP payload size is fixed to 512 samples. The size in bytes depends on the format:
+
+  - S16LE types not labeled as "mono": each sample is a complex sample of two 16 bit signed integers therefore the block size is 2048 bytes
+  - S16LE types labeled as "mono": each sample is a real sample of a single 16 bit signed integer therefore the block size is 1024 bytes
+
+The receiving application must make sure it acknowledges this block size. UDP may fragment the block but there will be a point when the last UDP block will fill up a complete block of this amount of bytes. In particular in GNUradio the UDP source block must be configured with a 2048 or 1024 bytes payload size depending on the format.
 
 <h2>Interface</h2>
 
@@ -33,13 +38,13 @@ Combo box to specify the type of samples that are sent over UDP.
   
 <h3>4: Signal sample rate</h3>
 
-Sample rate in samples per second of the signal that is sent over UDP. For raw I/Q output this is the sample rate of a complete I/Q sample (4 bytes). For demodulated outputs this is the sample rate of an "audio" sample (2 bytes).
+Sample rate in samples per second of the signal that is sent over UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
 
-<h3>5: Destination IP address</h3>
+<h3>5: Remote IP address</h3>
 
 IP address of the remote destination to which samples are sent 
 
-<h3>6: Destination port</h3>
+<h3>6: Remote data port</h3>
 
 Remote UDP port number to which samples are sent 
 
@@ -47,7 +52,7 @@ Remote UDP port number to which samples are sent
 
 The signal is bandpass filtered to this bandwidth (zero frequency centered) before being sent out as raw I/Q samples or before being demodulated for SSB and FM outputs. Thus a 20000 Hz bandwidth for example means +/-10000 Hz around center channel frequency.
 
-<h3>8: Audio UDP port</h3>
+<h3>8: Local audio UDP port</h3>
 
 There is a possible feedback of audio samples at 48 kHz into SDRangel using this port as the UDP port on the local machine to collect the audio samples.
 
@@ -61,11 +66,11 @@ This toggles between mono or stereo audio feedback
 
 <h3>11: FM deviation</h3>
 
-This is the FM deviation in Hz for NFM demodulated samples. Therefore it is active only if `S16LE NFM` is selected as the sample format. A positive deviation of this amount from the central carrier will result in a sample output value of 32767 (0x7FFF) corresponding to the +1.0 real value. A negative deviation of this amount from the central carrier will result in a sample output value of -32768 (0x8000) corresponding to the -1.0 real value.  
+This is the maximum expected FM deviation in Hz for NFM demodulated samples. Therefore it is active only for `NFM` types of sample formats. A positive deviation of this amount from the central carrier will result in a sample output value of 32767 (0x7FFF) corresponding to a +1.0 real value. A negative deviation of this amount from the central carrier will result in a sample output value of -32768 (0x8000) corresponding to a -1.0 real value.  
 
 <h3>12: Boost</h3>
 
-Amplify the signal being sent over UDP from the original. There are 4 levels of amplification from 0: none to 3: maximum
+Amplifies the signal from the input passband signal before processing. The level of amplification is the log2 of the amplification factor applied therefore it varies from 0 dB (0) to +30 dB (3) in 10 dB steps.
 
 <h3>13: Audio volume</h3>
 
@@ -79,5 +84,5 @@ When any item of connection or stream configuration changes this button becomes 
 
 This is the spectrum display of the channel signal after bandpass filtering. Please refer to the Spectrum display description for details. 
 
-This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequency. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz. 
+This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz. 
 
