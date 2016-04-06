@@ -245,6 +245,9 @@ protected:
 	quint32 m_nextSSBId;
 	quint32 m_nextS16leId;
 
+	char *m_udpAudioBuf;
+	static const int m_udpAudioPayloadSize = 8192; //!< UDP audio samples buffer. No UDP block on Earth is larger than this
+
     PhaseDiscriminators m_phaseDiscri;
 
 	QMutex m_settingsMutex;

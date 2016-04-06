@@ -70,7 +70,7 @@ This is the maximum expected FM deviation in Hz for NFM demodulated samples. The
 
 <h3>12: Boost</h3>
 
-Amplifies the signal from the input passband signal before processing. The level of amplification is the log2 of the amplification factor applied therefore it varies from 0 dB (0) to +30 dB (3) in 10 dB steps.
+Amplifies the input passband signal before processing. The level of amplification is the log2 of the amplification factor applied therefore it varies from 0 dB (0) to +30 dB (3) in 10 dB steps.
 
 <h3>13: Audio volume</h3>
 

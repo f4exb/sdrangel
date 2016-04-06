@@ -42,6 +42,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	m_udpBuffer = new UDPSink<Sample>(this, udpBLockSampleSize, m_udpPort);
 	m_udpBufferMono = new UDPSink<FixReal>(this, udpBLockSampleSize, m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
+	m_udpAudioBuf = new char[m_udpAudioPayloadSize];
 
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
@@ -73,7 +74,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* s
 	if (m_audioSocket->bind(QHostAddress::LocalHost, m_audioPort))
 	{
 		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_audioPort);
-		connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+		connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()), Qt::QueuedConnection);
 	}
 	else
 	{
@@ -88,6 +89,7 @@ UDPSrc::~UDPSrc()
 	delete m_audioSocket;
 	delete m_udpBuffer;
 	delete m_udpBufferMono;
+	delete[] m_udpAudioBuf;
 	if (UDPFilter) delete UDPFilter;
 	if (m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
@@ -349,9 +351,10 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			delete m_audioSocket;
 			m_audioSocket = new QUdpSocket(this);
 
-			if (m_audioSocket->bind(QHostAddress::Any, m_audioPort))
+			if (m_audioSocket->bind(QHostAddress::LocalHost, m_audioPort))
 			{
-				connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+				connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()), Qt::QueuedConnection);
+				qDebug("UDPSrc::handleMessage: audio socket bound to port %d", m_audioPort);
 			}
 			else
 			{
@@ -406,24 +409,22 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 void UDPSrc::audioReadyRead()
 {
-	QByteArray buffer;
-
 	while (m_audioSocket->hasPendingDatagrams())
 	{
-		buffer.resize(m_audioSocket->pendingDatagramSize());
-		m_audioSocket->readDatagram(buffer.data(), buffer.size(), 0, 0);
-		//qDebug("UDPSrc::audioReadyRead: %d", buffer.size());
+	    qint64 pendingDataSize = m_audioSocket->pendingDatagramSize();
+	    qint64 udpReadBytes = m_audioSocket->readDatagram(m_udpAudioBuf, pendingDataSize, 0, 0);
+		//qDebug("UDPSrc::audioReadyRead: %lld", udpReadBytes);
 
 		if (m_audioActive)
 		{
 			if (m_audioStereo)
 			{
-				for (int i = 0; i < buffer.size() - 3; i += 4)
+				for (int i = 0; i < udpReadBytes - 3; i += 4)
 				{
-					qint16 l_sample = (qint16) *(&buffer.data()[i]);
-					qint16 r_sample = (qint16) *(&buffer.data()[i+2]);
-					m_audioBuffer[m_audioBufferFill].l  = l_sample * 10 * m_volume;
-					m_audioBuffer[m_audioBufferFill].r  = r_sample * 10 * m_volume;
+					qint16 l_sample = (qint16) *(&m_udpAudioBuf[i]);
+					qint16 r_sample = (qint16) *(&m_udpAudioBuf[i+2]);
+					m_audioBuffer[m_audioBufferFill].l  = l_sample * m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = r_sample * m_volume;
 					++m_audioBufferFill;
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
@@ -441,11 +442,11 @@ void UDPSrc::audioReadyRead()
 			}
 			else
 			{
-				for (int i = 0; i < buffer.size() - 1; i += 2)
+				for (int i = 0; i < udpReadBytes - 1; i += 2)
 				{
-					qint16 sample = (qint16) *(&buffer.data()[i]);
-					m_audioBuffer[m_audioBufferFill].l  = sample * 10 * m_volume;
-					m_audioBuffer[m_audioBufferFill].r  = sample * 10 * m_volume;
+					qint16 sample = (qint16) *(&m_udpAudioBuf[i]);
+					m_audioBuffer[m_audioBufferFill].l  = sample * m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = sample * m_volume;
 					++m_audioBufferFill;
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
