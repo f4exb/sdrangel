@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "There is no configure script, just run make"

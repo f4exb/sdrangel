@@ -1,0 +1,2 @@
+#define _GIT_TAG "@GIT_TAG@"
+const char GIT_TAG[] = _GIT_TAG;
