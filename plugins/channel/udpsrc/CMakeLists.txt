@@ -26,7 +26,6 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt5_wrap_cpp(udpsrc_HEADERS_MOC ${udpsrc_HEADERS})
 qt5_wrap_ui(udpsrc_FORMS_HEADERS ${udpsrc_FORMS})
 
 add_library(demodudpsrc SHARED
@@ -40,6 +39,6 @@ target_link_libraries(demodudpsrc
 	sdrbase
 )
 
-qt5_use_modules(demodudpsrc Core Widgets OpenGL Network)
+qt5_use_modules(demodudpsrc Core Widgets OpenGL Network Multimedia)
 
 install(TARGETS demodudpsrc DESTINATION lib/plugins/channel)

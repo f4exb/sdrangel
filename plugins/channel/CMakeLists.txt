@@ -10,4 +10,6 @@ add_subdirectory(udpsrc)
 add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 
-#add_subdirectory(tetra)
+if(LIBMBE_FOUND)
+    add_subdirectory(demoddsd)
+endif(LIBMBE_FOUND)
