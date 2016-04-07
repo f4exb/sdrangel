@@ -1,19 +1,20 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
-#include "dsddemodgui.h"
 #include "ui_dsddemodgui.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/scopevis.h"
-#include "dsddemod.h"
-#include "dsp/nullsink.h"
+#include "gui/glscope.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+
+#include "dsddemod.h"
+#include "dsddemodgui.h"
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI)
 {
@@ -74,6 +75,7 @@ QByteArray DSDDemodGUI::serialize() const
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeS32(8, ui->squelchGate->value());
 	s.writeS32(9, ui->volume->value());
+    s.writeBlob(10, ui->scopeGUI->serialize());
 	return s.final();
 }
 
@@ -117,6 +119,8 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 		ui->squelchGate->setValue(tmp);
         d.readS32(9, &tmp, 20);
         ui->volume->setValue(tmp);
+        d.readBlob(10, &bytetmp);
+        ui->scopeGUI->deserialize(bytetmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -241,6 +245,9 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_scopeVis = new ScopeVis(ui->glScope);
 	m_dsdDemod = new DSDDemod(m_scopeVis);
 	m_dsdDemod->registerGUI(this);
+
+    ui->glScope->setSampleRate(48000);
+    m_scopeVis->setSampleRate(48000);
 
 	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 

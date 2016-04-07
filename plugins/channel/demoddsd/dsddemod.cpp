@@ -41,7 +41,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_fmExcursion(24),
 	m_settingsMutex(QMutex::Recursive),
     m_scope(sampleSink),
-	m_scopeEnabled(false)
+	m_scopeEnabled(true)
 {
 	setObjectName("DSDDemod");
 
@@ -113,7 +113,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				m_AGC.feed(ci);
 
-				Real demod = m_phaseDiscri.phaseDiscriminator(ci);
+				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
 				m_sampleCount++;
 
 				// AF processing
@@ -144,21 +144,21 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Sample s(demod, 0.0);
 				m_scopeSampleBuffer.push_back(s);
 
-//				m_audioBuffer[m_audioBufferFill].l = sample;
-//				m_audioBuffer[m_audioBufferFill].r = sample;
-//				++m_audioBufferFill;
-//
-//				if (m_audioBufferFill >= m_audioBuffer.size())
-//				{
-//					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-//
-//					if (res != m_audioBufferFill)
-//					{
-//						qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-//					}
-//
-//					m_audioBufferFill = 0;
-//				}
+				m_audioBuffer[m_audioBufferFill].l = sample;
+				m_audioBuffer[m_audioBufferFill].r = sample;
+				++m_audioBufferFill;
+
+				if (m_audioBufferFill >= m_audioBuffer.size())
+				{
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+
+					if (res != m_audioBufferFill)
+					{
+						qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+					}
+
+					m_audioBufferFill = 0;
+				}
 
 				m_interpolatorDistanceRemain += m_interpolatorDistance;
 			}

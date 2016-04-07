@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>503</width>
-    <height>506</height>
+    <height>898</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -234,7 +234,7 @@
          <number>50</number>
         </property>
         <property name="maximum">
-         <number>150</number>
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -525,50 +525,33 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="scopeContainer" native="true">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <widget class="QWidget" name="verticalWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>180</y>
-     <width>501</width>
-     <height>291</height>
+     <width>481</width>
+     <height>651</height>
     </rect>
    </property>
-   <widget class="GLScope" name="glScope" native="true">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>491</width>
-      <height>250</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>200</width>
-      <height>250</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <family>Monospace</family>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="GLScopeGUI" name="scopeGUI" native="true">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>260</y>
-      <width>481</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
+   <property name="windowTitle">
+    <string>Discriminator Scope</string>
+   </property>
+   <layout class="QVBoxLayout" name="scopeContainer">
+    <item>
+     <widget class="GLScope" name="glScope" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>250</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <customwidgets>
