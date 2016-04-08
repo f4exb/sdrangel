@@ -102,6 +102,14 @@ typedef struct
     int unmute_encrypted_p25;
 } dsd_opts;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void initOpts (dsd_opts * opts);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INCLUDE_DSD_OPTS_H_ */

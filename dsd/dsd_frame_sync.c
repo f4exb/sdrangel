@@ -18,6 +18,7 @@
 #include "dsd.h"
 #include "dsd_cleanupexit.h"
 #include "dsd_nocarrier.h"
+#include "dsd_comp.h"
 
 void
 printFrameSync (dsd_opts * opts, dsd_state * state, char *frametype, int offset, char *modulation)
@@ -794,7 +795,7 @@ getFrameSync (dsd_opts * opts, dsd_state * state)
             }
         }
 
-      if (exitflag == 1)
+      if (state->exitflag == 1) // was moved to state for inclusion in SDRangel. Should not be used anyway (always 0)
         {
           cleanupAndExit (opts, state);
         }

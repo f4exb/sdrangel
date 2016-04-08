@@ -30,7 +30,7 @@ cleanupAndExit (dsd_opts * opts, dsd_state * state)
     }
 #endif
   printf ("Exiting.\n");
-  exit (0);
+  //exit (0); // You just can't do that within SDRangel
 }
 
 

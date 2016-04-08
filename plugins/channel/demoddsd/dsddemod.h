@@ -1,3 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_DSDDEMOD_H
 #define INCLUDE_DSDDEMOD_H
 
@@ -14,6 +31,7 @@
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "dsddecoder.h"
 
 class DSDDemodGUI;
 
@@ -154,6 +172,8 @@ private:
 
 	Real m_fmExcursion;
 
+	qint16 *m_dsdInBuffer;             //!< Input buffer for DSD decoder process
+	int m_dsdInCount;
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -162,6 +182,7 @@ private:
 	SampleSink* m_scope;
 	bool m_scopeEnabled;
 
+	DSDDecoder m_dsdDecoder;
 	DSDDemodGUI *m_dsdDemodGUI;
 	QMutex m_settingsMutex;
 

@@ -16,6 +16,7 @@
  */
 
 #include "dsd.h"
+#include "dsd_comp.h"
 
 int
 getDibit (dsd_opts * opts, dsd_state * state)

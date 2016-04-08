@@ -35,10 +35,10 @@ processNXDN96 (dsd_opts * opts, dsd_state * state)
         {
           for (j = 0; j < 4; j++)
             {
-              w = nW;
-              x = nX;
-              y = nY;
-              z = nZ;
+              w = n96W;
+              x = n96X;
+              y = n96Y;
+              z = n96Z;
               for (i = 0; i < 36; i++)
                 {
                   dibit = getDibit (opts, state);
@@ -62,10 +62,10 @@ processNXDN96 (dsd_opts * opts, dsd_state * state)
         {
           for (j = 0; j < 3; j++)       // we skip the last voice frame until frame sync can work with < 24 symbols
             {
-              w = nW;
-              x = nX;
-              y = nY;
-              z = nZ;
+              w = n96W;
+              x = n96X;
+              y = n96Y;
+              z = n96Z;
               for (i = 0; i < 36; i++)
                 {
                   dibit = getDibit (opts, state);

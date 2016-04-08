@@ -15,32 +15,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DSDDEMODLUGIN_H
-#define INCLUDE_DSDDEMODLUGIN_H
+#ifndef PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_
+#define PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "dsd.h"
 
-class DSDDemodPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.channel.dsddemod")
-
+class DSDDecoder
+{
 public:
-	explicit DSDDemodPlugin(QObject* parent = NULL);
+    DSDDecoder();
+    ~DSDDecoder();
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+    void setInBuffer(const short *inBuffer);
+    void pushSamples(int nbSamples); // Push this amount of samples to the DSD decoder thread
 
-	PluginGUI* createChannel(const QString& channelName);
+    void start();
+    void stop();
+
+    static void* run_dsd (void *arg);
 
 private:
-	static const PluginDescriptor m_pluginDescriptor;
+    typedef struct
+    {
+      dsd_opts opts;
+      dsd_state state;
+    } dsd_params;
 
-	PluginAPI* m_pluginAPI;
+    dsd_params m_dsdParams;
 
-private slots:
-	void createInstanceDSDDemod();
+//    dsd_opts  m_dsdOpts;
+//    dsd_state m_dsdState;
+    pthread_t m_dsdThread;
 };
 
-#endif // INCLUDE_DSDDEMODLUGIN_H
+
+
+#endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

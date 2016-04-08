@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#define __USE_XOPEN
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -38,8 +37,12 @@
 #endif
 #include <math.h>
 #include <mbelib.h>
+#ifdef USE_LIBSNDFILE
 #include <sndfile.h>
+#endif
 
+#include "dsd_opts.h"
+#include "dsd_state.h"
 #include "p25p1_heuristics.h"
 
 
@@ -61,11 +64,7 @@
 /*
  * global variables
  */
-int exitflag;
-
-#include "dsd_opts.h"
-#include "dsd_state.h"
-#include "dsd_livescanner.h"
+//int exitflag; // You just can't have a global here within SDRangel -> moved to state
 
 /*
  * Frame sync patterns
@@ -105,6 +104,11 @@ int exitflag;
 /*
  * function prototypes
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void processDMRdata (dsd_opts * opts, dsd_state * state);
 void processDMRvoice (dsd_opts * opts, dsd_state * state);
 void processAudio (dsd_opts * opts, dsd_state * state);
@@ -130,10 +134,6 @@ void printFrameInfo (dsd_opts * opts, dsd_state * state);
 void processFrame (dsd_opts * opts, dsd_state * state);
 void printFrameSync (dsd_opts * opts, dsd_state * state, char *frametype, int offset, char *modulation);
 int getFrameSync (dsd_opts * opts, dsd_state * state);
-int comp (const void *a, const void *b);
-void usage ();
-void sigfun (int sig);
-int main (int argc, char **argv);
 void playMbeFiles (dsd_opts * opts, dsd_state * state, int argc, char **argv);
 void processMbeFrame (dsd_opts * opts, dsd_state * state, char imbe_fr[8][23], char ambe_fr[4][24], char imbe7100_fr[7][24]);
 void openSerial (dsd_opts * opts, dsd_state * state);
@@ -155,5 +155,9 @@ void processX2TDMAvoice (dsd_opts * opts, dsd_state * state);
 void processDSTAR_HD (dsd_opts * opts, dsd_state * state);
 short dmr_filter(short sample);
 short nxdn_filter(short sample);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // DSD_H

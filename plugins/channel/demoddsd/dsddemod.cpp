@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -41,9 +41,13 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_fmExcursion(24),
 	m_settingsMutex(QMutex::Recursive),
     m_scope(sampleSink),
-	m_scopeEnabled(true)
+	m_scopeEnabled(true),
+	m_dsdDecoder()
 {
 	setObjectName("DSDDemod");
+
+	m_dsdInBuffer = new qint16[1<<18]; // 128 k Samples is the maximum size of all input devices sample buffers (Airspy or HackRF) = 2^(17+1) for 2 byte samples
+	m_dsdDecoder.setInBuffer(m_dsdInBuffer);
 
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
@@ -72,6 +76,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 DSDDemod::~DSDDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	delete[] m_dsdInBuffer;
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,
@@ -98,6 +103,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	Complex ci;
 
 	m_settingsMutex.lock();
+	m_dsdInCount = 0;
 	m_scopeSampleBuffer.clear();
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
@@ -141,8 +147,9 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					sample = 0;
 				}
 
-				Sample s(demod, 0.0);
+				Sample s(sample, 0.0);
 				m_scopeSampleBuffer.push_back(s);
+				m_dsdInBuffer[m_dsdInCount++] = sample;
 
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
@@ -177,6 +184,11 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		m_audioBufferFill = 0;
 	}
 
+	if (m_dsdInCount > 0)
+	{
+	    m_dsdDecoder.pushSamples(m_dsdInCount);
+	}
+
     if((m_scope != 0) && (m_scopeEnabled))
     {
         m_scope->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), true); // true = real samples for what it's worth
@@ -189,10 +201,12 @@ void DSDDemod::start()
 {
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
+	m_dsdDecoder.start();
 }
 
 void DSDDemod::stop()
 {
+    m_dsdDecoder.stop();
 }
 
 bool DSDDemod::handleMessage(const Message& cmd)

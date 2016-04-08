@@ -21,51 +21,33 @@
 
 void liveScanner(dsd_opts * opts, dsd_state * state)
 {
-#ifdef USE_PORTAUDIO
-    if(opts->audio_in_type == 2)
+    if (opts->audio_in_fd == -1)
     {
-        PaError err = Pa_StartStream( opts->audio_in_pa_stream );
-        if( err != paNoError )
+        if (pthread_mutex_lock(&state->input_mutex))
         {
-            fprintf( stderr, "An error occured while starting the portaudio input stream\n" );
-            fprintf( stderr, "Error number: %d\n", err );
-            fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
-            return;
+            printf("liveScanner -> Unable to lock mutex\n");
         }
     }
-#endif
-    while (1)
+
+    while (state->dsd_running)
     {
         noCarrier(opts, state);
         state->synctype = getFrameSync(opts, state);
+
         // recalibrate center/umid/lmid
         state->center = ((state->max) + (state->min)) / 2;
         state->umid = (((state->max) - state->center) * 5 / 8) + state->center;
         state->lmid = (((state->min) - state->center) * 5 / 8) + state->center;
-        while (state->synctype != -1)
+
+        while ((state->synctype != -1) && (state->dsd_running))
         {
             processFrame(opts, state);
-
-#ifdef TRACE_DSD
-            state->debug_prefix = 'S';
-#endif
-
             state->synctype = getFrameSync(opts, state);
-
-#ifdef TRACE_DSD
-            state->debug_prefix = '\0';
-#endif
 
             // recalibrate center/umid/lmid
             state->center = ((state->max) + (state->min)) / 2;
-            state->umid = (((state->max) - state->center) * 5 / 8)
-                    + state->center;
-            state->lmid = (((state->min) - state->center) * 5 / 8)
-                    + state->center;
+            state->umid = (((state->max) - state->center) * 5 / 8) + state->center;
+            state->lmid = (((state->min) - state->center) * 5 / 8) + state->center;
         }
     }
 }
-
-
-
-

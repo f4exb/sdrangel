@@ -18,262 +18,299 @@
 #include "dsd.h"
 #include "dsd_cleanupexit.h"
 
-int
-getSymbol (dsd_opts * opts, dsd_state * state, int have_sync)
+int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
 {
 
-  short sample;
-  int i, sum, symbol, count;
-  ssize_t result;
+    short sample;
+    int i, sum, symbol, count;
+    ssize_t result;
 
-  sum = 0;
-  count = 0;
-  for (i = 0; i < state->samplesPerSymbol; i++)
+    sum = 0;
+    count = 0;
+
+    for (i = 0; i < state->samplesPerSymbol; i++)
     {
-      // timing control
-      if ((i == 0) && (have_sync == 0))
+        // timing control
+        if ((i == 0) && (have_sync == 0))
         {
-          if (state->samplesPerSymbol == 20)
+            if (state->samplesPerSymbol == 20)
             {
-              if ((state->jitter >= 7) && (state->jitter <= 10))
+                if ((state->jitter >= 7) && (state->jitter <= 10))
                 {
-                  i--;
+                    i--;
                 }
-              else if ((state->jitter >= 11) && (state->jitter <= 14))
+                else if ((state->jitter >= 11) && (state->jitter <= 14))
                 {
-                  i++;
+                    i++;
                 }
             }
-          else if (state->rf_mod == 1)
+            else if (state->rf_mod == 1)
             {
-              if ((state->jitter >= 0) && (state->jitter < state->symbolCenter))
+                if ((state->jitter >= 0) && (state->jitter < state->symbolCenter))
                 {
-                  i++;          // fall back
+                    i++;          // fall back
                 }
-              else if ((state->jitter > state->symbolCenter) && (state->jitter < 10))
+                else if ((state->jitter > state->symbolCenter) && (state->jitter < 10))
                 {
-                  i--;          // catch up
+                    i--;          // catch up
                 }
             }
-          else if (state->rf_mod == 2)
+            else if (state->rf_mod == 2)
             {
-              if ((state->jitter >= state->symbolCenter - 1) && (state->jitter <= state->symbolCenter))
+                if ((state->jitter >= state->symbolCenter - 1) && (state->jitter <= state->symbolCenter))
                 {
-                  i--;
+                    i--;
                 }
-              else if ((state->jitter >= state->symbolCenter + 1) && (state->jitter <= state->symbolCenter + 2))
+                else if ((state->jitter >= state->symbolCenter + 1) && (state->jitter <= state->symbolCenter + 2))
                 {
-                  i++;
+                    i++;
                 }
             }
-          else if (state->rf_mod == 0)
+            else if (state->rf_mod == 0)
             {
-              if ((state->jitter > 0) && (state->jitter <= state->symbolCenter))
+                if ((state->jitter > 0) && (state->jitter <= state->symbolCenter))
                 {
-                  i--;          // catch up
+                    i--;          // catch up
                 }
-              else if ((state->jitter > state->symbolCenter) && (state->jitter < state->samplesPerSymbol))
+                else if ((state->jitter > state->symbolCenter) && (state->jitter < state->samplesPerSymbol))
                 {
-                  i++;          // fall back
+                    i++;          // fall back
                 }
             }
-          state->jitter = -1;
+
+            state->jitter = -1;
         }
-      if(opts->audio_in_type == 0) {
-          if (opts->audio_in_fd == -1)
+
+        // get sample in and push samples out
+        if (opts->audio_in_type == 0)
+        {
+            if (opts->audio_in_fd == -1)
             {
-              while (state->input_length == 0)
+                while (state->input_length == 0)
                 {
-                  // If the buffer is empty, wait for more samples to arrive.
-                  if (pthread_cond_wait(&state->input_ready, &state->input_mutex))
+                    // If the buffer is empty, wait for more samples to arrive.
+                    if (pthread_cond_wait(&state->input_ready, &state->input_mutex))
                     {
-                      printf("getSymbol -> Error waiting for condition\n");
+                        printf("getSymbol -> Error waiting for input condition\n");
                     }
                 }
-              // Get the next sample from the buffer, converting from float to short.
-              sample = (short) (state->input_samples[state->input_offset++] * 32768);
-              if (state->input_offset == state->input_length)
+                // Get the next sample from the buffer
+                sample = state->input_samples[state->input_offset++];
+
+                if (state->input_offset == state->input_length) // all available samples have been read
                 {
-                  int i;
+                    int i;
 
-                  // We've reached the end of the buffer.  Wait for more next time.
-                  state->input_length = 0;
+                    // We've reached the end of the buffer.  Wait for more next time.
+                    state->input_length = 0;
 
-                  if (pthread_mutex_lock(&state->output_mutex))
+                    // make output samples availabele
+                    if (pthread_mutex_lock(&state->output_mutex))
                     {
-                      printf("Unable to lock mutex\n");
+                        printf("Unable to lock output mutex\n");
                     }
 
-                  state->output_num_samples = state->output_offset;
-                  if (state->output_num_samples > state->output_length) {
-                    state->output_num_samples = state->output_length;
-                  }
-                  for (i = 0; i < state->output_length - state->output_num_samples; i++)
-                    {
-                      state->output_samples[i] = 0;
-                    }
-                  for (; i < state->output_length; i++)
-                    {
-                      state->output_samples[i] = state->output_buffer[i - (state->output_length - state->output_num_samples)] / 32768.0;
-                    }
-                  state->output_offset -= state->output_num_samples;
-                  for (i = 0; i < state->output_offset; i++)
-                    {
-                      state->output_buffer[i] = state->output_buffer[i + state->output_num_samples];
-                    }
-                  state->output_finished = 1;
+                    state->output_num_samples = state->output_offset;
 
-                  // Wake up general_work
-                  if (pthread_cond_signal(&state->output_ready))
+                    // GNUradio drivel
+//                    if (state->output_num_samples > state->output_length)
+//                    {
+//                        state->output_num_samples = state->output_length;
+//                    }
+//
+//                    for (i = 0; i < state->output_length - state->output_num_samples; i++)
+//                    {
+//                        state->output_samples[i] = 0;
+//                    }
+//
+//                    for (; i < state->output_length; i++)
+//                    {
+//                        state->output_samples[i] = state->output_buffer[i - (state->output_length - state->output_num_samples)] / 32768.0;
+//                    }
+//
+//                    state->output_offset -= state->output_num_samples;
+//
+//                    for (i = 0; i < state->output_offset; i++)
+//                    {
+//                        state->output_buffer[i] = state->output_buffer[i + state->output_num_samples];
+//                    }
+
+                    if (state->output_num_samples > state->output_length)
                     {
-                      printf("Unable to signal\n");
+                        fprintf(stderr, "WARNING: audio buffer over-run! Truncating output");
+                        state->output_num_samples = state->output_length;
                     }
 
-                  if (pthread_mutex_unlock(&state->output_mutex))
+                    for (i = 0; i < state->output_num_samples; i++)
                     {
-                      printf("Unable to unlock mutex\n");
+                        state->output_samples[2*i] = state->output_buffer[i];    // L channel
+                        state->output_samples[2*i+1] = state->output_buffer[i];  // R channel
+                    }
+
+                    state->output_finished = 1;
+
+                    // Wake up audio out thread
+                    if (pthread_cond_signal(&state->output_ready))
+                    {
+                        printf("Unable to signal output ready\n");
+                    }
+
+                    if (pthread_mutex_unlock(&state->output_mutex))
+                    {
+                        printf("Unable to unlock output mutex\n");
                     }
                 }
             }
-          else
+            else
             {
-              result = read (opts->audio_in_fd, &sample, 2);
+                result = read(opts->audio_in_fd, &sample, 2);
             }
 
-      }
+        }
 #ifdef USE_LIBSNDFILE
-      else {
-          result = sf_read_short(opts->audio_in_file, &sample, 1);
-          if(result == 0) {
-              cleanupAndExit (opts, state);
-          }
-      }
+        else
+        {
+            result = sf_read_short(opts->audio_in_file, &sample, 1);
+            if(result == 0)
+            {
+                cleanupAndExit (opts, state);
+            }
+        }
 #endif
-     // printf("res: %zd\n, offset: %lld", result, sf_seek(opts->audio_in_file, 0, SEEK_CUR));
-      if (opts->use_cosine_filter)
-      {
-        if (state->lastsynctype >= 10 && state->lastsynctype <= 13)
-          sample = dmr_filter(sample);
-        else if (state->lastsynctype == 8 || state->lastsynctype == 9 ||
-                 state->lastsynctype == 16 || state->lastsynctype == 17)
-          sample = nxdn_filter(sample);
-      }
+        // printf("res: %zd\n, offset: %lld", result, sf_seek(opts->audio_in_file, 0, SEEK_CUR));
 
-      if ((sample > state->max) && (have_sync == 1) && (state->rf_mod == 0))
+        // process sample
+        if (opts->use_cosine_filter)
         {
-          sample = state->max;
-        }
-      else if ((sample < state->min) && (have_sync == 1) && (state->rf_mod == 0))
-        {
-          sample = state->min;
-        }
-
-      if (sample > state->center)
-        {
-          if (state->lastsample < state->center)
+            if (state->lastsynctype >= 10 && state->lastsynctype <= 13)
             {
-              state->numflips += 1;
+                sample = dmr_filter(sample);
             }
-          if (sample > (state->maxref * 1.25))
+            else if (state->lastsynctype == 8 || state->lastsynctype == 9
+                    || state->lastsynctype == 16 || state->lastsynctype == 17)
             {
-              if (state->lastsample < (state->maxref * 1.25))
+                sample = nxdn_filter(sample);
+            }
+        }
+
+        if ((sample > state->max) && (have_sync == 1) && (state->rf_mod == 0))
+        {
+            sample = state->max;
+        }
+        else if ((sample < state->min) && (have_sync == 1) && (state->rf_mod == 0))
+        {
+            sample = state->min;
+        }
+
+        if (sample > state->center)
+        {
+            if (state->lastsample < state->center)
+            {
+                state->numflips += 1;
+            }
+            if (sample > (state->maxref * 1.25))
+            {
+                if (state->lastsample < (state->maxref * 1.25))
                 {
-                  state->numflips += 1;
+                    state->numflips += 1;
                 }
-              if ((state->jitter < 0) && (state->rf_mod == 1))
+                if ((state->jitter < 0) && (state->rf_mod == 1))
                 {               // first spike out of place
-                  state->jitter = i;
+                    state->jitter = i;
                 }
-              if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
+                if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
                 {
-                  printf ("O");
+                    printf("O");
                 }
             }
-          else
+            else
             {
-              if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
+                if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
                 {
-                  printf ("+");
+                    printf("+");
                 }
-              if ((state->jitter < 0) && (state->lastsample < state->center) && (state->rf_mod != 1))
+                if ((state->jitter < 0) && (state->lastsample < state->center) && (state->rf_mod != 1))
                 {               // first transition edge
-                  state->jitter = i;
+                    state->jitter = i;
                 }
             }
         }
-      else
+        else
         {                       // sample < 0
-          if (state->lastsample > state->center)
+            if (state->lastsample > state->center)
             {
-              state->numflips += 1;
+                state->numflips += 1;
             }
-          if (sample < (state->minref * 1.25))
+            if (sample < (state->minref * 1.25))
             {
-              if (state->lastsample > (state->minref * 1.25))
+                if (state->lastsample > (state->minref * 1.25))
                 {
-                  state->numflips += 1;
+                    state->numflips += 1;
                 }
-              if ((state->jitter < 0) && (state->rf_mod == 1))
+                if ((state->jitter < 0) && (state->rf_mod == 1))
                 {               // first spike out of place
-                  state->jitter = i;
+                    state->jitter = i;
                 }
-              if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
+                if ((opts->symboltiming == 1) && (have_sync == 0)
+                        && (state->lastsynctype != -1))
                 {
-                  printf ("X");
+                    printf("X");
                 }
             }
-          else
+            else
             {
-              if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
+                if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
                 {
-                  printf ("-");
+                    printf("-");
                 }
-              if ((state->jitter < 0) && (state->lastsample > state->center) && (state->rf_mod != 1))
+                if ((state->jitter < 0) && (state->lastsample > state->center) && (state->rf_mod != 1))
                 {               // first transition edge
-                  state->jitter = i;
+                    state->jitter = i;
                 }
             }
         }
-      if (state->samplesPerSymbol == 20)
+        if (state->samplesPerSymbol == 20)
         {
-          if ((i >= 9) && (i <= 11))
+            if ((i >= 9) && (i <= 11))
             {
-              sum += sample;
-              count++;
+                sum += sample;
+                count++;
             }
         }
-      if (state->samplesPerSymbol == 5)
+        if (state->samplesPerSymbol == 5)
         {
-          if (i == 2)
+            if (i == 2)
             {
-              sum += sample;
-              count++;
+                sum += sample;
+                count++;
             }
         }
-      else
+        else
         {
-          if (((i >= state->symbolCenter - 1) && (i <= state->symbolCenter + 2) && (state->rf_mod == 0)) || (((i == state->symbolCenter) || (i == state->symbolCenter + 1)) && (state->rf_mod != 0)))
+            if (((i >= state->symbolCenter - 1)  && (i <= state->symbolCenter + 2) && (state->rf_mod == 0)) || (((i == state->symbolCenter) || (i == state->symbolCenter + 1)) && (state->rf_mod != 0)))
             {
-              sum += sample;
-              count++;
+                sum += sample;
+                count++;
             }
         }
-      state->lastsample = sample;
-    }
-  symbol = (sum / count);
 
-  if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
+        state->lastsample = sample;
+    } // for (i = 0; i < state->samplesPerSymbol; i++)
+
+    symbol = (sum / count);
+
+    if ((opts->symboltiming == 1) && (have_sync == 0) && (state->lastsynctype != -1))
     {
-      if (state->jitter >= 0)
+        if (state->jitter >= 0)
         {
-          printf (" %i\n", state->jitter);
+            printf(" %i\n", state->jitter);
         }
-      else
+        else
         {
-          printf ("\n");
+            printf("\n");
         }
     }
 
-  state->symbolcnt++;
-  return (symbol);
+    state->symbolcnt++;
+    return (symbol);
 }

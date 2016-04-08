@@ -111,6 +111,8 @@ void initState(dsd_state * state)
     state->debug_header_errors = 0;
     state->debug_header_critical_errors = 0;
 
+    state->exitflag = 0;
+
 #ifdef TRACE_DSD
     state->debug_sample_index = 0;
     state->debug_label_file = NULL;

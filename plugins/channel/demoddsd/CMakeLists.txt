@@ -4,12 +4,14 @@ set(dsddemod_SOURCES
 	dsddemod.cpp
 	dsddemodgui.cpp
 	dsddemodplugin.cpp
+	dsddecoder.cpp
 )
 
 set(dsddemod_HEADERS
 	dsddemod.h
 	dsddemodgui.h
 	dsddemodplugin.h
+	dsddecoder.h
 )
 
 set(dsddemod_FORMS
@@ -18,7 +20,9 @@ set(dsddemod_FORMS
 
 include_directories(
 	.
+	../../../dsd
 	${CMAKE_CURRENT_BINARY_DIR}
+	${LIBMBE_INCLUDE_DIR}
 )
 
 #include(${QT_USE_FILE})
@@ -37,6 +41,8 @@ add_library(demoddsd SHARED
 target_link_libraries(demoddsd
 	${QT_LIBRARIES}
 	sdrbase
+	dsd
+	${LIBMBE_LIBRARY}
 )
 
 qt5_use_modules(demoddsd Core Widgets OpenGL Multimedia)
