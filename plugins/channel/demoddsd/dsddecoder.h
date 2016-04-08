@@ -29,11 +29,6 @@ public:
     void setInBuffer(const short *inBuffer);
     void pushSamples(int nbSamples); // Push this amount of samples to the DSD decoder thread
 
-    void start();
-    void stop();
-
-    static void* run_dsd (void *arg);
-
 private:
     typedef struct
     {
@@ -42,12 +37,6 @@ private:
     } dsd_params;
 
     dsd_params m_dsdParams;
-
-//    dsd_opts  m_dsdOpts;
-//    dsd_state m_dsdState;
-    pthread_t m_dsdThread;
 };
-
-
 
 #endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

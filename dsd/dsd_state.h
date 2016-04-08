@@ -18,7 +18,6 @@
 #ifndef INCLUDE_DSD_STATE_H_
 #define INCLUDE_DSD_STATE_H_
 
-#include <pthread.h>
 #include <mbelib.h>
 #include "p25p1_heuristics.h"
 
@@ -104,22 +103,16 @@ typedef struct
   int exitflag;  // the former global that cannot be a global within SDRangel and is not of much use with it anyway
 
   // New from original DSD for in-memory processing support with SDRangel:
-  pthread_mutex_t input_mutex;   //!< mutex to communicate with input thread
-  pthread_cond_t input_ready;    //!< signals that input demodulator samples are available for processing
   const short *input_samples;    //!< demodulator samples
   int input_length;              //!< 0: data not ready, >0: data ready for this amount of demodulator samples
   int input_offset;              //!< consumer pointer
 
-  pthread_mutex_t output_mutex;  //!< mutex to communicate with output (audio) thread
-  pthread_cond_t output_ready;   //!< signals that output audio samples are ready
   short *output_buffer;          //!< Output of decoder single S16LE
   int output_offset;             //!< producer pointer
   short *output_samples;         //!< L+R channels S16LE ready for writing to audio FIFO
   int output_num_samples;        //!< Number of L+R samples available in the above buffer
   int output_length;             //!< L+R buffer size (fixed)
   int output_finished;           //!< 0: not ready, 1: ready
-
-  int dsd_running;               //!< True while DSD thread is running
 } dsd_state;
 
 #ifdef __cplusplus

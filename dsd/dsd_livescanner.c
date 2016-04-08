@@ -21,15 +21,7 @@
 
 void liveScanner(dsd_opts * opts, dsd_state * state)
 {
-    if (opts->audio_in_fd == -1)
-    {
-        if (pthread_mutex_lock(&state->input_mutex))
-        {
-            printf("liveScanner -> Unable to lock mutex\n");
-        }
-    }
-
-    while (state->dsd_running)
+    while (1) // FIXME: loop while input available
     {
         noCarrier(opts, state);
         state->synctype = getFrameSync(opts, state);
@@ -39,7 +31,7 @@ void liveScanner(dsd_opts * opts, dsd_state * state)
         state->umid = (((state->max) - state->center) * 5 / 8) + state->center;
         state->lmid = (((state->min) - state->center) * 5 / 8) + state->center;
 
-        while ((state->synctype != -1) && (state->dsd_running))
+        while (state->synctype != -1) // TODO: make sure it ends
         {
             processFrame(opts, state);
             state->synctype = getFrameSync(opts, state);

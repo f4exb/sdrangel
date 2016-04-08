@@ -86,16 +86,8 @@ int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
         {
             if (opts->audio_in_fd == -1)
             {
-                while (state->input_length == 0)
-                {
-                    // If the buffer is empty, wait for more samples to arrive.
-                    if (pthread_cond_wait(&state->input_ready, &state->input_mutex))
-                    {
-                        printf("getSymbol -> Error waiting for input condition\n");
-                    }
-                }
                 // Get the next sample from the buffer
-                sample = state->input_samples[state->input_offset++];
+                sample = state->input_samples[state->input_offset++]; // FIXME: get sample only if available
 
                 if (state->input_offset == state->input_length) // all available samples have been read
                 {
@@ -103,12 +95,6 @@ int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
 
                     // We've reached the end of the buffer.  Wait for more next time.
                     state->input_length = 0;
-
-                    // make output samples availabele
-                    if (pthread_mutex_lock(&state->output_mutex))
-                    {
-                        printf("Unable to lock output mutex\n");
-                    }
 
                     state->output_num_samples = state->output_offset;
 
@@ -148,17 +134,6 @@ int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
                     }
 
                     state->output_finished = 1;
-
-                    // Wake up audio out thread
-                    if (pthread_cond_signal(&state->output_ready))
-                    {
-                        printf("Unable to signal output ready\n");
-                    }
-
-                    if (pthread_mutex_unlock(&state->output_mutex))
-                    {
-                        printf("Unable to unlock output mutex\n");
-                    }
                 }
             }
             else

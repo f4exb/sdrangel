@@ -16,6 +16,7 @@ set(dsd_SOURCES
     dsd_mbe.c
     dsd_nocarrier.c
     dsd_opts.c
+    dsd_state.c
     dsd_symbol.c
     dsd_upsample.c
     dstar_const.c
@@ -28,6 +29,7 @@ set(dsd_SOURCES
     nxdn96_const.c
     p25_lcw.c
     p25p1_const.c
+    p25p1_heuristics.c
     p25p1_hdu.c
     p25p1_ldu1.c
     p25p1_ldu2.c

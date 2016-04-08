@@ -49,24 +49,8 @@ DSDDecoder::DSDDecoder()
     m_dsdParams.opts.mod_gfsk = 1;
     m_dsdParams.state.rf_mod = 0;
 
-    // Initialize the conditions
-    if(pthread_cond_init(&m_dsdParams.state.input_ready, NULL))
-    {
-        qCritical("DSDDecoder::DSDDecoder: Unable to initialize input condition");
-    }
-    if(pthread_cond_init(&m_dsdParams.state.output_ready, NULL))
-    {
-        qCritical("DSDDecoder::DSDDecoder: Unable to initialize output condition");
-    }
-
     m_dsdParams.state.input_length = 0;
     m_dsdParams.state.input_offset = 0;
-
-    // Lock output mutex
-    if (pthread_mutex_lock(&m_dsdParams.state.output_mutex))
-    {
-        qCritical("DSDDecoder::DSDDecoder: Unable to lock output mutex");
-    }
 
     m_dsdParams.state.output_buffer = (short *) malloc(1<<18); // Raw output buffer with single S16LE samples @ 8k (max: 128 kS)
     m_dsdParams.state.output_offset = 0;
@@ -84,20 +68,10 @@ DSDDecoder::DSDDecoder()
         qCritical("DSDDecoder::DSDDecoder: Unable to allocate audio L+R buffer.");
     }
 
-    m_dsdThread = pthread_self();      // dummy initialization
-    m_dsdParams.state.dsd_running = 0; // wait for start()
 }
 
 DSDDecoder::~DSDDecoder()
 {
-    stop();
-
-    // Unlock output mutex
-    if (pthread_mutex_unlock(&m_dsdParams.state.output_mutex))
-    {
-        qCritical("DSDDecoder::~DSDDecoder: Unable to unlock output mutex");
-    }
-
     free(m_dsdParams.state.output_samples);
     free(m_dsdParams.state.output_buffer);
 }
@@ -109,61 +83,6 @@ void DSDDecoder::setInBuffer(const short *inBuffer)
 
 void DSDDecoder::pushSamples(int nbSamples)
 {
-    if (pthread_mutex_lock(&m_dsdParams.state.input_mutex))
-    {
-        qCritical("DSDDecoder::pushSamples: Unable to lock input mutex");
-    }
-
     m_dsdParams.state.input_length = nbSamples;
     m_dsdParams.state.input_offset = 0;
-
-    if (pthread_cond_signal(&m_dsdParams.state.input_ready))
-    {
-        qCritical("DSDDecoder::pushSamples: Unable to signal input ready");
-    }
-
-    if (pthread_mutex_unlock(&m_dsdParams.state.input_mutex))
-    {
-        qCritical("DSDDecoder::pushSamples: Unable to unlock input mutex");
-    }
 }
-
-void DSDDecoder::start()
-{
-    if (m_dsdParams.state.dsd_running == 1)
-    {
-        m_dsdParams.state.dsd_running = 0;
-
-        if (pthread_join(m_dsdThread, NULL)) {
-            qCritical("DSDDecoder::start: error joining DSD thread. Not starting");
-            return;
-        }
-    }
-
-    m_dsdParams.state.dsd_running = 1;
-
-    if (pthread_create(&m_dsdThread, NULL, &run_dsd, &m_dsdParams))
-    {
-        qCritical("DSDDecoder::start: Unable to spawn DSD thread");
-    }
-}
-
-void DSDDecoder::stop()
-{
-    if (m_dsdParams.state.dsd_running == 1)
-    {
-        m_dsdParams.state.dsd_running = 0;
-
-        if (pthread_join(m_dsdThread, NULL)) {
-            qCritical("DSDDecoder::stop: error joining DSD thread. Not starting");
-        }
-    }
-}
-
-void* DSDDecoder::run_dsd (void *arg)
-{
-  dsd_params *params = (dsd_params *) arg;
-  liveScanner(&params->opts, &params->state);
-  return NULL;
-}
-
