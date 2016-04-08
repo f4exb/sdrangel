@@ -159,7 +159,6 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_agcAttack;
-	bool m_audioMute;
 
 	double m_squelchLevel;
 	bool m_squelchOpen;

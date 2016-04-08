@@ -34,7 +34,6 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_sampleCount(0),
 	m_squelchCount(0),
 	m_agcAttack(2400),
-	m_audioMute(false),
 	m_squelchOpen(false),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
@@ -138,7 +137,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				m_squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
 
-				if ((m_squelchOpen) && !m_running.m_audioMute)
+				if (m_squelchOpen)
 				{
                     sample = demod;
 				}
@@ -151,8 +150,17 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_scopeSampleBuffer.push_back(s);
 				m_dsdInBuffer[m_dsdInCount++] = sample;
 
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
+				if (m_running.m_audioMute)
+				{
+	                m_audioBuffer[m_audioBufferFill].l = 0;
+	                m_audioBuffer[m_audioBufferFill].r = 0;
+				}
+				else
+				{
+	                m_audioBuffer[m_audioBufferFill].l = sample;
+	                m_audioBuffer[m_audioBufferFill].r = sample;
+				}
+
 				++m_audioBufferFill;
 
 				if (m_audioBufferFill >= m_audioBuffer.size())
