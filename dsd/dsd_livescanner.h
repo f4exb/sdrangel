@@ -21,6 +21,14 @@
 #include "dsd_opts.h"
 #include "dsd_state.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void liveScanner (dsd_opts * opts, dsd_state * state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INCLUDE_DSD_LIVESCANNER_H_ */

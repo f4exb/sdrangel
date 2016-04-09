@@ -46,6 +46,7 @@ int
 getFrameSync (dsd_opts * opts, dsd_state * state)
 {
   /* detects frame sync and returns frame type
+   * -1 -> thread has to terminate
    * 0 = +P25p1
    * 1 = -P25p1
    * 2 = +X2-TDMA (non inverted signal data frame)
@@ -107,6 +108,11 @@ getFrameSync (dsd_opts * opts, dsd_state * state)
     {
       t++;
       symbol = getSymbol (opts, state, 0);
+
+      if (!state->dsd_running) {
+          return -1;
+      }
+
       lbuf[lidx] = symbol;
       state->sbuf[state->sidx] = symbol;
       if (lidx == 23)

@@ -83,6 +83,59 @@ void DSDDecoder::setInBuffer(const short *inBuffer)
 
 void DSDDecoder::pushSamples(int nbSamples)
 {
-    m_dsdParams.state.input_length = nbSamples;
     m_dsdParams.state.input_offset = 0;
+    m_dsdParams.state.input_length = nbSamples;
+
+    if (pthread_cond_signal(&m_dsdParams.state.input_ready)) {
+      printf("DSDDecoder::pushSamples: Unable to signal input ready");
+    }
 }
+
+void DSDDecoder::start()
+{
+    qDebug("DSDDecoder::start: starting");
+    m_dsdParams.state.dsd_running = 1;
+
+    if (pthread_create(&m_dsdParams.state.dsd_thread, NULL, &run_dsd, &m_dsdParams))
+    {
+        qCritical("DSDDecoder::start: Unable to spawn thread");
+        m_dsdParams.state.dsd_running = 0;
+    }
+
+    qDebug("DSDDecoder::start: started");
+}
+
+void DSDDecoder::stop()
+{
+    if (m_dsdParams.state.dsd_running)
+    {
+        qDebug("DSDDecoder::stop: stopping");
+        m_dsdParams.state.dsd_running = 0;
+        char *b;
+
+        if (pthread_cond_signal(&m_dsdParams.state.input_ready)) {
+          printf("DSDDecoder::pushSamples: Unable to signal input ready");
+        }
+
+//        if (pthread_join(m_dsdParams.state.dsd_thread, (void**) &b)) {
+//            qCritical("DSDDecoder::stop: cannot join dsd thread");
+//        }
+
+        qDebug("DSDDecoder::stop: stopped");
+    }
+    else
+    {
+        qDebug("DSDDecoder::stop: not running");
+    }
+}
+
+void* DSDDecoder::run_dsd(void *arg)
+{
+  dsd_params *params = (dsd_params *) arg;
+  liveScanner (&params->opts, &params->state);
+  return NULL;
+}
+
+
+
+

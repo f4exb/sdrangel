@@ -121,5 +121,16 @@ void initState(dsd_state * state)
 #endif
 
     initialize_p25_heuristics(&state->p25_heuristics);
+
+    // Initialize the mutexes
+    if (pthread_mutex_init(&state->input_mutex, NULL)) {
+      fprintf(stderr, "dsd::initState: Unable to initialize input mutex\n");
+    }
+    // Initialize the conditions
+    if (pthread_cond_init(&state->input_ready, NULL)) {
+      fprintf(stderr, "dsd::initState: Unable to initialize input condition\n");
+    }
+
+    state->dsd_running = 0;
 }
 

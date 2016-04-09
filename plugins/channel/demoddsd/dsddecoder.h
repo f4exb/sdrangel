@@ -29,12 +29,17 @@ public:
     void setInBuffer(const short *inBuffer);
     void pushSamples(int nbSamples); // Push this amount of samples to the DSD decoder thread
 
+    void start();
+    void stop();
+
 private:
     typedef struct
     {
       dsd_opts opts;
       dsd_state state;
     } dsd_params;
+
+    static void* run_dsd(void *arg);
 
     dsd_params m_dsdParams;
 };

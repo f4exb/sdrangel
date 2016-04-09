@@ -21,8 +21,13 @@
 
 void liveScanner(dsd_opts * opts, dsd_state * state)
 {
-    while (1) // FIXME: loop while input available
+    while (state->dsd_running) // FIXME: loop while input available
     {
+//        if (pthread_cond_wait(&state->input_ready, &state->input_mutex)) {
+//            fprintf(stderr, "dsd::liveScanner: Error waiting for input ready condition\n");
+//        }
+//
+//        fprintf (stderr, "dsd::liveScanner: input is ready\n");
         noCarrier(opts, state);
         state->synctype = getFrameSync(opts, state);
 
@@ -31,7 +36,7 @@ void liveScanner(dsd_opts * opts, dsd_state * state)
         state->umid = (((state->max) - state->center) * 5 / 8) + state->center;
         state->lmid = (((state->min) - state->center) * 5 / 8) + state->center;
 
-        while (state->synctype != -1) // TODO: make sure it ends
+        while (state->synctype != -1) // -1 -> exit thread
         {
             processFrame(opts, state);
             state->synctype = getFrameSync(opts, state);
@@ -42,4 +47,6 @@ void liveScanner(dsd_opts * opts, dsd_state * state)
             state->lmid = (((state->min) - state->center) * 5 / 8) + state->center;
         }
     }
+
+    fprintf (stderr, "dsd::liveScanner: end loop\n");
 }

@@ -15,22 +15,21 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <pthread.h>
 #include "dsd_cleanupexit.h"
 #include "dsd_nocarrier.h"
 #include "dsd.h"
 
-void
-cleanupAndExit (dsd_opts * opts, dsd_state * state)
+void cleanupAndExit(dsd_opts * opts, dsd_state * state)
 {
-  noCarrier (opts, state);
+    noCarrier(opts, state);
 #ifdef USE_LIBSNDFILE
-  if (opts->wav_out_f != NULL)
+    if (opts->wav_out_f != NULL)
     {
-      closeWavOutFile (opts, state);
+        closeWavOutFile (opts, state);
     }
 #endif
-  printf ("Exiting.\n");
-  //exit (0); // You just can't do that within SDRangel
+    printf("dsd::cleanupAndExit: Exiting.\n");
+    int rc = 0;
+    pthread_exit(&rc);
 }
-
-

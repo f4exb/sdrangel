@@ -18,6 +18,7 @@
 #ifndef INCLUDE_DSD_STATE_H_
 #define INCLUDE_DSD_STATE_H_
 
+#include <pthread.h>
 #include <mbelib.h>
 #include "p25p1_heuristics.h"
 
@@ -113,6 +114,11 @@ typedef struct
   int output_num_samples;        //!< Number of L+R samples available in the above buffer
   int output_length;             //!< L+R buffer size (fixed)
   int output_finished;           //!< 0: not ready, 1: ready
+
+  pthread_mutex_t input_mutex;
+  pthread_cond_t input_ready;
+  pthread_t dsd_thread;
+  int dsd_running;
 } dsd_state;
 
 #ifdef __cplusplus
