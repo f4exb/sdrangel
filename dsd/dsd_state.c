@@ -132,5 +132,6 @@ void initState(dsd_state * state)
     }
 
     state->dsd_running = 0;
+    state->output_phasor = 0;
 }
 

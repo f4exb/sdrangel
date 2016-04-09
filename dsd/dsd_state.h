@@ -111,9 +111,11 @@ typedef struct
   short *output_buffer;          //!< Output of decoder single S16LE
   int output_offset;             //!< producer pointer
   short *output_samples;         //!< L+R channels S16LE ready for writing to audio FIFO
+  int output_buffers_size;       //!< Size of buffers in number of samples
   int output_num_samples;        //!< Number of L+R samples available in the above buffer
-  int output_length;             //!< L+R buffer size (fixed)
+  int output_length;             //!< Number of wished samples
   int output_finished;           //!< 0: not ready, 1: ready
+  float output_phasor;
 
   pthread_mutex_t input_mutex;
   pthread_cond_t input_ready;

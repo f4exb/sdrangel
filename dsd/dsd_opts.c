@@ -78,5 +78,6 @@ void initOpts(dsd_opts * opts)
     opts->delay = 0;
     opts->use_cosine_filter = 1;
     opts->unmute_encrypted_p25 = 0;
+    opts->upsample = 0; // by default stay with 8k audio
 }
 

@@ -179,7 +179,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 		if (samples != framesPerBuffer)
 		{
-			qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
+			//qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
 		}
 
 		for (uint i = 0; i < samples; i++)

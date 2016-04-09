@@ -20,6 +20,8 @@
 
 #include "dsd.h"
 
+class AudioFifo;
+
 class DSDDecoder
 {
 public:
@@ -27,7 +29,9 @@ public:
     ~DSDDecoder();
 
     void setInBuffer(const short *inBuffer);
+    void pushSample(short sample);
     void pushSamples(int nbSamples); // Push this amount of samples to the DSD decoder thread
+    void popAudioSamples(AudioFifo *audioFifo, bool audioMute);
 
     void start();
     void stop();
@@ -42,6 +46,8 @@ private:
     static void* run_dsd(void *arg);
 
     dsd_params m_dsdParams;
+    short *m_zeroBuffer;
+    int m_lastNbSamples;
 };
 
 #endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

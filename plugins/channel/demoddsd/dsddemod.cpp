@@ -145,52 +145,51 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_scopeSampleBuffer.push_back(s);
 				m_dsdInBuffer[m_dsdInCount++] = sample;
 
-				if (m_running.m_audioMute)
-				{
-	                m_audioBuffer[m_audioBufferFill].l = 0;
-	                m_audioBuffer[m_audioBufferFill].r = 0;
-				}
-				else
-				{
-	                m_audioBuffer[m_audioBufferFill].l = sample;
-	                m_audioBuffer[m_audioBufferFill].r = sample;
-				}
-
-				++m_audioBufferFill;
-
-				if (m_audioBufferFill >= m_audioBuffer.size())
-				{
-					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-					if (res != m_audioBufferFill)
-					{
-						qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-					}
-
-					m_audioBufferFill = 0;
-				}
+//				if (m_running.m_audioMute)
+//				{
+//	                m_audioBuffer[m_audioBufferFill].l = 0;
+//	                m_audioBuffer[m_audioBufferFill].r = 0;
+//				}
+//				else
+//				{
+//	                m_audioBuffer[m_audioBufferFill].l = sample;
+//	                m_audioBuffer[m_audioBufferFill].r = sample;
+//				}
+//
+//				++m_audioBufferFill;
+//
+//				if (m_audioBufferFill >= m_audioBuffer.size())
+//				{
+//					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+//
+//					if (res != m_audioBufferFill)
+//					{
+//						qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+//					}
+//
+//					m_audioBufferFill = 0;
+//				}
 
 				m_interpolatorDistanceRemain += m_interpolatorDistance;
 			}
 		}
 	}
 
-	if (m_audioBufferFill > 0)
-	{
-		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
-		if (res != m_audioBufferFill)
-		{
-			qDebug("NFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
-		}
+//	if (m_audioBufferFill > 0)
+//	{
+//		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+//
+//		if (res != m_audioBufferFill)
+//		{
+//			qDebug("NFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
+//		}
+//
+//		m_audioBufferFill = 0;
+//	}
 
-		m_audioBufferFill = 0;
-	}
-
-	if (m_dsdInCount > 0)
-	{
-	    m_dsdDecoder.pushSamples(m_dsdInCount);
-	}
+	m_dsdDecoder.popAudioSamples(&m_audioFifo, m_running.m_audioMute);
+    m_dsdDecoder.pushSamples(m_dsdInCount);
 
     if((m_scope != 0) && (m_scopeEnabled))
     {

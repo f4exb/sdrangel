@@ -102,22 +102,36 @@ int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
                 {
                     int i;
                     state->input_length = 0; // states all samples have been consumed
+                    state->input_offset = 0;
+
+                    // debug ...
+                    for (i = 0; i < state->output_length; i++)
+                    {
+                        float s = sin(state->output_phasor);
+                        state->output_phasor = fmod(state->output_phasor + (M_PI / 48.0), 2.0 * M_PI);
+                        state->output_samples[2*state->output_offset + 2*i] = s * 16368.0f;
+                        state->output_samples[2*state->output_offset + 2*i+1] = s * 16368.0f;
+                    }
+                    state->output_offset += state->output_length;
                     state->output_num_samples = state->output_offset;
+                    // ... debug
 
-                    //ffprintf(stderr, stderr, "dsd::getSymbol: input processing has finished\n");
-
-                    if (state->output_num_samples > state->output_length)
-                    {
-                        fprintf(stderr, "WARNING: audio buffer over-run! Truncating output\n");
-                        state->output_num_samples = state->output_length;
-                    }
-
-                    for (i = 0; i < state->output_num_samples; i++)
-                    {
-                        state->output_samples[2*i] = state->output_buffer[i];    // L channel
-                        state->output_samples[2*i+1] = state->output_buffer[i];  // R channel
-                    }
-
+//                    state->output_num_samples = state->output_offset;
+//
+//                    //ffprintf(stderr, stderr, "dsd::getSymbol: input processing has finished\n");
+//
+//                    if (state->output_num_samples > state->output_length)
+//                    {
+//                        fprintf(stderr, "WARNING: audio buffer over-run! Truncating output\n");
+//                        state->output_num_samples = state->output_length;
+//                    }
+//
+//                    for (i = 0; i < state->output_num_samples; i++)
+//                    {
+//                        state->output_samples[2*i] = state->output_buffer[i];    // L channel
+//                        state->output_samples[2*i+1] = state->output_buffer[i];  // R channel
+//                    }
+//
                     state->output_finished = 1;
                 }
                 else
