@@ -33,9 +33,7 @@ MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_sampleCount(0),
 	m_squelchCount(0),
-	m_agcAttack(2400),
 	m_squelchOpen(false),
-	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_fmExcursion(24),
 	m_settingsMutex(QMutex::Recursive),
@@ -64,10 +62,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_agcLevel = 1.0;
-	m_AGC.resize(m_agcAttack, m_agcLevel);
-
-	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
+    m_movingAverage.resize(16, 0);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -113,19 +108,19 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		{
 			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
 			{
-
 				qint16 sample;
 
-				m_AGC.feed(ci);
+				m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())) / (Real) (1<<30);
+				m_movingAverage.feed(m_magsq);
 
 				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
 				m_sampleCount++;
 
 				// AF processing
 
-				if (getMag() > m_squelchLevel)
+				if (getMagSq() > m_squelchLevel)
 				{
-					if (m_squelchCount < m_agcAttack)
+					if (m_squelchCount < m_squelchGate)
 					{
 						m_squelchCount++;
 					}
@@ -135,7 +130,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_squelchCount = 0;
 				}
 
-				m_squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
+				m_squelchOpen = m_squelchCount == m_squelchGate;
 
 				if (m_squelchOpen)
 				{
@@ -291,16 +286,14 @@ void DSDDemod::apply()
 
 	if (m_config.m_squelchGate != m_running.m_squelchGate)
 	{
-		m_agcAttack = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
-		m_AGC.resize(m_agcAttack, m_agcLevel);
+		m_squelchGate = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
 	}
 
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a value in tenths of dB
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 200.0);
+		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 100.0);
 		//m_squelchLevel *= m_squelchLevel;
-		m_afSquelch.setThreshold(m_squelchLevel);
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;

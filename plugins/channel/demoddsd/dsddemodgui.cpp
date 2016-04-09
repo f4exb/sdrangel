@@ -354,7 +354,7 @@ void DSDDemodGUI::blockApplySettings(bool block)
 
 void DSDDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_dsdDemod->getMag()) * 2;
+	Real powDb = CalcDb::dbPower(m_dsdDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 	bool squelchOpen = m_dsdDemod->getSquelchOpen();

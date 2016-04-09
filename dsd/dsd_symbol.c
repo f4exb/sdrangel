@@ -108,7 +108,7 @@ int getSymbol(dsd_opts * opts, dsd_state * state, int have_sync)
 
                     if (state->output_num_samples > state->output_length)
                     {
-                        fprintf(stderr, "WARNING: audio buffer over-run! Truncating output");
+                        fprintf(stderr, "WARNING: audio buffer over-run! Truncating output\n");
                         state->output_num_samples = state->output_length;
                     }
 

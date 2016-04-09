@@ -27,7 +27,7 @@
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
 #include "dsp/afsquelch.h"
-#include "dsp/agc.h"
+#include "dsp/movingaverage.h"
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
@@ -58,7 +58,7 @@ public:
 		m_dsdDemodGUI = dsdDemodGUI;
 	}
 
-	Real getMag() { return m_AGC.getAverage() / (1<<15); }
+	Real getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
 private:
@@ -158,16 +158,14 @@ private:
 	Real m_interpolatorDistanceRemain;
 	int m_sampleCount;
 	int m_squelchCount;
-	int m_agcAttack;
+	int m_squelchGate;
 
 	double m_squelchLevel;
 	bool m_squelchOpen;
 
 	Real m_lastArgument;
-	MagAGC m_AGC;
-	AFSquelch m_afSquelch;
-	Real m_agcLevel; // AGC will aim to  this level
-	Real m_agcFloor; // AGC will not go below this level
+    MovingAverage<Real> m_movingAverage;
+    Real m_magsq;
 
 	Real m_fmExcursion;
 
