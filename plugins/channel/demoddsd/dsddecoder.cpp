@@ -52,8 +52,10 @@ DSDDecoder::DSDDecoder()
     m_dsdParams.opts.mod_gfsk = 1;
     m_dsdParams.state.rf_mod = 0;
 
+    m_dsdParams.state.input_samples = (short *) malloc(1<<18);
     m_dsdParams.state.input_length = 0;
     m_dsdParams.state.input_offset = 0;
+    m_dsdParams.state.input_buffer_size = 1<<17;
 
     m_dsdParams.state.output_buffer = (short *) malloc(1<<18); // Raw output buffer with single S16LE samples @ 8k (max: 128 kS)
     m_dsdParams.state.output_offset = 0;
@@ -82,14 +84,10 @@ DSDDecoder::~DSDDecoder()
 {
     free(m_dsdParams.state.output_samples);
     free(m_dsdParams.state.output_buffer);
+    free(m_dsdParams.state.input_samples);
 }
 
-void DSDDecoder::setInBuffer(const short *inBuffer)
-{
-    m_dsdParams.state.input_samples = inBuffer;
-}
-
-void DSDDecoder::pushSamples(int nbSamples)
+void DSDDecoder::pushSamples(const short *samples,int nbSamples)
 {
     if (nbSamples == 0)
     {
@@ -98,6 +96,7 @@ void DSDDecoder::pushSamples(int nbSamples)
     }
     else
     {
+        memcpy((void *) m_dsdParams.state.input_samples, (const void *) samples, nbSamples * sizeof(short));
         m_dsdParams.state.input_offset = 0;
         m_dsdParams.state.input_length = nbSamples;
         m_dsdParams.state.output_finished = 0;

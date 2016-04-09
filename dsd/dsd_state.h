@@ -104,9 +104,10 @@ typedef struct
   int exitflag;  // the former global that cannot be a global within SDRangel and is not of much use with it anyway
 
   // New from original DSD for in-memory processing support with SDRangel:
-  const short *input_samples;    //!< demodulator samples
+  short *input_samples;          //!< demodulator samples
   int input_length;              //!< 0: data not ready, >0: data ready for this amount of demodulator samples
   int input_offset;              //!< consumer pointer
+  int input_buffer_size;         //!< Size of buffer in number of samples
 
   short *output_buffer;          //!< Output of decoder single S16LE
   int output_offset;             //!< producer pointer

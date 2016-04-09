@@ -44,7 +44,6 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	setObjectName("DSDDemod");
 
 	m_dsdInBuffer = new qint16[1<<18]; // 128 k Samples is the maximum size of all input devices sample buffers (Airspy or HackRF) = 2^(17+1) for 2 byte samples
-	m_dsdDecoder.setInBuffer(m_dsdInBuffer);
 
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
@@ -105,45 +104,44 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		{
-			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
-			{
-				qint16 sample;
+        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+        {
+            qint16 sample;
 
-				m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())) / (Real) (1<<30);
-				m_movingAverage.feed(m_magsq);
+            m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())) / (Real) (1<<30);
+            m_movingAverage.feed(m_magsq);
 
-				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
-				m_sampleCount++;
+            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
+            m_sampleCount++;
 
-				// AF processing
+            // AF processing
 
-				if (getMagSq() > m_squelchLevel)
-				{
-					if (m_squelchCount < m_squelchGate)
-					{
-						m_squelchCount++;
-					}
-				}
-				else
-				{
-					m_squelchCount = 0;
-				}
+            if (getMagSq() > m_squelchLevel)
+            {
+                if (m_squelchCount < m_squelchGate)
+                {
+                    m_squelchCount++;
+                }
+            }
+            else
+            {
+                m_squelchCount = 0;
+            }
 
-				m_squelchOpen = m_squelchCount == m_squelchGate;
+            m_squelchOpen = m_squelchCount == m_squelchGate;
 
-				if (m_squelchOpen)
-				{
-                    sample = demod;
-				}
-				else
-				{
-					sample = 0;
-				}
+            if (m_squelchOpen)
+            {
+                sample = demod;
+            }
+            else
+            {
+                sample = 0;
+            }
 
-				Sample s(sample, 0.0);
-				m_scopeSampleBuffer.push_back(s);
-				m_dsdInBuffer[m_dsdInCount++] = sample;
+            Sample s(sample, 0.0);
+            m_scopeSampleBuffer.push_back(s);
+            m_dsdInBuffer[m_dsdInCount++] = sample;
 
 //				if (m_running.m_audioMute)
 //				{
@@ -170,9 +168,8 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //					m_audioBufferFill = 0;
 //				}
 
-				m_interpolatorDistanceRemain += m_interpolatorDistance;
-			}
-		}
+            m_interpolatorDistanceRemain += m_interpolatorDistance;
+        }
 	}
 
 
@@ -189,9 +186,9 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //	}
 
 	m_dsdDecoder.popAudioSamples(&m_audioFifo, m_running.m_audioMute);
-    m_dsdDecoder.pushSamples(m_dsdInCount);
+    m_dsdDecoder.pushSamples(m_dsdInBuffer, m_dsdInCount);
 
-    if((m_scope != 0) && (m_scopeEnabled))
+    if ((m_scope != 0) && (m_scopeEnabled))
     {
         m_scope->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), true); // true = real samples for what it's worth
     }

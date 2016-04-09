@@ -28,9 +28,7 @@ public:
     DSDDecoder();
     ~DSDDecoder();
 
-    void setInBuffer(const short *inBuffer);
-    void pushSample(short sample);
-    void pushSamples(int nbSamples); // Push this amount of samples to the DSD decoder thread
+    void pushSamples(const short *samples, int nbSamples); // Push this amount of samples to the DSD decoder thread
     void popAudioSamples(AudioFifo *audioFifo, bool audioMute);
 
     void start();
