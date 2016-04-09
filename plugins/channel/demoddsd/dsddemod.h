@@ -169,8 +169,8 @@ private:
 
 	Real m_fmExcursion;
 
-	qint16 *m_dsdInBuffer;             //!< Input buffer for DSD decoder process
-	int m_dsdInCount;
+	qint16 *m_samplesBuffer;             //!< Input buffer for DSD decoder process
+	int m_samplesBufferIndex;
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
