@@ -49,28 +49,28 @@ void dstar_header_decode(int radioheaderbuffer[660]) {
 		}
 	}
 	// print header
-	printf("\nDSTAR HEADER: ");
-	//printf("FLAG1: %02X - FLAG2: %02X - FLAG3: %02X\n", radioheader[0],
+	fprintf(stderr, "\nDSTAR HEADER: ");
+	//fprintf(stderr, "FLAG1: %02X - FLAG2: %02X - FLAG3: %02X\n", radioheader[0],
 	//		radioheader[1], radioheader[2]);
-	printf("RPT 2: %c%c%c%c%c%c%c%c ", radioheader[3], radioheader[4],
+	fprintf(stderr, "RPT 2: %c%c%c%c%c%c%c%c ", radioheader[3], radioheader[4],
 			radioheader[5], radioheader[6], radioheader[7], radioheader[8],
 			radioheader[9], radioheader[10]);
-	printf("RPT 1: %c%c%c%c%c%c%c%c ", radioheader[11], radioheader[12],
+	fprintf(stderr, "RPT 1: %c%c%c%c%c%c%c%c ", radioheader[11], radioheader[12],
 			radioheader[13], radioheader[14], radioheader[15], radioheader[16],
 			radioheader[17], radioheader[18]);
-	printf("YOUR: %c%c%c%c%c%c%c%c ", radioheader[19], radioheader[20],
+	fprintf(stderr, "YOUR: %c%c%c%c%c%c%c%c ", radioheader[19], radioheader[20],
 			radioheader[21], radioheader[22], radioheader[23], radioheader[24],
 			radioheader[25], radioheader[26]);
-	printf("MY: %c%c%c%c%c%c%c%c/%c%c%c%c\n", radioheader[27],
+	fprintf(stderr, "MY: %c%c%c%c%c%c%c%c/%c%c%c%c\n", radioheader[27],
 			radioheader[28], radioheader[29], radioheader[30], radioheader[31],
 			radioheader[32], radioheader[33], radioheader[34], radioheader[35],
 			radioheader[36], radioheader[37], radioheader[38]);
 	//FCSinheader = ((radioheader[39] << 8) | radioheader[40]) & 0xFFFF;
 	//FCScalculated = calc_fcs((unsigned char*) radioheader, 39);
-	//printf("Check sum = %04X ", FCSinheader);
+	//fprintf(stderr, "Check sum = %04X ", FCSinheader);
 	//if (FCSinheader == FCScalculated) {
-	//	printf("(OK)\n");
+	//	fprintf(stderr, "(OK)\n");
 	//} else {
-	//	printf("(NOT OK- Calculated FCS = %04X)\n", FCScalculated);
+	//	fprintf(stderr, "(NOT OK- Calculated FCS = %04X)\n", FCScalculated);
 	//}; // end else - if
 }

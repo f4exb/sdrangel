@@ -44,7 +44,7 @@ processLDU2 (dsd_opts * opts, dsd_state * state)
 
   if (opts->errorbars == 1)
     {
-      printf ("e:");
+      fprintf(stderr, "e:");
     }
 
   // separate imbe frames and deinterleave
@@ -339,17 +339,17 @@ processLDU2 (dsd_opts * opts, dsd_state * state)
 
   if (opts->errorbars == 1)
     {
-      printf ("\n");
+      fprintf(stderr, "\n");
     }
 
   if (opts->p25status == 1)
     {
-      printf ("status: %s lsd3: %s lsd4: %s\n", status, lsd3, lsd4);
+      fprintf(stderr, "status: %s lsd3: %s lsd4: %s\n", status, lsd3, lsd4);
     }
   if (opts->p25enc == 1)
     {
       algidhex = strtol (algid, NULL, 2);
       kidhex = strtol (kid, NULL, 2);
-      printf ("mi: %s algid: $%x kid: $%x\n", mi, algidhex, kidhex);
+      fprintf(stderr, "mi: %s algid: $%x kid: $%x\n", mi, algidhex, kidhex);
     }
 }

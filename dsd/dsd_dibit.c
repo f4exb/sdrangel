@@ -111,40 +111,40 @@ getDibit (dsd_opts * opts, dsd_state * state)
           if (state->symbolcnt > (4800 / opts->scoperate))
             {
               state->symbolcnt = 0;
-              printf ("\n");
-              printf ("Demod mode:     %s                Nac:                     %4X\n", modulation, state->nac);
-              printf ("Frame Type:    %s        Talkgroup:            %7i\n", state->ftype, state->lasttg);
-              printf ("Frame Subtype: %s       Source:          %12i\n", state->fsubtype, state->lastsrc);
-              printf ("TDMA activity:  %s %s     Voice errors: %s\n", state->slot0light, state->slot1light, state->err_str);
-              printf ("+----------------------------------------------------------------+\n");
+              fprintf(stderr, "\n");
+              fprintf(stderr, "Demod mode:     %s                Nac:                     %4X\n", modulation, state->nac);
+              fprintf(stderr, "Frame Type:    %s        Talkgroup:            %7i\n", state->ftype, state->lasttg);
+              fprintf(stderr, "Frame Subtype: %s       Source:          %12i\n", state->fsubtype, state->lastsrc);
+              fprintf(stderr, "TDMA activity:  %s %s     Voice errors: %s\n", state->slot0light, state->slot1light, state->err_str);
+              fprintf(stderr, "+----------------------------------------------------------------+\n");
               for (i = 0; i < 10; i++)
                 {
-                  printf ("|");
+                  fprintf(stderr, "|");
                   for (j = 0; j < 64; j++)
                     {
                       if (i == 0)
                         {
                           if ((j == ((state->min) + 32768) / 1024) || (j == ((state->max) + 32768) / 1024))
                             {
-                              printf ("#");
+                              fprintf(stderr, "#");
                             }
                           else if ((j == ((state->lmid) + 32768) / 1024) || (j == ((state->umid) + 32768) / 1024))
                             {
-                              printf ("^");
+                              fprintf(stderr, "^");
                             }
                           else if (j == (state->center + 32768) / 1024)
                             {
-                              printf ("!");
+                              fprintf(stderr, "!");
                             }
                           else
                             {
                               if (j == 32)
                                 {
-                                  printf ("|");
+                                  fprintf(stderr, "|");
                                 }
                               else
                                 {
-                                  printf (" ");
+                                  fprintf(stderr, " ");
                                 }
                             }
                         }
@@ -152,24 +152,24 @@ getDibit (dsd_opts * opts, dsd_state * state)
                         {
                           if (spectrum[j] > 9 - i)
                             {
-                              printf ("*");
+                              fprintf(stderr, "*");
                             }
                           else
                             {
                               if (j == 32)
                                 {
-                                  printf ("|");
+                                  fprintf(stderr, "|");
                                 }
                               else
                                 {
-                                  printf (" ");
+                                  fprintf(stderr, " ");
                                 }
                             }
                         }
                     }
-                  printf ("|\n");
+                  fprintf(stderr, "|\n");
                 }
-              printf ("+----------------------------------------------------------------+\n");
+              fprintf(stderr, "+----------------------------------------------------------------+\n");
             }
         }
     }

@@ -264,14 +264,14 @@ processHDU (dsd_opts * opts, dsd_state * state)
     {
       algidhex = strtol (algid, NULL, 2);
       kidhex = strtol (kid, NULL, 2);
-      printf ("mi: %s algid: $%x kid: $%x\n", mi, algidhex, kidhex);
+      fprintf(stderr, "mi: %s algid: $%x kid: $%x\n", mi, algidhex, kidhex);
     }
   if (opts->p25lc == 1)
     {
-      printf ("mfid: %s tgid: %s ", mfid, tgid);
+      fprintf(stderr, "mfid: %s tgid: %s ", mfid, tgid);
       if (opts->p25tg == 0)
         {
-          printf ("\n");
+          fprintf(stderr, "\n");
         }
     }
 
@@ -313,6 +313,6 @@ processHDU (dsd_opts * opts, dsd_state * state)
     }
   if (opts->p25tg == 1)
     {
-      printf ("tg: %li\n", talkgroup);
+      fprintf(stderr, "tg: %li\n", talkgroup);
     }
 }

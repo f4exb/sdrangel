@@ -114,7 +114,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
           k++;
         }
       cachbits[24] = 0;
-      printf ("%s ", cachbits);
+      fprintf(stderr, "%s ", cachbits);
 #endif
 
       // current slot frame 1
@@ -226,7 +226,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
 
       if ((j == 0) && (opts->errorbars == 1))
         {
-          printf ("%s %s  VOICE e:", state->slot0light, state->slot1light);
+          fprintf(stderr, "%s %s  VOICE e:", state->slot0light, state->slot1light);
         }
 
 #ifdef DMR_DUMP
@@ -240,7 +240,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
           k++;
         }
       syncbits[48] = 0;
-      printf ("%s ", syncbits);
+      fprintf(stderr, "%s ", syncbits);
 #endif
 
       // current slot frame 2 second half
@@ -307,7 +307,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
           k++;
         }
       cachbits[24] = 0;
-      printf ("%s ", cachbits);
+      fprintf(stderr, "%s ", cachbits);
 #endif
 
 
@@ -358,7 +358,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
           k++;
         }
       syncbits[48] = 0;
-      printf ("%s ", syncbits);
+      fprintf(stderr, "%s ", syncbits);
 #endif
 
       if (j == 5)
@@ -376,7 +376,7 @@ processDMRvoice (dsd_opts * opts, dsd_state * state)
 
   if (opts->errorbars == 1)
     {
-      printf ("\n");
+      fprintf(stderr, "\n");
     }
 
 }

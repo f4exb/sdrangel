@@ -161,8 +161,8 @@ writeSynthesizedVoice (dsd_opts * opts, dsd_state * state)
   short *aout_buf_p;
 
 //  for(n=0; n<160; n++)
-//    printf("%d ", ((short*)(state->audio_out_temp_buf))[n]);
-//  printf("\n");
+//    fprintf(stderr, "%d ", ((short*)(state->audio_out_temp_buf))[n]);
+//  fprintf(stderr, "\n");
 
   aout_buf_p = aout_buf;
   state->audio_out_temp_buf_p = state->audio_out_temp_buf;
@@ -251,12 +251,12 @@ openAudioOutDevice (dsd_opts * opts, int speed)
   // get info of device/file
   struct stat stat_buf;
   if(stat(opts->audio_out_dev, &stat_buf) != 0) {
-    printf("Error, couldn't open %s\n", opts->audio_out_dev);
+    fprintf(stderr, "Error, couldn't open %s\n", opts->audio_out_dev);
     exit(1);
   }
 
   if( !(S_ISCHR(stat_buf.st_mode) || S_ISBLK(stat_buf.st_mode))) { // this is not a device
-    printf("Error, %s is not a device. use -w filename for wav output.\n", opts->audio_out_dev);
+    fprintf(stderr, "Error, %s is not a device. use -w filename for wav output.\n", opts->audio_out_dev);
     exit(1);
   }
 #ifdef SOLARIS
@@ -265,7 +265,7 @@ openAudioOutDevice (dsd_opts * opts, int speed)
   opts->audio_out_fd = open (opts->audio_out_dev, O_WRONLY);
   if (opts->audio_out_fd == -1)
     {
-      printf ("Error, couldn't open %s\n", opts->audio_out_dev);
+      fprintf(stderr, "Error, couldn't open %s\n", opts->audio_out_dev);
       exit (1);
     }
 
@@ -283,7 +283,7 @@ openAudioOutDevice (dsd_opts * opts, int speed)
 
   if (ioctl (opts->audio_out_fd, AUDIO_SETINFO, &aset) == -1)
     {
-      printf ("Error setting sample device parameters\n");
+      fprintf(stderr, "Error setting sample device parameters\n");
       exit (1);
     }
 #endif
@@ -295,7 +295,7 @@ openAudioOutDevice (dsd_opts * opts, int speed)
   opts->audio_out_fd = open (opts->audio_out_dev, O_WRONLY);
   if (opts->audio_out_fd == -1)
     {
-      printf ("Error, couldn't open %s\n", opts->audio_out_dev);
+      fprintf(stderr, "Error, couldn't open %s\n", opts->audio_out_dev);
       opts->audio_out = 0;
       exit(1);
     }
@@ -303,26 +303,26 @@ openAudioOutDevice (dsd_opts * opts, int speed)
   fmt = 0;
   if (ioctl (opts->audio_out_fd, SNDCTL_DSP_RESET) < 0)
     {
-      printf ("ioctl reset error \n");
+      fprintf(stderr, "ioctl reset error \n");
     }
   fmt = speed;
   if (ioctl (opts->audio_out_fd, SNDCTL_DSP_SPEED, &fmt) < 0)
     {
-      printf ("ioctl speed error \n");
+      fprintf(stderr, "ioctl speed error \n");
     }
   fmt = 0;
   if (ioctl (opts->audio_out_fd, SNDCTL_DSP_STEREO, &fmt) < 0)
     {
-      printf ("ioctl stereo error \n");
+      fprintf(stderr, "ioctl stereo error \n");
     }
   fmt = AFMT_S16_LE;
   if (ioctl (opts->audio_out_fd, SNDCTL_DSP_SETFMT, &fmt) < 0)
     {
-      printf ("ioctl setfmt error \n");
+      fprintf(stderr, "ioctl setfmt error \n");
     }
 
 #endif
-  printf ("Audio Out Device: %s\n", opts->audio_out_dev);
+  fprintf(stderr, "Audio Out Device: %s\n", opts->audio_out_dev);
 }
 
 void
@@ -332,7 +332,7 @@ openAudioInDevice (dsd_opts * opts)
   // get info of device/file
   struct stat stat_buf;
   if (stat(opts->audio_in_dev, &stat_buf) != 0) {
-    printf("Error, couldn't open %s\n", opts->audio_in_dev);
+    fprintf(stderr, "Error, couldn't open %s\n", opts->audio_in_dev);
     exit(1);
   }
   if(S_ISREG(stat_buf.st_mode)) { // is this a regular file? then process with libsndfile.
@@ -341,7 +341,7 @@ openAudioInDevice (dsd_opts * opts)
     opts->audio_in_file_info->channels = 1;
     opts->audio_in_file = sf_open(opts->audio_in_dev, SFM_READ, opts->audio_in_file_info);
     if(opts->audio_in_file == NULL) {
-        printf ("Error, couldn't open file %s\n", opts->audio_in_dev);
+        fprintf(stderr, "Error, couldn't open file %s\n", opts->audio_in_dev);
         exit(1);
     }
   }
@@ -363,7 +363,7 @@ openAudioInDevice (dsd_opts * opts)
       }
     if (opts->audio_in_fd == -1)
       {
-        printf ("Error, couldn't open %s\n", opts->audio_in_dev);
+        fprintf(stderr, "Error, couldn't open %s\n", opts->audio_in_dev);
         exit(1);
       }
 
@@ -383,7 +383,7 @@ openAudioInDevice (dsd_opts * opts)
 
     if (ioctl (opts->audio_in_fd, AUDIO_SETINFO, &aset) == -1)
       {
-        printf ("Error setting sample device parameters\n");
+        fprintf(stderr, "Error setting sample device parameters\n");
         exit (1);
       }
 #endif
@@ -402,39 +402,39 @@ openAudioInDevice (dsd_opts * opts)
 
     if (opts->audio_in_fd == -1)
       {
-        printf ("Error, couldn't open %s\n", opts->audio_in_dev);
+        fprintf(stderr, "Error, couldn't open %s\n", opts->audio_in_dev);
         opts->audio_out = 0;
       }
 
     fmt = 0;
     if (ioctl (opts->audio_in_fd, SNDCTL_DSP_RESET) < 0)
       {
-        printf ("ioctl reset error \n");
+        fprintf(stderr, "ioctl reset error \n");
       }
     fmt = 48000;
     if (ioctl (opts->audio_in_fd, SNDCTL_DSP_SPEED, &fmt) < 0)
       {
-        printf ("ioctl speed error \n");
+        fprintf(stderr, "ioctl speed error \n");
       }
     fmt = 0;
     if (ioctl (opts->audio_in_fd, SNDCTL_DSP_STEREO, &fmt) < 0)
       {
-        printf ("ioctl stereo error \n");
+        fprintf(stderr, "ioctl stereo error \n");
       }
     fmt = AFMT_S16_LE;
     if (ioctl (opts->audio_in_fd, SNDCTL_DSP_SETFMT, &fmt) < 0)
       {
-        printf ("ioctl setfmt error \n");
+        fprintf(stderr, "ioctl setfmt error \n");
       }
 #endif
   }
   if (opts->split == 1)
     {
-      printf ("Audio In Device: %s\n", opts->audio_in_dev);
+      fprintf(stderr, "Audio In Device: %s\n", opts->audio_in_dev);
     }
   else
     {
-      printf ("Audio In/Out Device: %s\n", opts->audio_in_dev);
+      fprintf(stderr, "Audio In/Out Device: %s\n", opts->audio_in_dev);
     }
 #endif
 }

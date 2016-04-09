@@ -29,7 +29,7 @@ void cleanupAndExit(dsd_opts * opts, dsd_state * state)
         closeWavOutFile (opts, state);
     }
 #endif
-    printf("dsd::cleanupAndExit: Exiting.\n");
+    fprintf(stderr, "dsd::cleanupAndExit: Exiting.\n");
     int rc = 0;
     pthread_exit(&rc);
 }

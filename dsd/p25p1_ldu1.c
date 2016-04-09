@@ -42,7 +42,7 @@ processLDU1 (dsd_opts * opts, dsd_state * state)
 
   if (opts->errorbars == 1)
     {
-      printf ("e:");
+      fprintf(stderr, "e:");
     }
 
   // separate imbe frames and deinterleave
@@ -286,12 +286,12 @@ processLDU1 (dsd_opts * opts, dsd_state * state)
 
   if (opts->errorbars == 1)
     {
-      printf ("\n");
+      fprintf(stderr, "\n");
     }
 
   if (opts->p25status == 1)
     {
-      printf ("status: %s lsd1: %s lsd2: %s\n", status, lsd1, lsd2);
+      fprintf(stderr, "status: %s lsd1: %s lsd2: %s\n", status, lsd1, lsd2);
     }
 
   processP25lcw (opts, state, lcformat, mfid, lcinfo);

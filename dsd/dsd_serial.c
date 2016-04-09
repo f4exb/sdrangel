@@ -12,7 +12,7 @@ openSerial (dsd_opts * opts, dsd_state * state)
   opts->serial_fd = open (opts->serial_dev, O_WRONLY);
   if (opts->serial_fd == -1)
     {
-      printf ("Error, couldn't open %s\n", opts->serial_dev);
+      fprintf(stderr, "Error, couldn't open %s\n", opts->serial_dev);
       exit (1);
     }
 
