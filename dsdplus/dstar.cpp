@@ -308,7 +308,6 @@ void DSDDstar::processData()
             //printf("never scrambled-%s\n",slowdata);
         }
 
-
         if (terminate)
         {
             m_dsdDecoder->m_fsmState = DSDDecoder::DSDLookForSync; // end
