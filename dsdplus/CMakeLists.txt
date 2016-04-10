@@ -1,6 +1,7 @@
 project(dsdplus)
 
 set(dsdplus_SOURCES
+    descramble.cpp
     dmr_voice.cpp
     dsd_decoder.cpp
     dsd_filters.cpp
@@ -11,6 +12,7 @@ set(dsdplus_SOURCES
 )
 
 set(dsdplus_HEADERS
+    descramble.h
     dmr_voice.h
     dsd_decoder.h
     dsd_filters.h

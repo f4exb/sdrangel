@@ -34,11 +34,14 @@ public:
 
 private:
     void initVoiceFrame();
+    void initDataFrame();
     void processVoice();
     void processData();
+    void dstar_header_decode();
 
     DSDDecoder *m_dsdDecoder;
-    int m_symbolIndex;    //!< Current symbol index
+    int m_symbolIndex;    //!< Current symbol index in non HD sequence
+    int m_symbolIndexHD;  //!< Current symbol index in HD sequence
     int m_dibitCache[97]; // has to handle a voice + data frame (97 dibits)
     int m_dibitIndex;     // index in dibit cache
 
