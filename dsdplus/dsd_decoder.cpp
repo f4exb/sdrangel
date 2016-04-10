@@ -26,7 +26,8 @@ DSDDecoder::DSDDecoder() :
         m_hasSync(0),
         m_mbeDecoder(this),
         m_dsdDMRVoice(this),
-        m_dsdDMRData(this)
+        m_dsdDMRData(this),
+        m_dsdDstar(this)
 {
     resetSymbol();
     resetFrameSync();
@@ -70,6 +71,15 @@ void DSDDecoder::run(short sample)
             break;
         case DSDprocessDMRvoice:
             m_dsdDMRVoice.process();
+            break;
+        case DSDprocessDMRdata:
+            m_dsdDMRData.process();
+            break;
+        case DSDprocessDSTAR:
+            m_dsdDstar.process();
+            break;
+        case DSDprocessDSTAR_HD:
+            m_dsdDstar.processHD();
             break;
         default:
             break;
@@ -1646,6 +1656,7 @@ void DSDDecoder::processFrame()
 
         m_state.nac = 0;
         sprintf(m_state.fsubtype, " VOICE        ");
+        m_dsdDstar.init();
         m_fsmState = DSDprocessDSTAR;
     }
     else if ((m_state.synctype == 18) || (m_state.synctype == 19))
@@ -1665,6 +1676,7 @@ void DSDDecoder::processFrame()
 
         m_state.nac = 0;
         sprintf(m_state.fsubtype, " DATA         ");
+        m_dsdDstar.init();
         m_fsmState = DSDprocessDSTAR_HD;
     }
     else

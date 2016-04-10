@@ -7,6 +7,7 @@ set(dsdplus_SOURCES
     dsd_mbe.cpp
     dsd_opts.cpp
     dsd_state.cpp
+    dstar.cpp
 )
 
 set(dsdplus_HEADERS
@@ -16,6 +17,7 @@ set(dsdplus_HEADERS
     dsd_mbe.h
     dsd_opts.h
     dsd_state.h
+    dstar.h
 )
 
 include_directories(
