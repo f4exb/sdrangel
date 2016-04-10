@@ -18,7 +18,7 @@
 #ifndef PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_
 #define PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_
 
-#include "dsd.h"
+#include "dsd_decoder.h"
 
 class AudioFifo;
 
@@ -31,21 +31,9 @@ public:
     void pushSamples(const short *samples, int nbSamples); // Push this amount of samples to the DSD decoder thread
     void popAudioSamples(AudioFifo *audioFifo, bool audioMute);
 
-    void start();
-    void stop();
-
 private:
-    typedef struct
-    {
-      dsd_opts opts;
-      dsd_state state;
-    } dsd_params;
-
-    static void* run_dsd(void *arg);
-
-    dsd_params m_dsdParams;
+    DSDplus::DSDDecoder m_decoder;
     short *m_zeroBuffer;
-    int m_lastNbSamples;
 };
 
 #endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

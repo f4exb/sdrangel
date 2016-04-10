@@ -91,6 +91,8 @@ public:
     ~DSDDecoder();
 
     void run(short sample);
+    DSDOpts *getOpts() { return &m_opts; }
+    DSDState *getState() { return &m_state; }
 
 private:
     bool pushSample(short sample, int have_sync); //!< push a new sample into the decoder. Returns true if a new symbol is available

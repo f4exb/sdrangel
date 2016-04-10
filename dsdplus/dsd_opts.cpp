@@ -55,6 +55,7 @@ DSDOpts::DSDOpts()
     delay = 0;
     use_cosine_filter = 1;
     unmute_encrypted_p25 = 0;
+    upsample = 0;
 }
 
 DSDOpts::~DSDOpts()

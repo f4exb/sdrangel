@@ -200,12 +200,10 @@ void DSDDemod::start()
 {
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
-	m_dsdDecoder.start();
 }
 
 void DSDDemod::stop()
 {
-    m_dsdDecoder.stop();
 }
 
 bool DSDDemod::handleMessage(const Message& cmd)

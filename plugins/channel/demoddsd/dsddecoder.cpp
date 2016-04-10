@@ -17,167 +17,52 @@
 
 #include <QtGlobal>
 #include "dsddecoder.h"
-#include "dsd_livescanner.h"
 #include "audio/audiofifo.h"
 
 
 DSDDecoder::DSDDecoder()
 {
-    initOpts(&m_dsdParams.opts);
-    initState(&m_dsdParams.state);
+    DSDplus::DSDOpts  *dsdopts = m_decoder.getOpts();
+    DSDplus::DSDState *dsdstate = m_decoder.getState();
 
-    m_dsdParams.opts.split = 1;
-    m_dsdParams.opts.upsample = 1; // force upsampling of audio to 48k
-    m_dsdParams.opts.playoffset = 0;
-    m_dsdParams.opts.delay = 0;
-    m_dsdParams.opts.audio_in_type = 0;
-    m_dsdParams.opts.audio_out_type = 0;
+    dsdopts->split = 1;
+    dsdopts->upsample = 1; // force upsampling of audio to 48k
+    dsdopts->playoffset = 0;
+    dsdopts->delay = 0;
 
     // Initialize with auto-detect:
-    m_dsdParams.opts.frame_dstar = 1;
-    m_dsdParams.opts.frame_x2tdma = 1;
-    m_dsdParams.opts.frame_p25p1 = 1;
-    m_dsdParams.opts.frame_nxdn48 = 0;
-    m_dsdParams.opts.frame_nxdn96 = 1;
-    m_dsdParams.opts.frame_dmr = 1;
-    m_dsdParams.opts.frame_provoice = 0;
+    dsdopts->frame_dstar = 1;
+    dsdopts->frame_x2tdma = 1;
+    dsdopts->frame_p25p1 = 1;
+    dsdopts->frame_nxdn48 = 0;
+    dsdopts->frame_nxdn96 = 1;
+    dsdopts->frame_dmr = 1;
+    dsdopts->frame_provoice = 0;
 
-    m_dsdParams.opts.uvquality = 3; // This is gr-dsd default
-    m_dsdParams.opts.verbose = 2;   // This is gr-dsd default
-    m_dsdParams.opts.errorbars = 1; // This is gr-dsd default
+    dsdopts->uvquality = 3; // This is gr-dsd default
+    dsdopts->verbose = 2;   // This is gr-dsd default
+    dsdopts->errorbars = 1; // This is gr-dsd default
 
     // Initialize with auto detection of modulation optimization:
-    m_dsdParams.opts.mod_c4fm = 1;
-    m_dsdParams.opts.mod_qpsk = 1;
-    m_dsdParams.opts.mod_gfsk = 1;
-    m_dsdParams.state.rf_mod = 0;
+    dsdopts->mod_c4fm = 1;
+    dsdopts->mod_qpsk = 1;
+    dsdopts->mod_gfsk = 1;
+    dsdstate->rf_mod = 0;
 
-    m_dsdParams.state.input_samples = (short *) malloc(1<<18);
-    m_dsdParams.state.input_length = 0;
-    m_dsdParams.state.input_offset = 0;
-    m_dsdParams.state.input_buffer_size = 1<<17;
+    dsdstate->output_offset = 0;
 
-    m_dsdParams.state.output_buffer = (short *) malloc(1<<18); // Raw output buffer with single S16LE samples @ 8k (max: 128 kS)
-    m_dsdParams.state.output_offset = 0;
-    m_dsdParams.state.output_finished = 0;
-
-    if (m_dsdParams.state.output_buffer == NULL)
-    {
-        qCritical("DSDDecoder::DSDDecoder: Unable to allocate output raw buffer.");
-    }
-
-    m_dsdParams.state.output_samples = (short *) malloc(1<<19); // Audio output buffer with L+R S16LE samples (max: 128 kS)
-    m_dsdParams.state.output_buffers_size = 1<<17; // the buffers size in number of samples: 128 kS
-
-    if (m_dsdParams.state.output_samples == NULL)
-    {
-        qCritical("DSDDecoder::DSDDecoder: Unable to allocate audio L+R buffer.");
-    }
-
-    m_dsdParams.state.output_offset = 0;
     m_zeroBuffer = new short[1<<18]; // 128 kS
     memset(m_zeroBuffer, 0, sizeof(short) * (1<<18));
-    m_lastNbSamples = 0;
 }
 
 DSDDecoder::~DSDDecoder()
 {
-    free(m_dsdParams.state.output_samples);
-    free(m_dsdParams.state.output_buffer);
-    free(m_dsdParams.state.input_samples);
 }
 
 void DSDDecoder::pushSamples(const short *samples,int nbSamples)
 {
-    if (nbSamples == 0)
-    {
-        m_lastNbSamples = 0;
-        m_dsdParams.state.output_offset = 0; // reset output
-    }
-    else
-    {
-        memcpy((void *) m_dsdParams.state.input_samples, (const void *) samples, nbSamples * sizeof(short));
-        m_dsdParams.state.input_offset = 0;
-        m_dsdParams.state.input_length = nbSamples;
-        m_dsdParams.state.output_finished = 0;
-        m_dsdParams.state.output_length = m_lastNbSamples;
-        m_lastNbSamples = nbSamples;
-
-        if (pthread_cond_signal(&m_dsdParams.state.input_ready)) {
-          printf("DSDDecoder::pushSamples: Unable to signal input ready");
-        }
-    }
 }
 
 void DSDDecoder::popAudioSamples(AudioFifo *audioFifo, bool audioMute)
 {
-    if (audioMute)
-    {
-        uint res = audioFifo->write((const quint8*) m_zeroBuffer, m_dsdParams.state.output_num_samples, 10);
-
-        if (res != m_dsdParams.state.output_num_samples) {
-            qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_dsdParams.state.output_num_samples);
-        }
-    }
-    else if (m_dsdParams.state.output_finished)
-    {
-        uint res = audioFifo->write((const quint8*) m_dsdParams.state.output_samples, m_dsdParams.state.output_num_samples, 10);
-
-        if (res != m_dsdParams.state.output_num_samples) {
-            qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_dsdParams.state.output_num_samples);
-        }
-    }
-
-    m_dsdParams.state.output_finished = 0; // will be done by the next push anyway
 }
-
-void DSDDecoder::start()
-{
-    qDebug("DSDDecoder::start: starting");
-    m_dsdParams.state.dsd_running = 1;
-
-    if (pthread_create(&m_dsdParams.state.dsd_thread, NULL, &run_dsd, &m_dsdParams))
-    {
-        qCritical("DSDDecoder::start: Unable to spawn thread");
-        m_dsdParams.state.dsd_running = 0;
-    }
-
-    m_lastNbSamples = 0;
-
-    qDebug("DSDDecoder::start: started");
-}
-
-void DSDDecoder::stop()
-{
-    if (m_dsdParams.state.dsd_running)
-    {
-        qDebug("DSDDecoder::stop: stopping");
-        m_dsdParams.state.dsd_running = 0;
-        char *b;
-
-        if (pthread_cond_signal(&m_dsdParams.state.input_ready)) {
-          printf("DSDDecoder::pushSamples: Unable to signal input ready");
-        }
-
-//        if (pthread_join(m_dsdParams.state.dsd_thread, (void**) &b)) {
-//            qCritical("DSDDecoder::stop: cannot join dsd thread");
-//        }
-
-        qDebug("DSDDecoder::stop: stopped");
-    }
-    else
-    {
-        qDebug("DSDDecoder::stop: not running");
-    }
-}
-
-void* DSDDecoder::run_dsd(void *arg)
-{
-  dsd_params *params = (dsd_params *) arg;
-  liveScanner (&params->opts, &params->state);
-  return NULL;
-}
-
-
-
-

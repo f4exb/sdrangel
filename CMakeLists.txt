@@ -374,7 +374,6 @@ qt5_use_modules(sdrangel Widgets Multimedia)
 add_subdirectory(plugins)
 
 if(LIBMBE_FOUND)
-    add_subdirectory(dsd)
     add_subdirectory(dsdplus)
 endif(LIBMBE_FOUND)
 

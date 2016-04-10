@@ -60,6 +60,7 @@ public:
     int delay;
     int use_cosine_filter;
     int unmute_encrypted_p25;
+    int upsample;
 };
 
 } // namespace dsdplus
