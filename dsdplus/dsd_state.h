@@ -104,6 +104,7 @@ public:
     int output_num_samples;
     int output_length;
     int output_finished;
+    FILE *logfile;
 };
 
 } // namespace dsdplus

@@ -109,6 +109,11 @@ private:
             m_slotIndex = 9;
             return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12+54;
         }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36+12+54+24+54+12+54)
+        {
+            m_slotIndex = 10; // dummy slot for last skipped symbols
+            return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12+54+24;
+        }
         else // cannot go there if using this function in its valid context (input is a remainder of division by 288)
         {
             m_slotIndex = -1; // invalid slot
@@ -116,7 +121,8 @@ private:
         }
     }
 
-    void preProcess(); //!< process the 144 in memory dibits in initial phase
+    void preProcess();  //!< process the 144 in memory dibits in initial phase
+    void postProcess(int symbolIndex); //!< skip 54 + 12 + 54 symbols at the end of the last slot (block 5 slot 9)
     void processSlot0(int symbolIndex);
     void processSlot1(int symbolIndex);
     void processSlot2(int symbolIndex);
@@ -150,7 +156,6 @@ private:
     static const int rX[36];
     static const int rY[36];
     static const int rZ[36];
-
 };
 
 }

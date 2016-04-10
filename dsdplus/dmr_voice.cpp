@@ -123,6 +123,9 @@ void DSDDMRVoice::process()
     case 9:
         processSlot9(symbolIndex);
         break;
+    case 10:
+        postProcess(symbolIndex);
+        break;
     default:
         break;
     }
@@ -165,6 +168,16 @@ void DSDDMRVoice::preProcess()
     processSlot9(24-1);
 
     m_symbolIndex = 144; // advance the main symbol index
+}
+
+void DSDDMRVoice::postProcess(int symbolIndex)
+{
+    m_dsdDecoder->getDibit(); // get dibit from symbol but do nothing with it
+
+    if (symbolIndex == 54+12+54-1) // very last symbol -> go back to search sync state
+    {
+        m_dsdDecoder->m_fsmState = DSDDecoder::DSDLookForSync;
+    }
 }
 
 void DSDDMRVoice::processSlot0(int symbolIndex) // Slot0 is a 54 symbol slot
@@ -216,7 +229,6 @@ void DSDDMRVoice::processSlot1(int symbolIndex) // Slot1 is a 12 symbol slot
         }
 
         cachdata[12] = 0;
-        m_dibitIndex = 0; // done with the cache -> reset index
     }
 }
 
@@ -294,7 +306,7 @@ void DSDDMRVoice::processSlot4(int symbolIndex) // Slot4 is a 24 symbol slot
     {
         int *dibitCache = &m_dibitCache[m_dibitIndex - symbolIndex]; // move back to start of corresponding cache section
 
-        for (int i = 0; i < 18; i++)
+        for (int i = 0; i < 24; i++)
         {
             int dibit = dibitCache[i];
 
@@ -339,7 +351,7 @@ void DSDDMRVoice::processSlot4(int symbolIndex) // Slot4 is a 24 symbol slot
 
         if ((m_majorBlock == 0) && (m_dsdDecoder->m_opts.errorbars == 1))
         {
-            fprintf(stderr, "%s %s  VOICE e:", m_dsdDecoder->m_state.slot0light, m_dsdDecoder->m_state.slot1light);
+            fprintf(m_dsdDecoder->m_state.logfile, "%s %s  VOICE e:", m_dsdDecoder->m_state.slot0light, m_dsdDecoder->m_state.slot1light);
         }
     }
 }
@@ -380,5 +392,80 @@ void DSDDMRVoice::processSlot5(int symbolIndex) // Slot5 is a 18 symbol slot
     }
 }
 
+void DSDDMRVoice::processSlot6(int symbolIndex) // Slot6 is a 36 symbol slot
+{
+    int dibit = m_dsdDecoder->getDibit(); // get dibit from symbol and store it in cache
+    m_dibitCache[m_dibitIndex] = dibit;
+
+    if (symbolIndex == 36-1) // last symbol -> launch process
+    {
+        int *dibitCache = &m_dibitCache[m_dibitIndex - symbolIndex]; // move back to start of corresponding cache section
+
+        // current slot frame 3
+        w = rW;
+        x = rX;
+        y = rY;
+        z = rZ;
+
+        for (int i = 0; i < 36; i++)
+        {
+            int dibit = dibitCache[i];
+
+            ambe_fr3[*w][*x] = (1 & (dibit >> 1)); // bit 1
+            ambe_fr3[*y][*z] = (1 & dibit);        // bit 0
+            w++;
+            x++;
+            y++;
+            z++;
+        }
+
+        if (mutecurrentslot == 0)
+        {
+            m_dsdDecoder->m_mbeDecoder.processFrame(0, ambe_fr3, 0);
+        }
+    }
+}
+
+void DSDDMRVoice::processSlot7(int symbolIndex) // Slot7 is a 12 symbol slot
+{
+    int dibit = m_dsdDecoder->getDibit(); // get dibit from symbol and store it in cache
+    m_dibitCache[m_dibitIndex] = dibit;
+
+    if (symbolIndex == 12-1) // last symbol -> launch process
+    {
+        int *dibitCache = &m_dibitCache[m_dibitIndex - symbolIndex]; // move back to start of corresponding cache section
+        // CACH
+        for (int i = 0; i < 12; i++)
+        {
+            int dibit = dibitCache[i];
+            cachdata[i] = dibit;
+        }
+
+        cachdata[12] = 0;
+    }
+}
+
+void DSDDMRVoice::processSlot9(int symbolIndex) // Slot9 is a 24 symbol slot
+{
+    int dibit = m_dsdDecoder->getDibit(); // get dibit from symbol and store it in cache
+    m_dibitCache[m_dibitIndex] = dibit;
+
+    if (symbolIndex == 24-1) // last symbol -> launch process
+    {
+        int *dibitCache = &m_dibitCache[m_dibitIndex - symbolIndex]; // move back to start of corresponding cache section
+
+        for (int i = 0; i < 24; i++)
+        {
+            int dibit = dibitCache[i];
+
+            syncdata[i] = dibit;
+            sync[i] = (dibit | 1) + 48;
+        }
+
+        sync[24] = 0;
+        syncdata[24] = 0;
+
+    }
+}
 
 } // namespace dsdplus

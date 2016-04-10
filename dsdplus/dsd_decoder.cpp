@@ -30,10 +30,12 @@ DSDDecoder::DSDDecoder() :
     resetSymbol();
     resetFrameSync();
     noCarrier();
+    m_state.logfile = fdopen(fileno(stderr), (const char *) 'w');
 }
 
 DSDDecoder::~DSDDecoder()
 {
+    fclose(m_state.logfile);
 }
 
 void DSDDecoder::run(short sample)
@@ -183,7 +185,7 @@ bool DSDDecoder::pushSample(short sample, int have_sync)
             if ((m_opts.symboltiming == 1) && (have_sync == 0)
              && (m_state.lastsynctype != -1))
             {
-                fprintf(stderr, "O");
+                fprintf(m_state.logfile, "O");
             }
         }
         else
@@ -191,7 +193,7 @@ bool DSDDecoder::pushSample(short sample, int have_sync)
             if ((m_opts.symboltiming == 1) && (have_sync == 0)
              && (m_state.lastsynctype != -1))
             {
-                fprintf(stderr, "+");
+                fprintf(m_state.logfile, "+");
             }
             if ((m_state.jitter < 0)
              && (m_state.lastsample < m_state.center)
@@ -220,7 +222,7 @@ bool DSDDecoder::pushSample(short sample, int have_sync)
             if ((m_opts.symboltiming == 1) && (have_sync == 0)
              && (m_state.lastsynctype != -1))
             {
-                fprintf(stderr, "X");
+                fprintf(m_state.logfile, "X");
             }
         }
         else
@@ -228,7 +230,7 @@ bool DSDDecoder::pushSample(short sample, int have_sync)
             if ((m_opts.symboltiming == 1) && (have_sync == 0)
              && (m_state.lastsynctype != -1))
             {
-                fprintf(stderr, "-");
+                fprintf(m_state.logfile, "-");
             }
             if ((m_state.jitter < 0)
              && (m_state.lastsample > m_state.center)
@@ -278,11 +280,11 @@ bool DSDDecoder::pushSample(short sample, int have_sync)
         {
             if (m_state.jitter >= 0)
             {
-                fprintf(stderr, " %i\n", m_state.jitter);
+                fprintf(m_state.logfile, " %i\n", m_state.jitter);
             }
             else
             {
-                fprintf(stderr, "\n");
+                fprintf(m_state.logfile, "\n");
             }
         }
 
@@ -394,25 +396,25 @@ int DSDDecoder::getDibit()
             if (m_state.symbolcnt > (4800 / m_opts.scoperate))
             {
                 m_state.symbolcnt = 0;
-                fprintf(stderr, "\n");
-                fprintf(stderr,
+                fprintf(m_state.logfile, "\n");
+                fprintf(m_state.logfile,
                         "Demod mode:     %s                Nac:                     %4X\n",
                         modulation, m_state.nac);
-                fprintf(stderr,
+                fprintf(m_state.logfile,
                         "Frame Type:    %s        Talkgroup:            %7i\n",
                         m_state.ftype, m_state.lasttg);
-                fprintf(stderr,
+                fprintf(m_state.logfile,
                         "Frame Subtype: %s       Source:          %12i\n",
                         m_state.fsubtype, m_state.lastsrc);
-                fprintf(stderr,
+                fprintf(m_state.logfile,
                         "TDMA activity:  %s %s     Voice errors: %s\n",
                         m_state.slot0light, m_state.slot1light, m_state.err_str);
-                fprintf(stderr,
+                fprintf(m_state.logfile,
                         "+----------------------------------------------------------------+\n");
 
                 for (i = 0; i < 10; i++)
                 {
-                    fprintf(stderr, "|");
+                    fprintf(m_state.logfile, "|");
 
                     for (j = 0; j < 64; j++)
                     {
@@ -421,26 +423,26 @@ int DSDDecoder::getDibit()
                             if ((j == ((m_state.min) + 32768) / 1024)
                                     || (j == ((m_state.max) + 32768) / 1024))
                             {
-                                fprintf(stderr, "#");
+                                fprintf(m_state.logfile, "#");
                             }
                             else if ((j == ((m_state.lmid) + 32768) / 1024)
                                     || (j == ((m_state.umid) + 32768) / 1024))
                             {
-                                fprintf(stderr, "^");
+                                fprintf(m_state.logfile, "^");
                             }
                             else if (j == (m_state.center + 32768) / 1024)
                             {
-                                fprintf(stderr, "!");
+                                fprintf(m_state.logfile, "!");
                             }
                             else
                             {
                                 if (j == 32)
                                 {
-                                    fprintf(stderr, "|");
+                                    fprintf(m_state.logfile, "|");
                                 }
                                 else
                                 {
-                                    fprintf(stderr, " ");
+                                    fprintf(m_state.logfile, " ");
                                 }
                             }
                         }
@@ -448,24 +450,24 @@ int DSDDecoder::getDibit()
                         {
                             if (spectrum[j] > 9 - i)
                             {
-                                fprintf(stderr, "*");
+                                fprintf(m_state.logfile, "*");
                             }
                             else
                             {
                                 if (j == 32)
                                 {
-                                    fprintf(stderr, "|");
+                                    fprintf(m_state.logfile, "|");
                                 }
                                 else
                                 {
-                                    fprintf(stderr, " ");
+                                    fprintf(m_state.logfile, " ");
                                 }
                             }
                         }
                     }
-                    fprintf(stderr, "|\n");
+                    fprintf(m_state.logfile, "|\n");
                 }
-                fprintf(stderr,
+                fprintf(m_state.logfile,
                         "+----------------------------------------------------------------+\n");
             }
         }
@@ -607,7 +609,7 @@ void DSDDecoder::resetFrameSync()
 
     if ((m_opts.symboltiming == 1) && (m_state.carrier == 1))
     {
-        fprintf(stderr, "\nSymbol Timing:\n");
+        fprintf(m_state.logfile, "\nSymbol Timing:\n");
     }
 
     m_fsmState = DSDLookForSync;
@@ -617,19 +619,19 @@ void DSDDecoder::printFrameSync(const char *frametype, int offset, char *modulat
 {
     if (m_opts.verbose > 0)
     {
-        fprintf(stderr, "Sync: %s ", frametype);
+        fprintf(m_state.logfile, "Sync: %s ", frametype);
     }
     if (m_opts.verbose > 2)
     {
-        fprintf(stderr, "o: %4i ", offset);
+        fprintf(m_state.logfile, "o: %4i ", offset);
     }
     if (m_opts.verbose > 1)
     {
-        fprintf(stderr, "mod: %s ", modulation);
+        fprintf(m_state.logfile, "mod: %s ", modulation);
     }
     if (m_opts.verbose > 2)
     {
-        fprintf(stderr, "g: %f ", m_state.aout_gain);
+        fprintf(m_state.logfile, "g: %f ", m_state.aout_gain);
     }
 }
 
@@ -821,26 +823,26 @@ int DSDDecoder::getFrameSync()
                 {
                     m_state.symbolcnt = 0;
 
-                    fprintf(stderr, "\n");
-                    fprintf(stderr,
+                    fprintf(m_state.logfile, "\n");
+                    fprintf(m_state.logfile,
                             "Demod mode:     %s                Nac:                     %4X\n",
                             m_modulation, m_state.nac);
-                    fprintf(stderr,
+                    fprintf(m_state.logfile,
                             "Frame Type:    %s        Talkgroup:            %7i\n",
                             m_state.ftype, m_state.lasttg);
-                    fprintf(stderr,
+                    fprintf(m_state.logfile,
                             "Frame Subtype: %s       Source:          %12i\n",
                             m_state.fsubtype, m_state.lastsrc);
-                    fprintf(stderr,
+                    fprintf(m_state.logfile,
                             "TDMA activity:  %s %s     Voice errors: %s\n",
                             m_state.slot0light, m_state.slot1light,
                             m_state.err_str);
-                    fprintf(stderr,
+                    fprintf(m_state.logfile,
                             "+----------------------------------------------------------------+\n");
 
                     for (int i = 0; i < 10; i++)
                     {
-                        fprintf(stderr, "|");
+                        fprintf(m_state.logfile, "|");
 
                         for (int j = 0; j < 64; j++)
                         {
@@ -848,21 +850,21 @@ int DSDDecoder::getFrameSync()
                             {
                                 if ((j == ((m_state.min) + 32768) / 1024) || (j == ((m_state.max) + 32768) / 1024))
                                 {
-                                    fprintf(stderr, "#");
+                                    fprintf(m_state.logfile, "#");
                                 }
                                 else if (j == (m_state.center + 32768) / 1024)
                                 {
-                                    fprintf(stderr, "!");
+                                    fprintf(m_state.logfile, "!");
                                 }
                                 else
                                 {
                                     if (j == 32)
                                     {
-                                        fprintf(stderr, "|");
+                                        fprintf(m_state.logfile, "|");
                                     }
                                     else
                                     {
-                                        fprintf(stderr, " ");
+                                        fprintf(m_state.logfile, " ");
                                     }
                                 }
                             }
@@ -870,26 +872,26 @@ int DSDDecoder::getFrameSync()
                             {
                                 if (m_spectrum[j] > 9 - i)
                                 {
-                                    fprintf(stderr, "*");
+                                    fprintf(m_state.logfile, "*");
                                 }
                                 else
                                 {
                                     if (j == 32)
                                     {
-                                        fprintf(stderr, "|");
+                                        fprintf(m_state.logfile, "|");
                                     }
                                     else
                                     {
-                                        fprintf(stderr, " ");
+                                        fprintf(m_state.logfile, " ");
                                     }
                                 }
                             }
                         }
 
-                        fprintf(stderr, "|\n");
+                        fprintf(m_state.logfile, "|\n");
                     }
 
-                    fprintf(stderr,
+                    fprintf(m_state.logfile,
                             "+----------------------------------------------------------------+\n");
                 }
             }
@@ -1560,19 +1562,19 @@ void DSDDecoder::printFrameInfo()
 
     if (m_opts.verbose > 0)
     {
-        fprintf(stderr, "inlvl: %2i%% ", level);
+        fprintf(m_state.logfile, "inlvl: %2i%% ", level);
     }
     if (m_state.nac != 0)
     {
-        fprintf(stderr, "nac: %4X ", m_state.nac);
+        fprintf(m_state.logfile, "nac: %4X ", m_state.nac);
     }
 
     if (m_opts.verbose > 1)
     {
-        fprintf(stderr, "src: %8i ", m_state.lastsrc);
+        fprintf(m_state.logfile, "src: %8i ", m_state.lastsrc);
     }
 
-    fprintf(stderr, "tg: %5i ", m_state.lasttg);
+    fprintf(m_state.logfile, "tg: %5i ", m_state.lasttg);
 }
 
 int DSDDecoder::comp(const void *a, const void *b)
@@ -1609,7 +1611,7 @@ void DSDDecoder::processFrame()
             if (m_opts.verbose > 0)
             {
                 int level = (int) m_state.max / 164;
-                fprintf(stderr, "inlvl: %2i%% ", level);
+                fprintf(m_state.logfile, "inlvl: %2i%% ", level);
             }
         }
 
@@ -1655,7 +1657,7 @@ void DSDDecoder::processFrame()
             if (m_opts.verbose > 0)
             {
                 int level = (int) m_state.max / 164;
-                fprintf(stderr, "inlvl: %2i%% ", level);
+                fprintf(m_state.logfile, "inlvl: %2i%% ", level);
             }
         }
 

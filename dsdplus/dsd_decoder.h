@@ -63,6 +63,7 @@ namespace DSDplus
 
 class DSDDecoder
 {
+    friend class DSDMBEDecoder;
     friend class DSDDMRVoice;
 public:
     typedef enum
