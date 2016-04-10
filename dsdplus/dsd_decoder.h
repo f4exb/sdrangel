@@ -20,6 +20,7 @@
 #include "dsd_opts.h"
 #include "dsd_state.h"
 #include "dsd_filters.h"
+#include "dsd_mbe.h"
 #include "dmr_voice.h"
 
 /*
@@ -57,7 +58,7 @@
 #define INV_PROVOICE_EA_SYNC "13313133113113333311313133133311"
 #define PROVOICE_EA_SYNC     "31131311331331111133131311311133"
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 class DSDDecoder
@@ -88,6 +89,7 @@ public:
 
 private:
     bool pushSample(short sample, int have_sync); //!< push a new sample into the decoder. Returns true if a new symbol is available
+    int getDibit(); //!< get dibit from the last retrieved symbol. Returns the dibit as its dibit value: 0,1,2,3
     int getFrameSync();
     void resetSymbol();
     void resetFrameSync();
@@ -119,8 +121,11 @@ private:
     int m_lsum;
     char m_spectrum[64];
     int m_t;
+    int m_hasSync; //!< tells whether we are in synced phase
     // Other
     DSDFilters m_dsdFilters;
+    // MBE decoder
+    DSDMBEDecoder m_mbeDecoder;
     // Frame decoders
     DSDDMRVoice m_dsdDMRVoice;
 };

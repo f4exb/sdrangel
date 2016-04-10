@@ -22,7 +22,7 @@
 #include <string.h>
 #include <mbelib.h>
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 class DSDState

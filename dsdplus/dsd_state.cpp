@@ -16,7 +16,7 @@
 
 #include "dsd_state.h"
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 DSDState::DSDState()

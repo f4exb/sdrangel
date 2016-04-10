@@ -17,7 +17,7 @@
 #ifndef DSDPLUS_DSD_OPTS_H_
 #define DSDPLUS_DSD_OPTS_H_
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 class DSDOpts

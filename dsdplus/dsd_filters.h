@@ -21,7 +21,7 @@
 #define NXZEROS 134
 
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 class DSDFilters

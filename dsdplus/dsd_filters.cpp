@@ -16,7 +16,7 @@
 
 #include "dsd_filters.h"
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 // DMR filter

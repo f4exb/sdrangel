@@ -42,7 +42,7 @@
 #ifndef DSDPLUS_DMR_VOICE_H_
 #define DSDPLUS_DMR_VOICE_H_
 
-namespace DSDPlus
+namespace DSDplus
 {
 
 class DSDDecoder;
@@ -57,12 +57,82 @@ public:
     void process();
 
 private:
+    int getSlotIndex(int symbolInMajorBlockIndex) //!< calculates current slot index and returns symbol index in the slot
+    {
+        if (symbolInMajorBlockIndex < 54)
+        {
+            m_slotIndex = 0;
+            return symbolInMajorBlockIndex;
+        }
+        else if (symbolInMajorBlockIndex < 54+12)
+        {
+            m_slotIndex = 1;
+            return symbolInMajorBlockIndex - 54;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36)
+        {
+            m_slotIndex = 2;
+            return symbolInMajorBlockIndex - 54+12;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18)
+        {
+            m_slotIndex = 3;
+            return symbolInMajorBlockIndex - 54+12+36;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24)
+        {
+            m_slotIndex = 4;
+            return symbolInMajorBlockIndex - 54+12+36+18;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18)
+        {
+            m_slotIndex = 5;
+            return symbolInMajorBlockIndex - 54+12+36+18+24;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36)
+        {
+            m_slotIndex = 6;
+            return symbolInMajorBlockIndex - 54+12+36+18+24+18;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36+12)
+        {
+            m_slotIndex = 7;
+            return symbolInMajorBlockIndex - 54+12+36+18+24+18+36;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36+12+54)
+        {
+            m_slotIndex = 8;
+            return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12;
+        }
+        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36+12+54+24)
+        {
+            m_slotIndex = 9;
+            return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12+54;
+        }
+        else // cannot go there if using this function in its valid context (input is a remainder of division by 288)
+        {
+            m_slotIndex = -1; // invalid slot
+            return 0;
+        }
+    }
+
+    void preProcess(); //!< process the 144 in memory dibits in initial phase
+    void processSlot0(int symbolIndex);
+    void processSlot1(int symbolIndex);
+    void processSlot2(int symbolIndex);
+    void processSlot3(int symbolIndex);
+    void processSlot4(int symbolIndex);
+    void processSlot5(int symbolIndex);
+    void processSlot6(int symbolIndex);
+    void processSlot7(int symbolIndex);
+    void processSlot8(int symbolIndex);
+    void processSlot9(int symbolIndex);
 
     DSDDecoder *m_dsdDecoder;
     // extracts AMBE frames from DMR frame
-    int m_slotIndex;  //!< Slot index in major block 0..9 //i;
-    int m_majorBlock; //!< Major block index 0..5 //j;
-    int dibit;
+    int m_symbolIndex; //!< Current absolute symbol index
+    int m_slotIndex;   //!< Slot index in major block 0..9 //i;
+    int m_majorBlock;  //!< Major block index 0..5 //j;
     int *dibit_p;
     char ambe_fr[4][24];
     char ambe_fr2[4][24];
@@ -73,8 +143,14 @@ private:
     char cachdata[13];
     int mutecurrentslot;
     int msMode;
-    int m_dibitCache[54]; // biggest slot is 54 dibits
-    int m_dibitIndex;     // index in dibit cache
+    int m_dibitCache[288]; // has to handle a complete frame (288 dibits)
+    int m_dibitIndex;      // index in dibit cache
+
+    static const int rW[36];
+    static const int rX[36];
+    static const int rY[36];
+    static const int rZ[36];
+
 };
 
 }
