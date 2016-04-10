@@ -25,7 +25,8 @@ DSDDecoder::DSDDecoder() :
         m_fsmState(DSDLookForSync),
         m_hasSync(0),
         m_mbeDecoder(this),
-        m_dsdDMRVoice(this)
+        m_dsdDMRVoice(this),
+        m_dsdDMRData(this)
 {
     resetSymbol();
     resetFrameSync();
@@ -1624,6 +1625,7 @@ void DSDDecoder::processFrame()
         else
         {
             m_state.err_str[0] = 0;
+            m_dsdDMRData.init();
             m_fsmState = DSDprocessDMRdata;
         }
     }

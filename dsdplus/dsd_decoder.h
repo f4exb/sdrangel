@@ -22,6 +22,7 @@
 #include "dsd_filters.h"
 #include "dsd_mbe.h"
 #include "dmr_voice.h"
+#include "dmr_data.h"
 
 /*
  * Frame sync patterns
@@ -65,6 +66,7 @@ class DSDDecoder
 {
     friend class DSDMBEDecoder;
     friend class DSDDMRVoice;
+    friend class DSDDMRData;
 public:
     typedef enum
     {
@@ -129,6 +131,7 @@ private:
     DSDMBEDecoder m_mbeDecoder;
     // Frame decoders
     DSDDMRVoice m_dsdDMRVoice;
+    DSDDMRData m_dsdDMRData;
 };
 
 } // namespace dsdplus
