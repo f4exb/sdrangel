@@ -28,12 +28,12 @@ public:
     DSDDecoder();
     ~DSDDecoder();
 
-    void pushSamples(const short *samples, int nbSamples); // Push this amount of samples to the DSD decoder thread
-    void popAudioSamples(AudioFifo *audioFifo, bool audioMute);
+    void pushSample(short sample) { m_decoder.run(sample); }
+    short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
+    void resetAudio() { m_decoder.resetAudio(); }
 
 private:
     DSDplus::DSDDecoder m_decoder;
-    short *m_zeroBuffer;
 };
 
 #endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

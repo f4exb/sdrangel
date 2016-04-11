@@ -43,8 +43,6 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 {
 	setObjectName("DSDDemod");
 
-	m_samplesBuffer = new qint16[1<<18]; // 128 k Samples is the maximum size of all input devices sample buffers (Airspy or HackRF) = 2^(17+1) for 2 byte samples
-
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 100;
@@ -69,7 +67,6 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 DSDDemod::~DSDDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-	delete[] m_samplesBuffer;
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,
@@ -96,7 +93,6 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	Complex ci;
 
 	m_settingsMutex.lock();
-	m_samplesBufferIndex = 0;
 	m_scopeSampleBuffer.clear();
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
@@ -141,7 +137,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             Sample s(sample, 0.0);
             m_scopeSampleBuffer.push_back(s);
-            m_samplesBuffer[m_samplesBufferIndex++] = sample;
+            m_dsdDecoder.pushSample(sample);
 
 //				if (m_running.m_audioMute)
 //				{
@@ -185,8 +181,18 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //		m_audioBufferFill = 0;
 //	}
 
-	m_dsdDecoder.popAudioSamples(&m_audioFifo, m_running.m_audioMute);
-    m_dsdDecoder.pushSamples(m_samplesBuffer, m_samplesBufferIndex);
+	int nbAudioSamples;
+	short *audio = m_dsdDecoder.getAudio(nbAudioSamples);
+
+	if (nbAudioSamples > 0)
+	{
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], nbAudioSamples, 10);
+
+        if (res != nbAudioSamples)
+        {
+            qDebug("NFMDemod::feed: %u/%u tail samples written", res, nbAudioSamples);
+        }
+	}
 
     if ((m_scope != 0) && (m_scopeEnabled))
     {

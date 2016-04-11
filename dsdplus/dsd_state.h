@@ -20,7 +20,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+extern "C" {
 #include <mbelib.h>
+}
 
 namespace DSDplus
 {
@@ -34,11 +37,13 @@ public:
     int *dibit_buf;
     int *dibit_buf_p;
     int repeat;
-    short *audio_out_buf;
+    short *audio_out_buf;          //!< final result
     short *audio_out_buf_p;
-    float *audio_out_float_buf;
+    int   audio_out_nb_samples;
+    int   audio_out_buf_size;
+    float *audio_out_float_buf;    //!< output of upsampler
     float *audio_out_float_buf_p;
-    float audio_out_temp_buf[160];
+    float audio_out_temp_buf[160]; //!< output of decoder
     float *audio_out_temp_buf_p;
     int audio_out_idx;
     int audio_out_idx2;
@@ -94,17 +99,12 @@ public:
     mbe_parms *prev_mp_enhanced;
     int p25kid;
 
-    const float *input_samples;
-    int input_length;
-    int input_offset;
-
     short *output_buffer;
     int output_offset;
     float *output_samples;
     int output_num_samples;
     int output_length;
     int output_finished;
-    FILE *logfile;
 };
 
 } // namespace dsdplus

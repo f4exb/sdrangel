@@ -212,7 +212,7 @@ void DSDDMRData::preProcess()
 
     if (m_dsdDecoder->m_opts.errorbars == 1)
     {
-        fprintf(m_dsdDecoder->m_state.logfile, "%s %s ", m_dsdDecoder->m_state.slot0light, m_dsdDecoder->m_state.slot1light);
+        fprintf(stderr, "%s %s ", m_dsdDecoder->m_state.slot0light, m_dsdDecoder->m_state.slot1light);
     }
 }
 

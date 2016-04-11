@@ -50,19 +50,10 @@ DSDDecoder::DSDDecoder()
     dsdstate->rf_mod = 0;
 
     dsdstate->output_offset = 0;
-
-    m_zeroBuffer = new short[1<<18]; // 128 kS
-    memset(m_zeroBuffer, 0, sizeof(short) * (1<<18));
+    dsdopts->upsample = 1;
+    dsdopts->stereo = 1;
 }
 
 DSDDecoder::~DSDDecoder()
-{
-}
-
-void DSDDecoder::pushSamples(const short *samples,int nbSamples)
-{
-}
-
-void DSDDecoder::popAudioSamples(AudioFifo *audioFifo, bool audioMute)
 {
 }

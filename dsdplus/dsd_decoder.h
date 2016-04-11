@@ -91,6 +91,19 @@ public:
     ~DSDDecoder();
 
     void run(short sample);
+
+    short *getAudio(int& nbSamples)
+    {
+        nbSamples = m_state.audio_out_nb_samples;
+        return m_state.audio_out_buf;
+    }
+
+    void resetAudio()
+    {
+        m_state.audio_out_nb_samples = 0;
+        m_state.audio_out_buf_p = m_state.audio_out_buf;
+    }
+
     DSDOpts *getOpts() { return &m_opts; }
     DSDState *getState() { return &m_state; }
 

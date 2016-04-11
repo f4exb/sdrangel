@@ -23,19 +23,27 @@ DSDState::DSDState()
 {
     int i, j;
 
-    dibit_buf = (int *) malloc(sizeof(int) * 1000000);
-    dibit_buf_p = dibit_buf + 200;
-    memset (dibit_buf, 0, sizeof (int) * 200);
     repeat = 0;
-    audio_out_buf = (short *) malloc(sizeof(short) * 1000000);
-    memset (audio_out_buf, 0, 100 * sizeof (short));
-    audio_out_buf_p = audio_out_buf + 100;
-    audio_out_float_buf = (float *) malloc(sizeof(float) * 1000000);
-    memset (audio_out_float_buf, 0, 100 * sizeof (float));
-    audio_out_float_buf_p = audio_out_float_buf + 100;
+
+    dibit_buf = (int *) malloc(sizeof(int) * 1000000);
+    memset(dibit_buf, 0, sizeof(int) * 200);
+    dibit_buf_p = dibit_buf + 200;
+
+    audio_out_buf = (short *) malloc(sizeof(short) * 2 * 48000); // 1s of L+R S16LE samples
+    memset(audio_out_buf, 0, sizeof(short) * 2 * 48000);
+    audio_out_buf_p = audio_out_buf;
+    audio_out_nb_samples = 0;
+    audio_out_buf_size = 48000; // given in number of unique samples
+
+    audio_out_float_buf = (float *) malloc(sizeof(float) * 960); // 1 frame of 160 samples upampled 6 times
+    memset(audio_out_float_buf, 0, sizeof(float) * 960);
+    audio_out_float_buf_p = audio_out_float_buf;
+
+    audio_out_temp_buf_p = audio_out_temp_buf;
+
     audio_out_idx = 0;
     audio_out_idx2 = 0;
-    audio_out_temp_buf_p = audio_out_temp_buf;
+
     center = 0;
     jitter = -1;
     synctype = -1;
@@ -46,23 +54,28 @@ DSDState::DSDState()
     minref = -12000;
     maxref = 12000;
     lastsample = 0;
+
     for (i = 0; i < 128; i++)
-      {
+    {
         sbuf[i] = 0;
-      }
+    }
+
     sidx = 0;
+
     for (i = 0; i < 1024; i++)
-      {
+    {
         maxbuf[i] = 15000;
-      }
+    }
+
     for (i = 0; i < 1024; i++)
-      {
+    {
         minbuf[i] = -15000;
-      }
+    }
+
     midx = 0;
     err_str[0] = 0;
-    sprintf (fsubtype, "              ");
-    sprintf (ftype, "             ");
+    sprintf(fsubtype, "              ");
+    sprintf(ftype, "             ");
     symbolcnt = 0;
     rf_mod = 0;
     numflips = 0;
@@ -70,13 +83,15 @@ DSDState::DSDState()
     lastp25type = 0;
     offset = 0;
     carrier = 0;
+
     for (i = 0; i < 25; i++)
-      {
+    {
         for (j = 0; j < 16; j++)
-          {
+        {
             tg[i][j] = 48;
-          }
-      }
+        }
+    }
+
     tgcount = 0;
     lasttg = 0;
     lastsrc = 0;
@@ -87,30 +102,27 @@ DSDState::DSDState()
     optind = 0;
     numtdulc = 0;
     firstframe = 0;
-    sprintf (slot0light, " slot0 ");
-    sprintf (slot1light, " slot1 ");
+    sprintf(slot0light, " slot0 ");
+    sprintf(slot1light, " slot1 ");
     aout_gain = 25;
-    memset (aout_max_buf, 0, sizeof (float) * 200);
+    memset(aout_max_buf, 0, sizeof(float) * 200);
     aout_max_buf_p = aout_max_buf;
     aout_max_buf_idx = 0;
     samplesPerSymbol = 10;
     symbolCenter = 4;
-    sprintf (algid, "________");
-    sprintf (keyid, "________________");
+    sprintf(algid, "________");
+    sprintf(keyid, "________________");
     currentslot = 0;
-    cur_mp = (mbe_parms *) malloc (sizeof (mbe_parms));
-    prev_mp = (mbe_parms *) malloc (sizeof (mbe_parms));
-    prev_mp_enhanced = (mbe_parms *) malloc (sizeof (mbe_parms));
-    mbe_initMbeParms (cur_mp, prev_mp, prev_mp_enhanced);
+    cur_mp = (mbe_parms *) malloc(sizeof(mbe_parms));
+    prev_mp = (mbe_parms *) malloc(sizeof(mbe_parms));
+    prev_mp_enhanced = (mbe_parms *) malloc(sizeof(mbe_parms));
+    mbe_initMbeParms(cur_mp, prev_mp, prev_mp_enhanced);
     p25kid = 0;
 
     output_finished = 0;
-    input_offset = 0;
     output_offset = 0;
-    input_samples = 0;
     output_num_samples = 0;
     output_samples = 0;
-    input_length = 0;
     output_length = 0;
     output_buffer = 0;
 }
