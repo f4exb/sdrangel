@@ -86,6 +86,10 @@ DSDFilters::DSDFilters()
     }
 }
 
+DSDFilters::~DSDFilters()
+{
+}
+
 short DSDFilters::dmr_filter(short sample)
 {
     return dsd_input_filter(sample, 1);

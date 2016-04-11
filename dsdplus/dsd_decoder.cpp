@@ -36,7 +36,6 @@ DSDDecoder::DSDDecoder() :
 
 DSDDecoder::~DSDDecoder()
 {
-    fclose(stderr);
 }
 
 void DSDDecoder::run(short sample)
@@ -1046,7 +1045,7 @@ int DSDDecoder::getFrameSync()
 
                     if (m_opts.errorbars == 1)
                     {
-                        printFrameSync(" +DMR      ",  m_synctest_pos + 1, m_modulation);
+                        printFrameSync(" +DMRd     ",  m_synctest_pos + 1, m_modulation);
                     }
 
                     m_state.lastsynctype = 10;
@@ -1059,7 +1058,7 @@ int DSDDecoder::getFrameSync()
 
                     if (m_opts.errorbars == 1)
                     {
-                        printFrameSync(" -DMR      ", m_synctest_pos + 1, m_modulation);
+                        printFrameSync(" -DMRv     ", m_synctest_pos + 1, m_modulation);
                     }
 
                     if (m_state.lastsynctype != 11)
@@ -1086,7 +1085,7 @@ int DSDDecoder::getFrameSync()
 
                     if (m_opts.errorbars == 1)
                     {
-                        printFrameSync(" +DMR      ", m_synctest_pos + 1, m_modulation);
+                        printFrameSync(" +DMRv     ", m_synctest_pos + 1, m_modulation);
                     }
 
                     if (m_state.lastsynctype != 12)
@@ -1104,7 +1103,7 @@ int DSDDecoder::getFrameSync()
 
                     if (m_opts.errorbars == 1)
                     {
-                        printFrameSync(" -DMR      ", m_synctest_pos + 1, m_modulation);
+                        printFrameSync(" -DMRd     ", m_synctest_pos + 1, m_modulation);
                     }
 
                     m_state.lastsynctype = 13;
