@@ -178,7 +178,7 @@ void DSDDMRVoice::postProcess(int symbolIndex)
 
     if (symbolIndex == 54+12+54-1) // very last symbol -> go back to search sync state
     {
-        fprintf(stderr, "\nDSDDMRVoice::postProcess: end of frame\n");
+        fprintf(stderr, "DSDDMRVoice::postProcess: end of frame\n");
         m_dsdDecoder->m_fsmState = DSDDecoder::DSDLookForSync;
     }
 }
@@ -388,8 +388,19 @@ void DSDDMRVoice::processSlot5(int symbolIndex) // Slot5 is a 18 symbol slot
             }
             else
             {
+                if (m_dsdDecoder->m_opts.errorbars == 1) {
+                    fprintf(stderr, "\nMBE: ");
+                }
+
                 m_dsdDecoder->m_mbeDecoder.processFrame(0, ambe_fr, 0);
+                if (m_dsdDecoder->m_opts.errorbars == 1) {
+                    fprintf(stderr, ".");
+                }
+
                 m_dsdDecoder->m_mbeDecoder.processFrame(0, ambe_fr2, 0);
+                if (m_dsdDecoder->m_opts.errorbars == 1) {
+                    fprintf(stderr, ".");
+                }
             }
         }
     }
@@ -425,6 +436,10 @@ void DSDDMRVoice::processSlot6(int symbolIndex) // Slot6 is a 36 symbol slot
         if (mutecurrentslot == 0)
         {
             m_dsdDecoder->m_mbeDecoder.processFrame(0, ambe_fr3, 0);
+
+            if (m_dsdDecoder->m_opts.errorbars == 1) {
+                fprintf(stderr, "\n");
+            }
         }
     }
 }
@@ -467,7 +482,6 @@ void DSDDMRVoice::processSlot9(int symbolIndex) // Slot9 is a 24 symbol slot
 
         sync[24] = 0;
         syncdata[24] = 0;
-
     }
 }
 

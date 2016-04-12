@@ -628,7 +628,7 @@ void DSDDecoder::printFrameSync(const char *frametype, int offset, char *modulat
 {
     if (m_opts.verbose > 0)
     {
-        fprintf(stderr, "\nSync: %s ", frametype);
+        fprintf(stderr, "Sync: %s ", frametype);
     }
     if (m_opts.verbose > 2)
     {
@@ -1511,7 +1511,7 @@ int DSDDecoder::getFrameSync()
             if ((m_opts.errorbars == 1) && (m_opts.verbose > 1)
                     && (m_state.carrier == 1))
             {
-                printf("\nSync: no sync\n");
+                printf("Sync: no sync\n");
             }
 
             noCarrier();

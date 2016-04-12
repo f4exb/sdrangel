@@ -20,22 +20,24 @@
  * Map is as follows in number of bytes
  *
  *      0    ...    5
- * A 0  54   ...    54 <- this one is always skipped
- *   1  12          12 <- cache data
- *   2  36          36 <- AMBE slot
- *   3  18          18 <- AMBE slot
- *   4  24          24 <- sync data
- * B 5  18          18 <- AMBE slot
- *   6  36          36 <- AMBE slot
- *   7  12          12 <- cache data
- *   8  54          54 <- this one is always skipped
- *   9  24          24 <- sync data
+ * A 0  54   ...    54 <- AMBE DMR slot 0 frame 2 1/2 + frame 3: skipped
+ *   1  12          12 <- CACH data
+ *   2  36          36 <- AMBE DMR slot 1 frame 1
+ *   3  18          18 <- AMBE DMR slot 1 frame 2 1/2
+ *   4  24          24 <- SYNC data
+ * B 5  18          18 <- AMBE DMR slot 1 frame 2 1/2
+ *   6  36          36 <- AMBE DMR slot 1 frame 3
+ *   7  12          12 <- CACH data
+ *   8  54          54 <- AMBE DMR slot 0 frame 1 + frame 2 1/2: skipped
+ *   9  24          24 <- SYNC data
  *
- * The A gtoup of the first major block is already in memory and is processed
+ * The A group of the first major block is already in memory and is processed
  * at initialization time
  * Then dibits for each slot are stored in cache and processed right after the
  * last dibit for the slot has been added.
  * For skipped slots the dibits are simply thrown away
+ *
+ * The DMR slot 0 is ignored. Only the DMR slot 1 is processed (listening to one conversation at a time)
  *
  */
 
