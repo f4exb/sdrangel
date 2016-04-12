@@ -123,10 +123,11 @@ void DSDDMRVoice::process()
     case 9:
         processSlot9(symbolIndex);
         break;
-    case 10:
+    case 10: // this is the post-process case
         postProcess(symbolIndex);
         break;
     default:
+        m_dsdDecoder->m_fsmState = DSDDecoder::DSDLookForSync;
         break;
     }
 
@@ -172,10 +173,12 @@ void DSDDMRVoice::preProcess()
 
 void DSDDMRVoice::postProcess(int symbolIndex)
 {
+    //fprintf(stderr, "DSDDMRVoice::postProcess: m_symbolIndex: %d", m_symbolIndex);
     m_dsdDecoder->getDibit(); // get dibit from symbol but do nothing with it
 
     if (symbolIndex == 54+12+54-1) // very last symbol -> go back to search sync state
     {
+        fprintf(stderr, "\nDSDDMRVoice::postProcess: end of frame\n");
         m_dsdDecoder->m_fsmState = DSDDecoder::DSDLookForSync;
     }
 }

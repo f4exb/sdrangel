@@ -172,6 +172,8 @@ private:
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
+	qint16 *m_sampleBuffer; //!< samples ring buffer
+	int m_sampleBufferIndex;
 
 	AudioFifo m_audioFifo;
 	SampleSink* m_scope;

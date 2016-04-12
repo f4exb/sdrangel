@@ -59,6 +59,9 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
+	m_sampleBuffer = new qint16[1<<17]; // 128 kS
+	m_sampleBufferIndex = 0;
+
     m_movingAverage.resize(16, 0);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
@@ -66,6 +69,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 
 DSDDemod::~DSDDemod()
 {
+    delete[] m_sampleBuffer;
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
@@ -102,7 +106,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
         {
-            qint16 sample;
+            qint16 sample, delayedSample;
 
             m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())) / (Real) (1<<30);
             m_movingAverage.feed(m_magsq);
@@ -135,39 +139,52 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 sample = 0;
             }
 
-            Sample s(sample, 0.0);
+            if (m_sampleBufferIndex < (1<<17)) {
+                m_sampleBufferIndex++;
+            } else {
+                m_sampleBufferIndex = 0;
+            }
+
+            m_sampleBuffer[m_sampleBufferIndex] = sample;
+
+            if (m_sampleBufferIndex < 20) {
+                delayedSample = m_sampleBuffer[(1<<17) - 20 + m_sampleBufferIndex];
+            } else {
+                delayedSample = m_sampleBuffer[m_sampleBufferIndex - 20];
+            }
+
+            Sample s(sample, delayedSample); // I=signal, Q=signal delayed by 20 samples (2400 baud: lowest rate)
             m_scopeSampleBuffer.push_back(s);
             m_dsdDecoder.pushSample(sample);
 
-//				if (m_running.m_audioMute)
-//				{
-//	                m_audioBuffer[m_audioBufferFill].l = 0;
-//	                m_audioBuffer[m_audioBufferFill].r = 0;
-//				}
-//				else
-//				{
-//	                m_audioBuffer[m_audioBufferFill].l = sample;
-//	                m_audioBuffer[m_audioBufferFill].r = sample;
-//				}
+//            if (m_running.m_audioMute)
+//            {
+//                m_audioBuffer[m_audioBufferFill].l = 0;
+//                m_audioBuffer[m_audioBufferFill].r = 0;
+//            }
+//            else
+//            {
+//                m_audioBuffer[m_audioBufferFill].l = (sample * m_running.m_volume) / 100;
+//                m_audioBuffer[m_audioBufferFill].r = (sample * m_running.m_volume) / 100;
+//            }
 //
-//				++m_audioBufferFill;
+//            ++m_audioBufferFill;
 //
-//				if (m_audioBufferFill >= m_audioBuffer.size())
-//				{
-//					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+//            if (m_audioBufferFill >= m_audioBuffer.size())
+//            {
+//                uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 //
-//					if (res != m_audioBufferFill)
-//					{
-//						qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-//					}
+//                if (res != m_audioBufferFill)
+//                {
+//                    qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+//                }
 //
-//					m_audioBufferFill = 0;
-//				}
+//                m_audioBufferFill = 0;
+//            }
 
             m_interpolatorDistanceRemain += m_interpolatorDistance;
         }
 	}
-
 
 //	if (m_audioBufferFill > 0)
 //	{
@@ -182,17 +199,22 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //	}
 
 	int nbAudioSamples;
-	short *audio = m_dsdDecoder.getAudio(nbAudioSamples);
+	short *dsdAudio = m_dsdDecoder.getAudio(nbAudioSamples);
 
 	if (nbAudioSamples > 0)
 	{
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], nbAudioSamples, 10);
-
-        if (res != nbAudioSamples)
-        {
-            qDebug("NFMDemod::feed: %u/%u tail samples written", res, nbAudioSamples);
-        }
+        uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+        qDebug("DSDDemod::feed: written %d audio samples (%d)", res, nbAudioSamples);
+        m_dsdDecoder.resetAudio();
+//	    qDebug("\nDSDDemod::feed: got %d audio samples (%lu)", nbAudioSamples, m_audioBuffer.size());
 	}
+
+//	if (nbAudioSamples >= m_audioBuffer.size())
+//    {
+//	    uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+//	    qDebug("DSDDemod::feed: written %d audio samples (%d)", res, nbAudioSamples);
+//        m_dsdDecoder.resetAudio();
+//    }
 
     if ((m_scope != 0) && (m_scopeEnabled))
     {

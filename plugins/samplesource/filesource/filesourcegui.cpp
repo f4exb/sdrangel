@@ -151,7 +151,7 @@ void FileSourceGui::handleSourceMessages()
 
 	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
 	{
-		qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
+		//qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
 
 		if (handleMessage(*message))
 		{

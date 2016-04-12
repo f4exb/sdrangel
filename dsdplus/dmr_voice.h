@@ -59,6 +59,12 @@ public:
 private:
     int getSlotIndex(int symbolInMajorBlockIndex) //!< calculates current slot index and returns symbol index in the slot
     {
+        if (m_majorBlock > 5) // this is the post-process case
+        {
+            m_slotIndex = 10;
+            return symbolInMajorBlockIndex;
+        }
+
         if (symbolInMajorBlockIndex < 54)
         {
             m_slotIndex = 0;
@@ -108,11 +114,6 @@ private:
         {
             m_slotIndex = 9;
             return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12+54;
-        }
-        else if (symbolInMajorBlockIndex < 54+12+36+18+24+18+36+12+54+24+54+12+54)
-        {
-            m_slotIndex = 10; // dummy slot for last skipped symbols
-            return symbolInMajorBlockIndex - 54+12+36+18+24+18+36+12+54+24;
         }
         else // cannot go there if using this function in its valid context (input is a remainder of division by 288)
         {
