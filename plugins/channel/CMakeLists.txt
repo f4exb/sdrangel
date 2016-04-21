@@ -10,6 +10,6 @@ add_subdirectory(udpsrc)
 add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 
-if(LIBMBE_FOUND)
+if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
-endif(LIBMBE_FOUND)
+endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)

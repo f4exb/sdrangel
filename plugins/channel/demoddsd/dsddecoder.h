@@ -33,7 +33,7 @@ public:
     void resetAudio() { m_decoder.resetAudio(); }
 
 private:
-    DSDplus::DSDDecoder m_decoder;
+    DSDcc::DSDDecoder m_decoder;
 };
 
 #endif /* PLUGINS_CHANNEL_DEMODDSD_DSDDECODER_H_ */

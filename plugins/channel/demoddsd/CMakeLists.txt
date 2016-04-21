@@ -20,8 +20,8 @@ set(dsddemod_FORMS
 
 include_directories(
 	.
-	../../../dsdplus
 	${CMAKE_CURRENT_BINARY_DIR}
+	${LIBDSDCC_INCLUDE_DIR}
 	${LIBMBE_INCLUDE_DIR}
 )
 
@@ -41,7 +41,7 @@ add_library(demoddsd SHARED
 target_link_libraries(demoddsd
 	${QT_LIBRARIES}
 	sdrbase
-	dsdplus
+	${LIBDSDCC_LIBRARIES}
 	${LIBMBE_LIBRARY}
 )
 

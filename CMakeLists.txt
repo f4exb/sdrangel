@@ -48,6 +48,7 @@ find_package(PkgConfig)
 
 find_package(Boost)
 find_package(FFTW3F)
+find_package(LibDSDcc)
 find_package(LibMbe)
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
@@ -372,10 +373,6 @@ qt5_use_modules(sdrangel Widgets Multimedia)
 ##############################################################################
 
 add_subdirectory(plugins)
-
-if(LIBMBE_FOUND)
-    add_subdirectory(dsdplus)
-endif(LIBMBE_FOUND)
 
 if(LIBUSB_FOUND AND UNIX)
 	add_subdirectory(fcdhid)

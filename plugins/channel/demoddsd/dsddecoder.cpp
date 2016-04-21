@@ -22,36 +22,12 @@
 
 DSDDecoder::DSDDecoder()
 {
-    DSDplus::DSDOpts  *dsdopts = m_decoder.getOpts();
-    DSDplus::DSDState *dsdstate = m_decoder.getState();
-
-    dsdopts->split = 1;
-    dsdopts->upsample = 1; // force upsampling of audio to 48k
-    dsdopts->playoffset = 0;
-    dsdopts->delay = 0;
-
-    // Initialize with auto-detect:
-    dsdopts->frame_dstar = 1;
-    dsdopts->frame_x2tdma = 1;
-    dsdopts->frame_p25p1 = 1;
-    dsdopts->frame_nxdn48 = 0;
-    dsdopts->frame_nxdn96 = 1;
-    dsdopts->frame_dmr = 1;
-    dsdopts->frame_provoice = 0;
-
-    dsdopts->uvquality = 3; // This is gr-dsd default
-    dsdopts->verbose = 2;   // This is gr-dsd default
-    dsdopts->errorbars = 1; // This is gr-dsd default
-
-    // Initialize with auto detection of modulation optimization:
-    dsdopts->mod_c4fm = 1;
-    dsdopts->mod_qpsk = 1;
-    dsdopts->mod_gfsk = 1;
-    dsdstate->rf_mod = 0;
-
-    dsdstate->output_offset = 0;
-    dsdopts->upsample = 1;
-    dsdopts->stereo = 1;
+    m_decoder.setQuiet();
+    m_decoder.setUpsampling(6); // force upsampling of audio to 48k
+    m_decoder.setStereo(true);  // force copy to L+R channels
+    m_decoder.setDecodeMode(DSDcc::DSDDecoder::DSDDecodeAuto, true); // Initialize with auto-detect
+    m_decoder.setUvQuality(3); // This is gr-dsd default
+    m_decoder.setModulationOptimizations(DSDcc::DSDDecoder::DSDModulationOptimAuto); // Initialize with auto detection of modulation optimization:
 }
 
 DSDDecoder::~DSDDecoder()
