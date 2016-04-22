@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 F4EXB                                                      //
+// Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -251,7 +251,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(20,0),
+	m_tickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -368,5 +369,19 @@ void DSDDemodGUI::tick()
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+	}
+
+	// "slow" updates
+
+	if (m_tickCount < 10)
+	{
+	    m_tickCount++;
+	}
+	else
+	{
+	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
+	    ui->syncText->setText(QString(m_dsdDemod->getDecoder().getFrameTypeText()));
+	    ui->modulationText->setText(QString(m_dsdDemod->getDecoder().getModulationText()));
+	    m_tickCount = 0;
 	}
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
+    <width>520</width>
     <height>898</height>
    </rect>
   </property>
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>520</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -128,6 +134,54 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="modulationText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Modulation type detected</string>
+        </property>
+        <property name="text">
+         <string>____</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="syncText">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Synchronized on this frame type</string>
+        </property>
+        <property name="text">
+         <string>No Sync______</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="inLevelText">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Input level (%) valid when synchronized</string>
+        </property>
+        <property name="text">
+         <string>00</string>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="channnelPowerLayout">

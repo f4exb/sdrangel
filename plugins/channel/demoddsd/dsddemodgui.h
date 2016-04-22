@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 F4EXB                                                      //
+// Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -83,6 +83,7 @@ private:
     bool m_audioMute;
 	bool m_squelchOpen;
 	MovingAverage<Real> m_channelPowerDbAvg;
+	int m_tickCount;
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();

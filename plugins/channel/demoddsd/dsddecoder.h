@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 F4EXB                                                      //
+// Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -31,6 +31,12 @@ public:
     void pushSample(short sample) { m_decoder.run(sample); }
     short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
     void resetAudio() { m_decoder.resetAudio(); }
+
+    int getInLevel() const { return m_decoder.getInLevel(); }
+    const char *getFrameTypeText() const { return m_decoder.getFrameTypeText(); }
+    const char *getModulationText() const { return m_decoder.getModulationText(); }
+
+    void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
 
 private:
     DSDcc::DSDDecoder m_decoder;

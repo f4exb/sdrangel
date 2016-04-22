@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 F4EXB                                                      //
+// Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -157,64 +157,21 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_scopeSampleBuffer.push_back(s);
             m_dsdDecoder.pushSample(sample);
 
-//            if (m_running.m_audioMute)
-//            {
-//                m_audioBuffer[m_audioBufferFill].l = 0;
-//                m_audioBuffer[m_audioBufferFill].r = 0;
-//            }
-//            else
-//            {
-//                m_audioBuffer[m_audioBufferFill].l = (sample * m_running.m_volume) / 100;
-//                m_audioBuffer[m_audioBufferFill].r = (sample * m_running.m_volume) / 100;
-//            }
-//
-//            ++m_audioBufferFill;
-//
-//            if (m_audioBufferFill >= m_audioBuffer.size())
-//            {
-//                uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-//
-//                if (res != m_audioBufferFill)
-//                {
-//                    qDebug("DSDDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-//                }
-//
-//                m_audioBufferFill = 0;
-//            }
-
             m_interpolatorDistanceRemain += m_interpolatorDistance;
         }
 	}
-
-//	if (m_audioBufferFill > 0)
-//	{
-//		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-//
-//		if (res != m_audioBufferFill)
-//		{
-//			qDebug("NFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
-//		}
-//
-//		m_audioBufferFill = 0;
-//	}
 
 	int nbAudioSamples;
 	short *dsdAudio = m_dsdDecoder.getAudio(nbAudioSamples);
 
 	if (nbAudioSamples > 0)
 	{
-        uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
-        qDebug("DSDDemod::feed: written %d audio samples (%d)", res, nbAudioSamples);
-        m_dsdDecoder.resetAudio();
-//	    qDebug("\nDSDDemod::feed: got %d audio samples (%lu)", nbAudioSamples, m_audioBuffer.size());
-	}
+	    if (!m_running.m_audioMute) {
+	        uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+	    }
 
-//	if (nbAudioSamples >= m_audioBuffer.size())
-//    {
-//	    uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
-//	    qDebug("DSDDemod::feed: written %d audio samples (%d)", res, nbAudioSamples);
-//        m_dsdDecoder.resetAudio();
-//    }
+	    m_dsdDecoder.resetAudio();
+	}
 
     if ((m_scope != 0) && (m_scopeEnabled))
     {
@@ -317,6 +274,11 @@ void DSDDemod::apply()
 		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 100.0);
 		//m_squelchLevel *= m_squelchLevel;
 	}
+
+    if (m_config.m_volume != m_running.m_volume)
+    {
+        m_dsdDecoder.setAudioGain(m_config.m_volume / 10.0f);
+    }
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
