@@ -579,16 +579,40 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="formatStatusLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item>
        <widget class="QLabel" name="formatStatusText">
         <property name="minimumSize">
          <size>
-          <width>400</width>
+          <width>470</width>
           <height>0</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="lineWidth">
+         <number>2</number>
+        </property>
         <property name="text">
-         <string>___</string>
+         <string>A123456789B123456789C123456789D123456789E123456789F123456789G123</string>
         </property>
        </widget>
       </item>

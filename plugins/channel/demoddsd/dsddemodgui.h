@@ -82,7 +82,7 @@ private:
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
-	char m_formatStatusText[80+1]; //!< Fixed signal format dependent status text
+	char m_formatStatusText[64+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
 
 	ThreadedSampleSink* m_threadedChannelizer;

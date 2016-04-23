@@ -417,6 +417,7 @@ void DSDDemodGUI::formatStatusText()
             }
         }
 
+        m_formatStatusText[62] = '\0';
         m_signalFormat = signalFormatDStar;
         break;
     default:
@@ -425,7 +426,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     }
 
-    m_formatStatusText[80] = '\0'; // guard
+    m_formatStatusText[64] = '\0'; // guard
 }
 
 void DSDDemodGUI::tick()
@@ -460,6 +461,12 @@ void DSDDemodGUI::tick()
 
 	    formatStatusText();
 	    ui->formatStatusText->setText(QString(m_formatStatusText));
+
+	    if (m_formatStatusText[0] == '\0') {
+	        ui->formatStatusText->setStyleSheet("QLabel { background:rgb(53,53,53); }"); // turn off background
+	    } else {
+            ui->formatStatusText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background
+	    }
 
 	    m_tickCount = 0;
 	}
