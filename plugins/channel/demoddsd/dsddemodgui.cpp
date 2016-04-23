@@ -250,6 +250,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
+	m_signalFormat(signalFormatNone),
 	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
@@ -353,6 +354,80 @@ void DSDDemodGUI::blockApplySettings(bool block)
 	m_doApplySettings = !block;
 }
 
+void DSDDemodGUI::formatStatusText()
+{
+    switch (m_dsdDemod->getDecoder().getSyncType())
+    {
+    case DSDcc::DSDDecoder::DSDSyncDMRDataN:
+    case DSDcc::DSDDecoder::DSDSyncDMRDataP:
+    case DSDcc::DSDDecoder::DSDSyncDMRVoiceN:
+    case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
+        if (m_signalFormat != signalFormatDMR)
+        {
+            memcpy(m_formatStatusText, "Station: ", 9);
+            memcpy(&m_formatStatusText[12], "TDMA: ", 6);
+        }
+
+        switch (m_dsdDemod->getDecoder().getStationType())
+        {
+        case DSDcc::DSDDecoder::DSDBaseStation:
+            memcpy(&m_formatStatusText[9], "BS ", 3);
+            break;
+        case DSDcc::DSDDecoder::DSDMobileStation:
+            memcpy(&m_formatStatusText[9], "MS ", 3);
+            break;
+        default:
+            memcpy(&m_formatStatusText[9], "NA ", 3);
+            break;
+        }
+
+        memcpy(&m_formatStatusText[18], m_dsdDemod->getDecoder().getSlot0Text(), 7);
+        m_formatStatusText[25] = ' ';
+        memcpy(&m_formatStatusText[26], m_dsdDemod->getDecoder().getSlot1Text(), 7);
+        m_formatStatusText[33] = '\0';
+        m_signalFormat = signalFormatDMR;
+
+        break;
+    case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
+    case DSDcc::DSDDecoder::DSDSyncDStarHeaderP:
+    case DSDcc::DSDDecoder::DSDSyncDStarN:
+    case DSDcc::DSDDecoder::DSDSyncDStarP:
+        if (m_signalFormat != signalFormatDStar)
+        {
+            strcpy(m_formatStatusText, "RPT1: ________ RPT2: ________ YOUR: ________ MY: ________/____");
+        }
+
+        {
+            const std::string& rpt1 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt1();
+            const std::string& rpt2 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt2();
+            const std::string& mySign = m_dsdDemod->getDecoder().getDStarDecoder().getMySign();
+            const std::string& yrSign = m_dsdDemod->getDecoder().getDStarDecoder().getYourSign();
+
+            if (rpt1.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[6], rpt1.c_str(), 8);
+            }
+            if (rpt2.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[21], rpt2.c_str(), 8);
+            }
+            if (yrSign.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[36], yrSign.c_str(), 8);
+            }
+            if (mySign.length() > 0) { // 0 or 13
+                memcpy(&m_formatStatusText[49], mySign.c_str(), 13);
+            }
+        }
+
+        m_signalFormat = signalFormatDStar;
+        break;
+    default:
+        m_signalFormat = signalFormatNone;
+        m_formatStatusText[0] = '\0';
+        break;
+    }
+
+    m_formatStatusText[80] = '\0'; // guard
+}
+
 void DSDDemodGUI::tick()
 {
 	Real powDb = CalcDb::dbPower(m_dsdDemod->getMagSq());
@@ -382,6 +457,10 @@ void DSDDemodGUI::tick()
 	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
 	    ui->syncText->setText(QString(m_dsdDemod->getDecoder().getFrameTypeText()));
 	    ui->modulationText->setText(QString(m_dsdDemod->getDecoder().getModulationText()));
+
+	    formatStatusText();
+	    ui->formatStatusText->setText(QString(m_formatStatusText));
+
 	    m_tickCount = 0;
 	}
 }

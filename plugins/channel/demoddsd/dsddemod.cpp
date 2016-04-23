@@ -95,6 +95,7 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
 	Complex ci;
+	int samplesPerSymbol = m_dsdDecoder.getSamplesPerSymbol();
 
 	m_settingsMutex.lock();
 	m_scopeSampleBuffer.clear();
@@ -147,10 +148,10 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_sampleBuffer[m_sampleBufferIndex] = sample;
 
-            if (m_sampleBufferIndex < 20) {
-                delayedSample = m_sampleBuffer[(1<<17) - 20 + m_sampleBufferIndex];
+            if (m_sampleBufferIndex < samplesPerSymbol) {
+                delayedSample = m_sampleBuffer[(1<<17) - samplesPerSymbol + m_sampleBufferIndex]; // wrap
             } else {
-                delayedSample = m_sampleBuffer[m_sampleBufferIndex - 20];
+                delayedSample = m_sampleBuffer[m_sampleBufferIndex - samplesPerSymbol];
             }
 
             Sample s(sample, delayedSample); // I=signal, Q=signal delayed by 20 samples (2400 baud: lowest rate)

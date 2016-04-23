@@ -55,6 +55,7 @@ public:
 
 private slots:
 	void viewChanged();
+	void formatStatusText();
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
 	void on_rfBW_valueChanged(int index);
@@ -69,11 +70,20 @@ private slots:
 	void tick();
 
 private:
+	typedef enum
+	{
+	    signalFormatNone,
+	    signalFormatDMR,
+	    signalFormatDStar
+	} SignalFormat;
+
 	Ui::DSDDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
+	char m_formatStatusText[80+1]; //!< Fixed signal format dependent status text
+	SignalFormat m_signalFormat;
 
 	ThreadedSampleSink* m_threadedChannelizer;
 	Channelizer* m_channelizer;

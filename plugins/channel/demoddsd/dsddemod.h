@@ -58,7 +58,7 @@ public:
 		m_dsdDemodGUI = dsdDemodGUI;
 	}
 
-	Real getMagSq() { return m_magsq; }
+	Real getMagSq() { return m_movingAverage.average(); }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
 	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }

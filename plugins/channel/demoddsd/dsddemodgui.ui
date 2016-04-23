@@ -36,12 +36,12 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>501</width>
+     <width>521</width>
      <height>171</height>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -574,6 +574,36 @@
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="formatStatusLayout">
+      <item>
+       <widget class="QLabel" name="formatStatusText">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>___</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="formatStatusSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
