@@ -119,17 +119,24 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (getMagSq() > m_squelchLevel)
             {
-                if (m_squelchCount < m_squelchGate)
+                if (m_squelchGate > 0)
                 {
-                    m_squelchCount++;
+                    if (m_squelchCount < m_squelchGate) {
+                        m_squelchCount++;
+                    }
+
+                    m_squelchOpen = m_squelchCount == m_squelchGate;
+                }
+                else
+                {
+                    m_squelchOpen = true;
                 }
             }
             else
             {
                 m_squelchCount = 0;
+                m_squelchOpen = false;
             }
-
-            m_squelchOpen = m_squelchCount == m_squelchGate;
 
             if (m_squelchOpen)
             {
