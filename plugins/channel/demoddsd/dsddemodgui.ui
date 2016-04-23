@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>898</height>
+    <width>600</width>
+    <height>841</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>520</width>
+    <width>600</width>
     <height>0</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>521</width>
+     <width>601</width>
      <height>171</height>
     </rect>
    </property>
@@ -187,6 +187,12 @@
        <layout class="QHBoxLayout" name="channnelPowerLayout">
         <item>
          <widget class="QLabel" name="channelPower">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Channel power (dB)</string>
           </property>
@@ -194,7 +200,10 @@
            <enum>Qt::RightToLeft</enum>
           </property>
           <property name="text">
-           <string>0.0</string>
+           <string>-00.0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -638,7 +647,7 @@
     <rect>
      <x>10</x>
      <y>180</y>
-     <width>481</width>
+     <width>581</width>
      <height>651</height>
     </rect>
    </property>
