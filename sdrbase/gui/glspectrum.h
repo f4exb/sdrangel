@@ -21,7 +21,6 @@
 #ifndef INCLUDE_GLSPECTRUM_H
 #define INCLUDE_GLSPECTRUM_H
 
-#include <QOpenGLWidget>
 #include <QTimer>
 #include <QMutex>
 #include <QOpenGLBuffer>
