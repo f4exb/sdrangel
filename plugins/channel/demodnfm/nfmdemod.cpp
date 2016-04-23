@@ -362,6 +362,7 @@ void NFMDemod::apply()
 	{
 		m_agcAttack = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
 		m_AGC.resize(m_agcAttack, m_agcLevel);
+		m_squelchCount = 0; // reset squelch open counter
 	}
 
 	if (m_config.m_squelch != m_running.m_squelch)
