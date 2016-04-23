@@ -10,6 +10,12 @@
     <height>115</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>634</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="font">
    <font>
     <family>Sans Serif</family>
@@ -252,7 +258,7 @@
      <item>
       <widget class="QSlider" name="time">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -289,7 +295,7 @@
       <widget class="QLabel" name="timeText">
        <property name="minimumSize">
         <size>
-         <width>40</width>
+         <width>32</width>
          <height>0</height>
         </size>
        </property>
@@ -309,7 +315,7 @@
      <item>
       <widget class="QSlider" name="timeOfs">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -339,6 +345,12 @@
      </item>
      <item>
       <widget class="QLabel" name="timeOfsText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -395,6 +407,12 @@
      </item>
      <item>
       <widget class="QLabel" name="traceLenText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -513,7 +531,7 @@ kS/s</string>
      <item>
       <widget class="QSlider" name="amp1">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -548,7 +566,7 @@ kS/s</string>
       <widget class="QLabel" name="amp1Text">
        <property name="minimumSize">
         <size>
-         <width>40</width>
+         <width>32</width>
          <height>0</height>
         </size>
        </property>
@@ -558,7 +576,7 @@ kS/s</string>
         </font>
        </property>
        <property name="text">
-        <string>0</string>
+        <string>000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -570,7 +588,7 @@ kS/s</string>
        <item>
         <widget class="QSlider" name="amp1OfsCoarse">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -618,6 +636,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="amp1OfsText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -663,6 +687,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="amp2Text">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -709,6 +739,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="amp2OfsText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -1110,6 +1146,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -1148,6 +1190,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigDelayText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>0</string>
        </property>
@@ -1193,6 +1241,12 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigPreText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>

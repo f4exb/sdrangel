@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>640</width>
     <height>841</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
+    <width>640</width>
     <height>0</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>601</width>
+     <width>641</width>
      <height>171</height>
     </rect>
    </property>
@@ -647,14 +647,23 @@
     <rect>
      <x>10</x>
      <y>180</y>
-     <width>581</width>
+     <width>636</width>
      <height>651</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>636</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Discriminator Scope</string>
    </property>
    <layout class="QVBoxLayout" name="scopeContainer">
+    <property name="margin">
+     <number>2</number>
+    </property>
     <item>
      <widget class="GLScope" name="glScope" native="true">
       <property name="minimumSize">
