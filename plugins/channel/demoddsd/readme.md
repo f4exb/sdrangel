@@ -110,6 +110,7 @@ These is the standard D-Star embedded information that is read from the header f
 
   - `BS`: base station
   - `MS`: mobile station
+  - `NA`: not applicable or could not be determined
 
 <h5>13.2.2: TDMA slot #0 status</h5>
 
