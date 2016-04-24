@@ -3,6 +3,8 @@ SET libusbdir="D:\libusb-1.0.19\MinGW32"
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy lz4\%1\lz4.dll %2
+copy mbelib\%1\mbelib.dll %2
+copy dsdcc\%1\dsdcc.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
@@ -14,6 +16,7 @@ mkdir %2\plugins\samplesource
 copy plugins\channel\chanalyzer\%1\chanalyzer.dll %2\plugins\channel
 copy plugins\channel\demodam\%1\demodam.dll %2\plugins\channel
 copy plugins\channel\demodbfm\%1\demodbfm.dll %2\plugins\channel
+copy plugins\channel\demoddsd\%1\demoddsd.dll %2\plugins\channel
 copy plugins\channel\demodlora\%1\demodlora.dll %2\plugins\channel
 copy plugins\channel\demodnfm\%1\demodnfm.dll %2\plugins\channel
 copy plugins\channel\demodssb\%1\demodssb.dll %2\plugins\channel

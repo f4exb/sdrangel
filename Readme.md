@@ -122,7 +122,7 @@ Note that this plugin does not require any of the hardware support libraries nor
 This is the `demoddsd` plugin. At present it can be used to decode the following digital speech formats:
 
   - DMR/MOTOTRBO
-  - D-Star 
+  - D-Star
 
 It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
 
@@ -130,7 +130,10 @@ Please note that it also needs [mbelib](https://github.com/szechyjs/mbelib) and 
 
 While DSDcc is intended to be patent-free, `mbelib` that it uses describes functions that may be covered by one or more U.S. patents owned by DVSI Inc. The source code itself should not be infringing as it merely describes possible methods of implementation. Compiling or using `mbelib` may infringe on patents rights in your jurisdiction and/or require licensing. It is unknown if DVSI will sell licenses for software that uses `mbelib`.
 
-If you are not comfortable with this just do not install DSDcc and/or mbelib and the plugin will not be compiled and added to SDRangel. For packaged distributions just remove `libdemoddsd.so` or `libdemoddsd.dll` from the installed package.
+If you are not comfortable with this just do not install DSDcc and/or mbelib and the plugin will not be compiled and added to SDRangel. For packaged distributions just remove from the installation directory:
+
+  - For Linux distributions: `plugins/channel/libdemoddsd.so`
+  - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
 
 <h1>Software build</h1>
 
@@ -290,7 +293,7 @@ You then need to update the .pro files that depend on librtlsdr. They are:
 
 <h4>BladeRF library (libbladerf)</h4>
 
-You need to download the 1.5.1 version specifically that is found [here](https://github.com/Nuand/bladeRF/archive/libbladeRF_v1.5.1.zip). Unzip it somewhere say in `D:\softs` So it will be installed in `D:\softs\bladeRF-libbladeRF_v1.5.1`. If you installation directory is different you need to update the dependent .pro files:
+You need to download the 1.5.1 version specifically that is found [here](https://github.com/Nuand/bladeRF/archive/libbladeRF_v1.5.1.zip). Unzip it somewhere say in `D:\softs` So it will be installed in `D:\softs\bladeRF-libbladeRF_v1.5.1`. If your installation directory is different you need to update the dependent .pro files:
 
   - `libbladerf\libbladerf.pro`, update the following lines with the location of your bladeRF installation:
     - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1"`
@@ -298,6 +301,33 @@ You need to download the 1.5.1 version specifically that is found [here](https:/
     - `CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1\host\libraries\libbladeRF"`
   - `plugins\samplesource\bladerf\bladerf.pro`. Update the following line with the location of your BladeRF installation:
     - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"`
+
+<h3>Dependencies for DSD (Digital Speech Decoding) plugin</h3>
+
+<h4>mbelib</h4>
+
+You need to clone the [mbelib git repository](https://github.com/szechyjs/mbelib.git). Let's say you have cloned it to `D:\softs\mbelib`. If your cloned repository is different you will need to update the dependent .pro files:
+
+  - `mbelib\mbelib.pro`
+  - `dsdcc\dscc.pro`
+  - `plugins\channel\demoddsd\demodsd.pro`
+
+Changing the following lines:
+
+  CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
+  CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+
+<h4>DSDcc</h4>
+
+You need to clone the [DSDcc git repository](https://github.com/f4exb/dsdcc.git). Let's say you have cloned it to `D:\softs\dsdcc`. If your cloned repository is different you will need to update the dependent .pro files:
+
+  - `dsdcc\dscc.pro`
+  - `plugins\channel\demoddsd\demodsd.pro`
+
+Changing the following lines:
+
+  CONFIG(MINGW32):LIBDSDCCSRC = "D:\softs\dsdcc"
+  CONFIG(MINGW64):LIBDSDCCSRC = "D:\softs\dsdcc"
 
 <h3>Build</h3>
 
