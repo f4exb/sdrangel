@@ -384,9 +384,8 @@ void DSDDemodGUI::formatStatusText()
         memcpy(&m_formatStatusText[18], m_dsdDemod->getDecoder().getSlot0Text(), 7);
         m_formatStatusText[25] = ' ';
         memcpy(&m_formatStatusText[26], m_dsdDemod->getDecoder().getSlot1Text(), 7);
-        m_formatStatusText[33] = '\0';
+        sprintf(&m_formatStatusText[33], " CC: %02d", m_dsdDemod->getDecoder().getColorCode());
         m_signalFormat = signalFormatDMR;
-
         break;
     case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
     case DSDcc::DSDDecoder::DSDSyncDStarHeaderP:

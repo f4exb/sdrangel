@@ -40,6 +40,7 @@ public:
     const char *getModulationText() const { return m_decoder.getModulationText(); }
     const char *getSlot0Text() const { return m_decoder.getSlot0Text(); }
     const char *getSlot1Text() const { return m_decoder.getSlot1Text(); }
+    unsigned char getColorCode() const { return m_decoder.getColorCode(); }
     const DSDcc::DSDDstar& getDStarDecoder() const { return m_decoder.getDStarDecoder(); }
 
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
