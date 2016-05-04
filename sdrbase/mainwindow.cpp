@@ -684,7 +684,6 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialog audioDialog(m_audioDeviceInfo, this);
-
 	audioDialog.exec();
 }
 

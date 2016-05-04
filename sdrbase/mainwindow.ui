@@ -149,8 +149,8 @@
     <property name="title">
      <string>&amp;Preferences</string>
     </property>
-    <addaction name="actionAudio"/>
-    <addaction name="actionDV_Serial"/>
+    <addaction name="action_Audio"/>
+    <addaction name="action_DV_Serial"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
@@ -570,12 +570,15 @@
     <string>F8</string>
    </property>
   </action>
-  <action name="actionAudio">
+  <action name="action_Audio">
    <property name="text">
-    <string>Audio</string>
+    <string>&amp;Audio</string>
    </property>
   </action>
-  <action name="actionDV_Serial">
+  <action name="action_DV_Serial">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>DV Serial</string>
    </property>
