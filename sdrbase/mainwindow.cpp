@@ -31,10 +31,10 @@
 #include "gui/presetitem.h"
 #include "gui/addpresetdialog.h"
 #include "gui/pluginsdialog.h"
-#include "gui/preferencesdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
 #include "gui/channelwindow.h"
+#include "gui/audiodialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/filesink.h"
@@ -522,7 +522,7 @@ void MainWindow::on_presetSave_clicked()
 void MainWindow::on_presetUpdate_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	
+
 	if(item != 0) {
 		if(item->type() == PItem) {
 			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
@@ -681,11 +681,11 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 	pluginsDialog.exec();
 }
 
-void MainWindow::on_action_Preferences_triggered()
+void MainWindow::on_action_Audio_triggered()
 {
-	PreferencesDialog preferencesDialog(m_audioDeviceInfo, this);
+	AudioDialog audioDialog(m_audioDeviceInfo, this);
 
-	preferencesDialog.exec();
+	audioDialog.exec();
 }
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)

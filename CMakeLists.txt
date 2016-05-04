@@ -50,6 +50,11 @@ find_package(Boost)
 find_package(FFTW3F)
 find_package(LibDSDcc)
 find_package(LibMbe)
+find_package(SerialDV)
+
+if (LIBSERIALDV_FOUND)
+    add_definitions(-DDSD_USE_SERIALDV)
+endif()
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
  SET(USE_SIMD "SSE2" CACHE STRING "Use SIMD instructions")
@@ -127,7 +132,7 @@ set(sdrbase_SOURCES
 	sdrbase/gui/glspectrumgui.cpp
 	sdrbase/gui/indicator.cpp
 	sdrbase/gui/pluginsdialog.cpp
-	sdrbase/gui/preferencesdialog.cpp
+	sdrbase/gui/audiodialog.cpp
 	sdrbase/gui/presetitem.cpp
 	sdrbase/gui/rollupwidget.cpp
 	sdrbase/gui/scale.cpp
@@ -212,7 +217,7 @@ set(sdrbase_HEADERS
 	sdrbase/gui/indicator.h
 	sdrbase/gui/physicalunit.h
 	sdrbase/gui/pluginsdialog.h
-	sdrbase/gui/preferencesdialog.h
+	sdrbase/gui/audiodialog.h
 	sdrbase/gui/presetitem.h
 	sdrbase/gui/rollupwidget.h
 	sdrbase/gui/scale.h
@@ -256,7 +261,7 @@ set(sdrbase_FORMS
 	sdrbase/gui/glscopegui.ui
 	sdrbase/gui/glspectrumgui.ui
 	sdrbase/gui/pluginsdialog.ui
-	sdrbase/gui/preferencesdialog.ui
+	sdrbase/gui/audiodialog.ui
 )
 
 set(sdrbase_RESOURCES

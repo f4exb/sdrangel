@@ -79,8 +79,6 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_Preferences"/>
-    <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menu_Acquisition">
@@ -147,11 +145,19 @@
      <string>&amp;Window</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuPreferences">
+    <property name="title">
+     <string>&amp;Preferences</string>
+    </property>
+    <addaction name="actionAudio"/>
+    <addaction name="actionDV_Serial"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Acquisition"/>
    <addaction name="menu_Channels"/>
    <addaction name="menu_Window"/>
+   <addaction name="menuPreferences"/>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -562,6 +568,16 @@
    </property>
    <property name="shortcut">
     <string>F8</string>
+   </property>
+  </action>
+  <action name="actionAudio">
+   <property name="text">
+    <string>Audio</string>
+   </property>
+  </action>
+  <action name="actionDV_Serial">
+   <property name="text">
+    <string>DV Serial</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

@@ -152,7 +152,7 @@ private slots:
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
 	void on_action_Loaded_Plugins_triggered();
-	void on_action_Preferences_triggered();
+	void on_action_Audio_triggered();
 	void on_sampleSource_currentIndexChanged(int index);
 	void on_action_About_triggered();
 };

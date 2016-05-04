@@ -1,11 +1,11 @@
+#include <gui/audiodialog.h>
 #include <QTreeWidgetItem>
-#include "gui/preferencesdialog.h"
-#include "ui_preferencesdialog.h"
+#include "ui_audiodialog.h"
 #include "audio/audiodeviceinfo.h"
 
-PreferencesDialog::PreferencesDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
+AudioDialog::AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::PreferencesDialog),
+	ui(new Ui::AudioDialog),
 	m_audioDeviceInfo(audioDeviceInfo)
 {
 	ui->setupUi(this);
@@ -44,12 +44,12 @@ PreferencesDialog::PreferencesDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* 
 	ui->tabWidget->setCurrentIndex(0);
 }
 
-PreferencesDialog::~PreferencesDialog()
+AudioDialog::~AudioDialog()
 {
 	delete ui;
 }
 
-void PreferencesDialog::accept()
+void AudioDialog::accept()
 {
 	QDialog::accept();
 }
