@@ -23,6 +23,7 @@ DSPEngine::DSPEngine() :
 	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
 	m_deviceEngine = new DSPDeviceEngine();
+	m_dvSerialSupport = false;
 }
 
 DSPEngine::~DSPEngine()

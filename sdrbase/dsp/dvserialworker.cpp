@@ -27,8 +27,11 @@ DVSerialWorker::DVSerialWorker() :
     m_running(false),
     m_currentGainIn(0),
     m_currentGainOut(0),
-    m_upsamplerLastValue(0)
+    m_upsamplerLastValue(0),
+    m_phase(0)
 {
+    m_audioBuffer.resize(1<<14);
+    m_audioBufferFill = 0;
 }
 
 DVSerialWorker::~DVSerialWorker()
@@ -77,12 +80,45 @@ void DVSerialWorker::handleInputMessages()
 
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
-                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
-                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
+                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getAudioFifo());
+//                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
+//                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
             }
         }
 
         delete message;
+    }
+}
+
+void DVSerialWorker::upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo)
+{
+    for (int i = 0; i < nbSamplesIn; i++)
+    {
+        int cur = (int) in[i];
+        int prev = (int) m_upsamplerLastValue;
+        qint16 upsample;
+
+        for (int j = 1; j < 7; j++)
+        {
+            upsample = (qint16) ((cur*i + prev*(6-i)) / 6);
+            m_audioBuffer[m_audioBufferFill].l = upsample;
+            m_audioBuffer[m_audioBufferFill].r = upsample;
+            ++m_audioBufferFill;
+
+            if (m_audioBufferFill >= m_audioBuffer.size())
+            {
+                uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+
+                if (res != m_audioBufferFill)
+                {
+                    qDebug("DVSerialWorker::upsample6: %u/%u audio samples written", res, m_audioBufferFill);
+                }
+
+                m_audioBufferFill = 0;
+            }
+        }
+
+        m_upsamplerLastValue = in[i];
     }
 }
 
@@ -93,6 +129,21 @@ void DVSerialWorker::upsample6(short *in, short *out, int nbSamplesIn)
         int cur = (int) in[i];
         int prev = (int) m_upsamplerLastValue;
         short up;
+
+//        for (int j = 0; j < 6; j++)
+//        {
+//            up = 32768.0f * cos(m_phase);
+//            *out = up;
+//            out ++;
+//            *out = up;
+//            out ++;
+//            m_phase += M_PI / 6.0;
+//        }
+//
+//        if ((i % 2) == 1)
+//        {
+//            m_phase = 0.0f;
+//        }
 
         up = (cur*1 + prev*5) / 6;
         *out = up;

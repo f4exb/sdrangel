@@ -21,6 +21,8 @@
 #include <QObject>
 #include <QDebug>
 
+#include <vector>
+
 #include "dvcontroller.h"
 #include "util/message.h"
 #include "util/syncmessenger.h"
@@ -97,15 +99,26 @@ public slots:
     void handleInputMessages();
 
 private:
+    struct AudioSample {
+        qint16 l;
+        qint16 r;
+    };
+
+    typedef std::vector<AudioSample> AudioVector;
+
     void upsample6(short *in, short *out, int nbSamplesIn);
+    void upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo);
 
     SerialDV::DVController m_dvController;
     bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
     short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
-    short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
+    //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
+    AudioVector m_audioBuffer;
+    uint m_audioBufferFill;
     short m_upsamplerLastValue;
+    float m_phase;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */
