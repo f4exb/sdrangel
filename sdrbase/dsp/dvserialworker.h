@@ -97,11 +97,15 @@ public slots:
     void handleInputMessages();
 
 private:
+    void upsample6(short *in, short *out, int nbSamplesIn);
+
     SerialDV::DVController m_dvController;
     bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
-    short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
+    short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
+    short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
+    short m_upsamplerLastValue;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */

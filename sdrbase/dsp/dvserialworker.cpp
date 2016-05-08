@@ -26,7 +26,8 @@ MESSAGE_CLASS_DEFINITION(DVSerialWorker::MsgTest, Message)
 DVSerialWorker::DVSerialWorker() :
     m_running(false),
     m_currentGainIn(0),
-    m_currentGainOut(0)
+    m_currentGainOut(0),
+    m_upsamplerLastValue(0)
 {
 }
 
@@ -69,19 +70,66 @@ void DVSerialWorker::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("DVSerialWorker::handleInputMessages: message");
-
         if (MsgMbeDecode::match(*message))
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
             int dBVolume = (decodeMsg->getVolumeIndex() - 50) / 5;
 
-            if (m_dvController.decode(m_audioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
+            if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
-                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, 10);
+                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
+                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
             }
         }
 
         delete message;
+    }
+}
+
+void DVSerialWorker::upsample6(short *in, short *out, int nbSamplesIn)
+{
+    for (int i = 0; i < nbSamplesIn; i++)
+    {
+        int cur = (int) in[i];
+        int prev = (int) m_upsamplerLastValue;
+        short up;
+
+        up = (cur*1 + prev*5) / 6;
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        up = (cur*2 + prev*4) / 6;
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        up = (cur*3 + prev*3) / 6;
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        up = (cur*4 + prev*2) / 6;
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        up = (cur*5 + prev*1) / 6;
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        up = in[i];
+        *out = up;
+        out++;
+        *out = up;
+        out++;
+
+        m_upsamplerLastValue = in[i];
     }
 }
