@@ -52,10 +52,6 @@ find_package(LibDSDcc)
 find_package(LibMbe)
 find_package(SerialDV)
 
-if (LIBSERIALDV_FOUND)
-    add_definitions(-DDSD_USE_SERIALDV)
-endif()
-
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
  SET(USE_SIMD "SSE2" CACHE STRING "Use SIMD instructions")
 ENDIF()
@@ -292,6 +288,21 @@ else(FFTW3F_FOUND)
 	add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
+if (LIBSERIALDV_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        sdrbase/dsp/dvserialworker.cpp
+        sdrbase/dsp/dvserialengine.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        sdrbase/dsp/dvserialworker.h
+        sdrbase/dsp/dvserialengine.h
+    )
+    add_definitions(-DDSD_USE_SERIALDV)
+    include_directories(${LIBSERIALDV_INCLUDE_DIR})
+endif(LIBSERIALDV_FOUND)
+
 #include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
@@ -318,6 +329,10 @@ target_link_libraries(sdrbase
 if(FFTW3F_FOUND)
 	target_link_libraries(sdrbase ${FFTW3F_LIBRARIES})
 endif(FFTW3F_FOUND)
+
+if(LIBSERIALDV_FOUND)
+    target_link_libraries(sdrbase ${LIBSERIALDV_LIBRARY})
+endif(LIBSERIALDV_FOUND)
 
 set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0

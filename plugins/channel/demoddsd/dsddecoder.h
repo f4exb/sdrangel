@@ -32,6 +32,11 @@ public:
     short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
     void resetAudio() { m_decoder.resetAudio(); }
 
+    bool mbeDVReady() const { return m_decoder.mbeDVReady(); }
+    void resetMbeDV() { m_decoder.resetMbeDV(); }
+    const unsigned char *getMbeDVFrame() const { return m_decoder.getMbeDVFrame(); }
+    int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
+
     int getInLevel() const { return m_decoder.getInLevel(); }
     int getSamplesPerSymbol() const { return m_decoder.getSamplesPerSymbol(); }
     DSDcc::DSDDecoder::DSDSyncType getSyncType() const { return m_decoder.getSyncType(); }

@@ -22,6 +22,9 @@
 #include "dsp/dspdeviceengine.h"
 #include "audio/audiooutput.h"
 #include "util/export.h"
+#ifdef DSD_USE_SERIALDV
+#include "dsp/dvserialengine.h"
+#endif
 
 class DSPDeviceEngine;
 class ThreadedSampleSink;
@@ -65,10 +68,32 @@ public:
  	QString errorMessage(); //!< Return the current error message
 	QString sourceDeviceDescription(); //!< Return the source device description
 
+	bool hasDVSerialSupport()
+	{
+#ifdef DSD_USE_SERIALDV
+	    return m_dvSerialSupport;
+#else
+        return false;
+#endif
+	}
+
+	void setDVSerialSupport(bool support);
+
+	void push()
+	{
+#ifdef DSD_USE_SERIALDV
+	    m_dvSerialEngine.push();
+#endif
+	}
+
 private:
 	DSPDeviceEngine *m_deviceEngine;
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
+	bool m_dvSerialSupport;
+#ifdef DSD_USE_SERIALDV
+	DVSerialEngine m_dvSerialEngine;
+#endif
 };
 
 #endif // INCLUDE_DSPENGINE_H

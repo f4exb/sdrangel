@@ -687,6 +687,11 @@ void MainWindow::on_action_Audio_triggered()
 	audioDialog.exec();
 }
 
+void MainWindow::on_action_DV_Serial_triggered(bool checked)
+{
+    m_dspEngine->setDVSerialSupport(checked);
+}
+
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
 	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());

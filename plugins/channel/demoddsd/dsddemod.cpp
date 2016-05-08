@@ -169,17 +169,30 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
 	}
 
-	int nbAudioSamples;
-	short *dsdAudio = m_dsdDecoder.getAudio(nbAudioSamples);
-
-	if (nbAudioSamples > 0)
+	if (DSPEngine::instance()->hasDVSerialSupport())
 	{
-	    if (!m_running.m_audioMute) {
-	        uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
-	    }
 
-	    m_dsdDecoder.resetAudio();
+	    if (m_dsdDecoder.mbeDVReady())
+	    {
+	        DSPEngine::instance()->push();
+	        m_dsdDecoder.resetMbeDV();
+	    }
 	}
+	else
+	{
+	    int nbAudioSamples;
+	    short *dsdAudio = m_dsdDecoder.getAudio(nbAudioSamples);
+
+	    if (nbAudioSamples > 0)
+	    {
+	        if (!m_running.m_audioMute) {
+	            uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+	        }
+
+	        m_dsdDecoder.resetAudio();
+	    }
+	}
+
 
     if ((m_scope != 0) && (m_scopeEnabled))
     {

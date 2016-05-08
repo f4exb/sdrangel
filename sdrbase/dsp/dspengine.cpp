@@ -154,3 +154,18 @@ QString DSPEngine::sourceDeviceDescription()
 {
 	return m_deviceEngine->sourceDeviceDescription();
 }
+
+void DSPEngine::setDVSerialSupport(bool support)
+{
+#ifdef DSD_USE_SERIALDV
+    if (support)
+    {
+        m_dvSerialSupport = m_dvSerialEngine.scan();
+    }
+    else
+    {
+        m_dvSerialEngine.release();
+        m_dvSerialSupport = false;
+    }
+#endif
+}
