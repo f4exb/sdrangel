@@ -178,7 +178,7 @@ bool DVSerialEngine::scan()
             connect(controller.worker, SIGNAL(finished()), controller.thread, SLOT(quit()));
             connect(controller.worker, SIGNAL(finished()), controller.worker, SLOT(deleteLater()));
             connect(controller.thread, SIGNAL(finished()), controller.thread, SLOT(deleteLater()));
-            connect(&controller.worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), controller.worker, SLOT(handleTest()));
+            connect(&controller.worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), controller.worker, SLOT(handleInputMessages()));
             controller.thread->start();
 
             m_controllers.push_back(controller);
@@ -202,7 +202,7 @@ void DVSerialEngine::release()
 
     while (it != m_controllers.end())
     {
-        disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleTest()));
+        disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
         it->worker->stop();
         it->thread->wait(100);
         it->worker->m_inputMessageQueue.clear();
@@ -214,13 +214,23 @@ void DVSerialEngine::release()
     m_controllers.clear();
 }
 
-void DVSerialEngine::push()
+void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
 
     while (it != m_controllers.end())
     {
-        it->worker->m_inputMessageQueue.push(DVSerialWorker::MsgTest::create());
+        if (it->worker->m_inputMessageQueue.size() < 2)
+        {
+            it->worker->m_inputMessageQueue.push(DVSerialWorker::MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, audioFifo));
+            break;
+        }
+
         ++it;
+    }
+
+    if (it == m_controllers.end())
+    {
+        qDebug("DVSerialEngine::pushMbeFrame: no DV serial device available. MBE frame dropped");
     }
 }

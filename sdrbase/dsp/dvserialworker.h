@@ -40,27 +40,6 @@ public:
         MsgTest() {}
     };
 
-    DVSerialWorker();
-    ~DVSerialWorker();
-
-    bool open(const std::string& serialDevice);
-    void close();
-    void process();
-    void stop();
-
-    void postTest()
-    {
-        //emit inputMessageReady();
-        m_inputMessageQueue.push(MsgTest::create());
-    }
-
-    MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-
-signals:
-    void inputMessageReady();
-    void finished();
-
-private:
     class MsgMbeDecode : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -94,14 +73,35 @@ private:
         }
     };
 
+    DVSerialWorker();
+    ~DVSerialWorker();
+
+    bool open(const std::string& serialDevice);
+    void close();
+    void process();
+    void stop();
+
+    void postTest()
+    {
+        //emit inputMessageReady();
+        m_inputMessageQueue.push(MsgTest::create());
+    }
+
+    MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+
+signals:
+    void inputMessageReady();
+    void finished();
+
+public slots:
+    void handleInputMessages();
+
+private:
     SerialDV::DVController m_dvController;
     bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
     short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
-
-private slots:
-    void handleTest();
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */

@@ -63,7 +63,25 @@ void DVSerialWorker::stop()
     m_running = false;
 }
 
-void DVSerialWorker::handleTest()
+void DVSerialWorker::handleInputMessages()
 {
-    qDebug("DVSerialWorker::handleTest");
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        qDebug("DVSerialWorker::handleInputMessages: message");
+
+        if (MsgMbeDecode::match(*message))
+        {
+            MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
+            int dBVolume = (decodeMsg->getVolumeIndex() - 50) / 5;
+
+            if (m_dvController.decode(m_audioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
+            {
+                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, 10);
+            }
+        }
+
+        delete message;
+    }
 }

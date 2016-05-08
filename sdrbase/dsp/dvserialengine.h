@@ -38,7 +38,7 @@ public:
     void release();
 
     int getNbDevices() const { return m_controllers.size(); }
-    void push();
+    void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo);
 
 private:
     struct DVSerialController

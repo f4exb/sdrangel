@@ -79,10 +79,10 @@ public:
 
 	void setDVSerialSupport(bool support);
 
-	void push()
+	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo)
 	{
 #ifdef DSD_USE_SERIALDV
-	    m_dvSerialEngine.push();
+	    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, audioFifo);
 #endif
 	}
 
