@@ -30,7 +30,7 @@ DVSerialWorker::DVSerialWorker() :
     m_upsamplerLastValue(0),
     m_phase(0)
 {
-    m_audioBuffer.resize(1<<14);
+    m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
 }
 
