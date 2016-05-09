@@ -18,6 +18,8 @@ CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
 INCLUDEPATH += $$LIBDSDCCSRC
 INCLUDEPATH += $$LIBMBELIBSRC
 
+DEFINES += DSD_USE_MBELIB=1
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 

@@ -63,7 +63,7 @@ SOURCES += mainwindow.cpp\
         gui/glspectrumgui.cpp\
         gui/indicator.cpp\
         gui/pluginsdialog.cpp\
-        gui/preferencesdialog.cpp\
+        gui/audiodialog.cpp\
         gui/presetitem.cpp\
         gui/rollupwidget.cpp\
         gui/scale.cpp\
@@ -124,6 +124,7 @@ HEADERS  += mainwindow.h\
         dsp/threadedsamplesink.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
+        gui/audiodialog.h\
         gui/basicchannelsettingswidget.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
@@ -137,7 +138,6 @@ HEADERS  += mainwindow.h\
         gui/indicator.h\
         gui/physicalunit.h\
         gui/pluginsdialog.h\
-        gui/preferencesdialog.h\
         gui/presetitem.h\
         gui/rollupwidget.h\
         gui/scale.h\
@@ -165,7 +165,7 @@ FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\
         gui/basicchannelsettingswidget.ui\
-        gui/preferencesdialog.ui\
+        gui/audiodialog.ui\
         gui/glscopegui.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
