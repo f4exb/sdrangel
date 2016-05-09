@@ -45,6 +45,21 @@ DVSerialEngine::~DVSerialEngine()
     release();
 }
 
+#ifdef __WINDOWS__
+void DVSerialEngine::getComList()
+{
+    m_comList.clear();
+    m_comList8250.clear();
+    char comCStr[16];
+
+    // Arbitrarily set the list to the 20 first COM ports
+    for (int i = 1; i <= 20; i++)
+    {
+        sprintf(comCStr, "COM%d", i);
+        m_comList.push_back(std::string(comCStr));
+    }
+}
+#else
 std::string DVSerialEngine::get_driver(const std::string& tty)
 {
     struct stat st;
@@ -156,6 +171,7 @@ void DVSerialEngine::getComList()
     // serial8250-devices must be probe to check for validity
     probe_serial8250_comports(m_comList, m_comList8250);
 }
+#endif // __WINDOWS__
 
 bool DVSerialEngine::scan()
 {
