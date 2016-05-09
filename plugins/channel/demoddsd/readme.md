@@ -123,6 +123,10 @@ These is the standard D-Star embedded information that is read from the header f
   - `slot1`: nothing received in slot #1
   - `[slot1]`: data frame received for slot #1
   - `[SLOT1]`: voice frame received for slot #1
+  
+<h5>13.2.4: Color Code</h5>
+
+This is the color code in use (0 to 15). It may briefly change value to a incorrect one. Take into account the value shown most of the time.
 
 <h3>14: Discriminator output scope display</h3>
 
