@@ -84,6 +84,10 @@ void DVSerialWorker::handleInputMessages()
 //                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
 //                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
             }
+            else
+            {
+                qDebug("DVSerialWorker::handleInputMessages: MsgMbeDecode: decode failed");
+            }
         }
 
         delete message;
@@ -100,7 +104,7 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo)
 
         for (int j = 1; j < 7; j++)
         {
-            upsample = (qint16) ((cur*i + prev*(6-i)) / 6);
+            upsample = (qint16) ((cur*j + prev*(6-j)) / 6);
             m_audioBuffer[m_audioBufferFill].l = upsample;
             m_audioBuffer[m_audioBufferFill].r = upsample;
             ++m_audioBufferFill;

@@ -31,6 +31,7 @@ public:
     void pushSample(short sample) { m_decoder.run(sample); }
     short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
     void resetAudio() { m_decoder.resetAudio(); }
+    void enableMbelib(bool enable) { m_decoder.enableMbelib(enable); }
 
     bool mbeDVReady() const { return m_decoder.mbeDVReady(); }
     void resetMbeDV() { m_decoder.resetMbeDV(); }

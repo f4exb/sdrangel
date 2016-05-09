@@ -100,6 +100,8 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	m_settingsMutex.lock();
 	m_scopeSampleBuffer.clear();
 
+	m_dsdDecoder.enableMbelib(!DSPEngine::instance()->hasDVSerialSupport()); // disable mbelib if DV serial support is present and activated else enable it
+
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
 		Complex c(it->real(), it->imag());
