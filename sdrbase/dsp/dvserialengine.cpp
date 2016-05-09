@@ -233,6 +233,17 @@ void DVSerialEngine::release()
     m_controllers.clear();
 }
 
+void DVSerialEngine::getDevicesNames(std::vector<std::string>& deviceNames)
+{
+    std::vector<DVSerialController>::iterator it = m_controllers.begin();
+
+    while (it != m_controllers.end())
+    {
+        deviceNames.push_back(it->device);
+        ++it;
+    }
+}
+
 void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();

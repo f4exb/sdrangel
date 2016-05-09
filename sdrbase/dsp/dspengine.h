@@ -79,6 +79,13 @@ public:
 
 	void setDVSerialSupport(bool support);
 
+	void getDVSerialNames(std::vector<std::string>& deviceNames)
+	{
+#ifdef DSD_USE_SERIALDV
+	    m_dvSerialEngine.getDevicesNames(deviceNames);
+#endif
+	}
+
 	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo)
 	{
 #ifdef DSD_USE_SERIALDV

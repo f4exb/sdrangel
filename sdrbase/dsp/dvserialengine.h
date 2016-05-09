@@ -38,6 +38,8 @@ public:
     void release();
 
     int getNbDevices() const { return m_controllers.size(); }
+    void getDevicesNames(std::vector<std::string>& devicesNames);
+
     void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo);
 
 private:

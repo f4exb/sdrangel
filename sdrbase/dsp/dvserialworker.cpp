@@ -76,7 +76,7 @@ void DVSerialWorker::handleInputMessages()
         if (MsgMbeDecode::match(*message))
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
-            int dBVolume = (decodeMsg->getVolumeIndex() - 50) / 4;
+            int dBVolume = (decodeMsg->getVolumeIndex() - 50) / 2;
 
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {

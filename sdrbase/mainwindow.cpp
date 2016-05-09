@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -690,6 +691,34 @@ void MainWindow::on_action_Audio_triggered()
 void MainWindow::on_action_DV_Serial_triggered(bool checked)
 {
     m_dspEngine->setDVSerialSupport(checked);
+
+    if (checked)
+    {
+        std::vector<std::string> deviceNames;
+        m_dspEngine->getDVSerialNames(deviceNames);
+
+        if (deviceNames.size() == 0)
+        {
+            QMessageBox::information(this, tr("Message"), tr("No DV serial devices found"));
+        }
+        else
+        {
+            std::vector<std::string>::iterator it = deviceNames.begin();
+            std::string deviceNamesStr = "DV Serial devices found: ";
+
+            while (it != deviceNames.end())
+            {
+                if (it != deviceNames.begin()) {
+                    deviceNamesStr += ",";
+                }
+
+                deviceNamesStr += *it;
+                ++it;
+            }
+
+            QMessageBox::information(this, tr("Message"), tr(deviceNamesStr.c_str()));
+        }
+    }
 }
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
