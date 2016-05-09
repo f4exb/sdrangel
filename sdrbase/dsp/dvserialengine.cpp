@@ -23,10 +23,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <libgen.h>
+
+#ifndef __WINDOWS__
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/serial.h>
-#include <libgen.h>
+#endif
 
 #include <QDebug>
 #include <QThread>

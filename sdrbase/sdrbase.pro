@@ -12,10 +12,18 @@ TARGET = sdrbase
 INCLUDEPATH += $$PWD
 
 DEFINES += USE_KISSFFT=1
+DEFINES += __WINDOWS__=1
+
+CONFIG(Release):build_subdir = release
+CONFIG(Debug):build_subdir = debug
 
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
+
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+
+CONFIG(MINGW32):INCLUDEPATH += "D:\softs\serialDV"
+CONFIG(MINGW64):INCLUDEPATH += "D:\softs\serialDV"
 
 SOURCES += mainwindow.cpp\
         audio/audiodeviceinfo.cpp\
@@ -29,6 +37,8 @@ SOURCES += mainwindow.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdeviceengine.cpp\
+        dsp/dvserialengine.cpp\
+        dsp/dvserialworker.cpp\
         dsp/fftengine.cpp\
         dsp/kissengine.cpp\
         dsp/fftfilt.cxx\
@@ -97,6 +107,8 @@ HEADERS  += mainwindow.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
         dsp/dspdeviceengine.h\
+        dsp/dvserialengine.h\
+        dsp/dvserialworker.h\
         dsp/dsptypes.h\
         dsp/fftengine.h\
         dsp/fftfilt.h\
@@ -173,6 +185,8 @@ FORMS    += mainwindow.ui\
         mainwindow.ui
 
 RESOURCES = resources/res.qrc
+
+LIBS += -L../serialdv/$${build_subdir} -lserialdv
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
