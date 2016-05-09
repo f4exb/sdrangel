@@ -13,6 +13,7 @@ INCLUDEPATH += $$PWD
 
 DEFINES += USE_KISSFFT=1
 DEFINES += __WINDOWS__=1
+DEFINES += DSD_USE_SERIALDV=1
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
