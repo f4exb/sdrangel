@@ -16,6 +16,7 @@ SUBDIRS += libairspy
 SUBDIRS += libbladerf
 SUBDIRS += mbelib
 SUBDIRS += dsdcc
+SUBDIRS += serialdv
 SUBDIRS += plugins/samplesource/filesource
 CONFIG(MINGW64)SUBDIRS += plugins/samplesource/sdrdaemon
 SUBDIRS += plugins/samplesource/rtlsdr
