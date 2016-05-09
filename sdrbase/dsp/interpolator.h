@@ -7,7 +7,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 #include <stdio.h>
-#ifndef WIN32
+#ifndef __WINDOWS__
 #include <unistd.h>
 #endif
 
