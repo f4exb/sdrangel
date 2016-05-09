@@ -130,6 +130,8 @@ If you have one or more serial devices interfacing the AMBE3000 chip in packet m
 
 Such serial devices work with a serial interface at 400 kb. While this seems large for a serial interface this limits the throughput and hence the capability of decoding several channels in parallel. The software can enqueue requests over many devices so the more you have the more channels you can decode in parallel. Note also that a channel that does not output voice frames will not require a device for decoding.
 
+Note that this is not supported in Windows.
+
 Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
 
 While DSDcc is intended to be patent-free, `mbelib` that it uses describes functions that may be covered by one or more U.S. patents owned by DVSI Inc. The source code itself should not be infringing as it merely describes possible methods of implementation. Compiling or using `mbelib` may infringe on patents rights in your jurisdiction and/or require licensing. It is unknown if DVSI will sell licenses for software that uses `mbelib`.
