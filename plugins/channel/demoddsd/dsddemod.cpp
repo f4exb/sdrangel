@@ -169,7 +169,9 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady())
             {
-                DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo);
+                if (!m_running.m_audioMute) {
+                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo);
+                }
                 m_dsdDecoder.resetMbeDV();
             }
 
