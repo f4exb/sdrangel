@@ -12,7 +12,7 @@
 
 PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent) :
 	QObject(parent),
-	m_pluginAPI(this, mainWindow, dspEngine),
+	m_pluginAPI(this, mainWindow),
 	m_mainWindow(mainWindow),
 	m_dspEngine(dspEngine),
 	m_sampleSourceId(),

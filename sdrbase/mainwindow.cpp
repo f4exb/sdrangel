@@ -64,7 +64,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_sampleFileName(std::string("./test.sdriq"))
 {
 	qDebug() << "MainWindow::MainWindow: start";
-	m_pluginManager = new PluginManager(this, m_dspEngine);
 	connect(m_dspEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 	m_dspEngine->start();
 
@@ -105,6 +104,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
 
+    m_pluginManager = new PluginManager(this, m_dspEngine);
 	m_pluginManager->loadPlugins();
 
 	//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);

@@ -54,47 +54,14 @@ void PluginAPI::removeChannelMarker(ChannelMarker* channelMarker)
 	m_mainWindow->removeChannelMarker(channelMarker);
 }
 
-/*
-void PluginAPI::setSampleSource(SampleSource* sampleSource)
-{
-	m_dspEngine->stopAcquistion();
-	m_dspEngine->setSource(sampleSource);
-}
-
-void PluginAPI::addSampleSink(SampleSink* sampleSink)
-{
-	m_dspEngine->addSink(sampleSink);
-}
-
-void PluginAPI::removeSampleSink(SampleSink* sampleSink)
-{
-	m_dspEngine->removeSink(sampleSink);
-}
-
-MessageQueue* PluginAPI::getDSPEngineMessageQueue()
-{
-	return m_dspEngine->getInputMessageQueue();
-}
-
-void PluginAPI::addAudioSource(AudioFifo* audioFifo)
-{
-	m_dspEngine->addAudioSink(audioFifo);
-}
-
-void PluginAPI::removeAudioSource(AudioFifo* audioFifo)
-{
-	m_dspEngine->removeAudioSink(audioFifo);
-}*/
-
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
-PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow, DSPEngine* dspEngine) :
+PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),
 	m_pluginManager(pluginManager),
-	m_mainWindow(mainWindow),
-	m_dspEngine(dspEngine)
+	m_mainWindow(mainWindow)
 {
 }
