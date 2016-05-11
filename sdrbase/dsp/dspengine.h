@@ -55,9 +55,6 @@ public:
 	void addSink(SampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink
 	void removeSink(SampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink
 
-	void addThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink that will run on its own thread
-	void removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink that runs on its own thread
-
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex = 0); //!< Configure DSP corrections
 
     DSPDeviceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }

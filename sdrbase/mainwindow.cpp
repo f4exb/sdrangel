@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
 	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
-	m_dspEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+	dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
 	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
 	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
 	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
 	m_fileSink = new FileSink();
-	m_dspEngine->addSink(m_fileSink);
+	dspDeviceEngine->addSink(m_fileSink); // TODO: one file sink per device engine
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -174,7 +174,7 @@ MainWindow::~MainWindow()
 		delete m_deviceUIs[i];
 	}
 
-	m_dspEngine->removeSink(m_fileSink);
+	m_dspEngine->removeSink(m_fileSink); // TODO: one file sink per device engine
 	//m_dspEngine->removeSink(m_rxSpectrumVis);
 	delete m_fileSink;
 	//delete m_rxSpectrumVis;

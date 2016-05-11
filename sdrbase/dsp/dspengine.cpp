@@ -125,18 +125,6 @@ void DSPEngine::removeSink(SampleSink* sink, uint deviceIndex)
 	m_deviceEngines[deviceIndex]->removeSink(sink);
 }
 
-void DSPEngine::addThreadedSink(ThreadedSampleSink* sink, uint deviceIndex)
-{
-	qDebug("DSPEngine::addThreadedSink(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->addThreadedSink(sink);
-}
-
-void DSPEngine::removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex)
-{
-	qDebug("DSPEngine::removeThreadedSink(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->removeThreadedSink(sink);
-}
-
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
 {
 	qDebug("DSPEngine::addAudioSink");
