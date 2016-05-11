@@ -133,6 +133,8 @@ private:
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
 
+	void createDevice();
+
 private slots:
 	void handleDSPMessages();
 	void handleMessages();

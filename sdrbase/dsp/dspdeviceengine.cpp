@@ -25,7 +25,8 @@
 #include "dsp/dspcommands.h"
 #include "dsp/samplesource.h"
 
-DSPDeviceEngine::DSPDeviceEngine(QObject* parent) :
+DSPDeviceEngine::DSPDeviceEngine(uint uid, QObject* parent) :
+    m_uid(uid),
 	QThread(parent),
 	m_state(StNotStarted),
 	m_sampleSource(0),

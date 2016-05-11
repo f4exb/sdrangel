@@ -65,7 +65,8 @@ public:
     QString errorMessage(uint deviceIndex = 0); //!< Return the current error message
     QString sourceDeviceDescription(uint deviceIndex = 0); //!< Return the source device description
 
-    DSPDeviceEngine *getDeviceEngine(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
+    DSPDeviceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
+    DSPDeviceEngine *getDeviceEngineByUID(uint uid);
 
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink

@@ -45,8 +45,10 @@ public:
 		StError        //!< engine is in error
 	};
 
-	DSPDeviceEngine(QObject* parent = NULL);
+	DSPDeviceEngine(uint uid, QObject* parent = NULL);
 	~DSPDeviceEngine();
+
+	uint getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
@@ -75,6 +77,8 @@ public:
 	QString sourceDeviceDescription(); //!< Return the source device description
 
 private:
+	uint m_uid; //!< unique ID
+
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
 	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
 	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread

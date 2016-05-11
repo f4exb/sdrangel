@@ -22,7 +22,7 @@
 DSPEngine::DSPEngine() :
 	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
-    m_deviceEngines.push_back(new DSPDeviceEngine());
+    m_deviceEngines.push_back(new DSPDeviceEngine(0)); // TODO: multi device support
 	m_dvSerialSupport = false;
 }
 
@@ -155,6 +155,23 @@ DSPDeviceEngine::State DSPEngine::state(uint deviceIndex) const
 QString DSPEngine::errorMessage(uint deviceIndex)
 {
 	return m_deviceEngines[deviceIndex]->errorMessage();
+}
+
+DSPDeviceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
+{
+    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+
+    while (it != m_deviceEngines.end())
+    {
+        if ((*it)->getUID() == uid)
+        {
+            return *it;
+        }
+
+        ++it;
+    }
+
+    return 0;
 }
 
 QString DSPEngine::sourceDeviceDescription(uint deviceIndex)
