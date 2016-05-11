@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
 
-    m_pluginManager = new PluginManager(this, m_dspEngine);
+    m_pluginManager = new PluginManager(this, m_dspEngine->getDeviceEngine(0));
 	m_pluginManager->loadPlugins();
 
 	//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);

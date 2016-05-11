@@ -59,15 +59,16 @@ public:
 	void addThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink that will run on its own thread
 	void removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink that runs on its own thread
 
+    void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex = 0); //!< Configure DSP corrections
+
+    DSPDeviceEngine::State state(uint deviceIndex = 0) const;
+    QString errorMessage(uint deviceIndex = 0); //!< Return the current error message
+    QString sourceDeviceDescription(uint deviceIndex = 0); //!< Return the source device description
+
+    DSPDeviceEngine *getDeviceEngine(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
+
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
-
- 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex = 0); //!< Configure DSP corrections
-
- 	DSPDeviceEngine::State state(uint deviceIndex = 0) const;
-
- 	QString errorMessage(uint deviceIndex = 0); //!< Return the current error message
-	QString sourceDeviceDescription(uint deviceIndex = 0); //!< Return the source device description
 
 	// Serial DV methods:
 

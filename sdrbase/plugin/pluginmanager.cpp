@@ -5,16 +5,16 @@
 #include "plugin/plugingui.h"
 #include "settings/preset.h"
 #include "mainwindow.h"
-#include "dsp/dspengine.h"
+#include "dsp/dspdeviceengine.h"
 #include "dsp/samplesource.h"
 
 #include <QDebug>
 
-PluginManager::PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent) :
+PluginManager::PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
 	m_mainWindow(mainWindow),
-	m_dspEngine(dspEngine),
+	m_dspDeviceEngine(dspDeviceEngine),
 	m_sampleSourceId(),
 	m_sampleSourceSerial(),
 	m_sampleSourceSequence(0),
@@ -207,7 +207,7 @@ void PluginManager::saveSourceSettings(Preset* preset)
 
 void PluginManager::freeAll()
 {
-	m_dspEngine->stopAcquistion();
+    m_dspDeviceEngine->stopAcquistion();
 
 	while(!m_channelInstanceRegistrations.isEmpty()) {
 		ChannelInstanceRegistration reg(m_channelInstanceRegistrations.takeLast());
@@ -215,7 +215,7 @@ void PluginManager::freeAll()
 	}
 
 	if(m_sampleSourcePluginGUI != NULL) {
-		m_dspEngine->setSource(NULL);
+	    m_dspDeviceEngine->setSource(NULL);
 		m_sampleSourcePluginGUI->destroy();
 		m_sampleSourcePluginGUI = NULL;
 		m_sampleSourceId.clear();
@@ -282,11 +282,11 @@ int PluginManager::selectSampleSourceByIndex(int index)
 {
 	qDebug("PluginManager::selectSampleSourceByIndex: index: %d", index);
 
-	m_dspEngine->stopAcquistion();
+	m_dspDeviceEngine->stopAcquistion();
 
 	if(m_sampleSourcePluginGUI != NULL) {
-		m_dspEngine->stopAcquistion();
-		m_dspEngine->setSource(NULL);
+	    m_dspDeviceEngine->stopAcquistion();
+	    m_dspDeviceEngine->setSource(NULL);
 		m_sampleSourcePluginGUI->destroy();
 		m_sampleSourcePluginGUI = NULL;
 		m_sampleSourceId.clear();
@@ -317,7 +317,7 @@ int PluginManager::selectSampleSourceByIndex(int index)
 			<< " seq: " << m_sampleSourceSequence;
 
 	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
-	m_dspEngine->setSourceSequence(m_sampleSourceSequence);
+	m_dspDeviceEngine->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
 }
@@ -328,11 +328,11 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 
 	int index = -1;
 
-	m_dspEngine->stopAcquistion();
+	m_dspDeviceEngine->stopAcquistion();
 
 	if(m_sampleSourcePluginGUI != NULL) {
-		m_dspEngine->stopAcquistion();
-		m_dspEngine->setSource(NULL);
+	    m_dspDeviceEngine->stopAcquistion();
+	    m_dspDeviceEngine->setSource(NULL);
 		m_sampleSourcePluginGUI->destroy();
 		m_sampleSourcePluginGUI = NULL;
 		m_sampleSourceId.clear();

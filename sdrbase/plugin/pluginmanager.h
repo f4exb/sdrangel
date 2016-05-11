@@ -14,6 +14,7 @@ class Preset;
 class MainWindow;
 class SampleSource;
 class Message;
+class DSPDeviceEngine;
 
 class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
@@ -34,7 +35,7 @@ public:
 
 	typedef QList<Plugin> Plugins;
 
-	explicit PluginManager(MainWindow* mainWindow, DSPEngine* dspEngine, QObject* parent = NULL);
+	explicit PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, QObject* parent = NULL);
 	~PluginManager();
 	void loadPlugins();
 
@@ -121,7 +122,7 @@ private:
 
 	PluginAPI m_pluginAPI;
 	MainWindow* m_mainWindow;
-	DSPEngine* m_dspEngine;
+	DSPDeviceEngine* m_dspDeviceEngine;
 	Plugins m_plugins;
 
 	ChannelRegistrations m_channelRegistrations;
