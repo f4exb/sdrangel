@@ -43,9 +43,6 @@ public:
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
 
-	void start(uint deviceIndex = 0); //!< Device engine(s) start
-	void stop(uint deviceIndex = 0);  //!< Device engine(s) stop
-
 	void stopAllAcquisitions();
 	void stopAllDeviceEngines();
 

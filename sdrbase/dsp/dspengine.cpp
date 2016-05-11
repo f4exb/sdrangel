@@ -54,19 +54,6 @@ MessageQueue* DSPEngine::getOutputMessageQueue(uint deviceIndex)
 	return m_deviceEngines[deviceIndex]->getOutputMessageQueue();
 }
 
-void DSPEngine::start(uint deviceIndex)
-{
-	qDebug("DSPEngine::start(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->start();
-}
-
-void DSPEngine::stop(uint deviceIndex)
-{
-	qDebug("DSPEngine::stop(%d)", deviceIndex);
-	m_audioOutput.stop(); // FIXME: do not stop here since it is global
-	m_deviceEngines[deviceIndex]->stop();
-}
-
 void DSPEngine::stopAllAcquisitions()
 {
     std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
@@ -74,6 +61,7 @@ void DSPEngine::stopAllAcquisitions()
     while (it != m_deviceEngines.end())
     {
         (*it)->stopAcquistion();
+        stopAudio();
         ++it;
     }
 }

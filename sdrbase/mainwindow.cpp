@@ -63,8 +63,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_sampleFileName(std::string("./test.sdriq"))
 {
 	qDebug() << "MainWindow::MainWindow: start";
-	connect(m_dspEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
-	m_dspEngine->start();
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -103,19 +101,15 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
 
-    m_pluginManager = new PluginManager(this, m_dspEngine->getDeviceEngineByIndex(0));
+    // TODO: This will go in a create new device and device tab method:
+
+	DSPDeviceEngine *dspDeviceEngine = m_dspEngine->getDeviceEngineByIndex(0);
+
+    connect(dspDeviceEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    dspDeviceEngine->start();
+
+    m_pluginManager = new PluginManager(this, dspDeviceEngine);
 	m_pluginManager->loadPlugins();
-
-	//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-	//m_pluginManager->fillSampleSourceSelector(ui->sampleSource);
-	//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
-
-	//m_rxSpectrumVis = new SpectrumVis(ui->rxSpectrum);
-	//ui->rxSpectrum->connectTimer(m_masterTimer);
-	//ui->rxSpectrumGUI->setBuddies(m_rxSpectrumVis->getInputMessageQueue(), m_rxSpectrumVis, ui->rxSpectrum);
-	//m_dspEngine->
-
-	// TODO: This will go in a create new device tab method:
 
 	m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
 
@@ -186,7 +180,7 @@ MainWindow::~MainWindow()
 	//delete m_rxSpectrumVis;
 	delete m_pluginManager;
 
-	m_dspEngine->stop();
+	m_dspEngine->stopAllDeviceEngines();
 
 	delete ui;
 }
