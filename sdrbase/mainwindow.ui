@@ -66,7 +66,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -91,9 +91,6 @@
     <property name="title">
      <string>&amp;Acquisition</string>
     </property>
-    <addaction name="action_Start"/>
-    <addaction name="action_Stop"/>
-    <addaction name="separator"/>
     <addaction name="action_Start_Recording"/>
     <addaction name="action_Stop_Recording"/>
    </widget>

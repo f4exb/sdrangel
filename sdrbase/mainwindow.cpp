@@ -169,7 +169,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
-	m_dspEngine->stopAcquistion();
+	m_dspEngine->stopAllAcquisitions();
 
 	saveSettings();
 
@@ -288,18 +288,6 @@ void MainWindow::createStatusBar()
 	m_recording = new Indicator(tr("Rec"), this);
 	m_recording->setToolTip(tr("Recording"));
 	statusBar()->addPermanentWidget(m_recording);
-
-	m_engineIdle = new Indicator(tr("Idle"), this);
-	m_engineIdle->setToolTip(tr("DSP engine is idle"));
-	statusBar()->addPermanentWidget(m_engineIdle);
-
-	m_engineRunning = new Indicator(tr("Run"), this);
-	m_engineRunning->setToolTip(tr("DSP engine is running"));
-	statusBar()->addPermanentWidget(m_engineRunning);
-
-	m_engineError = new Indicator(tr("Err"), this);
-	m_engineError->setToolTip(tr("DSP engine failed"));
-	statusBar()->addPermanentWidget(m_engineError);
 }
 
 void MainWindow::closeEvent(QCloseEvent*)
@@ -417,56 +405,6 @@ void MainWindow::handleMessages()
 		}
 	}
 }
-
-//void MainWindow::updateStatus()
-//{
-//	int state = m_dspEngine->state();
-//	if(m_lastEngineState != state) {
-//		switch(state) {
-//			case DSPDeviceEngine::StNotStarted:
-//				m_engineIdle->setColor(Qt::gray);
-//				m_engineRunning->setColor(Qt::gray);
-//				m_engineError->setColor(Qt::gray);
-//				statusBar()->clearMessage();
-//				break;
-//
-//			case DSPDeviceEngine::StIdle:
-//				m_engineIdle->setColor(Qt::cyan);
-//				m_engineRunning->setColor(Qt::gray);
-//				m_engineError->setColor(Qt::gray);
-//				statusBar()->clearMessage();
-//				break;
-//
-//			case DSPDeviceEngine::StRunning:
-//				m_engineIdle->setColor(Qt::gray);
-//				m_engineRunning->setColor(Qt::green);
-//				m_engineError->setColor(Qt::gray);
-//				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->sourceDeviceDescription()));
-//				break;
-//
-//			case DSPDeviceEngine::StError:
-//				m_engineIdle->setColor(Qt::gray);
-//				m_engineRunning->setColor(Qt::gray);
-//				m_engineError->setColor(Qt::red);
-//				statusBar()->showMessage(tr("Error: %1").arg(m_dspEngine->errorMessage()));
-//				break;
-//		}
-//		m_lastEngineState = state;
-//	}
-//}
-
-//void MainWindow::on_action_Start_triggered()
-//{
-//	if (m_dspEngine->initAcquisition())
-//	{
-//		m_dspEngine->startAcquisition();
-//	}
-//}
-//
-//void MainWindow::on_action_Stop_triggered()
-//{
-//	m_dspEngine->stopAcquistion();
-//}
 
 void MainWindow::on_action_Start_Recording_triggered()
 {

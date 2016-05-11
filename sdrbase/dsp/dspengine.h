@@ -46,9 +46,8 @@ public:
 	void start(uint deviceIndex = 0); //!< Device engine(s) start
 	void stop(uint deviceIndex = 0);  //!< Device engine(s) stop
 
-	bool initAcquisition(uint deviceIndex = 0); //!< Initialize acquisition sequence
-	bool startAcquisition(uint deviceIndex = 0); //!< Start acquisition sequence
-	void stopAcquistion(uint deviceIndex = 0);   //!< Stop acquisition sequence
+	void stopAllAcquisitions();
+	void stopAllDeviceEngines();
 
 	void startAudio();
 	void stopAudio();
@@ -63,10 +62,6 @@ public:
 	void removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink that runs on its own thread
 
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex = 0); //!< Configure DSP corrections
-
-    DSPDeviceEngine::State state(uint deviceIndex = 0) const;
-    QString errorMessage(uint deviceIndex = 0); //!< Return the current error message
-    QString sourceDeviceDescription(uint deviceIndex = 0); //!< Return the source device description
 
     DSPDeviceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
     DSPDeviceEngine *getDeviceEngineByUID(uint uid);

@@ -108,9 +108,6 @@ private:
 
 	QLabel* m_sampleRateWidget;
 	Indicator* m_recording;
-	Indicator* m_engineIdle;
-	Indicator* m_engineRunning;
-	Indicator* m_engineError;
 
 	QWidget* m_inputGUI;
 
@@ -138,9 +135,6 @@ private:
 private slots:
 	void handleDSPMessages();
 	void handleMessages();
-	//void updateStatus();
-	//void on_action_Start_triggered();
-	//void on_action_Stop_triggered();
 	void on_action_Start_Recording_triggered();
 	void on_action_Stop_Recording_triggered();
 	void on_action_View_Fullscreen_toggled(bool checked);

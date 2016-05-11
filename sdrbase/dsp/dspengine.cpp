@@ -67,24 +67,26 @@ void DSPEngine::stop(uint deviceIndex)
 	m_deviceEngines[deviceIndex]->stop();
 }
 
-bool DSPEngine::initAcquisition(uint deviceIndex)
+void DSPEngine::stopAllAcquisitions()
 {
-	qDebug("DSPEngine::initAcquisition(%d)", deviceIndex);
-	return m_deviceEngines[deviceIndex]->initAcquisition();
+    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+
+    while (it != m_deviceEngines.end())
+    {
+        (*it)->stopAcquistion();
+        ++it;
+    }
 }
 
-bool DSPEngine::startAcquisition(uint deviceIndex)
+void DSPEngine::stopAllDeviceEngines()
 {
-	qDebug("DSPEngine::startAcquisition(%d)", deviceIndex);
-	bool started = m_deviceEngines[deviceIndex]->startAcquisition();
+    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
 
-	if (started)
-	{
-		m_audioOutput.start(-1, m_audioSampleRate); // FIXME: do not start here since it is global
-		m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
-	}
-
-	return started;
+    while (it != m_deviceEngines.end())
+    {
+        (*it)->stop();
+        ++it;
+    }
 }
 
 void DSPEngine::startAudio()
@@ -109,13 +111,6 @@ void DSPEngine::stopAudio()
             m_audioOutput.stop();
         }
     }
-}
-
-void DSPEngine::stopAcquistion(uint deviceIndex)
-{
-	qDebug("DSPEngine::stopAcquistion(%d)", deviceIndex);
-	m_audioOutput.stop();
-	m_deviceEngines[deviceIndex]->stopAcquistion();
 }
 
 void DSPEngine::setSource(SampleSource* source, uint deviceIndex)
@@ -172,16 +167,6 @@ void DSPEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCo
 	m_deviceEngines[deviceIndex]->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
-DSPDeviceEngine::State DSPEngine::state(uint deviceIndex) const
-{
-	return m_deviceEngines[deviceIndex]->state();
-}
-
-QString DSPEngine::errorMessage(uint deviceIndex)
-{
-	return m_deviceEngines[deviceIndex]->errorMessage();
-}
-
 DSPDeviceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
 {
     std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
@@ -197,11 +182,6 @@ DSPDeviceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
     }
 
     return 0;
-}
-
-QString DSPEngine::sourceDeviceDescription(uint deviceIndex)
-{
-	return m_deviceEngines[deviceIndex]->sourceDeviceDescription();
 }
 
 void DSPEngine::setDVSerialSupport(bool support)
