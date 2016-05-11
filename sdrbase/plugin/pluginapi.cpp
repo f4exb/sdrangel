@@ -59,6 +59,16 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
+void PluginAPI::addThreadedSink(ThreadedSampleSink* sink)
+{
+    m_pluginManager->addThreadedSink(sink);
+}
+
+void PluginAPI::removeThreadedSink(ThreadedSampleSink* sink)
+{
+    m_pluginManager->removeThreadedSink(sink);
+}
+
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),
 	m_pluginManager(pluginManager),

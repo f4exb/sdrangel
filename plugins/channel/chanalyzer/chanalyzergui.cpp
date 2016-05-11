@@ -69,11 +69,11 @@ void ChannelAnalyzerGUI::setCenterFrequency(qint64 centerFrequency)
 void ChannelAnalyzerGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->BW->setValue(30);
 	ui->deltaFrequency->setValue(0);
 	ui->spanLog2->setValue(3);
-    
+
 	blockApplySettings(false);
 	applySettings();
 }
@@ -96,22 +96,22 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) 
+	if(!d.isValid())
     {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) 
+	if(d.getVersion() == 1)
     {
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp, bw, lowCut;
 		bool tmpBool;
-        
+
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
-        
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &bw, 30);
@@ -133,16 +133,16 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 		ui->ssb->setChecked(tmpBool);
 		d.readBlob(8, &bytetmp);
 		ui->scopeGUI->deserialize(bytetmp);
-        
+
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
-        
+
 		ui->BW->setValue(bw);
 		ui->lowCut->setValue(lowCut); // does applySettings();
 
 		return true;
-	} 
-    else 
+	}
+    else
     {
 		resetToDefaults();
 		return false;
@@ -324,7 +324,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelizer = new Channelizer(m_channelAnalyzer);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -358,7 +358,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_channelAnalyzer;
@@ -380,7 +380,7 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
-    
+
 	if (ui->BW->value() < -m_rate/200) {
 		ui->BW->setValue(-m_rate/200);
 		m_channelMarker.setBandwidth(-m_rate*2);

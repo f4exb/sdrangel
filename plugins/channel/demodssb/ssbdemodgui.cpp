@@ -51,7 +51,7 @@ void SSBDemodGUI::setCenterFrequency(qint64 centerFrequency)
 void SSBDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->BW->setValue(30);
 	ui->volume->setValue(40);
 	ui->deltaFrequency->setValue(0);
@@ -92,10 +92,10 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
-        
+
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
-        
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
@@ -117,10 +117,10 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		ui->audioFlipChannels->setChecked(m_audioFlipChannels);
 		d.readBool(10, &m_dsb);
 		ui->dsb->setChecked(m_dsb);
-        
+
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
-        
+
 		applySettings();
 		return true;
 	}
@@ -338,7 +338,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_ssbDemod = new SSBDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_ssbDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -369,7 +369,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 SSBDemodGUI::~SSBDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_ssbDemod;

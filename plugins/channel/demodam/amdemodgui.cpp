@@ -52,7 +52,7 @@ void AMDemodGUI::setCenterFrequency(qint64 centerFrequency)
 void AMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
@@ -79,21 +79,21 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) 
+	if(!d.isValid())
     {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) 
+	if(d.getVersion() == 1)
     {
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
-        
+
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
-        
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
@@ -104,19 +104,19 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-		
+
         if(d.readU32(7, &u32tmp))
         {
 			m_channelMarker.setColor(u32tmp);
         }
-        
+
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
 		applySettings();
 		return true;
-	} 
-    else 
+	}
+    else
     {
 		resetToDefaults();
 		return false;
@@ -218,7 +218,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_amDemod = new AMDemod();
 	m_channelizer = new Channelizer(m_amDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -237,7 +238,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 AMDemodGUI::~AMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_amDemod;

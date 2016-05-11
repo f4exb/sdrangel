@@ -379,7 +379,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelizer = new Channelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
@@ -413,7 +413,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 BFMDemodGUI::~BFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_bfmDemod;

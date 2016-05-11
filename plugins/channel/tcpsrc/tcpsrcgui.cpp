@@ -46,7 +46,7 @@ QString TCPSrcGUI::getName() const
 void TCPSrcGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
@@ -88,10 +88,10 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		qint32 s32tmp;
 		Real realtmp;
-        
+
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
-        
+
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
@@ -123,10 +123,10 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		ui->boost->setValue(s32tmp);
 		d.readS32(9, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
-        
+
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
-        
+
 		applySettings();
 		return true;
 	}
@@ -199,7 +199,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_tcpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -229,7 +229,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 TCPSrcGUI::~TCPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_tcpSrc;

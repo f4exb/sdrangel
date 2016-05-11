@@ -64,7 +64,7 @@ QString UDPSrcGUI::getName() const
 void UDPSrcGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->sampleFormat->setCurrentIndex(0);
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
@@ -121,10 +121,10 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		qint32 s32tmp;
 		Real realtmp;
 		bool booltmp;
-        
+
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
-        
+
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
@@ -183,10 +183,10 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->audioStereo->setChecked(booltmp);
 		d.readS32(15, &s32tmp, 2500);
 		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
-        
+
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
-        
+
 		applySettingsImmediate();
 		applySettings();
 		return true;
@@ -237,7 +237,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_udpSrc = new UDPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_udpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->fmDeviation->setEnabled(false);
 
@@ -270,7 +270,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 UDPSrcGUI::~UDPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_udpSrc;

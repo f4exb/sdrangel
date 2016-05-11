@@ -16,6 +16,7 @@ class AudioFifo;
 class MessageQueue;
 class MainWindow;
 class ChannelMarker;
+class ThreadedSampleSink;
 class PluginGUI;
 
 class SDRANGEL_API PluginAPI : public QObject {
@@ -38,6 +39,10 @@ public:
 
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+
+	// Device engine stuff
+	void addThreadedSink(ThreadedSampleSink* sink);
+	void removeThreadedSink(ThreadedSampleSink* sink);
 
 	// R/O access to main window
 	const MainWindow* getMainWindow() const { return m_mainWindow; }

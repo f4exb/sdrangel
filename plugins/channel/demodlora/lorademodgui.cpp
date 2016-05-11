@@ -48,10 +48,10 @@ void LoRaDemodGUI::setCenterFrequency(qint64 centerFrequency)
 void LoRaDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
-    
+
 	ui->BW->setValue(0);
 	ui->Spread->setValue(0);
-    
+
 	blockApplySettings(false);
 	applySettings();
 }
@@ -70,20 +70,20 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
-	if(!d.isValid()) 
+	if(!d.isValid())
     {
 		resetToDefaults();
 		return false;
 	}
 
-	if(d.getVersion() == 1) 
+	if(d.getVersion() == 1)
     {
 		QByteArray bytetmp;
 		qint32 tmp;
-        
+
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
-        
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 0);
@@ -92,14 +92,14 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 		ui->Spread->setValue(tmp);
 		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
-        
+
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
-        
+
 		applySettings();
 		return true;
-	} 
-    else 
+	}
+    else
     {
 		resetToDefaults();
 		return false;
@@ -163,7 +163,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_LoRaDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
@@ -188,7 +188,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 LoRaDemodGUI::~LoRaDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_LoRaDemod;

@@ -86,6 +86,16 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
+void PluginManager::addThreadedSink(ThreadedSampleSink* sink)
+{
+    m_dspDeviceEngine->addThreadedSink(sink);
+}
+
+void PluginManager::removeThreadedSink(ThreadedSampleSink* sink)
+{
+    m_dspDeviceEngine->removeThreadedSink(sink);
+}
+
 void PluginManager::loadSettings(const Preset* preset)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));

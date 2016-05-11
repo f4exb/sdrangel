@@ -15,6 +15,7 @@ class MainWindow;
 class SampleSource;
 class Message;
 class DSPDeviceEngine;
+class ThreadedSampleSink;
 
 class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
@@ -47,6 +48,9 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+
+	void addThreadedSink(ThreadedSampleSink* sink);
+	void removeThreadedSink(ThreadedSampleSink* sink);
 
 	void loadSettings(const Preset* preset);
 	void loadSourceSettings(const Preset* preset);

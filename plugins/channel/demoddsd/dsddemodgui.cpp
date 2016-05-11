@@ -276,7 +276,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_channelizer = new Channelizer(m_dsdDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	DSPEngine::instance()->addThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::cyan);
@@ -296,7 +296,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 DSDDemodGUI::~DSDDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	DSPEngine::instance()->removeThreadedSink(m_threadedChannelizer);
+	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_dsdDemod;
