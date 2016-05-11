@@ -35,6 +35,18 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
      <item>
+      <widget class="ButtonSwitch" name="startStopButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="freqLeftSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

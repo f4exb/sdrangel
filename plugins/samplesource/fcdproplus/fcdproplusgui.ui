@@ -29,20 +29,23 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="ButtonSwitch" name="startStopButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -309,6 +312,8 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

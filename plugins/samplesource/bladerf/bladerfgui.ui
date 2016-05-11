@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>172</height>
+    <height>175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,6 +34,18 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <item>
+      <widget class="ButtonSwitch" name="startStopButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="freqLeftSpacer">
        <property name="orientation">
@@ -620,6 +632,8 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -57,7 +57,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState((DSPDeviceEngine::State)-1),
-	m_startOsmoSDRUpdateAfterStop(false),
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
@@ -746,6 +745,7 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
 	m_channelWindow = new ChannelWindow;
 	m_sampleSource = new QComboBox;
+	m_deviceEngine = 0;
 
 	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
 	QFont font;

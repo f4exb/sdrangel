@@ -31,6 +31,7 @@ class QComboBox;
 
 class AudioDeviceInfo;
 class DSPEngine;
+class DSPDeviceEngine;
 class Indicator;
 class SpectrumVis;
 class GLSpectrum;
@@ -59,6 +60,7 @@ public:
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
 		QComboBox *m_sampleSource;
+		DSPDeviceEngine *m_deviceEngine;
 
 		DeviceUISet(QTimer& timer);
 		~DeviceUISet();
@@ -109,8 +111,6 @@ private:
 	Indicator* m_engineIdle;
 	Indicator* m_engineRunning;
 	Indicator* m_engineError;
-
-	bool m_startOsmoSDRUpdateAfterStop;
 
 	QWidget* m_inputGUI;
 
