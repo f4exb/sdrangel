@@ -2,7 +2,6 @@
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 #include "mainwindow.h"
-#include "dsp/dspengine.h"
 
 QDockWidget* PluginAPI::createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title)
 {
@@ -67,6 +66,31 @@ void PluginAPI::addThreadedSink(ThreadedSampleSink* sink)
 void PluginAPI::removeThreadedSink(ThreadedSampleSink* sink)
 {
     m_pluginManager->removeThreadedSink(sink);
+}
+
+bool PluginAPI::initAcquisition()
+{
+    return m_pluginManager->initAcquisition();
+}
+
+bool PluginAPI::startAcquisition()
+{
+    return m_pluginManager->startAcquisition();
+}
+
+void PluginAPI::stopAcquistion()
+{
+    m_pluginManager->stopAcquistion();
+}
+
+DSPDeviceEngine::State PluginAPI::state() const
+{
+    return m_pluginManager->state();
+}
+
+QString PluginAPI::errorMessage()
+{
+    return m_pluginManager->errorMessage();
 }
 
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :

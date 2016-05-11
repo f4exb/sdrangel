@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_FCDPROGUI_H
 #define INCLUDE_FCDPROGUI_H
 
@@ -37,8 +53,10 @@ private:
 	PluginAPI* m_pluginAPI;
 	FCDProSettings m_settings;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
+	int m_lastEngineState;
 
 	void displaySettings();
 	void sendSettings();
@@ -66,7 +84,9 @@ private slots:
 	void on_gain5_currentIndexChanged(int index);
 	void on_gain6_currentIndexChanged(int index);
 	void on_setDefaults_clicked(bool checked);
+	void on_startStop_toggled(bool checked);
 	void updateHardware();
+	void updateStatus();
 };
 
 #endif // INCLUDE_FCDPROGUI_H

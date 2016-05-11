@@ -36,8 +36,10 @@ private:
 	PluginAPI* m_pluginAPI;
 	RTLSDRSettings m_settings;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
+	int m_lastEngineState;
 
 	void displaySettings();
 	void sendSettings();
@@ -52,7 +54,9 @@ private slots:
 	void on_gain_valueChanged(int value);
 	void on_sampleRate_currentIndexChanged(int index);
 	void on_checkBox_stateChanged(int state);
+	void on_startStop_toggled(bool checked);
 	void updateHardware();
+	void updateStatus();
 	void handleSourceMessages();
 };
 

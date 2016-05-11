@@ -44,6 +44,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_sampleSource(NULL),
 	m_acquisition(false),
+	m_lastEngineState((DSPDeviceEngine::State)-1),
 	m_sampleRate(0),
 	m_sampleRateStream(0),
 	m_centerFrequency(0),
@@ -78,7 +79,10 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer());
@@ -536,6 +540,22 @@ void SDRdaemonGui::on_fcPos_currentIndexChanged(int index)
 	ui->sendButton->setEnabled(true);
 }
 
+void SDRdaemonGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
 
 void SDRdaemonGui::configureUDPLink()
 {
@@ -620,6 +640,35 @@ void SDRdaemonGui::updateWithStreamTime()
 
     ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? 50 + m_bufferGauge : 0));
     ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : 50 - m_bufferGauge));
+}
+
+void SDRdaemonGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 void SDRdaemonGui::tick()

@@ -51,7 +51,7 @@ private:
 
 	PluginAPI* m_pluginAPI;
 	FileSourceInput::Settings m_settings;
-	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
@@ -63,11 +63,11 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 	bool m_enableNavTime;
+	int m_lastEngineState;
 
 	void displaySettings();
 	void displayTime();
 	void sendSettings();
-	void updateHardware();
 	void configureFileName();
 	void updateWithAcquisition();
 	void updateWithStreamData();
@@ -75,10 +75,12 @@ private:
 
 private slots:
 	void handleSourceMessages();
+	void on_startStop_toggled(bool checked);
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);
 	void on_navTimeSlider_valueChanged(int value);
 	void on_showFileDialog_clicked(bool checked);
+    void updateStatus();
 	void tick();
 };
 

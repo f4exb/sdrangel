@@ -53,8 +53,10 @@ private:
 	PluginAPI* m_pluginAPI;
 	BladeRFSettings m_settings;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
+	int m_lastEngineState;
 
 	void displaySettings();
 	void sendSettings();
@@ -72,7 +74,9 @@ private slots:
 	void on_vga2_valueChanged(int value);
 	void on_xb200_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);
+	void on_startStop_toggled(bool checked);
 	void updateHardware();
+	void updateStatus();
 };
 
 class BladerfSampleRates {

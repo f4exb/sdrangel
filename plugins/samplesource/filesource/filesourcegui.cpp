@@ -20,6 +20,8 @@
 #include <QDateTime>
 #include <QString>
 #include <QFileDialog>
+#include <QMessageBox>
+
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
@@ -42,15 +44,20 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
-	m_enableNavTime(false)
+	m_enableNavTime(false),
+	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
-	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
+
 	displaySettings();
+
 	ui->navTimeSlider->setEnabled(false);
 	ui->playLoop->setChecked(true); // FIXME: always play in a loop
 	ui->playLoop->setEnabled(false);
@@ -168,13 +175,55 @@ void FileSourceGui::sendSettings()
 {
 }
 
-void FileSourceGui::updateHardware()
-{
-}
-
 void FileSourceGui::on_playLoop_toggled(bool checked)
 {
 	// TODO: do something about it!
+}
+
+void FileSourceGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
+void FileSourceGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 void FileSourceGui::on_play_toggled(bool checked)

@@ -35,7 +35,7 @@
    <item>
     <layout class="QHBoxLayout" name="layoutFrequency">
      <item>
-      <widget class="ButtonSwitch" name="startStopButton">
+      <widget class="ButtonSwitch" name="startStop">
        <property name="text">
         <string/>
        </property>

@@ -62,7 +62,9 @@ private:
 	PluginAPI* m_pluginAPI;
 	HackRFSettings m_settings;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	SampleSource* m_sampleSource;
+	int m_lastEngineState;
 
 	void displaySettings();
 	void displaySampleRates();
@@ -82,7 +84,9 @@ private slots:
 	void on_lna_valueChanged(int value);
 	void on_bbFilter_currentIndexChanged(int index);
 	void on_vga_valueChanged(int value);
+	void on_startStop_toggled(bool checked);
 	void updateHardware();
+	void updateStatus();
 };
 
 class HackRFSampleRates {

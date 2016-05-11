@@ -51,6 +51,11 @@ public:
 
 	void addThreadedSink(ThreadedSampleSink* sink);
 	void removeThreadedSink(ThreadedSampleSink* sink);
+    bool initAcquisition() { return m_dspDeviceEngine->initAcquisition(); }   //!< Initialize device engine acquisition sequence
+    bool startAcquisition() { return m_dspDeviceEngine->startAcquisition(); } //!< Start device engine acquisition sequence
+    void stopAcquistion() { m_dspDeviceEngine->stopAcquistion(); }            //!< Stop device engine acquisition sequence
+    DSPDeviceEngine::State state() const { return m_dspDeviceEngine->state(); }
+    QString errorMessage() { return m_dspDeviceEngine->errorMessage(); }      //!< Return the current device engine error message
 
 	void loadSettings(const Preset* preset);
 	void loadSourceSettings(const Preset* preset);

@@ -96,8 +96,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(500);
+//	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+//	m_statusTimer.start(500);
 
 	m_masterTimer.start(50);
 
@@ -418,55 +418,55 @@ void MainWindow::handleMessages()
 	}
 }
 
-void MainWindow::updateStatus()
-{
-	int state = m_dspEngine->state();
-	if(m_lastEngineState != state) {
-		switch(state) {
-			case DSPDeviceEngine::StNotStarted:
-				m_engineIdle->setColor(Qt::gray);
-				m_engineRunning->setColor(Qt::gray);
-				m_engineError->setColor(Qt::gray);
-				statusBar()->clearMessage();
-				break;
+//void MainWindow::updateStatus()
+//{
+//	int state = m_dspEngine->state();
+//	if(m_lastEngineState != state) {
+//		switch(state) {
+//			case DSPDeviceEngine::StNotStarted:
+//				m_engineIdle->setColor(Qt::gray);
+//				m_engineRunning->setColor(Qt::gray);
+//				m_engineError->setColor(Qt::gray);
+//				statusBar()->clearMessage();
+//				break;
+//
+//			case DSPDeviceEngine::StIdle:
+//				m_engineIdle->setColor(Qt::cyan);
+//				m_engineRunning->setColor(Qt::gray);
+//				m_engineError->setColor(Qt::gray);
+//				statusBar()->clearMessage();
+//				break;
+//
+//			case DSPDeviceEngine::StRunning:
+//				m_engineIdle->setColor(Qt::gray);
+//				m_engineRunning->setColor(Qt::green);
+//				m_engineError->setColor(Qt::gray);
+//				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->sourceDeviceDescription()));
+//				break;
+//
+//			case DSPDeviceEngine::StError:
+//				m_engineIdle->setColor(Qt::gray);
+//				m_engineRunning->setColor(Qt::gray);
+//				m_engineError->setColor(Qt::red);
+//				statusBar()->showMessage(tr("Error: %1").arg(m_dspEngine->errorMessage()));
+//				break;
+//		}
+//		m_lastEngineState = state;
+//	}
+//}
 
-			case DSPDeviceEngine::StIdle:
-				m_engineIdle->setColor(Qt::cyan);
-				m_engineRunning->setColor(Qt::gray);
-				m_engineError->setColor(Qt::gray);
-				statusBar()->clearMessage();
-				break;
-
-			case DSPDeviceEngine::StRunning:
-				m_engineIdle->setColor(Qt::gray);
-				m_engineRunning->setColor(Qt::green);
-				m_engineError->setColor(Qt::gray);
-				statusBar()->showMessage(tr("Sampling from %1").arg(m_dspEngine->sourceDeviceDescription()));
-				break;
-
-			case DSPDeviceEngine::StError:
-				m_engineIdle->setColor(Qt::gray);
-				m_engineRunning->setColor(Qt::gray);
-				m_engineError->setColor(Qt::red);
-				statusBar()->showMessage(tr("Error: %1").arg(m_dspEngine->errorMessage()));
-				break;
-		}
-		m_lastEngineState = state;
-	}
-}
-
-void MainWindow::on_action_Start_triggered()
-{
-	if (m_dspEngine->initAcquisition())
-	{
-		m_dspEngine->startAcquisition();
-	}
-}
-
-void MainWindow::on_action_Stop_triggered()
-{
-	m_dspEngine->stopAcquistion();
-}
+//void MainWindow::on_action_Start_triggered()
+//{
+//	if (m_dspEngine->initAcquisition())
+//	{
+//		m_dspEngine->startAcquisition();
+//	}
+//}
+//
+//void MainWindow::on_action_Stop_triggered()
+//{
+//	m_dspEngine->stopAcquistion();
+//}
 
 void MainWindow::on_action_Start_Recording_triggered()
 {

@@ -50,6 +50,9 @@ public:
 	bool startAcquisition(uint deviceIndex = 0); //!< Start acquisition sequence
 	void stopAcquistion(uint deviceIndex = 0);   //!< Stop acquisition sequence
 
+	void startAudio();
+	void stopAudio();
+
 	void setSource(SampleSource* source, uint deviceIndex = 0); //!< Set the sample source type
 	void setSourceSequence(int sequence, uint deviceIndex = 0); //!< Set the sample source sequence in type
 
@@ -103,6 +106,7 @@ private:
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;
+	uint m_audioUsageCount;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
 #endif

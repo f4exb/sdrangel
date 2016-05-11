@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMessageBox>
+
 #include <libhackrf/hackrf.h>
 
 #include "plugin/pluginapi.h"
@@ -28,12 +30,17 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::HackRFGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
-	m_sampleSource(NULL)
+	m_sampleSource(NULL),
+	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
+
 	displaySettings();
 
 	m_sampleSource = new HackRFInput();
@@ -277,12 +284,58 @@ void HackRFGui::on_vga_valueChanged(int value)
 	sendSettings();
 }
 
+void HackRFGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
 void HackRFGui::updateHardware()
 {
 	qDebug() << "HackRFGui::updateHardware";
 	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create( m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
+}
+
+void HackRFGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200};

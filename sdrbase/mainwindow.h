@@ -103,7 +103,7 @@ private:
 	DSPEngine* m_dspEngine;
 
 	QTimer m_masterTimer;
-	QTimer m_statusTimer;
+	//QTimer m_statusTimer;
 	int m_lastEngineState;
 
 	QLabel* m_sampleRateWidget;
@@ -138,9 +138,9 @@ private:
 private slots:
 	void handleDSPMessages();
 	void handleMessages();
-	void updateStatus();
-	void on_action_Start_triggered();
-	void on_action_Stop_triggered();
+	//void updateStatus();
+	//void on_action_Start_triggered();
+	//void on_action_Stop_triggered();
 	void on_action_Start_Recording_triggered();
 	void on_action_Stop_Recording_triggered();
 	void on_action_View_Fullscreen_toggled(bool checked);

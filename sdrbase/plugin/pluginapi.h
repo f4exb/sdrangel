@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "util/export.h"
+#include "dsp/dspdeviceengine.h"
 
 class QDockWidget;
 class QAction;
@@ -43,6 +44,11 @@ public:
 	// Device engine stuff
 	void addThreadedSink(ThreadedSampleSink* sink);
 	void removeThreadedSink(ThreadedSampleSink* sink);
+    bool initAcquisition();               //!< Initialize device engine acquisition sequence
+    bool startAcquisition();              //!< Start device engine acquisition sequence
+    void stopAcquistion();                //!< Stop device engine acquisition sequence
+    DSPDeviceEngine::State state() const; //!< device engine state
+    QString errorMessage();               //!< Return the current device engine error message
 
 	// R/O access to main window
 	const MainWindow* getMainWindow() const { return m_mainWindow; }

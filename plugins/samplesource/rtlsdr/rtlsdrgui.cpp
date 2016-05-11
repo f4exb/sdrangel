@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QMessageBox>
+
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"
@@ -10,7 +12,8 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::RTLSDRGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
-	m_sampleSource(0)
+	m_sampleSource(0),
+	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -24,6 +27,9 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	}
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
+
 	displaySettings();
 
 	m_sampleSource = new RTLSDRInput();
@@ -246,11 +252,57 @@ void RTLSDRGui::on_sampleRate_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void RTLSDRGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
 void RTLSDRGui::updateHardware()
 {
 	RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
+}
+
+void RTLSDRGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 void RTLSDRGui::on_checkBox_stateChanged(int state)

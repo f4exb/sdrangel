@@ -52,8 +52,10 @@ private:
 
 	PluginAPI* m_pluginAPI;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
+    int m_lastEngineState;
 
 	int m_sampleRate;
 	int m_sampleRateStream;
@@ -119,6 +121,8 @@ private slots:
 	void on_specificParms_textEdited(const QString& arg1);
 	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);
+	void on_startStop_toggled(bool checked);
+	void updateStatus();
 	void tick();
 };
 

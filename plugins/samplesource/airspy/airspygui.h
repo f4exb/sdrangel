@@ -57,8 +57,10 @@ private:
 	PluginAPI* m_pluginAPI;
 	AirspySettings m_settings;
 	QTimer m_updateTimer;
+	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;
 	SampleSource* m_sampleSource;
+    int m_lastEngineState;
 
 	void displaySettings();
 	void displaySampleRates();
@@ -78,7 +80,9 @@ private slots:
 	void on_vga_valueChanged(int value);
 	void on_lnaAGC_stateChanged(int state);
 	void on_mixAGC_stateChanged(int state);
+	void on_startStop_toggled(bool checked);
 	void updateHardware();
+    void updateStatus();
 	void handleSourceMessages();
 };
 

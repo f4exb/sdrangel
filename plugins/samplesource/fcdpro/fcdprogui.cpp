@@ -1,3 +1,21 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include <QMessageBox>
+
 #include "ui_fcdprogui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
@@ -10,7 +28,8 @@ FCDProGui::FCDProGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::FCDProGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
-	m_sampleSource(NULL)
+	m_sampleSource(NULL),
+	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -113,6 +132,9 @@ FCDProGui::FCDProGui(PluginAPI* pluginAPI, QWidget* parent) :
 	}
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
+
 	displaySettings();
 
 	m_sampleSource = new FCDProInput();
@@ -355,6 +377,52 @@ void FCDProGui::on_setDefaults_clicked(bool checked)
 	m_settings.m_modeIndex = 0;           // Linearity
 	displaySettings();
 	sendSettings();
+}
+
+void FCDProGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
+void FCDProGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 void FCDProGui::updateHardware()

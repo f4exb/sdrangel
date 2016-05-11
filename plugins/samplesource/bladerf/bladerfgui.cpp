@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMessageBox>
+
 #include <libbladeRF.h>
 
 #include "ui_bladerfgui.h"
@@ -28,7 +30,8 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	ui(new Ui::BladerfGui),
 	m_pluginAPI(pluginAPI),
 	m_settings(),
-	m_sampleSource(NULL)
+	m_sampleSource(NULL),
+	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -47,6 +50,9 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	}
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(500);
+
 	displaySettings();
 
 	m_sampleSource = new BladerfInput();
@@ -302,12 +308,58 @@ void BladerfGui::on_xb200_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void BladerfGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_pluginAPI->initAcquisition())
+        {
+            m_pluginAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_pluginAPI->stopAcquistion();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
 void BladerfGui::updateHardware()
 {
 	qDebug() << "BladerfGui::updateHardware";
 	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create( m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
+}
+
+void BladerfGui::updateStatus()
+{
+    int state = m_pluginAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case DSPDeviceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
 }
 
 unsigned int BladerfGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter)
