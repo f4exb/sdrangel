@@ -22,13 +22,19 @@
 DSPEngine::DSPEngine() :
 	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
-	m_deviceEngine = new DSPDeviceEngine();
+    m_deviceEngines.push_back(new DSPDeviceEngine());
 	m_dvSerialSupport = false;
 }
 
 DSPEngine::~DSPEngine()
 {
-	delete m_deviceEngine;
+    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+
+    while (it != m_deviceEngines.end())
+    {
+        delete *it;
+        ++it;
+    }
 }
 
 Q_GLOBAL_STATIC(DSPEngine, dspEngine)
@@ -37,90 +43,90 @@ DSPEngine *DSPEngine::instance()
 	return dspEngine;
 }
 
-MessageQueue* DSPEngine::getInputMessageQueue()
+MessageQueue* DSPEngine::getInputMessageQueue(uint deviceIndex)
 {
-	return m_deviceEngine->getInputMessageQueue();
+	return m_deviceEngines[deviceIndex]->getInputMessageQueue();
 }
 
-MessageQueue* DSPEngine::getOutputMessageQueue()
+MessageQueue* DSPEngine::getOutputMessageQueue(uint deviceIndex)
 {
-	return m_deviceEngine->getOutputMessageQueue();
+	return m_deviceEngines[deviceIndex]->getOutputMessageQueue();
 }
 
-void DSPEngine::start()
+void DSPEngine::start(uint deviceIndex)
 {
-	qDebug("DSPEngine::start");
-	m_deviceEngine->start();
+	qDebug("DSPEngine::start(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->start();
 }
 
-void DSPEngine::stop()
+void DSPEngine::stop(uint deviceIndex)
 {
-	qDebug("DSPEngine::stop");
-	m_audioOutput.stop();
-	m_deviceEngine->stop();
+	qDebug("DSPEngine::stop(%d)", deviceIndex);
+	m_audioOutput.stop(); // FIXME: do not stop here since it is global
+	m_deviceEngines[deviceIndex]->stop();
 }
 
-bool DSPEngine::initAcquisition()
+bool DSPEngine::initAcquisition(uint deviceIndex)
 {
-	qDebug("DSPEngine::initAcquisition");
-	return m_deviceEngine->initAcquisition();
+	qDebug("DSPEngine::initAcquisition(%d)", deviceIndex);
+	return m_deviceEngines[deviceIndex]->initAcquisition();
 }
 
-bool DSPEngine::startAcquisition()
+bool DSPEngine::startAcquisition(uint deviceIndex)
 {
-	qDebug("DSPEngine::startAcquisition");
-	bool started = m_deviceEngine->startAcquisition();
+	qDebug("DSPEngine::startAcquisition(%d)", deviceIndex);
+	bool started = m_deviceEngines[deviceIndex]->startAcquisition();
 
 	if (started)
 	{
-		m_audioOutput.start(-1, m_audioSampleRate);
+		m_audioOutput.start(-1, m_audioSampleRate); // FIXME: do not start here since it is global
 		m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
 	}
 
 	return started;
 }
 
-void DSPEngine::stopAcquistion()
+void DSPEngine::stopAcquistion(uint deviceIndex)
 {
-	qDebug("DSPEngine::stopAcquistion");
+	qDebug("DSPEngine::stopAcquistion(%d)", deviceIndex);
 	m_audioOutput.stop();
-	m_deviceEngine->stopAcquistion();
+	m_deviceEngines[deviceIndex]->stopAcquistion();
 }
 
-void DSPEngine::setSource(SampleSource* source)
+void DSPEngine::setSource(SampleSource* source, uint deviceIndex)
 {
-	qDebug("DSPEngine::setSource");
-	m_deviceEngine->setSource(source);
+	qDebug("DSPEngine::setSource(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->setSource(source);
 }
 
-void DSPEngine::setSourceSequence(int sequence)
+void DSPEngine::setSourceSequence(int sequence, uint deviceIndex)
 {
-	qDebug("DSPEngine::setSource");
-	m_deviceEngine->setSourceSequence(sequence);
+	qDebug("DSPEngine::setSource(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->setSourceSequence(sequence);
 }
 
-void DSPEngine::addSink(SampleSink* sink)
+void DSPEngine::addSink(SampleSink* sink, uint deviceIndex)
 {
-	qDebug("DSPEngine::setSource");
-	m_deviceEngine->addSink(sink);
+	qDebug("DSPEngine::setSource(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->addSink(sink);
 }
 
-void DSPEngine::removeSink(SampleSink* sink)
+void DSPEngine::removeSink(SampleSink* sink, uint deviceIndex)
 {
-	qDebug("DSPEngine::removeSink");
-	m_deviceEngine->removeSink(sink);
+	qDebug("DSPEngine::removeSink(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->removeSink(sink);
 }
 
-void DSPEngine::addThreadedSink(ThreadedSampleSink* sink)
+void DSPEngine::addThreadedSink(ThreadedSampleSink* sink, uint deviceIndex)
 {
-	qDebug("DSPEngine::addThreadedSink");
-	m_deviceEngine->addThreadedSink(sink);
+	qDebug("DSPEngine::addThreadedSink(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->addThreadedSink(sink);
 }
 
-void DSPEngine::removeThreadedSink(ThreadedSampleSink* sink)
+void DSPEngine::removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex)
 {
-	qDebug("DSPEngine::addThreadedSink");
-	m_deviceEngine->removeThreadedSink(sink);
+	qDebug("DSPEngine::removeThreadedSink(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->removeThreadedSink(sink);
 }
 
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
@@ -135,25 +141,25 @@ void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 	m_audioOutput.removeFifo(audioFifo);
 }
 
-void DSPEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
+void DSPEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex)
 {
-	qDebug("DSPEngine::configureCorrections");
-	m_deviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+	qDebug("DSPEngine::configureCorrections(%d)", deviceIndex);
+	m_deviceEngines[deviceIndex]->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
-DSPDeviceEngine::State DSPEngine::state() const
+DSPDeviceEngine::State DSPEngine::state(uint deviceIndex) const
 {
-	return m_deviceEngine->state();
+	return m_deviceEngines[deviceIndex]->state();
 }
 
-QString DSPEngine::errorMessage()
+QString DSPEngine::errorMessage(uint deviceIndex)
 {
-	return m_deviceEngine->errorMessage();
+	return m_deviceEngines[deviceIndex]->errorMessage();
 }
 
-QString DSPEngine::sourceDeviceDescription()
+QString DSPEngine::sourceDeviceDescription(uint deviceIndex)
 {
-	return m_deviceEngine->sourceDeviceDescription();
+	return m_deviceEngines[deviceIndex]->sourceDeviceDescription();
 }
 
 void DSPEngine::setDVSerialSupport(bool support)

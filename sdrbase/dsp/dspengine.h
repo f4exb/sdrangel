@@ -19,6 +19,7 @@
 #define INCLUDE_DSPENGINE_H
 
 #include <QObject>
+#include <vector>
 #include "dsp/dspdeviceengine.h"
 #include "audio/audiooutput.h"
 #include "util/export.h"
@@ -37,36 +38,38 @@ public:
 
 	static DSPEngine *instance();
 
-	MessageQueue* getInputMessageQueue();
-	MessageQueue* getOutputMessageQueue();
+	MessageQueue* getInputMessageQueue(uint deviceIndex = 0);
+	MessageQueue* getOutputMessageQueue(uint deviceIndex = 0);
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
 
-	void start(); //!< Device engine(s) start
-	void stop();  //!< Device engine(s) stop
+	void start(uint deviceIndex = 0); //!< Device engine(s) start
+	void stop(uint deviceIndex = 0);  //!< Device engine(s) stop
 
-	bool initAcquisition(); //!< Initialize acquisition sequence
-	bool startAcquisition(); //!< Start acquisition sequence
-	void stopAcquistion();   //!< Stop acquisition sequence
+	bool initAcquisition(uint deviceIndex = 0); //!< Initialize acquisition sequence
+	bool startAcquisition(uint deviceIndex = 0); //!< Start acquisition sequence
+	void stopAcquistion(uint deviceIndex = 0);   //!< Stop acquisition sequence
 
-	void setSource(SampleSource* source); //!< Set the sample source type
-	void setSourceSequence(int sequence); //!< Set the sample source sequence in type
+	void setSource(SampleSource* source, uint deviceIndex = 0); //!< Set the sample source type
+	void setSourceSequence(int sequence, uint deviceIndex = 0); //!< Set the sample source sequence in type
 
-	void addSink(SampleSink* sink); //!< Add a sample sink
-	void removeSink(SampleSink* sink); //!< Remove a sample sink
+	void addSink(SampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink
+	void removeSink(SampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink
 
-	void addThreadedSink(ThreadedSampleSink* sink); //!< Add a sample sink that will run on its own thread
-	void removeThreadedSink(ThreadedSampleSink* sink); //!< Remove a sample sink that runs on its own thread
+	void addThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink that will run on its own thread
+	void removeThreadedSink(ThreadedSampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink that runs on its own thread
 
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
- 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
+ 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex = 0); //!< Configure DSP corrections
 
- 	DSPDeviceEngine::State state() const;
+ 	DSPDeviceEngine::State state(uint deviceIndex = 0) const;
 
- 	QString errorMessage(); //!< Return the current error message
-	QString sourceDeviceDescription(); //!< Return the source device description
+ 	QString errorMessage(uint deviceIndex = 0); //!< Return the current error message
+	QString sourceDeviceDescription(uint deviceIndex = 0); //!< Return the source device description
+
+	// Serial DV methods:
 
 	bool hasDVSerialSupport()
 	{
@@ -94,7 +97,7 @@ public:
 	}
 
 private:
-	DSPDeviceEngine *m_deviceEngine;
+	std::vector<DSPDeviceEngine*> m_deviceEngines;
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;
