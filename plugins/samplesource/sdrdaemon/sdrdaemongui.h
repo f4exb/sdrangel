@@ -24,6 +24,7 @@
 #include "sdrdaemoninput.h"
 
 class PluginAPI;
+class FileSink;
 
 namespace Ui {
 	class SDRdaemonGui;
@@ -55,6 +56,9 @@ private:
 	QTimer m_statusTimer;
 	SampleSource* m_sampleSource;
     bool m_acquisition;
+    FileSink *m_fileSink; //!< File sink to record device I/Q output
+    int m_deviceSampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
 
 	int m_sampleRate;
@@ -103,8 +107,10 @@ private:
 	void updateWithStreamData();
 	void updateWithStreamTime();
 	void sendConfiguration();
+    void updateSampleRateAndFrequency();
 
 private slots:
+    void handleDSPMessages();
 	void handleSourceMessages();
 	void on_applyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
@@ -122,6 +128,7 @@ private slots:
 	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
 	void updateStatus();
 	void tick();
 };

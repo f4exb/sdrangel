@@ -195,9 +195,9 @@ void FileSourceGui::handleSourceMessages()
 
 void FileSourceGui::updateSampleRateAndFrequency()
 {
-    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
 void FileSourceGui::displaySettings()
