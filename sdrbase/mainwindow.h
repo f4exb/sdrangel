@@ -101,11 +101,10 @@ private:
 	DSPEngine* m_dspEngine;
 
 	QTimer m_masterTimer;
-	//QTimer m_statusTimer;
+	QTimer m_statusTimer;
 	int m_lastEngineState;
 
-	QLabel* m_sampleRateWidget;
-	Indicator* m_recording;
+	QLabel* m_dateTimeWidget;
 
 	QWidget* m_inputGUI;
 
@@ -123,7 +122,6 @@ private:
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
 	void updateCenterFreqDisplay();
-	void updateSampleRate();
 	void updatePresetControls();
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
@@ -132,6 +130,7 @@ private:
 
 private slots:
 	void handleMessages();
+	void updateStatus();
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();

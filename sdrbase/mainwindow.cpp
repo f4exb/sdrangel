@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDateTime>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -93,8 +94,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
-//	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-//	m_statusTimer.start(500);
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+	m_statusTimer.start(1000);
 
 	m_masterTimer.start(50);
 
@@ -259,13 +260,9 @@ void MainWindow::savePresetSettings(Preset* preset)
 
 void MainWindow::createStatusBar()
 {
-	m_sampleRateWidget = new QLabel(tr("Rate: 0 kHz"), this);
-	m_sampleRateWidget->setToolTip(tr("Sample Rate"));
-	statusBar()->addPermanentWidget(m_sampleRateWidget);
-
-	m_recording = new Indicator(tr("Rec"), this);
-	m_recording->setToolTip(tr("Recording"));
-	statusBar()->addPermanentWidget(m_recording);
+	m_dateTimeWidget = new QLabel(tr("Date"), this);
+	m_dateTimeWidget->setToolTip(tr("Current date/time"));
+	statusBar()->addPermanentWidget(m_dateTimeWidget);
 }
 
 void MainWindow::closeEvent(QCloseEvent*)
@@ -275,12 +272,6 @@ void MainWindow::closeEvent(QCloseEvent*)
 void MainWindow::updateCenterFreqDisplay()
 {
 	m_deviceUIs.back()->m_spectrum->setCenterFrequency(m_centerFrequency);
-}
-
-void MainWindow::updateSampleRate()
-{
-	m_deviceUIs.back()->m_spectrum->setSampleRate(m_sampleRate);
-	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
 
 void MainWindow::updatePresetControls()
@@ -337,7 +328,6 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 void MainWindow::applySettings()
 {
 	updateCenterFreqDisplay();
-	updateSampleRate();
 }
 
 void MainWindow::handleMessages()
@@ -605,6 +595,11 @@ void MainWindow::on_action_About_triggered()
 {
 	AboutDialog dlg(this);
 	dlg.exec();
+}
+
+void MainWindow::updateStatus()
+{
+    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-ddThh:mm:ss t"));
 }
 
 MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
