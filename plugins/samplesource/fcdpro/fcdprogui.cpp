@@ -19,7 +19,10 @@
 #include "ui_fcdprogui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "dsp/filesink.h"
 #include "fcdprogui.h"
 #include "fcdproconst.h"
 
@@ -139,10 +142,19 @@ FCDProGui::FCDProGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_sampleSource = new FCDProInput();
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
+    m_fileSink = new FileSink(std::string(recFileNameCStr));
+    m_pluginAPI->addSink(m_fileSink);
+
+    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FCDProGui::~FCDProGui()
 {
+    m_pluginAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 	delete ui;
 }
 
@@ -203,6 +215,35 @@ bool FCDProGui::deserialize(const QByteArray& data)
 bool FCDProGui::handleMessage(const Message& message)
 {
 	return false;
+}
+
+void FCDProGui::handleDSPMessages()
+{
+    Message* message;
+
+    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("FCDProGui::handleDSPMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("FCDProGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+            m_fileSink->handleMessage(*notif); // forward to file sink
+
+            delete message;
+        }
+    }
+}
+
+void FCDProGui::updateSampleRateAndFrequency()
+{
+    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void FCDProGui::displaySettings()
@@ -393,6 +434,20 @@ void FCDProGui::on_startStop_toggled(bool checked)
     {
         m_pluginAPI->stopAcquistion();
         DSPEngine::instance()->stopAudio();
+    }
+}
+
+void FCDProGui::on_record_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
     }
 }
 
