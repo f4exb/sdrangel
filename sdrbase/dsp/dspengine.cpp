@@ -49,11 +49,6 @@ MessageQueue* DSPEngine::getInputMessageQueue(uint deviceIndex)
 	return m_deviceEngines[deviceIndex]->getInputMessageQueue();
 }
 
-MessageQueue* DSPEngine::getOutputMessageQueue(uint deviceIndex)
-{
-	return m_deviceEngines[deviceIndex]->getOutputMessageQueue();
-}
-
 void DSPEngine::stopAllAcquisitions()
 {
     std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();

@@ -46,7 +46,7 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new HackRFInput();
+	m_sampleSource = new HackRFInput(m_pluginAPI);
 
 	displaySampleRates();
 	displayBandwidths();

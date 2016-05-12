@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -28,7 +29,8 @@
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
 
-BladerfInput::BladerfInput() :
+BladerfInput::BladerfInput(PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_settings(),
 	m_dev(0),
 	m_bladerfThread(0),
@@ -413,7 +415,7 @@ bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
 	{
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
 	}
 
 	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

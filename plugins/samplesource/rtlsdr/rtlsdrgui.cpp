@@ -51,7 +51,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new RTLSDRInput();
+	m_sampleSource = new RTLSDRInput(m_pluginAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 

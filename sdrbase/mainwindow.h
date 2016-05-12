@@ -122,7 +122,6 @@ private:
 
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
-	void updateCenterFreqDisplay();
 	void updatePresetControls();
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();

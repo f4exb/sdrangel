@@ -59,7 +59,7 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new BladerfInput();
+	m_sampleSource = new BladerfInput(m_pluginAPI);
 	DSPEngine::instance()->setSource(m_sampleSource);
 
 	char recFileNameCStr[30];

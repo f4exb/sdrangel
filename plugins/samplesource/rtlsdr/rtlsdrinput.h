@@ -23,6 +23,7 @@
 #include <rtl-sdr.h>
 #include <QString>
 
+class PluginAPI;
 class RTLSDRThread;
 
 class RTLSDRInput : public SampleSource {
@@ -67,7 +68,7 @@ public:
 		{ }
 	};
 
-	RTLSDRInput();
+	RTLSDRInput(PluginAPI *pluginAPI);
 	virtual ~RTLSDRInput();
 
 	virtual bool init(const Message& message);
@@ -83,6 +84,7 @@ public:
 	void set_ds_mode(int on);
 
 private:
+	PluginAPI *m_pluginAPI;
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;

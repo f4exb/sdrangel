@@ -46,7 +46,7 @@ AirspyGui::AirspyGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new AirspyInput();
+	m_sampleSource = new AirspyInput(m_pluginAPI);
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));

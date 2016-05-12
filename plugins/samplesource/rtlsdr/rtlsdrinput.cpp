@@ -21,13 +21,15 @@
 #include "rtlsdrinput.h"
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
+#include "plugin/pluginapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
-RTLSDRInput::RTLSDRInput() :
+RTLSDRInput::RTLSDRInput(PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_settings(),
 	m_dev(0),
 	m_rtlSDRThread(0),
@@ -230,7 +232,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
         forwardChange = true;
-        
+
 		if(m_dev != 0)
 		{
 			if( rtlsdr_set_sample_rate(m_dev, settings.m_devSampleRate) < 0)
@@ -264,7 +266,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
         forwardChange = true;
-        
+
 		if(m_dev != 0)
 		{
 			m_settings.m_log2Decim = settings.m_log2Decim;
@@ -352,7 +354,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 			qDebug("rtlsdr_set_center_freq(%lld) failed", m_settings.m_centerFrequency);
 		}
 	}*/
-    
+
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
@@ -369,7 +371,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
 	return true;

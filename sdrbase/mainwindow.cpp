@@ -276,11 +276,6 @@ void MainWindow::closeEvent(QCloseEvent*)
 {
 }
 
-void MainWindow::updateCenterFreqDisplay()
-{
-	m_deviceUIs.back()->m_spectrum->setCenterFrequency(m_centerFrequency);
-}
-
 void MainWindow::updatePresetControls()
 {
 	ui->presetTree->resizeColumnToContents(0);
@@ -334,7 +329,6 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 
 void MainWindow::applySettings()
 {
-	updateCenterFreqDisplay();
 }
 
 void MainWindow::handleMessages()

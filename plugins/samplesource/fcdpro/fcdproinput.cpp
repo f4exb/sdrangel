@@ -20,6 +20,8 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
+
+#include "plugin/pluginapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "fcdproinput.h"
@@ -31,7 +33,8 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCD, Message)
 
-FCDProInput::FCDProInput() :
+FCDProInput::FCDProInput(PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
@@ -344,7 +347,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
     }
 }
 

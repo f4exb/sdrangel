@@ -20,6 +20,7 @@
 
 #include "airspygui.h"
 #include "airspyinput.h"
+#include "plugin/pluginapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
@@ -28,7 +29,8 @@
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
-AirspyInput::AirspyInput() :
+AirspyInput::AirspyInput(PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_settings(),
 	m_dev(0),
 	m_airspyThread(0),
@@ -449,7 +451,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 	{
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
 	}
 
 	return true;

@@ -39,7 +39,6 @@ public:
 	static DSPEngine *instance();
 
 	MessageQueue* getInputMessageQueue(uint deviceIndex = 0);
-	MessageQueue* getOutputMessageQueue(uint deviceIndex = 0);
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
 

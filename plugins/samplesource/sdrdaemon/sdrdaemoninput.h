@@ -24,6 +24,7 @@
 #include <iostream>
 #include <stdint.h>
 
+class PluginAPI;
 class SDRdaemonUDPHandler;
 
 class SDRdaemonInput : public SampleSource {
@@ -273,7 +274,7 @@ public:
 		{ }
 	};
 
-	SDRdaemonInput(const QTimer& masterTimer);
+	SDRdaemonInput(const QTimer& masterTimer, PluginAPI *pluginAPI);
 	virtual ~SDRdaemonInput();
 
 	virtual bool init(const Message& message);
@@ -289,6 +290,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
+	PluginAPI *m_pluginAPI;
 	QMutex m_mutex;
 	QString m_address;
 	quint16 m_port;

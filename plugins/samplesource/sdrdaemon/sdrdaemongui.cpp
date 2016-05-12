@@ -88,7 +88,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer());
+	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer(), m_pluginAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
 

@@ -22,6 +22,7 @@
 #include "hackrfsettings.h"
 #include <QString>
 
+class PluginAPI;
 class HackRFThread;
 
 class HackRFInput : public SampleSource {
@@ -64,7 +65,7 @@ public:
 		{ }
 	};
 
-	HackRFInput();
+	HackRFInput(PluginAPI *pluginAPI);
 	virtual ~HackRFInput();
 
 	virtual bool init(const Message& message);
@@ -82,6 +83,7 @@ private:
 	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
+	PluginAPI *m_pluginAPI;
 	QMutex m_mutex;
 	HackRFSettings m_settings;
 	struct hackrf_device* m_dev;

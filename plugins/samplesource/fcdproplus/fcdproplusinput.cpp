@@ -19,6 +19,8 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
+
+#include "plugin/pluginapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "fcdproplusinput.h"
@@ -30,7 +32,8 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 
-FCDProPlusInput::FCDProPlusInput() :
+FCDProPlusInput::FCDProPlusInput(PluginAPI *pluginAPI) :
+    m_pluginApi(pluginAPI),
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
@@ -177,7 +180,7 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 			set_bias_t(settings.m_biasT);
 		}
 	}
-    
+
 	if ((m_settings.m_mixGain != settings.m_mixGain) || force)
 	{
 		m_settings.m_mixGain = settings.m_mixGain;
@@ -243,7 +246,8 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 	if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.m_centerFrequency);
-		DSPEngine::instance()->getInputMessageQueue()->push(notif);
+		m_pluginApi->getDeviceInputMessageQueue()->push(notif);
+		//DSPEngine::instance()->getInputMessageQueue()->push(notif);
     }
 }
 

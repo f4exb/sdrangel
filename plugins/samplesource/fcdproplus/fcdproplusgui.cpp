@@ -58,7 +58,7 @@ FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new FCDProPlusInput();
+	m_sampleSource = new FCDProPlusInput(m_pluginAPI);
 	DSPEngine::instance()->setSource(m_sampleSource);
 
 	char recFileNameCStr[30];

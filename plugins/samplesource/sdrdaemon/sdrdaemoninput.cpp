@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -37,7 +38,8 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message)
 
-SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer) :
+SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),
 	m_SDRdaemonUDPHandler(0),
