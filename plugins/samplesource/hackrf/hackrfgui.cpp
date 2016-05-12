@@ -21,7 +21,10 @@
 
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "dsp/filesink.h"
 #include "hackrfgui.h"
 #include "ui_hackrfgui.h"
 
@@ -49,10 +52,19 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displayBandwidths();
 
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
+    m_fileSink = new FileSink(std::string(recFileNameCStr));
+    m_pluginAPI->addSink(m_fileSink);
+
+    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 HackRFGui::~HackRFGui()
 {
+    m_pluginAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
@@ -111,6 +123,35 @@ bool HackRFGui::deserialize(const QByteArray& data)
 bool HackRFGui::handleMessage(const Message& message)
 {
 	return false;
+}
+
+void HackRFGui::handleDSPMessages()
+{
+    Message* message;
+
+    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("HackRFGui::handleDSPMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("HackRFGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+            m_fileSink->handleMessage(*notif); // forward to file sink
+
+            delete message;
+        }
+    }
+}
+
+void HackRFGui::updateSampleRateAndFrequency()
+{
+    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void HackRFGui::displaySettings()
@@ -298,6 +339,20 @@ void HackRFGui::on_startStop_toggled(bool checked)
     {
         m_pluginAPI->stopAcquistion();
         DSPEngine::instance()->stopAudio();
+    }
+}
+
+void HackRFGui::on_record_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
     }
 }
 
