@@ -25,6 +25,7 @@
 #define AIRSPY_MAX_DEVICE (32)
 
 class PluginAPI;
+class FileSink;
 
 namespace Ui {
 	class AirspyGui;
@@ -60,13 +61,18 @@ private:
 	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;
 	SampleSource* m_sampleSource;
+    FileSink *m_fileSink; //!< File sink to record device I/Q output
+    int m_sampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
 
 	void displaySettings();
 	void displaySampleRates();
 	void sendSettings();
+    void updateSampleRateAndFrequency();
 
 private slots:
+    void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);
 	void on_dcOffset_toggled(bool checked);
@@ -81,6 +87,7 @@ private slots:
 	void on_lnaAGC_stateChanged(int state);
 	void on_mixAGC_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
 	void updateHardware();
     void updateStatus();
 	void handleSourceMessages();
