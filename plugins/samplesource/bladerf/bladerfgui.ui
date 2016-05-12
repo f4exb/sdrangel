@@ -56,7 +56,7 @@
          <item>
           <widget class="ButtonSwitch" name="record">
            <property name="toolTip">
-            <string>Record I/Q samples from device</string>
+            <string>Toggle record I/Q samples from device</string>
            </property>
            <property name="text">
             <string/>
