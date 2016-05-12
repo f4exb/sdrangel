@@ -25,7 +25,10 @@
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+
 #include "mainwindow.h"
 
 #include "filesourcegui.h"
@@ -65,6 +68,8 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -123,6 +128,27 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 	}
 }
 
+void FileSourceGui::handleDSPMessages()
+{
+    Message* message;
+
+    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("FileSourceGui::handleDSPMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_deviceSampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("FileSourceGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+
+            delete message;
+        }
+    }
+}
+
 bool FileSourceGui::handleMessage(const Message& message)
 {
 	if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
@@ -165,6 +191,13 @@ void FileSourceGui::handleSourceMessages()
 			delete message;
 		}
 	}
+}
+
+void FileSourceGui::updateSampleRateAndFrequency()
+{
+    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void FileSourceGui::displaySettings()

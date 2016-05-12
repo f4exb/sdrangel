@@ -63,17 +63,21 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 	bool m_enableNavTime;
+    int m_deviceSampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 
 	void displaySettings();
 	void displayTime();
 	void sendSettings();
+    void updateSampleRateAndFrequency();
 	void configureFileName();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
 
 private slots:
+    void handleDSPMessages();
 	void handleSourceMessages();
 	void on_startStop_toggled(bool checked);
 	void on_playLoop_toggled(bool checked);
