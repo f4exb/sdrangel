@@ -124,7 +124,7 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 		MsgConfigureSDRdaemonAutoCorr& conf = (MsgConfigureSDRdaemonAutoCorr&) message;
 		bool dcBlock = conf.getDCBlock();
 		bool iqImbalance = conf.getIQImbalance();
-		DSPEngine::instance()->configureCorrections(dcBlock, iqImbalance);
+		m_pluginAPI->configureCorrections(dcBlock, iqImbalance);
 		return true;
 	}
     else if (MsgConfigureSDRdaemonAutoFollowPolicy::match(message))

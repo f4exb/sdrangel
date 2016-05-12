@@ -228,13 +228,13 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 	if (m_settings.m_dcBlock != settings.m_dcBlock)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
 	if (m_settings.m_iqCorrection != settings.m_iqCorrection)
 	{
 		m_settings.m_iqCorrection = settings.m_iqCorrection;
-		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)

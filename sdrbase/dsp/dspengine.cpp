@@ -127,12 +127,6 @@ void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 	m_audioOutput.removeFifo(audioFifo);
 }
 
-void DSPEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, uint deviceIndex)
-{
-	qDebug("DSPEngine::configureCorrections(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
-}
-
 DSPDeviceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
 {
     std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();

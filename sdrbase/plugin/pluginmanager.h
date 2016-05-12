@@ -65,6 +65,11 @@ public:
     MessageQueue *getDeviceInputMessageQueue() { return m_dspDeviceEngine->getInputMessageQueue(); }
     MessageQueue *getDeviceOutputMessageQueue() { return m_dspDeviceEngine->getOutputMessageQueue(); }
 
+    void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection) //!< Configure current device engine DSP corrections
+    {
+        m_dspDeviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+    }
+
     GLSpectrum *getSpectrum() { return m_spectrum; }
 
 	void loadSettings(const Preset* preset);

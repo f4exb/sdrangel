@@ -55,6 +55,7 @@ public:
     uint getDeviceUID() const;            //!< Return the current device engine unique ID
     MessageQueue *getDeviceInputMessageQueue();
     MessageQueue *getDeviceOutputMessageQueue();
+    void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
     GLSpectrum *getSpectrum();
 

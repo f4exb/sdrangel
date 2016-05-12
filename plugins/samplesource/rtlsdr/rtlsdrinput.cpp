@@ -358,13 +358,13 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
 	}
 
 	if ((m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
 	{
 		m_settings.m_iqImbalance = settings.m_iqImbalance;
-		DSPEngine::instance()->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
 	}
 
     if (forwardChange)

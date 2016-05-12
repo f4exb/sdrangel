@@ -118,6 +118,11 @@ MessageQueue *PluginAPI::getDeviceOutputMessageQueue()
     return m_pluginManager->getDeviceOutputMessageQueue();
 }
 
+void PluginAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
+{
+    m_pluginManager->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+}
+
 GLSpectrum *PluginAPI::getSpectrum()
 {
     return m_pluginManager->getSpectrum();
