@@ -30,12 +30,13 @@
 class SampleFifo;
 class MessageQueue;
 class QTimer;
+class PluginAPI;
 
 class SDRdaemonUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonUDPHandler(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI);
+	SDRdaemonUDPHandler(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, PluginAPI *pluginAPI);
 	~SDRdaemonUDPHandler();
 	void connectTimer(const QTimer* timer);
 	void start();
@@ -49,6 +50,7 @@ public slots:
 	void dataReadyRead();
 
 private:
+	PluginAPI *m_pluginAPI;
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;

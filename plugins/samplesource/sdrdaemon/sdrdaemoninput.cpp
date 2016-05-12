@@ -52,7 +52,7 @@ SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, PluginAPI *pluginAPI) 
     m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI());
+	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_pluginAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 }
 

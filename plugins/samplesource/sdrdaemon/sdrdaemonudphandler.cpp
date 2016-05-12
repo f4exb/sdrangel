@@ -18,12 +18,15 @@
 #include <QDebug>
 #include <QTimer>
 #include <unistd.h>
+
+#include "plugin/pluginapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "sdrdaemonudphandler.h"
 #include "sdrdaemoninput.h"
 
-SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI) :
+SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, PluginAPI *pluginAPI) :
+    m_pluginAPI(pluginAPI),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
@@ -88,7 +91,7 @@ void SDRdaemonUDPHandler::start()
 
 	// Need to notify the DSP engine to actually start
 	DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
-	DSPEngine::instance()->getInputMessageQueue()->push(notif);
+	m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
     m_elapsedTimer.start();
 }
 
@@ -169,7 +172,7 @@ void SDRdaemonUDPHandler::processData()
 			if (change)
 			{
 				DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
-				DSPEngine::instance()->getInputMessageQueue()->push(notif);
+				m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
 				SDRdaemonInput::MsgReportSDRdaemonStreamData *report = SDRdaemonInput::MsgReportSDRdaemonStreamData::create(
 					m_sdrDaemonBuffer.getSampleRateStream(),
 					m_samplerate,
