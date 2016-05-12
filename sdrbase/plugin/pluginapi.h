@@ -18,6 +18,7 @@ class MessageQueue;
 class MainWindow;
 class ChannelMarker;
 class ThreadedSampleSink;
+class GLSpectrum;
 class PluginGUI;
 
 class SDRANGEL_API PluginAPI : public QObject {
@@ -42,13 +43,20 @@ public:
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
 	// Device engine stuff
-	void addThreadedSink(ThreadedSampleSink* sink);
-	void removeThreadedSink(ThreadedSampleSink* sink);
+    void addSink(SampleSink* sink);       //!< Add a sample sink to device engine
+    void removeSink(SampleSink* sink);    //!< Remove a sample sink from device engine
+	void addThreadedSink(ThreadedSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
+	void removeThreadedSink(ThreadedSampleSink* sink);  //!< Remove a sample sink that runs on its own thread from device engine
     bool initAcquisition();               //!< Initialize device engine acquisition sequence
     bool startAcquisition();              //!< Start device engine acquisition sequence
     void stopAcquistion();                //!< Stop device engine acquisition sequence
     DSPDeviceEngine::State state() const; //!< device engine state
     QString errorMessage();               //!< Return the current device engine error message
+    uint getDeviceUID() const;            //!< Return the current device engine unique ID
+    MessageQueue *getDeviceInputMessageQueue();
+    MessageQueue *getDeviceOutputMessageQueue();
+
+    GLSpectrum *getSpectrum();
 
 	// R/O access to main window
 	const MainWindow* getMainWindow() const { return m_mainWindow; }

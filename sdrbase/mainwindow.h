@@ -37,7 +37,7 @@ class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
-class FileSink;
+//class FileSink;
 class SampleSource;
 class PluginAPI;
 class PluginGUI;
@@ -96,7 +96,7 @@ private:
 	MainSettings m_settings;
 
 	SpectrumVis* m_rxSpectrumVis;
-	FileSink *m_fileSink;
+//	FileSink *m_fileSink;
 
 	std::vector<DeviceUISet*> m_deviceUIs;
 
@@ -135,8 +135,8 @@ private:
 private slots:
 	void handleDSPMessages();
 	void handleMessages();
-	void on_action_Start_Recording_triggered();
-	void on_action_Stop_Recording_triggered();
+//	void on_action_Start_Recording_triggered();
+//	void on_action_Stop_Recording_triggered();
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();

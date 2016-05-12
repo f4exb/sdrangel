@@ -8,8 +8,8 @@
 #include <ctime>
 #include "dsp/samplesink.h"
 #include "util/export.h"
-#include "util/message.h"
-#include "util/messagequeue.h"
+
+class Message;
 
 class SDRANGEL_API FileSink : public SampleSink {
 public:
@@ -22,11 +22,12 @@ public:
     };
 
 	FileSink();
+    FileSink(const std::string& filename);
 	virtual ~FileSink();
-    
+
     quint64 getByteCount() const { return m_byteCount; }
 
-	void configure(MessageQueue* msgQueue, const std::string& filename);
+    void setFileName(const std::string& filename);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -37,26 +38,6 @@ public:
     static void readHeader(std::ifstream& samplefile, Header& header);
 
 private:
-	class MsgConfigureFileSink : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const std::string& getFileName() const { return m_fileName; }
-
-		static MsgConfigureFileSink* create(const std::string& fileName)
-		{
-			return new MsgConfigureFileSink(fileName);
-		}
-
-	private:
-		std::string m_fileName;
-
-		MsgConfigureFileSink(const std::string& fileName) :
-			Message(),
-			m_fileName(fileName)
-		{ }
-	};
-
 	std::string m_fileName;
 	int m_sampleRate;
 	quint64 m_centerFrequency;

@@ -58,6 +58,16 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
+void PluginAPI::addSink(SampleSink* sink)
+{
+    m_pluginManager->addSink(sink);
+}
+
+void PluginAPI::removeSink(SampleSink* sink)
+{
+    m_pluginManager->removeSink(sink);
+}
+
 void PluginAPI::addThreadedSink(ThreadedSampleSink* sink)
 {
     m_pluginManager->addThreadedSink(sink);
@@ -91,6 +101,26 @@ DSPDeviceEngine::State PluginAPI::state() const
 QString PluginAPI::errorMessage()
 {
     return m_pluginManager->errorMessage();
+}
+
+uint PluginAPI::getDeviceUID() const
+{
+    return m_pluginManager->getDeviceUID();
+}
+
+MessageQueue *PluginAPI::getDeviceInputMessageQueue()
+{
+    return m_pluginManager->getDeviceInputMessageQueue();
+}
+
+MessageQueue *PluginAPI::getDeviceOutputMessageQueue()
+{
+    return m_pluginManager->getDeviceOutputMessageQueue();
+}
+
+GLSpectrum *PluginAPI::getSpectrum()
+{
+    return m_pluginManager->getSpectrum();
 }
 
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :

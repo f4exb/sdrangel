@@ -42,6 +42,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
      <item>
       <widget class="ButtonSwitch" name="startStop">
+       <property name="toolTip">
+        <string>start/stop acquisition</string>
+       </property>
        <property name="text">
         <string/>
        </property>

@@ -14,7 +14,10 @@ class Preset;
 class MainWindow;
 class SampleSource;
 class Message;
+class MessageQueue;
 class DSPDeviceEngine;
+class GLSpectrum;
+class SampleSink;
 class ThreadedSampleSink;
 
 class SDRANGEL_API PluginManager : public QObject {
@@ -36,7 +39,7 @@ public:
 
 	typedef QList<Plugin> Plugins;
 
-	explicit PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, QObject* parent = NULL);
+	explicit PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent = NULL);
 	~PluginManager();
 	void loadPlugins();
 
@@ -49,13 +52,20 @@ public:
 
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void addThreadedSink(ThreadedSampleSink* sink);
-	void removeThreadedSink(ThreadedSampleSink* sink);
+	void addSink(SampleSink* sink);
+	void removeSink(SampleSink* sink);
+    void addThreadedSink(ThreadedSampleSink* sink);
+    void removeThreadedSink(ThreadedSampleSink* sink);
     bool initAcquisition() { return m_dspDeviceEngine->initAcquisition(); }   //!< Initialize device engine acquisition sequence
     bool startAcquisition() { return m_dspDeviceEngine->startAcquisition(); } //!< Start device engine acquisition sequence
     void stopAcquistion() { m_dspDeviceEngine->stopAcquistion(); }            //!< Stop device engine acquisition sequence
     DSPDeviceEngine::State state() const { return m_dspDeviceEngine->state(); }
     QString errorMessage() { return m_dspDeviceEngine->errorMessage(); }      //!< Return the current device engine error message
+    uint getDeviceUID() const { return m_dspDeviceEngine->getUID(); }         //!< Return the current device engine unique ID
+    MessageQueue *getDeviceInputMessageQueue() { return m_dspDeviceEngine->getInputMessageQueue(); }
+    MessageQueue *getDeviceOutputMessageQueue() { return m_dspDeviceEngine->getOutputMessageQueue(); }
+
+    GLSpectrum *getSpectrum() { return m_spectrum; }
 
 	void loadSettings(const Preset* preset);
 	void loadSourceSettings(const Preset* preset);
@@ -132,6 +142,7 @@ private:
 	PluginAPI m_pluginAPI;
 	MainWindow* m_mainWindow;
 	DSPDeviceEngine* m_dspDeviceEngine;
+	GLSpectrum* m_spectrum;
 	Plugins m_plugins;
 
 	ChannelRegistrations m_channelRegistrations;

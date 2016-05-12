@@ -1,11 +1,9 @@
 #include "dsp/filesink.h"
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
-#include "util/messagequeue.h"
+#include "util/message.h"
 
 #include <QDebug>
-
-MESSAGE_CLASS_DEFINITION(FileSink::MsgConfigureFileSink, Message)
 
 FileSink::FileSink() :
 	SampleSink(),
@@ -19,15 +17,29 @@ FileSink::FileSink() :
 	setObjectName("FileSink");
 }
 
+FileSink::FileSink(const std::string& filename) :
+    SampleSink(),
+    m_fileName(std::string(filename)),
+    m_sampleRate(0),
+    m_centerFrequency(0),
+    m_recordOn(false),
+    m_recordStart(false),
+    m_byteCount(0)
+{
+    setObjectName("FileSink");
+}
+
 FileSink::~FileSink()
 {
     stopRecording();
 }
 
-void FileSink::configure(MessageQueue* msgQueue, const std::string& filename)
+void FileSink::setFileName(const std::string& filename)
 {
-	Message* cmd = MsgConfigureFileSink::create(filename);
-	msgQueue->push(cmd);
+    if (!m_recordOn)
+    {
+        m_fileName = filename;
+    }
 }
 
 void FileSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -94,13 +106,6 @@ bool FileSink::handleMessage(const Message& message)
 				<< " m_centerFrequency: " << m_centerFrequency;
 		return true;
 	}
-	else if (MsgConfigureFileSink::match(message))
-    {
-        MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
-        handleConfigure(conf.getFileName());
-        qDebug() << "FileSink::handleMessage: MsgConfigureFileSink: fileName: " << m_fileName.c_str();
-        return true;
-    }
     else
     {
         return false;
@@ -113,7 +118,7 @@ void FileSink::handleConfigure(const std::string& fileName)
     {
         stopRecording();
     }
-    
+
 	m_fileName = fileName;
 }
 

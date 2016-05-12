@@ -22,7 +22,10 @@
 #include "ui_bladerfgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "dsp/filesink.h"
 #include "bladerfgui.h"
 
 BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
@@ -31,6 +34,7 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_pluginAPI(pluginAPI),
 	m_settings(),
 	m_sampleSource(NULL),
+	m_sampleRate(0),
 	m_lastEngineState((DSPDeviceEngine::State)-1)
 {
 	ui->setupUi(this);
@@ -57,10 +61,19 @@ BladerfGui::BladerfGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_sampleSource = new BladerfInput();
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+	char recFileNameCStr[30];
+	sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
+    m_fileSink = new FileSink(std::string(recFileNameCStr));
+    m_pluginAPI->addSink(m_fileSink);
+
+    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 BladerfGui::~BladerfGui()
 {
+    m_pluginAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
@@ -127,6 +140,37 @@ bool BladerfGui::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+void BladerfGui::handleDSPMessages()
+{
+    Message* message;
+
+    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("BladerfGui::handleDSPMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("BladerfGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+//          updateCenterFreqDisplay();
+            updateSampleRateAndFrequency();
+//          qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
+//          m_fileSink->handleMessage(*notif);
+
+            delete message;
+        }
+    }
+}
+
+void BladerfGui::updateSampleRateAndFrequency()
+{
+    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateLabel->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void BladerfGui::displaySettings()
@@ -322,6 +366,20 @@ void BladerfGui::on_startStop_toggled(bool checked)
     {
         m_pluginAPI->stopAcquistion();
         DSPEngine::instance()->stopAudio();
+    }
+}
+
+void BladerfGui::on_record_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
     }
 }
 

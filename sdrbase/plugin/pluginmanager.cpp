@@ -10,11 +10,12 @@
 
 #include <QDebug>
 
-PluginManager::PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, QObject* parent) :
+PluginManager::PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
 	m_mainWindow(mainWindow),
 	m_dspDeviceEngine(dspDeviceEngine),
+	m_spectrum(spectrum),
 	m_sampleSourceId(),
 	m_sampleSourceSerial(),
 	m_sampleSourceSequence(0),
@@ -84,6 +85,16 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 			<< " with source name " << sourceName.toStdString().c_str();
 
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
+}
+
+void PluginManager::addSink(SampleSink* sink)
+{
+    m_dspDeviceEngine->addSink(sink);
+}
+
+void PluginManager::removeSink(SampleSink* sink)
+{
+    m_dspDeviceEngine->removeSink(sink);
 }
 
 void PluginManager::addThreadedSink(ThreadedSampleSink* sink)

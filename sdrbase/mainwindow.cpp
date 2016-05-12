@@ -38,7 +38,7 @@
 #include "gui/audiodialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
-#include "dsp/filesink.h"
+//#include "dsp/filesink.h"
 #include "dsp/dspcommands.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
@@ -105,13 +105,13 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	DSPDeviceEngine *dspDeviceEngine = m_dspEngine->getDeviceEngineByIndex(0);
 
-    connect(dspDeviceEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+//    connect(dspDeviceEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
     dspDeviceEngine->start();
 
-    m_pluginManager = new PluginManager(this, dspDeviceEngine);
-	m_pluginManager->loadPlugins();
+    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
 
-	m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+	m_pluginManager->loadPlugins();
 
 	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
 	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
@@ -123,8 +123,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
-	m_fileSink = new FileSink();
-	dspDeviceEngine->addSink(m_fileSink); // TODO: one file sink per device engine
+//	m_fileSink = new FileSink();
+//	dspDeviceEngine->addSink(m_fileSink); // TODO: one file sink per device engine
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -174,9 +174,9 @@ MainWindow::~MainWindow()
 		delete m_deviceUIs[i];
 	}
 
-	m_dspEngine->removeSink(m_fileSink); // TODO: one file sink per device engine
-	//m_dspEngine->removeSink(m_rxSpectrumVis);
-	delete m_fileSink;
+//	m_dspEngine->removeSink(m_fileSink); // TODO: one file sink per device engine
+//	//m_dspEngine->removeSink(m_rxSpectrumVis);
+//	delete m_fileSink;
 	//delete m_rxSpectrumVis;
 	delete m_pluginManager;
 
@@ -364,9 +364,7 @@ void MainWindow::handleDSPMessages()
 
 	while ((message = m_dspEngine->getOutputMessageQueue()->pop()) != 0)
 	{
-		qDebug("Message: %s", message->getIdentifier());
-
-		std::cerr << "MainWindow::handleDSPMessages: " << message->getIdentifier() << std::endl;
+		qDebug("MainWindow::handleDSPMessages: message: %s", message->getIdentifier());
 
 		if (DSPSignalNotification::match(*message))
 		{
@@ -376,8 +374,8 @@ void MainWindow::handleDSPMessages()
 			qDebug("SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
 			updateCenterFreqDisplay();
 			updateSampleRate();
-			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
-			m_fileSink->handleMessage(*notif);
+//			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
+//			m_fileSink->handleMessage(*notif);
 
 			delete message;
 		}
@@ -390,8 +388,7 @@ void MainWindow::handleMessages()
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		qDebug("Message: %s", message->getIdentifier());
-		std::cerr << "MainWindow::handleMessages: " << message->getIdentifier() << std::endl;
+		qDebug("MainWindow::handleMessages: message: %s", message->getIdentifier());
 
 		if (!m_pluginManager->handleMessage(*message))
 		{
@@ -400,17 +397,17 @@ void MainWindow::handleMessages()
 	}
 }
 
-void MainWindow::on_action_Start_Recording_triggered()
-{
-	m_recording->setColor(Qt::red);
-	m_fileSink->startRecording();
-}
-
-void MainWindow::on_action_Stop_Recording_triggered()
-{
-	m_recording->setColor(Qt::gray);
-	m_fileSink->stopRecording();
-}
+//void MainWindow::on_action_Start_Recording_triggered()
+//{
+//	m_recording->setColor(Qt::red);
+//	m_fileSink->startRecording();
+//}
+//
+//void MainWindow::on_action_Stop_Recording_triggered()
+//{
+//	m_recording->setColor(Qt::gray);
+//	m_fileSink->stopRecording();
+//}
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 {

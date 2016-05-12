@@ -288,7 +288,7 @@ void RTLSDRGui::updateStatus()
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
             case DSPDeviceEngine::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : cyan; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DSPDeviceEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");

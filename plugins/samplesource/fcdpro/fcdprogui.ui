@@ -25,6 +25,9 @@
   <property name="windowTitle">
    <string>FunCubeDongle</string>
   </property>
+  <property name="toolTip">
+   <string>start/stop acquisition</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>
