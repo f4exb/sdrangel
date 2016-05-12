@@ -55,6 +55,9 @@
          </item>
          <item>
           <widget class="ButtonSwitch" name="record">
+           <property name="toolTip">
+            <string>Record I/Q samples from device</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -72,7 +75,7 @@
          <item>
           <widget class="QLabel" name="deviceRateLabel">
            <property name="toolTip">
-            <string>Sample rate kS/s</string>
+            <string>I/Q sample rate kS/s</string>
            </property>
            <property name="text">
             <string>00000k</string>

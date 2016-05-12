@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_RTLSDRGUI_H
 #define INCLUDE_RTLSDRGUI_H
 
@@ -6,6 +22,7 @@
 #include "rtlsdrinput.h"
 
 class PluginAPI;
+class FileSink;
 
 namespace Ui {
 	class RTLSDRGui;
@@ -39,12 +56,17 @@ private:
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
+    FileSink *m_fileSink; //!< File sink to record device I/Q output
+    int m_sampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 
 	void displaySettings();
 	void sendSettings();
+	void updateSampleRateAndFrequency();
 
 private slots:
+    void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
@@ -55,6 +77,7 @@ private slots:
 	void on_sampleRate_currentIndexChanged(int index);
 	void on_checkBox_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
 	void handleSourceMessages();

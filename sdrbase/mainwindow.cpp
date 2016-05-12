@@ -38,7 +38,6 @@
 #include "gui/audiodialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
-//#include "dsp/filesink.h"
 #include "dsp/dspcommands.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
@@ -104,8 +103,6 @@ MainWindow::MainWindow(QWidget* parent) :
     // TODO: This will go in a create new device and device tab method:
 
 	DSPDeviceEngine *dspDeviceEngine = m_dspEngine->getDeviceEngineByIndex(0);
-
-//    connect(dspDeviceEngine->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
     dspDeviceEngine->start();
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
@@ -122,9 +119,6 @@ MainWindow::MainWindow(QWidget* parent) :
 	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
 	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
 	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
-
-//	m_fileSink = new FileSink();
-//	dspDeviceEngine->addSink(m_fileSink); // TODO: one file sink per device engine
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -174,10 +168,6 @@ MainWindow::~MainWindow()
 		delete m_deviceUIs[i];
 	}
 
-//	m_dspEngine->removeSink(m_fileSink); // TODO: one file sink per device engine
-//	//m_dspEngine->removeSink(m_rxSpectrumVis);
-//	delete m_fileSink;
-	//delete m_rxSpectrumVis;
 	delete m_pluginManager;
 
 	m_dspEngine->stopAllDeviceEngines();
@@ -193,8 +183,6 @@ void MainWindow::addChannelCreateAction(QAction* action)
 void MainWindow::addChannelRollup(QWidget* widget)
 {
 	m_deviceUIs.back()->m_channelWindow->addRollupWidget(widget);
-	//((ChannelWindow*)ui->rxChannels)->addRollupWidget(widget);
-	//((ChannelWindow*)ui->channelDock->widget())->addRollupWidget(widget);
 	ui->channelDock->show();
 	ui->channelDock->raise();
 }
@@ -206,13 +194,11 @@ void MainWindow::addViewAction(QAction* action)
 
 void MainWindow::addChannelMarker(ChannelMarker* channelMarker)
 {
-	//ui->rxSpectrum->addChannelMarker(channelMarker);
 	m_deviceUIs.back()->m_spectrum->addChannelMarker(channelMarker);
 }
 
 void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	//ui->rxSpectrum->removeChannelMarker(channelMarker);
 	m_deviceUIs.back()->m_spectrum->removeChannelMarker(channelMarker);
 }
 
@@ -243,7 +229,6 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	//ui->rxSpectrumGUI->deserialize(preset->getSpectrumConfig());
 	m_deviceUIs.back()->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
 	m_pluginManager->loadSettings(preset);
 
@@ -265,7 +250,6 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	//preset->setSpectrumConfig(ui->rxSpectrumGUI->serialize());
 	preset->setSpectrumConfig(m_deviceUIs.back()->m_spectrumGUI->serialize());
 	preset->clearChannels();
     m_pluginManager->saveSettings(preset);
@@ -290,13 +274,11 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::updateCenterFreqDisplay()
 {
-	//ui->rxSpectrum->setCenterFrequency(m_centerFrequency);
 	m_deviceUIs.back()->m_spectrum->setCenterFrequency(m_centerFrequency);
 }
 
 void MainWindow::updateSampleRate()
 {
-	//ui->rxSpectrum->setSampleRate(m_sampleRate);
 	m_deviceUIs.back()->m_spectrum->setSampleRate(m_sampleRate);
 	m_sampleRateWidget->setText(tr("Rate: %1 kHz").arg((float)m_sampleRate / 1000));
 }
@@ -358,30 +340,6 @@ void MainWindow::applySettings()
 	updateSampleRate();
 }
 
-void MainWindow::handleDSPMessages()
-{
-	Message* message;
-
-	while ((message = m_dspEngine->getOutputMessageQueue()->pop()) != 0)
-	{
-		qDebug("MainWindow::handleDSPMessages: message: %s", message->getIdentifier());
-
-		if (DSPSignalNotification::match(*message))
-		{
-			DSPSignalNotification* notif = (DSPSignalNotification*) message;
-			m_sampleRate = notif->getSampleRate();
-			m_centerFrequency = notif->getCenterFrequency();
-			qDebug("SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
-			updateCenterFreqDisplay();
-			updateSampleRate();
-//			qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
-//			m_fileSink->handleMessage(*notif);
-
-			delete message;
-		}
-	}
-}
-
 void MainWindow::handleMessages()
 {
 	Message* message;
@@ -396,18 +354,6 @@ void MainWindow::handleMessages()
 		}
 	}
 }
-
-//void MainWindow::on_action_Start_Recording_triggered()
-//{
-//	m_recording->setColor(Qt::red);
-//	m_fileSink->startRecording();
-//}
-//
-//void MainWindow::on_action_Stop_Recording_triggered()
-//{
-//	m_recording->setColor(Qt::gray);
-//	m_fileSink->stopRecording();
-//}
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 {
@@ -535,8 +481,6 @@ void MainWindow::on_presetImport_clicked()
 				preset->setGroup(group); // override with current group
 
 				ui->presetTree->setCurrentItem(addPresetToTree(preset));
-//				loadPresetSettings(preset);
-//				applySettings();
 			}
 			else
 			{
@@ -652,8 +596,6 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
 	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-	//m_pluginManager->selectSampleSourceByIndex(ui->sampleSource->currentIndex());
-	//m_settings.setSourceIndex(ui->sampleSource->currentIndex());
 	m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
 	m_settings.setSourceIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
 	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());

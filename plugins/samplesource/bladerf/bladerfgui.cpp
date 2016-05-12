@@ -156,10 +156,8 @@ void BladerfGui::handleDSPMessages()
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("BladerfGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
-//          updateCenterFreqDisplay();
             updateSampleRateAndFrequency();
-//          qDebug() << "MainWindow::handleDSPMessages: forward to file sink";
-//          m_fileSink->handleMessage(*notif);
+            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }

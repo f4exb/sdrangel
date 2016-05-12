@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QDebug>
 #include <QMessageBox>
 
@@ -5,7 +21,10 @@
 #include "ui_rtlsdrgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
+#include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "dsp/filesink.h"
 
 RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	QWidget(parent),
@@ -35,10 +54,19 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource = new RTLSDRInput();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	DSPEngine::instance()->setSource(m_sampleSource);
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
+    m_fileSink = new FileSink(std::string(recFileNameCStr));
+    m_pluginAPI->addSink(m_fileSink);
+
+    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 RTLSDRGui::~RTLSDRGui()
 {
+    m_pluginAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 	delete ui;
 }
 
@@ -123,6 +151,28 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	}
 }
 
+void RTLSDRGui::handleDSPMessages()
+{
+    Message* message;
+
+    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("RTLSDRGui::handleDSPMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("RTLSDRGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+            m_fileSink->handleMessage(*notif); // forward to file sink
+
+            delete message;
+        }
+    }
+}
+
 void RTLSDRGui::handleSourceMessages()
 {
 	Message* message;
@@ -136,6 +186,13 @@ void RTLSDRGui::handleSourceMessages()
 			delete message;
 		}
 	}
+}
+
+void RTLSDRGui::updateSampleRateAndFrequency()
+{
+    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void RTLSDRGui::displaySettings()
@@ -266,6 +323,20 @@ void RTLSDRGui::on_startStop_toggled(bool checked)
     {
         m_pluginAPI->stopAcquistion();
         DSPEngine::instance()->stopAudio();
+    }
+}
+
+void RTLSDRGui::on_record_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
     }
 }
 
