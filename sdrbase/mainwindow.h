@@ -105,6 +105,7 @@ private:
 	int m_lastEngineState;
 
 	QLabel* m_dateTimeWidget;
+	QLabel* m_showSystemWidget;
 
 	QWidget* m_inputGUI;
 

@@ -25,6 +25,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QSysInfo>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -173,6 +174,9 @@ MainWindow::~MainWindow()
 
 	m_dspEngine->stopAllDeviceEngines();
 
+	delete m_dateTimeWidget;
+	delete m_showSystemWidget;
+
 	delete ui;
 }
 
@@ -260,6 +264,9 @@ void MainWindow::savePresetSettings(Preset* preset)
 
 void MainWindow::createStatusBar()
 {
+    m_showSystemWidget = new QLabel("SDRangel v2.0.0 " + QSysInfo::prettyProductName(), this);
+    statusBar()->addPermanentWidget(m_showSystemWidget);
+
 	m_dateTimeWidget = new QLabel(tr("Date"), this);
 	m_dateTimeWidget->setToolTip(tr("Current date/time"));
 	statusBar()->addPermanentWidget(m_dateTimeWidget);
