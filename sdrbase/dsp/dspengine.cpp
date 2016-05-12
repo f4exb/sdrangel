@@ -91,30 +91,6 @@ void DSPEngine::stopAudio()
     }
 }
 
-void DSPEngine::setSource(SampleSource* source, uint deviceIndex)
-{
-	qDebug("DSPEngine::setSource(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->setSource(source);
-}
-
-void DSPEngine::setSourceSequence(int sequence, uint deviceIndex)
-{
-	qDebug("DSPEngine::setSource(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->setSourceSequence(sequence);
-}
-
-void DSPEngine::addSink(SampleSink* sink, uint deviceIndex)
-{
-	qDebug("DSPEngine::setSource(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->addSink(sink);
-}
-
-void DSPEngine::removeSink(SampleSink* sink, uint deviceIndex)
-{
-	qDebug("DSPEngine::removeSink(%d)", deviceIndex);
-	m_deviceEngines[deviceIndex]->removeSink(sink);
-}
-
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
 {
 	qDebug("DSPEngine::addAudioSink");

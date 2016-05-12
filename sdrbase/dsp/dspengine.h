@@ -46,12 +46,6 @@ public:
 	void startAudio();
 	void stopAudio();
 
-	void setSource(SampleSource* source, uint deviceIndex = 0); //!< Set the sample source type
-	void setSourceSequence(int sequence, uint deviceIndex = 0); //!< Set the sample source sequence in type
-
-	void addSink(SampleSink* sink, uint deviceIndex = 0); //!< Add a sample sink
-	void removeSink(SampleSink* sink, uint deviceIndex = 0); //!< Remove a sample sink
-
     DSPDeviceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
     DSPDeviceEngine *getDeviceEngineByUID(uint uid);
 

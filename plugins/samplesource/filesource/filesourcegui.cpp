@@ -67,7 +67,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	DSPEngine::instance()->setSource(m_sampleSource);
+	m_pluginAPI->setSource(m_sampleSource);
 
     connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

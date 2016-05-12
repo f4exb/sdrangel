@@ -90,7 +90,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer(), m_pluginAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	DSPEngine::instance()->setSource(m_sampleSource);
+	m_pluginAPI->setSource(m_sampleSource);
 
 	displaySettings();
 	ui->applyButton->setEnabled(false);

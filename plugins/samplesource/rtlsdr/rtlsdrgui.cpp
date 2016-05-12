@@ -53,7 +53,7 @@ RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_sampleSource = new RTLSDRInput(m_pluginAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	DSPEngine::instance()->setSource(m_sampleSource);
+	m_pluginAPI->setSource(m_sampleSource);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());

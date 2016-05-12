@@ -78,6 +78,11 @@ void PluginAPI::removeThreadedSink(ThreadedSampleSink* sink)
     m_pluginManager->removeThreadedSink(sink);
 }
 
+void PluginAPI::setSource(SampleSource* source)
+{
+    m_pluginManager->setSource(source);
+}
+
 bool PluginAPI::initAcquisition()
 {
     return m_pluginManager->initAcquisition();

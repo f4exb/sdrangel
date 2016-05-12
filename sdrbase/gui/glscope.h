@@ -35,7 +35,6 @@
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
-class DSPEngine;
 class ScopeVis;
 class QPainter;
 
@@ -63,7 +62,7 @@ public:
 	GLScope(QWidget* parent = NULL);
 	~GLScope();
 
-	void setDSPEngine(DSPEngine* dspEngine);
+//	void setDSPEngine(DSPEngine* dspEngine);
 	void setAmp1(Real amp);
 	void setAmp1Ofs(Real ampOfs);
 	void setAmp2(Real amp);
@@ -122,10 +121,6 @@ private:
 	Real m_amp2;
 	Real m_ofs1;
 	Real m_ofs2;
-
-	// sample sink
-	DSPEngine* m_dspEngine;
-	ScopeVis* m_scopeVis;
 
 	// config
 	int m_timeBase;

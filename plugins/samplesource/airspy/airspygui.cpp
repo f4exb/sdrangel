@@ -50,7 +50,7 @@ AirspyGui::AirspyGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	DSPEngine::instance()->setSource(m_sampleSource);
+	m_pluginAPI->setSource(m_sampleSource);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());

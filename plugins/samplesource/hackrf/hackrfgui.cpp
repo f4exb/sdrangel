@@ -51,7 +51,7 @@ HackRFGui::HackRFGui(PluginAPI* pluginAPI, QWidget* parent) :
 	displaySampleRates();
 	displayBandwidths();
 
-	DSPEngine::instance()->setSource(m_sampleSource);
+	m_pluginAPI->setSource(m_sampleSource);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());

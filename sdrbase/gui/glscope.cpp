@@ -23,7 +23,6 @@
 #include <QOpenGLFunctions>
 #include <QSurface>
 #include "gui/glscope.h"
-#include "dsp/dspengine.h"
 
 #include <algorithm>
 #include <QDebug>
@@ -54,8 +53,6 @@ GLScope::GLScope(QWidget* parent) :
 	m_amp2(1.0),
 	m_ofs1(0.0),
 	m_ofs2(0.0),
-	m_dspEngine(NULL),
-	m_scopeVis(NULL),
 	//m_amp(1.0),
 	//m_ofs(0.0),
 	m_timeBase(1),
@@ -88,21 +85,6 @@ GLScope::GLScope(QWidget* parent) :
 GLScope::~GLScope()
 {
 	cleanup();
-
-	if(m_dspEngine != 0)
-	{
-		m_dspEngine->removeSink(m_scopeVis);
-		delete m_scopeVis;
-	}
-}
-
-void GLScope::setDSPEngine(DSPEngine* dspEngine)
-{
-	if((m_dspEngine == NULL) && (dspEngine != NULL)) {
-		m_dspEngine = dspEngine;
-		m_scopeVis = new ScopeVis(this);
-		m_dspEngine->addSink(m_scopeVis);
-	}
 }
 
 void GLScope::setSampleRate(int sampleRate) {

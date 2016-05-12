@@ -56,6 +56,7 @@ public:
 	void removeSink(SampleSink* sink);
     void addThreadedSink(ThreadedSampleSink* sink);
     void removeThreadedSink(ThreadedSampleSink* sink);
+    void setSource(SampleSource* source) { m_dspDeviceEngine->setSource(source); }; //!< Set device engine sample source type
     bool initAcquisition() { return m_dspDeviceEngine->initAcquisition(); }   //!< Initialize device engine acquisition sequence
     bool startAcquisition() { return m_dspDeviceEngine->startAcquisition(); } //!< Start device engine acquisition sequence
     void stopAcquistion() { m_dspDeviceEngine->stopAcquistion(); }            //!< Stop device engine acquisition sequence

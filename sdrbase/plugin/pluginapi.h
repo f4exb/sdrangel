@@ -46,6 +46,7 @@ public:
     void addSink(SampleSink* sink);       //!< Add a sample sink to device engine
     void removeSink(SampleSink* sink);    //!< Remove a sample sink from device engine
 	void addThreadedSink(ThreadedSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
+	void setSource(SampleSource* source); //!< Set device engine sample source type
 	void removeThreadedSink(ThreadedSampleSink* sink);  //!< Remove a sample sink that runs on its own thread from device engine
     bool initAcquisition();               //!< Initialize device engine acquisition sequence
     bool startAcquisition();              //!< Start device engine acquisition sequence
