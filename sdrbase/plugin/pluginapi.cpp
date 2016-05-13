@@ -21,7 +21,7 @@ MessageQueue* PluginAPI::getMainWindowMessageQueue()
 
 void PluginAPI::setInputGUI(QWidget* inputGUI)
 {
-	m_mainWindow->setInputGUI(inputGUI);
+    m_pluginManager->setInputGUI(inputGUI);
 }
 
 void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action)
@@ -46,12 +46,12 @@ void PluginAPI::removeChannelInstance(PluginGUI* pluginGUI)
 
 void PluginAPI::addChannelMarker(ChannelMarker* channelMarker)
 {
-	m_mainWindow->addChannelMarker(channelMarker);
+	m_mainWindow->addChannelMarker(channelMarker);    // TODO: suspect verify. No ref to main window expected.
 }
 
 void PluginAPI::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	m_mainWindow->removeChannelMarker(channelMarker);
+	m_mainWindow->removeChannelMarker(channelMarker); // TODO: suspect verify. No ref to main window expected.
 }
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)

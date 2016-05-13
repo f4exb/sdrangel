@@ -88,6 +88,12 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
+void PluginManager::setInputGUI(QWidget* gui)
+{
+    //m_mainWindow->setInputGUI(gui);
+    m_mainWindow->setInputGUI(m_deviceTabIndex, gui);
+}
+
 void PluginManager::addSink(SampleSink* sink)
 {
     m_dspDeviceEngine->addSink(sink);

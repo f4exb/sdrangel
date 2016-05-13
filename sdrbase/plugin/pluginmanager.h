@@ -51,6 +51,7 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+	void setInputGUI(QWidget* gui);
 
 	void addSink(SampleSink* sink);
 	void removeSink(SampleSink* sink);

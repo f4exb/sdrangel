@@ -78,7 +78,8 @@ public:
 	void addChannelMarker(ChannelMarker* channelMarker);
 	void removeChannelMarker(ChannelMarker* channelMarker);
 
-	void setInputGUI(QWidget* gui);
+//	void setInputGUI(QWidget* gui);
+	void setInputGUI(int deviceTabIndex, QWidget* gui);
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 
 private:
