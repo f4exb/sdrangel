@@ -60,6 +60,7 @@ public:
 		ChannelWindow *m_channelWindow;
 		QComboBox *m_sampleSource;
 		DSPDeviceEngine *m_deviceEngine;
+		PluginManager *m_pluginManager;
 
 		DeviceUISet(QTimer& timer);
 		~DeviceUISet();
@@ -93,8 +94,6 @@ private:
 	MessageQueue m_inputMessageQueue;
 
 	MainSettings m_settings;
-
-	SpectrumVis* m_rxSpectrumVis;
 
 	std::vector<DeviceUISet*> m_deviceUIs;
 
@@ -147,6 +146,8 @@ private slots:
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_sampleSource_currentIndexChanged(int index);
 	void on_action_About_triggered();
+	void on_action_addDevice_triggered();
+	void on_action_removeDevice_triggered();
 };
 
 #endif // INCLUDE_MAINWINDOW_H

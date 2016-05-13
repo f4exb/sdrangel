@@ -26,7 +26,7 @@ class SDRANGEL_API PluginAPI : public QObject {
 
 public:
 	// MainWindow access
-	QDockWidget* createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title);
+	//QDockWidget* createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title);
 	MessageQueue* getMainWindowMessageQueue();
 	void setInputGUI(QWidget* inputGUI);
 
@@ -68,6 +68,7 @@ protected:
 	MainWindow* m_mainWindow;
 
 	PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow);
+	~PluginAPI();
 
 	friend class PluginManager;
 };

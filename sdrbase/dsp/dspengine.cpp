@@ -59,6 +59,7 @@ void DSPEngine::removeLastDeviceEngine()
         DSPDeviceEngine *lastDeviceEngine = m_deviceEngines.back();
         delete lastDeviceEngine;
         m_deviceEngines.pop_back();
+        m_deviceEnginesUIDSequence--;
     }
 }
 

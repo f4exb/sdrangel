@@ -3,15 +3,16 @@
 #include "plugin/pluginmanager.h"
 #include "mainwindow.h"
 
-QDockWidget* PluginAPI::createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title)
-{
-	QDockWidget* dock = new QDockWidget(title, m_mainWindow);
-	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-	dock->setAttribute(Qt::WA_DeleteOnClose);
-	m_mainWindow->addDockWidget(dockWidgetArea, dock);
-	m_mainWindow->addViewAction(dock->toggleViewAction());
-	return dock;
-}
+// This was used in Tetra demod plugin which is not part of the build anymore
+//QDockWidget* PluginAPI::createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title)
+//{
+//	QDockWidget* dock = new QDockWidget(title, m_mainWindow);
+//	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+//	dock->setAttribute(Qt::WA_DeleteOnClose);
+//	m_mainWindow->addDockWidget(dockWidgetArea, dock);
+//	m_mainWindow->addViewAction(dock->toggleViewAction());
+//	return dock;
+//}
 
 MessageQueue* PluginAPI::getMainWindowMessageQueue()
 {
@@ -137,5 +138,9 @@ PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),
 	m_pluginManager(pluginManager),
 	m_mainWindow(mainWindow)
+{
+}
+
+PluginAPI::~PluginAPI()
 {
 }

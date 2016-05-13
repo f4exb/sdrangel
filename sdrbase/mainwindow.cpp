@@ -159,21 +159,24 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
-	m_dspEngine->stopAllAcquisitions();
+    saveSettings();
 
-	saveSettings();
+    while (m_deviceUIs.size() > 0)
+    {
+        removeLastDevice();
+    }
 
-	m_pluginManager->freeAll();
-
-	for (int i = 0; i < m_deviceUIs.size(); i++)
-	{
-		delete m_deviceUIs[i];
-	}
-
-	delete m_pluginManager;
-
-	m_dspEngine->stopAllDeviceEngines();
-
+//	m_dspEngine->stopAllAcquisitions(); // FIXME: also present in m_pluginManager->freeAll()
+//	//m_pluginManager->freeAll();
+//    for (int i = 0; i < m_deviceUIs.size(); i++)
+//    {
+//        m_deviceUIs[i]->m_pluginManager->freeAll();
+//        delete m_deviceUIs[i];
+//    }
+//
+//    m_dspEngine->stopAllDeviceEngines();
+//
+//    //delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
 
@@ -185,23 +188,57 @@ void MainWindow::addDevice()
     DSPDeviceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
     dspDeviceEngine->start();
 
+    uint dspDeviceEngineUID =  dspDeviceEngine->getUID();
     char tabNameCStr[16];
-    sprintf(tabNameCStr, "R%d", dspDeviceEngine->getUID());
+    sprintf(tabNameCStr, "R%d", dspDeviceEngineUID);
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+    m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
 
-    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
-    m_pluginManager->loadPlugins();
+    PluginManager *pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    m_deviceUIs.back()->m_pluginManager = pluginManager;
+    pluginManager->loadPlugins();
 
+    dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
-    dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
+
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-    m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
     connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
     m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
+
+    if (dspDeviceEngineUID == 0)
+    {
+        m_pluginManager = pluginManager;
+    }
+}
+
+void MainWindow::removeLastDevice()
+{
+    DSPDeviceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceEngine;
+    lastDeviceEngine->stopAcquistion();
+    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
+
+    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
+    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
+    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+
+    // PluginManager destructor does freeAll() which does stopAcquistion() but stopAcquistion()
+    // can be done several times only the first is active so it is fine to do it here
+    // On the other hand freeAll() must be executed only once
+    delete m_deviceUIs.back()->m_pluginManager;
+    //m_deviceUIs.back()->m_pluginManager->freeAll();
+
+    lastDeviceEngine->stop();
+    m_dspEngine->removeLastDeviceEngine();
+
+    ui->tabInputs->removeTab(ui->tabInputs->count() - 1);
+
+    delete m_deviceUIs.back();
+    m_deviceUIs.pop_back();
 }
 
 void MainWindow::addChannelCreateAction(QAction* action)
@@ -622,9 +659,22 @@ void MainWindow::on_action_About_triggered()
 	dlg.exec();
 }
 
+void MainWindow::on_action_addDevice_triggered()
+{
+    addDevice();
+}
+
+void MainWindow::on_action_removeDevice_triggered()
+{
+    if (m_deviceUIs.size() > 1)
+    {
+        removeLastDevice();
+    }
+}
+
 void MainWindow::updateStatus()
 {
-    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-ddThh:mm:ss t"));
+    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss t"));
 }
 
 MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
@@ -637,6 +687,7 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_channelWindow = new ChannelWindow;
 	m_sampleSource = new QComboBox;
 	m_deviceEngine = 0;
+	m_pluginManager = 0;
 
 	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
 	QFont font;

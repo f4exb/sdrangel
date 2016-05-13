@@ -91,8 +91,8 @@
     <property name="title">
      <string>&amp;Acquisition</string>
     </property>
-    <addaction name="action_Start_Recording"/>
-    <addaction name="action_Stop_Recording"/>
+    <addaction name="action_addDevice"/>
+    <addaction name="action_removeDevice"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="font">
@@ -545,26 +545,20 @@
     <font/>
    </property>
   </action>
-  <action name="action_Start_Recording">
+  <action name="action_addDevice">
    <property name="text">
-    <string>Start Recording</string>
+    <string>Add device</string>
    </property>
    <property name="font">
     <font/>
-   </property>
-   <property name="shortcut">
-    <string>F7</string>
    </property>
   </action>
-  <action name="action_Stop_Recording">
+  <action name="action_removeDevice">
    <property name="text">
-    <string>Stop Recording</string>
+    <string>Remove device</string>
    </property>
    <property name="font">
     <font/>
-   </property>
-   <property name="shortcut">
-    <string>F8</string>
    </property>
   </action>
   <action name="action_Audio">

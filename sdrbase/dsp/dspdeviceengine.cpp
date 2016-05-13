@@ -99,7 +99,6 @@ void DSPDeviceEngine::stopAcquistion()
 	m_syncMessenger.storeMessage(cmd);
 	handleSynchronousMessages();
 
-
 	if(m_dcOffsetCorrection)
 	{
 		qDebug("DC offset:%f,%f", m_iOffset, m_qOffset);
