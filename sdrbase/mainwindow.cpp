@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_settings.getSourceIndex();
-	sampleSourceIndex = m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex);
+	sampleSourceIndex = m_deviceUIs.back()->m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex);
 
 	if (sampleSourceIndex >= 0)
 	{
@@ -210,10 +210,10 @@ void MainWindow::addDevice()
     m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
 
-    if (dspDeviceEngineUID == 0)
-    {
-        m_pluginManager = pluginManager;
-    }
+//    if (dspDeviceEngineUID == 0)
+//    {
+//        m_pluginManager = pluginManager;
+//    }
 }
 
 void MainWindow::removeLastDevice()
@@ -270,6 +270,7 @@ void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 
 void MainWindow::setInputGUI(QWidget* gui)
 {
+    // FIXME: Ceci est un tres tres gros CACA!
 	if(m_inputGUI != 0)
 		ui->inputDock->widget()->layout()->removeWidget(m_inputGUI);
 	if(gui != 0)
@@ -295,8 +296,18 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	m_deviceUIs.back()->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-	m_pluginManager->loadSettings(preset);
+	// Load into currently selected source tab
+	int currentSourceTabIndex = ui->tabInputs->currentIndex();
+
+	if (currentSourceTabIndex >= 0)
+	{
+        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+        deviceUI->m_pluginManager->loadSettings(preset);
+	}
+
+//	m_deviceUIs.back()->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+//	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
 	restoreState(preset->getLayout());
@@ -318,7 +329,15 @@ void MainWindow::savePresetSettings(Preset* preset)
 
 	preset->setSpectrumConfig(m_deviceUIs.back()->m_spectrumGUI->serialize());
 	preset->clearChannels();
-    m_pluginManager->saveSettings(preset);
+
+    // Save from currently selected source tab
+    int currentSourceTabIndex = ui->tabInputs->currentIndex();
+
+    if (currentSourceTabIndex >= 0)
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        deviceUI->m_pluginManager->saveSettings(preset);
+    }
 
     preset->setLayout(saveState());
 }
@@ -399,11 +418,12 @@ void MainWindow::handleMessages()
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
 		qDebug("MainWindow::handleMessages: message: %s", message->getIdentifier());
-
-		if (!m_pluginManager->handleMessage(*message))
-		{
-			delete message;
-		}
+		delete message;
+//
+//		if (!m_pluginManager->handleMessage(*message))
+//		{
+//			delete message;
+//		}
 	}
 }
 
@@ -599,12 +619,12 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 	on_presetLoad_clicked();
 }
 
-void MainWindow::on_action_Loaded_Plugins_triggered()
-{
-	PluginsDialog pluginsDialog(m_pluginManager, this);
-
-	pluginsDialog.exec();
-}
+//void MainWindow::on_action_Loaded_Plugins_triggered()
+//{
+//	PluginsDialog pluginsDialog(m_pluginManager, this);
+//
+//	pluginsDialog.exec();
+//}
 
 void MainWindow::on_action_Audio_triggered()
 {
@@ -647,10 +667,17 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
-	m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-	m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
-	m_settings.setSourceIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
-	m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
+    // Do it in the currently selected source tab
+    int currentSourceTabIndex = ui->tabInputs->currentIndex();
+
+    if (currentSourceTabIndex >= 0)
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
+        m_settings.setSourceIndex(deviceUI->m_sampleSource->currentIndex());
+        deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
+    }
 }
 
 void MainWindow::on_action_About_triggered()
