@@ -39,7 +39,7 @@ public:
 
 	typedef QList<Plugin> Plugins;
 
-	explicit PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent = NULL);
+	explicit PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent = NULL);
 	~PluginManager();
 	void loadPlugins();
 
@@ -147,6 +147,7 @@ private:
 
 	PluginAPI m_pluginAPI;
 	MainWindow* m_mainWindow;
+	uint m_deviceTabIndex;
 	DSPDeviceEngine* m_dspDeviceEngine;
 	GLSpectrum* m_spectrum;
 	Plugins m_plugins;

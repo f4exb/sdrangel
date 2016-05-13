@@ -195,7 +195,7 @@ void MainWindow::addDevice()
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
 
-    PluginManager *pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
     m_deviceUIs.back()->m_pluginManager = pluginManager;
     pluginManager->loadPlugins();
 

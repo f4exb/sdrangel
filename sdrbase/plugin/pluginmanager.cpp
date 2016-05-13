@@ -10,10 +10,11 @@
 
 #include <QDebug>
 
-PluginManager::PluginManager(MainWindow* mainWindow, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent) :
+PluginManager::PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
 	m_mainWindow(mainWindow),
+	m_deviceTabIndex(deviceTabIndex),
 	m_dspDeviceEngine(dspDeviceEngine),
 	m_spectrum(spectrum),
 	m_sampleSourceId(),
