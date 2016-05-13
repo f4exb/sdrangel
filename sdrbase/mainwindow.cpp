@@ -93,6 +93,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
+	//ui->tabInputsVoew->setStyleSheet("background-color: rgb(46,46,46)");
+
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -120,7 +122,7 @@ MainWindow::MainWindow(QWidget* parent) :
 //	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
 //	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
 //	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-//	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
+//	ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -208,7 +210,7 @@ void MainWindow::addDevice()
     pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
     connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
     m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-    ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
+    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
 
 //    if (dspDeviceEngineUID == 0)
 //    {
@@ -235,7 +237,7 @@ void MainWindow::removeLastDevice()
     lastDeviceEngine->stop();
     m_dspEngine->removeLastDeviceEngine();
 
-    ui->tabInputs->removeTab(ui->tabInputs->count() - 1);
+    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
     delete m_deviceUIs.back();
     m_deviceUIs.pop_back();
@@ -280,7 +282,25 @@ void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 
 void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui)
 {
-    ui->stackInputs->addWidget(gui);
+    qDebug("MainWindow::setInputGUI: count before %d", ui->tabInputsView->count());
+
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "R%d", deviceTabIndex);
+
+
+    if (deviceTabIndex < ui->tabInputsView->count())
+    {
+        qDebug("MainWindow::setInputGUI: device index %d replace", deviceTabIndex);
+        ui->tabInputsView->removeTab(deviceTabIndex);
+        ui->tabInputsView->insertTab(deviceTabIndex, gui, tabNameCStr);
+    }
+    else
+    {
+        qDebug("MainWindow::setInputGUI: device index %d add", deviceTabIndex);
+        ui->tabInputsView->addTab(gui, tabNameCStr);
+    }
+
+    qDebug("MainWindow::setInputGUI: count after %d", ui->tabInputsView->count());
 }
 
 void MainWindow::loadSettings()
@@ -302,7 +322,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getDescription()));
 
 	// Load into currently selected source tab
-	int currentSourceTabIndex = ui->tabInputs->currentIndex();
+	int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
 
 	if (currentSourceTabIndex >= 0)
 	{
@@ -336,7 +356,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 	preset->clearChannels();
 
     // Save from currently selected source tab
-    int currentSourceTabIndex = ui->tabInputs->currentIndex();
+    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
 
     if (currentSourceTabIndex >= 0)
     {
@@ -673,7 +693,7 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
 {
     // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputs->currentIndex();
+    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
 
     if (currentSourceTabIndex >= 0)
     {
