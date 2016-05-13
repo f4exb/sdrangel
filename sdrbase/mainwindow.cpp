@@ -102,25 +102,25 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
 
-    // TODO: This will go in a create new device and device tab method:
+    addDevice(); // add the first device
 
-	DSPDeviceEngine *dspDeviceEngine = m_dspEngine->getDeviceEngineByIndex(0);
-    dspDeviceEngine->start();
-
-    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
-
-    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
-	m_pluginManager->loadPlugins();
-
-	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
-	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
-	dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
-	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
-	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
-	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
-	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
+//    DSPDeviceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
+//    dspDeviceEngine->start();
+//
+//    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+//
+//    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+//	m_pluginManager->loadPlugins();
+//
+//	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
+//	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
+//	dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+//	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
+//	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+//	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+//	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+//	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+//	ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
 
 	qDebug() << "MainWindow::MainWindow: loadSettings...";
 
@@ -178,6 +178,30 @@ MainWindow::~MainWindow()
 	delete m_showSystemWidget;
 
 	delete ui;
+}
+
+void MainWindow::addDevice()
+{
+    DSPDeviceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
+    dspDeviceEngine->start();
+
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "R%d", dspDeviceEngine->getUID());
+
+    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+
+    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    m_pluginManager->loadPlugins();
+
+    ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
+    ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
+    dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+    ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
+    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+    m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+    connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+    m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+    ui->tabInputs->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
 }
 
 void MainWindow::addChannelCreateAction(QAction* action)

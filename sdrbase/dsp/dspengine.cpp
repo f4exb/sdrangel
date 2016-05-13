@@ -20,10 +20,11 @@
 #include "dsp/dspengine.h"
 
 DSPEngine::DSPEngine() :
+    m_deviceEnginesUIDSequence(0),
 	m_audioSampleRate(48000), // Use default output device at 48 kHz
 	m_audioUsageCount(0)
 {
-    m_deviceEngines.push_back(new DSPDeviceEngine(0)); // TODO: multi device support
+    //m_deviceEngines.push_back(new DSPDeviceEngine(0)); // TODO: multi device support
 	m_dvSerialSupport = false;
 }
 
@@ -42,6 +43,23 @@ Q_GLOBAL_STATIC(DSPEngine, dspEngine)
 DSPEngine *DSPEngine::instance()
 {
 	return dspEngine;
+}
+
+DSPDeviceEngine *DSPEngine::addDeviceEngine()
+{
+    m_deviceEngines.push_back(new DSPDeviceEngine(m_deviceEnginesUIDSequence));
+    m_deviceEnginesUIDSequence++;
+    return m_deviceEngines.back();
+}
+
+void DSPEngine::removeLastDeviceEngine()
+{
+    if (m_deviceEngines.size() > 0)
+    {
+        DSPDeviceEngine *lastDeviceEngine = m_deviceEngines.back();
+        delete lastDeviceEngine;
+        m_deviceEngines.pop_back();
+    }
 }
 
 void DSPEngine::stopAllAcquisitions()

@@ -40,6 +40,8 @@ public:
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
 
+	DSPDeviceEngine *addDeviceEngine();
+	void removeLastDeviceEngine();
 	void stopAllAcquisitions();
 	void stopAllDeviceEngines();
 
@@ -81,6 +83,7 @@ public:
 
 private:
 	std::vector<DSPDeviceEngine*> m_deviceEngines;
+	uint m_deviceEnginesUIDSequence;
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;
