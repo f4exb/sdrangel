@@ -18,7 +18,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
-//#include <QComboBox>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -141,14 +140,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	if (sampleSourceIndex >= 0)
 	{
-		//bool sampleSourceSignalsBlocked = ui->sampleSource->blockSignals(true);
-		//ui->sampleSource->setCurrentIndex(sampleSourceIndex);
-		//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
-
-//		bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-//		m_deviceUIs.back()->m_sampleSource->setCurrentIndex(sampleSourceIndex);
-//		m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-
         bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
         m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->setCurrentIndex(sampleSourceIndex);
         m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
@@ -180,17 +171,6 @@ MainWindow::~MainWindow()
         removeLastDevice();
     }
 
-//	m_dspEngine->stopAllAcquisitions(); // FIXME: also present in m_pluginManager->freeAll()
-//	//m_pluginManager->freeAll();
-//    for (int i = 0; i < m_deviceUIs.size(); i++)
-//    {
-//        m_deviceUIs[i]->m_pluginManager->freeAll();
-//        delete m_deviceUIs[i];
-//    }
-//
-//    m_dspEngine->stopAllDeviceEngines();
-//
-//    //delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
 
@@ -211,6 +191,7 @@ void MainWindow::addDevice()
 
     PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
     m_deviceUIs.back()->m_pluginManager = pluginManager;
+    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
     pluginManager->loadPlugins();
 
     dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
@@ -218,23 +199,11 @@ void MainWindow::addDevice()
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-//    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-//    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
-//    connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
-//    m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-//    int tabInputsSelectIndex = ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
-
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
     pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector());
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
-//    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), tabNameCStr);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
-
-//    if (dspDeviceEngineUID == 0)
-//    {
-//        m_pluginManager = pluginManager;
-//    }
 }
 
 void MainWindow::removeLastDevice()
@@ -344,9 +313,6 @@ void MainWindow::loadPresetSettings(const Preset* preset)
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
         deviceUI->m_pluginManager->loadSettings(preset);
 	}
-
-//	m_deviceUIs.back()->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-//	m_pluginManager->loadSettings(preset);
 
 	// has to be last step
 	restoreState(preset->getLayout());
@@ -658,16 +624,6 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 	on_presetLoad_clicked();
 }
 
-void MainWindow::on_action_Loaded_Plugins_triggered() // TODO: to be moved to a tabbed UI
-{
-    if (m_deviceUIs.size() > 0)
-    {
-        DeviceUISet *deviceUISet = m_deviceUIs[0];
-        PluginsDialog pluginsDialog(deviceUISet->m_pluginManager, this);
-        pluginsDialog.exec();
-    }
-}
-
 void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialog audioDialog(m_audioDeviceInfo, this);
@@ -716,10 +672,6 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-
-//        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
-//        m_settings.setSourceIndex(deviceUI->m_sampleSource->currentIndex());
-
         deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
 

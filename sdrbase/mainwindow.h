@@ -27,7 +27,6 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
-//class QComboBox;
 class SamplingDeviceControl;
 
 class AudioDeviceInfo;
@@ -59,7 +58,6 @@ public:
 		GLSpectrum *m_spectrum;
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
-//		QComboBox *m_sampleSource;
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceEngine *m_deviceEngine;
 		PluginManager *m_pluginManager;
@@ -114,8 +112,6 @@ private:
 	quint64 m_centerFrequency;
 	std::string m_sampleFileName;
 
-//	PluginManager* m_pluginManager;
-
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset);
 	void savePresetSettings(Preset* preset);
@@ -143,7 +139,6 @@ private slots:
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
-	void on_action_Loaded_Plugins_triggered(); // TODO: to be moved to a tabbed UI
 	void on_action_Audio_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_sampleSource_currentIndexChanged(int index);
