@@ -282,16 +282,6 @@ void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 	m_deviceUIs.back()->m_spectrum->removeChannelMarker(channelMarker);
 }
 
-//void MainWindow::setInputGUI(QWidget* gui)
-//{
-//    // FIXME: Ceci est un tres tres gros CACA!
-//	if(m_inputGUI != 0)
-//		ui->inputDock->widget()->layout()->removeWidget(m_inputGUI);
-//	if(gui != 0)
-//		ui->inputDock->widget()->layout()->addWidget(gui);
-//	m_inputGUI = gui;
-//}
-
 void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui)
 {
     qDebug("MainWindow::setInputGUI: count before %d", ui->tabInputsView->count());

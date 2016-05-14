@@ -41,8 +41,8 @@ public:
 
 	explicit PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent = NULL);
 	~PluginManager();
-	void loadPlugins();
 
+	void loadPlugins();
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action);
