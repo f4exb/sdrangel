@@ -47,9 +47,9 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	QAction* action = new QAction(tr("&UDP Source"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceUDPSrc()));
-	m_pluginAPI->registerChannel("sdrangel.channel.udpsrc", this, action);
+//	QAction* action = new QAction(tr("&UDP Source"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceUDPSrc()));
+	m_pluginAPI->registerChannel("sdrangel.channel.udpsrc", this);
 }
 
 PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName)

@@ -31,7 +31,7 @@ public:
 	void setInputGUI(QWidget* inputGUI);
 
 	// Channel stuff
-	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action);
+	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action = 0);
 	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
 	void addChannelRollup(QWidget* pluginGUI);
 	void removeChannelInstance(PluginGUI* pluginGUI);

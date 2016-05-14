@@ -238,10 +238,10 @@ void MainWindow::removeLastDevice()
     m_deviceUIs.pop_back();
 }
 
-void MainWindow::addChannelCreateAction(QAction* action) // TODO: move to some tabbed UI
-{
-	ui->menu_Channels->addAction(action);
-}
+//void MainWindow::addChannelCreateAction(QAction* action) // TODO: move to some tabbed UI
+//{
+//	ui->menu_Channels->addAction(action);
+//}
 
 void MainWindow::addChannelRollup(QWidget* widget)
 {

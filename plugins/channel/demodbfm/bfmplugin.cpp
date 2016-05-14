@@ -47,9 +47,9 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register BFM demodulator
-	QAction* action = new QAction(tr("&Broadcast FM Demodulator"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceBFM()));
-	m_pluginAPI->registerChannel("sdrangel.channel.bfm", this, action);
+//	QAction* action = new QAction(tr("&Broadcast FM Demodulator"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceBFM()));
+	m_pluginAPI->registerChannel("sdrangel.channel.bfm", this);
 }
 
 PluginGUI* BFMPlugin::createChannel(const QString& channelName)

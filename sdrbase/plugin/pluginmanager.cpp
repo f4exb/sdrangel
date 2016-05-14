@@ -54,7 +54,7 @@ void PluginManager::loadPlugins()
 void PluginManager::registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action)
 {
 	m_channelRegistrations.append(ChannelRegistration(channelName, plugin));
-	m_mainWindow->addChannelCreateAction(action);
+//	m_mainWindow->addChannelCreateAction(action);
 }
 
 void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)

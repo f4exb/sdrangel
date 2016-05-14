@@ -28,9 +28,9 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	QAction* action = new QAction(tr("&TCP Source"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceTCPSrc()));
-	m_pluginAPI->registerChannel("sdrangel.channel.tcpsrc", this, action);
+//	QAction* action = new QAction(tr("&TCP Source"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceTCPSrc()));
+	m_pluginAPI->registerChannel("sdrangel.channel.tcpsrc", this);
 }
 
 PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName)

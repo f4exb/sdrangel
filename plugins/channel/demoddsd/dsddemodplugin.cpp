@@ -45,9 +45,9 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register DSD demodulator
-	QAction* action = new QAction(tr("&DSD Demodulator"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceDSDDemod()));
-	m_pluginAPI->registerChannel("sdrangel.channel.dsddemod", this, action);
+//	QAction* action = new QAction(tr("&DSD Demodulator"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceDSDDemod()));
+	m_pluginAPI->registerChannel("sdrangel.channel.dsddemod", this);
 }
 
 PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName)

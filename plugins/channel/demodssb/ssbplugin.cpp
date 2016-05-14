@@ -28,9 +28,9 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	QAction* action = new QAction(tr("&SSB Demodulator"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceSSB()));
-	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ssb", this, action);
+//	QAction* action = new QAction(tr("&SSB Demodulator"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceSSB()));
+	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ssb", this);
 }
 
 PluginGUI* SSBPlugin::createChannel(const QString& channelName)

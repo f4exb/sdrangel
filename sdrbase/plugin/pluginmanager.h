@@ -46,7 +46,7 @@ public:
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins
-	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action);
+	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action = 0);
 	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
 	void addChannelRollup(QWidget* pluginGUI);
 	void removeChannelInstance(PluginGUI* pluginGUI);

@@ -29,9 +29,9 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register AM demodulator
-	QAction* action = new QAction(tr("&AM Demodulator"), this);
+//	QAction* action = new QAction(tr("&AM Demodulator"), this);
 //	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceAM()));
-	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.am", this, action);
+	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.am", this);
 }
 
 PluginGUI* AMPlugin::createChannel(const QString& channelName)

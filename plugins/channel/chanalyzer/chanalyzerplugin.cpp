@@ -28,9 +28,9 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	QAction* action = new QAction(tr("&ChannelAnalyzer"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceChannelAnalyzer()));
-	m_pluginAPI->registerChannel("org.f4exb.sdrangelove.channel.chanalyzer", this, action);
+//	QAction* action = new QAction(tr("&ChannelAnalyzer"), this);
+//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceChannelAnalyzer()));
+	m_pluginAPI->registerChannel("org.f4exb.sdrangelove.channel.chanalyzer", this);
 }
 
 PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName)
