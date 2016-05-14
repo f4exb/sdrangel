@@ -18,7 +18,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
-#include <QComboBox>
+//#include <QComboBox>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -38,6 +38,7 @@
 #include "gui/rollupwidget.h"
 #include "gui/channelwindow.h"
 #include "gui/audiodialog.h"
+#include "gui/samplingdevicecontrol.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -144,9 +145,13 @@ MainWindow::MainWindow(QWidget* parent) :
 		//ui->sampleSource->setCurrentIndex(sampleSourceIndex);
 		//ui->sampleSource->blockSignals(sampleSourceSignalsBlocked);
 
-		bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-		m_deviceUIs.back()->m_sampleSource->setCurrentIndex(sampleSourceIndex);
-		m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+//		bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+//		m_deviceUIs.back()->m_sampleSource->setCurrentIndex(sampleSourceIndex);
+//		m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+
+        bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
+        m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->setCurrentIndex(sampleSourceIndex);
+        m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
 	}
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -213,11 +218,18 @@ void MainWindow::addDevice()
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
-    connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
-    m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
+//    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
+//    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
+//    connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+//    m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
+//    int tabInputsSelectIndex = ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, tabNameCStr);
+
+    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
+    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector());
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+    m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
+//    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), tabNameCStr);
+    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
 
 //    if (dspDeviceEngineUID == 0)
 //    {
@@ -255,7 +267,7 @@ void MainWindow::removeLastDevice()
     m_deviceUIs.pop_back();
 }
 
-void MainWindow::addChannelCreateAction(QAction* action)
+void MainWindow::addChannelCreateAction(QAction* action) // TODO: move to some tabbed UI
 {
 	ui->menu_Channels->addAction(action);
 }
@@ -646,12 +658,15 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 	on_presetLoad_clicked();
 }
 
-//void MainWindow::on_action_Loaded_Plugins_triggered()
-//{
-//	PluginsDialog pluginsDialog(m_pluginManager, this);
-//
-//	pluginsDialog.exec();
-//}
+void MainWindow::on_action_Loaded_Plugins_triggered() // TODO: to be moved to a tabbed UI
+{
+    if (m_deviceUIs.size() > 0)
+    {
+        DeviceUISet *deviceUISet = m_deviceUIs[0];
+        PluginsDialog pluginsDialog(deviceUISet->m_pluginManager, this);
+        pluginsDialog.exec();
+    }
+}
 
 void MainWindow::on_action_Audio_triggered()
 {
@@ -701,8 +716,13 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
-        m_settings.setSourceIndex(deviceUI->m_sampleSource->currentIndex());
+
+//        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_sampleSource->currentIndex());
+//        m_settings.setSourceIndex(deviceUI->m_sampleSource->currentIndex());
+
+        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+
         deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
     }
 }
@@ -749,7 +769,7 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_spectrumGUI = new GLSpectrumGUI;
 	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
 	m_channelWindow = new ChannelWindow;
-	m_sampleSource = new QComboBox;
+	m_samplingDeviceControl = new SamplingDeviceControl;
 	m_deviceEngine = 0;
 	m_pluginManager = 0;
 
@@ -763,7 +783,7 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 
 MainWindow::DeviceUISet::~DeviceUISet()
 {
-	delete m_sampleSource;
+	delete m_samplingDeviceControl;
 	delete m_channelWindow;
 	delete m_spectrumGUI;
 	delete m_spectrumVis;

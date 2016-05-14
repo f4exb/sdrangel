@@ -27,7 +27,8 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
-class QComboBox;
+//class QComboBox;
+class SamplingDeviceControl;
 
 class AudioDeviceInfo;
 class DSPEngine;
@@ -58,7 +59,8 @@ public:
 		GLSpectrum *m_spectrum;
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
-		QComboBox *m_sampleSource;
+//		QComboBox *m_sampleSource;
+		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceEngine *m_deviceEngine;
 		PluginManager *m_pluginManager;
 
@@ -75,8 +77,8 @@ public:
 	void addChannelRollup(QWidget* widget);
 	void addViewAction(QAction* action);
 
-	void addChannelMarker(ChannelMarker* channelMarker);
-	void removeChannelMarker(ChannelMarker* channelMarker);
+	void addChannelMarker(ChannelMarker* channelMarker);    // TODO: review this
+	void removeChannelMarker(ChannelMarker* channelMarker); // TODO: review this
 
 	void setInputGUI(int deviceTabIndex, QWidget* gui);
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
@@ -141,7 +143,7 @@ private slots:
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
-//	void on_action_Loaded_Plugins_triggered();
+	void on_action_Loaded_Plugins_triggered(); // TODO: to be moved to a tabbed UI
 	void on_action_Audio_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_sampleSource_currentIndexChanged(int index);

@@ -400,7 +400,7 @@
   </widget>
   <widget class="QDockWidget" name="inputSelectDock">
    <property name="windowTitle">
-    <string>Select Sample Source</string>
+    <string>Sampling devices control</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -424,7 +424,7 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>50</height>
+         <height>80</height>
         </size>
        </property>
        <property name="currentIndex">
@@ -437,7 +437,7 @@
   </widget>
   <widget class="QDockWidget" name="inputViewDock">
    <property name="windowTitle">
-    <string>Sample Source</string>
+    <string>Sampling devices</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>

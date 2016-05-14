@@ -131,6 +131,7 @@ set(sdrbase_SOURCES
 	sdrbase/gui/audiodialog.cpp
 	sdrbase/gui/presetitem.cpp
 	sdrbase/gui/rollupwidget.cpp
+	sdrbase/gui/samplingdevicecontrol.cpp
 	sdrbase/gui/scale.cpp
 	sdrbase/gui/scaleengine.cpp
 	sdrbase/gui/valuedial.cpp
@@ -216,6 +217,7 @@ set(sdrbase_HEADERS
 	sdrbase/gui/audiodialog.h
 	sdrbase/gui/presetitem.h
 	sdrbase/gui/rollupwidget.h
+	sdrbase/gui/samplingdevicecontrol.h
 	sdrbase/gui/scale.h
 	sdrbase/gui/scaleengine.h
 	sdrbase/gui/valuedial.h
@@ -258,6 +260,7 @@ set(sdrbase_FORMS
 	sdrbase/gui/glspectrumgui.ui
 	sdrbase/gui/pluginsdialog.ui
 	sdrbase/gui/audiodialog.ui
+	sdrbase/gui/samplingdevicecontrol.ui
 )
 
 set(sdrbase_RESOURCES
