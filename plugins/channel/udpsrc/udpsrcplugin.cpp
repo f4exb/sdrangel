@@ -18,7 +18,6 @@
 #include "udpsrcplugin.h"
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
 #include "udpsrcgui.h"
@@ -47,8 +46,6 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-//	QAction* action = new QAction(tr("&UDP Source"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceUDPSrc()));
 	m_pluginAPI->registerChannel("sdrangel.channel.udpsrc", this);
 }
 

@@ -24,9 +24,9 @@ void PluginAPI::setInputGUI(QWidget* inputGUI)
     m_pluginManager->setInputGUI(inputGUI);
 }
 
-void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action)
+void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plugin)
 {
-	m_pluginManager->registerChannel(channelName, plugin, action);
+	m_pluginManager->registerChannel(channelName, plugin);
 }
 
 void PluginAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)

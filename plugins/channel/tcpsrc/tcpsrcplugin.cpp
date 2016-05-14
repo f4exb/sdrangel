@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "tcpsrcplugin.h"
 #include "tcpsrcgui.h"
@@ -28,8 +27,6 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-//	QAction* action = new QAction(tr("&TCP Source"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceTCPSrc()));
 	m_pluginAPI->registerChannel("sdrangel.channel.tcpsrc", this);
 }
 

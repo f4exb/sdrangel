@@ -71,7 +71,6 @@ public:
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
-//	void addChannelCreateAction(QAction* action);
 	void addChannelRollup(QWidget* widget);
 	void addViewAction(QAction* action);
 

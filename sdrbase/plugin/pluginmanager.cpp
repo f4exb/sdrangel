@@ -51,10 +51,9 @@ void PluginManager::loadPlugins()
 	updateSampleSourceDevices();
 }
 
-void PluginManager::registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action)
+void PluginManager::registerChannel(const QString& channelName, PluginInterface* plugin)
 {
 	m_channelRegistrations.append(ChannelRegistration(channelName, plugin));
-//	m_mainWindow->addChannelCreateAction(action);
 }
 
 void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)

@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "loraplugin.h"
 #include "lorademodgui.h"
@@ -28,8 +27,6 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-//	QAction* action = new QAction(tr("&LoRa Demodulator"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceLoRa()));
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.lora", this);
 }
 

@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
 #include "wfmdemodgui.h"
@@ -29,8 +28,6 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register WFM demodulator
-//	QAction* action = new QAction(tr("&WFM Demodulator"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceWFM()));
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.wfm", this);
 }
 

@@ -1,7 +1,6 @@
 #include "amplugin.h"
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "amdemodgui.h"
 
@@ -29,8 +28,6 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register AM demodulator
-//	QAction* action = new QAction(tr("&AM Demodulator"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceAM()));
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.am", this);
 }
 

@@ -118,17 +118,6 @@
     </property>
     <addaction name="action_About"/>
    </widget>
-   <widget class="QMenu" name="menu_Channels">
-    <property name="font">
-     <font>
-      <family>Sans Serif</family>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="title">
-     <string>&amp;Channels</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menu_Window">
     <property name="font">
      <font>
@@ -150,7 +139,6 @@
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Acquisition"/>
-   <addaction name="menu_Channels"/>
    <addaction name="menu_Window"/>
    <addaction name="menuPreferences"/>
    <addaction name="menu_Help"/>

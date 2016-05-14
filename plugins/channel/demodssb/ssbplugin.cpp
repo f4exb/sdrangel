@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "ssbplugin.h"
 #include "ssbdemodgui.h"
@@ -28,8 +27,6 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-//	QAction* action = new QAction(tr("&SSB Demodulator"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceSSB()));
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ssb", this);
 }
 

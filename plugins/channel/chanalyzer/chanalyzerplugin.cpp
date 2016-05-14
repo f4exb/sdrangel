@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "chanalyzergui.h"
 #include "chanalyzerplugin.h"
@@ -28,8 +27,6 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-//	QAction* action = new QAction(tr("&ChannelAnalyzer"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceChannelAnalyzer()));
 	m_pluginAPI->registerChannel("org.f4exb.sdrangelove.channel.chanalyzer", this);
 }
 

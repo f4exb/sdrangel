@@ -1,5 +1,4 @@
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "nfmplugin.h"
 #include "nfmdemodgui.h"
@@ -28,8 +27,6 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register NFM demodulator
-//	QAction* action = new QAction(tr("&NFM Demodulator"), this);
-//	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceNFM()));
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.nfm", this);
 }
 
