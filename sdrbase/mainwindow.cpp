@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
 	//ui->tabInputsVoew->setStyleSheet("background-color: rgb(46,46,46)");
-	ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); } ");
+	ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
@@ -162,6 +162,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	updatePresetControls();
 
 	qDebug() << "MainWindow::MainWindow: end";
+
+	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
 }
 
 MainWindow::~MainWindow()
@@ -732,6 +734,16 @@ void MainWindow::on_action_removeDevice_triggered()
     {
         removeLastDevice();
     }
+}
+
+void MainWindow::tabInputViewIndexChanged()
+{
+    int inputViewIndex = ui->tabInputsView->currentIndex();
+
+    ui->tabSpectra->setCurrentIndex(inputViewIndex);
+    ui->tabChannels->setCurrentIndex(inputViewIndex);
+    ui->tabInputsSelect->setCurrentIndex(inputViewIndex);
+    ui->tabSpectraGUI->setCurrentIndex(inputViewIndex);
 }
 
 void MainWindow::updateStatus()
