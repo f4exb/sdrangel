@@ -97,8 +97,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
-	//ui->tabInputsVoew->setStyleSheet("background-color: rgb(46,46,46)");
-	ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); }");
+	//ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); }");
+    ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); } QToolButton::checked { background: rgb(128,70,0); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
