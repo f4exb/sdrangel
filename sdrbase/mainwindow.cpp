@@ -715,7 +715,7 @@ void MainWindow::on_action_About_triggered()
 
 void MainWindow::on_action_addDevice_triggered()
 {
-    addDevice();
+//    addDevice(); TODO: re-activate when plugin issues are solved
 }
 
 void MainWindow::on_action_removeDevice_triggered()
