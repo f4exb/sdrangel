@@ -29,19 +29,6 @@
    <item>
     <layout class="QHBoxLayout" name="deviceSelectLayout">
      <item>
-      <widget class="QLabel" name="deviceSelectLabel">
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Dev</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QComboBox" name="deviceSelect">
        <property name="toolTip">
         <string>Select sampling device</string>
@@ -74,12 +61,44 @@
      <item>
       <widget class="QComboBox" name="channelSelect">
        <property name="toolTip">
+        <string>Select channel plugin</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addChannel">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
         <string>Add a new channel</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/plusw.png</normaloff>:/plusw.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="showLoadedPlugins">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>20</width>
@@ -90,7 +109,11 @@
         <string>Show loaded plugins</string>
        </property>
        <property name="text">
-        <string>?</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/questionmark.png</normaloff>:/questionmark.png</iconset>
        </property>
       </widget>
      </item>
@@ -98,6 +121,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

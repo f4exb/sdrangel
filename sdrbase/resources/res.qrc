@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>questionmark.png</file>
     <file>res.qrc</file>
     <file>export.png</file>
     <file>import.png</file>
