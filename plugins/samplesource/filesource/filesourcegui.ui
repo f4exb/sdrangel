@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>289</width>
-    <height>227</height>
+    <width>246</width>
+    <height>190</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>246</width>
+    <height>190</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -409,13 +415,6 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_rate2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_nav">
      <item>
       <widget class="QSlider" name="navTimeSlider">
@@ -434,6 +433,30 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="padLayout">
+     <item>
+      <spacer name="verticaPadlSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_rate2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_nav">

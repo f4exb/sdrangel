@@ -74,26 +74,31 @@ MainWindow::MainWindow(QWidget* parent) :
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
 	// work around broken Qt dock widget ordering
-	removeDockWidget(ui->inputDock);
+	removeDockWidget(ui->inputSelectDock);
+    removeDockWidget(ui->inputViewDock);
 	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
 	removeDockWidget(ui->channelDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->inputDock);
+	addDockWidget(Qt::LeftDockWidgetArea, ui->inputSelectDock);
+    addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
-	ui->inputDock->show();
+	ui->inputSelectDock->show();
+    ui->inputSelectDock->show();
 	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
 	ui->channelDock->show();
 
-	ui->menu_Window->addAction(ui->inputDock->toggleViewAction());
+	ui->menu_Window->addAction(ui->inputSelectDock->toggleViewAction());
+    ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
 	//ui->tabInputsVoew->setStyleSheet("background-color: rgb(46,46,46)");
+	ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); } ");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
@@ -237,6 +242,11 @@ void MainWindow::removeLastDevice()
     lastDeviceEngine->stop();
     m_dspEngine->removeLastDeviceEngine();
 
+    if (ui->tabInputsView->count() == ui->tabInputsSelect->count())
+    {
+        ui->tabInputsView->removeTab(ui->tabInputsView->count() - 1);
+    }
+
     ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
     delete m_deviceUIs.back();
@@ -322,7 +332,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 		qPrintable(preset->getDescription()));
 
 	// Load into currently selected source tab
-	int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+	int currentSourceTabIndex = ui->tabInputsView->currentIndex();
 
 	if (currentSourceTabIndex >= 0)
 	{
@@ -356,7 +366,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 	preset->clearChannels();
 
     // Save from currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+    int currentSourceTabIndex = ui->tabInputsView->currentIndex();
 
     if (currentSourceTabIndex >= 0)
     {

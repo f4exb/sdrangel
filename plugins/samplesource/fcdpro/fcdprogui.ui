@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>318</width>
-    <height>400</height>
+    <width>270</width>
+    <height>335</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>270</width>
+    <height>335</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -66,7 +72,7 @@
              <normaloff>:/record_off.png</normaloff>:/record_off.png</iconset>
            </property>
           </widget>
-         </item>         
+         </item>
         </layout>
        </item>
        <item>
@@ -83,8 +89,8 @@
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
-         </item>        
-        </layout>       
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
@@ -429,6 +435,23 @@
      </item>
      <item>
       <widget class="QComboBox" name="gain6"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="padLayout">
+     <item>
+      <spacer name="verticalPadSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
