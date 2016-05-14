@@ -191,8 +191,10 @@ void MainWindow::addDevice()
 
     PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
     m_deviceUIs.back()->m_pluginManager = pluginManager;
-    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
     pluginManager->loadPlugins();
+
+    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
+    m_deviceUIs.back()->m_samplingDeviceControl->populateChannelSelector();
 
     dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);

@@ -45,12 +45,13 @@ public:
 	void loadPlugins();
 	const Plugins& getPlugins() const { return m_plugins; }
 
+	// Callbacks from the plugins
 	void registerChannel(const QString& channelName, PluginInterface* plugin, QAction* action);
 	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
 	void addChannelRollup(QWidget* pluginGUI);
 	void removeChannelInstance(PluginGUI* pluginGUI);
-
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+
 	void setInputGUI(QWidget* gui);
 
 	void addSink(SampleSink* sink);
@@ -88,6 +89,9 @@ public:
 	int selectSampleSourceByIndex(int index);
 	int selectFirstSampleSource(const QString& sourceId);
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence);
+
+	void populateChannelComboBox(QComboBox *channels);
+	void createChannelInstance(int channelPluginIndex);
 
 private:
 	struct ChannelRegistration {

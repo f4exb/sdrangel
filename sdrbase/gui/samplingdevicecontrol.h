@@ -39,6 +39,7 @@ public:
 
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
     QComboBox *getDeviceSelector();
+    void populateChannelSelector();
 
 private:
     Ui::SamplingDeviceControl* ui;
@@ -46,6 +47,7 @@ private:
 
 private slots:
     void on_showLoadedPlugins_clicked(bool checked);
+    void on_addChannel_clicked(bool checked);
 };
 
 

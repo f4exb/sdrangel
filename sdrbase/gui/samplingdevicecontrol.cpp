@@ -38,6 +38,14 @@ QComboBox *SamplingDeviceControl::getDeviceSelector()
     return ui->deviceSelect;
 }
 
+void SamplingDeviceControl::populateChannelSelector()
+{
+    if (m_pluginManager)
+    {
+        m_pluginManager->populateChannelComboBox(ui->channelSelect);
+    }
+}
+
 void SamplingDeviceControl::on_showLoadedPlugins_clicked(bool checked)
 {
     if (m_pluginManager)
@@ -46,3 +54,12 @@ void SamplingDeviceControl::on_showLoadedPlugins_clicked(bool checked)
         pluginsDialog.exec();
     }
 }
+
+void SamplingDeviceControl::on_addChannel_clicked(bool checked)
+{
+    if (m_pluginManager)
+    {
+        m_pluginManager->createChannelInstance(ui->channelSelect->currentIndex());
+    }
+}
+

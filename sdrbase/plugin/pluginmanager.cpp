@@ -519,3 +519,21 @@ void PluginManager::renameChannelInstances()
 		m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
 	}
 }
+
+void PluginManager::populateChannelComboBox(QComboBox *channels)
+{
+    for(ChannelRegistrations::iterator it = m_channelRegistrations.begin(); it != m_channelRegistrations.end(); ++it)
+    {
+        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
+        channels->addItem(pluginDescipror.displayedName);
+    }
+}
+
+void PluginManager::createChannelInstance(int channelPluginIndex)
+{
+    if (channelPluginIndex < m_channelRegistrations.size())
+    {
+        PluginInterface *pluginInterface = m_channelRegistrations[channelPluginIndex].m_plugin;
+        pluginInterface->createChannel(m_channelRegistrations[channelPluginIndex].m_channelName);
+    }
+}
