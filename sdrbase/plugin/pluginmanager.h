@@ -19,6 +19,7 @@ class DSPDeviceEngine;
 class GLSpectrum;
 class SampleSink;
 class ThreadedSampleSink;
+class ChannelMarker;
 
 class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
@@ -48,9 +49,12 @@ public:
 	// Callbacks from the plugins
 	void registerChannel(const QString& channelName, PluginInterface* plugin);
 	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
-	void addChannelRollup(QWidget* pluginGUI);
 	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+
+	void addChannelRollup(QWidget* widget);
+    void addChannelMarker(ChannelMarker* channelMarker);
+    void removeChannelMarker(ChannelMarker* channelMarker);
 
 	void setInputGUI(QWidget* gui, const QString& sourceDisplayName);
 

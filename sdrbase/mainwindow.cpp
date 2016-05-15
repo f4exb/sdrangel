@@ -244,26 +244,20 @@ void MainWindow::removeLastDevice()
     m_deviceUIs.pop_back();
 }
 
-void MainWindow::addChannelRollup(QWidget* widget)
+void MainWindow::addChannelRollup(int deviceTabIndex, QWidget* widget)
 {
-	m_deviceUIs.back()->m_channelWindow->addRollupWidget(widget);
-	ui->channelDock->show();
-	ui->channelDock->raise();
+    if (deviceTabIndex < ui->tabInputsView->count())
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[deviceTabIndex];
+        deviceUI->m_channelWindow->addRollupWidget(widget);
+        ui->channelDock->show();
+        ui->channelDock->raise();
+    }
 }
 
 void MainWindow::addViewAction(QAction* action)
 {
 	ui->menu_Window->addAction(action);
-}
-
-void MainWindow::addChannelMarker(ChannelMarker* channelMarker)
-{
-	m_deviceUIs.back()->m_spectrum->addChannelMarker(channelMarker);
-}
-
-void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
-{
-	m_deviceUIs.back()->m_spectrum->removeChannelMarker(channelMarker);
 }
 
 void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName)

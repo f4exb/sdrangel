@@ -9,6 +9,7 @@
 #include "mainwindow.h"
 #include "dsp/dspdeviceengine.h"
 #include "dsp/samplesource.h"
+#include "gui/glspectrum.h"
 
 #include <QDebug>
 
@@ -64,11 +65,6 @@ void PluginManager::registerChannelInstance(const QString& channelName, PluginGU
 	renameChannelInstances();
 }
 
-void PluginManager::addChannelRollup(QWidget* pluginGUI)
-{
-	m_mainWindow->addChannelRollup(pluginGUI);
-}
-
 void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
 {
 	for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it) {
@@ -87,6 +83,21 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 			<< " with source name " << sourceName.toStdString().c_str();
 
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
+}
+
+void PluginManager::addChannelRollup(QWidget* widget)
+{
+    m_mainWindow->addChannelRollup(m_deviceTabIndex, widget);
+}
+
+void PluginManager::addChannelMarker(ChannelMarker* channelMarker)
+{
+    m_spectrum->addChannelMarker(channelMarker);
+}
+
+void PluginManager::removeChannelMarker(ChannelMarker* channelMarker)
+{
+    m_spectrum->removeChannelMarker(channelMarker);
 }
 
 void PluginManager::setInputGUI(QWidget* gui, const QString& sourceDisplayName)

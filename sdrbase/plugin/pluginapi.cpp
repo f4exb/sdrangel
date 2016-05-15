@@ -46,12 +46,12 @@ void PluginAPI::removeChannelInstance(PluginGUI* pluginGUI)
 
 void PluginAPI::addChannelMarker(ChannelMarker* channelMarker)
 {
-	m_mainWindow->addChannelMarker(channelMarker);    // TODO: suspect verify. No ref to main window expected.
+    m_pluginManager->addChannelMarker(channelMarker);
 }
 
 void PluginAPI::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	m_mainWindow->removeChannelMarker(channelMarker); // TODO: suspect verify. No ref to main window expected.
+    m_pluginManager->removeChannelMarker(channelMarker);
 }
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)

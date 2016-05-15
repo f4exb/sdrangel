@@ -71,13 +71,11 @@ public:
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
-	void addChannelRollup(QWidget* widget);
 	void addViewAction(QAction* action);
 
-	void addChannelMarker(ChannelMarker* channelMarker);    // TODO: review this
-	void removeChannelMarker(ChannelMarker* channelMarker); // TODO: review this
-
+    void addChannelRollup(int deviceTabIndex, QWidget* widget);
 	void setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName);
+
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 
 private:
