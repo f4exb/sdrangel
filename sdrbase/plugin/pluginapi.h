@@ -5,8 +5,7 @@
 #include "util/export.h"
 #include "dsp/dspdeviceengine.h"
 
-class QDockWidget;
-class QAction;
+class QString;
 
 class PluginManager;
 class PluginInterface;
@@ -26,9 +25,8 @@ class SDRANGEL_API PluginAPI : public QObject {
 
 public:
 	// MainWindow access
-	//QDockWidget* createMainWindowDock(Qt::DockWidgetArea dockWidgetArea, const QString& title);
 	MessageQueue* getMainWindowMessageQueue();
-	void setInputGUI(QWidget* inputGUI);
+	void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
 	// Channel stuff
 	void registerChannel(const QString& channelName, PluginInterface* plugin);

@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <QPluginLoader>
 #include <QComboBox>
+#include <cstdio>
+
 #include "plugin/pluginmanager.h"
 #include "plugin/plugingui.h"
 #include "settings/preset.h"
@@ -87,10 +89,10 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::setInputGUI(QWidget* gui)
+void PluginManager::setInputGUI(QWidget* gui, const QString& sourceDisplayName)
 {
     //m_mainWindow->setInputGUI(gui);
-    m_mainWindow->setInputGUI(m_deviceTabIndex, gui);
+    m_mainWindow->setInputGUI(m_deviceTabIndex, gui, sourceDisplayName);
 }
 
 void PluginManager::addSink(SampleSink* sink)
@@ -343,7 +345,7 @@ int PluginManager::selectSampleSourceByIndex(int index)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName);
 	m_dspDeviceEngine->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
@@ -397,7 +399,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }
@@ -464,7 +466,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 			<< " ser: " << qPrintable(m_sampleSourceSerial)
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId);
+	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }

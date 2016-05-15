@@ -97,8 +97,12 @@ MainWindow::MainWindow(QWidget* parent) :
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
-	//ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); }");
-    ui->tabInputsView->setStyleSheet("QWidget { background: rgb(46,46,46); } QToolButton::checked { background: rgb(128,70,0); }");
+    ui->tabInputsView->setStyleSheet("QWidget { background: rgb(44,44,44); } "
+            "QToolButton::checked { background: rgb(128,70,0); } "
+            "QComboBox::item:selected { color: rgb(255,140,0); }");
+    ui->tabInputsSelect->setStyleSheet("QWidget { background: rgb(44,44,44); } "
+            "QToolButton::checked { background: rgb(128,70,0); } "
+            "QComboBox::item:selected { color: rgb(255,140,0); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
@@ -260,27 +264,25 @@ void MainWindow::removeChannelMarker(ChannelMarker* channelMarker)
 	m_deviceUIs.back()->m_spectrum->removeChannelMarker(channelMarker);
 }
 
-void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui)
+void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName)
 {
-    qDebug("MainWindow::setInputGUI: count before %d", ui->tabInputsView->count());
-
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
 
     if (deviceTabIndex < ui->tabInputsView->count())
     {
-        qDebug("MainWindow::setInputGUI: device index %d replace", deviceTabIndex);
+        qDebug("MainWindow::setInputGUI: tab device index %d replace", deviceTabIndex);
         ui->tabInputsView->removeTab(deviceTabIndex);
         ui->tabInputsView->insertTab(deviceTabIndex, gui, tabNameCStr);
     }
     else
     {
-        qDebug("MainWindow::setInputGUI: device index %d add", deviceTabIndex);
+        qDebug("MainWindow::setInputGUI: tab device index %d add", deviceTabIndex);
         ui->tabInputsView->addTab(gui, tabNameCStr);
     }
 
-    qDebug("MainWindow::setInputGUI: count after %d", ui->tabInputsView->count());
+    ui->tabInputsView->setTabToolTip(deviceTabIndex, sourceDisplayName);
 }
 
 void MainWindow::loadSettings()
@@ -684,7 +686,7 @@ void MainWindow::on_action_About_triggered()
 
 void MainWindow::on_action_addDevice_triggered()
 {
-//    addDevice(); TODO: re-activate when plugin issues are solved
+    addDevice();
 }
 
 void MainWindow::on_action_removeDevice_triggered()

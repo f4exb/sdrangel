@@ -117,7 +117,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId)
+PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName)
 {
 	if (!m_pluginAPI)
 	{
@@ -127,7 +127,7 @@ PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 	if(sourceId == m_deviceTypeID)
 	{
 		AirspyGui* gui = new AirspyGui(m_pluginAPI);
-		m_pluginAPI->setInputGUI(gui);
+		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

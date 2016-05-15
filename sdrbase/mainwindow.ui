@@ -410,7 +410,7 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>80</height>
+         <height>110</height>
         </size>
        </property>
        <property name="currentIndex">

@@ -75,7 +75,7 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId)
+PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName)
 {
 	if (!m_pluginAPI)
 	{
@@ -85,7 +85,7 @@ PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId)
 	if(sourceId == m_deviceTypeID)
 	{
 		BladerfGui* gui = new BladerfGui(m_pluginAPI);
-		m_pluginAPI->setInputGUI(gui);
+		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

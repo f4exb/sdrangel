@@ -52,7 +52,7 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void setInputGUI(QWidget* gui);
+	void setInputGUI(QWidget* gui, const QString& sourceDisplayName);
 
 	void addSink(SampleSink* sink);
 	void removeSink(SampleSink* sink);
