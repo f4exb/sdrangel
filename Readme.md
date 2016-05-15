@@ -21,13 +21,6 @@ These plugins come from the parent code base and have been maintained so that th
   - lora
   - tcpsrc (although it has evolved please use the udpsrc plugin instead)
 
-<h2>Unsupported plugins</h2>
-
-These plugins come from the parent code base and are still present in the source tree but are not part of the build:
-
-- Channels:
-  - tetra
-
 <h1>Supported hardware</h1>
 
 <h2>Multiple device support</h2>
