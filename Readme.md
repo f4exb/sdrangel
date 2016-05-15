@@ -27,29 +27,12 @@ These plugins come from the parent code base and are still present in the source
 
 - Channels:
   - tetra
-- Sample sources:
-  - v4l-msi
-  - v4l-rtl
-
-<h3>Gnuradio</h3>
-
-The Gnuradio plugin source needs extra packages, including `liblog4cpp-dev libboost-system-dev gnuradio-dev libosmosdr-dev`
-
-If you use your own location for Gnuradio install directory you need to specify library and include locations. Example with `/opt/install/gnuradio-3.7.5.1` with the following defines on `cmake` command line:
-
-`-DGNURADIO_RUNTIME_LIBRARIES=/opt/install/gnuradio-3.7.5.1/lib/libgnuradio-runtime.so -DGNURADIO_RUNTIME_INCLUDE_DIRS=/opt/install/gnuradio-3.7.5.1/include`
-
-<h3>osmosdr</h3>
-
-If you use your own location for gr.osmocom install directory you need to specify library and include locations. Example with `/opt/install/gr-osmosdr` with the following defines on `cmake` command line:
-
-`-DGNURADIO_OSMOSDR_LIBRARIES=/opt/install/gr-osmosdr/lib/libgnuradio-osmosdr.so -DGNURADIO_OSMOSDR_INCLUDE_DIRS=/opt/install/gr-osmosdr/include`
-
-<h3>v4l*</h3>
-
-Use `cmake ../ -DV4L-RTL=ON` to build the Linux kernel driver for RTL-SDR (Experimental). Needs a recent kernel and libv4l2. Will need extra work to support SDRPlay. Needs `cp KERNEL_SOURCE/include/linux/compiler.h /usr/include/linux/` and `cp KERNEL_SOURCE/include/uapi/linux/videodev2.h /usr/include/uapi/linux/` and package `libv4l-dev`.
 
 <h1>Supported hardware</h1>
+
+<h2>Multiple device support</h2>
+
+From version 2 SDRangel can integrate more than one hardware device running concurrently.
 
 <h2>Airspy</h2>
 
@@ -81,7 +64,7 @@ The Pro+ has trouble starting. The sound card interface is not recognized when y
 
 <h2>HackRF</h2>
 
-HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install. Please note that you will need a recent version (2015.07.2 or 2015.07.1 at least) of libhackrf that supports the sequential listing of devices so you might need to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
+HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install. Please note that you will need a recent version (2015.07.2 at least) of libhackrf that supports the sequential listing of devices and the antenna power control (bias tee). To be safe anyway you may choose to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
 
 If you use your own location for libhackrf install directory you need to specify library and include locations. Example with `/opt/install/libhackrf` with the following defines on `cmake` command line:
 
@@ -140,6 +123,14 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
   - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
 
 <h1>Software build</h1>
+
+<h2>Qt version</h2>
+
+To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
+
+  - Linux builds are made with 5.5.1
+  - Windows 32 build is made with 5.5.1
+  - Windows 64 build is made with 5.6 
 
 <h2>Ubuntu</h2>
 
