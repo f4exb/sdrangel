@@ -1,6 +1,7 @@
 #include "amplugin.h"
 
 #include <QtPlugin>
+#include <QAction>
 #include "plugin/pluginapi.h"
 #include "amdemodgui.h"
 
@@ -34,16 +35,18 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginGUI* AMPlugin::createChannel(const QString& channelName)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.am") {
-	    return createInstanceAM();
+		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI);
+		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
+		m_pluginAPI->addChannelRollup(gui);
+		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-PluginGUI*  AMPlugin::createInstanceAM()
+void AMPlugin::createInstanceAM()
 {
 	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
 	m_pluginAPI->addChannelRollup(gui);
-	return gui;
 }

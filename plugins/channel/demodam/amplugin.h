@@ -21,7 +21,9 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 
 	PluginAPI* m_pluginAPI;
-    PluginGUI* createInstanceAM();
+
+private slots:
+	void createInstanceAM();
 };
 
 #endif // INCLUDE_AMPLUGIN_H

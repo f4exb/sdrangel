@@ -333,17 +333,13 @@ void MainWindow::savePresetSettings(Preset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	preset->setSpectrumConfig(m_deviceUIs.back()->m_spectrumGUI->serialize());
-	preset->clearChannels();
-
     // Save from currently selected source tab
     int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
 
-    if (currentSourceTabIndex >= 0)
-    {
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_pluginManager->saveSettings(preset);
-    }
+	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
+	preset->clearChannels();
+    deviceUI->m_pluginManager->saveSettings(preset);
 
     preset->setLayout(saveState());
 }
@@ -674,7 +670,7 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-        deviceUI->m_pluginManager->selectSampleSourceByIndex(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+        deviceUI->m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
 
         deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
