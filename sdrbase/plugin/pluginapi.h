@@ -41,7 +41,7 @@ public:
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
 	// Device engine stuff
-    void addSink(SampleSink* sink);       //!< Add a sample sink to device engine
+//    void addSink(SampleSink* sink);       //!< Add a sample sink to device engine
     void removeSink(SampleSink* sink);    //!< Remove a sample sink from device engine
 	void addThreadedSink(ThreadedSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
 	void setSource(SampleSource* source); //!< Set device engine sample source type

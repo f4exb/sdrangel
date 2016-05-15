@@ -20,6 +20,7 @@ class GLSpectrum;
 class SampleSink;
 class ThreadedSampleSink;
 class ChannelMarker;
+class DeviceAPI;
 
 class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
@@ -58,7 +59,7 @@ public:
 
 	void setInputGUI(QWidget* gui, const QString& sourceDisplayName);
 
-	void addSink(SampleSink* sink);
+//	void addSink(SampleSink* sink);
 	void removeSink(SampleSink* sink);
     void addThreadedSink(ThreadedSampleSink* sink);
     void removeThreadedSink(ThreadedSampleSink* sink);
@@ -90,9 +91,9 @@ public:
 
 	void updateSampleSourceDevices();
 	void fillSampleSourceSelector(QComboBox* comboBox);
-	int selectSampleSourceByIndex(int index);
-	int selectFirstSampleSource(const QString& sourceId);
-	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence);
+	int selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI);
+	int selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI);
+	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceAPI *deviceAPI);
 
 	void populateChannelComboBox(QComboBox *channels);
 	void createChannelInstance(int channelPluginIndex);

@@ -59,10 +59,10 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName)
+PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID) {
-		RTLSDRGui* gui = new RTLSDRGui(m_pluginAPI);
+		RTLSDRGui* gui = new RTLSDRGui(m_pluginAPI, deviceAPI);
 		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	} else {

@@ -25,6 +25,7 @@
 #define HACKRF_MAX_DEVICE (32)
 
 class PluginAPI;
+class DeviceAPI;
 class FileSink;
 
 namespace Ui {
@@ -43,7 +44,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit HackRFGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~HackRFGui();
 	void destroy();
 
@@ -61,6 +62,7 @@ private:
 	Ui::HackRFGui* ui;
 
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	HackRFSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

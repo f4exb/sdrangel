@@ -19,6 +19,7 @@
 
 #include "ui_fcdproplusgui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -27,10 +28,11 @@
 #include "fcdproplusgui.h"
 #include "fcdproplusconst.h"
 
-FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, QWidget* parent) :
+FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FCDProPlusGui),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceEngine::State)-1)
@@ -64,7 +66,7 @@ FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, QWidget* parent) :
 	char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
     m_fileSink = new FileSink(std::string(recFileNameCStr));
-    m_pluginAPI->addSink(m_fileSink);
+    m_deviceAPI->addSink(m_fileSink);
 
     connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

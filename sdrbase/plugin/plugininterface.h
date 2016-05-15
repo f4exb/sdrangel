@@ -15,6 +15,7 @@ struct PluginDescriptor {
 };
 
 class PluginAPI;
+class DeviceAPI;
 class PluginGUI;
 
 class PluginInterface {
@@ -46,7 +47,12 @@ public:
 	virtual PluginGUI* createChannel(const QString& channelName) { return 0; }
 
 	virtual SampleSourceDevices enumSampleSources() { return SampleSourceDevices(); }
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName) { return 0; }
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId,
+	        const QString& sourceDisplayName,
+	        DeviceAPI *deviceAPI)
+	{
+	    return 0;
+	}
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

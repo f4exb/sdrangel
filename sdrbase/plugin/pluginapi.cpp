@@ -59,10 +59,10 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
-void PluginAPI::addSink(SampleSink* sink)
-{
-    m_pluginManager->addSink(sink);
-}
+//void PluginAPI::addSink(SampleSink* sink)
+//{
+//    m_pluginManager->addSink(sink);
+//}
 
 void PluginAPI::removeSink(SampleSink* sink)
 {

@@ -31,6 +31,7 @@
 
 #include "ui_sdrdaemongui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -41,10 +42,11 @@
 
 #include "sdrdaemongui.h"
 
-SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
+SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonGui),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_sampleSource(NULL),
 	m_acquisition(false),
 	m_lastEngineState((DSPDeviceEngine::State)-1),
@@ -99,7 +101,7 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, QWidget* parent) :
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
     m_fileSink = new FileSink(std::string(recFileNameCStr));
-    m_pluginAPI->addSink(m_fileSink);
+    m_deviceAPI->addSink(m_fileSink);
 
     connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

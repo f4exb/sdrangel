@@ -42,6 +42,7 @@ class PluginAPI;
 class PluginGUI;
 class ChannelMarker;
 class PluginManager;
+class DeviceAPI;
 class PluginInterface;
 
 namespace Ui {
@@ -61,6 +62,7 @@ public:
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceEngine *m_deviceEngine;
 		PluginManager *m_pluginManager;
+		DeviceAPI *m_deviceAPI;
 
 		DeviceUISet(QTimer& timer);
 		~DeviceUISet();

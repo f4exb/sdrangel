@@ -43,6 +43,7 @@
 #include "dsp/dspcommands.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "plugin/plugingui.h"
 
 #include "gui/glspectrum.h"
@@ -142,7 +143,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_settings.getSourceIndex();
-	sampleSourceIndex = m_deviceUIs.back()->m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex);
+	sampleSourceIndex = m_deviceUIs.back()->m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex, m_deviceUIs.back()->m_deviceAPI);
 
 	if (sampleSourceIndex >= 0)
 	{
@@ -195,8 +196,13 @@ void MainWindow::addDevice()
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
 
+    DeviceAPI *deviceAPI = new DeviceAPI(dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    m_deviceUIs.back()->m_deviceAPI = deviceAPI;
+
+    // TODO: do not create one plugin manager per device. Use device API instead
     PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
     m_deviceUIs.back()->m_pluginManager = pluginManager;
+
     pluginManager->loadPlugins();
 
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
@@ -229,6 +235,7 @@ void MainWindow::removeLastDevice()
     // On the other hand freeAll() must be executed only once
     delete m_deviceUIs.back()->m_pluginManager;
     //m_deviceUIs.back()->m_pluginManager->freeAll();
+    //delete m_deviceUIs.back()->m_deviceAPI; // TODO: reinstate when plugin manager is not created for each device
 
     lastDeviceEngine->stop();
     m_dspEngine->removeLastDeviceEngine();
@@ -664,7 +671,7 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-        deviceUI->m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+        deviceUI->m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
 
         deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());

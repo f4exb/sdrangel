@@ -33,10 +33,11 @@
 
 #include "filesourcegui.h"
 
-FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, QWidget* parent) :
+FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSourceGui),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_acquisition(false),

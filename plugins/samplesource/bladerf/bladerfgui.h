@@ -23,6 +23,7 @@
 #include "bladerfinput.h"
 
 class PluginAPI;
+class DeviceAPI;
 class FileSink;
 
 namespace Ui {
@@ -34,7 +35,7 @@ class BladerfGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfGui(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit BladerfGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BladerfGui();
 	void destroy();
 
@@ -52,6 +53,7 @@ private:
 	Ui::BladerfGui* ui;
 
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	BladeRFSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

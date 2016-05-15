@@ -74,11 +74,11 @@ PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FCDProPlusPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName)
+PluginGUI* FCDProPlusPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI)
 {
 	if(sourceId == fcd_traits<ProPlus>::interfaceIID)
 	{
-		FCDProPlusGui* gui = new FCDProPlusGui(m_pluginAPI);
+		FCDProPlusGui* gui = new FCDProPlusGui(m_pluginAPI, deviceAPI);
 		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
