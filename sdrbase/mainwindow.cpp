@@ -99,10 +99,12 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui->tabInputsView->setStyleSheet("QWidget { background: rgb(44,44,44); } "
             "QToolButton::checked { background: rgb(128,70,0); } "
-            "QComboBox::item:selected { color: rgb(255,140,0); }");
+            "QComboBox::item:selected { color: rgb(255,140,0); } "
+            "QTabBar::tab:selected { background: rgb(128,70,0); }");
     ui->tabInputsSelect->setStyleSheet("QWidget { background: rgb(44,44,44); } "
             "QToolButton::checked { background: rgb(128,70,0); } "
-            "QComboBox::item:selected { color: rgb(255,140,0); }");
+            "QComboBox::item:selected { color: rgb(255,140,0); } "
+            "QTabBar::tab:selected { background: rgb(128,70,0); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
