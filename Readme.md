@@ -28,8 +28,6 @@ These plugins come from the parent code base and are still present in the source
 - Channels:
   - tetra
 - Sample sources:
-  - gnuradio
-  - osmosdr
   - v4l-msi
   - v4l-rtl
 
