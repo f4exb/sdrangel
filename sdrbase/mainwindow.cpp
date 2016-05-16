@@ -229,25 +229,24 @@ void MainWindow::removeLastDevice()
     lastDeviceEngine->stopAcquistion();
     lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
-    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
     ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
     ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
     // PluginManager destructor does freeAll() which does stopAcquistion() but stopAcquistion()
     // can be done several times only the first is active so it is fine to do it here
     // On the other hand freeAll() must be executed only once
-    delete m_deviceUIs.back()->m_pluginManager;
+    //delete m_deviceUIs.back()->m_pluginManager;
     //m_deviceUIs.back()->m_pluginManager->freeAll();
     //delete m_deviceUIs.back()->m_deviceAPI; // TODO: reinstate when plugin manager is not created for each device
+
+    m_deviceUIs.back()->m_deviceAPI->freeAll();
+
+    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
     lastDeviceEngine->stop();
     m_dspEngine->removeLastDeviceEngine();
 
-    if (ui->tabInputsView->count() == ui->tabInputsSelect->count())
-    {
-        ui->tabInputsView->removeTab(ui->tabInputsView->count() - 1);
-    }
-
+    ui->tabInputsView->removeTab(ui->tabInputsView->count() - 1);
     ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
     delete m_deviceUIs.back();

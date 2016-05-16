@@ -188,21 +188,26 @@ void DeviceAPI::renameChannelInstances()
 
 void DeviceAPI::freeAll()
 {
-    m_deviceEngine->stopAcquistion();
+//    while(!m_channelInstanceRegistrations.isEmpty())
+//    {
+//        ChannelInstanceRegistration reg(m_channelInstanceRegistrations.takeLast());
+//        reg.m_gui->destroy();
+//    }
 
-    while(!m_channelInstanceRegistrations.isEmpty())
+    for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
-        ChannelInstanceRegistration reg(m_channelInstanceRegistrations.takeLast());
-        reg.m_gui->destroy();
+        qDebug("PluginManager::loadSettings: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
+        m_channelInstanceRegistrations[i].m_gui->destroy();
     }
 
-    if(m_sampleSourcePluginGUI != 0)
-    {
-        m_deviceEngine->setSource(0);
-        m_sampleSourcePluginGUI->destroy();
-        m_sampleSourcePluginGUI = 0;
-        m_sampleSourceId.clear();
-    }
+
+//    if(m_sampleSourcePluginGUI != 0)
+//    {
+//        m_deviceEngine->setSource(0);
+//        m_sampleSourcePluginGUI->destroy();
+//        m_sampleSourcePluginGUI = 0;
+//        m_sampleSourceId.clear();
+//    }
 }
 
 void DeviceAPI::loadSourceSettings(const Preset* preset)
