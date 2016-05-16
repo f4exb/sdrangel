@@ -144,27 +144,27 @@ void PluginManager::loadSettings(const Preset* preset, DeviceAPI *deviceAPI)
 
 	renameChannelInstances();
 
-	loadSourceSettings(preset);
+//	loadSourceSettings(preset); // FIXME
 }
 
-void PluginManager::loadSourceSettings(const Preset* preset)
-{
-	fprintf(stderr, "PluginManager::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
-
-	if(m_sampleSourcePluginGUI != 0)
-	{
-		const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
-
-		if (sourceConfig != 0)
-		{
-			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
-			m_sampleSourcePluginGUI->deserialize(*sourceConfig);
-		}
-
-		qint64 centerFrequency = preset->getCenterFrequency();
-		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
-	}
-}
+//void PluginManager::loadSourceSettings(const Preset* preset)
+//{
+//	fprintf(stderr, "PluginManager::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+//
+//	if(m_sampleSourcePluginGUI != 0)
+//	{
+//		const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
+//
+//		if (sourceConfig != 0)
+//		{
+//			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
+//			m_sampleSourcePluginGUI->deserialize(*sourceConfig);
+//		}
+//
+//		qint64 centerFrequency = preset->getCenterFrequency();
+//		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
+//	}
+//}
 
 // sort by increasing delta frequency and type (i.e. name)
 bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const {
@@ -182,7 +182,7 @@ bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstance
 void PluginManager::saveSettings(Preset* preset)
 {
 	qDebug("PluginManager::saveSettings");
-	saveSourceSettings(preset);
+//	saveSourceSettings(preset); // FIXME
 
 	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
@@ -192,17 +192,17 @@ void PluginManager::saveSettings(Preset* preset)
 	}
 }
 
-void PluginManager::saveSourceSettings(Preset* preset)
-{
-	qDebug("PluginManager::saveSourceSettings");
-
-	if(m_sampleSourcePluginGUI != NULL)
-	{
-		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
-	}
-}
+//void PluginManager::saveSourceSettings(Preset* preset)
+//{
+//	qDebug("PluginManager::saveSourceSettings");
+//
+//	if(m_sampleSourcePluginGUI != NULL)
+//	{
+//		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+//		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+//		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
+//	}
+//}
 
 void PluginManager::freeAll()
 {
@@ -317,7 +317,10 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 
 	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
-	deviceAPI->setSourceSequence(m_sampleSourceSequence);
+	deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
+	deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
+	deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
+	deviceAPI->setSampleSourcePluginGUI(pluginGUI);
 
 	return index;
 }
@@ -372,7 +375,10 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 
 	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
-	deviceAPI->setSourceSequence(m_sampleSourceSequence);
+    deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
+    deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
+    deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
+    deviceAPI->setSampleSourcePluginGUI(pluginGUI);
 
 	return index;
 }
@@ -441,7 +447,10 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 
 	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
-	deviceAPI->setSourceSequence(m_sampleSourceSequence);
+    deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
+    deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
+    deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
+    deviceAPI->setSampleSourcePluginGUI(pluginGUI);
 
 	return index;
 }

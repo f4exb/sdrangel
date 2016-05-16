@@ -48,9 +48,9 @@ public:
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
 	void loadSettings(const Preset* preset, DeviceAPI *deviceAPI);
-	void loadSourceSettings(const Preset* preset);
+//	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);
-	void saveSourceSettings(Preset* preset);
+//	void saveSourceSettings(Preset* preset);
 
 	void freeAll();
 
@@ -129,10 +129,10 @@ private:
 	DSPDeviceEngine* m_dspDeviceEngine;
 	Plugins m_plugins;
 
-	ChannelRegistrations m_channelRegistrations;
-	ChannelInstanceRegistrations m_channelInstanceRegistrations;
-	SampleSourceRegistrations m_sampleSourceRegistrations;
-	SampleSourceDevices m_sampleSourceDevices;
+	ChannelRegistrations m_channelRegistrations;           //!< Channel plugins register here
+	ChannelInstanceRegistrations m_channelInstanceRegistrations; // TODO: remove
+	SampleSourceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
+	SampleSourceDevices m_sampleSourceDevices;             //!< Instances of input sources present in the system
 
 	QString m_sampleSourceId;
 	QString m_sampleSourceSerial;

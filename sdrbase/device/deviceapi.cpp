@@ -19,6 +19,7 @@
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
 #include "mainwindow.h"
+#include "settings/preset.h"
 
 DeviceAPI::DeviceAPI(MainWindow *mainWindow,
         int deviceTabIndex,
@@ -109,11 +110,6 @@ void DeviceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCo
     m_deviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
-void DeviceAPI::setSourceSequence(int sourceSequence)
-{
-    m_deviceEngine->setSourceSequence(sourceSequence);
-}
-
 GLSpectrum *DeviceAPI::getSpectrum()
 {
     return m_spectrum;
@@ -152,6 +148,7 @@ void DeviceAPI::setSampleSourceSerial(const QString& serial)
 void DeviceAPI::setSampleSourceSequence(int sequence)
 {
     m_sampleSourceSequence = sequence;
+    m_deviceEngine->setSourceSequence(sequence);
 }
 
 void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
@@ -169,5 +166,55 @@ void DeviceAPI::freeAll()
         m_sampleSourcePluginGUI->destroy();
         m_sampleSourcePluginGUI = 0;
         m_sampleSourceId.clear();
+    }
+}
+
+void DeviceAPI::loadSourceSettings(const Preset* preset)
+{
+    qDebug("DeviceAPI::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+
+    if(m_sampleSourcePluginGUI != 0)
+    {
+        const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
+
+        if (sourceConfig != 0)
+        {
+            qDebug() << "DeviceAPI::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
+            m_sampleSourcePluginGUI->deserialize(*sourceConfig);
+        }
+
+        qint64 centerFrequency = preset->getCenterFrequency();
+        m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
+    }
+}
+
+void DeviceAPI::saveSourceSettings(Preset* preset)
+{
+    qDebug("DeviceAPI::saveSourceSettings");
+
+    if(m_sampleSourcePluginGUI != NULL)
+    {
+        preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
+        preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
+    }
+}
+
+// sort by increasing delta frequency and type (i.e. name)
+bool DeviceAPI::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const
+{
+    if (m_gui && other.m_gui)
+    {
+        if (m_gui->getCenterFrequency() == other.m_gui->getCenterFrequency())
+        {
+            return m_gui->getName() < other.m_gui->getName();
+        }
+        else
+        {
+            return m_gui->getCenterFrequency() < other.m_gui->getCenterFrequency();
+        }
+    }
+    else
+    {
+        return false;
     }
 }

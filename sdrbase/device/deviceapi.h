@@ -35,6 +35,7 @@ class MessageQueue;
 class ChannelMarker;
 class QWidget;
 class PluginGUI;
+class Preset;
 
 class SDRANGEL_API DeviceAPI : public QObject {
     Q_OBJECT
@@ -56,8 +57,6 @@ public:
     MessageQueue *getDeviceOutputMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
-    void setSourceSequence(int sourceSequence);
-
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
@@ -72,7 +71,30 @@ public:
 
     void freeAll();
 
+    void loadSourceSettings(const Preset* preset);
+    void saveSourceSettings(Preset* preset);
+
 protected:
+    struct ChannelInstanceRegistration
+    {
+        QString m_channelName;
+        PluginGUI* m_gui;
+
+        ChannelInstanceRegistration() :
+            m_channelName(),
+            m_gui(NULL)
+        { }
+
+        ChannelInstanceRegistration(const QString& channelName, PluginGUI* pluginGUI) :
+            m_channelName(channelName),
+            m_gui(pluginGUI)
+        { }
+
+        bool operator<(const ChannelInstanceRegistration& other) const;
+    };
+
+    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
+
     DeviceAPI(MainWindow *mainWindow,
             int deviceTabIndex,
             DSPDeviceEngine *deviceEngine,
@@ -90,6 +112,8 @@ protected:
     QString m_sampleSourceSerial;
     int m_sampleSourceSequence;
     PluginGUI* m_sampleSourcePluginGUI;
+
+    ChannelInstanceRegistrations m_channelInstanceRegistrations;
 
     friend class MainWindow;
 };

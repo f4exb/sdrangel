@@ -317,6 +317,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
         deviceUI->m_pluginManager->loadSettings(preset, deviceUI->m_deviceAPI);
+        deviceUI->m_deviceAPI->loadSourceSettings(preset);
 	}
 
 	// has to be last step
@@ -344,6 +345,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
 	preset->clearChannels();
     deviceUI->m_pluginManager->saveSettings(preset);
+    deviceUI->m_deviceAPI->saveSourceSettings(preset);
 
     preset->setLayout(saveState());
 }
@@ -673,11 +675,13 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
     if (currentSourceTabIndex >= 0)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
+        //deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
         deviceUI->m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
 
-        deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
+        //deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
     }
 }
 
