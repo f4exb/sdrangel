@@ -29,7 +29,7 @@ struct fcd_buffer {
 	std::size_t length;
 };
 
-class PluginAPI;
+class DeviceAPI;
 class FCDProThread;
 
 class FCDProInput : public SampleSource {
@@ -54,7 +54,7 @@ public:
 		{ }
 	};
 
-	FCDProInput(PluginAPI *pluginAPI);
+	FCDProInput(DeviceAPI *deviceAPI);
 	virtual ~FCDProInput();
 
 	virtual bool init(const Message& cmd);
@@ -90,7 +90,7 @@ private:
 	void applySettings(const FCDProSettings& settings, bool force);
 	void set_lo_ppm();
 
-	PluginAPI *m_pluginAPI;
+	DeviceAPI *m_deviceAPI;
 	hid_device *m_dev;
 	QMutex m_mutex;
 	FCDProSettings m_settings;

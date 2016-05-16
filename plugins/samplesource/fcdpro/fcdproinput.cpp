@@ -21,7 +21,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "fcdproinput.h"
@@ -33,8 +33,8 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCD, Message)
 
-FCDProInput::FCDProInput(PluginAPI *pluginAPI) :
-    m_pluginAPI(pluginAPI),
+FCDProInput::FCDProInput(DeviceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
@@ -335,19 +335,19 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
 	if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
 	{
 		m_settings.m_iqCorrection = settings.m_iqCorrection;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
     if (signalChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
-		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
+		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 }
 

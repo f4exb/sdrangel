@@ -60,25 +60,25 @@ public:
 	void setInputGUI(QWidget* gui, const QString& sourceDisplayName);
 
 //	void addSink(SampleSink* sink);
-	void removeSink(SampleSink* sink);
+//	void removeSink(SampleSink* sink);
     void addThreadedSink(ThreadedSampleSink* sink);
     void removeThreadedSink(ThreadedSampleSink* sink);
-    void setSource(SampleSource* source) { m_dspDeviceEngine->setSource(source); }; //!< Set device engine sample source type
-    bool initAcquisition() { return m_dspDeviceEngine->initAcquisition(); }   //!< Initialize device engine acquisition sequence
-    bool startAcquisition() { return m_dspDeviceEngine->startAcquisition(); } //!< Start device engine acquisition sequence
-    void stopAcquistion() { m_dspDeviceEngine->stopAcquistion(); }            //!< Stop device engine acquisition sequence
-    DSPDeviceEngine::State state() const { return m_dspDeviceEngine->state(); }
-    QString errorMessage() { return m_dspDeviceEngine->errorMessage(); }      //!< Return the current device engine error message
-    uint getDeviceUID() const { return m_dspDeviceEngine->getUID(); }         //!< Return the current device engine unique ID
-    MessageQueue *getDeviceInputMessageQueue() { return m_dspDeviceEngine->getInputMessageQueue(); }
-    MessageQueue *getDeviceOutputMessageQueue() { return m_dspDeviceEngine->getOutputMessageQueue(); }
+//    void setSource(SampleSource* source) { m_dspDeviceEngine->setSource(source); }; //!< Set device engine sample source type
+//    bool initAcquisition() { return m_dspDeviceEngine->initAcquisition(); }   //!< Initialize device engine acquisition sequence
+//    bool startAcquisition() { return m_dspDeviceEngine->startAcquisition(); } //!< Start device engine acquisition sequence
+//    void stopAcquistion() { m_dspDeviceEngine->stopAcquistion(); }            //!< Stop device engine acquisition sequence
+//    DSPDeviceEngine::State state() const { return m_dspDeviceEngine->state(); }
+//    QString errorMessage() { return m_dspDeviceEngine->errorMessage(); }      //!< Return the current device engine error message
+//    uint getDeviceUID() const { return m_dspDeviceEngine->getUID(); }         //!< Return the current device engine unique ID
+//    MessageQueue *getDeviceInputMessageQueue() { return m_dspDeviceEngine->getInputMessageQueue(); }
+//    MessageQueue *getDeviceOutputMessageQueue() { return m_dspDeviceEngine->getOutputMessageQueue(); }
 
-    void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection) //!< Configure current device engine DSP corrections
-    {
-        m_dspDeviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
-    }
+//    void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection) //!< Configure current device engine DSP corrections
+//    {
+//        m_dspDeviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+//    }
 
-    GLSpectrum *getSpectrum() { return m_spectrum; }
+//    GLSpectrum *getSpectrum() { return m_spectrum; }
 
 	void loadSettings(const Preset* preset);
 	void loadSourceSettings(const Preset* preset);

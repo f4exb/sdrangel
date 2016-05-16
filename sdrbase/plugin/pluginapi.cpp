@@ -64,10 +64,10 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 //    m_pluginManager->addSink(sink);
 //}
 
-void PluginAPI::removeSink(SampleSink* sink)
-{
-    m_pluginManager->removeSink(sink);
-}
+//void PluginAPI::removeSink(SampleSink* sink)
+//{
+//    m_pluginManager->removeSink(sink);
+//}
 
 void PluginAPI::addThreadedSink(ThreadedSampleSink* sink)
 {
@@ -79,60 +79,60 @@ void PluginAPI::removeThreadedSink(ThreadedSampleSink* sink)
     m_pluginManager->removeThreadedSink(sink);
 }
 
-void PluginAPI::setSource(SampleSource* source)
-{
-    m_pluginManager->setSource(source);
-}
+//void PluginAPI::setSource(SampleSource* source)
+//{
+//    m_pluginManager->setSource(source);
+//}
 
-bool PluginAPI::initAcquisition()
-{
-    return m_pluginManager->initAcquisition();
-}
+//bool PluginAPI::initAcquisition()
+//{
+//    return m_pluginManager->initAcquisition();
+//}
+//
+//bool PluginAPI::startAcquisition()
+//{
+//    return m_pluginManager->startAcquisition();
+//}
+//
+//void PluginAPI::stopAcquistion()
+//{
+//    m_pluginManager->stopAcquistion();
+//}
 
-bool PluginAPI::startAcquisition()
-{
-    return m_pluginManager->startAcquisition();
-}
+//DSPDeviceEngine::State PluginAPI::state() const
+//{
+//    return m_pluginManager->state();
+//}
+//
+//QString PluginAPI::errorMessage()
+//{
+//    return m_pluginManager->errorMessage();
+//}
 
-void PluginAPI::stopAcquistion()
-{
-    m_pluginManager->stopAcquistion();
-}
+//uint PluginAPI::getDeviceUID() const
+//{
+//    return m_pluginManager->getDeviceUID();
+//}
 
-DSPDeviceEngine::State PluginAPI::state() const
-{
-    return m_pluginManager->state();
-}
+//MessageQueue *PluginAPI::getDeviceInputMessageQueue()
+//{
+//    return m_pluginManager->getDeviceInputMessageQueue();
+//}
+//
+//MessageQueue *PluginAPI::getDeviceOutputMessageQueue()
+//{
+//    return m_pluginManager->getDeviceOutputMessageQueue();
+//}
 
-QString PluginAPI::errorMessage()
-{
-    return m_pluginManager->errorMessage();
-}
+//void PluginAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
+//{
+//    m_pluginManager->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+//}
 
-uint PluginAPI::getDeviceUID() const
-{
-    return m_pluginManager->getDeviceUID();
-}
-
-MessageQueue *PluginAPI::getDeviceInputMessageQueue()
-{
-    return m_pluginManager->getDeviceInputMessageQueue();
-}
-
-MessageQueue *PluginAPI::getDeviceOutputMessageQueue()
-{
-    return m_pluginManager->getDeviceOutputMessageQueue();
-}
-
-void PluginAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
-{
-    m_pluginManager->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
-}
-
-GLSpectrum *PluginAPI::getSpectrum()
-{
-    return m_pluginManager->getSpectrum();
-}
+//GLSpectrum *PluginAPI::getSpectrum()
+//{
+//    return m_pluginManager->getSpectrum();
+//}
 
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),

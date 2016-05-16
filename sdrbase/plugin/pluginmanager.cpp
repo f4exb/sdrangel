@@ -111,10 +111,10 @@ void PluginManager::setInputGUI(QWidget* gui, const QString& sourceDisplayName)
 //    m_dspDeviceEngine->addSink(sink);
 //}
 
-void PluginManager::removeSink(SampleSink* sink)
-{
-    m_dspDeviceEngine->removeSink(sink);
-}
+//void PluginManager::removeSink(SampleSink* sink)
+//{
+//    m_dspDeviceEngine->removeSink(sink);
+//}
 
 void PluginManager::addThreadedSink(ThreadedSampleSink* sink)
 {

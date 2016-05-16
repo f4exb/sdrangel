@@ -21,15 +21,15 @@
 #include "rtlsdrinput.h"
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
-#include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
-RTLSDRInput::RTLSDRInput(PluginAPI *pluginAPI) :
-    m_pluginAPI(pluginAPI),
+RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
 	m_rtlSDRThread(0),
@@ -358,20 +358,20 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
 	}
 
 	if ((m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
 	{
 		m_settings.m_iqImbalance = settings.m_iqImbalance;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
 	}
 
     if (forwardChange)
     {
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
+		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
 	return true;

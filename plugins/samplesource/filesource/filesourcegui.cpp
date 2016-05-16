@@ -24,6 +24,7 @@
 
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -68,9 +69,9 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget
 
 	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	m_pluginAPI->setSource(m_sampleSource);
+	m_deviceAPI->setSource(m_sampleSource);
 
-    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -133,7 +134,7 @@ void FileSourceGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
     {
         qDebug("FileSourceGui::handleDSPMessages: message: %s", message->getIdentifier());
 
@@ -196,8 +197,8 @@ void FileSourceGui::handleSourceMessages()
 
 void FileSourceGui::updateSampleRateAndFrequency()
 {
-    m_pluginAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
+    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
@@ -218,22 +219,22 @@ void FileSourceGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_pluginAPI->initAcquisition())
+        if (m_deviceAPI->initAcquisition())
         {
-            m_pluginAPI->startAcquisition();
+            m_deviceAPI->startAcquisition();
             DSPEngine::instance()->startAudio();
         }
     }
     else
     {
-        m_pluginAPI->stopAcquistion();
+        m_deviceAPI->stopAcquisition();
         DSPEngine::instance()->stopAudio();
     }
 }
 
 void FileSourceGui::updateStatus()
 {
-    int state = m_pluginAPI->state();
+    int state = m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -250,7 +251,7 @@ void FileSourceGui::updateStatus()
                 break;
             case DSPDeviceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

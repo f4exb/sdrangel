@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -30,8 +30,8 @@
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
 
-HackRFInput::HackRFInput(PluginAPI *pluginAPI) :
-    m_pluginAPI(pluginAPI),
+HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
 	m_hackRFThread(0),
@@ -185,13 +185,13 @@ bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 	if (m_settings.m_dcBlock != settings.m_dcBlock)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
 	if (m_settings.m_iqCorrection != settings.m_iqCorrection)
 	{
 		m_settings.m_iqCorrection = settings.m_iqCorrection;
-		m_pluginAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
@@ -398,7 +398,7 @@ bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 	{
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		m_pluginAPI->getDeviceInputMessageQueue()->push(notif);
+		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 	}
 
 	return true;

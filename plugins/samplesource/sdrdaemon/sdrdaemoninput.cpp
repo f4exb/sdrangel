@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -38,8 +38,8 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message)
 
-SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, PluginAPI *pluginAPI) :
-    m_pluginAPI(pluginAPI),
+SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, DeviceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),
 	m_SDRdaemonUDPHandler(0),
@@ -52,7 +52,7 @@ SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, PluginAPI *pluginAPI) 
     m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_pluginAPI);
+	m_SDRdaemonUDPHandler = new SDRdaemonUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_deviceAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 }
 
@@ -124,7 +124,7 @@ bool SDRdaemonInput::handleMessage(const Message& message)
 		MsgConfigureSDRdaemonAutoCorr& conf = (MsgConfigureSDRdaemonAutoCorr&) message;
 		bool dcBlock = conf.getDCBlock();
 		bool iqImbalance = conf.getIQImbalance();
-		m_pluginAPI->configureCorrections(dcBlock, iqImbalance);
+		m_deviceAPI->configureCorrections(dcBlock, iqImbalance);
 		return true;
 	}
     else if (MsgConfigureSDRdaemonAutoFollowPolicy::match(message))

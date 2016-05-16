@@ -60,20 +60,20 @@ FCDProPlusGui::FCDProPlusGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget
 
 	displaySettings();
 
-	m_sampleSource = new FCDProPlusInput(m_pluginAPI);
-	m_pluginAPI->setSource(m_sampleSource);
+	m_sampleSource = new FCDProPlusInput(m_deviceAPI);
+	m_deviceAPI->setSource(m_sampleSource);
 
 	char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_pluginAPI->getDeviceUID());
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
     m_fileSink = new FileSink(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
 
-    connect(m_pluginAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FCDProPlusGui::~FCDProPlusGui()
 {
-    m_pluginAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
 	delete ui;
 }
@@ -141,7 +141,7 @@ void FCDProPlusGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_pluginAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
     {
         qDebug("RTLSDRGui::handleDSPMessages: message: %s", message->getIdentifier());
 
@@ -161,8 +161,8 @@ void FCDProPlusGui::handleDSPMessages()
 
 void FCDProPlusGui::updateSampleRateAndFrequency()
 {
-    m_pluginAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_pluginAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
@@ -215,7 +215,7 @@ void FCDProPlusGui::updateHardware()
 
 void FCDProPlusGui::updateStatus()
 {
-    int state = m_pluginAPI->state();
+    int state = m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -232,7 +232,7 @@ void FCDProPlusGui::updateStatus()
                 break;
             case DSPDeviceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_pluginAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -290,15 +290,15 @@ void FCDProPlusGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_pluginAPI->initAcquisition())
+        if (m_deviceAPI->initAcquisition())
         {
-            m_pluginAPI->startAcquisition();
+            m_deviceAPI->startAcquisition();
             DSPEngine::instance()->startAudio();
         }
     }
     else
     {
-        m_pluginAPI->stopAcquistion();
+        m_deviceAPI->stopAcquisition();
         DSPEngine::instance()->stopAudio();
     }
 }
