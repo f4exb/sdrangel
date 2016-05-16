@@ -32,21 +32,21 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.am", this);
 }
 
-PluginGUI* AMPlugin::createChannel(const QString& channelName)
+PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.am") {
-		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI);
+		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void AMPlugin::createInstanceAM()
+void AMPlugin::createInstanceAM(DeviceAPI *deviceAPI)
 {
-	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI);
+	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
 	m_pluginAPI->addChannelRollup(gui);
 }

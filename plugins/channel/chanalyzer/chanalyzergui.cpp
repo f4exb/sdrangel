@@ -34,9 +34,9 @@
 #include "chanalyzer.h"
 #include "chanalyzergui.h"
 
-ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI)
+ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	ChannelAnalyzerGUI* gui = new ChannelAnalyzerGUI(pluginAPI);
+	ChannelAnalyzerGUI* gui = new ChannelAnalyzerGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -301,10 +301,11 @@ void ChannelAnalyzerGUI::onMenuDoubleClicked()
 	}
 }
 
-ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent) :
+ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),

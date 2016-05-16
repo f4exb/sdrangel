@@ -126,7 +126,7 @@ void PluginManager::removeThreadedSink(ThreadedSampleSink* sink)
     m_dspDeviceEngine->removeThreadedSink(sink);
 }
 
-void PluginManager::loadSettings(const Preset* preset)
+void PluginManager::loadSettings(const Preset* preset, DeviceAPI *deviceAPI)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -163,7 +163,7 @@ void PluginManager::loadSettings(const Preset* preset)
 				if(m_channelRegistrations[i].m_channelName == channelConfig.m_channel)
 				{
 					qDebug("PluginManager::loadSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-					reg = ChannelInstanceRegistration(channelConfig.m_channel, m_channelRegistrations[i].m_plugin->createChannel(channelConfig.m_channel));
+					reg = ChannelInstanceRegistration(channelConfig.m_channel, m_channelRegistrations[i].m_plugin->createChannel(channelConfig.m_channel, deviceAPI));
 					break;
 				}
 			}
@@ -541,11 +541,11 @@ void PluginManager::populateChannelComboBox(QComboBox *channels)
     }
 }
 
-void PluginManager::createChannelInstance(int channelPluginIndex)
+void PluginManager::createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_channelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_channelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createChannel(m_channelRegistrations[channelPluginIndex].m_channelName);
+        pluginInterface->createChannel(m_channelRegistrations[channelPluginIndex].m_channelName, deviceAPI);
     }
 }

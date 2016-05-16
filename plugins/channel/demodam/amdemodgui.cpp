@@ -6,6 +6,7 @@
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -18,9 +19,9 @@ const int AMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
 
-AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI)
+AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	AMDemodGUI* gui = new AMDemodGUI(pluginAPI);
+	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -200,10 +201,11 @@ void AMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -218,7 +220,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_amDemod = new AMDemod();
 	m_channelizer = new Channelizer(m_amDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -230,7 +233,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	//m_pluginAPI->addChannelMarker(&m_channelMarker);
+    m_deviceAPI->addChannelMarker(&m_channelMarker);
+
+    m_deviceAPI->addRollupWidget(this);
 
 	applySettings();
 }

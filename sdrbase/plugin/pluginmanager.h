@@ -80,7 +80,7 @@ public:
 
 //    GLSpectrum *getSpectrum() { return m_spectrum; }
 
-	void loadSettings(const Preset* preset);
+	void loadSettings(const Preset* preset, DeviceAPI *deviceAPI);
 	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);
 	void saveSourceSettings(Preset* preset);
@@ -91,12 +91,13 @@ public:
 
 	void updateSampleSourceDevices();
 	void fillSampleSourceSelector(QComboBox* comboBox);
+
 	int selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI);
 	int selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI);
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceAPI *deviceAPI);
 
 	void populateChannelComboBox(QComboBox *channels);
-	void createChannelInstance(int channelPluginIndex);
+	void createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI);
 
 private:
 	struct ChannelRegistration {

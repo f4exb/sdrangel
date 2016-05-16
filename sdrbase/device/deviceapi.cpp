@@ -15,10 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/deviceapi.h"
+#include "gui/glspectrum.h"
+#include "gui/channelwindow.h"
 
-DeviceAPI::DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum) :
+DeviceAPI::DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum, ChannelWindow *channelWindow) :
     m_deviceEngine(deviceEngine),
-    m_spectrum(glSpectrum)
+    m_spectrum(glSpectrum),
+    m_channelWindow(channelWindow)
 {
 }
 
@@ -100,3 +103,19 @@ GLSpectrum *DeviceAPI::getSpectrum()
 {
     return m_spectrum;
 }
+
+void DeviceAPI::addChannelMarker(ChannelMarker* channelMarker)
+{
+    m_spectrum->addChannelMarker(channelMarker);
+}
+
+ChannelWindow *DeviceAPI::getChannelWindow()
+{
+    return m_channelWindow;
+}
+
+void DeviceAPI::addRollupWidget(QWidget *widget)
+{
+    m_channelWindow->addRollupWidget(widget);
+}
+

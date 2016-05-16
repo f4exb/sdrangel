@@ -7,6 +7,7 @@
 #include "dsp/movingaverage.h"
 
 class PluginAPI;
+class DeviceAPI;
 
 class ThreadedSampleSink;
 class Channelizer;
@@ -20,7 +21,7 @@ class AMDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static AMDemodGUI* create(PluginAPI* pluginAPI);
+	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -50,6 +51,7 @@ private slots:
 private:
 	Ui::AMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -62,7 +64,7 @@ private:
 
 	static const int m_rfBW[];
 
-	explicit AMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~AMDemodGUI();
 
     void blockApplySettings(bool block);

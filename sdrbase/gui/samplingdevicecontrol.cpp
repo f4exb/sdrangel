@@ -59,7 +59,7 @@ void SamplingDeviceControl::on_addChannel_clicked(bool checked)
 {
     if (m_pluginManager)
     {
-        m_pluginManager->createChannelInstance(ui->channelSelect->currentIndex());
+        m_pluginManager->createChannelInstance(ui->channelSelect->currentIndex(), m_deviceAPI);
     }
 }
 

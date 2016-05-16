@@ -196,7 +196,7 @@ void MainWindow::addDevice()
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    DeviceAPI *deviceAPI = new DeviceAPI(dspDeviceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
 
     // TODO: do not create one plugin manager per device. Use device API instead
@@ -205,6 +205,7 @@ void MainWindow::addDevice()
 
     pluginManager->loadPlugins();
 
+    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
     m_deviceUIs.back()->m_samplingDeviceControl->populateChannelSelector();
 
@@ -313,7 +314,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_pluginManager->loadSettings(preset);
+        deviceUI->m_pluginManager->loadSettings(preset, deviceUI->m_deviceAPI);
 	}
 
 	// has to be last step

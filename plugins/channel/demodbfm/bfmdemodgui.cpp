@@ -53,9 +53,9 @@ int requiredBW(int rfBW)
 		return 384000;
 }
 
-BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI)
+BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI);
+	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -356,10 +356,11 @@ void BFMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::BFMDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_rdsTimerCount(0),

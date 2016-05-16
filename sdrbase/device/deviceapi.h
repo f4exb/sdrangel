@@ -27,10 +27,13 @@
 class MainWindow;
 class DSPDeviceEngine;
 class GLSpectrum;
+class ChannelWindow;
 class SampleSink;
 class ThreadedSampleSink;
 class SampleSource;
 class MessageQueue;
+class ChannelMarker;
+class QWidget;
 
 class SDRANGEL_API DeviceAPI : public QObject {
     Q_OBJECT
@@ -53,14 +56,18 @@ public:
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
     // device related stuff
-    GLSpectrum *getSpectrum();
+    GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
+    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
+    ChannelWindow *getChannelWindow();                   //!< Direct channel window getter
+    void addRollupWidget(QWidget *widget);          //!< Add rollup widget to channel window
 
 protected:
-    DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum);
+    DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum, ChannelWindow *channelWindow);
     ~DeviceAPI();
 
     DSPDeviceEngine *m_deviceEngine;
     GLSpectrum *m_spectrum;
+    ChannelWindow *m_channelWindow;
 
     friend class MainWindow;
 };

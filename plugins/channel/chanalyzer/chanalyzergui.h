@@ -23,6 +23,7 @@
 #include "dsp/movingaverage.h"
 
 class PluginAPI;
+class DeviceAPI;
 
 class ThreadedSampleSink;
 class Channelizer;
@@ -39,7 +40,7 @@ class ChannelAnalyzerGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI);
+	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -69,6 +70,7 @@ private slots:
 private:
 	Ui::ChannelAnalyzerGUI* ui;
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -83,7 +85,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 
-	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~ChannelAnalyzerGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);

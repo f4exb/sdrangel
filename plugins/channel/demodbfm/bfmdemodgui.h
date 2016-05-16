@@ -25,6 +25,7 @@
 #include "rdsparser.h"
 
 class PluginAPI;
+class DeviceAPI;
 
 class ThreadedSampleSink;
 class Channelizer;
@@ -39,7 +40,7 @@ class BFMDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static BFMDemodGUI* create(PluginAPI* pluginAPI);
+	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -78,6 +79,7 @@ private slots:
 private:
 	Ui::BFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -95,7 +97,7 @@ private:
 
 	static const int m_rfBW[];
 
-	explicit BFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);

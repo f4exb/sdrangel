@@ -30,10 +30,10 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("org.f4exb.sdrangelove.channel.chanalyzer", this);
 }
 
-PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName)
+PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "org.f4exb.sdrangelove.channel.chanalyzer") {
-		ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI);
+		ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("org.f4exb.sdrangelove.channel.chanalyzer", gui);
 		m_pluginAPI->addChannelRollup(gui);
 		return gui;
@@ -42,9 +42,9 @@ PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName)
 	}
 }
 
-void ChannelAnalyzerPlugin::createInstanceChannelAnalyzer()
+void ChannelAnalyzerPlugin::createInstanceChannelAnalyzer(DeviceAPI *deviceAPI)
 {
-	ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI);
+	ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("org.f4exb.sdrangelove.channel.chanalyzer", gui);
 	m_pluginAPI->addChannelRollup(gui);
 }
