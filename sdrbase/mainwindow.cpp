@@ -202,7 +202,7 @@ void MainWindow::addDevice()
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
 
     // TODO: do not create one plugin manager per device. Use device API instead
-    PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
+    PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine);
     m_deviceUIs.back()->m_pluginManager = pluginManager;
 
     pluginManager->loadPlugins();

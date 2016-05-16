@@ -14,7 +14,6 @@ class MainWindow;
 class Message;
 class MessageQueue;
 class DSPDeviceEngine;
-class GLSpectrum;
 class DeviceAPI;
 
 class SDRANGEL_API PluginManager : public QObject {
@@ -36,7 +35,7 @@ public:
 
 	typedef QList<Plugin> Plugins;
 
-	explicit PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, GLSpectrum *spectrum, QObject* parent = NULL);
+	explicit PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, QObject* parent = NULL);
 	~PluginManager();
 
 	void loadPlugins();
@@ -130,7 +129,6 @@ private:
 	MainWindow* m_mainWindow;
 	uint m_deviceTabIndex;
 	DSPDeviceEngine* m_dspDeviceEngine;
-	GLSpectrum* m_spectrum;
 	Plugins m_plugins;
 
 	ChannelRegistrations m_channelRegistrations;
