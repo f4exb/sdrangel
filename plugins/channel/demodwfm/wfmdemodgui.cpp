@@ -6,6 +6,7 @@
 #include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -28,9 +29,9 @@ int requiredBW(int rfBW)
 		return 384000;
 }
 
-WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI)
+WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI);
+	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -213,10 +214,11 @@ void WFMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_channelPowerDbAvg(20,0)
@@ -232,7 +234,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_wfmDemod = new WFMDemod(0);
 	m_channelizer = new Channelizer(m_wfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -242,7 +244,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	applySettings();
 }
@@ -250,7 +253,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 WFMDemodGUI::~WFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_wfmDemod;

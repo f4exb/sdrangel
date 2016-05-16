@@ -25,6 +25,7 @@
 #include "dsp/movingaverage.h"
 
 class PluginAPI;
+class DeviceAPI;
 
 class ThreadedSampleSink;
 class Channelizer;
@@ -39,7 +40,7 @@ class DSDDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static DSDDemodGUI* create(PluginAPI* pluginAPI);
+	static DSDDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -79,6 +80,7 @@ private:
 
 	Ui::DSDDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -95,7 +97,7 @@ private:
 	MovingAverage<Real> m_channelPowerDbAvg;
 	int m_tickCount;
 
-	explicit DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent = NULL);
+	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();
 
 	void blockApplySettings(bool block);

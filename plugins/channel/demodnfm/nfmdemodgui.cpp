@@ -8,6 +8,7 @@
 #include "nfmdemod.h"
 #include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -22,9 +23,9 @@ const int NFMDemodGUI::m_fmDev[] = { // corresponding FM deviations
 };
 const int NFMDemodGUI::m_nbRfBW = 9;
 
-NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI)
+NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI);
+	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -247,10 +248,11 @@ void NFMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -289,7 +291,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::red);
@@ -299,7 +301,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	applySettings();
 }
@@ -307,7 +310,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 NFMDemodGUI::~NFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-    m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_nfmDemod;

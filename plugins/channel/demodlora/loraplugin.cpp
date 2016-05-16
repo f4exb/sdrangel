@@ -30,21 +30,21 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.lora", this);
 }
 
-PluginGUI* LoRaPlugin::createChannel(const QString& channelName)
+PluginGUI* LoRaPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.lora") {
-		LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI);
+		LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.lora", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void LoRaPlugin::createInstanceLoRa()
+void LoRaPlugin::createInstanceLoRa(DeviceAPI *deviceAPI)
 {
-	LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI);
+	LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.lora", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

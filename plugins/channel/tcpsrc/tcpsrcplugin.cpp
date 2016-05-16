@@ -30,21 +30,21 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("sdrangel.channel.tcpsrc", this);
 }
 
-PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName)
+PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "sdrangel.channel.tcpsrc") {
-		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI);
+		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void TCPSrcPlugin::createInstanceTCPSrc()
+void TCPSrcPlugin::createInstanceTCPSrc(DeviceAPI *deviceAPI)
 {
-	TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI);
+	TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

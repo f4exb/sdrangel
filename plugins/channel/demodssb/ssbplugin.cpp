@@ -1,5 +1,6 @@
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "ssbplugin.h"
 #include "ssbdemodgui.h"
 
@@ -30,21 +31,21 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ssb", this);
 }
 
-PluginGUI* SSBPlugin::createChannel(const QString& channelName)
+PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.ssb") {
-		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI);
+		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void SSBPlugin::createInstanceSSB()
+void SSBPlugin::createInstanceSSB(DeviceAPI *deviceAPI)
 {
-	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI);
+	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

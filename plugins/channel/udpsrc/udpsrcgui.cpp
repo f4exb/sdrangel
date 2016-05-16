@@ -18,6 +18,7 @@
 #include "udpsrcgui.h"
 
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
@@ -29,9 +30,9 @@
 #include "mainwindow.h"
 #include "udpsrc.h"
 
-UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI)
+UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI);
+	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -216,10 +217,11 @@ void UDPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
+UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::UDPSrcGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_udpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
@@ -237,7 +239,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_udpSrc = new UDPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_udpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->fmDeviation->setEnabled(false);
 
@@ -259,7 +261,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -270,7 +273,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 UDPSrcGUI::~UDPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_udpSrc;

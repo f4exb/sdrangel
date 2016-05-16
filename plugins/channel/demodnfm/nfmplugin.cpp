@@ -30,21 +30,21 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.nfm", this);
 }
 
-PluginGUI* NFMPlugin::createChannel(const QString& channelName)
+PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.nfm") {
-		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI);
+		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.nfm", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void NFMPlugin::createInstanceNFM()
+void NFMPlugin::createInstanceNFM(DeviceAPI *deviceAPI)
 {
-	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI);
+	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.nfm", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

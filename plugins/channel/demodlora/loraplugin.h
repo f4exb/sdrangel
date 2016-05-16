@@ -4,6 +4,8 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+class DeviceAPI;
+
 class LoRaPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
@@ -15,7 +17,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginGUI* createChannel(const QString& channelName);
+	PluginGUI* createChannel(const QString& channelName, DeviceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -23,7 +25,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceLoRa();
+	void createInstanceLoRa(DeviceAPI *deviceAPI);
 };
 
 #endif // INCLUDE_LoRaPLUGIN_H

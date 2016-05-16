@@ -17,6 +17,7 @@
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "dsddemodplugin.h"
 #include "dsddemodgui.h"
 
@@ -47,21 +48,21 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("sdrangel.channel.dsddemod", this);
 }
 
-PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName)
+PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "sdrangel.channel.dsddemod") {
-		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI);
+		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void DSDDemodPlugin::createInstanceDSDDemod()
+void DSDDemodPlugin::createInstanceDSDDemod(DeviceAPI *deviceAPI)
 {
-    DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI);
+    DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

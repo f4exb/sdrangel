@@ -9,6 +9,7 @@
 #include "tcpsrc.h"
 
 class PluginAPI;
+class DeviceAPI;
 class ThreadedSampleSink;
 class Channelizer;
 class TCPSrc;
@@ -22,7 +23,7 @@ class TCPSrcGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static TCPSrcGUI* create(PluginAPI* pluginAPI);
+	static TCPSrcGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -53,6 +54,7 @@ private slots:
 private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
+	DeviceAPI* m_deviceAPI;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<Real> m_channelPowerDbAvg;
@@ -71,7 +73,7 @@ private:
 	Channelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
-	explicit TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent = 0);
+	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = 0);
 	virtual ~TCPSrcGUI();
 
     void blockApplySettings(bool block);

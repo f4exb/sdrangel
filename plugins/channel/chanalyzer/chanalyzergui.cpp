@@ -25,6 +25,7 @@
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -325,7 +326,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAP
 	m_channelizer = new Channelizer(m_channelAnalyzer);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -347,7 +348,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAP
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);

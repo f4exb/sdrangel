@@ -10,13 +10,14 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 
-LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI)
+LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI);
+	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -146,10 +147,11 @@ void LoRaDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true)
@@ -163,7 +165,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_LoRaDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
@@ -178,7 +180,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_channelizer->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -188,7 +191,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 LoRaDemodGUI::~LoRaDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_LoRaDemod;

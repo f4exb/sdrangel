@@ -48,5 +48,5 @@ void AMPlugin::createInstanceAM(DeviceAPI *deviceAPI)
 {
 	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

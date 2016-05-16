@@ -24,6 +24,7 @@
 #include "dsp/scopevis.h"
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -33,9 +34,9 @@
 #include "dsddemod.h"
 #include "dsddemodgui.h"
 
-DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI)
+DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI);
+    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -243,10 +244,11 @@ void DSDDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::DSDDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -276,7 +278,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	m_channelizer = new Channelizer(m_dsdDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::cyan);
@@ -286,7 +288,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
@@ -296,7 +299,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 DSDDemodGUI::~DSDDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_dsdDemod;

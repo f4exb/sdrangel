@@ -29,6 +29,7 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -380,7 +381,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_channelizer = new Channelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
@@ -397,7 +398,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 

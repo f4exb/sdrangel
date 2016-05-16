@@ -49,21 +49,21 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel("sdrangel.channel.udpsrc", this);
 }
 
-PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName)
+PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
 	if(channelName == "sdrangel.channel.udpsrc") {
-		UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI);
+		UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
 		m_pluginAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
-		m_pluginAPI->addChannelRollup(gui);
+//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return 0;
 	}
 }
 
-void UDPSrcPlugin::createInstanceUDPSrc()
+void UDPSrcPlugin::createInstanceUDPSrc(DeviceAPI *deviceAPI)
 {
-	UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI);
+	UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
 	m_pluginAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
-	m_pluginAPI->addChannelRollup(gui);
+//	m_pluginAPI->addChannelRollup(gui);
 }

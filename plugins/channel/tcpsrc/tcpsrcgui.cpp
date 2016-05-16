@@ -1,5 +1,6 @@
 #include "tcpsrcgui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "tcpsrc.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/channelizer.h"
@@ -11,9 +12,9 @@
 #include "ui_tcpsrcgui.h"
 #include "mainwindow.h"
 
-TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI)
+TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI);
+	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -179,10 +180,11 @@ void TCPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
+TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_tcpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
@@ -199,7 +201,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new Channelizer(m_tcpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -219,7 +221,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -229,7 +232,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, QWidget* parent) :
 TCPSrcGUI::~TCPSrcGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_tcpSrc;

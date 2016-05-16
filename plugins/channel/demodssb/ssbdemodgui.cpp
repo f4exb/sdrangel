@@ -10,15 +10,16 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI)
+SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
-	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI);
+	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
@@ -314,10 +315,11 @@ void SSBDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
+SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
+	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -338,7 +340,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_ssbDemod = new SSBDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_ssbDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
-	m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
@@ -358,7 +360,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	m_pluginAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addChannelMarker(&m_channelMarker);
+	m_deviceAPI->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -369,7 +372,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 SSBDemodGUI::~SSBDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_ssbDemod;
