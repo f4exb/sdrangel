@@ -14,12 +14,10 @@
 
 #include <QDebug>
 
-PluginManager::PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDeviceEngine* dspDeviceEngine, QObject* parent) :
+PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
 	m_mainWindow(mainWindow),
-	m_deviceTabIndex(deviceTabIndex),
-	m_dspDeviceEngine(dspDeviceEngine),
 	m_sampleSourceId(),
 	m_sampleSourceSerial(),
 	m_sampleSourceSequence(0),
@@ -29,7 +27,7 @@ PluginManager::PluginManager(MainWindow* mainWindow, uint deviceTabIndex, DSPDev
 
 PluginManager::~PluginManager()
 {
-	freeAll();
+//	freeAll();
 }
 
 void PluginManager::loadPlugins()
@@ -59,23 +57,6 @@ void PluginManager::registerChannel(const QString& channelName, PluginInterface*
 	m_channelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
 }
 
-//void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
-//{
-//	m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
-//	renameChannelInstances();
-//}
-//
-//void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
-//{
-//	for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it) {
-//		if(it->m_gui == pluginGUI) {
-//			m_channelInstanceRegistrations.erase(it);
-//			break;
-//		}
-//	}
-//	renameChannelInstances();
-//}
-
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
 	qDebug() << "PluginManager::registerSampleSource "
@@ -84,169 +65,6 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
-
-//void PluginManager::loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI)
-//{
-//	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
-//
-//	// copy currently open channels and clear list
-//	ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
-//	m_channelInstanceRegistrations.clear();
-//
-//	for(int i = 0; i < preset->getChannelCount(); i++)
-//	{
-//		const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-//		ChannelInstanceRegistration reg;
-//
-//		// if we have one instance available already, use it
-//
-//		for(int i = 0; i < openChannels.count(); i++)
-//		{
-//			qDebug("PluginManager::loadSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
-//
-//			if(openChannels[i].m_channelName == channelConfig.m_channel)
-//			{
-//				qDebug("PluginManager::loadSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
-//				reg = openChannels.takeAt(i);
-//				m_channelInstanceRegistrations.append(reg);
-//				break;
-//			}
-//		}
-//
-//		// if we haven't one already, create one
-//
-//		if(reg.m_gui == NULL)
-//		{
-//			for(int i = 0; i < m_channelRegistrations.count(); i++)
-//			{
-//				if(m_channelRegistrations[i].m_channelName == channelConfig.m_channel)
-//				{
-//					qDebug("PluginManager::loadSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-//					reg = ChannelInstanceRegistration(channelConfig.m_channel, m_channelRegistrations[i].m_plugin->createChannel(channelConfig.m_channel, deviceAPI));
-//					break;
-//				}
-//			}
-//		}
-//
-//		if(reg.m_gui != NULL)
-//		{
-//			qDebug("PluginManager::loadSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
-//			reg.m_gui->deserialize(channelConfig.m_config);
-//		}
-//	}
-//
-//	// everything, that is still "available" is not needed anymore
-//	for(int i = 0; i < openChannels.count(); i++)
-//	{
-//		qDebug("PluginManager::loadSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
-//		openChannels[i].m_gui->destroy();
-//	}
-//
-//	renameChannelInstances();
-//
-////	loadSourceSettings(preset); // FIXME
-//}
-
-//void PluginManager::loadSourceSettings(const Preset* preset)
-//{
-//	fprintf(stderr, "PluginManager::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
-//
-//	if(m_sampleSourcePluginGUI != 0)
-//	{
-//		const QByteArray* sourceConfig = preset->findBestSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
-//
-//		if (sourceConfig != 0)
-//		{
-//			qDebug() << "PluginManager::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
-//			m_sampleSourcePluginGUI->deserialize(*sourceConfig);
-//		}
-//
-//		qint64 centerFrequency = preset->getCenterFrequency();
-//		m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
-//	}
-//}
-
-// sort by increasing delta frequency and type (i.e. name)
-bool PluginManager::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const {
-	if (m_gui && other.m_gui) {
-		if (m_gui->getCenterFrequency() == other.m_gui->getCenterFrequency()) {
-			return m_gui->getName() < other.m_gui->getName();
-		} else {
-			return m_gui->getCenterFrequency() < other.m_gui->getCenterFrequency();
-		}
-	} else {
-		return false;
-	}
-}
-
-//void PluginManager::saveSettings(Preset* preset)
-//{
-//	qDebug("PluginManager::saveSettings");
-////	saveSourceSettings(preset); // FIXME
-//
-//	qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
-//
-//	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
-//	{
-//		preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
-//	}
-//}
-
-//void PluginManager::saveSourceSettings(Preset* preset)
-//{
-//	qDebug("PluginManager::saveSourceSettings");
-//
-//	if(m_sampleSourcePluginGUI != NULL)
-//	{
-//		preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-//		//preset->setSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-//		preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
-//	}
-//}
-
-void PluginManager::freeAll()
-{
-    m_dspDeviceEngine->stopAcquistion();
-
-	while(!m_channelInstanceRegistrations.isEmpty()) {
-		ChannelInstanceRegistration reg(m_channelInstanceRegistrations.takeLast());
-		reg.m_gui->destroy();
-	}
-
-	if(m_sampleSourcePluginGUI != NULL) {
-	    m_dspDeviceEngine->setSource(NULL);
-		m_sampleSourcePluginGUI->destroy();
-		m_sampleSourcePluginGUI = NULL;
-		m_sampleSourceId.clear();
-	}
-}
-
-//bool PluginManager::handleMessage(const Message& message)
-//{
-//	if (m_sampleSourcePluginGUI != 0)
-//	{
-//		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourcePluginGUI))
-//		{
-//			if (m_sampleSourcePluginGUI->handleMessage(message))
-//			{
-//				return true;
-//			}
-//		}
-//	}
-//
-//	for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-//	{
-//		if ((message.getDestination() == 0) || (message.getDestination() == it->m_gui))
-//		{
-//			if (it->m_gui->handleMessage(message))
-//			{
-//				return true;
-//			}
-//		}
-//	}
-//
-//	return false;
-//}
 
 void PluginManager::updateSampleSourceDevices()
 {
@@ -495,13 +313,6 @@ void PluginManager::loadPlugins(const QDir& dir)
 	foreach (QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
 		loadPlugins(pluginsDir.absoluteFilePath(dirName));
-	}
-}
-
-void PluginManager::renameChannelInstances()
-{
-	for(int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
-		m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
 	}
 }
 

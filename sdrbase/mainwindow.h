@@ -61,7 +61,6 @@ public:
 		ChannelWindow *m_channelWindow;
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceEngine *m_deviceEngine;
-		PluginManager *m_pluginManager;
 		DeviceAPI *m_deviceAPI;
 
 		DeviceUISet(QTimer& timer);
@@ -87,16 +86,13 @@ private:
 	};
 
 	Ui::MainWindow* ui;
-
 	AudioDeviceInfo* m_audioDeviceInfo;
-
 	MessageQueue m_inputMessageQueue;
-
 	MainSettings m_settings;
-
 	std::vector<DeviceUISet*> m_deviceUIs;
 
 	DSPEngine* m_dspEngine;
+	PluginManager* m_pluginManager;
 
 	QTimer m_masterTimer;
 	QTimer m_statusTimer;

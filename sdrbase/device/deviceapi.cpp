@@ -196,18 +196,19 @@ void DeviceAPI::freeAll()
 
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
-        qDebug("PluginManager::loadSettings: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
+        qDebug("DeviceAPI::freeAll: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
         m_channelInstanceRegistrations[i].m_gui->destroy();
     }
 
 
-//    if(m_sampleSourcePluginGUI != 0)
-//    {
-//        m_deviceEngine->setSource(0);
-//        m_sampleSourcePluginGUI->destroy();
-//        m_sampleSourcePluginGUI = 0;
-//        m_sampleSourceId.clear();
-//    }
+    if(m_sampleSourcePluginGUI != 0)
+    {
+        qDebug("DeviceAPI::freeAll: destroying m_sampleSourcePluginGUI");
+        m_deviceEngine->setSource(0);
+        m_sampleSourcePluginGUI->destroy();
+        m_sampleSourcePluginGUI = 0;
+        m_sampleSourceId.clear();
+    }
 }
 
 void DeviceAPI::loadSourceSettings(const Preset* preset)

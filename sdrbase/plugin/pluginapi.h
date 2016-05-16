@@ -35,8 +35,6 @@ public:
 
 	// Channel stuff
 	void registerChannel(const QString& channelName, PluginInterface* plugin);
-//	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
-//	void removeChannelInstance(PluginGUI* pluginGUI);
 	ChannelRegistrations *getChannelRegistrations();
 
 	// Sample Source stuff
@@ -53,7 +51,6 @@ protected:
 	~PluginAPI();
 
 	friend class PluginManager;
-	friend class MainWindow;
 };
 
 #endif // INCLUDE_PLUGINAPI_H

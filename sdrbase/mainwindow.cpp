@@ -109,6 +109,9 @@ MainWindow::MainWindow(QWidget* parent) :
             "QTabWidget::pane { border: 1px solid #C06900; } "
             "QTabBar::tab:selected { background: rgb(128,70,0); }");
 
+    m_pluginManager = new PluginManager(this);
+    m_pluginManager->loadPlugins();
+
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -116,43 +119,28 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	m_masterTimer.start(50);
 
-	qDebug() << "MainWindow::MainWindow: m_pluginManager->loadPlugins ...";
+    qDebug() << "MainWindow::MainWindow: add the first device...";
 
     addDevice(); // add the first device
 
-//    DSPDeviceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
-//    dspDeviceEngine->start();
-//
-//    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
-//
-//    m_pluginManager = new PluginManager(this, dspDeviceEngine, m_deviceUIs.back()->m_spectrum);
-//	m_pluginManager->loadPlugins();
-//
-//	ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, "X0");
-//	ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, "X0");
-//	dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
-//	ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, "X0");
-//	bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_sampleSource->blockSignals(true);
-//	m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_sampleSource);
-//	connect(m_deviceUIs.back()->m_sampleSource, SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
-//	m_deviceUIs.back()->m_sampleSource->blockSignals(sampleSourceSignalsBlocked);
-//	ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_sampleSource, "X0");
-
-	qDebug() << "MainWindow::MainWindow: loadSettings...";
+    qDebug() << "MainWindow::MainWindow: load settings...";
 
 	loadSettings();
 
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_settings.getSourceIndex();
-	sampleSourceIndex = m_deviceUIs.back()->m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex, m_deviceUIs.back()->m_deviceAPI);
+	sampleSourceIndex = m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex, m_deviceUIs.back()->m_deviceAPI);
 
-	if (sampleSourceIndex >= 0)
+	if (sampleSourceIndex < 0)
 	{
-        bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
-        m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->setCurrentIndex(sampleSourceIndex);
-        m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
+	    qCritical("MainWindow::MainWindow: no sample source. Exit");
+	    exit(0);
 	}
+
+    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
+    m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->setCurrentIndex(sampleSourceIndex);
+    m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
@@ -166,9 +154,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	updatePresetControls();
 
-	qDebug() << "MainWindow::MainWindow: end";
-
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
+
+    qDebug() << "MainWindow::MainWindow: end";
 }
 
 MainWindow::~MainWindow()
@@ -180,6 +168,7 @@ MainWindow::~MainWindow()
         removeLastDevice();
     }
 
+    delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
 
@@ -199,16 +188,10 @@ void MainWindow::addDevice()
     m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
 
     DeviceAPI *deviceAPI = new DeviceAPI(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
-
-    // TODO: do not create one plugin manager per device. Use device API instead
-    PluginManager *pluginManager = new PluginManager(this, m_deviceUIs.size()-1, dspDeviceEngine);
-    m_deviceUIs.back()->m_pluginManager = pluginManager;
-
-    pluginManager->loadPlugins();
-
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);
-    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(pluginManager);
+    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     m_deviceUIs.back()->m_samplingDeviceControl->populateChannelSelector();
 
     dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
@@ -217,7 +200,7 @@ void MainWindow::addDevice()
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
-    pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector());
+    m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector());
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
@@ -235,21 +218,19 @@ void MainWindow::removeLastDevice()
     // PluginManager destructor does freeAll() which does stopAcquistion() but stopAcquistion()
     // can be done several times only the first is active so it is fine to do it here
     // On the other hand freeAll() must be executed only once
-    //delete m_deviceUIs.back()->m_pluginManager;
-    //m_deviceUIs.back()->m_pluginManager->freeAll();
-    //delete m_deviceUIs.back()->m_deviceAPI; // TODO: reinstate when plugin manager is not created for each device
 
     m_deviceUIs.back()->m_deviceAPI->freeAll();
 
     ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
-    lastDeviceEngine->stop();
-    m_dspEngine->removeLastDeviceEngine();
-
     ui->tabInputsView->removeTab(ui->tabInputsView->count() - 1);
     ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
     delete m_deviceUIs.back();
+
+    lastDeviceEngine->stop();
+    m_dspEngine->removeLastDeviceEngine();
+
     m_deviceUIs.pop_back();
 }
 
@@ -314,9 +295,8 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	if (currentSourceTabIndex >= 0)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        PluginAPI pluginAPI(deviceUI->m_pluginManager, this);
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_deviceAPI->loadChannelSettings(preset, &pluginAPI);
+        deviceUI->m_deviceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
         deviceUI->m_deviceAPI->loadSourceSettings(preset);
 	}
 
@@ -428,11 +408,6 @@ void MainWindow::handleMessages()
 	{
 		qDebug("MainWindow::handleMessages: message: %s", message->getIdentifier());
 		delete message;
-//
-//		if (!m_pluginManager->handleMessage(*message))
-//		{
-//			delete message;
-//		}
 	}
 }
 
@@ -677,7 +652,7 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
         //deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
-        deviceUI->m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
+        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
 
         //deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
@@ -729,7 +704,8 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_channelWindow = new ChannelWindow;
 	m_samplingDeviceControl = new SamplingDeviceControl;
 	m_deviceEngine = 0;
-	m_pluginManager = 0;
+	m_deviceAPI = 0;
+//	m_pluginManager = 0;
 
 	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
 	QFont font;
