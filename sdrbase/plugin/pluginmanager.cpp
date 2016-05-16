@@ -5,6 +5,7 @@
 
 #include "plugin/pluginmanager.h"
 #include "plugin/plugingui.h"
+#include "device/deviceapi.h"
 #include "settings/preset.h"
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
@@ -286,11 +287,11 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSourceByIndex: index: %d", index);
 
-	m_dspDeviceEngine->stopAcquistion();
+	deviceAPI->stopAcquisition();
 
 	if(m_sampleSourcePluginGUI != NULL) {
-	    m_dspDeviceEngine->stopAcquistion();
-	    m_dspDeviceEngine->setSource(NULL);
+	    deviceAPI->stopAcquisition();
+        deviceAPI->setSource(0);
 		m_sampleSourcePluginGUI->destroy();
 		m_sampleSourcePluginGUI = NULL;
 		m_sampleSourceId.clear();
@@ -321,7 +322,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 			<< " seq: " << m_sampleSourceSequence;
 
 	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
-	m_dspDeviceEngine->setSourceSequence(m_sampleSourceSequence);
+	deviceAPI->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
 }
@@ -332,11 +333,11 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 
 	int index = -1;
 
-	m_dspDeviceEngine->stopAcquistion();
+	deviceAPI->stopAcquisition();
 
 	if(m_sampleSourcePluginGUI != NULL) {
-	    m_dspDeviceEngine->stopAcquistion();
-	    m_dspDeviceEngine->setSource(NULL);
+	    deviceAPI->stopAcquisition();
+	    deviceAPI->setSource(0);
 		m_sampleSourcePluginGUI->destroy();
 		m_sampleSourcePluginGUI = NULL;
 		m_sampleSourceId.clear();

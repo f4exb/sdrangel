@@ -99,6 +99,11 @@ void DeviceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCo
     m_deviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
+void DeviceAPI::setSourceSequence(int sourceSequence)
+{
+    m_deviceEngine->setSourceSequence(sourceSequence);
+}
+
 GLSpectrum *DeviceAPI::getSpectrum()
 {
     return m_spectrum;

@@ -34,6 +34,7 @@ class SampleSource;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
+class PluginGUI;
 
 class SDRANGEL_API DeviceAPI : public QObject {
     Q_OBJECT
@@ -54,6 +55,7 @@ public:
     MessageQueue *getDeviceInputMessageQueue();
     MessageQueue *getDeviceOutputMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
+    void setSourceSequence(int sourceSequence);
 
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
