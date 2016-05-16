@@ -221,32 +221,32 @@ void PluginManager::freeAll()
 	}
 }
 
-bool PluginManager::handleMessage(const Message& message)
-{
-	if (m_sampleSourcePluginGUI != 0)
-	{
-		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourcePluginGUI))
-		{
-			if (m_sampleSourcePluginGUI->handleMessage(message))
-			{
-				return true;
-			}
-		}
-	}
-
-	for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-	{
-		if ((message.getDestination() == 0) || (message.getDestination() == it->m_gui))
-		{
-			if (it->m_gui->handleMessage(message))
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
+//bool PluginManager::handleMessage(const Message& message)
+//{
+//	if (m_sampleSourcePluginGUI != 0)
+//	{
+//		if ((message.getDestination() == 0) || (message.getDestination() == m_sampleSourcePluginGUI))
+//		{
+//			if (m_sampleSourcePluginGUI->handleMessage(message))
+//			{
+//				return true;
+//			}
+//		}
+//	}
+//
+//	for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
+//	{
+//		if ((message.getDestination() == 0) || (message.getDestination() == it->m_gui))
+//		{
+//			if (it->m_gui->handleMessage(message))
+//			{
+//				return true;
+//			}
+//		}
+//	}
+//
+//	return false;
+//}
 
 void PluginManager::updateSampleSourceDevices()
 {
