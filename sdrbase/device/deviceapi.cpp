@@ -199,6 +199,18 @@ void DeviceAPI::saveSourceSettings(Preset* preset)
     }
 }
 
+void DeviceAPI::saveChannelSettings(Preset *preset)
+{
+    qDebug("DeviceAPI::saveChannelSettings");
+
+    qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+
+    for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+    {
+        preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+    }
+}
+
 // sort by increasing delta frequency and type (i.e. name)
 bool DeviceAPI::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const
 {

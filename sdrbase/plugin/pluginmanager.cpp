@@ -56,7 +56,7 @@ void PluginManager::loadPlugins()
 
 void PluginManager::registerChannel(const QString& channelName, PluginInterface* plugin)
 {
-	m_channelRegistrations.append(ChannelRegistration(channelName, plugin));
+	m_channelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
 }
 
 void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
@@ -85,7 +85,7 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::loadSettings(const Preset* preset, DeviceAPI *deviceAPI)
+void PluginManager::loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -507,7 +507,7 @@ void PluginManager::renameChannelInstances()
 
 void PluginManager::populateChannelComboBox(QComboBox *channels)
 {
-    for(ChannelRegistrations::iterator it = m_channelRegistrations.begin(); it != m_channelRegistrations.end(); ++it)
+    for(PluginAPI::ChannelRegistrations::iterator it = m_channelRegistrations.begin(); it != m_channelRegistrations.end(); ++it)
     {
         const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
         channels->addItem(pluginDescipror.displayedName);

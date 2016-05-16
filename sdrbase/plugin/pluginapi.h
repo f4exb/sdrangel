@@ -2,6 +2,8 @@
 #define INCLUDE_PLUGINAPI_H
 
 #include <QObject>
+#include <QList>
+
 #include "util/export.h"
 
 class QString;
@@ -16,6 +18,18 @@ class SDRANGEL_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:
+    struct ChannelRegistration
+    {
+        QString m_channelName;
+        PluginInterface* m_plugin;
+        ChannelRegistration(const QString& channelName, PluginInterface* plugin) :
+            m_channelName(channelName),
+            m_plugin(plugin)
+        { }
+    };
+
+    typedef QList<ChannelRegistration> ChannelRegistrations;
+
 	// MainWindow access
 	MessageQueue* getMainWindowMessageQueue();
 

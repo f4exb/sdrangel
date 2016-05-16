@@ -47,7 +47,7 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void loadSettings(const Preset* preset, DeviceAPI *deviceAPI);
+	void loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI);
 //	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);
 //	void saveSourceSettings(Preset* preset);
@@ -67,16 +67,6 @@ public:
 	void createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI);
 
 private:
-	struct ChannelRegistration {
-		QString m_channelName;
-		PluginInterface* m_plugin;
-		ChannelRegistration(const QString& channelName, PluginInterface* plugin) :
-			m_channelName(channelName),
-			m_plugin(plugin)
-		{ }
-	};
-	typedef QList<ChannelRegistration> ChannelRegistrations;
-
 	struct ChannelInstanceRegistration {
 		QString m_channelName;
 		PluginGUI* m_gui;
@@ -129,7 +119,7 @@ private:
 	DSPDeviceEngine* m_dspDeviceEngine;
 	Plugins m_plugins;
 
-	ChannelRegistrations m_channelRegistrations;           //!< Channel plugins register here
+	PluginAPI::ChannelRegistrations m_channelRegistrations;           //!< Channel plugins register here
 	ChannelInstanceRegistrations m_channelInstanceRegistrations; // TODO: remove
 	SampleSourceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
 	SampleSourceDevices m_sampleSourceDevices;             //!< Instances of input sources present in the system

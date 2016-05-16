@@ -316,7 +316,7 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_pluginManager->loadSettings(preset, deviceUI->m_deviceAPI);
+        deviceUI->m_pluginManager->loadChannelSettings(preset, deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->loadSourceSettings(preset);
 	}
 

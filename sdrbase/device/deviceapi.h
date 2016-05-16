@@ -73,6 +73,7 @@ public:
 
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);
+    void saveChannelSettings(Preset* preset);
 
 protected:
     struct ChannelInstanceRegistration
