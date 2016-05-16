@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/deviceapi.h"
+#include "plugin/plugingui.h"
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
 #include "mainwindow.h"
@@ -28,7 +29,9 @@ DeviceAPI::DeviceAPI(MainWindow *mainWindow,
     m_deviceTabIndex(deviceTabIndex),
     m_deviceEngine(deviceEngine),
     m_spectrum(glSpectrum),
-    m_channelWindow(channelWindow)
+    m_channelWindow(channelWindow),
+    m_sampleSourceSequence(0),
+    m_sampleSourcePluginGUI(0)
 {
 }
 
@@ -134,4 +137,37 @@ void DeviceAPI::addRollupWidget(QWidget *widget)
 void DeviceAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
 {
     m_mainWindow->setInputGUI(m_deviceTabIndex, inputGUI, sourceDisplayName);
+}
+
+void DeviceAPI::setSampleSourceId(const QString& id)
+{
+    m_sampleSourceId = id;
+}
+
+void DeviceAPI::setSampleSourceSerial(const QString& serial)
+{
+    m_sampleSourceSerial = serial;
+}
+
+void DeviceAPI::setSampleSourceSequence(int sequence)
+{
+    m_sampleSourceSequence = sequence;
+}
+
+void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
+{
+    m_sampleSourcePluginGUI = gui;
+}
+
+void DeviceAPI::freeAll()
+{
+    m_deviceEngine->stopAcquistion();
+
+    if(m_sampleSourcePluginGUI != 0)
+    {
+        m_deviceEngine->setSource(0);
+        m_sampleSourcePluginGUI->destroy();
+        m_sampleSourcePluginGUI = 0;
+        m_sampleSourceId.clear();
+    }
 }

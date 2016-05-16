@@ -65,6 +65,13 @@ public:
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
     void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
+    void setSampleSourceId(const QString& id);
+    void setSampleSourceSerial(const QString& serial);
+    void setSampleSourceSequence(int sequence);
+    void setSampleSourcePluginGUI(PluginGUI *gui);
+
+    void freeAll();
+
 protected:
     DeviceAPI(MainWindow *mainWindow,
             int deviceTabIndex,
@@ -78,6 +85,11 @@ protected:
     DSPDeviceEngine *m_deviceEngine;
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
+
+    QString m_sampleSourceId;
+    QString m_sampleSourceSerial;
+    int m_sampleSourceSequence;
+    PluginGUI* m_sampleSourcePluginGUI;
 
     friend class MainWindow;
 };
