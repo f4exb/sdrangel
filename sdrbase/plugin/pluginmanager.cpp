@@ -7,9 +7,9 @@
 #include "plugin/plugingui.h"
 #include "settings/preset.h"
 #include "mainwindow.h"
-#include "dsp/dspdeviceengine.h"
-#include "dsp/samplesource.h"
 #include "gui/glspectrum.h"
+#include "dsp/dspdeviceengine.h"
+#include "util/message.h"
 
 #include <QDebug>
 
@@ -85,45 +85,10 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::addChannelRollup(QWidget* widget)
-{
-    m_mainWindow->addChannelRollup(m_deviceTabIndex, widget);
-}
-
-void PluginManager::addChannelMarker(ChannelMarker* channelMarker)
-{
-    m_spectrum->addChannelMarker(channelMarker);
-}
-
-void PluginManager::removeChannelMarker(ChannelMarker* channelMarker)
-{
-    m_spectrum->removeChannelMarker(channelMarker);
-}
-
 void PluginManager::setInputGUI(QWidget* gui, const QString& sourceDisplayName)
 {
     //m_mainWindow->setInputGUI(gui);
     m_mainWindow->setInputGUI(m_deviceTabIndex, gui, sourceDisplayName);
-}
-
-//void PluginManager::addSink(SampleSink* sink)
-//{
-//    m_dspDeviceEngine->addSink(sink);
-//}
-
-//void PluginManager::removeSink(SampleSink* sink)
-//{
-//    m_dspDeviceEngine->removeSink(sink);
-//}
-
-void PluginManager::addThreadedSink(ThreadedSampleSink* sink)
-{
-    m_dspDeviceEngine->addThreadedSink(sink);
-}
-
-void PluginManager::removeThreadedSink(ThreadedSampleSink* sink)
-{
-    m_dspDeviceEngine->removeThreadedSink(sink);
 }
 
 void PluginManager::loadSettings(const Preset* preset, DeviceAPI *deviceAPI)

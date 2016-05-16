@@ -244,7 +244,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pare
 AMDemodGUI::~AMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_amDemod;
