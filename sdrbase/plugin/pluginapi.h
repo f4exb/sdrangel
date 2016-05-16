@@ -18,7 +18,6 @@ class SDRANGEL_API PluginAPI : public QObject {
 public:
 	// MainWindow access
 	MessageQueue* getMainWindowMessageQueue();
-	void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
 	// Channel stuff
 	void registerChannel(const QString& channelName, PluginInterface* plugin);

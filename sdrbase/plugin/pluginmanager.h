@@ -47,8 +47,6 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	void setInputGUI(QWidget* gui, const QString& sourceDisplayName);
-
 	void loadSettings(const Preset* preset, DeviceAPI *deviceAPI);
 	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);

@@ -22,6 +22,7 @@
 
 #include "hackrfgui.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
@@ -122,7 +123,7 @@ PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, co
 	if(sourceId == m_deviceTypeID)
 	{
 		HackRFGui* gui = new HackRFGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

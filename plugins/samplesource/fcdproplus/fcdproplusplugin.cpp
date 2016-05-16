@@ -17,6 +17,7 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "fcdproplusplugin.h"
 #include "fcdproplusgui.h"
@@ -79,7 +80,7 @@ PluginGUI* FCDProPlusPlugin::createSampleSourcePluginGUI(const QString& sourceId
 	if(sourceId == fcd_traits<ProPlus>::interfaceIID)
 	{
 		FCDProPlusGui* gui = new FCDProPlusGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

@@ -21,6 +21,7 @@
 #include "airspygui.h"
 #include "airspyplugin.h"
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
@@ -127,7 +128,7 @@ PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId, co
 	if(sourceId == m_deviceTypeID)
 	{
 		AirspyGui* gui = new AirspyGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

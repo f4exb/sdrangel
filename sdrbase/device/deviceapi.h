@@ -55,18 +55,26 @@ public:
     MessageQueue *getDeviceInputMessageQueue();
     MessageQueue *getDeviceOutputMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
+
     void setSourceSequence(int sourceSequence);
 
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     ChannelWindow *getChannelWindow();                   //!< Direct channel window getter
-    void addRollupWidget(QWidget *widget);          //!< Add rollup widget to channel window
+    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
+    void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
 protected:
-    DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum, ChannelWindow *channelWindow);
+    DeviceAPI(MainWindow *mainWindow,
+            int deviceTabIndex,
+            DSPDeviceEngine *deviceEngine,
+            GLSpectrum *glSpectrum,
+            ChannelWindow *channelWindow);
     ~DeviceAPI();
 
+    MainWindow *m_mainWindow;
+    int m_deviceTabIndex;
     DSPDeviceEngine *m_deviceEngine;
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;

@@ -2,6 +2,7 @@
 #include <QAction>
 #include <rtl-sdr.h>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "rtlsdrplugin.h"
 #include "rtlsdrgui.h"
@@ -63,7 +64,7 @@ PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, co
 {
 	if(sourceId == m_deviceTypeID) {
 		RTLSDRGui* gui = new RTLSDRGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	} else {
 		return NULL;

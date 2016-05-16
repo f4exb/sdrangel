@@ -17,8 +17,15 @@
 #include "device/deviceapi.h"
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
+#include "mainwindow.h"
 
-DeviceAPI::DeviceAPI(DSPDeviceEngine *deviceEngine, GLSpectrum *glSpectrum, ChannelWindow *channelWindow) :
+DeviceAPI::DeviceAPI(MainWindow *mainWindow,
+        int deviceTabIndex,
+        DSPDeviceEngine *deviceEngine,
+        GLSpectrum *glSpectrum,
+        ChannelWindow *channelWindow) :
+    m_mainWindow(mainWindow),
+    m_deviceTabIndex(deviceTabIndex),
     m_deviceEngine(deviceEngine),
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow)
@@ -124,3 +131,7 @@ void DeviceAPI::addRollupWidget(QWidget *widget)
     m_channelWindow->addRollupWidget(widget);
 }
 
+void DeviceAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
+{
+    m_mainWindow->setInputGUI(m_deviceTabIndex, inputGUI, sourceDisplayName);
+}

@@ -18,6 +18,7 @@
 #include <QAction>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "bladerfgui.h"
 #include "bladerfplugin.h"
@@ -85,7 +86,7 @@ PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId, co
 	if(sourceId == m_deviceTypeID)
 	{
 		BladerfGui* gui = new BladerfGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

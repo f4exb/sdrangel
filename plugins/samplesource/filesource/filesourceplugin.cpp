@@ -17,6 +17,7 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 #include "filesourcegui.h"
@@ -72,7 +73,7 @@ PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId
 	if(sourceId == m_deviceTypeID)
 	{
 		FileSourceGui* gui = new FileSourceGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

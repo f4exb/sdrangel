@@ -17,6 +17,7 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
+#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 #include "sdrdaemongui.h"
@@ -72,7 +73,7 @@ PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId,
 	if(sourceId == m_deviceTypeID)
 	{
 		SDRdaemonGui* gui = new SDRdaemonGui(m_pluginAPI, deviceAPI);
-		m_pluginAPI->setInputGUI(gui, sourceDisplayName);
+		deviceAPI->setInputGUI(gui, sourceDisplayName);
 		return gui;
 	}
 	else

@@ -8,11 +8,6 @@ MessageQueue* PluginAPI::getMainWindowMessageQueue()
 	return m_mainWindow->getInputMessageQueue();
 }
 
-void PluginAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
-{
-    m_pluginManager->setInputGUI(inputGUI, sourceDisplayName);
-}
-
 void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plugin)
 {
 	m_pluginManager->registerChannel(channelName, plugin);

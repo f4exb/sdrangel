@@ -85,12 +85,6 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 	m_sampleSourceRegistrations.append(SampleSourceRegistration(sourceName, plugin));
 }
 
-void PluginManager::setInputGUI(QWidget* gui, const QString& sourceDisplayName)
-{
-    //m_mainWindow->setInputGUI(gui);
-    m_mainWindow->setInputGUI(m_deviceTabIndex, gui, sourceDisplayName);
-}
-
 void PluginManager::loadSettings(const Preset* preset, DeviceAPI *deviceAPI)
 {
 	fprintf(stderr, "PluginManager::loadSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
@@ -321,7 +315,8 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
@@ -375,7 +370,9 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	m_sampleSourcePluginGUI = pluginGUI;
+	deviceAPI->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
 }
@@ -442,7 +439,9 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 			<< " ser: " << qPrintable(m_sampleSourceSerial)
 			<< " seq: " << m_sampleSourceSequence;
 
-	m_sampleSourcePluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	m_sampleSourcePluginGUI = pluginGUI;
+	deviceAPI->setSourceSequence(m_sampleSourceSequence);
 
 	return index;
 }
