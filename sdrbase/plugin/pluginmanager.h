@@ -47,6 +47,8 @@ public:
 	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
+	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }
+
 	void loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI);
 //	void loadSourceSettings(const Preset* preset);
 	void saveSettings(Preset* preset);

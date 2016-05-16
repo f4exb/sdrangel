@@ -28,6 +28,12 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
+PluginAPI::ChannelRegistrations *PluginAPI::getChannelRegistrations()
+{
+    return m_pluginManager->getChannelRegistrations();
+}
+
+
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),
 	m_pluginManager(pluginManager),

@@ -37,6 +37,7 @@ public:
 	void registerChannel(const QString& channelName, PluginInterface* plugin);
 	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
 	void removeChannelInstance(PluginGUI* pluginGUI);
+	ChannelRegistrations *getChannelRegistrations();
 
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);

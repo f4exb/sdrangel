@@ -16,6 +16,8 @@
 
 #include "device/deviceapi.h"
 #include "plugin/plugingui.h"
+#include "plugin/pluginapi.h"
+#include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
 #include "mainwindow.h"
@@ -156,9 +158,43 @@ void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
     m_sampleSourcePluginGUI = gui;
 }
 
+void DeviceAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+{
+    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
+    renameChannelInstances();
+}
+
+void DeviceAPI::removeChannelInstance(PluginGUI* pluginGUI)
+{
+    for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
+    {
+        if(it->m_gui == pluginGUI)
+        {
+            m_channelInstanceRegistrations.erase(it);
+            break;
+        }
+    }
+
+    renameChannelInstances();
+}
+
+void DeviceAPI::renameChannelInstances()
+{
+    for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+    {
+        m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
+    }
+}
+
 void DeviceAPI::freeAll()
 {
     m_deviceEngine->stopAcquistion();
+
+    while(!m_channelInstanceRegistrations.isEmpty())
+    {
+        ChannelInstanceRegistration reg(m_channelInstanceRegistrations.takeLast());
+        reg.m_gui->destroy();
+    }
 
     if(m_sampleSourcePluginGUI != 0)
     {
@@ -197,6 +233,69 @@ void DeviceAPI::saveSourceSettings(Preset* preset)
         preset->addOrUpdateSourceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
         preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
     }
+}
+
+void DeviceAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
+{
+    qDebug("DeviceAPI::loadChannelSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+
+    // Available channel plugins
+    PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getChannelRegistrations();
+
+    // copy currently open channels and clear list
+    ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
+    m_channelInstanceRegistrations.clear();
+
+    for(int i = 0; i < preset->getChannelCount(); i++)
+    {
+        const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
+        ChannelInstanceRegistration reg;
+
+        // if we have one instance available already, use it
+
+        for(int i = 0; i < openChannels.count(); i++)
+        {
+            qDebug("PluginManager::loadSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+
+            if(openChannels[i].m_channelName == channelConfig.m_channel)
+            {
+                qDebug("PluginManager::loadSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
+                reg = openChannels.takeAt(i);
+                m_channelInstanceRegistrations.append(reg);
+                break;
+            }
+        }
+
+        // if we haven't one already, create one
+
+        if(reg.m_gui == NULL)
+        {
+            for(int i = 0; i < channelRegistrations->count(); i++)
+            {
+                if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
+                {
+                    qDebug("PluginManager::loadSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                    reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createChannel(channelConfig.m_channel, this));
+                    break;
+                }
+            }
+        }
+
+        if(reg.m_gui != NULL)
+        {
+            qDebug("PluginManager::loadSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+            reg.m_gui->deserialize(channelConfig.m_config);
+        }
+    }
+
+    // everything, that is still "available" is not needed anymore
+    for(int i = 0; i < openChannels.count(); i++)
+    {
+        qDebug("PluginManager::loadSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+        openChannels[i].m_gui->destroy();
+    }
+
+    renameChannelInstances();
 }
 
 void DeviceAPI::saveChannelSettings(Preset *preset)

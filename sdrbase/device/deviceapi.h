@@ -35,6 +35,7 @@ class MessageQueue;
 class ChannelMarker;
 class QWidget;
 class PluginGUI;
+class PluginAPI;
 class Preset;
 
 class SDRANGEL_API DeviceAPI : public QObject {
@@ -69,10 +70,14 @@ public:
     void setSampleSourceSequence(int sequence);
     void setSampleSourcePluginGUI(PluginGUI *gui);
 
+    void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
+    void removeChannelInstance(PluginGUI* pluginGUI);
+
     void freeAll();
 
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);
+    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveChannelSettings(Preset* preset);
 
 protected:
@@ -102,6 +107,8 @@ protected:
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);
     ~DeviceAPI();
+
+    void renameChannelInstances();
 
     MainWindow *m_mainWindow;
     int m_deviceTabIndex;
