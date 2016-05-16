@@ -40,6 +40,8 @@
 #include "bfmdemod.h"
 #include "rdstmc.h"
 
+const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
+
 const int BFMDemodGUI::m_rfBW[] = {
 	80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
@@ -397,7 +399,10 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -415,7 +420,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 BFMDemodGUI::~BFMDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

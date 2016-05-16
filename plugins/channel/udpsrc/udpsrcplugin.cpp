@@ -46,14 +46,15 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	m_pluginAPI->registerChannel("sdrangel.channel.udpsrc", this);
+	m_pluginAPI->registerChannel(UDPSrcGUI::m_channelID, this);
 }
 
 PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
-	if(channelName == "sdrangel.channel.udpsrc") {
+	if(channelName == UDPSrcGUI::m_channelID)
+	{
 		UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
-		m_pluginAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
+//		deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -64,6 +65,6 @@ PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *de
 void UDPSrcPlugin::createInstanceUDPSrc(DeviceAPI *deviceAPI)
 {
 	UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
-	m_pluginAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
+//	deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

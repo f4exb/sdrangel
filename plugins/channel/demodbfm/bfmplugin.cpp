@@ -46,14 +46,15 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register BFM demodulator
-	m_pluginAPI->registerChannel("sdrangel.channel.bfm", this);
+	m_pluginAPI->registerChannel(BFMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
-	if(channelName == "sdrangel.channel.bfm") {
+	if(channelName == BFMDemodGUI::m_channelID)
+	{
 		BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceAPI);
-		m_pluginAPI->registerChannelInstance("sdrangel.channel.bfm", gui);
+//		deviceAPI->registerChannelInstance("sdrangel.channel.bfm", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -64,6 +65,6 @@ PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void BFMPlugin::createInstanceBFM(DeviceAPI *deviceAPI)
 {
 	BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceAPI);
-	m_pluginAPI->registerChannelInstance("sdrangel.channel.bfm", gui);
+//	deviceAPI->registerChannelInstance("sdrangel.channel.bfm", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

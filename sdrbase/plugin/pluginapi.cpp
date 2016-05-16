@@ -13,15 +13,15 @@ void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plu
 	m_pluginManager->registerChannel(channelName, plugin);
 }
 
-void PluginAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
-{
-	m_pluginManager->registerChannelInstance(channelName, pluginGUI);
-}
-
-void PluginAPI::removeChannelInstance(PluginGUI* pluginGUI)
-{
-	m_pluginManager->removeChannelInstance(pluginGUI);
-}
+//void PluginAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+//{
+//	m_pluginManager->registerChannelInstance(channelName, pluginGUI);
+//}
+//
+//void PluginAPI::removeChannelInstance(PluginGUI* pluginGUI)
+//{
+//	m_pluginManager->removeChannelInstance(pluginGUI);
+//}
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {

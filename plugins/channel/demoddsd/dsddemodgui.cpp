@@ -34,6 +34,8 @@
 #include "dsddemod.h"
 #include "dsddemodgui.h"
 
+const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
+
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
@@ -288,6 +290,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -298,7 +301,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

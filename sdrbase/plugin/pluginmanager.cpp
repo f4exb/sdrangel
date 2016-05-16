@@ -59,22 +59,22 @@ void PluginManager::registerChannel(const QString& channelName, PluginInterface*
 	m_channelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
 }
 
-void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
-{
-	m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
-	renameChannelInstances();
-}
-
-void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
-{
-	for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it) {
-		if(it->m_gui == pluginGUI) {
-			m_channelInstanceRegistrations.erase(it);
-			break;
-		}
-	}
-	renameChannelInstances();
-}
+//void PluginManager::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+//{
+//	m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
+//	renameChannelInstances();
+//}
+//
+//void PluginManager::removeChannelInstance(PluginGUI* pluginGUI)
+//{
+//	for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it) {
+//		if(it->m_gui == pluginGUI) {
+//			m_channelInstanceRegistrations.erase(it);
+//			break;
+//		}
+//	}
+//	renameChannelInstances();
+//}
 
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {

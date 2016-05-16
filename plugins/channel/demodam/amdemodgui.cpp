@@ -15,6 +15,8 @@
 
 #include "amdemod.h"
 
+const QString AMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.am";
+
 const int AMDemodGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
@@ -232,10 +234,11 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pare
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-	//m_pluginAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
 
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
+    m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
 
 	applySettings();
@@ -243,7 +246,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pare
 
 AMDemodGUI::~AMDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

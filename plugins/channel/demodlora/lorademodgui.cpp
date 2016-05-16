@@ -15,6 +15,8 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 
+const QString LoRaDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.lora";
+
 LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
 	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceAPI);
@@ -179,7 +181,10 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* 
 	m_channelMarker.setBandwidth(7813);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -190,7 +195,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* 
 
 LoRaDemodGUI::~LoRaDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

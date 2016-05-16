@@ -15,6 +15,8 @@
 #include "wfmdemod.h"
 #include "wfmdemodgui.h"
 
+const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
+
 const int WFMDemodGUI::m_rfBW[] = {
 	48000, 80000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
@@ -243,7 +245,10 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -252,7 +257,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 WFMDemodGUI::~WFMDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

@@ -45,14 +45,15 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register DSD demodulator
-	m_pluginAPI->registerChannel("sdrangel.channel.dsddemod", this);
+	m_pluginAPI->registerChannel(DSDDemodGUI::m_channelID, this);
 }
 
 PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
-	if(channelName == "sdrangel.channel.dsddemod") {
+	if(channelName == DSDDemodGUI::m_channelID)
+	{
 		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
-		m_pluginAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
+//		deviceAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -63,6 +64,6 @@ PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *
 void DSDDemodPlugin::createInstanceDSDDemod(DeviceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
-	m_pluginAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
+//    deviceAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

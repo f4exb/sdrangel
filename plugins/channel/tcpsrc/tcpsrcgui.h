@@ -37,6 +37,8 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+	static const QString m_channelID;
+
 private slots:
 	void channelMarkerChanged();
 	void on_deltaFrequency_changed(quint64 value);

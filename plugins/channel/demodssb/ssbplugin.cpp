@@ -28,14 +28,15 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ssb", this);
+	m_pluginAPI->registerChannel(SSBDemodGUI::m_channelID, this);
 }
 
 PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
-	if(channelName == "de.maintech.sdrangelove.channel.ssb") {
+	if(channelName == SSBDemodGUI::m_channelID)
+	{
 		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
-		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
+//		deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -46,6 +47,6 @@ PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void SSBPlugin::createInstanceSSB(DeviceAPI *deviceAPI)
 {
 	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
-	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
+//	deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

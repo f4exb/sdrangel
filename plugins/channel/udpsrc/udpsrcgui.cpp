@@ -30,6 +30,8 @@
 #include "mainwindow.h"
 #include "udpsrc.h"
 
+const QString UDPSrcGUI::m_channelID = "sdrangel.channel.udpsrc";
+
 UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
 	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceAPI);
@@ -260,7 +262,10 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -272,7 +277,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 
 UDPSrcGUI::~UDPSrcGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

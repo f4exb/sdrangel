@@ -17,6 +17,8 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
+const QString SSBDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.ssb";
+
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
 	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceAPI);
@@ -359,7 +361,10 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -371,7 +376,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 SSBDemodGUI::~SSBDemodGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

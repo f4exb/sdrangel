@@ -12,6 +12,8 @@
 #include "ui_tcpsrcgui.h"
 #include "mainwindow.h"
 
+const QString TCPSrcGUI::m_channelID = "sdrangel.channel.tcpsrc";
+
 TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
 	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceAPI);
@@ -220,7 +222,10 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setVisible(true);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+
+	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
@@ -231,7 +236,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 
 TCPSrcGUI::~TCPSrcGUI()
 {
-	m_pluginAPI->removeChannelInstance(this);
+    m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;

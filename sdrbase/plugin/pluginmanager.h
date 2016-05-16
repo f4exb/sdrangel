@@ -43,8 +43,8 @@ public:
 
 	// Callbacks from the plugins
 	void registerChannel(const QString& channelName, PluginInterface* plugin);
-	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
-	void removeChannelInstance(PluginGUI* pluginGUI);
+//	void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
+//	void removeChannelInstance(PluginGUI* pluginGUI);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
 	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }

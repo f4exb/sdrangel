@@ -28,14 +28,15 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register WFM demodulator
-	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.wfm", this);
+	m_pluginAPI->registerChannel(WFMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
 {
-	if(channelName == "de.maintech.sdrangelove.channel.wfm") {
+	if(channelName == WFMDemodGUI::m_channelID)
+	{
 		WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
-		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
+//		deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -46,6 +47,6 @@ PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void WFMPlugin::createInstanceWFM(DeviceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
-	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
+//	deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }
