@@ -315,8 +315,9 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	if (currentSourceTabIndex >= 0)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        PluginAPI pluginAPI(deviceUI->m_pluginManager, this);
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_pluginManager->loadChannelSettings(preset, deviceUI->m_deviceAPI);
+        deviceUI->m_deviceAPI->loadChannelSettings(preset, &pluginAPI);
         deviceUI->m_deviceAPI->loadSourceSettings(preset);
 	}
 
@@ -344,7 +345,7 @@ void MainWindow::savePresetSettings(Preset* preset)
 
 	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
 	preset->clearChannels();
-    deviceUI->m_pluginManager->saveSettings(preset);
+    deviceUI->m_deviceAPI->saveChannelSettings(preset);
     deviceUI->m_deviceAPI->saveSourceSettings(preset);
 
     preset->setLayout(saveState());

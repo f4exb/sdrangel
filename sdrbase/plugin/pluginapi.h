@@ -53,6 +53,7 @@ protected:
 	~PluginAPI();
 
 	friend class PluginManager;
+	friend class MainWindow;
 };
 
 #endif // INCLUDE_PLUGINAPI_H

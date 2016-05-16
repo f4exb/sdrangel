@@ -49,9 +49,9 @@ public:
 
 	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }
 
-	void loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI);
+//	void loadChannelSettings(const Preset* preset, DeviceAPI *deviceAPI);
 //	void loadSourceSettings(const Preset* preset);
-	void saveSettings(Preset* preset);
+//	void saveSettings(Preset* preset);
 //	void saveSourceSettings(Preset* preset);
 
 	void freeAll();
@@ -67,6 +67,8 @@ public:
 
 	void populateChannelComboBox(QComboBox *channels);
 	void createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI);
+
+	PluginAPI *getAPI(MainWindow *mainWindow);
 
 private:
 	struct ChannelInstanceRegistration {
