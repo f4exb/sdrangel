@@ -39,6 +39,11 @@ QComboBox *SamplingDeviceControl::getDeviceSelector()
     return ui->deviceSelect;
 }
 
+QPushButton *SamplingDeviceControl::getDeviceSelectionConfirm()
+{
+    return ui->deviceConfirm;
+}
+
 void SamplingDeviceControl::populateChannelSelector()
 {
     if (m_pluginManager)

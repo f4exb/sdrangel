@@ -20,6 +20,7 @@
 
 #include <QWidget>
 #include <QComboBox>
+#include <QPushButton>
 
 #include "util/export.h"
 
@@ -41,6 +42,7 @@ public:
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
     void setDeviceAPI(DeviceAPI *devieAPI) { m_deviceAPI = devieAPI; }
     QComboBox *getDeviceSelector();
+    QPushButton *getDeviceSelectionConfirm();
     void populateChannelSelector();
 
 private:

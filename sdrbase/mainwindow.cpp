@@ -201,7 +201,10 @@ void MainWindow::addDevice()
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
     m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector());
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+
+//    connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSource_confirmClicked(bool)));
+
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
 
@@ -663,6 +666,25 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
 }
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)
+{
+    // Do it in the currently selected source tab
+    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+
+    if (currentSourceTabIndex >= 0)
+    {
+        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
+        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
+        //deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());
+        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
+        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+
+        //deviceUI->m_pluginManager->loadSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
+    }
+}
+
+void MainWindow::on_sampleSource_confirmClicked(bool checked)
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
