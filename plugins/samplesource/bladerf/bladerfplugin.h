@@ -20,6 +20,8 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+class PluginAPI;
+
 #define BLADERF_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf"
 
 class BlderfPlugin : public QObject, public PluginInterface {
@@ -40,8 +42,6 @@ public:
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
 };
 
 #endif // INCLUDE_BLADERFPLUGIN_H

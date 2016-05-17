@@ -35,8 +35,7 @@ const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
 const QString BlderfPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
 
 BlderfPlugin::BlderfPlugin(QObject* parent) :
-	QObject(parent),
-	m_pluginAPI(0)
+	QObject(parent)
 {
 }
 
@@ -47,8 +46,7 @@ const PluginDescriptor& BlderfPlugin::getPluginDescriptor() const
 
 void BlderfPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
@@ -78,14 +76,9 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 
 PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceAPI *deviceAPI)
 {
-	if (!m_pluginAPI)
-	{
-		return 0;
-	}
-
 	if(sourceId == m_deviceTypeID)
 	{
-		BladerfGui* gui = new BladerfGui(m_pluginAPI, deviceAPI);
+		BladerfGui* gui = new BladerfGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

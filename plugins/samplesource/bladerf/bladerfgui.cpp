@@ -20,7 +20,6 @@
 #include <libbladeRF.h>
 
 #include "ui_bladerfgui.h"
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -29,10 +28,9 @@
 #include "dsp/filesink.h"
 #include "bladerfgui.h"
 
-BladerfGui::BladerfGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+BladerfGui::BladerfGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BladerfGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),
