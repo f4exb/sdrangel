@@ -133,12 +133,14 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	QWidget *gui;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
 	deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
 	deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
 	deviceAPI->setSampleSourcePluginGUI(pluginGUI);
+	deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }
@@ -191,12 +193,14 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
 			<< " seq: " << m_sampleSourceSequence;
 
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	QWidget *gui;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
+    deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }
@@ -263,12 +267,14 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 			<< " ser: " << qPrintable(m_sampleSourceSerial)
 			<< " seq: " << m_sampleSourceSequence;
 
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, m_sampleSourceDevices[index].m_displayName, deviceAPI);
+	QWidget *gui;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
 	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
+    deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }

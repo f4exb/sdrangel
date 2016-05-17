@@ -34,7 +34,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	virtual SampleSourceDevices enumSampleSources();
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI);
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI);
 
 	static const QString m_deviceTypeID;
 

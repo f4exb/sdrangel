@@ -68,12 +68,12 @@ PluginInterface::SampleSourceDevices SDRdaemonPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI)
+PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{
 		SDRdaemonGui* gui = new SDRdaemonGui(m_pluginAPI, deviceAPI);
-		deviceAPI->setInputGUI(gui, sourceDisplayName);
+		*widget = gui;
 		return gui;
 	}
 	else

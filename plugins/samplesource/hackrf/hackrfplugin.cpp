@@ -113,7 +113,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI)
+PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
 	if (!m_pluginAPI)
 	{
@@ -123,7 +123,7 @@ PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, co
 	if(sourceId == m_deviceTypeID)
 	{
 		HackRFGui* gui = new HackRFGui(m_pluginAPI, deviceAPI);
-		deviceAPI->setInputGUI(gui, sourceDisplayName);
+		*widget = gui;
 		return gui;
 	}
 	else

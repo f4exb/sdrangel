@@ -204,6 +204,8 @@ void MainWindow::addDevice()
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_sampleSource_currentIndexChanged(int)));
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
+
+    int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceAPI);
 }
 
 void MainWindow::removeLastDevice()
@@ -214,10 +216,6 @@ void MainWindow::removeLastDevice()
 
     ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
     ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
-
-    // PluginManager destructor does freeAll() which does stopAcquistion() but stopAcquistion()
-    // can be done several times only the first is active so it is fine to do it here
-    // On the other hand freeAll() must be executed only once
 
     m_deviceUIs.back()->m_deviceAPI->freeAll();
 
@@ -255,20 +253,40 @@ void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui, const QString& so
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
+    qDebug("MainWindow::setInputGUI: insert tab at %d", deviceTabIndex);
 
-    if (deviceTabIndex < ui->tabInputsView->count())
+    if (deviceTabIndex < m_deviceWidgetTabs.size())
     {
-        qDebug("MainWindow::setInputGUI: tab device index %d replace", deviceTabIndex);
-        ui->tabInputsView->removeTab(deviceTabIndex);
-        ui->tabInputsView->insertTab(deviceTabIndex, gui, tabNameCStr);
+        m_deviceWidgetTabs[deviceTabIndex] = {gui, sourceDisplayName, QString(tabNameCStr)};
     }
     else
     {
-        qDebug("MainWindow::setInputGUI: tab device index %d add", deviceTabIndex);
-        ui->tabInputsView->addTab(gui, tabNameCStr);
+        m_deviceWidgetTabs.append({gui, sourceDisplayName, QString(tabNameCStr)});
     }
 
-    ui->tabInputsView->setTabToolTip(deviceTabIndex, sourceDisplayName);
+    ui->tabInputsView->clear();
+
+    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
+    {
+        qDebug("MainWindow::setInputGUI: adding tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
+        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
+        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
+    }
+
+
+//    if (deviceTabIndex < ui->tabInputsView->count())
+//    {
+//        qDebug("MainWindow::setInputGUI: tab device index %d replace", deviceTabIndex);
+//        ui->tabInputsView->removeTab(deviceTabIndex);
+//        ui->tabInputsView->insertTab(deviceTabIndex, gui, tabNameCStr);
+//    }
+//    else
+//    {
+//        qDebug("MainWindow::setInputGUI: tab device index %d add", deviceTabIndex);
+//        ui->tabInputsView->addTab(gui, tabNameCStr);
+//    }
+
+//    ui->tabInputsView->setTabToolTip(deviceTabIndex, sourceDisplayName);
 }
 
 void MainWindow::loadSettings()
@@ -649,6 +667,7 @@ void MainWindow::on_sampleSource_currentIndexChanged(int index)
 
     if (currentSourceTabIndex >= 0)
     {
+        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
         //deviceUI->m_pluginManager->saveSourceSettings(m_settings.getWorkingPreset());

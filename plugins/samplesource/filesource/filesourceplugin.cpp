@@ -68,12 +68,12 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId, const QString& sourceDisplayName, DeviceAPI *deviceAPI)
+PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{
 		FileSourceGui* gui = new FileSourceGui(m_pluginAPI, deviceAPI);
-		deviceAPI->setInputGUI(gui, sourceDisplayName);
+		*widget = gui;
 		return gui;
 	}
 	else

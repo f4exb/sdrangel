@@ -20,6 +20,8 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QList>
+
 #include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
@@ -44,6 +46,7 @@ class ChannelMarker;
 class PluginManager;
 class DeviceAPI;
 class PluginInterface;
+class QWidget;
 
 namespace Ui {
 	class MainWindow;
@@ -85,11 +88,19 @@ private:
 		PItem
 	};
 
+	struct DeviceWidgetTabData
+	{
+	    QWidget *gui;
+	    QString displayName;
+	    QString tabName;
+	};
+
 	Ui::MainWindow* ui;
 	AudioDeviceInfo* m_audioDeviceInfo;
 	MessageQueue m_inputMessageQueue;
 	MainSettings m_settings;
 	std::vector<DeviceUISet*> m_deviceUIs;
+	QList<DeviceWidgetTabData> m_deviceWidgetTabs;
 
 	DSPEngine* m_dspEngine;
 	PluginManager* m_pluginManager;
