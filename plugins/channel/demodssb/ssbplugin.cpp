@@ -36,8 +36,6 @@ PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	if(channelName == SSBDemodGUI::m_channelID)
 	{
 		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
-//		deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
-//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
@@ -47,6 +45,4 @@ PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void SSBPlugin::createInstanceSSB(DeviceAPI *deviceAPI)
 {
 	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
-//	deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ssb", gui);
-//	m_pluginAPI->addChannelRollup(gui);
 }

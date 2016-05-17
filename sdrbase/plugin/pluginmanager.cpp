@@ -17,11 +17,7 @@
 PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
-	m_mainWindow(mainWindow)//,
-//	m_sampleSourceId(),
-//	m_sampleSourceSerial(),
-//	m_sampleSourceSequence(0),
-//	m_sampleSourcePluginGUI(NULL)
+	m_mainWindow(mainWindow)
 {
 }
 
@@ -114,20 +110,6 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 		index = 0;
 	}
 
-//    deviceAPI->stopAcquisition();
-//
-//    if(m_sampleSourcePluginGUI != NULL) {
-//        deviceAPI->stopAcquisition();
-//        deviceAPI->setSource(0);
-//        m_sampleSourcePluginGUI->destroy();
-//        m_sampleSourcePluginGUI = NULL;
-//        m_sampleSourceId.clear();
-//    }
-//
-//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
-
     qDebug() << "PluginManager::selectSampleSourceByIndex: m_sampleSource at index " << index
             << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()
             << " ser: " << m_sampleSourceDevices[index].m_sourceSerial.toStdString().c_str()
@@ -155,16 +137,6 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 
 	int index = -1;
 
-//	deviceAPI->stopAcquisition();
-//
-//	if(m_sampleSourcePluginGUI != NULL) {
-//	    deviceAPI->stopAcquisition();
-//	    deviceAPI->setSource(0);
-//		m_sampleSourcePluginGUI->destroy();
-//		m_sampleSourcePluginGUI = NULL;
-//		m_sampleSourceId.clear();
-//	}
-
 	for (int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
 		qDebug("*** %s vs %s", qPrintable(m_sampleSourceDevices[i].m_sourceId), qPrintable(sourceId));
@@ -187,10 +159,6 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 			return -1;
 		}
 	}
-
-//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
     qDebug() << "PluginManager::selectFirstSampleSource: m_sampleSource at index " << index
             << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()
@@ -265,10 +233,6 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 			index = index_matchingSequence; // take the one that matches the sequence in the device type
 		}
 	}
-
-//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
     qDebug() << "PluginManager::selectSampleSourceBySequence: m_sampleSource at index " << index
             << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()

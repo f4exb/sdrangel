@@ -34,8 +34,6 @@ PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 {
 	if(channelName == NFMDemodGUI::m_channelID) {
 		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
-//		deviceAPI->registerChannelInstance(NFMDemodGUI::m_channelID, gui);
-//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
@@ -45,6 +43,4 @@ PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void NFMPlugin::createInstanceNFM(DeviceAPI *deviceAPI)
 {
 	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
-//	deviceAPI->registerChannelInstance(NFMDemodGUI::m_channelID, gui);
-//	m_pluginAPI->addChannelRollup(gui);
 }

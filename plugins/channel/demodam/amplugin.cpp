@@ -37,8 +37,6 @@ PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceAPI *device
 	if(channelName == AMDemodGUI::m_channelID)
 	{
 		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
-//		deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
-//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
@@ -48,6 +46,4 @@ PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceAPI *device
 void AMPlugin::createInstanceAM(DeviceAPI *deviceAPI)
 {
 	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
-//	deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.am", gui);
-//	m_pluginAPI->addChannelRollup(gui);
 }

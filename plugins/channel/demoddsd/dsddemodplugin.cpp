@@ -53,8 +53,6 @@ PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *
 	if(channelName == DSDDemodGUI::m_channelID)
 	{
 		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
-//		deviceAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
-//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
@@ -64,6 +62,4 @@ PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *
 void DSDDemodPlugin::createInstanceDSDDemod(DeviceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
-//    deviceAPI->registerChannelInstance("sdrangel.channel.dsddemod", gui);
-//	m_pluginAPI->addChannelRollup(gui);
 }

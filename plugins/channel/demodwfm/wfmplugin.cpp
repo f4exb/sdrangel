@@ -36,8 +36,6 @@ PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	if(channelName == WFMDemodGUI::m_channelID)
 	{
 		WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
-//		deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
-//		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
 		return NULL;
@@ -47,6 +45,4 @@ PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 void WFMPlugin::createInstanceWFM(DeviceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
-//	deviceAPI->registerChannelInstance("de.maintech.sdrangelove.channel.wfm", gui);
-//	m_pluginAPI->addChannelRollup(gui);
 }
