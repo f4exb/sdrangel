@@ -99,10 +99,10 @@ private:
 	SampleSourceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
 	SampleSourceDevices m_sampleSourceDevices;             //!< Instances of input sources present in the system
 
-	QString m_sampleSourceId;
-	QString m_sampleSourceSerial;
-	int m_sampleSourceSequence;
-	PluginGUI* m_sampleSourcePluginGUI;
+//	QString m_sampleSourceId;
+//	QString m_sampleSourceSerial;
+//	int m_sampleSourceSequence;
+//	PluginGUI* m_sampleSourcePluginGUI;
 
 	void loadPlugins(const QDir& dir);
 

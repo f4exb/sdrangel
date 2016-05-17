@@ -155,6 +155,12 @@ void DeviceAPI::setSampleSourceSequence(int sequence)
 
 void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
 {
+    if (m_sampleSourcePluginGUI != 0)
+    {
+        m_sampleSourcePluginGUI->destroy();
+        m_sampleSourceId.clear();
+    }
+
     m_sampleSourcePluginGUI = gui;
 }
 

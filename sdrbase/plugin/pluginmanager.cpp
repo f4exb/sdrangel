@@ -17,11 +17,11 @@
 PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
-	m_mainWindow(mainWindow),
-	m_sampleSourceId(),
-	m_sampleSourceSerial(),
-	m_sampleSourceSequence(0),
-	m_sampleSourcePluginGUI(NULL)
+	m_mainWindow(mainWindow)//,
+//	m_sampleSourceId(),
+//	m_sampleSourceSerial(),
+//	m_sampleSourceSequence(0),
+//	m_sampleSourcePluginGUI(NULL)
 {
 }
 
@@ -99,16 +99,6 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSourceByIndex: index: %d", index);
 
-	deviceAPI->stopAcquisition();
-
-	if(m_sampleSourcePluginGUI != NULL) {
-	    deviceAPI->stopAcquisition();
-        deviceAPI->setSource(0);
-		m_sampleSourcePluginGUI->destroy();
-		m_sampleSourcePluginGUI = NULL;
-		m_sampleSourceId.clear();
-	}
-
 	if (m_sampleSourceDevices.count() == 0)
 	{
 		return -1;
@@ -124,18 +114,32 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 		index = 0;
 	}
 
-	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
+//    deviceAPI->stopAcquisition();
+//
+//    if(m_sampleSourcePluginGUI != NULL) {
+//        deviceAPI->stopAcquisition();
+//        deviceAPI->setSource(0);
+//        m_sampleSourcePluginGUI->destroy();
+//        m_sampleSourcePluginGUI = NULL;
+//        m_sampleSourceId.clear();
+//    }
+//
+//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
+//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
+//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
-	qDebug() << "PluginManager::selectSampleSourceByIndex: m_sampleSource at index " << index
-			<< " id: " << m_sampleSourceId.toStdString().c_str()
-			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
-			<< " seq: " << m_sampleSourceSequence;
+    qDebug() << "PluginManager::selectSampleSourceByIndex: m_sampleSource at index " << index
+            << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()
+            << " ser: " << m_sampleSourceDevices[index].m_sourceSerial.toStdString().c_str()
+            << " seq: " << m_sampleSourceDevices[index].m_sourceSequence;
+
+    deviceAPI->stopAcquisition();
+    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
 
 	QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
-	m_sampleSourcePluginGUI = pluginGUI;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_sourceId, &gui, deviceAPI);
+
+	//	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
 	deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
 	deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
@@ -151,15 +155,15 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 
 	int index = -1;
 
-	deviceAPI->stopAcquisition();
-
-	if(m_sampleSourcePluginGUI != NULL) {
-	    deviceAPI->stopAcquisition();
-	    deviceAPI->setSource(0);
-		m_sampleSourcePluginGUI->destroy();
-		m_sampleSourcePluginGUI = NULL;
-		m_sampleSourceId.clear();
-	}
+//	deviceAPI->stopAcquisition();
+//
+//	if(m_sampleSourcePluginGUI != NULL) {
+//	    deviceAPI->stopAcquisition();
+//	    deviceAPI->setSource(0);
+//		m_sampleSourcePluginGUI->destroy();
+//		m_sampleSourcePluginGUI = NULL;
+//		m_sampleSourceId.clear();
+//	}
 
 	for (int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
@@ -184,18 +188,22 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 		}
 	}
 
-	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
+//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
+//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
+//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
-	qDebug() << "m_sampleSource at index " << index
-			<< " id: " << m_sampleSourceId.toStdString().c_str()
-			<< " ser: " << m_sampleSourceSerial.toStdString().c_str()
-			<< " seq: " << m_sampleSourceSequence;
+    qDebug() << "PluginManager::selectFirstSampleSource: m_sampleSource at index " << index
+            << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()
+            << " ser: " << m_sampleSourceDevices[index].m_sourceSerial.toStdString().c_str()
+            << " seq: " << m_sampleSourceDevices[index].m_sourceSequence;
 
-	QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
-	m_sampleSourcePluginGUI = pluginGUI;
+    deviceAPI->stopAcquisition();
+    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
+
+    QWidget *gui;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_sourceId, &gui, deviceAPI);
+
+	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
@@ -258,18 +266,22 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 		}
 	}
 
-	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
-	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
-	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
+//	m_sampleSourceId = m_sampleSourceDevices[index].m_sourceId;
+//	m_sampleSourceSerial = m_sampleSourceDevices[index].m_sourceSerial;
+//	m_sampleSourceSequence = m_sampleSourceDevices[index].m_sourceSequence;
 
-	qDebug() << "PluginManager::selectSampleSourceBySequence by sequence:  m_sampleSource at index " << index
-			<< " id: " << qPrintable(m_sampleSourceId)
-			<< " ser: " << qPrintable(m_sampleSourceSerial)
-			<< " seq: " << m_sampleSourceSequence;
+    qDebug() << "PluginManager::selectSampleSourceBySequence: m_sampleSource at index " << index
+            << " id: " << m_sampleSourceDevices[index].m_sourceId.toStdString().c_str()
+            << " ser: " << m_sampleSourceDevices[index].m_sourceSerial.toStdString().c_str()
+            << " seq: " << m_sampleSourceDevices[index].m_sourceSequence;
 
-	QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceId, &gui, deviceAPI);
-	m_sampleSourcePluginGUI = pluginGUI;
+    deviceAPI->stopAcquisition();
+    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
+
+    QWidget *gui;
+	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_sourceId, &gui, deviceAPI);
+
+	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_sourceSequence);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_sourceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_sourceSerial);
