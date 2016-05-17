@@ -22,9 +22,9 @@
 #include "fcdproinput.h"
 #include "plugin/plugingui.h"
 
-class PluginAPI;
 class DeviceAPI;
 class FileSink;
+class QWidget;
 
 namespace Ui {
 	class FCDProGui;
@@ -34,7 +34,7 @@ class FCDProGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit FCDProGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit FCDProGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~FCDProGui();
 	void destroy();
 
@@ -52,7 +52,6 @@ public:
 private:
 	Ui::FCDProGui* ui;
 
-	PluginAPI* m_pluginAPI;
 	DeviceAPI* m_deviceAPI;
 	FCDProSettings m_settings;
 	QTimer m_updateTimer;

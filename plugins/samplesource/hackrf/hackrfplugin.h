@@ -22,6 +22,8 @@
 
 #define HACKRF_DEVICE_TYPE_ID "sdrangel.samplesource.hackrf"
 
+class PluginAPI;
+
 class HackRFPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
@@ -40,8 +42,6 @@ public:
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
 };
 
 #endif // INCLUDE_HACKRFPLUGIN_H

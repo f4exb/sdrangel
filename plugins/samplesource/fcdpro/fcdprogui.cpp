@@ -17,7 +17,6 @@
 #include <QMessageBox>
 
 #include "ui_fcdprogui.h"
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -27,10 +26,9 @@
 #include "fcdprogui.h"
 #include "fcdproconst.h"
 
-FCDProGui::FCDProGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+FCDProGui::FCDProGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FCDProGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),

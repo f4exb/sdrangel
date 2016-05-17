@@ -24,7 +24,6 @@
 
 #define AIRSPY_MAX_DEVICE (32)
 
-class PluginAPI;
 class DeviceAPI;
 class FileSink;
 
@@ -37,7 +36,7 @@ class AirspyGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit AirspyGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit AirspyGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~AirspyGui();
 	void destroy();
 
@@ -56,7 +55,6 @@ public:
 private:
 	Ui::AirspyGui* ui;
 
-	PluginAPI* m_pluginAPI;
 	DeviceAPI* m_deviceAPI;
 	AirspySettings m_settings;
 	QTimer m_updateTimer;

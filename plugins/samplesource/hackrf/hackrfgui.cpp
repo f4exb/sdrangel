@@ -19,7 +19,6 @@
 
 #include <libhackrf/hackrf.h>
 
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -29,10 +28,9 @@
 #include "hackrfgui.h"
 #include "ui_hackrfgui.h"
 
-HackRFGui::HackRFGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+HackRFGui::HackRFGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::HackRFGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),

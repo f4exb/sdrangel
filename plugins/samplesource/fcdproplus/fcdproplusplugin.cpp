@@ -46,9 +46,7 @@ const PluginDescriptor& FCDProPlusPlugin::getPluginDescriptor() const
 
 void FCDProPlusPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-
-	m_pluginAPI->registerSampleSource(fcd_traits<ProPlus>::interfaceIID, this);
+	pluginAPI->registerSampleSource(fcd_traits<ProPlus>::interfaceIID, this);
 }
 
 PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
@@ -79,7 +77,7 @@ PluginGUI* FCDProPlusPlugin::createSampleSourcePluginGUI(const QString& sourceId
 {
 	if(sourceId == fcd_traits<ProPlus>::interfaceIID)
 	{
-		FCDProPlusGui* gui = new FCDProPlusGui(m_pluginAPI, deviceAPI);
+		FCDProPlusGui* gui = new FCDProPlusGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

@@ -37,8 +37,7 @@ const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
 const QString HackRFPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
 
 HackRFPlugin::HackRFPlugin(QObject* parent) :
-	QObject(parent),
-	m_pluginAPI(0)
+	QObject(parent)
 {
 }
 
@@ -49,8 +48,7 @@ const PluginDescriptor& HackRFPlugin::getPluginDescriptor() const
 
 void HackRFPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
@@ -115,14 +113,9 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 
 PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
-	if (!m_pluginAPI)
-	{
-		return 0;
-	}
-
 	if(sourceId == m_deviceTypeID)
 	{
-		HackRFGui* gui = new HackRFGui(m_pluginAPI, deviceAPI);
+		HackRFGui* gui = new HackRFGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

@@ -36,8 +36,7 @@ const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 const QString AirspyPlugin::m_deviceTypeID = AIRSPY_DEVICE_TYPE_ID;
 
 AirspyPlugin::AirspyPlugin(QObject* parent) :
-	QObject(parent),
-	m_pluginAPI(0)
+	QObject(parent)
 {
 }
 
@@ -48,8 +47,7 @@ const PluginDescriptor& AirspyPlugin::getPluginDescriptor() const
 
 void AirspyPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
@@ -120,14 +118,9 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 
 PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
-	if (!m_pluginAPI)
+	if (sourceId == m_deviceTypeID)
 	{
-		return 0;
-	}
-
-	if(sourceId == m_deviceTypeID)
-	{
-		AirspyGui* gui = new AirspyGui(m_pluginAPI, deviceAPI);
+		AirspyGui* gui = new AirspyGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

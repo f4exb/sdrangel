@@ -21,7 +21,6 @@
 
 #include "airspygui.h"
 #include "ui_airspygui.h"
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -29,10 +28,9 @@
 #include "dsp/dspcommands.h"
 #include "dsp/filesink.h"
 
-AirspyGui::AirspyGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+AirspyGui::AirspyGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::AirspyGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(0),

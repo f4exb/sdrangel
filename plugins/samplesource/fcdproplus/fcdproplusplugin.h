@@ -6,6 +6,8 @@
 
 #define FCDPROPLUS_DEVICE_TYPE_ID "sdrangel.samplesource.fcdproplus"
 
+class PluginAPI;
+
 class FCDProPlusPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
@@ -24,8 +26,6 @@ public:
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
 };
 
 #endif // INCLUDE_FCDPROPLUSPLUGIN_H

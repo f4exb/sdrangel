@@ -34,10 +34,9 @@
 
 #include "filesourcegui.h"
 
-FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+FileSourceGui::FileSourceGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSourceGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(NULL),
@@ -57,7 +56,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
 
-	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
@@ -67,7 +66,7 @@ FileSourceGui::FileSourceGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget
 	ui->playLoop->setChecked(true); // FIXME: always play in a loop
 	ui->playLoop->setEnabled(false);
 
-	m_sampleSource = new FileSourceInput(m_pluginAPI->getMainWindow()->getMasterTimer());
+	m_sampleSource = new FileSourceInput(m_deviceAPI->getMainWindow()->getMasterTimer());
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	m_deviceAPI->setSource(m_sampleSource);
 

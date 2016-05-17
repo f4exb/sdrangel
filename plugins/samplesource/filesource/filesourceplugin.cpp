@@ -46,8 +46,7 @@ const PluginDescriptor& FileSourcePlugin::getPluginDescriptor() const
 
 void FileSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
@@ -72,7 +71,7 @@ PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		FileSourceGui* gui = new FileSourceGui(m_pluginAPI, deviceAPI);
+		FileSourceGui* gui = new FileSourceGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}
