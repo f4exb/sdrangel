@@ -610,6 +610,12 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 	on_presetLoad_clicked();
 }
 
+void MainWindow::on_action_Loaded_Plugins_triggered()
+{
+    PluginsDialog pluginsDialog(m_pluginManager, this);
+    pluginsDialog.exec();
+}
+
 void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialog audioDialog(m_audioDeviceInfo, this);

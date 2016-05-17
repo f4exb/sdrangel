@@ -51,7 +51,7 @@ private:
     DeviceAPI *m_deviceAPI;
 
 private slots:
-    void on_showLoadedPlugins_clicked(bool checked);
+//    void on_showLoadedPlugins_clicked(bool checked);
     void on_addChannel_clicked(bool checked);
 };
 

@@ -116,6 +116,8 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="action_Loaded_Plugins"/>
+    <addaction name="separator"/>
     <addaction name="action_About"/>
    </widget>
    <widget class="QMenu" name="menu_Window">

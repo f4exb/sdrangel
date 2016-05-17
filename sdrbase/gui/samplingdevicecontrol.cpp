@@ -52,14 +52,14 @@ void SamplingDeviceControl::populateChannelSelector()
     }
 }
 
-void SamplingDeviceControl::on_showLoadedPlugins_clicked(bool checked)
-{
-    if (m_pluginManager)
-    {
-        PluginsDialog pluginsDialog(m_pluginManager, this);
-        pluginsDialog.exec();
-    }
-}
+//void SamplingDeviceControl::on_showLoadedPlugins_clicked(bool checked)
+//{
+//    if (m_pluginManager)
+//    {
+//        PluginsDialog pluginsDialog(m_pluginManager, this);
+//        pluginsDialog.exec();
+//    }
+//}
 
 void SamplingDeviceControl::on_addChannel_clicked(bool checked)
 {
