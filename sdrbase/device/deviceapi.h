@@ -80,6 +80,8 @@ public:
     void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveChannelSettings(Preset* preset);
 
+    MainWindow *getMainWindow() { return m_mainWindow; }
+
 protected:
     struct ChannelInstanceRegistration
     {

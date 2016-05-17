@@ -46,8 +46,7 @@ const PluginDescriptor& SDRdaemonPlugin::getPluginDescriptor() const
 
 void SDRdaemonPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices SDRdaemonPlugin::enumSampleSources()
@@ -72,7 +71,7 @@ PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId,
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		SDRdaemonGui* gui = new SDRdaemonGui(m_pluginAPI, deviceAPI);
+		SDRdaemonGui* gui = new SDRdaemonGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

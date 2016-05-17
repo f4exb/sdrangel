@@ -23,7 +23,6 @@
 
 #include "sdrdaemoninput.h"
 
-class PluginAPI;
 class DeviceAPI;
 class FileSink;
 
@@ -35,7 +34,7 @@ class SDRdaemonGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit SDRdaemonGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~SDRdaemonGui();
 	void destroy();
 
@@ -52,7 +51,6 @@ public:
 private:
 	Ui::SDRdaemonGui* ui;
 
-	PluginAPI* m_pluginAPI;
 	DeviceAPI* m_deviceAPI;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

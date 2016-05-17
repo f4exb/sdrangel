@@ -30,7 +30,6 @@
 #include <nanomsg/pair.h>
 
 #include "ui_sdrdaemongui.h"
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -42,10 +41,9 @@
 
 #include "sdrdaemongui.h"
 
-SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+SDRdaemonGui::SDRdaemonGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_sampleSource(NULL),
 	m_acquisition(false),
@@ -88,9 +86,9 @@ SDRdaemonGui::SDRdaemonGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
-	connect(&(m_pluginAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_sampleSource = new SDRdaemonInput(m_pluginAPI->getMainWindow()->getMasterTimer(), m_deviceAPI);
+	m_sampleSource = new SDRdaemonInput(deviceAPI->getMainWindow()->getMasterTimer(), m_deviceAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	m_deviceAPI->setSource(m_sampleSource);
 
