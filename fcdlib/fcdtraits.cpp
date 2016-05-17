@@ -19,5 +19,5 @@ const char *fcd_traits<ProPlus>::displayedName = "FunCube Dongle Pro+";
 const char *fcd_traits<Pro>::pluginDisplayedName = "FunCube Pro Input";
 const char *fcd_traits<ProPlus>::pluginDisplayedName = "FunCube Pro+ Input";
 
-const char *fcd_traits<Pro>::pluginVersion = "---";
-const char *fcd_traits<ProPlus>::pluginVersion = "---";
+const char *fcd_traits<Pro>::pluginVersion = "2.0.0";
+const char *fcd_traits<ProPlus>::pluginVersion = "2.0.0";

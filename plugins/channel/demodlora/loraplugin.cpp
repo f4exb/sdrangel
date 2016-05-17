@@ -5,7 +5,7 @@
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
 	QString("LoRa Demodulator"),
-	QString("0.1"),
+	QString("2.0.0"),
 	QString("(c) 2015 John Greb"),
 	QString("http://www.maintech.de"),
 	true,
