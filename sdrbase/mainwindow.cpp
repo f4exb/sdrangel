@@ -273,6 +273,8 @@ void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui, const QString& so
         ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
     }
 
+    ui->tabInputsView->setCurrentIndex(deviceTabIndex);
+
 
 //    if (deviceTabIndex < ui->tabInputsView->count())
 //    {
