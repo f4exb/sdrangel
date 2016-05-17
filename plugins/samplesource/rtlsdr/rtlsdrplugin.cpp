@@ -30,9 +30,7 @@ const PluginDescriptor& RTLSDRPlugin::getPluginDescriptor() const
 
 void RTLSDRPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
-
-	m_pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
 PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
@@ -63,7 +61,7 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID) {
-		RTLSDRGui* gui = new RTLSDRGui(m_pluginAPI, deviceAPI);
+		RTLSDRGui* gui = new RTLSDRGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	} else {

@@ -19,7 +19,6 @@
 
 #include "rtlsdrgui.h"
 #include "ui_rtlsdrgui.h"
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -27,10 +26,9 @@
 #include "dsp/dspcommands.h"
 #include "dsp/filesink.h"
 
-RTLSDRGui::RTLSDRGui(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+RTLSDRGui::RTLSDRGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::RTLSDRGui),
-	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_sampleSource(0),

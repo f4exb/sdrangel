@@ -4,6 +4,8 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+class PluginAPI;
+
 #define RTLSDR_DEVICE_TYPE_ID "sdrangel.samplesource.rtlsdr"
 
 class RTLSDRPlugin : public QObject, public PluginInterface {
@@ -24,8 +26,6 @@ public:
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
 };
 
 #endif // INCLUDE_RTLSDRPLUGIN_H
