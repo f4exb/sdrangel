@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	m_audioDeviceInfo(new AudioDeviceInfo),
+	m_masterTabIndex(0),
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState((DSPDeviceEngine::State)-1),
@@ -718,6 +719,17 @@ void MainWindow::on_action_removeDevice_triggered()
 void MainWindow::tabInputViewIndexChanged()
 {
     int inputViewIndex = ui->tabInputsView->currentIndex();
+
+    if ((inputViewIndex >= 0) && (inputViewIndex >= 0) && (inputViewIndex != m_masterTabIndex))
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[inputViewIndex];
+        DeviceUISet *lastdeviceUI = m_deviceUIs[m_masterTabIndex];
+        deviceUI->m_mainWindowState = saveState();
+        restoreState(lastdeviceUI->m_mainWindowState);
+        m_masterTabIndex = inputViewIndex;
+    }
+
+//    qDebug("MainWindow::tabInputViewIndexChanged: old: %d new: %d", m_masterTabIndex, inputViewIndex);
 
     ui->tabSpectra->setCurrentIndex(inputViewIndex);
     ui->tabChannels->setCurrentIndex(inputViewIndex);

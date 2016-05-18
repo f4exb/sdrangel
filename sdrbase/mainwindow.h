@@ -65,6 +65,7 @@ public:
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceEngine *m_deviceEngine;
 		DeviceAPI *m_deviceAPI;
+		QByteArray m_mainWindowState;
 
 		DeviceUISet(QTimer& timer);
 		~DeviceUISet();
@@ -101,6 +102,7 @@ private:
 	MainSettings m_settings;
 	std::vector<DeviceUISet*> m_deviceUIs;
 	QList<DeviceWidgetTabData> m_deviceWidgetTabs;
+	int m_masterTabIndex;
 
 	DSPEngine* m_dspEngine;
 	PluginManager* m_pluginManager;
