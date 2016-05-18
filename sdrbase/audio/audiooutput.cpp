@@ -113,6 +113,7 @@ void AudioOutput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	QIODevice::close();
+	delete m_audioOutput;
 }
 
 void AudioOutput::addFifo(AudioFifo* audioFifo)
