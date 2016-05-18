@@ -47,6 +47,8 @@ public:
 
 	void startAudio();
 	void stopAudio();
+    void startAudioImmediate();
+    void stopAudioImmediate();
 
     DSPDeviceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
     DSPDeviceEngine *getDeviceEngineByUID(uint uid);
