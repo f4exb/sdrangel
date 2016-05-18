@@ -223,8 +223,17 @@ void MainWindow::removeLastDevice()
 
     ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
-    ui->tabInputsView->removeTab(ui->tabInputsView->count() - 1);
     ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
+
+    m_deviceWidgetTabs.removeLast();
+    ui->tabInputsView->clear();
+
+    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
+    {
+        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
+        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
+        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
+    }
 
     delete m_deviceUIs.back();
 

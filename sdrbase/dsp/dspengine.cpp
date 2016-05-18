@@ -21,10 +21,8 @@
 
 DSPEngine::DSPEngine() :
     m_deviceEnginesUIDSequence(0),
-	m_audioSampleRate(48000), // Use default output device at 48 kHz
-	m_audioUsageCount(0)
+	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
-    //m_deviceEngines.push_back(new DSPDeviceEngine(0)); // TODO: multi device support
 	m_dvSerialSupport = false;
 }
 
@@ -88,26 +86,13 @@ void DSPEngine::stopAllDeviceEngines()
 
 void DSPEngine::startAudio()
 {
-    if (m_audioUsageCount == 0)
-    {
-        m_audioOutput.start(-1, m_audioSampleRate);
-        m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
-    }
-
-    m_audioUsageCount++;
+    m_audioOutput.start(-1, m_audioSampleRate);
+    m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
 void DSPEngine::stopAudio()
 {
-    if (m_audioUsageCount > 0)
-    {
-        m_audioUsageCount--;
-
-        if (m_audioUsageCount == 0)
-        {
-            m_audioOutput.stop();
-        }
-    }
+    m_audioOutput.stop();
 }
 
 void DSPEngine::startAudioImmediate()

@@ -45,6 +45,7 @@ public:
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
+	uint m_audioUsageCount;
 
 	typedef std::list<AudioFifo*> AudioFifos;
 	AudioFifos m_audioFifos;

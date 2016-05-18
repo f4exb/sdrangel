@@ -89,7 +89,6 @@ private:
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;
-	uint m_audioUsageCount;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
 #endif
