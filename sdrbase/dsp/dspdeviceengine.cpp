@@ -479,10 +479,10 @@ void DSPDeviceEngine::handleSetSource(SampleSource* source)
 {
 	gotoIdle();
 
-	if(m_sampleSource != 0)
-	{
-		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
-	}
+//	if(m_sampleSource != 0)
+//	{
+//		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
+//	}
 
 	m_sampleSource = source;
 
