@@ -720,16 +720,16 @@ void MainWindow::tabInputViewIndexChanged()
 {
     int inputViewIndex = ui->tabInputsView->currentIndex();
 
-    if ((inputViewIndex >= 0) && (inputViewIndex >= 0) && (inputViewIndex != m_masterTabIndex))
+    //qDebug("MainWindow::tabInputViewIndexChanged: old: %d new: %d", m_masterTabIndex, inputViewIndex);
+
+    if ((inputViewIndex >= 0) && (m_masterTabIndex >= 0) && (inputViewIndex != m_masterTabIndex))
     {
         DeviceUISet *deviceUI = m_deviceUIs[inputViewIndex];
         DeviceUISet *lastdeviceUI = m_deviceUIs[m_masterTabIndex];
-        deviceUI->m_mainWindowState = saveState();
-        restoreState(lastdeviceUI->m_mainWindowState);
+        lastdeviceUI->m_mainWindowState = saveState();
+        restoreState(deviceUI->m_mainWindowState);
         m_masterTabIndex = inputViewIndex;
     }
-
-//    qDebug("MainWindow::tabInputViewIndexChanged: old: %d new: %d", m_masterTabIndex, inputViewIndex);
 
     ui->tabSpectra->setCurrentIndex(inputViewIndex);
     ui->tabChannels->setCurrentIndex(inputViewIndex);
