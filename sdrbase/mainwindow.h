@@ -155,6 +155,7 @@ private slots:
 	void on_action_About_triggered();
 	void on_action_addDevice_triggered();
 	void on_action_removeDevice_triggered();
+	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
 };
 

@@ -162,13 +162,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
-    saveSettings();
-
-    while (m_deviceUIs.size() > 0)
-    {
-        removeLastDevice();
-    }
-
     delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
@@ -711,6 +704,16 @@ void MainWindow::on_action_addDevice_triggered()
 void MainWindow::on_action_removeDevice_triggered()
 {
     if (m_deviceUIs.size() > 1)
+    {
+        removeLastDevice();
+    }
+}
+
+void MainWindow::on_action_Exit_triggered()
+{
+    saveSettings();
+
+    while (m_deviceUIs.size() > 0)
     {
         removeLastDevice();
     }
