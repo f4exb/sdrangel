@@ -48,7 +48,7 @@ public:
 	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }
 
 	void updateSampleSourceDevices();
-	void fillSampleSourceSelector(QComboBox* comboBox);
+	void fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID);
 
 	int selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI);
 	int selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI);
@@ -98,6 +98,9 @@ private:
 	PluginAPI::ChannelRegistrations m_channelRegistrations;           //!< Channel plugins register here
 	SampleSourceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
 	SampleSourceDevices m_sampleSourceDevices;             //!< Instances of input sources present in the system
+
+	static const QString m_sdrDaemonDeviceTypeID;
+    static const QString m_fileSourceDeviceTypeID;
 
 //	QString m_sampleSourceId;
 //	QString m_sampleSourceSerial;

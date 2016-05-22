@@ -14,6 +14,9 @@
 
 #include <QDebug>
 
+const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemon";
+const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
+
 PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(this, mainWindow),
@@ -81,12 +84,20 @@ void PluginManager::updateSampleSourceDevices()
 	}
 }
 
-void PluginManager::fillSampleSourceSelector(QComboBox* comboBox)
+void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID)
 {
 	comboBox->clear();
 
 	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
+	    // There can be only one instance of file source and SDRdaemon plugins
+	    if ((m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonDeviceTypeID) || (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID))
+	    {
+	        if (deviceUID != 0) {
+	            continue;
+	        }
+	    }
+
 		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, i);
 	}
 }
