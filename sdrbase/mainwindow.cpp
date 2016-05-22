@@ -194,6 +194,7 @@ void MainWindow::addDevice()
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
+    m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceEngineUID);
     m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceEngineUID);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSource_confirmClicked(bool)));
@@ -658,21 +659,21 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
     }
 }
 
-void MainWindow::on_sampleSource_currentIndexChanged(int index)
-{
-    // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
-
-    if (currentSourceTabIndex >= 0)
-    {
-        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
-        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
-        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
-        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
-    }
-}
+//void MainWindow::on_sampleSource_currentIndexChanged(int index)
+//{
+//    // Do it in the currently selected source tab
+//    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+//
+//    if (currentSourceTabIndex >= 0)
+//    {
+//        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
+//        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+//        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
+//        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
+//        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+//        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
+//    }
+//}
 
 void MainWindow::on_sampleSource_confirmClicked(bool checked)
 {
@@ -684,7 +685,10 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
         qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
-        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
+        int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
+        void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
+        m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceAPI);
+//        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
     }

@@ -48,11 +48,13 @@ public:
 	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }
 
 	void updateSampleSourceDevices();
+	void duplicateLocalSampleSourceDevices(uint deviceUID);
 	void fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID);
 
 	int selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI);
 	int selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI);
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceAPI *deviceAPI);
+	void selectSampleSourceByDevice(void *devicePtr, DeviceAPI *deviceAPI);
 
 	void populateChannelComboBox(QComboBox *channels);
 	void createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI);
@@ -95,12 +97,13 @@ private:
 	MainWindow* m_mainWindow;
 	Plugins m_plugins;
 
-	PluginAPI::ChannelRegistrations m_channelRegistrations;           //!< Channel plugins register here
-	SampleSourceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
-	SampleSourceDevices m_sampleSourceDevices;             //!< Instances of input sources present in the system
+	PluginAPI::ChannelRegistrations m_channelRegistrations; //!< Channel plugins register here
+	SampleSourceRegistrations m_sampleSourceRegistrations;  //!< Input source plugins (one per device kind) register here
+	SampleSourceDevices m_sampleSourceDevices;              //!< Instances of input sources present in the system
 
-	static const QString m_sdrDaemonDeviceTypeID;
-    static const QString m_fileSourceDeviceTypeID;
+	// "Local" sample source device IDs
+	static const QString m_sdrDaemonDeviceTypeID;           //!< SDRdaemon source plugin ID
+    static const QString m_fileSourceDeviceTypeID;          //!< FileSource source plugin ID
 
 //	QString m_sampleSourceId;
 //	QString m_sampleSourceSerial;

@@ -84,21 +84,81 @@ void PluginManager::updateSampleSourceDevices()
 	}
 }
 
+void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
+{
+    if (deviceUID == 0) {
+        return;
+    }
+
+    SampleSourceDevice *sdrDaemonSSD0 = 0;
+    SampleSourceDevice *fileSourceSSD0 = 0;
+    bool duplicateSDRDaemon = true;
+    bool duplicateFileSource = true;
+
+    for(int i = 0; i < m_sampleSourceDevices.count(); ++i)
+    {
+        if (m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonDeviceTypeID) // SDRdaemon
+        {
+            if (m_sampleSourceDevices[i].m_sourceSequence == 0) { // reference to device 0
+                sdrDaemonSSD0 = &m_sampleSourceDevices[i];
+            }
+            else if (m_sampleSourceDevices[i].m_sourceSequence == deviceUID) { // already there
+                duplicateSDRDaemon = false;
+            }
+        }
+        else if (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID) // File Source
+        {
+            if (m_sampleSourceDevices[i].m_sourceSequence == 0) { // reference to device 0
+                fileSourceSSD0 = &m_sampleSourceDevices[i];
+            }
+            else if (m_sampleSourceDevices[i].m_sourceSequence == deviceUID) { // already there
+                duplicateFileSource = false;
+            }
+        }
+    }
+
+    if (sdrDaemonSSD0 && duplicateSDRDaemon) // append item for a new instance
+    {
+        m_sampleSourceDevices.append(
+            SampleSourceDevice(
+                sdrDaemonSSD0->m_plugin,
+                QString("SDRdaemon[%1]").arg(deviceUID),
+                sdrDaemonSSD0->m_sourceId,
+                sdrDaemonSSD0->m_sourceSerial,
+                deviceUID
+            )
+        );
+    }
+
+    if (fileSourceSSD0 && duplicateFileSource) // append item for a new instance
+    {
+        m_sampleSourceDevices.append(
+            SampleSourceDevice(
+                fileSourceSSD0->m_plugin,
+                QString("FileSource[%1]").arg(deviceUID),
+                fileSourceSSD0->m_sourceId,
+                fileSourceSSD0->m_sourceSerial,
+                deviceUID
+            )
+        );
+    }
+}
+
 void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID)
 {
 	comboBox->clear();
 
 	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
-	    // There can be only one instance of file source and SDRdaemon plugins
+	    // For "local" devices show only ones that concern this device set
 	    if ((m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonDeviceTypeID) || (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID))
 	    {
-	        if (deviceUID != 0) {
+	        if (deviceUID != m_sampleSourceDevices[i].m_sourceSequence) {
 	            continue;
 	        }
 	    }
 
-		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, i);
+		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSourceDevices[i]));
 	}
 }
 
@@ -264,6 +324,29 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
     deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
+}
+
+void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceAPI *deviceAPI)
+{
+    SampleSourceDevice *sampleSourceDevice = (SampleSourceDevice *) devicePtr;
+
+    qDebug() << "PluginManager::selectSampleSourceByDevice: "
+            << " id: " << sampleSourceDevice->m_sourceId.toStdString().c_str()
+            << " ser: " << sampleSourceDevice->m_sourceSerial.toStdString().c_str()
+            << " seq: " << sampleSourceDevice->m_sourceSequence;
+
+    deviceAPI->stopAcquisition();
+    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
+
+    QWidget *gui;
+    PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_sourceId, &gui, deviceAPI);
+
+    //  m_sampleSourcePluginGUI = pluginGUI;
+    deviceAPI->setSampleSourceSequence(sampleSourceDevice->m_sourceSequence);
+    deviceAPI->setSampleSourceId(sampleSourceDevice->m_sourceId);
+    deviceAPI->setSampleSourceSerial(sampleSourceDevice->m_sourceSerial);
+    deviceAPI->setSampleSourcePluginGUI(pluginGUI);
+    deviceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
 }
 
 void PluginManager::loadPlugins(const QDir& dir)
