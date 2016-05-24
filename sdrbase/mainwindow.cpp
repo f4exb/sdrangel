@@ -145,7 +145,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
-	loadPresetSettings(m_settings.getWorkingPreset());
+	loadPresetSettings(m_settings.getWorkingPreset(), 0);
 
 	qDebug() << "MainWindow::MainWindow: apply settings...";
 
@@ -294,18 +294,18 @@ void MainWindow::loadSettings()
     }
 }
 
-void MainWindow::loadPresetSettings(const Preset* preset)
+void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 {
 	qDebug("MainWindow::loadPresetSettings: preset [%s | %s]",
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
 	// Load into currently selected source tab
-	int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+	//int currentSourceTabIndex = ui->tabInputsView->currentIndex();
 
-	if (currentSourceTabIndex >= 0)
+	if (tabIndex >= 0)
 	{
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
         deviceUI->m_deviceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
         deviceUI->m_deviceAPI->loadSourceSettings(preset);
@@ -315,23 +315,23 @@ void MainWindow::loadPresetSettings(const Preset* preset)
 	restoreState(preset->getLayout());
 }
 
-void MainWindow::saveSettings()
-{
-	qDebug() << "MainWindow::saveSettings";
+//void MainWindow::saveSettings()
+//{
+//	qDebug() << "MainWindow::saveSettings";
+//
+//	savePresetSettings(m_settings.getWorkingPreset());
+//	m_settings.save();
+//}
 
-	savePresetSettings(m_settings.getWorkingPreset());
-	m_settings.save();
-}
-
-void MainWindow::savePresetSettings(Preset* preset)
+void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
 {
 	qDebug("MainWindow::savePresetSettings: preset [%s | %s]",
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
     // Save from currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsView->currentIndex();
-    DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+    //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
 
 	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
 	preset->clearChannels();
@@ -455,7 +455,7 @@ void MainWindow::on_presetSave_clicked()
 
 	if(dlg.exec() == QDialog::Accepted) {
 		Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
-		savePresetSettings(preset);
+		savePresetSettings(preset, ui->tabInputsView->currentIndex());
 
 		ui->presetTree->setCurrentItem(addPresetToTree(preset));
 	}
@@ -470,7 +470,7 @@ void MainWindow::on_presetUpdate_clicked()
 			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
 			if (preset != 0) {
 				Preset* preset_mod = const_cast<Preset*>(preset);
-				savePresetSettings(preset_mod);
+				savePresetSettings(preset_mod, ui->tabInputsView->currentIndex());
 			}
 		}
 	}
@@ -559,7 +559,9 @@ void MainWindow::on_presetImport_clicked()
 
 void MainWindow::on_settingsSave_clicked()
 {
-	saveSettings();
+//	saveSettings();
+    savePresetSettings(m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
+    m_settings.save();
 }
 
 void MainWindow::on_presetLoad_clicked()
@@ -583,7 +585,7 @@ void MainWindow::on_presetLoad_clicked()
 		return;
 	}
 
-	loadPresetSettings(preset);
+	loadPresetSettings(preset, ui->tabInputsView->currentIndex());
 	applySettings();
 }
 
@@ -715,7 +717,9 @@ void MainWindow::on_action_removeDevice_triggered()
 
 void MainWindow::on_action_Exit_triggered()
 {
-    saveSettings();
+//    saveSettings();
+    savePresetSettings(m_settings.getWorkingPreset(), 0);
+    m_settings.save();
 
     while (m_deviceUIs.size() > 0)
     {

@@ -121,9 +121,9 @@ private:
 	std::string m_sampleFileName;
 
 	void loadSettings();
-	void loadPresetSettings(const Preset* preset);
-	void savePresetSettings(Preset* preset);
-	void saveSettings();
+	void loadPresetSettings(const Preset* preset, int tabIndex);
+	void savePresetSettings(Preset* preset, int tabIndex);
+//	void saveSettings();
 
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
