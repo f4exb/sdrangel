@@ -7,7 +7,7 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-QT += core gui widgets multimedia network
+QT += core gui widgets multimedia network opengl
 
 TARGET = inputsdrdaemon
 

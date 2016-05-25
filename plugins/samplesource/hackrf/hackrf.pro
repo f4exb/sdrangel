@@ -7,7 +7,7 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-QT += core gui widgets multimedia
+QT += core gui widgets multimedia opengl
 
 TARGET = inputhackrf
 
