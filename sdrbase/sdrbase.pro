@@ -30,6 +30,7 @@ SOURCES += mainwindow.cpp\
         audio/audiodeviceinfo.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
+        device/deviceapi.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/channelizer.cpp\
@@ -77,6 +78,7 @@ SOURCES += mainwindow.cpp\
         gui/audiodialog.cpp\
         gui/presetitem.cpp\
         gui/rollupwidget.cpp\
+        gui/samplingdevicecontrol.cpp\
         gui/scale.cpp\
         gui/scaleengine.cpp\
         gui/valuedial.cpp\
@@ -100,6 +102,7 @@ HEADERS  += mainwindow.h\
         audio/audiodeviceinfo.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
+        device/deviceapi.h\
         dsp/afsquelch.h\
         dsp/channelizer.h\
         dsp/channelmarker.h\
@@ -153,6 +156,7 @@ HEADERS  += mainwindow.h\
         gui/pluginsdialog.h\
         gui/presetitem.h\
         gui/rollupwidget.h\
+        gui/samplingdevicecontrol.h\
         gui/scale.h\
         gui/scaleengine.h\
         gui/valuedial.h\
@@ -182,6 +186,7 @@ FORMS    += mainwindow.ui\
         gui/glscopegui.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
+        gui/samplingdevicecontrol.ui\
         gui/glspectrumgui.ui\
         mainwindow.ui
 
