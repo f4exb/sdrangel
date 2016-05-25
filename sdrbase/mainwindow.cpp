@@ -107,7 +107,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->tabInputsSelect->setStyleSheet("QWidget { background: rgb(50,50,50); } "
             "QToolButton::checked { background: rgb(128,70,0); } "
             "QComboBox::item:selected { color: rgb(255,140,0); } "
-            "QTabWidget::pane { border: 1px solid #C06900; } "
+            "QTabWidget::pane { border: 1px solid #808080; } "
             "QTabBar::tab:selected { background: rgb(100,100,100); }");
 
     m_pluginManager = new PluginManager(this);
