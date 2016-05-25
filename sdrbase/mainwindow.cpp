@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget* parent) :
             "QToolButton::checked { background: rgb(128,70,0); } "
             "QComboBox::item:selected { color: rgb(255,140,0); } "
             "QTabWidget::pane { border: 1px solid #C06900; } "
-            "QTabBar::tab:selected { background: rgb(128,70,0); }");
+            "QTabBar::tab:selected { background: rgb(100,100,100); }");
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins();
@@ -300,9 +300,6 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-	// Load into currently selected source tab
-	//int currentSourceTabIndex = ui->tabInputsView->currentIndex();
-
 	if (tabIndex >= 0)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
@@ -314,14 +311,6 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 	// has to be last step
 	restoreState(preset->getLayout());
 }
-
-//void MainWindow::saveSettings()
-//{
-//	qDebug() << "MainWindow::saveSettings";
-//
-//	savePresetSettings(m_settings.getWorkingPreset());
-//	m_settings.save();
-//}
 
 void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
 {
@@ -559,7 +548,6 @@ void MainWindow::on_presetImport_clicked()
 
 void MainWindow::on_settingsSave_clicked()
 {
-//	saveSettings();
     savePresetSettings(m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
     m_settings.save();
 }
@@ -661,22 +649,6 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
     }
 }
 
-//void MainWindow::on_sampleSource_currentIndexChanged(int index)
-//{
-//    // Do it in the currently selected source tab
-//    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
-//
-//    if (currentSourceTabIndex >= 0)
-//    {
-//        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
-//        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-//        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
-//        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
-//        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
-//        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
-//    }
-//}
-
 void MainWindow::on_sampleSource_confirmClicked(bool checked)
 {
     // Do it in the currently selected source tab
@@ -690,7 +662,6 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceAPI);
-//        m_pluginManager->selectSampleSourceByIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex(), deviceUI->m_deviceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
     }
@@ -717,7 +688,6 @@ void MainWindow::on_action_removeDevice_triggered()
 
 void MainWindow::on_action_Exit_triggered()
 {
-//    saveSettings();
     savePresetSettings(m_settings.getWorkingPreset(), 0);
     m_settings.save();
 
@@ -730,8 +700,6 @@ void MainWindow::on_action_Exit_triggered()
 void MainWindow::tabInputViewIndexChanged()
 {
     int inputViewIndex = ui->tabInputsView->currentIndex();
-
-    //qDebug("MainWindow::tabInputViewIndexChanged: old: %d new: %d", m_masterTabIndex, inputViewIndex);
 
     if ((inputViewIndex >= 0) && (m_masterTabIndex >= 0) && (inputViewIndex != m_masterTabIndex))
     {
