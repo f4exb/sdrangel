@@ -2,7 +2,11 @@
 
 <h2>Multi device support</h2>
 
-Starting with version 2 SDRangel supports several sampling devices simultaneously. A set of tabs is dedicated to each device marked R0, R1, R2... The tabbed windows are:
+Starting with version 2 SDRangel supports several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2... 
+
+The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device menu a new slot is allocated in the last position and when a devcie is removed with the Acquisition -> Remove device menu the slot in the last position is deleted. Slot 0 (R0) is created at initialization and cannot be deleted with the menu.
+
+The tabbed windows are:
 
   - Sampling devices (1)
   - Sampling devices control (2)
@@ -16,7 +20,7 @@ The sampling devices tab (1) acts as a master and when one of its tabs is select
 
 In each slave tab group (2), (3), (4) and (5) an individual tab corresponding to one device can be selected without affecting the selection of the other tabs. This way you can sneak peek into another spectrum or channel goup without affecting the display of other tabbed windows.
 
-<h2>Main areas</h2>
+<h2>Interface details</h2>
 
 ![Main Window interface](../doc/img/MainWindow_general.png)
 
@@ -29,8 +33,8 @@ The following items are presented hierarchically from left to right:
   - View:
    - Fullscreen (Shortcut F11): Toggle full screen mode
   - Acquisition:
-   - Add device: adds a new sampling device tab set to the device stack (last position)
-   - Remove device: removes the last sampling device tab set
+   - Add device: adds a new sampling device slot to the device stack (last position)
+   - Remove device: removes the last sampling device slot from thte device stack
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
    - Sampling devices control: control of which sampling devices is used and add channels
    - Sampling devices: the sampling devices UIs
@@ -85,7 +89,7 @@ This is where the plugin GUI specific to the device is displayed. Control of one
   
 <h4>2.2. Record I/Q</h2>
 
-This is the I/Q from device record toggle. When a red background is displayed the recording is currently active.
+This is the I/Q from device record toggle. When a red background is displayed the recording is currently active. The name of the file created is `test_<n>.sdriq` where `<n>` is the slot number.
 
 <h4>2.3. Device sampling rate</h4>
 
