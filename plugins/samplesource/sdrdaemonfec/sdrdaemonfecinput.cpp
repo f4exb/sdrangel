@@ -32,8 +32,6 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonWork, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonAutoFollowPolicy, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonResetIndexes, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonStreamData, Message)
@@ -128,26 +126,6 @@ bool SDRdaemonFECInput::handleMessage(const Message& message)
 		m_deviceAPI->configureCorrections(dcBlock, iqImbalance);
 		return true;
 	}
-    else if (MsgConfigureSDRdaemonAutoFollowPolicy::match(message))
-	{
-        MsgConfigureSDRdaemonAutoFollowPolicy& conf = (MsgConfigureSDRdaemonAutoFollowPolicy&) message;
-		bool autoFollowRate = conf.autoFollowRate();
-        bool autoCorrBuffer = conf.autoCorrBuffer();
-        if (autoFollowRate != m_autoFollowRate) {
-            m_SDRdaemonUDPHandler->setAutoFollowRate(autoFollowRate);
-            m_autoFollowRate = autoFollowRate;
-        }
-        if (autoCorrBuffer != m_autoCorrBuffer) {
-            m_SDRdaemonUDPHandler->setAutoCorrBuffer(autoCorrBuffer);
-            m_autoCorrBuffer = autoCorrBuffer;
-        }
-		return true;
-	}
-    else if (MsgConfigureSDRdaemonResetIndexes::match(message))
-    {
-        m_SDRdaemonUDPHandler->resetIndexes();
-        return true;
-    }
 	else if (MsgConfigureSDRdaemonWork::match(message))
 	{
 		MsgConfigureSDRdaemonWork& conf = (MsgConfigureSDRdaemonWork&) message;

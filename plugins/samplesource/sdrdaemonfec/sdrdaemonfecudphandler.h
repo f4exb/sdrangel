@@ -43,9 +43,7 @@ public:
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
-	void setAutoFollowRate(bool autoFollowRate) { m_sdrDaemonBuffer.setAutoFollowRate(autoFollowRate); }
-    void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; m_sdrDaemonBuffer.setAutoCorrBuffer(autoCorrBuffer); }
-    void resetIndexes() { m_sdrDaemonBuffer.setResetIndexes(); }
+    int getNbOriginalBlocks() const { return SDRdaemonFECBuffer::m_nbOriginalBlocks; }
 public slots:
 	void dataReadyRead();
 

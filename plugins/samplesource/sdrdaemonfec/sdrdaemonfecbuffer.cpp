@@ -22,7 +22,6 @@
 #include "sdrdaemonfecbuffer.h"
 
 
-const int SDRdaemonFECBuffer::m_udpPayloadSize = 512;
 const int SDRdaemonFECBuffer::m_sampleSize = 2;
 const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
 const int SDRdaemonFECBuffer::m_rawBufferLengthSeconds = 8; // should be even
@@ -55,7 +54,7 @@ void SDRdaemonFECBuffer::initDecoderSlotsAddresses()
 {
     for (int i = 0; i < nbDecoderSlots; i++)
     {
-        for (int j = 0; j < nbOriginalBlocks - 1; j++)
+        for (int j = 0; j < m_nbOriginalBlocks - 1; j++)
         {
             m_decoderSlots[i].m_originalBlockPtrs[j] = &m_frames[i].m_blocks[j];
         }
@@ -94,12 +93,12 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_decoded = false;
     m_decoderSlots[slotIndex].m_blockZero.m_metaData.init();
     memset((void *) m_decoderSlots[slotIndex].m_blockZero.m_samples, 0, samplesPerBlockZero * sizeof(Sample));
-    memset((void *) m_frames[slotIndex].m_blocks, 0, (nbOriginalBlocks - 1) * samplesPerBlock * sizeof(Sample));
+    memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * samplesPerBlock * sizeof(Sample));
 }
 
 void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 {
-    assert(length == udpSize);
+    assert(length == m_udpPayloadSize);
 
     bool dataAvailable = false;
     SuperBlock *superBlock = (SuperBlock *) array;
@@ -160,7 +159,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
     int blockIndex = superBlock->header.blockIndex;
     int blockHead = m_decoderSlots[decoderIndex].m_blockCount;
 
-    if (blockHead < nbOriginalBlocks) // not enough blocks to decode -> store data
+    if (blockHead < m_nbOriginalBlocks) // not enough blocks to decode -> store data
     {
         if (blockIndex == 0) // first block with meta
         {
@@ -171,7 +170,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                     (const void *) m_decoderSlots[decoderIndex].m_blockZero.m_samples,
                     samplesPerBlockZero * sizeof(Sample));
         }
-        else if (blockIndex < nbOriginalBlocks) // normal block
+        else if (blockIndex < m_nbOriginalBlocks) // normal block
         {
             m_frames[decoderIndex].m_blocks[blockIndex - 1] = superBlock->protectedBlock;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_frames[decoderIndex].m_blocks[blockIndex - 1];

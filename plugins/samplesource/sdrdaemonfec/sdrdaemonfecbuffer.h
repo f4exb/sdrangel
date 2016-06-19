@@ -138,15 +138,14 @@ public:
         }
     }
 
-	static const int m_udpPayloadSize;
+    static const int m_udpPayloadSize = SDRDAEMONFEC_UDPSIZE;
+    static const int m_nbOriginalBlocks = SDRDAEMONFEC_NBORIGINALBLOCKS;
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;
 	static const int m_rawBufferLengthSeconds;
 	static const int m_rawBufferMinNbFrames; //!< Minimum number of frames for the length of buffer
 
 private:
-    static const int udpSize = SDRDAEMONFEC_UDPSIZE;
-    static const int nbOriginalBlocks = SDRDAEMONFEC_NBORIGINALBLOCKS;
     static const int nbDecoderSlots = SDRDAEMONFEC_NBDECODERSLOTS;
 
 #pragma pack(push, 1)
@@ -158,16 +157,16 @@ private:
     struct BufferFrame
     {
         BufferBlockZero m_blockZero;
-        ProtectedBlock  m_blocks[nbOriginalBlocks - 1];
+        ProtectedBlock  m_blocks[m_nbOriginalBlocks - 1];
     };
 #pragma pack(pop)
 
     struct DecoderSlot
     {
         ProtectedBlockZero   m_blockZero;
-        ProtectedBlock*      m_originalBlockPtrs[nbOriginalBlocks];
-        ProtectedBlock       m_recoveryBlocks[nbOriginalBlocks]; // max size
-        cm256_block          m_cm256DescriptorBlocks[nbOriginalBlocks];
+        ProtectedBlock*      m_originalBlockPtrs[m_nbOriginalBlocks];
+        ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks]; // max size
+        cm256_block          m_cm256DescriptorBlocks[m_nbOriginalBlocks];
         int                  m_blockCount; //!< total number of blocks received for this frame
         int                  m_recoveryCount; //!< number of recovery blocks received
         bool                 m_decoded; //!< true if decoded

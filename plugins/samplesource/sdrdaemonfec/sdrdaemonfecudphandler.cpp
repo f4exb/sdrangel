@@ -134,7 +134,7 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
 
-		if (m_udpReadBytes == SDRdaemonFECBuffer::udpSize) {
+		if (m_udpReadBytes == SDRdaemonFECBuffer::m_udpPayloadSize) {
 		    processData();
 		}
 	}
@@ -178,7 +178,7 @@ void SDRdaemonFECUDPHandler::tick()
     if (throttlems != m_throttlems)
     {
         m_throttlems = throttlems;
-        m_readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+        m_readLengthSamples = (m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
         m_readLength = m_readLengthSamples * SDRdaemonFECBuffer::m_iqSampleSize;
         m_throttleToggle = !m_throttleToggle;
     }
@@ -199,6 +199,7 @@ void SDRdaemonFECUDPHandler::tick()
 			m_tv_usec,
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
             m_sdrDaemonBuffer.getBufferGauge(),
+            m_sdrDaemonBuffer.getCurNbBlocks() == SDRdaemonFECBuffer::m_nbOriginalBlocks,
             m_sdrDaemonBuffer.getCurNbBlocks(),
             m_sdrDaemonBuffer.getCurNbRecovery(),
             m_sdrDaemonBuffer.getAvgNbBlocks(),

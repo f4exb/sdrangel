@@ -94,43 +94,6 @@ public:
 		{ }
 	};
 
-    class MsgConfigureSDRdaemonAutoFollowPolicy : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool autoFollowRate() const { return m_autoFollowRate; }
-        bool autoCorrBuffer() const { return m_autoCorrBuffer; }
-
-        static MsgConfigureSDRdaemonAutoFollowPolicy* create(bool autoFollowRate, bool autoCorrBuffer)
-		{
-            return new MsgConfigureSDRdaemonAutoFollowPolicy(autoFollowRate, autoCorrBuffer);
-		}
-
-	private:
-		bool m_autoFollowRate;
-        bool m_autoCorrBuffer;
-
-        MsgConfigureSDRdaemonAutoFollowPolicy(bool autoFollowRate, bool autoCorrBuffer) :
-			Message(),
-            m_autoFollowRate(autoFollowRate),
-            m_autoCorrBuffer(autoCorrBuffer)
-		{ }
-	};
-
-    class MsgConfigureSDRdaemonResetIndexes : public Message {
-        MESSAGE_CLASS_DECLARATION
-    public:
-        static MsgConfigureSDRdaemonResetIndexes* create()
-        {
-            return new MsgConfigureSDRdaemonResetIndexes();
-        }
-
-    private:
-        MsgConfigureSDRdaemonResetIndexes() :
-            Message()
-        { }
-    };
-
 	class MsgConfigureSDRdaemonStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -218,6 +181,7 @@ public:
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
+                int nbOriginalBlocks,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
@@ -227,6 +191,7 @@ public:
 					tv_usec,
 					bufferLenSec,
                     bufferGauge,
+                    nbOriginalBlocks,
                     curNbBlocks,
                     curNbRecovery,
                     avgNbBlocks,
@@ -248,6 +213,7 @@ public:
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
+                int nbOriginalBlocks,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
@@ -255,7 +221,7 @@ public:
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
-			m_framesComplete(curNbBlocks == SDRdaemonFECBuffer::nbOriginalBlocks),
+			m_framesComplete(curNbBlocks == nbOriginalBlocks),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
             m_curNbBlocks(curNbBlocks),
