@@ -47,7 +47,11 @@ endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 #    add_subdirectory(sdrdaemon)    
 #endif(LIBNANOMSG_FOUND)
 
+find_package(CM256)
+if(CM256_FOUND)
+    add_subdirectory(sdrdaemonfec)
+endif(CM256_FOUND)
+
 add_subdirectory(filesource)
 add_subdirectory(sdrdaemon)
-add_subdirectory(sdrdaemonfec)
 

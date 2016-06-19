@@ -29,425 +29,268 @@ const int SDRdaemonFECBuffer::m_rawBufferLengthSeconds = 8; // should be even
 const int SDRdaemonFECBuffer::m_rawBufferMinNbFrames = 50;
 
 SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
-	m_throttlemsNominal(throttlems),
-	m_rawSize(0),
-	m_rawBuffer(0),
-	m_sampleRateStream(0),
-	m_sampleRate(0),
-	m_sampleBytes(2),
-	m_sampleBits(12),
-	m_sync(false),
-	m_syncLock(false),
-	m_lz4(false),
-	m_nbBlocks(0),
-	m_bytesInBlock(0),
-	m_dataCRC(0),
-	m_inCount(0),
-	m_lz4InCount(0),
-	m_lz4InSize(0),
-	m_lz4InBuffer(0),
-	m_lz4OutBuffer(0),
-	m_frameSize(0),
-	m_bufferLenSec(0.0),
-	m_nbLz4Decodes(0),
-	m_nbLz4SuccessfulDecodes(0),
-	m_nbLz4CRCOK(0),
-	m_nbLastLz4SuccessfulDecodes(0),
-	m_nbLastLz4CRCOK(0),
-	m_writeIndex(0),
-	m_readIndex(0),
-	m_readSize(0),
-	m_readBuffer(0),
-    m_autoFollowRate(false),
-    m_autoCorrBuffer(false),
-    m_skewTest(false),
-    m_skewCorrection(false),
-    m_resetIndexes(false),
-    m_readCount(0),
-    m_writeCount(0),
-    m_nbCycles(0),
-    m_nbReads(0),
-    m_balCorrection(0),
-    m_balCorrLimit(0)
+        m_frameHead(0),
+        m_decoderSlotHead(nbDecoderSlots/2),
+        m_curNbBlocks(0),
+        m_curNbRecovery(0),
+        m_throttlemsNominal(throttlems),
+        m_readIndex(0),
+        m_readBuffer(0),
+        m_readSize(0),
+        m_bufferLenSec(0.0f)
 {
 	m_currentMeta.init();
+	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame) * m_iqSampleSize;
+	m_wrDeltaEstimate = m_framesNbBytes / 2;
 }
 
 SDRdaemonFECBuffer::~SDRdaemonFECBuffer()
 {
-	if (m_rawBuffer) {
-		delete[] m_rawBuffer;
-	}
-
-	if (m_lz4InBuffer) {
-		delete[] m_lz4InBuffer;
-	}
-
-	if (m_lz4OutBuffer) {
-		delete[] m_lz4OutBuffer;
-	}
-
 	if (m_readBuffer) {
 		delete[] m_readBuffer;
 	}
 }
 
-void SDRdaemonFECBuffer::updateBufferSize(uint32_t sampleRate)
+void SDRdaemonFECBuffer::initDecoderSlotsAddresses()
 {
-	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
-
-	if ((m_frameSize > 0) && (rawSize / m_frameSize < m_rawBufferMinNbFrames))
-	{
-		rawSize = m_rawBufferMinNbFrames * m_frameSize; // ensure a minimal size of this times the write block size so that auto follow ups work fine
-	}
-
-	if (rawSize != m_rawSize)
-	{
-		m_rawSize = rawSize;
-        m_balCorrLimit = sampleRate / 50; // +/- 20 ms correction max per read
-        m_bufferLenSec = m_rawSize / (sampleRate * m_iqSampleSize);
-
-		if (m_rawBuffer) {
-			delete[] m_rawBuffer;
-		}
-
-		m_rawBuffer = new uint8_t[m_rawSize];
-        resetIndexes();
-
-		qDebug() << "SDRdaemonBuffer::updateBufferSize:"
-			<< " sampleRate: " << sampleRate
-			<< " m_frameSize: " << m_frameSize
-			<< " m_rawSize: " << m_rawSize;
-	}
+    for (int i = 0; i < nbDecoderSlots; i++)
+    {
+        for (int j = 0; j < nbOriginalBlocks - 1; j++)
+        {
+            m_decoderSlots[i].m_originalBlockPtrs[j] = &m_frames[i].m_blocks[j];
+        }
+    }
 }
 
-void SDRdaemonFECBuffer::updateLZ4Sizes(uint32_t frameSize)
+void SDRdaemonFECBuffer::initDecodeAllSlots()
 {
-	uint32_t maxInputSize = LZ4_compressBound(frameSize);
-
-	if (m_lz4InBuffer) {
-		delete[] m_lz4InBuffer;
-	}
-
-	m_lz4InBuffer = new uint8_t[maxInputSize];
-
-	if (m_lz4OutBuffer) {
-		delete[] m_lz4OutBuffer;
-	}
-
-	m_lz4OutBuffer = new uint8_t[frameSize];
+    for (int i = 0; i < nbDecoderSlots; i++)
+    {
+        m_decoderSlots[i].m_blockCount = 0;
+        m_decoderSlots[i].m_recoveryCount = 0;
+        m_decoderSlots[i].m_decoded = false;
+        m_decoderSlots[i].m_blockZero.m_metaData.init();
+    }
 }
 
-void SDRdaemonFECBuffer::updateReadBufferSize(uint32_t length)
+void SDRdaemonFECBuffer::initReadIndex()
 {
-	if (m_readBuffer) {
-		delete[] m_readBuffer;
-	}
-
-	m_readBuffer = new uint8_t[length];
+    m_readIndex = ((m_decoderSlotHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
+    m_wrDeltaEstimate = m_framesNbBytes / 2;
 }
 
-bool SDRdaemonFECBuffer::readMeta(char *array, uint32_t length)
+void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
 {
-	assert(length >= sizeof(MetaData) + 8);
-	MetaData *metaData = (MetaData *) array;
-
-	if (m_crc64.calculate_crc((uint8_t *) array, sizeof(MetaData) - 8) == metaData->m_crc)
-	{
-		// sync condition:
-		if (m_currentMeta.m_blockSize > 0)
-		{
-			uint32_t nbBlocks = m_currentMeta.m_nbBytes / m_currentMeta.m_blockSize;
-			m_syncLock = nbBlocks + (m_lz4 ? 2 : 1) == m_nbBlocks;
-			//qDebug("SDRdaemonBuffer::readMeta: m_nbBlocks: %d:%d %s", nbBlocks, m_nbBlocks, (m_syncLock ? "locked" : "unlocked"));
-		}
-		else
-		{
-			m_syncLock = false;
-		}
-
-		memcpy((void *) &m_dataCRC, (const void *) &array[sizeof(MetaData)], 8);
-		m_nbBlocks = 0;
-		m_inCount = 0;
-
-		if (!m_lz4 && !(m_currentMeta == *metaData))
-		{
-			printMeta(QString("SDRdaemonBuffer::readMeta"), metaData);
-		}
-
-		m_currentMeta = *metaData;
-
-		// sanity checks
-		if (metaData->m_blockSize == m_udpPayloadSize) // sent blocksize matches given blocksize
-		{
-			m_sampleBytes = metaData->m_sampleBytes & 0x0F;
-			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
-			int sampleRate = metaData->m_sampleRate;
-
-            if (sampleRate != m_sampleRateStream) // change of nominal stream sample rate
-			{
-				updateBufferSize(sampleRate);
-				m_sampleRateStream = sampleRate;
-				m_sampleRate = sampleRate;
-			}
-
-            // auto skew rate compensation
-            if (m_autoFollowRate)
-            {
-				if (m_skewCorrection)
-				{
-					int64_t deltaRate = (m_writeCount - m_readCount) / (m_nbCycles * m_rawBufferLengthSeconds * m_iqSampleSize);
-					m_sampleRate = ((m_sampleRate + deltaRate) / m_iqSampleSize) * m_iqSampleSize; // ensure it is a multiple of the I/Q sample size
-					resetIndexes();
-				}
-            }
-            else
-            {
-            	m_sampleRate = sampleRate;
-            }
-
-            // Reset indexes if requested
-            if (m_resetIndexes)
-            {
-                resetIndexes();
-                m_resetIndexes = false;
-            }
-
-			if (metaData->m_sampleBytes & 0x10)
-			{
-				m_lz4 = true;
-				m_lz4InSize = metaData->m_nbBytes; // compressed input size
-				m_lz4InCount = 0;
-
-				if (frameSize != m_frameSize)
-				{
-					updateLZ4Sizes(frameSize);
-				}
-			}
-			else
-			{
-				m_lz4 = false;
-			}
-
-			if (frameSize != m_frameSize) {
-				m_frameSize = frameSize;
-				updateBufferSize(m_sampleRate);
-			}
-
-			m_sync = true;
-		}
-		else
-		{
-			m_sync = false;
-		}
-
-		return m_sync;
-	}
-	else
-	{
-		return false;
-	}
+    int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
+    m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
+    // collect stats before voiding the slot
+    m_curNbBlocks = m_decoderSlots[slotIndex].m_blockCount;
+    m_curNbRecovery = m_decoderSlots[slotIndex].m_recoveryCount;
+    m_avgNbBlocks(m_curNbBlocks);
+    m_avgNbRecovery(m_curNbRecovery);
+    // void the slot
+    m_decoderSlots[slotIndex].m_blockCount = 0;
+    m_decoderSlots[slotIndex].m_recoveryCount = 0;
+    m_decoderSlots[slotIndex].m_decoded = false;
+    m_decoderSlots[slotIndex].m_blockZero.m_metaData.init();
+    memset((void *) m_decoderSlots[slotIndex].m_blockZero.m_samples, 0, samplesPerBlockZero * sizeof(Sample));
+    memset((void *) m_frames[slotIndex].m_blocks, 0, (nbOriginalBlocks - 1) * samplesPerBlock * sizeof(Sample));
 }
 
 void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 {
-	if ((m_sync) && (m_nbBlocks > 0))
-	{
-		if (m_lz4)
-		{
-			writeDataLZ4(array, length);
-		}
-		else
-		{
-			writeToRawBufferUncompressed(array, length);
-		}
-	}
-}
+    assert(length == udpSize);
 
-uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
-{
-    // auto compensation calculations
-    if (m_skewTest && ((m_readIndex + length) > (m_rawSize / 2)))
+    bool dataAvailable = false;
+    SuperBlock *superBlock = (SuperBlock *) array;
+    int frameIndex = superBlock->header.frameIndex;
+    int decoderIndex = frameIndex % nbDecoderSlots;
+
+    if (m_frameHead == -1) // initial state
     {
-        // auto follow sample rate calculation
-        int dIndex = (m_readIndex - m_writeIndex > 0 ? m_readIndex - m_writeIndex : m_writeIndex - m_readIndex); // absolute delta
-        m_skewCorrection = (dIndex < m_rawSize / 10); // close by 10%
-        m_nbCycles++;
-        // auto R/W balance calculation
-        if ((m_nbReads > 5*m_rawBufferLengthSeconds) && m_autoCorrBuffer)
+        m_decoderSlotHead = decoderIndex; // new decoder slot head
+        m_frameHead = frameIndex;
+        initReadIndex(); // reset read index
+        initDecodeAllSlots(); // initialize all slots
+    }
+    else
+    {
+        int frameDelta = m_frameHead - frameIndex;
+
+        if (frameDelta < 0)
         {
-            int32_t dBytes;
-            int32_t dI = (m_rawSize / 2) - m_readIndex; // delta of read index to the middle of buffer (positive)
-
-            if (m_readIndex > m_writeIndex) { // write leads
-                dBytes = m_writeIndex + dI; // positive from start of buffer + delta read index
-            } else { // read leads
-                dBytes = m_writeIndex - (int32_t) m_rawSize + dI; // negative from end of buffer minus delta read index
+            if (-frameDelta < nbDecoderSlots) // new frame head not too new
+            {
+                m_decoderSlotHead = decoderIndex; // new decoder slot head
+                m_frameHead = frameIndex;
+                dataAvailable = true;
+                initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
             }
-
-            m_balCorrection = (m_balCorrection / 4) + ((int32_t) dBytes / (int32_t) (m_nbReads * m_iqSampleSize)); // correction is in number of samples. Alpha = 0.25
-
-            if (m_balCorrection < -m_balCorrLimit) {
-                m_balCorrection = -m_balCorrLimit;
-            } else if (m_balCorrection > m_balCorrLimit) {
-                m_balCorrection = m_balCorrLimit;
+            else if (-frameDelta <= sizeof(uint16_t) - nbDecoderSlots) // loss of sync start over
+            {
+                m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
+                decoderIndex = m_decoderSlotHead;
+                m_frameHead = frameIndex;
+                initReadIndex(); // reset read index
+                initDecodeAllSlots(); // re-initialize all slots
             }
         }
         else
         {
-            m_balCorrection = 0;
+            if (frameDelta > sizeof(uint16_t) - nbDecoderSlots) // new frame head not too new
+            {
+                m_decoderSlotHead = decoderIndex; // new decoder slot head
+                m_frameHead = frameIndex;
+                dataAvailable = true;
+                initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
+            }
+            else if (frameDelta >= nbDecoderSlots) // loss of sync start over
+            {
+                m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
+                decoderIndex = m_decoderSlotHead;
+                m_frameHead = frameIndex;
+                initReadIndex(); // reset read index
+                initDecodeAllSlots(); // re-initialize all slots
+            }
         }
-
-        m_nbReads = 0;
-        // un-arm
-        m_skewTest = false;
     }
 
-    m_readCount += length;
-    m_nbReads++;
+    // decoderIndex should now be correctly set
 
-	if (m_readIndex + length < m_rawSize)
-	{
-		uint32_t readIndex = m_readIndex;
-		m_readIndex += length;
-		return &m_rawBuffer[readIndex];
-	}
-	else if (m_readIndex + length == m_rawSize)
-	{
-		uint32_t readIndex = m_readIndex;
-		m_readIndex = 0;
-        m_skewTest = true; // re-arm
-		return &m_rawBuffer[readIndex];
-	}
-	else
-	{
-		if (length > m_readSize)
-		{
-			updateReadBufferSize(length);
-			m_readSize = length;
-		}
+    int blockIndex = superBlock->header.blockIndex;
+    int blockHead = m_decoderSlots[decoderIndex].m_blockCount;
 
-		std::memcpy((void *) m_readBuffer, (const void *) &m_rawBuffer[m_readIndex], m_rawSize - m_readIndex);
-		length -= m_rawSize - m_readIndex;
-		std::memcpy((void *) &m_readBuffer[m_rawSize - m_readIndex], (const void *) m_rawBuffer, length);
-		m_readIndex = length;
-        m_skewTest = true; // re-arm
-        return m_readBuffer;
-	}
-}
-
-void SDRdaemonFECBuffer::writeDataLZ4(const char *array, uint32_t length)
-{
-    if (m_lz4InCount + length < m_lz4InSize)
+    if (blockHead < nbOriginalBlocks) // not enough blocks to decode -> store data
     {
-    	std::memcpy((void *) &m_lz4InBuffer[m_lz4InCount], (const void *) array, length);
-        m_lz4InCount += length;
-    }
-    else
-    {
-        std::memcpy((void *) &m_lz4InBuffer[m_lz4InCount], (const void *) array, m_lz4InSize - m_lz4InCount); // copy rest of data in compressed Buffer
-        m_lz4InCount += length;
-    }
-
-    if (m_lz4InCount >= m_lz4InSize) // full input compressed block retrieved
-    {
-        if (m_nbLz4Decodes == 100)
+        if (blockIndex == 0) // first block with meta
         {
-            qDebug() << "SDRdaemonBuffer::writeAndReadLZ4:"
-               << " decoding: " << m_nbLz4CRCOK
-               << ":" << m_nbLz4SuccessfulDecodes
-               << "/" <<  m_nbLz4Decodes;
-
-            m_nbLastLz4SuccessfulDecodes = m_nbLz4SuccessfulDecodes;
-            m_nbLastLz4CRCOK = m_nbLz4CRCOK;
-        	m_nbLz4Decodes = 0;
-        	m_nbLz4SuccessfulDecodes = 0;
-            m_nbLz4CRCOK = 0;
+            SuperBlockZero *superBlockZero = (SuperBlockZero *) array;
+            m_decoderSlots[decoderIndex].m_blockZero = superBlockZero->protectedBlock;
+            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_decoderSlots[decoderIndex].m_blockZero;
+            memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
+                    (const void *) m_decoderSlots[decoderIndex].m_blockZero.m_samples,
+                    samplesPerBlockZero * sizeof(Sample));
+        }
+        else if (blockIndex < nbOriginalBlocks) // normal block
+        {
+            m_frames[decoderIndex].m_blocks[blockIndex - 1] = superBlock->protectedBlock;
+            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_frames[decoderIndex].m_blocks[blockIndex - 1];
+        }
+        else // redundancy block
+        {
+            m_decoderSlots[decoderIndex].m_recoveryBlocks[m_decoderSlots[decoderIndex].m_recoveryCount] = superBlock->protectedBlock;
+            m_decoderSlots[decoderIndex].m_recoveryCount++;
         }
 
-        writeToRawBufferLZ4();
-		m_lz4InCount = 0;
+        m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Index = blockIndex;
+        m_decoderSlots[decoderIndex].m_blockCount++;
     }
-}
-
-void SDRdaemonFECBuffer::writeToRawBufferLZ4()
-{
-    uint64_t crc64 = m_crc64.calculate_crc(m_lz4InBuffer, m_lz4InSize);
-
-    if (memcmp(&crc64, &m_dataCRC, 8) == 0)
+    else if (!m_decoderSlots[decoderIndex].m_decoded) // ready to decode
     {
-        m_nbLz4CRCOK++;
+        if (m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks < 0) // block zero has not been received
+        {
+            m_paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks; // take last value for number of FEC blocks
+        }
+        else
+        {
+            m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
+        }
+
+        if (m_decoderSlots[decoderIndex].m_recoveryCount > 0) // recovery data used
+        {
+            if (cm256_decode(m_paramsCM256, m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks)) // failure to decode
+            {
+                qDebug("SDRdaemonFECBuffer::writeAndRead: CM256 decode error");
+            }
+            else // success to decode
+            {
+                int nbOriginalBlocks = m_decoderSlots[decoderIndex].m_blockCount - m_decoderSlots[decoderIndex].m_recoveryCount;
+
+                for (int ir = 0; ir < m_decoderSlots[decoderIndex].m_recoveryCount; ir++) // recover lost blocks
+                {
+                    int blockIndex = m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[nbOriginalBlocks+ir].Index;
+
+                    if (blockIndex == 0)
+                    {
+                        ProtectedBlockZero *recoveredBlockZero = (ProtectedBlockZero *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
+                        m_decoderSlots[decoderIndex].m_blockZero.m_metaData = recoveredBlockZero->m_metaData;
+                        memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
+                                (const void *) recoveredBlockZero->m_samples,
+                                samplesPerBlockZero * sizeof(Sample));
+                    }
+                    else
+                    {
+                        m_frames[decoderIndex].m_blocks[blockIndex - 1] =  m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
+                    }
+                }
+            }
+        }
+
+        if (m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks >= 0) // meta data valid
+        {
+            if (!(m_decoderSlots[decoderIndex].m_blockZero.m_metaData == m_currentMeta))
+            {
+                int sampleRate =  m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_sampleRate;
+
+                if (sampleRate > 0) {
+                    m_bufferLenSec = (float) m_framesNbBytes / (float) sampleRate;
+                }
+
+                printMeta("SDRdaemonFECBuffer::writeData", &m_decoderSlots[decoderIndex].m_blockZero.m_metaData); // print for change other than timestamp
+            }
+
+            m_currentMeta = m_decoderSlots[decoderIndex].m_blockZero.m_metaData; // renew current meta
+        }
+
+        m_decoderSlots[decoderIndex].m_decoded = true;
     }
-    else
+}
+
+uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
+{
+    uint8_t *buffer = (uint8_t *) m_frames;
+    uint32_t readIndex = m_readIndex;
+
+    if (m_readIndex + length < m_framesNbBytes) // ends before buffer bound
     {
-    	return;
+        m_readIndex += length;
+        return &buffer[readIndex];
     }
+    else if (m_readIndex + length == m_framesNbBytes) // ends at buffer bound
+    {
+        m_readIndex = 0;
+        return &buffer[readIndex];
+    }
+    else // ends after buffer bound
+    {
+        if (length > m_readSize) // reallocate composition buffer if necessary
+        {
+            if (m_readBuffer) {
+                delete[] m_readBuffer;
+            }
 
-    int compressedSize = LZ4_decompress_fast((const char*) m_lz4InBuffer, (char*) m_lz4OutBuffer, m_frameSize);
-    m_nbLz4Decodes++;
+            m_readBuffer = new uint8_t[length];
+            m_readSize = length;
+        }
 
-    if (compressedSize == m_lz4InSize)
-	{
-    	m_nbLz4SuccessfulDecodes++;
-    	writeToRawBufferUncompressed((const char *) m_lz4OutBuffer, m_frameSize);
-	}
+        std::memcpy((void *) m_readBuffer, (const void *) &buffer[m_readIndex], m_framesNbBytes - m_readIndex); // copy end of buffer
+        length -= m_framesNbBytes - m_readIndex;
+        std::memcpy((void *) &m_readBuffer[m_framesNbBytes - m_readIndex], (const void *) buffer, length); // copy start of buffer
+        m_readIndex = length;
+        return m_readBuffer;
+    }
 }
 
-void SDRdaemonFECBuffer::writeToRawBufferUncompressed(const char *array, uint32_t length)
-{
-	// TODO: handle the 1 byte per I or Q sample
-	if (m_writeIndex + length < m_rawSize)
-	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, length);
-		m_writeIndex += length;
-	}
-	else if (m_writeIndex + length == m_rawSize)
-	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, length);
-		m_writeIndex = 0;
-	}
-	else
-	{
-		std::memcpy((void *) &m_rawBuffer[m_writeIndex], (const void *) array, m_rawSize - m_writeIndex);
-		length -= m_rawSize - m_writeIndex;
-		std::memcpy((void *) m_rawBuffer, (const void *) &array[m_rawSize - m_writeIndex], length);
-		m_writeIndex = length;
-	}
-
-    m_writeCount += length;
-}
-
-void SDRdaemonFECBuffer::resetIndexes()
-{
-    m_writeIndex = 0;
-    m_readIndex = m_rawSize / 2;
-    m_readCount = 0;
-    m_writeCount = 0;
-    m_nbCycles = 0;
-    m_skewTest = false;
-    m_skewCorrection = false;
-    m_nbReads = 0;
-    m_balCorrection = 0;
-}
-
-void SDRdaemonFECBuffer::updateBlockCounts(uint32_t nbBytesReceived)
-{
-	m_nbBlocks += m_bytesInBlock + nbBytesReceived > m_udpPayloadSize ? 1 : 0;
-	m_bytesInBlock = m_bytesInBlock + nbBytesReceived > m_udpPayloadSize ? nbBytesReceived : m_bytesInBlock + nbBytesReceived;
-}
-
-void SDRdaemonFECBuffer::printMeta(const QString& header, MetaData *metaData)
+void SDRdaemonFECBuffer::printMeta(const QString& header, MetaDataFEC *metaData)
 {
 	qDebug() << header << ": "
-		<< "|" << metaData->m_centerFrequency
-		<< ":" << metaData->m_sampleRate
-		<< ":" << (int) (metaData->m_sampleBytes & 0xF)
-		<< ":" << (int) metaData->m_sampleBits
-		<< ":" << metaData->m_blockSize
-		<< ":" << metaData->m_nbSamples
-		<< "||" << metaData->m_nbBlocks
-		<< ":" << metaData->m_nbBytes
-		<< "|" << metaData->m_tv_sec
-		<< ":" << metaData->m_tv_usec;
+            << "|" << metaData->m_centerFrequency
+            << ":" << metaData->m_sampleRate
+            << ":" << (int) (metaData->m_sampleBytes & 0xF)
+            << ":" << (int) metaData->m_sampleBits
+            << ":" << (int) metaData->m_nbOriginalBlocks
+            << ":" << (int) metaData->m_nbFECBlocks
+            << "|" << metaData->m_tv_sec
+            << ":" << metaData->m_tv_usec
+            << "|";
 }
-

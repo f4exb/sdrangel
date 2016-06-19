@@ -26,7 +26,7 @@
 
 const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon input"),
-	QString("2.0.0"),
+	QString("2.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -240,6 +240,7 @@ set(sdrbase_HEADERS
 	sdrbase/util/export.h
 	sdrbase/util/message.h
 	sdrbase/util/messagequeue.h
+	sdrbase/util/movingaverage.h
 	sdrbase/util/prettyprint.h
 	sdrbase/util/syncmessenger.h
 	sdrbase/util/samplesourceserializer.h

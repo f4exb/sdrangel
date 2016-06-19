@@ -1,6 +1,5 @@
 project(sdrdaemonfec)
 
-find_package(LZ4)
 find_package(LibNANOMSG)
 
 set(sdrdaemonfec_SOURCES
@@ -43,13 +42,13 @@ add_library(inputsdrdaemonfec SHARED
 )
 
 target_include_directories(inputsdrdaemonfec PUBLIC
-    ${LZ4_INCLUDE_DIRS}
+    ${CM256_INCLUDE_DIR}
     ${LIBNANOMSG_INCLUDE_DIR}
 )
 
 target_link_libraries(inputsdrdaemonfec
 	${QT_LIBRARIES}
-	${LZ4_LIBRARIES}
+	${CM256_LIBRARIES}
 	${LIBNANOMSG_LIBRARIES}
 	sdrbase
 )

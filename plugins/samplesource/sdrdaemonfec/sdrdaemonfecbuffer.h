@@ -19,70 +19,100 @@
 
 #include <QString>
 #include <cstdlib>
+#include "cm256.h"
+#include "util/movingaverage.h"
 
-#include "util/CRC64.h"
+
+#define SDRDAEMONFEC_UDPSIZE 512            // UDP payload size
+#define SDRDAEMONFEC_NBORIGINALBLOCKS 128   // number of sample blocks per frame excluding FEC blocks
+#define SDRDAEMONFEC_NBDECODERSLOTS 4       // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
 class SDRdaemonFECBuffer
 {
 public:
-public:
 #pragma pack(push, 1)
-	struct MetaData
-	{
-        // critical data
-		uint32_t m_centerFrequency;   //!< center frequency in kHz
-		uint32_t m_sampleRate;        //!< sample rate in Hz
-		uint8_t  m_sampleBytes;       //!< MSB(4): indicators, LSB(4) number of bytes per sample
-		uint8_t  m_sampleBits;        //!< number of effective bits per sample
-		uint16_t m_blockSize;         //!< payload size
-		uint32_t m_nbSamples;         //!< number of samples in a hardware block
-        // end of critical data
-		uint16_t m_nbBlocks;          //!< number of hardware blocks in the frame
-		uint32_t m_nbBytes;           //!< total number of bytes in the frame
-		uint32_t m_tv_sec;            //!< seconds of timestamp at start time of frame processing
-		uint32_t m_tv_usec;           //!< microseconds of timestamp at start time of frame processing
-		uint64_t m_crc;               //!< 64 bit CRC of the above
+    struct MetaDataFEC
+    {
+        uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
+        uint32_t m_sampleRate;        //!<  8 sample rate in Hz
+        uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample
+        uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample
+        uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
+        uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
+        uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
+        uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
 
-		bool operator==(const MetaData& rhs)
-		{
-		    return (memcmp((const void *) this, (const void *) &rhs, 20) == 0); // Only the 20 first bytes are relevant (critical)
-		}
+        bool operator==(const MetaDataFEC& rhs)
+        {
+            return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
+        }
 
-		void init()
-		{
-			memset((void *) this, 0, sizeof(MetaData));
-		}
+        void init()
+        {
+            memset((void *) this, 0, sizeof(MetaDataFEC));
+            m_nbFECBlocks = -1;
+        }
+    };
 
-		void operator=(const MetaData& rhs)
-		{
-			memcpy((void *) this, (const void *) &rhs, sizeof(MetaData));
-		}
-	};
+    struct Sample
+    {
+        uint16_t i;
+        uint16_t q;
+    };
+
+    struct Header
+    {
+        uint16_t frameIndex;
+        uint8_t  blockIndex;
+        uint8_t  filler;
+    };
+
+    static const int samplesPerBlock = (SDRDAEMONFEC_UDPSIZE - sizeof(Header)) / sizeof(Sample);
+    static const int samplesPerBlockZero = samplesPerBlock - (sizeof(MetaDataFEC) / sizeof(Sample));
+
+    struct ProtectedBlock
+    {
+        Sample samples[samplesPerBlock];
+    };
+
+    struct SuperBlock
+    {
+        Header         header;
+        ProtectedBlock protectedBlock;
+    };
+
+    struct ProtectedBlockZero
+    {
+        MetaDataFEC m_metaData;
+        Sample      m_samples[samplesPerBlockZero];
+    };
+
+    struct SuperBlockZero
+    {
+        Header             header;
+        ProtectedBlockZero protectedBlock;
+    };
 #pragma pack(pop)
 
 	SDRdaemonFECBuffer(uint32_t throttlems);
 	~SDRdaemonFECBuffer();
 
-	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
+	// R/W operations
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
-	uint8_t *readData(int32_t length);
-	void updateBlockCounts(uint32_t nbBytesReceived);
+	uint8_t *readData(int32_t length);            //!< Read data from buffer
 
-	const MetaData& getCurrentMeta() const { return m_currentMeta; }
-	uint32_t getSampleRateStream() const { return m_sampleRateStream; }
-	uint32_t getSampleRate() const { return m_sampleRate; }
-	bool isSync() const { return m_sync; }
-	bool isSyncLocked() const { return m_syncLock; }
-	uint32_t getFrameSize() const { return m_frameSize; }
-	bool isLz4Compressed() const { return m_lz4; }
-	float getCompressionRatio() const { return (m_frameSize > 0 ? (float) m_lz4InSize / (float) m_frameSize : 1.0); }
-	uint32_t getLz4DataCRCOK() const { return m_nbLastLz4CRCOK; }
-	uint32_t getLz4SuccessfulDecodes() const { return m_nbLastLz4SuccessfulDecodes; }
-	float getBufferLengthInSecs() const { return m_bufferLenSec; }
-	void setAutoFollowRate(bool autoFollowRate) { m_autoFollowRate = autoFollowRate; }
-    void setAutoCorrBuffer(bool autoCorrBuffer) { m_autoCorrBuffer = autoCorrBuffer; }
-    void setResetIndexes() { m_resetIndexes = true; }
-    int32_t getRWBalanceCorrection() const { return m_balCorrection; }
+	// meta data
+	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
+    const MetaDataFEC& getOutputMeta() const { return m_outputMeta; }
+
+    // stats
+    int getCurNbBlocks() const { return m_curNbBlocks; }
+    int getCurNbRecovery() const { return m_curNbRecovery; }
+    float getAvgNbBlocks() const { return m_avgNbBlocks; }
+    float getAvgNbRecovery() const { return m_avgNbRecovery; }
+
+
+    float getBufferLengthInSecs() const { return m_bufferLenSec; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
      *  [-50:0] : write leads or read lags
@@ -90,9 +120,9 @@ public:
      */
     inline int32_t getBufferGauge() const
     {
-        if (m_rawSize)
+        if (m_framesNbBytes)
         {
-            int32_t val = ((m_writeIndex - m_readIndex) * 100) / (int32_t) m_rawSize;
+            int32_t val = (m_wrDeltaEstimate * 100) / (int32_t) m_framesNbBytes;
 
             if (val < -50) {
                 return val + 100; // read leads (positive)
@@ -115,63 +145,61 @@ public:
 	static const int m_rawBufferMinNbFrames; //!< Minimum number of frames for the length of buffer
 
 private:
-	void updateBufferSize(uint32_t sampleRate);
-	void updateLZ4Sizes(uint32_t frameSize);
-	void updateReadBufferSize(uint32_t length);
-	void writeDataLZ4(const char *array, uint32_t length);
-	void writeToRawBufferLZ4();
-	void writeToRawBufferUncompressed(const char *array, uint32_t length);
-    void resetIndexes();
+    static const int udpSize = SDRDAEMONFEC_UDPSIZE;
+    static const int nbOriginalBlocks = SDRDAEMONFEC_NBORIGINALBLOCKS;
+    static const int nbDecoderSlots = SDRDAEMONFEC_NBDECODERSLOTS;
 
-    static void printMeta(const QString& header, MetaData *metaData);
+#pragma pack(push, 1)
+    struct BufferBlockZero
+    {
+        Sample m_samples[samplesPerBlockZero];
+    };
+
+    struct BufferFrame
+    {
+        BufferBlockZero m_blockZero;
+        ProtectedBlock  m_blocks[nbOriginalBlocks - 1];
+    };
+#pragma pack(pop)
+
+    struct DecoderSlot
+    {
+        ProtectedBlockZero   m_blockZero;
+        ProtectedBlock*      m_originalBlockPtrs[nbOriginalBlocks];
+        ProtectedBlock       m_recoveryBlocks[nbOriginalBlocks]; // max size
+        cm256_block          m_cm256DescriptorBlocks[nbOriginalBlocks];
+        int                  m_blockCount; //!< total number of blocks received for this frame
+        int                  m_recoveryCount; //!< number of recovery blocks received
+        bool                 m_decoded; //!< true if decoded
+    };
+
+    MetaDataFEC m_currentMeta;                   //!< Stored current meta data
+    MetaDataFEC m_outputMeta;                    //!< Meta data corresponding to currently served frame
+    cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
+    DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
+    BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
+    int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
+    int                  m_decoderSlotHead;      //!< index of the current head frame slot in decoding slots
+    int                  m_frameHead;            //!< index of the current head frame sent
+    int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received
+    int                  m_curNbRecovery;        //!< (stats) instantaneous number of recovery blocks used
+    MovingAverage<int, int, 10> m_avgNbBlocks;   //!< (stats) average number of blocks received
+    MovingAverage<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
+    int                  m_readIndex;            //!< current byte read index in frames buffer
+    int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
-	uint32_t m_rawSize;            //!< Size of the raw samples buffer in bytes
-    uint8_t  *m_rawBuffer;         //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
-    uint32_t m_sampleRateStream;   //!< Current sample rate from the stream meta data
-    uint32_t m_sampleRate;         //!< Current actual sample rate in Hz
-	uint8_t  m_sampleBytes;        //!< Current number of bytes per I or Q sample
-	uint8_t  m_sampleBits;         //!< Current number of effective bits per sample
+    uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
+    uint32_t m_readSize;           //!< Read buffer size
 
-	bool m_sync;             //!< Meta data acquired
-	bool m_syncLock;         //!< Meta data expected (Stream synchronized)
-	bool m_lz4;              //!< Stream is compressed with LZ4
-	MetaData m_currentMeta;  //!< Stored current meta data
-	CRC64 m_crc64;           //!< CRC64 calculator
-    uint32_t m_nbBlocks;     //!< Number of UDP blocks received in the current frame
-    uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
-    uint64_t m_dataCRC;      //!< CRC64 of the data block
-	uint32_t m_inCount;      //!< Current position of uncompressed input
-    uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
-    uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
-    uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
-    uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
-    uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
-    float    m_bufferLenSec; //!< Raw buffer length in seconds
-    uint32_t m_nbLz4Decodes;
-    uint32_t m_nbLz4SuccessfulDecodes;
-    uint32_t m_nbLz4CRCOK;
-    uint32_t m_nbLastLz4SuccessfulDecodes;
-    uint32_t m_nbLastLz4CRCOK;
+    float    m_bufferLenSec;
 
-	int32_t  m_writeIndex;   //!< Current write position in the raw samples buffer
-	int32_t  m_readIndex;    //!< Current read position in the raw samples buffer
-	uint32_t m_readSize;     //!< Read buffer size
-	uint8_t  *m_readBuffer;  //!< Read buffer to hold samples when looping back to beginning of raw buffer
+    void initDecoderSlotsAddresses();
+    void initDecodeAllSlots();
+    void initReadIndex();
+    void initDecodeSlot(int slotIndex);
 
-    bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate
-    bool     m_autoCorrBuffer; //!< Auto correct buffer read / write balance (attempt to ...)
-    bool     m_skewTest;
-    bool     m_skewCorrection; //!< Do a skew rate correction at next meta data reception
-    bool     m_resetIndexes;   //!< Do a reset indexes at next meta data reception
-
-    int64_t  m_readCount;    //!< Number of bytes read for auto skew compensation
-    int64_t  m_writeCount;   //!< Number of bytes written for auto skew compensation
-    uint32_t m_nbCycles;     //!< Number of buffer cycles since start of auto skew compensation byte counting
-
-    uint32_t m_nbReads;      //!< Number of buffer reads since start of auto R/W balance correction period
-    int32_t  m_balCorrection; //!< R/W balance correction in number of samples
-    int32_t  m_balCorrLimit; //!< Correction absolute value limit in number of samples
+    static void printMeta(const QString& header, MetaDataFEC *metaData);
 };
 
 

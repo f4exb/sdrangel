@@ -133,60 +133,16 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 	{
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
-		processData();
+
+		if (m_udpReadBytes == SDRdaemonFECBuffer::udpSize) {
+		    processData();
+		}
 	}
 }
 
 void SDRdaemonFECUDPHandler::processData()
 {
-	if (m_udpReadBytes < 0)
-	{
-		qDebug() << "SDRdaemonThread::processData: read failed";
-	}
-	else if (m_udpReadBytes > 0)
-	{
-		m_sdrDaemonBuffer.updateBlockCounts(m_udpReadBytes);
-
-		if (m_sdrDaemonBuffer.readMeta(m_udpBuf, m_udpReadBytes))
-		{
-			const SDRdaemonFECBuffer::MetaData& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
-			bool change = false;
-			m_tv_sec = metaData.m_tv_sec;
-			m_tv_usec = metaData.m_tv_usec;
-
-			uint32_t sampleRate = m_sdrDaemonBuffer.getSampleRate();
-
-			if (m_samplerate != sampleRate)
-			{
-				setSamplerate(sampleRate);
-				m_samplerate = sampleRate;
-				change = true;
-			}
-
-			if (m_centerFrequency != metaData.m_centerFrequency)
-			{
-				m_centerFrequency = metaData.m_centerFrequency;
-				change = true;
-			}
-
-			if (change)
-			{
-				DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
-				m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
-				SDRdaemonFECInput::MsgReportSDRdaemonStreamData *report = SDRdaemonFECInput::MsgReportSDRdaemonStreamData::create(
-					m_sdrDaemonBuffer.getSampleRateStream(),
-					m_samplerate,
-					m_centerFrequency * 1000, // Frequency in Hz for the GUI
-					m_tv_sec,
-					m_tv_usec);
-				m_outputMessageQueueToGUI->push(report);
-			}
-		}
-		else if (m_sdrDaemonBuffer.isSync())
-		{
-			m_sdrDaemonBuffer.writeData(m_udpBuf, m_udpReadBytes);
-		}
-	}
+    m_sdrDaemonBuffer.writeData(m_udpBuf, m_udpReadBytes);
 }
 
 void SDRdaemonFECUDPHandler::setSamplerate(uint32_t samplerate)
@@ -223,13 +179,8 @@ void SDRdaemonFECUDPHandler::tick()
     {
         m_throttlems = throttlems;
         m_readLengthSamples = (m_sdrDaemonBuffer.getSampleRate() * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
-        m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
         m_readLength = m_readLengthSamples * SDRdaemonFECBuffer::m_iqSampleSize;
         m_throttleToggle = !m_throttleToggle;
-    }
-
-    if (m_autoCorrBuffer) {
-    	m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
 	// read samples directly feeding the SampleFifo (no callback)
@@ -243,17 +194,15 @@ void SDRdaemonFECUDPHandler::tick()
 	else
 	{
 		m_tickCount = 0;
-		SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming::create(
+		SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::create(
 			m_tv_sec,
 			m_tv_usec,
-			m_sdrDaemonBuffer.isSyncLocked(),
-			m_sdrDaemonBuffer.getFrameSize(),
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
-			m_sdrDaemonBuffer.isLz4Compressed(),
-			m_sdrDaemonBuffer.getCompressionRatio(),
-			m_sdrDaemonBuffer.getLz4DataCRCOK(),
-            m_sdrDaemonBuffer.getLz4SuccessfulDecodes(),
-            m_sdrDaemonBuffer.getBufferGauge());
+            m_sdrDaemonBuffer.getBufferGauge(),
+            m_sdrDaemonBuffer.getCurNbBlocks(),
+            m_sdrDaemonBuffer.getCurNbRecovery(),
+            m_sdrDaemonBuffer.getAvgNbBlocks(),
+            m_sdrDaemonBuffer.getAvgNbRecovery());
 		m_outputMessageQueueToGUI->push(report);
 	}
 }

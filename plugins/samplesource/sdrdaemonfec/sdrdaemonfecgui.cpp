@@ -303,24 +303,24 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 		updateWithStreamData();
 		return true;
 	}
-	else if (SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming::match(message))
+	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::match(message))
 	{
-		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_sec();
-		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).get_tv_usec();
-		m_syncLocked = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getSyncLock();
-		m_frameSize = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getFrameSize();
-		m_lz4 = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getLz4Compression();
+		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
+		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
+		m_syncLocked = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getSyncLock();
+		m_frameSize = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFrameSize();
+		m_lz4 = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4Compression();
 
 		if (m_lz4) {
-			m_compressionRatio = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getLz4CompressionRatio();
+			m_compressionRatio = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4CompressionRatio();
 		} else {
 			m_compressionRatio = 1.0;
 		}
 
-		m_nbLz4DataCRCOK = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getLz4DataCRCOK();
-		m_nbLz4SuccessfulDecodes = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getLz4SuccessfulDecodes();
-		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getBufferLengthInSecs();
-        m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamTiming&)message).getBufferGauge();
+		m_nbLz4DataCRCOK = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4DataCRCOK();
+		m_nbLz4SuccessfulDecodes = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4SuccessfulDecodes();
+		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
+        m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
 
 		updateWithStreamTime();
 		return true;

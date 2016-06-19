@@ -304,12 +304,12 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
-      <widget class="QToolButton" name="streamLocked">
+      <widget class="QToolButton" name="framesComplete">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Stream locked status i.e. synced with meta data</string>
+        <string>Frames complete</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -317,58 +317,6 @@
        <property name="icon">
         <iconset resource="../../../sdrbase/resources/res.qrc">
          <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="frameSizeText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Frame size in kB</string>
-       </property>
-       <property name="text">
-        <string>0000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream1">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sampleRateStreamText">
-       <property name="minimumSize">
-        <size>
-         <width>65</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Nominal sample rate from stream meta data (kS/s)</string>
-       </property>
-       <property name="text">
-        <string>00000.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -392,33 +340,7 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="lineStream3">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="skewRateText">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Sample rate skew from stream nominal rate (%)</string>
-       </property>
-       <property name="text">
-        <string>-00.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream4">
+      <widget class="Line" name="lineStream1">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -444,6 +366,74 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="lineStream2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="curNbBlocksText">
+       <property name="toolTip">
+        <string>Total number of blocks retrieved per frame</string>
+       </property>
+       <property name="text">
+        <string>128</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="avgNbBlocksText">
+       <property name="toolTip">
+        <string>Average number of blocks retrieved per frame</string>
+       </property>
+       <property name="text">
+        <string>000.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="curNbRecoveryText">
+       <property name="toolTip">
+        <string>Number of recovery blocks used per frame</string>
+       </property>
+       <property name="text">
+        <string>000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="avgNbRecoveryText">
+       <property name="toolTip">
+        <string>Average number of recovery blocks used per frame</string>
+       </property>
+       <property name="text">
+        <string>000.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -464,177 +454,6 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="lz4Layout">
-     <item>
-      <widget class="QToolButton" name="lz4Compressed">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Stream is compressed with LZ4</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/compressed.png</normaloff>:/compressed.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="compressionRatioText">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Stream comopression ratio (compressed / original)</string>
-       </property>
-       <property name="text">
-        <string>0.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineLz41">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="dataCRCOKText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Data CRC OK (%)</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineLz42">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lz4DecodesOKText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>LZ4 successful decodes (%)</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineLz43">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="bufferLenSecsText">
-       <property name="minimumSize">
-        <size>
-         <width>30</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Main buffer lenth in seconds</string>
-       </property>
-       <property name="text">
-        <string>00.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="resetIndexes">
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Reset buffer indexes</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="autoCorrBuffer">
-       <property name="toolTip">
-        <string>Auto maintain buffer read / write balance</string>
-       </property>
-       <property name="text">
-        <string>B</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="autoFollowRate">
-       <property name="toolTip">
-        <string>Auto follow actual stream sample rate</string>
-       </property>
-       <property name="text">
-        <string>R</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <widget class="Line" name="line">
