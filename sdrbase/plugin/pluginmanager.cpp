@@ -15,6 +15,7 @@
 #include <QDebug>
 
 const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemon";
+const QString PluginManager::m_sdrDaemonFECDeviceTypeID = "sdrangel.samplesource.sdrdaemonfec";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 
 PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
@@ -91,8 +92,10 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
     }
 
     SampleSourceDevice *sdrDaemonSSD0 = 0;
+    SampleSourceDevice *sdrDaemonFECSSD0 = 0;
     SampleSourceDevice *fileSourceSSD0 = 0;
     bool duplicateSDRDaemon = true;
+    bool duplicateSDRDaemonFEC = true;
     bool duplicateFileSource = true;
 
     for(int i = 0; i < m_sampleSourceDevices.count(); ++i)
@@ -104,6 +107,15 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
             }
             else if (m_sampleSourceDevices[i].m_sourceSequence == deviceUID) { // already there
                 duplicateSDRDaemon = false;
+            }
+        }
+        else if (m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonFECDeviceTypeID) // SDRdaemon with FEC
+        {
+            if (m_sampleSourceDevices[i].m_sourceSequence == 0) { // reference to device 0
+                sdrDaemonFECSSD0 = &m_sampleSourceDevices[i];
+            }
+            else if (m_sampleSourceDevices[i].m_sourceSequence == deviceUID) { // already there
+                duplicateSDRDaemonFEC = false;
             }
         }
         else if (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID) // File Source
@@ -130,6 +142,19 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
         );
     }
 
+    if (sdrDaemonFECSSD0 && duplicateSDRDaemonFEC) // append item for a new instance
+    {
+        m_sampleSourceDevices.append(
+            SampleSourceDevice(
+                sdrDaemonFECSSD0->m_plugin,
+                QString("SDRdaemonFEC[%1]").arg(deviceUID),
+                sdrDaemonFECSSD0->m_sourceId,
+                sdrDaemonFECSSD0->m_sourceSerial,
+                deviceUID
+            )
+        );
+    }
+
     if (fileSourceSSD0 && duplicateFileSource) // append item for a new instance
     {
         m_sampleSourceDevices.append(
@@ -151,7 +176,9 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID
 	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
 	    // For "local" devices show only ones that concern this device set
-	    if ((m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonDeviceTypeID) || (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID))
+	    if ((m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonDeviceTypeID)
+	            || (m_sampleSourceDevices[i].m_sourceId == m_sdrDaemonFECDeviceTypeID)
+	            || (m_sampleSourceDevices[i].m_sourceId == m_fileSourceDeviceTypeID))
 	    {
 	        if (deviceUID != m_sampleSourceDevices[i].m_sourceSequence) {
 	            continue;

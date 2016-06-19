@@ -25,7 +25,7 @@
 #include "sdrdaemonfecgui.h"
 
 const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
-	QString("SDRdaemon input"),
+	QString("SDRdaemon with FEC input"),
 	QString("2.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -57,7 +57,7 @@ PluginInterface::SampleSourceDevices SDRdaemonFECPlugin::enumSampleSources()
 
 	for(int i = 0; i < count; i++)
 	{
-		QString displayedName(QString("SDRdaemon[%1]").arg(i));
+		QString displayedName(QString("SDRdaemonFEC[%1]").arg(i));
 
 		result.append(SampleSourceDevice(displayedName,
 				m_deviceTypeID,

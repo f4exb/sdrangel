@@ -103,6 +103,7 @@ private:
 
 	// "Local" sample source device IDs
 	static const QString m_sdrDaemonDeviceTypeID;           //!< SDRdaemon source plugin ID
+    static const QString m_sdrDaemonFECDeviceTypeID;        //!< SDRdaemon with FEC source plugin ID
     static const QString m_fileSourceDeviceTypeID;          //!< FileSource source plugin ID
 
 //	QString m_sampleSourceId;
