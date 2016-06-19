@@ -49,14 +49,8 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_acquisition(false),
 	m_lastEngineState((DSPDeviceEngine::State)-1),
 	m_sampleRate(0),
-	m_sampleRateStream(0),
 	m_centerFrequency(0),
-	m_syncLocked(false),
-	m_frameSize(0),
-	m_lz4(false),
-	m_compressionRatio(1.0),
-	m_nbLz4DataCRCOK(0),
-	m_nbLz4SuccessfulDecodes(0),
+	m_framesComplete(false),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
 	m_samplesCount(0),
@@ -68,8 +62,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_dataPortEdited(false),
 	m_initSendConfiguration(false),
 	m_dcBlock(false),
-	m_iqCorrection(false),
-	m_autoFollowRate(false)
+	m_iqCorrection(false)
 {
 	m_sender = nn_socket(AF_SP, NN_PAIR);
 	assert(m_sender != -1);
@@ -134,7 +127,6 @@ void SDRdaemonFECGui::resetToDefaults()
 	m_controlPort = 9091;
 	m_dcBlock = false;
 	m_iqCorrection = false;
-	m_autoFollowRate = false;
 	displaySettings();
 }
 
@@ -153,8 +145,6 @@ QByteArray SDRdaemonFECGui::serialize() const
 	s.writeU32(2, uintval);
 	s.writeBool(3, m_dcBlock);
 	s.writeBool(4, m_iqCorrection);
-	s.writeBool(5, m_autoFollowRate);
-    s.writeBool(6, m_autoCorrBuffer);
 
 	uintval = ui->controlPort->text().toInt(&ok);
 
@@ -162,24 +152,24 @@ QByteArray SDRdaemonFECGui::serialize() const
 		uintval = 9091;
 	}
 
-	s.writeU32(7, uintval);
+	s.writeU32(5, uintval);
 
 	uint32_t confFrequency = ui->freq->text().toInt(&ok);
 
 	if (ok) {
-		s.writeU32(8, confFrequency);
+		s.writeU32(6, confFrequency);
 	}
 
-	s.writeU32(9,  ui->decim->currentIndex());
-	s.writeU32(10,  ui->fcPos->currentIndex());
+	s.writeU32(7,  ui->decim->currentIndex());
+	s.writeU32(8,  ui->fcPos->currentIndex());
 
 	uint32_t sampleRate = ui->sampleRate->text().toInt(&ok);
 
 	if (ok) {
-		s.writeU32(11, sampleRate);
+		s.writeU32(9, sampleRate);
 	}
 
-	s.writeString(12, ui->specificParms->text());
+	s.writeString(10, ui->specificParms->text());
 
 	return s.final();
 }
@@ -192,8 +182,6 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
 	quint16 dataPort;
 	bool dcBlock;
 	bool iqCorrection;
-	bool autoFollowRate;
-    bool autoCorrBuffer;
     uint32_t confFrequency;
     uint32_t confSampleRate;
     uint32_t confDecim;
@@ -221,9 +209,7 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
 
 		d.readBool(3, &dcBlock, false);
 		d.readBool(4, &iqCorrection, false);
-		d.readBool(5, &autoFollowRate, false);
-        d.readBool(6, &autoCorrBuffer, false);
-		d.readU32(7, &uintval, 9091);
+		d.readU32(5, &uintval, 9091);
 
 		if ((uintval > 1024) && (uintval < 65536)) {
 			m_controlPort = uintval;
@@ -231,11 +217,11 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
 			m_controlPort = 9091;
 		}
 
-		d.readU32(8, &confFrequency, 435000);
-		d.readU32(9, &confDecim, 3);
-		d.readU32(10, &confFcPos, 2);
-		d.readU32(11, &confSampleRate, 1000);
-		d.readString(12, &confSpecificParms, "");
+		d.readU32(6, &confFrequency, 435000);
+		d.readU32(7, &confDecim, 3);
+		d.readU32(8, &confFcPos, 2);
+		d.readU32(9, &confSampleRate, 1000);
+		d.readString(10, &confSpecificParms, "");
 
 		if ((address != m_address) || (dataPort != m_dataPort))
 		{
@@ -249,13 +235,6 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
 			m_dcBlock = dcBlock;
 			m_iqCorrection = iqCorrection;
 			configureAutoCorrections();
-		}
-
-        if ((m_autoFollowRate != autoFollowRate) || (m_autoCorrBuffer != autoCorrBuffer))
-        {
-			m_autoFollowRate = autoFollowRate;
-            m_autoCorrBuffer = autoCorrBuffer;
-            configureAutoFollowPolicy();
 		}
 
 		displaySettings();
@@ -295,7 +274,6 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonFECInput::MsgReportSDRdaemonStreamData::match(message))
 	{
-		m_sampleRateStream = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).getSampleRateStream();
 		m_sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).getSampleRate();
 		m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).getCenterFrequency();
 		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).get_tv_sec();
@@ -307,20 +285,13 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	{
 		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
-		m_syncLocked = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getSyncLock();
-		m_frameSize = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFrameSize();
-		m_lz4 = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4Compression();
-
-		if (m_lz4) {
-			m_compressionRatio = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4CompressionRatio();
-		} else {
-			m_compressionRatio = 1.0;
-		}
-
-		m_nbLz4DataCRCOK = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4DataCRCOK();
-		m_nbLz4SuccessfulDecodes = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getLz4SuccessfulDecodes();
+		m_framesComplete = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFramesComplete();
 		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
         m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
+        m_curNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getCurNbBlocks();
+        m_curNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getCurNbRecovery();
+        m_avgNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbBlocks();
+        m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
 
 		updateWithStreamTime();
 		return true;
@@ -382,8 +353,6 @@ void SDRdaemonFECGui::displaySettings()
 	ui->controlPort->setText(QString::number(m_controlPort));
 	ui->dcOffset->setChecked(m_dcBlock);
 	ui->iqImbalance->setChecked(m_iqCorrection);
-	ui->autoFollowRate->setChecked(m_autoFollowRate);
-    ui->autoCorrBuffer->setChecked(m_autoCorrBuffer);
 }
 
 void SDRdaemonFECGui::displayConfigurationParameters(uint32_t freq,
@@ -534,28 +503,6 @@ void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_autoFollowRate_toggled(bool checked)
-{
-	if (m_autoFollowRate != checked) {
-		m_autoFollowRate = checked;
-        configureAutoFollowPolicy();
-	}
-}
-
-void SDRdaemonFECGui::on_autoCorrBuffer_toggled(bool checked)
-{
-    if (m_autoCorrBuffer != checked) {
-        m_autoCorrBuffer = checked;
-        configureAutoFollowPolicy();
-    }
-}
-
-void SDRdaemonFECGui::on_resetIndexes_clicked(bool checked)
-{
-    SDRdaemonFECInput::MsgConfigureSDRdaemonResetIndexes* message = SDRdaemonFECInput::MsgConfigureSDRdaemonResetIndexes::create();
-    m_sampleSource->getInputMessageQueue()->push(message);
-}
-
 void SDRdaemonFECGui::on_freq_textEdited(const QString& arg1)
 {
 	ui->sendButton->setEnabled(true);
@@ -627,12 +574,6 @@ void SDRdaemonFECGui::configureAutoCorrections()
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonFECGui::configureAutoFollowPolicy()
-{
-    SDRdaemonFECInput::MsgConfigureSDRdaemonAutoFollowPolicy* message = SDRdaemonFECInput::MsgConfigureSDRdaemonAutoFollowPolicy::create(m_autoFollowRate, m_autoCorrBuffer);
-	m_sampleSource->getInputMessageQueue()->push(message);
-}
-
 void SDRdaemonFECGui::updateWithAcquisition()
 {
 }
@@ -640,13 +581,8 @@ void SDRdaemonFECGui::updateWithAcquisition()
 void SDRdaemonFECGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency / 1000);
-	QString s0 = QString::number(m_sampleRateStream/1000.0, 'f', 2);
-	ui->sampleRateStreamText->setText(tr("%1").arg(s0));
 	QString s1 = QString::number(m_sampleRate/1000.0, 'f', 3);
 	ui->sampleRateText->setText(tr("%1").arg(s1));
-	float skewPerCent = (float) ((m_sampleRate - m_sampleRateStream) * 100) / (float) m_sampleRateStream;
-	QString s2 = QString::number(skewPerCent, 'f', 2);
-	ui->skewRateText->setText(tr("%1").arg(s2));
 	updateWithStreamTime();
 }
 
@@ -663,31 +599,13 @@ void SDRdaemonFECGui::updateWithStreamTime()
     QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
-	if (m_syncLocked) {
-		ui->streamLocked->setStyleSheet("QToolButton { background-color : green; }");
+	if (m_framesComplete) {
+		ui->framesComplete->setStyleSheet("QToolButton { background-color : green; }");
 	} else {
-		ui->streamLocked->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+		ui->framesComplete->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
 
-	QString s = QString::number(m_frameSize / 1024.0, 'f', 0);
-	ui->frameSizeText->setText(tr("%1").arg(s));
-
-	if (m_lz4) {
-		ui->lz4Compressed->setStyleSheet("QToolButton { background-color : green; }");
-	} else {
-		ui->lz4Compressed->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-	}
-
-	s = QString::number(m_compressionRatio, 'f', 2);
-	ui->compressionRatioText->setText(tr("%1").arg(s));
-
-	s = QString::number(m_nbLz4DataCRCOK, 'f', 0);
-	ui->dataCRCOKText->setText(tr("%1").arg(s));
-
-	s = QString::number(m_nbLz4SuccessfulDecodes, 'f', 0);
-	ui->lz4DecodesOKText->setText(tr("%1").arg(s));
-
-	s = QString::number(m_bufferLengthInSecs, 'f', 1);
+	QString s = QString::number(m_bufferLengthInSecs, 'f', 1);
 	ui->bufferLenSecsText->setText(tr("%1").arg(s));
 
 	s = QString::number((m_bufferGauge < 0 ? -50 - m_bufferGauge : 50 - m_bufferGauge), 'f', 0);
@@ -695,6 +613,18 @@ void SDRdaemonFECGui::updateWithStreamTime()
 
     ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? 50 + m_bufferGauge : 0));
     ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : 50 - m_bufferGauge));
+
+    s = QString::number(m_curNbBlocks, 'f', 0);
+    ui->avgNbBlocksText->setText(tr("%1").arg(s));
+
+    s = QString::number(m_avgNbBlocks, 'f', 1);
+    ui->avgNbBlocksText->setText(tr("%1").arg(s));
+
+    s = QString::number(m_curNbRecovery, 'f', 0);
+    ui->avgNbRecoveryText->setText(tr("%1").arg(s));
+
+    s = QString::number(m_avgNbRecovery, 'f', 1);
+    ui->avgNbRecoveryText->setText(tr("%1").arg(s));
 }
 
 void SDRdaemonFECGui::updateStatus()

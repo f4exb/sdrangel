@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
+    <width>372</width>
     <height>261</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>372</width>
     <height>261</height>
    </size>
   </property>
@@ -374,6 +374,12 @@
      </item>
      <item>
       <widget class="QLabel" name="curNbBlocksText">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Total number of blocks retrieved per frame</string>
        </property>
@@ -391,6 +397,12 @@
      </item>
      <item>
       <widget class="QLabel" name="avgNbBlocksText">
+       <property name="minimumSize">
+        <size>
+         <width>35</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Average number of blocks retrieved per frame</string>
        </property>
@@ -408,6 +420,12 @@
      </item>
      <item>
       <widget class="QLabel" name="curNbRecoveryText">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Number of recovery blocks used per frame</string>
        </property>
@@ -425,11 +443,46 @@
      </item>
      <item>
       <widget class="QLabel" name="avgNbRecoveryText">
+       <property name="minimumSize">
+        <size>
+         <width>35</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Average number of recovery blocks used per frame</string>
        </property>
        <property name="text">
         <string>000.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="bufferLenSecsText">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>28</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Buffer length in seconds</string>
+       </property>
+       <property name="text">
+        <string>00.0</string>
        </property>
       </widget>
      </item>

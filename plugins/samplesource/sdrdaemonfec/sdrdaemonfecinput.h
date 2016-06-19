@@ -206,6 +206,7 @@ public:
 	public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
+		bool getFramesComplete() const { return m_framesComplete; }
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
         int32_t getBufferGauge() const { return m_bufferGauge; }
         int getCurNbBlocks() const { return m_curNbBlocks; }
@@ -235,6 +236,7 @@ public:
 	protected:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
+		bool     m_framesComplete;
 		float    m_bufferLenSec;
         int32_t  m_bufferGauge;
         int      m_curNbBlocks;
@@ -253,6 +255,7 @@ public:
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
+			m_framesComplete(curNbBlocks == SDRdaemonFECBuffer::nbOriginalBlocks),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
             m_curNbBlocks(curNbBlocks),

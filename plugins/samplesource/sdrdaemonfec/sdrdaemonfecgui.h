@@ -62,18 +62,16 @@ private:
     int m_lastEngineState;
 
 	int m_sampleRate;
-	int m_sampleRateStream;
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
-	bool m_syncLocked;
-	uint32_t m_frameSize;
-	bool m_lz4;
-	float m_compressionRatio;
-	uint32_t m_nbLz4DataCRCOK;
-	uint32_t m_nbLz4SuccessfulDecodes;
+	bool m_framesComplete;
 	float m_bufferLengthInSecs;
-
     int32_t m_bufferGauge;
+    int m_curNbBlocks;
+    int m_curNbRecovery;
+    float m_avgNbBlocks;
+    float m_avgNbRecovery;
+
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
@@ -88,8 +86,6 @@ private:
 
 	bool m_dcBlock;
 	bool m_iqCorrection;
-	bool m_autoFollowRate;
-    bool m_autoCorrBuffer;
 
 	void displaySettings();
 
@@ -102,7 +98,6 @@ private:
 	void displayTime();
 	void configureUDPLink();
 	void configureAutoCorrections();
-    void configureAutoFollowPolicy();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
@@ -115,9 +110,6 @@ private slots:
 	void on_applyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	void on_autoFollowRate_toggled(bool checked);
-    void on_autoCorrBuffer_toggled(bool checked);
-    void on_resetIndexes_clicked(bool checked);
 	void on_address_textEdited(const QString& arg1);
 	void on_dataPort_textEdited(const QString& arg1);
 	void on_controlPort_textEdited(const QString& arg1);
