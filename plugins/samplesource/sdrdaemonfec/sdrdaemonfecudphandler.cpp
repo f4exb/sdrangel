@@ -134,6 +134,9 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
 
+		qDebug() << "SDRdaemonUDPHandler::dataReadyRead:"
+		        << " m_udpReadBytes: " << m_udpReadBytes;
+
 		if (m_udpReadBytes == SDRdaemonFECBuffer::m_udpPayloadSize) {
 		    processData();
 		}
@@ -143,15 +146,39 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 void SDRdaemonFECUDPHandler::processData()
 {
     m_sdrDaemonBuffer.writeData(m_udpBuf, m_udpReadBytes);
-}
+    const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getOutputMeta();
 
-void SDRdaemonFECUDPHandler::setSamplerate(uint32_t samplerate)
-{
-	qDebug() << "SDRdaemonUDPHandler::setSamplerate:"
-			<< " new:" << samplerate
-			<< " old:" << m_samplerate;
+    bool change = false;
+    m_tv_sec = metaData.m_tv_sec;
+    m_tv_usec = metaData.m_tv_usec;
 
-	m_samplerate = samplerate;
+    qDebug() << "SDRdaemonUDPHandler::processData:"
+            << " m_samplerate: " << metaData.m_sampleRate
+            << " m_centerFrequency: " << metaData.m_centerFrequency;
+
+    if (m_centerFrequency != metaData.m_centerFrequency)
+    {
+        m_centerFrequency = metaData.m_centerFrequency;
+        change = true;
+    }
+
+    if (m_samplerate != metaData.m_sampleRate)
+    {
+        m_samplerate = metaData.m_sampleRate;
+        change = true;
+    }
+
+    if (change)
+    {
+        DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData::create(
+            m_samplerate,
+            m_centerFrequency * 1000, // Frequency in Hz for the GUI
+            m_tv_sec,
+            m_tv_usec);
+        m_outputMessageQueueToGUI->push(report);
+    }
 }
 
 void SDRdaemonFECUDPHandler::connectTimer(const QTimer* timer)

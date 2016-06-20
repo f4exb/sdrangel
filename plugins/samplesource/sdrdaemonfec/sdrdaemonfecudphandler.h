@@ -75,7 +75,6 @@ private:
     int m_rateDivider;
     bool m_autoCorrBuffer;
 
-	void setSamplerate(uint32_t samplerate);
 	void processData();
 
 private slots:

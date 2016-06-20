@@ -272,12 +272,12 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 		updateWithAcquisition();
 		return true;
 	}
-	else if (SDRdaemonFECInput::MsgReportSDRdaemonStreamData::match(message))
+	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData::match(message))
 	{
-		m_sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).getSampleRate();
-		m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).getCenterFrequency();
-		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).get_tv_sec();
-		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonStreamData&)message).get_tv_usec();
+		m_sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getSampleRate();
+		m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getCenterFrequency();
+		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_sec();
+		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_usec();
 		updateWithStreamData();
 		return true;
 	}

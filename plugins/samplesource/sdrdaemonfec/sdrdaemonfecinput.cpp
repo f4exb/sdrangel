@@ -34,7 +34,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr, Messa
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonAcquisition, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonStreamData, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming, Message)
 
 SDRdaemonFECInput::SDRdaemonFECInput(const QTimer& masterTimer, DeviceAPI *deviceAPI) :
