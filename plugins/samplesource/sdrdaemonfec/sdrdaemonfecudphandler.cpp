@@ -67,7 +67,7 @@ SDRdaemonFECUDPHandler::~SDRdaemonFECUDPHandler()
 
 void SDRdaemonFECUDPHandler::start()
 {
-	qDebug("SDRdaemonUDPHandler::start");
+	qDebug("SDRdaemonFECUDPHandler::start");
 
 	if (!m_dataSocket)
 	{
@@ -78,13 +78,13 @@ void SDRdaemonFECUDPHandler::start()
 	{
 		if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
-			qDebug("SDRdaemonUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+			qDebug("SDRdaemonFECUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
 			connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
 			m_dataConnected = true;
 		}
 		else
 		{
-			qWarning("SDRdaemonUDPHandler::start: cannot bind data port %d", m_dataPort);
+			qWarning("SDRdaemonFECUDPHandler::start: cannot bind data port %d", m_dataPort);
 			m_dataConnected = false;
 		}
 	}
@@ -97,7 +97,7 @@ void SDRdaemonFECUDPHandler::start()
 
 void SDRdaemonFECUDPHandler::stop()
 {
-	qDebug("SDRdaemonUDPHandler::stop");
+	qDebug("SDRdaemonFECUDPHandler::stop");
 
 	if (m_dataConnected) {
 		disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
@@ -113,12 +113,12 @@ void SDRdaemonFECUDPHandler::stop()
 
 void SDRdaemonFECUDPHandler::configureUDPLink(const QString& address, quint16 port)
 {
-	qDebug("SDRdaemonUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
+	qDebug("SDRdaemonFECUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
 	bool addressOK = m_dataAddress.setAddress(address);
 
 	if (!addressOK)
 	{
-		qWarning("SDRdaemonUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+		qWarning("SDRdaemonFECUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
 		m_dataAddress = QHostAddress::LocalHost;
 	}
 
@@ -134,9 +134,6 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
 
-		qDebug() << "SDRdaemonUDPHandler::dataReadyRead:"
-		        << " m_udpReadBytes: " << m_udpReadBytes;
-
 		if (m_udpReadBytes == SDRdaemonFECBuffer::m_udpPayloadSize) {
 		    processData();
 		}
@@ -151,10 +148,6 @@ void SDRdaemonFECUDPHandler::processData()
     bool change = false;
     m_tv_sec = metaData.m_tv_sec;
     m_tv_usec = metaData.m_tv_usec;
-
-    qDebug() << "SDRdaemonUDPHandler::processData:"
-            << " m_samplerate: " << metaData.m_sampleRate
-            << " m_centerFrequency: " << metaData.m_centerFrequency;
 
     if (m_centerFrequency != metaData.m_centerFrequency)
     {
@@ -183,7 +176,7 @@ void SDRdaemonFECUDPHandler::processData()
 
 void SDRdaemonFECUDPHandler::connectTimer(const QTimer* timer)
 {
-	qDebug() << "SDRdaemonUDPHandler::connectTimer";
+	qDebug() << "SDRdaemonFECUDPHandler::connectTimer";
 #ifdef USE_INTERNAL_TIMER
 #warning "Uses internal timer"
     m_timer = new QTimer();
@@ -226,7 +219,7 @@ void SDRdaemonFECUDPHandler::tick()
 			m_tv_usec,
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
             m_sdrDaemonBuffer.getBufferGauge(),
-            m_sdrDaemonBuffer.getCurNbBlocks() == SDRdaemonFECBuffer::m_nbOriginalBlocks,
+            SDRdaemonFECBuffer::m_nbOriginalBlocks,
             m_sdrDaemonBuffer.getCurNbBlocks(),
             m_sdrDaemonBuffer.getCurNbRecovery(),
             m_sdrDaemonBuffer.getAvgNbBlocks(),
