@@ -24,8 +24,6 @@
 
 const int SDRdaemonFECBuffer::m_sampleSize = 2;
 const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
-const int SDRdaemonFECBuffer::m_rawBufferLengthSeconds = 8; // should be even
-const int SDRdaemonFECBuffer::m_rawBufferMinNbFrames = 50;
 
 SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
         m_frameHead(0),
@@ -40,7 +38,7 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
 {
 	m_currentMeta.init();
 	m_outputMeta.init();
-	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame) * m_iqSampleSize;
+	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
 	m_wrDeltaEstimate = m_framesNbBytes / 2;
 }
 

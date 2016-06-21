@@ -25,7 +25,7 @@
 
 #define SDRDAEMONFEC_UDPSIZE 512            // UDP payload size
 #define SDRDAEMONFEC_NBORIGINALBLOCKS 128   // number of sample blocks per frame excluding FEC blocks
-#define SDRDAEMONFEC_NBDECODERSLOTS 4       // power of two sub multiple of uint16_t size. A too large one is superfluous.
+#define SDRDAEMONFEC_NBDECODERSLOTS 16      // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
 class SDRdaemonFECBuffer
 {
@@ -142,8 +142,6 @@ public:
     static const int m_nbOriginalBlocks = SDRDAEMONFEC_NBORIGINALBLOCKS;
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;
-	static const int m_rawBufferLengthSeconds;
-	static const int m_rawBufferMinNbFrames; //!< Minimum number of frames for the length of buffer
 
 private:
     static const int nbDecoderSlots = SDRDAEMONFEC_NBDECODERSLOTS;
