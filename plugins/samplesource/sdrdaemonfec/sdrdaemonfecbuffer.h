@@ -123,18 +123,12 @@ public:
         if (m_framesNbBytes)
         {
             int32_t val = (m_wrDeltaEstimate * 100) / (int32_t) m_framesNbBytes;
-
-            if (val < -50) {
-                return val + 100; // read leads (positive)
-            } else if (val < 50) {
-                return val;       // read leads (positive) or write leads (negative)
-            } else {
-                return val - 100; // write leads (negative)
-            }
+            // conversion: [-100:-50[ : read leads (+) / [-50:0[ : read lags (-) / [0:50[ : read leads (+) / [50:100{ : read lags (-)
+            return val < 0 ? -val - 50 : 50 -val;
         }
         else
         {
-            return -50; // default position
+            return 0; // default position
         }
     }
 

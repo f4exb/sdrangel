@@ -608,11 +608,11 @@ void SDRdaemonFECGui::updateWithStreamTime()
 	QString s = QString::number(m_bufferLengthInSecs, 'f', 1);
 	ui->bufferLenSecsText->setText(tr("%1").arg(s));
 
-	s = QString::number((m_bufferGauge < 0 ? -50 - m_bufferGauge : 50 - m_bufferGauge), 'f', 0);
+    s = QString::number(m_bufferGauge, 'f', 0);
 	ui->bufferRWBalanceText->setText(tr("%1").arg(s));
 
-    ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? 50 + m_bufferGauge : 0));
-    ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : 50 - m_bufferGauge));
+    ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? -m_bufferGauge : 0));
+    ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : m_bufferGauge));
 
     s = QString::number(m_curNbBlocks, 'f', 0);
     ui->avgNbBlocksText->setText(tr("%1").arg(s));
