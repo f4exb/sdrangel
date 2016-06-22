@@ -621,7 +621,7 @@ void SDRdaemonFECGui::updateWithStreamTime()
     ui->avgNbBlocksText->setText(tr("%1").arg(s));
 
     s = QString::number(m_curNbRecovery, 'f', 0);
-    ui->avgNbRecoveryText->setText(tr("%1").arg(s));
+    ui->curNbRecoveryText->setText(tr("%1").arg(s));
 
     s = QString::number(m_avgNbRecovery, 'f', 1);
     ui->avgNbRecoveryText->setText(tr("%1").arg(s));
