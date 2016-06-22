@@ -67,6 +67,7 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
         m_decoderSlots[i].m_blockCount = 0;
         m_decoderSlots[i].m_recoveryCount = 0;
         m_decoderSlots[i].m_decoded = false;
+        m_decoderSlots[i].m_metaRetrieved = false;
         m_decoderSlots[i].m_blockZero.m_metaData.init();
     }
 }
@@ -82,10 +83,10 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
 
-    if (m_decoderSlots[slotIndex].m_blockZero.m_metaData.m_nbFECBlocks < 0) { // meta data invalid
-        m_outputMeta = m_currentMeta; // use current meta
-    } else {
+    if (m_decoderSlots[slotIndex].m_metaRetrieved) { // meta data was retrieved in the current slot
         m_outputMeta = m_decoderSlots[slotIndex].m_blockZero.m_metaData;
+    } else {
+        m_outputMeta = m_currentMeta; // use stored current meta
     }
 
     // collect stats before voiding the slot
@@ -97,6 +98,7 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_blockCount = 0;
     m_decoderSlots[slotIndex].m_recoveryCount = 0;
     m_decoderSlots[slotIndex].m_decoded = false;
+    m_decoderSlots[slotIndex].m_metaRetrieved = false;
     m_decoderSlots[slotIndex].m_blockZero.m_metaData.init();
     memset((void *) m_decoderSlots[slotIndex].m_blockZero.m_samples, 0, samplesPerBlockZero * sizeof(Sample));
     memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * samplesPerBlock * sizeof(Sample));
@@ -171,6 +173,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         {
             SuperBlockZero *superBlockZero = (SuperBlockZero *) array;
             m_decoderSlots[decoderIndex].m_blockZero = superBlockZero->protectedBlock;
+            m_decoderSlots[decoderIndex].m_metaRetrieved = true;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_decoderSlots[decoderIndex].m_blockZero;
             memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
                     (const void *) m_decoderSlots[decoderIndex].m_blockZero.m_samples,
@@ -192,13 +195,13 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
     }
     else if (!m_decoderSlots[decoderIndex].m_decoded) // ready to decode
     {
-        if (m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks < 0) // block zero has not been received
+        if (m_decoderSlots[decoderIndex].m_metaRetrieved) // block zero with its meta data has been received
         {
-            m_paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks; // take last value for number of FEC blocks
+            m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
         }
         else
         {
-            m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
+            m_paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks; // take last stored value for number of FEC blocks
         }
 
         if (m_decoderSlots[decoderIndex].m_recoveryCount > 0) // recovery data used
@@ -223,6 +226,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                     {
                         ProtectedBlockZero *recoveredBlockZero = (ProtectedBlockZero *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
                         m_decoderSlots[decoderIndex].m_blockZero.m_metaData = recoveredBlockZero->m_metaData;
+                        m_decoderSlots[decoderIndex].m_metaRetrieved = true;
                         memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
                                 (const void *) recoveredBlockZero->m_samples,
                                 samplesPerBlockZero * sizeof(Sample));
@@ -237,7 +241,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 
         //printMeta("SDRdaemonFECBuffer::writeData", &m_decoderSlots[decoderIndex].m_blockZero.m_metaData);
 
-        if (m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks >= 0) // meta data valid
+        if (m_decoderSlots[decoderIndex].m_metaRetrieved) // meta data has been retrieved (direct or recovery)
         {
             if (!(m_decoderSlots[decoderIndex].m_blockZero.m_metaData == m_currentMeta))
             {

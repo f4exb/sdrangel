@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_SDRDAEMONFEC_SDRDAEMONFECBUFFER_H_
 
 #include <QString>
+#include <QDebug>
 #include <cstdlib>
 #include "cm256.h"
 #include "util/movingaverage.h"
@@ -50,7 +51,6 @@ public:
         void init()
         {
             memset((void *) this, 0, sizeof(MetaDataFEC));
-            m_nbFECBlocks = -1;
         }
     };
 
@@ -123,8 +123,11 @@ public:
         if (m_framesNbBytes)
         {
             int32_t val = (m_wrDeltaEstimate * 100) / (int32_t) m_framesNbBytes;
+            int32_t ret = val < 0 ? -val - 50 : 50 -val;
+            int32_t rp  = (m_readIndex * 100) / (int32_t) m_framesNbBytes;
+            //qDebug() << "getBufferLengthInSecs: " << val << ":" << ret << ":" << rp;
             // conversion: [-100:-50[ : read leads (+) / [-50:0[ : read lags (-) / [0:50[ : read leads (+) / [50:100{ : read lags (-)
-            return val < 0 ? -val - 50 : 50 -val;
+            return ret;
         }
         else
         {
@@ -162,6 +165,7 @@ private:
         int                  m_blockCount; //!< total number of blocks received for this frame
         int                  m_recoveryCount; //!< number of recovery blocks received
         bool                 m_decoded; //!< true if decoded
+        bool                 m_metaRetrieved;
     };
 
     MetaDataFEC m_currentMeta;                   //!< Stored current meta data
