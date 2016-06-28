@@ -65,6 +65,15 @@ extern "C" {
 #define DETACH_KERNEL_DRIVER
 #endif
 
+/**
+ * MacOS does not implement POSIX Thread Barriers
+ */
+#ifdef __APPLE__
+
+#include "../apple_compat.h"
+
+#endif
+
 /* Uncomment to enable the retrieval of Usage and Usage Page in
 hid_enumerate(). Warning, on platforms different from FreeBSD
 this is very invasive as it requires the detach

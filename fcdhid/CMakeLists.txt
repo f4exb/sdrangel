@@ -1,11 +1,13 @@
 project(fcdhid)
 
 set(fcdhid_SOURCES
+    ../apple_compat.c
 	hid-libusb.c
 	fcdhid.c
 )
 
 set(fcdhid_HEADERS
+    ../apple_compat.h
 	fcdhid.h
 	hid-libusb.h
 	hidapi.h
@@ -25,6 +27,7 @@ add_library(fcdhid SHARED
 
 target_link_libraries(fcdhid
 	${LIBUSB_LIBRARIES}
+    ${ICONV_LIBRARY}
 )
 
 install(TARGETS fcdhid DESTINATION lib)
