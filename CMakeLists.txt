@@ -61,10 +61,7 @@ ENDIF()
 
 # MacOS Compatibility
 if(APPLE)
-	find_package(ICONV)
-
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
-
+        find_package(ICONV)
 endif(APPLE)
 ##############################################################################
 
