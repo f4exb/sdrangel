@@ -182,7 +182,7 @@ void PhaseLock::process(const std::vector<Real>& samples_in, std::vector<Real>& 
 
         // Convert I/Q ratio to estimate of phase error.
         Real phase_err;
-        if (phasor_i > abs(phasor_q)) {
+        if (phasor_i > std::abs(phasor_q)) {
             // We are within +/- 45 degrees from lock.
             // Use simple linear approximation of arctan.
             phase_err = phasor_q / phasor_i;
@@ -278,7 +278,7 @@ void PhaseLock::process(const Real& sample_in, Real *samples_out)
 
 	// Convert I/Q ratio to estimate of phase error.
 	Real phase_err;
-	if (phasor_i > abs(phasor_q)) {
+    if (phasor_i > std::abs(phasor_q)) {
 		// We are within +/- 45 degrees from lock.
 		// Use simple linear approximation of arctan.
 		phase_err = phasor_q / phasor_i;

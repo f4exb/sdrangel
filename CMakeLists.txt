@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1.0)
 cmake_policy(SET CMP0043 OLD)
 
+# QT Framework
+set(CMAKE_PREFIX_PATH "/Applications/Qt/5.7/clang_64/lib/cmake")
+
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -56,6 +59,10 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
  SET(USE_SIMD "SSE2" CACHE STRING "Use SIMD instructions")
 ENDIF()
 
+# MacOS Compatibility
+if(APPLE)
+        find_package(ICONV)
+endif(APPLE)
 ##############################################################################
 
 #include(${QT_USE_FILE})

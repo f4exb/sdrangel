@@ -382,7 +382,7 @@ void PluginManager::loadPlugins(const QDir& dir)
 
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files))
 	{
-		if (fileName.endsWith(".so") || fileName.endsWith(".dll"))
+        if (fileName.endsWith(".so") || fileName.endsWith(".dll") || fileName.endsWith(".dylib"))
 		{
 			qDebug() << "PluginManager::loadPlugins: fileName: " << qPrintable(fileName);
 

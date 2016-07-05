@@ -150,8 +150,12 @@ bool AudioOutput::open(OpenMode mode)
 
 qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {
-	//qDebug("AudioOutput::readData: %lld", maxLen);
-	QMutexLocker mutexLocker(&m_mutex);
+    //qDebug("AudioOutput::readData: %lld", maxLen);
+
+    // @TODO: Study this mutex on OSX, for now deadlocks possible
+#ifndef __APPLE__
+    QMutexLocker mutexLocker(&m_mutex);
+#endif
 
 	unsigned int framesPerBuffer = maxLen / 4;
 
@@ -183,7 +187,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 		if (samples != framesPerBuffer)
 		{
-			//qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
+            qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
 		}
 
 		for (uint i = 0; i < samples; i++)
@@ -195,8 +199,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 			++src;
 			++dst;
 		}
-	}
-
+    }
 	// convert to int16
 
 	//std::vector<qint32>::const_iterator src = m_mixBuffer.begin(); // Valgrind optim
