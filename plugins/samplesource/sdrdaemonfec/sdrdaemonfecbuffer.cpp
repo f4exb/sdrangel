@@ -130,13 +130,15 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         {
             if (-frameDelta < nbDecoderSlots) // new frame head not too new
             {
+                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (1): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
                 m_decoderSlotHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 dataAvailable = true;
                 initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
             }
-            else if (-frameDelta <= sizeof(uint16_t) - nbDecoderSlots) // loss of sync start over
+            else if (-frameDelta <= 65536 - nbDecoderSlots) // loss of sync start over
             {
+                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (1)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
                 m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
                 decoderIndex = m_decoderSlotHead;
                 m_frameHead = frameIndex;
@@ -146,8 +148,9 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         }
         else
         {
-            if (frameDelta > sizeof(uint16_t) - nbDecoderSlots) // new frame head not too new
+            if (frameDelta > 65536 - nbDecoderSlots) // new frame head not too new
             {
+                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (2): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
                 m_decoderSlotHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 dataAvailable = true;
@@ -155,6 +158,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
             }
             else if (frameDelta >= nbDecoderSlots) // loss of sync start over
             {
+                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (2)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
                 m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
                 decoderIndex = m_decoderSlotHead;
                 m_frameHead = frameIndex;
@@ -227,6 +231,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                 for (int ir = 0; ir < m_decoderSlots[decoderIndex].m_recoveryCount; ir++) // recover lost blocks
                 {
                     int blockIndex = m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[nbOriginalBlocks+ir].Index;
+                    qDebug() << "SDRdaemonFECBuffer::writeData: recovered block #" << blockIndex;
 
                     if (blockIndex == 0)
                     {
