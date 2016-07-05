@@ -21,7 +21,7 @@ set(hackrf_FORMS
 )
 
 include_directories(
-	.
+        .
 	${CMAKE_CURRENT_BINARY_DIR}
 	${LIBHACKRF_INCLUDE_DIR}
 )

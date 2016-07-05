@@ -10,3 +10,4 @@ sdrangelove.supp
 .settings/
 *.cs
 *.pro.user
+.idea/*

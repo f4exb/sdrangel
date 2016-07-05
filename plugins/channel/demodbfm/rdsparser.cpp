@@ -526,15 +526,21 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 
 		if (af_1)
 		{
-			std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_1/1e3);
-			m_g0_af_updated = m_g0_af_updated || res.second;
+            // @TODO: Find proper header or STL on OSX
+#ifndef __APPLE__
+            std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_1/1e3);
+            m_g0_af_updated = m_g0_af_updated || res.second;
+#endif
 			no_af += 1;
 		}
 
 		if (af_2)
 		{
-			std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_2/1e3);
-			m_g0_af_updated = m_g0_af_updated || res.second;
+            // @TODO: Find proper header or STL on OSX
+#ifndef __APPLE__
+            std::pair<std::_Rb_tree_const_iterator<double>, bool> res = m_g0_alt_freq.insert(af_2/1e3);
+            m_g0_af_updated = m_g0_af_updated || res.second;
+#endif
 			no_af += 2;
 		}
 
