@@ -68,7 +68,6 @@ public:
     };
 
     static const int samplesPerBlock = (SDRDAEMONFEC_UDPSIZE - sizeof(Header)) / sizeof(Sample);
-    static const int samplesPerBlockZero = samplesPerBlock - (sizeof(MetaDataFEC) / sizeof(Sample));
 
     struct ProtectedBlock
     {
@@ -84,13 +83,7 @@ public:
     struct ProtectedBlockZero
     {
         MetaDataFEC m_metaData;
-        Sample      m_samples[samplesPerBlockZero];
-    };
-
-    struct SuperBlockZero
-    {
-        Header             header;
-        ProtectedBlockZero protectedBlock;
+        uint8_t     m_filler[SDRDAEMONFEC_UDPSIZE - sizeof(Header) - sizeof(MetaDataFEC)]; // complete for a 512 byte block
     };
 #pragma pack(pop)
 
@@ -144,14 +137,8 @@ private:
     static const int nbDecoderSlots = SDRDAEMONFEC_NBDECODERSLOTS;
 
 #pragma pack(push, 1)
-    struct BufferBlockZero
-    {
-        Sample m_samples[samplesPerBlockZero];
-    };
-
     struct BufferFrame
     {
-        BufferBlockZero m_blockZero;
         ProtectedBlock  m_blocks[m_nbOriginalBlocks - 1];
     };
 #pragma pack(pop)
@@ -174,7 +161,7 @@ private:
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
     int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
-    int                  m_decoderSlotHead;      //!< index of the current head frame slot in decoding slots
+    int                  m_decoderIndexHead;     //!< index of the current head frame slot in decoding slots
     int                  m_frameHead;            //!< index of the current head frame sent
     int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received
     int                  m_curNbRecovery;        //!< (stats) instantaneous number of recovery blocks used

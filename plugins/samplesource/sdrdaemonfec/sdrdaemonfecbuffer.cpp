@@ -27,7 +27,7 @@ const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
 
 SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
         m_frameHead(0),
-        m_decoderSlotHead(nbDecoderSlots/2),
+        m_decoderIndexHead(nbDecoderSlots/2),
         m_curNbBlocks(0),
         m_curNbRecovery(0),
         m_throttlemsNominal(throttlems),
@@ -76,7 +76,7 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
 
 void SDRdaemonFECBuffer::initReadIndex()
 {
-    m_readIndex = ((m_decoderSlotHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
+    m_readIndex = ((m_decoderIndexHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
     m_wrDeltaEstimate = m_framesNbBytes / 2;
 }
 
@@ -102,7 +102,6 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_decoded = false;
     m_decoderSlots[slotIndex].m_metaRetrieved = false;
     m_decoderSlots[slotIndex].m_blockZero.m_metaData.init();
-    memset((void *) m_decoderSlots[slotIndex].m_blockZero.m_samples, 0, samplesPerBlockZero * sizeof(Sample));
     memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * samplesPerBlock * sizeof(Sample));
 }
 
@@ -114,10 +113,16 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
     SuperBlock *superBlock = (SuperBlock *) array;
     int frameIndex = superBlock->header.frameIndex;
     int decoderIndex = frameIndex % nbDecoderSlots;
+    int blockIndex = superBlock->header.blockIndex;
+
+//    qDebug() << "SDRdaemonFECBuffer::writeData:"
+//            << " frameIndex: " << frameIndex
+//            << " decoderIndex: " << decoderIndex
+//            << " blockIndex: " << blockIndex;
 
     if (m_frameHead == -1) // initial state
     {
-        m_decoderSlotHead = decoderIndex; // new decoder slot head
+        m_decoderIndexHead = decoderIndex; // new decoder slot head
         m_frameHead = frameIndex;
         initReadIndex(); // reset read index
         initDecodeAllSlots(); // initialize all slots
@@ -131,7 +136,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
             if (-frameDelta < nbDecoderSlots) // new frame head not too new
             {
                 //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (1): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-                m_decoderSlotHead = decoderIndex; // new decoder slot head
+                m_decoderIndexHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 dataAvailable = true;
                 initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
@@ -139,8 +144,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
             else if (-frameDelta <= 65536 - nbDecoderSlots) // loss of sync start over
             {
                 //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (1)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-                m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
-                decoderIndex = m_decoderSlotHead;
+                m_decoderIndexHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 initReadIndex(); // reset read index
                 initDecodeAllSlots(); // re-initialize all slots
@@ -151,7 +155,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
             if (frameDelta > 65536 - nbDecoderSlots) // new frame head not too new
             {
                 //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (2): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-                m_decoderSlotHead = decoderIndex; // new decoder slot head
+                m_decoderIndexHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 dataAvailable = true;
                 initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
@@ -159,8 +163,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
             else if (frameDelta >= nbDecoderSlots) // loss of sync start over
             {
                 //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (2)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-                m_decoderSlotHead = frameIndex % nbDecoderSlots; // new decoder slot head
-                decoderIndex = m_decoderSlotHead;
+                m_decoderIndexHead = decoderIndex; // new decoder slot head
                 m_frameHead = frameIndex;
                 initReadIndex(); // reset read index
                 initDecodeAllSlots(); // re-initialize all slots
@@ -170,20 +173,16 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 
     // decoderIndex should now be correctly set
 
-    int blockIndex = superBlock->header.blockIndex;
     int blockHead = m_decoderSlots[decoderIndex].m_blockCount;
 
     if (blockHead < m_nbOriginalBlocks) // not enough blocks to decode -> store data
     {
         if (blockIndex == 0) // first block with meta
         {
-            SuperBlockZero *superBlockZero = (SuperBlockZero *) array;
-            m_decoderSlots[decoderIndex].m_blockZero = superBlockZero->protectedBlock;
-            m_decoderSlots[decoderIndex].m_metaRetrieved = true;
+            ProtectedBlockZero *blockZero = (ProtectedBlockZero *) &superBlock->protectedBlock;
+            m_decoderSlots[decoderIndex].m_blockZero = *blockZero;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_decoderSlots[decoderIndex].m_blockZero;
-            memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
-                    (const void *) m_decoderSlots[decoderIndex].m_blockZero.m_samples,
-                    samplesPerBlockZero * sizeof(Sample));
+            m_decoderSlots[decoderIndex].m_metaRetrieved = true;
         }
         else if (blockIndex < m_nbOriginalBlocks) // normal block
         {
@@ -238,9 +237,6 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                         ProtectedBlockZero *recoveredBlockZero = (ProtectedBlockZero *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
                         m_decoderSlots[decoderIndex].m_blockZero.m_metaData = recoveredBlockZero->m_metaData;
                         m_decoderSlots[decoderIndex].m_metaRetrieved = true;
-                        memcpy((void *) m_frames[decoderIndex].m_blockZero.m_samples,
-                                (const void *) recoveredBlockZero->m_samples,
-                                samplesPerBlockZero * sizeof(Sample));
                     }
                     else
                     {
