@@ -179,6 +179,7 @@ private:
     void initDecoderSlotsAddresses();
     void initDecodeAllSlots();
     void initReadIndex();
+    void checkSlotData(int slotIndex);
     void initDecodeSlot(int slotIndex);
 
     static void printMeta(const QString& header, MetaDataFEC *metaData);
