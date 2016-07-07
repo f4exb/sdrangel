@@ -79,12 +79,6 @@ public:
         Header         header;
         ProtectedBlock protectedBlock;
     };
-
-    struct ProtectedBlockZero
-    {
-        MetaDataFEC m_metaData;
-        uint8_t     m_filler[SDRDAEMONFEC_UDPSIZE - sizeof(Header) - sizeof(MetaDataFEC)]; // complete for a 512 byte block
-    };
 #pragma pack(pop)
 
 	SDRdaemonFECBuffer(uint32_t throttlems);
@@ -145,7 +139,7 @@ private:
 
     struct DecoderSlot
     {
-        ProtectedBlockZero   m_blockZero;
+        ProtectedBlock       m_blockZero;
         ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks]; // max size
         cm256_block          m_cm256DescriptorBlocks[m_nbOriginalBlocks];
         int                  m_blockCount; //!< total number of blocks received for this frame

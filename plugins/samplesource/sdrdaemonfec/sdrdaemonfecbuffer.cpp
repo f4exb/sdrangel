@@ -58,7 +58,8 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
         m_decoderSlots[i].m_recoveryCount = 0;
         m_decoderSlots[i].m_decoded = false;
         m_decoderSlots[i].m_metaRetrieved = false;
-        m_decoderSlots[i].m_blockZero.m_metaData.init();
+        MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[i].m_blockZero;
+        metaData->init();
     }
 }
 
@@ -79,18 +80,20 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
 
     if (m_decoderSlots[slotIndex].m_metaRetrieved) // meta data has been retrieved (direct or recovery)
     {
-        if (!(m_decoderSlots[slotIndex].m_blockZero.m_metaData == m_currentMeta))
+        MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
+
+        if (!(*metaData == m_currentMeta))
         {
-            int sampleRate =  m_decoderSlots[slotIndex].m_blockZero.m_metaData.m_sampleRate;
+            int sampleRate =  metaData->m_sampleRate;
 
             if (sampleRate > 0) {
                 m_bufferLenSec = (float) m_framesNbBytes / (float) sampleRate;
             }
 
-            printMeta("SDRdaemonFECBuffer::checkSlotData: new meta", &m_decoderSlots[slotIndex].m_blockZero.m_metaData); // print for change other than timestamp
+            printMeta("SDRdaemonFECBuffer::checkSlotData: new meta", metaData); // print for change other than timestamp
         }
 
-        m_currentMeta = m_decoderSlots[slotIndex].m_blockZero.m_metaData; // renew current meta
+        m_currentMeta = *metaData; // renew current meta
     }
 }
 
@@ -109,7 +112,8 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_recoveryCount = 0;
     m_decoderSlots[slotIndex].m_decoded = false;
     m_decoderSlots[slotIndex].m_metaRetrieved = false;
-    m_decoderSlots[slotIndex].m_blockZero.m_metaData.init();
+    MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
+    metaData->init();
     memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * sizeof(ProtectedBlock));
     memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 1, m_nbOriginalBlocks * sizeof(ProtectedBlock));
 }
@@ -149,8 +153,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         if (blockIndex == 0) // first block with meta
         {
             //qDebug() << "SDRdaemonFECBuffer::writeData(0): frameIndex: " << frameIndex << " blockIndex: " << blockIndex;
-            ProtectedBlockZero *blockZero = (ProtectedBlockZero *) &superBlock->protectedBlock;
-            m_decoderSlots[decoderIndex].m_blockZero = *blockZero;
+            m_decoderSlots[decoderIndex].m_blockZero = superBlock->protectedBlock;
             m_decoderSlots[decoderIndex].m_metaRetrieved = true;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) &m_decoderSlots[decoderIndex].m_blockZero;
         }
@@ -180,7 +183,8 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         {
             if (m_decoderSlots[decoderIndex].m_metaRetrieved) // block zero with its meta data has been received
             {
-                m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
+                MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[decoderIndex].m_blockZero;
+                m_paramsCM256.RecoveryCount = metaData->m_nbFECBlocks;
             }
             else
             {
@@ -301,8 +305,8 @@ void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
     {
         if (blockIndex == 0) // first block with meta
         {
-            ProtectedBlockZero *blockZero = (ProtectedBlockZero *) &superBlock->protectedBlock;
-            m_decoderSlots[decoderIndex].m_blockZero = *blockZero;
+//            ProtectedBlockZero *blockZero = (ProtectedBlockZero *) &superBlock->protectedBlock;
+//            m_decoderSlots[decoderIndex].m_blockZero = *blockZero;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockHead].Block = (void *) &m_decoderSlots[decoderIndex].m_blockZero;
             m_decoderSlots[decoderIndex].m_metaRetrieved = true;
         }
@@ -327,7 +331,7 @@ void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
         {
             if (m_decoderSlots[decoderIndex].m_metaRetrieved) // block zero with its meta data has been received
             {
-                m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
+//                m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_nbFECBlocks;
             }
             else
             {
@@ -356,8 +360,8 @@ void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
 
                     if (blockIndex == 0)
                     {
-                        ProtectedBlockZero *recoveredBlockZero = (ProtectedBlockZero *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
-                        printMeta("SDRdaemonFECBuffer::writeData: recovered meta", &recoveredBlockZero->m_metaData);
+//                        ProtectedBlockZero *recoveredBlockZero = (ProtectedBlockZero *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[ir];
+//                        printMeta("SDRdaemonFECBuffer::writeData: recovered meta", &recoveredBlockZero->m_metaData);
                         // FEC does not work
 //                        m_decoderSlots[decoderIndex].m_blockZero.m_metaData = recoveredBlockZero->m_metaData;
 //                        m_decoderSlots[decoderIndex].m_metaRetrieved = true;
@@ -377,22 +381,22 @@ void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
 
         //printMeta("SDRdaemonFECBuffer::writeData", &m_decoderSlots[decoderIndex].m_blockZero.m_metaData);
 
-        if (m_decoderSlots[decoderIndex].m_metaRetrieved) // meta data has been retrieved (direct or recovery)
-        {
-            if (!(m_decoderSlots[decoderIndex].m_blockZero.m_metaData == m_currentMeta))
-            {
-                int sampleRate =  m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_sampleRate;
-
-                if (sampleRate > 0) {
-                    m_bufferLenSec = (float) m_framesNbBytes / (float) sampleRate;
-                }
-
-                printMeta("SDRdaemonFECBuffer::writeData: new meta", &m_decoderSlots[decoderIndex].m_blockZero.m_metaData); // print for change other than timestamp
-            }
-
-            m_currentMeta = m_decoderSlots[decoderIndex].m_blockZero.m_metaData; // renew current meta
-        }
-
+//        if (m_decoderSlots[decoderIndex].m_metaRetrieved) // meta data has been retrieved (direct or recovery)
+//        {
+//            if (!(m_decoderSlots[decoderIndex].m_blockZero.m_metaData == m_currentMeta))
+//            {
+//                int sampleRate =  m_decoderSlots[decoderIndex].m_blockZero.m_metaData.m_sampleRate;
+//
+//                if (sampleRate > 0) {
+//                    m_bufferLenSec = (float) m_framesNbBytes / (float) sampleRate;
+//                }
+//
+//                printMeta("SDRdaemonFECBuffer::writeData: new meta", &m_decoderSlots[decoderIndex].m_blockZero.m_metaData); // print for change other than timestamp
+//            }
+//
+//            m_currentMeta = m_decoderSlots[decoderIndex].m_blockZero.m_metaData; // renew current meta
+//        }
+//
         m_decoderSlots[decoderIndex].m_decoded = true;
     }
 }
