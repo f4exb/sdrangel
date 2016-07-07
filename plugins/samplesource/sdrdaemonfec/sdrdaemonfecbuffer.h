@@ -97,7 +97,6 @@ public:
 
 	// meta data
 	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
-    const MetaDataFEC& getOutputMeta() const { return m_outputMeta; }
 
     // stats
     int getCurNbBlocks() const { return m_curNbBlocks; }
@@ -157,7 +156,6 @@ private:
     };
 
     MetaDataFEC m_currentMeta;                   //!< Stored current meta data
-    MetaDataFEC m_outputMeta;                    //!< Meta data corresponding to currently served frame
     cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer

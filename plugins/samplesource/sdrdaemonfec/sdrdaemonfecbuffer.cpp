@@ -37,7 +37,6 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
         m_bufferLenSec(0.0f)
 {
 	m_currentMeta.init();
-	m_outputMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
 	m_wrDeltaEstimate = m_framesNbBytes / 2;
     m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
@@ -110,12 +109,6 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
 {
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
-
-    if (m_decoderSlots[slotIndex].m_metaRetrieved) { // meta data was retrieved in the current slot
-        m_outputMeta = m_decoderSlots[slotIndex].m_blockZero.m_metaData;
-    } else {
-        m_outputMeta = m_currentMeta; // use stored current meta
-    }
 
     // collect stats before voiding the slot
     m_curNbBlocks = m_decoderSlots[slotIndex].m_blockCount;
