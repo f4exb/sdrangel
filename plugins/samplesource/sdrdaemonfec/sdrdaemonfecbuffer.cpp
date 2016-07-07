@@ -50,17 +50,6 @@ SDRdaemonFECBuffer::~SDRdaemonFECBuffer()
 	}
 }
 
-void SDRdaemonFECBuffer::initDecoderSlotsAddresses()
-{
-    for (int i = 0; i < nbDecoderSlots; i++)
-    {
-        for (int j = 0; j < m_nbOriginalBlocks - 1; j++)
-        {
-            m_decoderSlots[i].m_originalBlockPtrs[j] = &m_frames[i].m_blocks[j];
-        }
-    }
-}
-
 void SDRdaemonFECBuffer::initDecodeAllSlots()
 {
     for (int i = 0; i < nbDecoderSlots; i++)

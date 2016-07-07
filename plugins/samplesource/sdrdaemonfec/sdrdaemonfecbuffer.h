@@ -146,7 +146,6 @@ private:
     struct DecoderSlot
     {
         ProtectedBlockZero   m_blockZero;
-        ProtectedBlock*      m_originalBlockPtrs[m_nbOriginalBlocks];
         ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks]; // max size
         cm256_block          m_cm256DescriptorBlocks[m_nbOriginalBlocks];
         int                  m_blockCount; //!< total number of blocks received for this frame
@@ -175,7 +174,6 @@ private:
 
     float    m_bufferLenSec;
 
-    void initDecoderSlotsAddresses();
     void initDecodeAllSlots();
     void initReadIndex();
     void checkSlotData(int slotIndex);
