@@ -142,10 +142,13 @@ private:
         ProtectedBlock       m_blockZero;
         ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks]; // max size
         cm256_block          m_cm256DescriptorBlocks[m_nbOriginalBlocks];
-        int                  m_blockCount; //!< total number of blocks received for this frame
-        int                  m_recoveryCount; //!< number of recovery blocks received
-        bool                 m_decoded; //!< true if decoded
-        bool                 m_metaRetrieved;
+        int                  m_totalCount;         //!< total number of blocks received for this frame
+        int                  m_blockCount;         //!< number of blocks usable for decode in this frame
+        int                  m_originalCount;      //!< number of original blocks received
+        int                  m_recoveryStartIndex; //!< block number start of recovery blocks
+        int                  m_recoveryCount;      //!< number of recovery blocks received
+        bool                 m_decoded;            //!< true if decoded
+        bool                 m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
     };
 
     MetaDataFEC m_currentMeta;                   //!< Stored current meta data
