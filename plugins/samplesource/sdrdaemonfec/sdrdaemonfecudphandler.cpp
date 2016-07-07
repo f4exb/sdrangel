@@ -143,7 +143,7 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 void SDRdaemonFECUDPHandler::processData()
 {
     m_sdrDaemonBuffer.writeData(m_udpBuf, m_udpReadBytes);
-    const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getOutputMeta();
+    const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 
     bool change = false;
     m_tv_sec = metaData.m_tv_sec;
