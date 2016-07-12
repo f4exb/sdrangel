@@ -49,7 +49,7 @@ SDRdaemonFECUDPHandler::SDRdaemonFECUDPHandler(SampleFifo *sampleFifo, MessageQu
     m_readLength(0),
     m_throttleToggle(false),
     m_rateDivider(1000/SDRDAEMONFEC_THROTTLE_MS),
-	m_autoCorrBuffer(false)
+	m_autoCorrBuffer(true)
 {
     m_udpBuf = new char[SDRdaemonFECBuffer::m_udpPayloadSize];
 }

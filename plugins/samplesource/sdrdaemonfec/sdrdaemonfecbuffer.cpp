@@ -74,6 +74,9 @@ void SDRdaemonFECBuffer::initReadIndex()
 
 void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
 {
+    int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
+    m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
+
     if (!m_decoderSlots[slotIndex].m_decoded)
     //if (m_decoderSlots[slotIndex].m_blockCount < m_nbOriginalBlocks)
     {
@@ -91,7 +94,7 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
             int sampleRate =  metaData->m_sampleRate;
 
             if (sampleRate > 0) {
-                m_bufferLenSec = (float) m_framesNbBytes / (float) sampleRate;
+                m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * m_iqSampleSize);
             }
 
             printMeta("SDRdaemonFECBuffer::checkSlotData: new meta", metaData); // print for change other than timestamp
@@ -103,9 +106,6 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
 
 void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
 {
-    int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
-    m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
-
     // collect stats before voiding the slot
     m_curNbBlocks = m_decoderSlots[slotIndex].m_blockCount;
     m_curNbRecovery = m_decoderSlots[slotIndex].m_recoveryCount;

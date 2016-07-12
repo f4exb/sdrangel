@@ -98,8 +98,8 @@ public:
     float getAvgNbBlocks() const { return m_avgNbBlocks; }
     float getAvgNbRecovery() const { return m_avgNbRecovery; }
 
-
     float getBufferLengthInSecs() const { return m_bufferLenSec; }
+    int32_t getRWBalanceCorrection(int throttlems) const { return m_balCorrection; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
      *  [-50:0] : write leads or read lags
@@ -168,11 +168,13 @@ private:
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
     uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
     uint32_t m_readSize;           //!< Read buffer size
+    int32_t  m_balCorrection;      //!< R/W balance correction in number of samples per nominal tick period
 
     float    m_bufferLenSec;
 
     void initDecodeAllSlots();
     void initReadIndex();
+    void rwSkewEstimate(int slotIndex);
     void checkSlotData(int slotIndex);
     void initDecodeSlot(int slotIndex);
 
