@@ -127,8 +127,6 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
 
 void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 {
-    assert(length == m_udpPayloadSize);
-
     SuperBlock *superBlock = (SuperBlock *) array;
     int frameIndex = superBlock->header.frameIndex;
     int decoderIndex = frameIndex % nbDecoderSlots;

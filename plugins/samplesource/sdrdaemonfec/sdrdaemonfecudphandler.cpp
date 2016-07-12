@@ -129,13 +129,16 @@ void SDRdaemonFECUDPHandler::configureUDPLink(const QString& address, quint16 po
 
 void SDRdaemonFECUDPHandler::dataReadyRead()
 {
+    m_udpReadBytes = 0;
+
 	while (m_dataSocket->hasPendingDatagrams())
 	{
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
-		m_udpReadBytes = m_dataSocket->readDatagram(m_udpBuf, pendingDataSize, &m_remoteAddress, 0);
+		m_udpReadBytes += m_dataSocket->readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
 
 		if (m_udpReadBytes == SDRdaemonFECBuffer::m_udpPayloadSize) {
 		    processData();
+		    m_udpReadBytes = 0;
 		}
 	}
 }
