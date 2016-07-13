@@ -34,11 +34,16 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
         m_readIndex(0),
         m_readBuffer(0),
         m_readSize(0),
-        m_bufferLenSec(0.0f)
+        m_bufferLenSec(0.0f),
+		m_nbReads(0),
+		m_nbWrites(0),
+		m_balCorrection(0),
+	    m_balCorrLimit(0)
 {
 	m_currentMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
 	m_wrDeltaEstimate = m_framesNbBytes / 2;
+	m_readNbBytes = 1;
     m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
     m_paramsCM256.OriginalCount = m_nbOriginalBlocks;  // never changes
 }
@@ -70,12 +75,62 @@ void SDRdaemonFECBuffer::initReadIndex()
 {
     m_readIndex = ((m_decoderIndexHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
     m_wrDeltaEstimate = m_framesNbBytes / 2;
+    m_nbReads = 0;
+    m_nbWrites = 0;
+}
+
+void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
+{
+	if (m_nbReads >= 40) // check every ~1s as tick is ~50ms
+	{
+		int targetPivotSlot = (slotIndex + (nbDecoderSlots/2))  % nbDecoderSlots; // slot at half buffer opposite of current write slot
+		int targetPivotIndex = targetPivotSlot * sizeof(BufferFrame);             // buffer index corresponding to start of above slot
+		int normalizedReadIndex = (m_readIndex < targetPivotIndex ? m_readIndex + nbDecoderSlots * sizeof(BufferFrame) :  m_readIndex)
+				- (targetPivotSlot * sizeof(BufferFrame)); // normalize read index so it is positive and zero at start of pivot slot
+		int dBytes;
+        int rwDelta = (m_nbReads * m_readNbBytes) - (m_nbWrites * sizeof(BufferFrame));
+
+		if (normalizedReadIndex < (nbDecoderSlots/ 2) * sizeof(BufferFrame)) // read leads
+		{
+			dBytes = - normalizedReadIndex - rwDelta;
+		}
+		else // read lags
+		{
+			dBytes = (nbDecoderSlots * sizeof(BufferFrame)) - normalizedReadIndex - rwDelta;
+		}
+
+        m_balCorrection = (m_balCorrection / 4) + (dBytes / (int) (m_iqSampleSize * m_nbReads)); // correction is in number of samples. Alpha = 0.25
+
+        if (m_balCorrection < -m_balCorrLimit) {
+            m_balCorrection = -m_balCorrLimit;
+        } else if (m_balCorrection > m_balCorrLimit) {
+            m_balCorrection = m_balCorrLimit;
+        }
+
+        float rwRatio = (float) (m_nbWrites * sizeof(BufferFrame)) / (float)  (m_nbReads * m_readNbBytes);
+
+        qDebug() << "SDRdaemonFECBuffer::rwCorrectionEstimate: "
+                << " m_nbReads: " << m_nbReads
+                << " m_nbWrites: " << m_nbWrites
+                << " rwDelta: " << rwDelta
+                << " targetPivotSlot: " << targetPivotSlot
+                << " targetPivotIndex: " << targetPivotIndex
+                << " m_readIndex: " << m_readIndex
+                << " normalizedReadIndex: " << normalizedReadIndex
+                << " dBytes: " << dBytes
+                << " m_balCorrection: " << m_balCorrection;
+
+		//m_balCorrection = dBytes / (int) (m_iqSampleSize * m_nbReads);
+	    m_nbReads = 0;
+	    m_nbWrites = 0;
+	}
 }
 
 void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
 {
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
+    m_nbWrites++;
 
     if (!m_decoderSlots[slotIndex].m_decoded)
     //if (m_decoderSlots[slotIndex].m_blockCount < m_nbOriginalBlocks)
@@ -95,6 +150,8 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
 
             if (sampleRate > 0) {
                 m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * m_iqSampleSize);
+                m_balCorrLimit = sampleRate / 1000; // +/- 1 ms correction max per read
+                m_readNbBytes = (sampleRate * m_iqSampleSize) / 20;
             }
 
             printMeta("SDRdaemonFECBuffer::checkSlotData: new meta", metaData); // print for change other than timestamp
@@ -143,6 +200,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
         m_decoderIndexHead = decoderIndex; // new decoder slot head
         m_frameHead = frameIndex;          // new frame head
         checkSlotData(decoderIndex);       // check slot before re-init
+        rwCorrectionEstimate(decoderIndex);
         initDecodeSlot(decoderIndex);      // collect stats and re-initialize current slot
     }
 
@@ -416,6 +474,8 @@ uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
 {
     uint8_t *buffer = (uint8_t *) m_frames;
     uint32_t readIndex = m_readIndex;
+
+    m_nbReads++;
 
     if (m_readIndex + length < m_framesNbBytes) // ends before buffer bound
     {

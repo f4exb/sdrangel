@@ -202,11 +202,16 @@ void SDRdaemonFECUDPHandler::tick()
     {
         m_throttlems = throttlems;
         m_readLengthSamples = (m_sdrDaemonBuffer.getCurrentMeta().m_sampleRate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
-        m_readLength = m_readLengthSamples * SDRdaemonFECBuffer::m_iqSampleSize;
         m_throttleToggle = !m_throttleToggle;
     }
 
-	// read samples directly feeding the SampleFifo (no callback)
+    if (m_autoCorrBuffer) {
+        m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
+    }
+
+    m_readLength = m_readLengthSamples * SDRdaemonFECBuffer::m_iqSampleSize;
+
+    // read samples directly feeding the SampleFifo (no callback)
     m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
     m_samplesCount += m_readLengthSamples;
 
@@ -227,7 +232,7 @@ void SDRdaemonFECUDPHandler::tick()
             m_sdrDaemonBuffer.getCurNbRecovery(),
             m_sdrDaemonBuffer.getAvgNbBlocks(),
             m_sdrDaemonBuffer.getAvgNbRecovery());
-		m_outputMessageQueueToGUI->push(report);
+            m_outputMessageQueueToGUI->push(report);
 	}
 }
 

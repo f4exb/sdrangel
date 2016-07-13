@@ -24,9 +24,9 @@
 #include "util/movingaverage.h"
 
 
-#define SDRDAEMONFEC_UDPSIZE 512            // UDP payload size
-#define SDRDAEMONFEC_NBORIGINALBLOCKS 128   // number of sample blocks per frame excluding FEC blocks
-#define SDRDAEMONFEC_NBDECODERSLOTS 16      // power of two sub multiple of uint16_t size. A too large one is superfluous.
+#define SDRDAEMONFEC_UDPSIZE 512               // UDP payload size
+#define SDRDAEMONFEC_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
+#define SDRDAEMONFEC_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
 class SDRdaemonFECBuffer
 {
@@ -99,7 +99,7 @@ public:
     float getAvgNbRecovery() const { return m_avgNbRecovery; }
 
     float getBufferLengthInSecs() const { return m_bufferLenSec; }
-    int32_t getRWBalanceCorrection(int throttlems) const { return m_balCorrection; }
+    int32_t getRWBalanceCorrection() const { return m_balCorrection; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
      *  [-50:0] : write leads or read lags
@@ -164,17 +164,22 @@ private:
     MovingAverage<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
     int                  m_readIndex;            //!< current byte read index in frames buffer
     int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
+    int                  m_readNbBytes;          //!< Nominal number of bytes per read (50ms)
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
     uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
     uint32_t m_readSize;           //!< Read buffer size
-    int32_t  m_balCorrection;      //!< R/W balance correction in number of samples per nominal tick period
 
     float    m_bufferLenSec;
 
+    int      m_nbReads;       //!< Number of buffer reads since start of auto R/W balance correction period
+    int      m_nbWrites;      //!< Number of buffer writes since start of auto R/W balance correction period
+    int      m_balCorrection; //!< R/W balance correction in number of samples
+    int      m_balCorrLimit;  //!< Correction absolute value limit in number of samples
+
     void initDecodeAllSlots();
     void initReadIndex();
-    void rwSkewEstimate(int slotIndex);
+    void rwCorrectionEstimate(int slotIndex);
     void checkSlotData(int slotIndex);
     void initDecodeSlot(int slotIndex);
 
