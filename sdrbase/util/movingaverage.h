@@ -19,8 +19,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef GR_SDRDAEMONFEC_LIB_MOVINGAVERAGE_H_
-#define GR_SDRDAEMONFEC_LIB_MOVINGAVERAGE_H_
+#ifndef _UTIL_MOVINGAVERAGE_H_
+#define _UTIL_MOVINGAVERAGE_H_
 
 #include <algorithm>
 
