@@ -165,6 +165,7 @@ private:
     int                  m_readIndex;            //!< current byte read index in frames buffer
     int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
     int                  m_readNbBytes;          //!< Nominal number of bytes per read (50ms)
+    int                  m_blockIndex;           //!< Stored block index for verification
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
     uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
