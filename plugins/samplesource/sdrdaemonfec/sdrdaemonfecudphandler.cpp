@@ -227,9 +227,9 @@ void SDRdaemonFECUDPHandler::tick()
 			m_tv_usec,
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
             m_sdrDaemonBuffer.getBufferGauge(),
-            SDRdaemonFECBuffer::m_nbOriginalBlocks,
-            m_sdrDaemonBuffer.getCurNbBlocks(),
-            m_sdrDaemonBuffer.getCurNbRecovery(),
+            m_sdrDaemonBuffer.allFramesDecoded(),
+            m_sdrDaemonBuffer.getMinNbBlocks(),
+            m_sdrDaemonBuffer.getMaxNbRecovery(),
             m_sdrDaemonBuffer.getAvgNbBlocks(),
             m_sdrDaemonBuffer.getAvgNbRecovery());
             m_outputMessageQueueToGUI->push(report);

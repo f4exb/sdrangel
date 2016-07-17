@@ -29,7 +29,10 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
         m_frameHead(0),
         m_decoderIndexHead(nbDecoderSlots/2),
         m_curNbBlocks(0),
+        m_minNbBlocks(256),
         m_curNbRecovery(0),
+        m_maxNbRecovery(0),
+        m_framesDecoded(true),
         m_throttlemsNominal(throttlems),
         m_readIndex(0),
         m_readBuffer(0),
@@ -79,11 +82,23 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
 void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
 {
     // collect stats before voiding the slot
+
     m_curNbBlocks = m_decoderSlots[slotIndex].m_blockCount;
     m_curNbRecovery = m_decoderSlots[slotIndex].m_recoveryCount;
     m_avgNbBlocks(m_curNbBlocks);
     m_avgNbRecovery(m_curNbRecovery);
+    m_framesDecoded = m_framesDecoded && m_decoderSlots[slotIndex].m_decoded;
+
+    if (m_curNbBlocks < m_minNbBlocks) {
+        m_minNbBlocks = m_curNbBlocks;
+    }
+
+    if (m_curNbRecovery > m_maxNbRecovery) {
+        m_maxNbRecovery = m_curNbRecovery;
+    }
+
     // void the slot
+
     m_decoderSlots[slotIndex].m_blockCount = 0;
     m_decoderSlots[slotIndex].m_originalCount = 0;
     m_decoderSlots[slotIndex].m_recoveryCount = 0;

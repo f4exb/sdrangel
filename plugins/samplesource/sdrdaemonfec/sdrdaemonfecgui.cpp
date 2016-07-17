@@ -50,7 +50,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_lastEngineState((DSPDeviceEngine::State)-1),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_framesComplete(false),
+	m_allFramesDecoded(false),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
 	m_samplesCount(0),
@@ -285,11 +285,11 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	{
 		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
-		m_framesComplete = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFramesComplete();
+		m_allFramesDecoded = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAllFramesDecoded();
 		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
         m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
-        m_curNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getCurNbBlocks();
-        m_curNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getCurNbRecovery();
+        m_minNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbBlocks();
+        m_maxNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getmAXNbRecovery();
         m_avgNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbBlocks();
         m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
 
@@ -581,8 +581,6 @@ void SDRdaemonFECGui::updateWithAcquisition()
 void SDRdaemonFECGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency / 1000);
-	QString s1 = QString::number(m_sampleRate/1000.0, 'f', 3);
-	ui->sampleRateText->setText(tr("%1").arg(s1));
 	updateWithStreamTime();
 }
 
@@ -599,10 +597,10 @@ void SDRdaemonFECGui::updateWithStreamTime()
     QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
-	if (m_framesComplete) {
-		ui->framesComplete->setStyleSheet("QToolButton { background-color : green; }");
+	if (m_allFramesDecoded) {
+		ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
 	} else {
-		ui->framesComplete->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+		ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
 
 	QString s = QString::number(m_bufferLengthInSecs, 'f', 1);
@@ -614,13 +612,13 @@ void SDRdaemonFECGui::updateWithStreamTime()
     ui->bufferGaugeNegative->setValue((m_bufferGauge < 0 ? -m_bufferGauge : 0));
     ui->bufferGaugePositive->setValue((m_bufferGauge < 0 ? 0 : m_bufferGauge));
 
-    s = QString::number(m_curNbBlocks, 'f', 0);
-    ui->avgNbBlocksText->setText(tr("%1").arg(s));
+    s = QString::number(m_minNbBlocks, 'f', 0);
+    ui->minNbBlocksText->setText(tr("%1").arg(s));
 
     s = QString::number(m_avgNbBlocks, 'f', 1);
     ui->avgNbBlocksText->setText(tr("%1").arg(s));
 
-    s = QString::number(m_curNbRecovery, 'f', 0);
+    s = QString::number(m_maxNbRecovery, 'f', 0);
     ui->curNbRecoveryText->setText(tr("%1").arg(s));
 
     s = QString::number(m_avgNbRecovery, 'f', 1);

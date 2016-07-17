@@ -93,10 +93,32 @@ public:
 	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
 
     // stats
-    int getCurNbBlocks() const { return m_curNbBlocks; }
+
+	int getCurNbBlocks() const { return m_curNbBlocks; }
     int getCurNbRecovery() const { return m_curNbRecovery; }
     float getAvgNbBlocks() const { return m_avgNbBlocks; }
     float getAvgNbRecovery() const { return m_avgNbRecovery; }
+
+    int getMinNbBlocks()
+    {
+        int minNbBlocks = m_minNbBlocks;
+        m_minNbBlocks = 256;
+        return minNbBlocks;
+    }
+
+    int getMaxNbRecovery()
+    {
+        int maxNbRecovery = m_maxNbRecovery;
+        m_maxNbRecovery = 0;
+        return maxNbRecovery;
+    }
+
+    bool allFramesDecoded()
+    {
+        bool framesDecoded = m_framesDecoded;
+        m_framesDecoded = true;
+        return framesDecoded;
+    }
 
     float getBufferLengthInSecs() const { return m_bufferLenSec; }
     int32_t getRWBalanceCorrection() const { return m_balCorrection; }
@@ -157,9 +179,12 @@ private:
     int                  m_decoderIndexHead;     //!< index of the current head frame slot in decoding slots
     int                  m_frameHead;            //!< index of the current head frame sent
     int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received
+    int                  m_minNbBlocks;          //!< (stats) minimum number of blocks received since last poll
     int                  m_curNbRecovery;        //!< (stats) instantaneous number of recovery blocks used
+    int                  m_maxNbRecovery;        //!< (stats) maximum number of recovery blocks used since last poll
     MovingAverage<int, int, 10> m_avgNbBlocks;   //!< (stats) average number of blocks received
     MovingAverage<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
+    bool                 m_framesDecoded;        //!< [stats] true if all frames were decoded since last poll
     int                  m_readIndex;            //!< current byte read index in frames buffer
     int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
     int                  m_readNbBytes;          //!< Nominal number of bytes per read (50ms)

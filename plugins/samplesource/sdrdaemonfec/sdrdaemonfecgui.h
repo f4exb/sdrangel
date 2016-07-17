@@ -64,11 +64,11 @@ private:
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
-	bool m_framesComplete;
+	bool m_allFramesDecoded;
 	float m_bufferLengthInSecs;
     int32_t m_bufferGauge;
-    int m_curNbBlocks;
-    int m_curNbRecovery;
+    int m_minNbBlocks;
+    int m_maxNbRecovery;
     float m_avgNbBlocks;
     float m_avgNbRecovery;
 

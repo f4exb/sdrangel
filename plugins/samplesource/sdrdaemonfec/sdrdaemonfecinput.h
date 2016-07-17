@@ -166,11 +166,11 @@ public:
 	public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
-		bool getFramesComplete() const { return m_framesComplete; }
+		bool getAllFramesDecoded() const { return m_allFramesDecoded; }
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
         int32_t getBufferGauge() const { return m_bufferGauge; }
-        int getCurNbBlocks() const { return m_curNbBlocks; }
-        int getCurNbRecovery() const { return m_curNbRecovery; }
+        int getMinNbBlocks() const { return m_minNbBlocks; }
+        int getmAXNbRecovery() const { return m_maxNbRecovery; }
         float getAvgNbBlocks() const { return m_avgNbBlocks; }
         float getAvgNbRecovery() const { return m_avgNbRecovery; }
 
@@ -178,7 +178,7 @@ public:
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
-                int nbOriginalBlocks,
+                bool allFramesDecoded,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
@@ -188,7 +188,7 @@ public:
 					tv_usec,
 					bufferLenSec,
                     bufferGauge,
-                    nbOriginalBlocks,
+                    allFramesDecoded,
                     curNbBlocks,
                     curNbRecovery,
                     avgNbBlocks,
@@ -198,11 +198,11 @@ public:
 	protected:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
-		bool     m_framesComplete;
+		bool     m_allFramesDecoded;
 		float    m_bufferLenSec;
         int32_t  m_bufferGauge;
-        int      m_curNbBlocks;
-        int      m_curNbRecovery;
+        int      m_minNbBlocks;
+        int      m_maxNbRecovery;
         float    m_avgNbBlocks;
         float    m_avgNbRecovery;
 
@@ -210,7 +210,7 @@ public:
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
-                int nbOriginalBlocks,
+                bool allFramesDecoded,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
@@ -218,11 +218,11 @@ public:
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
-			m_framesComplete(curNbBlocks == nbOriginalBlocks),
+			m_allFramesDecoded(allFramesDecoded),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
-            m_curNbBlocks(curNbBlocks),
-            m_curNbRecovery(curNbRecovery),
+            m_minNbBlocks(curNbBlocks),
+            m_maxNbRecovery(curNbRecovery),
             m_avgNbBlocks(avgNbBlocks),
             m_avgNbRecovery(avgNbRecovery)
 		{ }

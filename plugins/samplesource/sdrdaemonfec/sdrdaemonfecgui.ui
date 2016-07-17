@@ -304,7 +304,7 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
-      <widget class="QToolButton" name="framesComplete">
+      <widget class="QToolButton" name="allFramesDecoded">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -321,59 +321,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="sampleRateText">
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Actual sample rate (kS/s)</string>
-       </property>
-       <property name="text">
-        <string>00000.000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream1">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="bufferRWBalanceText">
-       <property name="minimumSize">
-        <size>
-         <width>22</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Main buffer read/write positions unbalance (%): positive means read leads</string>
-       </property>
-       <property name="text">
-        <string>-00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="curNbBlocksText">
+      <widget class="QLabel" name="minNbBlocksText">
        <property name="minimumSize">
         <size>
          <width>24</width>
@@ -381,10 +329,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Total number of blocks retrieved per frame</string>
+        <string>Minimum number of blocks retrieved per frame</string>
        </property>
        <property name="text">
-        <string>128</string>
+        <string>000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -433,7 +381,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Number of recovery blocks used per frame</string>
+        <string>Maximum number of recovery blocks used per frame</string>
        </property>
        <property name="text">
         <string>000</string>
@@ -495,6 +443,32 @@
        </property>
        <property name="text">
         <string>00.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="bufferRWBalanceText">
+       <property name="minimumSize">
+        <size>
+         <width>22</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Main buffer read/write positions unbalance (%): positive means read leads</string>
+       </property>
+       <property name="text">
+        <string>-00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
