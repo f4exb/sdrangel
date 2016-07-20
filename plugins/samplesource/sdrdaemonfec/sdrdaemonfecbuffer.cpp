@@ -271,7 +271,16 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                         m_decoderSlots[decoderIndex].m_metaRetrieved = true;
                     }
 
-                    qDebug() << "SDRdaemonFECBuffer::writeData: recovered block #" << blockIndex;
+                    qDebug() << "SDRdaemonFECBuffer::writeData: recovered block #" << blockIndex
+                            << " i[0]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[0].i
+                            << " q[0]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[0].q
+                            << " i[1]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[1].i
+                            << " q[1]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[1].q
+                            << " i[2]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[2].i
+                            << " q[2]: " << m_decoderSlots[decoderIndex].m_recoveryBlocks[ir].samples[2].q;
+
+
+
                 } // restore missing blocks
             } // CM256 decode
         } // revovery

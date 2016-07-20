@@ -56,8 +56,8 @@ public:
 
     struct Sample
     {
-        uint16_t i;
-        uint16_t q;
+        int16_t i;
+        int16_t q;
     };
 
     struct Header
