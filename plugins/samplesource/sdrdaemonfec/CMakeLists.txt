@@ -42,13 +42,13 @@ add_library(inputsdrdaemonfec SHARED
 )
 
 target_include_directories(inputsdrdaemonfec PUBLIC
-    ${CM256_INCLUDE_DIR}
+    ${CM256CC_INCLUDE_DIR}
     ${LIBNANOMSG_INCLUDE_DIR}
 )
 
 target_link_libraries(inputsdrdaemonfec
 	${QT_LIBRARIES}
-	${CM256_LIBRARIES}
+	${CM256CC_LIBRARIES}
 	${LIBNANOMSG_LIBRARIES}
 	sdrbase
 )

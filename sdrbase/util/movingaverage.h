@@ -56,6 +56,4 @@ class MovingAverage
     Total m_total;
 };
 
-
-
 #endif /* GR_SDRDAEMONFEC_LIB_MOVINGAVERAGE_H_ */

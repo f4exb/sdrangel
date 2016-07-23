@@ -50,9 +50,9 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
     m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
     m_paramsCM256.OriginalCount = m_nbOriginalBlocks;  // never changes
 
-    if (cm256_init()) {
+    if (!m_cm256.isInitialized()) {
         m_cm256_OK = false;
-       qDebug() << "SDRdaemonFECBuffer::SDRdaemonFECBuffer: cannot initialize CM256 library";
+        qDebug() << "SDRdaemonFECBuffer::SDRdaemonFECBuffer: cannot initialize CM256 library";
     } else {
         m_cm256_OK = true;
     }
@@ -249,7 +249,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                 m_paramsCM256.RecoveryCount = m_decoderSlots[decoderIndex].m_recoveryCount;
             }
 
-            if (cm256_decode(m_paramsCM256, m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks)) // CM256 decode
+            if (m_cm256.cm256_decode(m_paramsCM256, m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks)) // CM256 decode
             {
                 qDebug() << "SDRdaemonFECBuffer::writeData: decode CM256 error:"
                         << " m_originalCount: " << m_decoderSlots[decoderIndex].m_originalCount

@@ -163,7 +163,7 @@ private:
     {
         ProtectedBlock       m_originalBlocks[m_nbOriginalBlocks];        //!< Original blocks retrieved directly or by later FEC
         ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
-        cm256_block          m_cm256DescriptorBlocks[m_nbOriginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
+        CM256::cm256_block   m_cm256DescriptorBlocks[m_nbOriginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
         int                  m_blockCount;         //!< number of blocks received for this frame
         int                  m_originalCount;      //!< number of original blocks received
         int                  m_recoveryCount;      //!< number of recovery blocks received
@@ -172,7 +172,7 @@ private:
     };
 
     MetaDataFEC          m_currentMeta;          //!< Stored current meta data
-    cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
+    CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
     int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
@@ -199,6 +199,7 @@ private:
     int      m_nbWrites;      //!< Number of buffer writes since start of auto R/W balance correction period
     int      m_balCorrection; //!< R/W balance correction in number of samples
     int      m_balCorrLimit;  //!< Correction absolute value limit in number of samples
+    CM256    m_cm256;         //!< CM256 library
     bool     m_cm256_OK;      //!< CM256 library initialized OK
 
     void initDecodeAllSlots();
