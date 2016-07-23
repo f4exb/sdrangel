@@ -421,6 +421,7 @@ void SDRdaemonFECGui::sendConfiguration()
 	    int rc = nn_connect(m_sender, addrstrng.c_str());
 
 	    if (rc < 0) {
+            qDebug() << "SDRdaemonGui::sendConfiguration: connexion to " << addrstrng.c_str() << " failed";
 	    	QMessageBox::information(this, tr("Message"), tr("Cannot connect to remote control port"));
 	    } else {
 	    	qDebug() << "SDRdaemonGui::sendConfiguration: connexion to " << addrstrng.c_str() << " successful";
