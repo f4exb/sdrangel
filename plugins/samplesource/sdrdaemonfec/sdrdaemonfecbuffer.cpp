@@ -19,6 +19,9 @@
 #include <cstring>
 #include <cmath>
 #include <lz4.h>
+#include <boost/crc.hpp>
+#include <boost/cstdint.hpp>
+
 #include "sdrdaemonfecbuffer.h"
 
 
@@ -282,8 +285,20 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 
                     if (blockIndex == 0) // first block with meta
                     {
-                        printMeta("SDRdaemonFECBuffer::writeData: recovered meta", (MetaDataFEC *) recoveredBlock);
-//                        m_decoderSlots[decoderIndex].m_metaRetrieved = true;
+                        MetaDataFEC *metaData = (MetaDataFEC *) recoveredBlock;
+
+                        boost::crc_32_type crc32;
+                        crc32.process_bytes(metaData, 20);
+
+                        if (crc32.checksum() == metaData->m_crc32)
+                        {
+                            m_decoderSlots[decoderIndex].m_metaRetrieved = true;
+                            printMeta("SDRdaemonFECBuffer::writeData: recovered meta", metaData);
+                        }
+                        else
+                        {
+                            qDebug() << "SDRdaemonFECBuffer::writeData: recovered meta: invalid CRC32";
+                        }
                     }
 
                     m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = *recoveredBlock;

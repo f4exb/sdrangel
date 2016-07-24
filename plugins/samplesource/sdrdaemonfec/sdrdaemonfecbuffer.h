@@ -42,6 +42,7 @@ public:
         uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
         uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
         uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
+        uint32_t m_crc32;             //!< 24 CRC32 of the above
 
         bool operator==(const MetaDataFEC& rhs)
         {
