@@ -221,17 +221,26 @@ void SDRdaemonFECUDPHandler::tick()
 	}
 	else
 	{
+	    int framesDecodingStatus;
+	    int minNbBlocks = m_sdrDaemonBuffer.getMinNbBlocks();
+	    int nbOriginalBlocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbOriginalBlocks;
+	    int nbFECblocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbFECBlocks;
 		m_tickCount = 0;
+
+		framesDecodingStatus = (minNbBlocks < nbOriginalBlocks ? 0 : (minNbBlocks < nbOriginalBlocks + nbFECblocks ? 1 : 2));
+
 		SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::create(
 			m_tv_sec,
 			m_tv_usec,
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
             m_sdrDaemonBuffer.getBufferGauge(),
-            m_sdrDaemonBuffer.allFramesDecoded(),
-            m_sdrDaemonBuffer.getMinNbBlocks(),
+            framesDecodingStatus,
+            minNbBlocks,
             m_sdrDaemonBuffer.getMaxNbRecovery(),
             m_sdrDaemonBuffer.getAvgNbBlocks(),
-            m_sdrDaemonBuffer.getAvgNbRecovery());
+            m_sdrDaemonBuffer.getAvgNbRecovery(),
+            nbOriginalBlocks,
+            nbFECblocks);
             m_outputMessageQueueToGUI->push(report);
 	}
 }

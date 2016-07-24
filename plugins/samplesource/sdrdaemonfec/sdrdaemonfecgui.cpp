@@ -50,7 +50,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_lastEngineState((DSPDeviceEngine::State)-1),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_allFramesDecoded(false),
+	m_framesDecodingStatus(0),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
 	m_samplesCount(0),
@@ -62,7 +62,9 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_dataPortEdited(false),
 	m_initSendConfiguration(false),
 	m_dcBlock(false),
-	m_iqCorrection(false)
+	m_iqCorrection(false),
+	m_nbOriginalBlocks(128),
+	m_nbFECBlocks(0)
 {
 	m_sender = nn_socket(AF_SP, NN_PAIR);
 	assert(m_sender != -1);
@@ -285,13 +287,15 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	{
 		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
-		m_allFramesDecoded = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAllFramesDecoded();
+		m_framesDecodingStatus = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFramesDecodingStatus();
 		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
         m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
         m_minNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbBlocks();
         m_maxNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getmAXNbRecovery();
         m_avgNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbBlocks();
         m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
+        m_nbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbOriginalBlocksPerFrame();
+        m_nbFECBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbFECBlocksPerFrame();
 
 		updateWithStreamTime();
 		return true;
@@ -598,8 +602,10 @@ void SDRdaemonFECGui::updateWithStreamTime()
     QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
-	if (m_allFramesDecoded) {
+	if (m_framesDecodingStatus == 2) {
 		ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
+	} else if (m_framesDecodingStatus == 1) {
+	    ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
 	} else {
 		ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
@@ -624,6 +630,10 @@ void SDRdaemonFECGui::updateWithStreamTime()
 
     s = QString::number(m_avgNbRecovery, 'f', 1);
     ui->avgNbRecoveryText->setText(tr("%1").arg(s));
+
+    s = QString::number(m_nbOriginalBlocks + m_nbFECBlocks, 'f', 0);
+    QString s1 = QString::number(m_nbFECBlocks, 'f', 0);
+    ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
 }
 
 void SDRdaemonFECGui::updateStatus()

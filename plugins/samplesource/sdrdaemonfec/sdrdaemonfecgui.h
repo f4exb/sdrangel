@@ -64,13 +64,15 @@ private:
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
-	bool m_allFramesDecoded;
+	int m_framesDecodingStatus;
 	float m_bufferLengthInSecs;
     int32_t m_bufferGauge;
     int m_minNbBlocks;
     int m_maxNbRecovery;
     float m_avgNbBlocks;
     float m_avgNbRecovery;
+    int m_nbOriginalBlocks;
+    int m_nbFECBlocks;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;

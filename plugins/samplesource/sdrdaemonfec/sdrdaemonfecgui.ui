@@ -309,7 +309,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Frames complete</string>
+        <string>Frames status: green = all original received, blue = some recovered by FEC, none = some lost</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -443,6 +443,32 @@
        </property>
        <property name="text">
         <string>00.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="lineStream7">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nominalNbBlocksText">
+       <property name="minimumSize">
+        <size>
+         <width>52</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Nominal number of blocks per frame: Total/FEC</string>
+       </property>
+       <property name="text">
+        <string>000/000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

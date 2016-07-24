@@ -166,65 +166,77 @@ public:
 	public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
-		bool getAllFramesDecoded() const { return m_allFramesDecoded; }
+		int getFramesDecodingStatus() const { return m_framesDecodingStatus; }
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
         int32_t getBufferGauge() const { return m_bufferGauge; }
         int getMinNbBlocks() const { return m_minNbBlocks; }
         int getmAXNbRecovery() const { return m_maxNbRecovery; }
         float getAvgNbBlocks() const { return m_avgNbBlocks; }
         float getAvgNbRecovery() const { return m_avgNbRecovery; }
+        int getNbOriginalBlocksPerFrame() const { return m_nbOriginalBlocksPerFrame; }
+        int getNbFECBlocksPerFrame() const { return m_nbFECBlocksPerFrame; }
 
 		static MsgReportSDRdaemonFECStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
-                bool allFramesDecoded,
+                int framesDecodingStatus,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
-                float avgNbRecovery)
+                float avgNbRecovery,
+                int nbOriginalBlocksPerFrame,
+                int nbFECBlocksPerFrame)
 		{
 			return new MsgReportSDRdaemonFECStreamTiming(tv_sec,
 					tv_usec,
 					bufferLenSec,
                     bufferGauge,
-                    allFramesDecoded,
+                    framesDecodingStatus,
                     curNbBlocks,
                     curNbRecovery,
                     avgNbBlocks,
-                    avgNbRecovery);
+                    avgNbRecovery,
+                    nbOriginalBlocksPerFrame,
+                    nbFECBlocksPerFrame);
 		}
 
 	protected:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
-		bool     m_allFramesDecoded;
+		int      m_framesDecodingStatus;
 		float    m_bufferLenSec;
         int32_t  m_bufferGauge;
         int      m_minNbBlocks;
         int      m_maxNbRecovery;
         float    m_avgNbBlocks;
         float    m_avgNbRecovery;
+        int      m_nbOriginalBlocksPerFrame;
+        int      m_nbFECBlocksPerFrame;
 
 		MsgReportSDRdaemonFECStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
-                bool allFramesDecoded,
+                int framesDecodingStatus,
                 int curNbBlocks,
                 int curNbRecovery,
                 float avgNbBlocks,
-                float avgNbRecovery) :
+                float avgNbRecovery,
+                int nbOriginalBlocksPerFrame,
+                int nbFECBlocksPerFrame) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
-			m_allFramesDecoded(allFramesDecoded),
+			m_framesDecodingStatus(framesDecodingStatus),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
             m_minNbBlocks(curNbBlocks),
             m_maxNbRecovery(curNbRecovery),
             m_avgNbBlocks(avgNbBlocks),
-            m_avgNbRecovery(avgNbRecovery)
+            m_avgNbRecovery(avgNbRecovery),
+            m_nbOriginalBlocksPerFrame(nbOriginalBlocksPerFrame),
+            m_nbFECBlocksPerFrame(nbFECBlocksPerFrame)
 		{ }
 	};
 
