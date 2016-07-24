@@ -283,7 +283,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                     if (blockIndex == 0) // first block with meta
                     {
                         printMeta("SDRdaemonFECBuffer::writeData: recovered meta", (MetaDataFEC *) recoveredBlock);
-                        m_decoderSlots[decoderIndex].m_metaRetrieved = true;
+//                        m_decoderSlots[decoderIndex].m_metaRetrieved = true;
                     }
 
                     m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = *recoveredBlock;
