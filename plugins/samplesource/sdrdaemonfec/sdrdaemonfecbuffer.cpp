@@ -46,6 +46,8 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
 	m_currentMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
 	m_wrDeltaEstimate = m_framesNbBytes / 2;
+	m_tvOut_sec = 0;
+	m_tvOut_usec = 0;
 	m_readNbBytes = 1;
     m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
     m_paramsCM256.OriginalCount = m_nbOriginalBlocks;  // never changes
@@ -168,6 +170,17 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
     m_nbWrites++;
+
+    int rwDelayBytes = (m_wrDeltaEstimate > 0 ? m_wrDeltaEstimate : sizeof(BufferFrame) * nbDecoderSlots + m_wrDeltaEstimate);
+    int sampleRate = m_currentMeta.m_sampleRate;
+
+    if (sampleRate > 0)
+    {
+        int64_t ts = m_currentMeta.m_tv_sec * 1000000LL + m_currentMeta.m_tv_usec;
+        ts -= (rwDelayBytes * 1000000LL) / (sampleRate * sizeof(Sample));
+        m_tvOut_sec = ts / 1000000LL;
+        m_tvOut_usec = ts - (m_tvOut_sec * 1000000LL);
+    }
 
     if (!m_decoderSlots[slotIndex].m_decoded)
     {

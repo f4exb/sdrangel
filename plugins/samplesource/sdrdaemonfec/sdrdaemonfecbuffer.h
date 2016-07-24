@@ -92,6 +92,10 @@ public:
 	// meta data
 	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
 
+	// samples timestamp
+	uint32_t getTVOutSec() const { return m_tvOut_sec; }
+	uint32_t getTVOutUsec() const { return m_tvOut_usec; }
+
     // stats
 
 	int getCurNbBlocks() const { return m_curNbBlocks; }
@@ -187,6 +191,8 @@ private:
     bool                 m_framesDecoded;        //!< [stats] true if all frames were decoded since last poll
     int                  m_readIndex;            //!< current byte read index in frames buffer
     int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
+    uint32_t             m_tvOut_sec;            //!< Estimated returned samples timestamp (seconds)
+    uint32_t             m_tvOut_usec;           //!< Estimated returned samples timestamp (microseconds)
     int                  m_readNbBytes;          //!< Nominal number of bytes per read (50ms)
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms

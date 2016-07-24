@@ -149,8 +149,10 @@ void SDRdaemonFECUDPHandler::processData()
     const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 
     bool change = false;
-    m_tv_sec = metaData.m_tv_sec;
-    m_tv_usec = metaData.m_tv_usec;
+//    m_tv_sec = metaData.m_tv_sec;
+//    m_tv_usec = metaData.m_tv_usec;
+    m_tv_sec = m_sdrDaemonBuffer.getTVOutSec();
+    m_tv_usec = m_sdrDaemonBuffer.getTVOutUsec();
 
     if (m_centerFrequency != metaData.m_centerFrequency)
     {
