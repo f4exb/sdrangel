@@ -309,7 +309,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Frames status: green = all original received, blue = some recovered by FEC, none = some lost</string>
+        <string>Frames status: green = all original received, pink = some recovered by FEC, none = some lost</string>
        </property>
        <property name="text">
         <string>...</string>

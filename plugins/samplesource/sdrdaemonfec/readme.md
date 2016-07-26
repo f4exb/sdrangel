@@ -4,6 +4,14 @@
 
 This input sample source plugin gets its samples over tbe network from a SDRdaemon server using UDP connection. SDRdaemon refers to the SDRdaemon utility found in [this](https://github.com/f4exb/sdrdaemon) Github repostory. This plugin is specialized in the version of SDRdaemon that sends data with FEC (Forward Erasure Correction). When FEC is used the format of the data is completely different from what it is without FEC.
 
+The addition of FEC blocks and the sequence tagging of frames and blocks make the transmission more robust. While it is unlikely to be beneficial with copper or fiber links it can improve links over WiFi particularly on distant links.
+
+Please note that there is no provision for handling out of sync UDP blocks. It is assumed that frames and block numbers always increase with possible blocks missing.
+
+<h2>Build</h2>
+
+The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. You will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+
 <h2>Interface</h2>
 
 ![SDR Daemon with FEC plugin GUI](../../../doc/img/SDRdaemonFEC_plugin.png)
@@ -60,7 +68,7 @@ The system tries to compensate read / write unbalance however at start or when a
 The color of the icon indicates stream status:
 
   - Green: all original blocks have been received for all frames during the last polling timeframe
-  - Blue: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe
+  - Magenta/Pink: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe
   - No color: some original blocks were definitely lost for some frames during the last polling timeframe
 
 <h4>4.2: Minimum number of blocks received by frame</h4>
@@ -73,7 +81,7 @@ Moving average over the last 10 frames of the number of blocks received per fram
 
 <h4>4.4: Maximum number of FEC blocks used by frame</h4>
 
-Maximum number of FEC blocks used for original blocks recovery during the last polling timeframe. Ideally this should be 0 when no blocks are lost but the system is able to correct lost blocks up to the nominal number of FEC blocks (blue lock icon).
+Maximum number of FEC blocks used for original blocks recovery during the last polling timeframe. Ideally this should be 0 when no blocks are lost but the system is able to correct lost blocks up to the nominal number of FEC blocks (Magenta/Pink lock icon).
 
 <h4>4.5: Average number of FEC blocks used for original blocks recovery by frame</h4>
 

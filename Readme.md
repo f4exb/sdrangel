@@ -89,6 +89,16 @@ There is an automated skew rate compensation in place. During rate readjustemnt 
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
 
+<h2>SDRdaemonFEC input</h2>
+
+This is a specialized client for the SDRdaemon server that matches the SDRdaemon with FEC option (`sdrdaemonfec` binary). The frame format is quite different from what it is without FEC and it also does not have the exact same functionnalities so a different plugin is more practiclal than trying to fit both versions in one plugin.
+
+Using this scheme the remote operation is more robust in case conditions are not optimal. While SDRdaemon without FEC will work fine on copper or fiber lines the FEC version is recommended for WiFi links where even in good conditions some UDP packets might get lost.
+
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. You will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemonFEC[0]` even if no physical device is connected.
+
 <h1>Channel plugins with special conditions</h1>
 
 <h2>DSD (Digital Speech Decoder)</h2>

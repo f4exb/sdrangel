@@ -605,9 +605,8 @@ void SDRdaemonFECGui::updateWithStreamTime()
 	if (m_framesDecodingStatus == 2) {
 		ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
 	} else if (m_framesDecodingStatus == 1) {
-	    ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+	    ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : magenta; }");
 	} else {
-//		ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(56,56,56); }");
 	}
 
