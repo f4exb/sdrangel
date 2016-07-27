@@ -68,8 +68,10 @@ private:
 	float m_bufferLengthInSecs;
     int32_t m_bufferGauge;
     int m_minNbBlocks;
+    int m_minNbOriginalBlocks;
     int m_maxNbRecovery;
     float m_avgNbBlocks;
+    float m_avgNbOriginalBlocks;
     float m_avgNbRecovery;
     int m_nbOriginalBlocks;
     int m_nbFECBlocks;

@@ -170,8 +170,10 @@ public:
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
         int32_t getBufferGauge() const { return m_bufferGauge; }
         int getMinNbBlocks() const { return m_minNbBlocks; }
-        int getmAXNbRecovery() const { return m_maxNbRecovery; }
+        int getMinNbOriginalBlocks() const { return m_minNbOriginalBlocks; }
+        int getMaxNbRecovery() const { return m_maxNbRecovery; }
         float getAvgNbBlocks() const { return m_avgNbBlocks; }
+        float getAvgNbOriginalBlocks() const { return m_avgNbOriginalBlocks; }
         float getAvgNbRecovery() const { return m_avgNbRecovery; }
         int getNbOriginalBlocksPerFrame() const { return m_nbOriginalBlocksPerFrame; }
         int getNbFECBlocksPerFrame() const { return m_nbFECBlocksPerFrame; }
@@ -181,9 +183,11 @@ public:
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
-                int curNbBlocks,
-                int curNbRecovery,
+                int minNbBlocks,
+                int minNbOriginalBlocks,
+                int maxNbRecovery,
                 float avgNbBlocks,
+                float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
                 int nbFECBlocksPerFrame)
@@ -193,9 +197,11 @@ public:
 					bufferLenSec,
                     bufferGauge,
                     framesDecodingStatus,
-                    curNbBlocks,
-                    curNbRecovery,
+                    minNbBlocks,
+                    minNbOriginalBlocks,
+                    maxNbRecovery,
                     avgNbBlocks,
+                    avgNbOriginalBlocks,
                     avgNbRecovery,
                     nbOriginalBlocksPerFrame,
                     nbFECBlocksPerFrame);
@@ -208,8 +214,10 @@ public:
 		float    m_bufferLenSec;
         int32_t  m_bufferGauge;
         int      m_minNbBlocks;
+        int      m_minNbOriginalBlocks;
         int      m_maxNbRecovery;
         float    m_avgNbBlocks;
+        float    m_avgNbOriginalBlocks;
         float    m_avgNbRecovery;
         int      m_nbOriginalBlocksPerFrame;
         int      m_nbFECBlocksPerFrame;
@@ -219,9 +227,11 @@ public:
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
-                int curNbBlocks,
-                int curNbRecovery,
+                int minNbBlocks,
+                int minNbOriginalBlocks,
+                int maxNbRecovery,
                 float avgNbBlocks,
+                float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
                 int nbFECBlocksPerFrame) :
@@ -231,9 +241,11 @@ public:
 			m_framesDecodingStatus(framesDecodingStatus),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
-            m_minNbBlocks(curNbBlocks),
-            m_maxNbRecovery(curNbRecovery),
+            m_minNbBlocks(minNbBlocks),
+            m_minNbOriginalBlocks(minNbOriginalBlocks),
+            m_maxNbRecovery(maxNbRecovery),
             m_avgNbBlocks(avgNbBlocks),
+            m_avgNbOriginalBlocks(avgNbOriginalBlocks),
             m_avgNbRecovery(avgNbRecovery),
             m_nbOriginalBlocksPerFrame(nbOriginalBlocksPerFrame),
             m_nbFECBlocksPerFrame(nbFECBlocksPerFrame)

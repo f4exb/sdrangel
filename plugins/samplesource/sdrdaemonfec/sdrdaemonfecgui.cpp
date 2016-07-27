@@ -291,8 +291,10 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
         m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
         m_minNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbBlocks();
-        m_maxNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getmAXNbRecovery();
+        m_minNbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbOriginalBlocks();
+        m_maxNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMaxNbRecovery();
         m_avgNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbBlocks();
+        m_avgNbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbOriginalBlocks();
         m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
         m_nbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbOriginalBlocksPerFrame();
         m_nbFECBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbFECBlocksPerFrame();
@@ -625,8 +627,11 @@ void SDRdaemonFECGui::updateWithStreamTime()
     s = QString::number(m_avgNbBlocks, 'f', 1);
     ui->avgNbBlocksText->setText(tr("%1").arg(s));
 
+    s = QString::number(m_minNbOriginalBlocks, 'f', 0);
+    ui->minNbOriginalText->setText(tr("%1").arg(s));
+
     s = QString::number(m_maxNbRecovery, 'f', 0);
-    ui->curNbRecoveryText->setText(tr("%1").arg(s));
+    ui->maxNbRecoveryText->setText(tr("%1").arg(s));
 
     s = QString::number(m_avgNbRecovery, 'f', 1);
     ui->avgNbRecoveryText->setText(tr("%1").arg(s));
@@ -672,4 +677,3 @@ void SDRdaemonFECGui::tick()
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }
-

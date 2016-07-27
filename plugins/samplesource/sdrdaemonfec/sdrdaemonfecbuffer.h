@@ -100,8 +100,10 @@ public:
     // stats
 
 	int getCurNbBlocks() const { return m_curNbBlocks; }
+    int getCurOriginalBlocks() const { return m_curOriginalBlocks; }
     int getCurNbRecovery() const { return m_curNbRecovery; }
     float getAvgNbBlocks() const { return m_avgNbBlocks; }
+    float getAvgOriginalBlocks() const { return m_avgOrigBlocks; }
     float getAvgNbRecovery() const { return m_avgNbRecovery; }
 
     int getMinNbBlocks()
@@ -109,6 +111,13 @@ public:
         int minNbBlocks = m_minNbBlocks;
         m_minNbBlocks = 256;
         return minNbBlocks;
+    }
+
+    int getMinOriginalBlocks()
+    {
+        int minOriginalBlocks = m_minOriginalBlocks;
+        m_minOriginalBlocks = 128;
+        return minOriginalBlocks;
     }
 
     int getMaxNbRecovery()
@@ -183,9 +192,12 @@ private:
     int                  m_frameHead;            //!< index of the current head frame sent
     int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received
     int                  m_minNbBlocks;          //!< (stats) minimum number of blocks received since last poll
+    int                  m_curOriginalBlocks;    //!< (stats) instantanous number of original blocks received
+    int                  m_minOriginalBlocks;    //!< (stats) minimum number of original blocks received since last poll
     int                  m_curNbRecovery;        //!< (stats) instantaneous number of recovery blocks used
     int                  m_maxNbRecovery;        //!< (stats) maximum number of recovery blocks used since last poll
     MovingAverage<int, int, 10> m_avgNbBlocks;   //!< (stats) average number of blocks received
+    MovingAverage<int, int, 10> m_avgOrigBlocks; //!< (stats) average number of original blocks received
     MovingAverage<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
     bool                 m_framesDecoded;        //!< [stats] true if all frames were decoded since last poll
     int                  m_readIndex;            //!< current byte read index in frames buffer
