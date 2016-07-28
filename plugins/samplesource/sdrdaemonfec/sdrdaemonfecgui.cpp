@@ -288,6 +288,7 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
 		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
 		m_framesDecodingStatus = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFramesDecodingStatus();
+		m_allBlocksReceived = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).allBlocksReceived();
 		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
         m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
         m_minNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbBlocks();
@@ -623,6 +624,12 @@ void SDRdaemonFECGui::updateWithStreamTime()
 
     s = QString::number(m_minNbBlocks, 'f', 0);
     ui->minNbBlocksText->setText(tr("%1").arg(s));
+
+    if (m_allBlocksReceived) {
+        ui->minNbBlocksText->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->minNbBlocksText->setStyleSheet("QLabel { background:rgb(56,56,56); }");
+    }
 
     s = QString::number(m_avgNbBlocks, 'f', 1);
     ui->avgNbBlocksText->setText(tr("%1").arg(s));

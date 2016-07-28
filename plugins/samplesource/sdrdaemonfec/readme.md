@@ -63,39 +63,43 @@ The system tries to compensate read / write unbalance however at start or when a
 
 ![SDR Daemon FEC status1 GUI](../../../doc/img/SDRdaemonFEC_plugin_04.png)
 
-<h4>4.1: Stream status</h4>
+<h4>4.1: Minimum total number of blocks per frame</h4>
+
+This is the minimum total number of blocks per frame during the last polling period. If all blocks were received for all frames then this number is the nominal number of original blocks plus FEC blocks and the background lits in green.
+
+<h4>4.2: Average total number of blocks received by frame</h4>
+
+Moving average over the last 10 frames of the total number of blocks received per frame.
+
+<h4>4.3: Stream status</h4>
 
 The color of the icon indicates stream status:
 
   - Green: all original blocks have been received for all frames during the last polling timeframe
-  - Magenta/Pink: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe
+  - Pink: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe
   - No color: some original blocks were definitely lost for some frames during the last polling timeframe
 
-<h4>4.2: Minimum number of blocks received by frame</h4>
+<h4>4.4: Minimum number of original blocks received by frame</h4>
 
-Minimum number of blocks received by frame during the last polling timeframe. Ideally this should match the nominal number of blocks per frame (see 4.7) for no lost blocks (green lock icon).
+Minimum number of original blocks received by frame during the last polling timeframe. Ideally this should match the nominal number of original blocks per frame which is 128 (green lock icon). Anything below the nominal number of original blocks minus FEC blocks means data loss (lock icon off). In betweem FEC is used to recover lost blocks (pink lock icon)
 
-<h4>4.3: Average number of blocks received by frame</h4>
+<h4>4.5: Maximum number of FEC blocks used by frame</h4>
 
-Moving average over the last 10 frames of the number of blocks received per frame.
+Maximum number of FEC blocks used for original blocks recovery during the last polling timeframe. Ideally this should be 0 when no blocks are lost but the system is able to correct lost blocks up to the nominal number of FEC blocks (Pink lock icon).
 
-<h4>4.4: Maximum number of FEC blocks used by frame</h4>
-
-Maximum number of FEC blocks used for original blocks recovery during the last polling timeframe. Ideally this should be 0 when no blocks are lost but the system is able to correct lost blocks up to the nominal number of FEC blocks (Magenta/Pink lock icon).
-
-<h4>4.5: Average number of FEC blocks used for original blocks recovery by frame</h4>
+<h4>4.6: Average number of FEC blocks used for original blocks recovery by frame</h4>
 
 Moving average over the last 10 frames of the number of FEC blocks used for original blocks recovery per frame.
 
-<h4>4.6: Receive buffer length</h4>
+<h4>4.7: Receive buffer length</h4>
 
 This is the main buffer (writes from UDP / reads from DSP engine) length in units of time (seconds). As read and write pointers are normally about half the buffer apart the nominal delay introduced by the buffer is the half of this value.
 
-<h4>4.7: FEC nominal values</h4>
+<h4>4.8: FEC nominal values</h4>
 
 This is the nominal (Tx side) total number of blocks sent by frame (original blocks plus FEC blocks) and the nominal number of FEC blocks sent by frame separated by a slash (/)
 
-<h4>4.8: Main buffer R/W pointers positions</h4>
+<h4>4.9: Main buffer R/W pointers positions</h4>
 
 Read and write pointers should always be a half buffer distance buffer apart. This is the difference in percent of the main buffer size from this ideal position.
 

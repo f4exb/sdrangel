@@ -65,6 +65,7 @@ private:
 	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
 	int m_framesDecodingStatus;
+	bool m_allBlocksReceived;
 	float m_bufferLengthInSecs;
     int32_t m_bufferGauge;
     int m_minNbBlocks;

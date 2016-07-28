@@ -29,16 +29,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -313,23 +304,6 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
-      <widget class="QToolButton" name="allFramesDecoded">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Frames status: green = all original received, pink = some recovered by FEC, none = some lost</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="minNbBlocksText">
        <property name="minimumSize">
         <size>
@@ -338,7 +312,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Minimum number of blocks retrieved per frame</string>
+        <string>Minimum number of blocks retrieved per frame (green: all blocks received)</string>
        </property>
        <property name="text">
         <string>000</string>
@@ -368,9 +342,19 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="lineStream4">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+      <widget class="QToolButton" name="allFramesDecoded">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Frames status: green = all original received, pink = some recovered by FEC, none = some lost</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
        </property>
       </widget>
      </item>

@@ -238,6 +238,7 @@ void SDRdaemonFECUDPHandler::tick()
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),
             m_sdrDaemonBuffer.getBufferGauge(),
             framesDecodingStatus,
+            minNbBlocks == nbOriginalBlocks + nbFECblocks,
             minNbBlocks,
             minNbOriginalBlocks,
             m_sdrDaemonBuffer.getMaxNbRecovery(),

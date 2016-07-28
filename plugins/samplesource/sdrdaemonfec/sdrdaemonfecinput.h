@@ -167,6 +167,7 @@ public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
 		int getFramesDecodingStatus() const { return m_framesDecodingStatus; }
+		bool allBlocksReceived() const { return m_allBlocksReceived; }
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
         int32_t getBufferGauge() const { return m_bufferGauge; }
         int getMinNbBlocks() const { return m_minNbBlocks; }
@@ -183,6 +184,7 @@ public:
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
+                bool allBlocksReceived,
                 int minNbBlocks,
                 int minNbOriginalBlocks,
                 int maxNbRecovery,
@@ -197,6 +199,7 @@ public:
 					bufferLenSec,
                     bufferGauge,
                     framesDecodingStatus,
+                    allBlocksReceived,
                     minNbBlocks,
                     minNbOriginalBlocks,
                     maxNbRecovery,
@@ -211,6 +214,7 @@ public:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
 		int      m_framesDecodingStatus;
+		bool     m_allBlocksReceived;
 		float    m_bufferLenSec;
         int32_t  m_bufferGauge;
         int      m_minNbBlocks;
@@ -227,6 +231,7 @@ public:
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
+                bool allBlocksReceived,
                 int minNbBlocks,
                 int minNbOriginalBlocks,
                 int maxNbRecovery,
@@ -239,6 +244,7 @@ public:
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
 			m_framesDecodingStatus(framesDecodingStatus),
+			m_allBlocksReceived(allBlocksReceived),
 			m_bufferLenSec(bufferLenSec),
             m_bufferGauge(bufferGauge),
             m_minNbBlocks(minNbBlocks),
