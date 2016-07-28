@@ -259,11 +259,6 @@ private:
         memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * sizeof(ProtectedBlock));
     }
 
-    inline void copyOriginalBlocks(int slotIndex)
-    {
-        // memcpy((void *) &m_frames[slotIndex].m_blocks[0], (const void *) &m_decoderSlots[slotIndex].m_originalBlocks[1], (m_nbOriginalBlocks - 1)*sizeof(ProtectedBlock));
-    }
-
     void initDecodeAllSlots();
     void initReadIndex();
     void rwCorrectionEstimate(int slotIndex);
