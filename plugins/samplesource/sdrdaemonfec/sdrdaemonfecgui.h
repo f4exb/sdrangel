@@ -92,6 +92,9 @@ private:
 	bool m_dcBlock;
 	bool m_iqCorrection;
 
+    QPalette m_paletteGreenText;
+    QPalette m_paletteWhiteText;
+
 	void displaySettings();
 
 	void displayConfigurationParameters(uint32_t freq,

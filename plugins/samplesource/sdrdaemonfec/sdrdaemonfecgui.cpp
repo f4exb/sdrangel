@@ -72,6 +72,9 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
     int rc = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
+    m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
+    m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
+
 	m_startingTimeStamp.tv_sec = 0;
 	m_startingTimeStamp.tv_usec = 0;
 	ui->setupUi(this);
@@ -626,9 +629,9 @@ void SDRdaemonFECGui::updateWithStreamTime()
     ui->minNbBlocksText->setText(tr("%1").arg(s));
 
     if (m_allBlocksReceived) {
-        ui->minNbBlocksText->setStyleSheet("QLabel { background-color : green; }");
+        ui->minNbBlocksText->setPalette(m_paletteGreenText);
     } else {
-        ui->minNbBlocksText->setStyleSheet("QLabel { background:rgb(56,56,56); }");
+        ui->minNbBlocksText->setPalette(m_paletteWhiteText);
     }
 
     s = QString::number(m_avgNbBlocks, 'f', 1);
