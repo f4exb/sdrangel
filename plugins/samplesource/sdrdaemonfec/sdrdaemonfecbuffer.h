@@ -173,6 +173,7 @@ private:
 
     struct DecoderSlot
     {
+        ProtectedBlock       m_blockZero;                                 //!< First block of a frame. Has meta data.
         ProtectedBlock       m_originalBlocks[m_nbOriginalBlocks];        //!< Original blocks retrieved directly or by later FEC
         ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
         CM256::cm256_block   m_cm256DescriptorBlocks[m_nbOriginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
@@ -218,6 +219,50 @@ private:
     int      m_balCorrLimit;  //!< Correction absolute value limit in number of samples
     CM256    m_cm256;         //!< CM256 library
     bool     m_cm256_OK;      //!< CM256 library initialized OK
+
+    inline ProtectedBlock* storeOriginalBlock(int slotIndex, int blockIndex, const ProtectedBlock& protectedBlock)
+    {
+        if (blockIndex == 0) {
+            // m_decoderSlots[slotIndex].m_originalBlocks[0] = protectedBlock;
+            // return &m_decoderSlots[slotIndex].m_originalBlocks[0];
+            m_decoderSlots[slotIndex].m_blockZero = protectedBlock;
+            return &m_decoderSlots[slotIndex].m_blockZero;
+        } else {
+            // m_decoderSlots[slotIndex].m_originalBlocks[blockIndex] = protectedBlock;
+            // return &m_decoderSlots[slotIndex].m_originalBlocks[blockIndex];
+            m_frames[slotIndex].m_blocks[blockIndex - 1] = protectedBlock;
+            return &m_frames[slotIndex].m_blocks[blockIndex - 1];
+        }
+    }
+
+    inline ProtectedBlock& getOriginalBlock(int slotIndex, int blockIndex)
+    {
+        if (blockIndex == 0) {
+            // return m_decoderSlots[slotIndex].m_originalBlocks[0];
+            return m_decoderSlots[slotIndex].m_blockZero;
+        } else {
+            // return m_decoderSlots[slotIndex].m_originalBlocks[blockIndex];
+            return m_frames[slotIndex].m_blocks[blockIndex - 1];
+        }
+    }
+
+    inline MetaDataFEC *getMetaData(int slotIndex)
+    {
+        // return (MetaDataFEC *) &m_decoderSlots[slotIndex].m_originalBlocks[0];
+        return (MetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
+    }
+
+    inline void resetOriginalBlocks(int slotIndex)
+    {
+        // memset((void *) m_decoderSlots[slotIndex].m_originalBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
+        memset((void *) &m_decoderSlots[slotIndex].m_blockZero, 0, sizeof(ProtectedBlock));
+        memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * sizeof(ProtectedBlock));
+    }
+
+    inline void copyOriginalBlocks(int slotIndex)
+    {
+        // memcpy((void *) &m_frames[slotIndex].m_blocks[0], (const void *) &m_decoderSlots[slotIndex].m_originalBlocks[1], (m_nbOriginalBlocks - 1)*sizeof(ProtectedBlock));
+    }
 
     void initDecodeAllSlots();
     void initReadIndex();

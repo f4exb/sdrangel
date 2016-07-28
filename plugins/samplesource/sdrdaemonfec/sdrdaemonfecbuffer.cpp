@@ -80,7 +80,7 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
         m_decoderSlots[i].m_recoveryCount = 0;
         m_decoderSlots[i].m_decoded = false;
         m_decoderSlots[i].m_metaRetrieved = false;
-        memset((void *) m_decoderSlots[i].m_originalBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
+        resetOriginalBlocks(i);
         memset((void *) m_decoderSlots[i].m_recoveryBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
     }
 }
@@ -116,7 +116,8 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_recoveryCount = 0;
     m_decoderSlots[slotIndex].m_decoded = false;
     m_decoderSlots[slotIndex].m_metaRetrieved = false;
-    memset((void *) m_decoderSlots[slotIndex].m_originalBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
+
+    resetOriginalBlocks(slotIndex);
     memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
 }
 
@@ -188,7 +189,7 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
     }
 
     // copy retrieved data to main buffer
-    memcpy((void *) &m_frames[slotIndex].m_blocks[0], (const void *) &m_decoderSlots[slotIndex].m_originalBlocks[1], (m_nbOriginalBlocks - 1)*sizeof(ProtectedBlock));
+    copyOriginalBlocks(slotIndex);
 }
 
 void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
@@ -231,8 +232,9 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 
         if (blockIndex < m_nbOriginalBlocks) // original data
         {
-            m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = superBlock->protectedBlock;
-            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) &m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex];
+            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) storeOriginalBlock(decoderIndex, blockIndex, superBlock->protectedBlock);
+            // m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = superBlock->protectedBlock;
+            // m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) &m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex];
             m_decoderSlots[decoderIndex].m_originalCount++;
         }
         else // recovery data
@@ -296,7 +298,8 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
                         }
                     }
 
-                    m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = *recoveredBlock;
+                    storeOriginalBlock(decoderIndex, blockIndex, *recoveredBlock);
+                    // m_decoderSlots[decoderIndex].m_originalBlocks[blockIndex] = *recoveredBlock;
 
                     qDebug() << "SDRdaemonFECBuffer::writeData: recovered block #" << blockIndex;
                 } // restore missing blocks
@@ -305,7 +308,8 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
 
         if (m_decoderSlots[decoderIndex].m_metaRetrieved) // block zero with its meta data has been received
         {
-            MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[decoderIndex].m_originalBlocks[0];
+            // MetaDataFEC *metaData = (MetaDataFEC *) &m_decoderSlots[decoderIndex].m_originalBlocks[0];
+            MetaDataFEC *metaData = getMetaData(decoderIndex);
 
             if (!(*metaData == m_currentMeta))
             {
