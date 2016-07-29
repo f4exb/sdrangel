@@ -131,7 +131,7 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 {
     m_udpReadBytes = 0;
 
-	while (m_dataSocket->hasPendingDatagrams())
+	while (m_dataSocket->hasPendingDatagrams() && m_dataConnected)
 	{
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes += m_dataSocket->readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
