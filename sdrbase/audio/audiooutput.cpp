@@ -185,10 +185,10 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 		const qint16* src = (const qint16*) data;
 		std::vector<qint32>::iterator dst = m_mixBuffer.begin();
 
-		if (samples != framesPerBuffer)
-		{
-            qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
-		}
+//		if (samples != framesPerBuffer)
+//		{
+//            qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
+//		}
 
 		for (uint i = 0; i < samples; i++)
 		{
