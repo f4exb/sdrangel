@@ -136,6 +136,29 @@
        </spacer>
       </item>
       <item>
+       <widget class="QComboBox" name="baudRate">
+        <property name="maximumSize">
+         <size>
+          <width>55</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Baud rate: 2.4k: NXDN, dPMR 4.8k: DMR, D-Star, YSF</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>2.4k</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4.8k</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="modulationText">
         <property name="minimumSize">
          <size>
