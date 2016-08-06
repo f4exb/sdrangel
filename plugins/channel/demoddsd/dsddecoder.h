@@ -50,6 +50,7 @@ public:
     const DSDcc::DSDDstar& getDStarDecoder() const { return m_decoder.getDStarDecoder(); }
 
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
+    void setBaudRate(int baudRate);
 
 private:
     DSDcc::DSDDecoder m_decoder;

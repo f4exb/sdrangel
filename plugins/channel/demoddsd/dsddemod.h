@@ -44,6 +44,7 @@ public:
 			int  rfBandwidth,
 			int  demodGain,
             int  volume,
+            int  baudRate,
 			int  fmDeviation,
 			int  squelchGate,
 			Real squelch,
@@ -72,6 +73,7 @@ private:
 		int  getDemodGain() const { return m_demodGain; }
 		int  getFMDeviation() const { return m_fmDeviation; }
         int  getVolume() const { return m_volume; }
+        int  getBaudRate() const { return m_baudRate; }
 		int  getSquelchGate() const { return m_squelchGate; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
@@ -80,11 +82,12 @@ private:
 				int  demodGain,
 				int  fmDeviation,
 				int  volume,
+				int  baudRate,
 				int  squelchGate,
 				Real squelch,
 				bool audioMute)
 		{
-			return new MsgConfigureDSDDemod(rfBandwidth, demodGain, fmDeviation, volume, squelchGate, squelch, audioMute);
+			return new MsgConfigureDSDDemod(rfBandwidth, demodGain, fmDeviation, volume, baudRate, squelchGate, squelch, audioMute);
 		}
 
 	private:
@@ -92,6 +95,7 @@ private:
 		Real m_demodGain;
 		int  m_fmDeviation;
 		int  m_volume;
+		int  m_baudRate;
 		int  m_squelchGate;
 		Real m_squelch;
 		bool m_audioMute;
@@ -100,6 +104,7 @@ private:
 				int  demodGain,
 				int  fmDeviation,
 				int  volume,
+				int  baudRate,
 				int  squelchGate,
 				Real squelch,
 				bool audioMute) :
@@ -108,6 +113,7 @@ private:
 			m_demodGain(demodGain),
 			m_fmDeviation(fmDeviation),
 			m_volume(volume),
+			m_baudRate(baudRate),
 			m_squelchGate(squelchGate),
 			m_squelch(squelch),
 			m_audioMute(audioMute)
@@ -131,6 +137,7 @@ private:
 		int  m_rfBandwidth;
 		int  m_demodGain;
 		int  m_volume;
+		int  m_baudRate;
 		int  m_fmDeviation;
 		int  m_squelchGate;
 		Real m_squelch;
@@ -143,6 +150,7 @@ private:
 			m_rfBandwidth(-1),
 			m_demodGain(-1),
 			m_volume(-1),
+			m_baudRate(4800),
 			m_fmDeviation(1),
 			m_squelchGate(1),
 			m_squelch(0),

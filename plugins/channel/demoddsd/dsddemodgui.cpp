@@ -36,6 +36,11 @@
 
 const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
 
+unsigned int DSDDemodBaudRates::m_rates[] = {2400, 4800};
+unsigned int DSDDemodBaudRates::m_nb_rates = 2;
+unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
+
+
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
@@ -76,6 +81,7 @@ void DSDDemodGUI::resetToDefaults()
 	ui->demodGain->setValue(100); // 100ths
 	ui->fmDeviation->setValue(50); // x100 Hz
 	ui->volume->setValue(20); // /10.0
+	ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getDefaultRateIndex());
 	ui->squelchGate->setValue(5);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
@@ -96,6 +102,7 @@ QByteArray DSDDemodGUI::serialize() const
 	s.writeS32(8, ui->squelchGate->value());
 	s.writeS32(9, ui->volume->value());
     s.writeBlob(10, ui->scopeGUI->serialize());
+    s.writeS32(11, ui->baudRate->currentIndex());
 	return s.final();
 }
 
@@ -141,6 +148,8 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         ui->volume->setValue(tmp);
         d.readBlob(10, &bytetmp);
         ui->scopeGUI->deserialize(bytetmp);
+        d.readS32(11, &tmp, 20);
+        ui->baudRate->setCurrentIndex(tmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -210,6 +219,10 @@ void DSDDemodGUI::on_volume_valueChanged(int value)
     applySettings();
 }
 
+void DSDDemodGUI::on_baudRate_currentIndexChanged(int index)
+{
+    applySettings();
+}
 
 void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 {
@@ -335,6 +348,7 @@ void DSDDemodGUI::applySettings()
 			ui->demodGain->value(),
 			ui->fmDeviation->value(),
 			ui->volume->value(),
+			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
 			ui->squelchGate->value(), // in 10ths of ms
 			ui->squelch->value(),
 			ui->audioMute->isChecked());
@@ -475,4 +489,29 @@ void DSDDemodGUI::tick()
 
 	    m_tickCount = 0;
 	}
+}
+
+unsigned int DSDDemodBaudRates::getRate(unsigned int rate_index)
+{
+    if (rate_index < m_nb_rates)
+    {
+        return m_rates[rate_index];
+    }
+    else
+    {
+        return m_rates[m_defaultRateIndex];
+    }
+}
+
+unsigned int DSDDemodBaudRates::getRateIndex(unsigned int rate)
+{
+    for (unsigned int i=0; i < m_nb_rates; i++)
+    {
+        if (rate == m_rates[i])
+        {
+            return i;
+        }
+    }
+
+    return m_defaultRateIndex;
 }

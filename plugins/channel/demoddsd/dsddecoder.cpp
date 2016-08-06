@@ -29,8 +29,33 @@ DSDDecoder::DSDDecoder()
     m_decoder.setUvQuality(3); // This is gr-dsd default
     m_decoder.setModulationOptimizations(DSDcc::DSDDecoder::DSDModulationOptimAuto); // Initialize with auto detection of modulation optimization:
     m_decoder.enableCosineFiltering(false);
+    m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate4800);
 }
 
 DSDDecoder::~DSDDecoder()
 {
+}
+
+void DSDDecoder::setBaudRate(int baudRate)
+{
+    if (baudRate == 2400)
+    {
+        m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate2400);
+    }
+    else if (baudRate == 4800)
+    {
+        m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate4800);
+    }
+    else if (baudRate == 9600)
+    {
+        m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate9600);
+    }
+    else // default 4800 bauds
+    {
+        m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate4800);
+    }
+
+    // when setting baud rate activate detection of all possible modes for this rate
+    // because on the other hand when a mode is selected then the baud rate is automatically changed
+    m_decoder.setDecodeMode(DSDcc::DSDDecoder::DSDDecodeAuto, true);
 }

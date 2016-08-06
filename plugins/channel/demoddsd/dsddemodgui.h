@@ -64,6 +64,7 @@ private slots:
 	void on_rfBW_valueChanged(int index);
 	void on_demodGain_valueChanged(int value);
     void on_volume_valueChanged(int value);
+    void on_baudRate_currentIndexChanged(int index);
 	void on_fmDeviation_valueChanged(int value);
 	void on_squelchGate_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
@@ -107,6 +108,20 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+};
+
+class DSDDemodBaudRates
+{
+public:
+    static unsigned int getRate(unsigned int rate_index);
+    static unsigned int getRateIndex(unsigned int rate);
+    static unsigned int getDefaultRate() { return m_rates[m_defaultRateIndex]; }
+    static unsigned int getDefaultRateIndex() { return m_defaultRateIndex; }
+    static unsigned int getNbRates();
+private:
+    static unsigned int m_nb_rates;
+    static unsigned int m_rates[2];
+    static unsigned int m_defaultRateIndex;
 };
 
 #endif // INCLUDE_DSDDEMODGUI_H

@@ -137,9 +137,15 @@
       </item>
       <item>
        <widget class="QComboBox" name="baudRate">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>55</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>

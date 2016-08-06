@@ -51,6 +51,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
+	m_config.m_baudRate = 4800;
 	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
@@ -78,6 +79,7 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		int  demodGain,
 		int  fmDeviation,
 		int  volume,
+		int  baudRate,
 		int  squelchGate,
 		Real squelch,
 		bool audioMute)
@@ -86,6 +88,7 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			demodGain,
 			fmDeviation,
 			volume,
+			baudRate,
 			squelchGate,
 			squelch,
 			audioMute);
@@ -239,6 +242,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_demodGain = cfg.getDemodGain();
 		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_volume = cfg.getVolume();
+		m_config.m_baudRate = cfg.getBaudRate();
 		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioMute = cfg.getAudioMute();
@@ -249,6 +253,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_demodGain: " << m_config.m_demodGain / 100.0
 				<< " m_fmDeviation: " << m_config.m_fmDeviation * 100
 				<< " m_volume: " << m_config.m_volume / 10.0
+                << " m_baudRate: " << m_config.m_baudRate
 				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioMute: " << m_config.m_audioMute;
@@ -303,7 +308,12 @@ void DSDDemod::apply()
         m_dsdDecoder.setAudioGain(m_config.m_volume / 10.0f);
     }
 
-	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
+    if (m_config.m_baudRate != m_running.m_baudRate)
+    {
+        m_dsdDecoder.setBaudRate(m_config.m_baudRate);
+    }
+
+    m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_demodGain = m_config.m_demodGain;
@@ -311,6 +321,7 @@ void DSDDemod::apply()
 	m_running.m_squelchGate = m_config.m_squelchGate;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
+	m_running.m_baudRate = m_config.m_baudRate;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
 }
