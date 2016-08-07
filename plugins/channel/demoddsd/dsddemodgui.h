@@ -78,7 +78,8 @@ private:
 	{
 	    signalFormatNone,
 	    signalFormatDMR,
-	    signalFormatDStar
+	    signalFormatDStar,
+	    signalFormatDPMR
 	} SignalFormat;
 
 	Ui::DSDDemodGUI* ui;

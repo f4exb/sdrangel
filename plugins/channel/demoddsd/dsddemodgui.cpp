@@ -439,6 +439,14 @@ void DSDDemodGUI::formatStatusText()
         m_formatStatusText[62] = '\0';
         m_signalFormat = signalFormatDStar;
         break;
+    case DSDcc::DSDDecoder::DSDSyncDPMR:
+        if (m_signalFormat != signalFormatDPMR)
+        {
+            memcpy(&m_formatStatusText, "CC: ", 4);
+        }
+        sprintf(&m_formatStatusText[4], "%04d", m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode());
+        m_signalFormat = signalFormatDPMR;
+        break;
     default:
         m_signalFormat = signalFormatNone;
         m_formatStatusText[0] = '\0';
