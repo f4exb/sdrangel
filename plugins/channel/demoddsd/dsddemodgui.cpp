@@ -40,6 +40,15 @@ unsigned int DSDDemodBaudRates::m_rates[] = {2400, 4800};
 unsigned int DSDDemodBaudRates::m_nb_rates = 2;
 unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
 
+char DSDDemodGUI::m_frameTypes[][3] = {
+		"--", // no frame sync
+		"HD", // header frame
+		"PY", // payload super frame not categorized yet
+		"VO", // voice super frame
+		"D1", // data type 1 super frame
+		"D2", // data type 2 super frame
+		"EN", // end frame
+};
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
@@ -440,12 +449,9 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDStar;
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
-        if (m_signalFormat != signalFormatDPMR)
-        {
-            memcpy(&m_formatStatusText, "  CC: ", 6);
-        }
-        sprintf(&m_formatStatusText[6], "%04d", m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode());
-        m_formatStatusText[0] = (m_dsdDemod->getDecoder().getDPMRDecoder().hasSync() ? 'S' : '-');
+        sprintf(m_formatStatusText, "%s CC: %04d",
+                m_frameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
+                m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode());
         m_signalFormat = signalFormatDPMR;
         break;
     default:
