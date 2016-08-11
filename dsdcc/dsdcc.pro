@@ -34,6 +34,9 @@ $$LIBDSDCCSRC/dsd_opts.cpp\
 $$LIBDSDCCSRC/dsd_state.cpp\
 $$LIBDSDCCSRC/dsd_symbol.cpp\
 $$LIBDSDCCSRC/dstar.cpp\
+$$LIBDSDCCSRC/ysf.cpp\
+$$LIBDSDCCSRC/nxdn.cpp\
+$$LIBDSDCCSRC/dpmr.cpp\
 $$LIBDSDCCSRC/p25p1_heuristics.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
@@ -47,6 +50,9 @@ $$LIBDSDCCSRC/dsd_opts.h\
 $$LIBDSDCCSRC/dsd_state.h\
 $$LIBDSDCCSRC/dsd_symbol.h\
 $$LIBDSDCCSRC/dstar.h\
+$$LIBDSDCCSRC/ysf.h\
+$$LIBDSDCCSRC/nxdn.h\
+$$LIBDSDCCSRC/dpmr.h\
 $$LIBDSDCCSRC/p25p1_heuristics.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
