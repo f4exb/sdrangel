@@ -40,8 +40,9 @@ unsigned int DSDDemodBaudRates::m_rates[] = {2400, 4800};
 unsigned int DSDDemodBaudRates::m_nb_rates = 2;
 unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
 
-char DSDDemodGUI::m_frameTypes[][3] = {
+char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
 		"--", // no frame sync
+		"XS", // no frame - extensive search of FS2
 		"HD", // header frame
 		"PY", // payload super frame not categorized yet
 		"VO", // voice super frame
@@ -450,7 +451,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
         sprintf(m_formatStatusText, "%s CC: %04d",
-                m_frameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
+                m_dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
                 m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode());
         m_signalFormat = signalFormatDPMR;
         break;
