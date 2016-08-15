@@ -46,6 +46,8 @@ char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
 		"HD", // header frame
 		"PY", // payload super frame not categorized yet
 		"VO", // voice super frame
+		"VS", // voice super frame with slow data (SLD)
+		"VD", // voice and data superframe
 		"D1", // data type 1 super frame
 		"D2", // data type 2 super frame
 		"EN", // end frame
