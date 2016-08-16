@@ -177,22 +177,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="modulationText">
-        <property name="minimumSize">
-         <size>
-          <width>30</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Modulation type detected</string>
-        </property>
-        <property name="text">
-         <string>____</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="syncText">
         <property name="minimumSize">
          <size>

@@ -43,7 +43,6 @@ public:
     DSDcc::DSDDecoder::DSDSyncType getSyncType() const { return m_decoder.getSyncType(); }
     DSDcc::DSDDecoder::DSDStationType getStationType() const { return m_decoder.getStationType(); }
     const char *getFrameTypeText() const { return m_decoder.getFrameTypeText(); }
-    const char *getModulationText() const { return m_decoder.getModulationText(); }
     const char *getSlot0Text() const { return m_decoder.getSlot0Text(); }
     const char *getSlot1Text() const { return m_decoder.getSlot1Text(); }
     unsigned char getColorCode() const { return m_decoder.getColorCode(); }

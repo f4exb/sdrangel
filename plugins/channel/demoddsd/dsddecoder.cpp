@@ -27,7 +27,6 @@ DSDDecoder::DSDDecoder()
     m_decoder.setStereo(true);  // force copy to L+R channels
     m_decoder.setDecodeMode(DSDcc::DSDDecoder::DSDDecodeAuto, true); // Initialize with auto-detect
     m_decoder.setUvQuality(3); // This is gr-dsd default
-    m_decoder.setModulationOptimizations(DSDcc::DSDDecoder::DSDModulationOptimAuto); // Initialize with auto detection of modulation optimization:
     m_decoder.enableCosineFiltering(false);
     m_decoder.setDataRate(DSDcc::DSDDecoder::DSDRate4800);
 }

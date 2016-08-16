@@ -496,7 +496,6 @@ void DSDDemodGUI::tick()
 	{
 	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
 	    ui->syncText->setText(QString(m_dsdDemod->getDecoder().getFrameTypeText()));
-	    ui->modulationText->setText(QString(m_dsdDemod->getDecoder().getModulationText()));
 
 	    formatStatusText();
 	    ui->formatStatusText->setText(QString(m_formatStatusText));
