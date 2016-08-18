@@ -497,7 +497,7 @@ void DSDDemodGUI::tick()
 	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
         ui->inCarrierPosText->setText(QString::number(m_dsdDemod->getDecoder().getCarrierPos()));
         ui->zcPosText->setText(QString::number(m_dsdDemod->getDecoder().getZeroCrossingPos()));
-        ui->syncNumFlipsText->setText(QString::number(m_dsdDemod->getDecoder().getNumFlips()));
+        ui->symbolSyncQualityText->setText(QString::number(m_dsdDemod->getDecoder().getSymbolSyncQuality()));
 	    ui->syncText->setText(QString(m_dsdDemod->getDecoder().getFrameTypeText()));
 
 	    formatStatusText();
