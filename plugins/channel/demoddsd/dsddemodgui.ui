@@ -250,6 +250,25 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="syncNumFlipsText">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of active re-synchronization symbol flips per 32 symbol period</string>
+        </property>
+        <property name="text">
+         <string>00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="channnelPowerLayout">
         <item>
          <widget class="QLabel" name="channelPower">

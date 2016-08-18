@@ -41,6 +41,7 @@ public:
     int getInLevel() const { return m_decoder.getInLevel(); }
     int getCarrierPos() const { return m_decoder.getCarrierPos(); }
     int getZeroCrossingPos() const { return m_decoder.getZeroCrossingPos(); }
+    int getNumFlips() const { return m_decoder.getNumFlips(); }
     int getSamplesPerSymbol() const { return m_decoder.getSamplesPerSymbol(); }
     DSDcc::DSDDecoder::DSDSyncType getSyncType() const { return m_decoder.getSyncType(); }
     DSDcc::DSDDecoder::DSDStationType getStationType() const { return m_decoder.getStationType(); }
