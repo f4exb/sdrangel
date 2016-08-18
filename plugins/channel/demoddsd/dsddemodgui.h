@@ -65,6 +65,7 @@ private slots:
 	void on_demodGain_valueChanged(int value);
     void on_volume_valueChanged(int value);
     void on_baudRate_currentIndexChanged(int index);
+    void on_enableCosineFiltering_toggled(bool enable);
 	void on_fmDeviation_valueChanged(int value);
 	void on_squelchGate_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
@@ -96,6 +97,7 @@ private:
     ScopeVis* m_scopeVis;
 
 	DSDDemod* m_dsdDemod;
+	bool m_enableCosineFiltering;
     bool m_audioMute;
 	bool m_squelchOpen;
 	MovingAverage<Real> m_channelPowerDbAvg;

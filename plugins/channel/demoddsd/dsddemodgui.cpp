@@ -115,6 +115,7 @@ QByteArray DSDDemodGUI::serialize() const
 	s.writeS32(9, ui->volume->value());
     s.writeBlob(10, ui->scopeGUI->serialize());
     s.writeS32(11, ui->baudRate->currentIndex());
+    s.writeBool(12, m_enableCosineFiltering);
 	return s.final();
 }
 
@@ -162,6 +163,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         ui->scopeGUI->deserialize(bytetmp);
         d.readS32(11, &tmp, 20);
         ui->baudRate->setCurrentIndex(tmp);
+        d.readBool(12, &m_enableCosineFiltering, false);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -236,6 +238,12 @@ void DSDDemodGUI::on_baudRate_currentIndexChanged(int index)
     applySettings();
 }
 
+void DSDDemodGUI::on_enableCosineFiltering_toggled(bool enable)
+{
+	m_enableCosineFiltering = enable;
+	applySettings();
+}
+
 void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 {
 	applySettings();
@@ -280,6 +288,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_signalFormat(signalFormatNone),
+	m_enableCosineFiltering(false),
 	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
@@ -354,6 +363,9 @@ void DSDDemodGUI::applySettings()
 	    ui->fmDeviationText->setText(QString("%1k").arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
 		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
 	    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
+	    ui->enableCosineFiltering->setChecked(m_enableCosineFiltering);
+
+	    // TODO: pass m_enableCosineFiltering
 
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
 			ui->rfBW->value(),
@@ -363,7 +375,8 @@ void DSDDemodGUI::applySettings()
 			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
 			ui->squelchGate->value(), // in 10ths of ms
 			ui->squelch->value(),
-			ui->audioMute->isChecked());
+			ui->audioMute->isChecked(),
+			m_enableCosineFiltering);
 	}
 }
 

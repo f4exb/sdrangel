@@ -202,7 +202,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="inLevelText">
+       <widget class="QLabel" name="symbolSyncQualityText">
         <property name="minimumSize">
          <size>
           <width>20</width>
@@ -210,29 +210,10 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Carrier input level (%) when synchronized</string>
+         <string>Symbol synchronization quality (%)</string>
         </property>
         <property name="text">
          <string>00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="inCarrierPosText">
-        <property name="minimumSize">
-         <size>
-          <width>25</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Carrier relative position (%) when synchronized</string>
-        </property>
-        <property name="text">
-         <string>-00</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -259,18 +240,51 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="symbolSyncQualityText">
+       <widget class="ButtonSwitch" name="enableCosineFiltering">
+        <property name="toolTip">
+         <string>Enable cosine filtering</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="inCarrierPosText">
         <property name="minimumSize">
          <size>
-          <width>20</width>
+          <width>25</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>Symbol synchronization quality (%)</string>
+         <string>Carrier relative position (%) when synchronized</string>
         </property>
         <property name="text">
-         <string>00</string>
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="inLevelText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Carrier input level (%) when synchronized</string>
+        </property>
+        <property name="text">
+         <string>000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -813,6 +827,11 @@
    <extends>QWidget</extends>
    <header>gui/glscopegui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

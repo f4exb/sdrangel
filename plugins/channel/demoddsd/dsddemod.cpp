@@ -54,6 +54,7 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_config.m_baudRate = 4800;
 	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+	m_config.m_enableCosineFiltering = false;
 
 	apply();
 
@@ -82,7 +83,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		int  baudRate,
 		int  squelchGate,
 		Real squelch,
-		bool audioMute)
+		bool audioMute,
+		bool enableCosineFiltering)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
 			demodGain,
@@ -91,7 +93,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			baudRate,
 			squelchGate,
 			squelch,
-			audioMute);
+			audioMute,
+			enableCosineFiltering);
 	messageQueue->push(cmd);
 }
 
@@ -246,6 +249,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_enableCosineFiltering = cfg.getEnableCosineFiltering();
 
 		apply();
 
@@ -256,7 +260,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
                 << " m_baudRate: " << m_config.m_baudRate
 				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioMute: " << m_config.m_audioMute;
+				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering;
 
 		return true;
 	}
@@ -313,6 +318,11 @@ void DSDDemod::apply()
         m_dsdDecoder.setBaudRate(m_config.m_baudRate);
     }
 
+    if (m_config.m_enableCosineFiltering != m_running.m_enableCosineFiltering)
+    {
+    	m_dsdDecoder.enableCosineFiltering(m_config.m_enableCosineFiltering);
+    }
+
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
@@ -324,4 +334,5 @@ void DSDDemod::apply()
 	m_running.m_baudRate = m_config.m_baudRate;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_enableCosineFiltering = m_config.m_enableCosineFiltering;
 }

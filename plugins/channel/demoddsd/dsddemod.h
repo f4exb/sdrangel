@@ -48,7 +48,8 @@ public:
 			int  fmDeviation,
 			int  squelchGate,
 			Real squelch,
-			bool audioMute);
+			bool audioMute,
+			bool enableCosineFiltering);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -77,6 +78,7 @@ private:
 		int  getSquelchGate() const { return m_squelchGate; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
+		bool getEnableCosineFiltering() const { return m_enableCosineFiltering; }
 
 		static MsgConfigureDSDDemod* create(int rfBandwidth,
 				int  demodGain,
@@ -85,9 +87,10 @@ private:
 				int  baudRate,
 				int  squelchGate,
 				Real squelch,
-				bool audioMute)
+				bool audioMute,
+				bool enableCosineFiltering)
 		{
-			return new MsgConfigureDSDDemod(rfBandwidth, demodGain, fmDeviation, volume, baudRate, squelchGate, squelch, audioMute);
+			return new MsgConfigureDSDDemod(rfBandwidth, demodGain, fmDeviation, volume, baudRate, squelchGate, squelch, audioMute, enableCosineFiltering);
 		}
 
 	private:
@@ -99,6 +102,7 @@ private:
 		int  m_squelchGate;
 		Real m_squelch;
 		bool m_audioMute;
+		bool m_enableCosineFiltering;
 
 		MsgConfigureDSDDemod(int rfBandwidth,
 				int  demodGain,
@@ -107,7 +111,8 @@ private:
 				int  baudRate,
 				int  squelchGate,
 				Real squelch,
-				bool audioMute) :
+				bool audioMute,
+				bool enableCosineFiltering) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_demodGain(demodGain),
@@ -116,7 +121,8 @@ private:
 			m_baudRate(baudRate),
 			m_squelchGate(squelchGate),
 			m_squelch(squelch),
-			m_audioMute(audioMute)
+			m_audioMute(audioMute),
+			m_enableCosineFiltering(enableCosineFiltering)
 		{ }
 	};
 
@@ -143,6 +149,7 @@ private:
 		Real m_squelch;
 		bool m_audioMute;
 		quint32 m_audioSampleRate;
+		bool m_enableCosineFiltering;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -155,7 +162,8 @@ private:
 			m_squelchGate(1),
 			m_squelch(0),
 			m_audioMute(false),
-			m_audioSampleRate(0)
+			m_audioSampleRate(0),
+			m_enableCosineFiltering(false)
 		{ }
 	};
 

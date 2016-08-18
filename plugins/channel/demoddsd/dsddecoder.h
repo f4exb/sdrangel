@@ -43,6 +43,7 @@ public:
     int getZeroCrossingPos() const { return m_decoder.getZeroCrossingPos(); }
     int getSymbolSyncQuality() const { return m_decoder.getSymbolSyncQuality(); }
     int getSamplesPerSymbol() const { return m_decoder.getSamplesPerSymbol(); }
+    void enableCosineFiltering(bool on) { m_decoder.enableCosineFiltering(on); }
     DSDcc::DSDDecoder::DSDSyncType getSyncType() const { return m_decoder.getSyncType(); }
     DSDcc::DSDDecoder::DSDStationType getStationType() const { return m_decoder.getStationType(); }
     const char *getFrameTypeText() const { return m_decoder.getFrameTypeText(); }
