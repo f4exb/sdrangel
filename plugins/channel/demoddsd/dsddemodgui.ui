@@ -201,10 +201,51 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Input level (%) valid when synchronized</string>
+         <string>Carrier input level (%) when synchronized</string>
         </property>
         <property name="text">
          <string>00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="inCarrierPosText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Carrier relative position (%) when synchronized</string>
+        </property>
+        <property name="text">
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="zcPosText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Zero crossing relaive position in number of samples (&lt;0 sampling point lags, &gt;0 it leads)</string>
+        </property>
+        <property name="text">
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
