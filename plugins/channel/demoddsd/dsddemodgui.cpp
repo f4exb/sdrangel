@@ -41,16 +41,15 @@ unsigned int DSDDemodBaudRates::m_nb_rates = 2;
 unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
 
 char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
-		"--", // no frame sync
-		"XS", // no frame - extensive search of FS2
-		"HD", // header frame
-		"PY", // payload super frame not categorized yet
-		"VO", // voice super frame
-		"VS", // voice super frame with slow data (SLD)
-		"VD", // voice and data superframe
-		"D1", // data type 1 super frame
-		"D2", // data type 2 super frame
-		"EN", // end frame
+		"--", // 0: no frame sync
+		"XS", // 1: no frame - extensive search of FS2
+		"HD", // 2: header frame
+		"PY", // 3: payload super frame not categorized yet
+		"VO", // 4: voice super frame
+		"VD", // 5: voice and data superframe
+		"D1", // 6: data type 1 super frame
+		"D2", // 7: data type 2 super frame
+		"EN", // 8: end frame
 };
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)

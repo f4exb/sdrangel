@@ -103,7 +103,7 @@ private:
 	MovingAverage<Real> m_channelPowerDbAvg;
 	int m_tickCount;
 
-	static char m_dpmrFrameTypes[10][3];
+	static char m_dpmrFrameTypes[9][3];
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();
