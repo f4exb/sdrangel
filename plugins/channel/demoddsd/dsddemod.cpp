@@ -155,6 +155,12 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 sample = 0;
             }
 
+            m_dsdDecoder.pushSample(sample);
+
+            if (m_running.m_enableCosineFiltering) { // show actual input to FSK demod
+            	sample = m_dsdDecoder.getFilteredSample();
+            }
+
             if (m_sampleBufferIndex < (1<<17)) {
                 m_sampleBufferIndex++;
             } else {
@@ -171,7 +177,6 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             Sample s(sample, delayedSample); // I=signal, Q=signal delayed by 20 samples (2400 baud: lowest rate)
             m_scopeSampleBuffer.push_back(s);
-            m_dsdDecoder.pushSample(sample);
 
             if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady())
             {

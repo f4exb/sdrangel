@@ -29,6 +29,7 @@ public:
     ~DSDDecoder();
 
     void pushSample(short sample) { m_decoder.run(sample); }
+    short getFilteredSample() const { return m_decoder.getFilteredSample(); }
     short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
     void resetAudio() { m_decoder.resetAudio(); }
     void enableMbelib(bool enable) { m_decoder.enableMbelib(enable); }
