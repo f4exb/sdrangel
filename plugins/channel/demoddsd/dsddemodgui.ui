@@ -59,16 +59,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -210,7 +201,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Symbol synchronization quality (%)</string>
+         <string>Symbol synchronization rate (%)</string>
         </property>
         <property name="text">
          <string>00</string>
@@ -250,6 +241,24 @@
         <property name="icon">
          <iconset resource="../../../sdrbase/resources/res.qrc">
           <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="syncOrConstellation">
+        <property name="toolTip">
+         <string>Toggle between transition constellation and symbol synchronization displays</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/constellation.png</normaloff>
+          <normalon>:/slopep_icon.png</normalon>:/constellation.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -775,16 +784,7 @@
     <string>Discriminator Scope</string>
    </property>
    <layout class="QVBoxLayout" name="scopeContainer">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>

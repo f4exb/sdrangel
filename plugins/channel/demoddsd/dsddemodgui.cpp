@@ -115,6 +115,7 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeBlob(10, ui->scopeGUI->serialize());
     s.writeS32(11, ui->baudRate->currentIndex());
     s.writeBool(12, m_enableCosineFiltering);
+    s.writeBool(13, m_syncOrConstellation);
 	return s.final();
 }
 
@@ -163,6 +164,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         d.readS32(11, &tmp, 20);
         ui->baudRate->setCurrentIndex(tmp);
         d.readBool(12, &m_enableCosineFiltering, false);
+        d.readBool(13, &m_syncOrConstellation, false);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -243,6 +245,12 @@ void DSDDemodGUI::on_enableCosineFiltering_toggled(bool enable)
 	applySettings();
 }
 
+void DSDDemodGUI::on_syncOrConstellation_toggled(bool checked)
+{
+    m_syncOrConstellation = checked;
+    applySettings();
+}
+
 void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 {
 	applySettings();
@@ -288,6 +296,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_doApplySettings(true),
 	m_signalFormat(signalFormatNone),
 	m_enableCosineFiltering(false),
+	m_syncOrConstellation(false),
 	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
@@ -363,8 +372,7 @@ void DSDDemodGUI::applySettings()
 		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
 	    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
 	    ui->enableCosineFiltering->setChecked(m_enableCosineFiltering);
-
-	    // TODO: pass m_enableCosineFiltering
+	    ui->syncOrConstellation->setChecked(m_syncOrConstellation);
 
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
 			ui->rfBW->value(),
@@ -375,7 +383,8 @@ void DSDDemodGUI::applySettings()
 			ui->squelchGate->value(), // in 10ths of ms
 			ui->squelch->value(),
 			ui->audioMute->isChecked(),
-			m_enableCosineFiltering);
+			m_enableCosineFiltering,
+			m_syncOrConstellation);
 	}
 }
 

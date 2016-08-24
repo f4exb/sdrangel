@@ -49,7 +49,8 @@ public:
 			int  squelchGate,
 			Real squelch,
 			bool audioMute,
-			bool enableCosineFiltering);
+			bool enableCosineFiltering,
+			bool syncOrConstellation);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -79,6 +80,7 @@ private:
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
 		bool getEnableCosineFiltering() const { return m_enableCosineFiltering; }
+		bool getSyncOrConstellation() const { return m_syncOrConstellation; }
 
 		static MsgConfigureDSDDemod* create(int rfBandwidth,
 				int  demodGain,
@@ -88,9 +90,19 @@ private:
 				int  squelchGate,
 				Real squelch,
 				bool audioMute,
-				bool enableCosineFiltering)
+				bool enableCosineFiltering,
+				bool syncOrConstellation)
 		{
-			return new MsgConfigureDSDDemod(rfBandwidth, demodGain, fmDeviation, volume, baudRate, squelchGate, squelch, audioMute, enableCosineFiltering);
+			return new MsgConfigureDSDDemod(rfBandwidth,
+			        demodGain,
+			        fmDeviation,
+			        volume,
+			        baudRate,
+			        squelchGate,
+			        squelch,
+			        audioMute,
+			        enableCosineFiltering,
+			        syncOrConstellation);
 		}
 
 	private:
@@ -103,6 +115,7 @@ private:
 		Real m_squelch;
 		bool m_audioMute;
 		bool m_enableCosineFiltering;
+		bool m_syncOrConstellation;
 
 		MsgConfigureDSDDemod(int rfBandwidth,
 				int  demodGain,
@@ -112,7 +125,8 @@ private:
 				int  squelchGate,
 				Real squelch,
 				bool audioMute,
-				bool enableCosineFiltering) :
+				bool enableCosineFiltering,
+				bool syncOrConstellation) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_demodGain(demodGain),
@@ -122,7 +136,8 @@ private:
 			m_squelchGate(squelchGate),
 			m_squelch(squelch),
 			m_audioMute(audioMute),
-			m_enableCosineFiltering(enableCosineFiltering)
+			m_enableCosineFiltering(enableCosineFiltering),
+			m_syncOrConstellation(syncOrConstellation)
 		{ }
 	};
 
@@ -150,6 +165,7 @@ private:
 		bool m_audioMute;
 		quint32 m_audioSampleRate;
 		bool m_enableCosineFiltering;
+		bool m_syncOrConstellation;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -163,7 +179,8 @@ private:
 			m_squelch(0),
 			m_audioMute(false),
 			m_audioSampleRate(0),
-			m_enableCosineFiltering(false)
+			m_enableCosineFiltering(false),
+			m_syncOrConstellation(false)
 		{ }
 	};
 

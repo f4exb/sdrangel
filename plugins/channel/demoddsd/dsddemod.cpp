@@ -84,7 +84,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		int  squelchGate,
 		Real squelch,
 		bool audioMute,
-		bool enableCosineFiltering)
+		bool enableCosineFiltering,
+		bool syncOrConstellation)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
 			demodGain,
@@ -94,7 +95,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			squelchGate,
 			squelch,
 			audioMute,
-			enableCosineFiltering);
+			enableCosineFiltering,
+			syncOrConstellation);
 	messageQueue->push(cmd);
 }
 
@@ -175,8 +177,16 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 delayedSample = m_sampleBuffer[m_sampleBufferIndex - samplesPerSymbol];
             }
 
-            Sample s(sample, delayedSample); // I=signal, Q=signal delayed by 20 samples (2400 baud: lowest rate)
-            m_scopeSampleBuffer.push_back(s);
+            if (m_running.m_syncOrConstellation)
+            {
+                Sample s(sample, m_dsdDecoder.getSymbolSyncSample());
+                m_scopeSampleBuffer.push_back(s);
+            }
+            else
+            {
+                Sample s(sample, delayedSample); // I=signal, Q=signal delayed by 20 samples (2400 baud: lowest rate)
+                m_scopeSampleBuffer.push_back(s);
+            }
 
             if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady())
             {
@@ -255,6 +265,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_enableCosineFiltering = cfg.getEnableCosineFiltering();
+		m_config.m_syncOrConstellation = cfg.getSyncOrConstellation();
 
 		apply();
 
@@ -266,7 +277,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioMute: " << m_config.m_audioMute
-				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering;
+				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering
+				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation;
 
 		return true;
 	}
@@ -340,4 +352,5 @@ void DSDDemod::apply()
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_enableCosineFiltering = m_config.m_enableCosineFiltering;
+	m_running.m_syncOrConstellation = m_config.m_syncOrConstellation;
 }

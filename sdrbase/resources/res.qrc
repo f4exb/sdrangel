@@ -57,5 +57,6 @@
     <file>rds.png</file>
     <file>recycle.png</file>
     <file>lsb.png</file>
+    <file>constellation.png</file>
   </qresource>
 </RCC>
