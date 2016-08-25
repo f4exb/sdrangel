@@ -201,7 +201,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Courier</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -759,7 +759,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Courier</family>
+          <family>DejaVu Sans Mono</family>
           <pointsize>9</pointsize>
          </font>
         </property>
