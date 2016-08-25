@@ -59,7 +59,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -151,7 +160,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>35</width>
           <height>0</height>
          </size>
         </property>
@@ -180,12 +189,32 @@
        <widget class="QLabel" name="syncText">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>110</width>
           <height>0</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Courier</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Synchronized on this frame type</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="lineWidth">
+         <number>2</number>
         </property>
         <property name="text">
          <string>No Sync______</string>
@@ -730,7 +759,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>Courier</family>
           <pointsize>9</pointsize>
          </font>
         </property>
@@ -784,7 +813,16 @@
     <string>Discriminator Scope</string>
    </property>
    <layout class="QVBoxLayout" name="scopeContainer">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>

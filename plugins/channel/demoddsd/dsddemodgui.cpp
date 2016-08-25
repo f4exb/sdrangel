@@ -519,7 +519,16 @@ void DSDDemodGUI::tick()
         ui->inCarrierPosText->setText(QString::number(m_dsdDemod->getDecoder().getCarrierPos()));
         ui->zcPosText->setText(QString::number(m_dsdDemod->getDecoder().getZeroCrossingPos()));
         ui->symbolSyncQualityText->setText(QString::number(m_dsdDemod->getDecoder().getSymbolSyncQuality()));
-	    ui->syncText->setText(QString(m_dsdDemod->getDecoder().getFrameTypeText()));
+
+        const char *frameTypeText = m_dsdDemod->getDecoder().getFrameTypeText();
+
+	    if (frameTypeText[0] == '\0') {
+	        ui->syncText->setStyleSheet("QLabel { background:rgb(53,53,53); }"); // turn off background
+	    } else {
+            ui->syncText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background
+	    }
+
+	    ui->syncText->setText(QString(frameTypeText));
 
 	    formatStatusText();
 	    ui->formatStatusText->setText(QString(m_formatStatusText));
