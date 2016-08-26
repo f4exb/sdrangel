@@ -41,13 +41,12 @@ For software built fron source if you choose to have `mbelib` support you will n
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Use the "+/-" button on the left side to toggle between positive and negative shift.
 
-<h3>2: Modulation detected</h3>
+<h3>2: Symbol (Baud) rate</h3>
 
-This is the type of modulation detected by DSDcc. It can be the following:
+Here you can specify which symbol rate or Baud rate is expected. Choices are:
 
-  - `C4FM`: 4-FSK modulation as implemented for example by Yaesu. It is also the default display. Sometimes 4-GFSK signals can be detected as C4FM if the signal is relatively noisy. This should not affect decoding provided noise is not too strong.
-  - `GFSK`: Gaussian mean frequency shift keying. it is either 2 or 4-FSK (2-GFSK or 4-GFSK). DMR transmissions will typically be identified as GFSK as it is 4-GFSK. D-Star will also be detected as GFSK as it is 2-GFSK.
-  - `QPSK`: At present no decodable transmissions use QPSK.
+  - `2.4k`: 2400 S/s used for dPMR and 4800 b/s NXDN
+  - `4.8k`: 4800 S/s used for 9600 b/s NXDN, DMR, D-Star and YSF.
 
 <h3>3: Type of frame detected</h3>
 
@@ -57,91 +56,155 @@ This can be one of the following:
   - `-DMRd`: inverted DMR data frame
   - `+DMRv`: non-inverted DMR voice frame
   - `-DMRv`: inverted DMR voice frame
-  - `(+DMR)`: non-inverted isolated DMR voice frame
-  - `(-DMR)`: inverted isolated DMR voice frame
   - `+D-STAR`: non-inverted D-Star frame
   - `-D-STAR`: inverted D-Star frame
   - `+D-STAR_HD`: non-inverted D-Star header frame encountered
   - `-D-STAR_HD`: inverted D-Star header frame encountered
+  - `+dPMR`: non-inverted dPMR non-packet frame
+  - `-dPMR`: inverted dPMR non-packet frame
+  - `+NXDN`: non-inverted NXDN frame (detection only)
+  - `-NXDN`: inverted NXDN frame (detection only)
+  - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
+  - `-YSF`: inverted Yaesu System Fusion frame (detection only)
 
-<h3>4: Decoder input level in %</h3>
+<h3>4: Symbol synchronization zero crossing hits in %</h3>
 
-Most satisfactory decodes for values 50~70%. When no signal is detected it defaults to 91%.
+This is the percentage per symbols for which a valid zero crossing has been detected. This can display 101% because somtimes there are two crossings per symbol period at the start of a sequence. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
 
-<h3>5: Channel power</h3>
+<h3>5: Zero crossing shift</h3>
+ 
+This is the current (at display polling time) zero crosing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
+
+  - `2400 S/s`: +/- 5 inclusive
+  - `4800 S/s`: +/- 2 inclusive
+ 
+<h3>6: Matched filter toggle</h3>
+ 
+Normally you would always want to have a matched filter however on some strong D-Star signals more synchronization points could be obtained without. When engaged the background of the button is lit in orange.
+
+<h3>7: Transition constellation or symbol synchronization signal toggle</h3>
+
+Using this button you can either:
+
+  - show the transitions constellation
+  - show a indicative signal about symbol synchronization
+    - when a zero crossing is detected the signal is set to estimated input discriminator signal maximum value
+    - when the symbol clock is 0 (start of symbol period) the signal is set to the estimated median point of the input discriminator signal
+
+<h3>8: Discriminator input signal median level in %</h3>
+
+This is the estimated median level (center) of the discriminator input signal in percentage of half the total range. When the signal is correctly aligned in the input range it should be 0
+
+<h3>9: Discriminator input signal level range in %</h3>
+
+This is the estimated discriminator input signal level range (max - min) in percentage of half the total range. For optimal decoding it should be maintained close to 100.
+
+<h3>10: Channel power</h3>
 
 Total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>6: Channel bandwidth before discriminator</h3>
+<h3>11: Channel bandwidth before discriminator</h3>
 
 This is the bandwidth of the pre-discriminator filter
 
-<h3>7: Gain after discriminator</h3>
+<h3>12: Gain after discriminator</h3>
 
 This is the gain applied to the output of the discriminator before the decoder
 
-<h3>8: Audio volume</h3>
+<h3>13: Audio volume</h3>
 
 This is the audio volume for positive values. A value of zero triggers the auto volume (audio AGC).
 
-<h3>9: Maximum expected FM deviation</h3>
+<h3>14: Maximum expected FM deviation</h3>
 
 This is the deviation in kHz leading to maximum (100%) deviation. You should aim for 30 to 50% (+/-300 to +/-500m) deviation on the scope display.
 
-<h3>10: Squelch level</h3>
+<h3>15: Squelch level</h3>
 
 The level corresponds to the channel power above which the squelch gate opens.
 
-<h3>11: Squelch time gate</h3>
+<h3>16: Squelch time gate</h3>
 
 Number of milliseconds following squelch gate opening after which the signal is actually fed to the decoder. 0 means no delay i.e. immediate feed.
 
-<h3>12: Audio mute and squelch indicator</h3>
+<h3>17: Audio mute and squelch indicator</h3>
 
 Audio mute toggle button. This button lights in green when the squelch opens.
 
-<h3>13: Format specific status display</h3>
+<h3>18: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 
-<h4>13.1: D-Star status display</h4>
+<h4>18.1: D-Star status display</h4>
 
 ![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
 
 These is the standard D-Star embedded information that is read from the header frame.
 
-<h5>13.1.1: Repeater 1 callsign</h5>
-<h5>13.1.2: Repeater 2 callsign</h5>
-<h5>13.1.3: Destination (your) callsign</h5>
-<h5>13.1.4: Origin (my) callsign</h5>
+<h5>18.1.1: Repeater 1 callsign</h5>
+<h5>18.1.2: Repeater 2 callsign</h5>
+<h5>18.1.3: Destination (your) callsign</h5>
+<h5>18.1.4: Origin (my) callsign</h5>
 
-<h4>13.2: DMR status display</h4>
+<h4>18.2: DMR status display</h4>
 
 ![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
 
-<h5>13.2.1: Station role</h5>
+<h5>18.2.1: Station role</h5>
 
   - `BS`: base station
   - `MS`: mobile station
   - `NA`: not applicable or could not be determined
 
-<h5>13.2.2: TDMA slot #0 status</h5>
+<h5>18.2.2: TDMA slot #0 status</h5>
 
   - `slot0`: nothing received in slot #0
   - `[slot0]`: data frame received for slot #0
   - `[SLOT0]`: voice frame received for slot #0
 
-<h5>13.2.3: TDMA slot #1 status</h5>
+<h5>18.2.3: TDMA slot #1 status</h5>
 
   - `slot1`: nothing received in slot #1
   - `[slot1]`: data frame received for slot #1
   - `[SLOT1]`: voice frame received for slot #1
   
-<h5>13.2.4: Color Code</h5>
+<h5>18.2.4: Color Code</h5>
 
 This is the color code in use (0 to 15). It may briefly change value to a incorrect one. Take into account the value shown most of the time.
 
-<h3>14: Discriminator output scope display</h3>
+<h4>18.3: dPMR status display</h4>
+
+![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
+
+<h5>18.3.1: dPMR frame tyoe</h5>
+
+  - `--`: undetermined
+  - `HD`: Header of FS1 type
+  - `PY`: Payload frame of a sitll undetermined type
+  - `VO`: Voice frame
+  - `VD`: Voice and data frame
+  - `D1`: Data without FEC frame
+  - `D2`: Data with FEC frame
+  - `XS`: Extended search: looking for a new payload frame when out of sequence
+  - `EN`: End frame
+  
+<h5>18.3.2: Colour code</h5>
+
+Colour code in hexadecimal (12 bits)
+
+<h5>18.3.3: Own ID</h5>
+
+Sender's identification code in hexadecimal (24 bits)
+
+<h5>18.3.4: Called ID</h5>
+
+Called party's identification code in hexadecimal (24 bits)
+
+<h3>19: Discriminator output scope display</h3>
+
+<h4>19.1 Transitions constellation display</h4>
+
+This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
 The discriminator signal at 48 kS/s is routed to the scope display with the following connections:
 
@@ -155,22 +218,22 @@ This allows the visualization of symbol transitions which depend on the type of 
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope.png)
 
-<h4>14.1: Setting the display</h4>
+<h5>19.1.1: Setting the display</h5>
 
   - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
   - On the display buttons you should choose the side by side display
 
 On the same line you can choose any trace length. If it is too short the constellation points will not appear clearly and if it is too long the polar figure will be too dense. Usually 100ms give good results.
 
-<h4>14.2: IQ linear display</h4>
+<h5>19.1.2: IQ linear display</h5>
 
 The yellow trace (I) is the direct trace and the blue trace (Q) is the delayed trace. This can show how symbols differentiate between each other in a sort of eye diagram.
 
-<h4>14.3: IQ polar display</h4>
+<h5>19.1.3: IQ polar display</h5>
 
 This shows the constellation of transition points. You should adjust the frequency shift to center the figure and the maximum deviation and/or discriminator gain to contain the figure within the +/-0.4 square. +/- 0.1 to +/- 0.3 usually give the best results.
 
-<h5>2-FSK or 2-GFSK</h5>
+<h6>2-FSK or 2-GFSK</h6>
 
 This concerns the following formats:
 
@@ -187,11 +250,14 @@ There are 4 possible points corresponding to the 4 possible transitions. x repre
 
 As you can see the pointer can make all moves except between (-1, -1) and (1,1) hence all vertices between the 4 points can appear except the one between the lower left corner and the upper right corner.
 
-<h5>4-FSK or 4-GFSK</h5>
+<h6>4-FSK or 4-GFSK</h6>
 
 This concerns the following formats:
 
   - DMR
+  - YSF
+  - dPMR
+  - NXDN
 
 ![DSD DMR polar](../../../doc/img/DSDdemod_plugin_dmr_polar.png)
 
@@ -199,14 +265,50 @@ There are 16 possible points corresponding to the 16 possible transitions betwee
 
 Because not all transitions are possible similarly to the 2-FSK case pointer moves from the lower left side of the diagonal to the upper right side are not possible.
 
-<h4>14.4: I gain</h4>
+<h5>19.1.4: I gain</h5>
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset.
+You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h4>14.5: Q gain</h4>
+<h5>19.1.5: Q gain</h5>
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset.
+You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h4>14.6: Trigger settings</h4>
+<h5>19.1.6: Trigger settings</h5>
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
+
+<h4>19.2 Symbol synchronization display</h4>
+
+This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
+
+![DSD scope](../../../doc/img/DSDdemod_plugin_scope2.png)
+
+<h5>19.2.1 IQ linear display</h5>
+
+The I trace (yellow) is the discriminator signal and the Q trace (blue) is the symbol synchronization monitor trace that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
+
+The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Q trace (blue) should go down to mid position in the first fourth of the symbol period.
+
+<h5>19.2.2: Setting the display</h5>
+
+  - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
+  - On the display buttons you should choose the first display (1)
+
+<h5>19.2.3: Timing settings</h5>
+
+You can choose any trace length with the third slider from the left however 100 ms will give you the best view. You may stretch further the display by reducing the full length to 20 ms or less using the first slider. You can move this 20 ms window across the 100 ms trace with the middle slider.
+
+<h5>19.2.4: I gain</h5>
+
+You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+
+<h5>19.2.5: Q gain</h5>
+
+You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+
+<h5>19.2.6: Trigger settings</h5>
+
+You can leave the trigger free running or set it to I linear with a 0 threshold.
+
+
+ 
