@@ -61,7 +61,7 @@ public:
 		m_dsdDemodGUI = dsdDemodGUI;
 	}
 
-	Real getMagSq() { return m_movingAverage.average(); }
+	double getMagSq() { return m_movingAverage.average() / (double) (1<<30); }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
 	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }
@@ -199,8 +199,8 @@ private:
 	bool m_squelchOpen;
 
 	Real m_lastArgument;
-    MovingAverage<Real> m_movingAverage;
-    Real m_magsq;
+    MovingAverage<double> m_movingAverage;
+    double m_magsq;
 
 	Real m_fmExcursion;
 
