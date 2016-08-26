@@ -512,15 +512,28 @@ void GLScopeGUI::on_scope_sampleRateChanged(int)
 void GLScopeGUI::setTimeScaleDisplay()
 {
 	m_sampleRate = m_glScope->getSampleRate();
-	qreal t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (qreal)m_timeBase;
-	if(t < 0.000001)
-		ui->timeText->setText(tr("%1\nns").arg(t * 1000000000.0));
+	double t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (qreal)m_timeBase;
+
+    if(t < 0.000001)
+	{
+        t = round(t * 100000000000.0) / 100.0;
+        ui->timeText->setText(tr("%1\nns").arg(t));
+	}
 	else if(t < 0.001)
-		ui->timeText->setText(tr("%1\nµs").arg(t * 1000000.0));
+	{
+	    t = round(t * 100000000.0) / 100.0;
+        ui->timeText->setText(tr("%1\nµs").arg(t));
+	}
 	else if(t < 1.0)
-		ui->timeText->setText(tr("%1\nms").arg(t * 1000.0));
+	{
+	    t = round(t * 100000.0) / 100.0;
+        ui->timeText->setText(tr("%1\nms").arg(t));
+	}
 	else
-		ui->timeText->setText(tr("%1\ns").arg(t * 1.0));
+	{
+	    t = round(t * 100.0) / 100.0;
+        ui->timeText->setText(tr("%1\ns").arg(t));
+	}
 }
 
 void GLScopeGUI::setTraceLenDisplay()
