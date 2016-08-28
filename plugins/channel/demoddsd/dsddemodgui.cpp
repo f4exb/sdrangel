@@ -417,27 +417,24 @@ void DSDDemodGUI::formatStatusText()
     case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
         if (m_signalFormat != signalFormatDMR)
         {
-            memcpy(m_formatStatusText, "Station: ", 9);
-            memcpy(&m_formatStatusText[12], "TDMA: ", 6);
+            strcpy(m_formatStatusText, "Sta: __ S1: ______ S2: ______");
         }
 
         switch (m_dsdDemod->getDecoder().getStationType())
         {
         case DSDcc::DSDDecoder::DSDBaseStation:
-            memcpy(&m_formatStatusText[9], "BS ", 3);
+            memcpy(&m_formatStatusText[5], "BS ", 3);
             break;
         case DSDcc::DSDDecoder::DSDMobileStation:
-            memcpy(&m_formatStatusText[9], "MS ", 3);
+            memcpy(&m_formatStatusText[5], "MS ", 3);
             break;
         default:
-            memcpy(&m_formatStatusText[9], "NA ", 3);
+            memcpy(&m_formatStatusText[5], "NA ", 3);
             break;
         }
 
-        memcpy(&m_formatStatusText[18], m_dsdDemod->getDecoder().getSlot0Text(), 7);
-        m_formatStatusText[25] = ' ';
-        memcpy(&m_formatStatusText[26], m_dsdDemod->getDecoder().getSlot1Text(), 7);
-        sprintf(&m_formatStatusText[33], " CC: %02d", m_dsdDemod->getDecoder().getColorCode());
+        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getSlot0Text(), 6);
+        memcpy(&m_formatStatusText[23], m_dsdDemod->getDecoder().getSlot1Text(), 6);
         m_signalFormat = signalFormatDMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
