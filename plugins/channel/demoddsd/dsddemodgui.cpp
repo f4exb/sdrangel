@@ -417,7 +417,7 @@ void DSDDemodGUI::formatStatusText()
     case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
         if (m_signalFormat != signalFormatDMR)
         {
-            strcpy(m_formatStatusText, "Sta: __ S1: ______ S2: ______");
+            strcpy(m_formatStatusText, "Sta: __ S1: _______ S2: _______");
         }
 
         switch (m_dsdDemod->getDecoder().getStationType())
@@ -433,8 +433,8 @@ void DSDDemodGUI::formatStatusText()
             break;
         }
 
-        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getSlot0Text(), 6);
-        memcpy(&m_formatStatusText[23], m_dsdDemod->getDecoder().getSlot1Text(), 6);
+        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getSlot0Text(), 7);
+        memcpy(&m_formatStatusText[24], m_dsdDemod->getDecoder().getSlot1Text(), 7);
         m_signalFormat = signalFormatDMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
