@@ -26,6 +26,7 @@ CONFIG(Debug):build_subdir = debug
 SOURCES = $$LIBDSDCCSRC/descramble.cpp\
 $$LIBDSDCCSRC/dmr_data.cpp\
 $$LIBDSDCCSRC/dmr_voice.cpp\
+$$LIBDSDCCSRC/dmr.cpp\
 $$LIBDSDCCSRC/dsd_decoder.cpp\
 $$LIBDSDCCSRC/dsd_filters.cpp\
 $$LIBDSDCCSRC/dsd_logger.cpp\
@@ -42,6 +43,7 @@ $$LIBDSDCCSRC/p25p1_heuristics.cpp
 HEADERS = $$LIBDSDCCSRC/descramble.h\
 $$LIBDSDCCSRC/dmr_data.h\
 $$LIBDSDCCSRC/dmr_voice.h\
+$$LIBDSDCCSRC/dmr.h\
 $$LIBDSDCCSRC/dsd_decoder.h\
 $$LIBDSDCCSRC/dsd_filters.h\
 $$LIBDSDCCSRC/dsd_logger.h\
@@ -53,6 +55,8 @@ $$LIBDSDCCSRC/dstar.h\
 $$LIBDSDCCSRC/ysf.h\
 $$LIBDSDCCSRC/nxdn.h\
 $$LIBDSDCCSRC/dpmr.h\
-$$LIBDSDCCSRC/p25p1_heuristics.h
+$$LIBDSDCCSRC/p25p1_heuristics.h\
+$$LIBDSDCCSRC/runningmaxmin.h\
+$$LIBDSDCCSRC/doublebuffer.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
