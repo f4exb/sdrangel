@@ -58,5 +58,9 @@
     <file>recycle.png</file>
     <file>lsb.png</file>
     <file>constellation.png</file>
+    <file>slot1_off.png</file>
+    <file>slot1_on.png</file>
+    <file>slot2_off.png</file>
+    <file>slot2_on.png</file>
   </qresource>
 </RCC>
