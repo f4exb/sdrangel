@@ -85,7 +85,9 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		Real squelch,
 		bool audioMute,
 		bool enableCosineFiltering,
-		bool syncOrConstellation)
+		bool syncOrConstellation,
+		bool slot1On,
+		bool slot2On)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
 			demodGain,
@@ -96,7 +98,9 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			squelch,
 			audioMute,
 			enableCosineFiltering,
-			syncOrConstellation);
+			syncOrConstellation,
+			slot1On,
+			slot2On);
 	messageQueue->push(cmd);
 }
 
@@ -266,6 +270,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_enableCosineFiltering = cfg.getEnableCosineFiltering();
 		m_config.m_syncOrConstellation = cfg.getSyncOrConstellation();
+		m_config.m_slot1On = cfg.getSlot1On();
+		m_config.m_slot2On = cfg.getSlot2On();
 
 		apply();
 
@@ -278,7 +284,9 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering
-				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation;
+				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation
+				<< " m_slot1On: " << m_config.m_slot1On
+				<< " m_slot2On: " << m_config.m_slot2On;
 
 		return true;
 	}
@@ -353,4 +361,6 @@ void DSDDemod::apply()
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_enableCosineFiltering = m_config.m_enableCosineFiltering;
 	m_running.m_syncOrConstellation = m_config.m_syncOrConstellation;
+	m_running.m_slot1On = m_config.m_slot1On;
+	m_running.m_slot2On = m_config.m_slot2On;
 }

@@ -116,6 +116,8 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeS32(11, ui->baudRate->currentIndex());
     s.writeBool(12, m_enableCosineFiltering);
     s.writeBool(13, m_syncOrConstellation);
+    s.writeBool(14, m_slot1On);
+    s.writeBool(15, m_slot2On);
 	return s.final();
 }
 
@@ -165,6 +167,8 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         ui->baudRate->setCurrentIndex(tmp);
         d.readBool(12, &m_enableCosineFiltering, false);
         d.readBool(13, &m_syncOrConstellation, false);
+        d.readBool(14, &m_slot1On, false);
+        d.readBool(15, &m_slot2On, false);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -251,6 +255,18 @@ void DSDDemodGUI::on_syncOrConstellation_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_slot1On_toggled(bool checked)
+{
+    m_slot1On = checked;
+    applySettings();
+}
+
+void DSDDemodGUI::on_slot2On_toggled(bool checked)
+{
+    m_slot2On = checked;
+    applySettings();
+}
+
 void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 {
 	applySettings();
@@ -297,6 +313,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_signalFormat(signalFormatNone),
 	m_enableCosineFiltering(false),
 	m_syncOrConstellation(false),
+	m_slot1On(false),
+	m_slot2On(false),
 	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
@@ -373,6 +391,8 @@ void DSDDemodGUI::applySettings()
 	    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
 	    ui->enableCosineFiltering->setChecked(m_enableCosineFiltering);
 	    ui->syncOrConstellation->setChecked(m_syncOrConstellation);
+	    ui->slot1On->setChecked(m_slot1On);
+        ui->slot2On->setChecked(m_slot2On);
 
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
 			ui->rfBW->value(),
@@ -384,7 +404,9 @@ void DSDDemodGUI::applySettings()
 			ui->squelch->value(),
 			ui->audioMute->isChecked(),
 			m_enableCosineFiltering,
-			m_syncOrConstellation);
+			m_syncOrConstellation,
+			m_slot1On,
+			m_slot2On);
 	}
 }
 
