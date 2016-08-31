@@ -31,8 +31,8 @@ public:
     void pushSample(short sample) { m_decoder.run(sample); }
     short getFilteredSample() const { return m_decoder.getFilteredSample(); }
     short getSymbolSyncSample() const { return m_decoder.getSymbolSyncSample(); }
-    short *getAudio(int& nbSamples) { return m_decoder.getAudio(nbSamples); }
-    void resetAudio() { m_decoder.resetAudio(); }
+    short *getAudio1(int& nbSamples) { return m_decoder.getAudio1(nbSamples); }
+    void resetAudio1() { m_decoder.resetAudio1(); }
     void enableMbelib(bool enable) { m_decoder.enableMbelib(enable); }
 
     bool mbeDVReady() const { return m_decoder.mbeDVReady(); }

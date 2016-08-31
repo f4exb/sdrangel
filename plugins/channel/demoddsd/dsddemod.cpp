@@ -207,7 +207,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	if (!DSPEngine::instance()->hasDVSerialSupport())
 	{
 	    int nbAudioSamples;
-	    short *dsdAudio = m_dsdDecoder.getAudio(nbAudioSamples);
+	    short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
 
 	    if (nbAudioSamples > 0)
 	    {
@@ -215,7 +215,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	            uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
 	        }
 
-	        m_dsdDecoder.resetAudio();
+	        m_dsdDecoder.resetAudio1();
 	    }
 	}
 
