@@ -38,7 +38,8 @@ $$LIBDSDCCSRC/dstar.cpp\
 $$LIBDSDCCSRC/ysf.cpp\
 $$LIBDSDCCSRC/nxdn.cpp\
 $$LIBDSDCCSRC/dpmr.cpp\
-$$LIBDSDCCSRC/p25p1_heuristics.cpp
+$$LIBDSDCCSRC/p25p1_heuristics.cpp\
+$$LIBDSDCCSRC/fec.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
 $$LIBDSDCCSRC/dmr_data.h\
@@ -57,6 +58,7 @@ $$LIBDSDCCSRC/nxdn.h\
 $$LIBDSDCCSRC/dpmr.h\
 $$LIBDSDCCSRC/p25p1_heuristics.h\
 $$LIBDSDCCSRC/runningmaxmin.h\
-$$LIBDSDCCSRC/doublebuffer.h
+$$LIBDSDCCSRC/doublebuffer.h\
+$$LIBDSDCCSRC/fec.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
