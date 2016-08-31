@@ -35,9 +35,9 @@ public:
     void resetAudio1() { m_decoder.resetAudio1(); }
     void enableMbelib(bool enable) { m_decoder.enableMbelib(enable); }
 
-    bool mbeDVReady() const { return m_decoder.mbeDVReady(); }
-    void resetMbeDV() { m_decoder.resetMbeDV(); }
-    const unsigned char *getMbeDVFrame() const { return m_decoder.getMbeDVFrame(); }
+    bool mbeDVReady1() const { return m_decoder.mbeDVReady1(); }
+    void resetMbeDV1() { m_decoder.resetMbeDV1(); }
+    const unsigned char *getMbeDVFrame1() const { return m_decoder.getMbeDVFrame1(); }
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 
     int getInLevel() const { return m_decoder.getInLevel(); }

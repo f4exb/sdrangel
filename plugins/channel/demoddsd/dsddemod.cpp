@@ -192,12 +192,12 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_scopeSampleBuffer.push_back(s);
             }
 
-            if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady())
+            if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady1())
             {
                 if (!m_running.m_audioMute) {
-                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo);
+                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo);
                 }
-                m_dsdDecoder.resetMbeDV();
+                m_dsdDecoder.resetMbeDV1();
             }
 
             m_interpolatorDistanceRemain += m_interpolatorDistance;
