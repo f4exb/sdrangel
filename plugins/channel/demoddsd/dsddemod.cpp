@@ -34,7 +34,8 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_sampleCount(0),
 	m_squelchCount(0),
 	m_squelchOpen(false),
-	m_audioFifo(4, 48000),
+	m_audioFifo1(4, 48000),
+    m_audioFifo2(4, 48000),
 	m_fmExcursion(24),
 	m_settingsMutex(QMutex::Recursive),
     m_scope(sampleSink),
@@ -66,13 +67,15 @@ DSDDemod::DSDDemod(SampleSink* sampleSink) :
 
     m_movingAverage.resize(50, 0);
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
+    DSPEngine::instance()->addAudioSink(&m_audioFifo2);
 }
 
 DSDDemod::~DSDDemod()
 {
     delete[] m_sampleBuffer;
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	DSPEngine::instance()->removeAudioSink(&m_audioFifo1);
+    DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,
@@ -192,13 +195,36 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_scopeSampleBuffer.push_back(s);
             }
 
-            if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady1())
+            if (DSPEngine::instance()->hasDVSerialSupport())
             {
-                if (!m_running.m_audioMute) {
-                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo);
+                if ((m_running.m_slot1On) && m_dsdDecoder.mbeDVReady1())
+                {
+                    if (!m_running.m_audioMute) {
+                        DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo1);
+                    }
+
+                    m_dsdDecoder.resetMbeDV1();
                 }
-                m_dsdDecoder.resetMbeDV1();
+
+                if ((m_running.m_slot2On) && m_dsdDecoder.mbeDVReady2())
+                {
+                    if (!m_running.m_audioMute) {
+                        DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame2(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo2);
+                    }
+
+                    m_dsdDecoder.resetMbeDV2();
+                }
             }
+
+//            if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady1())
+//            {
+//                if (!m_running.m_audioMute)
+//                {
+//                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo1);
+//                }
+//
+//                m_dsdDecoder.resetMbeDV1();
+//            }
 
             m_interpolatorDistanceRemain += m_interpolatorDistance;
         }
@@ -206,17 +232,47 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	if (!DSPEngine::instance()->hasDVSerialSupport())
 	{
-	    int nbAudioSamples;
-	    short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
-
-	    if (nbAudioSamples > 0)
+	    if (m_running.m_slot1On)
 	    {
-	        if (!m_running.m_audioMute) {
-	            uint res = m_audioFifo.write((const quint8*) dsdAudio, nbAudioSamples, 10);
-	        }
+	        int nbAudioSamples;
+	        short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
 
-	        m_dsdDecoder.resetAudio1();
+	        if (nbAudioSamples > 0)
+	        {
+	            if (!m_running.m_audioMute) {
+	                uint res = m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+	            }
+
+	            m_dsdDecoder.resetAudio1();
+	        }
 	    }
+
+        if (m_running.m_slot2On)
+        {
+            int nbAudioSamples;
+            short *dsdAudio = m_dsdDecoder.getAudio2(nbAudioSamples);
+
+            if (nbAudioSamples > 0)
+            {
+                if (!m_running.m_audioMute) {
+                    uint res = m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+                }
+
+                m_dsdDecoder.resetAudio2();
+            }
+        }
+
+//	    int nbAudioSamples;
+//	    short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
+//
+//	    if (nbAudioSamples > 0)
+//	    {
+//	        if (!m_running.m_audioMute) {
+//	            uint res = m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+//	        }
+//
+//	        m_dsdDecoder.resetAudio1();
+//	    }
 	}
 
 
@@ -230,7 +286,8 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void DSDDemod::start()
 {
-	m_audioFifo.clear();
+	m_audioFifo1.clear();
+    m_audioFifo2.clear();
 	m_phaseDiscri.reset();
 }
 

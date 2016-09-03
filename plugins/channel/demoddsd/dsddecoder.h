@@ -31,13 +31,21 @@ public:
     void pushSample(short sample) { m_decoder.run(sample); }
     short getFilteredSample() const { return m_decoder.getFilteredSample(); }
     short getSymbolSyncSample() const { return m_decoder.getSymbolSyncSample(); }
+
     short *getAudio1(int& nbSamples) { return m_decoder.getAudio1(nbSamples); }
     void resetAudio1() { m_decoder.resetAudio1(); }
+    short *getAudio2(int& nbSamples) { return m_decoder.getAudio2(nbSamples); }
+    void resetAudio2() { m_decoder.resetAudio2(); }
+
     void enableMbelib(bool enable) { m_decoder.enableMbelib(enable); }
 
     bool mbeDVReady1() const { return m_decoder.mbeDVReady1(); }
     void resetMbeDV1() { m_decoder.resetMbeDV1(); }
+    bool mbeDVReady2() const { return m_decoder.mbeDVReady2(); }
+    void resetMbeDV2() { m_decoder.resetMbeDV2(); }
     const unsigned char *getMbeDVFrame1() const { return m_decoder.getMbeDVFrame1(); }
+    const unsigned char *getMbeDVFrame2() const { return m_decoder.getMbeDVFrame2(); }
+
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 
     int getInLevel() const { return m_decoder.getInLevel(); }

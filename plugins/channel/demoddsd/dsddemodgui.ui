@@ -712,7 +712,7 @@
       <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
-         <string>Mute/Unmute audio</string>
+         <string>Mute/Unmute audio (all slots)</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -784,7 +784,7 @@
       <item>
        <widget class="QToolButton" name="slot1On">
         <property name="toolTip">
-         <string>TDMA slot1 voice on/off</string>
+         <string>TDMA slot1 or FDMA unique slot voice on/off</string>
         </property>
         <property name="text">
          <string/>

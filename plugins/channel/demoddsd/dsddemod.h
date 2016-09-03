@@ -228,7 +228,8 @@ private:
 	qint16 *m_sampleBuffer; //!< samples ring buffer
 	int m_sampleBufferIndex;
 
-	AudioFifo m_audioFifo;
+	AudioFifo m_audioFifo1;
+    AudioFifo m_audioFifo2;
 	SampleSink* m_scope;
 	bool m_scopeEnabled;
 
