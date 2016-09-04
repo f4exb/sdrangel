@@ -540,6 +540,18 @@ void DSDDemodGUI::tick()
         ui->zcPosText->setText(QString::number(m_dsdDemod->getDecoder().getZeroCrossingPos()));
         ui->symbolSyncQualityText->setText(QString::number(m_dsdDemod->getDecoder().getSymbolSyncQuality()));
 
+        if (m_dsdDemod->getDecoder().getVoice1On()) {
+            ui->slot1On->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->slot1On->setStyleSheet("QToolButton { background-color : rgb(79,79,79); }");
+        }
+
+        if (m_dsdDemod->getDecoder().getVoice2On()) {
+            ui->slot2On->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->slot2On->setStyleSheet("QToolButton { background-color : rgb(79,79,79); }");
+        }
+
         const char *frameTypeText = m_dsdDemod->getDecoder().getFrameTypeText();
 
 	    if (frameTypeText[0] == '\0') {

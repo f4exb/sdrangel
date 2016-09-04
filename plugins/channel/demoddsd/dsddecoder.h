@@ -45,6 +45,8 @@ public:
     void resetMbeDV2() { m_decoder.resetMbeDV2(); }
     const unsigned char *getMbeDVFrame1() const { return m_decoder.getMbeDVFrame1(); }
     const unsigned char *getMbeDVFrame2() const { return m_decoder.getMbeDVFrame2(); }
+    bool getVoice1On() const { return m_decoder.getVoice1On(); }
+    bool getVoice2On() const { return m_decoder.getVoice2On(); }
 
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 
