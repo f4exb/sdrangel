@@ -603,6 +603,42 @@
        </spacer>
       </item>
       <item>
+       <widget class="QToolButton" name="slot1On">
+        <property name="toolTip">
+         <string>TDMA slot1 or FDMA unique slot voice on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/slot1_off.png</normaloff>
+          <normalon>:/slot1_on.png</normalon>:/slot1_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="slot2On">
+        <property name="toolTip">
+         <string>TDMA slot2 voice on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/slot2_off.png</normaloff>
+          <normalon>:/slot2_on.png</normalon>:/slot2_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="squelchLabel">
         <property name="text">
          <string>Sq</string>
@@ -744,7 +780,7 @@
        <widget class="QLabel" name="formatStatusText">
         <property name="minimumSize">
          <size>
-          <width>470</width>
+          <width>535</width>
           <height>0</height>
          </size>
         </property>
@@ -764,7 +800,7 @@
          <number>2</number>
         </property>
         <property name="text">
-         <string>A123456789B123456789C123456789D123456789E123456789F123456789G123</string>
+         <string>A123456789B123456789C123456789D123456789E123456789F123456789G123456789H1</string>
         </property>
        </widget>
       </item>
@@ -780,42 +816,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QToolButton" name="slot1On">
-        <property name="toolTip">
-         <string>TDMA slot1 or FDMA unique slot voice on/off</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/slot1_off.png</normaloff>
-          <normalon>:/slot1_on.png</normalon>:/slot1_off.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="slot2On">
-        <property name="toolTip">
-         <string>TDMA slot2 voice on/off</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/slot2_off.png</normaloff>
-          <normalon>:/slot2_on.png</normalon>:/slot2_off.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
