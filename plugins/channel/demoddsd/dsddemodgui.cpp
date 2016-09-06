@@ -267,6 +267,12 @@ void DSDDemodGUI::on_slot2On_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_tdmaStereoSplit_toggled(bool checked)
+{
+    m_tdmaStereo = checked;
+    applySettings();
+}
+
 void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 {
 	applySettings();
@@ -315,6 +321,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_syncOrConstellation(false),
 	m_slot1On(false),
 	m_slot2On(false),
+	m_tdmaStereo(false),
 	m_squelchOpen(false),
 	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
@@ -406,7 +413,8 @@ void DSDDemodGUI::applySettings()
 			m_enableCosineFiltering,
 			m_syncOrConstellation,
 			m_slot1On,
-			m_slot2On);
+			m_slot2On,
+			m_tdmaStereo);
 	}
 }
 

@@ -69,6 +69,7 @@ private slots:
     void on_syncOrConstellation_toggled(bool checked);
     void on_slot1On_toggled(bool checked);
     void on_slot2On_toggled(bool checked);
+    void on_tdmaStereoSplit_toggled(bool checked);
 	void on_fmDeviation_valueChanged(int value);
 	void on_squelchGate_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
@@ -104,6 +105,7 @@ private:
 	bool m_syncOrConstellation;
 	bool m_slot1On;
     bool m_slot2On;
+    bool m_tdmaStereo;
     bool m_audioMute;
 	bool m_squelchOpen;
 	MovingAverage<Real> m_channelPowerDbAvg;

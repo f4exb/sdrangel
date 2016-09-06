@@ -47,6 +47,7 @@ public:
     const unsigned char *getMbeDVFrame2() const { return m_decoder.getMbeDVFrame2(); }
     bool getVoice1On() const { return m_decoder.getVoice1On(); }
     bool getVoice2On() const { return m_decoder.getVoice2On(); }
+    void setTDMAStereo(bool tdmaStereo) { m_decoder.setTDMAStereo(tdmaStereo); }
 
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 

@@ -90,7 +90,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		bool enableCosineFiltering,
 		bool syncOrConstellation,
 		bool slot1On,
-		bool slot2On)
+		bool slot2On,
+		bool tdmaStereo)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
 			demodGain,
@@ -103,7 +104,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			enableCosineFiltering,
 			syncOrConstellation,
 			slot1On,
-			slot2On);
+			slot2On,
+			tdmaStereo);
 	messageQueue->push(cmd);
 }
 
@@ -329,6 +331,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_syncOrConstellation = cfg.getSyncOrConstellation();
 		m_config.m_slot1On = cfg.getSlot1On();
 		m_config.m_slot2On = cfg.getSlot2On();
+		m_config.m_tdmaStereo = cfg.getTDMAStereo();
 
 		apply();
 
@@ -343,7 +346,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering
 				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation
 				<< " m_slot1On: " << m_config.m_slot1On
-				<< " m_slot2On: " << m_config.m_slot2On;
+				<< " m_slot2On: " << m_config.m_slot2On
+				<< " m_tdmaStereo: " << m_config.m_tdmaStereo;
 
 		return true;
 	}
@@ -405,6 +409,11 @@ void DSDDemod::apply()
     	m_dsdDecoder.enableCosineFiltering(m_config.m_enableCosineFiltering);
     }
 
+    if (m_config.m_tdmaStereo != m_running.m_tdmaStereo)
+    {
+        m_dsdDecoder.setTDMAStereo(m_config.m_tdmaStereo);
+    }
+
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
@@ -420,4 +429,5 @@ void DSDDemod::apply()
 	m_running.m_syncOrConstellation = m_config.m_syncOrConstellation;
 	m_running.m_slot1On = m_config.m_slot1On;
 	m_running.m_slot2On = m_config.m_slot2On;
+	m_running.m_tdmaStereo = m_config.m_tdmaStereo;
 }
