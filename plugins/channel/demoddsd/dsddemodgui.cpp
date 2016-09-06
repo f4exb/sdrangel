@@ -118,6 +118,7 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeBool(13, m_syncOrConstellation);
     s.writeBool(14, m_slot1On);
     s.writeBool(15, m_slot2On);
+    s.writeBool(16, m_tdmaStereo);
 	return s.final();
 }
 
@@ -169,6 +170,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         d.readBool(13, &m_syncOrConstellation, false);
         d.readBool(14, &m_slot1On, false);
         d.readBool(15, &m_slot2On, false);
+        d.readBool(16, &m_tdmaStereo, false);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -400,6 +402,7 @@ void DSDDemodGUI::applySettings()
 	    ui->syncOrConstellation->setChecked(m_syncOrConstellation);
 	    ui->slot1On->setChecked(m_slot1On);
         ui->slot2On->setChecked(m_slot2On);
+        ui->tdmaStereoSplit->setChecked(m_tdmaStereo);
 
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
 			ui->rfBW->value(),
