@@ -201,8 +201,14 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             {
                 if ((m_running.m_slot1On) && m_dsdDecoder.mbeDVReady1())
                 {
-                    if (!m_running.m_audioMute) {
-                        DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo1);
+                    if (!m_running.m_audioMute)
+                    {
+                        DSPEngine::instance()->pushMbeFrame(
+                                m_dsdDecoder.getMbeDVFrame1(),
+                                m_dsdDecoder.getMbeRateIndex(),
+                                m_running.m_volume,
+                                m_running.m_tdmaStereo ? 1 : 3, // left or both channels
+                                &m_audioFifo1);
                     }
 
                     m_dsdDecoder.resetMbeDV1();
@@ -210,8 +216,14 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
                 if ((m_running.m_slot2On) && m_dsdDecoder.mbeDVReady2())
                 {
-                    if (!m_running.m_audioMute) {
-                        DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame2(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo2);
+                    if (!m_running.m_audioMute)
+                    {
+                        DSPEngine::instance()->pushMbeFrame(
+                                m_dsdDecoder.getMbeDVFrame2(),
+                                m_dsdDecoder.getMbeRateIndex(),
+                                m_running.m_volume,
+                                m_running.m_tdmaStereo ? 2 : 3, // right or both channels
+                                &m_audioFifo2);
                     }
 
                     m_dsdDecoder.resetMbeDV2();

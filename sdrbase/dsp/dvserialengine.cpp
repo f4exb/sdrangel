@@ -244,7 +244,7 @@ void DVSerialEngine::getDevicesNames(std::vector<std::string>& deviceNames)
     }
 }
 
-void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, AudioFifo *audioFifo)
+void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
 
@@ -252,7 +252,7 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
     {
         if (it->worker->m_inputMessageQueue.size() < 2)
         {
-            it->worker->m_inputMessageQueue.push(DVSerialWorker::MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, audioFifo));
+            it->worker->m_inputMessageQueue.push(DVSerialWorker::MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
             break;
         }
 

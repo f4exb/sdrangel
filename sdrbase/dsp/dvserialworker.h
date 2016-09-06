@@ -49,26 +49,30 @@ public:
         const unsigned char *getMbeFrame() const { return m_mbeFrame; }
         SerialDV::DVRate getMbeRate() const { return m_mbeRate; }
         int getVolumeIndex() const { return m_volumeIndex; }
+        unsigned char getChannels() const { return m_channels % 4; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
 
-        static MsgMbeDecode* create(const unsigned char *mbeFrame, int mbeRateIndex, int volumeIndex, AudioFifo *audioFifo)
+        static MsgMbeDecode* create(const unsigned char *mbeFrame, int mbeRateIndex, int volumeIndex, unsigned char channels, AudioFifo *audioFifo)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, audioFifo);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo);
         }
 
     private:
         unsigned char m_mbeFrame[SerialDV::MBE_FRAME_LENGTH_BYTES];
         SerialDV::DVRate m_mbeRate;
         int m_volumeIndex;
+        unsigned char m_channels;
         AudioFifo *m_audioFifo;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
                 SerialDV::DVRate mbeRate,
                 int volumeIndex,
+                unsigned char channels,
                 AudioFifo *audioFifo) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
+            m_channels(channels),
             m_audioFifo(audioFifo)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::MBE_FRAME_LENGTH_BYTES);
@@ -107,7 +111,7 @@ private:
     typedef std::vector<AudioSample> AudioVector;
 
     void upsample6(short *in, short *out, int nbSamplesIn);
-    void upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo);
+    void upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo);
 
     SerialDV::DVController m_dvController;
     bool m_running;

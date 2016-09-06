@@ -80,7 +80,7 @@ void DVSerialWorker::handleInputMessages()
 
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
-                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getAudioFifo());
+                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getAudioFifo());
 //                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
 //                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
             }
@@ -94,7 +94,7 @@ void DVSerialWorker::handleInputMessages()
     }
 }
 
-void DVSerialWorker::upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo)
+void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {
@@ -105,8 +105,8 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, AudioFifo *audioFifo)
         for (int j = 1; j < 7; j++)
         {
             upsample = (qint16) ((cur*j + prev*(6-j)) / 6);
-            m_audioBuffer[m_audioBufferFill].l = upsample;
-            m_audioBuffer[m_audioBufferFill].r = upsample;
+            m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
+            m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
             ++m_audioBufferFill;
 
             if (m_audioBufferFill >= m_audioBuffer.size())
