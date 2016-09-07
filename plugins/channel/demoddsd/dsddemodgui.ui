@@ -639,16 +639,20 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="tdmaStereoSplit">
+       <widget class="QToolButton" name="tdmaStereoSplit">
         <property name="toolTip">
-         <string>Split TDMA channels on left (slot 1) and right (slot 2) audio channels</string>
+         <string>Split TDMA channels on left (slot 1) and right (slot 2) audio stereo channels or merge as mono</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/stereo.png</normaloff>:/stereo.png</iconset>
+          <normaloff>:/mono.png</normaloff>
+          <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
