@@ -24,8 +24,6 @@ CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 SOURCES = $$LIBDSDCCSRC/descramble.cpp\
-$$LIBDSDCCSRC/dmr_data.cpp\
-$$LIBDSDCCSRC/dmr_voice.cpp\
 $$LIBDSDCCSRC/dmr.cpp\
 $$LIBDSDCCSRC/dsd_decoder.cpp\
 $$LIBDSDCCSRC/dsd_filters.cpp\
@@ -42,8 +40,6 @@ $$LIBDSDCCSRC/p25p1_heuristics.cpp\
 $$LIBDSDCCSRC/fec.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
-$$LIBDSDCCSRC/dmr_data.h\
-$$LIBDSDCCSRC/dmr_voice.h\
 $$LIBDSDCCSRC/dmr.h\
 $$LIBDSDCCSRC/dsd_decoder.h\
 $$LIBDSDCCSRC/dsd_filters.h\
