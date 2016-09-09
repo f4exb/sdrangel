@@ -444,9 +444,9 @@ void DSDDemodGUI::formatStatusText()
 {
     switch (m_dsdDemod->getDecoder().getSyncType())
     {
-    case DSDcc::DSDDecoder::DSDSyncDMRDataN:
+    case DSDcc::DSDDecoder::DSDSyncDMRDataMS:
     case DSDcc::DSDDecoder::DSDSyncDMRDataP:
-    case DSDcc::DSDDecoder::DSDSyncDMRVoiceN:
+    case DSDcc::DSDDecoder::DSDSyncDMRVoiceMS:
     case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
         if (m_signalFormat != signalFormatDMR)
         {
