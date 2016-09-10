@@ -4,10 +4,16 @@
 
 This plugin uses the [DSDcc](https://github.com/f4exb/dsdcc) library that has been rewritten from the original [DSD](https://github.com/szechyjs/dsd) program to decode several digital speech formats. At present it covers the following:
 
-  - DMR/MOTOTRBO: European two slot TDMA standard. MOTOTRBO is a popular implementation of this standard.
+  - DMR/MOTOTRBO: ETSI two slot TDMA standard. MOTOTRBO is a popular implementation of this standard.
+  - dPMR: Another ETSI standard at slower rate (2400 Baud / 6.25 kHz) and FDMA
   - D-Star: developed and promoted by Icom for Amateur Radio customers.
 
-The modulation and format is automatically detected and switched.
+It can only detect the following standards (no data, no voice):
+
+  - Yaesu System Fusion (YSF): developed and promoted by Yaesu for Amateur Radio customers.
+  - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard with 2400 and 4800 Baud versions.
+
+The modulation and standard is automatically detected and switched depending on the Baud rate chosen.
 
 To enable this plugin at compile time you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
 
@@ -53,19 +59,14 @@ Here you can specify which symbol rate or Baud rate is expected. Choices are:
 This can be one of the following:
 
   - `+DMRd`: non-inverted DMR data frame
-  - `-DMRd`: inverted DMR data frame
   - `+DMRv`: non-inverted DMR voice frame
-  - `-DMRv`: inverted DMR voice frame
   - `+D-STAR`: non-inverted D-Star frame
   - `-D-STAR`: inverted D-Star frame
   - `+D-STAR_HD`: non-inverted D-Star header frame encountered
   - `-D-STAR_HD`: inverted D-Star header frame encountered
   - `+dPMR`: non-inverted dPMR non-packet frame
-  - `-dPMR`: inverted dPMR non-packet frame
   - `+NXDN`: non-inverted NXDN frame (detection only)
-  - `-NXDN`: inverted NXDN frame (detection only)
   - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
-  - `-YSF`: inverted Yaesu System Fusion frame (detection only)
 
 <h3>4: Symbol synchronization zero crossing hits in %</h3>
 
@@ -119,64 +120,122 @@ This is the audio volume for positive values. A value of zero triggers the auto 
 
 This is the deviation in kHz leading to maximum (100%) deviation. You should aim for 30 to 50% (+/-300 to +/-500m) deviation on the scope display.
 
-<h3>15: Squelch level</h3>
+<h3>15: Two slot TDMA handling</h3>
+
+This is useful for two slot TDMA modes that is only DMR at present. FDMA modes are treated as using slot #1 only.
+
+![DSD TDMA handling](../../../doc/img/DSDdemod_plugin_tdma.png)
+
+<h4>15.1: Slot #1 voice select</h4>
+
+Toggle button to select slot #1 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave only this toggle on.
+
+<h4>15.2: Slot #2 voice select</h4>
+
+Toggle button to select slot #2 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave this toggle off.
+
+<h4>15.3: TDMA stereo mode toggle</h4>
+
+  - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
+  - When on the icon shows a pair of loudspeakers. It sends slot #1 vocie to the left stereo audio channel and slot #2 to the right one
+  
+For FDMA standards you may want to leave this as mono mode.
+
+<h3>16: Squelch level</h3>
 
 The level corresponds to the channel power above which the squelch gate opens.
 
-<h3>16: Squelch time gate</h3>
+<h3>17: Squelch time gate</h3>
 
 Number of milliseconds following squelch gate opening after which the signal is actually fed to the decoder. 0 means no delay i.e. immediate feed.
 
-<h3>17: Audio mute and squelch indicator</h3>
+<h3>18: Audio mute and squelch indicator</h3>
 
 Audio mute toggle button. This button lights in green when the squelch opens.
 
-<h3>18: Format specific status display</h3>
+<h3>19: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 
-<h4>18.1: D-Star status display</h4>
+<h4>19.1: D-Star status display</h4>
 
 ![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
 
 These is the standard D-Star embedded information that is read from the header frame.
 
-<h5>18.1.1: Repeater 1 callsign</h5>
-<h5>18.1.2: Repeater 2 callsign</h5>
-<h5>18.1.3: Destination (your) callsign</h5>
-<h5>18.1.4: Origin (my) callsign</h5>
+<h5>19.1.1: Repeater 1 callsign</h5>
+<h5>19.1.2: Repeater 2 callsign</h5>
+<h5>19.1.3: Destination (your) callsign</h5>
+<h5>19.1.4: Origin (my) callsign</h5>
 
-<h4>18.2: DMR status display</h4>
+<h4>19.2: DMR status display</h4>
 
 ![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
 
-<h5>18.2.1: Station role</h5>
+  - Note 1: statuses are polled at ~1s rate and therefore do not reflect values instantaneously. As a consequence some block types that occur during the conversation may not appear.
+  - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared 
+
+<h5>19.2.1: Station role</h5>
 
   - `BS`: base station
   - `MS`: mobile station
-  - `NA`: not applicable or could not be determined
+  - `NA`: not applicable or could not be determined (you should not see this normally)
 
-<h5>18.2.2: TDMA slot #0 status</h5>
+<h5>19.2.2: TDMA slot #0 status</h5>
 
-  - `slot0`: nothing received in slot #0
-  - `[slot0]`: data frame received for slot #0
-  - `[SLOT0]`: voice frame received for slot #0
+For mobile stations on an inbound channel there is no channel identification (no CACH) so information goes there by default.
 
-<h5>18.2.3: TDMA slot #1 status</h5>
+<h5>19.2.3: TDMA slot #1 status</h5>
 
-  - `slot1`: nothing received in slot #1
-  - `[slot1]`: data frame received for slot #1
-  - `[SLOT1]`: voice frame received for slot #1
+<h5>19.2.4: Channel status and color code</h5>
+
+This applies to base stations and mobile stations in continuous mode that is transmissions including the CACH sequences.
+
+  - The first character is either:
   
-<h5>18.2.4: Color Code</h5>
+    - `*`: Busy. That is the AT bit on the opposite channel is on
+    - `.`: Clear. That is the AT bit on the opposite channel is off
+    - `/`: The CACH could not be decoded and information is missing
+    
+  - The two next characters are either:
+  
+    - The color code from 0 to 15 (4 bits)
+    - `--`: The color code could not be decoded and information is missing
+  
+<h5>19.2.5: Slot type</h5>
 
-This is the color code in use (0 to 15). It may briefly change value to a incorrect one. Take into account the value shown most of the time.
+This is either:
 
-<h4>18.3: dPMR status display</h4>
+   - `VOX`: voice block
+   - `IDL`: data idle block
+   - `VLC`: voice Link Control data block
+   - `TLC`: terminator with Link Control information data block
+   - `CSB`: CSBK (Control Signalling BlocK) data block
+   - `MBH`: Multi Block Control block header data block
+   - `MBC`: Multi Block Control block continuation data block
+   - `DAH`: Data header block
+   - `D12`: 1/2 rate data block
+   - `D34`: 3/4 rate data block
+   - `DB1`: full rate data block
+   - `RES`: reserved data block 
+   - `UNK`: unknown data type or could not be decoded
+
+<h5>19.2.6: Addressing information</h5>
+
+String is in the form: `02223297>G00000222`
+
+  - At the left of the `>` sign this is the source address (24 bits) as defined in the DMR ETSI standard
+  - The first character at the right of the `>` sign is the address type indicator:
+  
+    - `G`: group address
+    - `U`: unit (individual) address
+  - Next on the right is the target address (24 bits) as defined in the DMR ETSI standard
+
+<h4>19.3: dPMR status display</h4>
 
 ![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
 
-<h5>18.3.1: dPMR frame tyoe</h5>
+<h5>19.3.1: dPMR frame tyoe</h5>
 
   - `--`: undetermined
   - `HD`: Header of FS1 type
@@ -188,21 +247,21 @@ This is the color code in use (0 to 15). It may briefly change value to a incorr
   - `XS`: Extended search: looking for a new payload frame when out of sequence
   - `EN`: End frame
   
-<h5>18.3.2: Colour code</h5>
+<h5>19.3.2: Colour code</h5>
 
 Colour code in hexadecimal (12 bits)
 
-<h5>18.3.3: Own ID</h5>
+<h5>19.3.3: Own ID</h5>
 
 Sender's identification code in hexadecimal (24 bits)
 
-<h5>18.3.4: Called ID</h5>
+<h5>19.3.4: Called ID</h5>
 
 Called party's identification code in hexadecimal (24 bits)
 
-<h3>19: Discriminator output scope display</h3>
+<h3>20: Discriminator output scope display</h3>
 
-<h4>19.1 Transitions constellation display</h4>
+<h4>20.1 Transitions constellation display</h4>
 
 This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
@@ -218,18 +277,18 @@ This allows the visualization of symbol transitions which depend on the type of 
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope.png)
 
-<h5>19.1.1: Setting the display</h5>
+<h5>20.1.1: Setting the display</h5>
 
   - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
   - On the display buttons you should choose the side by side display
 
 On the same line you can choose any trace length. If it is too short the constellation points will not appear clearly and if it is too long the polar figure will be too dense. Usually 100ms give good results.
 
-<h5>19.1.2: IQ linear display</h5>
+<h5>20.1.2: IQ linear display</h5>
 
 The yellow trace (I) is the direct trace and the blue trace (Q) is the delayed trace. This can show how symbols differentiate between each other in a sort of eye diagram.
 
-<h5>19.1.3: IQ polar display</h5>
+<h5>20.1.3: IQ polar display</h5>
 
 This shows the constellation of transition points. You should adjust the frequency shift to center the figure and the maximum deviation and/or discriminator gain to contain the figure within the +/-0.4 square. +/- 0.1 to +/- 0.3 usually give the best results.
 
@@ -265,48 +324,48 @@ There are 16 possible points corresponding to the 16 possible transitions betwee
 
 Because not all transitions are possible similarly to the 2-FSK case pointer moves from the lower left side of the diagonal to the upper right side are not possible.
 
-<h5>19.1.4: I gain</h5>
+<h5>20.1.4: I gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>19.1.5: Q gain</h5>
+<h5>20.1.5: Q gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>19.1.6: Trigger settings</h5>
+<h5>20.1.6: Trigger settings</h5>
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
 
-<h4>19.2 Symbol synchronization display</h4>
+<h4>20.2 Symbol synchronization display</h4>
 
 This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope2.png)
 
-<h5>19.2.1 IQ linear display</h5>
+<h5>20.2.1 IQ linear display</h5>
 
 The I trace (yellow) is the discriminator signal and the Q trace (blue) is the symbol synchronization monitor trace that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
 
 The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Q trace (blue) should go down to mid position in the first fourth of the symbol period.
 
-<h5>19.2.2: Setting the display</h5>
+<h5>20.2.2: Setting the display</h5>
 
   - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
   - On the display buttons you should choose the first display (1)
 
-<h5>19.2.3: Timing settings</h5>
+<h5>20.2.3: Timing settings</h5>
 
 You can choose any trace length with the third slider from the left however 100 ms will give you the best view. You may stretch further the display by reducing the full length to 20 ms or less using the first slider. You can move this 20 ms window across the 100 ms trace with the middle slider.
 
-<h5>19.2.4: I gain</h5>
+<h5>20.2.4: I gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>19.2.5: Q gain</h5>
+<h5>20.2.5: Q gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>19.2.6: Trigger settings</h5>
+<h5>20.2.6: Trigger settings</h5>
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
 

@@ -106,6 +106,7 @@ Note that this plugin does not require any of the hardware support libraries nor
 This is the `demoddsd` plugin. At present it can be used to decode the following digital speech formats:
 
   - DMR/MOTOTRBO
+  - dPMR
   - D-Star
 
 It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
@@ -372,9 +373,15 @@ Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to yo
 
 The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\libusb-1.0.19\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.
 
+<h1>Mac O/S</h1>
+
+A Mac O/S build was contributed from version 2.0.1. Please be aware that this is still experimental.
+
 <h1>Android</h1>
 
-Despite several attempts and the presence of Android related stuff still present in the .pro files there is NO and will NEVER be any support for Android. An APK can be built but Qt fails miserably at porting applications other than its ridiculously simple examples. When multi-threading is involved a lot like in SDRangel this simply crashes at the very beginning of the application when starting the event loop.
+Despite several attempts and the presence of Android related stuff still present in the .pro files there is no Android build available. An APK can be built but Qt fails miserably at porting applications other than its ridiculously simple examples. When multi-threading is involved a lot like in SDRangel this simply crashes at the very beginning of the application when starting the event loop.
+
+Contributors welcome!
 
 
 <h1>Software installation on Linux flavours</h1>
@@ -401,8 +408,8 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 
 <h2>To Do</h2>
 
-  - Allow the handling of more than one device at the same time. For Rx/Tx devices like the BladeRF Rx and Tx appear as two logical devices with two plugin instances and a common handler for the physical device services both plugins. This effectively opens Tx support.
-  - Tx channels
+  - Tx support for devices like Blade-RF or Hack-RF and simple file output (probably to start with)
+  - Tx channels to feed Tx devices
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
   - 32 bit samples for the Channel Analyzer
@@ -411,7 +418,7 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration
-  - Even more demods ...
+  - Even more demods. Contributors welcome!
 
 <h1>Developper's notes</h1>
 
