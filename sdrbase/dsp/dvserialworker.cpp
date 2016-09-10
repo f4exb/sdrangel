@@ -149,37 +149,37 @@ void DVSerialWorker::upsample6(short *in, short *out, int nbSamplesIn)
 //            m_phase = 0.0f;
 //        }
 
-        up = (cur*1 + prev*5) / 6;
+        up = m_upsampleFilter.run((cur*1 + prev*5) / 6);
         *out = up;
         out++;
         *out = up;
         out++;
 
-        up = (cur*2 + prev*4) / 6;
+        up = m_upsampleFilter.run((cur*2 + prev*4) / 6);
         *out = up;
         out++;
         *out = up;
         out++;
 
-        up = (cur*3 + prev*3) / 6;
+        up = m_upsampleFilter.run((cur*3 + prev*3) / 6);
         *out = up;
         out++;
         *out = up;
         out++;
 
-        up = (cur*4 + prev*2) / 6;
+        up = m_upsampleFilter.run((cur*4 + prev*2) / 6);
         *out = up;
         out++;
         *out = up;
         out++;
 
-        up = (cur*5 + prev*1) / 6;
+        up = m_upsampleFilter.run((cur*5 + prev*1) / 6);
         *out = up;
         out++;
         *out = up;
         out++;
 
-        up = in[i];
+        up = m_upsampleFilter.run(in[i]);
         *out = up;
         out++;
         *out = up;

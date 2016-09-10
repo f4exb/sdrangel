@@ -27,6 +27,7 @@
 #include "util/message.h"
 #include "util/syncmessenger.h"
 #include "util/messagequeue.h"
+#include "dsp/filtermbe.h"
 
 class AudioFifo;
 
@@ -123,6 +124,7 @@ private:
     uint m_audioBufferFill;
     short m_upsamplerLastValue;
     float m_phase;
+    MBEAudioInterpolatorFilter m_upsampleFilter;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */

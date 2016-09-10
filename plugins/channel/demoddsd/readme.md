@@ -226,7 +226,6 @@ String is in the form: `02223297>G00000222`
 
   - At the left of the `>` sign this is the source address (24 bits) as defined in the DMR ETSI standard
   - The first character at the right of the `>` sign is the address type indicator:
-  
     - `G`: group address
     - `U`: unit (individual) address
   - Next on the right is the target address (24 bits) as defined in the DMR ETSI standard
