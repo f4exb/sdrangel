@@ -75,6 +75,8 @@ void DVSerialWorker::handleInputMessages()
 {
     m_timer->stop(); // suspend FIFO queue holding timeout
     Message* message;
+    m_audioBufferFill = 0;
+    AudioFifo *audioFifo = 0;
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
@@ -86,6 +88,7 @@ void DVSerialWorker::handleInputMessages()
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
                 upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getAudioFifo());
+                audioFifo = decodeMsg->getAudioFifo();
             }
             else
             {
@@ -94,6 +97,16 @@ void DVSerialWorker::handleInputMessages()
         }
 
         delete message;
+    }
+
+    if (audioFifo)
+    {
+        uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+
+        if (res != m_audioBufferFill)
+        {
+            qDebug("DVSerialWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
+        }
     }
 
     m_timer->start(1000); // FIFO queue holding timeout
@@ -127,18 +140,14 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channel
             upsample = m_upsampleFilter.run((qint16) ((cur*j + prev*(6-j)) / 6));
             m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
             m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
-            ++m_audioBufferFill;
 
-            if (m_audioBufferFill >= m_audioBuffer.size())
+            if (m_audioBufferFill < m_audioBuffer.size() - 1)
             {
-                uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-                if (res != m_audioBufferFill)
-                {
-                    qDebug("DVSerialWorker::upsample6: %u/%u audio samples written", res, m_audioBufferFill);
-                }
-
-                m_audioBufferFill = 0;
+                ++m_audioBufferFill;
+            }
+            else
+            {
+                qDebug("DVSerialWorker::upsample6: audio buffer is full check its size");
             }
         }
 
