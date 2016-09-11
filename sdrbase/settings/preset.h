@@ -75,6 +75,15 @@ public:
 			const QString& sourceSerial,
 			int sourceSequence) const;
 
+	static bool presetCompare(const Preset *p1, Preset *p2)
+	{
+	    if (p1->m_centerFrequency != p2->m_centerFrequency) {
+	        return p1->m_centerFrequency < p2->m_centerFrequency;
+	    } else {
+	        return p1->m_description < p2->m_description;
+	    }
+	}
+
 protected:
 	// group and preset description
 	QString m_group;

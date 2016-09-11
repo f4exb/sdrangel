@@ -92,3 +92,8 @@ void MainSettings::deletePreset(const Preset* preset)
 	m_presets.removeAll((Preset*)preset);
 	delete (Preset*)preset;
 }
+
+void MainSettings::sortPresets()
+{
+    qSort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
+}

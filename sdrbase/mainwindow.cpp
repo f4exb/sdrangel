@@ -287,6 +287,7 @@ void MainWindow::loadSettings()
 	qDebug() << "MainWindow::loadSettings";
 
     m_settings.load();
+    m_settings.sortPresets();
 
     for(int i = 0; i < m_settings.getPresetCount(); ++i)
     {

@@ -19,6 +19,7 @@ public:
 	void deletePreset(const Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
 	const Preset* getPreset(int index) const { return m_presets[index]; }
+	void sortPresets();
 
 	Preset* getWorkingPreset() { return &m_workingPreset; }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
