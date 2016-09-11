@@ -73,15 +73,15 @@ void DVSerialWorker::stop()
 
 void DVSerialWorker::handleInputMessages()
 {
+    m_timer->stop(); // suspend FIFO queue holding timeout
     Message* message;
-    m_timer->start(500); // FIFO queue holding timeout
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
         if (MsgMbeDecode::match(*message))
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
-            int dBVolume = (decodeMsg->getVolumeIndex() - 50) / 2;
+            int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 2;
 
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
@@ -95,6 +95,8 @@ void DVSerialWorker::handleInputMessages()
 
         delete message;
     }
+
+    m_timer->start(1000); // FIFO queue holding timeout
 }
 
 void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
@@ -122,7 +124,7 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channel
 
         for (int j = 1; j < 7; j++)
         {
-            upsample = (qint16) ((cur*j + prev*(6-j)) / 6);
+            upsample = m_upsampleFilter.run((qint16) ((cur*j + prev*(6-j)) / 6));
             m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
             m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
             ++m_audioBufferFill;

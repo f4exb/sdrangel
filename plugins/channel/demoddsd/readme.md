@@ -24,7 +24,7 @@ You can use a serial device connected to your system that implements and exposes
   - Compile with [SerialDV](https://github.com/f4exb/serialDV) support Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so`
   - Enable DV serial devices in your system by checking the option in the Preferences menu. YOu will need to enable the DV serial devices each time you start SDRangel.
   
-Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 500ms. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
+Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
 
 Note also that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
 
@@ -116,7 +116,9 @@ This is the gain applied to the output of the discriminator before the decoder
 
 <h3>13: Audio volume</h3>
 
-This is the audio volume for positive values. A value of zero triggers the auto volume (audio AGC).
+When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature. 
+
+With the DV serial device(s) amplification factor in dB is given by `(value - 3.0)*5.0`. In most practical cases the middle value of 5.0 (+10 dB) is a comfortable level.
 
 <h3>14: Maximum expected FM deviation</h3>
 

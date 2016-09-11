@@ -24,7 +24,9 @@ const float MBEAudioInterpolatorFilter::m_b1 = 1.392667E+00;
 const float MBEAudioInterpolatorFilter::m_b2 = -5.474446E-01;
 
 MBEAudioInterpolatorFilter::MBEAudioInterpolatorFilter()
-{}
+{
+    init();
+}
 
 MBEAudioInterpolatorFilter::~MBEAudioInterpolatorFilter()
 {}
