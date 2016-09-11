@@ -24,9 +24,11 @@ You can use a serial device connected to your system that implements and exposes
   - Compile with [SerialDV](https://github.com/f4exb/serialDV) support Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so`
   - Enable DV serial devices in your system by checking the option in the Preferences menu. YOu will need to enable the DV serial devices each time you start SDRangel.
   
-Please note that such serial devices work with a serial interface at 400 kb. While this seems large for a serial interface this limits the throughput and hence the capability of decoding several channels in parallel. The software can enqueue requests over many devices so the more you have the more channels you can decode in parallel. Note also that a channel that does not output voice frames will not require a device for decoding so only channels that receive voice frames at any one time will require a DV serial device.
+Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 500ms. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
 
-Note also that this is not supported in Windows.
+Note also that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
+
+Altermatively you can use software decoding with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
 <h2>Mbelib support</h2>
 

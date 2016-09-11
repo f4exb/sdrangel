@@ -19,6 +19,7 @@
 #define SDRBASE_DSP_DVSERIALENGINE_H_
 
 #include <QObject>
+#include <QMutex>
 #include <vector>
 #include <string>
 #include <list>
@@ -60,6 +61,7 @@ private:
     std::list<std::string> m_comList;
     std::list<std::string> m_comList8250;
     std::vector<DVSerialController> m_controllers;
+    QMutex m_mutex;
 };
 
 

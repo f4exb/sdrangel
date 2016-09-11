@@ -32,10 +32,14 @@ DVSerialWorker::DVSerialWorker() :
 {
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
+    m_audioFifo = 0;
+    m_timer = new QTimer(this);
+    m_timer->setSingleShot(true);
 }
 
 DVSerialWorker::~DVSerialWorker()
 {
+    delete m_timer;
 }
 
 bool DVSerialWorker::open(const std::string& serialDevice)
@@ -70,6 +74,7 @@ void DVSerialWorker::stop()
 void DVSerialWorker::handleInputMessages()
 {
     Message* message;
+    m_timer->start(500); // FIFO queue holding timeout
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
@@ -81,8 +86,6 @@ void DVSerialWorker::handleInputMessages()
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
                 upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getAudioFifo());
-//                upsample6(m_dvAudioSamples, m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE);
-//                decodeMsg->getAudioFifo()->write((const quint8 *) m_audioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE * 6, 10);
             }
             else
             {
@@ -92,6 +95,21 @@ void DVSerialWorker::handleInputMessages()
 
         delete message;
     }
+}
+
+void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels, AudioFifo *audioFifo)
+{
+    m_audioFifo = audioFifo;
+    m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
+}
+
+void DVSerialWorker::releaseQueue()
+{
+    qDebug("DVSerialWorker::releaseQueue: release %p", m_audioFifo);
+    m_audioFifo = 0;
 }
 
 void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
@@ -134,6 +152,7 @@ void DVSerialWorker::upsample6(short *in, short *out, int nbSamplesIn)
         int prev = (int) m_upsamplerLastValue;
         short up;
 
+// DEBUG:
 //        for (int j = 0; j < 6; j++)
 //        {
 //            up = 32768.0f * cos(m_phase);

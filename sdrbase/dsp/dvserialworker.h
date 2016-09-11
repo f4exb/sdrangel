@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QTimer>
 
 #include <vector>
 
@@ -83,6 +84,12 @@ public:
     DVSerialWorker();
     ~DVSerialWorker();
 
+    void pushMbeFrame(const unsigned char *mbeFrame,
+            int mbeRateIndex,
+            int mbeVolumeIndex,
+            unsigned char channels,
+            AudioFifo *audioFifo);
+
     bool open(const std::string& serialDevice);
     void close();
     void process();
@@ -95,13 +102,15 @@ public:
     }
 
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+    AudioFifo *m_audioFifo;
+    QTimer *m_timer;
 
 signals:
-    void inputMessageReady();
     void finished();
 
 public slots:
     void handleInputMessages();
+    void releaseQueue();
 
 private:
     struct AudioSample {

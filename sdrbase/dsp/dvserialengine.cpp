@@ -33,6 +33,7 @@
 
 #include <QDebug>
 #include <QThread>
+#include <QMutexLocker>
 
 #include "audio/audiooutput.h"
 #include "dvserialengine.h"
@@ -198,6 +199,7 @@ bool DVSerialEngine::scan()
             connect(controller.worker, SIGNAL(finished()), controller.worker, SLOT(deleteLater()));
             connect(controller.thread, SIGNAL(finished()), controller.thread, SLOT(deleteLater()));
             connect(&controller.worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), controller.worker, SLOT(handleInputMessages()));
+            connect(controller.worker->m_timer, SIGNAL(timeout()), controller.worker, SLOT(releaseQueue()));
             controller.thread->start();
 
             m_controllers.push_back(controller);
@@ -247,20 +249,37 @@ void DVSerialEngine::getDevicesNames(std::vector<std::string>& deviceNames)
 void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
+    std::vector<DVSerialController>::iterator itAvail = m_controllers.end();
+    bool done = false;
+    QMutexLocker locker(&m_mutex);
 
     while (it != m_controllers.end())
     {
-        if (it->worker->m_inputMessageQueue.size() < 2)
+        if (it->worker->m_audioFifo == audioFifo)
         {
-            it->worker->m_inputMessageQueue.push(DVSerialWorker::MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
-            break;
+            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+            done = true;
+        }
+        else if (it->worker->m_audioFifo == 0)
+        {
+            itAvail = it;
         }
 
         ++it;
     }
 
-    if (it == m_controllers.end())
+    if (!done)
     {
-        qDebug("DVSerialEngine::pushMbeFrame: no DV serial device available. MBE frame dropped");
+        if (itAvail != m_controllers.end())
+        {
+            int wNum = itAvail - m_controllers.begin();
+
+            qDebug("DVSerialEngine::pushMbeFrame: push %p on empty queue %d", audioFifo, wNum);
+            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+        }
+        else
+        {
+            qDebug("DVSerialEngine::pushMbeFrame: no DV serial device available. MBE frame dropped");
+        }
     }
 }
