@@ -503,7 +503,7 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDStar;
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
-        sprintf(m_formatStatusText, "%s CC: %04d OI: %06X CI: %06X",
+        sprintf(m_formatStatusText, "%s CC: %04d OI: %08d CI: %08d",
                 m_dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
                 m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode(),
                 m_dsdDemod->getDecoder().getDPMRDecoder().getOwnId(),

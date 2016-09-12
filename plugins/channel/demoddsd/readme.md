@@ -252,15 +252,15 @@ String is in the form: `02223297>G00000222`
   
 <h5>19.3.2: Colour code</h5>
 
-Colour code in hexadecimal (12 bits)
+Colour code in decimal (12 bits)
 
 <h5>19.3.3: Own ID</h5>
 
-Sender's identification code in hexadecimal (24 bits)
+Sender's identification code in decimal (24 bits)
 
 <h5>19.3.4: Called ID</h5>
 
-Called party's identification code in hexadecimal (24 bits)
+Called party's identification code in decimal (24 bits)
 
 <h3>20: Discriminator output scope display</h3>
 
