@@ -532,13 +532,16 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDPMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncYSF:
+        //           1    1    2
+        // 0....5....0....5....0...
+        // CC VD2 RID B0 F7 WL S000
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
-    		sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
+            sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
     	}
     	else
     	{
-    		sprintf(m_formatStatusText, "E%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
+            sprintf(m_formatStatusText, "E%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
     	}
     	sprintf(&m_formatStatusText[3], "%s %s B%d F%d %c%c ",
     			m_ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
@@ -549,11 +552,11 @@ void DSDDemodGUI::formatStatusText()
 				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
     	{
-    		sprintf(&m_formatStatusText[20], "S%02d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
+            sprintf(&m_formatStatusText[20], "S%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
     	}
     	else
     	{
-    		strcpy(&m_formatStatusText[20], "S--");
+            strcpy(&m_formatStatusText[20], "S---");
     	}
     	m_signalFormat = signalFormatYSF;
     	break;
