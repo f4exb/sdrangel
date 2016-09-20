@@ -52,6 +52,27 @@ char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
 		"EN", // 8: end frame
 };
 
+const char * DSDDemodGUI::m_ysfChannelTypeText[4] = {
+        "HC", //!< Header Channel
+        "CC", //!< Communications Channel
+        "TC", //!< Termination Channel
+        "TT"  //!< Test
+};
+
+const char * DSDDemodGUI::m_ysfDataTypeText[4] = {
+        "VD1", //!< Voice/Data type 1
+        "DFR", //!< Data Full Rate
+        "VD2", //!< Voice/Data type 2
+        "VFR"  //!< Voice Full Rate
+};
+
+const char * DSDDemodGUI::m_ysfCallModeText[4] = {
+        "GCQ", //!< Group CQ
+        "RID", //!< Radio ID
+        "RES", //!< Reserved
+        "IND"  //!< Individual
+};
+
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
@@ -510,6 +531,32 @@ void DSDDemodGUI::formatStatusText()
                 m_dsdDemod->getDecoder().getDPMRDecoder().getCalledId());
         m_signalFormat = signalFormatDPMR;
         break;
+    case DSDcc::DSDDecoder::DSDSyncYSF:
+    	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
+    	{
+    		sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
+    	}
+    	else
+    	{
+    		sprintf(m_formatStatusText, "E%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
+    	}
+    	sprintf(&m_formatStatusText[3], "%s %s B%d F%d %c%c ",
+    			m_ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
+				m_ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
+				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
+				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
+				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),
+				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
+    	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
+    	{
+    		sprintf(&m_formatStatusText[20], "S%02d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
+    	}
+    	else
+    	{
+    		strcpy(&m_formatStatusText[20], "S--");
+    	}
+    	m_signalFormat = signalFormatYSF;
+    	break;
     default:
         m_signalFormat = signalFormatNone;
         m_formatStatusText[0] = '\0';

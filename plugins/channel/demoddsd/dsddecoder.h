@@ -65,6 +65,7 @@ public:
     unsigned char getColorCode() const { return m_decoder.getColorCode(); }
     const DSDcc::DSDDstar& getDStarDecoder() const { return m_decoder.getDStarDecoder(); }
     const DSDcc::DSDdPMR& getDPMRDecoder() const { return m_decoder.getDPMRDecoder(); }
+    const DSDcc::DSDYSF& getYSFDecoder() const { return m_decoder.getYSFDecoder(); }
 
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
     void setBaudRate(int baudRate);

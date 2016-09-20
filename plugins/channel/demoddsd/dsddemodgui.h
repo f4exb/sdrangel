@@ -84,7 +84,8 @@ private:
 	    signalFormatNone,
 	    signalFormatDMR,
 	    signalFormatDStar,
-	    signalFormatDPMR
+	    signalFormatDPMR,
+		signalFormatYSF
 	} SignalFormat;
 
 	Ui::DSDDemodGUI* ui;
@@ -112,6 +113,10 @@ private:
 	int m_tickCount;
 
 	static char m_dpmrFrameTypes[9][3];
+    static const char *m_ysfChannelTypeText[4];
+    static const char *m_ysfDataTypeText[4];
+    static const char *m_ysfCallModeText[4];
+
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();
