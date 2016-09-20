@@ -37,7 +37,11 @@ $$LIBDSDCCSRC/ysf.cpp\
 $$LIBDSDCCSRC/nxdn.cpp\
 $$LIBDSDCCSRC/dpmr.cpp\
 $$LIBDSDCCSRC/p25p1_heuristics.cpp\
-$$LIBDSDCCSRC/fec.cpp
+$$LIBDSDCCSRC/fec.cpp\
+$$LIBDSDCCSRC/crc.cpp\
+$$LIBDSDCCSRC/viterbi.cpp\
+$$LIBDSDCCSRC/viterbi3.cpp\
+$$LIBDSDCCSRC/viterbi5.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
 $$LIBDSDCCSRC/dmr.h\
@@ -55,6 +59,10 @@ $$LIBDSDCCSRC/dpmr.h\
 $$LIBDSDCCSRC/p25p1_heuristics.h\
 $$LIBDSDCCSRC/runningmaxmin.h\
 $$LIBDSDCCSRC/doublebuffer.h\
-$$LIBDSDCCSRC/fec.h
+$$LIBDSDCCSRC/fec.h\
+$$LIBDSDCCSRC/crc.h\
+$$LIBDSDCCSRC/viterbi.h\
+$$LIBDSDCCSRC/viterbi3.h\
+$$LIBDSDCCSRC/viterbi5.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
