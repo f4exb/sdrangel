@@ -41,7 +41,8 @@ $$LIBDSDCCSRC/fec.cpp\
 $$LIBDSDCCSRC/crc.cpp\
 $$LIBDSDCCSRC/viterbi.cpp\
 $$LIBDSDCCSRC/viterbi3.cpp\
-$$LIBDSDCCSRC/viterbi5.cpp
+$$LIBDSDCCSRC/viterbi5.cpp\
+$$LIBDSDCCSRC/pn.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
 $$LIBDSDCCSRC/dmr.h\
@@ -63,6 +64,7 @@ $$LIBDSDCCSRC/fec.h\
 $$LIBDSDCCSRC/crc.h\
 $$LIBDSDCCSRC/viterbi.h\
 $$LIBDSDCCSRC/viterbi3.h\
-$$LIBDSDCCSRC/viterbi5.h
+$$LIBDSDCCSRC/viterbi5.h\
+$$LIBDSDCCSRC/pn.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
