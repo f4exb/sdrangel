@@ -534,7 +534,7 @@ void DSDDemodGUI::formatStatusText()
     case DSDcc::DSDDecoder::DSDSyncYSF:
         //           1    1    2    2    3    3    4    4    5    5    6    6    7
         // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-        // C V2 RI 0:7 WL000 ssssssssss>dddddddddd  UUUUUUUUUU>DDDDDDDDDD 44444
+        // C V2 RI 0:7 WL000 ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
             sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
@@ -558,6 +558,12 @@ void DSDDemodGUI::formatStatusText()
     	{
             strcpy(&m_formatStatusText[14], "---");
     	}
+        sprintf(&m_formatStatusText[17], "|%-10s>%-10s |%-10s>%-10s|%-5s",
+                m_dsdDemod->getDecoder().getYSFDecoder().getSrc(),
+                m_dsdDemod->getDecoder().getYSFDecoder().getDest(),
+                m_dsdDemod->getDecoder().getYSFDecoder().getUplink(),
+                m_dsdDemod->getDecoder().getYSFDecoder().getDownlink(),
+                m_dsdDemod->getDecoder().getYSFDecoder().getRem4());
     	m_signalFormat = signalFormatYSF;
     	break;
     default:
