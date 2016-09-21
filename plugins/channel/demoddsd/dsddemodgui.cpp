@@ -543,6 +543,7 @@ void DSDDemodGUI::formatStatusText()
     	{
             sprintf(m_formatStatusText, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
     	}
+
         sprintf(&m_formatStatusText[2], "%s %s %d:%d %c%c",
     			m_ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
 				m_ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
@@ -550,7 +551,8 @@ void DSDDemodGUI::formatStatusText()
 				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
 				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),
 				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
-    	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
+
+        if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
     	{
             sprintf(&m_formatStatusText[14], "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
     	}
@@ -558,13 +560,28 @@ void DSDDemodGUI::formatStatusText()
     	{
             strcpy(&m_formatStatusText[14], "---");
     	}
-        sprintf(&m_formatStatusText[17], "|%-10s>%-10s |%-10s>%-10s|%-5s",
+
+        char dest[11];
+
+        if ( m_dsdDemod->getDecoder().getYSFDecoder().radioIdMode())
+        {
+            sprintf(dest, "%-5s:%-5s",
+                    m_dsdDemod->getDecoder().getYSFDecoder().getDestId(),
+                    m_dsdDemod->getDecoder().getYSFDecoder().getSrcId());
+        }
+        else
+        {
+            sprintf(dest, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
+        }
+
+        sprintf(&m_formatStatusText[17], "|%-10s>%s|%-10s>%-10s|%-5s",
                 m_dsdDemod->getDecoder().getYSFDecoder().getSrc(),
-                m_dsdDemod->getDecoder().getYSFDecoder().getDest(),
+                dest,
                 m_dsdDemod->getDecoder().getYSFDecoder().getUplink(),
                 m_dsdDemod->getDecoder().getYSFDecoder().getDownlink(),
                 m_dsdDemod->getDecoder().getYSFDecoder().getRem4());
-    	m_signalFormat = signalFormatYSF;
+
+        m_signalFormat = signalFormatYSF;
     	break;
     default:
         m_signalFormat = signalFormatNone;
