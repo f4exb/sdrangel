@@ -53,24 +53,24 @@ char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
 };
 
 const char * DSDDemodGUI::m_ysfChannelTypeText[4] = {
-        "HC", //!< Header Channel
-        "CC", //!< Communications Channel
-        "TC", //!< Termination Channel
-        "TT"  //!< Test
+        "H", //!< Header Channel
+        "C", //!< Communications Channel
+        "T", //!< Termination Channel
+        "S"  //!< Test
 };
 
 const char * DSDDemodGUI::m_ysfDataTypeText[4] = {
-        "VD1", //!< Voice/Data type 1
-        "DFR", //!< Data Full Rate
-        "VD2", //!< Voice/Data type 2
-        "VFR"  //!< Voice Full Rate
+        "V1", //!< Voice/Data type 1
+        "DF", //!< Data Full Rate
+        "V2", //!< Voice/Data type 2
+        "VF"  //!< Voice Full Rate
 };
 
 const char * DSDDemodGUI::m_ysfCallModeText[4] = {
-        "GCQ", //!< Group CQ
-        "RID", //!< Radio ID
-        "RES", //!< Reserved
-        "IND"  //!< Individual
+        "GC", //!< Group CQ
+        "RI", //!< Radio ID
+        "RS", //!< Reserved
+        "IN"  //!< Individual
 };
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
@@ -532,18 +532,18 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDPMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncYSF:
-        //           1    1    2
-        // 0....5....0....5....0...
-        // CC VD2 RID B0 F7 WL S000
+        //           1    1    2    2    3    3    4    4    5    5    6    6    7
+        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+        // C V2 RI 0:7 WL000 ssssssssss>dddddddddd  UUUUUUUUUU>DDDDDDDDDD 44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
             sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
     	}
     	else
     	{
-            sprintf(m_formatStatusText, "E%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
+            sprintf(m_formatStatusText, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
     	}
-    	sprintf(&m_formatStatusText[3], "%s %s B%d F%d %c%c ",
+        sprintf(&m_formatStatusText[2], "%s %s %d:%d %c%c",
     			m_ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
 				m_ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
 				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
@@ -552,11 +552,11 @@ void DSDDemodGUI::formatStatusText()
 				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
     	{
-            sprintf(&m_formatStatusText[20], "S%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
+            sprintf(&m_formatStatusText[14], "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
     	}
     	else
     	{
-            strcpy(&m_formatStatusText[20], "S---");
+            strcpy(&m_formatStatusText[14], "---");
     	}
     	m_signalFormat = signalFormatYSF;
     	break;
