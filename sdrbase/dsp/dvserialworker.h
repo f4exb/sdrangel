@@ -60,7 +60,7 @@ public:
         }
 
     private:
-        unsigned char m_mbeFrame[SerialDV::MBE_FRAME_LENGTH_BYTES];
+        unsigned char m_mbeFrame[SerialDV::MBE_FRAME_MAX_LENGTH_BYTES];
         SerialDV::DVRate m_mbeRate;
         int m_volumeIndex;
         unsigned char m_channels;
@@ -77,7 +77,7 @@ public:
             m_channels(channels),
             m_audioFifo(audioFifo)
         {
-            memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::MBE_FRAME_LENGTH_BYTES);
+            memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
         }
     };
 
