@@ -798,7 +798,7 @@
        <widget class="QLabel" name="formatStatusText">
         <property name="minimumSize">
          <size>
-          <width>535</width>
+          <width>595</width>
           <height>0</height>
          </size>
         </property>
@@ -818,7 +818,7 @@
          <number>2</number>
         </property>
         <property name="text">
-         <string>A123456789B123456789C123456789D123456789E123456789F123456789G123456789H1</string>
+         <string>A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I</string>
         </property>
        </widget>
       </item>

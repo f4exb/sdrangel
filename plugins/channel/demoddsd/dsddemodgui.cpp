@@ -497,7 +497,7 @@ void DSDDemodGUI::formatStatusText()
     case DSDcc::DSDDecoder::DSDSyncDStarP:
         if (m_signalFormat != signalFormatDStar)
         {
-            strcpy(m_formatStatusText, "RPT1: ________ RPT2: ________ YOUR: ________ MY: ________/____");
+            strcpy(m_formatStatusText, "R1: ________ R2: ________ UR: ________ MY: ________/____ ____________________");
         }
 
         {
@@ -507,20 +507,21 @@ void DSDDemodGUI::formatStatusText()
             const std::string& yrSign = m_dsdDemod->getDecoder().getDStarDecoder().getYourSign();
 
             if (rpt1.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[6], rpt1.c_str(), 8);
+                memcpy(&m_formatStatusText[4], rpt1.c_str(), 8);
             }
             if (rpt2.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[21], rpt2.c_str(), 8);
+                memcpy(&m_formatStatusText[17], rpt2.c_str(), 8);
             }
             if (yrSign.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[36], yrSign.c_str(), 8);
+                memcpy(&m_formatStatusText[30], yrSign.c_str(), 8);
             }
             if (mySign.length() > 0) { // 0 or 13
-                memcpy(&m_formatStatusText[49], mySign.c_str(), 13);
+                memcpy(&m_formatStatusText[43], mySign.c_str(), 13);
             }
+            memcpy(&m_formatStatusText[57], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
         }
 
-        m_formatStatusText[72] = '\0';
+        m_formatStatusText[80] = '\0';
         m_signalFormat = signalFormatDStar;
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
@@ -589,7 +590,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     }
 
-    m_formatStatusText[72] = '\0'; // guard
+    m_formatStatusText[80] = '\0'; // guard
 }
 
 void DSDDemodGUI::tick()
