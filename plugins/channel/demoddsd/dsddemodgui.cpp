@@ -498,9 +498,9 @@ void DSDDemodGUI::formatStatusText()
         if (m_signalFormat != signalFormatDStar)
         {
                                      //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0
-            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|___/_____._");
-                                     // MY            UR       RPT1     RPT2     Info                 Target
+                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______ ___/_____._");
+                                     // MY            UR       RPT1     RPT2     Info                 Loc    Target
         }
 
         {
@@ -524,7 +524,7 @@ void DSDDemodGUI::formatStatusText()
             memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
         }
 
-        m_formatStatusText[80] = '\0';
+        m_formatStatusText[82] = '\0';
         m_signalFormat = signalFormatDStar;
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
@@ -537,7 +537,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     case DSDcc::DSDDecoder::DSDSyncYSF:
         //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0
+        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
         // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
@@ -593,7 +593,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     }
 
-    m_formatStatusText[80] = '\0'; // guard
+    m_formatStatusText[82] = '\0'; // guard
 }
 
 void DSDDemodGUI::tick()
