@@ -497,7 +497,10 @@ void DSDDemodGUI::formatStatusText()
     case DSDcc::DSDDecoder::DSDSyncDStarP:
         if (m_signalFormat != signalFormatDStar)
         {
-            strcpy(m_formatStatusText, "R1:________ R2:________ UR:________ MY:________/____ I:____________________");
+                                     //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0
+            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|___/_____._");
+                                     // MY            UR       RPT1     RPT2     Info                 Target
         }
 
         {
@@ -507,18 +510,18 @@ void DSDDemodGUI::formatStatusText()
             const std::string& yrSign = m_dsdDemod->getDecoder().getDStarDecoder().getYourSign();
 
             if (rpt1.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[3], rpt1.c_str(), 8);
+                memcpy(&m_formatStatusText[23], rpt1.c_str(), 8);
             }
             if (rpt2.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[15], rpt2.c_str(), 8);
+                memcpy(&m_formatStatusText[32], rpt2.c_str(), 8);
             }
             if (yrSign.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[27], yrSign.c_str(), 8);
+                memcpy(&m_formatStatusText[14], yrSign.c_str(), 8);
             }
             if (mySign.length() > 0) { // 0 or 13
-                memcpy(&m_formatStatusText[39], mySign.c_str(), 13);
+                memcpy(&m_formatStatusText[0], mySign.c_str(), 13);
             }
-            memcpy(&m_formatStatusText[55], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
+            memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
         }
 
         m_formatStatusText[80] = '\0';
@@ -533,9 +536,9 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDPMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncYSF:
-        //           1    1    2    2    3    3    4    4    5    5    6    6    7
-        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-        // C V2 RI 0:7 WL000 ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
+        //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0
+        // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
             sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
