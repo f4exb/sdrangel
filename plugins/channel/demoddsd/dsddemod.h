@@ -55,6 +55,8 @@ public:
 			bool slot2On,
 			bool tdmaStereo);
 
+	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
+
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
@@ -70,6 +72,28 @@ public:
 	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }
 
 private:
+	class MsgConfigureMyPosition : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		float getMyLatitude() const { return m_myLatitude; }
+		float getMyLongitude() const { return m_myLongitude; }
+
+		static MsgConfigureMyPosition* create(float myLatitude, float myLongitude)
+		{
+			return new MsgConfigureMyPosition(myLatitude, myLongitude);
+		}
+
+	private:
+		float m_myLatitude;
+		float m_myLongitude;
+
+		MsgConfigureMyPosition(float myLatitude, float myLongitude) :
+			m_myLatitude(myLatitude),
+			m_myLongitude(myLongitude)
+		{}
+	};
+
 	class MsgConfigureDSDDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
 

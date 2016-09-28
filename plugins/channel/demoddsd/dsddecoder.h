@@ -67,6 +67,7 @@ public:
     const DSDcc::DSDdPMR& getDPMRDecoder() const { return m_decoder.getDPMRDecoder(); }
     const DSDcc::DSDYSF& getYSFDecoder() const { return m_decoder.getYSFDecoder(); }
 
+    void setMyPoint(float lat, float lon) { m_decoder.setMyPoint(lat, lon); }
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
     void setBaudRate(int baudRate);
 

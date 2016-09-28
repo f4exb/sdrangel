@@ -29,6 +29,7 @@
 static const Real afSqTones[2] = {1200.0, 6400.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
+MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 
 DSDDemod::DSDDemod(SampleSink* sampleSink) :
 	m_sampleCount(0),
@@ -106,6 +107,12 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			slot1On,
 			slot2On,
 			tdmaStereo);
+	messageQueue->push(cmd);
+}
+
+void DSDDemod::configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude)
+{
+	Message* cmd = MsgConfigureMyPosition::create(myLatitude, myLongitude);
 	messageQueue->push(cmd);
 }
 
@@ -361,6 +368,12 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_slot2On: " << m_config.m_slot2On
 				<< " m_tdmaStereo: " << m_config.m_tdmaStereo;
 
+		return true;
+	}
+	else if (MsgConfigureMyPosition::match(cmd))
+	{
+		MsgConfigureMyPosition& cfg = (MsgConfigureMyPosition&) cmd;
+		m_dsdDecoder.setMyPoint(cfg.getMyLatitude(), cfg.getMyLongitude());
 		return true;
 	}
 	else

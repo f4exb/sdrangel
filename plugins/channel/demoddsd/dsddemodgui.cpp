@@ -196,6 +196,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
+		updateMyPosition(); // we do it also here to be able to refresh with latest settings
 		applySettings();
 		return true;
 	}
@@ -386,6 +387,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
+	updateMyPosition();
 	applySettings();
 }
 
@@ -398,6 +400,19 @@ DSDDemodGUI::~DSDDemodGUI()
 	delete m_dsdDemod;
 	//delete m_channelMarker;
 	delete ui;
+}
+
+void DSDDemodGUI::updateMyPosition()
+{
+    float latitude = m_pluginAPI->getMainWindow()->getMainSettings().getLatitude();
+    float longitude = m_pluginAPI->getMainWindow()->getMainSettings().getLongitude();
+
+    if ((m_myLatitude != latitude) || (m_myLongitude != longitude))
+    {
+        m_dsdDemod->configureMyPosition(m_dsdDemod->getInputMessageQueue(), latitude, longitude);
+        m_myLatitude = latitude;
+        m_myLongitude = longitude;
+    }
 }
 
 void DSDDemodGUI::applySettings()
