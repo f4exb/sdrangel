@@ -33,7 +33,16 @@
     </font>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -66,7 +75,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -137,6 +146,7 @@
     </property>
     <addaction name="action_Audio"/>
     <addaction name="action_DV_Serial"/>
+    <addaction name="action_My_Position"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
@@ -162,7 +172,16 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_6">
-     <property name="margin">
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
       <number>2</number>
      </property>
      <property name="spacing">
@@ -373,7 +392,16 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="margin">
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
       <number>2</number>
      </property>
      <item>
@@ -404,7 +432,16 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="margin">
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
       <number>2</number>
      </property>
      <item>
@@ -441,7 +478,16 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="margin">
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
       <number>2</number>
      </property>
      <item>
@@ -469,7 +515,16 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <property name="margin">
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
       <number>2</number>
      </property>
      <item>
@@ -596,6 +651,11 @@
     <string>DV Serial</string>
    </property>
   </action>
+  <action name="action_My_Position">
+   <property name="text">
+    <string>My Position</string>
+   </property>
+  </action>
   <zorder>presetDock</zorder>
   <zorder>channelDock</zorder>
  </widget>
@@ -607,6 +667,23 @@
   <tabstop>presetLoad</tabstop>
  </tabstops>
  <resources>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
   <include location="resources/res.qrc"/>
  </resources>
  <connections>

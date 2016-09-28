@@ -80,6 +80,7 @@ SOURCES += mainwindow.cpp\
         gui/presetitem.cpp\
         gui/rollupwidget.cpp\
         gui/samplingdevicecontrol.cpp\
+        gui/mypositiondialog.cpp\
         gui/scale.cpp\
         gui/scaleengine.cpp\
         gui/valuedial.cpp\
@@ -159,6 +160,7 @@ HEADERS  += mainwindow.h\
         gui/presetitem.h\
         gui/rollupwidget.h\
         gui/samplingdevicecontrol.h\
+        gui/mypositiondialog.h\
         gui/scale.h\
         gui/scaleengine.h\
         gui/valuedial.h\
@@ -189,6 +191,7 @@ FORMS    += mainwindow.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
         gui/samplingdevicecontrol.ui\
+        gui/myposdialog.ui\
         gui/glspectrumgui.ui\
         mainwindow.ui
 

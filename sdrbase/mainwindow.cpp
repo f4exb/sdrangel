@@ -38,6 +38,7 @@
 #include "gui/channelwindow.h"
 #include "gui/audiodialog.h"
 #include "gui/samplingdevicecontrol.h"
+#include "gui/mypositiondialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -615,6 +616,12 @@ void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialog audioDialog(m_audioDeviceInfo, this);
 	audioDialog.exec();
+}
+
+void MainWindow::on_action_My_Position_triggered()
+{
+	MyPositionDialog myPositionDialog(m_settings, this);
+	myPositionDialog.exec();
 }
 
 void MainWindow::on_action_DV_Serial_triggered(bool checked)
