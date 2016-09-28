@@ -135,6 +135,7 @@ set(sdrbase_SOURCES
     sdrbase/gui/glspectrum.cpp
 	sdrbase/gui/glspectrumgui.cpp
 	sdrbase/gui/indicator.cpp
+	sdrbase/gui/mypositiondialog.cpp
 	sdrbase/gui/pluginsdialog.cpp
 	sdrbase/gui/audiodialog.cpp
 	sdrbase/gui/presetitem.cpp
@@ -223,6 +224,7 @@ set(sdrbase_HEADERS
     sdrbase/gui/glspectrum.h
 	sdrbase/gui/glspectrumgui.h
 	sdrbase/gui/indicator.h
+	sdrbase/gui/mypositiondialog.h
 	sdrbase/gui/physicalunit.h
 	sdrbase/gui/pluginsdialog.h
 	sdrbase/gui/audiodialog.h
@@ -275,6 +277,7 @@ set(sdrbase_FORMS
 	sdrbase/gui/pluginsdialog.ui
 	sdrbase/gui/audiodialog.ui
 	sdrbase/gui/samplingdevicecontrol.ui
+	sdrbase/gui/myposdialog.ui
 )
 
 set(sdrbase_RESOURCES
