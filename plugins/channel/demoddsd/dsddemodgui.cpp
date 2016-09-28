@@ -499,7 +499,7 @@ void DSDDemodGUI::formatStatusText()
         {
                                      //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
                                      // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______ ___/_____._");
+            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______:___/_____._");
                                      // MY            UR       RPT1     RPT2     Info                 Loc    Target
         }
 
@@ -522,6 +522,7 @@ void DSDDemodGUI::formatStatusText()
                 memcpy(&m_formatStatusText[0], mySign.c_str(), 13);
             }
             memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
+            memcpy(&m_formatStatusText[62], m_dsdDemod->getDecoder().getDStarDecoder().getLocator(), 6);
         }
 
         m_formatStatusText[82] = '\0';
