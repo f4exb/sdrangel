@@ -23,6 +23,11 @@ public:
 	void setAudioDevice(const QString& value) { m_audioDevice= value; }
 	const QString& getAudioDevice() const { return m_audioDevice; }
 
+	void setLatitude(float latitude) { m_latitude = latitude; }
+	void setLongitude(float longitude) { m_longitude = longitude; }
+	float getLatitude() const { return m_latitude; }
+	float getLongitude() const { return m_longitude; }
+
 protected:
 	QString m_sourceType;
 	QString m_sourceDevice;
@@ -30,6 +35,9 @@ protected:
 
 	QString m_audioType;
 	QString m_audioDevice;
+
+	float m_latitude;
+	float m_longitude;
 };
 
 #endif // INCLUDE_PREFERENCES_H

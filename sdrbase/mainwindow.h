@@ -82,6 +82,7 @@ public:
 	void setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName);
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
+	const MainSettings& getMainSettings() const { return m_settings; }
 
 private:
 	enum {

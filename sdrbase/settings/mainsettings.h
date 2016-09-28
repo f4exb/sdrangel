@@ -25,6 +25,11 @@ public:
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
 	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }
 
+	void setLatitude(float latitude) { m_preferences.setLatitude(latitude); }
+	void setLongitude(float longitude) { m_preferences.setLongitude(longitude); }
+	float getLatitude() const { return m_preferences.getLatitude(); }
+	float getLongitude() const { return m_preferences.getLongitude(); }
+
 protected:
 	Preferences m_preferences;
 	Preset m_workingPreset;
