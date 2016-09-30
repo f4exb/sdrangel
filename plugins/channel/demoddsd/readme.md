@@ -7,10 +7,10 @@ This plugin uses the [DSDcc](https://github.com/f4exb/dsdcc) library that has be
   - DMR/MOTOTRBO: ETSI two slot TDMA standard. MOTOTRBO is a popular implementation of this standard.
   - dPMR: Another ETSI standard at slower rate (2400 Baud / 6.25 kHz) and FDMA
   - D-Star: developed and promoted by Icom for Amateur Radio customers.
+  - Yaesu System Fusion (YSF): developed and promoted by Yaesu for Amateur Radio customers. Voice full rate with DV serial devices is not supported
 
 It can only detect the following standards (no data, no voice):
 
-  - Yaesu System Fusion (YSF): developed and promoted by Yaesu for Amateur Radio customers.
   - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard with 2400 and 4800 Baud versions.
 
 The modulation and standard is automatically detected and switched depending on the Baud rate chosen.
@@ -167,10 +167,26 @@ When the display is active the background turns from the surrounding gray color 
 
 These is the standard D-Star embedded information that is read from the header frame.
 
-<h5>19.1.1: Repeater 1 callsign</h5>
-<h5>19.1.2: Repeater 2 callsign</h5>
-<h5>19.1.3: Destination (your) callsign</h5>
-<h5>19.1.4: Origin (my) callsign</h5>
+<h5>19.1.1: Origin (my) and destination (your) callsign</h5>
+
+  - at the left of the `>` sign is the origin callsign with the 4 character informative suffix nest to the slash `/`
+  - at the right of the `>` sign is the destination callsign. As per Icom standard this is `CQCQCQ` when a call is made to all stations
+  - this information is retrieved from the header or the slow data if it can be decoded
+
+<h5>19.1.2: Repeater callsign</h5>
+
+  - at the left of the `>` sign is the origin repeater or `RPT1`
+  - at the right of the `>` sign is the destination repeater or `RPT2`
+  - this information is retrieved from the header or the slow data if it can be decoded
+
+<h5>19.1.3: Informative text</h5>
+
+When slow data can be decoded this is the 20 character string that is sent in the text frames 
+
+<h5>19.1.4: Geopositional data</h5>
+
+   - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
+   - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`. 
 
 <h4>19.2: DMR status display</h4>
 
@@ -261,6 +277,57 @@ Sender's identification code in decimal (24 bits)
 <h5>19.3.4: Called ID</h5>
 
 Called party's identification code in decimal (24 bits)
+
+<h4>19.4: Yaesu System Fusion (YSF) status display</h4>
+
+![DSD YSF status](../../../doc/img/DSDdemod_plugin_ysf_status.png)
+
+<h5>19.4.1: FICH data</h5>
+
+This displays a summary of FICH (Frame Identification CHannel) block data. From left to right:
+
+  - Frame type:
+    - `H`: header
+    - `C`: channel (as in the example)
+    - `T`: terminator
+    - `S`: test
+    
+  - Channel type:
+    - `V1`: voice/data mode 1
+    - `V2`: voice/data mode 2 (as in the example)
+    - `VF`: voice full rate
+    - `DF`: data full rate
+     
+  - Call mode:
+    - `GC`: group call (as in the example)
+    - `RI`: radio ID
+    - `RE`: reserved
+    - `IN`: individual call
+    
+  - Number of total blocks and number of total frames separated by a colon `:`
+  
+  - Miscellaneous information in a single string
+    - First character is the bandwidth mode:
+      - `N`: narrow band mode
+      - `W`: wide band mode (as in the example)
+    - Second character is the path type:
+      - `I`: Internet path
+      - `L`: local path
+    - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
+    
+<h5>19.4.2: Origin and destination callsigns</h5>
+
+  - at the left of the `>` sign is the origin callsign
+  - at the right of the `>` sign is the destination callsign. It is filled woth stars `*` when call is made to all stations (as the CQCQCQ in D-Star)
+
+<h5>19.4.3: Origin and destination repeaters callsigns</h5>
+
+  - at the left of the `>` sign is the origin repeater callsign
+  - at the right of the `>` sign is the destination repeater callsign. 
+
+<h5>19.4.4: Originator radio ID</h5>
+
+This is the unique character string assigned to the device by the manufacturer.
 
 <h3>20: Discriminator output scope display</h3>
 

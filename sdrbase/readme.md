@@ -43,7 +43,8 @@ The following items are presented hierarchically from left to right:
    - Channels: the channels active for each device
   - Preferences:
    - Audio: opens a dialog to choose the audio output device
-   - DV serial: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
+   - DV Serial: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
+   - My Position: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. 
   Help:
   - Laoded Plugins: shows details about the loaded plugins (see next)
   - About: current version and blah blah.    
