@@ -165,12 +165,10 @@ When the display is active the background turns from the surrounding gray color 
 
 ![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
 
-These is the standard D-Star embedded information that is read from the header frame.
-
 <h5>19.1.1: Origin (my) and destination (your) callsign</h5>
 
-  - at the left of the `>` sign is the origin callsign with the 4 character informative suffix nest to the slash `/`
-  - at the right of the `>` sign is the destination callsign. As per Icom standard this is `CQCQCQ` when a call is made to all stations
+  - at the left of the `>` sign is the origin callsign ` MY` with the 4 character informative suffix nest to the slash `/`
+  - at the right of the `>` sign is the destination callsign `YOUR`. As per Icom standard this is `CQCQCQ` when a call is made to all stations
   - this information is retrieved from the header or the slow data if it can be decoded
 
 <h5>19.1.2: Repeater callsign</h5>
@@ -184,6 +182,8 @@ These is the standard D-Star embedded information that is read from the header f
 When slow data can be decoded this is the 20 character string that is sent in the text frames 
 
 <h5>19.1.4: Geopositional data</h5>
+
+When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:  
 
    - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
    - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`. 
@@ -307,18 +307,18 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
   - Number of total blocks and number of total frames separated by a colon `:`
   
   - Miscellaneous information in a single string
-    - First character is the bandwidth mode:
+    - first character is the bandwidth mode:
       - `N`: narrow band mode
       - `W`: wide band mode (as in the example)
-    - Second character is the path type:
+    - second character is the path type:
       - `I`: Internet path
-      - `L`: local path
+      - `L`: local path (as inthe example)
     - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
     
 <h5>19.4.2: Origin and destination callsigns</h5>
 
   - at the left of the `>` sign is the origin callsign
-  - at the right of the `>` sign is the destination callsign. It is filled woth stars `*` when call is made to all stations (as the CQCQCQ in D-Star)
+  - at the right of the `>` sign is the destination callsign. It is filled with stars `*` when call is made to all stations (similar to the CQCQCQ in D-Star)
 
 <h5>19.4.3: Origin and destination repeaters callsigns</h5>
 
