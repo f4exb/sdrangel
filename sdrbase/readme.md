@@ -44,34 +44,34 @@ The following items are presented hierarchically from left to right:
   - Preferences:
    - Audio: opens a dialog to choose the audio output device
    - DV Serial: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
-   - My Position: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. 
-  Help:
-  - Laoded Plugins: shows details about the loaded plugins (see next)
-  - About: current version and blah blah.    
+   - My Position: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channel/demoddsd/readme.md) for details on how to decode Digital Vocie modes.
+  - Help:
+    - Loaded Plugins: shows details about the loaded plugins (see next)
+    - About: current version and blah blah.    
 
-<h3>Loaded plugins display</h3>
+<h4>1.1. Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
 ![Main Window loaded plugins](../doc/img/MainWindow_loadedPlugins.png)
 
-<h4>Name</h4>
+<h5>Name</h5>
 
 Plugin display name. Tells briefly what this plugin is about.
 
-<h4>Version</h4>
+<h5>Version</h5>
 
 Starting with SDRangel version 2.0.0 this is the SDRangel version when the plugin was last updated.
 
-<h4>GPL</h4>
+<h5>GPL</h5>
 
 Tells if the plugin is under GPL license.
 
-<h4>Expansion</h4>
+<h5>Expansion</h5>
 
 The plugin entry can be expanded or collapsed using the caret on the left. When expanded it shows more information about the copyright of the author and locations on the web where the plugin can be found. In all cases this is just here.
 
-<h4>OK button</h4>
+<h5>OK button</h5>
 
 Click here when done to dismiss the dialog.
 

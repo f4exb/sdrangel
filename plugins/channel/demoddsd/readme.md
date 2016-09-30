@@ -406,13 +406,13 @@ You should set the slider to a unity (1) span (+/- 0.5) with no offset. This cor
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
 
-<h4>20.2 Symbol synchronization display</h4>
+<h4>20.2: Symbol synchronization display</h4>
 
 This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope2.png)
 
-<h5>20.2.1 IQ linear display</h5>
+<h5>20.2.1: IQ linear display</h5>
 
 The I trace (yellow) is the discriminator signal and the Q trace (blue) is the symbol synchronization monitor trace that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
 
