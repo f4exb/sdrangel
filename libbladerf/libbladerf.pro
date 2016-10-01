@@ -36,6 +36,7 @@ SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
     $$LIBBLADERFLIBSRC/src/gain.c\
     $$LIBBLADERFLIBSRC/src/init_fini.c\
     $$LIBBLADERFLIBSRC/src/sync.c\
+    $$LIBBLADERFLIBSRC/src/smb_clock.c\
     $$LIBBLADERFLIBSRC/src/tuning.c\
     $$LIBBLADERFLIBSRC/src/xb.c\
     $$LIBBLADERFLIBSRC/src/bladerf.c\
@@ -48,6 +49,7 @@ SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
     $$LIBBLADERFLIBSRC/src/image.c\
     $$LIBBLADERFLIBSRC/src/si5338.c\
     $$LIBBLADERFLIBSRC/src/sync_worker.c\
+    $$LIBBLADERFLIBSRC/src/trigger.c\
     $$LIBBLADERFLIBSRC/src/version_compat.c\
     $$LIBBLADERFLIBSRC/src/backend/backend.c\
     $$LIBBLADERFLIBSRC/src/backend/dummy.c\
@@ -70,6 +72,7 @@ HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$LIBBLADERFLIBSRC/src/fx3_fw_log.h\
     $$LIBBLADERFLIBSRC/src/metadata.h\
     $$LIBBLADERFLIBSRC/src/sync.h\
+    $$LIBBLADERFLIBSRC/src/smb_clock.h\
     $$LIBBLADERFLIBSRC/src/tuning.h\
     $$LIBBLADERFLIBSRC/src/xb.h\
     $$LIBBLADERFLIBSRC/src/bladerf_priv.h\
@@ -81,6 +84,7 @@ HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$LIBBLADERFLIBSRC/src/gain.h\
     $$LIBBLADERFLIBSRC/src/si5338.h\
     $$LIBBLADERFLIBSRC/src/sync_worker.h\
+    $$LIBBLADERFLIBSRC/src/trigger.h\
     $$LIBBLADERFLIBSRC/src/version_compat.h\
     $$LIBBLADERFLIBSRC/src/backend/backend.h\
     $$LIBBLADERFLIBSRC/src/backend/dummy.h\
