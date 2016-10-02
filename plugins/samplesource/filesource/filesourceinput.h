@@ -17,7 +17,7 @@
 #ifndef INCLUDE_FILESOURCEINPUT_H
 #define INCLUDE_FILESOURCEINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
 #include <QString>
 #include <QTimer>
 #include <ctime>
@@ -26,7 +26,7 @@
 
 class FileSourceThread;
 
-class FileSourceInput : public SampleSource {
+class FileSourceInput : public DeviceSampleSource {
 public:
 	struct Settings {
 		QString m_fileName;

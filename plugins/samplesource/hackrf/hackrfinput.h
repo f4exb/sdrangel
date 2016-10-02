@@ -17,7 +17,7 @@
 #ifndef INCLUDE_HACKRFINPUT_H
 #define INCLUDE_HACKRFINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
 #include "libhackrf/hackrf.h"
 #include "hackrfsettings.h"
 #include <QString>
@@ -25,7 +25,7 @@
 class DeviceAPI;
 class HackRFThread;
 
-class HackRFInput : public SampleSource {
+class HackRFInput : public DeviceSampleSource {
 public:
 
 	class MsgConfigureHackRF : public Message {

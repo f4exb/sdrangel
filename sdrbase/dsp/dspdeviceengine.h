@@ -29,7 +29,7 @@
 #include "util/syncmessenger.h"
 #include "util/export.h"
 
-class SampleSource;
+class DeviceSampleSource;
 class BasebandSampleSink;
 class ThreadedSampleSink;
 
@@ -60,7 +60,7 @@ public:
 	bool startAcquisition(); //!< Start acquisition sequence
 	void stopAcquistion();   //!< Stop acquisition sequence
 
-	void setSource(SampleSource* source); //!< Set the sample source type
+	void setSource(DeviceSampleSource* source); //!< Set the sample source type
 	void setSourceSequence(int sequence); //!< Set the sample source sequence in type
 
 	void addSink(BasebandSampleSink* sink); //!< Add a sample sink
@@ -88,7 +88,7 @@ private:
 	QString m_errorMessage;
 	QString m_deviceDescription;
 
-	SampleSource* m_sampleSource;
+	DeviceSampleSource* m_sampleSource;
 	int m_sampleSourceSequence;
 
 	typedef std::list<BasebandSampleSink*> SampleSinks;
@@ -118,7 +118,7 @@ private:
 	State gotoRunning();  //!< Go to the running state from ready state
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
-	void handleSetSource(SampleSource* source); //!< Manage source setting
+	void handleSetSource(DeviceSampleSource* source); //!< Manage source setting
 
 private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed

@@ -62,7 +62,7 @@ void DeviceAPI::removeThreadedSink(ThreadedSampleSink* sink)
     m_deviceEngine->removeThreadedSink(sink);
 }
 
-void DeviceAPI::setSource(SampleSource* source)
+void DeviceAPI::setSource(DeviceSampleSource* source)
 {
     m_deviceEngine->setSource(source);
 }

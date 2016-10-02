@@ -17,8 +17,9 @@
 #ifndef INCLUDE_FCDINPUT_H
 #define INCLUDE_FCDINPUT_H
 
+#include <dsp/devicesamplesource.h>
+
 #include "fcdproplussettings.h"
-#include "dsp/samplesource.h"
 #include "fcdhid.h"
 #include <QString>
 #include <inttypes.h>
@@ -31,7 +32,7 @@ struct fcd_buffer {
 class DeviceAPI;
 class FCDProPlusThread;
 
-class FCDProPlusInput : public SampleSource {
+class FCDProPlusInput : public DeviceSampleSource {
 public:
 	class MsgConfigureFCD : public Message {
 		MESSAGE_CLASS_DECLARATION

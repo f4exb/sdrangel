@@ -60,7 +60,7 @@ private:
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;
-	SampleSource* m_sampleSource;
+	DeviceSampleSource* m_sampleSource;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device

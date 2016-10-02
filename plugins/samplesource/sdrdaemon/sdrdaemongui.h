@@ -54,7 +54,7 @@ private:
 	DeviceAPI* m_deviceAPI;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
-	SampleSource* m_sampleSource;
+	DeviceSampleSource* m_sampleSource;
     bool m_acquisition;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_deviceSampleRate;

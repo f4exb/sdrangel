@@ -18,7 +18,8 @@
 #ifndef INCLUDE_RTLSDRINPUT_H
 #define INCLUDE_RTLSDRINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
+
 #include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
 #include <QString>
@@ -26,7 +27,7 @@
 class DeviceAPI;
 class RTLSDRThread;
 
-class RTLSDRInput : public SampleSource {
+class RTLSDRInput : public DeviceSampleSource {
 public:
 	class MsgConfigureRTLSDR : public Message {
 		MESSAGE_CLASS_DECLARATION

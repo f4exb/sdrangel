@@ -17,7 +17,8 @@
 #ifndef INCLUDE_AIRSPYINPUT_H
 #define INCLUDE_AIRSPYINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
+
 #include "airspysettings.h"
 #include <libairspy/airspy.h>
 #include <QString>
@@ -25,7 +26,7 @@
 class DeviceAPI;
 class AirspyThread;
 
-class AirspyInput : public SampleSource {
+class AirspyInput : public DeviceSampleSource {
 public:
 	class MsgConfigureAirspy : public Message {
 		MESSAGE_CLASS_DECLARATION

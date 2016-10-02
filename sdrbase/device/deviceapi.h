@@ -30,7 +30,7 @@ class GLSpectrum;
 class ChannelWindow;
 class BasebandSampleSink;
 class ThreadedSampleSink;
-class SampleSource;
+class DeviceSampleSource;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
@@ -47,7 +47,7 @@ public:
     void removeSink(BasebandSampleSink* sink);    //!< Remove a sample sink from device engine
     void addThreadedSink(ThreadedSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
     void removeThreadedSink(ThreadedSampleSink* sink);  //!< Remove a sample sink that runs on its own thread from device engine
-    void setSource(SampleSource* source); //!< Set device engine sample source type
+    void setSource(DeviceSampleSource* source); //!< Set device engine sample source type
     bool initAcquisition();               //!< Initialize device engine acquisition sequence
     bool startAcquisition();              //!< Start device engine acquisition sequence
     void stopAcquisition();               //!< Stop device engine acquisition sequence

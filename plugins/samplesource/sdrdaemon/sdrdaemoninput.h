@@ -17,7 +17,7 @@
 #ifndef INCLUDE_SDRDAEMONINPUT_H
 #define INCLUDE_SDRDAEMONINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
 #include <QString>
 #include <QTimer>
 #include <ctime>
@@ -27,7 +27,7 @@
 class DeviceAPI;
 class SDRdaemonUDPHandler;
 
-class SDRdaemonInput : public SampleSource {
+class SDRdaemonInput : public DeviceSampleSource {
 public:
 	class MsgConfigureSDRdaemonUDPLink : public Message {
 		MESSAGE_CLASS_DECLARATION

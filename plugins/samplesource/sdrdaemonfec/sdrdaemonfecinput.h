@@ -17,7 +17,7 @@
 #ifndef INCLUDE_SDRDAEMONFECINPUT_H
 #define INCLUDE_SDRDAEMONFECINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
 #include <QString>
 #include <QTimer>
 #include <ctime>
@@ -27,7 +27,7 @@
 class DeviceAPI;
 class SDRdaemonFECUDPHandler;
 
-class SDRdaemonFECInput : public SampleSource {
+class SDRdaemonFECInput : public DeviceSampleSource {
 public:
 	class MsgConfigureSDRdaemonUDPLink : public Message {
 		MESSAGE_CLASS_DECLARATION

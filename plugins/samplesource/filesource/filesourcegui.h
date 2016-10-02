@@ -53,7 +53,7 @@ private:
 	FileSourceInput::Settings m_settings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
-	SampleSource* m_sampleSource;
+	DeviceSampleSource* m_sampleSource;
     bool m_acquisition;
     QString m_fileName;
 	int m_sampleRate;

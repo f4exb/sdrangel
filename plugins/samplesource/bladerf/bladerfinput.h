@@ -17,7 +17,8 @@
 #ifndef INCLUDE_BLADERFINPUT_H
 #define INCLUDE_BLADERFINPUT_H
 
-#include "dsp/samplesource.h"
+#include <dsp/devicesamplesource.h>
+
 #include "bladerfsettings.h"
 #include <libbladeRF.h>
 #include <QString>
@@ -25,7 +26,7 @@
 class DeviceAPI;
 class BladerfThread;
 
-class BladerfInput : public SampleSource {
+class BladerfInput : public DeviceSampleSource {
 public:
 	class MsgConfigureBladerf : public Message {
 		MESSAGE_CLASS_DECLARATION

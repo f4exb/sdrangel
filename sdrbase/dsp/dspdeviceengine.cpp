@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <dsp/basebandsamplesink.h>
+#include <dsp/devicesamplesource.h>
 #include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
@@ -23,7 +24,6 @@
 #include "dsp/samplefifo.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "dsp/samplesource.h"
 
 DSPDeviceEngine::DSPDeviceEngine(uint uid, QObject* parent) :
     m_uid(uid),
@@ -105,7 +105,7 @@ void DSPDeviceEngine::stopAcquistion()
 	}
 }
 
-void DSPDeviceEngine::setSource(SampleSource* source)
+void DSPDeviceEngine::setSource(DeviceSampleSource* source)
 {
 	qDebug() << "DSPDeviceEngine::setSource";
 	DSPSetSource cmd(source);
@@ -475,7 +475,7 @@ DSPDeviceEngine::State DSPDeviceEngine::gotoError(const QString& errorMessage)
 	return StError;
 }
 
-void DSPDeviceEngine::handleSetSource(SampleSource* source)
+void DSPDeviceEngine::handleSetSource(DeviceSampleSource* source)
 {
 	gotoIdle();
 

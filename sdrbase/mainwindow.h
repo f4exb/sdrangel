@@ -39,7 +39,7 @@ class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
-class SampleSource;
+class DeviceSampleSource;
 class PluginAPI;
 class PluginGUI;
 class ChannelMarker;

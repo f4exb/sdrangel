@@ -23,7 +23,7 @@
 #include "fftwindow.h"
 #include "util/export.h"
 
-class SampleSource;
+class DeviceSampleSource;
 class BasebandSampleSink;
 class ThreadedSampleSink;
 class AudioFifo;
@@ -70,12 +70,12 @@ class SDRANGEL_API DSPSetSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPSetSource(SampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+	DSPSetSource(DeviceSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
 
-	SampleSource* getSampleSource() const { return m_sampleSource; }
+	DeviceSampleSource* getSampleSource() const { return m_sampleSource; }
 
 private:
-	SampleSource* m_sampleSource;
+	DeviceSampleSource* m_sampleSource;
 };
 
 class SDRANGEL_API DSPAddSink : public Message {
