@@ -4,7 +4,7 @@
 #include "dsp/dspcommands.h"
 #include "util/message.h"
 
-ThreadedSampleFifo::ThreadedSampleFifo(SampleSink *sampleSink, std::size_t size) :
+ThreadedSampleFifo::ThreadedSampleFifo(BasebandSampleSink *sampleSink, std::size_t size) :
 	m_sampleSink(sampleSink)
 {
 	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleFifoData()));
@@ -62,7 +62,7 @@ void ThreadedSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new th
 	}
 }
 
-ThreadedSampleSink::ThreadedSampleSink(SampleSink* sampleSink, QObject *parent) :
+ThreadedSampleSink::ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *parent) :
 	m_sampleSink(sampleSink)
 {
 	QString name = "ThreadedSampleSink(" + m_sampleSink->objectName() + ")";

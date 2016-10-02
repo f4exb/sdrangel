@@ -24,7 +24,7 @@
 #include "util/export.h"
 
 class SampleSource;
-class SampleSink;
+class BasebandSampleSink;
 class ThreadedSampleSink;
 class AudioFifo;
 
@@ -82,24 +82,24 @@ class SDRANGEL_API DSPAddSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddSink(SampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+	DSPAddSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
 
-	SampleSink* getSampleSink() const { return m_sampleSink; }
+	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
 
 private:
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 };
 
 class SDRANGEL_API DSPRemoveSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveSink(SampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+	DSPRemoveSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
 
-	SampleSink* getSampleSink() const { return m_sampleSink; }
+	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
 
 private:
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 };
 
 class SDRANGEL_API DSPAddThreadedSampleSink : public Message {

@@ -18,10 +18,10 @@
 #ifndef INCLUDE_NFMDEMOD_H
 #define INCLUDE_NFMDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <dsp/phasediscri.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -35,7 +35,7 @@
 
 class NFMDemodGUI;
 
-class NFMDemod : public SampleSink {
+class NFMDemod : public BasebandSampleSink {
 public:
 	NFMDemod();
 	~NFMDemod();

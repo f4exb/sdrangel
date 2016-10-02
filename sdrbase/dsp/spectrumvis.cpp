@@ -15,7 +15,7 @@ inline double log2f(double n)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 
 SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
-	SampleSink(),
+	BasebandSampleSink(),
 	m_fft(FFTEngine::create()),
 	m_fftBuffer(MAX_FFT_SIZE),
 	m_logPowerSpectrum(MAX_FFT_SIZE),

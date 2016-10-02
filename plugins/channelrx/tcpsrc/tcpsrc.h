@@ -1,9 +1,9 @@
 #ifndef INCLUDE_TCPSRC_H
 #define INCLUDE_TCPSRC_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <QHostAddress>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
@@ -15,7 +15,7 @@ class QTcpServer;
 class QTcpSocket;
 class TCPSrcGUI;
 
-class TCPSrc : public SampleSink {
+class TCPSrc : public BasebandSampleSink {
 	Q_OBJECT
 
 public:
@@ -26,7 +26,7 @@ public:
 		FormatNone
 	};
 
-	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum);
+	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum);
 	virtual ~TCPSrc();
 
 	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
@@ -160,7 +160,7 @@ protected:
 
 	SampleVector m_sampleBuffer;
 	SampleVector m_sampleBufferSSB;
-	SampleSink* m_spectrum;
+	BasebandSampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 
 	QTcpServer* m_tcpServer;

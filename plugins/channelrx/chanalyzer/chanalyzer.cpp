@@ -25,7 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 
-ChannelAnalyzer::ChannelAnalyzer(SampleSink* sampleSink) :
+ChannelAnalyzer::ChannelAnalyzer(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_settingsMutex(QMutex::Recursive)
 {

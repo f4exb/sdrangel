@@ -15,12 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <dsp/basebandsamplesink.h>
 #include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
 #include "dsp/dspdeviceengine.h"
 #include "dsp/samplefifo.h"
-#include "dsp/samplesink.h"
 #include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "dsp/samplesource.h"
@@ -118,14 +118,14 @@ void DSPDeviceEngine::setSourceSequence(int sequence)
 	m_sampleSourceSequence = sequence;
 }
 
-void DSPDeviceEngine::addSink(SampleSink* sink)
+void DSPDeviceEngine::addSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::addSink: " << sink->objectName().toStdString().c_str();
 	DSPAddSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::removeSink(SampleSink* sink)
+void DSPDeviceEngine::removeSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::removeSink: " << sink->objectName().toStdString().c_str();
 	DSPRemoveSink cmd(sink);
@@ -547,12 +547,12 @@ void DSPDeviceEngine::handleSynchronousMessages()
 	}
 	else if (DSPAddSink::match(*message))
 	{
-		SampleSink* sink = ((DSPAddSink*) message)->getSampleSink();
+		BasebandSampleSink* sink = ((DSPAddSink*) message)->getSampleSink();
 		m_sampleSinks.push_back(sink);
 	}
 	else if (DSPRemoveSink::match(*message))
 	{
-		SampleSink* sink = ((DSPRemoveSink*) message)->getSampleSink();
+		BasebandSampleSink* sink = ((DSPRemoveSink*) message)->getSampleSink();
 
 		if(m_state == StRunning) {
 			sink->stop();

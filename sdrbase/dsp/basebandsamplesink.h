@@ -8,11 +8,11 @@
 
 class Message;
 
-class SDRANGEL_API SampleSink : public QObject {
+class SDRANGEL_API BasebandSampleSink : public QObject {
 	Q_OBJECT
 public:
-	SampleSink();
-	virtual ~SampleSink();
+	BasebandSampleSink();
+	virtual ~BasebandSampleSink();
 
 	virtual void start() = 0;
 	virtual void stop() = 0;

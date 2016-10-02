@@ -1,16 +1,16 @@
 #ifndef INCLUDE_CHANNELIZER_H
 #define INCLUDE_CHANNELIZER_H
 
+#include <dsp/basebandsamplesink.h>
 #include <list>
 #include <QMutex>
-#include "dsp/samplesink.h"
 #include "util/export.h"
 #include "util/message.h"
 
 class MessageQueue;
 class IntHalfbandFilter;
 
-class SDRANGEL_API DownChannelizer : public SampleSink {
+class SDRANGEL_API DownChannelizer : public BasebandSampleSink {
 	Q_OBJECT
 public:
 	class SDRANGEL_API MsgChannelizerNotification : public Message {
@@ -31,7 +31,7 @@ public:
 		qint64 m_frequencyOffset;
 	};
 
-	DownChannelizer(SampleSink* sampleSink);
+	DownChannelizer(BasebandSampleSink* sampleSink);
 	virtual ~DownChannelizer();
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
@@ -64,7 +64,7 @@ protected:
 	};
 	typedef std::list<FilterStage*> FilterStages;
 	FilterStages m_filterStages;
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	int m_inputSampleRate;
 	int m_requestedOutputSampleRate;
 	int m_requestedCenterFrequency;

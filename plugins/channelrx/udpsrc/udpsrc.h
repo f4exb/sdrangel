@@ -18,9 +18,9 @@
 #ifndef INCLUDE_UDPSRC_H
 #define INCLUDE_UDPSRC_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <QHostAddress>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
@@ -33,7 +33,7 @@
 class QUdpSocket;
 class UDPSrcGUI;
 
-class UDPSrc : public SampleSink {
+class UDPSrc : public BasebandSampleSink {
 	Q_OBJECT
 
 public:
@@ -56,7 +56,7 @@ public:
 
 	typedef std::vector<AudioSample> AudioVector;
 
-	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, SampleSink* spectrum);
+	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum);
 	virtual ~UDPSrc();
 
 	void configure(MessageQueue* messageQueue,
@@ -239,7 +239,7 @@ protected:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 
-	SampleSink* m_spectrum;
+	BasebandSampleSink* m_spectrum;
 	bool m_spectrumEnabled;
 
 	quint32 m_nextSSBId;

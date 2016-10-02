@@ -1,16 +1,16 @@
-#include "dsp/samplesink.h"
+#include <dsp/basebandsamplesink.h>
 #include "util/message.h"
 
-SampleSink::SampleSink()
+BasebandSampleSink::BasebandSampleSink()
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
-SampleSink::~SampleSink()
+BasebandSampleSink::~BasebandSampleSink()
 {
 }
 
-void SampleSink::handleInputMessages()
+void BasebandSampleSink::handleInputMessages()
 {
 	Message* message;
 

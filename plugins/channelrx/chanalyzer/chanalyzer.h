@@ -17,9 +17,9 @@
 #ifndef INCLUDE_CHANALYZER_H
 #define INCLUDE_CHANALYZER_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
@@ -27,9 +27,9 @@
 
 #define ssbFftLen 1024
 
-class ChannelAnalyzer : public SampleSink {
+class ChannelAnalyzer : public BasebandSampleSink {
 public:
-	ChannelAnalyzer(SampleSink* m_sampleSink);
+	ChannelAnalyzer(BasebandSampleSink* m_sampleSink);
 	virtual ~ChannelAnalyzer();
 
 	void configure(MessageQueue* messageQueue,
@@ -98,7 +98,7 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 };

@@ -18,9 +18,9 @@
 #ifndef INCLUDE_SSBDEMOD_H
 #define INCLUDE_SSBDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
@@ -29,9 +29,9 @@
 
 #define ssbFftLen 1024
 
-class SSBDemod : public SampleSink {
+class SSBDemod : public BasebandSampleSink {
 public:
-	SSBDemod(SampleSink* sampleSink);
+	SSBDemod(BasebandSampleSink* sampleSink);
 	virtual ~SSBDemod();
 
 	void configure(MessageQueue* messageQueue,
@@ -135,7 +135,7 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
 
 	AudioVector m_audioBuffer;

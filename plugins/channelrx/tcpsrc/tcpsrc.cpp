@@ -26,7 +26,7 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* spectrum) :
+TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");

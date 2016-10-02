@@ -42,12 +42,12 @@ DeviceAPI::~DeviceAPI()
 {
 }
 
-void DeviceAPI::addSink(SampleSink *sink)
+void DeviceAPI::addSink(BasebandSampleSink *sink)
 {
     m_deviceEngine->addSink(sink);
 }
 
-void DeviceAPI::removeSink(SampleSink* sink)
+void DeviceAPI::removeSink(BasebandSampleSink* sink)
 {
     m_deviceEngine->removeSink(sink);
 }

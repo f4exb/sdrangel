@@ -6,7 +6,7 @@
 #include <QDebug>
 
 FileRecord::FileRecord() :
-	SampleSink(),
+	BasebandSampleSink(),
     m_fileName(std::string("test.sdriq")),
     m_sampleRate(0),
     m_centerFrequency(0),
@@ -18,7 +18,7 @@ FileRecord::FileRecord() :
 }
 
 FileRecord::FileRecord(const std::string& filename) :
-    SampleSink(),
+    BasebandSampleSink(),
     m_fileName(std::string(filename)),
     m_sampleRate(0),
     m_centerFrequency(0),

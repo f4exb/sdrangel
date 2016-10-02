@@ -56,7 +56,7 @@ SOURCES += mainwindow.cpp\
         dsp/pidcontroller.cpp\
         dsp/phaselock.cpp\
         dsp/samplefifo.cpp\
-        dsp/samplesink.cpp\
+        dsp/basebandsamplesink.cpp\
         dsp/nullsink.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/scopevis.cpp\
@@ -136,7 +136,7 @@ HEADERS  += mainwindow.h\
         dsp/phaselock.h\
         dsp/pidcontroller.h\
         dsp/samplefifo.h\
-        dsp/samplesink.h\
+        dsp/basebandsamplesink.h\
         dsp/nullsink.h\
         dsp/scopevis.h\
         dsp/spectrumvis.h\

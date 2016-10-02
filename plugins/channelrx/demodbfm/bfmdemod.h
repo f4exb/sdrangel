@@ -18,9 +18,9 @@
 #ifndef INCLUDE_BFMDEMOD_H
 #define INCLUDE_BFMDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -37,9 +37,9 @@
 
 class RDSParser;
 
-class BFMDemod : public SampleSink {
+class BFMDemod : public BasebandSampleSink {
 public:
-	BFMDemod(SampleSink* sampleSink, RDSParser* rdsParser);
+	BFMDemod(BasebandSampleSink* sampleSink, RDSParser* rdsParser);
 	virtual ~BFMDemod();
 
 	void configure(MessageQueue* messageQueue,
@@ -201,7 +201,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;

@@ -18,9 +18,9 @@
 #ifndef INCLUDE_LoRaDEMOD_H
 #define INCLUDE_LoRaDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
@@ -32,9 +32,9 @@
 #define LORA_SFFT_LEN (SPREADFACTOR / 2)
 #define LORA_SQUELCH (3)
 
-class LoRaDemod : public SampleSink {
+class LoRaDemod : public BasebandSampleSink {
 public:
-	LoRaDemod(SampleSink* sampleSink);
+	LoRaDemod(BasebandSampleSink* sampleSink);
 	virtual ~LoRaDemod();
 
 	void configure(MessageQueue* messageQueue, Real Bandwidth);
@@ -96,7 +96,7 @@ private:
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 };

@@ -28,7 +28,7 @@ class MainWindow;
 class DSPDeviceEngine;
 class GLSpectrum;
 class ChannelWindow;
-class SampleSink;
+class BasebandSampleSink;
 class ThreadedSampleSink;
 class SampleSource;
 class MessageQueue;
@@ -43,8 +43,8 @@ class SDRANGEL_API DeviceAPI : public QObject {
 
 public:
     // Device engine stuff
-    void addSink(SampleSink* sink);       //!< Add a sample sink to device engine
-    void removeSink(SampleSink* sink);    //!< Remove a sample sink from device engine
+    void addSink(BasebandSampleSink* sink);       //!< Add a sample sink to device engine
+    void removeSink(BasebandSampleSink* sink);    //!< Remove a sample sink from device engine
     void addThreadedSink(ThreadedSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
     void removeThreadedSink(ThreadedSampleSink* sink);  //!< Remove a sample sink that runs on its own thread from device engine
     void setSource(SampleSource* source); //!< Set device engine sample source type

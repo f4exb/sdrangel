@@ -1,12 +1,12 @@
 #ifndef INCLUDE_NULLSINK_H
 #define INCLUDE_NULLSINK_H
 
-#include "dsp/samplesink.h"
+#include <dsp/basebandsamplesink.h>
 #include "util/export.h"
 
 class Message;
 
-class SDRANGEL_API NullSink : public SampleSink {
+class SDRANGEL_API NullSink : public BasebandSampleSink {
 public:
 
 	NullSink();

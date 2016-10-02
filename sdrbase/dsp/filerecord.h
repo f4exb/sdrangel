@@ -1,17 +1,17 @@
 #ifndef INCLUDE_FILESINK_H
 #define INCLUDE_FILESINK_H
 
+#include <dsp/basebandsamplesink.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 
 #include <ctime>
-#include "dsp/samplesink.h"
 #include "util/export.h"
 
 class Message;
 
-class SDRANGEL_API FileRecord : public SampleSink {
+class SDRANGEL_API FileRecord : public BasebandSampleSink {
 public:
 
     struct Header

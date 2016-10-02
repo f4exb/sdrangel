@@ -30,7 +30,7 @@
 #include "util/export.h"
 
 class SampleSource;
-class SampleSink;
+class BasebandSampleSink;
 class ThreadedSampleSink;
 
 class SDRANGEL_API DSPDeviceEngine : public QThread {
@@ -63,8 +63,8 @@ public:
 	void setSource(SampleSource* source); //!< Set the sample source type
 	void setSourceSequence(int sequence); //!< Set the sample source sequence in type
 
-	void addSink(SampleSink* sink); //!< Add a sample sink
-	void removeSink(SampleSink* sink); //!< Remove a sample sink
+	void addSink(BasebandSampleSink* sink); //!< Add a sample sink
+	void removeSink(BasebandSampleSink* sink); //!< Remove a sample sink
 
 	void addThreadedSink(ThreadedSampleSink* sink); //!< Add a sample sink that will run on its own thread
 	void removeThreadedSink(ThreadedSampleSink* sink); //!< Remove a sample sink that runs on its own thread
@@ -91,7 +91,7 @@ private:
 	SampleSource* m_sampleSource;
 	int m_sampleSourceSequence;
 
-	typedef std::list<SampleSink*> SampleSinks;
+	typedef std::list<BasebandSampleSink*> SampleSinks;
 	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
 
 	typedef std::list<ThreadedSampleSink*> ThreadedSampleSinks;

@@ -27,7 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
-SSBDemod::SSBDemod(SampleSink* sampleSink) :
+SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 24000),
 	m_settingsMutex(QMutex::Recursive),

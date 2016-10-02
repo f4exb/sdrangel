@@ -2,14 +2,14 @@
 #define INCLUDE_SCOPEVIS_H
 
 #include <boost/circular_buffer.hpp>
-#include "dsp/samplesink.h"
+#include <dsp/basebandsamplesink.h>
 #include "util/export.h"
 #include "util/message.h"
 
 class GLScope;
 class MessageQueue;
 
-class SDRANGEL_API ScopeVis : public SampleSink {
+class SDRANGEL_API ScopeVis : public BasebandSampleSink {
 public:
 	enum TriggerChannel {
 		TriggerFreeRun,

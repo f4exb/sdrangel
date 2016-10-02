@@ -18,9 +18,9 @@
 #ifndef INCLUDE_WFMDEMOD_H
 #define INCLUDE_WFMDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -32,9 +32,9 @@
 
 #define rfFilterFftLength 1024
 
-class WFMDemod : public SampleSink {
+class WFMDemod : public BasebandSampleSink {
 public:
-	WFMDemod(SampleSink* sampleSink);
+	WFMDemod(BasebandSampleSink* sampleSink);
 	virtual ~WFMDemod();
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
@@ -127,7 +127,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;

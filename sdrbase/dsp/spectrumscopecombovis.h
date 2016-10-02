@@ -1,14 +1,14 @@
 #ifndef INCLUDE_SPECTRUMSCOPECOMBOVIS_H
 #define INCLUDE_SPECTRUMSCOPECOMBOVIS_H
 
-#include "dsp/samplesink.h"
+#include <dsp/basebandsamplesink.h>
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
 #include "util/export.h"
 
 class Message;
 
-class SDRANGEL_API SpectrumScopeComboVis : public SampleSink {
+class SDRANGEL_API SpectrumScopeComboVis : public BasebandSampleSink {
 public:
 
 	SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);

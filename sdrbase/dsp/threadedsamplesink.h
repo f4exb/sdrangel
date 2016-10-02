@@ -18,13 +18,13 @@
 #ifndef INCLUDE_THREADEDSAMPLESINK_H
 #define INCLUDE_THREADEDSAMPLESINK_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
-#include "samplesink.h"
 #include "dsp/samplefifo.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 
-class SampleSink;
+class BasebandSampleSink;
 class QThread;
 
 /**
@@ -35,11 +35,11 @@ class ThreadedSampleFifo : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedSampleFifo(SampleSink* sampleSink, std::size_t size = 1<<18);
+	ThreadedSampleFifo(BasebandSampleSink* sampleSink, std::size_t size = 1<<18);
 	~ThreadedSampleFifo();
 	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
 
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 	SampleFifo m_sampleFifo;
 
 public slots:
@@ -53,10 +53,10 @@ class SDRANGEL_API ThreadedSampleSink : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedSampleSink(SampleSink* sampleSink, QObject *parent = 0);
+	ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *parent = 0);
 	~ThreadedSampleSink();
 
-	const SampleSink *getSink() const { return m_sampleSink; }
+	const BasebandSampleSink *getSink() const { return m_sampleSink; }
 	MessageQueue* getInputMessageQueue() { return m_sampleSink->getInputMessageQueue(); } //!< Return pointer to sample sink's input message queue
 	MessageQueue* getOutputMessageQueue() { return m_sampleSink->getOutputMessageQueue(); } //!< Return pointer to sample sink's output message queue
 
@@ -72,7 +72,7 @@ protected:
 
 	QThread *m_thread; //!< The thead object
 	ThreadedSampleFifo *m_threadedSampleFifo;
-	SampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink;
 };
 
 #endif // INCLUDE_THREADEDSAMPLESINK_H

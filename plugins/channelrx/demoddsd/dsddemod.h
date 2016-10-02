@@ -18,10 +18,10 @@
 #ifndef INCLUDE_DSDDEMOD_H
 #define INCLUDE_DSDDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <dsp/phasediscri.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -36,9 +36,9 @@
 
 class DSDDemodGUI;
 
-class DSDDemod : public SampleSink {
+class DSDDemod : public BasebandSampleSink {
 public:
-    DSDDemod(SampleSink* sampleSink);
+    DSDDemod(BasebandSampleSink* sampleSink);
 	~DSDDemod();
 
 	void configure(MessageQueue* messageQueue,
@@ -264,7 +264,7 @@ private:
 
 	AudioFifo m_audioFifo1;
     AudioFifo m_audioFifo2;
-	SampleSink* m_scope;
+	BasebandSampleSink* m_scope;
 	bool m_scopeEnabled;
 
 	DSDDecoder m_dsdDecoder;

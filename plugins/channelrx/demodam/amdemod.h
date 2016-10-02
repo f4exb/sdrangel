@@ -17,9 +17,9 @@
 #ifndef INCLUDE_AMDEMOD_H
 #define INCLUDE_AMDEMOD_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/samplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -28,7 +28,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
-class AMDemod : public SampleSink {
+class AMDemod : public BasebandSampleSink {
 	Q_OBJECT
 public:
 	AMDemod();

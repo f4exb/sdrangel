@@ -28,7 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 
-WFMDemod::WFMDemod(SampleSink* sampleSink) :
+WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 250000),
 	m_settingsMutex(QMutex::Recursive)

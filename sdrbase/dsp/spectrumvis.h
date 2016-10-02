@@ -1,8 +1,8 @@
 #ifndef INCLUDE_SPECTRUMVIS_H
 #define INCLUDE_SPECTRUMVIS_H
 
+#include <dsp/basebandsamplesink.h>
 #include <QMutex>
-#include "dsp/samplesink.h"
 #include "dsp/fftengine.h"
 #include "fftwindow.h"
 #include "util/export.h"
@@ -11,7 +11,7 @@
 class GLSpectrum;
 class MessageQueue;
 
-class SDRANGEL_API SpectrumVis : public SampleSink {
+class SDRANGEL_API SpectrumVis : public BasebandSampleSink {
 
 public:
 	class SDRANGEL_API MsgConfigureSpectrumVis : public Message {

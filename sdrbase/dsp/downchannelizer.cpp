@@ -7,7 +7,7 @@
 
 MESSAGE_CLASS_DEFINITION(DownChannelizer::MsgChannelizerNotification, Message)
 
-DownChannelizer::DownChannelizer(SampleSink* sampleSink) :
+DownChannelizer::DownChannelizer(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_inputSampleRate(0),
 	m_requestedOutputSampleRate(0),

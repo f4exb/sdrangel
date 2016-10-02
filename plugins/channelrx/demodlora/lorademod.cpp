@@ -26,7 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 
-LoRaDemod::LoRaDemod(SampleSink* sampleSink) :
+LoRaDemod::LoRaDemod(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_settingsMutex(QMutex::Recursive)
 {
