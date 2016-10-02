@@ -106,7 +106,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/fftwindow.cpp
 	sdrbase/dsp/filterrc.cpp
 	sdrbase/dsp/filtermbe.cpp
-	sdrbase/dsp/filesink.cpp
+	sdrbase/dsp/filerecord.cpp
 	sdrbase/dsp/interpolator.cpp
 	sdrbase/dsp/inthalfbandfilter.cpp
 	sdrbase/dsp/lowpass.cpp
@@ -191,7 +191,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/fftwindow.h
 	sdrbase/dsp/filterrc.h
 	sdrbase/dsp/filtermbe.h
-	sdrbase/dsp/filesink.h
+	sdrbase/dsp/filerecord.h
 	sdrbase/dsp/gfft.h
 	sdrbase/dsp/interpolator.h
 	sdrbase/dsp/inthalfbandfilter.h

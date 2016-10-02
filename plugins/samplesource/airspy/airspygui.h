@@ -25,7 +25,7 @@
 #define AIRSPY_MAX_DEVICE (32)
 
 class DeviceAPI;
-class FileSink;
+class FileRecord;
 
 namespace Ui {
 	class AirspyGui;
@@ -61,7 +61,7 @@ private:
 	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;
 	SampleSource* m_sampleSource;
-    FileSink *m_fileSink; //!< File sink to record device I/Q output
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;

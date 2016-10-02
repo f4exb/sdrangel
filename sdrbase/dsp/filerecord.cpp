@@ -1,11 +1,11 @@
-#include "dsp/filesink.h"
+#include <dsp/filerecord.h>
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 #include "util/message.h"
 
 #include <QDebug>
 
-FileSink::FileSink() :
+FileRecord::FileRecord() :
 	SampleSink(),
     m_fileName(std::string("test.sdriq")),
     m_sampleRate(0),
@@ -17,7 +17,7 @@ FileSink::FileSink() :
 	setObjectName("FileSink");
 }
 
-FileSink::FileSink(const std::string& filename) :
+FileRecord::FileRecord(const std::string& filename) :
     SampleSink(),
     m_fileName(std::string(filename)),
     m_sampleRate(0),
@@ -29,12 +29,12 @@ FileSink::FileSink(const std::string& filename) :
     setObjectName("FileSink");
 }
 
-FileSink::~FileSink()
+FileRecord::~FileRecord()
 {
     stopRecording();
 }
 
-void FileSink::setFileName(const std::string& filename)
+void FileRecord::setFileName(const std::string& filename)
 {
     if (!m_recordOn)
     {
@@ -42,7 +42,7 @@ void FileSink::setFileName(const std::string& filename)
     }
 }
 
-void FileSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     // if no recording is active, send the samples to /dev/null
     if(!m_recordOn)
@@ -61,16 +61,16 @@ void FileSink::feed(const SampleVector::const_iterator& begin, const SampleVecto
     }
 }
 
-void FileSink::start()
+void FileRecord::start()
 {
 }
 
-void FileSink::stop()
+void FileRecord::stop()
 {
     stopRecording();
 }
 
-void FileSink::startRecording()
+void FileRecord::startRecording()
 {
     if (!m_sampleFile.is_open())
     {
@@ -82,7 +82,7 @@ void FileSink::startRecording()
     }
 }
 
-void FileSink::stopRecording()
+void FileRecord::stopRecording()
 {
     if (m_sampleFile.is_open())
     {
@@ -93,7 +93,7 @@ void FileSink::stopRecording()
     }
 }
 
-bool FileSink::handleMessage(const Message& message)
+bool FileRecord::handleMessage(const Message& message)
 {
 	qDebug() << "FileSink::handleMessage";
 
@@ -112,7 +112,7 @@ bool FileSink::handleMessage(const Message& message)
     }
 }
 
-void FileSink::handleConfigure(const std::string& fileName)
+void FileRecord::handleConfigure(const std::string& fileName)
 {
     if (fileName != m_fileName)
     {
@@ -122,7 +122,7 @@ void FileSink::handleConfigure(const std::string& fileName)
 	m_fileName = fileName;
 }
 
-void FileSink::writeHeader()
+void FileRecord::writeHeader()
 {
     m_sampleFile.write((const char *) &m_sampleRate, sizeof(int));
     m_sampleFile.write((const char *) &m_centerFrequency, sizeof(quint64));
@@ -130,7 +130,7 @@ void FileSink::writeHeader()
     m_sampleFile.write((const char *) &ts, sizeof(std::time_t));
 }
 
-void FileSink::readHeader(std::ifstream& sampleFile, Header& header)
+void FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
 {
     sampleFile.read((char *) &(header.sampleRate), sizeof(int));
     sampleFile.read((char *) &(header.centerFrequency), sizeof(quint64));

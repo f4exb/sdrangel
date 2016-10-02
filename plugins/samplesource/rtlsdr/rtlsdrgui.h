@@ -22,7 +22,7 @@
 #include "rtlsdrinput.h"
 
 class DeviceAPI;
-class FileSink;
+class FileRecord;
 
 namespace Ui {
 	class RTLSDRGui;
@@ -56,7 +56,7 @@ private:
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	SampleSource* m_sampleSource;
-    FileSink *m_fileSink; //!< File sink to record device I/Q output
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;

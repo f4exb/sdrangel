@@ -22,10 +22,11 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filesink.h"
-
 #include "sdrdaemongui.h"
 #include "sdrdaemoninput.h"
+
+#include <dsp/filerecord.h>
+
 #include "sdrdaemonudphandler.h"
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgConfigureSDRdaemonUDPLink, Message)

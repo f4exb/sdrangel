@@ -21,10 +21,11 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filesink.h"
-
 #include "filesourcegui.h"
 #include "filesourceinput.h"
+
+#include <dsp/filerecord.h>
+
 #include "filesourcethread.h"
 
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
@@ -101,15 +102,15 @@ void FileSourceInput::openFileStream()
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 	quint64 fileSize = m_ifstream.tellg();
 	m_ifstream.seekg(0,std::ios_base::beg);
-	FileSink::Header header;
-	FileSink::readHeader(m_ifstream, header);
+	FileRecord::Header header;
+	FileRecord::readHeader(m_ifstream, header);
 
 	m_sampleRate = header.sampleRate;
 	m_centerFrequency = header.centerFrequency;
 	m_startingTimeStamp = header.startTimeStamp;
 
-	if (fileSize > sizeof(FileSink::Header)) {
-		m_recordLength = (fileSize - sizeof(FileSink::Header)) / (4 * m_sampleRate);
+	if (fileSize > sizeof(FileRecord::Header)) {
+		m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
 	} else {
 		m_recordLength = 0;
 	}

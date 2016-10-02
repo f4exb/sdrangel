@@ -35,11 +35,11 @@
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filesink.h"
 #include "mainwindow.h"
 #include "util/simpleserializer.h"
 
 #include "sdrdaemonfecgui.h"
+#include <dsp/filerecord.h>
 
 SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
@@ -96,7 +96,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent) :
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileSink(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);

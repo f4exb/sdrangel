@@ -47,7 +47,7 @@ SOURCES += mainwindow.cpp\
         dsp/fftwindow.cpp\
         dsp/filterrc.cpp\
         dsp/filtermbe.cpp\
-        dsp/filesink.cpp\
+        dsp/filerecord.cpp\
         dsp/interpolator.cpp\
         dsp/inthalfbandfilter.cpp\
         dsp/lowpass.cpp\
@@ -122,7 +122,7 @@ HEADERS  += mainwindow.h\
         dsp/fftwindow.h\
         dsp/filterrc.h\
         dsp/filtermbe.h\
-        dsp/filesink.h\
+        dsp/filerecord.h\
         dsp/gfft.h\
         dsp/interpolator.h\
         dsp/inthalfbandfilter.h\

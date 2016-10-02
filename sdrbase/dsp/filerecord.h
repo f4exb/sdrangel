@@ -11,7 +11,7 @@
 
 class Message;
 
-class SDRANGEL_API FileSink : public SampleSink {
+class SDRANGEL_API FileRecord : public SampleSink {
 public:
 
     struct Header
@@ -21,9 +21,9 @@ public:
         std::time_t startTimeStamp;
     };
 
-	FileSink();
-    FileSink(const std::string& filename);
-	virtual ~FileSink();
+	FileRecord();
+    FileRecord(const std::string& filename);
+	virtual ~FileRecord();
 
     quint64 getByteCount() const { return m_byteCount; }
 

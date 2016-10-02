@@ -22,9 +22,9 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filesink.h"
-
 #include "sdrdaemonfecinput.h"
+
+#include <dsp/filerecord.h>
 
 #include "sdrdaemonfecgui.h"
 #include "sdrdaemonfecudphandler.h"
