@@ -18,11 +18,10 @@
 
 #include "../../channelrx/demodlora/lorademod.h"
 
+#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
-#include "dsp/channelizer.h"
-
 #include "../../channelrx/demodlora/lorabits.h"
 
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
@@ -285,9 +284,9 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "LoRaDemod::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_settingsMutex.lock();
 

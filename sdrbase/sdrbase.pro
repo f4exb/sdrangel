@@ -33,7 +33,7 @@ SOURCES += mainwindow.cpp\
         device/deviceapi.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
-        dsp/channelizer.cpp\
+        dsp/downchannelizer.cpp\
         dsp/channelmarker.cpp\
         dsp/ctcssdetector.cpp\
         dsp/dspcommands.cpp\
@@ -106,7 +106,7 @@ HEADERS  += mainwindow.h\
         audio/audiooutput.h\
         device/deviceapi.h\
         dsp/afsquelch.h\
-        dsp/channelizer.h\
+        dsp/downchannelizer.h\
         dsp/channelmarker.h\
         dsp/complex.h\
         dsp/decimators.h\

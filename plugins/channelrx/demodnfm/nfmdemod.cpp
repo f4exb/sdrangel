@@ -21,8 +21,8 @@
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+#include <dsp/downchannelizer.h>
 #include "audio/audiooutput.h"
-#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 #include "../../channelrx/demodnfm/nfmdemodgui.h"
@@ -280,9 +280,9 @@ bool NFMDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "NFMDemod::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();

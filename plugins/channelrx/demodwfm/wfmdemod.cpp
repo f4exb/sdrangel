@@ -21,9 +21,9 @@
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+#include <dsp/downchannelizer.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
@@ -180,9 +180,9 @@ bool WFMDemod::handleMessage(const Message& cmd)
 {
 	qDebug() << "WFMDemod::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();

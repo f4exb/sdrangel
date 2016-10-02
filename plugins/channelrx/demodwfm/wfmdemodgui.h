@@ -10,7 +10,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class WFMDemod;
 
 namespace Ui {
@@ -58,7 +58,7 @@ private:
 	bool m_doApplySettings;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
 

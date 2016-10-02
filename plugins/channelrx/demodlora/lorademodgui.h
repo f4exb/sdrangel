@@ -10,7 +10,7 @@
 class PluginAPI;
 class DeviceAPI;
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class LoRaDemod;
 class SpectrumVis;
 
@@ -54,7 +54,7 @@ private:
 	bool m_doApplySettings;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
 

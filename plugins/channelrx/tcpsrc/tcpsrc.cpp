@@ -16,10 +16,10 @@
 
 #include "../../channelrx/tcpsrc/tcpsrc.h"
 
+#include <dsp/downchannelizer.h>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
-#include "dsp/channelizer.h"
 #include "../../channelrx/tcpsrc/tcpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
@@ -181,9 +181,9 @@ bool TCPSrc::handleMessage(const Message& cmd)
 {
 	qDebug() << "TCPSrc::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_settingsMutex.lock();
 

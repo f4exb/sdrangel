@@ -29,7 +29,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class SpectrumVis;
 class BFMDemod;
 
@@ -89,7 +89,7 @@ private:
 	int m_rdsTimerCount;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 	RDSParser m_rdsParser;
 

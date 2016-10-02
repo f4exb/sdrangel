@@ -10,7 +10,7 @@
 class MessageQueue;
 class IntHalfbandFilter;
 
-class SDRANGEL_API Channelizer : public SampleSink {
+class SDRANGEL_API DownChannelizer : public SampleSink {
 	Q_OBJECT
 public:
 	class SDRANGEL_API MsgChannelizerNotification : public Message {
@@ -31,8 +31,8 @@ public:
 		qint64 m_frequencyOffset;
 	};
 
-	Channelizer(SampleSink* sampleSink);
-	virtual ~Channelizer();
+	DownChannelizer(SampleSink* sampleSink);
+	virtual ~DownChannelizer();
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
 	int getInputSampleRate() const { return m_inputSampleRate; }

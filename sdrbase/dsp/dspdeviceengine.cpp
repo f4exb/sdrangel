@@ -15,10 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
 #include "dsp/dspdeviceengine.h"
-#include "dsp/channelizer.h"
 #include "dsp/samplefifo.h"
 #include "dsp/samplesink.h"
 #include "dsp/threadedsamplesink.h"

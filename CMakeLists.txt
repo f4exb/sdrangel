@@ -95,7 +95,7 @@ set(sdrbase_SOURCES
 
 	sdrbase/dsp/afsquelch.cpp
 	sdrbase/dsp/agc.cpp
-	sdrbase/dsp/channelizer.cpp
+	sdrbase/dsp/downchannelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
 	sdrbase/dsp/ctcssdetector.cpp
 	sdrbase/dsp/dspcommands.cpp
@@ -177,7 +177,7 @@ set(sdrbase_HEADERS
 	sdrbase/audio/audiooutput.h
 
 	sdrbase/dsp/afsquelch.h
-	sdrbase/dsp/channelizer.h
+	sdrbase/dsp/downchannelizer.h
 	sdrbase/dsp/channelmarker.h
 	sdrbase/dsp/complex.h
 	sdrbase/dsp/decimators.h

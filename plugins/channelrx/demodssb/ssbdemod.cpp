@@ -18,12 +18,12 @@
 
 #include "../../channelrx/demodssb/ssbdemod.h"
 
+#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/channelizer.h"
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
@@ -220,9 +220,9 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 	qDebug() << "SSBDemod::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_settingsMutex.lock();
 

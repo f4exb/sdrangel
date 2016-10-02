@@ -1,9 +1,9 @@
 #include "../../channelrx/tcpsrc/tcpsrcgui.h"
 
+#include <dsp/downchannelizer.h>
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "dsp/threadedsamplesink.h"
-#include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -202,7 +202,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
-	m_channelizer = new Channelizer(m_tcpSrc);
+	m_channelizer = new DownChannelizer(m_tcpSrc);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 

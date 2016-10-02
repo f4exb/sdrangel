@@ -10,7 +10,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class AMDemod;
 
 namespace Ui {
@@ -59,7 +59,7 @@ private:
 	bool m_doApplySettings;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
 	bool m_squelchOpen;

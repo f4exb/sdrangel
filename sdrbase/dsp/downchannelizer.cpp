@@ -1,13 +1,13 @@
-#include "dsp/channelizer.h"
+#include <dsp/downchannelizer.h>
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
 
 #include <QString>
 #include <QDebug>
 
-MESSAGE_CLASS_DEFINITION(Channelizer::MsgChannelizerNotification, Message)
+MESSAGE_CLASS_DEFINITION(DownChannelizer::MsgChannelizerNotification, Message)
 
-Channelizer::Channelizer(SampleSink* sampleSink) :
+DownChannelizer::DownChannelizer(SampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_inputSampleRate(0),
 	m_requestedOutputSampleRate(0),
@@ -19,18 +19,18 @@ Channelizer::Channelizer(SampleSink* sampleSink) :
 	setObjectName(name);
 }
 
-Channelizer::~Channelizer()
+DownChannelizer::~DownChannelizer()
 {
 	freeFilterChain();
 }
 
-void Channelizer::configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency)
+void DownChannelizer::configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency)
 {
 	Message* cmd = new DSPConfigureChannelizer(sampleRate, centerFrequency);
 	messageQueue->push(cmd);
 }
 
-void Channelizer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void DownChannelizer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	if(m_sampleSink == 0) {
 		m_sampleBuffer.clear();
@@ -64,7 +64,7 @@ void Channelizer::feed(const SampleVector::const_iterator& begin, const SampleVe
 	m_sampleBuffer.clear();
 }
 
-void Channelizer::start()
+void DownChannelizer::start()
 {
 	if (m_sampleSink != 0)
 	{
@@ -76,13 +76,13 @@ void Channelizer::start()
 	}
 }
 
-void Channelizer::stop()
+void DownChannelizer::stop()
 {
 	if(m_sampleSink != 0)
 		m_sampleSink->stop();
 }
 
-bool Channelizer::handleMessage(const Message& cmd)
+bool DownChannelizer::handleMessage(const Message& cmd)
 {
 	qDebug() << "Channelizer::handleMessage: " << cmd.getIdentifier();
 
@@ -130,7 +130,7 @@ bool Channelizer::handleMessage(const Message& cmd)
 	}
 }
 
-void Channelizer::applyConfiguration()
+void DownChannelizer::applyConfiguration()
 {
 	if (m_inputSampleRate == 0)
 	{
@@ -162,7 +162,7 @@ void Channelizer::applyConfiguration()
 	}
 }
 
-Channelizer::FilterStage::FilterStage(Mode mode) :
+DownChannelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilter),
 	m_workFunction(0)
 {
@@ -181,12 +181,12 @@ Channelizer::FilterStage::FilterStage(Mode mode) :
 	}
 }
 
-Channelizer::FilterStage::~FilterStage()
+DownChannelizer::FilterStage::~FilterStage()
 {
 	delete m_filter;
 }
 
-bool Channelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
+bool DownChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
 {
 	//qDebug("   testing signal [%f, %f], channel [%f, %f]", sigStart, sigEnd, chanStart, chanEnd);
 	if(sigEnd <= sigStart)
@@ -196,7 +196,7 @@ bool Channelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanSta
 	return (sigStart <= chanStart) && (sigEnd >= chanEnd);
 }
 
-Real Channelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
+Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
 	Real sigBw = sigEnd - sigStart;
 	Real safetyMargin = sigBw / 20;
@@ -235,7 +235,7 @@ Real Channelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, 
 	return ofs;
 }
 
-void Channelizer::freeFilterChain()
+void DownChannelizer::freeFilterChain()
 {
 	for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
 		delete *it;

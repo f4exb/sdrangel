@@ -12,7 +12,7 @@
 class PluginAPI;
 class DeviceAPI;
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class TCPSrc;
 class SpectrumVis;
 
@@ -73,7 +73,7 @@ private:
 
 	// RF path
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
 	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = 0);

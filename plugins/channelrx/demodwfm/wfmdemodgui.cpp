@@ -1,11 +1,11 @@
 #include "../../channelrx/demodwfm/wfmdemodgui.h"
 
+#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
 #include "ui_wfmdemodgui.h"
 #include "dsp/threadedsamplesink.h"
-#include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -235,7 +235,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_wfmDemod = new WFMDemod(0);
-	m_channelizer = new Channelizer(m_wfmDemod);
+	m_channelizer = new DownChannelizer(m_wfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 

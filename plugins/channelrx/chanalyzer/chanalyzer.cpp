@@ -16,11 +16,11 @@
 
 #include "../../channelrx/chanalyzer/chanalyzer.h"
 
+#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include "audio/audiooutput.h"
-#include "dsp/channelizer.h"
 
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
@@ -137,9 +137,9 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 
 	qDebug() << "ChannelAnalyzer::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);

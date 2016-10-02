@@ -17,10 +17,10 @@
 
 #include "../../channelrx/udpsrc/udpsrc.h"
 
+#include <dsp/downchannelizer.h>
 #include <QUdpSocket>
 #include <QThread>
 #include <QHostAddress>
-#include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
 
 #include "../../channelrx/udpsrc/udpsrcgui.h"
@@ -255,9 +255,9 @@ bool UDPSrc::handleMessage(const Message& cmd)
 {
 	qDebug() << "UDPSrc::handleMessage";
 
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_settingsMutex.lock();
 

@@ -11,7 +11,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class NFMDemod;
 
 namespace Ui {
@@ -64,7 +64,7 @@ private:
 	bool m_doApplySettings;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
 	bool m_ctcssOn;
 	bool m_audioMute;

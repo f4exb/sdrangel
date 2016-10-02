@@ -17,6 +17,7 @@
 
 #include "../../channelrx/demodbfm/bfmdemodgui.h"
 
+#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
@@ -26,7 +27,6 @@
 #include <iomanip>
 
 #include "dsp/threadedsamplesink.h"
-#include "dsp/channelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
@@ -381,7 +381,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_bfmDemod = new BFMDemod(m_spectrumVis, &m_rdsParser);
-	m_channelizer = new Channelizer(m_bfmDemod);
+	m_channelizer = new DownChannelizer(m_bfmDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);

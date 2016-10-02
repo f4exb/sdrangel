@@ -1,12 +1,12 @@
 #include "../../channelrx/demodlora/lorademodgui.h"
 #include "../../channelrx/demodlora/lorademodgui.h"
 
+#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include "ui_lorademodgui.h"
 #include "ui_lorademodgui.h"
 #include "dsp/threadedsamplesink.h"
-#include "dsp/channelizer.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
@@ -166,7 +166,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* 
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
-	m_channelizer = new Channelizer(m_LoRaDemod);
+	m_channelizer = new DownChannelizer(m_LoRaDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 

@@ -28,7 +28,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class ScopeVis;
 class DSDDemod;
 
@@ -98,7 +98,7 @@ private:
 	SignalFormat m_signalFormat;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
     ScopeVis* m_scopeVis;
 
 	DSDDemod* m_dsdDemod;

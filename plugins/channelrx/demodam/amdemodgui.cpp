@@ -1,10 +1,10 @@
 #include "../../channelrx/demodam/amdemodgui.h"
 
+#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include "ui_amdemodgui.h"
 #include "dsp/threadedsamplesink.h"
-#include "dsp/channelizer.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "util/simpleserializer.h"
@@ -220,7 +220,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pare
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_amDemod = new AMDemod();
-	m_channelizer = new Channelizer(m_amDemod);
+	m_channelizer = new DownChannelizer(m_amDemod);
 	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);

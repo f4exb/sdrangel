@@ -23,9 +23,10 @@
 #include <complex.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/channelizer.h"
 #include "dsp/pidcontroller.h"
 #include "bfmdemod.h"
+
+#include <dsp/downchannelizer.h>
 
 #include "../../channelrx/demodbfm/rdsparser.h"
 
@@ -285,9 +286,9 @@ void BFMDemod::stop()
 
 bool BFMDemod::handleMessage(const Message& cmd)
 {
-	if (Channelizer::MsgChannelizerNotification::match(cmd))
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
-		Channelizer::MsgChannelizerNotification& notif = (Channelizer::MsgChannelizerNotification&) cmd;
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();

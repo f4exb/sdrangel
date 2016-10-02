@@ -11,7 +11,7 @@ class DeviceAPI;
 
 class AudioFifo;
 class ThreadedSampleSink;
-class Channelizer;
+class DownChannelizer;
 class SSBDemod;
 class SpectrumVis;
 
@@ -71,7 +71,7 @@ private:
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	ThreadedSampleSink* m_threadedChannelizer;
-	Channelizer* m_channelizer;
+	DownChannelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
 
