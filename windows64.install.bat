@@ -27,16 +27,16 @@ copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channel
 mkdir %2\plugins\samplesource
-copy plugins\channel\chanalyzer\%1\chanalyzer.dll %2\plugins\channel
-copy plugins\channel\demodam\%1\demodam.dll %2\plugins\channel
-copy plugins\channel\demodbfm\%1\demodbfm.dll %2\plugins\channel
-copy plugins\channel\demoddsd\%1\demoddsd.dll %2\plugins\channel
-copy plugins\channel\demodlora\%1\demodlora.dll %2\plugins\channel
-copy plugins\channel\demodnfm\%1\demodnfm.dll %2\plugins\channel
-copy plugins\channel\demodssb\%1\demodssb.dll %2\plugins\channel
-copy plugins\channel\demodwfm\%1\demodwfm.dll %2\plugins\channel
-copy plugins\channel\tcpsrc\%1\tcpsrc.dll %2\plugins\channel
-copy plugins\channel\udpsrc\%1\udpsrc.dll %2\plugins\channel
+copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
+copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
+copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
+copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx
+copy plugins\channelrx\demodlora\%1\demodlora.dll %2\plugins\channelrx
+copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
+copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrxd
+copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
+copy plugins\channelrx\tcpsrc\%1\tcpsrc.dll %2\plugins\channelrx
+copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemonfec\%1\inputsdrdaemonfec.dll %2\plugins\samplesource
