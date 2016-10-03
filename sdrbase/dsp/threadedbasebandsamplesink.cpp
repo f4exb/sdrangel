@@ -64,18 +64,18 @@ void ThreadedBasebandSampleFifo::handleFifoData() // FIXME: Fixed? Move it to th
 }
 
 ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampleSink, QObject *parent) :
-	m_sampleSink(sampleSink)
+	m_basebandSampleSink(sampleSink)
 {
-	QString name = "ThreadedSampleSink(" + m_sampleSink->objectName() + ")";
+	QString name = "ThreadedSampleSink(" + m_basebandSampleSink->objectName() + ")";
 	setObjectName(name);
 
 	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: " << name;
 
 	m_thread = new QThread(parent);
-	m_threadedSampleFifo = new ThreadedBasebandSampleFifo(m_sampleSink);
+	m_threadedBasebandSampleFifo = new ThreadedBasebandSampleFifo(m_basebandSampleSink);
 	//moveToThread(m_thread); // FIXME: Fixed? the intermediate FIFO should be handled within the sink. Define a new type of sink that is compatible with threading
-	m_sampleSink->moveToThread(m_thread);
-	m_threadedSampleFifo->moveToThread(m_thread);
+	m_basebandSampleSink->moveToThread(m_thread);
+	m_threadedBasebandSampleFifo->moveToThread(m_thread);
 	//m_sampleFifo.moveToThread(m_thread);
 	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
 	//m_sampleFifo.setSize(262144);
@@ -85,7 +85,7 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 
 ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 {
-	delete m_threadedSampleFifo; // Valgrind memcheck
+	delete m_threadedBasebandSampleFifo; // Valgrind memcheck
 	delete m_thread;
 }
 
@@ -93,13 +93,13 @@ void ThreadedBasebandSampleSink::start()
 {
 	qDebug() << "ThreadedSampleSink::start";
 	m_thread->start();
-	m_sampleSink->start();
+	m_basebandSampleSink->start();
 }
 
 void ThreadedBasebandSampleSink::stop()
 {
 	qDebug() << "ThreadedSampleSink::stop";
-	m_sampleSink->stop();
+	m_basebandSampleSink->stop();
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -108,15 +108,15 @@ void ThreadedBasebandSampleSink::feed(SampleVector::const_iterator begin, Sample
 {
 	//m_sampleSink->feed(begin, end, positiveOnly);
 	//m_sampleFifo.write(begin, end);
-	m_threadedSampleFifo->writeToFifo(begin, end);
+	m_threadedBasebandSampleFifo->writeToFifo(begin, end);
 }
 
 bool ThreadedBasebandSampleSink::handleSinkMessage(const Message& cmd)
 {
-	return m_sampleSink->handleMessage(cmd);
+	return m_basebandSampleSink->handleMessage(cmd);
 }
 
 QString ThreadedBasebandSampleSink::getSampleSinkObjectName() const
 {
-	return m_sampleSink->objectName();
+	return m_basebandSampleSink->objectName();
 }

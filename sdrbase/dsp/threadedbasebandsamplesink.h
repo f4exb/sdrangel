@@ -56,9 +56,9 @@ public:
 	ThreadedBasebandSampleSink(BasebandSampleSink* sampleSink, QObject *parent = 0);
 	~ThreadedBasebandSampleSink();
 
-	const BasebandSampleSink *getSink() const { return m_sampleSink; }
-	MessageQueue* getInputMessageQueue() { return m_sampleSink->getInputMessageQueue(); } //!< Return pointer to sample sink's input message queue
-	MessageQueue* getOutputMessageQueue() { return m_sampleSink->getOutputMessageQueue(); } //!< Return pointer to sample sink's output message queue
+	const BasebandSampleSink *getSink() const { return m_basebandSampleSink; }
+	MessageQueue* getInputMessageQueue() { return m_basebandSampleSink->getInputMessageQueue(); } //!< Return pointer to sample sink's input message queue
+	MessageQueue* getOutputMessageQueue() { return m_basebandSampleSink->getOutputMessageQueue(); } //!< Return pointer to sample sink's output message queue
 
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()
@@ -71,8 +71,8 @@ public:
 protected:
 
 	QThread *m_thread; //!< The thead object
-	ThreadedBasebandSampleFifo *m_threadedSampleFifo;
-	BasebandSampleSink* m_sampleSink;
+	ThreadedBasebandSampleFifo *m_threadedBasebandSampleFifo;
+	BasebandSampleSink* m_basebandSampleSink;
 };
 
 #endif // INCLUDE_THREADEDSAMPLESINK_H

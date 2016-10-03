@@ -88,14 +88,14 @@ private:
 	QString m_errorMessage;
 	QString m_deviceDescription;
 
-	DeviceSampleSource* m_sampleSource;
+	DeviceSampleSource* m_deviceSampleSource;
 	int m_sampleSourceSequence;
 
-	typedef std::list<BasebandSampleSink*> SampleSinks;
-	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
+	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
+	BasebandSampleSinks m_basebandSampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
 
-	typedef std::list<ThreadedBasebandSampleSink*> ThreadedSampleSinks;
-	ThreadedSampleSinks m_threadedSampleSinks; //!< sample sinks on their own threads (usually channels)
+	typedef std::list<ThreadedBasebandSampleSink*> ThreadedBasebandSampleSinks;
+	ThreadedBasebandSampleSinks m_threadedBasebandSampleSinks; //!< sample sinks on their own threads (usually channels)
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;
