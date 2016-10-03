@@ -33,7 +33,7 @@ class DeviceSampleSource;
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 
-class SDRANGEL_API DSPDeviceEngine : public QThread {
+class SDRANGEL_API DSPDeviceSourceEngine : public QThread {
 	Q_OBJECT
 
 public:
@@ -45,8 +45,8 @@ public:
 		StError        //!< engine is in error
 	};
 
-	DSPDeviceEngine(uint uid, QObject* parent = NULL);
-	~DSPDeviceEngine();
+	DSPDeviceSourceEngine(uint uid, QObject* parent = NULL);
+	~DSPDeviceSourceEngine();
 
 	uint getUID() const { return m_uid; }
 

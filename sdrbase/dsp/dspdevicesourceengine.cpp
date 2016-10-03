@@ -15,17 +15,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "dspdevicesourceengine.h"
+
 #include <dsp/basebandsamplesink.h>
 #include <dsp/devicesamplesource.h>
 #include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
-#include "dsp/dspdeviceengine.h"
 #include "dsp/samplefifo.h"
 #include "dsp/dspcommands.h"
 #include "threadedbasebandsamplesink.h"
 
-DSPDeviceEngine::DSPDeviceEngine(uint uid, QObject* parent) :
+DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
     m_uid(uid),
 	QThread(parent),
 	m_state(StNotStarted),
@@ -48,12 +49,12 @@ DSPDeviceEngine::DSPDeviceEngine(uint uid, QObject* parent) :
 	moveToThread(this);
 }
 
-DSPDeviceEngine::~DSPDeviceEngine()
+DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 {
 	wait();
 }
 
-void DSPDeviceEngine::run()
+void DSPDeviceSourceEngine::run()
 {
 	qDebug() << "DSPDeviceEngine::run";
 
@@ -63,20 +64,20 @@ void DSPDeviceEngine::run()
 	exec();
 }
 
-void DSPDeviceEngine::start()
+void DSPDeviceSourceEngine::start()
 {
 	qDebug() << "DSPDeviceEngine::start";
 	QThread::start();
 }
 
-void DSPDeviceEngine::stop()
+void DSPDeviceSourceEngine::stop()
 {
 	qDebug() << "DSPDeviceEngine::stop";
 	DSPExit cmd;
 	m_syncMessenger.sendWait(cmd);
 }
 
-bool DSPDeviceEngine::initAcquisition()
+bool DSPDeviceSourceEngine::initAcquisition()
 {
 	qDebug() << "DSPDeviceEngine::initAcquisition";
 	DSPAcquisitionInit cmd;
@@ -84,7 +85,7 @@ bool DSPDeviceEngine::initAcquisition()
 	return m_syncMessenger.sendWait(cmd) == StReady;
 }
 
-bool DSPDeviceEngine::startAcquisition()
+bool DSPDeviceSourceEngine::startAcquisition()
 {
 	qDebug() << "DSPDeviceEngine::startAcquisition";
 	DSPAcquisitionStart cmd;
@@ -92,7 +93,7 @@ bool DSPDeviceEngine::startAcquisition()
 	return m_syncMessenger.sendWait(cmd) == StRunning;
 }
 
-void DSPDeviceEngine::stopAcquistion()
+void DSPDeviceSourceEngine::stopAcquistion()
 {
 	qDebug() << "DSPDeviceEngine::stopAcquistion";
 	DSPAcquisitionStop cmd;
@@ -105,55 +106,55 @@ void DSPDeviceEngine::stopAcquistion()
 	}
 }
 
-void DSPDeviceEngine::setSource(DeviceSampleSource* source)
+void DSPDeviceSourceEngine::setSource(DeviceSampleSource* source)
 {
 	qDebug() << "DSPDeviceEngine::setSource";
 	DSPSetSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::setSourceSequence(int sequence)
+void DSPDeviceSourceEngine::setSourceSequence(int sequence)
 {
 	qDebug("DSPDeviceEngine::setSourceSequence: seq: %d", sequence);
 	m_sampleSourceSequence = sequence;
 }
 
-void DSPDeviceEngine::addSink(BasebandSampleSink* sink)
+void DSPDeviceSourceEngine::addSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::addSink: " << sink->objectName().toStdString().c_str();
 	DSPAddSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::removeSink(BasebandSampleSink* sink)
+void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::removeSink: " << sink->objectName().toStdString().c_str();
 	DSPRemoveSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::addThreadedSink(ThreadedBasebandSampleSink* sink)
+void DSPDeviceSourceEngine::addThreadedSink(ThreadedBasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::addThreadedSink: " << sink->objectName().toStdString().c_str();
 	DSPAddThreadedSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::removeThreadedSink(ThreadedBasebandSampleSink* sink)
+void DSPDeviceSourceEngine::removeThreadedSink(ThreadedBasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::removeThreadedSink: " << sink->objectName().toStdString().c_str();
 	DSPRemoveThreadedSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
+void DSPDeviceSourceEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {
 	qDebug() << "DSPDeviceEngine::configureCorrections";
 	DSPConfigureCorrection* cmd = new DSPConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection);
 	m_inputMessageQueue.push(cmd);
 }
 
-QString DSPDeviceEngine::errorMessage()
+QString DSPDeviceSourceEngine::errorMessage()
 {
 	qDebug() << "DSPDeviceEngine::errorMessage";
 	DSPGetErrorMessage cmd;
@@ -161,7 +162,7 @@ QString DSPDeviceEngine::errorMessage()
 	return cmd.getErrorMessage();
 }
 
-QString DSPDeviceEngine::sourceDeviceDescription()
+QString DSPDeviceSourceEngine::sourceDeviceDescription()
 {
 	qDebug() << "DSPDeviceEngine::sourceDeviceDescription";
 	DSPGetSourceDeviceDescription cmd;
@@ -169,7 +170,7 @@ QString DSPDeviceEngine::sourceDeviceDescription()
 	return cmd.getDeviceDescription();
 }
 
-void DSPDeviceEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
+void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
 {
 	double count;
 	int io = 0;
@@ -190,7 +191,7 @@ void DSPDeviceEngine::dcOffset(SampleVector::iterator begin, SampleVector::itera
 	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
 }
 
-void DSPDeviceEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
+void DSPDeviceSourceEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
 {
 	int iMin = 0;
 	int iMax = 0;
@@ -239,7 +240,7 @@ void DSPDeviceEngine::imbalance(SampleVector::iterator begin, SampleVector::iter
 	}
 }
 
-void DSPDeviceEngine::work()
+void DSPDeviceSourceEngine::work()
 {
 	SampleFifo* sampleFifo = m_sampleSource->getSampleFifo();
 	std::size_t samplesDone = 0;
@@ -318,7 +319,7 @@ void DSPDeviceEngine::work()
 //                ^                       |
 //                +-----------------------+
 
-DSPDeviceEngine::State DSPDeviceEngine::gotoIdle()
+DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 {
 	qDebug() << "DSPDeviceEngine::gotoIdle";
 
@@ -354,7 +355,7 @@ DSPDeviceEngine::State DSPDeviceEngine::gotoIdle()
 	return StIdle;
 }
 
-DSPDeviceEngine::State DSPDeviceEngine::gotoInit()
+DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 {
 	qDebug() << "DSPDeviceEngine::gotoInit";
 
@@ -415,7 +416,7 @@ DSPDeviceEngine::State DSPDeviceEngine::gotoInit()
 	return StReady;
 }
 
-DSPDeviceEngine::State DSPDeviceEngine::gotoRunning()
+DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 {
 	qDebug() << "DSPDeviceEngine::gotoRunning";
 
@@ -465,7 +466,7 @@ DSPDeviceEngine::State DSPDeviceEngine::gotoRunning()
 	return StRunning;
 }
 
-DSPDeviceEngine::State DSPDeviceEngine::gotoError(const QString& errorMessage)
+DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& errorMessage)
 {
 	qDebug() << "DSPDeviceEngine::gotoError";
 
@@ -475,7 +476,7 @@ DSPDeviceEngine::State DSPDeviceEngine::gotoError(const QString& errorMessage)
 	return StError;
 }
 
-void DSPDeviceEngine::handleSetSource(DeviceSampleSource* source)
+void DSPDeviceSourceEngine::handleSetSource(DeviceSampleSource* source)
 {
 	gotoIdle();
 
@@ -497,7 +498,7 @@ void DSPDeviceEngine::handleSetSource(DeviceSampleSource* source)
 	}
 }
 
-void DSPDeviceEngine::handleData()
+void DSPDeviceSourceEngine::handleData()
 {
 	if(m_state == StRunning)
 	{
@@ -505,7 +506,7 @@ void DSPDeviceEngine::handleData()
 	}
 }
 
-void DSPDeviceEngine::handleSynchronousMessages()
+void DSPDeviceSourceEngine::handleSynchronousMessages()
 {
     Message *message = m_syncMessenger.getMessage();
 	qDebug() << "DSPDeviceEngine::handleSynchronousMessages: " << message->getIdentifier();
@@ -576,7 +577,7 @@ void DSPDeviceEngine::handleSynchronousMessages()
 	m_syncMessenger.done(m_state);
 }
 
-void DSPDeviceEngine::handleInputMessages()
+void DSPDeviceSourceEngine::handleInputMessages()
 {
 	qDebug() << "DSPDeviceEngine::handleInputMessages";
 

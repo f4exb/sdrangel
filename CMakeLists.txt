@@ -100,7 +100,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/ctcssdetector.cpp
 	sdrbase/dsp/dspcommands.cpp
 	sdrbase/dsp/dspengine.cpp
-	sdrbase/dsp/dspdeviceengine.cpp
+	sdrbase/dsp/dspdevicesourceengine.cpp
 	sdrbase/dsp/fftengine.cpp
 	sdrbase/dsp/fftfilt.cxx
 	sdrbase/dsp/fftwindow.cpp
@@ -183,7 +183,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/decimators.h
 	sdrbase/dsp/dspcommands.h
 	sdrbase/dsp/dspengine.h
-	sdrbase/dsp/dspdeviceengine.h
+	sdrbase/dsp/dspdevicesourceengine.h
 	sdrbase/dsp/dsptypes.h
 	sdrbase/dsp/fftengine.h
 	sdrbase/dsp/fftfilt.h

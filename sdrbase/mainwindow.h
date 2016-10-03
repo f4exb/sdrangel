@@ -33,7 +33,7 @@ class SamplingDeviceControl;
 
 class AudioDeviceInfo;
 class DSPEngine;
-class DSPDeviceEngine;
+class DSPDeviceSourceEngine;
 class Indicator;
 class SpectrumVis;
 class GLSpectrum;
@@ -63,7 +63,7 @@ public:
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
 		SamplingDeviceControl *m_samplingDeviceControl;
-		DSPDeviceEngine *m_deviceEngine;
+		DSPDeviceSourceEngine *m_deviceEngine;
 		DeviceAPI *m_deviceAPI;
 		QByteArray m_mainWindowState;
 

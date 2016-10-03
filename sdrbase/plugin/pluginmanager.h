@@ -13,7 +13,7 @@ class Preset;
 class MainWindow;
 class Message;
 class MessageQueue;
-class DSPDeviceEngine;
+class DSPDeviceSourceEngine;
 class DeviceAPI;
 
 class SDRANGEL_API PluginManager : public QObject {

@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_masterTabIndex(0),
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
-	m_lastEngineState((DSPDeviceEngine::State)-1),
+	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
@@ -172,7 +172,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::addDevice()
 {
-    DSPDeviceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
+    DSPDeviceSourceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
     dspDeviceEngine->start();
 
     uint dspDeviceEngineUID =  dspDeviceEngine->getUID();
@@ -208,7 +208,7 @@ void MainWindow::addDevice()
 
 void MainWindow::removeLastDevice()
 {
-    DSPDeviceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceEngine;
+    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceEngine;
     lastDeviceEngine->stopAcquistion();
     lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 

@@ -25,7 +25,7 @@
 
 DeviceAPI::DeviceAPI(MainWindow *mainWindow,
         int deviceTabIndex,
-        DSPDeviceEngine *deviceEngine,
+        DSPDeviceSourceEngine *deviceEngine,
         GLSpectrum *glSpectrum,
         ChannelWindow *channelWindow) :
     m_mainWindow(mainWindow),
@@ -82,7 +82,7 @@ void DeviceAPI::stopAcquisition()
     m_deviceEngine->stopAcquistion();
 }
 
-DSPDeviceEngine::State DeviceAPI::state() const
+DSPDeviceSourceEngine::State DeviceAPI::state() const
 {
     return m_deviceEngine->state();
 }

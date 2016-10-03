@@ -9,10 +9,10 @@
 #include "settings/preset.h"
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
-#include "dsp/dspdeviceengine.h"
 #include "util/message.h"
 
 #include <QDebug>
+#include "../dsp/dspdevicesourceengine.h"
 
 const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemon";
 const QString PluginManager::m_sdrDaemonFECDeviceTypeID = "sdrangel.samplesource.sdrdaemonfec";

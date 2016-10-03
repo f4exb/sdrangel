@@ -20,12 +20,12 @@
 #include <QObject>
 #include <QString>
 
+#include "../dsp/dspdevicesourceengine.h"
 
 #include "util/export.h"
-#include "dsp/dspdeviceengine.h"
 
 class MainWindow;
-class DSPDeviceEngine;
+class DSPDeviceSourceEngine;
 class GLSpectrum;
 class ChannelWindow;
 class BasebandSampleSink;
@@ -51,7 +51,7 @@ public:
     bool initAcquisition();               //!< Initialize device engine acquisition sequence
     bool startAcquisition();              //!< Start device engine acquisition sequence
     void stopAcquisition();               //!< Stop device engine acquisition sequence
-    DSPDeviceEngine::State state() const; //!< device engine state
+    DSPDeviceSourceEngine::State state() const; //!< device engine state
     QString errorMessage();               //!< Return the current device engine error message
     uint getDeviceUID() const;            //!< Return the current device engine unique ID
     MessageQueue *getDeviceInputMessageQueue();
@@ -105,7 +105,7 @@ protected:
 
     DeviceAPI(MainWindow *mainWindow,
             int deviceTabIndex,
-            DSPDeviceEngine *deviceEngine,
+            DSPDeviceSourceEngine *deviceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);
     ~DeviceAPI();
@@ -114,7 +114,7 @@ protected:
 
     MainWindow *m_mainWindow;
     int m_deviceTabIndex;
-    DSPDeviceEngine *m_deviceEngine;
+    DSPDeviceSourceEngine *m_deviceEngine;
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
 

@@ -38,7 +38,7 @@ SOURCES += mainwindow.cpp\
         dsp/ctcssdetector.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
-        dsp/dspdeviceengine.cpp\
+        dsp/dspdevicesourceengine.cpp\
         dsp/dvserialengine.cpp\
         dsp/dvserialworker.cpp\
         dsp/fftengine.cpp\
@@ -112,7 +112,7 @@ HEADERS  += mainwindow.h\
         dsp/decimators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
-        dsp/dspdeviceengine.h\
+        dsp/dspdevicesourceengine.h\
         dsp/dvserialengine.h\
         dsp/dvserialworker.h\
         dsp/dsptypes.h\

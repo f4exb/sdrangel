@@ -28,7 +28,7 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
-    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
 
     while (it != m_deviceEngines.end())
     {
@@ -43,9 +43,9 @@ DSPEngine *DSPEngine::instance()
 	return dspEngine;
 }
 
-DSPDeviceEngine *DSPEngine::addDeviceEngine()
+DSPDeviceSourceEngine *DSPEngine::addDeviceEngine()
 {
-    m_deviceEngines.push_back(new DSPDeviceEngine(m_deviceEnginesUIDSequence));
+    m_deviceEngines.push_back(new DSPDeviceSourceEngine(m_deviceEnginesUIDSequence));
     m_deviceEnginesUIDSequence++;
     return m_deviceEngines.back();
 }
@@ -54,7 +54,7 @@ void DSPEngine::removeLastDeviceEngine()
 {
     if (m_deviceEngines.size() > 0)
     {
-        DSPDeviceEngine *lastDeviceEngine = m_deviceEngines.back();
+        DSPDeviceSourceEngine *lastDeviceEngine = m_deviceEngines.back();
         delete lastDeviceEngine;
         m_deviceEngines.pop_back();
         m_deviceEnginesUIDSequence--;
@@ -63,7 +63,7 @@ void DSPEngine::removeLastDeviceEngine()
 
 void DSPEngine::stopAllAcquisitions()
 {
-    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
 
     while (it != m_deviceEngines.end())
     {
@@ -75,7 +75,7 @@ void DSPEngine::stopAllAcquisitions()
 
 void DSPEngine::stopAllDeviceEngines()
 {
-    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
 
     while (it != m_deviceEngines.end())
     {
@@ -118,9 +118,9 @@ void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 	m_audioOutput.removeFifo(audioFifo);
 }
 
-DSPDeviceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
+DSPDeviceSourceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
 {
-    std::vector<DSPDeviceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
 
     while (it != m_deviceEngines.end())
     {

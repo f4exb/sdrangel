@@ -35,7 +35,7 @@ BladerfGui::BladerfGui(DeviceAPI *deviceAPI, QWidget* parent) :
 	m_settings(),
 	m_sampleSource(NULL),
 	m_sampleRate(0),
-	m_lastEngineState((DSPDeviceEngine::State)-1)
+	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -397,16 +397,16 @@ void BladerfGui::updateStatus()
     {
         switch(state)
         {
-            case DSPDeviceEngine::StNotStarted:
+            case DSPDeviceSourceEngine::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceEngine::StIdle:
+            case DSPDeviceSourceEngine::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceEngine::StRunning:
+            case DSPDeviceSourceEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceEngine::StError:
+            case DSPDeviceSourceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
