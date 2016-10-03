@@ -25,7 +25,7 @@
 class PluginAPI;
 class DeviceAPI;
 
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class ChannelAnalyzer;
 class SpectrumScopeComboVis;
@@ -80,7 +80,7 @@ private:
 	int m_spanLog2;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;

@@ -52,12 +52,12 @@ void DeviceAPI::removeSink(BasebandSampleSink* sink)
     m_deviceEngine->removeSink(sink);
 }
 
-void DeviceAPI::addThreadedSink(ThreadedSampleSink* sink)
+void DeviceAPI::addThreadedSink(ThreadedBasebandSampleSink* sink)
 {
     m_deviceEngine->addThreadedSink(sink);
 }
 
-void DeviceAPI::removeThreadedSink(ThreadedSampleSink* sink)
+void DeviceAPI::removeThreadedSink(ThreadedBasebandSampleSink* sink)
 {
     m_deviceEngine->removeThreadedSink(sink);
 }

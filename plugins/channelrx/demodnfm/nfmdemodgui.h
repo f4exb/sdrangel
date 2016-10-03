@@ -10,7 +10,7 @@
 class PluginAPI;
 class DeviceAPI;
 
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class NFMDemod;
 
@@ -63,7 +63,7 @@ private:
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
 	bool m_ctcssOn;

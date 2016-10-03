@@ -4,9 +4,10 @@
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_ssbdemodgui.h"
 #include "ui_ssbdemodgui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
@@ -342,7 +343,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbDemod = new SSBDemod(m_spectrumVis);
 	m_channelizer = new DownChannelizer(m_ssbDemod);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));

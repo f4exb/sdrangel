@@ -22,8 +22,8 @@
 #include <QDebug>
 #include "dsp/dspdeviceengine.h"
 #include "dsp/samplefifo.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
+#include "threadedbasebandsamplesink.h"
 
 DSPDeviceEngine::DSPDeviceEngine(uint uid, QObject* parent) :
     m_uid(uid),
@@ -132,14 +132,14 @@ void DSPDeviceEngine::removeSink(BasebandSampleSink* sink)
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::addThreadedSink(ThreadedSampleSink* sink)
+void DSPDeviceEngine::addThreadedSink(ThreadedBasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::addThreadedSink: " << sink->objectName().toStdString().c_str();
 	DSPAddThreadedSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceEngine::removeThreadedSink(ThreadedSampleSink* sink)
+void DSPDeviceEngine::removeThreadedSink(ThreadedBasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceEngine::removeThreadedSink: " << sink->objectName().toStdString().c_str();
 	DSPRemoveThreadedSampleSink cmd(sink);
@@ -562,13 +562,13 @@ void DSPDeviceEngine::handleSynchronousMessages()
 	}
 	else if (DSPAddThreadedSampleSink::match(*message))
 	{
-		ThreadedSampleSink *threadedSink = ((DSPAddThreadedSampleSink*) message)->getThreadedSampleSink();
+		ThreadedBasebandSampleSink *threadedSink = ((DSPAddThreadedSampleSink*) message)->getThreadedSampleSink();
 		m_threadedSampleSinks.push_back(threadedSink);
 		threadedSink->start();
 	}
 	else if (DSPRemoveThreadedSampleSink::match(*message))
 	{
-		ThreadedSampleSink* threadedSink = ((DSPRemoveThreadedSampleSink*) message)->getThreadedSampleSink();
+		ThreadedBasebandSampleSink* threadedSink = ((DSPRemoveThreadedSampleSink*) message)->getThreadedSampleSink();
 		threadedSink->stop();
 		m_threadedSampleSinks.remove(threadedSink);
 	}

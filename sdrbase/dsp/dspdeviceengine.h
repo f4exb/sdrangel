@@ -31,7 +31,7 @@
 
 class DeviceSampleSource;
 class BasebandSampleSink;
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 
 class SDRANGEL_API DSPDeviceEngine : public QThread {
 	Q_OBJECT
@@ -66,8 +66,8 @@ public:
 	void addSink(BasebandSampleSink* sink); //!< Add a sample sink
 	void removeSink(BasebandSampleSink* sink); //!< Remove a sample sink
 
-	void addThreadedSink(ThreadedSampleSink* sink); //!< Add a sample sink that will run on its own thread
-	void removeThreadedSink(ThreadedSampleSink* sink); //!< Remove a sample sink that runs on its own thread
+	void addThreadedSink(ThreadedBasebandSampleSink* sink); //!< Add a sample sink that will run on its own thread
+	void removeThreadedSink(ThreadedBasebandSampleSink* sink); //!< Remove a sample sink that runs on its own thread
 
 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
 
@@ -94,7 +94,7 @@ private:
 	typedef std::list<BasebandSampleSink*> SampleSinks;
 	SampleSinks m_sampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
 
-	typedef std::list<ThreadedSampleSink*> ThreadedSampleSinks;
+	typedef std::list<ThreadedBasebandSampleSink*> ThreadedSampleSinks;
 	ThreadedSampleSinks m_threadedSampleSinks; //!< sample sinks on their own threads (usually channels)
 
 	uint m_sampleRate;

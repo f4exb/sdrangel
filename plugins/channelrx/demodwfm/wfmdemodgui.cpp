@@ -4,8 +4,9 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_wfmdemodgui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -236,7 +237,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 
 	m_wfmDemod = new WFMDemod(0);
 	m_channelizer = new DownChannelizer(m_wfmDemod);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));

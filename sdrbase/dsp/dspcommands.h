@@ -25,7 +25,7 @@
 
 class DeviceSampleSource;
 class BasebandSampleSink;
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class AudioFifo;
 
 class SDRANGEL_API DSPExit : public Message {
@@ -106,24 +106,24 @@ class SDRANGEL_API DSPAddThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddThreadedSampleSink(ThreadedSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
+	DSPAddThreadedSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
 
-	ThreadedSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
+	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
 
 private:
-	ThreadedSampleSink* m_threadedSampleSink;
+	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
 class SDRANGEL_API DSPRemoveThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveThreadedSampleSink(ThreadedSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
+	DSPRemoveThreadedSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
 
-	ThreadedSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
+	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
 
 private:
-	ThreadedSampleSink* m_threadedSampleSink;
+	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
 class SDRANGEL_API DSPAddAudioSink : public Message {

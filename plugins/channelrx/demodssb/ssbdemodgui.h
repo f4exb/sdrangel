@@ -10,7 +10,7 @@ class PluginAPI;
 class DeviceAPI;
 
 class AudioFifo;
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class SSBDemod;
 class SpectrumVis;
@@ -70,7 +70,7 @@ private:
 	bool m_audioMute;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;

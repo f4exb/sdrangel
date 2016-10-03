@@ -31,12 +31,12 @@ class QThread;
  * Because Qt is a piece of shit this class cannot be a nested protected class of ThreadedSampleSink
  * So let's make everything public
  */
-class ThreadedSampleFifo : public QObject {
+class ThreadedBasebandSampleFifo : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedSampleFifo(BasebandSampleSink* sampleSink, std::size_t size = 1<<18);
-	~ThreadedSampleFifo();
+	ThreadedBasebandSampleFifo(BasebandSampleSink* sampleSink, std::size_t size = 1<<18);
+	~ThreadedBasebandSampleFifo();
 	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
 
 	BasebandSampleSink* m_sampleSink;
@@ -49,12 +49,12 @@ public slots:
 /**
  * This class is a wrapper for SampleSink that runs the SampleSink object in its own thread
  */
-class SDRANGEL_API ThreadedSampleSink : public QObject {
+class SDRANGEL_API ThreadedBasebandSampleSink : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *parent = 0);
-	~ThreadedSampleSink();
+	ThreadedBasebandSampleSink(BasebandSampleSink* sampleSink, QObject *parent = 0);
+	~ThreadedBasebandSampleSink();
 
 	const BasebandSampleSink *getSink() const { return m_sampleSink; }
 	MessageQueue* getInputMessageQueue() { return m_sampleSink->getInputMessageQueue(); } //!< Return pointer to sample sink's input message queue
@@ -71,7 +71,7 @@ public:
 protected:
 
 	QThread *m_thread; //!< The thead object
-	ThreadedSampleFifo *m_threadedSampleFifo;
+	ThreadedBasebandSampleFifo *m_threadedSampleFifo;
 	BasebandSampleSink* m_sampleSink;
 };
 

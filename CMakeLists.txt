@@ -120,7 +120,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/spectrumscopecombovis.cpp
 	sdrbase/dsp/scopevis.cpp
 	sdrbase/dsp/spectrumvis.cpp
-	sdrbase/dsp/threadedsamplesink.cpp
+	sdrbase/dsp/threadedbasebandsamplesink.cpp
 
 	sdrbase/gui/aboutdialog.cpp
 	sdrbase/gui/addpresetdialog.cpp
@@ -209,7 +209,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/nullsink.h
 	sdrbase/dsp/scopevis.h
 	sdrbase/dsp/spectrumvis.h
-	sdrbase/dsp/threadedsamplesink.h
+	sdrbase/dsp/threadedbasebandsamplesink.h
 
 	sdrbase/gui/aboutdialog.h
 	sdrbase/gui/addpresetdialog.h

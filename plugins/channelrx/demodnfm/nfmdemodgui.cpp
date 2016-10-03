@@ -4,8 +4,9 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_nfmdemodgui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -293,7 +294,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pa
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	//m_channelMarker = new ChannelMarker(this);

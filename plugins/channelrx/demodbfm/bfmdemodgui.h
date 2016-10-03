@@ -28,7 +28,7 @@
 class PluginAPI;
 class DeviceAPI;
 
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class SpectrumVis;
 class BFMDemod;
@@ -88,7 +88,7 @@ private:
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 	RDSParser m_rdsParser;

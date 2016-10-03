@@ -4,9 +4,10 @@
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_lorademodgui.h"
 #include "ui_lorademodgui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
@@ -167,7 +168,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
 	m_channelizer = new DownChannelizer(m_LoRaDemod);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(16000);

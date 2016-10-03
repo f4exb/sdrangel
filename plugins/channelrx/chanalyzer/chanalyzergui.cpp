@@ -19,8 +19,9 @@
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_chanalyzergui.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
@@ -327,7 +328,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAP
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
 	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
 	m_channelizer = new DownChannelizer(m_channelAnalyzer);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 

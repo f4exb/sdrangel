@@ -9,7 +9,7 @@
 class PluginAPI;
 class DeviceAPI;
 
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class AMDemod;
 
@@ -58,7 +58,7 @@ private:
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;

@@ -28,7 +28,7 @@
 #endif
 
 class DSPDeviceEngine;
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 
 class SDRANGEL_API DSPEngine : public QObject {
 	Q_OBJECT

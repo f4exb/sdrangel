@@ -61,7 +61,7 @@ SOURCES += mainwindow.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/scopevis.cpp\
         dsp/spectrumvis.cpp\
-        dsp/threadedsamplesink.cpp\
+        dsp/threadedbasebandsamplesink.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
         gui/basicchannelsettingswidget.cpp\
@@ -140,7 +140,7 @@ HEADERS  += mainwindow.h\
         dsp/nullsink.h\
         dsp/scopevis.h\
         dsp/spectrumvis.h\
-        dsp/threadedsamplesink.h\
+        dsp/threadedbasebandsamplesink.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
         gui/audiodialog.h\

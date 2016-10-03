@@ -18,9 +18,9 @@
 #include "../../channelrx/udpsrc/udpsrcgui.h"
 
 #include <dsp/downchannelizer.h>
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
-#include "dsp/threadedsamplesink.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -241,7 +241,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_udpSrc = new UDPSrc(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
 	m_channelizer = new DownChannelizer(m_udpSrc);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->fmDeviation->setEnabled(false);

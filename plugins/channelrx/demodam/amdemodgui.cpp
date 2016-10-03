@@ -3,8 +3,9 @@
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
+
+#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "ui_amdemodgui.h"
-#include "dsp/threadedsamplesink.h"
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "util/simpleserializer.h"
@@ -221,7 +222,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* pare
 
 	m_amDemod = new AMDemod();
 	m_channelizer = new DownChannelizer(m_amDemod);
-	m_threadedChannelizer = new ThreadedSampleSink(m_channelizer, this);
+	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 

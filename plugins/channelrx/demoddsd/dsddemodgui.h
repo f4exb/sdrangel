@@ -27,7 +27,7 @@
 class PluginAPI;
 class DeviceAPI;
 
-class ThreadedSampleSink;
+class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class ScopeVis;
 class DSDDemod;
@@ -97,7 +97,7 @@ private:
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
 
-	ThreadedSampleSink* m_threadedChannelizer;
+	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
     ScopeVis* m_scopeVis;
 

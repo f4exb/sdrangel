@@ -1,27 +1,28 @@
+#include "threadedbasebandsamplesink.h"
+
 #include <QThread>
 #include <QDebug>
-#include "dsp/threadedsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "util/message.h"
 
-ThreadedSampleFifo::ThreadedSampleFifo(BasebandSampleSink *sampleSink, std::size_t size) :
+ThreadedBasebandSampleFifo::ThreadedBasebandSampleFifo(BasebandSampleSink *sampleSink, std::size_t size) :
 	m_sampleSink(sampleSink)
 {
 	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleFifoData()));
 	m_sampleFifo.setSize(size);
 }
 
-ThreadedSampleFifo::~ThreadedSampleFifo()
+ThreadedBasebandSampleFifo::~ThreadedBasebandSampleFifo()
 {
 	m_sampleFifo.readCommit(m_sampleFifo.fill());
 }
 
-void ThreadedSampleFifo::writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
+void ThreadedBasebandSampleFifo::writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
 {
 	m_sampleFifo.write(begin, end);
 }
 
-void ThreadedSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
+void ThreadedBasebandSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
 {
 	bool positiveOnly = false;
 
@@ -62,7 +63,7 @@ void ThreadedSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new th
 	}
 }
 
-ThreadedSampleSink::ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *parent) :
+ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampleSink, QObject *parent) :
 	m_sampleSink(sampleSink)
 {
 	QString name = "ThreadedSampleSink(" + m_sampleSink->objectName() + ")";
@@ -71,7 +72,7 @@ ThreadedSampleSink::ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *
 	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: " << name;
 
 	m_thread = new QThread(parent);
-	m_threadedSampleFifo = new ThreadedSampleFifo(m_sampleSink);
+	m_threadedSampleFifo = new ThreadedBasebandSampleFifo(m_sampleSink);
 	//moveToThread(m_thread); // FIXME: Fixed? the intermediate FIFO should be handled within the sink. Define a new type of sink that is compatible with threading
 	m_sampleSink->moveToThread(m_thread);
 	m_threadedSampleFifo->moveToThread(m_thread);
@@ -82,20 +83,20 @@ ThreadedSampleSink::ThreadedSampleSink(BasebandSampleSink* sampleSink, QObject *
 	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: thread: " << thread() << " m_thread: " << m_thread;
 }
 
-ThreadedSampleSink::~ThreadedSampleSink()
+ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 {
 	delete m_threadedSampleFifo; // Valgrind memcheck
 	delete m_thread;
 }
 
-void ThreadedSampleSink::start()
+void ThreadedBasebandSampleSink::start()
 {
 	qDebug() << "ThreadedSampleSink::start";
 	m_thread->start();
 	m_sampleSink->start();
 }
 
-void ThreadedSampleSink::stop()
+void ThreadedBasebandSampleSink::stop()
 {
 	qDebug() << "ThreadedSampleSink::stop";
 	m_sampleSink->stop();
@@ -103,19 +104,19 @@ void ThreadedSampleSink::stop()
 	m_thread->wait();
 }
 
-void ThreadedSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void ThreadedBasebandSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
 	//m_sampleSink->feed(begin, end, positiveOnly);
 	//m_sampleFifo.write(begin, end);
 	m_threadedSampleFifo->writeToFifo(begin, end);
 }
 
-bool ThreadedSampleSink::handleSinkMessage(const Message& cmd)
+bool ThreadedBasebandSampleSink::handleSinkMessage(const Message& cmd)
 {
 	return m_sampleSink->handleMessage(cmd);
 }
 
-QString ThreadedSampleSink::getSampleSinkObjectName() const
+QString ThreadedBasebandSampleSink::getSampleSinkObjectName() const
 {
 	return m_sampleSink->objectName();
 }
