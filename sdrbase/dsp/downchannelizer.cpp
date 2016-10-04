@@ -37,31 +37,38 @@ void DownChannelizer::feed(const SampleVector::const_iterator& begin, const Samp
 		return;
 	}
 
-	m_mutex.lock();
-
-	for(SampleVector::const_iterator sample = begin; sample != end; ++sample)
+	if (m_filterStages.size() == 0) // optimization when no downsampling is done anyway
 	{
-		Sample s(*sample);
-		FilterStages::iterator stage = m_filterStages.begin();
+		m_sampleSink->feed(begin, end, positiveOnly);
+	}
+	else
+	{
+		m_mutex.lock();
 
-		for (; stage != m_filterStages.end(); ++stage)
+		for(SampleVector::const_iterator sample = begin; sample != end; ++sample)
 		{
-			if(!(*stage)->work(&s))
+			Sample s(*sample);
+			FilterStages::iterator stage = m_filterStages.begin();
+
+			for (; stage != m_filterStages.end(); ++stage)
 			{
-				break;
+				if(!(*stage)->work(&s))
+				{
+					break;
+				}
+			}
+
+			if(stage == m_filterStages.end())
+			{
+				m_sampleBuffer.push_back(s);
 			}
 		}
 
-		if(stage == m_filterStages.end())
-		{
-			m_sampleBuffer.push_back(s);
-		}
+		m_mutex.unlock();
+
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
+		m_sampleBuffer.clear();
 	}
-
-	m_mutex.unlock();
-
-	m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), positiveOnly);
-	m_sampleBuffer.clear();
 }
 
 void DownChannelizer::start()
