@@ -24,7 +24,6 @@
 #include <QWaitCondition>
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
-#include "dsp/samplefifo.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "util/export.h"
