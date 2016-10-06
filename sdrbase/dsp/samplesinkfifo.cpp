@@ -15,11 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/samplefifo.h"
+#include "samplesinkfifo.h"
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-void SampleFifo::create(uint s)
+void SampleSinkFifo::create(uint s)
 {
 	m_size = 0;
 	m_fill = 0;
@@ -33,7 +33,7 @@ void SampleFifo::create(uint s)
 		qCritical("SampleFifo: out of memory");
 }
 
-SampleFifo::SampleFifo(QObject* parent) :
+SampleSinkFifo::SampleSinkFifo(QObject* parent) :
 	QObject(parent),
 	m_data()
 {
@@ -44,7 +44,7 @@ SampleFifo::SampleFifo(QObject* parent) :
 	m_tail = 0;
 }
 
-SampleFifo::SampleFifo(int size, QObject* parent) :
+SampleSinkFifo::SampleSinkFifo(int size, QObject* parent) :
 	QObject(parent),
 	m_data()
 {
@@ -53,21 +53,21 @@ SampleFifo::SampleFifo(int size, QObject* parent) :
 	create(size);
 }
 
-SampleFifo::~SampleFifo()
+SampleSinkFifo::~SampleSinkFifo()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	m_size = 0;
 }
 
-bool SampleFifo::setSize(int size)
+bool SampleSinkFifo::setSize(int size)
 {
 	create(size);
 
 	return m_data.size() == (uint)size;
 }
 
-uint SampleFifo::write(const quint8* data, uint count)
+uint SampleSinkFifo::write(const quint8* data, uint count)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	uint total;
@@ -110,7 +110,7 @@ uint SampleFifo::write(const quint8* data, uint count)
 	return total;
 }
 
-uint SampleFifo::write(SampleVector::const_iterator begin, SampleVector::const_iterator end)
+uint SampleSinkFifo::write(SampleVector::const_iterator begin, SampleVector::const_iterator end)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	uint count = end - begin;
@@ -152,7 +152,7 @@ uint SampleFifo::write(SampleVector::const_iterator begin, SampleVector::const_i
 	return total;
 }
 
-uint SampleFifo::read(SampleVector::iterator begin, SampleVector::iterator end)
+uint SampleSinkFifo::read(SampleVector::iterator begin, SampleVector::iterator end)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	uint count = end - begin;
@@ -178,7 +178,7 @@ uint SampleFifo::read(SampleVector::iterator begin, SampleVector::iterator end)
 	return total;
 }
 
-uint SampleFifo::readBegin(uint count,
+uint SampleSinkFifo::readBegin(uint count,
 	SampleVector::iterator* part1Begin, SampleVector::iterator* part1End,
 	SampleVector::iterator* part2Begin, SampleVector::iterator* part2End)
 {
@@ -216,7 +216,7 @@ uint SampleFifo::readBegin(uint count,
 	return total;
 }
 
-uint SampleFifo::readCommit(uint count)
+uint SampleSinkFifo::readCommit(uint count)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 

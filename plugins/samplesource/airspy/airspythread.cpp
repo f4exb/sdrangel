@@ -18,11 +18,12 @@
 #include <errno.h>
 
 #include "airspythread.h"
-#include "dsp/samplefifo.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
 AirspyThread *AirspyThread::m_this = 0;
 
-AirspyThread::AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent) :
+AirspyThread::AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

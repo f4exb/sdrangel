@@ -16,12 +16,12 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "dsp/samplefifo.h"
 #include "bladerfthread.h"
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
 
 
-BladerfThread::BladerfThread(struct bladerf* dev, SampleFifo* sampleFifo, QObject* parent) :
+BladerfThread::BladerfThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

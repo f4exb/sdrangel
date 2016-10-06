@@ -21,7 +21,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <libairspy/airspy.h>
-#include "dsp/samplefifo.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
 #define AIRSPY_BLOCKSIZE (1<<17)
@@ -30,7 +31,7 @@ class AirspyThread : public QThread {
 	Q_OBJECT
 
 public:
-	AirspyThread(struct airspy_device* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~AirspyThread();
 
 	void startWork();
@@ -47,7 +48,7 @@ private:
 	struct airspy_device* m_dev;
 	qint16 m_buf[2*AIRSPY_BLOCKSIZE];
 	SampleVector m_convertBuffer;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

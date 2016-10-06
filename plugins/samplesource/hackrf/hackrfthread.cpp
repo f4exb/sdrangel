@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "dsp/samplefifo.h"
 #include "hackrfthread.h"
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
 HackRFThread *HackRFThread::m_this = 0;
 
-HackRFThread::HackRFThread(hackrf_device* dev, SampleFifo* sampleFifo, QObject* parent) :
+HackRFThread::HackRFThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

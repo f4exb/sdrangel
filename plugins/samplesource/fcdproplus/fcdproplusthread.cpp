@@ -18,11 +18,12 @@
 #include <QDebug>
 #include <stdio.h>
 #include <errno.h>
-#include "dsp/samplefifo.h"
 #include "fcdproplusthread.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "fcdtraits.h"
 
-FCDProPlusThread::FCDProPlusThread(SampleFifo* sampleFifo, QObject* parent) :
+FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	fcd_handle(NULL),
 	m_running(false),

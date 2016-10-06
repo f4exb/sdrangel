@@ -21,8 +21,8 @@
 #include <cstring>
 #include <cstddef>
 #include <lz4.h>
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "util/CRC64.h"
-#include "dsp/samplefifo.h"
 
 class SDRdaemonBufferOld
 {

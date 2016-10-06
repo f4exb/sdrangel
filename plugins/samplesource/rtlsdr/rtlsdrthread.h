@@ -22,15 +22,15 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <rtl-sdr.h>
-#include "dsp/samplefifo.h"
-//#include "dsp/inthalfbandfilter.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
 class RTLSDRThread : public QThread {
 	Q_OBJECT
 
 public:
-	RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~RTLSDRThread();
 
 	void startWork();
@@ -46,7 +46,7 @@ private:
 
 	rtlsdr_dev_t* m_dev;
 	SampleVector m_convertBuffer;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

@@ -55,7 +55,7 @@ SOURCES += mainwindow.cpp\
         dsp/nco.cpp\
         dsp/pidcontroller.cpp\
         dsp/phaselock.cpp\
-        dsp/samplefifo.cpp\
+        dsp/samplesinkfifo.cpp\
         dsp/samplesinkfifodoublebuffered.cpp\
         dsp/basebandsamplesink.cpp\
         dsp/nullsink.cpp\
@@ -136,7 +136,7 @@ HEADERS  += mainwindow.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
         dsp/pidcontroller.h\
-        dsp/samplefifo.h\
+        dsp/samplesinkfifo.h\
         dsp/samplesinkfifodoublebuffered.h\
         dsp/samplesinkfifodecimator.h\
         dsp/basebandsamplesink.h\

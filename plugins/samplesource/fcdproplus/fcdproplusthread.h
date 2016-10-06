@@ -21,15 +21,15 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include "dsp/samplefifo.h"
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
 class FCDProPlusThread : public QThread {
 	Q_OBJECT
 
 public:
-	FCDProPlusThread(SampleFifo* sampleFifo, QObject* parent = NULL);
+	FCDProPlusThread(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~FCDProPlusThread();
 
 	void startWork();
@@ -45,7 +45,7 @@ private:
 	bool m_running;
 
 	SampleVector m_convertBuffer;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 
 	void run();
 	int work(int n_items);

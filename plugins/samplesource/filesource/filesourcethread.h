@@ -25,7 +25,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include "dsp/samplefifo.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/inthalfbandfilter.h"
 
 #define FILESOURCE_THROTTLE_MS 50
@@ -34,7 +35,7 @@ class FileSourceThread : public QThread {
 	Q_OBJECT
 
 public:
-	FileSourceThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent = NULL);
+	FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~FileSourceThread();
 
 	void startWork();
@@ -56,7 +57,7 @@ private:
 	quint8  *m_buf;
 	std::size_t m_bufsize;
 	std::size_t m_chunksize;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 	std::size_t m_samplesCount;
 
 	int m_samplerate;

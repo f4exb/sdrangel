@@ -20,7 +20,8 @@
 
 #include <dsp/basebandsamplesink.h>
 #include <QMutex>
-#include "dsp/samplefifo.h"
+
+#include "samplesinkfifo.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 
@@ -40,7 +41,7 @@ public:
 	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
 
 	BasebandSampleSink* m_sampleSink;
-	SampleFifo m_sampleFifo;
+	SampleSinkFifo m_sampleFifo;
 
 public slots:
 	void handleFifoData();

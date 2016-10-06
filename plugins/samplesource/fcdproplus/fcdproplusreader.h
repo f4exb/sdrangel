@@ -22,7 +22,7 @@
 #include <QWaitCondition>
 #include <QByteArray>
 
-#include "dsp/samplefifo.h"
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/inthalfbandfilter.h"
 
 class QAudioInput;
@@ -33,7 +33,7 @@ class FCDProPlusReader : public QObject {
 	Q_OBJECT
 
 public:
-	FCDProPlusReader(SampleFifo* sampleFifo, QObject* parent = NULL);
+	FCDProPlusReader(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~FCDProPlusReader();
 
 	void startWork();
@@ -49,7 +49,7 @@ private:
 
 	SampleVector m_convertBuffer;
 	QByteArray m_fcdBuffer;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 
 	void openFcdAudio(const QAudioDeviceInfo& fcdAudioDeviceInfo);
 

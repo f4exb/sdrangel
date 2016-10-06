@@ -25,7 +25,7 @@
 #include "sdrdaemonudphandler.h"
 #include "sdrdaemoninput.h"
 
-SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *devieAPI) :
+SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *devieAPI) :
     m_deviceAPI(devieAPI),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),

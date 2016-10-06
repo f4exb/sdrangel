@@ -24,7 +24,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGEL_API SampleFifo : public QObject {
+class SDRANGEL_API SampleSinkFifo : public QObject {
 	Q_OBJECT
 
 private:
@@ -42,9 +42,9 @@ private:
 	void create(uint s);
 
 public:
-	SampleFifo(QObject* parent = NULL);
-	SampleFifo(int size, QObject* parent = NULL);
-	~SampleFifo();
+	SampleSinkFifo(QObject* parent = NULL);
+	SampleSinkFifo(int size, QObject* parent = NULL);
+	~SampleSinkFifo();
 
 	bool setSize(int size);
 	inline uint size() const { return m_size; }

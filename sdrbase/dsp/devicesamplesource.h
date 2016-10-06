@@ -19,7 +19,8 @@
 #define INCLUDE_SAMPLESOURCE_H
 
 #include <QtGlobal>
-#include "dsp/samplefifo.h"
+
+#include "samplesinkfifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
@@ -42,13 +43,13 @@ public:
 	
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; }
-    SampleFifo* getSampleFifo() { return &m_sampleFifo; }
+    SampleSinkFifo* getSampleFifo() { return &m_sampleFifo; }
 
 protected slots:
 	void handleInputMessages();
 
 protected:
-    SampleFifo m_sampleFifo;
+    SampleSinkFifo m_sampleFifo;
 	MessageQueue m_inputMessageQueue; //!< Input queue to the source
     MessageQueue m_outputMessageQueueToGUI; //!< Output queue specialized for the source GUI
 };

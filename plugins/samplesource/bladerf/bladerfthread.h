@@ -21,7 +21,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <libbladeRF.h>
-#include "dsp/samplefifo.h"
+#include "dsp/samplesinkfifo.h"
 //#include "dsp/inthalfbandfilter.h"
 #include "dsp/decimators.h"
 
@@ -31,7 +31,7 @@ class BladerfThread : public QThread {
 	Q_OBJECT
 
 public:
-	BladerfThread(struct bladerf* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+    BladerfThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~BladerfThread();
 
 	void startWork();
@@ -48,7 +48,7 @@ private:
 	struct bladerf* m_dev;
 	qint16 m_buf[2*BLADERF_BLOCKSIZE];
 	SampleVector m_convertBuffer;
-	SampleFifo* m_sampleFifo;
+    SampleSinkFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

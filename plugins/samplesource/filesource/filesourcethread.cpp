@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
-#include "dsp/samplefifo.h"
 #include <QDebug>
 
 #include "filesourcethread.h"
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
-FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleFifo* sampleFifo, QObject* parent) :
+FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_ifstream(samplesStream),

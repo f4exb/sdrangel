@@ -18,11 +18,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include "rtlsdrthread.h"
-#include "dsp/samplefifo.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 
 #define FCD_BLOCKSIZE 16384
 
-RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleFifo* sampleFifo, QObject* parent) :
+RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

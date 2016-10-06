@@ -22,8 +22,8 @@
 #include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
-#include "dsp/samplefifo.h"
 #include "dsp/dspcommands.h"
+#include "samplesinkfifo.h"
 #include "threadedbasebandsamplesink.h"
 
 DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
@@ -242,7 +242,7 @@ void DSPDeviceSourceEngine::imbalance(SampleVector::iterator begin, SampleVector
 
 void DSPDeviceSourceEngine::work()
 {
-	SampleFifo* sampleFifo = m_deviceSampleSource->getSampleFifo();
+	SampleSinkFifo* sampleFifo = m_deviceSampleSource->getSampleFifo();
 	std::size_t samplesDone = 0;
 	bool positiveOnly = false;
 

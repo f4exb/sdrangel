@@ -24,11 +24,12 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "dsp/samplefifo.h"
 #include "fcdproplusreader.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "fcdtraits.h"
 
-FCDProPlusReader::FCDProPlusReader(SampleFifo* sampleFifo, QObject* parent) :
+FCDProPlusReader::FCDProPlusReader(SampleSinkFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
 	m_fcdAudioInput(0),
 	m_fcdInput(0),

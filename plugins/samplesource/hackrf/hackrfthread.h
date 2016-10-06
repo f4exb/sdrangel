@@ -21,7 +21,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <libhackrf/hackrf.h>
-#include "dsp/samplefifo.h"
+
+#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
 #define HACKRF_BLOCKSIZE (1<<17)
@@ -30,7 +31,7 @@ class HackRFThread : public QThread {
 	Q_OBJECT
 
 public:
-	HackRFThread(hackrf_device* dev, SampleFifo* sampleFifo, QObject* parent = NULL);
+	HackRFThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
 	~HackRFThread();
 
 	void startWork();
@@ -47,7 +48,7 @@ private:
 	hackrf_device* m_dev;
 	qint16 m_buf[2*HACKRF_BLOCKSIZE];
 	SampleVector m_convertBuffer;
-	SampleFifo* m_sampleFifo;
+	SampleSinkFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

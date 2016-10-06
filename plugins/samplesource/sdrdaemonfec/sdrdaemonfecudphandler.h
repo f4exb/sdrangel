@@ -27,7 +27,7 @@
 
 #define SDRDAEMONFEC_THROTTLE_MS 50
 
-class SampleFifo;
+class SampleSinkFifo;
 class MessageQueue;
 class QTimer;
 class DeviceAPI;
@@ -36,7 +36,7 @@ class SDRdaemonFECUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonFECUDPHandler(SampleFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *deviceAPI);
+	SDRdaemonFECUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *deviceAPI);
 	~SDRdaemonFECUDPHandler();
 	void connectTimer(const QTimer* timer);
 	void start();
@@ -57,7 +57,7 @@ private:
 	bool m_dataConnected;
 	char *m_udpBuf;
 	qint64 m_udpReadBytes;
-	SampleFifo *m_sampleFifo;
+	SampleSinkFifo *m_sampleFifo;
 	uint32_t m_samplerate;
 	uint32_t m_centerFrequency;
 	uint32_t m_tv_sec;
