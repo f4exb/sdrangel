@@ -94,6 +94,10 @@ bool AirspyInput::start(int device)
 		qCritical("AirspyInput::start: could not obtain Airspy sample rates");
 		return false;
 	}
+	else
+	{
+	    qDebug("AirspyInput::start: %d sample rates", nbSampleRates);
+	}
 
 	m_sampleRates.clear();
 
@@ -105,6 +109,7 @@ bool AirspyInput::start(int device)
 
 	delete[] sampleRates;
 #else
+	qDebug("AirspyInput::start: detault rates");
 	m_sampleRates.clear();
 	m_sampleRates.push_back(10000000);
 	m_sampleRates.push_back(2500000);

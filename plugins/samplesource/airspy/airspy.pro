@@ -17,6 +17,8 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += $$LIBAIRSPYSRC
 
+DEFINES += LIBAIRSPY_DYN_RATES
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
