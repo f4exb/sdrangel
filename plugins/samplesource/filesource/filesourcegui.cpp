@@ -311,8 +311,7 @@ void FileSourceGui::updateWithAcquisition()
 void FileSourceGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
-	QString s = QString::number(m_sampleRate/1000.0, 'f', 0);
-	ui->sampleRateText->setText(tr("%1k").arg(s));
+	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 	ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addSecs(m_recordLength);

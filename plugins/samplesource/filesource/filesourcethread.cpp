@@ -150,7 +150,7 @@ void FileSourceThread::tick()
         if (throttlems != m_throttlems)
         {
             m_throttlems = throttlems;
-            m_chunksize = (m_samplerate * 4 * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+            m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
             m_throttleToggle = !m_throttleToggle;
             setBuffer(m_chunksize);
         }
