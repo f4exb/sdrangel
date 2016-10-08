@@ -26,6 +26,7 @@ AudioOutput::AudioOutput() :
 	m_mutex(),
 	m_audioOutput(0),
 	m_audioUsageCount(0),
+	m_onExit(false),
 	m_audioFifos()
 {
 }
@@ -124,7 +125,10 @@ void AudioOutput::stop()
         if (m_audioUsageCount == 0)
         {
             QIODevice::close();
-            delete m_audioOutput;
+
+            if (!m_onExit) {
+                delete m_audioOutput;
+            }
         }
     }
 }

@@ -28,6 +28,8 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
+    m_audioOutput.setOnExit(true);
+
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
 
     while (it != m_deviceEngines.end())

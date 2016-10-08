@@ -41,11 +41,13 @@ public:
 	void removeFifo(AudioFifo* audioFifo);
 
 	uint getRate() const { return m_audioFormat.sampleRate(); }
+	void setOnExit(bool onExit) { m_onExit = onExit; }
 
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
 	uint m_audioUsageCount;
+	bool m_onExit;
 
 	typedef std::list<AudioFifo*> AudioFifos;
 	AudioFifos m_audioFifos;
