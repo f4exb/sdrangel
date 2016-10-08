@@ -9,8 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = librtlsdr
 
-CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\rtl-sdr"
-CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\rtl-sdr"
+CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"
+CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 INCLUDEPATH += $$LIBRTLSDRSRC/include
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"
