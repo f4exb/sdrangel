@@ -19,8 +19,9 @@
 #include <assert.h>
 #include <QDebug>
 
+#include "dsp/filerecord.h"
 #include "filesourcethread.h"
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 
 FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
@@ -52,7 +53,7 @@ FileSourceThread::~FileSourceThread()
 void FileSourceThread::startWork()
 {
 	qDebug() << "FileSourceThread::startWork: ";
-    
+
     if (m_ifstream->is_open())
     {
         qDebug() << "FileSourceThread::startWork: file stream open, starting...";
@@ -157,13 +158,13 @@ void FileSourceThread::tick()
 
 		// read samples directly feeding the SampleFifo (no callback)
 		m_ifstream->read(reinterpret_cast<char*>(m_buf), m_chunksize);
-        
+
         if (m_ifstream->eof())
         {
             m_sampleFifo->write(m_buf, m_ifstream->gcount());
             // TODO: handle loop playback situation
     		m_ifstream->clear();
-    		m_ifstream->seekg(0, std::ios::beg);
+            m_ifstream->seekg(sizeof(FileRecord::Header), std::ios::beg);
     		m_samplesCount = 0;
             //stopWork();
             //m_ifstream->close();

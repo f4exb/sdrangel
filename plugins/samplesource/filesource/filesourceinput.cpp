@@ -136,7 +136,7 @@ void FileSourceInput::seekFileStream(int seekPercentage)
 		m_fileSourceThread->setSamplesCount(seekPoint);
 		seekPoint *= 4; // + sizeof(FileSink::Header)
 		m_ifstream.clear();
-		m_ifstream.seekg(seekPoint, std::ios::beg);
+		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
 	}
 }
 
@@ -152,7 +152,7 @@ bool FileSourceInput::start(int device)
 
 	if (m_ifstream.tellg() != 0) {
 		m_ifstream.clear();
-		m_ifstream.seekg(0, std::ios::beg);
+		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
 
 	if(!m_sampleFifo.setSize(m_sampleRate * 4)) {
