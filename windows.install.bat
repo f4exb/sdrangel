@@ -12,7 +12,7 @@ copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
-mkdir %2\plugins\channel
+mkdir %2\plugins\channelrx
 mkdir %2\plugins\samplesource
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
