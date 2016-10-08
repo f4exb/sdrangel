@@ -148,14 +148,14 @@ bool FileSourceInput::init(const Message& message)
 bool FileSourceInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
-	qDebug() << "FileSourceInput::startInput";
+	qDebug() << "FileSourceInput::start";
 
 	if (m_ifstream.tellg() != 0) {
 		m_ifstream.clear();
 		m_ifstream.seekg(0, std::ios::beg);
 	}
 
-	if(!m_sampleFifo.setSize(96000 * 4)) {
+	if(!m_sampleFifo.setSize(m_sampleRate * 4)) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
