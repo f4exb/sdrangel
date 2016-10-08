@@ -400,7 +400,6 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
   - The message queuing model supports a n:1 connection to an object (on its input queue) and a 1:1 connection from an object (on its output queue). Assuming a different model can cause insidious disruptions.
   - As the objects input and output queues can be publicly accessed there is no strict control of which objects post messages on these queues. The correct assumption is that messages can be popped from the input queue only by its holder and that messages can be pushed on the output queue only by its holder.
   - Objects managing more than one message queue (input + output for example) do not work well under stress conditions. Output queue removed from sample sources but this model has to be revised throughout the application.
-  - File input plugin in Linux: it is having trouble switching to another file source. The best option is to restart SDRangel. Strangely enough the Windows version does not seem to be affected maybe this is an ALSA only issue.
   - SDRdaemon FEC plugin: it has trouble doing the first connection or reconnecting to another device. The best option is to try then acknowledge the error message and restart SDRangel.
 
 <h1>Limitations</h1>
