@@ -113,6 +113,8 @@ bool AudioOutput::start(int device, int rate)
 
 void AudioOutput::stop()
 {
+    qDebug("AudioOutput::stop");
+
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_audioUsageCount > 0)
@@ -122,7 +124,7 @@ void AudioOutput::stop()
         if (m_audioUsageCount == 0)
         {
             QIODevice::close();
-//            delete m_audioOutput;
+            delete m_audioOutput;
         }
     }
 }
