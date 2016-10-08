@@ -30,7 +30,7 @@ void SampleSinkFifo::create(uint s)
 	m_size = m_data.size();
 
 	if(m_size != s)
-		qCritical("SampleFifo: out of memory");
+		qCritical("SampleSinkFifo: out of memory");
 }
 
 SampleSinkFifo::SampleSinkFifo(QObject* parent) :
@@ -81,11 +81,11 @@ uint SampleSinkFifo::write(const quint8* data, uint count)
 		if(m_suppressed < 0) {
 			m_suppressed = 0;
 			m_msgRateTimer.start();
-			qCritical("SampleFifo: overflow - dropping %u samples", count - total);
+			qCritical("SampleSinkFifo: overflow - dropping %u samples", count - total);
 		} else {
 			if(m_msgRateTimer.elapsed() > 2500) {
-				qCritical("SampleFifo: %u messages dropped", m_suppressed);
-				qCritical("SampleFifo: overflow - dropping %u samples", count - total);
+				qCritical("SampleSinkFifo: %u messages dropped", m_suppressed);
+				qCritical("SampleSinkFifo: overflow - dropping %u samples", count - total);
 				m_suppressed = -1;
 			} else {
 				m_suppressed++;
@@ -123,11 +123,11 @@ uint SampleSinkFifo::write(SampleVector::const_iterator begin, SampleVector::con
 		if(m_suppressed < 0) {
 			m_suppressed = 0;
 			m_msgRateTimer.start();
-			qCritical("SampleFifo: overflow - dropping %u samples", count - total);
+			qCritical("SampleSinkFifo: overflow - dropping %u samples", count - total);
 		} else {
 			if(m_msgRateTimer.elapsed() > 2500) {
-				qCritical("SampleFifo: %u messages dropped", m_suppressed);
-				qCritical("SampleFifo: overflow - dropping %u samples", count - total);
+				qCritical("SampleSinkFifo: %u messages dropped", m_suppressed);
+				qCritical("SampleSinkFifo: overflow - dropping %u samples", count - total);
 				m_suppressed = -1;
 			} else {
 				m_suppressed++;
@@ -162,7 +162,7 @@ uint SampleSinkFifo::read(SampleVector::iterator begin, SampleVector::iterator e
 
 	total = MIN(count, m_fill);
 	if(total < count)
-		qCritical("SampleFifo: underflow - missing %u samples", count - total);
+		qCritical("SampleSinkFifo: underflow - missing %u samples", count - total);
 
 	remaining = total;
 	while(remaining > 0) {
@@ -190,7 +190,7 @@ uint SampleSinkFifo::readBegin(uint count,
 
 	total = MIN(count, m_fill);
 	if(total < count)
-		qCritical("SampleFifo: underflow - missing %u samples", count - total);
+		qCritical("SampleSinkFifo: underflow - missing %u samples", count - total);
 
 	remaining = total;
 	if(remaining > 0) {
@@ -221,7 +221,7 @@ uint SampleSinkFifo::readCommit(uint count)
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if(count > m_fill) {
-		qCritical("SampleFifo: cannot commit more than available samples");
+		qCritical("SampleSinkFifo: cannot commit more than available samples");
 		count = m_fill;
 	}
 	m_head = (m_head + count) % m_size;

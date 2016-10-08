@@ -15,7 +15,7 @@ DownChannelizer::DownChannelizer(BasebandSampleSink* sampleSink) :
 	m_currentOutputSampleRate(0),
 	m_currentCenterFrequency(0)
 {
-	QString name = "Channelizer(" + m_sampleSink->objectName() + ")";
+	QString name = "DownChannelizer(" + m_sampleSink->objectName() + ")";
 	setObjectName(name);
 }
 
@@ -75,7 +75,7 @@ void DownChannelizer::start()
 {
 	if (m_sampleSink != 0)
 	{
-		qDebug() << "Channelizer::start: thread: " << thread()
+		qDebug() << "DownChannelizer::start: thread: " << thread()
 				<< " m_inputSampleRate: " << m_inputSampleRate
 				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
 				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
@@ -91,7 +91,7 @@ void DownChannelizer::stop()
 
 bool DownChannelizer::handleMessage(const Message& cmd)
 {
-	qDebug() << "Channelizer::handleMessage: " << cmd.getIdentifier();
+	qDebug() << "DownChannelizer::handleMessage: " << cmd.getIdentifier();
 
 	// TODO: apply changes only if input sample rate or requested output sample rate change. Change of center frequency has no impact.
 
@@ -99,7 +99,7 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
 		m_inputSampleRate = notif.getSampleRate();
-		qDebug() << "Channelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
+		qDebug() << "DownChannelizer::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_inputSampleRate;
 		applyConfiguration();
 
 		if (m_sampleSink != 0)
@@ -116,7 +116,7 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 		m_requestedOutputSampleRate = chan.getSampleRate();
 		m_requestedCenterFrequency = chan.getCenterFrequency();
 
-		qDebug() << "Channelizer::handleMessage: DSPConfigureChannelizer:"
+		qDebug() << "DownChannelizer::handleMessage: DSPConfigureChannelizer:"
 				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
 				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
 
@@ -141,7 +141,7 @@ void DownChannelizer::applyConfiguration()
 {
 	if (m_inputSampleRate == 0)
 	{
-		qDebug() << "Channelizer::applyConfiguration: m_inputSampleRate=0 aborting";
+		qDebug() << "DownChannelizer::applyConfiguration: m_inputSampleRate=0 aborting";
 		return;
 	}
 
@@ -157,7 +157,7 @@ void DownChannelizer::applyConfiguration()
 
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
 
-	qDebug() << "Channelizer::applyConfiguration in=" << m_inputSampleRate
+	qDebug() << "DownChannelizer::applyConfiguration in=" << m_inputSampleRate
 			<< ", req=" << m_requestedOutputSampleRate
 			<< ", out=" << m_currentOutputSampleRate
 			<< ", fc=" << m_currentCenterFrequency;

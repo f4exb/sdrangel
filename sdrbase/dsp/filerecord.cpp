@@ -26,7 +26,7 @@ FileRecord::FileRecord(const std::string& filename) :
     m_recordStart(false),
     m_byteCount(0)
 {
-    setObjectName("FileSink");
+    setObjectName("FileRecord");
 }
 
 FileRecord::~FileRecord()
@@ -74,7 +74,7 @@ void FileRecord::startRecording()
 {
     if (!m_sampleFile.is_open())
     {
-    	qDebug() << "FileSink::startRecording";
+    	qDebug() << "FileRecord::startRecording";
         m_sampleFile.open(m_fileName.c_str(), std::ios::binary);
         m_recordOn = true;
         m_recordStart = true;
@@ -86,7 +86,7 @@ void FileRecord::stopRecording()
 {
     if (m_sampleFile.is_open())
     {
-    	qDebug() << "FileSink::stopRecording";
+    	qDebug() << "FileRecord::stopRecording";
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
@@ -95,14 +95,14 @@ void FileRecord::stopRecording()
 
 bool FileRecord::handleMessage(const Message& message)
 {
-	qDebug() << "FileSink::handleMessage";
+	qDebug() << "FileRecord::handleMessage";
 
 	if (DSPSignalNotification::match(message))
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;
 		m_sampleRate = notif.getSampleRate();
 		m_centerFrequency = notif.getCenterFrequency();
-		qDebug() << "FileSink::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
+		qDebug() << "FileRecord::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
 				<< " m_centerFrequency: " << m_centerFrequency;
 		return true;
 	}

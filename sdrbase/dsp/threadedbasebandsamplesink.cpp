@@ -66,10 +66,10 @@ void ThreadedBasebandSampleFifo::handleFifoData() // FIXME: Fixed? Move it to th
 ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampleSink, QObject *parent) :
 	m_basebandSampleSink(sampleSink)
 {
-	QString name = "ThreadedSampleSink(" + m_basebandSampleSink->objectName() + ")";
+	QString name = "ThreadedBasebandSampleSink(" + m_basebandSampleSink->objectName() + ")";
 	setObjectName(name);
 
-	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: " << name;
+	qDebug() << "ThreadedBasebandSampleSink::ThreadedBasebandSampleSink: " << name;
 
 	m_thread = new QThread(parent);
 	m_threadedBasebandSampleFifo = new ThreadedBasebandSampleFifo(m_basebandSampleSink);
@@ -80,7 +80,7 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
 	//m_sampleFifo.setSize(262144);
 
-	qDebug() << "ThreadedSampleSink::ThreadedSampleSink: thread: " << thread() << " m_thread: " << m_thread;
+	qDebug() << "ThreadedBasebandSampleSink::ThreadedBasebandSampleSink: thread: " << thread() << " m_thread: " << m_thread;
 }
 
 ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
@@ -91,14 +91,14 @@ ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 
 void ThreadedBasebandSampleSink::start()
 {
-	qDebug() << "ThreadedSampleSink::start";
+	qDebug() << "ThreadedBasebandSampleSink::start";
 	m_thread->start();
 	m_basebandSampleSink->start();
 }
 
 void ThreadedBasebandSampleSink::stop()
 {
-	qDebug() << "ThreadedSampleSink::stop";
+	qDebug() << "ThreadedBasebandSampleSink::stop";
 	m_basebandSampleSink->stop();
 	m_thread->exit();
 	m_thread->wait();
