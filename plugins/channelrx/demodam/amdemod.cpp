@@ -77,7 +77,7 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+		if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
 		{
 			//m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
 			m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));

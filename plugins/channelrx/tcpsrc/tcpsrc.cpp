@@ -92,7 +92,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
 			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (1<<30);
 			m_sampleBuffer.push_back(Sample(ci.real() * rescale, ci.imag() * rescale));

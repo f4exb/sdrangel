@@ -101,7 +101,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
 			if (m_dsb)
 			{

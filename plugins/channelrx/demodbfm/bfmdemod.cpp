@@ -148,7 +148,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
 				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
 
-				if (m_interpolatorRDS.interpolate(&m_interpolatorRDSDistanceRemain, r, &cr))
+				if (m_interpolatorRDS.decimate(&m_interpolatorRDSDistanceRemain, r, &cr))
 				{
 					bool bit;
 
@@ -185,7 +185,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					// 1.17 * 0.7 = 0.819
 					Complex s(demod * m_pilotPLLSamples[1], demod * m_pilotPLLSamples[2]);
 
-					if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+					if (m_interpolatorStereo.decimate(&m_interpolatorStereoDistanceRemain, s, &cs))
 					{
 						sampleStereo = cs.real() + cs.imag();
 						m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
@@ -195,7 +195,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				{
 					Complex s(demod * 1.17 * m_pilotPLLSamples[1], 0);
 
-					if (m_interpolatorStereo.interpolate(&m_interpolatorStereoDistanceRemain, s, &cs))
+					if (m_interpolatorStereo.decimate(&m_interpolatorStereoDistanceRemain, s, &cs))
 					{
 						sampleStereo = cs.real();
 						m_interpolatorStereoDistanceRemain += m_interpolatorStereoDistance;
@@ -205,7 +205,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			Complex e(demod, 0);
 
-			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
+			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				if (m_running.m_audioStereo)
 				{

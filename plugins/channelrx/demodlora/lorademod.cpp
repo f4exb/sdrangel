@@ -250,7 +250,7 @@ void LoRaDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.interpolate(&m_sampleDistanceRemain, c, &ci))
+		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
 			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
                         m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);

@@ -140,7 +140,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		c *= m_nco.nextIQ();
 
 		{
-			if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
 			{
 
 				qint16 sample;

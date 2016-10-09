@@ -20,7 +20,7 @@ public:
 	void free();
 
 	// Original code allowed for upsampling, but was never used that way
-	bool interpolate(Real *distance, const Complex& next, Complex* result)
+	bool decimate(Real *distance, const Complex& next, Complex* result)
 	{
 		advanceFilter(next);
 		*distance -= 1.0;

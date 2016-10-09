@@ -118,7 +118,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			Complex e(demod, 0);
 
-			if(m_interpolator.interpolate(&m_interpolatorDistanceRemain, e, &ci))
+			if(m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
 				m_sampleBuffer.push_back(Sample(sample, sample));
