@@ -115,6 +115,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/pidcontroller.cpp
     sdrbase/dsp/phaselock.cpp
 	sdrbase/dsp/samplesinkfifo.cpp
+    sdrbase/dsp/samplesourcefifo.cpp
     sdrbase/dsp/samplesinkfifodoublebuffered.cpp
 	sdrbase/dsp/basebandsamplesink.cpp
 	sdrbase/dsp/nullsink.cpp
@@ -206,6 +207,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/phaselock.h
     sdrbase/dsp/pidcontroller.h
 	sdrbase/dsp/samplesinkfifo.h
+    sdrbase/dsp/samplesourcefifo.h
     sdrbase/dsp/samplesinkfifodoublebuffered.h
     sdrbase/dsp/samplesinkfifodecimator.h
 	sdrbase/dsp/basebandsamplesink.h
