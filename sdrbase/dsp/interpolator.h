@@ -35,6 +35,24 @@ public:
 		return true;
 	}
 
+	// interpolation works nearly the same way
+	bool interpolate(Real *distance, const Complex& next, Complex* result)
+	{
+        *distance -= 1.0;
+
+        if (*distance < 1.0) // use sample
+        {
+            advanceFilter(next);
+            doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
+            return true;  // need new input sample and increment distance
+        }
+        else // use zero
+        {
+            advanceFilter();
+            doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
+            return false; // input sample was not used and do not increment distance
+        }
+	}
 
 private:
 	float* m_taps;
@@ -55,6 +73,15 @@ private:
 			m_ptr = m_nTaps - 1;
 		m_samples[m_ptr] = next;
 	}
+
+    void advanceFilter()
+    {
+        m_ptr--;
+        if(m_ptr < 0)
+            m_ptr = m_nTaps - 1;
+        m_samples[m_ptr].real(0.0);
+        m_samples[m_ptr].imag(0.0);
+    }
 
 	void doInterpolate(int phase, Complex* result)
 	{
