@@ -172,31 +172,31 @@ MainWindow::~MainWindow()
 
 void MainWindow::addDevice()
 {
-    DSPDeviceSourceEngine *dspDeviceEngine = m_dspEngine->addDeviceEngine();
-    dspDeviceEngine->start();
+    DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
+    dspDeviceSourceEngine->start();
 
-    uint dspDeviceEngineUID =  dspDeviceEngine->getUID();
+    uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
     char tabNameCStr[16];
-    sprintf(tabNameCStr, "R%d", dspDeviceEngineUID);
+    sprintf(tabNameCStr, "R%d", dspDeviceSourceEngineUID);
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
-    m_deviceUIs.back()->m_deviceEngine = dspDeviceEngine;
+    m_deviceUIs.back()->m_deviceEngine = dspDeviceSourceEngine;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(this, m_deviceUIs.size()-1, dspDeviceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceAPI *deviceAPI = new DeviceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     m_deviceUIs.back()->m_samplingDeviceControl->populateChannelSelector();
 
-    dspDeviceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+    dspDeviceSourceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
-    m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceEngineUID);
-    m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceEngineUID);
+    m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceSourceEngineUID);
+    m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceSourceEngineUID);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSource_confirmClicked(bool)));
 
@@ -234,7 +234,7 @@ void MainWindow::removeLastDevice()
     delete m_deviceUIs.back();
 
     lastDeviceEngine->stop();
-    m_dspEngine->removeLastDeviceEngine();
+    m_dspEngine->removeLastDeviceSourceEngine();
 
     m_deviceUIs.pop_back();
 }

@@ -20,7 +20,7 @@
 #include "dsp/dspengine.h"
 
 DSPEngine::DSPEngine() :
-    m_deviceEnginesUIDSequence(0),
+    m_deviceSourceEnginesUIDSequence(0),
 	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
 	m_dvSerialSupport = false;
@@ -30,9 +30,9 @@ DSPEngine::~DSPEngine()
 {
     m_audioOutput.setOnExit(true);
 
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
-    while (it != m_deviceEngines.end())
+    while (it != m_deviceSourceEngines.end())
     {
         delete *it;
         ++it;
@@ -45,44 +45,21 @@ DSPEngine *DSPEngine::instance()
 	return dspEngine;
 }
 
-DSPDeviceSourceEngine *DSPEngine::addDeviceEngine()
+DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
-    m_deviceEngines.push_back(new DSPDeviceSourceEngine(m_deviceEnginesUIDSequence));
-    m_deviceEnginesUIDSequence++;
-    return m_deviceEngines.back();
+    m_deviceSourceEngines.push_back(new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence));
+    m_deviceSourceEnginesUIDSequence++;
+    return m_deviceSourceEngines.back();
 }
 
-void DSPEngine::removeLastDeviceEngine()
+void DSPEngine::removeLastDeviceSourceEngine()
 {
-    if (m_deviceEngines.size() > 0)
+    if (m_deviceSourceEngines.size() > 0)
     {
-        DSPDeviceSourceEngine *lastDeviceEngine = m_deviceEngines.back();
+        DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSourceEngines.back();
         delete lastDeviceEngine;
-        m_deviceEngines.pop_back();
-        m_deviceEnginesUIDSequence--;
-    }
-}
-
-void DSPEngine::stopAllAcquisitions()
-{
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
-
-    while (it != m_deviceEngines.end())
-    {
-        (*it)->stopAcquistion();
-        stopAudio();
-        ++it;
-    }
-}
-
-void DSPEngine::stopAllDeviceEngines()
-{
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
-
-    while (it != m_deviceEngines.end())
-    {
-        (*it)->stop();
-        ++it;
+        m_deviceSourceEngines.pop_back();
+        m_deviceSourceEnginesUIDSequence--;
     }
 }
 
@@ -120,11 +97,11 @@ void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 	m_audioOutput.removeFifo(audioFifo);
 }
 
-DSPDeviceSourceEngine *DSPEngine::getDeviceEngineByUID(uint uid)
+DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
 {
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceEngines.begin();
+    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
-    while (it != m_deviceEngines.end())
+    while (it != m_deviceSourceEngines.end())
     {
         if ((*it)->getUID() == uid)
         {

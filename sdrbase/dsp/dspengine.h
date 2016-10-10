@@ -40,18 +40,16 @@ public:
 
 	uint getAudioSampleRate() const { return m_audioSampleRate; }
 
-	DSPDeviceSourceEngine *addDeviceEngine();
-	void removeLastDeviceEngine();
-	void stopAllAcquisitions();
-	void stopAllDeviceEngines();
+	DSPDeviceSourceEngine *addDeviceSourceEngine();
+	void removeLastDeviceSourceEngine();
 
 	void startAudio();
 	void stopAudio();
     void startAudioImmediate();
     void stopAudioImmediate();
 
-    DSPDeviceSourceEngine *getDeviceEngineByIndex(uint deviceIndex) { return m_deviceEngines[deviceIndex]; }
-    DSPDeviceSourceEngine *getDeviceEngineByUID(uint uid);
+    DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
+    DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
 
 	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
@@ -84,8 +82,8 @@ public:
 	}
 
 private:
-	std::vector<DSPDeviceSourceEngine*> m_deviceEngines;
-	uint m_deviceEnginesUIDSequence;
+	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
+	uint m_deviceSourceEnginesUIDSequence;
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;
