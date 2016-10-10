@@ -252,7 +252,7 @@ void RTLSDRGui::on_centerFrequency_changed(quint64 value)
 
 void RTLSDRGui::on_decim_currentIndexChanged(int index)
 {
-	if ((index <0) || (index > 4))
+	if ((index <0) || (index > 5))
 	{
 		return;
 	}
