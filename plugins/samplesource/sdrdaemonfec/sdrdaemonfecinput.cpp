@@ -18,12 +18,12 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "sdrdaemonfecinput.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
 #include "sdrdaemonfecgui.h"
@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonAcquisition, Messa
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming, Message)
 
-SDRdaemonFECInput::SDRdaemonFECInput(const QTimer& masterTimer, DeviceAPI *deviceAPI) :
+SDRdaemonFECInput::SDRdaemonFECInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),

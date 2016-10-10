@@ -24,7 +24,6 @@
 
 #include "ui_filesourcegui.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -33,8 +32,9 @@
 #include "mainwindow.h"
 
 #include "filesourcegui.h"
+#include <device/devicesourceapi.h>
 
-FileSourceGui::FileSourceGui(DeviceAPI *deviceAPI, QWidget* parent) :
+FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSourceGui),
 	m_deviceAPI(deviceAPI),

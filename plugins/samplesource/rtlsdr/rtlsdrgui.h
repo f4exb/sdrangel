@@ -21,7 +21,7 @@
 #include "plugin/plugingui.h"
 #include "rtlsdrinput.h"
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
@@ -33,7 +33,7 @@ class RTLSDRGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit RTLSDRGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~RTLSDRGui();
 	void destroy();
 
@@ -50,7 +50,7 @@ public:
 private:
 	Ui::RTLSDRGui* ui;
 
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	RTLSDRSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

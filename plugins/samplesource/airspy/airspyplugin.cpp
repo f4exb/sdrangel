@@ -20,8 +20,9 @@
 
 #include "airspygui.h"
 #include "airspyplugin.h"
+
+#include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
@@ -116,7 +117,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* AirspyPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if (sourceId == m_deviceTypeID)
 	{

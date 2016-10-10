@@ -19,16 +19,16 @@
 
 #include "rtlsdrgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
 #include "ui_rtlsdrgui.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
-RTLSDRGui::RTLSDRGui(DeviceAPI *deviceAPI, QWidget* parent) :
+RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::RTLSDRGui),
 	m_deviceAPI(deviceAPI),

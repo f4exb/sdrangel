@@ -13,7 +13,7 @@ class Preset;
 class MainWindow;
 class Message;
 class MessageQueue;
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class SDRANGEL_API PluginManager : public QObject {
 	Q_OBJECT
@@ -50,13 +50,13 @@ public:
 	void duplicateLocalSampleSourceDevices(uint deviceUID);
 	void fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID);
 
-	int selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI);
-	int selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI);
-	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceAPI *deviceAPI);
-	void selectSampleSourceByDevice(void *devicePtr, DeviceAPI *deviceAPI);
+	int selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI);
+	int selectFirstSampleSource(const QString& sourceId, DeviceSourceAPI *deviceAPI);
+	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceSourceAPI *deviceAPI);
+	void selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI *deviceAPI);
 
 	void populateChannelComboBox(QComboBox *channels);
-	void createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI);
+	void createChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
 
 private:
 	struct SampleSourceRegistration {

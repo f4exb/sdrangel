@@ -20,9 +20,10 @@
 
 #include "hackrfplugin.h"
 
+#include <device/devicesourceapi.h>
+
 #include "hackrfgui.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
@@ -111,7 +112,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

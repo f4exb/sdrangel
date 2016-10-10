@@ -32,7 +32,7 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(TCPSrcGUI::m_channelID, this);
 }
 
-PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == TCPSrcGUI::m_channelID)
 	{
@@ -45,7 +45,7 @@ PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *de
 	}
 }
 
-void TCPSrcPlugin::createInstanceTCPSrc(DeviceAPI *deviceAPI)
+void TCPSrcPlugin::createInstanceTCPSrc(DeviceSourceAPI *deviceAPI)
 {
 	TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceAPI);
 //	deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);

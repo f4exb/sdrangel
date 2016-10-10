@@ -7,7 +7,7 @@
 #include "dsp/movingaverage.h"
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class AudioFifo;
 class ThreadedBasebandSampleSink;
@@ -23,7 +23,7 @@ class SSBDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -58,7 +58,7 @@ private slots:
 private:
 	Ui::SSBDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -75,7 +75,7 @@ private:
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
 
-	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI* deviceAPI, QWidget* parent = NULL);
+	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI* deviceAPI, QWidget* parent = NULL);
 	virtual ~SSBDemodGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);

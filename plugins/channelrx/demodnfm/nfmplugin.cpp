@@ -32,7 +32,7 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(NFMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == NFMDemodGUI::m_channelID) {
 		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
@@ -42,7 +42,7 @@ PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	}
 }
 
-void NFMPlugin::createInstanceNFM(DeviceAPI *deviceAPI)
+void NFMPlugin::createInstanceNFM(DeviceSourceAPI *deviceAPI)
 {
 	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

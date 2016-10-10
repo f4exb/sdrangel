@@ -19,18 +19,18 @@
 
 #include <libhackrf/hackrf.h>
 
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "hackrfgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
 #include "ui_hackrfgui.h"
 
-HackRFGui::HackRFGui(DeviceAPI *deviceAPI, QWidget* parent) :
+HackRFGui::HackRFGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::HackRFGui),
 	m_deviceAPI(deviceAPI),

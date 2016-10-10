@@ -24,7 +24,7 @@
 
 #define HACKRF_MAX_DEVICE (32)
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
@@ -43,7 +43,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit HackRFGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~HackRFGui();
 	void destroy();
 
@@ -60,7 +60,7 @@ public:
 private:
 	Ui::HackRFGui* ui;
 
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	HackRFSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

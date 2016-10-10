@@ -1,5 +1,6 @@
 #include "../../channelrx/demodnfm/nfmdemodgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -9,7 +10,6 @@
 #include "ui_nfmdemodgui.h"
 #include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -27,7 +27,7 @@ const int NFMDemodGUI::m_fmDev[] = { // corresponding FM deviations
 };
 const int NFMDemodGUI::m_nbRfBW = 9;
 
-NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -252,7 +252,7 @@ void NFMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMDemodGUI),
 	m_pluginAPI(pluginAPI),

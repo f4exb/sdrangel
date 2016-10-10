@@ -10,7 +10,7 @@
 #include "../../channelrx/tcpsrc/tcpsrc.h"
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class TCPSrc;
@@ -24,7 +24,7 @@ class TCPSrcGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static TCPSrcGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static TCPSrcGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -57,7 +57,7 @@ private slots:
 private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<Real> m_channelPowerDbAvg;
@@ -76,7 +76,7 @@ private:
 	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
-	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = 0);
+	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);
 	virtual ~TCPSrcGUI();
 
     void blockApplySettings(bool block);

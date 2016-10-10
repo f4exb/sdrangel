@@ -1,3 +1,4 @@
+#include <device/devicesourceapi.h>
 #include <QApplication>
 #include <QPluginLoader>
 #include <QComboBox>
@@ -5,7 +6,6 @@
 
 #include "plugin/pluginmanager.h"
 #include "plugin/plugingui.h"
-#include "device/deviceapi.h"
 #include "settings/preset.h"
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
@@ -189,7 +189,7 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID
 	}
 }
 
-int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
+int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSourceByIndex: index: %d", index);
 
@@ -229,7 +229,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceAPI *deviceAPI)
 	return index;
 }
 
-int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *deviceAPI)
+int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectFirstSampleSource by id: [%s]", qPrintable(sourceId));
 
@@ -279,7 +279,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceAPI *d
 	return index;
 }
 
-int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceAPI *deviceAPI)
+int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceSourceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSourceBySequence by sequence: id: %s ser: %s seq: %d", qPrintable(sourceId), qPrintable(sourceSerial), sourceSequence);
 
@@ -353,7 +353,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 	return index;
 }
 
-void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceAPI *deviceAPI)
+void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI *deviceAPI)
 {
     SampleSourceDevice *sampleSourceDevice = (SampleSourceDevice *) devicePtr;
 
@@ -428,7 +428,7 @@ void PluginManager::populateChannelComboBox(QComboBox *channels)
     }
 }
 
-void PluginManager::createChannelInstance(int channelPluginIndex, DeviceAPI *deviceAPI)
+void PluginManager::createChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_channelRegistrations.size())
     {

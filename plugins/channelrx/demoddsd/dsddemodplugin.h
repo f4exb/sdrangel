@@ -21,7 +21,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class DSDDemodPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -34,7 +34,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginGUI* createChannel(const QString& channelName, DeviceAPI *deviceAPI);
+	PluginGUI* createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -42,7 +42,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceDSDDemod(DeviceAPI *deviceAPI);
+	void createInstanceDSDDemod(DeviceSourceAPI *deviceAPI);
 };
 
 #endif // INCLUDE_DSDDEMODLUGIN_H

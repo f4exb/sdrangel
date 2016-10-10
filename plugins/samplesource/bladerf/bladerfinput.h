@@ -23,7 +23,7 @@
 #include <libbladeRF.h>
 #include <QString>
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class BladerfThread;
 
 class BladerfInput : public DeviceSampleSource {
@@ -65,7 +65,7 @@ public:
 		{ }
 	};
 
-	BladerfInput(DeviceAPI *deviceAPI);
+	BladerfInput(DeviceSourceAPI *deviceAPI);
 	virtual ~BladerfInput();
 
 	virtual bool init(const Message& message);
@@ -83,7 +83,7 @@ private:
 	bladerf_lna_gain getLnaGain(int lnaGain);
 	struct bladerf *open_bladerf_from_serial(const char *serial);
 
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	BladeRFSettings m_settings;
 	struct bladerf* m_dev;

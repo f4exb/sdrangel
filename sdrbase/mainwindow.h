@@ -44,7 +44,7 @@ class PluginAPI;
 class PluginGUI;
 class ChannelMarker;
 class PluginManager;
-class DeviceAPI;
+class DeviceSourceAPI;
 class PluginInterface;
 class QWidget;
 
@@ -64,7 +64,7 @@ public:
 		ChannelWindow *m_channelWindow;
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceSourceEngine *m_deviceEngine;
-		DeviceAPI *m_deviceAPI;
+		DeviceSourceAPI *m_deviceAPI;
 		QByteArray m_mainWindowState;
 
 		DeviceUISet(QTimer& timer);

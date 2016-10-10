@@ -49,7 +49,7 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(UDPSrcGUI::m_channelID, this);
 }
 
-PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == UDPSrcGUI::m_channelID)
 	{
@@ -62,7 +62,7 @@ PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceAPI *de
 	}
 }
 
-void UDPSrcPlugin::createInstanceUDPSrc(DeviceAPI *deviceAPI)
+void UDPSrcPlugin::createInstanceUDPSrc(DeviceSourceAPI *deviceAPI)
 {
 	UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
 //	deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);

@@ -1,9 +1,9 @@
 #include "../../channelrx/tcpsrc/tcpsrcgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -15,7 +15,7 @@
 
 const QString TCPSrcGUI::m_channelID = "sdrangel.channel.tcpsrc";
 
-TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -183,7 +183,7 @@ void TCPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),

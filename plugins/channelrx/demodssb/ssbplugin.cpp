@@ -1,9 +1,8 @@
 #include "../../channelrx/demodssb/ssbplugin.h"
 
+#include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
-
 #include "../../channelrx/demodssb/ssbdemodgui.h"
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
@@ -33,7 +32,7 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(SSBDemodGUI::m_channelID, this);
 }
 
-PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == SSBDemodGUI::m_channelID)
 	{
@@ -44,7 +43,7 @@ PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	}
 }
 
-void SSBPlugin::createInstanceSSB(DeviceAPI *deviceAPI)
+void SSBPlugin::createInstanceSSB(DeviceSourceAPI *deviceAPI)
 {
 	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
 }

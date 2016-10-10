@@ -16,6 +16,7 @@
 
 #include "../../channelrx/chanalyzer/chanalyzergui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -28,7 +29,6 @@
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -39,7 +39,7 @@
 
 const QString ChannelAnalyzerGUI::m_channelID = "org.f4exb.sdrangelove.channel.chanalyzer";
 
-ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	ChannelAnalyzerGUI* gui = new ChannelAnalyzerGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -306,7 +306,7 @@ void ChannelAnalyzerGUI::onMenuDoubleClicked()
 	}
 }
 
-ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),

@@ -23,7 +23,7 @@
 
 #include "sdrdaemonfecinput.h"
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
@@ -34,7 +34,7 @@ class SDRdaemonFECGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonFECGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~SDRdaemonFECGui();
 	void destroy();
 
@@ -51,7 +51,7 @@ public:
 private:
 	Ui::SDRdaemonFECGui* ui;
 
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;

@@ -26,7 +26,7 @@
 #include "../../channelrx/demodbfm/rdsparser.h"
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -41,7 +41,7 @@ class BFMDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -82,7 +82,7 @@ private slots:
 private:
 	Ui::BFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -100,7 +100,7 @@ private:
 
 	static const int m_rfBW[];
 
-	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);

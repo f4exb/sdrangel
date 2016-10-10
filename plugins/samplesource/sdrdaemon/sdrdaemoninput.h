@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdint.h>
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class SDRdaemonUDPHandler;
 
 class SDRdaemonInput : public DeviceSampleSource {
@@ -274,7 +274,7 @@ public:
 		{ }
 	};
 
-	SDRdaemonInput(const QTimer& masterTimer, DeviceAPI *deviceAPI);
+	SDRdaemonInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonInput();
 
 	virtual bool init(const Message& message);
@@ -290,7 +290,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	QString m_address;
 	quint16 m_port;

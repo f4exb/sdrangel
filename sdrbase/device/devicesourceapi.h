@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DEVICE_DEVICEAPI_H_
-#define SDRBASE_DEVICE_DEVICEAPI_H_
+#ifndef SDRBASE_DEVICE_DEVICESOURCEAPI_H_
+#define SDRBASE_DEVICE_DEVICESOURCEAPI_H_
 
 #include <QObject>
 #include <QString>
@@ -38,7 +38,7 @@ class PluginGUI;
 class PluginAPI;
 class Preset;
 
-class SDRANGEL_API DeviceAPI : public QObject {
+class SDRANGEL_API DeviceSourceAPI : public QObject {
     Q_OBJECT
 
 public:
@@ -103,12 +103,12 @@ protected:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    DeviceAPI(MainWindow *mainWindow,
+    DeviceSourceAPI(MainWindow *mainWindow,
             int deviceTabIndex,
             DSPDeviceSourceEngine *deviceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);
-    ~DeviceAPI();
+    ~DeviceSourceAPI();
 
     void renameChannelInstances();
 
@@ -129,4 +129,4 @@ protected:
 };
 
 
-#endif /* SDRBASE_DEVICE_DEVICEAPI_H_ */
+#endif /* SDRBASE_DEVICE_DEVICESOURCEAPI_H_ */

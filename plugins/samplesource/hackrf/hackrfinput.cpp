@@ -18,11 +18,12 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "hackrfinput.h"
+
+#include <device/devicesourceapi.h>
 
 #include "hackrfgui.h"
 #include "hackrfthread.h"
@@ -30,7 +31,7 @@
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
 
-HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
+HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),

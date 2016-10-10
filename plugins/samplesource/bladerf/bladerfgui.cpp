@@ -20,15 +20,16 @@
 #include <libbladeRF.h>
 
 #include "ui_bladerfgui.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "bladerfgui.h"
+
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
-BladerfGui::BladerfGui(DeviceAPI *deviceAPI, QWidget* parent) :
+BladerfGui::BladerfGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BladerfGui),
 	m_deviceAPI(deviceAPI),

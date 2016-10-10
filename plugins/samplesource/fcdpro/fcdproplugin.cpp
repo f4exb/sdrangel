@@ -17,9 +17,11 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "fcdproplugin.h"
+
+#include <device/devicesourceapi.h>
+
 #include "fcdprogui.h"
 #include "fcdtraits.h"
 
@@ -73,7 +75,7 @@ PluginInterface::SampleSourceDevices FCDProPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FCDProPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* FCDProPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == fcd_traits<Pro>::interfaceIID)
 	{

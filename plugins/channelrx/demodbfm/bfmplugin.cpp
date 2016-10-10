@@ -49,7 +49,7 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(BFMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == BFMDemodGUI::m_channelID)
 	{
@@ -60,7 +60,7 @@ PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	}
 }
 
-void BFMPlugin::createInstanceBFM(DeviceAPI *deviceAPI)
+void BFMPlugin::createInstanceBFM(DeviceSourceAPI *deviceAPI)
 {
 	BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

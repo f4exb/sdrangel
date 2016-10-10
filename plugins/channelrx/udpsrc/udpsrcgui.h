@@ -27,7 +27,7 @@
 #include "../../channelrx/udpsrc/udpsrc.h"
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class UDPSrc;
@@ -41,7 +41,7 @@ class UDPSrcGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -80,7 +80,7 @@ private slots:
 private:
 	Ui::UDPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	UDPSrc* m_udpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<Real> m_channelPowerDbAvg;
@@ -105,7 +105,7 @@ private:
 	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
-	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = 0);
+	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);
 	virtual ~UDPSrcGUI();
 
     void blockApplySettings(bool block);

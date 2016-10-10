@@ -168,7 +168,7 @@ set(sdrbase_SOURCES
 	sdrbase/util/simpleserializer.cpp
 	#sdrbase/util/spinlock.cpp
 	
-	sdrbase/device/deviceapi.cpp
+	sdrbase/device/devicesourceapi.cpp
 )
 
 set(sdrbase_HEADERS
@@ -263,7 +263,7 @@ set(sdrbase_HEADERS
 	sdrbase/util/simpleserializer.h
 	#sdrbase/util/spinlock.h
 	
-	sdrbase/device/deviceapi.h
+	sdrbase/device/devicesourceapi.h
 )
 
 set(sdrbase_SOURCES

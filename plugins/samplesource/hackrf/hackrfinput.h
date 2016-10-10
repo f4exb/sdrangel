@@ -22,7 +22,7 @@
 #include "hackrfsettings.h"
 #include <QString>
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class HackRFThread;
 
 class HackRFInput : public DeviceSampleSource {
@@ -65,7 +65,7 @@ public:
 		{ }
 	};
 
-	HackRFInput(DeviceAPI *deviceAPI);
+	HackRFInput(DeviceSourceAPI *deviceAPI);
 	virtual ~HackRFInput();
 
 	virtual bool init(const Message& message);
@@ -83,7 +83,7 @@ private:
 	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	HackRFSettings m_settings;
 	struct hackrf_device* m_dev;

@@ -21,16 +21,16 @@
 
 #include "airspygui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
 #include "ui_airspygui.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
-AirspyGui::AirspyGui(DeviceAPI *deviceAPI, QWidget* parent) :
+AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::AirspyGui),
 	m_deviceAPI(deviceAPI),

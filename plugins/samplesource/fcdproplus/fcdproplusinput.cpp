@@ -20,10 +20,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "fcdproplusinput.h"
+
+#include <device/devicesourceapi.h>
 
 #include "fcdproplusgui.h"
 #include "fcdproplusthread.h"
@@ -32,7 +33,7 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 
-FCDProPlusInput::FCDProPlusInput(DeviceAPI *deviceAPI) :
+FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_dev(0),
 	m_settings(),

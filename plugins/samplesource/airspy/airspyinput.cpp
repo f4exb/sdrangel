@@ -20,7 +20,8 @@
 
 #include "airspygui.h"
 #include "airspyinput.h"
-#include "device/deviceapi.h"
+
+#include <device/devicesourceapi.h>
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
@@ -29,7 +30,7 @@
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
-AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
+AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),

@@ -32,7 +32,7 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(WFMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == WFMDemodGUI::m_channelID)
 	{
@@ -43,7 +43,7 @@ PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceAPI *devic
 	}
 }
 
-void WFMPlugin::createInstanceWFM(DeviceAPI *deviceAPI)
+void WFMPlugin::createInstanceWFM(DeviceSourceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

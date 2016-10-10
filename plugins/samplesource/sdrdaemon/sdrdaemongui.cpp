@@ -30,7 +30,6 @@
 #include <nanomsg/pair.h>
 
 #include "ui_sdrdaemongui.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -39,9 +38,11 @@
 #include "util/simpleserializer.h"
 
 #include "sdrdaemongui.h"
+
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
-SDRdaemonGui::SDRdaemonGui(DeviceAPI *deviceAPI, QWidget* parent) :
+SDRdaemonGui::SDRdaemonGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonGui),
 	m_deviceAPI(deviceAPI),

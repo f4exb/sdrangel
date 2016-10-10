@@ -17,10 +17,9 @@
 
 #include "../../channelrx/demoddsd/dsddemodplugin.h"
 
+#include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
-
 #include "../../channelrx/demoddsd/dsddemodgui.h"
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
@@ -50,7 +49,7 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(DSDDemodGUI::m_channelID, this);
 }
 
-PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == DSDDemodGUI::m_channelID)
 	{
@@ -61,7 +60,7 @@ PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceAPI *
 	}
 }
 
-void DSDDemodPlugin::createInstanceDSDDemod(DeviceAPI *deviceAPI)
+void DSDDemodPlugin::createInstanceDSDDemod(DeviceSourceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
 }

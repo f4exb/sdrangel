@@ -17,11 +17,11 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 #include "filesourcegui.h"
 #include "filesourceplugin.h"
+#include <device/devicesourceapi.h>
 
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("File source input"),
@@ -67,7 +67,7 @@ PluginInterface::SampleSourceDevices FileSourcePlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* FileSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

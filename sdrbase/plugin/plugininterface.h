@@ -15,7 +15,7 @@ struct PluginDescriptor {
 };
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 class PluginGUI;
 class QWidget;
 
@@ -45,10 +45,10 @@ public:
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
-	virtual PluginGUI* createChannel(const QString& channelName, DeviceAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
 
 	virtual SampleSourceDevices enumSampleSources() { return SampleSourceDevices(); }
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 	{
 	    return 0;
 	}

@@ -2,9 +2,11 @@
 #include <QAction>
 #include <rtl-sdr.h>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "rtlsdrplugin.h"
+
+#include <device/devicesourceapi.h>
+
 #include "rtlsdrgui.h"
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
@@ -58,7 +60,7 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* RTLSDRPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID) {
 		RTLSDRGui* gui = new RTLSDRGui(deviceAPI);

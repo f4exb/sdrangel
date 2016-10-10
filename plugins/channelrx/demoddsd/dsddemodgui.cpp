@@ -17,6 +17,7 @@
 
 #include "../../channelrx/demoddsd/dsddemodgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -27,7 +28,6 @@
 #include "dsp/scopevis.h"
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -75,7 +75,7 @@ const char * DSDDemodGUI::m_ysfCallModeText[4] = {
         "IN"  //!< Individual
 };
 
-DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -334,7 +334,7 @@ void DSDDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::DSDDemodGUI),
 	m_pluginAPI(pluginAPI),

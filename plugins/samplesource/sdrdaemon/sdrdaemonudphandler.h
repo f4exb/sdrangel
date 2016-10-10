@@ -30,13 +30,13 @@
 class SampleSinkFifo;
 class MessageQueue;
 class QTimer;
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class SDRdaemonUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *deviceAPI);
+	SDRdaemonUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *deviceAPI);
 	~SDRdaemonUDPHandler();
 	void connectTimer(const QTimer* timer);
 	void start();
@@ -50,7 +50,7 @@ public slots:
 	void dataReadyRead();
 
 private:
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	SDRdaemonBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;

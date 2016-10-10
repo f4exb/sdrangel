@@ -22,7 +22,7 @@
 
 #include "filesourceinput.h"
 
-class DeviceAPI;
+class DeviceSourceAPI;
 
 namespace Ui {
 	class FileSourceGui;
@@ -32,7 +32,7 @@ class FileSourceGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSourceGui(DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~FileSourceGui();
 	void destroy();
 
@@ -49,7 +49,7 @@ public:
 private:
 	Ui::FileSourceGui* ui;
 
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	FileSourceInput::Settings m_settings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;

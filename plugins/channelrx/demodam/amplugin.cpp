@@ -33,7 +33,7 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(AMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == AMDemodGUI::m_channelID)
 	{
@@ -44,7 +44,7 @@ PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceAPI *device
 	}
 }
 
-void AMPlugin::createInstanceAM(DeviceAPI *deviceAPI)
+void AMPlugin::createInstanceAM(DeviceSourceAPI *deviceAPI)
 {
 	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

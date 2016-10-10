@@ -17,10 +17,11 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 #include "sdrdaemonfecplugin.h"
+
+#include <device/devicesourceapi.h>
 
 #include "sdrdaemonfecgui.h"
 
@@ -68,7 +69,7 @@ PluginInterface::SampleSourceDevices SDRdaemonFECPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* SDRdaemonFECPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* SDRdaemonFECPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

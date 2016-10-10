@@ -8,7 +8,7 @@
 #define BANDWIDTHSTRING {7813,15625,20833,31250,62500}
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class LoRaDemod;
@@ -22,7 +22,7 @@ class LoRaDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -48,7 +48,7 @@ private slots:
 private:
 	Ui::LoRaDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -58,7 +58,7 @@ private:
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
 
-	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~LoRaDemodGUI();
 
     void blockApplySettings(bool block);

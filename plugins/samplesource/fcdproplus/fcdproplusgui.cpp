@@ -18,17 +18,17 @@
 #include <QMessageBox>
 
 #include "ui_fcdproplusgui.h"
-#include "device/deviceapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "fcdproplusgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 #include "fcdproplusconst.h"
 
-FCDProPlusGui::FCDProPlusGui(DeviceAPI *deviceAPI, QWidget* parent) :
+FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FCDProPlusGui),
 	m_deviceAPI(deviceAPI),

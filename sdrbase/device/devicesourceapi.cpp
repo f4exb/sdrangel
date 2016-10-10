@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "device/deviceapi.h"
+#include <device/devicesourceapi.h>
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
@@ -23,7 +23,7 @@
 #include "mainwindow.h"
 #include "settings/preset.h"
 
-DeviceAPI::DeviceAPI(MainWindow *mainWindow,
+DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
         int deviceTabIndex,
         DSPDeviceSourceEngine *deviceEngine,
         GLSpectrum *glSpectrum,
@@ -38,122 +38,122 @@ DeviceAPI::DeviceAPI(MainWindow *mainWindow,
 {
 }
 
-DeviceAPI::~DeviceAPI()
+DeviceSourceAPI::~DeviceSourceAPI()
 {
 }
 
-void DeviceAPI::addSink(BasebandSampleSink *sink)
+void DeviceSourceAPI::addSink(BasebandSampleSink *sink)
 {
     m_deviceEngine->addSink(sink);
 }
 
-void DeviceAPI::removeSink(BasebandSampleSink* sink)
+void DeviceSourceAPI::removeSink(BasebandSampleSink* sink)
 {
     m_deviceEngine->removeSink(sink);
 }
 
-void DeviceAPI::addThreadedSink(ThreadedBasebandSampleSink* sink)
+void DeviceSourceAPI::addThreadedSink(ThreadedBasebandSampleSink* sink)
 {
     m_deviceEngine->addThreadedSink(sink);
 }
 
-void DeviceAPI::removeThreadedSink(ThreadedBasebandSampleSink* sink)
+void DeviceSourceAPI::removeThreadedSink(ThreadedBasebandSampleSink* sink)
 {
     m_deviceEngine->removeThreadedSink(sink);
 }
 
-void DeviceAPI::setSource(DeviceSampleSource* source)
+void DeviceSourceAPI::setSource(DeviceSampleSource* source)
 {
     m_deviceEngine->setSource(source);
 }
 
-bool DeviceAPI::initAcquisition()
+bool DeviceSourceAPI::initAcquisition()
 {
     return m_deviceEngine->initAcquisition();
 }
 
-bool DeviceAPI::startAcquisition()
+bool DeviceSourceAPI::startAcquisition()
 {
     return m_deviceEngine->startAcquisition();
 }
 
-void DeviceAPI::stopAcquisition()
+void DeviceSourceAPI::stopAcquisition()
 {
     m_deviceEngine->stopAcquistion();
 }
 
-DSPDeviceSourceEngine::State DeviceAPI::state() const
+DSPDeviceSourceEngine::State DeviceSourceAPI::state() const
 {
     return m_deviceEngine->state();
 }
 
-QString DeviceAPI::errorMessage()
+QString DeviceSourceAPI::errorMessage()
 {
     return m_deviceEngine->errorMessage();
 }
 
-uint DeviceAPI::getDeviceUID() const
+uint DeviceSourceAPI::getDeviceUID() const
 {
     return m_deviceEngine->getUID();
 }
 
-MessageQueue *DeviceAPI::getDeviceInputMessageQueue()
+MessageQueue *DeviceSourceAPI::getDeviceInputMessageQueue()
 {
     return m_deviceEngine->getInputMessageQueue();
 }
 
-MessageQueue *DeviceAPI::getDeviceOutputMessageQueue()
+MessageQueue *DeviceSourceAPI::getDeviceOutputMessageQueue()
 {
     return m_deviceEngine->getOutputMessageQueue();
 }
 
-void DeviceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
+void DeviceSourceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {
     m_deviceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
-GLSpectrum *DeviceAPI::getSpectrum()
+GLSpectrum *DeviceSourceAPI::getSpectrum()
 {
     return m_spectrum;
 }
 
-void DeviceAPI::addChannelMarker(ChannelMarker* channelMarker)
+void DeviceSourceAPI::addChannelMarker(ChannelMarker* channelMarker)
 {
     m_spectrum->addChannelMarker(channelMarker);
 }
 
-ChannelWindow *DeviceAPI::getChannelWindow()
+ChannelWindow *DeviceSourceAPI::getChannelWindow()
 {
     return m_channelWindow;
 }
 
-void DeviceAPI::addRollupWidget(QWidget *widget)
+void DeviceSourceAPI::addRollupWidget(QWidget *widget)
 {
     m_channelWindow->addRollupWidget(widget);
 }
 
-void DeviceAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
+void DeviceSourceAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
 {
     m_mainWindow->setInputGUI(m_deviceTabIndex, inputGUI, sourceDisplayName);
 }
 
-void DeviceAPI::setSampleSourceId(const QString& id)
+void DeviceSourceAPI::setSampleSourceId(const QString& id)
 {
     m_sampleSourceId = id;
 }
 
-void DeviceAPI::setSampleSourceSerial(const QString& serial)
+void DeviceSourceAPI::setSampleSourceSerial(const QString& serial)
 {
     m_sampleSourceSerial = serial;
 }
 
-void DeviceAPI::setSampleSourceSequence(int sequence)
+void DeviceSourceAPI::setSampleSourceSequence(int sequence)
 {
     m_sampleSourceSequence = sequence;
     m_deviceEngine->setSourceSequence(sequence);
 }
 
-void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
 {
     if (m_sampleSourcePluginGUI != 0)
     {
@@ -164,13 +164,13 @@ void DeviceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
     m_sampleSourcePluginGUI = gui;
 }
 
-void DeviceAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceAPI::removeChannelInstance(PluginGUI* pluginGUI)
+void DeviceSourceAPI::removeChannelInstance(PluginGUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -184,7 +184,7 @@ void DeviceAPI::removeChannelInstance(PluginGUI* pluginGUI)
     renameChannelInstances();
 }
 
-void DeviceAPI::renameChannelInstances()
+void DeviceSourceAPI::renameChannelInstances()
 {
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
@@ -192,7 +192,7 @@ void DeviceAPI::renameChannelInstances()
     }
 }
 
-void DeviceAPI::freeAll()
+void DeviceSourceAPI::freeAll()
 {
 //    while(!m_channelInstanceRegistrations.isEmpty())
 //    {
@@ -217,7 +217,7 @@ void DeviceAPI::freeAll()
     }
 }
 
-void DeviceAPI::loadSourceSettings(const Preset* preset)
+void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
 {
     qDebug("DeviceAPI::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -236,7 +236,7 @@ void DeviceAPI::loadSourceSettings(const Preset* preset)
     }
 }
 
-void DeviceAPI::saveSourceSettings(Preset* preset)
+void DeviceSourceAPI::saveSourceSettings(Preset* preset)
 {
     qDebug("DeviceAPI::saveSourceSettings");
 
@@ -247,7 +247,7 @@ void DeviceAPI::saveSourceSettings(Preset* preset)
     }
 }
 
-void DeviceAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
+void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
 {
     qDebug("DeviceAPI::loadChannelSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
@@ -310,7 +310,7 @@ void DeviceAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
     renameChannelInstances();
 }
 
-void DeviceAPI::saveChannelSettings(Preset *preset)
+void DeviceSourceAPI::saveChannelSettings(Preset *preset)
 {
     qDebug("DeviceAPI::saveChannelSettings");
 
@@ -323,7 +323,7 @@ void DeviceAPI::saveChannelSettings(Preset *preset)
 }
 
 // sort by increasing delta frequency and type (i.e. name)
-bool DeviceAPI::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const
+bool DeviceSourceAPI::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const
 {
     if (m_gui && other.m_gui)
     {

@@ -1,6 +1,7 @@
 #include "../../channelrx/demodlora/lorademodgui.h"
 #include "../../channelrx/demodlora/lorademodgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -11,7 +12,6 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
@@ -19,7 +19,7 @@
 
 const QString LoRaDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.lora";
 
-LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -151,7 +151,7 @@ void LoRaDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
 	m_pluginAPI(pluginAPI),

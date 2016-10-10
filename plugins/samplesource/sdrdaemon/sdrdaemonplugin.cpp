@@ -17,11 +17,11 @@
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 
 #include "sdrdaemongui.h"
 #include "sdrdaemonplugin.h"
+#include <device/devicesourceapi.h>
 
 const PluginDescriptor SDRdaemonPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon input"),
@@ -67,7 +67,7 @@ PluginInterface::SampleSourceDevices SDRdaemonPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* SDRdaemonPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

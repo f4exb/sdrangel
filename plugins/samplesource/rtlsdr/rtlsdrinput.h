@@ -24,7 +24,7 @@
 #include <rtl-sdr.h>
 #include <QString>
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class RTLSDRThread;
 
 class RTLSDRInput : public DeviceSampleSource {
@@ -69,7 +69,7 @@ public:
 		{ }
 	};
 
-	RTLSDRInput(DeviceAPI *deviceAPI);
+	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
 
 	virtual bool init(const Message& message);
@@ -85,7 +85,7 @@ public:
 	void set_ds_mode(int on);
 
 private:
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;

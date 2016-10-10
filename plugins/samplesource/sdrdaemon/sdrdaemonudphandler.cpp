@@ -19,13 +19,15 @@
 #include <QTimer>
 #include <unistd.h>
 
-#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "sdrdaemonudphandler.h"
+
+#include <device/devicesourceapi.h>
+
 #include "sdrdaemoninput.h"
 
-SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceAPI *devieAPI) :
+SDRdaemonUDPHandler::SDRdaemonUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *devieAPI) :
     m_deviceAPI(devieAPI),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),

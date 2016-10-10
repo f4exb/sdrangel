@@ -18,18 +18,20 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "bladerfgui.h"
 #include "bladerfinput.h"
+
+#include <device/devicesourceapi.h>
+
 #include "bladerfthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
 
-BladerfInput::BladerfInput(DeviceAPI *deviceAPI) :
+BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),

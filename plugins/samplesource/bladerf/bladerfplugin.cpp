@@ -18,10 +18,10 @@
 #include <QAction>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "bladerfgui.h"
 #include "bladerfplugin.h"
+#include <device/devicesourceapi.h>
 
 const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
@@ -74,7 +74,7 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceAPI *deviceAPI)
+PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

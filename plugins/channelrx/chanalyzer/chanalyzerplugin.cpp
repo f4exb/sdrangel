@@ -32,7 +32,7 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerChannel(ChannelAnalyzerGUI::m_channelID, this);
 }
 
-PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, DeviceAPI *deviceAPI)
+PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == ChannelAnalyzerGUI::m_channelID)
 	{
@@ -43,7 +43,7 @@ PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, Devi
 	}
 }
 
-void ChannelAnalyzerPlugin::createInstanceChannelAnalyzer(DeviceAPI *deviceAPI)
+void ChannelAnalyzerPlugin::createInstanceChannelAnalyzer(DeviceSourceAPI *deviceAPI)
 {
 	ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceAPI);
 }

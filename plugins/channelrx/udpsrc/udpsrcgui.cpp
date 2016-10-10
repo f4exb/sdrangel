@@ -17,10 +17,10 @@
 
 #include "../../channelrx/udpsrc/udpsrcgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -33,7 +33,7 @@
 
 const QString UDPSrcGUI::m_channelID = "sdrangel.channel.udpsrc";
 
-UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -220,7 +220,7 @@ void UDPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::UDPSrcGUI),
 	m_pluginAPI(pluginAPI),

@@ -17,6 +17,7 @@
 
 #include "../../channelrx/demodbfm/bfmdemodgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -31,7 +32,6 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -57,7 +57,7 @@ int requiredBW(int rfBW)
 		return 384000;
 }
 
-BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -360,7 +360,7 @@ void BFMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::BFMDemodGUI),
 	m_pluginAPI(pluginAPI),

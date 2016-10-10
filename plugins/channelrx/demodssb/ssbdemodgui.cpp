@@ -1,6 +1,7 @@
 #include "../../channelrx/demodssb/ssbdemodgui.h"
 #include "../../channelrx/demodssb/ssbdemodgui.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -11,7 +12,6 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -21,7 +21,7 @@
 
 const QString SSBDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.ssb";
 
-SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI)
+SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceAPI);
 	return gui;
@@ -319,7 +319,7 @@ void SSBDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent) :
+SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),

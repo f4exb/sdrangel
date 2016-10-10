@@ -18,13 +18,13 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "device/deviceapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "sdrdaemongui.h"
 #include "sdrdaemoninput.h"
 
+#include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
 #include "sdrdaemonudphandler.h"
@@ -39,7 +39,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonInput::MsgReportSDRdaemonStreamTiming, Message)
 
-SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, DeviceAPI *deviceAPI) :
+SDRdaemonInput::SDRdaemonInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),

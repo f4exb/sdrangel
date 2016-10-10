@@ -19,16 +19,18 @@
 #include <string.h>
 #include <errno.h>
 #include "rtlsdrinput.h"
+
+#include <device/devicesourceapi.h>
+
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
-#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 
-RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
+RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),

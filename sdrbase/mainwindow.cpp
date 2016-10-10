@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <device/devicesourceapi.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -44,7 +45,6 @@
 #include "dsp/dspcommands.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
-#include "device/deviceapi.h"
 #include "plugin/plugingui.h"
 
 #include "gui/glspectrum.h"
@@ -182,7 +182,7 @@ void MainWindow::addDevice()
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceEngine = dspDeviceSourceEngine;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceSourceAPI *deviceAPI = new DeviceSourceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);

@@ -23,7 +23,7 @@
 #include <libairspy/airspy.h>
 #include <QString>
 
-class DeviceAPI;
+class DeviceSourceAPI;
 class AirspyThread;
 
 class AirspyInput : public DeviceSampleSource {
@@ -68,7 +68,7 @@ public:
 		{ }
 	};
 
-	AirspyInput(DeviceAPI *deviceAPI);
+	AirspyInput(DeviceSourceAPI *deviceAPI);
 	virtual ~AirspyInput();
 
 	virtual bool init(const Message& message);
@@ -87,7 +87,7 @@ private:
 	struct airspy_device *open_airspy_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
-	DeviceAPI *m_deviceAPI;
+	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AirspySettings m_settings;
 	struct airspy_device* m_dev;

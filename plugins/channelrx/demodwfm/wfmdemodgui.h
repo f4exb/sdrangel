@@ -7,7 +7,7 @@
 #include "dsp/movingaverage.h"
 
 class PluginAPI;
-class DeviceAPI;
+class DeviceSourceAPI;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -21,7 +21,7 @@ class WFMDemodGUI : public RollupWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceAPI *deviceAPI);
+	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
 	void destroy();
 
 	void setName(const QString& name);
@@ -52,7 +52,7 @@ private slots:
 private:
 	Ui::WFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -64,7 +64,7 @@ private:
 
 	static const int m_rfBW[];
 
-	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~WFMDemodGUI();
 
     void blockApplySettings(bool block);
