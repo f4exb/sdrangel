@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QTimer>
+#include <QDateTime>
 
 #include <vector>
 
@@ -94,6 +95,8 @@ public:
     void close();
     void process();
     void stop();
+    bool isAvailable();
+    bool hasFifo(AudioFifo *audioFifo);
 
     void postTest()
     {
@@ -103,14 +106,13 @@ public:
 
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AudioFifo *m_audioFifo;
-    QTimer *m_timer;
+    QDateTime m_timestamp;
 
 signals:
     void finished();
 
 public slots:
     void handleInputMessages();
-    void releaseQueue();
 
 private:
     struct AudioSample {

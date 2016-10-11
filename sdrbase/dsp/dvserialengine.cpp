@@ -199,7 +199,6 @@ bool DVSerialEngine::scan()
             connect(controller.worker, SIGNAL(finished()), controller.worker, SLOT(deleteLater()));
             connect(controller.thread, SIGNAL(finished()), controller.thread, SLOT(deleteLater()));
             connect(&controller.worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), controller.worker, SLOT(handleInputMessages()));
-            connect(controller.worker->m_timer, SIGNAL(timeout()), controller.worker, SLOT(releaseQueue()));
             controller.thread->start();
 
             m_controllers.push_back(controller);
@@ -255,12 +254,12 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
 
     while (it != m_controllers.end())
     {
-        if (it->worker->m_audioFifo == audioFifo)
+        if (it->worker->hasFifo(audioFifo))
         {
             it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
             done = true;
         }
-        else if (it->worker->m_audioFifo == 0)
+        else if (it->worker->isAvailable())
         {
             itAvail = it;
         }

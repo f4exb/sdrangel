@@ -33,13 +33,10 @@ DVSerialWorker::DVSerialWorker() :
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
     m_audioFifo = 0;
-    m_timer = new QTimer(this);
-    m_timer->setSingleShot(true);
 }
 
 DVSerialWorker::~DVSerialWorker()
 {
-    delete m_timer;
 }
 
 bool DVSerialWorker::open(const std::string& serialDevice)
@@ -73,7 +70,6 @@ void DVSerialWorker::stop()
 
 void DVSerialWorker::handleInputMessages()
 {
-    m_timer->stop(); // suspend FIFO queue holding timeout
     Message* message;
     m_audioBufferFill = 0;
     AudioFifo *audioFifo = 0;
@@ -109,7 +105,7 @@ void DVSerialWorker::handleInputMessages()
         }
     }
 
-    m_timer->start(1000); // FIFO queue holding timeout
+    m_timestamp = QDateTime::currentDateTime();
 }
 
 void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
@@ -121,10 +117,18 @@ void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
     m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
 }
 
-void DVSerialWorker::releaseQueue()
+bool DVSerialWorker::isAvailable()
 {
-    qDebug("DVSerialWorker::releaseQueue: release %p", m_audioFifo);
-    m_audioFifo = 0;
+	if (m_audioFifo == 0) {
+		return true;
+	}
+
+	return m_timestamp.time().msecsTo(QDateTime::currentDateTime().time()) > 1000; // 1 second inactivity timeout
+}
+
+bool DVSerialWorker::hasFifo(AudioFifo *audioFifo)
+{
+    return m_audioFifo == audioFifo;
 }
 
 void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
