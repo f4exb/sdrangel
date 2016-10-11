@@ -26,13 +26,8 @@ MESSAGE_CLASS_DEFINITION(DVSerialWorker::MsgTest, Message)
 DVSerialWorker::DVSerialWorker() :
     m_running(false),
     m_currentGainIn(0),
-    m_currentGainOut(0),
-//    m_upsamplerLastValue(0),
-    m_phase(0)
+    m_currentGainOut(0)
 {
-//    m_audioBuffer.resize(48000);
-//    m_audioBufferFill = 0;
-//    m_audioFifo = 0;
 }
 
 DVSerialWorker::~DVSerialWorker()
@@ -85,11 +80,15 @@ void DVSerialWorker::handleInputMessages()
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
             int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 2;
+            unsigned int fifoSlot = decodeMsg->getFifoSlot();
 
-            if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
+            if (m_dvController.decode(m_fifoSlots[fifoSlot].m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
-                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getFifoSlot());
-                audioFifo[decodeMsg->getFifoSlot()] = decodeMsg->getAudioFifo();
+                upsample6(m_fifoSlots[fifoSlot].m_dvAudioSamples,
+                        SerialDV::MBE_AUDIO_BLOCK_SIZE,
+                        decodeMsg->getChannels(),
+                        fifoSlot);
+                audioFifo[fifoSlot] = decodeMsg->getAudioFifo();
             }
             else
             {
@@ -183,67 +182,3 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channel
         m_fifoSlots[fifoSlot].m_upsamplerLastValue = in[i];
     }
 }
-
-//void DVSerialWorker::upsample6(short *in, short *out, int nbSamplesIn)
-//{
-//    for (int i = 0; i < nbSamplesIn; i++)
-//    {
-//        int cur = (int) in[i];
-//        int prev = (int) m_upsamplerLastValue;
-//        short up;
-//
-//// DEBUG:
-////        for (int j = 0; j < 6; j++)
-////        {
-////            up = 32768.0f * cos(m_phase);
-////            *out = up;
-////            out ++;
-////            *out = up;
-////            out ++;
-////            m_phase += M_PI / 6.0;
-////        }
-////
-////        if ((i % 2) == 1)
-////        {
-////            m_phase = 0.0f;
-////        }
-//
-//        up = m_upsampleFilter.run((cur*1 + prev*5) / 6);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        up = m_upsampleFilter.run((cur*2 + prev*4) / 6);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        up = m_upsampleFilter.run((cur*3 + prev*3) / 6);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        up = m_upsampleFilter.run((cur*4 + prev*2) / 6);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        up = m_upsampleFilter.run((cur*5 + prev*1) / 6);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        up = m_upsampleFilter.run(in[i]);
-//        *out = up;
-//        out++;
-//        *out = up;
-//        out++;
-//
-//        m_upsamplerLastValue = in[i];
-//    }
-//}

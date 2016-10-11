@@ -148,20 +148,17 @@ private:
         uint m_audioBufferFill;
         short m_upsamplerLastValue;
         MBEAudioInterpolatorFilter m_upsampleFilter;
+        short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
     };
 
-//    void upsample6(short *in, short *out, int nbSamplesIn);
     void upsample6(short *in, int nbSamplesIn, unsigned char channels, unsigned int fifoSlot);
 
     SerialDV::DVController m_dvController;
     bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
-    short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
-    //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
     static const unsigned int m_nbFifoSlots = 1;
     FifoSlot m_fifoSlots[m_nbFifoSlots];
-    float m_phase;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */
