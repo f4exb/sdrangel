@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <unistd.h>
+#include <sys/time.h>
 
 #include "dsp/dvserialworker.h"
 #include "audio/audiofifo.h"
@@ -181,4 +182,11 @@ void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channel
 
         m_fifoSlots[fifoSlot].m_upsamplerLastValue = in[i];
     }
+}
+
+long long DVSerialWorker::getUSecs()
+{
+    struct timeval tp;
+    gettimeofday(&tp, 0);
+    return (long long) tp.tv_sec * 1000000L + tp.tv_usec;
 }

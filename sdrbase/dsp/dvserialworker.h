@@ -152,6 +152,7 @@ private:
     };
 
     void upsample6(short *in, int nbSamplesIn, unsigned char channels, unsigned int fifoSlot);
+    static long long getUSecs();
 
     SerialDV::DVController m_dvController;
     bool m_running;
