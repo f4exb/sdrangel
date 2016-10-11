@@ -133,13 +133,25 @@ private:
 
     struct FifoSlot
     {
-        FifoSlot() : m_audioFifo(0), m_timestamp(QDate(2000, 1, 1)) {}
+        FifoSlot() :
+            m_audioFifo(0),
+            m_timestamp(QDate(2000, 1, 1)),
+            m_audioBufferFill(0),
+            m_upsamplerLastValue(0)
+        {
+            m_audioBuffer.resize(48000);
+        }
+
         AudioFifo *m_audioFifo;
         QDateTime m_timestamp;
+        AudioVector m_audioBuffer;
+        uint m_audioBufferFill;
+        short m_upsamplerLastValue;
+        MBEAudioInterpolatorFilter m_upsampleFilter;
     };
 
-    void upsample6(short *in, short *out, int nbSamplesIn);
-    void upsample6(short *in, int nbSamplesIn, unsigned char channels);
+//    void upsample6(short *in, short *out, int nbSamplesIn);
+    void upsample6(short *in, int nbSamplesIn, unsigned char channels, unsigned int fifoSlot);
 
     SerialDV::DVController m_dvController;
     bool m_running;
@@ -147,13 +159,9 @@ private:
     int m_currentGainOut;
     short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
     //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
-    AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
     static const unsigned int m_nbFifoSlots = 1;
     FifoSlot m_fifoSlots[m_nbFifoSlots];
-    short m_upsamplerLastValue;
     float m_phase;
-    MBEAudioInterpolatorFilter m_upsampleFilter;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */
