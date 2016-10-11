@@ -54,10 +54,17 @@ public:
         int getVolumeIndex() const { return m_volumeIndex; }
         unsigned char getChannels() const { return m_channels % 4; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
+        unsigned int getFifoSlot() const { return m_fifoSlot; }
 
-        static MsgMbeDecode* create(const unsigned char *mbeFrame, int mbeRateIndex, int volumeIndex, unsigned char channels, AudioFifo *audioFifo)
+        static MsgMbeDecode* create(
+                const unsigned char *mbeFrame,
+                int mbeRateIndex,
+                int volumeIndex,
+                unsigned char channels,
+                AudioFifo *audioFifo,
+                unsigned int fifoSlot)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo, fifoSlot);
         }
 
     private:
@@ -66,17 +73,20 @@ public:
         int m_volumeIndex;
         unsigned char m_channels;
         AudioFifo *m_audioFifo;
+        unsigned int m_fifoSlot;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
                 SerialDV::DVRate mbeRate,
                 int volumeIndex,
                 unsigned char channels,
-                AudioFifo *audioFifo) :
+                AudioFifo *audioFifo,
+                unsigned int fifoSlot) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
             m_channels(channels),
-            m_audioFifo(audioFifo)
+            m_audioFifo(audioFifo),
+            m_fifoSlot(fifoSlot)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
         }
@@ -89,14 +99,15 @@ public:
             int mbeRateIndex,
             int mbeVolumeIndex,
             unsigned char channels,
-            AudioFifo *audioFifo);
+            AudioFifo *audioFifo,
+            unsigned int fifoSlot);
 
     bool open(const std::string& serialDevice);
     void close();
     void process();
     void stop();
-    bool isAvailable();
-    bool hasFifo(AudioFifo *audioFifo);
+    bool isAvailable(unsigned int& fifoSlot);
+    bool hasFifo(AudioFifo *audioFifo, unsigned int& fifoSlot);
 
     void postTest()
     {
@@ -138,7 +149,8 @@ private:
     //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
-    FifoSlot m_fifoSlots[2];
+    static const unsigned int m_nbFifoSlots = 1;
+    FifoSlot m_fifoSlots[m_nbFifoSlots];
     short m_upsamplerLastValue;
     float m_phase;
     MBEAudioInterpolatorFilter m_upsampleFilter;

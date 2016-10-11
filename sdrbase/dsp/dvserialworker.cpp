@@ -72,7 +72,12 @@ void DVSerialWorker::handleInputMessages()
 {
     Message* message;
     m_audioBufferFill = 0;
-    AudioFifo *audioFifo = 0;
+    AudioFifo *audioFifo[m_nbFifoSlots];
+
+    for (int i = 0; i < m_nbFifoSlots; i++)
+    {
+        audioFifo[i] = 0;
+    }
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
@@ -84,7 +89,7 @@ void DVSerialWorker::handleInputMessages()
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
                 upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getAudioFifo());
-                audioFifo = decodeMsg->getAudioFifo();
+                audioFifo[decodeMsg->getFifoSlot()] = decodeMsg->getAudioFifo();
             }
             else
             {
@@ -95,40 +100,60 @@ void DVSerialWorker::handleInputMessages()
         delete message;
     }
 
-    if (audioFifo)
+    for (int i = 0; i < m_nbFifoSlots; i++)
     {
-        uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-        if (res != m_audioBufferFill)
+        if (audioFifo[i])
         {
-            qDebug("DVSerialWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
+            uint res = audioFifo[i]->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+
+            if (res != m_audioBufferFill)
+            {
+                qDebug("DVSerialWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
+            }
+
+            m_fifoSlots[i].m_timestamp = QDateTime::currentDateTime();
         }
     }
-
-    m_fifoSlots[0].m_timestamp = QDateTime::currentDateTime();
 }
 
 void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
         int mbeRateIndex,
         int mbeVolumeIndex,
-        unsigned char channels, AudioFifo *audioFifo)
+        unsigned char channels, AudioFifo *audioFifo,
+        unsigned int fifoSlot)
 {
     m_fifoSlots[0].m_audioFifo = audioFifo;
-    m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
+    m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo, fifoSlot));
 }
 
-bool DVSerialWorker::isAvailable()
+bool DVSerialWorker::isAvailable(unsigned int& fifoSlot)
 {
-	if (m_fifoSlots[0].m_audioFifo == 0) {
-		return true;
-	}
+    for (fifoSlot = 0; fifoSlot < m_nbFifoSlots; fifoSlot++)
+    {
+        if (m_fifoSlots[fifoSlot].m_audioFifo == 0)
+        {
+            return true;
+        }
+        else if (m_fifoSlots[fifoSlot].m_timestamp.time().msecsTo(QDateTime::currentDateTime().time()) > 1000)
+        {
+            return true;
+        }
+    }
 
-	return m_fifoSlots[0].m_timestamp.time().msecsTo(QDateTime::currentDateTime().time()) > 1000; // 1 second inactivity timeout
+	return false;
 }
 
-bool DVSerialWorker::hasFifo(AudioFifo *audioFifo)
+bool DVSerialWorker::hasFifo(AudioFifo *audioFifo, unsigned int& fifoSlot)
 {
-    return m_fifoSlots[0].m_audioFifo == audioFifo;
+    for (fifoSlot = 0; fifoSlot < m_nbFifoSlots; fifoSlot++)
+    {
+        if (m_fifoSlots[fifoSlot].m_audioFifo == audioFifo)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
