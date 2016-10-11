@@ -258,10 +258,12 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
         {
             it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
             done = true;
+            break;
         }
         else if (it->worker->isAvailable())
         {
             itAvail = it;
+            break;
         }
 
         ++it;

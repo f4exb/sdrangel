@@ -105,8 +105,6 @@ public:
     }
 
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    AudioFifo *m_audioFifo;
-    QDateTime m_timestamp;
 
 signals:
     void finished();
@@ -122,6 +120,13 @@ private:
 
     typedef std::vector<AudioSample> AudioVector;
 
+    struct FifoSlot
+    {
+        FifoSlot() : m_audioFifo(0), m_timestamp(QDate(2000, 1, 1)) {}
+        AudioFifo *m_audioFifo;
+        QDateTime m_timestamp;
+    };
+
     void upsample6(short *in, short *out, int nbSamplesIn);
     void upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo);
 
@@ -133,6 +138,7 @@ private:
     //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
+    FifoSlot m_fifoSlots[2];
     short m_upsamplerLastValue;
     float m_phase;
     MBEAudioInterpolatorFilter m_upsampleFilter;

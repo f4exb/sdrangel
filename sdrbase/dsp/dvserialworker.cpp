@@ -32,7 +32,7 @@ DVSerialWorker::DVSerialWorker() :
 {
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
-    m_audioFifo = 0;
+//    m_audioFifo = 0;
 }
 
 DVSerialWorker::~DVSerialWorker()
@@ -105,7 +105,7 @@ void DVSerialWorker::handleInputMessages()
         }
     }
 
-    m_timestamp = QDateTime::currentDateTime();
+    m_fifoSlots[0].m_timestamp = QDateTime::currentDateTime();
 }
 
 void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
@@ -113,22 +113,22 @@ void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
         int mbeVolumeIndex,
         unsigned char channels, AudioFifo *audioFifo)
 {
-    m_audioFifo = audioFifo;
+    m_fifoSlots[0].m_audioFifo = audioFifo;
     m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
 }
 
 bool DVSerialWorker::isAvailable()
 {
-	if (m_audioFifo == 0) {
+	if (m_fifoSlots[0].m_audioFifo == 0) {
 		return true;
 	}
 
-	return m_timestamp.time().msecsTo(QDateTime::currentDateTime().time()) > 1000; // 1 second inactivity timeout
+	return m_fifoSlots[0].m_timestamp.time().msecsTo(QDateTime::currentDateTime().time()) > 1000; // 1 second inactivity timeout
 }
 
 bool DVSerialWorker::hasFifo(AudioFifo *audioFifo)
 {
-    return m_audioFifo == audioFifo;
+    return m_fifoSlots[0].m_audioFifo == audioFifo;
 }
 
 void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
