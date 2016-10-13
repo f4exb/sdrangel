@@ -419,7 +419,7 @@ void PluginManager::loadPlugins(const QDir& dir)
 	}
 }
 
-void PluginManager::populateChannelComboBox(QComboBox *channels)
+void PluginManager::populateRxChannelComboBox(QComboBox *channels)
 {
     for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
@@ -428,11 +428,11 @@ void PluginManager::populateChannelComboBox(QComboBox *channels)
     }
 }
 
-void PluginManager::createChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI)
+void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelName, deviceAPI);
+        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelName, deviceAPI);
     }
 }

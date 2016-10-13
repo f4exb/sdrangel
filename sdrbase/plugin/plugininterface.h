@@ -45,8 +45,8 @@ public:
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
-	// channel plugins
-	virtual PluginGUI* createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
+	// channel Rx plugins
+	virtual PluginGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
 
 	// device plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }

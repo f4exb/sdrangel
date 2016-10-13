@@ -49,7 +49,7 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(BFMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginGUI* BFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == BFMDemodGUI::m_channelID)
 	{

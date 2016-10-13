@@ -287,7 +287,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
                 if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
                 {
                     qDebug("DeviceSourceAPI::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-                    reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createChannel(channelConfig.m_channel, this));
+                    reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createRxChannel(channelConfig.m_channel, this));
                     break;
                 }
             }

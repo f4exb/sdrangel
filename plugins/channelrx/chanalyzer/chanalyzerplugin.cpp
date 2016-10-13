@@ -32,7 +32,7 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChannelAnalyzerGUI::m_channelID, this);
 }
 
-PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginGUI* ChannelAnalyzerPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == ChannelAnalyzerGUI::m_channelID)
 	{

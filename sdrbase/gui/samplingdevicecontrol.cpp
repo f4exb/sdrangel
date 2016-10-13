@@ -48,7 +48,7 @@ void SamplingDeviceControl::populateChannelSelector()
 {
     if (m_pluginManager)
     {
-        m_pluginManager->populateChannelComboBox(ui->channelSelect);
+        m_pluginManager->populateRxChannelComboBox(ui->channelSelect);
     }
 }
 
@@ -65,7 +65,7 @@ void SamplingDeviceControl::on_addChannel_clicked(bool checked)
 {
     if (m_pluginManager)
     {
-        m_pluginManager->createChannelInstance(ui->channelSelect->currentIndex(), m_deviceAPI);
+        m_pluginManager->createRxChannelInstance(ui->channelSelect->currentIndex(), m_deviceAPI);
     }
 }
 

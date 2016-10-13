@@ -33,7 +33,7 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(AMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginGUI* AMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == AMDemodGUI::m_channelID)
 	{

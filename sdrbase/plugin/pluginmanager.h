@@ -55,8 +55,8 @@ public:
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceSourceAPI *deviceAPI);
 	void selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI *deviceAPI);
 
-	void populateChannelComboBox(QComboBox *channels);
-	void createChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
+	void populateRxChannelComboBox(QComboBox *channels);
+	void createRxChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
 
 private:
 	struct SamplingDeviceRegistration {
