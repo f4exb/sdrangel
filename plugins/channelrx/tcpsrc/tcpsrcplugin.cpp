@@ -29,7 +29,7 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	m_pluginAPI->registerChannel(TCPSrcGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(TCPSrcGUI::m_channelID, this);
 }
 
 PluginGUI* TCPSrcPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

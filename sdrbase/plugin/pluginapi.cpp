@@ -8,9 +8,9 @@ MessageQueue* PluginAPI::getMainWindowMessageQueue()
 	return m_mainWindow->getInputMessageQueue();
 }
 
-void PluginAPI::registerChannel(const QString& channelName, PluginInterface* plugin)
+void PluginAPI::registerRxChannel(const QString& channelName, PluginInterface* plugin)
 {
-	m_pluginManager->registerChannel(channelName, plugin);
+	m_pluginManager->registerRxChannel(channelName, plugin);
 }
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
@@ -18,9 +18,9 @@ void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface*
 	m_pluginManager->registerSampleSource(sourceName, plugin);
 }
 
-PluginAPI::ChannelRegistrations *PluginAPI::getChannelRegistrations()
+PluginAPI::ChannelRegistrations *PluginAPI::getRxChannelRegistrations()
 {
-    return m_pluginManager->getChannelRegistrations();
+    return m_pluginManager->getRxChannelRegistrations();
 }
 
 

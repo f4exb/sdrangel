@@ -29,7 +29,7 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register WFM demodulator
-	m_pluginAPI->registerChannel(WFMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(WFMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* WFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

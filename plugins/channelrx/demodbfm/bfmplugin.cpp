@@ -46,7 +46,7 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register BFM demodulator
-	m_pluginAPI->registerChannel(BFMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(BFMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* BFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

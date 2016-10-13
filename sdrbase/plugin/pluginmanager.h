@@ -41,10 +41,10 @@ public:
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins
-	void registerChannel(const QString& channelName, PluginInterface* plugin);
+	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 
-	PluginAPI::ChannelRegistrations *getChannelRegistrations() { return &m_channelRegistrations; }
+	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 
 	void updateSampleSourceDevices();
 	void duplicateLocalSampleSourceDevices(uint deviceUID);
@@ -59,56 +59,51 @@ public:
 	void createChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
 
 private:
-	struct SampleSourceRegistration {
-		QString m_sourceId;
+	struct SamplingDeviceRegistration {
+		QString m_deviceId;
 		PluginInterface* m_plugin;
-		SampleSourceRegistration(const QString& sourceId, PluginInterface* plugin) :
-			m_sourceId(sourceId),
+		SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
+			m_deviceId(deviceId),
 			m_plugin(plugin)
 		{ }
 	};
 
-	typedef QList<SampleSourceRegistration> SampleSourceRegistrations;
+	typedef QList<SamplingDeviceRegistration> SamplingDeviceRegistrations;
 
-	struct SampleSourceDevice {
+	struct SamplingDevice {
 		PluginInterface* m_plugin;
 		QString m_displayName;
-		QString m_sourceId;
-		QString m_sourceSerial;
-		int m_sourceSequence;
+		QString m_deviceId;
+		QString m_deviceSerial;
+		int m_deviceSequence;
 
-		SampleSourceDevice(PluginInterface* plugin,
+		SamplingDevice(PluginInterface* plugin,
 				const QString& displayName,
-				const QString& sourceId,
-				const QString& sourceSerial,
-				int sourceSequence) :
+				const QString& deviceId,
+				const QString& deviceSerial,
+				int deviceSequence) :
 			m_plugin(plugin),
 			m_displayName(displayName),
-			m_sourceId(sourceId),
-			m_sourceSerial(sourceSerial),
-			m_sourceSequence(sourceSequence)
+			m_deviceId(deviceId),
+			m_deviceSerial(deviceSerial),
+			m_deviceSequence(deviceSequence)
 		{ }
 	};
 
-	typedef QList<SampleSourceDevice> SampleSourceDevices;
+	typedef QList<SamplingDevice> SamplingDevices;
 
 	PluginAPI m_pluginAPI;
 	MainWindow* m_mainWindow;
 	Plugins m_plugins;
 
-	PluginAPI::ChannelRegistrations m_channelRegistrations; //!< Channel plugins register here
-	SampleSourceRegistrations m_sampleSourceRegistrations;  //!< Input source plugins (one per device kind) register here
-	SampleSourceDevices m_sampleSourceDevices;              //!< Instances of input sources present in the system
+	PluginAPI::ChannelRegistrations m_rxChannelRegistrations; //!< Channel plugins register here
+	SamplingDeviceRegistrations m_sampleSourceRegistrations;  //!< Input source plugins (one per device kind) register here
+	SamplingDevices m_sampleSourceDevices;                    //!< Instances of input sources present in the system
 
 	// "Local" sample source device IDs
 	static const QString m_sdrDaemonDeviceTypeID;           //!< SDRdaemon source plugin ID
     static const QString m_sdrDaemonFECDeviceTypeID;        //!< SDRdaemon with FEC source plugin ID
     static const QString m_fileSourceDeviceTypeID;          //!< FileSource source plugin ID
-
-//	QString m_sampleSourceId;
-//	QString m_sampleSourceSerial;
-//	int m_sampleSourceSequence;
-//	PluginGUI* m_sampleSourcePluginGUI;
 
 	void loadPlugins(const QDir& dir);
 

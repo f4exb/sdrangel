@@ -29,7 +29,7 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerChannel(SSBDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(SSBDemodGUI::m_channelID, this);
 }
 
 PluginGUI* SSBPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

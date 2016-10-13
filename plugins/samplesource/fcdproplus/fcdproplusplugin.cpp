@@ -51,9 +51,9 @@ void FCDProPlusPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(fcd_traits<ProPlus>::interfaceIID, this);
 }
 
-PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
+PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 
 	int i = 0;
 	struct hid_device_info *device_info = hid_enumerate(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId);
@@ -63,7 +63,7 @@ PluginInterface::SampleSourceDevices FCDProPlusPlugin::enumSampleSources()
 		QString serialNumber = QString::fromWCharArray(device_info->serial_number);
 		QString displayedName(QString("%1[%2] %3").arg(fcd_traits<ProPlus>::displayedName).arg(i).arg(serialNumber));
 
-		result.append(SampleSourceDevice(displayedName,
+		result.append(SamplingDevice(displayedName,
 				fcd_traits<ProPlus>::interfaceIID,
 				serialNumber,
 				i));

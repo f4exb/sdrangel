@@ -34,8 +34,8 @@ public:
 	MessageQueue* getMainWindowMessageQueue();
 
 	// Channel stuff
-	void registerChannel(const QString& channelName, PluginInterface* plugin);
-	ChannelRegistrations *getChannelRegistrations();
+	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
+	ChannelRegistrations *getRxChannelRegistrations();
 
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);

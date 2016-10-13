@@ -51,16 +51,16 @@ void SDRdaemonFECPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices SDRdaemonFECPlugin::enumSampleSources()
+PluginInterface::SamplingDevices SDRdaemonFECPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 	int count = 1;
 
 	for(int i = 0; i < count; i++)
 	{
 		QString displayedName(QString("SDRdaemonFEC[%1]").arg(i));
 
-		result.append(SampleSourceDevice(displayedName,
+		result.append(SamplingDevice(displayedName,
 				m_deviceTypeID,
 				QString::null,
 				i));

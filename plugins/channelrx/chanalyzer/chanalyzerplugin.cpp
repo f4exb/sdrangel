@@ -29,7 +29,7 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerChannel(ChannelAnalyzerGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(ChannelAnalyzerGUI::m_channelID, this);
 }
 
 PluginGUI* ChannelAnalyzerPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

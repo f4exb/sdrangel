@@ -52,7 +52,7 @@ void HackRFPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
+PluginInterface::SamplingDevices HackRFPlugin::enumSampleSources()
 {
 	hackrf_error rc = (hackrf_error) hackrf_init();
 
@@ -61,7 +61,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 		qCritical("HackRFPlugin::SampleSourceDevices: failed to initiate HackRF library: %s", hackrf_error_name(rc));
 	}
 
-	SampleSourceDevices result;
+	SamplingDevices result;
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
 	hackrf_device *hackrf_ptr;
 	read_partid_serialno_t read_partid_serialno;
@@ -91,7 +91,7 @@ PluginInterface::SampleSourceDevices HackRFPlugin::enumSampleSources()
 			uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 			QString displayedName(QString("HackRF[%1] %2").arg(i).arg(serial_str));
 
-			result.append(SampleSourceDevice(displayedName, m_deviceTypeID,
+			result.append(SamplingDevice(displayedName, m_deviceTypeID,
 					serial_str,
 					i));
 

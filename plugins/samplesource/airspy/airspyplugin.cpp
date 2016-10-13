@@ -51,9 +51,9 @@ void AirspyPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
+PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 	airspy_read_partid_serialno_t read_partid_serialno;
 	struct airspy_device *devinfo;
 	uint32_t serial_msb = 0;
@@ -94,7 +94,7 @@ PluginInterface::SampleSourceDevices AirspyPlugin::enumSampleSources()
 				uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 				QString displayedName(QString("Airspy[%1] %2").arg(i).arg(serial_str));
 
-				result.append(SampleSourceDevice(displayedName,
+				result.append(SamplingDevice(displayedName,
 						m_deviceTypeID,
 						serial_str,
 						i));

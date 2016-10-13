@@ -49,9 +49,9 @@ void BlderfPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
+PluginInterface::SamplingDevices BlderfPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 	struct bladerf_devinfo *devinfo = 0;
 
 	int count = bladerf_get_device_list(&devinfo);
@@ -60,7 +60,7 @@ PluginInterface::SampleSourceDevices BlderfPlugin::enumSampleSources()
 	{
 		QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
 
-		result.append(SampleSourceDevice(displayedName,
+		result.append(SamplingDevice(displayedName,
 				m_deviceTypeID,
 				QString(devinfo[i].serial),
 				i));

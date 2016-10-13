@@ -252,7 +252,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
     qDebug("DeviceAPI::loadChannelSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
     // Available channel plugins
-    PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getChannelRegistrations();
+    PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
 
     // copy currently open channels and clear list
     ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
@@ -267,11 +267,11 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
 
         for(int i = 0; i < openChannels.count(); i++)
         {
-            qDebug("PluginManager::loadSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+            qDebug("DeviceSourceAPI::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
 
             if(openChannels[i].m_channelName == channelConfig.m_channel)
             {
-                qDebug("PluginManager::loadSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
+                qDebug("DeviceSourceAPI::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                 reg = openChannels.takeAt(i);
                 m_channelInstanceRegistrations.append(reg);
                 break;
@@ -286,7 +286,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
             {
                 if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
                 {
-                    qDebug("PluginManager::loadSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                    qDebug("DeviceSourceAPI::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
                     reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createChannel(channelConfig.m_channel, this));
                     break;
                 }
@@ -295,7 +295,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
 
         if(reg.m_gui != NULL)
         {
-            qDebug("PluginManager::loadSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+            qDebug("DeviceSourceAPI::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
             reg.m_gui->deserialize(channelConfig.m_config);
         }
     }
@@ -303,7 +303,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
     // everything, that is still "available" is not needed anymore
     for(int i = 0; i < openChannels.count(); i++)
     {
-        qDebug("PluginManager::loadSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+        qDebug("DeviceSourceAPI::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
         openChannels[i].m_gui->destroy();
     }
 

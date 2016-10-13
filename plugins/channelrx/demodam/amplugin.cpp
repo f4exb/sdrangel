@@ -30,7 +30,7 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register AM demodulator
-	m_pluginAPI->registerChannel(AMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(AMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* AMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

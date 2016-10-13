@@ -29,7 +29,7 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerChannel(LoRaDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(LoRaDemodGUI::m_channelID, this);
 }
 
 PluginGUI* LoRaPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

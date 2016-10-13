@@ -29,7 +29,7 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register NFM demodulator
-	m_pluginAPI->registerChannel(NFMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(NFMDemodGUI::m_channelID, this);
 }
 
 PluginGUI* NFMPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

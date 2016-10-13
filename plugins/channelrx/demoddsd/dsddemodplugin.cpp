@@ -46,7 +46,7 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register DSD demodulator
-	m_pluginAPI->registerChannel(DSDDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(DSDDemodGUI::m_channelID, this);
 }
 
 PluginGUI* DSDDemodPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

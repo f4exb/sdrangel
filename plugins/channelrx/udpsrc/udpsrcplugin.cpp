@@ -46,7 +46,7 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	m_pluginAPI->registerChannel(UDPSrcGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(UDPSrcGUI::m_channelID, this);
 }
 
 PluginGUI* UDPSrcPlugin::createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)

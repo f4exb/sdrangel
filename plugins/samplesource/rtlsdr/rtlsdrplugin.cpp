@@ -35,9 +35,9 @@ void RTLSDRPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
+PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 	int count = rtlsdr_get_device_count();
 	char vendor[256];
 	char product[256];
@@ -52,7 +52,7 @@ PluginInterface::SampleSourceDevices RTLSDRPlugin::enumSampleSources()
 			continue;
 		QString displayedName(QString("RTL-SDR[%1] %2").arg(i).arg(serial));
 
-		result.append(SampleSourceDevice(displayedName,
+		result.append(SamplingDevice(displayedName,
 				m_deviceTypeID,
 				QString(serial),
 				i));

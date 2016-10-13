@@ -35,7 +35,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	virtual SampleSourceDevices enumSampleSources();
+	virtual SamplingDevices enumSampleSources();
 	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
 
 	static const QString m_deviceTypeID;

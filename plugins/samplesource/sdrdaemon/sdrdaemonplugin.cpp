@@ -49,16 +49,16 @@ void SDRdaemonPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SampleSourceDevices SDRdaemonPlugin::enumSampleSources()
+PluginInterface::SamplingDevices SDRdaemonPlugin::enumSampleSources()
 {
-	SampleSourceDevices result;
+	SamplingDevices result;
 	int count = 1;
 
 	for(int i = 0; i < count; i++)
 	{
 		QString displayedName(QString("SDRdaemon[%1]").arg(i));
 
-		result.append(SampleSourceDevice(displayedName,
+		result.append(SamplingDevice(displayedName,
 				m_deviceTypeID,
 				QString::null,
 				i));

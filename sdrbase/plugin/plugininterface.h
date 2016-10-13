@@ -21,14 +21,14 @@ class QWidget;
 
 class PluginInterface {
 public:
-	struct SampleSourceDevice
+	struct SamplingDevice
 	{
 		QString displayedName;
 		QString id;
 		QString serial;
 		int sequence;
 
-		SampleSourceDevice(const QString& _displayedName,
+		SamplingDevice(const QString& _displayedName,
 				const QString& _id,
 				const QString& _serial,
 				int _sequence) :
@@ -38,16 +38,18 @@ public:
 			sequence(_sequence)
 		{ }
 	};
-	typedef QList<SampleSourceDevice> SampleSourceDevices;
+	typedef QList<SamplingDevice> SamplingDevices;
 
 	virtual ~PluginInterface() { };
 
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
+	// channel plugins
 	virtual PluginGUI* createChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
 
-	virtual SampleSourceDevices enumSampleSources() { return SampleSourceDevices(); }
+	// device plugins only
+	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
 	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 	{
 	    return 0;
