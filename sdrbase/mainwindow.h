@@ -131,7 +131,7 @@ private:
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
 
-	void addDevice();
+	void addSourceDevice();
     void removeLastDevice();
 
 private slots:
@@ -151,10 +151,11 @@ private slots:
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
 	void on_sampleSource_confirmClicked(bool checked);
+    void on_rxChannel_addClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
-	void on_action_addDevice_triggered();
-	void on_action_removeDevice_triggered();
+	void on_action_addSourceDevice_triggered();
+	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
 };

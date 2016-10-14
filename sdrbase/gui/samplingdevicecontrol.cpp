@@ -44,28 +44,12 @@ QPushButton *SamplingDeviceControl::getDeviceSelectionConfirm()
     return ui->deviceConfirm;
 }
 
-void SamplingDeviceControl::populateChannelSelector()
+QComboBox *SamplingDeviceControl::getChannelSelector()
 {
-    if (m_pluginManager)
-    {
-        m_pluginManager->populateRxChannelComboBox(ui->channelSelect);
-    }
+    return ui->channelSelect;
 }
 
-//void SamplingDeviceControl::on_showLoadedPlugins_clicked(bool checked)
-//{
-//    if (m_pluginManager)
-//    {
-//        PluginsDialog pluginsDialog(m_pluginManager, this);
-//        pluginsDialog.exec();
-//    }
-//}
-
-void SamplingDeviceControl::on_addChannel_clicked(bool checked)
+QPushButton *SamplingDeviceControl::getAddChannelButton()
 {
-    if (m_pluginManager)
-    {
-        m_pluginManager->createRxChannelInstance(ui->channelSelect->currentIndex(), m_deviceAPI);
-    }
+    return ui->addChannel;
 }
-

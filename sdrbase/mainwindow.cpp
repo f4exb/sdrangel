@@ -123,7 +123,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     qDebug() << "MainWindow::MainWindow: add the first device...";
 
-    addDevice(); // add the first device
+    addSourceDevice(); // add the first device
 
     qDebug() << "MainWindow::MainWindow: load settings...";
 
@@ -170,7 +170,7 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::addDevice()
+void MainWindow::addSourceDevice()
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
     dspDeviceSourceEngine->start();
@@ -187,7 +187,9 @@ void MainWindow::addDevice()
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
-    m_deviceUIs.back()->m_samplingDeviceControl->populateChannelSelector();
+    m_pluginManager->populateRxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
+
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_rxChannel_addClicked(bool)));
 
     dspDeviceSourceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
@@ -675,18 +677,31 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
     }
 }
 
+void MainWindow::on_rxChannel_addClicked(bool checked)
+{
+    // Do it in the currently selected source tab
+    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+
+    if (currentSourceTabIndex >= 0)
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceAPI);
+    }
+
+}
+
 void MainWindow::on_action_About_triggered()
 {
 	AboutDialog dlg(this);
 	dlg.exec();
 }
 
-void MainWindow::on_action_addDevice_triggered()
+void MainWindow::on_action_addSourceDevice_triggered()
 {
-    addDevice();
+    addSourceDevice();
 }
 
-void MainWindow::on_action_removeDevice_triggered()
+void MainWindow::on_action_removeLastDevice_triggered()
 {
     if (m_deviceUIs.size() > 1)
     {

@@ -43,16 +43,13 @@ public:
     void setDeviceAPI(DeviceSourceAPI *devieAPI) { m_deviceAPI = devieAPI; }
     QComboBox *getDeviceSelector();
     QPushButton *getDeviceSelectionConfirm();
-    void populateChannelSelector();
+    QComboBox *getChannelSelector();
+    QPushButton *getAddChannelButton();
 
 private:
     Ui::SamplingDeviceControl* ui;
     PluginManager *m_pluginManager;
     DeviceSourceAPI *m_deviceAPI;
-
-private slots:
-//    void on_showLoadedPlugins_clicked(bool checked);
-    void on_addChannel_clicked(bool checked);
 };
 
 
