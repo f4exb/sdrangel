@@ -32,12 +32,12 @@ class QThread;
  * Because Qt is a piece of shit this class cannot be a nested protected class of ThreadedSampleSink
  * So let's make everything public
  */
-class ThreadedBasebandSampleFifo : public QObject {
+class ThreadedBasebandSampleSinkFifo : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedBasebandSampleFifo(BasebandSampleSink* sampleSink, std::size_t size = 1<<18);
-	~ThreadedBasebandSampleFifo();
+	ThreadedBasebandSampleSinkFifo(BasebandSampleSink* sampleSink, std::size_t size = 1<<18);
+	~ThreadedBasebandSampleSinkFifo();
 	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
 
 	BasebandSampleSink* m_sampleSink;
@@ -72,7 +72,7 @@ public:
 protected:
 
 	QThread *m_thread; //!< The thead object
-	ThreadedBasebandSampleFifo *m_threadedBasebandSampleFifo;
+	ThreadedBasebandSampleSinkFifo *m_threadedBasebandSampleSinkFifo;
 	BasebandSampleSink* m_basebandSampleSink;
 };
 

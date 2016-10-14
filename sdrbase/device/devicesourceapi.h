@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QString>
 
-#include "../dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesourceengine.h"
 
 #include "util/export.h"
 

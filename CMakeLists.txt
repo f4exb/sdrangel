@@ -118,6 +118,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/samplesourcefifo.cpp
     sdrbase/dsp/samplesinkfifodoublebuffered.cpp
 	sdrbase/dsp/basebandsamplesink.cpp
+    sdrbase/dsp/basebandsamplesource.cpp
 	sdrbase/dsp/nullsink.cpp
 	sdrbase/dsp/spectrumscopecombovis.cpp
 	sdrbase/dsp/scopevis.cpp
@@ -148,6 +149,7 @@ set(sdrbase_SOURCES
 	sdrbase/gui/valuedial.cpp
 
 	sdrbase/dsp/devicesamplesource.cpp
+    sdrbase/dsp/devicesamplesink.cpp
 
 	sdrbase/plugin/pluginapi.cpp
 	#sdrbase/plugin/plugingui.cpp
@@ -211,6 +213,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/samplesinkfifodoublebuffered.h
     sdrbase/dsp/samplesinkfifodecimator.h
 	sdrbase/dsp/basebandsamplesink.h
+    sdrbase/dsp/basebandsamplesource.h
 	sdrbase/dsp/nullsink.h
 	sdrbase/dsp/scopevis.h
 	sdrbase/dsp/spectrumvis.h
@@ -241,6 +244,7 @@ set(sdrbase_HEADERS
 	sdrbase/gui/valuedial.h
 
 	sdrbase/dsp/devicesamplesource.h
+    sdrbase/dsp/devicesamplesink.h
 
 	sdrbase/plugin/pluginapi.h
 	sdrbase/plugin/plugingui.h

@@ -59,6 +59,7 @@ SOURCES += mainwindow.cpp\
         dsp/samplesourcefifo.cpp\
         dsp/samplesinkfifodoublebuffered.cpp\
         dsp/basebandsamplesink.cpp\
+        dsp/basebandsamplesource.cpp\
         dsp/nullsink.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/scopevis.cpp\
@@ -87,6 +88,7 @@ SOURCES += mainwindow.cpp\
         gui/scaleengine.cpp\
         gui/valuedial.cpp\
         dsp/devicesamplesource.cpp\
+        dsp/devicesamplesink.cpp\
         plugin/pluginapi.cpp\
         plugin/plugininterface.cpp\
         plugin/pluginmanager.cpp\
@@ -142,6 +144,7 @@ HEADERS  += mainwindow.h\
         dsp/samplesinkfifodoublebuffered.h\
         dsp/samplesinkfifodecimator.h\
         dsp/basebandsamplesink.h\
+        dsp/basebandsamplesource.h\
         dsp/nullsink.h\
         dsp/scopevis.h\
         dsp/spectrumvis.h\
@@ -170,6 +173,7 @@ HEADERS  += mainwindow.h\
         gui/scaleengine.h\
         gui/valuedial.h\
         dsp/devicesamplesource.h\
+        dsp/devicesamplesink.h\
         plugin/pluginapi.h\
         plugin/plugingui.h\
         plugin/plugininterface.h\

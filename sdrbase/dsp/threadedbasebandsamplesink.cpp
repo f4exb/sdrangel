@@ -5,24 +5,24 @@
 #include "dsp/dspcommands.h"
 #include "util/message.h"
 
-ThreadedBasebandSampleFifo::ThreadedBasebandSampleFifo(BasebandSampleSink *sampleSink, std::size_t size) :
+ThreadedBasebandSampleSinkFifo::ThreadedBasebandSampleSinkFifo(BasebandSampleSink *sampleSink, std::size_t size) :
 	m_sampleSink(sampleSink)
 {
 	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleFifoData()));
 	m_sampleFifo.setSize(size);
 }
 
-ThreadedBasebandSampleFifo::~ThreadedBasebandSampleFifo()
+ThreadedBasebandSampleSinkFifo::~ThreadedBasebandSampleSinkFifo()
 {
 	m_sampleFifo.readCommit(m_sampleFifo.fill());
 }
 
-void ThreadedBasebandSampleFifo::writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
+void ThreadedBasebandSampleSinkFifo::writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
 {
 	m_sampleFifo.write(begin, end);
 }
 
-void ThreadedBasebandSampleFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
+void ThreadedBasebandSampleSinkFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
 {
 	bool positiveOnly = false;
 
@@ -72,10 +72,10 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 	qDebug() << "ThreadedBasebandSampleSink::ThreadedBasebandSampleSink: " << name;
 
 	m_thread = new QThread(parent);
-	m_threadedBasebandSampleFifo = new ThreadedBasebandSampleFifo(m_basebandSampleSink);
+	m_threadedBasebandSampleSinkFifo = new ThreadedBasebandSampleSinkFifo(m_basebandSampleSink);
 	//moveToThread(m_thread); // FIXME: Fixed? the intermediate FIFO should be handled within the sink. Define a new type of sink that is compatible with threading
 	m_basebandSampleSink->moveToThread(m_thread);
-	m_threadedBasebandSampleFifo->moveToThread(m_thread);
+	m_threadedBasebandSampleSinkFifo->moveToThread(m_thread);
 	//m_sampleFifo.moveToThread(m_thread);
 	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
 	//m_sampleFifo.setSize(262144);
@@ -85,7 +85,7 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 
 ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 {
-	delete m_threadedBasebandSampleFifo; // Valgrind memcheck
+	delete m_threadedBasebandSampleSinkFifo; // Valgrind memcheck
 	delete m_thread;
 }
 
@@ -108,7 +108,7 @@ void ThreadedBasebandSampleSink::feed(SampleVector::const_iterator begin, Sample
 {
 	//m_sampleSink->feed(begin, end, positiveOnly);
 	//m_sampleFifo.write(begin, end);
-	m_threadedBasebandSampleFifo->writeToFifo(begin, end);
+	m_threadedBasebandSampleSinkFifo->writeToFifo(begin, end);
 }
 
 bool ThreadedBasebandSampleSink::handleSinkMessage(const Message& cmd)
