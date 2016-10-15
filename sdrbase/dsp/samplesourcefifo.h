@@ -32,21 +32,25 @@ public:
     ~SampleSourceFifo();
 
     unsigned int getChunkSize() const { return m_samplesChunkSize; }
-    void read(SampleVector::iterator& begin, SampleVector::iterator& end);
-    void getReadIterator(SampleVector::iterator& beginRead); //!< begin read at this point for the chunksize length
-    void write(const Sample& sample);                        //!< write directly
+
+    /** begin read at current read point for the given length */
+    void read(SampleVector::iterator& beginRead, unsigned int nbSamples);
+
     void getWriteIterator(SampleVector::iterator& writeAt);  //!< get iterator to current item for update - write phase 1
     void bumpIndex();                                        //!< copy current item to second buffer and bump write index - write phase 2
+
+    void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
 
 private:
     uint32_t m_size;
     uint32_t m_samplesChunkSize;
     SampleVector m_data;
-    uint32_t m_i;
+    uint32_t m_iw;
+    uint32_t m_ir;
     QMutex m_mutex;
 
 signals:
-    void dataRead(); // signal data has been read past a read chunk of samples
+    void dataWrite(); // signal data is read past a read chunk of samples and write is needed
 };
 
 #endif /* SDRBASE_DSP_SAMPLESOURCEFIFO_H_ */
