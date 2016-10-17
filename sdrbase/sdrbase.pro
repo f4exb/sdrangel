@@ -31,6 +31,7 @@ SOURCES += mainwindow.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         device/devicesourceapi.cpp\
+        device/devicesinkapi.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/downchannelizer.cpp\
@@ -112,6 +113,7 @@ HEADERS  += mainwindow.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         device/devicesourceapi.h\
+        device/devicesinkapi.h\
         dsp/afsquelch.h\
         dsp/downchannelizer.h\
         dsp/upchannelizer.h\

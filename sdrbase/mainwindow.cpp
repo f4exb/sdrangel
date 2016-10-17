@@ -257,27 +257,35 @@ void MainWindow::addViewAction(QAction* action)
 	ui->menu_Window->addAction(action);
 }
 
-void MainWindow::setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName)
+void MainWindow::setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, bool sourceDevice)
 {
     char tabNameCStr[16];
-    sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
-    qDebug("MainWindow::setInputGUI: insert tab at %d", deviceTabIndex);
-
-    if (deviceTabIndex < m_deviceWidgetTabs.size())
+    if (sourceDevice)
     {
-        m_deviceWidgetTabs[deviceTabIndex] = {gui, sourceDisplayName, QString(tabNameCStr)};
+        sprintf(tabNameCStr, "R%d", deviceTabIndex);
     }
     else
     {
-        m_deviceWidgetTabs.append({gui, sourceDisplayName, QString(tabNameCStr)});
+        sprintf(tabNameCStr, "T%d", deviceTabIndex);
+    }
+
+    qDebug("MainWindow::setDeviceGUI: insert %s tab at %d", sourceDevice ? "Rx" : "Tx", deviceTabIndex);
+
+    if (deviceTabIndex < m_deviceWidgetTabs.size())
+    {
+        m_deviceWidgetTabs[deviceTabIndex] = {gui, deviceDisplayName, QString(tabNameCStr)};
+    }
+    else
+    {
+        m_deviceWidgetTabs.append({gui, deviceDisplayName, QString(tabNameCStr)});
     }
 
     ui->tabInputsView->clear();
 
     for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
     {
-        qDebug("MainWindow::setInputGUI: adding tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
+        qDebug("MainWindow::setDeviceGUI: adding tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
         ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
         ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
     }

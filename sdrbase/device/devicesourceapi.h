@@ -104,7 +104,7 @@ protected:
 
     DeviceSourceAPI(MainWindow *mainWindow,
             int deviceTabIndex,
-            DSPDeviceSourceEngine *deviceEngine,
+            DSPDeviceSourceEngine *deviceSourceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);
     ~DeviceSourceAPI();
@@ -113,7 +113,7 @@ protected:
 
     MainWindow *m_mainWindow;
     int m_deviceTabIndex;
-    DSPDeviceSourceEngine *m_deviceEngine;
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
 

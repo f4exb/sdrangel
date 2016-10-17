@@ -174,6 +174,7 @@ set(sdrbase_SOURCES
 	#sdrbase/util/spinlock.cpp
 	
 	sdrbase/device/devicesourceapi.cpp
+    sdrbase/device/devicesinkapi.cpp
 )
 
 set(sdrbase_HEADERS
@@ -274,6 +275,7 @@ set(sdrbase_HEADERS
 	#sdrbase/util/spinlock.h
 	
 	sdrbase/device/devicesourceapi.h
+    sdrbase/device/devicesinkapi.h
 )
 
 set(sdrbase_SOURCES

@@ -79,7 +79,7 @@ public:
 	void addViewAction(QAction* action);
 
     void addChannelRollup(int deviceTabIndex, QWidget* widget);
-	void setInputGUI(int deviceTabIndex, QWidget* gui, const QString& sourceDisplayName);
+	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, bool sourceDevice = true);
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }

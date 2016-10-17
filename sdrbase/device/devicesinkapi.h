@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QString>
 
-#include "dsp/dspdevicesinkengine.h" // TODO: TBD
+#include "dsp/dspdevicesinkengine.h"
 #include "util/export.h"
 
 class MainWindow;
@@ -41,6 +41,8 @@ class SDRANGEL_API DeviceSinkAPI : public QObject {
 
 public:
     // Device engine stuff
+    void addSink(BasebandSampleSink* sink);                        //!< Add a sample sink to device engine (spectrum vis)
+    void removeSink(BasebandSampleSink* sink);                     //!< Remove a sample sink from device engine (spectrum vis)
     void addSource(BasebandSampleSource* source);                  //!< Add a baseband sample source to device engine
     void removeSource(BasebandSampleSource* sink);                 //!< Remove a baseband sample source from device engine
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine
@@ -101,7 +103,7 @@ protected:
 
     DeviceSinkAPI(MainWindow *mainWindow,
             int deviceTabIndex,
-            DSPDeviceSourceEngine *deviceEngine,
+            DSPDeviceSinkEngine *deviceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);
     ~DeviceSinkAPI();
@@ -110,7 +112,7 @@ protected:
 
     MainWindow *m_mainWindow;
     int m_deviceTabIndex;
-    DSPDeviceSinkEngine *m_deviceEngine;
+    DSPDeviceSinkEngine *m_deviceSinkEngine;
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
 

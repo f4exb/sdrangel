@@ -50,7 +50,7 @@ public:
 	virtual PluginGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
 
 	// channel Tx plugins
-	virtual PluginGUI* createTxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI) { return 0; }
 
 	// device source plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
