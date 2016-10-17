@@ -348,7 +348,10 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 		(*it)->stop();
 	}
 
-	// TODO: why not stopping the threaded baseband sample sinks?
+    for(ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks.begin(); it != m_threadedBasebandSampleSinks.end(); it++)
+    {
+        (*it)->stop();
+    }
 
 	m_deviceSampleSource->stop();
 	m_deviceDescription.clear();
