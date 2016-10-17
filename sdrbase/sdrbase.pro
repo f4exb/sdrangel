@@ -34,6 +34,7 @@ SOURCES += mainwindow.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/downchannelizer.cpp\
+        dsp/upchannelizer.cpp\
         dsp/channelmarker.cpp\
         dsp/ctcssdetector.cpp\
         dsp/dspcommands.cpp\
@@ -65,6 +66,7 @@ SOURCES += mainwindow.cpp\
         dsp/scopevis.cpp\
         dsp/spectrumvis.cpp\
         dsp/threadedbasebandsamplesink.cpp\
+        dsp/threadedbasebandsamplesource.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
         gui/basicchannelsettingswidget.cpp\
@@ -111,6 +113,7 @@ HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
         dsp/afsquelch.h\
         dsp/downchannelizer.h\
+        dsp/upchannelizer.h\
         dsp/channelmarker.h\
         dsp/complex.h\
         dsp/decimators.h\
@@ -149,6 +152,7 @@ HEADERS  += mainwindow.h\
         dsp/scopevis.h\
         dsp/spectrumvis.h\
         dsp/threadedbasebandsamplesink.h\
+        dsp/threadedbasebandsamplesource.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
         gui/audiodialog.h\

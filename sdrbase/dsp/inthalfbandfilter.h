@@ -51,6 +51,47 @@ public:
 		}
 	}
 
+    // upsample by 2, return center part of original spectrum
+    bool workInterpolateCenter(Sample* sampleIn, Sample *SampleOut)
+    {
+        switch(m_state)
+        {
+            case 0:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(SampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 1;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            default:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = sampleIn->real();
+                m_samples[m_ptr][1] = sampleIn->imag();
+
+                // save result
+                doFIR(SampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 0;
+
+                // tell caller we consumed the sample
+                return true;
+        }
+    }
+
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
@@ -84,43 +125,43 @@ public:
 		}
 	}
 
-	// downsample by 2, return edges of spectrum rotated into center
-	bool workDecimateFullRotate(Sample* sample)
-	{
-		switch(m_state)
-		{
-			case 0:
-				// insert sample into ring-buffer
-				m_samples[m_ptr][0] = sample->real();
-				m_samples[m_ptr][1] = sample->imag();
-
-				// advance write-pointer
-				m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
-
-				// next state
-				m_state = 1;
-
-				// tell caller we don't have a new sample
-				return false;
-
-			default:
-				// insert sample into ring-buffer
-				m_samples[m_ptr][0] = -sample->real();
-				m_samples[m_ptr][1] = sample->imag();
-
-				// save result
-				doFIR(sample);
-
-				// advance write-pointer
-				m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
-
-				// next state
-				m_state = 0;
-
-				// tell caller we have a new sample
-				return true;
-		}
-	}
+	// downsample by 2, return edges of spectrum rotated into center - unused
+//	bool workDecimateFullRotate(Sample* sample)
+//	{
+//		switch(m_state)
+//		{
+//			case 0:
+//				// insert sample into ring-buffer
+//				m_samples[m_ptr][0] = sample->real();
+//				m_samples[m_ptr][1] = sample->imag();
+//
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+//
+//				// next state
+//				m_state = 1;
+//
+//				// tell caller we don't have a new sample
+//				return false;
+//
+//			default:
+//				// insert sample into ring-buffer
+//				m_samples[m_ptr][0] = -sample->real();
+//				m_samples[m_ptr][1] = sample->imag();
+//
+//				// save result
+//				doFIR(sample);
+//
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+//
+//				// next state
+//				m_state = 0;
+//
+//				// tell caller we have a new sample
+//				return true;
+//		}
+//	}
 
 	// downsample by 2, return lower half of original spectrum
 	bool workDecimateLowerHalf(Sample* sample)
@@ -191,6 +232,81 @@ public:
 		}
 	}
 
+    // upsample by 2, from lower half of original spectrum
+    bool workInterpolateLowerHalf(Sample* sampleIn, Sample *sampleOut)
+    {
+        switch(m_state)
+        {
+            case 0:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 1;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            case 1:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = -sampleIn->real();
+                m_samples[m_ptr][1] = -sampleIn->imag();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 2;
+
+                // tell caller we consumed the sample
+                return true;
+
+            case 2:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 3;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            default:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = sampleIn->real();
+                m_samples[m_ptr][1] = sampleIn->imag();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 0;
+
+                // tell caller we consumed the sample
+                return true;
+        }
+    }
+
 	// downsample by 2, return upper half of original spectrum
 	bool workDecimateUpperHalf(Sample* sample)
 	{
@@ -260,7 +376,82 @@ public:
 		}
 	}
 
-	void myDecimate(const Sample* sample1, Sample* sample2)
+    // upsample by 2, from upper half of original spectrum
+    bool workInterpolateUpperHalf(Sample* sampleIn, Sample *sampleOut)
+    {
+        switch(m_state)
+        {
+            case 0:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 1;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            case 1:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = -sampleIn->real();
+                m_samples[m_ptr][1] = -sampleIn->imag();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 2;
+
+                // tell caller we consumed the sample
+                return true;
+
+            case 2:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 3;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            default:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = sampleIn->real();
+                m_samples[m_ptr][1] = sampleIn->imag();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 0;
+
+                // tell caller we consumed the sample
+                return true;
+        }
+    }
+
+    void myDecimate(const Sample* sample1, Sample* sample2)
     {
 		static const qint16 mod33[38] = { 31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
 							20,21,22,23,24,25,26,27,28,29,30,31,32,0,1,2};

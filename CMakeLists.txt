@@ -96,6 +96,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/afsquelch.cpp
 	sdrbase/dsp/agc.cpp
 	sdrbase/dsp/downchannelizer.cpp
+    sdrbase/dsp/upchannelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
 	sdrbase/dsp/ctcssdetector.cpp
 	sdrbase/dsp/dspcommands.cpp
@@ -124,6 +125,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/scopevis.cpp
 	sdrbase/dsp/spectrumvis.cpp
 	sdrbase/dsp/threadedbasebandsamplesink.cpp
+    sdrbase/dsp/threadedbasebandsamplesource.cpp
 
 	sdrbase/gui/aboutdialog.cpp
 	sdrbase/gui/addpresetdialog.cpp
@@ -182,6 +184,7 @@ set(sdrbase_HEADERS
 
 	sdrbase/dsp/afsquelch.h
 	sdrbase/dsp/downchannelizer.h
+    sdrbase/dsp/upchannelizer.h
 	sdrbase/dsp/channelmarker.h
 	sdrbase/dsp/complex.h
 	sdrbase/dsp/decimators.h
@@ -218,6 +221,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/scopevis.h
 	sdrbase/dsp/spectrumvis.h
 	sdrbase/dsp/threadedbasebandsamplesink.h
+    sdrbase/dsp/threadedbasebandsamplesource.h
 
 	sdrbase/gui/aboutdialog.h
 	sdrbase/gui/addpresetdialog.h

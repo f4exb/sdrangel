@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 F4EXB                                                      //
+// Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -36,15 +36,18 @@ class ThreadedBasebandSampleSourceFifo : public QObject {
 	Q_OBJECT
 
 public:
-	ThreadedBasebandSampleSourceFifo(BasebandSampleSource* sampleSource, std::size_t size = 1<<18);
+	ThreadedBasebandSampleSourceFifo(BasebandSampleSource* sampleSource);
 	~ThreadedBasebandSampleSourceFifo();
-	void writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
+	void readFromFifo(SampleVector::iterator& beginRead, unsigned int nbSamples);
 
 	BasebandSampleSource* m_sampleSource;
 	SampleSourceFifo m_sampleSourceFifo;
 
 public slots:
 	void handleFifoData();
+
+private:
+    unsigned int m_samplesChunkSize;
 };
 
 /**
@@ -58,21 +61,20 @@ public:
 	~ThreadedBasebandSampleSource();
 
 	const BasebandSampleSource *getSource() const { return m_basebandSampleSource; }
-	MessageQueue* getInputMessageQueue() { return m_basebandSampleSource->getInputMessageQueue(); } //!< Return pointer to sample source's input message queue
+	MessageQueue* getInputMessageQueue() { return m_basebandSampleSource->getInputMessageQueue(); }   //!< Return pointer to sample source's input message queue
 	MessageQueue* getOutputMessageQueue() { return m_basebandSampleSource->getOutputMessageQueue(); } //!< Return pointer to sample source's output message queue
 
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()
 
-	bool handleSourceMessage(const Message& cmd); //!< Send message to source synchronously
-	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly); //!< Feed source with samples
+	bool handleSourceMessage(const Message& cmd);                         //!< Send message to source synchronously
+	void pull(SampleVector::iterator& beginRead, unsigned int nbSamples); //!< Pull samples from source
 
 	QString getSampleSourceObjectName() const;
 
 protected:
-
 	QThread *m_thread; //!< The thead object
-	ThreadedBasebandSampleSinkFifo *m_threadedBasebandSampleSourceFifo;
+	ThreadedBasebandSampleSourceFifo *m_threadedBasebandSampleSourceFifo;
 	BasebandSampleSource* m_basebandSampleSource;
 };
 

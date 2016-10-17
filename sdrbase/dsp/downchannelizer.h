@@ -1,5 +1,22 @@
-#ifndef INCLUDE_CHANNELIZER_H
-#define INCLUDE_CHANNELIZER_H
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef SDRBASE_DSP_DOWNCHANNELIZER_H
+#define SDRBASE_DSP_DOWNCHANNELIZER_H
 
 #include <dsp/basebandsamplesink.h>
 #include <list>
@@ -64,7 +81,7 @@ protected:
 	};
 	typedef std::list<FilterStage*> FilterStages;
 	FilterStages m_filterStages;
-	BasebandSampleSink* m_sampleSink;
+	BasebandSampleSink* m_sampleSink; //!< Demodulator
 	int m_inputSampleRate;
 	int m_requestedOutputSampleRate;
 	int m_requestedCenterFrequency;
@@ -82,4 +99,4 @@ signals:
 	void inputSampleRateChanged();
 };
 
-#endif // INCLUDE_CHANNELIZER_H
+#endif // SDRBASE_DSP_DOWNCHANNELIZER_H
