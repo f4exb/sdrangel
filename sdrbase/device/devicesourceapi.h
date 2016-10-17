@@ -25,7 +25,6 @@
 #include "util/export.h"
 
 class MainWindow;
-class DSPDeviceSourceEngine;
 class GLSpectrum;
 class ChannelWindow;
 class BasebandSampleSink;

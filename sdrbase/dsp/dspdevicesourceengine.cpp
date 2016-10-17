@@ -348,6 +348,8 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 		(*it)->stop();
 	}
 
+	// TODO: why not stopping the threaded baseband sample sinks?
+
 	m_deviceSampleSource->stop();
 	m_deviceDescription.clear();
 	m_sampleRate = 0;

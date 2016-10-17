@@ -40,6 +40,7 @@ SOURCES += mainwindow.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
+        dsp/dspdevicesinkengine.cpp\
         dsp/dvserialengine.cpp\
         dsp/dvserialworker.cpp\
         dsp/fftengine.cpp\
@@ -120,6 +121,7 @@ HEADERS  += mainwindow.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
         dsp/dspdevicesourceengine.h\
+        dsp/dspdevicesinkengine.h\
         dsp/dvserialengine.h\
         dsp/dvserialworker.h\
         dsp/dsptypes.h\

@@ -26,6 +26,9 @@
 class DeviceSampleSource;
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
+class DeviceSampleSink;
+class BasebandSampleSource;
+class ThreadedBasebandSampleSource;
 class AudioFifo;
 
 class SDRANGEL_API DSPExit : public Message {
@@ -44,7 +47,30 @@ class SDRANGEL_API DSPAcquisitionStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
+class SDRANGEL_API DSPGenerationInit : public Message {
+	MESSAGE_CLASS_DECLARATION
+};
+
+class SDRANGEL_API DSPGenerationStart : public Message {
+	MESSAGE_CLASS_DECLARATION
+};
+
+class SDRANGEL_API DSPGenerationStop : public Message {
+	MESSAGE_CLASS_DECLARATION
+};
+
 class SDRANGEL_API DSPGetSourceDeviceDescription : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	void setDeviceDescription(const QString& text) { m_deviceDescription = text; }
+	const QString& getDeviceDescription() const { return m_deviceDescription; }
+
+private:
+	QString m_deviceDescription;
+};
+
+class SDRANGEL_API DSPGetSinkDeviceDescription : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -78,6 +104,18 @@ private:
 	DeviceSampleSource* m_sampleSource;
 };
 
+class SDRANGEL_API DSPSetSink : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPSetSink(DeviceSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+
+	DeviceSampleSink* getSampleSink() const { return m_sampleSink; }
+
+private:
+	DeviceSampleSink* m_sampleSink;
+};
+
 class SDRANGEL_API DSPAddSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -88,6 +126,18 @@ public:
 
 private:
 	BasebandSampleSink* m_sampleSink;
+};
+
+class SDRANGEL_API DSPAddSource : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPAddSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+
+	BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
+
+private:
+	BasebandSampleSource* m_sampleSource;
 };
 
 class SDRANGEL_API DSPRemoveSink : public Message {
@@ -102,6 +152,18 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
+class SDRANGEL_API DSPRemoveSource : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPRemoveSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+
+	BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
+
+private:
+	BasebandSampleSource* m_sampleSource;
+};
+
 class SDRANGEL_API DSPAddThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -114,6 +176,18 @@ private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
+class SDRANGEL_API DSPAddThreadedSampleSource : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPAddThreadedSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
+
+	ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
+
+private:
+	ThreadedBasebandSampleSource* m_threadedSampleSource;
+};
+
 class SDRANGEL_API DSPRemoveThreadedSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -124,6 +198,18 @@ public:
 
 private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
+};
+
+class SDRANGEL_API DSPRemoveThreadedSampleSource : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPRemoveThreadedSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
+
+	ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
+
+private:
+	ThreadedBasebandSampleSource* m_threadedSampleSource;
 };
 
 class SDRANGEL_API DSPAddAudioSink : public Message {

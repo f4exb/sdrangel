@@ -31,7 +31,8 @@
 
 class DeviceSampleSink;
 class BasebandSampleSource;
-class ThreadedBasebandSampleSource; // TODO: TBD
+class ThreadedBasebandSampleSource;
+class BasebandSampleSink;
 
 class SDRANGEL_API DSPDeviceSinkEngine : public QThread {
 	Q_OBJECT
@@ -64,10 +65,13 @@ public:
 	void setSinkSequence(int sequence); //!< Set the sample sink sequence in type
 
 	void addSource(BasebandSampleSource* source); //!< Add a baseband sample source
-	void removeSink(BasebandSampleSource* source); //!< Remove a baseband sample source
+	void removeSource(BasebandSampleSource* source); //!< Remove a baseband sample source
 
 	void addThreadedSource(ThreadedBasebandSampleSource* source); //!< Add a baseband sample source that will run on its own thread
 	void removeThreadedSource(ThreadedBasebandSampleSource* source); //!< Remove a baseband sample source that runs on its own thread
+
+	void addSink(BasebandSampleSink* sink); //!< Add a baseband sample sink
+	void removeSink(BasebandSampleSink* sink); //!< Remove a baseband sample sink
 
 	State state() const { return m_state; } //!< Return DSP engine current state
 
@@ -94,6 +98,9 @@ private:
 
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	ThreadedBasebandSampleSources m_threadedBasebandSampleSources; //!< baseband sample sources on their own threads (usually channels)
+
+	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
+	BasebandSampleSinks m_basebandSampleSinks; //!< baseband sample sinks within main thread (this is only the spectrum vis normally)
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;

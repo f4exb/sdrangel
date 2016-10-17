@@ -20,34 +20,6 @@
 
 #include "dsp/threadedbasebandsamplesource.h"
 
-ThreadedBasebandSampleSourceFifo::ThreadedBasebandSampleSourceFifo(BasebandSampleSource* sampleSource) :
-    m_sampleSource(sampleSource),
-    m_sampleSourceFifo(1<<19, 1<<17)
-{
-    m_samplesChunkSize = m_sampleSourceFifo.getChunkSize();
-    connect(&m_sampleSourceFifo, SIGNAL(dataWrite()), this, SLOT(handleFifoData()));
-}
-
-ThreadedBasebandSampleSourceFifo::~ThreadedBasebandSampleSourceFifo()
-{
-}
-
-void ThreadedBasebandSampleSourceFifo::readFromFifo(SampleVector::iterator& beginRead, unsigned int nbSamples)
-{
-    m_sampleSourceFifo.read(beginRead, nbSamples);
-}
-
-void ThreadedBasebandSampleSourceFifo::handleFifoData()
-{
-    for (int i = 0; i < m_samplesChunkSize; i++)
-    {
-        SampleVector::iterator sampleIt;
-        m_sampleSourceFifo.getWriteIterator(sampleIt);
-        m_sampleSource->pull(*sampleIt);
-        m_sampleSourceFifo.bumpIndex();
-    }
-}
-
 ThreadedBasebandSampleSource::ThreadedBasebandSampleSource(BasebandSampleSource* sampleSource, QObject *parent) :
         m_basebandSampleSource(sampleSource)
 {
@@ -57,16 +29,13 @@ ThreadedBasebandSampleSource::ThreadedBasebandSampleSource(BasebandSampleSource*
     qDebug() << "ThreadedBasebandSampleSource::ThreadedBasebandSampleSource: " << name;
 
     m_thread = new QThread(parent);
-    m_threadedBasebandSampleSourceFifo = new ThreadedBasebandSampleSourceFifo(m_basebandSampleSource);
     m_basebandSampleSource->moveToThread(m_thread);
-    m_threadedBasebandSampleSourceFifo->moveToThread(m_thread);
 
     qDebug() << "ThreadedBasebandSampleSource::ThreadedBasebandSampleSource: thread: " << thread() << " m_thread: " << m_thread;
 }
 
 ThreadedBasebandSampleSource::~ThreadedBasebandSampleSource()
 {
-    delete m_threadedBasebandSampleSourceFifo;
     delete m_thread;
 }
 
@@ -85,9 +54,9 @@ void ThreadedBasebandSampleSource::stop()
     m_thread->wait();
 }
 
-void ThreadedBasebandSampleSource::pull(SampleVector::iterator& beginRead, unsigned int nbSamples)
+void ThreadedBasebandSampleSource::pull(Sample& sample)
 {
-    m_threadedBasebandSampleSourceFifo->readFromFifo(beginRead, nbSamples);
+	m_basebandSampleSource->pull(sample);
 }
 
 bool ThreadedBasebandSampleSource::handleSourceMessage(const Message& cmd)

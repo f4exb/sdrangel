@@ -20,15 +20,15 @@
 #include <QObject>
 #include <QString>
 
+#include "dsp/dspdevicesinkengine.h" // TODO: TBD
 #include "util/export.h"
 
 class MainWindow;
-class DSPDeviceSinkEngine; // TODO: TBD
 class GLSpectrum;
 class ChannelWindow;
-class BasebandSampleSource; // TODO: TBD
-class ThreadedBasebandSampleSource; // TODO: TBD
-class DeviceSampleSink; // TODO: TBD
+class BasebandSampleSource;
+class ThreadedBasebandSampleSource;
+class DeviceSampleSink;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
@@ -49,9 +49,9 @@ public:
     bool initGeneration();                                         //!< Initialize device engine generation sequence
     bool startGeneration();                                        //!< Start device engine generation sequence
     void stopGeneration();                                         //!< Stop device engine generation sequence
-//TODO:    DSPDeviceSourceEngine::State state() const; //!< device engine state
-    QString errorMessage();               //!< Return the current device engine error message
-    uint getDeviceUID() const;            //!< Return the current device engine unique ID
+    DSPDeviceSinkEngine::State state() const;                      //!< device engine state
+    QString errorMessage();                                        //!< Return the current device engine error message
+    uint getDeviceUID() const;                                     //!< Return the current device engine unique ID
     MessageQueue *getDeviceInputMessageQueue();
     MessageQueue *getDeviceOutputMessageQueue();
     // device related stuff

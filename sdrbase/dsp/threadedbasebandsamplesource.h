@@ -29,28 +29,6 @@ class BasebandSampleSource;
 class QThread;
 
 /**
- * Because Qt is a piece of shit this class cannot be a nested protected class of ThreadedSampleSource
- * So let's make everything public
- */
-class ThreadedBasebandSampleSourceFifo : public QObject {
-	Q_OBJECT
-
-public:
-	ThreadedBasebandSampleSourceFifo(BasebandSampleSource* sampleSource);
-	~ThreadedBasebandSampleSourceFifo();
-	void readFromFifo(SampleVector::iterator& beginRead, unsigned int nbSamples);
-
-	BasebandSampleSource* m_sampleSource;
-	SampleSourceFifo m_sampleSourceFifo;
-
-public slots:
-	void handleFifoData();
-
-private:
-    unsigned int m_samplesChunkSize;
-};
-
-/**
  * This class is a wrapper for BasebandSampleSource that runs the BasebandSampleSource object in its own thread
  */
 class SDRANGEL_API ThreadedBasebandSampleSource : public QObject {
@@ -67,14 +45,13 @@ public:
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()
 
-	bool handleSourceMessage(const Message& cmd);                         //!< Send message to source synchronously
-	void pull(SampleVector::iterator& beginRead, unsigned int nbSamples); //!< Pull samples from source
+	bool handleSourceMessage(const Message& cmd);  //!< Send message to source synchronously
+	void pull(Sample& sample);                     //!< Pull one sample from source
 
 	QString getSampleSourceObjectName() const;
 
 protected:
 	QThread *m_thread; //!< The thead object
-	ThreadedBasebandSampleSourceFifo *m_threadedBasebandSampleSourceFifo;
 	BasebandSampleSource* m_basebandSampleSource;
 };
 

@@ -102,6 +102,7 @@ set(sdrbase_SOURCES
 	sdrbase/dsp/dspcommands.cpp
 	sdrbase/dsp/dspengine.cpp
 	sdrbase/dsp/dspdevicesourceengine.cpp
+    sdrbase/dsp/dspdevicesinkengine.cpp
 	sdrbase/dsp/fftengine.cpp
 	sdrbase/dsp/fftfilt.cxx
 	sdrbase/dsp/fftwindow.cpp
@@ -191,6 +192,7 @@ set(sdrbase_HEADERS
 	sdrbase/dsp/dspcommands.h
 	sdrbase/dsp/dspengine.h
 	sdrbase/dsp/dspdevicesourceengine.h
+    sdrbase/dsp/dspdevicesinkengine.h
 	sdrbase/dsp/dsptypes.h
 	sdrbase/dsp/fftengine.h
 	sdrbase/dsp/fftfilt.h

@@ -40,6 +40,7 @@ struct Sample
 
 	inline Sample& operator+=(const Sample& other) { m_real += other.m_real; m_imag += other.m_imag; return *this; }
 	inline Sample& operator-=(const Sample& other) { m_real -= other.m_real; m_imag -= other.m_imag; return *this; }
+	inline Sample& operator/=(const unsigned int& divisor) { m_real /= divisor; m_imag /= divisor; return *this; }
 
 	inline void setReal(FixReal v) { m_real = v; }
 	inline void setImag(FixReal v) { m_imag = v; }
