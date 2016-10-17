@@ -63,8 +63,8 @@ public:
 		GLSpectrumGUI *m_spectrumGUI;
 		ChannelWindow *m_channelWindow;
 		SamplingDeviceControl *m_samplingDeviceControl;
-		DSPDeviceSourceEngine *m_deviceEngine;
-		DeviceSourceAPI *m_deviceAPI;
+		DSPDeviceSourceEngine *m_deviceSourceEngine;
+		DeviceSourceAPI *m_deviceSourceAPI;
 		QByteArray m_mainWindowState;
 
 		DeviceUISet(QTimer& timer);

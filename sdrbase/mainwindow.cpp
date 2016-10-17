@@ -132,7 +132,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
 
 	int sampleSourceIndex = m_settings.getSourceIndex();
-	sampleSourceIndex = m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex, m_deviceUIs.back()->m_deviceAPI);
+	sampleSourceIndex = m_pluginManager->selectSampleSourceByIndex(sampleSourceIndex, m_deviceUIs.back()->m_deviceSourceAPI);
 
 	if (sampleSourceIndex < 0)
 	{
@@ -180,12 +180,12 @@ void MainWindow::addSourceDevice()
     sprintf(tabNameCStr, "R%d", dspDeviceSourceEngineUID);
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
-    m_deviceUIs.back()->m_deviceEngine = dspDeviceSourceEngine;
+    m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
 
-    DeviceSourceAPI *deviceAPI = new DeviceSourceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
-    m_deviceUIs.back()->m_deviceAPI = deviceAPI;
-    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceAPI);
+    m_deviceUIs.back()->m_deviceSourceAPI = deviceSourceAPI;
+    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSourceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     m_pluginManager->populateRxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
 
@@ -205,19 +205,19 @@ void MainWindow::addSourceDevice()
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
 
-    int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceAPI);
+    int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
 }
 
 void MainWindow::removeLastDevice()
 {
-    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceEngine;
+    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
     lastDeviceEngine->stopAcquistion();
     lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
     ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
     ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
-    m_deviceUIs.back()->m_deviceAPI->freeAll();
+    m_deviceUIs.back()->m_deviceSourceAPI->freeAll();
 
     ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -308,8 +308,8 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
         deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_deviceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
-        deviceUI->m_deviceAPI->loadSourceSettings(preset);
+        deviceUI->m_deviceSourceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
+        deviceUI->m_deviceSourceAPI->loadSourceSettings(preset);
 	}
 
 	// has to be last step
@@ -328,8 +328,8 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
 
 	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
 	preset->clearChannels();
-    deviceUI->m_deviceAPI->saveChannelSettings(preset);
-    deviceUI->m_deviceAPI->saveSourceSettings(preset);
+    deviceUI->m_deviceSourceAPI->saveChannelSettings(preset);
+    deviceUI->m_deviceSourceAPI->saveSourceSettings(preset);
 
     preset->setLayout(saveState());
 }
@@ -668,12 +668,12 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
     {
         qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_deviceAPI->saveSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset());
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
-        m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceAPI);
+        m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI);
         m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
-        deviceUI->m_deviceAPI->loadSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset());
     }
 }
 
@@ -685,7 +685,7 @@ void MainWindow::on_rxChannel_addClicked(bool checked)
     if (currentSourceTabIndex >= 0)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceAPI);
+        m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSourceAPI);
     }
 
 }
@@ -753,8 +753,8 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
 	m_channelWindow = new ChannelWindow;
 	m_samplingDeviceControl = new SamplingDeviceControl;
-	m_deviceEngine = 0;
-	m_deviceAPI = 0;
+	m_deviceSourceEngine = 0;
+	m_deviceSourceAPI = 0;
 
 	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
 	QFont font;
