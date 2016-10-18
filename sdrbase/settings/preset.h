@@ -18,28 +18,32 @@ public:
 	};
 	typedef QList<ChannelConfig> ChannelConfigs;
 
-	struct SourceConfig
+	struct DeviceConfig
 	{
-		QString m_sourceId;
-		QString m_sourceSerial;
-		int m_sourceSequence;
+		QString m_deviceId;
+		QString m_deviceSerial;
+		int m_deviceSequence;
 		QByteArray m_config;
 
-		SourceConfig(const QString& sourceId,
-				const QString& sourceSerial,
-				int sourceSequence,
+		DeviceConfig(const QString& deviceId,
+				const QString& deviceSerial,
+				int deviceSequence,
 				const QByteArray& config) :
-					m_sourceId(sourceId),
-					m_sourceSerial(sourceSerial),
-					m_sourceSequence(sourceSequence),
+					m_deviceId(deviceId),
+					m_deviceSerial(deviceSerial),
+					m_deviceSequence(deviceSequence),
 					m_config(config)
 		{ }
 	};
-	typedef QList<SourceConfig> SourceConfigs;
+	typedef QList<DeviceConfig> DeviceeConfigs;
 
 	Preset();
 
 	void resetToDefaults();
+
+	void setSourcePreset(bool isSourcePreset) { m_sourcePreset = isSourcePreset; }
+	bool isSourcePreset() const { return m_sourcePreset; }
+
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
@@ -61,19 +65,19 @@ public:
 	int getChannelCount() const { return m_channelConfigs.count(); }
 	const ChannelConfig& getChannelConfig(int index) const { return m_channelConfigs.at(index); }
 
-	void setSourceConfig(const QString& sourceId, const QString& sourceSerial, int sourceSequence, const QByteArray& config)
+	void setDeviceConfig(const QString& deviceId, const QString& deviceSerial, int deviceSequence, const QByteArray& config)
 	{
-		addOrUpdateSourceConfig(sourceId, sourceSerial, sourceSequence, config);
+		addOrUpdateDeviceConfig(deviceId, deviceSerial, deviceSequence, config);
 	}
 
-	void addOrUpdateSourceConfig(const QString& sourceId,
-			const QString& sourceSerial,
-			int sourceSequence,
+	void addOrUpdateDeviceConfig(const QString& deviceId,
+			const QString& deviceSerial,
+			int deviceSequence,
 			const QByteArray& config);
 
-	const QByteArray* findBestSourceConfig(const QString& sourceId,
-			const QString& sourceSerial,
-			int sourceSequence) const;
+	const QByteArray* findBestDeviceConfig(const QString& deviceId,
+			const QString& deviceSerial,
+			int deviceSequence) const;
 
 	static bool presetCompare(const Preset *p1, Preset *p2)
 	{
@@ -85,7 +89,9 @@ public:
 	}
 
 protected:
-	// group and preset description
+    bool m_sourcePreset;
+
+    // group and preset description
 	QString m_group;
 	QString m_description;
 	quint64 m_centerFrequency;
@@ -106,8 +112,8 @@ protected:
 	// channels and configurations
 	ChannelConfigs m_channelConfigs;
 
-	// sources and configurations
-	SourceConfigs m_sourceConfigs;
+	// devices and configurations
+	DeviceeConfigs m_deviceConfigs;
 
 	// screen and dock layout
 	QByteArray m_layout;

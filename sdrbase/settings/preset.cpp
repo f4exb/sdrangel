@@ -10,6 +10,7 @@ Preset::Preset()
 
 void Preset::resetToDefaults()
 {
+    m_sourcePreset = true;
 	m_group = "default";
 	m_description = "no name";
 	m_centerFrequency = 0;
@@ -36,19 +37,19 @@ QByteArray Preset::serialize() const
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
 
-	s.writeS32(20, m_sourceConfigs.size());
+	s.writeS32(20, m_deviceConfigs.size());
 
-	for (int i = 0; i < m_sourceConfigs.size(); i++)
+	for (int i = 0; i < m_deviceConfigs.size(); i++)
 	{
-		s.writeString(24 + i*4, m_sourceConfigs[i].m_sourceId);
-		s.writeString(25 + i*4, m_sourceConfigs[i].m_sourceSerial);
-		s.writeS32(26 + i*4, m_sourceConfigs[i].m_sourceSequence);
-		s.writeBlob(27 + i*4, m_sourceConfigs[i].m_config);
+		s.writeString(24 + i*4, m_deviceConfigs[i].m_deviceId);
+		s.writeString(25 + i*4, m_deviceConfigs[i].m_deviceSerial);
+		s.writeS32(26 + i*4, m_deviceConfigs[i].m_deviceSequence);
+		s.writeBlob(27 + i*4, m_deviceConfigs[i].m_config);
 
 		qDebug("Preset::serialize:  source: id: %s, ser: %s, seq: %d",
-			qPrintable(m_sourceConfigs[i].m_sourceId),
-			qPrintable(m_sourceConfigs[i].m_sourceSerial),
-			m_sourceConfigs[i].m_sourceSequence);
+			qPrintable(m_deviceConfigs[i].m_deviceId),
+			qPrintable(m_deviceConfigs[i].m_deviceSerial),
+			m_deviceConfigs[i].m_deviceSequence);
 
 		if (i >= (200-23)/4) // full!
 		{
@@ -100,7 +101,7 @@ bool Preset::deserialize(const QByteArray& data)
 			sourcesCount = ((200-23)/4) - 1;
 		}
 
-		m_sourceConfigs.clear();
+		m_deviceConfigs.clear();
 
 		for (int i = 0; i < sourcesCount; i++)
 		{
@@ -120,7 +121,7 @@ bool Preset::deserialize(const QByteArray& data)
 					qPrintable(sourceSerial),
 					sourceSequence);
 
-				m_sourceConfigs.append(SourceConfig(sourceId, sourceSerial, sourceSequence, sourceConfig));
+				m_deviceConfigs.append(DeviceConfig(sourceId, sourceSerial, sourceSequence, sourceConfig));
 			}
 		}
 
@@ -150,27 +151,27 @@ bool Preset::deserialize(const QByteArray& data)
 	}
 }
 
-void Preset::addOrUpdateSourceConfig(const QString& sourceId,
+void Preset::addOrUpdateDeviceConfig(const QString& sourceId,
 		const QString& sourceSerial,
 		int sourceSequence,
 		const QByteArray& config)
 {
-	SourceConfigs::iterator it = m_sourceConfigs.begin();
+	DeviceeConfigs::iterator it = m_deviceConfigs.begin();
 
-	for (; it != m_sourceConfigs.end(); ++it)
+	for (; it != m_deviceConfigs.end(); ++it)
 	{
-		if (it->m_sourceId == sourceId)
+		if (it->m_deviceId == sourceId)
 		{
 			if (sourceSerial.isNull() || sourceSerial.isEmpty())
 			{
-				if (it->m_sourceSequence == sourceSequence)
+				if (it->m_deviceSequence == sourceSequence)
 				{
 					break;
 				}
 			}
 			else
 			{
-				if (it->m_sourceSerial == sourceSerial)
+				if (it->m_deviceSerial == sourceSerial)
 				{
 					break;
 				}
@@ -178,9 +179,9 @@ void Preset::addOrUpdateSourceConfig(const QString& sourceId,
 		}
 	}
 
-	if (it == m_sourceConfigs.end())
+	if (it == m_deviceConfigs.end())
 	{
-		m_sourceConfigs.append(SourceConfig(sourceId, sourceSerial, sourceSequence, config));
+		m_deviceConfigs.append(DeviceConfig(sourceId, sourceSerial, sourceSequence, config));
 	}
 	else
 	{
@@ -188,37 +189,37 @@ void Preset::addOrUpdateSourceConfig(const QString& sourceId,
 	}
 }
 
-const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
+const QByteArray* Preset::findBestDeviceConfig(const QString& sourceId,
 		const QString& sourceSerial,
 		int sourceSequence) const
 {
-	SourceConfigs::const_iterator it = m_sourceConfigs.begin();
-	SourceConfigs::const_iterator itFirstOfKind = m_sourceConfigs.end();
-	SourceConfigs::const_iterator itMatchSequence = m_sourceConfigs.end();
+	DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
+	DeviceeConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
+	DeviceeConfigs::const_iterator itMatchSequence = m_deviceConfigs.end();
 
-	for (; it != m_sourceConfigs.end(); ++it)
+	for (; it != m_deviceConfigs.end(); ++it)
 	{
-		if (it->m_sourceId == sourceId)
+		if (it->m_deviceId == sourceId)
 		{
-			if (itFirstOfKind == m_sourceConfigs.end())
+			if (itFirstOfKind == m_deviceConfigs.end())
 			{
 				itFirstOfKind = it;
 			}
 
 			if (sourceSerial.isNull() || sourceSerial.isEmpty())
 			{
-				if (it->m_sourceSequence == sourceSequence)
+				if (it->m_deviceSequence == sourceSequence)
 				{
 					break;
 				}
 			}
 			else
 			{
-				if (it->m_sourceSerial == sourceSerial)
+				if (it->m_deviceSerial == sourceSerial)
 				{
 					break;
 				}
-				else if(it->m_sourceSequence == sourceSequence)
+				else if(it->m_deviceSequence == sourceSequence)
 				{
 					itMatchSequence = it;
 				}
@@ -226,16 +227,16 @@ const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
 		}
 	}
 
-	if (it == m_sourceConfigs.end()) // no exact match
+	if (it == m_deviceConfigs.end()) // no exact match
 	{
-		if (itMatchSequence != m_sourceConfigs.end()) // match sequence ?
+		if (itMatchSequence != m_deviceConfigs.end()) // match sequence ?
 		{
-			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(itMatchSequence->m_sourceId), itMatchSequence->m_sourceSequence);
+			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(itMatchSequence->m_deviceId), itMatchSequence->m_deviceSequence);
 			return &(itMatchSequence->m_config);
 		}
-		else if (itFirstOfKind != m_sourceConfigs.end()) // match source type ?
+		else if (itFirstOfKind != m_deviceConfigs.end()) // match source type ?
 		{
-			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(itFirstOfKind->m_sourceId));
+			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(itFirstOfKind->m_deviceId));
 			return &(itFirstOfKind->m_config);
 		}
 		else // definitely not found !
@@ -246,7 +247,7 @@ const QByteArray* Preset::findBestSourceConfig(const QString& sourceId,
 	}
 	else // exact match
 	{
-		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %s", qPrintable(it->m_sourceId), qPrintable(it->m_sourceSerial));
+		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %s", qPrintable(it->m_deviceId), qPrintable(it->m_deviceSerial));
 		return &(it->m_config);
 	}
 }
