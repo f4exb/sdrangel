@@ -46,7 +46,7 @@ const PluginDescriptor& FileSinkPlugin::getPluginDescriptor() const
 
 void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
 PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()

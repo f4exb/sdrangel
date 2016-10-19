@@ -30,7 +30,7 @@ void PluginAPI::registerTxChannel(const QString& channelName, PluginInterface* p
 
 void PluginAPI::registerSampleSink(const QString& sinkName, PluginInterface* plugin)
 {
-	m_pluginManager->registerSampleSource(sinkName, plugin);
+	m_pluginManager->registerSampleSink(sinkName, plugin);
 }
 
 PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
