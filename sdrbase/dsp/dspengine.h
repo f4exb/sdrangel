@@ -21,14 +21,13 @@
 #include <QObject>
 #include <vector>
 #include "audio/audiooutput.h"
-#include "dspdevicesourceengine.h"
 #include "util/export.h"
 #ifdef DSD_USE_SERIALDV
 #include "dsp/dvserialengine.h"
 #endif
 
 class DSPDeviceSourceEngine;
-class ThreadedBasebandSampleSink;
+class DSPDeviceSinkEngine;
 
 class SDRANGEL_API DSPEngine : public QObject {
 	Q_OBJECT
@@ -43,6 +42,9 @@ public:
 	DSPDeviceSourceEngine *addDeviceSourceEngine();
 	void removeLastDeviceSourceEngine();
 
+	DSPDeviceSinkEngine *addDeviceSinkEngine();
+	void removeLastDeviceSinkEngine();
+
 	void startAudio();
 	void stopAudio();
     void startAudioImmediate();
@@ -51,7 +53,10 @@ public:
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
 
-	void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
+    DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(uint deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
+    DSPDeviceSinkEngine *getDeviceSinkEngineByUID(uint uid);
+
+    void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
 	// Serial DV methods:
@@ -84,6 +89,8 @@ public:
 private:
 	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
 	uint m_deviceSourceEnginesUIDSequence;
+	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
+	uint m_deviceSinkEnginesUIDSequence;
 	AudioOutput m_audioOutput;
 	uint m_audioSampleRate;
 	bool m_dvSerialSupport;

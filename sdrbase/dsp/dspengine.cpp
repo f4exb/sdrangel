@@ -17,10 +17,15 @@
 
 #include <QGlobalStatic>
 #include <QThread>
+
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
+
 
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
+    m_deviceSinkEnginesUIDSequence(0),
 	m_audioSampleRate(48000) // Use default output device at 48 kHz
 {
 	m_dvSerialSupport = false;
@@ -63,6 +68,24 @@ void DSPEngine::removeLastDeviceSourceEngine()
     }
 }
 
+DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
+{
+    m_deviceSinkEngines.push_back(new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence));
+    m_deviceSinkEnginesUIDSequence++;
+    return m_deviceSinkEngines.back();
+}
+
+void DSPEngine::removeLastDeviceSinkEngine()
+{
+    if (m_deviceSinkEngines.size() > 0)
+    {
+        DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSinkEngines.back();
+        delete lastDeviceEngine;
+        m_deviceSinkEngines.pop_back();
+        m_deviceSinkEnginesUIDSequence--;
+    }
+}
+
 void DSPEngine::startAudio()
 {
     m_audioOutput.start(-1, m_audioSampleRate);
@@ -102,6 +125,23 @@ DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())
+    {
+        if ((*it)->getUID() == uid)
+        {
+            return *it;
+        }
+
+        ++it;
+    }
+
+    return 0;
+}
+
+DSPDeviceSinkEngine *DSPEngine::getDeviceSinkEngineByUID(uint uid)
+{
+    std::vector<DSPDeviceSinkEngine*>::iterator it = m_deviceSinkEngines.begin();
+
+    while (it != m_deviceSinkEngines.end())
     {
         if ((*it)->getUID() == uid)
         {
