@@ -33,12 +33,19 @@ public:
 	// MainWindow access
 	MessageQueue* getMainWindowMessageQueue();
 
-	// Channel stuff
+	// Rx Channel stuff
 	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
 	ChannelRegistrations *getRxChannelRegistrations();
 
+	// Tx Channel stuff
+	void registerTxChannel(const QString& channelName, PluginInterface* plugin);
+	ChannelRegistrations *getTxChannelRegistrations();
+
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
+
+	// Sample Sink stuff
+	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
 
 	// R/O access to main window
 	const MainWindow* getMainWindow() const { return m_mainWindow; }

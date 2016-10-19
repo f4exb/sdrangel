@@ -26,10 +26,11 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
 #include "dsp/inthalfbandfilter.h"
 
 #define FILESOURCE_THROTTLE_MS 50
+
+class SampleSinkFifo;
 
 class FileSourceThread : public QThread {
 	Q_OBJECT

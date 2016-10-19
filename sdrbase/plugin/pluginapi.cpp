@@ -23,6 +23,21 @@ PluginAPI::ChannelRegistrations *PluginAPI::getRxChannelRegistrations()
     return m_pluginManager->getRxChannelRegistrations();
 }
 
+void PluginAPI::registerTxChannel(const QString& channelName, PluginInterface* plugin)
+{
+	m_pluginManager->registerTxChannel(channelName, plugin);
+}
+
+void PluginAPI::registerSampleSink(const QString& sinkName, PluginInterface* plugin)
+{
+	m_pluginManager->registerSampleSource(sinkName, plugin);
+}
+
+PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
+{
+    return m_pluginManager->getTxChannelRegistrations();
+}
+
 
 PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
 	QObject(mainWindow),
