@@ -2,7 +2,7 @@
 #include <QAction>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/demodam/amdemodgui.h"
+#include "amdemodgui.h"
 #include "amdemodplugin.h"
 
 const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
