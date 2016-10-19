@@ -765,6 +765,8 @@ MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
 	m_samplingDeviceControl = new SamplingDeviceControl;
 	m_deviceSourceEngine = 0;
 	m_deviceSourceAPI = 0;
+	m_deviceSinkEngine = 0;
+	m_deviceSinkAPI = 0;
 
 	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
 	QFont font;

@@ -34,17 +34,18 @@ class SamplingDeviceControl;
 class AudioDeviceInfo;
 class DSPEngine;
 class DSPDeviceSourceEngine;
+class DSPDeviceSinkEngine;
 class Indicator;
 class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
-class DeviceSampleSource;
 class PluginAPI;
 class PluginGUI;
 class ChannelMarker;
 class PluginManager;
 class DeviceSourceAPI;
+class DeviceSinkApi;
 class PluginInterface;
 class QWidget;
 
@@ -65,6 +66,8 @@ public:
 		SamplingDeviceControl *m_samplingDeviceControl;
 		DSPDeviceSourceEngine *m_deviceSourceEngine;
 		DeviceSourceAPI *m_deviceSourceAPI;
+		DSPDeviceSinkEngine *m_deviceSinkEngine;
+		DeviceSinkApi *m_deviceSinkAPI;
 		QByteArray m_mainWindowState;
 
 		DeviceUISet(QTimer& timer);
