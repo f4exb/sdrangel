@@ -244,12 +244,29 @@
      </item>
      <item row="1" column="1" rowspan="4" colspan="12">
       <widget class="QTreeWidget" name="presetTree">
+       <property name="indentation">
+        <number>10</number>
+       </property>
        <property name="allColumnsShowFocus">
         <bool>true</bool>
        </property>
+       <attribute name="headerMinimumSectionSize">
+        <number>5</number>
+       </attribute>
        <column>
         <property name="text">
-         <string>Frequency</string>
+         <string>Freq (MHz)</string>
+        </property>
+        <property name="toolTip">
+         <string>Center frequency in MHz</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>M</string>
+        </property>
+        <property name="toolTip">
+         <string>Mode: R: Rx or source, T: Tx or sink</string>
         </property>
        </column>
        <column>

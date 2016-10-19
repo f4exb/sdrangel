@@ -24,8 +24,9 @@ void Preset::resetToDefaults()
 
 QByteArray Preset::serialize() const
 {
-	qDebug("Preset::serialize: m_group: %s m_description: %s m_centerFrequency: %llu",
+	qDebug("Preset::serialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
 			qPrintable(m_group),
+			m_sourcePreset ? "Rx" : "Tx",
 			qPrintable(m_description),
 			m_centerFrequency);
 
@@ -36,6 +37,7 @@ QByteArray Preset::serialize() const
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
+	s.writeBool(6, m_sourcePreset);
 
 	s.writeS32(20, m_deviceConfigs.size());
 
@@ -87,9 +89,11 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readU64(3, &m_centerFrequency, 0);
 		d.readBlob(4, &m_layout);
 		d.readBlob(5, &m_spectrumConfig);
+		d.readBool(6, &m_sourcePreset, true);
 
-		qDebug("Preset::deserialize: m_group: %s m_description: %s m_centerFrequency: %llu",
+		qDebug("Preset::deserialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
 				qPrintable(m_group),
+				m_sourcePreset ? "Rx" : "Tx",
 				qPrintable(m_description),
 				m_centerFrequency);
 

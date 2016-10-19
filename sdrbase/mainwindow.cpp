@@ -397,12 +397,14 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 	}
 
 	QStringList sl;
-	sl.append(QString("%1 kHz").arg(preset->getCenterFrequency() / 1000));
-	sl.append(preset->getDescription());
+	sl.append(QString("%1").arg(preset->getCenterFrequency() / 1e6f, 0, 'f', 3)); // frequency column
+	sl.append(QString("%1").arg(preset->isSourcePreset() ? 'R' : 'T'));           // mode column
+	sl.append(preset->getDescription());                                          // description column
 	PresetItem* item = new PresetItem(group, sl, preset->getCenterFrequency(), PItem);
 	item->setTextAlignment(0, Qt::AlignRight);
 	item->setData(0, Qt::UserRole, qVariantFromValue(preset));
-	ui->presetTree->resizeColumnToContents(0);
+	ui->presetTree->resizeColumnToContents(0); // Resize frequency column to minimum
+    ui->presetTree->resizeColumnToContents(1); // Resize mode column to minimum
 
 	updatePresetControls();
 	return item;
