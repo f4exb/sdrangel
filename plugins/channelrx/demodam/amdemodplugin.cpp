@@ -1,31 +1,30 @@
-#include "../../channelrx/demodam/amplugin.h"
-
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
 
 #include "../../channelrx/demodam/amdemodgui.h"
+#include "amdemodplugin.h"
 
-const PluginDescriptor AMPlugin::m_pluginDescriptor = {
+const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
 	QString("AM Demodulator"),
-	QString("2.0.0"),
+	QString("2.2.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-AMPlugin::AMPlugin(QObject* parent) :
+AMDemodPlugin::AMDemodPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& AMPlugin::getPluginDescriptor() const
+const PluginDescriptor& AMDemodPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void AMPlugin::initPlugin(PluginAPI* pluginAPI)
+void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
@@ -33,7 +32,7 @@ void AMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(AMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* AMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginGUI* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == AMDemodGUI::m_channelID)
 	{
@@ -44,7 +43,7 @@ PluginGUI* AMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI
 	}
 }
 
-void AMPlugin::createInstanceAM(DeviceSourceAPI *deviceAPI)
+void AMDemodPlugin::createInstanceDemodAM(DeviceSourceAPI *deviceAPI)
 {
 	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
 }
