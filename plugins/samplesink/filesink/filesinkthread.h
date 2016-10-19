@@ -44,6 +44,8 @@ public:
 	void setSamplerate(int samplerate);
     void setBuffer(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
+    std::size_t getSamplesCount() const { return m_samplesCount; }
+    void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
 
 	void connectTimer(const QTimer& timer);
 
@@ -57,6 +59,7 @@ private:
 	std::size_t m_bufsize;
 	std::size_t m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;
+    std::size_t m_samplesCount;
 
 	int m_samplerate;
     int m_throttlems;

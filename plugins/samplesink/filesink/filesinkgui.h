@@ -27,7 +27,7 @@ class DeviceSinkAPI;
 class DeviceSampleSink;
 
 namespace Ui {
-	class FileSourceGui;
+	class FileSinkGui;
 }
 
 class FileSinkGui : public QWidget, public PluginGUI {
@@ -49,7 +49,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::FileSourceGui* ui;
+	Ui::FileSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
 	FileSinkOutput::Settings m_settings;

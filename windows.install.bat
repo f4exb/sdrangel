@@ -14,6 +14,7 @@ copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
 mkdir %2\plugins\samplesource
+mkdir %2\plugins\samplesink
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
@@ -29,3 +30,4 @@ copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrf\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerf\%1\inputbladerf.dll %2\plugins\samplesource
+copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink

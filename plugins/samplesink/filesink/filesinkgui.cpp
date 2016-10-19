@@ -47,7 +47,6 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
-	m_enableNavTime(false),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
 	ui->setupUi(this);
@@ -234,16 +233,16 @@ void FileSinkGui::updateStatus()
     {
         switch(state)
         {
-            case DSPDeviceSourceEngine::StNotStarted:
+            case DSPDeviceSinkEngine::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSourceEngine::StIdle:
+            case DSPDeviceSinkEngine::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSourceEngine::StRunning:
+            case DSPDeviceSinkEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSourceEngine::StError:
+            case DSPDeviceSinkEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
@@ -283,16 +282,12 @@ void FileSinkGui::configureFileName()
 
 void FileSinkGui::updateWithGeneration()
 {
-	ui->play->setEnabled(m_generation);
-	ui->play->setChecked(m_generation);
 	ui->showFileDialog->setEnabled(!m_generation);
 }
 
 void FileSinkGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
-	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
-	ui->play->setEnabled(m_generation);
 }
 
 void FileSinkGui::updateWithStreamTime()

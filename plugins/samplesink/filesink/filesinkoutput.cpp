@@ -30,7 +30,6 @@
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSink, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkName, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkWork, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamData, Message)
@@ -74,12 +73,11 @@ bool FileSinkOutput::Settings::deserialize(const QByteArray& data)
 
 FileSinkOutput::FileSinkOutput(const QTimer& masterTimer) :
 	m_settings(),
-	m_fileSourceThread(0),
+	m_fileSinkThread(0),
 	m_deviceDescription(),
 	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_recordLength(0),
 	m_startingTimeStamp(0),
 	m_masterTimer(masterTimer)
 {
@@ -126,15 +124,15 @@ bool FileSinkOutput::start(int device)
 
 	//openFileStream();
 
-	if((m_fileSourceThread = new FileSinkThread(&m_ifstream, &m_sampleFifo)) == 0) {
+	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0) {
 		qFatal("out of memory");
 		stop();
 		return false;
 	}
 
-	m_fileSourceThread->setSamplerate(m_sampleRate);
-	m_fileSourceThread->connectTimer(m_masterTimer);
-	m_fileSourceThread->startWork();
+	m_fileSinkThread->setSamplerate(m_sampleRate);
+	m_fileSinkThread->connectTimer(m_masterTimer);
+	m_fileSinkThread->startWork();
 	m_deviceDescription = "FileSink";
 
 	mutexLocker.unlock();
@@ -152,11 +150,11 @@ void FileSinkOutput::stop()
 	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_fileSourceThread != 0)
+	if(m_fileSinkThread != 0)
 	{
-		m_fileSourceThread->stopWork();
-		delete m_fileSourceThread;
-		m_fileSourceThread = 0;
+		m_fileSinkThread->stopWork();
+		delete m_fileSinkThread;
+		m_fileSinkThread = 0;
 	}
 
 	m_deviceDescription.clear();
@@ -199,11 +197,11 @@ bool FileSinkOutput::handleMessage(const Message& message)
 		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileSourceThread != 0)
+		if (m_fileSinkThread != 0)
 		{
 			if (working)
 			{
-				m_fileSourceThread->startWork();
+				m_fileSinkThread->startWork();
 				/*
 				MsgReportFileSourceStreamTiming *report =
 						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
@@ -211,17 +209,9 @@ bool FileSinkOutput::handleMessage(const Message& message)
 			}
 			else
 			{
-				m_fileSourceThread->stopWork();
+				m_fileSinkThread->stopWork();
 			}
 		}
-
-		return true;
-	}
-	else if (MsgConfigureFileSinkSeek::match(message))
-	{
-		MsgConfigureFileSinkSeek& conf = (MsgConfigureFileSinkSeek&) message;
-		int seekPercentage = conf.getPercentage();
-		seekFileStream(seekPercentage);
 
 		return true;
 	}
@@ -229,9 +219,9 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	{
 		MsgReportFileSinkStreamTiming *report;
 
-		if (m_fileSourceThread != 0)
+		if (m_fileSinkThread != 0)
 		{
-			report = MsgReportFileSinkStreamTiming::create(m_fileSourceThread->getSamplesCount());
+			report = MsgReportFileSinkStreamTiming::create(m_fileSinkThread->getSamplesCount());
 			getOutputMessageQueueToGUI()->push(report);
 		}
 

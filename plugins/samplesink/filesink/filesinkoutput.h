@@ -114,26 +114,6 @@ public:
 		{ }
 	};
 
-	class MsgConfigureFileSinkSeek : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		int getPercentage() const { return m_seekPercentage; }
-
-		static MsgConfigureFileSinkSeek* create(int seekPercentage)
-		{
-			return new MsgConfigureFileSinkSeek(seekPercentage);
-		}
-
-	protected:
-		int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
-
-		MsgConfigureFileSinkSeek(int seekPercentage) :
-			Message(),
-			m_seekPercentage(seekPercentage)
-		{ }
-	};
-
 	class MsgReportFileSinkGeneration : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -222,7 +202,7 @@ private:
 	QMutex m_mutex;
 	Settings m_settings;
 	std::ofstream m_ofstream;
-	FileSinkThread* m_fileSourceThread;
+	FileSinkThread* m_fileSinkThread;
 	QString m_deviceDescription;
 	QString m_fileName;
 	int m_sampleRate;

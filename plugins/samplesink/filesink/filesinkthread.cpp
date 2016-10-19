@@ -22,7 +22,7 @@
 #include "dsp/samplesourcefifo.h"
 #include "filesinkthread.h"
 
-FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent) :
+FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_ofstream(samplesStream),
@@ -30,6 +30,7 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSinkFifo* sam
 	m_bufsize(0),
 	m_samplesChunkSize(0),
 	m_sampleFifo(sampleFifo),
+	m_samplesCount(0),
     m_samplerate(0),
     m_throttlems(FILESINK_THROTTLE_MS),
     m_throttleToggle(false)
@@ -129,6 +130,7 @@ void FileSinkThread::tick()
         SampleVector::iterator beginRead;
 
         m_sampleFifo->read(beginRead, m_samplesChunkSize);
-        m_ofstream->write(reinterpret_cast<char*>(*beginRead), m_samplesChunkSize*4);
+        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*4);
+        m_samplesCount += m_samplesChunkSize;
 	}
 }

@@ -15,6 +15,7 @@ SUBDIRS += plugins/samplesource/sdrdaemon
 #SUBDIRS += plugins/samplesource/rtlsdr
 #SUBDIRS += plugins/samplesource/hackrf
 #SUBDIRS += plugins/samplesource/airspy
+SUBDIRS += plugins/samplesink/filesink
 SUBDIRS += plugins/channel/chanalyzer
 SUBDIRS += plugins/channel/demodam
 SUBDIRS += plugins/channel/demodbfm
