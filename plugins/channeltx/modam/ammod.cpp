@@ -18,6 +18,7 @@
 
 #include <QTime>
 #include <QDebug>
+#include <QMutexLocker>
 #include <stdio.h>
 #include <complex.h>
 #include <dsp/upchannelizer.h>
@@ -35,7 +36,7 @@ AMMod::AMMod() :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
-	m_config.m_modPercent = 20;
+	m_config.m_modFactor = 20;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -46,6 +47,8 @@ AMMod::AMMod() :
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
+
+	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
 }
 
 AMMod::~AMMod()
@@ -60,7 +63,30 @@ void AMMod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandw
 
 void AMMod::pull(Sample& sample)
 {
-	// TODO
+	Complex ci;
+
+	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+	{
+		m_settingsMutex.lock();
+		m_carrierNco.nextPhase();
+		m_toneNco.nextPhase();
+		m_settingsMutex.unlock();
+
+		m_carrierNco.getIQ(m_modSample);
+		Real t = m_toneNco.get();
+
+		m_modSample *= (t+1.0f) * m_running.m_modFactor * 16384.0f; // modulate carrier
+
+		m_interpolatorDistanceRemain += m_interpolatorDistance;
+	}
+
+	Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+	magsq /= (1<<30);
+	m_movingAverage.feed(magsq);
+	m_magsq = m_movingAverage.average();
+
+	sample.m_real = (FixReal) ci.real();
+	sample.m_imag = (FixReal) ci.imag();
 }
 
 void AMMod::start()
@@ -100,7 +126,7 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
-		m_config.m_modPercent = cfg.getModPercent();
+		m_config.m_modFactor = cfg.getModFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
 
 		apply();
@@ -108,7 +134,7 @@ bool AMMod::handleMessage(const Message& cmd)
 		qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
-				<< " m_modPercent: " << m_config.m_modPercent
+				<< " m_modFactor: " << m_config.m_modFactor
 				<< " m_audioMute: " << m_config.m_audioMute;
 
 		return true;
@@ -122,10 +148,9 @@ bool AMMod::handleMessage(const Message& cmd)
 void AMMod::apply()
 {
 
-	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_outputSampleRate != m_running.m_outputSampleRate))
+	if(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset)
 	{
-		m_carrierNco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
+		m_carrierNco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_audioSampleRate);
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
@@ -150,7 +175,7 @@ void AMMod::apply()
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
-	m_running.m_modPercent = m_config.m_modPercent;
+	m_running.m_modFactor = m_config.m_modFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
 }

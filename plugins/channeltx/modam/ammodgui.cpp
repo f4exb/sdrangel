@@ -278,7 +278,7 @@ void AMModGUI::applySettings()
 		m_amMod->configure(m_amMod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
-			ui->modPercent->value(),
+			ui->modPercent->value() / 100.0f,
 			ui->audioMute->isChecked());
 	}
 }

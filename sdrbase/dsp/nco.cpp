@@ -49,22 +49,28 @@ void NCO::setFreq(Real freq, Real sampleRate)
 
 float NCO::next()
 {
-	m_phase += m_phaseIncrement;
-	while(m_phase >= TableSize)
-		m_phase -= TableSize;
-	while(m_phase < 0)
-		m_phase += TableSize;
-
+	nextPhase();
 	return m_table[m_phase];
 }
 
 Complex NCO::nextIQ()
 {
-	m_phase += m_phaseIncrement;
-	while(m_phase >= TableSize)
-		m_phase -= TableSize;
-	while(m_phase < 0)
-		m_phase += TableSize;
-
+	nextPhase();
 	return Complex(m_table[m_phase], -m_table[(m_phase + TableSize / 4) % TableSize]);
+}
+
+float NCO::get()
+{
+	return m_table[m_phase];
+}
+
+Complex NCO::getIQ()
+{
+	return Complex(m_table[m_phase], -m_table[(m_phase + TableSize / 4) % TableSize]);
+}
+
+void NCO::getIQ(Complex& c)
+{
+	c.real(m_table[m_phase]);
+	c.imag(-m_table[(m_phase + TableSize / 4) % TableSize]);
 }

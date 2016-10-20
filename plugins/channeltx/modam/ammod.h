@@ -51,7 +51,7 @@ private:
     public:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getAFBandwidth() const { return m_afBandwidth; }
-        Real getModPercent() const { return m_modPercent; }
+        float getModFactor() const { return m_modFactor; }
         bool getAudioMute() const { return m_audioMute; }
 
         static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute)
@@ -62,14 +62,14 @@ private:
     private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
-        Real m_modPercent;
+        float m_modFactor;
         bool m_audioMute;
 
-        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute) :
+        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
-            m_modPercent(modPercent),
+            m_modFactor(modFactor),
             m_audioMute(audioMute)
         { }
     };
@@ -90,7 +90,7 @@ private:
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
         Real m_afBandwidth;
-        int m_modPercent;
+        float m_modFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
 
@@ -99,7 +99,7 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(-1),
             m_afBandwidth(-1),
-            m_modPercent(20),
+            m_modFactor(0.2f),
             m_audioSampleRate(0),
             m_audioMute(false)
         { }
@@ -110,6 +110,7 @@ private:
 
     NCO m_carrierNco;
     NCO m_toneNco;
+    Complex m_modSample;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;

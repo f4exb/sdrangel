@@ -38,8 +38,21 @@ public:
 	NCO();
 
 	void setFreq(Real freq, Real sampleRate);
-	Real next();
-	Complex nextIQ();
+
+	void nextPhase()        //!< Increment phase
+	{
+		m_phase += m_phaseIncrement;
+		while(m_phase >= TableSize)
+			m_phase -= TableSize;
+		while(m_phase < 0)
+			m_phase += TableSize;
+	}
+
+	Real next();            //!< Return next real sample
+	Complex nextIQ();       //!< Return next complex sample
+	Real get();             //!< Return current real sample (no phase increment)
+	Complex getIQ();        //!< Return current complex sample (no phase increment)
+	void getIQ(Complex& c); //!< Sets to the current complex sample (no phase increment)
 };
 
 #endif // INCLUDE_NCO_H
