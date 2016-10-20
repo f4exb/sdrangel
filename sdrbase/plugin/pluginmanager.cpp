@@ -73,11 +73,19 @@ void PluginManager::loadPlugins()
 
 void PluginManager::registerRxChannel(const QString& channelName, PluginInterface* plugin)
 {
+    qDebug() << "PluginManager::registerRxChannel "
+            << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+            << " with channel name " << channelName;
+
 	m_rxChannelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
 }
 
 void PluginManager::registerTxChannel(const QString& channelName, PluginInterface* plugin)
 {
+    qDebug() << "PluginManager::registerTxChannel "
+            << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+            << " with channel name " << channelName;
+
 	m_txChannelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
 }
 
@@ -94,7 +102,7 @@ void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface*
 {
 	qDebug() << "PluginManager::registerSampleSink "
 			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-			<< " with source name " << sinkName.toStdString().c_str();
+			<< " with sink name " << sinkName.toStdString().c_str();
 
 	m_sampleSinkRegistrations.append(SamplingDeviceRegistration(sinkName, plugin));
 }
