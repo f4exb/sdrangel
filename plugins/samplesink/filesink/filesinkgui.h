@@ -20,6 +20,7 @@
 #include <QTimer>
 
 #include "filesinkoutput.h"
+#include "filesinksettings.h"
 #include "plugin/plugingui.h"
 
 
@@ -52,36 +53,30 @@ private:
 	Ui::FileSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
-	FileSinkOutput::Settings m_settings;
+	FileSinkSettings m_settings;
+    QString m_fileName;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
-	DeviceSampleSink* m_sampleSink;
+	DeviceSampleSink* m_deviceSampleSink;
     bool m_generation;
-    QString m_fileName;
-	int m_sampleRate;
-	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
 	std::size_t m_tickCount;
-    int m_deviceSampleRate;
-    quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 
 	void displaySettings();
 	void displayTime();
 	void sendSettings();
-    void updateSampleRateAndFrequency();
 	void configureFileName();
 	void updateWithGeneration();
-	void updateWithStreamData();
 	void updateWithStreamTime();
 
 private slots:
-    void handleDSPMessages();
 	void handleSinkMessages();
+    void on_centerFrequency_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
-	void on_play_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
+    void on_sampleRate_currentIndexChanged(int index);
     void updateStatus();
 	void tick();
 };

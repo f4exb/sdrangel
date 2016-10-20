@@ -32,44 +32,7 @@ MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkName, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
-
-FileSinkOutput::Settings::Settings() :
-	m_fileName("./test.sdriq")
-{
-}
-
-void FileSinkOutput::Settings::resetToDefaults()
-{
-	m_fileName = "./test.sdriq";
-}
-
-QByteArray FileSinkOutput::Settings::serialize() const
-{
-	SimpleSerializer s(1);
-	s.writeString(1, m_fileName);
-	return s.final();
-}
-
-bool FileSinkOutput::Settings::deserialize(const QByteArray& data)
-{
-	SimpleDeserializer d(data);
-
-	if(!d.isValid()) {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1) {
-		int intval;
-		d.readString(1, &m_fileName, "./test.sdriq");
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
 
 FileSinkOutput::FileSinkOutput(const QTimer& masterTimer) :
 	m_settings(),
@@ -97,19 +60,13 @@ void FileSinkOutput::openFileStream()
 	}
 
 	m_ofstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
-	FileRecord::Header header;
 
-	header.sampleRate = m_sampleRate;
-	header.centerFrequency = m_centerFrequency;
-	header.startTimeStamp = m_startingTimeStamp; // TODO: set timestamp
+	m_ofstream.write((const char *) &m_settings.m_sampleRate, sizeof(int));
+	m_ofstream.write((const char *) &m_settings.m_centerFrequency, sizeof(quint64));
+    m_startingTimeStamp = time(0);
+    m_ofstream.write((const char *) &m_startingTimeStamp, sizeof(std::time_t));
 
 	qDebug() << "FileSinkOutput::openFileStream: " << m_fileName.toStdString().c_str();
-
-	MsgReportFileSinkStreamData *report = MsgReportFileSinkStreamData::create(m_sampleRate,
-			m_centerFrequency,
-			m_startingTimeStamp); // file stream data
-
-	getOutputMessageQueueToGUI()->push(report);
 }
 
 bool FileSinkOutput::init(const Message& message)
@@ -192,6 +149,12 @@ bool FileSinkOutput::handleMessage(const Message& message)
 		openFileStream();
 		return true;
 	}
+	else if (MsgConfigureFileSink::match(message))
+    {
+	    MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
+        applySettings(conf.getSettings(), false);
+        return true;
+    }
 	else if (MsgConfigureFileSinkWork::match(message))
 	{
 		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) message;
@@ -202,10 +165,6 @@ bool FileSinkOutput::handleMessage(const Message& message)
 			if (working)
 			{
 				m_fileSinkThread->startWork();
-				/*
-				MsgReportFileSourceStreamTiming *report =
-						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-				getOutputMessageQueueToGUI()->push(report);*/
 			}
 			else
 			{
@@ -231,4 +190,19 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
+    {
+        m_settings.m_centerFrequency = settings.m_centerFrequency;
+    }
+
+    if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
+    {
+        m_settings.m_sampleRate = settings.m_sampleRate;
+    }
 }

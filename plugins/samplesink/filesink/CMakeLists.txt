@@ -4,6 +4,7 @@ set(filesink_SOURCES
 	filesinkgui.cpp
 	filesinkoutput.cpp
 	filesinkplugin.cpp
+	filesinksettings.cpp
 	filesinkthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(filesink_HEADERS
 	filesinkgui.h
 	filesinkoutput.h
 	filesinkplugin.h
+	filesinksettings.h
 	filesinkthread.h
 )
 

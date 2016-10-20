@@ -17,41 +17,34 @@
 #ifndef INCLUDE_FILESINKOUTPUT_H
 #define INCLUDE_FILESINKOUTPUT_H
 
-#include <dsp/devicesamplesink.h>
 #include <QString>
 #include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <fstream>
 
+#include "dsp/devicesamplesink.h"
+#include "filesinksettings.h"
+
 class FileSinkThread;
 
 class FileSinkOutput : public DeviceSampleSink {
 public:
-	struct Settings {
-		QString m_fileName;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureFileSink : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const FileSinkSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFileSink* create(const Settings& settings)
+		static MsgConfigureFileSink* create(const FileSinkSettings& settings)
 		{
 			return new MsgConfigureFileSink(settings);
 		}
 
 	private:
-		Settings m_settings;
+		FileSinkSettings m_settings;
 
-		MsgConfigureFileSink(const Settings& settings) :
+		MsgConfigureFileSink(const FileSinkSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -134,36 +127,6 @@ public:
 		{ }
 	};
 
-	class MsgReportFileSinkStreamData : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		int getSampleRate() const { return m_sampleRate; }
-		quint64 getCenterFrequency() const { return m_centerFrequency; }
-		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
-
-		static MsgReportFileSinkStreamData* create(int sampleRate,
-				quint64 centerFrequency,
-				std::time_t startingTimeStamp)
-		{
-			return new MsgReportFileSinkStreamData(sampleRate, centerFrequency, startingTimeStamp);
-		}
-
-	protected:
-		int m_sampleRate;
-		quint64 m_centerFrequency;
-		std::time_t m_startingTimeStamp;
-
-		MsgReportFileSinkStreamData(int sampleRate,
-				quint64 centerFrequency,
-				std::time_t startingTimeStamp) :
-			Message(),
-			m_sampleRate(sampleRate),
-			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp)
-		{ }
-	};
-
 	class MsgReportFileSinkStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -200,7 +163,7 @@ public:
 
 private:
 	QMutex m_mutex;
-	Settings m_settings;
+	FileSinkSettings m_settings;
 	std::ofstream m_ofstream;
 	FileSinkThread* m_fileSinkThread;
 	QString m_deviceDescription;
@@ -211,6 +174,7 @@ private:
 	const QTimer& m_masterTimer;
 
 	void openFileStream();
+	void applySettings(const FileSinkSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_FILESINKOUTPUT_H
