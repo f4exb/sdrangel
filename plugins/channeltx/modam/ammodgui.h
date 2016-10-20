@@ -75,7 +75,7 @@ private:
 
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
-    AMMod* m_amDemod;
+    AMMod* m_amMod;
     MovingAverage<Real> m_channelPowerDbAvg;
 
     static const int m_rfBW[];

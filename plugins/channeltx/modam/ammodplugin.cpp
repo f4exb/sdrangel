@@ -18,6 +18,7 @@
 #include <QAction>
 #include "plugin/pluginapi.h"
 
+#include "ammodgui.h"
 #include "ammodplugin.h"
 
 const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
@@ -37,4 +38,28 @@ AMModPlugin::AMModPlugin(QObject* parent) :
 const PluginDescriptor& AMModPlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
+}
+
+void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
+{
+	m_pluginAPI = pluginAPI;
+
+	// register AM modulator
+	m_pluginAPI->registerTxChannel(AMModGUI::m_channelID, this);
+}
+
+PluginGUI* AMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+{
+	if(channelName == AMModGUI::m_channelID)
+	{
+		AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceAPI);
+		return gui;
+	} else {
+		return 0;
+	}
+}
+
+void AMModPlugin::createInstanceModAM(DeviceSinkAPI *deviceAPI)
+{
+	AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceAPI);
 }

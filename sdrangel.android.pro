@@ -16,15 +16,16 @@ SUBDIRS += plugins/samplesource/sdrdaemon
 #SUBDIRS += plugins/samplesource/hackrf
 #SUBDIRS += plugins/samplesource/airspy
 SUBDIRS += plugins/samplesink/filesink
-SUBDIRS += plugins/channel/chanalyzer
-SUBDIRS += plugins/channel/demodam
-SUBDIRS += plugins/channel/demodbfm
-SUBDIRS += plugins/channel/demodlora
-SUBDIRS += plugins/channel/demodnfm
-SUBDIRS += plugins/channel/demodssb
-SUBDIRS += plugins/channel/demodwfm
-SUBDIRS += plugins/channel/tcpsrc
-SUBDIRS += plugins/channel/udpsrc
+SUBDIRS += plugins/channelrx/chanalyzer
+SUBDIRS += plugins/channelrx/demodam
+SUBDIRS += plugins/channelrx/demodbfm
+SUBDIRS += plugins/channelrx/demodlora
+SUBDIRS += plugins/channelrx/demodnfm
+SUBDIRS += plugins/channelrx/demodssb
+SUBDIRS += plugins/channelrx/demodwfm
+SUBDIRS += plugins/channelrx/tcpsrc
+SUBDIRS += plugins/channelrx/udpsrc
+SUBDIRS += plugins/channeltx/modam
 
 # Main app must be last
 CONFIG += ordered

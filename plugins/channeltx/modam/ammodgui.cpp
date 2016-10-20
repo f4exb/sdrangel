@@ -17,13 +17,13 @@
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "amdemodgui.h"
+#include "ammodgui.h"
 
-#include "device/devicesourceapi.h"
-#include "dsp/downchannelizer.h"
+#include "device/devicesinkapi.h"
+#include "dsp/upchannelizer.h"
 
-#include "dsp/threadedbasebandsamplesink.h"
-#include "ui_amdemodgui.h"
+#include "dsp/threadedbasebandsamplesource.h"
+#include "ui_ammodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -31,72 +31,69 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-#include "amdemod.h"
+#include "ammod.h"
 
-const QString AMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.am";
+const QString AMModGUI::m_channelID = "sdrangel.channel.modam";
 
-const int AMDemodGUI::m_rfBW[] = {
+const int AMModGUI::m_rfBW[] = {
 	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
 
-AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
-	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceAPI);
+	AMModGUI* gui = new AMModGUI(pluginAPI, deviceAPI);
 	return gui;
 }
 
-void AMDemodGUI::destroy()
+void AMModGUI::destroy()
 {
-	delete this; // TODO: is this really useful?
 }
 
-void AMDemodGUI::setName(const QString& name)
+void AMModGUI::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString AMDemodGUI::getName() const
+QString AMModGUI::getName() const
 {
 	return objectName();
 }
 
-qint64 AMDemodGUI::getCenterFrequency() const {
+qint64 AMModGUI::getCenterFrequency() const {
 	return m_channelMarker.getCenterFrequency();
 }
 
-void AMDemodGUI::setCenterFrequency(qint64 centerFrequency)
+void AMModGUI::setCenterFrequency(qint64 centerFrequency)
 {
 	m_channelMarker.setCenterFrequency(centerFrequency);
 	applySettings();
 }
 
-void AMDemodGUI::resetToDefaults()
+void AMModGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
 	ui->rfBW->setValue(4);
 	ui->afBW->setValue(3);
-	ui->volume->setValue(20);
-	ui->squelch->setValue(-40);
+	ui->modPercent->setValue(20);
 	ui->deltaFrequency->setValue(0);
 
 	blockApplySettings(false);
 	applySettings();
 }
 
-QByteArray AMDemodGUI::serialize() const
+QByteArray AMModGUI::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
 	s.writeS32(3, ui->afBW->value());
-	s.writeS32(4, ui->volume->value());
-	s.writeS32(5, ui->squelch->value());
-	s.writeU32(7, m_channelMarker.getColor().rgb());
+	s.writeS32(4, ui->modPercent->value());
+	s.writeU32(5, m_channelMarker.getColor().rgb());
 	return s.final();
 }
 
-bool AMDemodGUI::deserialize(const QByteArray& data)
+bool AMModGUI::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
@@ -122,11 +119,9 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
 		d.readS32(4, &tmp, 20);
-		ui->volume->setValue(tmp);
-		d.readS32(5, &tmp, -40);
-		ui->squelch->setValue(tmp);
+		ui->modPercent->setValue(tmp);
 
-        if(d.readU32(7, &u32tmp))
+        if(d.readU32(5, &u32tmp))
         {
 			m_channelMarker.setColor(u32tmp);
         }
@@ -144,17 +139,17 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool AMDemodGUI::handleMessage(const Message& message)
+bool AMModGUI::handleMessage(const Message& message)
 {
 	return false;
 }
 
-void AMDemodGUI::viewChanged()
+void AMModGUI::viewChanged()
 {
 	applySettings();
 }
 
-void AMDemodGUI::on_deltaMinus_toggled(bool minus)
+void AMModGUI::on_deltaMinus_toggled(bool minus)
 {
 	int deltaFrequency = m_channelMarker.getCenterFrequency();
 	bool minusDelta = (deltaFrequency < 0);
@@ -165,7 +160,7 @@ void AMDemodGUI::on_deltaMinus_toggled(bool minus)
 	}
 }
 
-void AMDemodGUI::on_deltaFrequency_changed(quint64 value)
+void AMModGUI::on_deltaFrequency_changed(quint64 value)
 {
 	if (ui->deltaMinus->isChecked()) {
 		m_channelMarker.setCenterFrequency(-value);
@@ -174,45 +169,35 @@ void AMDemodGUI::on_deltaFrequency_changed(quint64 value)
 	}
 }
 
-void AMDemodGUI::on_rfBW_valueChanged(int value)
+void AMModGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
 	m_channelMarker.setBandwidth(m_rfBW[value]);
 	applySettings();
 }
 
-void AMDemodGUI::on_afBW_valueChanged(int value)
+void AMModGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1 kHz").arg(value));
 	applySettings();
 }
 
-void AMDemodGUI::on_volume_valueChanged(int value)
+void AMModGUI::on_modPercent_valueChanged(int value)
 {
-	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	ui->modPercentText->setText(QString("%1").arg(value));
 	applySettings();
 }
 
-void AMDemodGUI::on_squelch_valueChanged(int value)
-{
-	ui->squelchText->setText(QString("%1 dB").arg(value));
-	applySettings();
-}
-
-void AMDemodGUI::on_audioMute_toggled(bool checked)
+void AMModGUI::on_audioMute_toggled(bool checked)
 {
 	applySettings();
 }
 
-void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-	/*
-	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))
-		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
-	*/
 }
 
-void AMDemodGUI::onMenuDoubleClicked()
+void AMModGUI::onMenuDoubleClicked()
 {
 	if(!m_basicSettingsShown) {
 		m_basicSettingsShown = true;
@@ -221,27 +206,26 @@ void AMDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	RollupWidget(parent),
-	ui(new Ui::AMDemodGUI),
+	ui(new Ui::AMModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0),
-	m_squelchOpen(false)
+	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_amDemod = new AMDemod();
-	m_channelizer = new DownChannelizer(m_amDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+	m_amMod = new AMMod();
+	m_channelizer = new UpChannelizer(m_amMod);
+	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -262,23 +246,23 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	applySettings();
 }
 
-AMDemodGUI::~AMDemodGUI()
+AMModGUI::~AMModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
 	delete m_threadedChannelizer;
 	delete m_channelizer;
-	delete m_amDemod;
+	delete m_amMod;
 	//delete m_channelMarker;
 	delete ui;
 }
 
-void AMDemodGUI::blockApplySettings(bool block)
+void AMModGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void AMDemodGUI::applySettings()
+void AMModGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
@@ -291,45 +275,32 @@ void AMDemodGUI::applySettings()
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
-		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
+		m_amMod->configure(m_amMod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
-			ui->volume->value() / 10.0,
-			ui->squelch->value(),
+			ui->modPercent->value(),
 			ui->audioMute->isChecked());
 	}
 }
 
-void AMDemodGUI::leaveEvent(QEvent*)
+void AMModGUI::leaveEvent(QEvent*)
 {
 	blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
 	blockApplySettings(false);
 }
 
-void AMDemodGUI::enterEvent(QEvent*)
+void AMModGUI::enterEvent(QEvent*)
 {
 	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
 	blockApplySettings(false);
 }
 
-void AMDemodGUI::tick()
+void AMModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_amDemod->getMagSq());
+	Real powDb = CalcDb::dbPower(m_amMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
-	bool squelchOpen = m_amDemod->getSquelchOpen();
-
-	if (squelchOpen != m_squelchOpen)
-	{
-		m_squelchOpen = squelchOpen;
-
-		if (m_squelchOpen) {
-			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
-		} else {
-			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-		}
-	}
 }
 

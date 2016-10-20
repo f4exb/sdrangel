@@ -36,6 +36,7 @@ SUBDIRS += plugins/channelrx/demodssb
 SUBDIRS += plugins/channelrx/demodwfm
 SUBDIRS += plugins/channelrx/tcpsrc
 SUBDIRS += plugins/channelrx/udpsrc
+SUBDIRS += plugins/channeltx/modam
 
 # Main app must be last
 CONFIG += ordered

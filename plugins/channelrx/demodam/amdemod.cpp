@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodam/amdemod.h"
+#include "amdemod.h"
 
 #include <QTime>
 #include <QDebug>

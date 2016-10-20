@@ -45,7 +45,7 @@ public:
     Real getMagSq() const { return m_magsq; }
 
 private:
-    class MsgConfigureAMDemod : public Message {
+    class MsgConfigureAMMod : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -54,9 +54,9 @@ private:
         Real getModPercent() const { return m_modPercent; }
         bool getAudioMute() const { return m_audioMute; }
 
-        static MsgConfigureAMDemod* create(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute)
+        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute)
         {
-            return new MsgConfigureAMDemod(rfBandwidth, afBandwidth, modPercent, audioMute);
+            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modPercent, audioMute);
         }
 
     private:
@@ -65,7 +65,7 @@ private:
         Real m_modPercent;
         bool m_audioMute;
 
-        MsgConfigureAMDemod(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute) :
+        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
@@ -86,7 +86,7 @@ private:
     };
 
     struct Config {
-        int m_inputSampleRate;
+        int m_outputSampleRate;
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
         Real m_afBandwidth;
@@ -95,7 +95,7 @@ private:
         bool m_audioMute;
 
         Config() :
-            m_inputSampleRate(-1),
+            m_outputSampleRate(-1),
             m_inputFrequencyOffset(0),
             m_rfBandwidth(-1),
             m_afBandwidth(-1),
@@ -108,7 +108,8 @@ private:
     Config m_config;
     Config m_running;
 
-    NCO m_nco;
+    NCO m_carrierNco;
+    NCO m_toneNco;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;

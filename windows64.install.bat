@@ -26,6 +26,7 @@ copy libbladerf\%1\libbladerf.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
+mkdir %2\plugins\channeltx
 mkdir %2\plugins\samplesource
 mkdir %2\plugins\samplesink
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
@@ -38,6 +39,7 @@ copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrxd
 copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
 copy plugins\channelrx\tcpsrc\%1\tcpsrc.dll %2\plugins\channelrx
 copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
+copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemon\%1\inputsdrdaemon.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemonfec\%1\inputsdrdaemonfec.dll %2\plugins\samplesource
