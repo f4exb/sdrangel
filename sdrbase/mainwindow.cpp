@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <device/devicesourceapi.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -29,6 +28,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
 #include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
@@ -208,35 +209,108 @@ void MainWindow::addSourceDevice()
     int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
 }
 
+void MainWindow::addSinkDevice()
+{
+    DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
+    dspDeviceSinkEngine->start();
+
+    uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "T%d", dspDeviceSinkEngineUID);
+
+    m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
+    m_deviceUIs.back()->m_deviceSourceEngine = 0;
+    m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
+
+    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(this, m_deviceUIs.size()-1, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+
+    m_deviceUIs.back()->m_deviceSourceAPI = 0;
+    m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;
+    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSinkAPI);
+    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
+    m_pluginManager->populateTxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
+
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
+
+    dspDeviceSinkEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+    ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
+    ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
+    ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
+
+    bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
+    m_pluginManager->duplicateLocalSampleSinkDevices(dspDeviceSinkEngineUID);
+    m_pluginManager->fillSampleSinkSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceSinkEngineUID);
+
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSink_confirmClicked(bool)));
+
+    m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
+    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
+
+    int sampleSinkIndex = m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
+}
+
 void MainWindow::removeLastDevice()
 {
-    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
-    lastDeviceEngine->stopAcquistion();
-    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
+	if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
+	{
+	    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
+	    lastDeviceEngine->stopAcquistion();
+	    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
-    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
-    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
+	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
-    m_deviceUIs.back()->m_deviceSourceAPI->freeAll();
+	    m_deviceUIs.back()->m_deviceSourceAPI->freeAll();
 
-    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
+	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
-    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
+	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
-    m_deviceWidgetTabs.removeLast();
-    ui->tabInputsView->clear();
+	    m_deviceWidgetTabs.removeLast();
+	    ui->tabInputsView->clear();
 
-    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
-    {
-        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
-        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
-        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
-    }
+	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
+	    {
+	        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
+	        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
+	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
+	    }
 
-    delete m_deviceUIs.back();
+	    delete m_deviceUIs.back();
 
-    lastDeviceEngine->stop();
-    m_dspEngine->removeLastDeviceSourceEngine();
+	    lastDeviceEngine->stop();
+	    m_dspEngine->removeLastDeviceSourceEngine();
+	}
+	else if (m_deviceUIs.back()->m_deviceSinkEngine) // sink tab
+	{
+	    DSPDeviceSinkEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSinkEngine;
+	    lastDeviceEngine->stopGeneration();
+	    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
+
+	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
+	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+
+	    m_deviceUIs.back()->m_deviceSinkAPI->freeAll();
+
+	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
+
+	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
+
+	    m_deviceWidgetTabs.removeLast();
+	    ui->tabInputsView->clear();
+
+	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
+	    {
+	        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
+	        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
+	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
+	    }
+
+	    delete m_deviceUIs.back();
+
+	    lastDeviceEngine->stop();
+	    m_dspEngine->removeLastDeviceSinkEngine();
+	}
 
     m_deviceUIs.pop_back();
 }
@@ -315,9 +389,19 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 	if (tabIndex >= 0)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
-        deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-        deviceUI->m_deviceSourceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
-        deviceUI->m_deviceSourceAPI->loadSourceSettings(preset);
+
+        if (deviceUI->m_deviceSourceEngine) // source device
+        {
+            deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+            deviceUI->m_deviceSourceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
+            deviceUI->m_deviceSourceAPI->loadSourceSettings(preset);
+        }
+        else if (deviceUI->m_deviceSinkEngine) // sink device
+        {
+            deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+            deviceUI->m_deviceSinkAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
+            deviceUI->m_deviceSinkAPI->loadSinkSettings(preset);
+        }
 	}
 
 	// has to be last step
@@ -334,10 +418,20 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
     DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
 
-	preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
-	preset->clearChannels();
-    deviceUI->m_deviceSourceAPI->saveChannelSettings(preset);
-    deviceUI->m_deviceSourceAPI->saveSourceSettings(preset);
+    if (deviceUI->m_deviceSourceEngine) // source device
+    {
+        preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
+        preset->clearChannels();
+        deviceUI->m_deviceSourceAPI->saveChannelSettings(preset);
+        deviceUI->m_deviceSourceAPI->saveSourceSettings(preset);
+    }
+    else if (deviceUI->m_deviceSinkEngine) // sink device
+    {
+        preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
+        preset->clearChannels();
+        deviceUI->m_deviceSinkAPI->saveChannelSettings(preset);
+        deviceUI->m_deviceSinkAPI->saveSinkSettings(preset);
+    }
 
     preset->setLayout(saveState());
 }
@@ -676,18 +770,40 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
 
     if (currentSourceTabIndex >= 0)
     {
-        qDebug("MainWindow::on_sampleSource_currentIndexChanged: tab at %d", currentSourceTabIndex);
+        qDebug("MainWindow::on_sampleSource_confirmClicked: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset());
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI);
-        m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset());
+
+        if (currentSourceTabIndex == 0)
+        {
+            m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
+        }
+    }
+
+}
+
+void MainWindow::on_sampleSink_confirmClicked(bool checked)
+{
+    // Do it in the currently selected source tab
+    int currentSinkTabIndex = ui->tabInputsSelect->currentIndex();
+
+    if (currentSinkTabIndex >= 0)
+    {
+        qDebug("MainWindow::on_sampleSink_confirmClicked: tab at %d", currentSinkTabIndex);
+        DeviceUISet *deviceUI = m_deviceUIs[currentSinkTabIndex];
+        deviceUI->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset());
+        int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
+        void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
+        m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI);
+        deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset());
     }
 }
 
-void MainWindow::on_rxChannel_addClicked(bool checked)
+void MainWindow::on_channel_addClicked(bool checked)
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
@@ -695,7 +811,15 @@ void MainWindow::on_rxChannel_addClicked(bool checked)
     if (currentSourceTabIndex >= 0)
     {
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSourceAPI);
+
+        if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
+        {
+            m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSourceAPI);
+        }
+        else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
+        {
+            m_pluginManager->createTxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSinkAPI);
+        }
     }
 
 }
@@ -709,6 +833,11 @@ void MainWindow::on_action_About_triggered()
 void MainWindow::on_action_addSourceDevice_triggered()
 {
     addSourceDevice();
+}
+
+void MainWindow::on_action_addSinkDevice_triggered()
+{
+    addSinkDevice();
 }
 
 void MainWindow::on_action_removeLastDevice_triggered()

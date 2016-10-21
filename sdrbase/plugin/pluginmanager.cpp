@@ -69,6 +69,7 @@ void PluginManager::loadPlugins()
 	}
 
 	updateSampleSourceDevices();
+	updateSampleSinkDevices();
 }
 
 void PluginManager::registerRxChannel(const QString& channelName, PluginInterface* plugin)

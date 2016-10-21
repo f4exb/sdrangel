@@ -31,6 +31,7 @@ namespace Ui {
 class ChannelMarker;
 class PluginManager;
 class DeviceSourceAPI;
+class DeviceSinkAPI;
 
 class SDRANGEL_API SamplingDeviceControl : public QWidget {
     Q_OBJECT
@@ -40,7 +41,8 @@ public:
     ~SamplingDeviceControl();
 
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
-    void setDeviceAPI(DeviceSourceAPI *devieAPI) { m_deviceAPI = devieAPI; }
+    void setDeviceAPI(DeviceSourceAPI *deviceAPI) { m_deviceSourceAPI = deviceAPI; }
+    void setDeviceAPI(DeviceSinkAPI *deviceAPI) { m_deviceSinkAPI = deviceAPI; }
     QComboBox *getDeviceSelector();
     QPushButton *getDeviceSelectionConfirm();
     QComboBox *getChannelSelector();
@@ -49,7 +51,8 @@ public:
 private:
     Ui::SamplingDeviceControl* ui;
     PluginManager *m_pluginManager;
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceSourceAPI *m_deviceSourceAPI;
+    DeviceSinkAPI *m_deviceSinkAPI;
 };
 
 

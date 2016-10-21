@@ -45,7 +45,7 @@ class PluginGUI;
 class ChannelMarker;
 class PluginManager;
 class DeviceSourceAPI;
-class DeviceSinkApi;
+class DeviceSinkAPI;
 class PluginInterface;
 class QWidget;
 
@@ -67,7 +67,7 @@ public:
 		DSPDeviceSourceEngine *m_deviceSourceEngine;
 		DeviceSourceAPI *m_deviceSourceAPI;
 		DSPDeviceSinkEngine *m_deviceSinkEngine;
-		DeviceSinkApi *m_deviceSinkAPI;
+		DeviceSinkAPI *m_deviceSinkAPI;
 		QByteArray m_mainWindowState;
 
 		DeviceUISet(QTimer& timer);
@@ -135,6 +135,7 @@ private:
 	void applySettings();
 
 	void addSourceDevice();
+	void addSinkDevice();
     void removeLastDevice();
 
 private slots:
@@ -154,10 +155,12 @@ private slots:
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
 	void on_sampleSource_confirmClicked(bool checked);
-    void on_rxChannel_addClicked(bool checked);
+	void on_sampleSink_confirmClicked(bool checked);
+    void on_channel_addClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
+	void on_action_addSinkDevice_triggered();
 	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
