@@ -35,7 +35,7 @@ copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx
 copy plugins\channelrx\demodlora\%1\demodlora.dll %2\plugins\channelrx
 copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
-copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrxd
+copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrx
 copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
 copy plugins\channelrx\tcpsrc\%1\tcpsrc.dll %2\plugins\channelrx
 copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
