@@ -177,13 +177,17 @@ void MainWindow::addSourceDevice()
     dspDeviceSourceEngine->start();
 
     uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "R%d", dspDeviceSourceEngineUID);
+    char uidCStr[16];
+    sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
 
-    DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(this, m_deviceUIs.size()-1, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    int deviceTabIndex = m_deviceUIs.size()-1;
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "R%d", deviceTabIndex);
+
+    DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(this, deviceTabIndex, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceSourceAPI = deviceSourceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSourceAPI);
@@ -205,6 +209,7 @@ void MainWindow::addSourceDevice()
 
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
+    ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
     int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
 }
@@ -215,14 +220,18 @@ void MainWindow::addSinkDevice()
     dspDeviceSinkEngine->start();
 
     uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "T%d", dspDeviceSinkEngineUID);
+    char uidCStr[16];
+    sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
     m_deviceUIs.push_back(new DeviceUISet(m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = 0;
     m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
 
-    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(this, m_deviceUIs.size()-1, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    int deviceTabIndex = m_deviceUIs.size()-1;
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "T%d", deviceTabIndex);
+
+    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(this, deviceTabIndex, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceSourceAPI = 0;
     m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;
@@ -245,6 +254,7 @@ void MainWindow::addSinkDevice()
 
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
+    ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
     int sampleSinkIndex = m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
 }
