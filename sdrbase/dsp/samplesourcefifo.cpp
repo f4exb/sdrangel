@@ -23,7 +23,7 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size, uint32_t samplesChunkSize) :
     m_ir(0),
     m_iw(size/2)
 {
-    assert(samplesChunkSize < m_size/4);
+    assert(samplesChunkSize <= m_size/4);
     m_data.resize(2*m_size);
 }
 
