@@ -273,7 +273,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
         qDebug("DeviceSinkAPI::loadChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
-        PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
+        PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations();
 
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
@@ -303,7 +303,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             // if we haven't one already, create one
 
-            if(reg.m_gui == NULL)
+            if(reg.m_gui == 0)
             {
                 for(int i = 0; i < channelRegistrations->count(); i++)
                 {
@@ -316,7 +316,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
                 }
             }
 
-            if(reg.m_gui != NULL)
+            if(reg.m_gui != 0)
             {
                 qDebug("DeviceSinkAPI::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
                 reg.m_gui->deserialize(channelConfig.m_config);
