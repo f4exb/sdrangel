@@ -194,7 +194,7 @@ void MainWindow::addSourceDevice()
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     m_pluginManager->populateRxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_rxChannel_addClicked(bool)));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
 
     dspDeviceSourceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
