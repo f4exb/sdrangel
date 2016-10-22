@@ -23,6 +23,8 @@
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
 
+#include "device/devicesinkapi.h"
+
 #include "filesinkgui.h"
 #include "filesinkoutput.h"
 #include "filesinkthread.h"
@@ -34,7 +36,8 @@ MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Messa
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
 
-FileSinkOutput::FileSinkOutput(const QTimer& masterTimer) :
+FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
+    m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSinkThread(0),
 	m_deviceDescription(),
@@ -195,14 +198,24 @@ bool FileSinkOutput::handleMessage(const Message& message)
 void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
+    bool forwardChange = false;
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
+        forwardChange = true;
     }
 
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
+        forwardChange = true;
     }
+
+    if (forwardChange)
+    {
+        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+    }
+
 }

@@ -20,7 +20,7 @@
 #include <errno.h>
 #include "rtlsdrinput.h"
 
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
