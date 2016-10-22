@@ -439,6 +439,7 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     {
         preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
         preset->clearChannels();
+        preset->setSourcePreset(false);
         deviceUI->m_deviceSinkAPI->saveChannelSettings(preset);
         deviceUI->m_deviceSinkAPI->saveSinkSettings(preset);
     }

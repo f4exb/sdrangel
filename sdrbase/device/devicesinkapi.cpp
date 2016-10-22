@@ -219,20 +219,19 @@ void DeviceSinkAPI::loadSinkSettings(const Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceSinkAPI::loadSinkSettings: Preset [%s | %s] is not a sink preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSinkAPI::loadSinkSettings: Preset [%s | %s] is not a sink preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
     else
     {
-        qDebug("DeviceSinkAPI::loadSinkSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSinkAPI::loadSinkSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         if(m_sampleSinkPluginGUI != 0)
         {
-            // TODO: is "source" limiting to source devices?
             const QByteArray* sourceConfig = preset->findBestDeviceConfig(m_sampleSinkId, m_sampleSinkSerial, m_sampleSinkSequence);
 
             if (sourceConfig != 0)
             {
-                qDebug() << "DeviceSinkAPI::loadSinkSettings: deserializing sink " << qPrintable(m_sampleSinkId);
+                qDebug("DeviceSinkAPI::loadSinkSettings: deserializing sink: %s", qPrintable(m_sampleSinkId));
                 m_sampleSinkPluginGUI->deserialize(*sourceConfig);
             }
 
@@ -250,13 +249,15 @@ void DeviceSinkAPI::saveSinkSettings(Preset* preset)
     }
     else
     {
-        qDebug("DeviceSinkAPI::saveSinkSettings: sink preset");
-
         if(m_sampleSinkPluginGUI != NULL)
         {
-            // TODO: is "source" limiting to source devices?
+            qDebug("DeviceSinkAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSinkPluginGUI->getName()));
             preset->addOrUpdateDeviceConfig(m_sampleSinkId, m_sampleSinkSerial, m_sampleSinkSequence, m_sampleSinkPluginGUI->serialize());
             preset->setCenterFrequency(m_sampleSinkPluginGUI->getCenterFrequency());
+        }
+        else
+        {
+            qDebug("DeviceSinkAPI::saveSinkSettings: no sink");
         }
     }
 }
@@ -265,11 +266,11 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceSinkAPI::loadChannelSettings: Loading preset [%s | %s] not a sink preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSinkAPI::loadChannelSettings: Loading preset [%s | %s] not a sink preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
     else
     {
-        qDebug("DeviceSinkAPI::loadChannelSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSinkAPI::loadChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
@@ -277,6 +278,8 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
+
+        qDebug("DeviceSinkAPI::loadChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for(int i = 0; i < preset->getChannelCount(); i++)
         {
@@ -287,11 +290,11 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             for(int i = 0; i < openChannels.count(); i++)
             {
-                qDebug("DeviceSourceAPI::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+                qDebug("DeviceSinkAPI::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
 
                 if(openChannels[i].m_channelName == channelConfig.m_channel)
                 {
-                    qDebug("DeviceSourceAPI::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
+                    qDebug("DeviceSinkAPI::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
                     m_channelInstanceRegistrations.append(reg);
                     break;
@@ -306,7 +309,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
                 {
                     if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
                     {
-                        qDebug("DeviceSourceAPI::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                        qDebug("DeviceSinkAPI::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
                         reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createTxChannel(channelConfig.m_channel, this));
                         break;
                     }
@@ -315,7 +318,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             if(reg.m_gui != NULL)
             {
-                qDebug("DeviceSourceAPI::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+                qDebug("DeviceSinkAPI::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
                 reg.m_gui->deserialize(channelConfig.m_config);
             }
         }
@@ -323,7 +326,7 @@ void DeviceSinkAPI::loadChannelSettings(const Preset *preset, PluginAPI *pluginA
         // everything, that is still "available" is not needed anymore
         for(int i = 0; i < openChannels.count(); i++)
         {
-            qDebug("DeviceSourceAPI::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+            qDebug("DeviceSinkAPI::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
             openChannels[i].m_gui->destroy();
         }
 
@@ -339,12 +342,11 @@ void DeviceSinkAPI::saveChannelSettings(Preset *preset)
     }
     else
     {
-        qDebug("DeviceSinkAPI::saveChannelSettings: sink preset");
-
         qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
+            qDebug("DeviceSinkAPI::saveChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
         }
     }

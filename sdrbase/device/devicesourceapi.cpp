@@ -221,7 +221,7 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceAPI::loadSourceSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadSourceSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         if(m_sampleSourcePluginGUI != 0)
         {
@@ -229,7 +229,7 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
 
             if (sourceConfig != 0)
             {
-                qDebug() << "DeviceAPI::loadSettings: deserializing source " << qPrintable(m_sampleSourceId);
+                qDebug("DeviceSourceAPI::loadSettings: deserializing source %s", qPrintable(m_sampleSourceId));
                 m_sampleSourcePluginGUI->deserialize(*sourceConfig);
             }
 
@@ -239,7 +239,7 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
     }
     else
     {
-        qDebug("DeviceAPI::loadSourceSettings: Loading preset [%s | %s] is not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadSourceSettings: Loading preset [%s | %s] is not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
 }
 
@@ -247,17 +247,20 @@ void DeviceSourceAPI::saveSourceSettings(Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceAPI::saveSourceSettings");
-
         if(m_sampleSourcePluginGUI != NULL)
         {
+            qDebug("DeviceSourceAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSourcePluginGUI->getName()));
             preset->addOrUpdateDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
             preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
+        }
+        else
+        {
+            qDebug("DeviceSourceAPI::saveSourceSettings: no source");
         }
     }
     else
     {
-        qDebug("DeviceAPI::saveSourceSettings: not a source preset");
+        qDebug("DeviceSourceAPI::saveSourceSettings: not a source preset");
     }
 }
 
@@ -265,7 +268,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceAPI::loadChannelSettings: Loading preset [%s | %s]\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
@@ -273,6 +276,8 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
+
+        qDebug("DeviceSourceAPI::loadChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for(int i = 0; i < preset->getChannelCount(); i++)
         {
@@ -327,7 +332,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
     }
     else
     {
-        qDebug("DeviceAPI::loadChannelSettings: Loading preset [%s | %s] not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadChannelSettings: Loading preset [%s | %s] not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
 }
 
@@ -335,18 +340,17 @@ void DeviceSourceAPI::saveChannelSettings(Preset *preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceAPI::saveChannelSettings");
-
         qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
+            qDebug("DeviceSourceAPI::saveChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
         }
     }
     else
     {
-        qDebug("DeviceAPI::saveChannelSettings: not a source preset");
+        qDebug("DeviceSourceAPI::saveChannelSettings: not a source preset");
     }
 }
 
