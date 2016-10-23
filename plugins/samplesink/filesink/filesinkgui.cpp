@@ -67,6 +67,7 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	displaySettings();
 
 	m_deviceSampleSink = new FileSinkOutput(m_deviceAPI, m_deviceAPI->getMainWindow()->getMasterTimer());
+    connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
 	m_deviceAPI->setSink(m_deviceSampleSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
@@ -164,6 +165,21 @@ void FileSinkGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             updateSampleRateAndFrequency();
 
+            delete message;
+        }
+    }
+}
+
+void FileSinkGui::handleSinkMessages()
+{
+    Message* message;
+
+    while ((message = m_deviceSampleSink->getOutputMessageQueueToGUI()->pop()) != 0)
+    {
+        //qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
+
+        if (handleMessage(*message))
+        {
             delete message;
         }
     }
@@ -295,6 +311,8 @@ void FileSinkGui::updateWithStreamTime()
 		t_sec = m_samplesCount / m_settings.m_sampleRate;
 	}
 
+	qDebug("FileSinkGui::updateWithStreamTime: m_samplesCount: %d", m_samplesCount);
+
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
@@ -304,7 +322,8 @@ void FileSinkGui::updateWithStreamTime()
 
 void FileSinkGui::tick()
 {
-	if ((++m_tickCount & 0xf) == 0) {
+	if ((++m_tickCount & 0xf) == 0)
+	{
 		FileSinkOutput::MsgConfigureFileSinkStreamTiming* message = FileSinkOutput::MsgConfigureFileSinkStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}

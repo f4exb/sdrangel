@@ -178,7 +178,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileSinkStreamTiming::match(message))
 	{
-		MsgReportFileSinkStreamTiming *report;
+        MsgReportFileSinkStreamTiming *report;
 
 		if (m_fileSinkThread != 0)
 		{

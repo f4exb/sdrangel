@@ -77,6 +77,7 @@ private:
 
 private slots:
     void handleDSPMessages();
+    void handleSinkMessages();
     void on_centerFrequency_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
