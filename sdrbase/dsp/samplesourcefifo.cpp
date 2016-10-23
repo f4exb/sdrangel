@@ -57,14 +57,14 @@ void SampleSourceFifo::read(SampleVector::iterator& beginRead, unsigned int nbSa
     }
     else if (i_delta > 0)
     {
-        if (i_delta < m_samplesChunkSize)
+        if (i_delta <= m_samplesChunkSize)
         {
             emit dataWrite();
         }
     }
     else
     {
-        if (i_delta + m_size < m_samplesChunkSize)
+        if (i_delta + m_size <= m_samplesChunkSize)
         {
             emit dataWrite();
         }
@@ -87,13 +87,14 @@ void SampleSourceFifo::getWriteIterator(SampleVector::iterator& writeAt)
     writeAt = m_data.begin() + m_iw;
 }
 
-void SampleSourceFifo::bumpIndex()
+void SampleSourceFifo::bumpIndex(SampleVector::iterator& writeAt)
 {
     m_data[m_iw+m_size] = m_data[m_iw];
-    m_iw = (m_iw+1) % m_size;
 
     {
         QMutexLocker mutexLocker(&m_mutex);
         m_iw = (m_iw+1) % m_size;
     }
+
+    writeAt = m_data.begin() + m_iw;
 }

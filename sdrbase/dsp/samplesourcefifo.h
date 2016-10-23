@@ -38,7 +38,7 @@ public:
     void read(SampleVector::iterator& beginRead, unsigned int nbSamples);
 
     void getWriteIterator(SampleVector::iterator& writeAt);  //!< get iterator to current item for update - write phase 1
-    void bumpIndex();                                        //!< copy current item to second buffer and bump write index - write phase 2
+    void bumpIndex(SampleVector::iterator& writeAt);         //!< copy current item to second buffer and bump write index - write phase 2
 
     void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
 

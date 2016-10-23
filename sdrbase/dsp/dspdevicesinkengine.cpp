@@ -178,14 +178,14 @@ void DSPDeviceSinkEngine::work()
 
 	if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 0)
 	{
-		for (int is = 0; is < nbWriteSamples; is++, ++writeAt)
+		for (int is = 0; is < nbWriteSamples; is++)
 		{
 			// pull data from threaded sources and merge them in the device sample FIFO
 			for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
 			{
 				(*it)->pull(s);
 				s /= (m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size());
-				*writeAt += s;
+				(*writeAt) += s;
 			}
 
 			// pull data from direct sources and merge them in the device sample FIFO
@@ -193,8 +193,10 @@ void DSPDeviceSinkEngine::work()
 			{
 				(*it)->pull(s);
 				s /= (m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size());
-				*writeAt += s;
+				(*writeAt) += s;
 			}
+
+			sampleFifo->bumpIndex(writeAt);
 		}
 
 		// feed the mix to the sinks normally just the main spectrum vis
