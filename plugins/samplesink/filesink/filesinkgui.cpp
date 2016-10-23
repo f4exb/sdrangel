@@ -246,14 +246,17 @@ void FileSinkGui::on_startStop_toggled(bool checked)
     {
         if (m_deviceAPI->initGeneration())
         {
-            m_deviceAPI->startGeneration();
-            DSPEngine::instance()->startAudio();
+            if (!m_deviceAPI->startGeneration())
+            {
+                qDebug("FileSinkGui::on_startStop_toggled: device start failed");
+            }
+//            DSPEngine::instance()->startAudio(); // TODO: activate when audio input is available
         }
     }
     else
     {
         m_deviceAPI->stopGeneration();
-        DSPEngine::instance()->stopAudio();
+//        DSPEngine::instance()->stopAudio(); // TODO: activate when audio input is available
     }
 }
 

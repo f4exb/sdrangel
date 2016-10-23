@@ -337,7 +337,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 			break;
 	}
 
-	if(m_deviceSampleSink == NULL) {
+	if(m_deviceSampleSink == 0) {
 		return gotoError("DSPDeviceSinkEngine::gotoRunning: No sample source configured");
 	}
 

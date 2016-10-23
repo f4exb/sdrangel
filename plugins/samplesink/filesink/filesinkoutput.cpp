@@ -40,10 +40,8 @@ FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTim
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSinkThread(0),
-	m_deviceDescription(),
-	m_fileName("..."),
-	m_sampleRate(0),
-	m_centerFrequency(0),
+	m_deviceDescription("FileSink"),
+	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
 	m_masterTimer(masterTimer)
 {
@@ -90,10 +88,9 @@ bool FileSinkOutput::start(int device)
 		return false;
 	}
 
-	m_fileSinkThread->setSamplerate(m_sampleRate);
+	m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_fileSinkThread->connectTimer(m_masterTimer);
 	m_fileSinkThread->startWork();
-	m_deviceDescription = "FileSink";
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -117,8 +114,6 @@ void FileSinkOutput::stop()
 		m_fileSinkThread = 0;
 	}
 
-	m_deviceDescription.clear();
-
 	MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
 	getOutputMessageQueueToGUI()->push(report);
 }
@@ -130,12 +125,12 @@ const QString& FileSinkOutput::getDeviceDescription() const
 
 int FileSinkOutput::getSampleRate() const
 {
-	return m_sampleRate;
+	return m_settings.m_sampleRate;
 }
 
 quint64 FileSinkOutput::getCenterFrequency() const
 {
-	return m_centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 std::time_t FileSinkOutput::getStartingTimeStamp() const
@@ -210,6 +205,12 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
+
+        if (m_fileSinkThread != 0)
+        {
+            m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
+        }
+
         forwardChange = true;
     }
 

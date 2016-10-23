@@ -170,8 +170,6 @@ private:
 	FileSinkThread* m_fileSinkThread;
 	QString m_deviceDescription;
 	QString m_fileName;
-	int m_sampleRate;
-	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
