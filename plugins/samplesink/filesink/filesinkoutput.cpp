@@ -54,8 +54,6 @@ FileSinkOutput::~FileSinkOutput()
 
 void FileSinkOutput::openFileStream()
 {
-	//stopInput();
-
 	if (m_ofstream.is_open()) {
 		m_ofstream.close();
 	}
@@ -80,9 +78,10 @@ bool FileSinkOutput::start(int device)
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSinkOutput::start";
 
-	//openFileStream();
+	openFileStream();
 
-	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0) {
+	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0)
+	{
 		qFatal("out of memory");
 		stop();
 		return false;
@@ -114,7 +113,11 @@ void FileSinkOutput::stop()
 		m_fileSinkThread = 0;
 	}
 
-	MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
+    if (m_ofstream.is_open()) {
+        m_ofstream.close();
+    }
+
+    MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
 	getOutputMessageQueueToGUI()->push(report);
 }
 
