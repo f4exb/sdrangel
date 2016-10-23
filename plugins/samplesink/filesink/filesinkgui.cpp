@@ -40,6 +40,7 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_deviceSampleSink(0),
+	m_sampleRate(0),
 	m_generation(false),
 	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
@@ -59,14 +60,16 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	}
 
 	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
 	displaySettings();
 
 	m_deviceSampleSink = new FileSinkOutput(m_deviceAPI, m_deviceAPI->getMainWindow()->getMasterTimer());
-	connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
 	m_deviceAPI->setSink(m_deviceSampleSink);
+
+    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FileSinkGui::~FileSinkGui()
@@ -145,19 +148,32 @@ bool FileSinkGui::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkGui::handleSinkMessages()
+void FileSinkGui::handleDSPMessages()
 {
-	Message* message;
+    Message* message;
 
-	while ((message = m_deviceSampleSink->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		//qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
+    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    {
+        qDebug("FileSinkGui::handleDSPMessages: message: %s", message->getIdentifier());
 
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            qDebug("FileSinkGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            updateSampleRateAndFrequency();
+
+            delete message;
+        }
+    }
+}
+
+void FileSinkGui::updateSampleRateAndFrequency()
+{
+    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
 void FileSinkGui::displaySettings()
@@ -169,8 +185,17 @@ void FileSinkGui::displaySettings()
 
 void FileSinkGui::sendSettings()
 {
+    if(!m_updateTimer.isActive())
+        m_updateTimer.start(100);
+}
+
+
+void FileSinkGui::updateHardware()
+{
+    qDebug() << "FileSinkGui::updateHardware";
     FileSinkOutput::MsgConfigureFileSink* message = FileSinkOutput::MsgConfigureFileSink::create(m_settings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
+    m_updateTimer.stop();
 }
 
 void FileSinkGui::updateStatus()

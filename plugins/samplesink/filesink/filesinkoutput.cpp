@@ -154,6 +154,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileSink::match(message))
     {
+	    qDebug() << "FileSinkOutput::handleMessage: MsgConfigureFileSink";
 	    MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
         applySettings(conf.getSettings(), false);
         return true;
@@ -214,6 +215,9 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 
     if (forwardChange)
     {
+        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %d",
+                m_settings.m_centerFrequency,
+                m_settings.m_sampleRate);
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }

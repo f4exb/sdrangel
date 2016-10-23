@@ -55,9 +55,12 @@ private:
 	DeviceSinkAPI* m_deviceAPI;
 	FileSinkSettings m_settings;
     QString m_fileName;
-	QTimer m_statusTimer;
+	QTimer m_updateTimer;
+    QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	DeviceSampleSink* m_deviceSampleSink;
+    int m_sampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
     bool m_generation;
 	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
@@ -70,13 +73,15 @@ private:
 	void configureFileName();
 	void updateWithGeneration();
 	void updateWithStreamTime();
+	void updateSampleRateAndFrequency();
 
 private slots:
-	void handleSinkMessages();
+    void handleDSPMessages();
     void on_centerFrequency_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
     void on_sampleRate_currentIndexChanged(int index);
+    void updateHardware();
     void updateStatus();
 	void tick();
 };

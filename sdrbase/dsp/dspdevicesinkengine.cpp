@@ -416,7 +416,7 @@ void DSPDeviceSinkEngine::handleData()
 void DSPDeviceSinkEngine::handleSynchronousMessages()
 {
     Message *message = m_syncMessenger.getMessage();
-	qDebug() << "DSPDeviceSourceEngine::handleSynchronousMessages: " << message->getIdentifier();
+	qDebug() << "DSPDeviceSinkEngine::handleSynchronousMessages: " << message->getIdentifier();
 
 	if (DSPExit::match(*message))
 	{
@@ -520,7 +520,7 @@ void DSPDeviceSinkEngine::handleInputMessages()
 
 			qDebug() << "DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
 
-			// forward source changes to sources with immediate execution
+            // forward source changes to sources with immediate execution
 
 			for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 			{
@@ -532,14 +532,6 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			{
 				qDebug() << "DSPDeviceSinkEngine::handleSourceMessages: forward message to ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
 				(*it)->handleSourceMessage(*message);
-			}
-
-			// forward source changes to sinks with immediate execution
-
-			for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
-			{
-				qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
-				(*it)->handleMessage(*message);
 			}
 
 			// forward changes to listeners on DSP output queue

@@ -164,7 +164,7 @@ void UpChannelizer::applyConfiguration()
 
     qDebug() << "UpChannelizer::applyConfiguration in=" << m_outputSampleRate
             << ", req=" << m_requestedInputSampleRate
-            << ", out=" << m_requestedInputSampleRate
+            << ", out=" << m_currentInputSampleRate
             << ", fc=" << m_currentCenterFrequency;
 
     if (m_sampleSource != 0)

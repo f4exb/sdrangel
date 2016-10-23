@@ -47,7 +47,7 @@
          <item>
           <widget class="ButtonSwitch" name="startStop">
            <property name="toolTip">
-            <string>start/stop acquisition</string>
+            <string>start/stop generation</string>
            </property>
            <property name="text">
             <string/>
@@ -55,7 +55,7 @@
            <property name="icon">
             <iconset resource="../../../sdrbase/resources/res.qrc">
              <normaloff>:/record_off.png</normaloff>
-             <normalon>:/record_on.png</normalon>:/record_off.png</iconset>
+             <normalon>:/stop.png</normalon>:/record_off.png</iconset>
            </property>
           </widget>
          </item>
