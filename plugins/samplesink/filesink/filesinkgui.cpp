@@ -311,8 +311,6 @@ void FileSinkGui::updateWithStreamTime()
 		t_sec = m_samplesCount / m_settings.m_sampleRate;
 	}
 
-	qDebug("FileSinkGui::updateWithStreamTime: m_samplesCount: %d", m_samplesCount);
-
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);

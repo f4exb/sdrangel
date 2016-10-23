@@ -131,7 +131,6 @@ private:
 	uint m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
-	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 
 	void apply();

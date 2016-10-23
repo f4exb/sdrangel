@@ -79,9 +79,6 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 		if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
 		{
-			//m_sampleBuffer.push_back(Sample(ci.real() * 32767.0, ci.imag() * 32767.0));
-			m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));
-
 			Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 			magsq /= (1<<30);
 			m_movingAverage.feed(magsq);
@@ -164,8 +161,6 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 		m_audioBufferFill = 0;
 	}
-
-	m_sampleBuffer.clear();
 
 	m_settingsMutex.unlock();
 }
