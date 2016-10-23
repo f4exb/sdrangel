@@ -20,16 +20,24 @@
 SampleSourceFifo::SampleSourceFifo(uint32_t size, uint32_t samplesChunkSize) :
     m_size(size),
     m_samplesChunkSize(samplesChunkSize),
-    m_ir(0),
-    m_iw(size/2)
+    m_init(false)
 {
     assert(samplesChunkSize <= m_size/4);
     m_data.resize(2*m_size);
+    init();
 }
 
 
 SampleSourceFifo::~SampleSourceFifo()
 {}
+
+void SampleSourceFifo::init()
+{
+    memset(&m_data[0], 0, sizeof(2*m_size*sizeof(Sample)));
+    m_ir = 0;
+    m_iw = m_samplesChunkSize*2;
+    m_init = true;
+}
 
 void SampleSourceFifo::read(SampleVector::iterator& beginRead, unsigned int nbSamples)
 {
@@ -42,7 +50,12 @@ void SampleSourceFifo::read(SampleVector::iterator& beginRead, unsigned int nbSa
 
     int i_delta = m_iw - m_ir;
 
-    if (i_delta > 0)
+    if (m_init)
+    {
+        emit dataWrite();
+        m_init = false;
+    }
+    else if (i_delta > 0)
     {
         if (i_delta < m_samplesChunkSize)
         {

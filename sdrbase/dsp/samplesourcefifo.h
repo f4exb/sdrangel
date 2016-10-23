@@ -33,6 +33,7 @@ public:
 
     unsigned int getChunkSize() const { return m_samplesChunkSize; }
 
+    void init();
     /** begin read at current read point for the given length */
     void read(SampleVector::iterator& beginRead, unsigned int nbSamples);
 
@@ -47,6 +48,7 @@ private:
     SampleVector m_data;
     uint32_t m_iw;
     uint32_t m_ir;
+    bool m_init;
     QMutex m_mutex;
 
 signals:
