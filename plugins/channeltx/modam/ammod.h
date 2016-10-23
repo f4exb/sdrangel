@@ -35,7 +35,7 @@ public:
     AMMod();
     ~AMMod();
 
-    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute);
+    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -54,9 +54,9 @@ private:
         float getModFactor() const { return m_modFactor; }
         bool getAudioMute() const { return m_audioMute; }
 
-        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute)
+        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute)
         {
-            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modPercent, audioMute);
+            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modFactor, audioMute);
         }
 
     private:

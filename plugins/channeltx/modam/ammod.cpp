@@ -55,9 +55,9 @@ AMMod::~AMMod()
 {
 }
 
-void AMMod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, int modPercent, bool audioMute)
+void AMMod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modPercent, audioMute);
+	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modFactor, audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -75,7 +75,7 @@ void AMMod::pull(Sample& sample)
 		m_carrierNco.getIQ(m_modSample);
 		Real t = m_toneNco.get();
 
-		m_modSample *= (t+1.0f) * m_running.m_modFactor * 16384.0f; // modulate carrier
+		m_modSample *= (t+1.0f) * m_running.m_modFactor * 16384.0f; // modulate and scale carrier
 
 		m_interpolatorDistanceRemain += m_interpolatorDistance;
 	}
@@ -150,7 +150,7 @@ void AMMod::apply()
 
 	if(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset)
 	{
-		m_carrierNco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_audioSampleRate);
+		m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_audioSampleRate);
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
