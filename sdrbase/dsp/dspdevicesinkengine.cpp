@@ -218,10 +218,10 @@ void DSPDeviceSinkEngine::work()
 		}
 
 		// feed the mix to the main spectrum sink
-		if (m_spectrumSink)
-		{
-			m_spectrumSink->feed(writeBegin, writeBegin + nbWriteSamples, false);
-		}
+//		if (m_spectrumSink)
+//		{
+//			m_spectrumSink->feed(writeBegin, writeBegin + nbWriteSamples, false);
+//		}
 	}
 }
 
@@ -262,6 +262,8 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 	{
 		(*it)->stop();
 	}
+
+	disconnect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
 
 	m_spectrumSink->stop();
 	m_deviceSampleSink->stop();
@@ -374,6 +376,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 		(*it)->start();
 	}
 
+	connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
 	m_spectrumSink->start();
 
 	qDebug() << "DSPDeviceSinkEngine::gotoRunning: input message queue pending: " << m_inputMessageQueue.size();
@@ -551,3 +554,13 @@ void DSPDeviceSinkEngine::handleInputMessages()
 	}
 }
 
+void DSPDeviceSinkEngine::handleForwardToSpectrumSink(int nbSamples)
+{
+	if (m_spectrumSink)
+	{
+		SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
+		SampleVector::iterator readUntil;
+		sampleFifo->getReadIterator(readUntil);
+		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
+	}
+}
