@@ -129,7 +129,7 @@ void FileSinkThread::tick()
 
         SampleVector::iterator beginRead;
 
-        m_sampleFifo->read(beginRead, m_samplesChunkSize);
+        m_sampleFifo->readAndSignal(beginRead, m_samplesChunkSize);
         m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*4);
         m_samplesCount += m_samplesChunkSize;
 	}

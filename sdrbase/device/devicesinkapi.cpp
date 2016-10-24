@@ -42,14 +42,14 @@ DeviceSinkAPI::~DeviceSinkAPI()
 {
 }
 
-void DeviceSinkAPI::addSink(BasebandSampleSink *sink)
+void DeviceSinkAPI::addSpectrumSink(BasebandSampleSink *spectrumSink)
 {
-    m_deviceSinkEngine->addSink(sink);
+    m_deviceSinkEngine->addSpectrumSink(spectrumSink);
 }
 
-void DeviceSinkAPI::removeSink(BasebandSampleSink* sink)
+void DeviceSinkAPI::removeSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-    m_deviceSinkEngine->removeSink(sink);
+    m_deviceSinkEngine->removeSpectrumSink(spectrumSink);
 }
 
 void DeviceSinkAPI::addSource(BasebandSampleSource *source)

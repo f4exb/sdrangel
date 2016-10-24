@@ -39,7 +39,7 @@ void SampleSourceFifo::init()
     m_init = true;
 }
 
-void SampleSourceFifo::read(SampleVector::iterator& beginRead, unsigned int nbSamples)
+void SampleSourceFifo::readAndSignal(SampleVector::iterator& beginRead, unsigned int nbSamples)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -47,6 +47,8 @@ void SampleSourceFifo::read(SampleVector::iterator& beginRead, unsigned int nbSa
 
     beginRead = m_data.begin() + m_size + m_ir;
     m_ir = (m_ir + nbSamples) % m_size;
+
+    emit dataRead(nbSamples);
 
     int i_delta = m_iw - m_ir;
 
@@ -80,6 +82,11 @@ void SampleSourceFifo::write(const Sample& sample)
         QMutexLocker mutexLocker(&m_mutex);
         m_iw = (m_iw+1) % m_size;
     }
+}
+
+void SampleSourceFifo::getReadIterator(SampleVector::iterator& writeUntil)
+{
+	writeUntil = m_data.begin() + m_size + m_ir;
 }
 
 void SampleSourceFifo::getWriteIterator(SampleVector::iterator& writeAt)

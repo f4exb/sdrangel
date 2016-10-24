@@ -41,8 +41,8 @@ class SDRANGEL_API DeviceSinkAPI : public QObject {
 
 public:
     // Device engine stuff
-    void addSink(BasebandSampleSink* sink);                        //!< Add a sample sink to device engine (spectrum vis)
-    void removeSink(BasebandSampleSink* sink);                     //!< Remove a sample sink from device engine (spectrum vis)
+    void addSpectrumSink(BasebandSampleSink* sink);                //!< Add the spectrum sample sink to device engine (spectrum vis)
+    void removeSpectrumSink(BasebandSampleSink* sink);             //!< Remove the spectrum sample sink from device engine (spectrum vis)
     void addSource(BasebandSampleSource* source);                  //!< Add a baseband sample source to device engine
     void removeSource(BasebandSampleSource* sink);                 //!< Remove a baseband sample source from device engine
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine

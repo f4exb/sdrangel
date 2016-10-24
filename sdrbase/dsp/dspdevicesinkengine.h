@@ -70,8 +70,8 @@ public:
 	void addThreadedSource(ThreadedBasebandSampleSource* source); //!< Add a baseband sample source that will run on its own thread
 	void removeThreadedSource(ThreadedBasebandSampleSource* source); //!< Remove a baseband sample source that runs on its own thread
 
-	void addSink(BasebandSampleSink* sink); //!< Add a baseband sample sink
-	void removeSink(BasebandSampleSink* sink); //!< Remove a baseband sample sink
+	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
+	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
 
 	State state() const { return m_state; } //!< Return DSP engine current state
 
@@ -99,8 +99,7 @@ private:
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	ThreadedBasebandSampleSources m_threadedBasebandSampleSources; //!< baseband sample sources on their own threads (usually channels)
 
-	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
-	BasebandSampleSinks m_basebandSampleSinks; //!< baseband sample sinks within main thread (this is only the spectrum vis normally)
+	BasebandSampleSink *m_spectrumSink;
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;

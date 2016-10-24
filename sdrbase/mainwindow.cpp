@@ -241,7 +241,7 @@ void MainWindow::addSinkDevice()
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
 
-    dspDeviceSinkEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
+    dspDeviceSinkEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
@@ -295,7 +295,7 @@ void MainWindow::removeLastDevice()
 	{
 	    DSPDeviceSinkEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSinkEngine;
 	    lastDeviceEngine->stopGeneration();
-	    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
+	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);

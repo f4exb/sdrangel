@@ -34,9 +34,10 @@ public:
     unsigned int getChunkSize() const { return m_samplesChunkSize; }
 
     void init();
-    /** begin read at current read point for the given length */
-    void read(SampleVector::iterator& beginRead, unsigned int nbSamples);
+    /** begin read at current read point for the given length and activate R/W signals */
+    void readAndSignal(SampleVector::iterator& beginRead, unsigned int nbSamples);
 
+    void getReadIterator(SampleVector::iterator& readUntil); //!< get iterator past the last sample that was read by a read with signal (i.e. current read iterator)
     void getWriteIterator(SampleVector::iterator& writeAt);  //!< get iterator to current item for update - write phase 1
     void bumpIndex(SampleVector::iterator& writeAt);         //!< copy current item to second buffer and bump write index - write phase 2
 
@@ -52,7 +53,8 @@ private:
     QMutex m_mutex;
 
 signals:
-    void dataWrite(); // signal data is read past a read chunk of samples and write is needed
+    void dataWrite();             // signal data is read past a read chunk of samples and write is needed
+    void dataRead(int nbSamples); // signal a read has been done for a number of samples
 };
 
 #endif /* SDRBASE_DSP_SAMPLESOURCEFIFO_H_ */

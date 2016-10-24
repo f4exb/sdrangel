@@ -128,6 +128,18 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
+class SDRANGEL_API DSPAddSpectrumSink : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPAddSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+
+	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
+
+private:
+	BasebandSampleSink* m_sampleSink;
+};
+
 class SDRANGEL_API DSPAddSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
@@ -145,6 +157,18 @@ class SDRANGEL_API DSPRemoveSink : public Message {
 
 public:
 	DSPRemoveSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+
+	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
+
+private:
+	BasebandSampleSink* m_sampleSink;
+};
+
+class SDRANGEL_API DSPRemoveSpectrumSink : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPRemoveSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
 
 	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
 

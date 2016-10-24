@@ -35,6 +35,7 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint uid, QObject* parent) :
 	m_deviceSampleSink(0),
 	m_sampleSinkSequence(0),
 	m_basebandSampleSources(),
+	m_spectrumSink(0),
 	m_sampleRate(0),
 	m_centerFrequency(0)
 {
@@ -137,17 +138,17 @@ void DSPDeviceSinkEngine::removeThreadedSource(ThreadedBasebandSampleSource* sou
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceSinkEngine::addSink(BasebandSampleSink* sink)
+void DSPDeviceSinkEngine::addSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceSinkEngine::addSink: " << sink->objectName().toStdString().c_str();
-	DSPAddSink cmd(sink);
+	qDebug() << "DSPDeviceSinkEngine::addSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	DSPAddSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceSinkEngine::removeSink(BasebandSampleSink* sink)
+void DSPDeviceSinkEngine::removeSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceSinkEngine::removeSink: " << sink->objectName().toStdString().c_str();
-	DSPRemoveSink cmd(sink);
+	qDebug() << "DSPDeviceSinkEngine::removeSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	DSPRemoveSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
 
@@ -216,10 +217,10 @@ void DSPDeviceSinkEngine::work()
             sourceOccurence = 0;
 		}
 
-		// feed the mix to the sinks normally just the main spectrum vis
-		for (BasebandSampleSinks::iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
+		// feed the mix to the main spectrum sink
+		if (m_spectrumSink)
 		{
-			(*it)->feed(writeBegin, writeBegin + nbWriteSamples, false);
+			m_spectrumSink->feed(writeBegin, writeBegin + nbWriteSamples, false);
 		}
 	}
 }
@@ -262,11 +263,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 		(*it)->stop();
 	}
 
-	for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
-	{
-		(*it)->stop();
-	}
-
+	m_spectrumSink->stop();
 	m_deviceSampleSink->stop();
 	m_deviceDescription.clear();
 	m_sampleRate = 0;
@@ -322,11 +319,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 		(*it)->handleSourceMessage(notif);
 	}
 
-	for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
-	{
-		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
-		(*it)->handleMessage(notif);
-	}
+	m_spectrumSink->handleMessage(notif);
 
 	// pass data to listeners
 
@@ -381,11 +374,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 		(*it)->start();
 	}
 
-	for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
-	{
-        qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
-		(*it)->start();
-	}
+	m_spectrumSink->start();
 
 	qDebug() << "DSPDeviceSinkEngine::gotoRunning: input message queue pending: " << m_inputMessageQueue.size();
 
@@ -472,20 +461,19 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 	else if (DSPSetSink::match(*message)) {
 		handleSetSink(((DSPSetSink*) message)->getSampleSink());
 	}
-	else if (DSPAddSink::match(*message))
+	else if (DSPAddSpectrumSink::match(*message))
 	{
-		BasebandSampleSink* sink = ((DSPAddSink*) message)->getSampleSink();
-		m_basebandSampleSinks.push_back(sink);
+		m_spectrumSink = ((DSPAddSpectrumSink*) message)->getSampleSink();
 	}
-	else if (DSPRemoveSink::match(*message))
+	else if (DSPRemoveSpectrumSink::match(*message))
 	{
-		BasebandSampleSink* sink = ((DSPRemoveSink*) message)->getSampleSink();
+		BasebandSampleSink* spectrumSink = ((DSPRemoveSpectrumSink*) message)->getSampleSink();
 
 		if(m_state == StRunning) {
-			sink->stop();
+			spectrumSink->stop();
 		}
 
-		m_basebandSampleSinks.remove(sink);
+		m_spectrumSink = 0;
 	}
 	else if (DSPAddSource::match(*message))
 	{
