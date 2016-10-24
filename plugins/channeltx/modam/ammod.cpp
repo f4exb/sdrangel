@@ -65,22 +65,17 @@ void AMMod::pull(Sample& sample)
 {
 	Complex ci;
 
-	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-	{
-		m_settingsMutex.lock();
-		m_carrierNco.nextPhase();
-		m_toneNco.nextPhase();
-		m_settingsMutex.unlock();
+    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+    {
+        Real t = m_toneNco.next();
+        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+        m_modSample.imag(0.0f);
+        m_interpolatorDistanceRemain += m_interpolatorDistance;
+    }
 
-		m_carrierNco.getIQ(m_modSample);
-		Real t = m_toneNco.get();
+    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
-		m_modSample *= (t+1.0f) * m_running.m_modFactor * 16384.0f; // modulate and scale carrier
-
-		m_interpolatorDistanceRemain += m_interpolatorDistance;
-	}
-
-	Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+    Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 	magsq /= (1<<30);
 	m_movingAverage.feed(magsq);
 	m_magsq = m_movingAverage.average();
@@ -148,9 +143,10 @@ bool AMMod::handleMessage(const Message& cmd)
 void AMMod::apply()
 {
 
-	if(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset)
+	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
+	    (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
 	{
-		m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_audioSampleRate);
+		m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
