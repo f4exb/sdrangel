@@ -26,7 +26,6 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* s
 	QThread(parent),
 	m_running(false),
 	m_ofstream(samplesStream),
-	m_buf(0),
 	m_bufsize(0),
 	m_samplesChunkSize(0),
 	m_sampleFifo(sampleFifo),
@@ -42,10 +41,6 @@ FileSinkThread::~FileSinkThread()
 {
 	if (m_running) {
 		stopWork();
-	}
-
-	if (m_buf != 0) {
-		free(m_buf);
 	}
 }
 
@@ -132,10 +127,11 @@ void FileSinkThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-        SampleVector::iterator beginRead;
+        SampleVector::iterator readUntil;
 
-        m_sampleFifo->readAndSignal(beginRead, m_samplesChunkSize);
-        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*4);
+        m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize);
+        SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
+        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
         m_samplesCount += m_samplesChunkSize;
 	}
 }

@@ -4,7 +4,7 @@
 
 Starting with version 2 SDRangel supports several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2... 
 
-The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device menu a new slot is allocated in the last position and when a devcie is removed with the Acquisition -> Remove device menu the slot in the last position is deleted. Slot 0 (R0) is created at initialization and cannot be deleted with the menu.
+The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device menu a new slot is allocated in the last position and when a devcie is removed with the Acquisition -> Remove device menu the slot in the last position is deleted. Slot 0 (R0) receiver slot is created at initialization and cannot be deleted with the menu. The letter "R" in the tab names indicates that the slot is for a receiver (source) device while "T" designates a tramsmitter (sink) device.
 
 The tabbed windows are:
 
@@ -32,9 +32,10 @@ The following items are presented hierarchically from left to right:
    - Exit (shortcut Ctl-Q): Exit the program
   - View:
    - Fullscreen (Shortcut F11): Toggle full screen mode
-  - Acquisition:
-   - Add device: adds a new sampling device slot to the device stack (last position)
-   - Remove device: removes the last sampling device slot from thte device stack
+  - Devices:
+   - Add source device: adds a new source (receiver) device slot to the device stack (last position)
+   - Add sink device: adds a new sink (transmitter) device slot to the device stack (last position)
+   - Remove device: removes the last device slot from thte device stack
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
    - Sampling devices control: control of which sampling devices is used and add channels
    - Sampling devices: the sampling devices UIs

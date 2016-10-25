@@ -55,7 +55,6 @@ private:
 	bool m_running;
 
 	std::ofstream* m_ofstream;
-	quint8  *m_buf;
 	std::size_t m_bufsize;
 	unsigned int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;

@@ -27,6 +27,16 @@ These plugins come from the parent code base and have been maintained so that th
 
 From version 2 SDRangel can integrate more than one hardware device running concurrently.
 
+<h2>Transmission support</h2>
+
+Transmission or signal generation support for eligible devices (BladeRF and HackRF) will be progressively introduced with the following roadmap:
+
+  - Phase 1: version 2.2.0: generation to file (File Sink) with AM modulator with simple sine modulation. Fixed sample rate of 48 kS/s (no interpolation)
+  - Phase 2: version 2.2.x: full baseband interpolation chain: in AM modulator and Up Channelizer.
+  - Phase 3: version 2.3.0: FM and SSB modulators with audio file input
+  - Phase 4: version 2.3.x: Audio (Mic) input support
+  - phase 5: version 3.0.0: BladeRF and HackRF support including final interpolation stage.
+
 <h2>Airspy</h2>
 
 Airspy is supported through the libairspy library that should be installed in your system for proper build of the software and operation support. Add `libairspy-dev` to the list of dependencies to install.
