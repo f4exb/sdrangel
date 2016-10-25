@@ -44,6 +44,12 @@ At present the following plugins are available:
   - `SDRDaemonFECXxx` classes in `plugins/samplesource/sdrdaemonfec`: Special inteface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon) with FEC protection of blocks.
   - `FileSource` classes in `plugins/samplesource/filesource`: Special inteface reading I/Q samples from a file directly into the baseband skipping the downsampling block
 
+<h3>Device sample sink plugins</h3>
+
+At present the following plugins are available:
+
+  - `FileSink` classes in `plugins/samplesink/filesink`: Special inteface writing baseband I/Q samples to a file skipping the final upsampling block
+
 <h3>Channel receiver (Rx) plugins</h3>
 
 At present the following plugins are available:
@@ -59,6 +65,12 @@ At present the following plugins are available:
   - `TCPSrcXxx` classes in `plugins/channelrx/tcpsrc`: Sends channel I/Q samples via TCP
   - `UDPSrcXxx` classes in `plugins/channelrx/udpsrc`: Sends channel I/Q or FM demodulated samples via UDP
 
+<h3>Channel transmitter (Tx) plugins</h3>
+
+At present the following plugins are available:
+
+  - `AMMmodXxx` classes in `plugins/channeltx/modam`: AM modulator with simple sine
+
 <h2>Source tree structure</h2>
 
 At the first subdirectory level `indclude` and `sdrbase` contain the common core components include and source files respectively. They are further broken down in subdirectories corresponding to a specific area:
@@ -70,7 +82,7 @@ At the first subdirectory level `indclude` and `sdrbase` contain the common core
   - `settings` contains components to manage presets and preferences
   - `util` contains common utilities such as the message queue
 
-The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is yet to be created.
+The `plugins` subdirectory contains the associated plugins used to manage devices and channel components. Naming convention of various items depend on the usage and Rx (reception side) or Tx (transmission side) affinity. Transmission side is a work in progress.
 
   - Receiver functions (Rx):
     - `samplesource`: Device managers:
@@ -81,11 +93,11 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxsettings.h/cpp` : Configuration manager
         - `xxxthread.h/cpp` : Reading samples
         - `xxx.pro` : Qt .pro file for Windows/Android build        
-    - `channel`: Channel handlers:
+    - `channelrx`: Channel handlers:
       - `demodxxx` : Demodulator internal handler (e.g xxx = demodam)
         - `xxxdemod.h/cpp` : Demodulator core
         - `xxxdemodgui.h/cpp` : Demodulator GUI
-        - `xxxplugin.h/cpp` : Plugin interface
+        - `xxxdemodplugin.h/cpp` : Plugin interface
         - `demodxxx.pro` : Qt .pro file for Windows/Android build
       - `xxxanalyzer` : Analyzer internal handler (e.g xxx = channel)
         - `xxxanalyzer.h/cpp` : Analyzer core
@@ -97,3 +109,30 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxsrcgui.h/cpp` : Interface GUI
         - `xxxsrcplugin/h/cpp` : Interface plugin manager
         - `xxxsrc.pro` : Qt .pro file for Windows/Android build
+
+  - Transmitter functions (Tx):
+    - `samplesink`: Device managers:
+      - `xxx` : Device manager (e.g. xxx = bladerf)
+        - `xxxsinkoutput.h/cpp` : Device interface
+        - `xxxsinkgui.h/cpp` : GUI
+        - `xxxsinkplugin.h/cpp` : Plugin interface
+        - `xxxsinksettings.h/cpp` : Configuration manager
+        - `xxxsinkthread.h/cpp` : Writing samples
+        - `xxxsink.pro` : Qt .pro file for Windows/Android build        
+    - `channeltx`: Channel handlers:
+      - `modxxx` : Modulator internal handler (e.g xxx = modam)
+        - `xxxmod.h/cpp` : Modulator core
+        - `xxxmodgui.h/cpp` : Modulator GUI
+        - `xxxmodplugin.h/cpp` : Plugin interface
+        - `modxxx.pro` : Qt .pro file for Windows/Android build
+      - `xxxgenerator` : Generator internal handler (e.g xxx = channel)
+        - `xxxgenerator.h/cpp` : Generator core
+        - `xxxgeneratorgui.h/cpp` : Generator GUI
+        - `xxxgeneratorplugin.h/cpp` : Generator plugin manager
+        - `xxxgenerator.pro` : Qt .pro file for Windows/Android build
+      - `xxxsink` : Interface to the outside (e.g xxx = udp):
+        - `xxxsink.h/cpp` : Inteface core
+        - `xxxsinkgui.h/cpp` : Interface GUI
+        - `xxxsinklugin/h/cpp` : Interface plugin manager
+        - `xxxsink.pro` : Qt .pro file for Windows/Android build
+        

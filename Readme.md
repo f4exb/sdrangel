@@ -23,15 +23,17 @@ These plugins come from the parent code base and have been maintained so that th
 
 <h1>Supported hardware</h1>
 
-<h2>Multiple device support</h2>
+<h2>General</h2>
+
+<h3>Multiple device support</h3>
 
 From version 2 SDRangel can integrate more than one hardware device running concurrently.
 
-<h2>Transmission support</h2>
+<h3>Transmission support</h3>
 
-Transmission or signal generation support for eligible devices (BladeRF and HackRF) will be progressively introduced with the following roadmap:
+Transmission or signal generation support for eligible devices (BladeRF and HackRF) is progressively introduced with the following roadmap:
 
-  - Phase 1: version 2.2.0: generation to file (File Sink) with AM modulator with simple sine modulation. Fixed sample rate of 48 kS/s (no interpolation)
+  - Phase 1: version 2.2.0: generation to file (File Sink) with AM modulator with simple sine modulation. Fixed sample rate of 48 kS/s (no effective interpolation)
   - Phase 2: version 2.2.x: full baseband interpolation chain: in AM modulator and Up Channelizer.
   - Phase 3: version 2.3.0: FM and SSB modulators with audio file input
   - Phase 4: version 2.3.x: Audio (Mic) input support
@@ -83,13 +85,21 @@ If you use your own location for librtlsdr install directory you need to specify
 
 `-DLIBRTLSDR_LIBRARIES=/opt/install/librtlsdr/lib/librtlsdr.so -DLIBRTLSDR_INCLUDE_DIR=/opt/install/librtlsdr/include`
 
-<h1>Plugins for special sample sources</h1>
+<h1>Plugins for special devices</h1>
 
 <h2>File input</h2>
 
-The file input plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Press F7 to start recording and F8 to stop. The file has a fixed name `test.sdriq` created in the current directory.
+The file source plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Press F7 to start recording and F8 to stop. The file has a fixed name `test.sdriq` created in the current directory.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
+
+The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block with a glitch at the beginning corresponding to the header data. 
+
+<h2>File output</h2>
+
+The file sink plugin allows the recording of the I/Q baseband signal produced by a transmission chain to a file in the `.sdriq` format thus readable by the file source plugin described just above.
+
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSink[0]` even if no physical device is connected.
 
 <h2>SDRdaemon input</h2>
 
