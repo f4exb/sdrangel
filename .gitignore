@@ -11,3 +11,8 @@ sdrangelove.supp
 *.cs
 *.pro.user
 .idea/*
+debian/sdrangel/*
+debian/sdrangel.substvars
+debian/files
+debian/sdrangel.debhelper.log
+obj-x86_64-linux-gnu/*

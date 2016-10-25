@@ -1,29 +1,38 @@
 project(dsddemod)
 
 set(dsddemod_SOURCES
-	dsddemod.cpp
-	dsddemodgui.cpp
-	dsddemodplugin.cpp
-	dsddecoder.cpp
+    dsddemod.cpp
+    dsddemodgui.cpp
+    dsddemodplugin.cpp
+    dsddecoder.cpp
 )
 
 set(dsddemod_HEADERS
-	dsddemod.h
-	dsddemodgui.h
-	dsddemodplugin.h
-	dsddecoder.h
+    dsddemod.h
+    dsddemodgui.h
+    dsddemodplugin.h
+    dsddecoder.h
 )
 
 set(dsddemod_FORMS
-	dsddemodgui.ui
+    dsddemodgui.ui
 )
 
+if (BUILD_DEBIAN)
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-	${LIBDSDCC_INCLUDE_DIR}
-	${LIBMBE_INCLUDE_DIR}
+    .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBDSDCCSRC}
+    ${LIBMBELIBSRC}
 )
+else (BUILD_DEBIAN)
+include_directories(
+    .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBDSDCC_INCLUDE_DIR}
+    ${LIBMBE_INCLUDE_DIR}
+)
+endif (BUILD_DEBIAN)
 
 #include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
@@ -33,17 +42,27 @@ add_definitions(-DQT_SHARED)
 qt5_wrap_ui(dsddemod_FORMS_HEADERS ${dsddemod_FORMS})
 
 add_library(demoddsd SHARED
-	${dsddemod_SOURCES}
-	${dsddemod_HEADERS_MOC}
-	${dsddemod_FORMS_HEADERS}
+    ${dsddemod_SOURCES}
+    ${dsddemod_HEADERS_MOC}
+    ${dsddemod_FORMS_HEADERS}
 )
 
+if (BUILD_DEBIAN)
 target_link_libraries(demoddsd
-	${QT_LIBRARIES}
-	sdrbase
-	${LIBDSDCC_LIBRARIES}
-	${LIBMBE_LIBRARY}
+    ${QT_LIBRARIES}
+    sdrbase
+    dsdcc
+    mbelib
 )
+else (BUILD_DEBIAN)
+target_link_libraries(demoddsd
+    ${QT_LIBRARIES}
+    sdrbase
+    ${LIBDSDCC_LIBRARIES}
+    ${LIBMBE_LIBRARY}
+)
+endif (BUILD_DEBIAN)
+
 
 qt5_use_modules(demoddsd Core Widgets OpenGL Multimedia)
 

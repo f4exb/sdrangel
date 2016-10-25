@@ -1,30 +1,38 @@
 project(airspy)
 
 set(airspy_SOURCES
-	airspygui.cpp
-	airspyinput.cpp
-	airspyplugin.cpp
-	airspysettings.cpp
-	airspythread.cpp
+    airspygui.cpp
+    airspyinput.cpp
+    airspyplugin.cpp
+    airspysettings.cpp
+    airspythread.cpp
 )
 
 set(airspy_HEADERS
-	airspygui.h
-	airspyinput.h
-	airspyplugin.h
-	airspysettings.h
-	airspythread.h
+    airspygui.h
+    airspyinput.h
+    airspyplugin.h
+    airspysettings.h
+    airspythread.h
 )
 
 set(airspy_FORMS
-	airspygui.ui
+    airspygui.ui
 )
 
+if (BUILD_DEBIAN)
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-	${LIBAIRSPY_INCLUDE_DIR}
+    .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBAIRSPYSRC}/src
 )
+else (BUILD_DEBIAN)
+include_directories(
+    .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBAIRSPY_INCLUDE_DIR}
+)
+endif (BUILD_DEBIAN)
 
 #include(${QT_USE_FILE})
 #add_definitions(${QT_DEFINITIONS})
@@ -36,16 +44,25 @@ add_definitions(-DQT_SHARED)
 qt5_wrap_ui(airspy_FORMS_HEADERS ${airspy_FORMS})
 
 add_library(inputairspy SHARED
-	${airspy_SOURCES}
-	${airspy_HEADERS_MOC}
-	${airspy_FORMS_HEADERS}
+    ${airspy_SOURCES}
+    ${airspy_HEADERS_MOC}
+    ${airspy_FORMS_HEADERS}
 )
 
+if (BUILD_DEBIAN)
 target_link_libraries(inputairspy
-	${QT_LIBRARIES}
-	${LIBAIRSPY_LIBRARIES}
-	sdrbase
+    ${QT_LIBRARIES}
+    airspy
+    sdrbase
 )
+else (BUILD_DEBIAN)
+target_link_libraries(inputairspy
+    ${QT_LIBRARIES}
+    ${LIBAIRSPY_LIBRARIES}
+    sdrbase
+)
+endif (BUILD_DEBIAN)
+
 
 qt5_use_modules(inputairspy Core Widgets OpenGL Multimedia)
 

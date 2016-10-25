@@ -1,0 +1,6 @@
+sdrangel (2.2.0-1) unstable; urgency=medium
+
+  * Initial release as a Debian package
+  * Embryonic Tx support (phase 1)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 24 Oct 2016 23:15:15 +0200

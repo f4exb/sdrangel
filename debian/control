@@ -1,0 +1,24 @@
+Source: sdrangel
+Section: hamradio
+Priority: optional
+Maintainer: Edouard Griffiths, F4EXB <f4exb06@gmail.com>
+Build-Depends: debhelper (>=9)
+Standards-Version: 3.9.6
+Homepage: https://github.com/f4exb/sdrangel
+#Vcs-Git: git://anonscm.debian.org/collab-maint/sdrangel.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/sdrangel.git
+
+Package: sdrangel
+Architecture: any
+Depends: libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libglu1-mesa, liblz4-1, libnanomsg0, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libstdc++6, libusb-1.0-0, ${shlibs:Depends}, ${misc:Depends}
+Description: SDR/Analyzer/Generator front-end for various hardware
+ SDR/Analyzer/Generator front-end for Airspy, BladeRF (Rx), HackRF (Rx), RTL-SDR and FunCube. 
+ Also File source and sink for I/Q samples, network I/Q sources with SDRDaemon.
+ Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
+ Builds on Linux, Windows and Mac O/S
+ Reception modes supported: 
+   Analog: AM, NFM, WFM, SSB, broadcast FM
+   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa
+   Analyzer: Generic channel
+ Transmission modes supported:
+   Analog: AM

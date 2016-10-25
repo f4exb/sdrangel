@@ -13,3 +13,7 @@ add_subdirectory(chanalyzer)
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
+
+if (BUILD_DEBIAN)
+    add_subdirectory(demoddsd)
+endif (BUILD_DEBIAN)

@@ -1,30 +1,38 @@
 project(hackrf)
 
 set(hackrf_SOURCES
-	hackrfgui.cpp
-	hackrfinput.cpp
-	hackrfplugin.cpp
-	hackrfsettings.cpp
-	hackrfthread.cpp
+    hackrfgui.cpp
+    hackrfinput.cpp
+    hackrfplugin.cpp
+    hackrfsettings.cpp
+    hackrfthread.cpp
 )
 
 set(hackrf_HEADERS
-	hackrfgui.h
-	hackrfinput.h
-	hackrfplugin.h
-	hackrfsettings.h
-	hackrfthread.h
+    hackrfgui.h
+    hackrfinput.h
+    hackrfplugin.h
+    hackrfsettings.h
+    hackrfthread.h
 )
 
 set(hackrf_FORMS
-	hackrfgui.ui
+    hackrfgui.ui
 )
 
+if (BUILD_DEBIAN)
 include_directories(
         .
-	${CMAKE_CURRENT_BINARY_DIR}
-	${LIBHACKRF_INCLUDE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBHACKRFSRC}/src
 )
+else (BUILD_DEBIAN)
+include_directories(
+        .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBHACKRF_INCLUDE_DIR}
+)
+endif (BUILD_DEBIAN)
 
 #include(${QT_USE_FILE})
 #add_definitions(${QT_DEFINITIONS})
@@ -36,16 +44,24 @@ add_definitions(-DQT_SHARED)
 qt5_wrap_ui(hackrf_FORMS_HEADERS ${hackrf_FORMS})
 
 add_library(inputhackrf SHARED
-	${hackrf_SOURCES}
-	${hackrf_HEADERS_MOC}
-	${hackrf_FORMS_HEADERS}
+    ${hackrf_SOURCES}
+    ${hackrf_HEADERS_MOC}
+    ${hackrf_FORMS_HEADERS}
 )
 
+if (BUILD_DEBIAN)
 target_link_libraries(inputhackrf
-	${QT_LIBRARIES}
-	${LIBHACKRF_LIBRARIES}
-	sdrbase
+    ${QT_LIBRARIES}
+    ${LIBHACKRF_LIBRARIES}
+    sdrbase
 )
+else (BUILD_DEBIAN)
+target_link_libraries(inputhackrf
+    ${QT_LIBRARIES}
+    hackrf
+    sdrbase
+)
+endif (BUILD_DEBIAN)
 
 qt5_use_modules(inputhackrf Core Widgets OpenGL Multimedia)
 
