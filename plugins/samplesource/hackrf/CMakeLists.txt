@@ -52,13 +52,13 @@ add_library(inputhackrf SHARED
 if (BUILD_DEBIAN)
 target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
-    ${LIBHACKRF_LIBRARIES}
+    hackrf
     sdrbase
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
-    hackrf
+    ${LIBHACKRF_LIBRARIES}
     sdrbase
 )
 endif (BUILD_DEBIAN)
