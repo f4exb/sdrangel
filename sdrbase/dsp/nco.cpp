@@ -44,7 +44,7 @@ NCO::NCO()
 void NCO::setFreq(Real freq, Real sampleRate)
 {
 	m_phaseIncrement = (freq * TableSize) / sampleRate;
-	qDebug("NCO phase inc %d", m_phaseIncrement);
+	qDebug("NCO freq: %f phase inc %d", freq, m_phaseIncrement);
 }
 
 float NCO::next()

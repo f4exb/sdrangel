@@ -332,7 +332,7 @@ void DeviceSourceAPI::loadChannelSettings(const Preset *preset, PluginAPI *plugi
     }
     else
     {
-        qDebug("DeviceSourceAPI::loadChannelSettings: Loading preset [%s | %s] not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadChannelSettings: Loading preset [%s | %s] not a source preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
 }
 

@@ -33,6 +33,7 @@ public:
 
     unsigned int getChunkSize() const { return m_samplesChunkSize; }
 
+    void resize(uint32_t size, uint32_t samplesChunkSize);
     void init();
     /** begin read at current read point for the given length and activate R/W signals */
     void readAndSignal(SampleVector::iterator& beginRead, unsigned int nbSamples);

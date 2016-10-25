@@ -146,7 +146,9 @@ void AMMod::apply()
 	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 	    (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
 	{
+        m_settingsMutex.lock();
 		m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
+        m_settingsMutex.unlock();
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||

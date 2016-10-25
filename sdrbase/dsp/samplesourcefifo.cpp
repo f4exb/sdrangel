@@ -31,6 +31,17 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size, uint32_t samplesChunkSize) :
 SampleSourceFifo::~SampleSourceFifo()
 {}
 
+void SampleSourceFifo::resize(uint32_t size, uint32_t samplesChunkSize)
+{
+    qDebug("SampleSourceFifo::resize: %d, %d", size, samplesChunkSize);
+    assert(samplesChunkSize <= size/4);
+
+    m_size = size;
+    m_samplesChunkSize = samplesChunkSize;
+    m_data.resize(2*m_size);
+    init();
+}
+
 void SampleSourceFifo::init()
 {
     memset(&m_data[0], 0, sizeof(2*m_size*sizeof(Sample)));
@@ -84,9 +95,9 @@ void SampleSourceFifo::write(const Sample& sample)
     }
 }
 
-void SampleSourceFifo::getReadIterator(SampleVector::iterator& writeUntil)
+void SampleSourceFifo::getReadIterator(SampleVector::iterator& readUntil)
 {
-	writeUntil = m_data.begin() + m_size + m_ir;
+    readUntil = m_data.begin() + m_size + m_ir;
 }
 
 void SampleSourceFifo::getWriteIterator(SampleVector::iterator& writeAt)

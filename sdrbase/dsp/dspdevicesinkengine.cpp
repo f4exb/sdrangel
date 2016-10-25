@@ -202,7 +202,6 @@ void DSPDeviceSinkEngine::work()
 			{
 				(*it)->pull(s);
 				s /= (m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size());
-				(*writeAt) += s;
 
                 if (sourceOccurence == 0) {
                     (*writeAt) = s;
