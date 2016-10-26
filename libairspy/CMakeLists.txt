@@ -3,24 +3,24 @@ project(airspy)
 find_package(LibUSB)
 
 set(airspy_SOURCES
-    ${LIBAIRSPYSRC}/src/airspy.c
-    ${LIBAIRSPYSRC}/src/iqconverter_float.c
-    ${LIBAIRSPYSRC}/src/iqconverter_int16.c
+    ${LIBAIRSPYSRC}/libairspy/src/airspy.c
+    ${LIBAIRSPYSRC}/libairspy/src/iqconverter_float.c
+    ${LIBAIRSPYSRC}/libairspy/src/iqconverter_int16.c
 )
 
 set(airspy_HEADERS
-    ${LIBAIRSPYSRC}/src/airspy.h
-    ${LIBAIRSPYSRC}/src/airspy_commands.h
-    ${LIBAIRSPYSRC}/src/iqconverter_float.h
-    ${LIBAIRSPYSRC}/src/iqconverter_int16.h
-    ${LIBAIRSPYSRC}/src/filters.h
+    ${LIBAIRSPYSRC}/libairspy/src/airspy.h
+    ${LIBAIRSPYSRC}/libairspy/src/airspy_commands.h
+    ${LIBAIRSPYSRC}/libairspy/src/iqconverter_float.h
+    ${LIBAIRSPYSRC}/libairspy/src/iqconverter_int16.h
+    ${LIBAIRSPYSRC}/libairspy/src/filters.h
 )
 
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBUSB_INCLUDE_DIR}    
-    ${LIBAIRSPYSRC}/src
+    ${LIBAIRSPYSRC}/libairspy/src
 )
 
 add_definitions(-DQT_SHARED)

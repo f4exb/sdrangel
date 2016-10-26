@@ -21,5 +21,4 @@
 # dh_make generated override targets
 # This is example for Cmake (See https://bugs.debian.org/641051 )
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/opt/sdrangel -DBUILD_TYPE=DEBIAN -DLIBCM256CCSRC=/z1/development/cm256cc -DLIBDSDCCSRC=/z1/development/dsdcc -DLIBAIRSPYSRC=/z1/development/libairspy/libairspy -DLIBHACKRFSRC=/z1/development/hackrf/host/libhackrf -DLIBRTLSDRSRC=/z1/development/librtlsdr.f4exb -DLIBMBELIBSRC=/z1/development/mbelib -DLIBSERIALDVSRC=/z1/development/serialDV
-#	dh_auto_configure -- -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/sdrangel -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so -DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc
+	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/opt/sdrangel -DBUILD_TYPE=DEBIAN -DLIBCM256CCSRC=/z1/development/cm256cc -DLIBDSDCCSRC=/z1/development/dsdcc -DLIBAIRSPYSRC=/z1/development/libairspy -DLIBHACKRFSRC=/z1/development/hackrf/host -DLIBRTLSDRSRC=/z1/development/librtlsdr.f4exb -DLIBMBELIBSRC=/z1/development/mbelib -DLIBSERIALDVSRC=/z1/development/serialDV

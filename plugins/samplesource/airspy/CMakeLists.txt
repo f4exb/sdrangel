@@ -24,7 +24,8 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBAIRSPYSRC}/src
+    ${LIBAIRSPYSRC}
+    ${LIBAIRSPYSRC}/libairspy/src
 )
 else (BUILD_DEBIAN)
 include_directories(

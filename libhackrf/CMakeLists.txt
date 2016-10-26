@@ -3,18 +3,18 @@ project(hackrf)
 find_package(LibUSB)
 
 set(hackrf_SOURCES
-    ${LIBHACKRFSRC}/src/hackrf.c
+    ${LIBHACKRFSRC}/libhackrf/src/hackrf.c
 )
 
 set(hackrf_HEADERS
-    ${LIBHACKRFSRC}/src/hackrf.h
+    ${LIBHACKRFSRC}/libhackrf/src/hackrf.h
 )
 
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBUSB_INCLUDE_DIR}    
-    ${LIBHACKRFSRC}/src
+    ${LIBHACKRFSRC}/libhackrf/src
 )
 
 add_definitions(-DQT_SHARED)
