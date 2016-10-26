@@ -53,6 +53,7 @@ if(CM256CC_FOUND)
 endif(CM256CC_FOUND)
 
 if (BUILD_DEBIAN)
+    add_subdirectory(sdrdaemonfec)
     add_subdirectory(airspy)
     add_subdirectory(hackrf)
     add_subdirectory(rtlsdr)

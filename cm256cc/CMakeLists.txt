@@ -1,17 +1,15 @@
 project(cm256cc)
 
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11" )
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11" )
-add_definitions(-DNO_RESTRICT)
-
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
-message( STATUS "Architecture: ${ARCHITECTURE}" )
+message( STATUS "CM256cc: Architecture: ${ARCHITECTURE}" )
 
 if(${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
-    SET(USE_SIMD "SSSE3" CACHE STRING "Use SIMD SSSE3 instructions")
+    SET(USE_SIMD "SSSE3")
 elseif(${ARCHITECTURE} MATCHES "armv7l")
-    SET(USE_SIMD "NEON" CACHE STRING "Use SIMD NEON instructions")
+    SET(USE_SIMD "NEON")
 endif()
+
+message( STATUS "CM256cc: use SIMD: ${USE_SIMD}" )
 
 if(USE_SIMD MATCHES SSSE3)
     if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
@@ -35,7 +33,7 @@ elseif(USE_SIMD MATCHES NEON)
         add_definitions(-DUSE_NEON)
     endif()
 else()
-    message(STATUS "Unsupported architecture")
+    message(STATUS "CM256cc: Unsupported architecture")
     return()
 endif()
 
@@ -59,9 +57,6 @@ add_definitions(-DQT_SHARED)
 
 add_library(cm256cc SHARED
     ${cm256cc_SOURCES}
-)
-
-target_link_libraries(cm256cc
 )
 
 install(TARGETS cm256cc DESTINATION lib)
