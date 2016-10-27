@@ -46,6 +46,6 @@ target_link_libraries(inputbladerf
 	sdrbase
 )
 
-qt5_use_modules(inputbladerf Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputbladerf Core Widgets)
 
 install(TARGETS inputbladerf DESTINATION lib/plugins/samplesource)

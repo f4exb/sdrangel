@@ -54,6 +54,6 @@ target_link_libraries(inputsdrdaemon
 	sdrbase
 )
 
-qt5_use_modules(inputsdrdaemon Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputsdrdaemon Core Widgets)
 
 install(TARGETS inputsdrdaemon DESTINATION lib/plugins/samplesource)

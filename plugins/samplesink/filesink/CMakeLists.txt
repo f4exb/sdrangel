@@ -42,6 +42,6 @@ target_link_libraries(outputfilesink
 	sdrbase
 )
 
-qt5_use_modules(outputfilesink Core Widgets OpenGL Multimedia)
+qt5_use_modules(outputfilesink Core Widgets)
 
 install(TARGETS outputfilesink DESTINATION lib/plugins/samplesink)

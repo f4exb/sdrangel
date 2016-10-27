@@ -65,6 +65,6 @@ target_link_libraries(inputairspy
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputairspy Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputairspy Core Widgets)
 
 install(TARGETS inputairspy DESTINATION lib/plugins/samplesource)

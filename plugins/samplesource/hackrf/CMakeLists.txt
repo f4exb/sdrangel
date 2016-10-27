@@ -64,6 +64,6 @@ target_link_libraries(inputhackrf
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputhackrf Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputhackrf Core Widgets)
 
 install(TARGETS inputhackrf DESTINATION lib/plugins/samplesource)

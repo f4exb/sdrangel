@@ -49,6 +49,6 @@ target_link_libraries(inputfcdproplus
 	sdrbase
 )
 
-qt5_use_modules(inputfcdproplus Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputfcdproplus Core Widgets)
 
 install(TARGETS inputfcdproplus DESTINATION lib/plugins/samplesource)

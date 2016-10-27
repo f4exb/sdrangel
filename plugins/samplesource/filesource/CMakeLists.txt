@@ -42,6 +42,6 @@ target_link_libraries(inputfilesource
 	sdrbase
 )
 
-qt5_use_modules(inputfilesource Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputfilesource Core Widgets)
 
 install(TARGETS inputfilesource DESTINATION lib/plugins/samplesource)

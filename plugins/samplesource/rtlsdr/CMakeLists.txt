@@ -64,6 +64,6 @@ target_link_libraries(inputrtlsdr
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputrtlsdr Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputrtlsdr Core Widgets)
 
 install(TARGETS inputrtlsdr DESTINATION lib/plugins/samplesource)
