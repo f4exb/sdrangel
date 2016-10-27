@@ -35,7 +35,7 @@ public:
 		return true;
 	}
 
-	// interpolation works nearly the same way
+	// interpolation works nearly the same way // TODO: remove when original is used
 	bool interpolate(Real *distance, const Complex& next, Complex* result)
 	{
         *distance -= 1.0;
@@ -52,6 +52,28 @@ public:
             doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
             return false; // input sample was not used and do not increment distance
         }
+	}
+
+	// original interpolator
+	bool interpolate(Real* distance, const Complex& next, bool* consumed, Complex* result)
+	{
+		while(*distance >= 1.0)
+		{
+			if(!(*consumed))
+			{
+				advanceFilter(next);
+				*distance -= 1.0;
+				*consumed = true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		doInterpolate((int)floor(*distance * (Real)m_phaseSteps), result);
+
+		return true;
 	}
 
 private:
