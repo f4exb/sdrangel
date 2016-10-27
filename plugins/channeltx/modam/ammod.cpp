@@ -65,13 +65,16 @@ void AMMod::pull(Sample& sample)
 {
 	Complex ci;
 
-    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-    {
-        Real t = m_toneNco.next();
-        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-        m_modSample.imag(0.0f);
-        m_interpolatorDistanceRemain += m_interpolatorDistance;
-    }
+	m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &m_interpolatorConsumed, &ci);
+	m_interpolatorDistanceRemain += m_interpolatorDistance;
+
+	if (m_interpolatorConsumed)
+	{
+		Real t = m_toneNco.next();
+		m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+		m_modSample.imag(0.0f);
+		m_interpolatorConsumed = false;
+	}
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
@@ -157,7 +160,8 @@ void AMMod::apply()
 		m_settingsMutex.lock();
 		m_interpolator.create(16, m_config.m_outputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
-		m_interpolatorDistance = (Real) m_config.m_outputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_interpolatorConsumed = false;
+		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
 		m_settingsMutex.unlock();
 	}
 

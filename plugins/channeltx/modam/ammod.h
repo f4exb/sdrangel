@@ -114,6 +114,7 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
+    bool m_interpolatorConsumed;
     Lowpass<Real> m_lowpass;
 
     Real m_magsq;
