@@ -40,6 +40,6 @@ target_link_libraries(demodssb
 	sdrbase
 )
 
-qt5_use_modules(demodssb Core Widgets OpenGL Multimedia)
+qt5_use_modules(demodssb Core Widgets)
 
 install(TARGETS demodssb DESTINATION lib/plugins/channelrx)

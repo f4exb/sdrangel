@@ -40,6 +40,6 @@ target_link_libraries(demodlora
 	sdrbase
 )
 
-qt5_use_modules(demodlora Core Widgets OpenGL Multimedia)
+qt5_use_modules(demodlora Core Widgets)
 
 install(TARGETS demodlora DESTINATION lib/plugins/channelrx)

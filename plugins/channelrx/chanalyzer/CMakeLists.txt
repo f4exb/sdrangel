@@ -40,6 +40,6 @@ target_link_libraries(chanalyzer
 	sdrbase
 )
 
-qt5_use_modules(chanalyzer Core Widgets OpenGL Multimedia)
+qt5_use_modules(chanalyzer Core Widgets )
 
 install(TARGETS chanalyzer DESTINATION lib/plugins/channelrx)

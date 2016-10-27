@@ -40,6 +40,6 @@ target_link_libraries(demodwfm
 	sdrbase
 )
 
-qt5_use_modules(demodwfm Core Widgets OpenGL Multimedia)
+qt5_use_modules(demodwfm Core Widgets)
 
 install(TARGETS demodwfm DESTINATION lib/plugins/channelrx)

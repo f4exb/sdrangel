@@ -39,6 +39,6 @@ target_link_libraries(demodudpsrc
 	sdrbase
 )
 
-qt5_use_modules(demodudpsrc Core Widgets OpenGL Network Multimedia)
+qt5_use_modules(demodudpsrc Core Widgets Network)
 
 install(TARGETS demodudpsrc DESTINATION lib/plugins/channelrx)

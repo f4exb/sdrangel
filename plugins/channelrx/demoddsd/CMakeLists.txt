@@ -64,6 +64,6 @@ target_link_libraries(demoddsd
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(demoddsd Core Widgets OpenGL Multimedia)
+qt5_use_modules(demoddsd Core Widgets)
 
 install(TARGETS demoddsd DESTINATION lib/plugins/channelrx)

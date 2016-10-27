@@ -40,6 +40,6 @@ target_link_libraries(demodtcpsrc
 	sdrbase
 )
 
-qt5_use_modules(demodtcpsrc Core Widgets OpenGL Network)
+qt5_use_modules(demodtcpsrc Core Widgets Network)
 
 install(TARGETS demodtcpsrc DESTINATION lib/plugins/channelrx)

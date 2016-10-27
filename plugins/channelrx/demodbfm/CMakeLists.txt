@@ -47,6 +47,6 @@ target_link_libraries(demodbfm
 	sdrbase
 )
 
-qt5_use_modules(demodbfm Core Widgets OpenGL Multimedia)
+qt5_use_modules(demodbfm Core Widgets)
 
 install(TARGETS demodbfm DESTINATION lib/plugins/channelrx)

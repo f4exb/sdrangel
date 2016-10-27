@@ -38,6 +38,6 @@ target_link_libraries(modam
 	sdrbase
 )
 
-qt5_use_modules(modam Core Widgets OpenGL Multimedia)
+qt5_use_modules(modam Core Widgets)
 
 install(TARGETS modam DESTINATION lib/plugins/channeltx)

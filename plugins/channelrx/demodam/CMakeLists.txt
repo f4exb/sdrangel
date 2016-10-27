@@ -40,6 +40,6 @@ target_link_libraries(demodam
 	sdrbase
 )
 
-qt5_use_modules(demodam Core Widgets OpenGL Multimedia)
+qt5_use_modules(demodam Core Widgets)
 
 install(TARGETS demodam DESTINATION lib/plugins/channelrx)
