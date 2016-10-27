@@ -2,6 +2,43 @@ project(sdrdaemonfec)
 
 find_package(LibNANOMSG)
 
+EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+message( STATUS "SDRdaemonFEC: Architecture: ${ARCHITECTURE}" )
+
+if(${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
+    SET(USE_SIMD "SSSE3")
+elseif(${ARCHITECTURE} MATCHES "armv7l")
+    SET(USE_SIMD "NEON")
+endif()
+
+message( STATUS "SDRdaemonFEC: use SIMD: ${USE_SIMD}" )
+
+if(USE_SIMD MATCHES SSSE3)
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mssse3" )
+        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mssse3" )
+        message(STATUS "SDRdaemonFEC: g++ SSSE3")
+        add_definitions(-DUSE_SIMD)
+    elseif(MSVC)
+        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSSE3" )
+        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSSE3" )
+        set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
+        message(STATUS "SDRdaemonFEC: MSVC SSSE3")
+        add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
+        add_definitions(-DUSE_SIMD)
+    endif()
+elseif(USE_SIMD MATCHES NEON)
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mfpu=neon" )
+        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mfpu=neon" )
+        message(STATUS "SDRdaemonFEC: g++ NEON")
+        add_definitions(-DUSE_NEON)
+    endif()
+else()
+    message(STATUS "SDRdaemonFEC: Unsupported architecture")
+    return()
+endif()
+
 set(sdrdaemonfec_SOURCES
     sdrdaemonfecbuffer.cpp
     sdrdaemonfecgui.cpp
@@ -68,6 +105,6 @@ target_link_libraries(inputsdrdaemonfec
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputsdrdaemonfec Core Widgets OpenGL Multimedia)
+qt5_use_modules(inputsdrdaemonfec Core Widgets)
 
 install(TARGETS inputsdrdaemonfec DESTINATION lib/plugins/samplesource)
