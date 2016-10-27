@@ -225,7 +225,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="samplerate">
+      <widget class="QComboBox" name="sampleRate">
        <property name="toolTip">
         <string>Sample rate selection (kS/s)</string>
        </property>

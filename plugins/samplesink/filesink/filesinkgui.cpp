@@ -53,10 +53,10 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
 
-	ui->samplerate->clear();
+	ui->sampleRate->clear();
 	for (int i = 0; i < FileSinkSampleRates::getNbRates(); i++)
 	{
-		ui->samplerate->addItem(QString::number(FileSinkSampleRates::getRate(i)));
+		ui->sampleRate->addItem(QString::number(FileSinkSampleRates::getRate(i)));
 	}
 
 	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -196,7 +196,7 @@ void FileSinkGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     unsigned int sampleRateIndex = FileSinkSampleRates::getRateIndex(m_settings.m_sampleRate);
-    ui->samplerate->setCurrentIndex(sampleRateIndex);
+    ui->sampleRate->setCurrentIndex(sampleRateIndex);
 }
 
 void FileSinkGui::sendSettings()
@@ -251,7 +251,7 @@ void FileSinkGui::on_centerFrequency_changed(quint64 value)
 
 void FileSinkGui::on_sampleRate_currentIndexChanged(int index)
 {
-    int newrate = FileSinkSampleRates::getRate(index);
+	int newrate = FileSinkSampleRates::getRate(index);
     m_settings.m_sampleRate = newrate * 1000;
     sendSettings();
 }
@@ -327,8 +327,8 @@ void FileSinkGui::tick()
 	}
 }
 
-unsigned int FileSinkSampleRates::m_rates[] = {48};
-unsigned int FileSinkSampleRates::m_nb_rates = 1;
+unsigned int FileSinkSampleRates::m_rates[] = {48, 60, 64, 72};
+unsigned int FileSinkSampleRates::m_nb_rates = 4;
 
 unsigned int FileSinkSampleRates::getRate(unsigned int rate_index)
 {
