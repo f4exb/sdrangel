@@ -250,21 +250,18 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
     std::vector<DVSerialController>::iterator itAvail = m_controllers.end();
     bool done = false;
-    unsigned int fifoSlot;
     QMutexLocker locker(&m_mutex);
 
     while (it != m_controllers.end())
     {
-        if (it->worker->hasFifo(audioFifo, fifoSlot))
+        if (it->worker->hasFifo(audioFifo))
         {
-            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo, fifoSlot);
+            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
             done = true;
-            break;
         }
-        else if (it->worker->isAvailable(fifoSlot))
+        else if (it->worker->isAvailable())
         {
             itAvail = it;
-            break;
         }
 
         ++it;
@@ -277,7 +274,7 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
             int wNum = itAvail - m_controllers.begin();
 
             qDebug("DVSerialEngine::pushMbeFrame: push %p on empty queue %d", audioFifo, wNum);
-            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo, fifoSlot);
+            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
         }
         else
         {

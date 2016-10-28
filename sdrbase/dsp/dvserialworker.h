@@ -54,17 +54,10 @@ public:
         int getVolumeIndex() const { return m_volumeIndex; }
         unsigned char getChannels() const { return m_channels % 4; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
-        unsigned int getFifoSlot() const { return m_fifoSlot; }
 
-        static MsgMbeDecode* create(
-                const unsigned char *mbeFrame,
-                int mbeRateIndex,
-                int volumeIndex,
-                unsigned char channels,
-                AudioFifo *audioFifo,
-                unsigned int fifoSlot)
+        static MsgMbeDecode* create(const unsigned char *mbeFrame, int mbeRateIndex, int volumeIndex, unsigned char channels, AudioFifo *audioFifo)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo, fifoSlot);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo);
         }
 
     private:
@@ -73,20 +66,17 @@ public:
         int m_volumeIndex;
         unsigned char m_channels;
         AudioFifo *m_audioFifo;
-        unsigned int m_fifoSlot;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
                 SerialDV::DVRate mbeRate,
                 int volumeIndex,
                 unsigned char channels,
-                AudioFifo *audioFifo,
-                unsigned int fifoSlot) :
+                AudioFifo *audioFifo) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
             m_channels(channels),
-            m_audioFifo(audioFifo),
-            m_fifoSlot(fifoSlot)
+            m_audioFifo(audioFifo)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
         }
@@ -99,15 +89,14 @@ public:
             int mbeRateIndex,
             int mbeVolumeIndex,
             unsigned char channels,
-            AudioFifo *audioFifo,
-            unsigned int fifoSlot);
+            AudioFifo *audioFifo);
 
     bool open(const std::string& serialDevice);
     void close();
     void process();
     void stop();
-    bool isAvailable(unsigned int& fifoSlot);
-    bool hasFifo(AudioFifo *audioFifo, unsigned int& fifoSlot);
+    bool isAvailable();
+    bool hasFifo(AudioFifo *audioFifo);
 
     void postTest()
     {
@@ -116,6 +105,8 @@ public:
     }
 
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+    AudioFifo *m_audioFifo;
+    QDateTime m_timestamp;
 
 signals:
     void finished();
@@ -131,35 +122,20 @@ private:
 
     typedef std::vector<AudioSample> AudioVector;
 
-    struct FifoSlot
-    {
-        FifoSlot() :
-            m_audioFifo(0),
-            m_timestamp(QDate(2000, 1, 1)),
-            m_audioBufferFill(0),
-            m_upsamplerLastValue(0)
-        {
-            m_audioBuffer.resize(48000);
-        }
-
-        AudioFifo *m_audioFifo;
-        QDateTime m_timestamp;
-        AudioVector m_audioBuffer;
-        uint m_audioBufferFill;
-        short m_upsamplerLastValue;
-        MBEAudioInterpolatorFilter m_upsampleFilter;
-        short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
-    };
-
-    void upsample6(short *in, int nbSamplesIn, unsigned char channels, unsigned int fifoSlot);
-    static long long getUSecs();
+    void upsample6(short *in, short *out, int nbSamplesIn);
+    void upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo);
 
     SerialDV::DVController m_dvController;
     bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
-    static const unsigned int m_nbFifoSlots = 1;
-    FifoSlot m_fifoSlots[m_nbFifoSlots];
+    short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
+    //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
+    AudioVector m_audioBuffer;
+    uint m_audioBufferFill;
+    short m_upsamplerLastValue;
+    float m_phase;
+    MBEAudioInterpolatorFilter m_upsampleFilter;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */
