@@ -77,76 +77,24 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+		if (m_interpolatorDistance < 1.0f) // interpolate
 		{
-			Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-			magsq /= (1<<30);
-			m_movingAverage.feed(magsq);
-			m_magsq = m_movingAverage.average();
+            processOneSample(ci);
 
-			if (m_magsq >= m_squelchLevel)
-			{
-				if (m_squelchCount <= m_running.m_audioSampleRate / 10)
-				{
-					m_squelchCount++;
-				}
-			}
-			else
-			{
-				if (m_squelchCount > 1)
-				{
-					m_squelchCount -= 2;
-				}
-			}
+		    while (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci);
+            }
 
-			qint16 sample;
-
-			if ((m_squelchCount >= m_running.m_audioSampleRate / 20) && !m_running.m_audioMute)
-			{
-				Real demod = sqrt(magsq);
-
-				demod = m_lowpass.filter(demod);
-
-				if (demod < -1)
-				{
-					demod = -1;
-				}
-				else if (demod > 1)
-				{
-					demod = 1;
-				}
-
-				m_volumeAGC.feed(demod);
-
-				Real attack = (m_squelchCount - (m_running.m_audioSampleRate / 20)) / (Real) (m_running.m_audioSampleRate / 20);
-				demod *= ((0.003 * attack) / m_volumeAGC.getValue());
-				demod *= m_running.m_volume;
-				sample = demod * 32700 * 16;
-				m_squelchOpen = true;
-			}
-			else
-			{
-				sample = 0;
-				m_squelchOpen = false;
-			}
-
-			m_audioBuffer[m_audioBufferFill].l = sample;
-			m_audioBuffer[m_audioBufferFill].r = sample;
-			++m_audioBufferFill;
-
-			if (m_audioBufferFill >= m_audioBuffer.size())
-			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-				if (res != m_audioBufferFill)
-				{
-					qDebug("AMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-				}
-
-				m_audioBufferFill = 0;
-			}
-
-			m_interpolatorDistanceRemain += m_interpolatorDistance;
+            m_interpolatorDistanceRemain += m_interpolatorDistance;
+		}
+		else // decimate
+		{
+	        if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+	        {
+	            processOneSample(ci);
+	            m_interpolatorDistanceRemain += m_interpolatorDistance;
+	        }
 		}
 	}
 
