@@ -83,7 +83,7 @@ void DVSerialWorker::handleInputMessages()
 
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
-                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels(), decodeMsg->getAudioFifo());
+                upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels());
                 audioFifo = decodeMsg->getAudioFifo();
             }
             else
@@ -131,7 +131,7 @@ bool DVSerialWorker::hasFifo(AudioFifo *audioFifo)
     return m_audioFifo == audioFifo;
 }
 
-void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo)
+void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels)
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {

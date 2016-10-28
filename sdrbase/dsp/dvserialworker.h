@@ -123,7 +123,7 @@ private:
     typedef std::vector<AudioSample> AudioVector;
 
     void upsample6(short *in, short *out, int nbSamplesIn);
-    void upsample6(short *in, int nbSamplesIn, unsigned char channels, AudioFifo *audioFifo);
+    void upsample6(short *in, int nbSamplesIn, unsigned char channels);
 
     SerialDV::DVController m_dvController;
     bool m_running;
