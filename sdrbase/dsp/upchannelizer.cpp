@@ -63,14 +63,23 @@ void UpChannelizer::pull(Sample& sample)
     {
         m_mutex.lock();
 
-        // TODO: handle multiple stages
-
         FilterStages::iterator stage = m_filterStages.begin();
+        FilterStages::iterator last = m_filterStages.end();
+        last--;
 
-        if ((*stage)->work(&m_sampleIn, &sample))
-        {
-            m_sampleSource->pull(m_sampleIn);
-        }
+        // m_sampleIn
+
+		for (; stage != m_filterStages.end(); ++stage)
+		{
+			// let's make it work for one stage only (96 kS/s < SR < 192 kS/s)
+			if(stage == last)
+			{
+				if ((*stage)->work(&m_sampleIn, &sample))
+				{
+					m_sampleSource->pull(m_sampleIn); // get new input sample
+				}
+			}
+		}
 
         m_mutex.unlock();
     }
@@ -162,9 +171,9 @@ void UpChannelizer::applyConfiguration()
 
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
 
-    qDebug() << "UpChannelizer::applyConfiguration in=" << m_outputSampleRate
+    qDebug() << "UpChannelizer::applyConfiguration out=" << m_outputSampleRate
             << ", req=" << m_requestedInputSampleRate
-            << ", out=" << m_currentInputSampleRate
+            << ", in=" << m_currentInputSampleRate
             << ", fc=" << m_currentCenterFrequency;
 
     if (m_sampleSource != 0)

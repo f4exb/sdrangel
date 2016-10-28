@@ -376,7 +376,7 @@ public:
 		}
 	}
 
-    // upsample by 2, from upper half of original spectrum
+    // upsample by 2, move original spectrum to upper half
     bool workInterpolateUpperHalf(Sample* sampleIn, Sample *sampleOut)
     {
         switch(m_state)
@@ -400,8 +400,8 @@ public:
 
             case 1:
                 // insert sample into ring-buffer
-                m_samples[m_ptr][0] = -sampleIn->real();
-                m_samples[m_ptr][1] = -sampleIn->imag();
+				m_samples[m_ptr][0] = sampleIn->imag();
+				m_samples[m_ptr][1] = -sampleIn->real();
 
                 // save result
                 doFIR(sampleOut);
@@ -432,10 +432,78 @@ public:
                 // tell caller we didn't consume the sample
                 return false;
 
+            case 3:
+                // insert sample into ring-buffer
+				m_samples[m_ptr][0] = -sampleIn->real();
+				m_samples[m_ptr][1] = -sampleIn->imag();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 4;
+
+                // tell caller we consumed the sample
+                return true;
+
+            case 4:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 5;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            case 5:
+                // insert sample into ring-buffer
+				m_samples[m_ptr][0] = -sampleIn->imag();
+				m_samples[m_ptr][1] = sampleIn->real();
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 6;
+
+                // tell caller we consumed the sample
+                return true;
+
+            case 6:
+                // insert sample into ring-buffer
+                m_samples[m_ptr][0] = 0;
+                m_samples[m_ptr][1] = 0;
+
+                // save result
+                doFIR(sampleOut);
+
+                // advance write-pointer
+                m_ptr = (m_ptr + HB_FILTERORDER) % (HB_FILTERORDER + 1);
+
+                // next state
+                m_state = 7;
+
+                // tell caller we didn't consume the sample
+                return false;
+
             default:
                 // insert sample into ring-buffer
-                m_samples[m_ptr][0] = sampleIn->real();
-                m_samples[m_ptr][1] = sampleIn->imag();
+				m_samples[m_ptr][0] = sampleIn->real();
+				m_samples[m_ptr][1] = sampleIn->imag();
 
                 // save result
                 doFIR(sampleOut);
