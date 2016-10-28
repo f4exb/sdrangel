@@ -78,12 +78,35 @@ void AMMod::pull(Sample& sample)
 //	}
 
 //  Specialized interpolator
-	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-	{
+//	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+//	{
+//        Real t = m_toneNco.next();
+//        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+//        m_modSample.imag(0.0f);
+//	}
+
+    if (m_interpolatorDistance > 1.0f) // decimate
+    {
         Real t = m_toneNco.next();
         m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
-	}
+
+        while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+        {
+            Real t = m_toneNco.next();
+            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+            m_modSample.imag(0.0f);
+        }
+    }
+    else
+    {
+        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+        {
+            Real t = m_toneNco.next();
+            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+            m_modSample.imag(0.0f);
+        }
+    }
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
@@ -169,10 +192,10 @@ void AMMod::apply()
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
 	{
 		m_settingsMutex.lock();
-		m_interpolator.create(16, m_config.m_outputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
+        m_interpolator.create(16, m_config.m_outputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_settingsMutex.unlock();
 	}
 
