@@ -35,27 +35,26 @@ public:
 		return true;
 	}
 
-	// interpolation works nearly the same way // TODO: remove when original is used
+	// interpolation simplified from the generalized resampler
 	bool interpolate(Real *distance, const Complex& next, Complex* result)
 	{
-        *distance -= 1.0;
+	    bool consumed = false;
 
-        if (*distance < 1.0) // use sample
+        if (*distance >= 1.0)
         {
             advanceFilter(next);
-            doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
-            return true;  // need new input sample and increment distance
+            *distance -= 1.0;
+            consumed = true;
         }
-        else // use zero
-        {
-            advanceFilter();
-            doInterpolate((int) floor(*distance * (Real)m_phaseSteps), result);
-            return false; // input sample was not used and do not increment distance
-        }
+
+        doInterpolate((int)floor(*distance * (Real)m_phaseSteps), result);
+
+        return consumed;
 	}
 
-	// original interpolator
-	bool interpolate(Real* distance, const Complex& next, bool* consumed, Complex* result)
+	// original interpolator which is actually an arbitrary rational resampler P/Q for any positive P, Q
+	// sampling frequency must be the highest of the two
+	bool resample(Real* distance, const Complex& next, bool* consumed, Complex* result)
 	{
 		while(*distance >= 1.0)
 		{

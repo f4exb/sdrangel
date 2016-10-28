@@ -65,16 +65,27 @@ void AMMod::pull(Sample& sample)
 {
 	Complex ci;
 
-	m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &m_interpolatorConsumed, &ci);
-	m_interpolatorDistanceRemain += m_interpolatorDistance;
+//  Resampler used for interpolation only
+//	m_interpolator.resample(&m_interpolatorDistanceRemain, m_modSample, &m_interpolatorConsumed, &ci);
+//	m_interpolatorDistanceRemain += m_interpolatorDistance;
+//
+//	if (m_interpolatorConsumed)
+//	{
+//		Real t = m_toneNco.next();
+//		m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+//		m_modSample.imag(0.0f);
+//		m_interpolatorConsumed = false;
+//	}
 
-	if (m_interpolatorConsumed)
+//  Specialized interpolator
+	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
 	{
-		Real t = m_toneNco.next();
-		m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-		m_modSample.imag(0.0f);
-		m_interpolatorConsumed = false;
+        Real t = m_toneNco.next();
+        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+        m_modSample.imag(0.0f);
 	}
+
+    m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
