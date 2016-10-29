@@ -397,7 +397,7 @@ if (BUILD_DEBIAN)
 endif (BUILD_DEBIAN)
 
 set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
-target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
+target_compile_features(sdrbase PUBLIC cxx_generalized_initializers) # cmake >= 3.1.0
 
 qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
 

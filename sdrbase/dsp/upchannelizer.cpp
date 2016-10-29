@@ -171,7 +171,8 @@ void UpChannelizer::applyConfiguration()
 
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
 
-    qDebug() << "UpChannelizer::applyConfiguration out=" << m_outputSampleRate
+    qDebug() << "UpChannelizer::applyConfiguration:"
+            << " out=" << m_outputSampleRate
             << ", req=" << m_requestedInputSampleRate
             << ", in=" << m_currentInputSampleRate
             << ", fc=" << m_currentCenterFrequency;
@@ -225,34 +226,52 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
 
     safetyMargin = 0;
 
-    //fprintf(stderr, "Channelizer::createFilterChain: ");
-    //fprintf(stderr, "Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f, Safety %.1f\n", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot, safetyMargin);
-#if 1
+    qDebug() << "UpChannelizer::createFilterChain: start:"
+            << " sig: ["  << sigStart << ":" << sigEnd << "]"
+            << " BW: " << sigBw
+            << " chan: [" << chanStart << ":" << chanEnd << "]"
+            << " rot: " << rot
+            << " safety: " << safetyMargin;
+
     // check if it fits into the left half
-    if(signalContainsChannel(sigStart + safetyMargin, sigStart + sigBw / 2.0 - safetyMargin, chanStart, chanEnd)) {
-        //fprintf(stderr, "-> take left half (rotate by +1/4 and decimate by 2)\n");
+    if(signalContainsChannel(sigStart + safetyMargin, sigStart + sigBw / 2.0 - safetyMargin, chanStart, chanEnd))
+    {
+        qDebug() << "UpChannelizer::createFilterChain: take left half (rotate by +1/4 and decimate by 2):"
+                << " [" << m_filterStages.size() << "]"
+                << " sig: ["  << sigStart << ":" << sigStart + sigBw / 2.0 << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
         return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
     }
 
     // check if it fits into the right half
-    if(signalContainsChannel(sigEnd - sigBw / 2.0f + safetyMargin, sigEnd - safetyMargin, chanStart, chanEnd)) {
-        //fprintf(stderr, "-> take right half (rotate by -1/4 and decimate by 2)\n");
+    if(signalContainsChannel(sigEnd - sigBw / 2.0f + safetyMargin, sigEnd - safetyMargin, chanStart, chanEnd))
+    {
+        qDebug() << "UpChannelizer::createFilterChain: take right half (rotate by -1/4 and decimate by 2):"
+                << " [" << m_filterStages.size() << "]"
+                << " sig: ["  << sigEnd - sigBw / 2.0f << ":" << sigEnd << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
         return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
     }
 
     // check if it fits into the center
     // Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
-    if(signalContainsChannel(sigStart + rot + safetyMargin, sigEnd - rot - safetyMargin, chanStart, chanEnd)) {
-        //fprintf(stderr, "-> take center half (decimate by 2)\n");
+    if(signalContainsChannel(sigStart + rot + safetyMargin, sigEnd - rot - safetyMargin, chanStart, chanEnd))
+    {
+        qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
+                << " [" << m_filterStages.size() << "]"
+                << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
         // Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
         return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
     }
-#endif
+
     Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
-    //fprintf(stderr, "-> complete (final BW %.1f, frequency offset %.1f)\n", sigBw, ofs);
+
+    qDebug() << "UpChannelizer::createFilterChain: complete:"
+            << " #stages: " << m_filterStages.size()
+            << " BW: "  << sigBw
+            << " ofs: " << ofs;
+
     return ofs;
 }
 
