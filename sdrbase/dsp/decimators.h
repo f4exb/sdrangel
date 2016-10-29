@@ -20,20 +20,22 @@
 #include "dsp/dsptypes.h"
 #include "dsp/inthalfbandfilter.h"
 
-template<uint SdrBits, uint InputBits> 
+#define DECIMATORS_HB_FILTER_ORDER 48
+
+template<uint SdrBits, uint InputBits>
 struct decimation_shifts
 {
-    static const uint pre1   = 0; 
-    static const uint pre2   = 0; 
-    static const uint post2  = 0; 
-    static const uint pre4   = 0; 
-    static const uint post4  = 0; 
-    static const uint pre8   = 0; 
-    static const uint post8  = 0; 
-    static const uint pre16  = 0; 
-    static const uint post16 = 0; 
-    static const uint pre32  = 0; 
-    static const uint post32 = 0; 
+    static const uint pre1   = 0;
+    static const uint pre2   = 0;
+    static const uint post2  = 0;
+    static const uint pre4   = 0;
+    static const uint post4  = 0;
+    static const uint pre8   = 0;
+    static const uint post8  = 0;
+    static const uint pre16  = 0;
+    static const uint post16 = 0;
+    static const uint pre32  = 0;
+    static const uint post32 = 0;
     static const uint pre64  = 0;
     static const uint post64 = 0;
 };
@@ -59,17 +61,17 @@ struct decimation_shifts<16, 16>
 template<>
 struct decimation_shifts<16, 12>
 {
-    static const uint pre1   = 4; 
-    static const uint pre2   = 3; 
-    static const uint post2  = 0; 
-    static const uint pre4   = 2; 
-    static const uint post4  = 0; 
-    static const uint pre8   = 1; 
-    static const uint post8  = 0; 
-    static const uint pre16  = 0; 
-    static const uint post16 = 0; 
-    static const uint pre32  = 0; 
-    static const uint post32 = 1; 
+    static const uint pre1   = 4;
+    static const uint pre2   = 3;
+    static const uint post2  = 0;
+    static const uint pre4   = 2;
+    static const uint post4  = 0;
+    static const uint pre8   = 1;
+    static const uint post8  = 0;
+    static const uint pre16  = 0;
+    static const uint post16 = 0;
+    static const uint pre32  = 0;
+    static const uint post32 = 1;
     static const uint pre64  = 0;
     static const uint post64 = 2;
 };
@@ -79,15 +81,15 @@ struct decimation_shifts<16, 8>
 {
     static const uint pre1   = 6;
     static const uint pre2   = 5;
-    static const uint post2  = 0; 
+    static const uint post2  = 0;
     static const uint pre4   = 4;
-    static const uint post4  = 0; 
+    static const uint post4  = 0;
     static const uint pre8   = 3;
-    static const uint post8  = 0; 
+    static const uint post8  = 0;
     static const uint pre16  = 2;
-    static const uint post16 = 0; 
+    static const uint post16 = 0;
     static const uint pre32  = 1;
-    static const uint post32 = 0; 
+    static const uint post32 = 0;
     static const uint pre64  = 0;
     static const uint post64 = 0;
 };
@@ -118,12 +120,12 @@ public:
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
-	IntHalfbandFilter m_decimator2;  // 1st stages
-	IntHalfbandFilter m_decimator4;  // 2nd stages
-	IntHalfbandFilter m_decimator8;  // 3rd stages
-	IntHalfbandFilter m_decimator16; // 4th stages
-	IntHalfbandFilter m_decimator32; // 5th stages
-	IntHalfbandFilter m_decimator64; // 6th stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 };
 
 template<typename T, uint SdrBits, uint InputBits>
@@ -308,7 +310,7 @@ void Decimators<T, SdrBits, InputBits>::decimate16_inf(SampleVector::iterator* i
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        
+
 		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
 
 		(**it).setReal(xreal[3] >> decimation_shifts<SdrBits, InputBits>::post16);

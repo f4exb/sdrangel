@@ -23,9 +23,11 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
+#include "dsp/inthalfbandfilter.h"
+
+#define DOWNCHANNELIZER_HB_FILTER_ORDER 48
 
 class MessageQueue;
-class IntHalfbandFilter;
 
 class SDRANGEL_API DownChannelizer : public BasebandSampleSink {
 	Q_OBJECT
@@ -67,8 +69,8 @@ protected:
 			ModeUpperHalf
 		};
 
-		typedef bool (IntHalfbandFilter::*WorkFunction)(Sample* s);
-		IntHalfbandFilter* m_filter;
+		typedef bool (IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+		IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 		WorkFunction m_workFunction;
 
 		FilterStage(Mode mode);

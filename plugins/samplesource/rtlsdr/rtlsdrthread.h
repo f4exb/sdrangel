@@ -23,7 +23,7 @@
 #include <QWaitCondition>
 #include <rtl-sdr.h>
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
 class RTLSDRThread : public QThread {

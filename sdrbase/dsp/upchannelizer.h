@@ -23,9 +23,11 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
+#include "dsp/inthalfbandfilter.h"
+
+#define UPCHANNELIZER_HB_FILTER_ORDER 80
 
 class MessageQueue;
-class IntHalfbandFilter;
 
 class SDRANGEL_API UpChannelizer : public BasebandSampleSource {
     Q_OBJECT
@@ -67,8 +69,8 @@ protected:
             ModeUpperHalf
         };
 
-        typedef bool (IntHalfbandFilter::*WorkFunction)(Sample* sIn, Sample *sOut);
-        IntHalfbandFilter* m_filter;
+        typedef bool (IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
+        IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
         WorkFunction m_workFunction;
 
         FilterStage(Mode mode);

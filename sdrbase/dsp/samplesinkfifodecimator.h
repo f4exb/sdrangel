@@ -120,12 +120,12 @@ public:
 	void decimate64_cen(SampleSinkFifoDoubleBuffered& fifo, const T* buf, qint32 len);
 
 private:
-	IntHalfbandFilter m_decimator2;  // 1st stages
-	IntHalfbandFilter m_decimator4;  // 2nd stages
-	IntHalfbandFilter m_decimator8;  // 3rd stages
-	IntHalfbandFilter m_decimator16; // 4th stages
-	IntHalfbandFilter m_decimator32; // 5th stages
-	IntHalfbandFilter m_decimator64; // 6th stages
+	IntHalfbandFilter<32> m_decimator2;  // 1st stages
+	IntHalfbandFilter<32> m_decimator4;  // 2nd stages
+	IntHalfbandFilter<32> m_decimator8;  // 3rd stages
+	IntHalfbandFilter<32> m_decimator16; // 4th stages
+	IntHalfbandFilter<32> m_decimator32; // 5th stages
+	IntHalfbandFilter<32> m_decimator64; // 6th stages
 };
 
 template<typename T, uint32_t SdrBits, uint32_t InputBits>
@@ -337,7 +337,7 @@ void SampleSinkFifoDecimator<T, SdrBits, InputBits>::decimate16_inf(SampleSinkFi
 
 		m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 		m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        
+
 		m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
 
 		(*it).setReal(xreal[3] >> decimation_shifts<SdrBits, InputBits>::post16);
