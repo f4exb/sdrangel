@@ -64,20 +64,39 @@ void UpChannelizer::pull(Sample& sample)
         m_mutex.lock();
 
         FilterStages::iterator stage = m_filterStages.begin();
+        std::vector<Sample>::iterator stageSample = m_stageSamples.begin();
 
-        // m_sampleIn
+        for (; stage != m_filterStages.end(); ++stage, ++stageSample)
+        {
+            if(stage == m_filterStages.end() - 1)
+            {
+                if ((*stage)->work(&m_sampleIn, &(*stageSample)))
+                {
+                    m_sampleSource->pull(m_sampleIn); // get new input sample
+                }
+            }
+            else
+            {
+                if (!(*stage)->work(&(*(stageSample+1)), &(*stageSample)))
+                {
+                    break;
+                }
+            }
+        }
 
-		for (; stage != m_filterStages.end(); ++stage)
-		{
-			// let's make it work for one stage only (96 kS/s < SR < 192 kS/s)
-			if(stage == m_filterStages.end() - 1)
-			{
-				if ((*stage)->work(&m_sampleIn, &sample))
-				{
-					m_sampleSource->pull(m_sampleIn); // get new input sample
-				}
-			}
-		}
+        sample = *m_stageSamples.begin();
+
+//		for (; stage != m_filterStages.end(); ++stage)
+//		{
+//			// let's make it work for one stage only (96 kS/s < SR < 192 kS/s)
+//			if(stage == m_filterStages.end() - 1)
+//			{
+//				if ((*stage)->work(&m_sampleIn, &sample))
+//				{
+//					m_sampleSource->pull(m_sampleIn); // get new input sample
+//				}
+//			}
+//		}
 
         m_mutex.unlock();
     }
@@ -221,6 +240,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
     Real sigBw = sigEnd - sigStart;
     Real safetyMargin = sigBw / 20;
     Real rot = sigBw / 4;
+    Sample s;
 
     safetyMargin = 0;
 
@@ -238,6 +258,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigStart << ":" << sigStart + sigBw / 2.0 << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
+        m_stageSamples.push_back(s);
         return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
     }
 
@@ -248,6 +269,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigEnd - sigBw / 2.0f << ":" << sigEnd << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
+        m_stageSamples.push_back(s);
         return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
     }
 
@@ -259,6 +281,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+        m_stageSamples.push_back(s);
         // Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
         return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
     }
@@ -278,6 +301,7 @@ void UpChannelizer::freeFilterChain()
     for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
         delete *it;
     m_filterStages.clear();
+    m_stageSamples.clear();
 }
 
 

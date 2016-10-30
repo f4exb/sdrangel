@@ -83,6 +83,7 @@ protected:
     };
     typedef std::vector<FilterStage*> FilterStages;
     FilterStages m_filterStages;
+    std::vector<Sample> m_stageSamples;
     BasebandSampleSource* m_sampleSource; //!< Modulator
     int m_outputSampleRate;
     int m_requestedInputSampleRate;
