@@ -65,25 +65,7 @@ void AMMod::pull(Sample& sample)
 {
 	Complex ci;
 
-//  Resampler used for interpolation only
-//	m_interpolator.resample(&m_interpolatorDistanceRemain, m_modSample, &m_interpolatorConsumed, &ci);
-//	m_interpolatorDistanceRemain += m_interpolatorDistance;
-//
-//	if (m_interpolatorConsumed)
-//	{
-//		Real t = m_toneNco.next();
-//		m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-//		m_modSample.imag(0.0f);
-//		m_interpolatorConsumed = false;
-//	}
-
-//  Specialized interpolator
-//	if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-//	{
-//        Real t = m_toneNco.next();
-//        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-//        m_modSample.imag(0.0f);
-//	}
+	m_settingsMutex.lock();
 
     if (m_interpolatorDistance > 1.0f) // decimate
     {
@@ -111,6 +93,8 @@ void AMMod::pull(Sample& sample)
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+
+    m_settingsMutex.unlock();
 
     Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 	magsq /= (1<<30);
