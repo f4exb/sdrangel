@@ -36,19 +36,75 @@ ColorMapper::ColorMapper(Theme theme) :
 		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x40, 0x23, 0x00)));
 		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x97, 0x54, 0x00)));
 		*/
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x97, 0x54, 0x00))); // 59%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x5e, 0x34, 0x00))); // 37%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x2e, 0x19, 0x00))); // 18%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x40, 0x23, 0x00))); // 25%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x5e, 0x34, 0x00))); // 37%
-		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x97, 0x54, 0x00))); // 59%
-		m_foregroundColor = QColor(0xff, 0x8b, 0x00);
-		m_secondaryForegroundColor = QColor(0xff, 0xc5, 0x80);
-		m_highlightColor = QColor(0xbf, 0x69, 0x00, 0x80);
-		m_boundaryColor = QColor(0x66, 0x38, 0x20);
-		m_boundaryAlphaColor = QColor(0xff, 0x8b, 0x00, 0x20);
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x97, 0x54, 0x00))); // 59% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x5e, 0x34, 0x00))); // 37% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x2e, 0x19, 0x00))); // 18% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x40, 0x23, 0x00))); // 25% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x5e, 0x34, 0x00))); // 37% brightness
+		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x97, 0x54, 0x00))); // 59% brightness
+		m_foregroundColor = QColor(0xff, 0x8b, 0x00);           // Base 33 degrees hue
+		m_secondaryForegroundColor = QColor(0xff, 0xc5, 0x80);  // 50% saturation
+		m_highlightColor = QColor(0xbf, 0x69, 0x00, 0x80);      // 75% saturation
+		m_boundaryColor = QColor(0x66, 0x38, 0x20);             // 69% saturation 40% brightness
+		m_boundaryAlphaColor = QColor(0xff, 0x8b, 0x00, 0x20);  // Base with alpha
 		break;
+    case ReverseGreenEmerald:
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x00, 0x96, 0x26))); // 59% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x00, 0x5e, 0x10))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x00, 0x2e, 0x0b))); // 18% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x00, 0x40, 0x10))); // 25% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x00, 0x5e, 0x10))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x00, 0x96, 0x26))); // 59% brightness
+        m_foregroundColor = QColor(0x00, 0xff, 0x40);           // Base 135 degrees hue
+        m_secondaryForegroundColor = QColor(0x80, 0xff, 0x9f);  // 50% saturation
+        m_highlightColor = QColor(0x40, 0xff, 0x70, 0x80);      // 75% saturation
+        m_boundaryColor = QColor(0x20, 0x66, 0x31);             // 69% saturation 40% brightness
+        m_boundaryAlphaColor = QColor(0x80, 0xff, 0x40, 0x20);  // Base with alpha
+        break;
+    case ReverseGreen:
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x00, 0x96, 0x00))); // 59% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x00, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x00, 0x2e, 0x00))); // 18% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x00, 0x40, 0x00))); // 25% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x00, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x00, 0x96, 0x00))); // 59% brightness
+        m_foregroundColor = QColor(0x00, 0xff, 0x00);           // Base 120 degrees hue (pure green)
+        m_secondaryForegroundColor = QColor(0x80, 0xff, 0x80);  // 50% saturation
+        m_highlightColor = QColor(0x40, 0xff, 0x40, 0x80);      // 75% saturation
+        m_boundaryColor = QColor(0x20, 0x66, 0x20);             // 69% saturation 40% brightness
+        m_boundaryAlphaColor = QColor(0x00, 0xff, 0x00, 0x20);  // Base with alpha
+        break;
+    case ReverseGreenApple:
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x26, 0x96, 0x00))); // 59% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x10, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x0b, 0x2e, 0x00))); // 18% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x10, 0x40, 0x00))); // 25% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x10, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x26, 0x96, 0x00))); // 59% brightness
+        m_foregroundColor = QColor(0x40, 0xff, 0x00);           // Base 105 degrees hue (opposite towards red of emerald w.r. to pure green)
+        m_secondaryForegroundColor = QColor(0x9f, 0xff, 0x80);  // 50% saturation
+        m_highlightColor = QColor(0x70, 0xff, 0x40, 0x80);      // 75% saturation
+        m_boundaryColor = QColor(0x31, 0x66, 0x20);             // 69% saturation 40% brightness
+        m_boundaryAlphaColor = QColor(0x40, 0xff, 0x00, 0x20);  // Base with alpha
+        break;
+    case ReverseGreenYellow:
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x53, 0x96, 0x00))); // 59% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(0x34, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(0x19, 0x2e, 0x00))); // 18% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.5, QColor(0x00, 0x00, 0x00))); //  0% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(0x23, 0x40, 0x00))); // 25% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(0x34, 0x5e, 0x00))); // 37% brightness
+        m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(0x53, 0x96, 0x00))); // 59% brightness
+        m_foregroundColor = QColor(0x8c, 0xff, 0x00);           // Base 87 (=120-33) degrees hue
+        m_secondaryForegroundColor = QColor(0xc6, 0xff, 0x80);  // 50% saturation
+        m_highlightColor = QColor(0xa9, 0xff, 0x40, 0x80);      // 75% saturation
+        m_boundaryColor = QColor(0x46, 0x66, 0x20);             // 69% saturation 40% brightness
+        m_boundaryAlphaColor = QColor(0x8c, 0xff, 0x00, 0x20);  // Base with alpha
+        break;
 	case Normal:
 	default:
 		m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(0x40, 0x40, 0x40)));
