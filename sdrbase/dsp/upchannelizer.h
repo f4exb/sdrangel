@@ -19,7 +19,7 @@
 #define SDRBASE_DSP_UPCHANNELIZER_H_
 
 #include <dsp/basebandsamplesource.h>
-#include <list>
+#include <vector>
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
@@ -81,7 +81,7 @@ protected:
             return (m_filter->*m_workFunction)(sampleIn, sampleOut);
         }
     };
-    typedef std::list<FilterStage*> FilterStages;
+    typedef std::vector<FilterStage*> FilterStages;
     FilterStages m_filterStages;
     BasebandSampleSource* m_sampleSource; //!< Modulator
     int m_outputSampleRate;

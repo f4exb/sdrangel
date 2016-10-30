@@ -64,15 +64,13 @@ void UpChannelizer::pull(Sample& sample)
         m_mutex.lock();
 
         FilterStages::iterator stage = m_filterStages.begin();
-        FilterStages::iterator last = m_filterStages.end();
-        last--;
 
         // m_sampleIn
 
 		for (; stage != m_filterStages.end(); ++stage)
 		{
 			// let's make it work for one stage only (96 kS/s < SR < 192 kS/s)
-			if(stage == last)
+			if(stage == m_filterStages.end() - 1)
 			{
 				if ((*stage)->work(&m_sampleIn, &sample))
 				{
