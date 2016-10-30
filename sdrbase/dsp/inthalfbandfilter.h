@@ -8,7 +8,7 @@
 // uses Q1.14 format internally, input and output are S16
 
 /*
- * supported filter orders: 64, 48, 32
+ * supported filter orders: 80, 64, 48, 32
  * any usage of another value will be prevented by compilation errors
  */
 template<uint32_t HBFilterOrder>
