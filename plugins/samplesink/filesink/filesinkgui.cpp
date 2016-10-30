@@ -327,8 +327,8 @@ void FileSinkGui::tick()
 	}
 }
 
-unsigned int FileSinkSampleRates::m_rates[] = {32, 48, 64, 72, 128, 192, 256, 300, 512, 1000};
-unsigned int FileSinkSampleRates::m_nb_rates = 10;
+unsigned int FileSinkSampleRates::m_rates[] = {32, 48, 64, 72, 128, 192, 256, 288, 300, 384, 512, 1000};
+unsigned int FileSinkSampleRates::m_nb_rates = 12;
 
 unsigned int FileSinkSampleRates::getRate(unsigned int rate_index)
 {
