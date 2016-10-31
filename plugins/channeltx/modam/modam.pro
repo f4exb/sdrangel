@@ -13,6 +13,8 @@ TARGET = modam
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 
+DEFINES += USE_SIMD=1
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
