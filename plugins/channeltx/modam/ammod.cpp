@@ -179,7 +179,7 @@ void AMMod::apply()
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(16, m_config.m_outputSampleRate, m_config.m_rfBandwidth / 2.2);
+        m_interpolator.create(48, m_config.m_outputSampleRate, m_config.m_rfBandwidth / 2.2, 4.0);
 		m_settingsMutex.unlock();
 	}
 
