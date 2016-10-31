@@ -3,20 +3,36 @@
 #include <vector>
 #include "dsp/interpolator.h"
 
-static std::vector<Real> createPolyphaseLowPass(
-	int phaseSteps,
-	double gain,
-	double sampleRateHz,
-	double cutoffFreqHz,
-	double transitionWidthHz,
-	double oobAttenuationdB)
+
+void Interpolator::createPolyphaseLowPass(
+        std::vector<Real>& taps,
+        int phaseSteps,
+        double gain,
+        double sampleRateHz,
+        double cutoffFreqHz,
+        double transitionWidthHz,
+        double oobAttenuationdB)
 {
-	int ntaps = (int)(oobAttenuationdB * sampleRateHz / (22.0 * transitionWidthHz));
+    double nbTapsPerPhase = (oobAttenuationdB * sampleRateHz) / (22.0 * transitionWidthHz * phaseSteps);
+    return createPolyphaseLowPass(taps, phaseSteps, gain, sampleRateHz, cutoffFreqHz, nbTapsPerPhase);
+}
+
+
+void Interpolator::createPolyphaseLowPass(
+        std::vector<Real>& taps,
+        int phaseSteps,
+        double gain,
+        double sampleRateHz,
+        double cutoffFreqHz,
+        double nbTapsPerPhase)
+{
+	int ntaps = (int)(nbTapsPerPhase * phaseSteps);
+	qDebug("Interpolator::createPolyphaseLowPass: ntaps: %d", ntaps);
 	if((ntaps % 2) != 0)
 		ntaps++;
 	ntaps *= phaseSteps;
 
-	std::vector<float> taps(ntaps);
+	taps.resize(ntaps);
 	std::vector<float> window(ntaps);
 
 	for(int n = 0; n < ntaps; n++)
@@ -37,8 +53,6 @@ static std::vector<Real> createPolyphaseLowPass(
 
 	for(int i = 0; i < ntaps; i++)
 		taps[i] *= gain;
-
-	return taps;
 }
 
 Interpolator::Interpolator() :
@@ -52,17 +66,19 @@ Interpolator::~Interpolator()
 	free();
 }
 
-void Interpolator::create(int phaseSteps, double sampleRate, double cutoff)
+void Interpolator::create(int phaseSteps, double sampleRate, double cutoff, double nbTapsPerPhase)
 {
 	free();
 
-	std::vector<Real> taps = createPolyphaseLowPass(
+	std::vector<Real> taps;
+
+	createPolyphaseLowPass(
+	    taps,
 		phaseSteps, // number of polyphases
 		1.0, // gain
 		phaseSteps * sampleRate, // sampling frequency
 		cutoff, // hz beginning of transition band
-		sampleRate / 5.0,  // hz width of transition band
-		20.0); // out of band attenuation
+		nbTapsPerPhase);
 
 	// init state
 	m_ptr = 0;

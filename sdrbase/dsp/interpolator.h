@@ -16,7 +16,7 @@ public:
 	Interpolator();
 	~Interpolator();
 
-	void create(int phaseSteps, double sampleRate, double cutoff);
+	void create(int phaseSteps, double sampleRate, double cutoff, double nbTapsPerPhase = 4.5);
 	void free();
 
 	// Original code allowed for upsampling, but was never used that way
@@ -84,6 +84,23 @@ private:
 	int m_ptr;
 	int m_phaseSteps;
 	int m_nTaps;
+
+	static void createPolyphaseLowPass(
+	    std::vector<Real>& taps,
+	    int phaseSteps,
+	    double gain,
+	    double sampleRateHz,
+	    double cutoffFreqHz,
+	    double transitionWidthHz,
+	    double oobAttenuationdB);
+
+    static void createPolyphaseLowPass(
+        std::vector<Real>& taps,
+        int phaseSteps,
+        double gain,
+        double sampleRateHz,
+        double cutoffFreqHz,
+        double nbTapsPerPhase);
 
 	void createTaps(int nTaps, double sampleRate, double cutoff, std::vector<Real>* taps);
 
