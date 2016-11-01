@@ -3,63 +3,8 @@
 
 #include <stdint.h>
 #include "dsp/dsptypes.h"
+#include "dsp/hbfiltertraits.h"
 #include "util/export.h"
-
-// uses Q1.14 format internally, input and output are S16
-
-/*
- * supported filter orders: 96, 80, 64, 48, 32
- * any usage of another value will be prevented by compilation errors
- */
-template<uint32_t HBFilterOrder>
-struct HBFIRFilterTraits
-{
-};
-
-template<>
-struct HBFIRFilterTraits<32>
-{
-    static const qint32 hbOrder = 32;
-    static const qint32 hbShift = 14;
-    static const qint16 hbMod[32+6];
-    static const qint32 hbCoeffs[8];
-};
-
-template<>
-struct HBFIRFilterTraits<48>
-{
-    static const qint32 hbOrder = 48;
-    static const qint32 hbShift = 14;
-    static const qint16 hbMod[48+6];
-    static const qint32 hbCoeffs[12];
-};
-
-template<>
-struct HBFIRFilterTraits<64>
-{
-    static const qint32 hbOrder = 64;
-    static const qint32 hbShift = 14;
-    static const qint16 hbMod[64+6];
-    static const qint32 hbCoeffs[16];
-};
-
-template<>
-struct HBFIRFilterTraits<80>
-{
-    static const qint32 hbOrder = 80;
-    static const qint32 hbShift = 14;
-    static const qint16 hbMod[80+6];
-    static const qint32 hbCoeffs[20];
-};
-
-template<>
-struct HBFIRFilterTraits<96>
-{
-    static const qint32 hbOrder = 96;
-    static const qint32 hbShift = 16;
-    static const qint16 hbMod[96+6];
-    static const qint32 hbCoeffs[24];
-};
 
 template<uint32_t HBFilterOrder>
 class SDRANGEL_API IntHalfbandFilter {

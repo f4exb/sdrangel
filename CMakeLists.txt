@@ -116,7 +116,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/filtermbe.cpp
     sdrbase/dsp/filerecord.cpp
     sdrbase/dsp/interpolator.cpp
-    sdrbase/dsp/inthalfbandfilter.cpp
+    sdrbase/dsp/hbfiltertraits.cpp
     sdrbase/dsp/lowpass.cpp
     sdrbase/dsp/movingaverage.cpp
     sdrbase/dsp/nco.cpp
@@ -210,6 +210,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/filerecord.h
     sdrbase/dsp/gfft.h
     sdrbase/dsp/interpolator.h
+    sdrbase/dsp/hbfiltertraits.h
     sdrbase/dsp/inthalfbandfilter.h
     sdrbase/dsp/kissfft.h
     sdrbase/dsp/kissengine.h
