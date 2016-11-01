@@ -212,6 +212,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/interpolator.h
     sdrbase/dsp/hbfiltertraits.h
     sdrbase/dsp/inthalfbandfilter.h
+    sdrbase/dsp/inthalfbandfilterdb.h
     sdrbase/dsp/kissfft.h
     sdrbase/dsp/kissengine.h
     sdrbase/dsp/lowpass.h

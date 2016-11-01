@@ -202,20 +202,20 @@ void UpChannelizer::applyConfiguration()
 }
 
 UpChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>),
+    m_filter(new IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenterDB;
+            m_workFunction = &IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalfDB;
+            m_workFunction = &IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalfDB;
+            m_workFunction = &IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
             break;
     }
 }
