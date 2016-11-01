@@ -207,15 +207,15 @@ UpChannelizer::FilterStage::FilterStage(Mode mode) :
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
+            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenterDB;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
+            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalfDB;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
+            m_workFunction = &IntHalfbandFilter<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalfDB;
             break;
     }
 }

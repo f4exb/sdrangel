@@ -141,6 +141,51 @@ public:
         }
     }
 
+    // upsample by 2, return center part of original spectrum - double buffer variant
+    bool workInterpolateCenterDB(Sample* sampleIn, Sample *SampleOut)
+    {
+        switch(m_state)
+        {
+            case 0:
+                // insert sample into ring-buffer
+                m_samplesDB[m_ptrDB][0] = 0;
+                m_samplesDB[m_ptrDB][1] = 0;
+                m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
+                m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+
+                // save result
+                doFIRDB(SampleOut);
+
+                // advance write-pointer
+                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+                // next state
+                m_state = 1;
+
+                // tell caller we didn't consume the sample
+                return false;
+
+            default:
+                // insert sample into ring-buffer
+                m_samplesDB[m_ptrDB][0] = sampleIn->real();
+                m_samplesDB[m_ptrDB][1] = sampleIn->imag();
+                m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
+                m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+
+                // save result
+                doFIRDB(SampleOut);
+
+                // advance write-pointer
+                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+                // next state
+                m_state = 0;
+
+                // tell caller we consumed the sample
+                return true;
+        }
+    }
+
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
@@ -304,7 +349,7 @@ public:
             // next state
             m_state = 1;
 
-            // tell caller we don't have a new sample
+            // tell caller we didn't consume the sample
             return false;
 
         case 1:
@@ -323,7 +368,7 @@ public:
             // next state
             m_state = 2;
 
-            // tell caller we have a new sample
+            // tell caller we consumed the sample
             return true;
 
         case 2:
@@ -342,7 +387,7 @@ public:
             // next state
             m_state = 3;
 
-            // tell caller we don't have a new sample
+            // tell caller we didn't consume the sample
             return false;
 
         default:
@@ -361,7 +406,100 @@ public:
             // next state
             m_state = 0;
 
-            // tell caller we have a new sample
+            // tell caller we consumed the sample
+            return true;
+        }
+    }
+
+    // upsample by 2, from lower half of original spectrum - double buffer variant
+    bool workInterpolateLowerHalfDB(Sample* sampleIn, Sample *sampleOut)
+    {
+        Sample s;
+
+        switch(m_state)
+        {
+        case 0:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = 0;
+            m_samplesDB[m_ptrDB][1] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(s.imag());
+            sampleOut->setImag(-s.real());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 1;
+
+            // tell caller we didn't consume the sample
+            return false;
+
+        case 1:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(-s.real());
+            sampleOut->setImag(-s.imag());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 2;
+
+            // tell caller we consumed the sample
+            return true;
+
+        case 2:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = 0;
+            m_samplesDB[m_ptrDB][1] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(-s.imag());
+            sampleOut->setImag(s.real());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 3;
+
+            // tell caller we didn't consume the sample
+            return false;
+
+        default:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(s.real());
+            sampleOut->setImag(s.imag());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 0;
+
+            // tell caller we consumed the sample
             return true;
         }
     }
@@ -458,7 +596,7 @@ public:
             // next state
             m_state = 1;
 
-            // tell caller we don't have a new sample
+            // tell caller we didn't consume the sample
             return false;
 
         case 1:
@@ -477,7 +615,7 @@ public:
             // next state
             m_state = 2;
 
-            // tell caller we have a new sample
+            // tell caller we consumed the sample
             return true;
 
         case 2:
@@ -496,7 +634,7 @@ public:
             // next state
             m_state = 3;
 
-            // tell caller we don't have a new sample
+            // tell caller we didn't consume the sample
             return false;
 
         default:
@@ -515,7 +653,100 @@ public:
             // next state
             m_state = 0;
 
-            // tell caller we have a new sample
+            // tell caller we consumed the sample
+            return true;
+        }
+    }
+
+    // upsample by 2, move original spectrum to upper half - double buffer variant
+    bool workInterpolateUpperHalfDB(Sample* sampleIn, Sample *sampleOut)
+    {
+        Sample s;
+
+        switch(m_state)
+        {
+        case 0:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = 0;
+            m_samplesDB[m_ptrDB][1] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(-s.imag());
+            sampleOut->setImag(s.real());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 1;
+
+            // tell caller we didn't consume the sample
+            return false;
+
+        case 1:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(-s.real());
+            sampleOut->setImag(-s.imag());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 2;
+
+            // tell caller we consumed the sample
+            return true;
+
+        case 2:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = 0;
+            m_samplesDB[m_ptrDB][1] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(s.imag());
+            sampleOut->setImag(-s.real());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 3;
+
+            // tell caller we didn't consume the sample
+            return false;
+
+        default:
+            // insert sample into ring-buffer
+            m_samplesDB[m_ptrDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
+            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+
+            // save result
+            doFIRDB(&s);
+            sampleOut->setReal(s.real());
+            sampleOut->setImag(s.imag());
+
+            // advance write-pointer
+            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+
+            // next state
+            m_state = 0;
+
+            // tell caller we consumed the sample
             return true;
         }
     }
@@ -549,15 +780,43 @@ public:
     }
 
 protected:
-	qint32 m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2]; // Valgrind optim (from qint16)
+	qint32 m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2];     // Valgrind optim (from qint16)
+	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
 	qint16 m_ptr;
+	int m_ptrDB;
+	int m_sizeDB;
 	int m_state;
+
+    void doFIRDB(Sample* sample)
+    {
+        int a = m_ptrDB + m_sizeDB; // tip pointer
+        int b = m_ptrDB + 1; // tail pointer
+        qint32 iAcc = 0;
+        qint32 qAcc = 0;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
+        {
+            iAcc += (m_samplesDB[a][0] + m_samplesDB[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += (m_samplesDB[a][1] + m_samplesDB[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            a -= 2;
+            b += 2;
+        }
+
+        iAcc += ((qint32)m_samplesDB[b-1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        qAcc += ((qint32)m_samplesDB[b-1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+
+        sample->setReal(iAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+        sample->setImag(qAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+    }
 
 	void doFIR(Sample* sample)
 	{
 		// init read-pointer
-		int a = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 + 1]; // 0 + 1
-		int b = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 2]; //-1 - 1
+//		int a = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 + 1]; // 0 + 1
+//		int b = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 2]; //-1 - 1
+		// ancient way:
+		int a = (m_ptr + 1) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+		int b = (m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
 
 		// go through samples in buffer
 		qint32 iAcc = 0;
@@ -572,11 +831,16 @@ protected:
 			qAcc += (m_samples[a][1] + m_samples[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
 
 			// update read-pointer
-			a = HBFIRFilterTraits<HBFilterOrder>::hbMod[a + 2 + 2];
-			b = HBFIRFilterTraits<HBFilterOrder>::hbMod[b + 2 - 2];
+//			a = HBFIRFilterTraits<HBFilterOrder>::hbMod[a + 2 + 2];
+//			b = HBFIRFilterTraits<HBFilterOrder>::hbMod[b + 2 - 2];
+			// ancient way:
+			a = (a + 2) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+			b = (b + (HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
 		}
 
-		a = HBFIRFilterTraits<HBFilterOrder>::hbMod[a + 2 - 1];
+//		a = HBFIRFilterTraits<HBFilterOrder>::hbMod[a + 2 - 1];
+		// ancient way:
+		a = (a + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
 
 		iAcc += ((qint32)m_samples[a][0] + 1) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 		qAcc += ((qint32)m_samples[a][1] + 1) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
@@ -628,11 +892,23 @@ protected:
 template<uint32_t HBFilterOrder>
 IntHalfbandFilter<HBFilterOrder>::IntHalfbandFilter()
 {
-    for(int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1; i++) {
+    m_sizeDB = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
+
+    for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1; i++)
+    {
         m_samples[i][0] = 0;
         m_samples[i][1] = 0;
+
+        if (i < m_sizeDB)
+        {
+            m_samplesDB[i][0] = 0;
+            m_samplesDB[i][1] = 0;
+        }
     }
+
     m_ptr = 0;
+    m_ptrDB = 0;
+
     m_state = 0;
 }
 

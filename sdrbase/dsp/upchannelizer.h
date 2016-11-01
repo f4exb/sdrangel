@@ -25,7 +25,7 @@
 #include "util/message.h"
 #include "dsp/inthalfbandfilter.h"
 
-#define UPCHANNELIZER_HB_FILTER_ORDER 64
+#define UPCHANNELIZER_HB_FILTER_ORDER 96
 
 class MessageQueue;
 
