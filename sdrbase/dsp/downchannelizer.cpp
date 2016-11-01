@@ -187,20 +187,20 @@ void DownChannelizer::applyConfiguration()
 }
 
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-	m_filter(new IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>),
+	m_filter(new IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>),
 	m_workFunction(0)
 {
 	switch(mode) {
 		case ModeCenter:
-			m_workFunction = &IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
 			break;
 
 		case ModeLowerHalf:
-			m_workFunction = &IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
 			break;
 
 		case ModeUpperHalf:
-			m_workFunction = &IntHalfbandFilter<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
 			break;
 	}
 }
