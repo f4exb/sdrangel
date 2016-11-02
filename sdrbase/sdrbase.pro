@@ -54,7 +54,7 @@ SOURCES += mainwindow.cpp\
         dsp/filtermbe.cpp\
         dsp/filerecord.cpp\
         dsp/interpolator.cpp\
-        dsp/inthalfbandfilter.cpp\
+        dsp/hbfiltertraits.cpp\
         dsp/lowpass.cpp\
         dsp/movingaverage.cpp\
         dsp/nco.cpp\
@@ -137,8 +137,10 @@ HEADERS  += mainwindow.h\
         dsp/filtermbe.h\
         dsp/filerecord.h\
         dsp/gfft.h\
+        dsp/hbfiltertraits.h\
         dsp/interpolator.h\
         dsp/inthalfbandfilter.h\
+        dsp/inthalfbandfilterdb.h\
         dsp/kissfft.h\
         dsp/kissengine.h\
         dsp/lowpass.h\
