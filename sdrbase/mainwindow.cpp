@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
 	// work around broken Qt dock widget ordering
-	removeDockWidget(ui->inputSelectDock);
     removeDockWidget(ui->inputViewDock);
+	removeDockWidget(ui->inputSelectDock);
 	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
 	removeDockWidget(ui->channelDock);
@@ -89,14 +89,14 @@ MainWindow::MainWindow(QWidget* parent) :
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
-	ui->inputSelectDock->show();
+	ui->inputViewDock->show();
     ui->inputSelectDock->show();
 	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
 	ui->channelDock->show();
 
-	ui->menu_Window->addAction(ui->inputSelectDock->toggleViewAction());
     ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
+	ui->menu_Window->addAction(ui->inputSelectDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
