@@ -18,7 +18,7 @@
 #define INCLUDE_GPL_DSP_DECIMATORS_H_
 
 #include "dsp/dsptypes.h"
-#include "dsp/inthalfbandfilter.h"
+#include "dsp/inthalfbandfilterdb.h"
 
 #define DECIMATORS_HB_FILTER_ORDER 48
 
@@ -120,12 +120,12 @@ public:
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-	IntHalfbandFilter<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 };
 
 template<typename T, uint SdrBits, uint InputBits>
