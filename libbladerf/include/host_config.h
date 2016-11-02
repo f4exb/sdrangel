@@ -27,11 +27,11 @@
 #ifndef HOST_CONFIG_H__
 #define HOST_CONFIG_H__
 
-#define  BLADERF_OS_LINUX 0
-#define  BLADERF_OS_FREEBSD 0
-#define  BLADERF_OS_OSX 0
-#define  BLADERF_OS_WINDOWS 1
-#define  BLADERF_BIG_ENDIAN 0
+//#define  BLADERF_OS_LINUX 0
+//#define  BLADERF_OS_FREEBSD 0
+//#define  BLADERF_OS_OSX 0
+//#define  BLADERF_OS_WINDOWS 1
+//#define  BLADERF_BIG_ENDIAN 0
 
 #if !(BLADERF_OS_LINUX || BLADERF_OS_OSX || BLADERF_OS_WINDOWS || BLADERF_OS_FREEBSD)
 #   error "Build not configured for any supported operating systems"

@@ -57,6 +57,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(airspy)
     add_subdirectory(hackrf)
     add_subdirectory(rtlsdr)
+    add_subdirectory(bladerf)
 endif (BUILD_DEBIAN)
 
 

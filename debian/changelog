@@ -1,3 +1,10 @@
+sdrangel (2.2.1-1) unstable; urgency=medium
+
+  * Baseband Tx support (phase 2)
+  * Code optimizations
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 02 Nov 2016 14:15:15 +0100
+
 sdrangel (2.2.0-1) unstable; urgency=medium
 
   * Initial release as a Debian package

@@ -464,6 +464,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(libairspy)
     add_subdirectory(libhackrf)
     add_subdirectory(librtlsdr)
+    add_subdirectory(libbladerf)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(plugins)

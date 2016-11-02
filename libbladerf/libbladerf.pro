@@ -9,6 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = libbladerf
 
+DEFINES += BLADERF_OS_WINDOWS=1
+
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF"
 CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
 CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
