@@ -35,16 +35,16 @@ public:
 	bool workDecimateCenter(Sample* sample)
 	{
 		// insert sample into ring-buffer
-	    m_samplesDB[m_ptrDB][0] = sample->real();
-	    m_samplesDB[m_ptrDB][1] = sample->imag();
-	    m_samplesDB[m_ptrDB + m_sizeDB][0] = sample->real();
-	    m_samplesDB[m_ptrDB + m_sizeDB][1] = sample->imag();
+	    m_samplesDB[m_ptr][0] = sample->real();
+	    m_samplesDB[m_ptr][1] = sample->imag();
+	    m_samplesDB[m_ptr + m_size][0] = sample->real();
+	    m_samplesDB[m_ptr + m_size][1] = sample->imag();
 
 		switch(m_state)
 		{
 			case 0:
 				// advance write-pointer
-			    m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+			    m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 1;
@@ -57,7 +57,7 @@ public:
 				doFIR(sample);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 0;
@@ -74,16 +74,16 @@ public:
         {
             case 0:
                 // insert sample into ring-buffer
-                m_samplesDB[m_ptrDB][0] = 0;
-                m_samplesDB[m_ptrDB][1] = 0;
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+                m_samplesDB[m_ptr][0] = 0;
+                m_samplesDB[m_ptr][1] = 0;
+                m_samplesDB[m_ptr + m_size][0] = 0;
+                m_samplesDB[m_ptr + m_size][1] = 0;
 
                 // save result
                 doFIR(SampleOut);
 
                 // advance write-pointer
-                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+                m_ptr = (m_ptr + 1) % m_size;
 
                 // next state
                 m_state = 1;
@@ -93,16 +93,16 @@ public:
 
             default:
                 // insert sample into ring-buffer
-                m_samplesDB[m_ptrDB][0] = sampleIn->real();
-                m_samplesDB[m_ptrDB][1] = sampleIn->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+                m_samplesDB[m_ptr][0] = sampleIn->real();
+                m_samplesDB[m_ptr][1] = sampleIn->imag();
+                m_samplesDB[m_ptr + m_size][0] = sampleIn->real();
+                m_samplesDB[m_ptr + m_size][1] = sampleIn->imag();
 
                 // save result
                 doFIR(SampleOut);
 
                 // advance write-pointer
-                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+                m_ptr = (m_ptr + 1) % m_size;
 
                 // next state
                 m_state = 0;
@@ -115,16 +115,16 @@ public:
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
-	    m_samplesDB[m_ptrDB][0] = *x;
-	    m_samplesDB[m_ptrDB][1] = *y;
-	    m_samplesDB[m_ptrDB + m_sizeDB][0] = *x;
-	    m_samplesDB[m_ptrDB + m_sizeDB][1] = *y;
+	    m_samplesDB[m_ptr][0] = *x;
+	    m_samplesDB[m_ptr][1] = *y;
+	    m_samplesDB[m_ptr + m_size][0] = *x;
+	    m_samplesDB[m_ptr + m_size][1] = *y;
 
 		switch(m_state)
 		{
 			case 0:
 				// advance write-pointer
-			    m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+			    m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 1;
@@ -137,7 +137,7 @@ public:
 				doFIR(x, y);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 0;
@@ -154,13 +154,13 @@ public:
 		{
 			case 0:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = -sample->imag();
-			    m_samplesDB[m_ptrDB][1] = sample->real();
-			    m_samplesDB[m_ptrDB + m_sizeDB][0] = -sample->imag();
-			    m_samplesDB[m_ptrDB + m_sizeDB][1] = sample->real();
+			    m_samplesDB[m_ptr][0] = -sample->imag();
+			    m_samplesDB[m_ptr][1] = sample->real();
+			    m_samplesDB[m_ptr + m_size][0] = -sample->imag();
+			    m_samplesDB[m_ptr + m_size][1] = sample->real();
 
 				// advance write-pointer
-			    m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+			    m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 1;
@@ -170,16 +170,16 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = -sample->real();
-			    m_samplesDB[m_ptrDB][1] = -sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = -sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = -sample->imag();
+			    m_samplesDB[m_ptr][0] = -sample->real();
+			    m_samplesDB[m_ptr][1] = -sample->imag();
+                m_samplesDB[m_ptr + m_size][0] = -sample->real();
+                m_samplesDB[m_ptr + m_size][1] = -sample->imag();
 
 				// save result
 				doFIR(sample);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 2;
@@ -189,13 +189,13 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = sample->imag();
-			    m_samplesDB[m_ptrDB][1] = -sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = -sample->real();
+			    m_samplesDB[m_ptr][0] = sample->imag();
+			    m_samplesDB[m_ptr][1] = -sample->real();
+                m_samplesDB[m_ptr + m_size][0] = sample->imag();
+                m_samplesDB[m_ptr + m_size][1] = -sample->real();
 
 				// advance write-pointer
-                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+                m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 3;
@@ -205,16 +205,16 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = sample->real();
-			    m_samplesDB[m_ptrDB][1] = sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = sample->imag();
+			    m_samplesDB[m_ptr][0] = sample->real();
+			    m_samplesDB[m_ptr][1] = sample->imag();
+                m_samplesDB[m_ptr + m_size][0] = sample->real();
+                m_samplesDB[m_ptr + m_size][1] = sample->imag();
 
 				// save result
 				doFIR(sample);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 0;
@@ -233,10 +233,10 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = 0;
-            m_samplesDB[m_ptrDB][1] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+            m_samplesDB[m_ptr][0] = 0;
+            m_samplesDB[m_ptr][1] = 0;
+            m_samplesDB[m_ptr + m_size][0] = 0;
+            m_samplesDB[m_ptr + m_size][1] = 0;
 
             // save result
             doFIR(&s);
@@ -244,7 +244,7 @@ public:
             sampleOut->setImag(-s.real());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 1;
@@ -254,10 +254,10 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptr][0] = sampleIn->real();
+            m_samplesDB[m_ptr][1] = sampleIn->imag();
+            m_samplesDB[m_ptr + m_size][0] = sampleIn->real();
+            m_samplesDB[m_ptr + m_size][1] = sampleIn->imag();
 
             // save result
             doFIR(&s);
@@ -265,7 +265,7 @@ public:
             sampleOut->setImag(-s.imag());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 2;
@@ -275,10 +275,10 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = 0;
-            m_samplesDB[m_ptrDB][1] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+            m_samplesDB[m_ptr][0] = 0;
+            m_samplesDB[m_ptr][1] = 0;
+            m_samplesDB[m_ptr + m_size][0] = 0;
+            m_samplesDB[m_ptr + m_size][1] = 0;
 
             // save result
             doFIR(&s);
@@ -286,7 +286,7 @@ public:
             sampleOut->setImag(s.real());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 3;
@@ -296,10 +296,10 @@ public:
 
         default:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptr][0] = sampleIn->real();
+            m_samplesDB[m_ptr][1] = sampleIn->imag();
+            m_samplesDB[m_ptr + m_size][0] = sampleIn->real();
+            m_samplesDB[m_ptr + m_size][1] = sampleIn->imag();
 
             // save result
             doFIR(&s);
@@ -307,7 +307,7 @@ public:
             sampleOut->setImag(s.imag());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 0;
@@ -324,13 +324,13 @@ public:
 		{
 			case 0:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = sample->imag();
-			    m_samplesDB[m_ptrDB][1] = -sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = -sample->real();
+			    m_samplesDB[m_ptr][0] = sample->imag();
+			    m_samplesDB[m_ptr][1] = -sample->real();
+                m_samplesDB[m_ptr + m_size][0] = sample->imag();
+                m_samplesDB[m_ptr + m_size][1] = -sample->real();
 
 				// advance write-pointer
-                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+                m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 1;
@@ -340,16 +340,16 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = -sample->real();
-			    m_samplesDB[m_ptrDB][1] = -sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = -sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = -sample->imag();
+			    m_samplesDB[m_ptr][0] = -sample->real();
+			    m_samplesDB[m_ptr][1] = -sample->imag();
+                m_samplesDB[m_ptr + m_size][0] = -sample->real();
+                m_samplesDB[m_ptr + m_size][1] = -sample->imag();
 
 				// save result
 				doFIR(sample);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 2;
@@ -359,13 +359,13 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = -sample->imag();
-			    m_samplesDB[m_ptrDB][1] = sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = -sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = sample->real();
+			    m_samplesDB[m_ptr][0] = -sample->imag();
+			    m_samplesDB[m_ptr][1] = sample->real();
+                m_samplesDB[m_ptr + m_size][0] = -sample->imag();
+                m_samplesDB[m_ptr + m_size][1] = sample->real();
 
 				// advance write-pointer
-                m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+                m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 3;
@@ -375,16 +375,16 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-			    m_samplesDB[m_ptrDB][0] = sample->real();
-			    m_samplesDB[m_ptrDB][1] = sample->imag();
-                m_samplesDB[m_ptrDB + m_sizeDB][0] = sample->real();
-                m_samplesDB[m_ptrDB + m_sizeDB][1] = sample->imag();
+			    m_samplesDB[m_ptr][0] = sample->real();
+			    m_samplesDB[m_ptr][1] = sample->imag();
+                m_samplesDB[m_ptr + m_size][0] = sample->real();
+                m_samplesDB[m_ptr + m_size][1] = sample->imag();
 
 				// save result
 				doFIR(sample);
 
 				// advance write-pointer
-				m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+				m_ptr = (m_ptr + 1) % m_size;
 
 				// next state
 				m_state = 0;
@@ -403,10 +403,10 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = 0;
-            m_samplesDB[m_ptrDB][1] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+            m_samplesDB[m_ptr][0] = 0;
+            m_samplesDB[m_ptr][1] = 0;
+            m_samplesDB[m_ptr + m_size][0] = 0;
+            m_samplesDB[m_ptr + m_size][1] = 0;
 
             // save result
             doFIR(&s);
@@ -414,7 +414,7 @@ public:
             sampleOut->setImag(s.real());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 1;
@@ -424,10 +424,10 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptr][0] = sampleIn->real();
+            m_samplesDB[m_ptr][1] = sampleIn->imag();
+            m_samplesDB[m_ptr + m_size][0] = sampleIn->real();
+            m_samplesDB[m_ptr + m_size][1] = sampleIn->imag();
 
             // save result
             doFIR(&s);
@@ -435,7 +435,7 @@ public:
             sampleOut->setImag(-s.imag());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 2;
@@ -445,10 +445,10 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = 0;
-            m_samplesDB[m_ptrDB][1] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = 0;
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = 0;
+            m_samplesDB[m_ptr][0] = 0;
+            m_samplesDB[m_ptr][1] = 0;
+            m_samplesDB[m_ptr + m_size][0] = 0;
+            m_samplesDB[m_ptr + m_size][1] = 0;
 
             // save result
             doFIR(&s);
@@ -456,7 +456,7 @@ public:
             sampleOut->setImag(-s.real());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 3;
@@ -466,10 +466,10 @@ public:
 
         default:
             // insert sample into ring-buffer
-            m_samplesDB[m_ptrDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB][1] = sampleIn->imag();
-            m_samplesDB[m_ptrDB + m_sizeDB][0] = sampleIn->real();
-            m_samplesDB[m_ptrDB + m_sizeDB][1] = sampleIn->imag();
+            m_samplesDB[m_ptr][0] = sampleIn->real();
+            m_samplesDB[m_ptr][1] = sampleIn->imag();
+            m_samplesDB[m_ptr + m_size][0] = sampleIn->real();
+            m_samplesDB[m_ptr + m_size][1] = sampleIn->imag();
 
             // save result
             doFIR(&s);
@@ -477,7 +477,7 @@ public:
             sampleOut->setImag(s.imag());
 
             // advance write-pointer
-            m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+            m_ptr = (m_ptr + 1) % m_size;
 
             // next state
             m_state = 0;
@@ -489,52 +489,60 @@ public:
 
     void myDecimate(const Sample* sample1, Sample* sample2)
     {
-        m_samplesDB[m_ptrDB][0] = sample1->real();
-        m_samplesDB[m_ptrDB][1] = sample1->imag();
-        m_samplesDB[m_ptrDB + m_sizeDB][0] = sample1->real();
-        m_samplesDB[m_ptrDB + m_sizeDB][1] = sample1->imag();
+        m_samplesDB[m_ptr][0] = sample1->real();
+        m_samplesDB[m_ptr][1] = sample1->imag();
+        m_samplesDB[m_ptr + m_size][0] = sample1->real();
+        m_samplesDB[m_ptr + m_size][1] = sample1->imag();
 
-        m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+        m_ptr = (m_ptr + 1) % m_size;
 
-        m_samplesDB[m_ptrDB][0] = sample2->real();
-        m_samplesDB[m_ptrDB][1] = sample2->imag();
-        m_samplesDB[m_ptrDB + m_sizeDB][0] = sample2->real();
-        m_samplesDB[m_ptrDB + m_sizeDB][1] = sample2->imag();
+        m_samplesDB[m_ptr][0] = sample2->real();
+        m_samplesDB[m_ptr][1] = sample2->imag();
+        m_samplesDB[m_ptr + m_size][0] = sample2->real();
+        m_samplesDB[m_ptr + m_size][1] = sample2->imag();
 
         doFIR(sample2);
 
-        m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+        m_ptr = (m_ptr + 1) % m_size;
     }
 
     void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
     {
-        m_samplesDB[m_ptrDB][0] = x1;
-        m_samplesDB[m_ptrDB][1] = y1;
-        m_samplesDB[m_ptrDB + m_sizeDB][0] = x1;
-        m_samplesDB[m_ptrDB + m_sizeDB][1] = y1;
+        m_samplesDB[m_ptr][0] = x1;
+        m_samplesDB[m_ptr][1] = y1;
+        m_samplesDB[m_ptr + m_size][0] = x1;
+        m_samplesDB[m_ptr + m_size][1] = y1;
 
-        m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+        m_ptr = (m_ptr + 1) % m_size;
 
-        m_samplesDB[m_ptrDB][0] = *x2;
-        m_samplesDB[m_ptrDB][1] = *y2;
-        m_samplesDB[m_ptrDB + m_sizeDB][0] = *x2;
-        m_samplesDB[m_ptrDB + m_sizeDB][1] = *y2;
+        m_samplesDB[m_ptr][0] = *x2;
+        m_samplesDB[m_ptr][1] = *y2;
+        m_samplesDB[m_ptr + m_size][0] = *x2;
+        m_samplesDB[m_ptr + m_size][1] = *y2;
 
         doFIR(x2, y2);
 
-        m_ptrDB = (m_ptrDB + 1) % m_sizeDB;
+        m_ptr = (m_ptr + 1) % m_size;
     }
 
 protected:
 	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
-	int m_ptrDB;
-	int m_sizeDB;
+	int m_ptr;
+	int m_size;
 	int m_state;
+
+    void storeSample(const FixReal& sampleI, const FixReal& sampleQ)
+    {
+    }
+
+    void storeSample(qint32 x, qint32 y)
+    {
+    }
 
     void doFIR(Sample* sample)
     {
-        int a = m_ptrDB + m_sizeDB; // tip pointer
-        int b = m_ptrDB + 1; // tail pointer
+        int a = m_ptr + m_size; // tip pointer
+        int b = m_ptr + 1; // tail pointer
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
@@ -555,8 +563,8 @@ protected:
 
     void doFIR(qint32 *x, qint32 *y)
     {
-        int a = m_ptrDB + m_sizeDB; // tip pointer
-        int b = m_ptrDB + 1; // tail pointer
+        int a = m_ptr + m_size; // tip pointer
+        int b = m_ptr + 1; // tail pointer
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
@@ -579,15 +587,15 @@ protected:
 template<uint32_t HBFilterOrder>
 IntHalfbandFilterDB<HBFilterOrder>::IntHalfbandFilterDB()
 {
-    m_sizeDB = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
+    m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
 
-    for (int i = 0; i < m_sizeDB; i++)
+    for (int i = 0; i < m_size; i++)
     {
         m_samplesDB[i][0] = 0;
         m_samplesDB[i][1] = 0;
     }
 
-    m_ptrDB = 0;
+    m_ptr = 0;
     m_state = 0;
 }
 
