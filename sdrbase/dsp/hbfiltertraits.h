@@ -37,7 +37,7 @@ struct HBFIRFilterTraits<32>
     static const int32_t hbOrder = 32;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[32+6];
-    static const int32_t hbCoeffs[8];
+    static const int32_t hbCoeffs[8] __attribute__ ((aligned (16)));
 };
 
 template<>
@@ -46,7 +46,7 @@ struct HBFIRFilterTraits<48>
     static const int32_t hbOrder = 48;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[48+6];
-    static const int32_t hbCoeffs[12];
+    static const int32_t hbCoeffs[12] __attribute__ ((aligned (16)));
 };
 
 template<>
@@ -55,7 +55,7 @@ struct HBFIRFilterTraits<64>
     static const int32_t hbOrder = 64;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[64+6];
-    static const int32_t hbCoeffs[16];
+    static const int32_t hbCoeffs[16] __attribute__ ((aligned (16)));
 };
 
 template<>
@@ -64,7 +64,7 @@ struct HBFIRFilterTraits<80>
     static const int32_t hbOrder = 80;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[80+6];
-    static const int32_t hbCoeffs[20];
+    static const int32_t hbCoeffs[20] __attribute__ ((aligned (16)));
 };
 
 template<>
@@ -73,7 +73,25 @@ struct HBFIRFilterTraits<96>
     static const int32_t hbOrder = 96;
     static const int32_t hbShift = 16;
     static const int16_t hbMod[96+6];
-    static const int32_t hbCoeffs[24];
+    static const int32_t hbCoeffs[24] __attribute__ ((aligned (16)));
+};
+
+template<>
+struct HBFIRFilterTraits<112>
+{
+    static const int32_t hbOrder = 112;
+    static const int32_t hbShift = 19;
+    static const int16_t hbMod[112+6];
+    static const int32_t hbCoeffs[28] __attribute__ ((aligned (16)));
+};
+
+template<>
+struct HBFIRFilterTraits<128>
+{
+    static const int32_t hbOrder = 128;
+    static const int32_t hbShift = 19;
+    static const int16_t hbMod[128+6];
+    static const int32_t hbCoeffs[32] __attribute__ ((aligned (16)));
 };
 
 #endif /* SDRBASE_DSP_HBFILTERTRAITS_H_ */

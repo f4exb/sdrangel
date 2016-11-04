@@ -23,7 +23,7 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
-#include "dsp/inthalfbandfilterdb.h"
+#include "dsp/inthalfbandfiltereo1.h"
 
 #define UPCHANNELIZER_HB_FILTER_ORDER 96
 
@@ -69,8 +69,8 @@ protected:
             ModeUpperHalf
         };
 
-        typedef bool (IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
-        IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
+        IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
         WorkFunction m_workFunction;
 
         FilterStage(Mode mode);
