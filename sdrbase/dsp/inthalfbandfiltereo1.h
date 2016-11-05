@@ -412,7 +412,7 @@ protected:
     qint32 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
 
     int m_ptr;
-    int m_sizeEO;
+    int m_size;
     int m_state;
 
     void storeSample(const FixReal& sampleI, const FixReal& sampleQ)
@@ -421,15 +421,15 @@ protected:
         {
             m_even[0][m_ptr/2] = sampleI;
             m_even[1][m_ptr/2] = sampleQ;
-            m_even[0][m_ptr/2 + m_sizeEO] = sampleI;
-            m_even[1][m_ptr/2 + m_sizeEO] = sampleQ;
+            m_even[0][m_ptr/2 + m_size] = sampleI;
+            m_even[1][m_ptr/2 + m_size] = sampleQ;
         }
         else
         {
             m_odd[0][m_ptr/2] = sampleI;
             m_odd[1][m_ptr/2] = sampleQ;
-            m_odd[0][m_ptr/2 + m_sizeEO] = sampleI;
-            m_odd[1][m_ptr/2 + m_sizeEO] = sampleQ;
+            m_odd[0][m_ptr/2 + m_size] = sampleI;
+            m_odd[1][m_ptr/2 + m_size] = sampleQ;
         }
     }
 
@@ -439,26 +439,26 @@ protected:
         {
             m_even[0][m_ptr/2] = x;
             m_even[1][m_ptr/2] = y;
-            m_even[0][m_ptr/2 + m_sizeEO] = x;
-            m_even[1][m_ptr/2 + m_sizeEO] = y;
+            m_even[0][m_ptr/2 + m_size] = x;
+            m_even[1][m_ptr/2 + m_size] = y;
         }
         else
         {
             m_odd[0][m_ptr/2] = x;
             m_odd[1][m_ptr/2] = y;
-            m_odd[0][m_ptr/2 + m_sizeEO] = x;
-            m_odd[1][m_ptr/2 + m_sizeEO] = y;
+            m_odd[0][m_ptr/2 + m_size] = x;
+            m_odd[1][m_ptr/2 + m_size] = y;
         }
     }
 
     void advancePointer()
     {
-        m_ptr = (m_ptr + 1) % (2*m_sizeEO);
+        m_ptr = (m_ptr + 1) % (2*m_size);
     }
 
     void doFIR(Sample* sample)
     {
-        int a = m_ptr/2 + m_sizeEO; // tip pointer
+        int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
         qint32 iAcc = 0;
@@ -530,13 +530,13 @@ protected:
 
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_sizeEO/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_sizeEO/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((qint32)m_even[0][m_ptr/2 + m_sizeEO/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_even[1][m_ptr/2 + m_sizeEO/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((qint32)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((qint32)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         sample->setReal(iAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
@@ -545,7 +545,7 @@ protected:
 
     void doFIR(qint32 *x, qint32 *y)
     {
-        int a = m_ptr/2 + m_sizeEO; // tip pointer
+        int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
         qint32 iAcc = 0;
@@ -615,13 +615,13 @@ protected:
 #endif
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_sizeEO/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_sizeEO/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((qint32)m_even[0][m_ptr/2 + m_sizeEO/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_even[1][m_ptr/2 + m_sizeEO/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((qint32)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((qint32)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit
@@ -632,9 +632,9 @@ protected:
 template<uint32_t HBFilterOrder>
 IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
 {
-    m_sizeEO = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
+    m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
 
-    for (int i = 0; i < 2*m_sizeEO; i++)
+    for (int i = 0; i < 2*m_size; i++)
     {
         m_even[0][i] = 0;
         m_even[1][i] = 0;
