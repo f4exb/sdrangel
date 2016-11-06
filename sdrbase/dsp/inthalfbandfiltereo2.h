@@ -571,6 +571,7 @@ protected:
         qint32 qAcc = 0;
 
 #ifdef USE_SIMD
+//#warning "IntHalfbandFiler SIMD"
         const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sumI = _mm_setzero_si128();
         __m128i sumQ = _mm_setzero_si128();
@@ -584,7 +585,7 @@ protected:
                 sb = _mm_loadu_si128((__m128i*) &(m_evenB[0][b]));
                 sumI = _mm_add_epi32(sumI, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
 
-                sa = _mm_loadu_si128((__m128i*) &(m_evenB[1][a]));
+                sa = _mm_loadu_si128((__m128i*) &(m_evenA[1][a]));
                 sb = _mm_loadu_si128((__m128i*) &(m_evenB[1][b]));
                 sumQ = _mm_add_epi32(sumQ, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
             }
@@ -594,7 +595,7 @@ protected:
                 sb = _mm_loadu_si128((__m128i*) &(m_oddB[0][b]));
                 sumI = _mm_add_epi32(sumI, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
 
-                sa = _mm_loadu_si128((__m128i*) &(m_oddB[1][a]));
+                sa = _mm_loadu_si128((__m128i*) &(m_oddA[1][a]));
                 sb = _mm_loadu_si128((__m128i*) &(m_oddB[1][b]));
                 sumQ = _mm_add_epi32(sumQ, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
             }
@@ -631,6 +632,7 @@ protected:
             b += 1;
         }
 #endif
+
         if ((m_ptrB % 2) == 0)
         {
             iAcc += ((qint32)m_oddB[0][m_ptrB/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
