@@ -1,8 +1,8 @@
 #ifndef INCLUDE_INTERPOLATOR_H
 #define INCLUDE_INTERPOLATOR_H
 
-#ifdef USE_SSE
-#include <immintrin.h>
+#ifdef USE_SSE2
+#include <emmintrin.h>
 #endif
 #include "dsp/dsptypes.h"
 #include "util/export.h"
@@ -125,7 +125,7 @@ private:
 	{
 		if (phase < 0)
 			phase = 0;
-#if USE_SSE
+#if USE_SSE2
 		// beware of the ringbuffer
 		if(m_ptr == 0) {
 			// only one straight block

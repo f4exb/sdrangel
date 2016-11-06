@@ -18,7 +18,7 @@
 #define INCLUDE_GPL_DSP_DECIMATORS_H_
 
 #include "dsp/dsptypes.h"
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
@@ -124,7 +124,7 @@ public:
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages

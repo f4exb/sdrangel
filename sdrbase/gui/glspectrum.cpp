@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_SSE
-#include <immintrin.h>
+#ifdef USE_SSE2
+#include <emmintrin.h>
 #endif
 
 #include <QMouseEvent>
@@ -381,83 +381,83 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
 
-#ifndef USE_SSE
-	for(int i = 0; i < m_fftSize; i++) {
-		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
+#ifdef USE_SSE2
+    if(m_decay >= 0) { // normal
+        const __m128 refl = {m_referenceLevel, m_referenceLevel, m_referenceLevel, m_referenceLevel};
+        const __m128 power = {m_powerRange, m_powerRange, m_powerRange, m_powerRange};
+        const __m128 mul = {100.0f, 100.0f, 100.0f, 100.0f};
 
-		if ((v >= 0) && (v <= 99)) {
-			b = m_histogram + i * 100 + v;
-			if(*b < 220)
-				*b += m_histogramStroke; // was 4
-			else if(*b < 239)
-				*b += 1;
-		}
-	}
+        for(int i = 0; i < m_fftSize; i += 4) {
+            __m128 abc = _mm_loadu_ps (&spectrum[i]);
+            abc = _mm_sub_ps(abc, refl);
+            abc = _mm_mul_ps(abc, mul);
+            abc = _mm_div_ps(abc, power);
+            abc =  _mm_add_ps(abc, mul);
+            __m128i result = _mm_cvtps_epi32(abc);
+
+            for(int j = 0; j < 4; j++) {
+                int v = ((int*)&result)[j];
+                if((v >= 0) && (v <= 99)) {
+                    b = m_histogram + (i + j) * 100 + v;
+                    if(*b < 220)
+                        *b += m_histogramStroke; // was 4
+                    else if(*b < 239)
+                        *b += 1;
+                }
+            }
+        }
+    } else { // draw double pixels
+        int add = -m_decay * 4;
+        const __m128 refl = {m_referenceLevel, m_referenceLevel, m_referenceLevel, m_referenceLevel};
+        const __m128 power = {m_powerRange, m_powerRange, m_powerRange, m_powerRange};
+        const __m128 mul = {100.0f, 100.0f, 100.0f, 100.0f};
+
+        for(int i = 0; i < m_fftSize; i += 4) {
+            __m128 abc = _mm_loadu_ps (&spectrum[i]);
+            abc = _mm_sub_ps(abc, refl);
+            abc = _mm_mul_ps(abc, mul);
+            abc = _mm_div_ps(abc, power);
+            abc =  _mm_add_ps(abc, mul);
+            __m128i result = _mm_cvtps_epi32(abc);
+
+            for(int j = 0; j < 4; j++) {
+                int v = ((int*)&result)[j];
+                if((v >= 1) && (v <= 98)) {
+                    b = m_histogram + (i + j) * 100 + v;
+                    if(b[-1] < 220)
+                        b[-1] += add;
+                    else if(b[-1] < 239)
+                        b[-1] += 1;
+                    if(b[0] < 220)
+                        b[0] += add;
+                    else if(b[0] < 239)
+                        b[0] += 1;
+                    if(b[1] < 220)
+                        b[1] += add;
+                    else if(b[1] < 239)
+                        b[1] += 1;
+                } else if((v >= 0) && (v <= 99)) {
+                    b = m_histogram + (i + j) * 100 + v;
+                    if(*b < 220)
+                        *b += add;
+                    else if(*b < 239)
+                        *b += 1;
+                }
+            }
+        }
+    }
 #else
-	if(m_decay >= 0) { // normal
-		const __m128 refl = {m_referenceLevel, m_referenceLevel, m_referenceLevel, m_referenceLevel};
-		const __m128 power = {m_powerRange, m_powerRange, m_powerRange, m_powerRange};
-		const __m128 mul = {100.0f, 100.0f, 100.0f, 100.0f};
+    for(int i = 0; i < m_fftSize; i++) {
+        int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
-		for(int i = 0; i < m_fftSize; i += 4) {
-			__m128 abc = _mm_loadu_ps (&spectrum[i]);
-			abc = _mm_sub_ps(abc, refl);
-			abc = _mm_mul_ps(abc, mul);
-			abc = _mm_div_ps(abc, power);
-			abc =  _mm_add_ps(abc, mul);
-			__m128i result = _mm_cvtps_epi32(abc);
-
-			for(int j = 0; j < 4; j++) {
-				int v = ((int*)&result)[j];
-				if((v >= 0) && (v <= 99)) {
-					b = m_histogram + (i + j) * 100 + v;
-					if(*b < 220)
-						*b += m_histogramStroke; // was 4
-					else if(*b < 239)
-						*b += 1;
-				}
-			}
-		}
-	} else { // draw double pixels
-		int add = -m_decay * 4;
-		const __m128 refl = {m_referenceLevel, m_referenceLevel, m_referenceLevel, m_referenceLevel};
-		const __m128 power = {m_powerRange, m_powerRange, m_powerRange, m_powerRange};
-		const __m128 mul = {100.0f, 100.0f, 100.0f, 100.0f};
-
-		for(int i = 0; i < m_fftSize; i += 4) {
-			__m128 abc = _mm_loadu_ps (&spectrum[i]);
-			abc = _mm_sub_ps(abc, refl);
-			abc = _mm_mul_ps(abc, mul);
-			abc = _mm_div_ps(abc, power);
-			abc =  _mm_add_ps(abc, mul);
-			__m128i result = _mm_cvtps_epi32(abc);
-
-			for(int j = 0; j < 4; j++) {
-				int v = ((int*)&result)[j];
-				if((v >= 1) && (v <= 98)) {
-					b = m_histogram + (i + j) * 100 + v;
-					if(b[-1] < 220)
-						b[-1] += add;
-					else if(b[-1] < 239)
-						b[-1] += 1;
-					if(b[0] < 220)
-						b[0] += add;
-					else if(b[0] < 239)
-						b[0] += 1;
-					if(b[1] < 220)
-						b[1] += add;
-					else if(b[1] < 239)
-						b[1] += 1;
-				} else if((v >= 0) && (v <= 99)) {
-					b = m_histogram + (i + j) * 100 + v;
-					if(*b < 220)
-						*b += add;
-					else if(*b < 239)
-						*b += 1;
-				}
-			}
-		}
-	}
+        if ((v >= 0) && (v <= 99)) {
+            b = m_histogram + i * 100 + v;
+            if(*b < 220)
+                *b += m_histogramStroke; // was 4
+            else if(*b < 239)
+                *b += 1;
+        }
+    }
 #endif
 }
 

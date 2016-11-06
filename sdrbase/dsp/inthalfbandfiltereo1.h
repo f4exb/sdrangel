@@ -22,7 +22,7 @@
 #ifndef SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 #define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
 #include <smmintrin.h>
 #endif
 
@@ -464,7 +464,7 @@ protected:
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
 //#warning "IntHalfbandFiler SIMD"
         const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sumI = _mm_setzero_si128();
@@ -551,7 +551,7 @@ protected:
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
         const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sumI = _mm_setzero_si128();
         __m128i sumQ = _mm_setzero_si128();

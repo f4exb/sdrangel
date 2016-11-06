@@ -22,8 +22,12 @@
 #ifndef SDRBASE_DSP_INTHALFBANDFILTEREO2_H_
 #define SDRBASE_DSP_INTHALFBANDFILTEREO2_H_
 
-#ifdef USE_SSE
+#ifdef USE_SSE4_1
 #include <smmintrin.h>
+#endif
+
+#ifdef USE_NEON
+#include <arm_neon.h>
 #endif
 
 #include <stdint.h>
@@ -484,8 +488,7 @@ protected:
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
-#ifdef USE_SSE
-//#warning "IntHalfbandFiler SIMD"
+#if defined(USE_SSE4_1)
         const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sumI = _mm_setzero_si128();
         __m128i sumQ = _mm_setzero_si128();
@@ -528,6 +531,47 @@ protected:
         sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 8));
         sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 4));
         qAcc = _mm_cvtsi128_si32(sumQ);
+#elif defined(USE_NEON)
+        int32x4_t sumI = vdupq_n_s32(0);
+        int32x4_t sumQ = vdupq_n_s32(0);
+        int32x4_t sa, sb, sh;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 16; i++)
+        {
+            sh = vld1_s32(&h[4*i]);
+
+            if ((m_ptrB % 2) == 0)
+            {
+                sa = vld1q_s32(&(m_evenA[0][a]));
+                sb = vld1q_s32(&(m_evenB[0][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+
+                sa = vld1q_s32(&(m_evenA[1][a]));
+                sb = vld1q_s32(&(m_evenB[1][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+            }
+            else
+            {
+                sa = vld1q_s32(&(m_oddA[0][a]));
+                sb = vld1q_s32(&(m_oddB[0][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+
+                sa = vld1q_s32(&(m_oddA[1][a]));
+                sb = vld1q_s32(&(m_oddB[1][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+            }
+
+            a += 4;
+            b += 4;
+        }
+
+        int32x2_t sumI1 = vpadd_s32(vget_high_s32(sumI), vget_low_s32(sumI));
+        int32x2_t sumI2 = vpadd_s32(sumI1, sumI1);
+        iAcc = vget_lane_s32(sumI2, 0);
+
+        int32x2_t sumQ1 = vpadd_s32(vget_high_s32(sumQ), vget_low_s32(sumQ));
+        int32x2_t sumQ2 = vpadd_s32(sumQ1, sumQ1);
+        qAcc = vget_lane_s32(sumQ2, 0);
 #else
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -570,7 +614,7 @@ protected:
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
-#ifdef USE_SSE
+#if defined(USE_SSE4_1)
 //#warning "IntHalfbandFiler SIMD"
         const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sumI = _mm_setzero_si128();
@@ -614,6 +658,47 @@ protected:
         sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 8));
         sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 4));
         qAcc = _mm_cvtsi128_si32(sumQ);
+#elif defined(USE_NEON)
+        int32x4_t sumI = vdupq_n_s32(0);
+        int32x4_t sumQ = vdupq_n_s32(0);
+        int32x4_t sa, sb, sh;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 16; i++)
+        {
+            sh = vld1_s32(&h[4*i]);
+
+            if ((m_ptrB % 2) == 0)
+            {
+                sa = vld1q_s32(&(m_evenA[0][a]));
+                sb = vld1q_s32(&(m_evenB[0][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+
+                sa = vld1q_s32(&(m_evenA[1][a]));
+                sb = vld1q_s32(&(m_evenB[1][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+            }
+            else
+            {
+                sa = vld1q_s32(&(m_oddA[0][a]));
+                sb = vld1q_s32(&(m_oddB[0][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+
+                sa = vld1q_s32(&(m_oddA[1][a]));
+                sb = vld1q_s32(&(m_oddB[1][b]));
+                sumI = vmlaq_s32(sumI, vaddq_s32(sa, sb), sh);
+            }
+
+            a += 4;
+            b += 4;
+        }
+
+        int32x2_t sumI1 = vpadd_s32(vget_high_s32(sumI), vget_low_s32(sumI));
+        int32x2_t sumI2 = vpadd_s32(sumI1, sumI1);
+        iAcc = vget_lane_s32(sumI2, 0);
+
+        int32x2_t sumQ1 = vpadd_s32(vget_high_s32(sumQ), vget_low_s32(sumQ));
+        int32x2_t sumQ2 = vpadd_s32(sumQ1, sumQ1);
+        qAcc = vget_lane_s32(sumQ2, 0);
 #else
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
