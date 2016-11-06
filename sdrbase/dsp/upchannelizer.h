@@ -24,7 +24,7 @@
 #include "util/export.h"
 #include "util/message.h"
 #ifdef USE_SIMD
-#include "dsp/inthalfbandfiltereo1.h"
+#include "dsp/inthalfbandfiltereo2.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
 #endif
@@ -74,8 +74,8 @@ protected:
         };
 
 #ifdef USE_SIMD
-        typedef bool (IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
-        IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
+        IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else
         typedef bool (IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
         IntHalfbandFilterDB<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;

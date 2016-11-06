@@ -203,20 +203,20 @@ void UpChannelizer::applyConfiguration()
 
 #ifdef USE_SIMD
 UpChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>),
+    m_filter(new IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
+            m_workFunction = &IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
+            m_workFunction = &IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
+            m_workFunction = &IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
             break;
     }
 }
