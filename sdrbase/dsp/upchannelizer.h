@@ -23,7 +23,7 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
-#ifdef USE_SIMD
+#ifdef USE_SSE
 #include "dsp/inthalfbandfiltereo2.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
@@ -73,7 +73,7 @@ protected:
             ModeUpperHalf
         };
 
-#ifdef USE_SIMD
+#ifdef USE_SSE
         typedef bool (IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
         IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else

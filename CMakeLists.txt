@@ -62,7 +62,7 @@ if (NOT BUILD_DEBIAN)
 endif()
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|x86")
- SET(USE_SIMD "SSE2" CACHE STRING "Use SIMD instructions")
+ SET(USE_SSE "SSE4_1" CACHE STRING "Use SSE 4.1 SIMD instructions")
 ENDIF()
 
 # MacOS Compatibility
@@ -411,17 +411,17 @@ include_directories(
     ${OPENGL_INCLUDE_DIR}
 )
 
-if(USE_SIMD MATCHES SSE2)
+if(USE_SSE MATCHES SSE4_1)
     if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
         set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse4.1" )
         set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse4.1" )
-        add_definitions(-DUSE_SIMD)
+        add_definitions(-DUSE_SSE)
     elseif(MSVC)
-        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE2" )
-        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE2" )
+        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE4_1" )
+        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE4_1" )
         set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
         add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-        add_definitions(-DUSE_SIMD)
+        add_definitions(-DUSE_SSE)
     endif()
 endif()
 

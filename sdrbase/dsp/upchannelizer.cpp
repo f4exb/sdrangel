@@ -201,7 +201,7 @@ void UpChannelizer::applyConfiguration()
     }
 }
 
-#ifdef USE_SIMD
+#ifdef USE_SSE
 UpChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterEO2<UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)
