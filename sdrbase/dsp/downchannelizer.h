@@ -23,7 +23,11 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
+#ifdef USE_SSE4_1
+#include "dsp/inthalfbandfiltereo1.h"
+#else
 #include "dsp/inthalfbandfilterdb.h"
+#endif
 
 #define DOWNCHANNELIZER_HB_FILTER_ORDER 48
 
@@ -69,8 +73,13 @@ protected:
 			ModeUpperHalf
 		};
 
+#ifdef USE_SSE4_1
+		typedef bool (IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+		IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+#else
 		typedef bool (IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
 		IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+#endif
 		WorkFunction m_workFunction;
 
 		FilterStage(Mode mode);

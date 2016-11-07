@@ -186,6 +186,26 @@ void DownChannelizer::applyConfiguration()
 	}
 }
 
+#ifdef USE_SSE4_1
+DownChannelizer::FilterStage::FilterStage(Mode mode) :
+	m_filter(new IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>),
+	m_workFunction(0)
+{
+	switch(mode) {
+		case ModeCenter:
+			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+			break;
+
+		case ModeLowerHalf:
+			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+			break;
+
+		case ModeUpperHalf:
+			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+			break;
+	}
+}
+#else
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>),
 	m_workFunction(0)
@@ -204,6 +224,7 @@ DownChannelizer::FilterStage::FilterStage(Mode mode) :
 			break;
 	}
 }
+#endif
 
 DownChannelizer::FilterStage::~FilterStage()
 {
