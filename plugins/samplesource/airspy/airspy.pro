@@ -18,6 +18,10 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += $$LIBAIRSPYSRC
 
 DEFINES += LIBAIRSPY_DYN_RATES
+DEFINES += USE_SSE2=1
+QMAKE_CXXFLAGS += -msse2
+DEFINES += USE_SSE4_1=1
+QMAKE_CXXFLAGS += -msse4.1
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug

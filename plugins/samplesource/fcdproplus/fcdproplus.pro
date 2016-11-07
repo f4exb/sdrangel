@@ -11,6 +11,11 @@ QT += core gui widgets multimedia network
 
 TARGET = inputfcdproplus
 
+DEFINES += USE_SSE2=1
+QMAKE_CXXFLAGS += -msse2
+DEFINES += USE_SSE4_1=1
+QMAKE_CXXFLAGS += -msse4.1
+
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../fcdhid

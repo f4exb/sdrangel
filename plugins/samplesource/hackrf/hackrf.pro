@@ -11,6 +11,11 @@ QT += core gui widgets multimedia opengl
 
 TARGET = inputhackrf
 
+DEFINES += USE_SSE2=1
+QMAKE_CXXFLAGS += -msse2
+DEFINES += USE_SSE4_1=1
+QMAKE_CXXFLAGS += -msse4.1
+
 CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 INCLUDEPATH += $$PWD

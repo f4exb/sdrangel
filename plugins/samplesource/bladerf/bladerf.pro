@@ -11,6 +11,11 @@ QT += core gui widgets multimedia opengl
 
 TARGET = inputbladerf
 
+DEFINES += USE_SSE2=1
+QMAKE_CXXFLAGS += -msse2
+DEFINES += USE_SSE4_1=1
+QMAKE_CXXFLAGS += -msse4.1
+
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 INCLUDEPATH += $$PWD
