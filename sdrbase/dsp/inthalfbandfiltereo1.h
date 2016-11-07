@@ -459,9 +459,6 @@ protected:
 
     void doFIR(Sample* sample)
     {
-        int a = m_ptr/2 + m_size; // tip pointer
-        int b = m_ptr/2 + 1; // tail pointer
-
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
@@ -474,6 +471,9 @@ protected:
                 qAcc
         );
 #else
+        int a = m_ptr/2 + m_size; // tip pointer
+        int b = m_ptr/2 + 1; // tail pointer
+
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
             if ((m_ptr % 2) == 0)
@@ -509,9 +509,6 @@ protected:
 
     void doFIR(qint32 *x, qint32 *y)
     {
-        int a = m_ptr/2 + m_size; // tip pointer
-        int b = m_ptr/2 + 1; // tail pointer
-
         qint32 iAcc = 0;
         qint32 qAcc = 0;
 
@@ -524,6 +521,9 @@ protected:
                 qAcc
         );
 #else
+        int a = m_ptr/2 + m_size; // tip pointer
+        int b = m_ptr/2 + 1; // tail pointer
+
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
             if ((m_ptr % 2) == 0)
