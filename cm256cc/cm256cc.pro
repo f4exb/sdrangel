@@ -16,7 +16,7 @@ INCLUDEPATH += $$LIBCM256CCSRC
 
 DEFINES += __WINDOWS__=1
 DEFINES += USE_SSSE3=1
-QMAKE_CXXFLAGS += -msse4.1
+QMAKE_CXXFLAGS += -mssse3
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
