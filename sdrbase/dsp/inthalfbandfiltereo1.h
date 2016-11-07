@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
+#include "dsp/inthalfbandfiltereo1i.h"
 #include "util/export.h"
 
 template<uint32_t HBFilterOrder>
@@ -465,50 +466,13 @@ protected:
         qint32 qAcc = 0;
 
 #ifdef USE_SSE4_1
-//#warning "IntHalfbandFiler SIMD"
-        const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
-        __m128i sumI = _mm_setzero_si128();
-        __m128i sumQ = _mm_setzero_si128();
-        __m128i sa, sb;
-        a -= 3;
-
-        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 16; i++)
-        {
-            if ((m_ptr % 2) == 0)
-            {
-                sa = _mm_shuffle_epi32(_mm_loadu_si128((__m128i*) &(m_even[0][a])), _MM_SHUFFLE(0,1,2,3));
-                sb = _mm_loadu_si128((__m128i*) &(m_even[0][b]));
-                sumI = _mm_add_epi32(sumI, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
-
-                sa = _mm_shuffle_epi32(_mm_loadu_si128((__m128i*) &(m_even[1][a])), _MM_SHUFFLE(0,1,2,3));
-                sb = _mm_loadu_si128((__m128i*) &(m_even[1][b]));
-                sumQ = _mm_add_epi32(sumQ, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
-            }
-            else
-            {
-                sa = _mm_shuffle_epi32(_mm_loadu_si128((__m128i*) &(m_odd[0][a])), _MM_SHUFFLE(0,1,2,3));
-                sb = _mm_loadu_si128((__m128i*) &(m_odd[0][b]));
-                sumI = _mm_add_epi32(sumI, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
-
-                sa = _mm_shuffle_epi32(_mm_loadu_si128((__m128i*) &(m_odd[1][a])), _MM_SHUFFLE(0,1,2,3));
-                sb = _mm_loadu_si128((__m128i*) &(m_odd[1][b]));
-                sumQ = _mm_add_epi32(sumQ, _mm_mullo_epi32(_mm_add_epi32(sa, sb), *h));
-            }
-
-            a -= 4;
-            b += 4;
-            ++h;
-        }
-
-        // horizontal add of four 32 bit partial sums
-
-        sumI = _mm_add_epi32(sumI, _mm_srli_si128(sumI, 8));
-        sumI = _mm_add_epi32(sumI, _mm_srli_si128(sumI, 4));
-        iAcc = _mm_cvtsi128_si32(sumI);
-
-        sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 8));
-        sumQ = _mm_add_epi32(sumQ, _mm_srli_si128(sumQ, 4));
-        qAcc = _mm_cvtsi128_si32(sumQ);
+        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
+                m_ptr,
+                m_even,
+                m_odd,
+                iAcc,
+                qAcc
+        );
 #else
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {

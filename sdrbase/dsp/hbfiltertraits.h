@@ -37,7 +37,7 @@ struct HBFIRFilterTraits<32>
     static const int32_t hbOrder = 32;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[32+6];
-    static const int32_t hbCoeffs[8] __attribute__ ((aligned (16)));
+    static const int32_t hbCoeffs[8] __attribute__ ((aligned (32)));
 };
 
 template<>
@@ -55,7 +55,7 @@ struct HBFIRFilterTraits<64>
     static const int32_t hbOrder = 64;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[64+6];
-    static const int32_t hbCoeffs[16] __attribute__ ((aligned (16)));
+    static const int32_t hbCoeffs[16] __attribute__ ((aligned (32)));
 };
 
 template<>
@@ -73,7 +73,7 @@ struct HBFIRFilterTraits<96>
     static const int32_t hbOrder = 96;
     static const int32_t hbShift = 16;
     static const int16_t hbMod[96+6];
-    static const int32_t hbCoeffs[24] __attribute__ ((aligned (16)));
+    static const int32_t hbCoeffs[24] __attribute__ ((aligned (32)));
 };
 
 template<>
