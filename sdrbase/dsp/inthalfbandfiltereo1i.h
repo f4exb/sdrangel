@@ -24,12 +24,8 @@
 
 #include <stdint.h>
 
-#if defined(USE_AVX2)
-#include <immintrin.h>
-#elif defined(USE_SSE4_1)
+#if defined(USE_SSE4_1)
 #include <smmintrin.h>
-#elif defined(USE_NEON)
-#include <arm_neon.h>
 #endif
 
 #include "hbfiltertraits.h"
@@ -93,7 +89,5 @@ public:
 #endif
     }
 };
-
-
 
 #endif /* SDRBASE_DSP_INTHALFBANDFILTEREO1I_H_ */
