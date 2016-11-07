@@ -10,11 +10,14 @@ CONFIG += plugin
 QT += core gui widgets multimedia
 
 TARGET = modam
-INCLUDEPATH += $$PWD
-INCLUDEPATH += ../../../sdrbase
 
+DEFINES += USE_SSE2=1
+QMAKE_CXXFLAGS += -msse2
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
+
+INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../sdrbase
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
