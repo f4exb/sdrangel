@@ -147,6 +147,8 @@ HEADERS  += mainwindow.h\
         dsp/inthalfbandfiltereo1i.h\
         dsp/inthalfbandfiltereo2.h\
         dsp/inthalfbandfiltereo2i.h\
+        dsp/inthalfbandfilterst.h\
+        dsp/inthalfbandfiltersti.h\
         dsp/kissfft.h\
         dsp/kissengine.h\
         dsp/lowpass.h\

@@ -3,7 +3,7 @@
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // Integer half-band FIR based interpolator and decimator                        //
-// This is the double buffer variant                                             //
+// This is the even/odd and I/Q stride with double buffering variant             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
+#include "dsp/inthalfbandfiltersti.h"
 #include "util/export.h"
 
 template<uint32_t HBFilterOrder>
@@ -403,7 +404,8 @@ public:
     }
 
 protected:
-	qint32 m_samplesDB[2*HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique with even/odd amnd I/Q stride
+	qint32 m_samplesDB[2*HBFilterOrder][2]; // double buffer technique with even/odd amnd I/Q stride
+	qint32 m_samplesAligned[HBFilterOrder][2] __attribute__ ((aligned (16)));
 	int m_ptr;
 	int m_size;
 	int m_state;
@@ -431,9 +433,6 @@ protected:
 
     void doFIR(Sample* sample)
     {
-        int a = m_ptr + m_size; // tip pointer - odd
-        int b = m_ptr + 1; // tail pointer - aven
-
         // calculate on odd values
 
         if ((m_ptr % 2) == 1)
@@ -442,6 +441,17 @@ protected:
             m_qEvenAcc = 0;
             m_iOddAcc = 0;
             m_qOddAcc = 0;
+#ifdef USE_SSE4_1
+            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(qint32));
+            IntHalfbandFilterSTIntrinsics<HBFilterOrder>::work(
+					m_samplesAligned,
+					m_iEvenAcc,
+					m_qEvenAcc,
+					m_iOddAcc,
+					m_qOddAcc);
+#else
+            int a = m_ptr + m_size; // tip pointer - odd
+            int b = m_ptr + 1; // tail pointer - aven
 
             for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
             {
@@ -452,7 +462,7 @@ protected:
                 a -= 2;
                 b += 2;
             }
-
+#endif
             m_iEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
             m_qEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
             m_iOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
@@ -470,9 +480,6 @@ protected:
 
     void doFIR(qint32 *x, qint32 *y)
     {
-        int a = m_ptr + m_size; // tip pointer - odd
-        int b = m_ptr + 1; // tail pointer - aven
-
         // calculate on odd values
 
         if ((m_ptr % 2) == 1)
@@ -481,6 +488,18 @@ protected:
             m_qEvenAcc = 0;
             m_iOddAcc = 0;
             m_qOddAcc = 0;
+
+#ifdef USE_SSE4_1
+            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(qint32));
+            IntHalfbandFilterSTIntrinsics<HBFilterOrder>::work(
+					m_samplesAligned,
+					m_iEvenAcc,
+					m_qEvenAcc,
+					m_iOddAcc,
+					m_qOddAcc);
+#else
+            int a = m_ptr + m_size; // tip pointer - odd
+            int b = m_ptr + 1; // tail pointer - aven
 
             for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
             {
@@ -491,7 +510,7 @@ protected:
                 a -= 2;
                 b += 2;
             }
-
+#endif
             m_iEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
             m_qEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
             m_iOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
