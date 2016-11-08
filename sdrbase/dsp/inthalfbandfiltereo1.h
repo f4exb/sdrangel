@@ -22,10 +22,6 @@
 #ifndef SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 #define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 
-#ifdef USE_SSE4_1
-#include <smmintrin.h>
-#endif
-
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
