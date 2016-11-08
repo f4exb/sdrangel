@@ -213,6 +213,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/inthalfbandfiltereo1i.h
     sdrbase/dsp/inthalfbandfiltereo2.h
     sdrbase/dsp/inthalfbandfiltereo2i.h
+    sdrbase/dsp/inthalfbandfilterst.h
     sdrbase/dsp/kissfft.h
     sdrbase/dsp/kissengine.h
     sdrbase/dsp/lowpass.h
