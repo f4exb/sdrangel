@@ -24,7 +24,7 @@
 #include "dsp/inthalfbandfilterdb.h"
 #endif
 
-#define DECIMATORS_HB_FILTER_ORDER 48
+#define DECIMATORS_HB_FILTER_ORDER 64
 
 template<uint SdrBits, uint InputBits>
 struct decimation_shifts
