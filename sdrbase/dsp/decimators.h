@@ -19,7 +19,7 @@
 
 #include "dsp/dsptypes.h"
 #ifdef USE_SSE4_1
-#include "dsp/inthalfbandfilterst.h"
+#include "dsp/inthalfbandfiltereo1.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
 #endif
@@ -125,12 +125,12 @@ public:
 
 private:
 #ifdef USE_SSE4_1
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterST<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 #else
 	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
 	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages

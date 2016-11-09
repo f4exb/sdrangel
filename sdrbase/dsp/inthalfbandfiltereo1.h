@@ -450,7 +450,7 @@ protected:
 
     void advancePointer()
     {
-        m_ptr = (m_ptr + 1) % (2*m_size);
+        m_ptr = m_ptr + 1 < 2*m_size ? m_ptr + 1: 0;
     }
 
     void doFIR(Sample* sample)

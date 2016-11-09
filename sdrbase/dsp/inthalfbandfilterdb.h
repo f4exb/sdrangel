@@ -41,7 +41,7 @@ public:
 		{
 			case 0:
 				// advance write-pointer
-			    m_ptr = (m_ptr + 1) % m_size;
+			    advancePointer();
 				// next state
 				m_state = 1;
 				// tell caller we don't have a new sample
@@ -51,7 +51,7 @@ public:
 				// save result
 				doFIR(sample);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 0;
 
@@ -71,7 +71,7 @@ public:
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
-                m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
                 // next state
                 m_state = 1;
                 // tell caller we didn't consume the sample
@@ -83,7 +83,7 @@ public:
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
-                m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
                 // next state
                 m_state = 0;
                 // tell caller we consumed the sample
@@ -100,7 +100,7 @@ public:
 		{
 			case 0:
 				// advance write-pointer
-			    m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 1;
 				// tell caller we don't have a new sample
@@ -110,7 +110,7 @@ public:
 				// save result
 				doFIR(x, y);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 0;
 				// tell caller we have a new sample
@@ -127,7 +127,7 @@ public:
 				// insert sample into ring-buffer
 			    storeSample((FixReal) -sample->imag(), (FixReal) sample->real());
 				// advance write-pointer
-			    m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 1;
 				// tell caller we don't have a new sample
@@ -139,7 +139,7 @@ public:
 				// save result
 				doFIR(sample);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 2;
 				// tell caller we have a new sample
@@ -149,7 +149,7 @@ public:
 				// insert sample into ring-buffer
                 storeSample((FixReal) sample->imag(), (FixReal) -sample->real());
 				// advance write-pointer
-                m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 3;
 				// tell caller we don't have a new sample
@@ -161,7 +161,7 @@ public:
 				// save result
 				doFIR(sample);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 0;
 				// tell caller we have a new sample
@@ -186,7 +186,7 @@ public:
             sampleOut->setImag(-s.real());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 1;
@@ -204,7 +204,7 @@ public:
             sampleOut->setImag(-s.imag());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 2;
@@ -222,7 +222,7 @@ public:
             sampleOut->setImag(s.real());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 3;
@@ -240,7 +240,7 @@ public:
             sampleOut->setImag(s.imag());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 0;
@@ -259,7 +259,7 @@ public:
 				// insert sample into ring-buffer
 	            storeSample((FixReal) sample->imag(), (FixReal) -sample->real());
 				// advance write-pointer
-                m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 1;
 				// tell caller we don't have a new sample
@@ -271,7 +271,7 @@ public:
 				// save result
 				doFIR(sample);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 2;
 				// tell caller we have a new sample
@@ -281,7 +281,7 @@ public:
 				// insert sample into ring-buffer
                 storeSample((FixReal) -sample->imag(), (FixReal) sample->real());
 				// advance write-pointer
-                m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 3;
 				// tell caller we don't have a new sample
@@ -293,7 +293,7 @@ public:
 				// save result
 				doFIR(sample);
 				// advance write-pointer
-				m_ptr = (m_ptr + 1) % m_size;
+                advancePointer();
 				// next state
 				m_state = 0;
 				// tell caller we have a new sample
@@ -318,7 +318,7 @@ public:
             sampleOut->setImag(s.real());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 1;
@@ -336,7 +336,7 @@ public:
             sampleOut->setImag(-s.imag());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 2;
@@ -354,7 +354,7 @@ public:
             sampleOut->setImag(-s.real());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 3;
@@ -372,7 +372,7 @@ public:
             sampleOut->setImag(s.imag());
 
             // advance write-pointer
-            m_ptr = (m_ptr + 1) % m_size;
+            advancePointer();
 
             // next state
             m_state = 0;
@@ -385,21 +385,21 @@ public:
     void myDecimate(const Sample* sample1, Sample* sample2)
     {
         storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
-        m_ptr = (m_ptr + 1) % m_size;
+        advancePointer();
 
         storeSample((FixReal) sample2->real(), (FixReal) sample2->imag());
         doFIR(sample2);
-        m_ptr = (m_ptr + 1) % m_size;
+        advancePointer();
     }
 
     void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
     {
         storeSample(x1, y1);
-        m_ptr = (m_ptr + 1) % m_size;
+        advancePointer();
 
         storeSample(*x2, *y2);
         doFIR(x2, y2);
-        m_ptr = (m_ptr + 1) % m_size;
+        advancePointer();
     }
 
 protected:
@@ -422,6 +422,11 @@ protected:
         m_samplesDB[m_ptr][1] = y;
         m_samplesDB[m_ptr + m_size][0] = x;
         m_samplesDB[m_ptr + m_size][1] = y;
+    }
+
+    void advancePointer()
+    {
+        m_ptr = m_ptr + 1 < m_size ? m_ptr + 1: 0;
     }
 
     void doFIR(Sample* sample)
