@@ -42,38 +42,37 @@ public:
 #if defined(USE_SSE4_1)
         int a = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 2; // tip
         int b = 0; // tail
-        const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
+        const int *h = (const int*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sum = _mm_setzero_si128();
         __m128i shh, sa, sb;
         int32_t sums[4] __attribute__ ((aligned (16)));
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 16; i++)
         {
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(0,0,0,0));
+            shh = _mm_set_epi32(h[4*i], h[4*i], h[4*i], h[4*i]);
             sa = _mm_load_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_load_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(1,1,1,1));
+            shh = _mm_set_epi32(h[4*i+1], h[4*i+1], h[4*i+1], h[4*i+1]);
             sa = _mm_load_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_load_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(2,2,2,2));
+            shh = _mm_set_epi32(h[4*i+2], h[4*i+2], h[4*i+2], h[4*i+2]);
             sa = _mm_load_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_load_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(3,3,3,3));
+            shh = _mm_set_epi32(h[4*i+3], h[4*i+3], h[4*i+3], h[4*i+3]);
             sa = _mm_load_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_load_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            ++h;
         }
 
         // Extract values from sum vector
@@ -95,38 +94,37 @@ public:
 #if defined(USE_SSE4_1)
         int a = ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder - 2; // tip
         int b = ptr + 0; // tail
-        const __m128i* h = (const __m128i*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
+        const int *h = (const int*) HBFIRFilterTraits<HBFilterOrder>::hbCoeffs;
         __m128i sum = _mm_setzero_si128();
         __m128i shh, sa, sb;
         int32_t sums[4] __attribute__ ((aligned (16)));
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 16; i++)
         {
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(0,0,0,0));
+            shh = _mm_set_epi32(h[4*i], h[4*i], h[4*i], h[4*i]);
             sa = _mm_loadu_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_loadu_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(1,1,1,1));
+            shh = _mm_set_epi32(h[4*i+1], h[4*i+1], h[4*i+1], h[4*i+1]);
             sa = _mm_loadu_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_loadu_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(2,2,2,2));
+            shh = _mm_set_epi32(h[4*i+2], h[4*i+2], h[4*i+2], h[4*i+2]);
             sa = _mm_loadu_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_loadu_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            shh = _mm_shuffle_epi32(*h, _MM_SHUFFLE(3,3,3,3));
+            shh = _mm_set_epi32(h[4*i+3], h[4*i+3], h[4*i+3], h[4*i+3]);
             sa = _mm_loadu_si128((__m128i*) &(samples[a][0])); // Ei,Eq,Oi,Oq
             sb = _mm_loadu_si128((__m128i*) &(samples[b][0]));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_add_epi32(sa, sb), shh));
             a -= 2;
             b += 2;
-            ++h;
         }
 
         // Extract values from sum vector
