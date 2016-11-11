@@ -92,7 +92,7 @@ public:
         }
     }
 
-	bool workDecimateCenter(qint32 *x, qint32 *y)
+	bool workDecimateCenter(int32_t *x, int32_t *y)
 	{
 		// insert sample into ring-buffer
 	    storeSample(*x, *y);
@@ -393,7 +393,7 @@ public:
         advancePointer();
     }
 
-    void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
+    void myDecimate(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2)
     {
         storeSample(x1, y1);
         advancePointer();
@@ -404,15 +404,15 @@ public:
     }
 
 protected:
-	qint32 m_samplesDB[2*HBFilterOrder][2]; // double buffer technique with even/odd amnd I/Q stride
-	qint32 m_samplesAligned[HBFilterOrder][2] __attribute__ ((aligned (16)));
+	int32_t m_samplesDB[2*HBFilterOrder][2]; // double buffer technique with even/odd amnd I/Q stride
+	int32_t m_samplesAligned[HBFilterOrder][2] __attribute__ ((aligned (16)));
 	int m_ptr;
 	int m_size;
 	int m_state;
-    qint32 m_iEvenAcc;
-    qint32 m_qEvenAcc;
-    qint32 m_iOddAcc;
-    qint32 m_qOddAcc;
+    int32_t m_iEvenAcc;
+    int32_t m_qEvenAcc;
+    int32_t m_iOddAcc;
+    int32_t m_qOddAcc;
 
 
     void storeSample(const FixReal& sampleI, const FixReal& sampleQ)
@@ -423,7 +423,7 @@ protected:
         m_samplesDB[m_ptr + m_size][1] = sampleQ;
     }
 
-    void storeSample(qint32 x, qint32 y)
+    void storeSample(int32_t x, int32_t y)
     {
         m_samplesDB[m_ptr][0] = x;
         m_samplesDB[m_ptr][1] = y;
@@ -447,7 +447,7 @@ protected:
             m_iOddAcc = 0;
             m_qOddAcc = 0;
 #ifdef USE_SSE4_1
-//            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(qint32));
+//            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(int32_t));
             IntHalfbandFilterSTIntrinsics<HBFilterOrder>::workNA(
                     m_ptr + 1,
                     m_samplesDB,
@@ -469,10 +469,10 @@ protected:
                 b += 2;
             }
 #endif
-            m_iEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_qEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_iOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_qOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_iEvenAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_qEvenAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_iOddAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_qOddAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2 + 1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
             sample->setReal(m_iEvenAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
             sample->setImag(m_qEvenAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
@@ -484,7 +484,7 @@ protected:
         }
     }
 
-    void doFIR(qint32 *x, qint32 *y)
+    void doFIR(int32_t *x, int32_t *y)
     {
         // calculate on odd values
 
@@ -496,7 +496,7 @@ protected:
             m_qOddAcc = 0;
 
 #ifdef USE_SSE4_1
-//            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(qint32));
+//            memcpy((void *) m_samplesAligned, (const void *) &(m_samplesDB[ m_ptr + 1][0]), HBFilterOrder*2*sizeof(int32_t));
             IntHalfbandFilterSTIntrinsics<HBFilterOrder>::workNA(
                     m_ptr + 1,
                     m_samplesDB,
@@ -518,10 +518,10 @@ protected:
                 b += 2;
             }
 #endif
-            m_iEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_qEvenAcc += ((qint32)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_iOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            m_qOddAcc += ((qint32)m_samplesDB[m_ptr + m_size/2 + 1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_iEvenAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_qEvenAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_iOddAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2 + 1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            m_qOddAcc += ((int32_t)m_samplesDB[m_ptr + m_size/2 + 1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
             *x = m_iEvenAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1;
             *y = m_qEvenAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1;

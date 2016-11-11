@@ -23,6 +23,7 @@
 #define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 
 #include <stdint.h>
+#include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
 #include "dsp/inthalfbandfiltereo1i.h"
@@ -93,7 +94,7 @@ public:
         }
     }
 
-    bool workDecimateCenter(qint32 *x, qint32 *y)
+    bool workDecimateCenter(int32_t *x, int32_t *y)
     {
         // insert sample into ring-buffer
         storeSample(*x, *y);
@@ -394,7 +395,7 @@ public:
         advancePointer();
     }
 
-    void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
+    void myDecimate(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2)
     {
         storeSample(x1, y1);
         advancePointer();
@@ -405,8 +406,8 @@ public:
     }
 
 protected:
-    qint32 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
-    qint32 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
+    int32_t m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
+    int32_t m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
 
     int m_ptr;
     int m_size;
@@ -430,7 +431,7 @@ protected:
         }
     }
 
-    void storeSample(qint32 x, qint32 y)
+    void storeSample(int32_t x, int32_t y)
     {
         if ((m_ptr % 2) == 0)
         {
@@ -453,10 +454,15 @@ protected:
         m_ptr = m_ptr + 1 < 2*m_size ? m_ptr + 1: 0;
     }
 
+    int32_t rand(int32_t mod)
+    {
+        return (RAND_MAX/2 - std::rand()) % mod;
+    }
+
     void doFIR(Sample* sample)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        int32_t iAcc = 0;
+        int32_t qAcc = 0;
 
 #ifdef USE_SSE4_1
         IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
@@ -490,23 +496,23 @@ protected:
 
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((int32_t)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((qint32)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((int32_t)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((int32_t)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         sample->setReal(iAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
         sample->setImag(qAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
     }
 
-    void doFIR(qint32 *x, qint32 *y)
+    void doFIR(int32_t *x, int32_t *y)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        int32_t iAcc = 0;
+        int32_t qAcc = 0;
 
 #ifdef USE_SSE4_1
         IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
@@ -539,13 +545,13 @@ protected:
 #endif
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((qint32)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((int32_t)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((qint32)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((qint32)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += ((int32_t)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += ((int32_t)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit

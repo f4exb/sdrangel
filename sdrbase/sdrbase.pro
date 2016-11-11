@@ -145,8 +145,6 @@ HEADERS  += mainwindow.h\
         dsp/inthalfbandfilterdb.h\
         dsp/inthalfbandfiltereo1.h\
         dsp/inthalfbandfiltereo1i.h\
-        dsp/inthalfbandfiltereo2.h\
-        dsp/inthalfbandfiltereo2i.h\
         dsp/inthalfbandfilterst.h\
         dsp/inthalfbandfiltersti.h\
         dsp/kissfft.h\
