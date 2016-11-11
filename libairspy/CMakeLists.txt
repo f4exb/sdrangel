@@ -2,6 +2,8 @@ project(airspy)
 
 find_package(LibUSB)
 
+remove_definitions(-DUSE_SSE2)
+
 set(airspy_SOURCES
     ${LIBAIRSPYSRC}/libairspy/src/airspy.c
     ${LIBAIRSPYSRC}/libairspy/src/iqconverter_float.c
