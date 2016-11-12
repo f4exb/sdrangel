@@ -325,7 +325,6 @@ bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
 			else
 			{
 				qDebug() << "bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
-				m_bladerfThread->setSamplerate(m_settings.m_devSampleRate);
 			}
 		}
 	}

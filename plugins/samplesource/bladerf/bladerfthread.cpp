@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "bladerfthread.h"
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 
 
 
@@ -27,7 +27,6 @@ BladerfThread::BladerfThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QO
 	m_dev(dev),
 	m_convertBuffer(BLADERF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
-	m_samplerate(10),
 	m_log2Decim(0),
 	m_fcPos(0)
 {
@@ -51,11 +50,6 @@ void BladerfThread::stopWork()
 {
 	m_running = false;
 	wait();
-}
-
-void BladerfThread::setSamplerate(int samplerate)
-{
-	m_samplerate = samplerate;
 }
 
 void BladerfThread::setLog2Decimation(unsigned int log2_decim)

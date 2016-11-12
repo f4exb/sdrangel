@@ -22,7 +22,6 @@
 #include <QWaitCondition>
 #include <libbladeRF.h>
 #include "dsp/samplesinkfifo.h"
-//#include "dsp/inthalfbandfilter.h"
 #include "dsp/decimators.h"
 
 #define BLADERF_BLOCKSIZE (1<<14)
@@ -36,7 +35,6 @@ public:
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(int samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
 	void setFcPos(int fcPos);
 
@@ -50,7 +48,6 @@ private:
 	SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
 
-	int m_samplerate;
 	unsigned int m_log2Decim;
 	int m_fcPos;
 
