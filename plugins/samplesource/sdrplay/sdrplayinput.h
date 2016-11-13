@@ -78,6 +78,7 @@ public:
 
 private:
     bool applySettings(const SDRPlaySettings& settings, bool force);
+    void reinitMirSDR(mir_sdr_ReasonForReinitT reasonForReinit);
     static void callbackGC(unsigned int gRdB, unsigned int lnaGRdB, void *cbContext);
 
     DeviceSourceAPI *m_deviceAPI;
@@ -87,6 +88,7 @@ private:
     QString m_deviceDescription;
 
     int m_samplesPerPacket;
+    bool m_mirStreamRunning;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

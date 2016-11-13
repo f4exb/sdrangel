@@ -70,14 +70,18 @@ private:
 
     void displaySettings();
     void sendSettings();
+    void updateSampleRateAndFrequency();
 
 private slots:
     void updateHardware();
+    void updateStatus();
+    void handleSourceMessages();
+    void handleDSPMessages();
     void on_centerFrequency_changed(quint64 value);
     void on_ppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
-    void on_fBband_currentIndexChanged(int index);
+    void on_fBand_currentIndexChanged(int index);
     void on_mirDCCorr_currentIndexChanged(int index);
     void on_mirDCCorrTrackTime_valueChanged(int value);
     void on_bandwidth_currentIndexChanged(int index);

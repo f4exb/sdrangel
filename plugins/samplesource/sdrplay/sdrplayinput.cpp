@@ -36,7 +36,8 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
     m_sdrPlayThread(0),
     m_deviceDescription("SDRPlay"),
-    m_samplesPerPacket(4096)
+    m_samplesPerPacket(4096),
+    m_mirStreamRunning(false)
 {
 }
 
@@ -89,7 +90,16 @@ bool SDRPlayInput::start(int device)
             callbackGC,
             0);
 
-    m_sdrPlayThread->startWork();
+    if (r != mir_sdr_Success)
+    {
+        qCritical("SDRPlayInput::start: Mir stream init failed with code %d", (int) r);
+    }
+    else
+    {
+        qDebug("SDRPlayInput::start: Mir stream started: samplesPerPacket: %d", m_samplesPerPacket);
+        m_mirStreamRunning = true;
+        m_sdrPlayThread->startWork();
+    }
 }
 
 void SDRPlayInput::stop()
@@ -103,6 +113,8 @@ void SDRPlayInput::stop()
     {
         qCritical("SDRPlayInput::stop: stream uninit failed with code %d", (int) r);
     }
+
+    m_mirStreamRunning = false;
 
     if(m_sdrPlayThread != 0)
     {
@@ -120,7 +132,7 @@ const QString& SDRPlayInput::getDeviceDescription() const
 int SDRPlayInput::getSampleRate() const
 {
     int rate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
-    return ((rate * 1000) / (1<<m_settings.m_log2Decim));
+    return (rate * 1000) / (1<<m_settings.m_log2Decim);
 }
 
 quint64 SDRPlayInput::getCenterFrequency() const
@@ -190,11 +202,163 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+    {
+        m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
+        forwardChange = true;
+
+        if (m_mirStreamRunning)
+        {
+            reinitMirSDR(mir_sdr_CHANGE_FS_FREQ);
+        }
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
+        m_settings.m_centerFrequency = settings.m_centerFrequency;
+        forwardChange = true;
+
+        if (m_mirStreamRunning)
+        {
+            reinitMirSDR(mir_sdr_CHANGE_RF_FREQ);
+        }
+    }
+
+    if ((m_settings.m_frequencyBandIndex != settings.m_frequencyBandIndex) || force)
+    {
+        m_settings.m_frequencyBandIndex = settings.m_frequencyBandIndex;
+        // change of frequency is done already
+    }
+
+    if ((m_settings.m_bandwidthIndex != settings.m_bandwidthIndex) || force)
+    {
+        m_settings.m_bandwidthIndex = settings.m_bandwidthIndex;
+
+        if (m_mirStreamRunning)
+        {
+            reinitMirSDR(mir_sdr_CHANGE_BW_TYPE);
+        }
+    }
+
+    // TODO: change IF mode
+    // TODO: change LO mode
+
+    if ((m_settings.m_gainRedctionIndex != settings.m_gainRedctionIndex) || force)
+    {
+        if (m_settings.m_bandwidthIndex < 4)
+        {
+            m_settings.m_gainRedctionIndex = settings.m_gainRedctionIndex;
+
+            if (m_mirStreamRunning)
+            {
+                reinitMirSDR(mir_sdr_CHANGE_GR);
+            }
+        }
+        else
+        {
+            if (settings.m_gainRedctionIndex > 85)
+            {
+                if (m_settings.m_gainRedctionIndex < 85)
+                {
+                    m_settings.m_gainRedctionIndex = 85;
+
+                    if (m_mirStreamRunning)
+                    {
+                        reinitMirSDR(mir_sdr_CHANGE_GR);
+                    }
+                }
+            }
+            else
+            {
+                m_settings.m_gainRedctionIndex = settings.m_gainRedctionIndex;
+
+                if (m_mirStreamRunning)
+                {
+                    reinitMirSDR(mir_sdr_CHANGE_GR);
+                }
+            }
+        }
+    }
+
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    {
+        m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+
+        mir_sdr_ErrT r = mir_sdr_SetPpm(m_settings.m_LOppmTenths / 10.0);
+
+        if (r != mir_sdr_Success)
+        {
+            qDebug("SDRPlayInput::applySettings: mir_sdr_SetPpm failed with code %d", (int) r);
+        }
+    }
+
+    if ((m_settings.m_mirDcCorrIndex != settings.m_mirDcCorrIndex) || force)
+    {
+        m_settings.m_mirDcCorrIndex = settings.m_mirDcCorrIndex;
+
+        if (m_mirStreamRunning)
+        {
+            mir_sdr_ErrT r = mir_sdr_SetDcMode(m_settings.m_mirDcCorrIndex, 0);
+
+            if (r != mir_sdr_Success)
+            {
+                qDebug("SDRPlayInput::applySettings: mir_sdr_SetDcMode failed with code %d", (int) r);
+            }
+        }
+    }
+
+    if ((m_settings.m_mirDcCorrTrackTimeIndex != settings.m_mirDcCorrTrackTimeIndex) || force)
+    {
+        m_settings.m_mirDcCorrTrackTimeIndex = settings.m_mirDcCorrTrackTimeIndex;
+
+        if (m_mirStreamRunning)
+        {
+            mir_sdr_ErrT r = mir_sdr_SetDcTrackTime(m_settings.m_mirDcCorrTrackTimeIndex);
+
+            if (r != mir_sdr_Success)
+            {
+                qDebug("SDRPlayInput::applySettings: mir_sdr_SetDcTrackTime failed with code %d", (int) r);
+            }
+        }
+    }
+
     if (forwardChange)
     {
         int sampleRate = getSampleRate();
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+    }
+
+    return true;
+}
+
+void SDRPlayInput::reinitMirSDR(mir_sdr_ReasonForReinitT reasonForReinit)
+{
+    int grdB = m_settings.m_gainRedctionIndex;
+    int rate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
+    int gRdBsystem;
+
+    mir_sdr_ErrT r = mir_sdr_Reinit(
+            &grdB,
+            rate / 1e3,
+            m_settings.m_centerFrequency / 1e6,
+            (mir_sdr_Bw_MHzT) m_settings.m_bandwidthIndex,
+            mir_sdr_IF_Zero,
+            mir_sdr_LO_Auto,
+            1, // LNA
+            &gRdBsystem,
+            0, // use mir_sdr_SetGr() to set initial gain reduction
+            &m_samplesPerPacket,
+            reasonForReinit);
+
+    if (r != mir_sdr_Success)
+    {
+        qCritical("SDRPlayInput::reinitMirSDR (%d): MirSDR stream reinit failed with code %d", (int) reasonForReinit, (int) r);
+        m_mirStreamRunning = false;
+    }
+    else
+    {
+        qDebug("SDRPlayInput::reinitMirSDR (%d): MirSDR stream restarted: samplesPerPacket: %d", (int) reasonForReinit, m_samplesPerPacket);
     }
 }
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>291</width>
+    <width>292</width>
     <height>210</height>
    </rect>
   </property>
@@ -79,7 +79,7 @@
        <item>
         <layout class="QHBoxLayout" name="deviceRateLayout">
          <item>
-          <widget class="QLabel" name="deviceRateLabel">
+          <widget class="QLabel" name="deviceRateText">
            <property name="toolTip">
             <string>I/Q sample rate kS/s</string>
            </property>
@@ -386,6 +386,12 @@
      </item>
      <item row="0" column="2">
       <widget class="QLabel" name="mirDCCorrTrackTimeText">
+       <property name="minimumSize">
+        <size>
+         <width>42</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>105uS</string>
        </property>
@@ -579,10 +585,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>LNA-Mixer-BaseBand gains in dB</string>
+        <string>Gain reduction:LNA-Mixer-BaseBand gains in dB</string>
        </property>
        <property name="text">
-        <string>24-19-59</string>
+        <string>035:24-19-59</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
