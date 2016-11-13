@@ -1,8 +1,14 @@
+sdrangel (2.3.0-1) unstable; urgency=medium
+
+  * SDRPlay support: new input source plugin
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Nov 2016 23:14:18 +0100
+
 sdrangel (2.2.2-1) unstable; urgency=medium
 
   * Baseband Halfband FIR filter optimizations
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 02 Nov 2016 14:15:15 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 11 Nov 2016 12:25:34 +0100
 
 sdrangel (2.2.1-1) unstable; urgency=medium
 
