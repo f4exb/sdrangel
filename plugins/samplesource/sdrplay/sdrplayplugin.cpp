@@ -93,6 +93,11 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
 
     libusb_free_device_list(devs, 1);
 
+    if (usb_context)
+    {
+        libusb_exit(usb_context);
+    }
+
     return result;
 }
 
