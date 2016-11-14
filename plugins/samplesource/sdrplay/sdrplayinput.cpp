@@ -68,7 +68,7 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
-    int agcSetPoint = m_settings.m_gainRedctionIndex;
+    int agcSetPoint = -m_settings.m_gainRedctionIndex;
     double sampleRateMHz = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex) / 1e3;
     double frequencyMHz = m_settings.m_centerFrequency / 1e6;
     int infoOverallGr;
@@ -87,6 +87,8 @@ bool SDRPlayInput::start(int device)
 
     qDebug("SDRPlayInput::start: sampleRateMHz: %lf frequencyMHz: %lf", sampleRateMHz, frequencyMHz);
 
+    mir_sdr_DebugEnable(1);
+
     r = mir_sdr_StreamInit(
             &agcSetPoint,
             sampleRateMHz,
@@ -97,8 +99,8 @@ bool SDRPlayInput::start(int device)
             &infoOverallGr,
             0, /* use internal gr tables according to band */
             &m_samplesPerPacket,
-            m_sdrPlayThread->streamCallback,
-            callbackGC,
+            SDRPlayThread::streamCallback,
+            SDRPlayInput::callbackGC,
             0);
 
     if (r != mir_sdr_Success)
@@ -345,7 +347,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
 
 void SDRPlayInput::reinitMirSDR(mir_sdr_ReasonForReinitT reasonForReinit)
 {
-    int grdB = m_settings.m_gainRedctionIndex;
+    int grdB = -m_settings.m_gainRedctionIndex;
     int rate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
     int gRdBsystem;
 
