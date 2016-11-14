@@ -73,8 +73,19 @@ bool SDRPlayInput::start(int device)
     double frequencyMHz = m_settings.m_centerFrequency / 1e6;
     int infoOverallGr;
 
-    mir_sdr_DCoffsetIQimbalanceControl(1, 0);
-    mir_sdr_AgcControl(mir_sdr_AGC_DISABLE, agcSetPoint, 0, 0, 0, 0, 1);
+    r = mir_sdr_DCoffsetIQimbalanceControl(1, 0);
+    if (r != mir_sdr_Success)
+    {
+        qCritical("SDRPlayInput::start: mir_sdr_DCoffsetIQimbalanceControl failed with code %d", (int) r);
+    }
+
+    r = mir_sdr_AgcControl(mir_sdr_AGC_DISABLE, agcSetPoint, 0, 0, 0, 0, 1);
+    if (r != mir_sdr_Success)
+    {
+        qCritical("SDRPlayInput::start: mir_sdr_AgcControl failed with code %d", (int) r);
+    }
+
+    qDebug("SDRPlayInput::start: sampleRateMHz: %lf frequencyMHz: %lf", sampleRateMHz, frequencyMHz);
 
     r = mir_sdr_StreamInit(
             &agcSetPoint,
@@ -92,7 +103,7 @@ bool SDRPlayInput::start(int device)
 
     if (r != mir_sdr_Success)
     {
-        qCritical("SDRPlayInput::start: Mir stream init failed with code %d", (int) r);
+        qCritical("SDRPlayInput::start: mir_sdr_StreamInit failed with code %d", (int) r);
     }
     else
     {

@@ -701,6 +701,37 @@ void SDRPlayGui::on_gr_valueChanged(int value)
     sendSettings();
 }
 
+void SDRPlayGui::on_startStop_toggled(bool checked)
+{
+    if (checked)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudio();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+        DSPEngine::instance()->stopAudio();
+    }
+}
+
+void SDRPlayGui::on_record_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
+    }
+}
+
 // ====================================================================
 
 unsigned int SDRPlaySampleRates::m_rates[m_nb_rates] = {

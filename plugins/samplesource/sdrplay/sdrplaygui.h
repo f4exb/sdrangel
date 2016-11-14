@@ -89,6 +89,8 @@ private slots:
     void on_decim_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);
     void on_gr_valueChanged(int value);
+    void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
 };
 
 

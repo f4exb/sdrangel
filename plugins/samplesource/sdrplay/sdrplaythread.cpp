@@ -74,11 +74,13 @@ void SDRPlayThread::streamCallback(
         unsigned int reset,
         void *cbContext)
 {
+    qDebug("SDRPlayThread::streamCallback");
     m_this->callback(xi, xq, numSamples);
 }
 
 void SDRPlayThread::callback(short *xi, short *xq, unsigned int numSamples)
 {
+    qDebug("SDRPlayThread::callback");
     if (m_convertBuffer.size() < numSamples)
     {
         m_convertBuffer.resize(numSamples);
