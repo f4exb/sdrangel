@@ -16,7 +16,7 @@
 
 #include <QtPlugin>
 #include <QAction>
-#include <libusb-1.0/libusb.h>
+#include <mirisdr.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "sdrplaygui.h"
@@ -51,52 +51,32 @@ void SDRPlayPlugin::initPlugin(PluginAPI* pluginAPI)
 
 PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
 {
-    // USB device:
-    // New USB device found, idVendor=1df7, idProduct=2500
-    // New USB device strings: Mfr=0, Product=0, SerialNumber=0
+	SamplingDevices result;
+	int count = mirisdr_get_device_count();
 
-    libusb_context *usb_context = 0;
-    ssize_t num_devs;
-    SamplingDevices result;
-    libusb_device **devs;
-    libusb_device *dev;
-    int i = 0;
+	char vendor[256];
+	char product[256];
+	char serial[256];
 
-    if (libusb_init(&usb_context)) {
-        return result;
-    }
+	for(int i = 0; i < count; i++)
+	{
+		vendor[0] = '\0';
+		product[0] = '\0';
+		serial[0] = '\0';
 
-    num_devs = libusb_get_device_list(usb_context, &devs);
+		if (mirisdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
+		{
+			continue;
+		}
 
-    if (num_devs > 0)
-    {
-        while ((dev = devs[i++]) != 0)
-        {
-            struct libusb_device_descriptor desc;
-            struct libusb_config_descriptor *conf_desc = 0;
-            int res = libusb_get_device_descriptor(dev, &desc);
-            unsigned short dev_vid = desc.idVendor;
-            unsigned short dev_pid = desc.idProduct;
+		qDebug("SDRPlayPlugin::enumSampleSources: found %s:%s (%s)", vendor, product, serial);
+		QString displayedName(QString("SDRPlay[%1] %2").arg(i).arg(serial));
 
-            if ((dev_vid == 0x1df7) && (dev_pid == 0x2500))
-            {
-                QString displayedName(QString("SDRPlay[0] 0"));
-
-                result.append(SamplingDevice(displayedName,
-                        m_deviceTypeID,
-                        QString("0"),
-                        0));
-                break;
-            }
-        }
-    }
-
-    libusb_free_device_list(devs, 1);
-
-    if (usb_context)
-    {
-        libusb_exit(usb_context);
-    }
+		result.append(SamplingDevice(displayedName,
+				m_deviceTypeID,
+				QString(serial),
+				i));
+	}
 
     return result;
 }
