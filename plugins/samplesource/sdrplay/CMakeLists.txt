@@ -24,13 +24,13 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBSDRPLAYSRC}
+    ${LIBMIRISDR_INCLUDE_DIR}
 )
 else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBSDRPLAY_INCLUDE_DIRS}
+    ${LIBMIRISDR_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 
@@ -48,13 +48,13 @@ add_library(inputsdrplay SHARED
 if (BUILD_DEBIAN)
 target_link_libraries(inputsdrplay
     ${QT_LIBRARIES}
-    sdrplay
+    mirisdr
     sdrbase
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputsdrplay
     ${QT_LIBRARIES}
-    ${LIBSDRPLAY_LIBRARIES}
+    ${LIBMIRISDR_LIBRARIES}
     sdrbase
 )
 endif (BUILD_DEBIAN)
