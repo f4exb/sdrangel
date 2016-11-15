@@ -23,6 +23,7 @@ copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
+copy libmirisdr\%1\libmirisdr.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx

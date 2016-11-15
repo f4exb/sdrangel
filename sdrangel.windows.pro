@@ -14,6 +14,7 @@ SUBDIRS += librtlsdr
 SUBDIRS += libhackrf
 SUBDIRS += libairspy
 SUBDIRS += libbladerf
+SUBDIRS += libmirisdr
 SUBDIRS += mbelib
 SUBDIRS += dsdcc
 SUBDIRS += serialdv
