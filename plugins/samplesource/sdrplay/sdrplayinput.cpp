@@ -34,10 +34,9 @@ MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlay, Message)
 SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
+	m_dev(0),
     m_sdrPlayThread(0),
-    m_deviceDescription("SDRPlay"),
-    m_samplesPerPacket(4096),
-    m_mirStreamRunning(false)
+    m_deviceDescription("SDRPlay")
 {
 }
 
@@ -51,10 +50,20 @@ bool SDRPlayInput::init(const Message& cmd)
     return false;
 }
 
-bool SDRPlayInput::start(int device)
+bool SDRPlayInput::start(uint32_t device)
 {
-    mir_sdr_ErrT r;
     QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_dev != 0)
+	{
+		stop();
+	}
+
+	char vendor[256];
+	char product[256];
+	char serial[256];
+	int res;
+	int numberOfGains;
 
     if (!m_sampleFifo.setSize(96000 * 4))
     {
@@ -62,57 +71,121 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
+	if ((res = mirisdr_open(&m_dev, device)) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", device, strerror(errno));
+		return false;
+	}
+
+	vendor[0] = '\0';
+	product[0] = '\0';
+	serial[0] = '\0';
+
+	if ((res = mirisdr_get_device_usb_strings(m_dev, vendor, product, serial)) < 0)
+	{
+		qCritical("SDRPlayInput::start: error accessing USB device");
+		stop();
+		return false;
+	}
+
+	qWarning("SDRPlayInput::start: open: %s %s, SN: %s", vendor, product, serial);
+	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
+
+	if ((res = mirisdr_set_sample_rate(m_dev, 2048000)) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not set sample rate: 2048kS/s");
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_center_freq(m_dev, m_settings.m_centerFrequency)) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not set frequency to: %lu Hz", m_settings.m_centerFrequency);
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_sample_format(m_dev, "336_S16"))) // sample format S12
+	{
+		qCritical("SDRPlayInput::start: could not set sample format: rc: %d", res);
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_transfer(m_dev, "BULK")) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not set USB Bulk mode: rc: %d", res);
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_if_freq(m_dev, SDRPlayIF::m_if[m_settings.m_ifFrequencyIndex])) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not set IF frequency at index %d: rc: %d", m_settings.m_ifFrequencyIndex, res);
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_bandwidth(m_dev, SDRPlayBandwidths::m_bw[m_settings.m_bandwidthIndex])) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not set bandwidth at index %d: rc: %d", m_settings.m_bandwidthIndex, res);
+		stop();
+		return false;
+	}
+
+	if ((res = mirisdr_set_tuner_gain_mode(m_dev, 1)) < 0)
+	{
+		qCritical("SDRPlayInput::start: error setting tuner gain mode");
+		stop();
+		return false;
+	}
+
+	numberOfGains = mirisdr_get_tuner_gains(m_dev, 0);
+
+	if (numberOfGains < 0)
+	{
+		qCritical("SDRPlayInput::start: error getting number of gain values supported");
+		stop();
+		return false;
+	}
+	else
+	{
+		qDebug("SDRPlayInput::start: supported gain values: %d", numberOfGains);
+	}
+
+	m_gains.resize(numberOfGains);
+
+	if (mirisdr_get_tuner_gains(m_dev, &m_gains[0]) < 0)
+	{
+		qCritical("SDRPlayInput::start: error getting gain values");
+		stop();
+		return false;
+	}
+	else
+	{
+		qDebug() << "SDRPlayInput::start: " << m_gains.size() << "gains";
+		MsgReportSDRPlay *message = MsgReportSDRPlay::create(m_gains);
+		getOutputMessageQueueToGUI()->push(message);
+	}
+
+	if ((res = mirisdr_reset_buffer(m_dev)) < 0)
+	{
+		qCritical("SDRPlayInput::start: could not reset USB EP buffers: %s", strerror(errno));
+		stop();
+		return false;
+	}
+
     if((m_sdrPlayThread = new SDRPlayThread(&m_sampleFifo)) == 0)
     {
         qFatal("SDRPlayInput::start: failed to create thread");
         return false;
     }
 
-    int agcSetPoint = -m_settings.m_gainRedctionIndex;
-    double sampleRateMHz = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex) / 1e3;
-    double frequencyMHz = m_settings.m_centerFrequency / 1e6;
-    int infoOverallGr;
+    m_sdrPlayThread->startWork();
 
-    r = mir_sdr_DCoffsetIQimbalanceControl(1, 0);
-    if (r != mir_sdr_Success)
-    {
-        qCritical("SDRPlayInput::start: mir_sdr_DCoffsetIQimbalanceControl failed with code %d", (int) r);
-    }
+	mutexLocker.unlock();
 
-    r = mir_sdr_AgcControl(mir_sdr_AGC_DISABLE, agcSetPoint, 0, 0, 0, 0, 1);
-    if (r != mir_sdr_Success)
-    {
-        qCritical("SDRPlayInput::start: mir_sdr_AgcControl failed with code %d", (int) r);
-    }
-
-    qDebug("SDRPlayInput::start: sampleRateMHz: %lf frequencyMHz: %lf", sampleRateMHz, frequencyMHz);
-
-    mir_sdr_DebugEnable(1);
-
-    r = mir_sdr_StreamInit(
-            &agcSetPoint,
-            sampleRateMHz,
-            frequencyMHz,
-            mir_sdr_BW_1_536,
-            mir_sdr_IF_Zero,
-            1, /* LNA */
-            &infoOverallGr,
-            0, /* use internal gr tables according to band */
-            &m_samplesPerPacket,
-            SDRPlayThread::streamCallback,
-            SDRPlayInput::callbackGC,
-            0);
-
-    if (r != mir_sdr_Success)
-    {
-        qCritical("SDRPlayInput::start: mir_sdr_StreamInit failed with code %d", (int) r);
-    }
-    else
-    {
-        qDebug("SDRPlayInput::start: Mir stream started: samplesPerPacket: %d", m_samplesPerPacket);
-        m_mirStreamRunning = true;
-        m_sdrPlayThread->startWork();
-    }
+	applySettings(m_settings, true);
 }
 
 void SDRPlayInput::stop()
@@ -293,11 +366,11 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    if ((m_settings.m_LOppmCorrection != settings.m_LOppmCorrection) || force)
     {
-        m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+        m_settings.m_LOppmCorrection = settings.m_LOppmCorrection;
 
-        mir_sdr_ErrT r = mir_sdr_SetPpm(m_settings.m_LOppmTenths / 10.0);
+        mir_sdr_ErrT r = mir_sdr_SetPpm(m_settings.m_LOppmCorrection / 10.0);
 
         if (r != mir_sdr_Success)
         {

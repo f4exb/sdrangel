@@ -28,11 +28,10 @@ struct SDRPlaySettings {
 	} fcPos_t;
 
 	uint64_t m_centerFrequency;
-	int32_t  m_LOppmTenths;
+	qint32 m_gain;
+	int32_t  m_LOppmCorrection;
     uint32_t m_frequencyBandIndex;
     uint32_t m_ifFrequencyIndex;
-    uint32_t m_mirDcCorrIndex;
-    uint32_t m_mirDcCorrTrackTimeIndex;
     uint32_t m_bandwidthIndex;
 	uint32_t m_devSampleRateIndex;
 	uint32_t m_gainRedctionIndex;

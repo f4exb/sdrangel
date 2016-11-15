@@ -20,8 +20,9 @@
 #include <dsp/devicesamplesource.h>
 
 #include "sdrplaysettings.h"
-#include <mirsdrapi-rsp.h>
+#include <mirisdr.h>
 #include <QString>
+#include <stdint.h>
 
 class DeviceSourceAPI;
 class SDRPlayThread;
@@ -52,14 +53,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgReportSDRPlay* create()
+		const std::vector<int>& getGains() const { return m_gains; }
+
+        static MsgReportSDRPlay* create(const std::vector<int>& gains)
         {
-            return new MsgReportSDRPlay();
+            return new MsgReportSDRPlay(gains);
         }
 
     protected:
-        MsgReportSDRPlay() :
-            Message()
+		std::vector<int> m_gains;
+
+        MsgReportSDRPlay(const std::vector<int>& gains) :
+            Message(),
+			m_gains(gains)
         { }
     };
 
@@ -67,7 +73,7 @@ public:
     virtual ~SDRPlayInput();
 
     virtual bool init(const Message& message);
-    virtual bool start(int device);
+    virtual bool start(uint32_t device);
     virtual void stop();
 
     virtual const QString& getDeviceDescription() const;
@@ -78,17 +84,14 @@ public:
 
 private:
     bool applySettings(const SDRPlaySettings& settings, bool force);
-    void reinitMirSDR(mir_sdr_ReasonForReinitT reasonForReinit);
-    static void callbackGC(unsigned int gRdB, unsigned int lnaGRdB, void *cbContext);
 
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;
     SDRPlaySettings m_settings;
+    mirisdr_dev_t* m_dev;
     SDRPlayThread* m_sdrPlayThread;
     QString m_deviceDescription;
-
-    int m_samplesPerPacket;
-    bool m_mirStreamRunning;
+    std::vector<int> m_gains;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

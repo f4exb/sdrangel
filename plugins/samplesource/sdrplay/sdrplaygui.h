@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 
 #include <QTimer>
+#include <vector>
 #include "plugin/plugingui.h"
 
 #include "sdrplayinput.h"
@@ -56,17 +57,12 @@ private:
     SDRPlaySettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
+    std::vector<int> m_gains;
     DeviceSampleSource* m_sampleSource;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
-
-    static const unsigned int m_nbGRValues = 103;
-    static const unsigned int m_nbBands = 8;
-    static unsigned int m_bbGr[m_nbBands][m_nbGRValues];
-    static unsigned int m_lnaGr[m_nbBands][m_nbGRValues];
-    static unsigned int m_mixerGr[m_nbBands][m_nbGRValues];
 
     void displaySettings();
     void sendSettings();
@@ -82,13 +78,11 @@ private slots:
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
     void on_fBand_currentIndexChanged(int index);
-    void on_mirDCCorr_currentIndexChanged(int index);
-    void on_mirDCCorrTrackTime_valueChanged(int value);
     void on_bandwidth_currentIndexChanged(int index);
     void on_samplerate_currentIndexChanged(int index);
     void on_decim_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);
-    void on_gr_valueChanged(int value);
+    void on_gain_valueChanged(int value);
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
 };
@@ -102,7 +96,7 @@ public:
     static unsigned int getRateIndex(unsigned int rate);
     static unsigned int getNbRates();
 private:
-    static const unsigned int m_nb_rates = 18;
+    static const unsigned int m_nb_rates = 16;
     static unsigned int m_rates[m_nb_rates];
 };
 
@@ -137,15 +131,6 @@ private:
     static unsigned int m_bandLow[m_nb_bands];
     static unsigned int m_bandHigh[m_nb_bands];
     static const char* m_bandName[m_nb_bands];
-};
-
-class SDRPlayDCCorr {
-public:
-    static QString getDCCorrName(unsigned int dcCorr_index);
-    static unsigned int getNbDCCorrs();
-private:
-    static const unsigned int m_nb_dcCorrs = 6;
-    static const char* m_dcCorrName[m_nb_dcCorrs];
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_ */
