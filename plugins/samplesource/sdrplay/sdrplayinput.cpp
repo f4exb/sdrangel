@@ -71,7 +71,7 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
-	if ((res = mirisdr_open(&m_dev, device)) < 0)
+	if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, device)) < 0)
 	{
 		qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", device, strerror(errno));
 		return false;
