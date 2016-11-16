@@ -28,33 +28,33 @@ void SDRPlaySettings::resetToDefaults()
 {
 	m_centerFrequency = 7040*1000;
 	m_gain = 0;
-    m_LOppmCorrection = 0;
+    m_LOppmTenths = 0;
     m_frequencyBandIndex = 0;
     m_ifFrequencyIndex = 0;
     m_bandwidthIndex = 0;
 	m_devSampleRateIndex = 0;
-	m_gainRedctionIndex = 35;
     m_log2Decim = 0;
     m_fcPos = FC_POS_CENTER;
     m_dcBlock = false;
     m_iqCorrection = false;
+    m_autoGain = false;
 }
 
 QByteArray SDRPlaySettings::serialize() const
 {
 	SimpleSerializer s(1);
 
-	s.writeS32(1, m_LOppmCorrection);
+	s.writeS32(1, m_LOppmTenths);
     s.writeU32(2, m_frequencyBandIndex);
     s.writeU32(3, m_ifFrequencyIndex);
     s.writeS32(4, m_gain);
     s.writeU32(5, m_bandwidthIndex);
 	s.writeU32(6, m_devSampleRateIndex);
-    s.writeU32(7, m_gainRedctionIndex);
-	s.writeU32(8, m_log2Decim);
-	s.writeS32(9, (int) m_fcPos);
-	s.writeBool(10, m_dcBlock);
-	s.writeBool(11, m_iqCorrection);
+	s.writeU32(7, m_log2Decim);
+	s.writeS32(8, (int) m_fcPos);
+	s.writeBool(9, m_dcBlock);
+	s.writeBool(10, m_iqCorrection);
+    s.writeBool(11, m_autoGain);
 
 	return s.final();
 }
@@ -73,18 +73,18 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 	{
 		int intval;
 
-		d.readS32(1, &m_LOppmCorrection, 0);
+		d.readS32(1, &m_LOppmTenths, 0);
         d.readU32(2, &m_frequencyBandIndex, 0);
         d.readU32(3, &m_ifFrequencyIndex, 0);
 		d.readS32(4, &m_gain, 0);
         d.readU32(5, &m_bandwidthIndex, 0);
         d.readU32(6, &m_devSampleRateIndex, 0);
-        d.readU32(7, &m_gainRedctionIndex, 35);
-		d.readU32(8, &m_log2Decim, 0);
-		d.readS32(9, &intval, 0);
+		d.readU32(7, &m_log2Decim, 0);
+		d.readS32(8, &intval, 0);
 		m_fcPos = (fcPos_t) intval;
-		d.readBool(10, &m_dcBlock, false);
-		d.readBool(11, &m_iqCorrection, false);
+		d.readBool(9, &m_dcBlock, false);
+		d.readBool(10, &m_iqCorrection, false);
+        d.readBool(11, &m_autoGain, false);
 
 		return true;
 	}

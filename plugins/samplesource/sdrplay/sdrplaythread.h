@@ -20,7 +20,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include <mirsdrapi-rsp.h>
+#include <mirisdr.h>
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
@@ -30,41 +30,34 @@ class SDRPlayThread : public QThread {
     Q_OBJECT
 
 public:
-    SDRPlayThread(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+    SDRPlayThread(mirisdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
     ~SDRPlayThread();
 
     void startWork();
     void stopWork();
+    void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
-
-    static void streamCallback (
-            short *xi,
-            short *xq,
-            unsigned int firstSampleNum,
-            int grChanged,
-            int rfChanged,
-            int fsChanged,
-            unsigned int numSamples,
-            unsigned int reset,
-            void *cbContext);
 
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
     bool m_running;
 
+    mirisdr_dev_t *m_dev;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
 
+    int m_samplerate;
     unsigned int m_log2Decim;
     int m_fcPos;
-    static SDRPlayThread *m_this;
 
     Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 
     void run();
-    void callback(short *xi, short *xq, unsigned int numSamples);
+    void callback(const qint16* buf, qint32 len);
+
+    static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYTHREAD_H_ */

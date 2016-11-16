@@ -19,23 +19,21 @@
 #include "sdrplaythread.h"
 #include "dsp/samplesinkfifo.h"
 
-SDRPlayThread *SDRPlayThread::m_this = 0;
-
-SDRPlayThread::SDRPlayThread(SampleSinkFifo* sampleFifo, QObject* parent) :
+SDRPlayThread::SDRPlayThread(mirisdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),
+    m_dev(dev),
     m_convertBuffer(SDRPLAY_INIT_NBSAMPLES),
     m_sampleFifo(sampleFifo),
+    m_samplerate(288000),
     m_log2Decim(0),
     m_fcPos(0)
 {
-    m_this = this;
 }
 
 SDRPlayThread::~SDRPlayThread()
 {
     stopWork();
-    m_this = 0;
 }
 
 void SDRPlayThread::startWork()
@@ -53,6 +51,11 @@ void SDRPlayThread::stopWork()
     wait();
 }
 
+void SDRPlayThread::setSamplerate(int samplerate)
+{
+    m_samplerate = samplerate;
+}
+
 void SDRPlayThread::setLog2Decimation(unsigned int log2_decim)
 {
     m_log2Decim = log2_decim;
@@ -63,110 +66,114 @@ void SDRPlayThread::setFcPos(int fcPos)
     m_fcPos = fcPos;
 }
 
-void SDRPlayThread::streamCallback(
-        short *xi,
-        short *xq,
-        unsigned int firstSampleNum,
-        int grChanged,
-        int rfChanged,
-        int fsChanged,
-        unsigned int numSamples,
-        unsigned int reset,
-        void *cbContext)
+void SDRPlayThread::run()
 {
-    qDebug("SDRPlayThread::streamCallback");
-    m_this->callback(xi, xq, numSamples);
-}
+    int res;
 
-void SDRPlayThread::callback(short *xi, short *xq, unsigned int numSamples)
-{
-    qDebug("SDRPlayThread::callback");
-    if (m_convertBuffer.size() < numSamples)
+    m_running = true;
+    m_startWaiter.wakeAll();
+
+    while (m_running)
     {
-        m_convertBuffer.resize(numSamples);
+        if ((res = mirisdr_read_async(m_dev, &SDRPlayThread::callbackHelper, this, 32, SDRPLAY_INIT_NBSAMPLES)) < 0)
+        {
+            qCritical("SDRPlayThread::run: async read error: rc %d: %s", res, strerror(errno));
+            break;
+        }
     }
 
+    m_running = false;
+}
+
+void SDRPlayThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
+{
+    SDRPlayThread* thread = (SDRPlayThread*) ctx;
+    thread->callback((const qint16*) buf, len/2);
+}
+
+void SDRPlayThread::callback(const qint16* buf, qint32 len)
+{
     SampleVector::iterator it = m_convertBuffer.begin();
 
     if (m_log2Decim == 0)
     {
-        m_decimators.decimate1(&it, xi, xq, numSamples);
+        m_decimators.decimate1(&it, buf, len);
     }
     else
     {
-        if (m_fcPos == 0) // Infra
+        if (m_fcPos == 0) // Infradyne
         {
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_inf(&it, xi, xq, numSamples);
+                m_decimators.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
             }
         }
-        else if (m_fcPos == 1) // Supra
+        else if (m_fcPos == 1) // Supradyne
         {
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_sup(&it, xi, xq, numSamples);
+                m_decimators.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
             }
         }
-        else if (m_fcPos == 2) // Center
+        else // Centered
         {
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_cen(&it, xi, xq, numSamples);
+                m_decimators.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
@@ -175,21 +182,10 @@ void SDRPlayThread::callback(short *xi, short *xq, unsigned int numSamples)
     }
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
-}
 
-void SDRPlayThread::run()
-{
-    int res;
-
-    m_running = true;
-    m_startWaiter.wakeAll();
-
-    while(m_running)
+    if(!m_running)
     {
-        sleep(1);
+        mirisdr_cancel_async(m_dev);
     }
-
-    m_running = false;
 }
-
 

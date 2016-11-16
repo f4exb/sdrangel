@@ -473,7 +473,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& errorMessage)
 {
-	qDebug() << "DSPDeviceSourceEngine::gotoError";
+	qDebug() << "DSPDeviceSourceEngine::gotoError: " << errorMessage;
 
 	m_errorMessage = errorMessage;
 	m_deviceDescription.clear();

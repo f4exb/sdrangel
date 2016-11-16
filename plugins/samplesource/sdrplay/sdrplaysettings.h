@@ -29,16 +29,16 @@ struct SDRPlaySettings {
 
 	uint64_t m_centerFrequency;
 	qint32 m_gain;
-	int32_t  m_LOppmCorrection;
+	int32_t  m_LOppmTenths;
     uint32_t m_frequencyBandIndex;
     uint32_t m_ifFrequencyIndex;
     uint32_t m_bandwidthIndex;
 	uint32_t m_devSampleRateIndex;
-	uint32_t m_gainRedctionIndex;
 	uint32_t m_log2Decim;
 	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	bool m_autoGain;
 
 	SDRPlaySettings();
 	void resetToDefaults();

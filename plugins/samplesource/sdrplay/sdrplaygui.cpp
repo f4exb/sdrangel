@@ -47,19 +47,19 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui->ifFrequency->clear();
     for (int i = 0; i < SDRPlayIF::getNbIFs(); i++)
     {
-        ui->ifFrequency->addItem(QString::number(SDRPlayIF::getIF(i)));
+        ui->ifFrequency->addItem(QString::number(SDRPlayIF::getIF(i)/1000));
     }
 
     ui->samplerate->clear();
     for (int i = 0; i < SDRPlaySampleRates::getNbRates(); i++)
     {
-        ui->samplerate->addItem(QString::number(SDRPlaySampleRates::getRate(i)));
+        ui->samplerate->addItem(QString::number(SDRPlaySampleRates::getRate(i)/1000));
     }
 
     ui->bandwidth->clear();
     for (int i = 0; i < SDRPlayBandwidths::getNbBandwidths(); i++)
     {
-        ui->bandwidth->addItem(QString::number(SDRPlayBandwidths::getBandwidth(i)));
+        ui->bandwidth->addItem(QString::number(SDRPlayBandwidths::getBandwidth(i)/1000));
     }
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -205,8 +205,8 @@ void SDRPlayGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
-    ui->ppm->setValue(m_settings.m_LOppmCorrection);
-    ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmCorrection/10.0, 'f', 1)));
+    ui->ppm->setValue(m_settings.m_LOppmTenths);
+    ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     ui->samplerate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
@@ -214,6 +214,7 @@ void SDRPlayGui::displaySettings()
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
     ui->fBand->setCurrentIndex(m_settings.m_frequencyBandIndex);
+    ui->bandwidth->setCurrentIndex(m_settings.m_bandwidthIndex);
     ui->ifFrequency->setCurrentIndex(m_settings.m_ifFrequencyIndex);
     ui->samplerate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
@@ -298,13 +299,14 @@ void SDRPlayGui::on_centerFrequency_changed(quint64 value)
 
 void SDRPlayGui::on_ppm_valueChanged(int value)
 {
-    m_settings.m_LOppmCorrection = value;
-    ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmCorrection/10.0, 'f', 1)));
+    m_settings.m_LOppmTenths = value;
+    ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
     sendSettings();
 }
 
 void SDRPlayGui::on_dcOffset_toggled(bool checked)
 {
+    qDebug("SDRPlayGui::on_dcOffset_toggled: %s", checked ? "on" : "off");
     m_settings.m_dcBlock = checked;
     sendSettings();
 }
@@ -329,19 +331,6 @@ void SDRPlayGui::on_fBand_currentIndexChanged(int index)
     sendSettings();
 }
 
-void SDRPlayGui::on_mirDCCorr_currentIndexChanged(int index)
-{
-    m_settings.m_mirDcCorrIndex = index;
-    sendSettings();
-}
-
-void SDRPlayGui::on_mirDCCorrTrackTime_valueChanged(int value)
-{
-    m_settings.m_mirDcCorrTrackTimeIndex = value;
-    ui->mirDCCorrTrackTimeText->setText(tr("%1us").arg(m_settings.m_mirDcCorrTrackTimeIndex * 3));
-    sendSettings();
-}
-
 void SDRPlayGui::on_bandwidth_currentIndexChanged(int index)
 {
     m_settings.m_bandwidthIndex = index;
@@ -351,6 +340,12 @@ void SDRPlayGui::on_bandwidth_currentIndexChanged(int index)
 void SDRPlayGui::on_samplerate_currentIndexChanged(int index)
 {
     m_settings.m_devSampleRateIndex = index;
+    sendSettings();
+}
+
+void SDRPlayGui::on_ifFrequency_currentIndexChanged(int index)
+{
+    m_settings.m_ifFrequencyIndex = index;
     sendSettings();
 }
 
@@ -366,20 +361,24 @@ void SDRPlayGui::on_fcPos_currentIndexChanged(int index)
     sendSettings();
 }
 
-void SDRPlayGui::on_gr_valueChanged(int value)
+void SDRPlayGui::on_gain_valueChanged(int value)
 {
-    m_settings.m_gainRedctionIndex = value;
+    if (value > (int)m_gains.size())
+    {
+        return;
+    }
 
-    char grStrChr[20];
+    int gain = m_gains[value];
+    ui->gainText->setText(tr("%1.%2").arg(gain / 10).arg(abs(gain % 10)));
+    m_settings.m_gain = gain;
 
-    sprintf(grStrChr, "%03d:%02d-%02d-%02d",
-            m_settings.m_gainRedctionIndex,
-            24 - m_lnaGr[m_settings.m_frequencyBandIndex][m_settings.m_gainRedctionIndex],
-            19 - m_mixerGr[m_settings.m_frequencyBandIndex][m_settings.m_gainRedctionIndex],
-            59 - m_bbGr[m_settings.m_frequencyBandIndex][m_settings.m_gainRedctionIndex]);
+    sendSettings();
+}
 
-    ui->grText->setText(QString(grStrChr));
-
+void SDRPlayGui::on_gainAuto_toggled(bool checked)
+{
+    qDebug("SDRPlayGui::on_gainAuto_toggled: %s", checked ? "on" : "off");
+    m_settings.m_autoGain = checked;
     sendSettings();
 }
 

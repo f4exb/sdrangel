@@ -80,9 +80,11 @@ private slots:
     void on_fBand_currentIndexChanged(int index);
     void on_bandwidth_currentIndexChanged(int index);
     void on_samplerate_currentIndexChanged(int index);
+    void on_ifFrequency_currentIndexChanged(int index);
     void on_decim_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
+    void on_gainAuto_toggled(bool checked);
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
 };

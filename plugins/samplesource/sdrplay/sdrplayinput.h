@@ -73,7 +73,7 @@ public:
     virtual ~SDRPlayInput();
 
     virtual bool init(const Message& message);
-    virtual bool start(uint32_t device);
+    virtual bool start(int device);
     virtual void stop();
 
     virtual const QString& getDeviceDescription() const;
@@ -84,6 +84,7 @@ public:
 
 private:
     bool applySettings(const SDRPlaySettings& settings, bool force);
+    bool setCenterFrequency(quint64 freq);
 
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;

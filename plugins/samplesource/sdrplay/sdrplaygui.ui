@@ -35,16 +35,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -526,7 +517,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_vga1">
+    <layout class="QGridLayout" name="gridLayout_gain">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -561,10 +552,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Tuner gain in dB</string>
+        <string>  </string>
        </property>
        <property name="text">
-        <string>---</string>
+        <string>000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -575,6 +566,13 @@
       <widget class="QLabel" name="gainLabel">
        <property name="text">
         <string>Gain</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="ButtonSwitch" name="gainAuto">
+       <property name="text">
+        <string>A</string>
        </property>
       </widget>
      </item>
