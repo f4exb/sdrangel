@@ -223,28 +223,30 @@ void SDRPlayGui::displaySettings()
 
 	if (m_gains.size() > 0)
 	{
-		int dist = abs(m_settings.m_gain - m_gains[0]);
+		int dist = abs(m_settings.m_tunerGain - m_gains[0]);
 		int pos = 0;
 
 		for (uint i = 1; i < m_gains.size(); i++)
 		{
-			if (abs(m_settings.m_gain - m_gains[i]) < dist)
+			if (abs(m_settings.m_tunerGain - m_gains[i]) < dist)
 			{
-				dist = abs(m_settings.m_gain - m_gains[i]);
+				dist = abs(m_settings.m_tunerGain - m_gains[i]);
 				pos = i;
 			}
 		}
 
-		ui->gainText->setText(tr("%1.%2").arg(m_gains[pos] / 10).arg(abs(m_gains[pos] % 10)));
-		ui->gain->setMaximum(m_gains.size() - 1);
-		ui->gain->setEnabled(true);
-		ui->gain->setValue(pos);
+		QString gainText;
+		gainText.sprintf("%03d", m_gains[pos]);
+	    ui->gainTunerText->setText(gainText);
+		ui->gainTuner->setMaximum(m_gains.size() - 1);
+		ui->gainTuner->setEnabled(true);
+		ui->gainTuner->setValue(pos);
 	}
 	else
 	{
-		ui->gain->setMaximum(0);
-		ui->gain->setEnabled(false);
-		ui->gain->setValue(0);
+		ui->gainTuner->setMaximum(0);
+		ui->gainTuner->setEnabled(false);
+		ui->gainTuner->setValue(0);
 	}
 }
 
@@ -361,7 +363,12 @@ void SDRPlayGui::on_fcPos_currentIndexChanged(int index)
     sendSettings();
 }
 
-void SDRPlayGui::on_gain_valueChanged(int value)
+void SDRPlayGui::on_gainTunerOn_toggled(bool checked)
+{
+	// TODO
+}
+
+void SDRPlayGui::on_gainTuner_valueChanged(int value)
 {
     if (value > (int)m_gains.size())
     {
@@ -369,10 +376,32 @@ void SDRPlayGui::on_gain_valueChanged(int value)
     }
 
     int gain = m_gains[value];
-    ui->gainText->setText(tr("%1.%2").arg(gain / 10).arg(abs(gain % 10)));
-    m_settings.m_gain = gain;
+	QString gainText;
+	gainText.sprintf("%03d", gain);
+    ui->gainTunerText->setText(gainText);
+    m_settings.m_tunerGain = gain;
 
     sendSettings();
+}
+
+void SDRPlayGui::on_gainManualOn_toggled(bool checked)
+{
+	// TODO
+}
+
+void SDRPlayGui::on_gainLNA_toggled(bool checked)
+{
+	// TODO
+}
+
+void SDRPlayGui::on_gainMixer_toggled(bool checked)
+{
+	// TODO
+}
+
+void SDRPlayGui::on_gainBaseband_valueChanged(int value)
+{
+	// TODO
 }
 
 void SDRPlayGui::on_startStop_toggled(bool checked)

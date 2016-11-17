@@ -27,7 +27,7 @@ SDRPlaySettings::SDRPlaySettings()
 void SDRPlaySettings::resetToDefaults()
 {
 	m_centerFrequency = 7040*1000;
-	m_gain = 0;
+	m_tunerGain = 0;
     m_LOppmTenths = 0;
     m_frequencyBandIndex = 0;
     m_ifFrequencyIndex = 0;
@@ -46,7 +46,7 @@ QByteArray SDRPlaySettings::serialize() const
 	s.writeS32(1, m_LOppmTenths);
     s.writeU32(2, m_frequencyBandIndex);
     s.writeU32(3, m_ifFrequencyIndex);
-    s.writeS32(4, m_gain);
+    s.writeS32(4, m_tunerGain);
     s.writeU32(5, m_bandwidthIndex);
 	s.writeU32(6, m_devSampleRateIndex);
 	s.writeU32(7, m_log2Decim);
@@ -74,7 +74,7 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 		d.readS32(1, &m_LOppmTenths, 0);
         d.readU32(2, &m_frequencyBandIndex, 0);
         d.readU32(3, &m_ifFrequencyIndex, 0);
-		d.readS32(4, &m_gain, 0);
+		d.readS32(4, &m_tunerGain, 0);
         d.readU32(5, &m_bandwidthIndex, 0);
         d.readU32(6, &m_devSampleRateIndex, 0);
 		d.readU32(7, &m_log2Decim, 0);

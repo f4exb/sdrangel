@@ -83,7 +83,12 @@ private slots:
     void on_ifFrequency_currentIndexChanged(int index);
     void on_decim_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);
-    void on_gain_valueChanged(int value);
+    void on_gainTunerOn_toggled(bool checked);
+    void on_gainTuner_valueChanged(int value);
+    void on_gainManualOn_toggled(bool checked);
+    void on_gainLNA_toggled(bool checked);
+    void on_gainMixer_toggled(bool checked);
+    void on_gainBaseband_valueChanged(int value);
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
 };

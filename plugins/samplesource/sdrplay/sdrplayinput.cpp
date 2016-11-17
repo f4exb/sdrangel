@@ -267,13 +267,13 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_gain != settings.m_gain) || force)
+    if ((m_settings.m_tunerGain != settings.m_tunerGain) || force)
     {
-        m_settings.m_gain = settings.m_gain;
+        m_settings.m_tunerGain = settings.m_tunerGain;
 
         if(m_dev != 0)
         {
-            int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_gain);
+            int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_tunerGain);
 
             if (r < 0)
             {

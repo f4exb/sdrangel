@@ -35,7 +35,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -521,51 +530,110 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="gain">
-       <property name="toolTip">
-        <string>Tuner gain</string>
-       </property>
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>0</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="gainText">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="gainLabel">
        <property name="text">
         <string>Gain</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QRadioButton" name="gainTunerOn">
+       <property name="toolTip">
+        <string>Use global tuner gain</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
+      <widget class="ButtonSwitch" name="gainLNA">
+       <property name="toolTip">
+        <string>LNA toggle</string>
+       </property>
+       <property name="text">
+        <string>LNA</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QDial" name="gainTuner">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Tuner gain in step units</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QRadioButton" name="gainManualOn">
+       <property name="toolTip">
+        <string>Use individual LNA, Mixer and Baseband gains</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
+      <widget class="ButtonSwitch" name="gainMixer">
+       <property name="toolTip">
+        <string>Mixer amplifier toggle</string>
+       </property>
+       <property name="text">
+        <string>MIX</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="9">
+      <widget class="QDial" name="gainBaseband">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Baseband gain (dB)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="gainTunerText">
+       <property name="toolTip">
+        <string>Current tuner gain step unit</string>
+       </property>
+       <property name="text">
+        <string>000</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="10">
+      <widget class="QLabel" name="gainBasebandText">
+       <property name="toolTip">
+        <string>Baseband amplifier gain in dB</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
