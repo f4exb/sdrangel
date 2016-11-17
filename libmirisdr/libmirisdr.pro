@@ -9,8 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = libmirisdr
 
-CONFIG(MINGW32):LIBMIRISDRSRC = "D:\softs\libmirisdr-3-bsz"
-CONFIG(MINGW64):LIBMIRISDRSRC = "D:\softs\libmirisdr-3-bsz"
+CONFIG(MINGW32):LIBMIRISDRSRC = "D:\softs\libmirisdr-4"
+CONFIG(MINGW64):LIBMIRISDRSRC = "D:\softs\libmirisdr-4"
 INCLUDEPATH += $$LIBMIRISDRSRC/include
 INCLUDEPATH += $$LIBMIRISDRSRC/src
 INCLUDEPATH += $$LIBMIRISDRSRC/src/convert
