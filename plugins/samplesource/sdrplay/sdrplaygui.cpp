@@ -555,10 +555,10 @@ unsigned int SDRPlayBands::m_bandLow[m_nb_bands] = {
         10,       // 0
         12000,    // 1
         30000,    // 2
-        60000,    // 3
+        50000,    // 3
         120000,   // 4
         250000,   // 5
-        420000,   // 6
+        380000,   // 6
         1000000,  // 7
 };
 
@@ -566,10 +566,10 @@ unsigned int SDRPlayBands::m_bandLow[m_nb_bands] = {
 unsigned int SDRPlayBands::m_bandHigh[m_nb_bands] = {
         12000,    // 0
         30000,    // 1
-        60000,    // 2
+        50000,    // 2
         120000,   // 3
         250000,   // 4
-        420000,   // 5
+        380000,   // 5
         1000000,  // 6
         2000000,  // 7
 };
@@ -577,11 +577,11 @@ unsigned int SDRPlayBands::m_bandHigh[m_nb_bands] = {
 const char* SDRPlayBands::m_bandName[m_nb_bands] = {
         "10k-12M",    // 0
         "12-30M",     // 1
-        "30-60M",     // 2
-        "60-120M",    // 3
+        "30-50M",     // 2
+        "50-120M",    // 3
         "120-250M",   // 4
-        "250-420M",   // 5
-        "420M-1G",    // 6
+        "250-380M",   // 5
+        "380M-1G",    // 6
         "1-2G",       // 7
 };
 
