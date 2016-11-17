@@ -552,7 +552,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>  </string>
+        <string/>
        </property>
        <property name="text">
         <string>000</string>
@@ -566,13 +566,6 @@
       <widget class="QLabel" name="gainLabel">
        <property name="text">
         <string>Gain</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="ButtonSwitch" name="gainAuto">
-       <property name="text">
-        <string>A</string>
        </property>
       </widget>
      </item>

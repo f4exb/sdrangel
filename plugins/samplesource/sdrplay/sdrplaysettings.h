@@ -38,7 +38,6 @@ struct SDRPlaySettings {
 	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqCorrection;
-	bool m_autoGain;
 
 	SDRPlaySettings();
 	void resetToDefaults();

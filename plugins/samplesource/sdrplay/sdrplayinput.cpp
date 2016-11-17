@@ -253,7 +253,6 @@ bool SDRPlayInput::handleMessage(const Message& message)
 bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
 {
     bool forwardChange = false;
-    bool forceManualGain = false;
     QMutexLocker mutexLocker(&m_mutex);
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -268,40 +267,17 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_autoGain != settings.m_autoGain) || force)
+    if ((m_settings.m_gain != settings.m_gain) || force)
     {
-        m_settings.m_autoGain = settings.m_autoGain;
+        m_settings.m_gain = settings.m_gain;
 
         if(m_dev != 0)
         {
-            int r = mirisdr_set_tuner_gain_mode(m_dev, m_settings.m_autoGain ? 0 : 1);
+            int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_gain);
 
             if (r < 0)
             {
-                qDebug("SDRPlayInput::applySettings: could not set auto gain %s: rc: %d", m_settings.m_autoGain ? "on" : "off", r);
-            }
-            else
-            {
-                qDebug("SDRPlayInput::applySettings: auto gain set to %s", m_settings.m_autoGain ? "on" : "off");
-                forceManualGain = !m_settings.m_autoGain;
-            }
-        }
-    }
-
-    if (!m_settings.m_autoGain)
-    {
-        if ((m_settings.m_gain != settings.m_gain) || force || forceManualGain)
-        {
-            m_settings.m_gain = settings.m_gain;
-
-            if(m_dev != 0)
-            {
-                int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_gain);
-
-                if (r < 0)
-                {
-                    qDebug("SDRPlayInput::applySettings: could not set tuner gain()");
-                }
+                qDebug("SDRPlayInput::applySettings: could not set tuner gain()");
             }
         }
     }

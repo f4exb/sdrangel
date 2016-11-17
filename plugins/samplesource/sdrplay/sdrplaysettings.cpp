@@ -37,7 +37,6 @@ void SDRPlaySettings::resetToDefaults()
     m_fcPos = FC_POS_CENTER;
     m_dcBlock = false;
     m_iqCorrection = false;
-    m_autoGain = false;
 }
 
 QByteArray SDRPlaySettings::serialize() const
@@ -54,7 +53,6 @@ QByteArray SDRPlaySettings::serialize() const
 	s.writeS32(8, (int) m_fcPos);
 	s.writeBool(9, m_dcBlock);
 	s.writeBool(10, m_iqCorrection);
-    s.writeBool(11, m_autoGain);
 
 	return s.final();
 }
@@ -84,7 +82,6 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 		m_fcPos = (fcPos_t) intval;
 		d.readBool(9, &m_dcBlock, false);
 		d.readBool(10, &m_iqCorrection, false);
-        d.readBool(11, &m_autoGain, false);
 
 		return true;
 	}

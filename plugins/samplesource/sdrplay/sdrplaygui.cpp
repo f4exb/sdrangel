@@ -375,13 +375,6 @@ void SDRPlayGui::on_gain_valueChanged(int value)
     sendSettings();
 }
 
-void SDRPlayGui::on_gainAuto_toggled(bool checked)
-{
-    qDebug("SDRPlayGui::on_gainAuto_toggled: %s", checked ? "on" : "off");
-    m_settings.m_autoGain = checked;
-    sendSettings();
-}
-
 void SDRPlayGui::on_startStop_toggled(bool checked)
 {
     if (checked)
