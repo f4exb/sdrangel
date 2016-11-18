@@ -91,20 +91,6 @@ bool SDRPlayInput::start(int device)
 	qWarning("SDRPlayInput::start: open: %s %s, SN: %s", vendor, product, serial);
 	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
-	if ((res = mirisdr_set_sample_rate(m_dev, 2048000)) < 0)
-	{
-		qCritical("SDRPlayInput::start: could not set sample rate: 2048kS/s");
-		stop();
-		return false;
-	}
-
-	if ((res = mirisdr_set_center_freq(m_dev, m_settings.m_centerFrequency)) < 0)
-	{
-		qCritical("SDRPlayInput::start: could not set frequency to: %lu Hz", m_settings.m_centerFrequency);
-		stop();
-		return false;
-	}
-
 	char s12FormatString[] = "336_S16";
 
 	if ((res = mirisdr_set_sample_format(m_dev, s12FormatString))) // sample format S12
@@ -121,40 +107,6 @@ bool SDRPlayInput::start(int device)
 		qCritical("SDRPlayInput::start: could not set USB Bulk mode: rc: %d", res);
 		stop();
 		return false;
-	}
-
-	if ((res = mirisdr_set_if_freq(m_dev, SDRPlayIF::getIF(m_settings.m_ifFrequencyIndex))) < 0)
-	{
-		qCritical("SDRPlayInput::start: could not set IF frequency at index %d: rc: %d", m_settings.m_ifFrequencyIndex, res);
-		stop();
-		return false;
-	}
-
-	if ((res = mirisdr_set_bandwidth(m_dev, SDRPlayBandwidths::getBandwidth(m_settings.m_bandwidthIndex))) < 0)
-	{
-		qCritical("SDRPlayInput::start: could not set bandwidth at index %d: rc: %d", m_settings.m_bandwidthIndex, res);
-		stop();
-		return false;
-	}
-
-	if ((res = mirisdr_set_tuner_gain_mode(m_dev, 1)) < 0)
-	{
-		qCritical("SDRPlayInput::start: error setting tuner gain mode");
-		stop();
-		return false;
-	}
-
-	numberOfGains = mirisdr_get_tuner_gains(m_dev, 0);
-
-	if (numberOfGains < 0)
-	{
-		qCritical("SDRPlayInput::start: error getting number of gain values supported");
-		stop();
-		return false;
-	}
-	else
-	{
-		qDebug("SDRPlayInput::start: supported gain values: %d", numberOfGains);
 	}
 
 	if ((res = mirisdr_reset_buffer(m_dev)) < 0)
@@ -252,6 +204,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         m_settings.m_iqCorrection = settings.m_iqCorrection;
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
+
+    // gains processing
 
     if ((m_settings.m_tunerGainMode != settings.m_tunerGainMode) || force)
     {
