@@ -39,7 +39,6 @@ HEADERS = $$LIBMIRISDRSRC/include/mirisdr.h\
     $$LIBMIRISDRSRC/src/gain.h\
     $$LIBMIRISDRSRC/src/hard.c\
     $$LIBMIRISDRSRC/src/hard.h\
-    $$LIBMIRISDRSRC/src/libusb.h\
     $$LIBMIRISDRSRC/src/reg.c\
     $$LIBMIRISDRSRC/src/soft.c\
     $$LIBMIRISDRSRC/src/soft.h\
