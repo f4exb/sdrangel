@@ -37,6 +37,10 @@ void SDRPlaySettings::resetToDefaults()
     m_fcPos = FC_POS_CENTER;
     m_dcBlock = false;
     m_iqCorrection = false;
+    m_tunerGainMode = true;
+    m_lnaOn = false;
+    m_mixerAmpOn = false;
+    m_basebandGain = 29;
 }
 
 QByteArray SDRPlaySettings::serialize() const
@@ -53,6 +57,10 @@ QByteArray SDRPlaySettings::serialize() const
 	s.writeS32(8, (int) m_fcPos);
 	s.writeBool(9, m_dcBlock);
 	s.writeBool(10, m_iqCorrection);
+	s.writeBool(11, m_tunerGainMode);
+	s.writeBool(12, m_lnaOn);
+	s.writeBool(13, m_mixerAmpOn);
+	s.writeS32(14, m_basebandGain);
 
 	return s.final();
 }
@@ -82,6 +90,10 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 		m_fcPos = (fcPos_t) intval;
 		d.readBool(9, &m_dcBlock, false);
 		d.readBool(10, &m_iqCorrection, false);
+		d.readBool(11, &m_tunerGainMode, true);
+		d.readBool(12, &m_lnaOn, false);
+		d.readBool(13, &m_mixerAmpOn, false);
+		d.readS32(14, &m_basebandGain, 29);
 
 		return true;
 	}

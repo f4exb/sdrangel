@@ -29,7 +29,7 @@
 #include "sdrplaythread.h"
 
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgConfigureSDRPlay, Message)
-MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlay, Message)
+MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlayGains, Message)
 
 SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -157,21 +157,6 @@ bool SDRPlayInput::start(int device)
 		qDebug("SDRPlayInput::start: supported gain values: %d", numberOfGains);
 	}
 
-	m_gains.resize(numberOfGains);
-
-	if (mirisdr_get_tuner_gains(m_dev, &m_gains[0]) < 0)
-	{
-		qCritical("SDRPlayInput::start: error getting gain values");
-		stop();
-		return false;
-	}
-	else
-	{
-		qDebug() << "SDRPlayInput::start: " << m_gains.size() << "gains";
-		MsgReportSDRPlay *message = MsgReportSDRPlay::create(m_gains);
-		getOutputMessageQueueToGUI()->push(message);
-	}
-
 	if ((res = mirisdr_reset_buffer(m_dev)) < 0)
 	{
 		qCritical("SDRPlayInput::start: could not reset USB EP buffers: %s", strerror(errno));
@@ -253,6 +238,7 @@ bool SDRPlayInput::handleMessage(const Message& message)
 bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
 {
     bool forwardChange = false;
+    bool forceGainSetting = false;
     QMutexLocker mutexLocker(&m_mutex);
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -267,20 +253,109 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_tunerGain != settings.m_tunerGain) || force)
+    if ((m_settings.m_tunerGainMode != settings.m_tunerGainMode) || force)
     {
-        m_settings.m_tunerGain = settings.m_tunerGain;
+        m_settings.m_tunerGainMode = settings.m_tunerGainMode;
+        forceGainSetting = true;
+    }
 
-        if(m_dev != 0)
+    if (m_settings.m_tunerGainMode)
+    {
+        if ((m_settings.m_tunerGain != settings.m_tunerGain) || forceGainSetting)
         {
-            int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_tunerGain);
+            m_settings.m_tunerGain = settings.m_tunerGain;
 
-            if (r < 0)
+            if(m_dev != 0)
             {
-                qDebug("SDRPlayInput::applySettings: could not set tuner gain()");
+                int r = mirisdr_set_tuner_gain(m_dev, m_settings.m_tunerGain);
+
+                if (r < 0)
+                {
+                    qDebug("SDRPlayInput::applySettings: could not set tuner gain");
+                }
+                else
+                {
+                    MsgReportSDRPlayGains *message = MsgReportSDRPlayGains::create(
+                            mirisdr_get_lna_gain(m_dev),
+                            mirisdr_get_mixer_gain(m_dev),
+                            mirisdr_get_baseband_gain(m_dev),
+                            mirisdr_get_tuner_gain(m_dev)
+                    );
+                    getOutputMessageQueueToGUI()->push(message);
+                }
             }
         }
     }
+    else
+    {
+        bool anyChange = false;
+
+        if ((m_settings.m_lnaOn != settings.m_lnaOn) || forceGainSetting)
+        {
+            if(m_dev != 0)
+            {
+                int r = mirisdr_set_lna_gain(m_dev, settings.m_lnaOn ? 0 : 1); // mirisdr_set_lna_gain takes gain reduction
+
+                if (r != 0)
+                {
+                    qDebug("SDRPlayInput::applySettings: could not set LNA gain");
+                }
+                else
+                {
+                    m_settings.m_lnaOn = settings.m_lnaOn;
+                    anyChange = true;
+                }
+            }
+        }
+
+        if ((m_settings.m_mixerAmpOn != settings.m_mixerAmpOn) || forceGainSetting)
+        {
+            if(m_dev != 0)
+            {
+                int r = mirisdr_set_mixer_gain(m_dev, settings.m_mixerAmpOn ? 0 : 1); // mirisdr_set_lna_gain takes gain reduction
+
+                if (r != 0)
+                {
+                    qDebug("SDRPlayInput::applySettings: could not set mixer gain");
+                }
+                else
+                {
+                    m_settings.m_mixerAmpOn = settings.m_mixerAmpOn;
+                    anyChange = true;
+                }
+            }
+        }
+
+        if ((m_settings.m_basebandGain != settings.m_basebandGain) || forceGainSetting)
+        {
+            if(m_dev != 0)
+            {
+                int r = mirisdr_set_baseband_gain(m_dev, settings.m_basebandGain);
+
+                if (r != 0)
+                {
+                    qDebug("SDRPlayInput::applySettings: could not set mixer gain");
+                }
+                else
+                {
+                    m_settings.m_basebandGain = settings.m_basebandGain;
+                    anyChange = true;
+                }
+            }
+        }
+
+        if (anyChange)
+        {
+            MsgReportSDRPlayGains *message = MsgReportSDRPlayGains::create(
+                    mirisdr_get_lna_gain(m_dev),
+                    mirisdr_get_mixer_gain(m_dev),
+                    mirisdr_get_baseband_gain(m_dev),
+                    mirisdr_get_tuner_gain(m_dev)
+            );
+            getOutputMessageQueueToGUI()->push(message);
+        }
+    }
+
 
     if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
     {

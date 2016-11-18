@@ -49,23 +49,32 @@ public:
         { }
     };
 
-    class MsgReportSDRPlay : public Message {
+    class MsgReportSDRPlayGains : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-		const std::vector<int>& getGains() const { return m_gains; }
-
-        static MsgReportSDRPlay* create(const std::vector<int>& gains)
+        static MsgReportSDRPlayGains* create(int lnaGain, int mixerGain, int basebandGain, int tunerGain)
         {
-            return new MsgReportSDRPlay(gains);
+            return new MsgReportSDRPlayGains(lnaGain, mixerGain, basebandGain, tunerGain);
         }
 
-    protected:
-		std::vector<int> m_gains;
+        int getLNAGain() const { return m_lnaGain; }
+        int getMixerGain() const { return m_mixerGain; }
+        int getBasebandGain() const { return m_basebandGain; }
+        int getTunerGain() const { return m_tunerGain; }
 
-        MsgReportSDRPlay(const std::vector<int>& gains) :
+    protected:
+        int m_lnaGain;
+        int m_mixerGain;
+        int m_basebandGain;
+        int m_tunerGain;
+
+        MsgReportSDRPlayGains(int lnaGain, int mixerGain, int basebandGain, int tunerGain) :
             Message(),
-			m_gains(gains)
+            m_lnaGain(lnaGain),
+            m_mixerGain(mixerGain),
+            m_basebandGain(basebandGain),
+            m_tunerGain(tunerGain)
         { }
     };
 
@@ -92,7 +101,6 @@ private:
     mirisdr_dev_t* m_dev;
     SDRPlayThread* m_sdrPlayThread;
     QString m_deviceDescription;
-    std::vector<int> m_gains;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

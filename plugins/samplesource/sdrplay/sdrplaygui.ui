@@ -35,16 +35,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -543,7 +534,7 @@
         <string>Use global tuner gain</string>
        </property>
        <property name="text">
-        <string/>
+        <string>T</string>
        </property>
       </widget>
      </item>
@@ -568,6 +559,12 @@
        <property name="toolTip">
         <string>Tuner gain in step units</string>
        </property>
+       <property name="maximum">
+        <number>102</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
       </widget>
      </item>
      <item row="0" column="5">
@@ -583,7 +580,7 @@
         <string>Use individual LNA, Mixer and Baseband gains</string>
        </property>
        <property name="text">
-        <string/>
+        <string>M</string>
        </property>
       </widget>
      </item>
@@ -607,6 +604,12 @@
        </property>
        <property name="toolTip">
         <string>Baseband gain (dB)</string>
+       </property>
+       <property name="maximum">
+        <number>59</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>

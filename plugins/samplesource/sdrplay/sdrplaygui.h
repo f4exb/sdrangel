@@ -57,7 +57,6 @@ private:
     SDRPlaySettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
-    std::vector<int> m_gains;
     DeviceSampleSource* m_sampleSource;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;

@@ -38,6 +38,10 @@ struct SDRPlaySettings {
 	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	bool m_tunerGainMode; // true: tuner (table) gain, false: manual (LNA, Mixer, BB) gain
+	bool m_lnaOn;
+	bool m_mixerAmpOn;
+	int  m_basebandGain;
 
 	SDRPlaySettings();
 	void resetToDefaults();

@@ -143,11 +143,31 @@ bool SDRPlayGui::deserialize(const QByteArray& data)
 
 bool SDRPlayGui::handleMessage(const Message& message)
 {
-    if (SDRPlayInput::MsgReportSDRPlay::match(message))
+    if (SDRPlayInput::MsgReportSDRPlayGains::match(message))
     {
-    	qDebug() << "SDRPlayGui::handleMessage: MsgReportSDRPlay";
-    	m_gains = ((SDRPlayInput::MsgReportSDRPlay&) message).getGains();
-        displaySettings();
+    	qDebug() << "SDRPlayGui::handleMessage: MsgReportSDRPlayGains";
+
+    	SDRPlayInput::MsgReportSDRPlayGains msg = (SDRPlayInput::MsgReportSDRPlayGains&) message;
+
+    	if (m_settings.m_tunerGainMode)
+    	{
+            ui->gainLNA->setChecked(msg.getLNAGain() != 0);
+            ui->gainMixer->setChecked(msg.getMixerGain() != 0);
+            ui->gainBaseband->setValue(msg.getBasebandGain());
+
+            QString gainText;
+            gainText.sprintf("%02d", msg.getBasebandGain());
+            ui->gainBasebandText->setText(gainText);
+    	}
+    	else
+    	{
+    	    ui->gainTuner->setValue(msg.getTunerGain());
+
+            QString gainText;
+            gainText.sprintf("%03d", msg.getTunerGain());
+            ui->gainTunerText->setText(gainText);
+    	}
+
         return true;
     }
     else
@@ -221,33 +241,7 @@ void SDRPlayGui::displaySettings()
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-	if (m_gains.size() > 0)
-	{
-		int dist = abs(m_settings.m_tunerGain - m_gains[0]);
-		int pos = 0;
-
-		for (uint i = 1; i < m_gains.size(); i++)
-		{
-			if (abs(m_settings.m_tunerGain - m_gains[i]) < dist)
-			{
-				dist = abs(m_settings.m_tunerGain - m_gains[i]);
-				pos = i;
-			}
-		}
-
-		QString gainText;
-		gainText.sprintf("%03d", m_gains[pos]);
-	    ui->gainTunerText->setText(gainText);
-		ui->gainTuner->setMaximum(m_gains.size() - 1);
-		ui->gainTuner->setEnabled(true);
-		ui->gainTuner->setValue(pos);
-	}
-	else
-	{
-		ui->gainTuner->setMaximum(0);
-		ui->gainTuner->setEnabled(false);
-		ui->gainTuner->setValue(0);
-	}
+    ui->gainTunerOn->setChecked(true);
 }
 
 void SDRPlayGui::sendSettings()
@@ -365,17 +359,19 @@ void SDRPlayGui::on_fcPos_currentIndexChanged(int index)
 
 void SDRPlayGui::on_gainTunerOn_toggled(bool checked)
 {
-	// TODO
+    qDebug("SDRPlayGui::on_gainTunerOn_toggled: %s", checked ? "on" : "off");
+    m_settings.m_tunerGainMode = true;
+    ui->gainTuner->setEnabled(true);
+    ui->gainLNA->setEnabled(false);
+    ui->gainMixer->setEnabled(false);
+    ui->gainBaseband->setEnabled(false);
+
+    sendSettings();
 }
 
 void SDRPlayGui::on_gainTuner_valueChanged(int value)
 {
-    if (value > (int)m_gains.size())
-    {
-        return;
-    }
-
-    int gain = m_gains[value];
+    int gain = value;
 	QString gainText;
 	gainText.sprintf("%03d", gain);
     ui->gainTunerText->setText(gainText);
@@ -386,22 +382,37 @@ void SDRPlayGui::on_gainTuner_valueChanged(int value)
 
 void SDRPlayGui::on_gainManualOn_toggled(bool checked)
 {
-	// TODO
+    qDebug("SDRPlayGui::on_gainManualOn_toggled: %s", checked ? "on" : "off");
+    m_settings.m_tunerGainMode = false;
+    ui->gainTuner->setEnabled(false);
+    ui->gainLNA->setEnabled(true);
+    ui->gainMixer->setEnabled(true);
+    ui->gainBaseband->setEnabled(true);
+
+    sendSettings();
 }
 
 void SDRPlayGui::on_gainLNA_toggled(bool checked)
 {
-	// TODO
+	m_settings.m_lnaOn = checked ? 1 : 0;
+	sendSettings();
 }
 
 void SDRPlayGui::on_gainMixer_toggled(bool checked)
 {
-	// TODO
+	m_settings.m_mixerAmpOn = checked ? 1 : 0;
+	sendSettings();
 }
 
 void SDRPlayGui::on_gainBaseband_valueChanged(int value)
 {
-	// TODO
+	m_settings.m_basebandGain = value;
+
+    QString gainText;
+    gainText.sprintf("%02d", value);
+    ui->gainBasebandText->setText(gainText);
+
+	sendSettings();
 }
 
 void SDRPlayGui::on_startStop_toggled(bool checked)
