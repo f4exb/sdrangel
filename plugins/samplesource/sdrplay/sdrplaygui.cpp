@@ -241,7 +241,38 @@ void SDRPlayGui::displaySettings()
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-    ui->gainTunerOn->setChecked(true);
+    ui->gainTunerOn->setChecked(m_settings.m_tunerGainMode);
+
+    if (m_settings.m_tunerGainMode)
+    {
+        ui->gainTuner->setEnabled(true);
+        ui->gainLNA->setEnabled(false);
+        ui->gainMixer->setEnabled(false);
+        ui->gainBaseband->setEnabled(false);
+
+        int gain = m_settings.m_tunerGain;
+        ui->gainTuner->setValue(gain);
+        QString gainText;
+        gainText.sprintf("%03d", gain);
+        ui->gainTunerText->setText(gainText);
+        m_settings.m_tunerGain = gain;
+    }
+    else
+    {
+        ui->gainTuner->setEnabled(false);
+        ui->gainLNA->setEnabled(true);
+        ui->gainMixer->setEnabled(true);
+        ui->gainBaseband->setEnabled(true);
+
+        ui->gainLNA->setChecked(m_settings.m_lnaOn != 0);
+        ui->gainMixer->setChecked(m_settings.m_mixerAmpOn != 0);
+
+        int gain = m_settings.m_basebandGain;
+        ui->gainBaseband->setValue(gain);
+        QString gainText;
+        gainText.sprintf("%02d", gain);
+        ui->gainBasebandText->setText(gainText);
+    }
 }
 
 void SDRPlayGui::sendSettings()

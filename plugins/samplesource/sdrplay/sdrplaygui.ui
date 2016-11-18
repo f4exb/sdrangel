@@ -540,8 +540,11 @@
      </item>
      <item row="0" column="7">
       <widget class="ButtonSwitch" name="gainLNA">
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
        <property name="toolTip">
-        <string>LNA toggle</string>
+        <string>LNA toggle (gain depends on frequency)</string>
        </property>
        <property name="text">
         <string>LNA</string>
@@ -587,7 +590,7 @@
      <item row="0" column="8">
       <widget class="ButtonSwitch" name="gainMixer">
        <property name="toolTip">
-        <string>Mixer amplifier toggle</string>
+        <string>Mixer amplifier toggle (+19 dB)</string>
        </property>
        <property name="text">
         <string>MIX</string>
