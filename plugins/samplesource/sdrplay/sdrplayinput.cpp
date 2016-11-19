@@ -193,6 +193,29 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
     bool forceGainSetting = false;
     QMutexLocker mutexLocker(&m_mutex);
 
+
+    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+    {
+        forwardChange = true;
+
+        if(m_dev != 0)
+        {
+            int sampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
+            int r = mirisdr_set_sample_rate(m_dev, sampleRate);
+
+            if(r < 0)
+            {
+                qCritical("SDRPlayInput::applySettings: could not set sample rate: %d rc: %d", sampleRate, r);
+            }
+            else
+            {
+                qDebug("SDRPlayInput::applySettings: sample rate set to %d", sampleRate);
+                m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
+                m_sdrPlayThread->setSamplerate(sampleRate);
+            }
+        }
+    }
+
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
         m_settings.m_dcBlock = settings.m_dcBlock;
@@ -307,29 +330,6 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
                     mirisdr_get_tuner_gain(m_dev)
             );
             getOutputMessageQueueToGUI()->push(message);
-        }
-    }
-
-
-    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
-    {
-        forwardChange = true;
-
-        if(m_dev != 0)
-        {
-            int sampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
-            int r = mirisdr_set_sample_rate(m_dev, sampleRate);
-
-            if(r < 0)
-            {
-                qCritical("SDRPlayInput::applySettings: could not set sample rate: %d rc: %d", sampleRate, r);
-            }
-            else
-            {
-                qDebug("SDRPlayInput::applySettings: sample rate set to %d", sampleRate);
-                m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
-                m_sdrPlayThread->setSamplerate(sampleRate);
-            }
         }
     }
 
