@@ -481,7 +481,7 @@ void SDRPlayGui::on_record_toggled(bool checked)
 
 unsigned int SDRPlaySampleRates::m_rates[m_nb_rates] = {
 		1536000,   // 0
-		1800000,   // 1
+		1792000,   // 1
         2000000,   // 2
         2048000,   // 3
         2304000,   // 4
@@ -495,7 +495,7 @@ unsigned int SDRPlaySampleRates::m_rates[m_nb_rates] = {
         5000000,   // 12
         6000000,   // 13
         6144000,   // 14
-        6480000,   // 15
+        6400000,   // 15
         8000000,   // 16
         8192000,   // 17
 };
