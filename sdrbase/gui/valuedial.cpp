@@ -241,15 +241,41 @@ void ValueDial::mousePressEvent(QMouseEvent* event)
 	int i;
 
 	i = (event->x() - 1) / m_digitWidth;
-	if(m_text[i] == QChar('.')) {
+
+	if(m_text[i] == QChar('.'))
+	{
 		i++;
-		if(i > m_numDigits + m_numDecimalPoints)
+
+		if(i > m_numDigits + m_numDecimalPoints) {
 			return;
+		}
 	}
-	m_cursor = i;
-	m_cursorState = true;
-	m_blinkTimer.start(400);
-	update();
+
+    Qt::MouseButton mouseButton = event->button();
+
+    if (mouseButton == Qt::RightButton) // ceil value at current digit
+    {
+        if(m_cursor >= 0)
+        {
+            m_cursor = -1;
+            m_blinkTimer.stop();
+            update();
+        }
+
+        quint64 e = findExponent(i);
+        m_valueNew = (m_value / e) * e;
+        setValue(m_valueNew);
+        emit changed(m_valueNew);
+        //qDebug("ValueDial::mousePressEvent: Qt::RightButton: i: %d e: %llu new: %llu", i, e, valueNew);
+    }
+    else if (mouseButton == Qt::LeftButton) // set cursor at current digit
+    {
+        m_cursor = i;
+        m_cursorState = true;
+        m_blinkTimer.start(400);
+
+        update();
+    }
 }
 
 void ValueDial::mouseMoveEvent(QMouseEvent* event)
