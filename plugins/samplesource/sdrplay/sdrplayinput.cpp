@@ -36,7 +36,8 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
 	m_dev(0),
     m_sdrPlayThread(0),
-    m_deviceDescription("SDRPlay")
+    m_deviceDescription("SDRPlay"),
+    m_devNumber(0)
 {
 }
 
@@ -53,6 +54,8 @@ bool SDRPlayInput::init(const Message& cmd)
 bool SDRPlayInput::start(int device)
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    m_devNumber = device;
 
 	if (m_dev != 0)
 	{
@@ -100,6 +103,15 @@ bool SDRPlayInput::start(int device)
 		return false;
 	}
 
+	int sampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
+
+	if ((res = mirisdr_set_sample_rate(m_dev, sampleRate)))
+    {
+        qCritical("SDRPlayInput::start: could not set sample rate to %d: rc: %d", sampleRate, res);
+        stop();
+        return false;
+    }
+
     char bulkFormatString[] = "BULK";
 
 	if ((res = mirisdr_set_transfer(m_dev, bulkFormatString)) < 0)
@@ -126,7 +138,7 @@ bool SDRPlayInput::start(int device)
 
 	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, true, true);
 
 	return true;
 }
@@ -173,10 +185,22 @@ bool SDRPlayInput::handleMessage(const Message& message)
     {
         MsgConfigureSDRPlay& conf = (MsgConfigureSDRPlay&) message;
         qDebug() << "SDRPlayInput::handleMessage: MsgConfigureSDRPlay";
+        const SDRPlaySettings& settings = conf.getSettings();
 
-        if (!applySettings(conf.getSettings(), false))
+        // change of sample rate needs full stop / start sequence that includes the standard apply settings
+        if (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex)
         {
-            qDebug("SDRPlayInput::handleMessage: config error");
+            m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
+            stop();
+            start(m_devNumber);
+        }
+        // standard changes
+        else
+        {
+            if (!applySettings(settings, false, false))
+            {
+                qDebug("SDRPlayInput::handleMessage: config error");
+            }
         }
 
         return true;
@@ -187,34 +211,10 @@ bool SDRPlayInput::handleMessage(const Message& message)
     }
 }
 
-bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
+bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force)
 {
-    bool forwardChange = false;
     bool forceGainSetting = false;
     QMutexLocker mutexLocker(&m_mutex);
-
-
-    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
-    {
-        forwardChange = true;
-
-        if(m_dev != 0)
-        {
-            int sampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
-            int r = mirisdr_set_sample_rate(m_dev, sampleRate);
-
-            if(r < 0)
-            {
-                qCritical("SDRPlayInput::applySettings: could not set sample rate: %d rc: %d", sampleRate, r);
-            }
-            else
-            {
-                qDebug("SDRPlayInput::applySettings: sample rate set to %d", sampleRate);
-                m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
-                m_sdrPlayThread->setSamplerate(sampleRate);
-            }
-        }
-    }
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
@@ -426,7 +426,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool force)
         }
     }
 
-    if (m_settings.m_ifFrequencyIndex != settings.m_ifFrequencyIndex)
+    if ((m_settings.m_ifFrequencyIndex != settings.m_ifFrequencyIndex) || force)
     {
         int iFFrequency = SDRPlayIF::getIF(settings.m_ifFrequencyIndex);
         int r = mirisdr_set_if_freq(m_dev, iFFrequency);
