@@ -236,7 +236,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         forceGainSetting = true;
     }
 
-    if (m_settings.m_tunerGainMode)
+    if (m_settings.m_tunerGainMode) // auto
     {
         if ((m_settings.m_tunerGain != settings.m_tunerGain) || forceGainSetting)
         {
@@ -252,18 +252,30 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                 }
                 else
                 {
+                    int lnaGain;
+
+                    if (m_settings.m_frequencyBandIndex < 3) // bands using AM mode
+                    {
+                        lnaGain = mirisdr_get_mixbuffer_gain(m_dev);
+                    }
+                    else
+                    {
+                        lnaGain = mirisdr_get_lna_gain(m_dev);
+                    }
+
                     MsgReportSDRPlayGains *message = MsgReportSDRPlayGains::create(
-                            mirisdr_get_lna_gain(m_dev),
+                            lnaGain,
                             mirisdr_get_mixer_gain(m_dev),
                             mirisdr_get_baseband_gain(m_dev),
                             mirisdr_get_tuner_gain(m_dev)
                     );
+
                     getOutputMessageQueueToGUI()->push(message);
                 }
             }
         }
     }
-    else
+    else // manual
     {
         bool anyChange = false;
 
@@ -271,16 +283,33 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         {
             if(m_dev != 0)
             {
-                int r = mirisdr_set_lna_gain(m_dev, settings.m_lnaOn ? 0 : 1); // mirisdr_set_lna_gain takes gain reduction
-
-                if (r != 0)
+                if (m_settings.m_frequencyBandIndex < 3) // bands using AM mode
                 {
-                    qDebug("SDRPlayInput::applySettings: could not set LNA gain");
+                    int r = mirisdr_set_mixbuffer_gain(m_dev, settings.m_lnaOn ? 0 : 1); // mirisdr_set_mixbuffer_gain takes gain reduction
+
+                    if (r != 0)
+                    {
+                        qDebug("SDRPlayInput::applySettings: could not set mixer buffer gain");
+                    }
+                    else
+                    {
+                        m_settings.m_lnaOn = settings.m_lnaOn;
+                        anyChange = true;
+                    }
                 }
                 else
                 {
-                    m_settings.m_lnaOn = settings.m_lnaOn;
-                    anyChange = true;
+                    int r = mirisdr_set_lna_gain(m_dev, settings.m_lnaOn ? 0 : 1); // mirisdr_set_lna_gain takes gain reduction
+
+                    if (r != 0)
+                    {
+                        qDebug("SDRPlayInput::applySettings: could not set LNA gain");
+                    }
+                    else
+                    {
+                        m_settings.m_lnaOn = settings.m_lnaOn;
+                        anyChange = true;
+                    }
                 }
             }
         }
@@ -323,8 +352,19 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
 
         if (anyChange)
         {
+            int lnaGain;
+
+            if (m_settings.m_frequencyBandIndex < 3) // bands using AM mode
+            {
+                lnaGain = mirisdr_get_mixbuffer_gain(m_dev);
+            }
+            else
+            {
+                mirisdr_get_lna_gain(m_dev);
+            }
+
             MsgReportSDRPlayGains *message = MsgReportSDRPlayGains::create(
-                    mirisdr_get_lna_gain(m_dev),
+                    lnaGain,
                     mirisdr_get_mixer_gain(m_dev),
                     mirisdr_get_baseband_gain(m_dev),
                     mirisdr_get_tuner_gain(m_dev)
