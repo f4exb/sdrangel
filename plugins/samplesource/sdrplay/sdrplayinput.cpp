@@ -188,9 +188,10 @@ bool SDRPlayInput::handleMessage(const Message& message)
         const SDRPlaySettings& settings = conf.getSettings();
 
         // change of sample rate needs full stop / start sequence that includes the standard apply settings
-        if (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex)
+        // only if in started state (iff m_dev != 0)
+        if ((m_dev != 0) && (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex))
         {
-            m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
+            m_settings = settings;
             stop();
             start(m_devNumber);
         }
@@ -214,6 +215,7 @@ bool SDRPlayInput::handleMessage(const Message& message)
 bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force)
 {
     bool forceGainSetting = false;
+    //settings.debug("SDRPlayInput::applySettings");
     QMutexLocker mutexLocker(&m_mutex);
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
