@@ -50,15 +50,16 @@ else(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
     message(STATUS "LibMiriSDR NOT found")
 endif(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
 
-#find_package(LibNANOMSG)
-#if(LIBNANOMSG_FOUND)
-#    add_subdirectory(sdrdaemon)    
-#endif(LIBNANOMSG_FOUND)
+find_package(LZ4)
+find_package(LibNANOMSG)
+if(LIBNANOMSG_FOUND AND LIBLZ4_FOUND)
+    add_subdirectory(sdrdaemon)
+endif(LIBNANOMSG_FOUND AND LIBLZ4_FOUND)
 
 find_package(CM256cc)
-if(CM256CC_FOUND)
+if(CM256CC_FOUND AND LIBNANOMSG_FOUND)
     add_subdirectory(sdrdaemonfec)
-endif(CM256CC_FOUND)
+endif(CM256CC_FOUND AND LIBNANOMSG_FOUND)
 
 if (BUILD_DEBIAN)
     add_subdirectory(sdrdaemonfec)
@@ -68,7 +69,5 @@ if (BUILD_DEBIAN)
     add_subdirectory(bladerf)
 endif (BUILD_DEBIAN)
 
-
 add_subdirectory(filesource)
-add_subdirectory(sdrdaemon)
 
