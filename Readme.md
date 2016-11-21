@@ -1,4 +1,4 @@
-![SDR Angel banner](/doc/img/sdrangel_banner.png)
+![SDR Angel banner](doc/img/sdrangel_banner.png)
 
 **SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware.
 
@@ -17,8 +17,9 @@ Although it keeps the same look and feel as its parent application **SDRangelove
 
 These plugins come from the parent code base and have been maintained so that they compile but they are not being actively tested:
 
-- Channels:
-  - lora
+channelrx:
+
+  - demodlora
   - tcpsrc (although it has evolved please use the udpsrc plugin instead)
 
 <h1>Supported hardware</h1>
@@ -35,8 +36,12 @@ Transmission or signal generation support for eligible devices (BladeRF and Hack
 
   - Phase 1: version 2.2.0: generation to file (File Sink) with AM modulator with simple sine modulation. Fixed sample rate of 48 kS/s (no effective interpolation)
   - Phase 2: version 2.2.x: full baseband interpolation chain: in AM modulator and Up Channelizer.
-  - Phase 3: version 2.3.0: FM and SSB modulators with audio file input
-  - Phase 4: version 2.3.x: Audio (Mic) input support
+  - 2.3.0: SDRplay came into play ...
+  - Phase 3a: version 2.3.x: Improve AM modulator with audio file input
+  - Phase 3b: version 2.3.x: Improve AM modulator with audio input (Mic) support
+  - Phase 4a: version 2.4.0: FM modulator
+  - Phase 4b: version 2.4.x: WFM modulator
+  - Phase 4c: version 2.4.x: SSB modulator
   - phase 5: version 3.0.0: BladeRF and HackRF support including final interpolation stage.
 
 <h2>Airspy</h2>
@@ -85,21 +90,29 @@ If you use your own location for librtlsdr install directory you need to specify
 
 `-DLIBRTLSDR_LIBRARIES=/opt/install/librtlsdr/lib/librtlsdr.so -DLIBRTLSDR_INCLUDE_DIR=/opt/install/librtlsdr/include`
 
+<h2>SDRplay</h2>
+
+SDRplay devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Windows and Debian packages of SDRangel contain a pre-compiled version of this library.
+
+If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
+
+`-DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so -DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include`
+
 <h1>Plugins for special devices</h1>
 
 <h2>File input</h2>
 
-The file source plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Press F7 to start recording and F8 to stop. The file has a fixed name `test.sdriq` created in the current directory.
+The file source plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Click on the record button on the left of the main frequency dial to toggle recording. The file has a fixed name `test_<n>.sdriq` created in the current directory where `<n>` is the device tab index.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
 
-The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block with a glitch at the beginning corresponding to the header data. 
+The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block. It will just produce a short glitch at the beginning corresponding to the header data. 
 
 <h2>File output</h2>
 
 The file sink plugin allows the recording of the I/Q baseband signal produced by a transmission chain to a file in the `.sdriq` format thus readable by the file source plugin described just above.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSink[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSink[0]` even if no physical device is connected.
 
 <h2>SDRdaemon input</h2>
 
@@ -107,7 +120,9 @@ This is the client side of the SDRdaemon server. See the [SDRdaemon](https://git
 
 There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
+This plugin will be built only if the lz4 and libnanomsg libraries are installed in your system. These libraries are available as dev packages in most distributions.
+
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
 
 <h2>SDRdaemonFEC input</h2>
 
@@ -115,9 +130,9 @@ This is a specialized client for the SDRdaemon server that matches the SDRdaemon
 
 Using this scheme the remote operation is more robust in case conditions are not optimal. While SDRdaemon without FEC will work fine on copper or fiber lines the FEC version is recommended for WiFi links where even in good conditions some UDP packets might get lost.
 
-This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. You will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `SDRdaemonFEC[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonFEC[0]` even if no physical device is connected.
 
 <h1>Channel plugins with special conditions</h1>
 
@@ -150,6 +165,36 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
   - For Linux distributions: `plugins/channel/libdemoddsd.so`
   - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
+
+<h1>Software distributions</h1>
+
+In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
+
+  - Windows 64 bit
+  - Windows 32 bit
+  - Debian x86_64 (Ubuntu 16.04)
+  - Debian armv7l (Debian Jessie)
+  
+<h2>Windows distributions</h2>
+
+This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
+
+<h2>Debian distributions</h2>
+
+It is provided in the form of a .deb package for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). 
+
+Install it as usual for a .deb package:
+
+  - Make sure the `universe` repository is in your `/etc/apt/sources.list`
+
+Then in a terminal do:
+
+  - `sudo apt-get update`
+  - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
+  - `sudo apt-get -f install` this will install missing dependencies
+    
+The software is installed in `\opt\sdrangel` you can start it from the command line with:
+  - `/opt/sdrangel/bin/sdrangel`
 
 <h1>Software build</h1>
 
@@ -235,168 +280,7 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
 <h2>Windows</h2>
 
-<h3>Introduction, limitations, warnings...</h3>
-
-This is new in version 1.1.3 and also experimental. Use at your own risk! This may or may not work on your machine and version of Windows. It was tested more or less successfully in native Windows 7, 8 and 10 however it does not work in a Virtualbox guest supposedly because it uses OpenGL ES 2.0 instead of the OpenGL desktop version (OpenGL 4.3) when it is running native and I think the OpenGL code in SDRangel is still not quite right to be compatible with the ES version (use of QtGLWidget instead of QtOpenGLWidget).
-
-You should take note that the Windows scheduler is just a piece of crap and not suitable for near real time applications like SDRs. In any case you should make sure that the sdrangel.exe process does not take more than 35% of the global CPU (check this with Task Manager). Unload channel plugins if necessary. Promoting sdrangel.exe process to real time via Task Manager may or may not help but usually not. If you encounter any problem just grab a Linux installation CD or .iso file and get yourself a decent OS first. You have been warned!
-
-There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
-
-The SDRdaemon plug-in is present only in the 64 bit build version since version 1.1.4. The messaging system based on nanomsg works only in the 64 bit environment. However please be aware that the SDRdaemon plugin is not working well mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). In fact depending on the case your mileage may vary however the Linux version works always beautifully so you know the options if you really want to use it!
-
-<h3>Build environment</h3>
-
-You will have to use QtCreator and its environment for that purpose. Build was done with the `Desktop_Qt_5_5_1_MinGW_32bit` tool-chain. Some other flavors might work. Please refer to Qt documentation for Qt Creator details.
-
-You will need to add `CONFIG+=MINGW32` to the `qmake` options. In QtCreator open the `Projects` menu (the file icon on the left bar) and in the `Build steps` section open the `qmake` details collapsed section (click on the caret icon). Choose the build configuration for which you run the build (`debug` or `release`) and add `CONFIG+=MINGW32` to the `Additional arguments` line.
-
-<h3>Dependencies</h3>
-
-<h4>Boost</h4>
-
-You only really need the Boost headers so there is no need to compile Boost itself. Just download an archive from the Boost website and unpack it somewhere. In our example it will be installed in `D:\boost_1_58_0`.
-
-You then need to update the .pro files that depend on Boost. They are:
-
-  - `sdrbase\sdrbase.pro`
-  - `plugins\channel\chanalyzer\chanalyzer.pro`
-
-Just update the following line with the location of your Boost installation:
-
-  - `CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"`
-
-<h4>USB support (libusb)</h4>
-
-You have to download an archive of libusb that supports MinGW32 from the following [location](https://sourceforge.net/projects/libusb/files/libusb-1.0/). You will have the choice among various versions and various archive formats in each version folder. It works with version `1.0.19` and is untested with later version(s). In our example it will be installed in `D:\libusb-1.0.19`.
-
-You then need to update the .pro files that depend on libusb. They are:
-
-  - `libairspy\libairspy.pro`
-  - `libhackrf\libhackrf.pro`
-  - `librtlsdr\librtlsdr.pro`
-  - `libbladerf\libbladerf.pro`
-
-Just update the following lines with the location of your libusb installation:
-
-  - `CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"`
-  - `CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0`
-
-<h4>Airspy library (libairspy)</h4>
-
-Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\libairspy`. Copy the header files (`*.h`) from `D:\softs\libairspy\libairspy\src` to the directory above (`D:\softs\libairspy\libairspy`).
-
-You then need to update the .pro files that depend on libairspy. They are:
-
-  - `libairspy\libairspy.pro`. Update the following line with the location of your libiarspy installation:
-    - `CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"`
-  - `plugins\samplesource\airspy\airspy.pro`. Update the following line with the location of your libiarspy installation:
-    - `CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy"`
-
-<h4>HackRF library (libhackrf)</h4>
-
-Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\hackrf`. Copy the header files (`*.h`) from `D:\softs\hackrf\host\libhackrf\src` to the directory above (`D:\softs\hackrf\host\libhackrf`).
-
-You then need to update the .pro files that depend on libhackrf. They are:
-
-  - `libhackrf\libhackrf.pro`. Update the following line with the location of your libhackrf installation:
-    - `CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host\libhackrf"`
-  - `plugins\samplesource\hackrf\hackrf.pro`. Update the following line with the location of your libhackrf installation:
-    - `CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"`
-
-<h4>RTL-SDR library (librtlsdr)</h4>
-
-Download the source code or clone the git repository somewhere. It our example it will be installed in `D:\softs\librtlsdr`.
-
-You then need to update the .pro files that depend on librtlsdr. They are:
-
-  - `librtlsdr\librtlsdr.pro`. Update the following line with the location of your librtlsdr installation:
-    - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
-  - `plugins\samplesource\rtlsdr\rtlsdr.pro`. Update the following line with the location of your librtlsdr installation:
-    - `CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"`
-
-<h4>BladeRF library (libbladerf)</h4>
-
-You need to download the 1.5.1 version specifically that is found [here](https://github.com/Nuand/bladeRF/archive/libbladeRF_v1.5.1.zip). Unzip it somewhere say in `D:\softs` So it will be installed in `D:\softs\bladeRF-libbladeRF_v1.5.1`. If your installation directory is different you need to update the dependent .pro files:
-
-  - `libbladerf\libbladerf.pro`, update the following lines with the location of your bladeRF installation:
-    - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1"`
-    - `CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1\host\common"`
-    - `CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF-libbladeRF_v1.5.1\host\libraries\libbladeRF"`
-  - `plugins\samplesource\bladerf\bladerf.pro`. Update the following line with the location of your BladeRF installation:
-    - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"`
-
-<h3>Dependencies for DSD (Digital Speech Decoding) plugin</h3>
-
-<h4>mbelib</h4>
-
-You need to clone the [mbelib git repository](https://github.com/szechyjs/mbelib.git). Let's say you have cloned it to `D:\softs\mbelib`. If your cloned repository is different you will need to update the dependent .pro files:
-
-  - `mbelib\mbelib.pro`
-  - `dsdcc\dscc.pro`
-  - `plugins\channel\demoddsd\demodsd.pro`
-
-Changing the following lines:
-
-  CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
-  CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
-
-<h4>DSDcc</h4>
-
-You need to clone the [DSDcc git repository](https://github.com/f4exb/dsdcc.git). Let's say you have cloned it to `D:\softs\dsdcc`. If your cloned repository is different you will need to update the dependent .pro files:
-
-  - `dsdcc\dscc.pro`
-  - `plugins\channel\demoddsd\demodsd.pro`
-
-Changing the following lines:
-
-  CONFIG(MINGW32):LIBDSDCCSRC = "D:\softs\dsdcc"
-  CONFIG(MINGW64):LIBDSDCCSRC = "D:\softs\dsdcc"
-
-<h3>Build</h3>
-
-Basically you open the project in QtCreator by selecting the `sdrangel.windows.pro` file in the source root directory and run the `build` command from the menu. This will eventually produce the `sdrangel.exe` executable and dependent library and plug-in DLLs in various parts of the build directory. See the Installation paragraph next for details on installing all files in a single place.
-
-<h3>Installation</h3>
-
-Then comes the tedious part of packaging everything in a single place so that you will just have to click on `sdrangel.exe` in the file explorer to start. Please follow the next steps for this purpose.
-
-  - Make yourself an installation directory say `D:\Programs\sdrangel`
-  - Assume the build directory is `D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release` (assuming you compiled SDRangel for release)
-  - Assume the source directory is `D:\development\sdrangel`
-  - From the Qt group in the Windows start menu select the `Qt 5.5 for Desktop (Mingw...` console box
-  - In this console type: `bin\windeployqt.exe --dir D:\Programs\sdrangel D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release\app\release\sdrangel.exe D:\development\build-sdrangel.windows-Desktop_Qt_5_5_1_MinGW_32bit-Release\sdrbase\release\sdrbase.dll`
-  - This copies all dependencies for Qt but alas nothing from our software so you will have to do this yourself. In the same console cd to the root of the build directory and type:
-    - `D:\development\sdrangel\windows.install.bat release D:\Programs\sdrangel`
-    - use `debug` in the place of `release` if you built the debug version
-
-<h3>Running</h3>
-
-You will need to install Zadig to get USB support for hardware devices. Please refer to [Zadig website](http://zadig.akeo.ie/) for details. Basically if you get things working for SDR# or HDSDR then it will work with SDRangel.
-
-<h3>MinGW64 tool-chain</h3>
-
-It is possible to use a MinGW64 tool-chain by following these steps:
-
-  - Install MSys2 from [this page](http://msys2.github.io/). Follow all the steps.
-  - Install Qt5 from MSys2 command line:
-    - `pacman -Sy  mingw-w64-x86_64-qt5`
-  - Install gcc/g++ from MSys2 command line:
-    - `pacman -Sy mingw64/mingw-w64-x86_64-gcc`
-  - Create a new "kit" in Qt Creator:
-    - Go to "Projects" sub-menu from the left menu bar
-    - Click on "Manage kits"
-    - In "Compilers" tab add a compiler naming it "MinGW64" for example. In the compiler path specify the path to `g++` in your MSys2 installation (ex: `D:\msys64\mingw64\bin\g++.exe`)
-    - In "Qt versions" tab add a Qt version and specify the path to the `qmake.exe` in your MSys2 installation (ex: `D:\msys64\mingw64\bin\qmake.exe`)
-    - In "Kits" tab add a new kit and name it "MinGW64" for example.
-      - In "Compiler" select the "MinGW64" compiler you created previously
-      - In "Qt version" select the Qt version you created previously
-    - You should now be able to use this "kit" for your build
-    - In the "Build steps" section add `CONFIG+=MINGW64` in the "Additional arguments"
-
-Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to your target installation directory in a similar way as this is done for MinGW32 (see above).
-
-The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\libusb-1.0.19\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.
+This is a rather long story and one may prefer using the software distribution instead. However the brave may follow [this link](ReadmeWindowsBuild.md)
 
 <h1>Mac O/S</h1>
 
@@ -434,9 +318,9 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 
 <h2>To Do</h2>
 
-  - Tx support for devices like Blade-RF or Hack-RF and simple file output (probably to start with)
-  - Tx channels to feed Tx devices
-  - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection.
+  - Tx support for devices like Blade-RF or Hack-RF and simple file output (started)
+  - Tx channels to feed Tx devices (started)
+  - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection. Introduce the notion of ports of the same physical device.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
   - 32 bit samples for the Channel Analyzer
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).

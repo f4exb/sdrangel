@@ -123,7 +123,7 @@ public:
 	void decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
-	// separate I and Q input buffers (ex: SDRPlay)
+	// separate I and Q input buffers
     void decimate1(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len);
     void decimate2_u(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len);
     void decimate2_inf(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len);

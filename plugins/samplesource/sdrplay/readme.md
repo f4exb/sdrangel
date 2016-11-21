@@ -1,36 +1,34 @@
-<h1>SDRPlay plugin</h1>
+<h1>SDRplay plugin</h1>
 
 <h2>Introduction</h2>
 
-This plugin supports input from SDRPlay devices. SDRPlay is based on the MSi001 and MSi2500 chips from Mirics. The standard API provided by Mirics is closed source moreover it could not be implemented successfully in SDRangel. An open source API libmirisdr-2 has been written by Miroslav Slugen and later amended by Leif Asbrink SM5BSZ. Some enhancements and bug fixes have nade it to libmirisdr-4 in this repository. It is this API that is used to drive the SDRPlay.
+This plugin supports input from SDRplay devices. SDRplay is based on the MSi001 and MSi2500 chips from Mirics. The standard API provided by Mirics is closed source moreover it could not be implemented successfully in SDRangel. An open source API libmirisdr-2 has been written by Miroslav Slugen and later amended by Leif Asbrink SM5BSZ. This API uses a new flavour called [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) in this very same Github space. It contains enhancements and bug fixes.
 
-SDRPlay has a rather good performance in HF bands due to front end filtering and the MSi001 chip. This sets it apart from the other supported hardware and is an interesting addition to the collection.
-
-<b>Note to Windows users:</b> this plugin uses standard USB interface provided by Zadig (for example). It is not compatible with the drivers from Mirics so you will have to unistall (or you should not install) the Mirics software before you can use this plugin.
+<b>Note to Windows users:</b> this plugin uses standard USB interface provided by [Zadig](http://zadig.akeo.ie) for example. It is not compatible with the drivers from Mirics so you will have to unistall (or you should not install) the Mirics software before you can use this plugin.
 
 <h2>Build</h2>
 
-As mentioned already the plugin depends on libmirisdr-4. You will have to specify the include and library paths on the cmake command line. Say if you install `libmirisdr-4` in `/opt/install/libmirisdr` you will have to add `-DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include -DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so` on the cmake command line.
+As mentioned already the plugin depends on libmirisdr-4. You will have to compile it and install it in your system. When installed in non standard folders the include and library paths have to be specified on the cmake command line. Say if you install `libmirisdr-4` in `/opt/install/libmirisdr` you will have to add `-DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include -DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so` on the cmake command line.
 
 <h2>Interface</h2>
 
-![SDRPlay plugin GUI](../../../doc/img/SDRPlay_plugin.png)
+![SDRplay plugin GUI](../../../doc/img/SDRPlay_plugin.png)
 
 <h3>1. Common controls</h3>
 
-Controls common to all source plugins. See ![main interface description](../../../sdrbase/readme.md).
+Controls common to all source plugins. See [main interface description](../../../sdrbase/readme.md).
 
 <h3>2. Local oscillator frequency correction</h3>
 
-This is the correction in tenths of ppm steps. This is hardly useful with SDRPlay as it has been found on spot. It appears on many source plugins ans it has been kept as LO accuracy could depend on units.
+This is the correction in tenths of ppm steps. This is hardly useful with SDRplay as it has been found on spot. The MSi001 chip probably uses some sort of internal compensation. However this control is kept just in case.
 
 <h3>3. DC and IQ imbalance correction</h3>
 
-These are controls common to many source plugins too. IQ imbalance is hardly useful but SDRPlay is affected by DC bias when used at zero IF.
+These controls are also common with many source plugins. IQ imbalance is hardly useful but SDRplay is affected by DC bias when used at zero IF.
 
 <h3>4. Band selection</h3>
 
-This selects a frequency range corresponding to the hardware path in the SDRPlay. Bands available are:
+This selects a frequency range corresponding to the hardware path in the SDRplay. Bands available are:
 
   - 10 kHz to 12 MHz
   - 12 MHz to 30 MHz
@@ -56,7 +54,7 @@ This selects the IF filter. Following bandwidths are available according to MSi0
 
 <h3>6. IF frequency</h3>
 
-This select the IF frequency between these values:
+This selects the IF frequency between these values:
 
   - 0 for zero IF
   - 450 kHz: you have to set sample rate to 1792 kHz (7) and use decimation (8) with an infradyne position (9)
@@ -85,24 +83,24 @@ Relative position of center frequency of decimated baseband relative to the orig
   
 <h3>10. Tuner gain mode</h3>
 
-Use this radiobuton to select a mode where the gain of LNA (or mixer buffer), mixer and baseband amplifiers is automatically selected depending on the tuner gain index (11). This index is the gain value in dB at nominal gain of all amplifiers. This is not the exact gain at all frequencies because the LNA gain decreases significantly at higher frequencies. 
+Use this radiobutton to select a mode where the gain of the LNA (or mixer buffer below 50 MHz), mixer and baseband amplifiers are automatically selected depending on the tuner gain index (11). This index is the gain value in dB at the nominal gain of all amplifiers. This is not the exact gain at all frequencies because the LNA gain decreases significantly at higher frequencies. 
 
-<h3>11. Tuner gain setting<h3>
+<h3>11. Tuner gain setting</h3>
 
-The tuner gain index can be set between 0 and 102.
+The tuner gain index can be set between 0 and 102 points (corresponds to dB in the nominal case).
 
 <h3>12. Manual gain mode</h3>
  
-Use this radiobuton to select a mode where the gain of all amplifiers can be set independently
+Use this radiobutton to select a mode where the gain of all amplifiers can be set independently
 
 <h3>13. LNA toggle</h3>
 
-Toggle button to switch on or off the LNA (bands higher than 50 MHz) or mixer buffer (band lower than 50 MHz). The nominal gain is +24 dB
+Toggle button to switch on or off the LNA (bands above 50 MHz) or mixer buffer (bands below 50 MHz). The nominal gain is +24 dB.
 
 <h3>14. Mixer amplifier toggle</h3>
 
-Toggle button to switch on or off the mixer amplifier. The gain of this amplifier is +19 dB
+Toggle button to switch on or off the mixer amplifier. The gain of this amplifier is +19 dB.
 
 <h3>15. Baseband amplifier gain</h3>
 
-Baseband amplifier gain from 0 to 59 dB
+Baseband amplifier gain from 0 to 59 dB.
