@@ -277,6 +277,8 @@ bool TCPSrc::handleMessage(const Message& cmd)
 			return false;
 		}
 	}
+
+	return false;
 }
 
 void TCPSrc::closeAllSockets(Sockets* sockets)

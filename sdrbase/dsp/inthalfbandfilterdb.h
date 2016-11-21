@@ -447,8 +447,8 @@ protected:
         iAcc += ((qint32)m_samplesDB[b-1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         qAcc += ((qint32)m_samplesDB[b-1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
-        sample->setReal(iAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
-        sample->setImag(qAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+        sample->setReal(iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
+        sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
     }
 
     void doFIR(qint32 *x, qint32 *y)

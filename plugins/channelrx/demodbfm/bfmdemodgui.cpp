@@ -297,7 +297,7 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
 			RDSParser::freqs_set_t::iterator sIt = (mIt->second).begin();
 			const RDSParser::freqs_set_t::iterator sItEnd = (mIt->second).end();
 
-			for (sIt; sIt != sItEnd; ++sIt)
+			for (; sIt != sItEnd; ++sIt)
 			{
 				std::ostringstream os;
 				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
@@ -315,7 +315,7 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
 			RDSParser::freqs_set_t::iterator sIt = (mIt->second).begin();
 			const RDSParser::freqs_set_t::iterator sItEnd = (mIt->second).end();
 
-			for (sIt; sIt != sItEnd; ++sIt)
+			for (; sIt != sItEnd; ++sIt)
 			{
 				std::ostringstream os;
 				os << std::fixed << std::showpoint << std::setprecision(2) << *sIt;
@@ -753,7 +753,7 @@ void BFMDemodGUI::rdsUpdate(bool force)
 			const RDSParser::psns_map_t::iterator itEnd = m_rdsParser.m_g14_program_service_names.end();
 			int i = 0;
 
-			for (it; it != itEnd; ++it, i++)
+			for (; it != itEnd; ++it, i++)
 			{
 				m_g14ComboIndex.push_back(it->first);
 				QString pistring(str(boost::format("%04X:%s") % it->first % it->second).c_str());
