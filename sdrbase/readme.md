@@ -99,7 +99,11 @@ This is the sampling rate in kS/s of the I/Q stream extracted from the device af
 
 <h4>2.4. Center frequency</h4>
 
-This is the current center frequency in kHz with dot separated thousands (MHz, GHz). On devices for which frequency can be directly controlled (i.e. all except File Source and SDRdaemon) you can use the thumbwheels to set the frequency. Thumwheels move with the mouse wheel when hovering over a digit and when a digit is selected by clicking on it you can also use the arrows to move the corresponding thumbwheel.
+This is the current center frequency in kHz with dot separated thousands (MHz, GHz). On devices for which frequency can be directly controlled (i.e. all except File Source and SDRdaemon) you can use the thumbwheels to set the frequency. Thumwheels move with the mouse wheel when hovering over a digit. 
+
+When left clicking on a digit a cursor is set on it and you can also use the arrows to move the corresponding thumbwheel.
+
+When right clicking on a digit the digits on the right are all set to zero. This effectively does a ceil rounding at the current position.
 
 <h4>Additional inputs</h4>
 
