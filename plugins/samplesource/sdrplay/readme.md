@@ -4,7 +4,13 @@
 
 This plugin supports input from SDRplay devices. SDRplay is based on the MSi001 and MSi2500 chips from Mirics. The standard API provided by Mirics is closed source moreover it could not be implemented successfully in SDRangel. An open source API libmirisdr-2 has been written by Miroslav Slugen and later amended by Leif Asbrink SM5BSZ. This API uses a new flavour called [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) in this very same Github space. It contains enhancements and bug fixes.
 
-<b>Note to Windows users:</b> this plugin uses standard USB interface provided by [Zadig](http://zadig.akeo.ie) for example. It is not compatible with the drivers from Mirics so you will have to unistall (or you should not install) the Mirics software before you can use this plugin.
+<b>Note to Windows users:</b> 
+
+this plugin uses the libusbK USB interface provided by [Zadig](http://zadig.akeo.ie). It will not work with any of the other drivers provided by Zadig. It is also not compatible with the drivers from Mirics so you will have to unistall (or you should not install) the Mirics software before you can use this plugin. 
+
+Use it at your own risk! If the device disconnects you will immediately get a BSOD. In Linux it is just a core dump.
+
+Also sometimes when loading a preset the device will not work correctly. In this case just use the stop/start toggle to reset the device.
 
 <h2>Build</h2>
 
