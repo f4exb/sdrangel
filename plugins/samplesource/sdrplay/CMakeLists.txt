@@ -24,7 +24,8 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBMIRISDR_INCLUDE_DIR}
+    ${LIBMIRISDRSRC}/include
+    ${LIBMIRISDRSRC}/src
 )
 else (BUILD_DEBIAN)
 include_directories(

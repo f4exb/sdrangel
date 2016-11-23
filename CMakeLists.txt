@@ -535,7 +535,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(libhackrf)
     add_subdirectory(librtlsdr)
     add_subdirectory(libbladerf)
-    add_subdirectory(libsdrplay)
+    add_subdirectory(libmirisdr)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(plugins)

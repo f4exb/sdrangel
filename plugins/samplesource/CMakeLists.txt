@@ -67,6 +67,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(hackrf)
     add_subdirectory(rtlsdr)
     add_subdirectory(bladerf)
+    add_subdirectory(sdrplay)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesource)
