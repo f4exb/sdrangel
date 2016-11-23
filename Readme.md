@@ -92,6 +92,8 @@ If you use your own location for librtlsdr install directory you need to specify
 
 <h2>SDRplay</h2>
 
+Linux only.
+
 SDRplay devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Windows and Debian packages of SDRangel contain a pre-compiled version of this library.
 
 If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
