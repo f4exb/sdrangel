@@ -37,7 +37,7 @@
 const QString AMModGUI::m_channelID = "sdrangel.channeltx.modam";
 
 const int AMModGUI::m_rfBW[] = {
-	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
+	3000, 4000, 5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
 
 AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
