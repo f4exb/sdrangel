@@ -94,6 +94,7 @@ set(sdrbase_SOURCES
     sdrbase/audio/audiodeviceinfo.cpp
     sdrbase/audio/audiofifo.cpp
     sdrbase/audio/audiooutput.cpp
+    sdrbase/audio/audioinput.cpp
 
     sdrbase/dsp/afsquelch.cpp
     sdrbase/dsp/agc.cpp
@@ -185,6 +186,7 @@ set(sdrbase_HEADERS
     sdrbase/audio/audiodeviceinfo.h
     sdrbase/audio/audiofifo.h
     sdrbase/audio/audiooutput.h
+    sdrbase/audio/audioinput.h
 
     sdrbase/dsp/afsquelch.h
     sdrbase/dsp/downchannelizer.h
