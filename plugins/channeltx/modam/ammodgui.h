@@ -21,6 +21,7 @@
 #include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "ammod.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -55,14 +56,26 @@ public:
 
 private slots:
     void viewChanged();
+    void handleSourceMessages();
+
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
     void on_rfBW_valueChanged(int value);
     void on_afBW_valueChanged(int value);
     void on_modPercent_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
+    void on_tone_toggled(bool checked);
+    void on_mic_toggled(bool checked);
+    void on_play_toggled(bool checked);
+
+    void on_playLoop_toggled(bool checked);
+    void on_navTimeSlider_valueChanged(int value);
+    void on_showFileDialog_clicked(bool checked);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
+
+    void configureFileName();
     void tick();
 
 private:
@@ -78,6 +91,14 @@ private:
     AMMod* m_amMod;
     MovingAverage<Real> m_channelPowerDbAvg;
 
+    QString m_fileName;
+    quint32 m_recordLength;
+    int m_recordSampleRate;
+    int m_samplesCount;
+    std::size_t m_tickCount;
+    bool m_enableNavTime;
+    AMMod::AMModInputAF m_modAFInput;
+
     static const int m_rfBW[];
 
     explicit AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
@@ -85,6 +106,8 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+    void updateWithStreamData();
+    void updateWithStreamTime();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

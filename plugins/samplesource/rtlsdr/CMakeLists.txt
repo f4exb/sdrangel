@@ -31,7 +31,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBRTLSDRSRC}/include
+    ${LIBRTLSDR_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 

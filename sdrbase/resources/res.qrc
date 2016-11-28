@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>microphone.png</file>
     <file>checkmark.png</file>
     <file>questionmark.png</file>
     <file>res.qrc</file>

@@ -16,6 +16,9 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QFileDialog>
+#include <QTime>
+#include <QDebug>
 
 #include "ammodgui.h"
 
@@ -30,8 +33,6 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
-
-#include "ammod.h"
 
 const QString AMModGUI::m_channelID = "sdrangel.channeltx.modam";
 
@@ -141,12 +142,42 @@ bool AMModGUI::deserialize(const QByteArray& data)
 
 bool AMModGUI::handleMessage(const Message& message)
 {
-	return false;
+    if (AMMod::MsgReportFileSourceStreamData::match(message))
+    {
+        m_recordSampleRate = ((AMMod::MsgReportFileSourceStreamData&)message).getSampleRate();
+        m_recordLength = ((AMMod::MsgReportFileSourceStreamData&)message).getRecordLength();
+        m_samplesCount = 0;
+        updateWithStreamData();
+        return true;
+    }
+    else if (AMMod::MsgReportFileSourceStreamTiming::match(message))
+    {
+        m_samplesCount = ((AMMod::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
+        updateWithStreamTime();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void AMModGUI::viewChanged()
 {
 	applySettings();
+}
+
+void AMModGUI::handleSourceMessages()
+{
+    Message* message;
+
+    while ((message = m_amMod->getOutputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void AMModGUI::on_deltaMinus_toggled(bool minus)
@@ -193,6 +224,74 @@ void AMModGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
+void AMModGUI::on_playLoop_toggled(bool checked)
+{
+    // TODO: do something about it!
+}
+
+void AMModGUI::on_play_toggled(bool checked)
+{
+    ui->tone->setEnabled(!checked); // release other source inputs
+    ui->mic->setEnabled(!checked);
+    m_modAFInput = checked ? AMMod::AMModInputFile : AMMod::AMModInputNone;
+    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
+    m_amMod->getInputMessageQueue()->push(message);
+    ui->navTimeSlider->setEnabled(!checked);
+    m_enableNavTime = !checked;
+}
+
+void AMModGUI::on_tone_toggled(bool checked)
+{
+    ui->play->setEnabled(!checked); // release other source inputs
+    ui->mic->setEnabled(!checked);
+    m_modAFInput = checked ? AMMod::AMModInputTone : AMMod::AMModInputNone;
+    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
+    m_amMod->getInputMessageQueue()->push(message);
+}
+
+void AMModGUI::on_mic_toggled(bool checked)
+{
+    ui->play->setEnabled(!checked); // release other source inputs
+    ui->tone->setEnabled(!checked); // release other source inputs
+    m_modAFInput = checked ? AMMod::AMModInputAudio : AMMod::AMModInputNone;
+    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
+    m_amMod->getInputMessageQueue()->push(message);
+}
+
+void AMModGUI::on_navTimeSlider_valueChanged(int value)
+{
+    if (m_enableNavTime && ((value >= 0) && (value <= 100)))
+    {
+        int t_sec = (m_recordLength * value) / 100;
+        QTime t(0, 0, 0, 0);
+        t = t.addSecs(t_sec);
+
+        AMMod::MsgConfigureFileSourceSeek* message = AMMod::MsgConfigureFileSourceSeek::create(value);
+        m_amMod->getInputMessageQueue()->push(message);
+    }
+}
+
+void AMModGUI::on_showFileDialog_clicked(bool checked)
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+
+    if (fileName != "")
+    {
+        m_fileName = fileName;
+        ui->recordFileText->setText(m_fileName);
+        ui->play->setEnabled(true);
+        configureFileName();
+    }
+}
+
+void AMModGUI::configureFileName()
+{
+    qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
+    AMMod::MsgConfigureFileSourceName* message = AMMod::MsgConfigureFileSourceName::create(m_fileName);
+    m_amMod->getInputMessageQueue()->push(message);
+}
+
 void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 }
@@ -214,7 +313,13 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(20,0),
+    m_recordLength(0),
+    m_recordSampleRate(48000),
+    m_samplesCount(0),
+    m_tickCount(0),
+    m_enableNavTime(false),
+    m_modAFInput(AMMod::AMModInputNone)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -243,7 +348,14 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
 
+    ui->play->setEnabled(false);
+    ui->play->setChecked(false);
+    ui->tone->setChecked(false);
+    ui->mic->setChecked(false);
+
 	applySettings();
+
+	connect(m_amMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 }
 
 AMModGUI::~AMModGUI()
@@ -302,5 +414,44 @@ void AMModGUI::tick()
 	Real powDb = CalcDb::dbPower(m_amMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+    if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == AMMod::AMModInputFile))
+    {
+        AMMod::MsgConfigureFileSourceStreamTiming* message = AMMod::MsgConfigureFileSourceStreamTiming::create();
+        m_amMod->getInputMessageQueue()->push(message);
+    }
 }
 
+void AMModGUI::updateWithStreamData()
+{
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(m_recordLength);
+    QString s_time = recordLength.toString("hh:mm:ss");
+    ui->recordLengthText->setText(s_time);
+    updateWithStreamTime();
+}
+
+void AMModGUI::updateWithStreamTime()
+{
+    int t_sec = 0;
+    int t_msec = 0;
+
+    if (m_recordSampleRate > 0)
+    {
+        t_msec = ((m_samplesCount * 1000) / m_recordSampleRate) % 1000;
+        t_sec = m_samplesCount / m_recordSampleRate;
+    }
+
+    QTime t(0, 0, 0, 0);
+    t = t.addSecs(t_sec);
+    t = t.addMSecs(t_msec);
+    QString s_timems = t.toString("hh:mm:ss.zzz");
+    QString s_time = t.toString("hh:mm:ss");
+    ui->relTimeText->setText(s_timems);
+
+    if (!m_enableNavTime)
+    {
+        float posRatio = (float) t_sec / (float) m_recordLength;
+        ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+    }
+}

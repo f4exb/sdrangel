@@ -19,6 +19,9 @@
 
 #include <QMutex>
 #include <vector>
+#include <iostream>
+#include <fstream>
+
 #include "dsp/basebandsamplesource.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
@@ -32,6 +35,142 @@ class AMMod : public BasebandSampleSource {
     Q_OBJECT
 
 public:
+    typedef enum
+    {
+        AMModInputNone,
+        AMModInputTone,
+        AMModInputFile,
+        AMModInputAudio
+    } AMModInputAF;
+
+    class MsgConfigureFileSourceName : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getFileName() const { return m_fileName; }
+
+        static MsgConfigureFileSourceName* create(const QString& fileName)
+        {
+            return new MsgConfigureFileSourceName(fileName);
+        }
+
+    private:
+        QString m_fileName;
+
+        MsgConfigureFileSourceName(const QString& fileName) :
+            Message(),
+            m_fileName(fileName)
+        { }
+    };
+
+    class MsgConfigureFileSourceSeek : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getPercentage() const { return m_seekPercentage; }
+
+        static MsgConfigureFileSourceSeek* create(int seekPercentage)
+        {
+            return new MsgConfigureFileSourceSeek(seekPercentage);
+        }
+
+    protected:
+        int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
+
+        MsgConfigureFileSourceSeek(int seekPercentage) :
+            Message(),
+            m_seekPercentage(seekPercentage)
+        { }
+    };
+
+    class MsgConfigureFileSourceStreamTiming : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgConfigureFileSourceStreamTiming* create()
+        {
+            return new MsgConfigureFileSourceStreamTiming();
+        }
+
+    private:
+
+        MsgConfigureFileSourceStreamTiming() :
+            Message()
+        { }
+    };
+
+    class MsgConfigureAFInput : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        AMModInputAF getAFInput() const { return m_afInput; }
+
+        static MsgConfigureAFInput* create(AMModInputAF afInput)
+        {
+            return new MsgConfigureAFInput(afInput);
+        }
+
+    private:
+        AMModInputAF m_afInput;
+
+        MsgConfigureAFInput(AMModInputAF afInput) :
+            Message(),
+            m_afInput(afInput)
+        { }
+    };
+
+    class MsgReportFileSourceStreamTiming : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        std::size_t getSamplesCount() const { return m_samplesCount; }
+
+        static MsgReportFileSourceStreamTiming* create(std::size_t samplesCount)
+        {
+            return new MsgReportFileSourceStreamTiming(samplesCount);
+        }
+
+    protected:
+        std::size_t m_samplesCount;
+
+        MsgReportFileSourceStreamTiming(std::size_t samplesCount) :
+            Message(),
+            m_samplesCount(samplesCount)
+        { }
+    };
+
+    class MsgReportFileSourceStreamData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        quint32 getRecordLength() const { return m_recordLength; }
+
+        static MsgReportFileSourceStreamData* create(int sampleRate,
+                quint32 recordLength)
+        {
+            return new MsgReportFileSourceStreamData(sampleRate, recordLength);
+        }
+
+    protected:
+        int m_sampleRate;
+        quint32 m_recordLength;
+
+        MsgReportFileSourceStreamData(int sampleRate,
+                quint32 recordLength) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_recordLength(recordLength)
+        { }
+    };
+
+    //=================================================================
+
     AMMod();
     ~AMMod();
 
@@ -45,7 +184,8 @@ public:
     Real getMagSq() const { return m_magsq; }
 
 private:
-    class MsgConfigureAMMod : public Message {
+    class MsgConfigureAMMod : public Message
+    {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -73,6 +213,8 @@ private:
             m_audioMute(audioMute)
         { }
     };
+
+    //=================================================================
 
     struct AudioSample {
         qint16 l;
@@ -105,6 +247,8 @@ private:
         { }
     };
 
+    //=================================================================
+
     Config m_config;
     Config m_running;
 
@@ -128,7 +272,17 @@ private:
     SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;
 
+    std::ifstream m_ifstream;
+    QString m_fileName;
+    quint32 m_recordLength; //!< record length in seconds computed from file size
+    int m_sampleRate;
+
+    AMModInputAF m_afInput;
+
     void apply();
+    void pullAF(Real& sample);
+    void openFileStream();
+    void seekFileStream(int seekPercentage);
 };
 
 

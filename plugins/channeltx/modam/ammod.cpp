@@ -26,6 +26,13 @@
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAFInput, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
+
 
 AMMod::AMMod() :
 	m_settingsMutex(QMutex::Recursive)
@@ -49,6 +56,8 @@ AMMod::AMMod() :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
+
+	m_afInput = AMModInputNone;
 }
 
 AMMod::~AMMod()
@@ -64,18 +73,19 @@ void AMMod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandw
 void AMMod::pull(Sample& sample)
 {
 	Complex ci;
+	Real t;
 
 	m_settingsMutex.lock();
 
     if (m_interpolatorDistance > 1.0f) // decimate
     {
-        Real t = m_toneNco.next();
+        pullAF(t);
         m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
 
         while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            Real t = m_toneNco.next();
+            pullAF(t);
             m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
         }
@@ -84,7 +94,7 @@ void AMMod::pull(Sample& sample)
     {
         if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            Real t = m_toneNco.next();
+            pullAF(t);
             m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
         }
@@ -103,6 +113,41 @@ void AMMod::pull(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void AMMod::pullAF(Real& sample)
+{
+    switch (m_afInput)
+    {
+    case AMModInputTone:
+        sample = m_toneNco.next();
+        break;
+    case AMModInputFile:
+        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
+        // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
+        if (m_ifstream.is_open())
+        {
+            if (m_ifstream.eof()) // TODO: handle loop playback situation
+            {
+                m_ifstream.clear();
+                m_ifstream.seekg(0, std::ios::beg);
+            }
+
+            m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
+        }
+        else
+        {
+            sample = 0.0f;
+        }
+        break;
+    case AMModInputAudio:
+        sample = 0.0f; // TODO
+        break;
+    case AMModInputNone:
+    default:
+        sample = 0.0f;
+        break;
+    }
 }
 
 void AMMod::start()
@@ -155,6 +200,37 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+	else if (MsgConfigureFileSourceName::match(cmd))
+    {
+        MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
+        m_fileName = conf.getFileName();
+        openFileStream();
+        return true;
+    }
+    else if (MsgConfigureFileSourceSeek::match(cmd))
+    {
+        MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
+        int seekPercentage = conf.getPercentage();
+        seekFileStream(seekPercentage);
+
+        return true;
+    }
+    else if (MsgConfigureAFInput::match(cmd))
+    {
+        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
+        m_afInput = conf.getAFInput();
+
+        return true;
+    }
+    else if (MsgConfigureFileSourceStreamTiming::match(cmd))
+    {
+        std::size_t samplesCount = m_ifstream.tellg() / sizeof(Real);
+        MsgReportFileSourceStreamTiming *report;
+        report = MsgReportFileSourceStreamTiming::create(samplesCount);
+        getOutputMessageQueue()->push(report);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -200,3 +276,37 @@ void AMMod::apply()
 	m_running.m_audioMute = m_config.m_audioMute;
 }
 
+void AMMod::openFileStream()
+{
+    if (m_ifstream.is_open()) {
+        m_ifstream.close();
+    }
+
+    m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
+    quint64 fileSize = m_ifstream.tellg();
+    m_ifstream.seekg(0,std::ios_base::beg);
+
+    m_sampleRate = 48000; // fixed rate
+    m_recordLength = fileSize / (sizeof(Real) * m_sampleRate);
+
+    qDebug() << "AMMod::openFileStream: " << m_fileName.toStdString().c_str()
+            << " fileSize: " << fileSize << "bytes"
+            << " length: " << m_recordLength << " seconds";
+
+    MsgReportFileSourceStreamData *report;
+    report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
+    getOutputMessageQueue()->push(report);
+}
+
+void AMMod::seekFileStream(int seekPercentage)
+{
+    QMutexLocker mutexLocker(&m_settingsMutex);
+
+    if (m_ifstream.is_open())
+    {
+        int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+        seekPoint *= sizeof(Real);
+        m_ifstream.clear();
+        m_ifstream.seekg(seekPoint, std::ios::beg);
+    }
+}
