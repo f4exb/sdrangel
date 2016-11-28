@@ -174,7 +174,7 @@ public:
     AMMod();
     ~AMMod();
 
-    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute);
+    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -193,10 +193,11 @@ private:
         Real getAFBandwidth() const { return m_afBandwidth; }
         float getModFactor() const { return m_modFactor; }
         bool getAudioMute() const { return m_audioMute; }
+        bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute)
+        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop)
         {
-            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modFactor, audioMute);
+            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modFactor, audioMute, playLoop);
         }
 
     private:
@@ -204,13 +205,15 @@ private:
         Real m_afBandwidth;
         float m_modFactor;
         bool m_audioMute;
+        bool m_playLoop;
 
-        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute) :
+        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
             m_modFactor(modFactor),
-            m_audioMute(audioMute)
+            m_audioMute(audioMute),
+			m_playLoop(playLoop)
         { }
     };
 
@@ -235,6 +238,7 @@ private:
         float m_modFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
+        bool m_playLoop;
 
         Config() :
             m_outputSampleRate(-1),
@@ -243,7 +247,8 @@ private:
             m_afBandwidth(-1),
             m_modFactor(0.2f),
             m_audioSampleRate(0),
-            m_audioMute(false)
+            m_audioMute(false),
+			m_playLoop(false)
         { }
     };
 
@@ -274,6 +279,7 @@ private:
 
     std::ifstream m_ifstream;
     QString m_fileName;
+    quint64 m_fileSize;     //!< raw file size (bytes)
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 

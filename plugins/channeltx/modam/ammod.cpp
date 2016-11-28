@@ -35,7 +35,11 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
 
 AMMod::AMMod() :
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+	m_fileSize(0),
+	m_recordLength(0),
+	m_sampleRate(48000),
+	m_afInput(AMModInputNone)
 {
 	setObjectName("AMMod");
 
@@ -56,17 +60,20 @@ AMMod::AMMod() :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
-
-	m_afInput = AMModInputNone;
 }
 
 AMMod::~AMMod()
 {
 }
 
-void AMMod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute)
+void AMMod::configure(MessageQueue* messageQueue,
+		Real rfBandwidth,
+		Real afBandwidth,
+		float modFactor,
+		bool audioMute,
+		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modFactor, audioMute);
+	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modFactor, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -127,13 +134,23 @@ void AMMod::pullAF(Real& sample)
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
         {
-            if (m_ifstream.eof()) // TODO: handle loop playback situation
+            if (m_ifstream.eof())
             {
-                m_ifstream.clear();
-                m_ifstream.seekg(0, std::ios::beg);
+            	if (m_running.m_playLoop)
+            	{
+                    m_ifstream.clear();
+                    m_ifstream.seekg(0, std::ios::beg);
+            	}
             }
 
-            m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
+            if (m_ifstream.eof())
+            {
+            	sample = 0.0f;
+            }
+            else
+            {
+            	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
+            }
         }
         else
         {
@@ -189,6 +206,7 @@ bool AMMod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_modFactor = cfg.getModFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
 
@@ -196,7 +214,8 @@ bool AMMod::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_modFactor: " << m_config.m_modFactor
-				<< " m_audioMute: " << m_config.m_audioMute;
+				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_playLoop: " << m_config.m_playLoop;
 
 		return true;
 	}
@@ -224,8 +243,15 @@ bool AMMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
-        std::size_t samplesCount = m_ifstream.tellg() / sizeof(Real);
-        MsgReportFileSourceStreamTiming *report;
+    	std::size_t samplesCount;
+
+    	if (m_ifstream.eof()) {
+    		samplesCount = m_fileSize / sizeof(Real);
+    	} else {
+    		samplesCount = m_ifstream.tellg() / sizeof(Real);
+    	}
+
+    	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
         getOutputMessageQueue()->push(report);
 
@@ -274,6 +300,7 @@ void AMMod::apply()
 	m_running.m_modFactor = m_config.m_modFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_playLoop = m_config.m_playLoop;
 }
 
 void AMMod::openFileStream()
@@ -283,14 +310,14 @@ void AMMod::openFileStream()
     }
 
     m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
-    quint64 fileSize = m_ifstream.tellg();
+    m_fileSize = m_ifstream.tellg();
     m_ifstream.seekg(0,std::ios_base::beg);
 
     m_sampleRate = 48000; // fixed rate
-    m_recordLength = fileSize / (sizeof(Real) * m_sampleRate);
+    m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
 
     qDebug() << "AMMod::openFileStream: " << m_fileName.toStdString().c_str()
-            << " fileSize: " << fileSize << "bytes"
+            << " fileSize: " << m_fileSize << "bytes"
             << " length: " << m_recordLength << " seconds";
 
     MsgReportFileSourceStreamData *report;
