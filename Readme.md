@@ -66,6 +66,8 @@ If you use your own location for libbladeRF install directory you need to specif
 
 <h2>FunCube Dongle</h2>
 
+Linux only.
+
 Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. For the Pro+ the band filter selection is not effective as it is handled by the firmware using the center frequency.
 
 The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support. Library fcdlib is used to store the constants for each dongle type.
