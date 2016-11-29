@@ -41,13 +41,13 @@ NFMMod::NFMMod() :
 	m_sampleRate(48000),
 	m_afInput(NFMModInputNone)
 {
-	setObjectName("AMMod");
+	setObjectName("NFMod");
 
 	m_config.m_outputSampleRate = 48000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
-	m_config.m_modFactor = 20;
+	m_config.m_fmDeviation = 20;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -71,12 +71,12 @@ NFMMod::~NFMMod()
 void NFMMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real afBandwidth,
-		float modFactor,
+		float fmDeviation,
 		int volumeTenths,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, modFactor, volumeTenths, audioMute, playLoop);
+	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, fmDeviation, volumeTenths, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -90,13 +90,13 @@ void NFMMod::pull(Sample& sample)
     if (m_interpolatorDistance > 1.0f) // decimate
     {
         pullAF(t);
-        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+        m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
 
         while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
             pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+            m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
         }
     }
@@ -105,7 +105,7 @@ void NFMMod::pull(Sample& sample)
         if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
             pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
+            m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
         }
     }
@@ -210,17 +210,17 @@ bool NFMMod::handleMessage(const Message& cmd)
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
-		m_config.m_modFactor = cfg.getModFactor();
+		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
 
-		qDebug() << "NFMMod::handleMessage: MsgConfigureAMMod:"
+		qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
-				<< " m_modFactor: " << m_config.m_modFactor
+				<< " m_fmDeviation: " << m_config.m_fmDeviation
                 << " m_volumeFactor: " << m_config.m_volumeFactor
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_playLoop: " << m_config.m_playLoop;
@@ -305,7 +305,7 @@ void NFMMod::apply()
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
-	m_running.m_modFactor = m_config.m_modFactor;
+	m_running.m_fmDeviation = m_config.m_fmDeviation;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
@@ -325,7 +325,7 @@ void NFMMod::openFileStream()
     m_sampleRate = 48000; // fixed rate
     m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
 
-    qDebug() << "AMMod::openFileStream: " << m_fileName.toStdString().c_str()
+    qDebug() << "NFMMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
             << " length: " << m_recordLength << " seconds";
 

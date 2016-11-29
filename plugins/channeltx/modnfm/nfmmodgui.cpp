@@ -38,6 +38,7 @@ const QString NFMModGUI::m_channelID = "sdrangel.channeltx.modnfm";
 const int NFMModGUI::m_rfBW[] = {
 	3000, 4000, 5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
+const int NFMModGUI::m_nbRfBW = 11;
 
 NFMModGUI* NFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
@@ -73,9 +74,9 @@ void NFMModGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
-	ui->rfBW->setValue(6);
+	ui->rfBW->setCurrentIndex(6);
 	ui->afBW->setValue(3);
-	ui->modPercent->setValue(20);
+	ui->fmDev->setValue(50);
 	ui->micVolume->setValue(50);
 	ui->deltaFrequency->setValue(0);
 
@@ -87,9 +88,9 @@ QByteArray NFMModGUI::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
+	s.writeS32(2, ui->rfBW->currentIndex());
 	s.writeS32(3, ui->afBW->value());
-	s.writeS32(4, ui->modPercent->value());
+	s.writeS32(4, ui->fmDev->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	return s.final();
 }
@@ -115,12 +116,12 @@ bool NFMModGUI::deserialize(const QByteArray& data)
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
+		d.readS32(2, &tmp, 6);
+		ui->rfBW->setCurrentIndex(tmp);
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
-		d.readS32(4, &tmp, 20);
-		ui->modPercent->setValue(tmp);
+		d.readS32(4, &tmp, 50);
+		ui->fmDev->setValue(tmp);
 
         if(d.readU32(5, &u32tmp))
         {
@@ -202,7 +203,6 @@ void NFMModGUI::on_deltaFrequency_changed(quint64 value)
 
 void NFMModGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
 	m_channelMarker.setBandwidth(m_rfBW[value]);
 	applySettings();
 }
@@ -215,7 +215,7 @@ void NFMModGUI::on_afBW_valueChanged(int value)
 
 void NFMModGUI::on_modPercent_valueChanged(int value)
 {
-	ui->modPercentText->setText(QString("%1").arg(value));
+	ui->fmDevText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
 }
 
@@ -329,6 +329,14 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
+
+    blockApplySettings(true);
+    ui->rfBW->clear();
+    for (int i = 0; i < m_nbRfBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    }
+    blockApplySettings(false);
+
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
@@ -394,9 +402,9 @@ void NFMModGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->value()],
+			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
-			ui->modPercent->value() / 100.0f,
+			ui->fmDev->value() / 100.0f,
 			ui->micVolume->value(),
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());

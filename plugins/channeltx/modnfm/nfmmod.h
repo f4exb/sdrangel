@@ -174,7 +174,7 @@ public:
     NFMMod();
     ~NFMMod();
 
-    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop);
+    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -191,29 +191,29 @@ private:
     public:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getAFBandwidth() const { return m_afBandwidth; }
-        float getModFactor() const { return m_modFactor; }
+        float getFMDeviation() const { return m_fmDeviation; }
         int getVolumeFactor() const { return m_volumeFactor; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop)
         {
-            return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, modFactor, volumeFactor, audioMute, playLoop);
+            return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, fmDeviation, volumeFactor, audioMute, playLoop);
         }
 
     private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
-        float m_modFactor;
+        float m_fmDeviation;
         int m_volumeFactor;
         bool m_audioMute;
         bool m_playLoop;
 
-        MsgConfigureNFMMod(Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureNFMMod(Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
-            m_modFactor(modFactor),
+            m_fmDeviation(fmDeviation),
             m_volumeFactor(volumeFactor),
             m_audioMute(audioMute),
 			m_playLoop(playLoop)
@@ -238,7 +238,7 @@ private:
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
         Real m_afBandwidth;
-        float m_modFactor;
+        float m_fmDeviation;
         int m_volumeFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
@@ -249,7 +249,7 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(-1),
             m_afBandwidth(-1),
-            m_modFactor(0.2f),
+            m_fmDeviation(5.0f),
             m_volumeFactor(20),
             m_audioSampleRate(0),
             m_audioMute(false),

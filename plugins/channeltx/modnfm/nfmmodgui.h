@@ -102,6 +102,7 @@ private:
     NFMMod::NFMModInputAF m_modAFInput;
 
     static const int m_rfBW[];
+    static const int m_nbRfBW;
 
     explicit NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~NFMModGUI();

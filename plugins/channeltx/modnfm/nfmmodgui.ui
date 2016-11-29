@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>266</width>
-    <height>190</height>
+    <width>295</width>
+    <height>181</height>
    </rect>
   </property>
   <property name="font">
@@ -27,7 +27,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>251</width>
+     <width>271</width>
      <height>161</height>
     </rect>
    </property>
@@ -164,55 +164,49 @@
     <item>
      <layout class="QHBoxLayout" name="rfBandwidthLayout">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="rfBwLabel">
         <property name="text">
-         <string>RF BW</string>
+         <string>RFBW</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="rfBW">
-        <property name="toolTip">
-         <string>Demodulator (RF) bandwidth</string>
-        </property>
-        <property name="maximum">
-         <number>10</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>6</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QComboBox" name="rfBW">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="rfBWText">
+       <widget class="QLabel" name="rfBWUnit">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>10</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>12.5kHz</string>
+         <string>k</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="afBandwidthLayout">
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="afBwLabel">
         <property name="text">
-         <string>AF BW</string>
+         <string>AFBW</string>
         </property>
        </widget>
       </item>
@@ -242,12 +236,12 @@
        <widget class="QLabel" name="afBWText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>25</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>3 kHz</string>
+         <string>3k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -257,16 +251,16 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="modPercentLayout">
+     <layout class="QHBoxLayout" name="fmDeviationLayout">
       <item>
-       <widget class="QLabel" name="pLabel">
+       <widget class="QLabel" name="fmDevLabel">
         <property name="text">
-         <string>Mod%</string>
+         <string>Dev</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="modPercent">
+       <widget class="QSlider" name="fmDev">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
           <horstretch>0</horstretch>
@@ -283,13 +277,13 @@
          <string>Modulation percentage</string>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>250</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>20</number>
+         <number>50</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -297,7 +291,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="modPercentText">
+       <widget class="QLabel" name="fmDevText">
         <property name="minimumSize">
          <size>
           <width>30</width>
@@ -305,7 +299,7 @@
          </size>
         </property>
         <property name="text">
-         <string>20</string>
+         <string>5k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
