@@ -589,13 +589,13 @@ void SDRdaemonGui::on_startStop_toggled(bool checked)
         if (m_deviceAPI->initAcquisition())
         {
             m_deviceAPI->startAcquisition();
-            DSPEngine::instance()->startAudio();
+            DSPEngine::instance()->startAudioOutput();
         }
     }
     else
     {
         m_deviceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudio();
+        DSPEngine::instance()->stopAudioOutput();
     }
 }
 

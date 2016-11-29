@@ -35,6 +35,7 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
 
 AMMod::AMMod() :
+    m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -52,28 +53,31 @@ AMMod::AMMod() :
 
 	apply();
 
-	m_audioBuffer.resize(1<<14);
-	m_audioBufferFill = 0;
+	//m_audioBuffer.resize(1<<14);
+	//m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
+	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 }
 
 AMMod::~AMMod()
 {
+    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
 void AMMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real afBandwidth,
 		float modFactor,
+		int volumeTenths,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modFactor, audioMute, playLoop);
+	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, afBandwidth, modFactor, volumeTenths, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -124,6 +128,8 @@ void AMMod::pull(Sample& sample)
 
 void AMMod::pullAF(Real& sample)
 {
+    int16_t audioSample[2];
+
     switch (m_afInput)
     {
     case AMModInputTone:
@@ -158,7 +164,8 @@ void AMMod::pullAF(Real& sample)
         }
         break;
     case AMModInputAudio:
-        sample = 0.0f; // TODO
+        m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
+        sample = ((audioSample[0] + audioSample[1]) * m_running.m_volumeFactor) / 6553600.0f;
         break;
     case AMModInputNone:
     default:
@@ -205,6 +212,7 @@ bool AMMod::handleMessage(const Message& cmd)
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_modFactor = cfg.getModFactor();
+		m_config.m_volumeFactor = cfg.getVolumeFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 
@@ -214,6 +222,7 @@ bool AMMod::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_modFactor: " << m_config.m_modFactor
+                << " m_volumeFactor: " << m_config.m_volumeFactor
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_playLoop: " << m_config.m_playLoop;
 
@@ -298,6 +307,7 @@ void AMMod::apply()
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
 	m_running.m_modFactor = m_config.m_modFactor;
+    m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_playLoop = m_config.m_playLoop;

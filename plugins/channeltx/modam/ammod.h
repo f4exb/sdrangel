@@ -174,7 +174,7 @@ public:
     AMMod();
     ~AMMod();
 
-    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop);
+    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -192,26 +192,29 @@ private:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getAFBandwidth() const { return m_afBandwidth; }
         float getModFactor() const { return m_modFactor; }
+        int getVolumeFactor() const { return m_volumeFactor; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop)
+        static MsgConfigureAMMod* create(Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop)
         {
-            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modFactor, audioMute, playLoop);
+            return new MsgConfigureAMMod(rfBandwidth, afBandwidth, modFactor, volumeFactor, audioMute, playLoop);
         }
 
     private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
         float m_modFactor;
+        int m_volumeFactor;
         bool m_audioMute;
         bool m_playLoop;
 
-        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, float modFactor, bool audioMute, bool playLoop) :
+        MsgConfigureAMMod(Real rfBandwidth, Real afBandwidth, float modFactor, int volumeFactor, bool audioMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
             m_modFactor(modFactor),
+            m_volumeFactor(volumeFactor),
             m_audioMute(audioMute),
 			m_playLoop(playLoop)
         { }
@@ -236,6 +239,7 @@ private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
         float m_modFactor;
+        int m_volumeFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
         bool m_playLoop;
@@ -246,6 +250,7 @@ private:
             m_rfBandwidth(-1),
             m_afBandwidth(-1),
             m_modFactor(0.2f),
+            m_volumeFactor(20),
             m_audioSampleRate(0),
             m_audioMute(false),
 			m_playLoop(false)
@@ -270,8 +275,8 @@ private:
     MovingAverage<Real> m_movingAverage;
     SimpleAGC m_volumeAGC;
 
-    AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    //AudioVector m_audioBuffer;
+    //uint m_audioBufferFill;
 
     AudioFifo m_audioFifo;
     SampleVector m_sampleBuffer;

@@ -26,7 +26,8 @@
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
-	m_audioSampleRate(48000) // Use default output device at 48 kHz
+	m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
+    m_audioInputSampleRate(48000)   // Use default input device at 48 kHz
 {
 	m_dvSerialSupport = false;
 }
@@ -86,26 +87,48 @@ void DSPEngine::removeLastDeviceSinkEngine()
     }
 }
 
-void DSPEngine::startAudio()
+void DSPEngine::startAudioOutput()
 {
-    m_audioOutput.start(-1, m_audioSampleRate);
-    m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
+    m_audioOutput.start(-1, m_audioOutputSampleRate);
+    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
-void DSPEngine::stopAudio()
+void DSPEngine::stopAudioOutput()
 {
     m_audioOutput.stop();
 }
 
-void DSPEngine::startAudioImmediate()
+void DSPEngine::startAudioOutputImmediate()
 {
-    m_audioOutput.start(-1, m_audioSampleRate);
-    m_audioSampleRate = m_audioOutput.getRate(); // update with actual rate
+    m_audioOutput.start(-1, m_audioOutputSampleRate);
+    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
-void DSPEngine::stopAudioImmediate()
+void DSPEngine::stopAudioOutputImmediate()
 {
     m_audioOutput.stop();
+}
+
+void DSPEngine::startAudioInput()
+{
+    m_audioInput.start(-1, m_audioInputSampleRate);
+    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
+}
+
+void DSPEngine::stopAudioInput()
+{
+    m_audioInput.stop();
+}
+
+void DSPEngine::startAudioInputImmediate()
+{
+    m_audioInput.start(-1, m_audioInputSampleRate);
+    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
+}
+
+void DSPEngine::stopAudioInputImmediate()
+{
+    m_audioInput.stop();
 }
 
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
@@ -118,6 +141,18 @@ void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
 {
 	qDebug("DSPEngine::removeAudioSink");
 	m_audioOutput.removeFifo(audioFifo);
+}
+
+void DSPEngine::addAudioSource(AudioFifo* audioFifo)
+{
+    qDebug("DSPEngine::addAudioSource");
+    m_audioInput.addFifo(audioFifo);
+}
+
+void DSPEngine::removeAudioSource(AudioFifo* audioFifo)
+{
+    qDebug("DSPEngine::removeAudioSource");
+    m_audioInput.removeFifo(audioFifo);
 }
 
 DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)

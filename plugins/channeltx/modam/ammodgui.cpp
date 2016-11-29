@@ -77,6 +77,7 @@ void AMModGUI::resetToDefaults()
 	ui->rfBW->setValue(6);
 	ui->afBW->setValue(3);
 	ui->modPercent->setValue(20);
+	ui->micVolume->setValue(50);
 	ui->deltaFrequency->setValue(0);
 
 	blockApplySettings(false);
@@ -217,6 +218,12 @@ void AMModGUI::on_modPercent_valueChanged(int value)
 {
 	ui->modPercentText->setText(QString("%1").arg(value));
 	applySettings();
+}
+
+void AMModGUI::on_micVolume_valueChanged(int value)
+{
+    ui->micVolumeText->setText(QString("%1").arg(value));
+    applySettings();
 }
 
 void AMModGUI::on_audioMute_toggled(bool checked)
@@ -391,6 +398,7 @@ void AMModGUI::applySettings()
 			m_rfBW[ui->rfBW->value()],
 			ui->afBW->value() * 1000.0,
 			ui->modPercent->value() / 100.0f,
+			ui->micVolume->value(),
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());
 	}

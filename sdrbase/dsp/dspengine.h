@@ -21,6 +21,7 @@
 #include <QObject>
 #include <vector>
 #include "audio/audiooutput.h"
+#include "audio/audioinput.h"
 #include "util/export.h"
 #ifdef DSD_USE_SERIALDV
 #include "dsp/dvserialengine.h"
@@ -37,7 +38,7 @@ public:
 
 	static DSPEngine *instance();
 
-	uint getAudioSampleRate() const { return m_audioSampleRate; }
+	uint getAudioSampleRate() const { return m_audioOutputSampleRate; }
 
 	DSPDeviceSourceEngine *addDeviceSourceEngine();
 	void removeLastDeviceSourceEngine();
@@ -45,10 +46,15 @@ public:
 	DSPDeviceSinkEngine *addDeviceSinkEngine();
 	void removeLastDeviceSinkEngine();
 
-	void startAudio();
-	void stopAudio();
-    void startAudioImmediate();
-    void stopAudioImmediate();
+	void startAudioOutput();
+	void stopAudioOutput();
+    void startAudioOutputImmediate();
+    void stopAudioOutputImmediate();
+
+    void startAudioInput();
+    void stopAudioInput();
+    void startAudioInputImmediate();
+    void stopAudioInputImmediate();
 
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
@@ -58,6 +64,9 @@ public:
 
     void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
 	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
+
+	void addAudioSource(AudioFifo* audioFifo); //!< Add an audio source
+    void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
 	// Serial DV methods:
 
@@ -92,7 +101,9 @@ private:
 	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
 	uint m_deviceSinkEnginesUIDSequence;
 	AudioOutput m_audioOutput;
-	uint m_audioSampleRate;
+	AudioInput m_audioInput;
+	uint m_audioOutputSampleRate;
+    uint m_audioInputSampleRate;
 	bool m_dvSerialSupport;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;

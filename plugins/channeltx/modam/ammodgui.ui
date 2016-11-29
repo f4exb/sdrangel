@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>180</height>
+    <width>266</width>
+    <height>190</height>
    </rect>
   </property>
   <property name="font">
@@ -27,7 +27,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>241</width>
+     <width>251</width>
      <height>161</height>
     </rect>
    </property>
@@ -38,16 +38,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -276,6 +267,18 @@
       </item>
       <item>
        <widget class="QSlider" name="modPercent">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Modulation percentage</string>
         </property>
@@ -297,12 +300,63 @@
        <widget class="QLabel" name="modPercentText">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
          <string>20</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="micVolume">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input volume</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="micVolumeText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input volume level</string>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="text">
+         <string>50</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

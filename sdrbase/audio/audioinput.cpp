@@ -96,7 +96,7 @@ bool AudioInput::start(int device, int rate)
 
         m_audioInput = new QAudioInput(devInfo, m_audioFormat);
 
-        QIODevice::open(QIODevice::ReadOnly);
+        QIODevice::open(QIODevice::ReadWrite);
 
         m_audioInput->start(this);
 
