@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>266</width>
-    <height>190</height>
+    <height>169</height>
    </rect>
   </property>
   <property name="font">
@@ -28,7 +28,7 @@
      <x>10</x>
      <y>10</y>
      <width>251</width>
-     <height>161</height>
+     <height>151</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -38,7 +38,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -175,14 +184,17 @@
         <property name="toolTip">
          <string>Demodulator (RF) bandwidth</string>
         </property>
-        <property name="maximum">
+        <property name="minimum">
          <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>6</number>
+         <number>50</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -198,56 +210,7 @@
          </size>
         </property>
         <property name="text">
-         <string>12.5kHz</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="afBandwidthLayout">
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>AF BW</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="afBW">
-        <property name="toolTip">
-         <string>Audio bandwidth</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>20</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>3</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="afBWText">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>3 kHz</string>
+         <string>5 kHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -582,6 +545,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>

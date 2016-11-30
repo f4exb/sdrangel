@@ -36,10 +36,6 @@
 
 const QString AMModGUI::m_channelID = "sdrangel.channeltx.modam";
 
-const int AMModGUI::m_rfBW[] = {
-	3000, 4000, 5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
-};
-
 AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
 	AMModGUI* gui = new AMModGUI(pluginAPI, deviceAPI);
@@ -74,8 +70,7 @@ void AMModGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
-	ui->rfBW->setValue(6);
-	ui->afBW->setValue(3);
+	ui->rfBW->setValue(50);
 	ui->modPercent->setValue(20);
 	ui->micVolume->setValue(50);
 	ui->deltaFrequency->setValue(0);
@@ -89,7 +84,7 @@ QByteArray AMModGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
-	s.writeS32(3, ui->afBW->value());
+	//s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->modPercent->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	return s.final();
@@ -119,7 +114,7 @@ bool AMModGUI::deserialize(const QByteArray& data)
 		d.readS32(2, &tmp, 4);
 		ui->rfBW->setValue(tmp);
 		d.readS32(3, &tmp, 3);
-		ui->afBW->setValue(tmp);
+		//ui->afBW->setValue(tmp);
 		d.readS32(4, &tmp, 20);
 		ui->modPercent->setValue(tmp);
 
@@ -203,14 +198,8 @@ void AMModGUI::on_deltaFrequency_changed(quint64 value)
 
 void AMModGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker.setBandwidth(m_rfBW[value]);
-	applySettings();
-}
-
-void AMModGUI::on_afBW_valueChanged(int value)
-{
-	ui->afBWText->setText(QString("%1 kHz").arg(value));
+	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0));
+	m_channelMarker.setBandwidth(value * 100);
 	applySettings();
 }
 
@@ -395,8 +384,7 @@ void AMModGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_amMod->configure(m_amMod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->value()],
-			ui->afBW->value() * 1000.0,
+			ui->rfBW->value() * 100.0,
 			ui->modPercent->value() / 100.0f,
 			ui->micVolume->value(),
 			ui->audioMute->isChecked(),

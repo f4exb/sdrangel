@@ -61,7 +61,6 @@ private slots:
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
     void on_rfBW_valueChanged(int value);
-    void on_afBW_valueChanged(int value);
     void on_modPercent_valueChanged(int value);
     void on_micVolume_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
@@ -99,8 +98,6 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     AMMod::AMModInputAF m_modAFInput;
-
-    static const int m_rfBW[];
 
     explicit AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~AMModGUI();
