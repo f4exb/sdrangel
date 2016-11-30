@@ -22,7 +22,6 @@
 #include <vector>
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
@@ -34,7 +33,7 @@ public:
 	AMDemod();
 	~AMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute);
+	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -50,27 +49,24 @@ private:
 
 	public:
 		Real getRFBandwidth() const { return m_rfBandwidth; }
-		Real getAFBandwidth() const { return m_afBandwidth; }
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
 
-		static MsgConfigureAMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute)
+		static MsgConfigureAMDemod* create(Real rfBandwidth, Real volume, Real squelch, bool audioMute)
 		{
-			return new MsgConfigureAMDemod(rfBandwidth, afBandwidth, volume, squelch, audioMute);
+			return new MsgConfigureAMDemod(rfBandwidth, volume, squelch, audioMute);
 		}
 
 	private:
 		Real m_rfBandwidth;
-		Real m_afBandwidth;
 		Real m_volume;
 		Real m_squelch;
 		bool m_audioMute;
 
-		MsgConfigureAMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute) :
+		MsgConfigureAMDemod(Real rfBandwidth, Real volume, Real squelch, bool audioMute) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
-			m_afBandwidth(afBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
 			m_audioMute(audioMute)
@@ -92,7 +88,6 @@ private:
 		int m_inputSampleRate;
 		qint64 m_inputFrequencyOffset;
 		Real m_rfBandwidth;
-		Real m_afBandwidth;
 		Real m_squelch;
 		Real m_volume;
 		quint32 m_audioSampleRate;
@@ -102,7 +97,6 @@ private:
 			m_inputSampleRate(-1),
 			m_inputFrequencyOffset(0),
 			m_rfBandwidth(-1),
-			m_afBandwidth(-1),
 			m_squelch(0),
 			m_volume(0),
 			m_audioSampleRate(0),
@@ -117,7 +111,6 @@ private:
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
-	Lowpass<Real> m_lowpass;
 
 	Real m_squelchLevel;
 	int m_squelchCount;
@@ -162,8 +155,6 @@ private:
         if ((m_squelchCount >= m_running.m_audioSampleRate / 20) && !m_running.m_audioMute)
         {
             Real demod = sqrt(magsq);
-
-            demod = m_lowpass.filter(demod);
 
             if (demod < -1)
             {

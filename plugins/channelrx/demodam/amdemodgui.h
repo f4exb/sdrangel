@@ -42,7 +42,6 @@ private slots:
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
 	void on_rfBW_valueChanged(int value);
-	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
@@ -63,8 +62,6 @@ private:
 	AMDemod* m_amDemod;
 	MovingAverage<Real> m_channelPowerDbAvg;
 	bool m_squelchOpen;
-
-	static const int m_rfBW[];
 
 	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~AMDemodGUI();

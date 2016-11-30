@@ -36,8 +36,7 @@ AMDemod::AMDemod() :
 
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 12500;
-	m_config.m_afBandwidth = 3000;
+	m_config.m_rfBandwidth = 5000;
 	m_config.m_squelch = -40.0;
 	m_config.m_volume = 2.0;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
@@ -59,9 +58,9 @@ AMDemod::~AMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute)
+void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute)
 {
-	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioMute);
+	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, volume, squelch, audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -150,7 +149,6 @@ bool AMDemod::handleMessage(const Message& cmd)
 		MsgConfigureAMDemod& cfg = (MsgConfigureAMDemod&) cmd;
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioMute = cfg.getAudioMute();
@@ -159,7 +157,6 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 		qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
 				<< " m_audioMute: " << m_config.m_audioMute;
@@ -182,20 +179,13 @@ void AMDemod::apply()
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
+		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_settingsMutex.unlock();
-	}
-
-	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
-	{
-		m_settingsMutex.lock();
-		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
 		m_settingsMutex.unlock();
 	}
 
@@ -208,7 +198,6 @@ void AMDemod::apply()
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-	m_running.m_afBandwidth = m_config.m_afBandwidth;
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;

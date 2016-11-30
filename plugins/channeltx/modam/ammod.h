@@ -25,7 +25,6 @@
 #include "dsp/basebandsamplesource.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
