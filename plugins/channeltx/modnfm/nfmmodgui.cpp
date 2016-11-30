@@ -351,7 +351,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
 	//m_channelMarker = new ChannelMarker(this);
-	m_channelMarker.setColor(Qt::yellow);
+	m_channelMarker.setColor(Qt::red);
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
