@@ -406,7 +406,7 @@ void NFMModGUI::applySettings()
 		m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
-			ui->fmDev->value() / 100.0f,
+			ui->fmDev->value() * 100.0f, // value is in '100 Hz
 			ui->micVolume->value(),
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());

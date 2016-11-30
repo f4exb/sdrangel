@@ -26,6 +26,7 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
+#include "dsp/bandpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
@@ -264,12 +265,14 @@ private:
 
     NCO m_carrierNco;
     NCO m_toneNco;
+    float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
     Lowpass<Real> m_lowpass;
+    Bandpass<Real> m_bandpass;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;
@@ -292,6 +295,7 @@ private:
 
     void apply();
     void pullAF(Real& sample);
+    void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
 };

@@ -34,6 +34,7 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
 
 
 NFMMod::NFMMod() :
+	m_modPhasor(0.0f),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -47,7 +48,7 @@ NFMMod::NFMMod() :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
-	m_config.m_fmDeviation = 20;
+	m_config.m_fmDeviation = 5000;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -89,24 +90,18 @@ void NFMMod::pull(Sample& sample)
 
     if (m_interpolatorDistance > 1.0f) // decimate
     {
-        pullAF(t);
-        m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
-        m_modSample.imag(0.0f);
+    	modulateSample();
 
         while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
-            m_modSample.imag(0.0f);
+        	modulateSample();
         }
     }
     else
     {
         if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_fmDeviation * 16384.0f)); // modulate and scale zero frequency carrier
-            m_modSample.imag(0.0f);
+        	modulateSample();
         }
     }
 
@@ -123,6 +118,17 @@ void NFMMod::pull(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void NFMMod::modulateSample()
+{
+	Real t;
+
+    pullAF(t);
+
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 302.0f);
+    m_modSample.real(cos(m_modPhasor) * 32678.0f);
+    m_modSample.imag(sin(m_modPhasor) * 32678.0f);
 }
 
 void NFMMod::pullAF(Real& sample)
@@ -293,11 +299,12 @@ void NFMMod::apply()
 		m_settingsMutex.unlock();
 	}
 
-	if((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
+	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
-		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
+		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 		m_settingsMutex.unlock();
 	}
 
