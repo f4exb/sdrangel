@@ -285,6 +285,7 @@ private:
 
     void apply();
     void pullAF(Real& sample);
+    void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
 };

@@ -82,30 +82,23 @@ void AMMod::configure(MessageQueue* messageQueue,
 void AMMod::pull(Sample& sample)
 {
 	Complex ci;
-	Real t;
 
 	m_settingsMutex.lock();
 
     if (m_interpolatorDistance > 1.0f) // decimate
     {
-        pullAF(t);
-        m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-        m_modSample.imag(0.0f);
+    	modulateSample();
 
         while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-            m_modSample.imag(0.0f);
+        	modulateSample();
         }
     }
     else
     {
         if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
         {
-            pullAF(t);
-            m_modSample.real(((t+1.0f) * m_running.m_modFactor * 16384.0f)); // modulate and scale zero frequency carrier
-            m_modSample.imag(0.0f);
+        	modulateSample();
         }
     }
 
@@ -122,6 +115,16 @@ void AMMod::pull(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void AMMod::modulateSample()
+{
+	Real t;
+
+    pullAF(t);
+
+    m_modSample.real((t*m_running.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+    m_modSample.imag(0.0f);
 }
 
 void AMMod::pullAF(Real& sample)
