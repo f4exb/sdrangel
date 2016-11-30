@@ -47,7 +47,8 @@ AMMod::AMMod() :
 	m_config.m_outputSampleRate = 48000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
-	m_config.m_modFactor = 20;
+	m_config.m_modFactor = 0.2f;
+	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -71,11 +72,12 @@ AMMod::~AMMod()
 void AMMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		float modFactor,
+		float toneFrequency,
 		int volumeTenths,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, volumeTenths, audioMute, playLoop);
+	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, toneFrequency, volumeTenths, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -212,6 +214,7 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_modFactor = cfg.getModFactor();
+		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
@@ -221,6 +224,7 @@ bool AMMod::handleMessage(const Message& cmd)
 		qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_modFactor: " << m_config.m_modFactor
+                << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_playLoop: " << m_config.m_playLoop;
@@ -283,8 +287,8 @@ void AMMod::apply()
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+	   (m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+	   (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
 		m_interpolatorDistanceRemain = 0;
@@ -294,10 +298,19 @@ void AMMod::apply()
 		m_settingsMutex.unlock();
 	}
 
+	if ((m_config.m_toneFrequency != m_running.m_toneFrequency) ||
+	    (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+	{
+        m_settingsMutex.lock();
+        m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
+        m_settingsMutex.unlock();
+	}
+
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
 	m_running.m_modFactor = m_config.m_modFactor;
+	m_running.m_toneFrequency = m_config.m_toneFrequency;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;

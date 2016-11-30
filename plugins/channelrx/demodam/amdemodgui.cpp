@@ -171,7 +171,7 @@ void AMDemodGUI::on_deltaFrequency_changed(quint64 value)
 
 void AMDemodGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0));
+	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 100);
 	applySettings();
 }

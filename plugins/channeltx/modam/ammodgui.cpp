@@ -73,6 +73,7 @@ void AMModGUI::resetToDefaults()
 	ui->rfBW->setValue(50);
 	ui->modPercent->setValue(20);
 	ui->micVolume->setValue(50);
+	ui->toneFrequency->setValue(100);
 	ui->deltaFrequency->setValue(0);
 
 	blockApplySettings(false);
@@ -84,7 +85,7 @@ QByteArray AMModGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
-	//s.writeS32(3, ui->afBW->value());
+	s.writeS32(3, ui->toneFrequency->value());
 	s.writeS32(4, ui->modPercent->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	return s.final();
@@ -113,8 +114,8 @@ bool AMModGUI::deserialize(const QByteArray& data)
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
 		ui->rfBW->setValue(tmp);
-		d.readS32(3, &tmp, 3);
-		//ui->afBW->setValue(tmp);
+		d.readS32(3, &tmp, 100);
+		ui->toneFrequency->setValue(tmp);
 		d.readS32(4, &tmp, 20);
 		ui->modPercent->setValue(tmp);
 
@@ -198,7 +199,7 @@ void AMModGUI::on_deltaFrequency_changed(quint64 value)
 
 void AMModGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0));
+	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 100);
 	applySettings();
 }
@@ -214,6 +215,13 @@ void AMModGUI::on_micVolume_valueChanged(int value)
     ui->micVolumeText->setText(QString("%1").arg(value));
     applySettings();
 }
+
+void AMModGUI::on_toneFrequency_valueChanged(int value)
+{
+    ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
+    applySettings();
+}
+
 
 void AMModGUI::on_audioMute_toggled(bool checked)
 {
@@ -386,6 +394,7 @@ void AMModGUI::applySettings()
 		m_amMod->configure(m_amMod->getInputMessageQueue(),
 			ui->rfBW->value() * 100.0,
 			ui->modPercent->value() / 100.0f,
+			ui->toneFrequency->value() * 10.0f,
 			ui->micVolume->value(),
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());

@@ -38,16 +38,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -188,7 +179,7 @@
          <number>10</number>
         </property>
         <property name="maximum">
-         <number>200</number>
+         <number>400</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -210,7 +201,7 @@
          </size>
         </property>
         <property name="text">
-         <string>5 kHz</string>
+         <string>5.0 kHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

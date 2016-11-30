@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>266</width>
-    <height>169</height>
+    <width>342</width>
+    <height>195</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>290</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -27,9 +33,15 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>251</width>
-     <height>151</height>
+     <width>320</width>
+     <height>161</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>280</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -38,16 +50,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -175,7 +178,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>RF BW</string>
+         <string>RFBW</string>
         </property>
        </widget>
       </item>
@@ -188,7 +191,7 @@
          <number>10</number>
         </property>
         <property name="maximum">
-         <number>200</number>
+         <number>400</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -210,7 +213,7 @@
          </size>
         </property>
         <property name="text">
-         <string>5 kHz</string>
+         <string>5.0 kHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -282,6 +285,92 @@
         </property>
        </widget>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="recordFileSelectLayout">
+      <item>
+       <widget class="ButtonSwitch" name="tone">
+        <property name="toolTip">
+         <string>Tone modulation</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="toneFrequency">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>250</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="toneFrequencyText">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency (kHz)</string>
+        </property>
+        <property name="text">
+         <string>1.00k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="mic">
+        <property name="toolTip">
+         <string>Audio input</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QDial" name="micVolume">
         <property name="maximumSize">
@@ -308,15 +397,12 @@
        <widget class="QLabel" name="micVolumeText">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>20</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
          <string>Audio input volume level</string>
-        </property>
-        <property name="statusTip">
-         <string/>
         </property>
         <property name="text">
          <string>50</string>
@@ -326,41 +412,34 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="recordFileSelectLayout">
+     <layout class="QHBoxLayout" name="fileNameLayout">
       <item>
-       <widget class="ButtonSwitch" name="tone">
-        <property name="toolTip">
-         <string>Tone modulation (1 kHz)</string>
-        </property>
+       <widget class="QLabel" name="recordFileText">
         <property name="text">
          <string>...</string>
         </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
-        </property>
        </widget>
       </item>
-      <item>
-       <widget class="ButtonSwitch" name="mic">
-        <property name="toolTip">
-         <string>Audio input</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="playControllLayout">
       <item>
        <widget class="QPushButton" name="showFileDialog">
         <property name="minimumSize">
@@ -387,17 +466,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLabel" name="recordFileText">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="playControllLayout">
       <item>
        <widget class="ButtonSwitch" name="playLoop">
         <property name="toolTip">
