@@ -201,21 +201,21 @@ void NFMModGUI::on_deltaFrequency_changed(quint64 value)
 	}
 }
 
-void NFMModGUI::on_rfBW_valueChanged(int value)
+void NFMModGUI::on_rfBW_currentIndexChanged(int index)
 {
-	m_channelMarker.setBandwidth(m_rfBW[value]);
+	m_channelMarker.setBandwidth(m_rfBW[index]);
 	applySettings();
 }
 
 void NFMModGUI::on_afBW_valueChanged(int value)
 {
-	ui->afBWText->setText(QString("%1 kHz").arg(value));
+	ui->afBWText->setText(QString("%1k").arg(value));
 	applySettings();
 }
 
-void NFMModGUI::on_modPercent_valueChanged(int value)
+void NFMModGUI::on_fmDev_valueChanged(int value)
 {
-	ui->fmDevText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
 }
 
@@ -335,7 +335,9 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     for (int i = 0; i < m_nbRfBW; i++) {
         ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
     }
+    ui->rfBW->setCurrentIndex(6);
     blockApplySettings(false);
+
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
