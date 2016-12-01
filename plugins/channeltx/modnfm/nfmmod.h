@@ -175,7 +175,14 @@ public:
     NFMMod();
     ~NFMMod();
 
-    void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop);
+    void configure(MessageQueue* messageQueue,
+            Real rfBandwidth,
+            Real afBandwidth,
+            float fmDeviation,
+            float toneFrequency,
+            int volumeFactor,
+            bool audioMute,
+            bool playLoop);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -193,28 +200,31 @@ private:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getAFBandwidth() const { return m_afBandwidth; }
         float getFMDeviation() const { return m_fmDeviation; }
+        float getToneFrequency() const { return m_toneFrequency; }
         int getVolumeFactor() const { return m_volumeFactor; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, int volumeFactor, bool audioMute, bool playLoop)
         {
-            return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, fmDeviation, volumeFactor, audioMute, playLoop);
+            return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
         }
 
     private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
         float m_fmDeviation;
+        float m_toneFrequency;
         int m_volumeFactor;
         bool m_audioMute;
         bool m_playLoop;
 
-        MsgConfigureNFMMod(Real rfBandwidth, Real afBandwidth, float fmDeviation, int volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureNFMMod(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, int volumeFactor, bool audioMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
             m_fmDeviation(fmDeviation),
+            m_toneFrequency(toneFrequency),
             m_volumeFactor(volumeFactor),
             m_audioMute(audioMute),
 			m_playLoop(playLoop)
@@ -240,6 +250,7 @@ private:
         Real m_rfBandwidth;
         Real m_afBandwidth;
         float m_fmDeviation;
+        float m_toneFrequency;
         int m_volumeFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
@@ -250,7 +261,8 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(-1),
             m_afBandwidth(-1),
-            m_fmDeviation(5.0f),
+            m_fmDeviation(5000.0f),
+            m_toneFrequency(1000.0f),
             m_volumeFactor(20),
             m_audioSampleRate(0),
             m_audioMute(false),

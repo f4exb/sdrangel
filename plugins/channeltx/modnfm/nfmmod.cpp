@@ -48,7 +48,8 @@ NFMMod::NFMMod() :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
 	m_config.m_afBandwidth = 3000;
-	m_config.m_fmDeviation = 5000;
+	m_config.m_fmDeviation = 5000.0f;
+	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	apply();
@@ -73,11 +74,12 @@ void NFMMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real afBandwidth,
 		float fmDeviation,
+		float toneFrequency,
 		int volumeTenths,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, fmDeviation, volumeTenths, audioMute, playLoop);
+	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeTenths, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -126,7 +128,7 @@ void NFMMod::modulateSample()
 
     pullAF(t);
 
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 302.0f);
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 1208.0f);
     m_modSample.real(cos(m_modPhasor) * 32678.0f);
     m_modSample.imag(sin(m_modPhasor) * 32678.0f);
 }
@@ -217,6 +219,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_fmDeviation = cfg.getFMDeviation();
+		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
@@ -227,6 +230,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_fmDeviation: " << m_config.m_fmDeviation
+                << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_playLoop: " << m_config.m_playLoop;
@@ -306,6 +310,14 @@ void NFMMod::apply()
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
 		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
 		m_settingsMutex.unlock();
+	}
+
+	if ((m_config.m_toneFrequency != m_running.m_toneFrequency) ||
+	    (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+	{
+        m_settingsMutex.lock();
+        m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
+        m_settingsMutex.unlock();
 	}
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
