@@ -75,11 +75,11 @@ void NFMMod::configure(MessageQueue* messageQueue,
 		Real afBandwidth,
 		float fmDeviation,
 		float toneFrequency,
-		int volumeTenths,
+		float volumeFactor,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeTenths, audioMute, playLoop);
+	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -163,6 +163,7 @@ void NFMMod::pullAF(Real& sample)
             else
             {
             	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
+            	sample *= m_running.m_volumeFactor;
             }
         }
         else
@@ -172,7 +173,7 @@ void NFMMod::pullAF(Real& sample)
         break;
     case NFMModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1]) * m_running.m_volumeFactor) / 6553600.0f;
+        sample = ((audioSample[0] + audioSample[1])  / 131072.0f) * m_running.m_volumeFactor;
         break;
     case NFMModInputNone:
     default:

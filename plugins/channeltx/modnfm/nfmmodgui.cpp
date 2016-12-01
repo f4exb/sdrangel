@@ -78,7 +78,7 @@ void NFMModGUI::resetToDefaults()
 	ui->afBW->setValue(3);
 	ui->fmDev->setValue(50);
 	ui->toneFrequency->setValue(100);
-	ui->micVolume->setValue(50);
+	ui->micVolume->setValue(10);
 	ui->deltaFrequency->setValue(0);
 
 	blockApplySettings(false);
@@ -94,6 +94,7 @@ QByteArray NFMModGUI::serialize() const
 	s.writeS32(4, ui->fmDev->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	s.writeS32(6, ui->toneFrequency->value());
+	s.writeS32(7, ui->micVolume->value());
 	return s.final();
 }
 
@@ -132,6 +133,8 @@ bool NFMModGUI::deserialize(const QByteArray& data)
 
         d.readS32(6, &tmp, 100);
         ui->toneFrequency->setValue(tmp);
+        d.readS32(7, &tmp, 10);
+        ui->micVolume->setValue(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -221,6 +224,12 @@ void NFMModGUI::on_afBW_valueChanged(int value)
 void NFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+	applySettings();
+}
+
+void NFMModGUI::on_micVolume_valueChanged(int value)
+{
+	ui->micVolumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
 }
 
@@ -413,7 +422,7 @@ void NFMModGUI::applySettings()
 			ui->afBW->value() * 1000.0,
 			ui->fmDev->value() * 100.0f, // value is in '100 Hz
 			ui->toneFrequency->value() * 10.0f,
-			ui->micVolume->value(),
+			ui->micVolume->value() / 10.0f,
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());
 	}
