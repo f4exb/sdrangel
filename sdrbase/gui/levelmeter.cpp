@@ -3,6 +3,7 @@
  * Modifications made to:
  * - use the widget horizontally
  * - differentiate each area with a different color
+ * - allow overload by 25% with indication of 100% threshold and overload
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -130,45 +131,31 @@ void LevelMeter::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.fillRect(rect(), Qt::black);
 
+    // red zone on top half
+    QRect barTop = rect();
+    barTop.setBottom(0.5 * rect().height());
+    barTop.setLeft(0.75* rect().width());
+    painter.fillRect(barTop, Qt::red);
+
     QRect bar = rect();
 
-    // old
+    // 100% full height white line
+    bar.setLeft(0.75* rect().width() - 2);
+    bar.setRight(0.75* rect().width());
+    painter.fillRect(bar, Qt::white);
 
-//    bar.setTop(rect().top() + (1.0 - m_peakHoldLevel) * rect().height());
-//    bar.setBottom(bar.top() + 5);
-//    painter.fillRect(bar, m_rmsColor);
-//    bar.setBottom(rect().bottom());
-//
-//    bar.setTop(rect().top() + (1.0 - m_decayedPeakLevel) * rect().height());
-//    painter.fillRect(bar, m_peakColor);
-//
-//    bar.setTop(rect().top() + (1.0 - m_rmsLevel) * rect().height());
-//    painter.fillRect(bar, m_rmsColor);
+    // Bottom moving gauge
 
-    // old v.2
+    bar.setTop(0.5 * rect().height());
 
-//    bar.setTop(rect().top() + (1.0 - m_peakHoldLevel) * rect().height());
-//    bar.setBottom(bar.top() + 5);
-//    painter.fillRect(bar, m_peakColor);
-//    bar.setBottom(rect().bottom());
-//
-//    bar.setTop(rect().top() + (1.0 - m_decayedPeakLevel) * rect().height());
-//    painter.fillRect(bar, m_decayedPeakColor);
-//
-//    bar.setTop(rect().top() + (1.0 - m_rmsLevel) * rect().height());
-//    painter.fillRect(bar, m_rmsColor);
-
-    // new
-
-    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
+    bar.setRight(rect().right() - (1.0 - 0.75*m_peakHoldLevel) * rect().width());
     bar.setLeft(bar.right() - 5);
     painter.fillRect(bar, m_peakColor);
     bar.setLeft(rect().left());
 
-    bar.setRight(rect().right() - (1.0 - m_decayedPeakLevel) * rect().width());
+    bar.setRight(rect().right() - (1.0 - 0.75*m_decayedPeakLevel) * rect().width());
     painter.fillRect(bar, m_decayedPeakColor);
 
-    bar.setRight(rect().right() - (1.0 - m_rmsLevel) * rect().width());
+    bar.setRight(rect().right() - (1.0 - 0.75*m_rmsLevel) * rect().width());
     painter.fillRect(bar, m_rmsColor);
-
 }

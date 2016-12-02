@@ -3,6 +3,7 @@
  * Modifications made to:
  * - use the widget horizontally
  * - differentiate each area with a different color
+ * - allow overload by 25% with indication of 100% threshold and overload
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/

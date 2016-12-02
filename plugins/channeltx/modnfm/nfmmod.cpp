@@ -134,7 +134,8 @@ void NFMMod::modulateSample()
     pullAF(t);
     calculateLevel(t);
 
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 1208.0f);
+    // 378 = 302 * 1.25; 302 = number of filter taps (established experimentally)
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 378.0f);
     m_modSample.real(cos(m_modPhasor) * 32678.0f);
     m_modSample.imag(sin(m_modPhasor) * 32678.0f);
 }

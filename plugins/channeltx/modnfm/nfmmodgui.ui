@@ -345,7 +345,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio input volume</string>
+         <string>Audio input gain</string>
         </property>
         <property name="maximum">
          <number>100</number>
@@ -367,7 +367,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio input volume level</string>
+         <string>Audio input gain value</string>
         </property>
         <property name="statusTip">
          <string/>
@@ -387,6 +387,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Volume meter. White line is 100% and shoul not be exceeded (red zone)</string>
         </property>
        </widget>
       </item>
