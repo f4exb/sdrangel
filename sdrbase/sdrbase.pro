@@ -87,6 +87,7 @@ SOURCES += mainwindow.cpp\
         gui/glspectrum.cpp\
         gui/glspectrumgui.cpp\
         gui/indicator.cpp\
+        gui/levelmeter.cpp\
         gui/pluginsdialog.cpp\
         gui/audiodialog.cpp\
         gui/presetitem.cpp\
@@ -183,6 +184,7 @@ HEADERS  += mainwindow.h\
         gui/glspectrum.h\
         gui/glspectrumgui.h\
         gui/indicator.h\
+        gui/levelmeter.h\
         gui/physicalunit.h\
         gui/pluginsdialog.h\
         gui/presetitem.h\
