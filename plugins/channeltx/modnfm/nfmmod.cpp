@@ -19,6 +19,7 @@
 #include <QMutexLocker>
 #include <stdio.h>
 #include <complex.h>
+#include <algorithm>
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
@@ -32,6 +33,7 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
 
+const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
 NFMMod::NFMMod() :
 	m_modPhasor(0.0f),
@@ -40,7 +42,10 @@ NFMMod::NFMMod() :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(NFMModInputNone)
+	m_afInput(NFMModInputNone),
+	m_levelCalcCount(0),
+	m_peakLevel(0.0f),
+	m_levelSum(0.0f)
 {
 	setObjectName("NFMod");
 
@@ -127,6 +132,7 @@ void NFMMod::modulateSample()
 	Real t;
 
     pullAF(t);
+    calculateLevel(t);
 
     m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 1208.0f);
     m_modSample.real(cos(m_modPhasor) * 32678.0f);
@@ -173,12 +179,31 @@ void NFMMod::pullAF(Real& sample)
         break;
     case NFMModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1])  / 131072.0f) * m_running.m_volumeFactor;
+        sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
         break;
     case NFMModInputNone:
     default:
         sample = 0.0f;
         break;
+    }
+}
+
+void NFMMod::calculateLevel(Real& sample)
+{
+    if (m_levelCalcCount < m_levelNbSamples)
+    {
+        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
+        m_levelSum += sample * sample;
+        m_levelCalcCount++;
+    }
+    else
+    {
+        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
+        emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_levelCalcCount = 0;
     }
 }
 

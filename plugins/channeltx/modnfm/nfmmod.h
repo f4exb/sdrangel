@@ -191,6 +191,16 @@ public:
 
     Real getMagSq() const { return m_magsq; }
 
+signals:
+    /**
+     * Level changed
+     * \param rmsLevel RMS level in range 0.0 - 1.0
+     * \param peakLevel Peak level in range 0.0 - 1.0
+     * \param numSamples Number of audio samples analyzed
+     */
+    void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
+
 private:
     class MsgConfigureNFMMod : public Message
     {
@@ -304,9 +314,14 @@ private:
     int m_sampleRate;
 
     NFMModInputAF m_afInput;
+    quint32 m_levelCalcCount;
+    Real m_peakLevel;
+    Real m_levelSum;
+    static const int m_levelNbSamples;
 
     void apply();
     void pullAF(Real& sample);
+    void calculateLevel(Real& sample);
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);

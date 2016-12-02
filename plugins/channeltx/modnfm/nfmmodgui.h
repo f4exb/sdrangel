@@ -65,7 +65,7 @@ private slots:
     void on_afBW_valueChanged(int value);
     void on_fmDev_valueChanged(int value);
     void on_toneFrequency_valueChanged(int value);
-    void on_micVolume_valueChanged(int value);
+    void on_volume_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
     void on_tone_toggled(bool checked);
     void on_mic_toggled(bool checked);
