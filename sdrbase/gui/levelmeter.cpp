@@ -66,7 +66,7 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_redrawTimer(new QTimer(this))
     ,   m_rmsColor(Qt::green)                  // m_rmsColor(Qt::red)
     ,   m_decayedPeakColor(Qt::yellow)
-    ,   m_peakColor(255, 0, 0, 255)            // m_peakColor(255, 200, 200, 255)
+    ,   m_peakColor(255, 0, 0, 255)            // r,g,b,a m_peakColor(255, 200, 200, 255)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setMinimumWidth(30);
@@ -129,7 +129,7 @@ void LevelMeter::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     QPainter painter(this);
-    painter.fillRect(rect(), Qt::black);
+    painter.fillRect(rect(), QColor(42, 42, 42, 255));
 
     // red zone on top half
     QRect barTop = rect();
