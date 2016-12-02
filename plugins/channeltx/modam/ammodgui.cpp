@@ -72,7 +72,7 @@ void AMModGUI::resetToDefaults()
 
 	ui->rfBW->setValue(50);
 	ui->modPercent->setValue(20);
-	ui->micVolume->setValue(50);
+	ui->volume->setValue(10);
 	ui->toneFrequency->setValue(100);
 	ui->deltaFrequency->setValue(0);
 
@@ -83,11 +83,14 @@ void AMModGUI::resetToDefaults()
 QByteArray AMModGUI::serialize() const
 {
 	SimpleSerializer s(1);
+
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
 	s.writeS32(3, ui->toneFrequency->value());
 	s.writeS32(4, ui->modPercent->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
+	s.writeS32(6, ui->volume->value());
+
 	return s.final();
 }
 
@@ -123,6 +126,9 @@ bool AMModGUI::deserialize(const QByteArray& data)
         {
 			m_channelMarker.setColor(u32tmp);
         }
+
+        d.readS32(6, &tmp, 10);
+        ui->volume->setValue(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -210,9 +216,9 @@ void AMModGUI::on_modPercent_valueChanged(int value)
 	applySettings();
 }
 
-void AMModGUI::on_micVolume_valueChanged(int value)
+void AMModGUI::on_volume_valueChanged(int value)
 {
-    ui->micVolumeText->setText(QString("%1").arg(value));
+    ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     applySettings();
 }
 
@@ -360,6 +366,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	applySettings();
 
 	connect(m_amMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+	connect(m_amMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 
 AMModGUI::~AMModGUI()
@@ -395,7 +402,7 @@ void AMModGUI::applySettings()
 			ui->rfBW->value() * 100.0,
 			ui->modPercent->value() / 100.0f,
 			ui->toneFrequency->value() * 10.0f,
-			ui->micVolume->value(),
+			ui->volume->value() / 10.0f ,
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());
 	}

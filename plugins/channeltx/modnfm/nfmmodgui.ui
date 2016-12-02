@@ -694,26 +694,6 @@
  </customwidgets>
  <resources>
   <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

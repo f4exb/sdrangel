@@ -177,7 +177,7 @@ public:
             Real rfBandwidth,
             float modFactor,
             float toneFrequency,
-            int volumeFactor,
+			float volumeFactor,
             bool audioMute,
             bool playLoop);
 
@@ -188,6 +188,16 @@ public:
 
     Real getMagSq() const { return m_magsq; }
 
+signals:
+	/**
+	 * Level changed
+	 * \param rmsLevel RMS level in range 0.0 - 1.0
+	 * \param peakLevel Peak level in range 0.0 - 1.0
+	 * \param numSamples Number of audio samples analyzed
+	 */
+	void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
+
 private:
     class MsgConfigureAMMod : public Message
     {
@@ -197,11 +207,11 @@ private:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         float getModFactor() const { return m_modFactor; }
         float getToneFrequency() const { return m_toneFrequency; }
-        int getVolumeFactor() const { return m_volumeFactor; }
+        float getVolumeFactor() const { return m_volumeFactor; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureAMMod* create(Real rfBandwidth, float modFactor, float toneFreqeuncy, int volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureAMMod* create(Real rfBandwidth, float modFactor, float toneFreqeuncy, float volumeFactor, bool audioMute, bool playLoop)
         {
             return new MsgConfigureAMMod(rfBandwidth, modFactor, toneFreqeuncy, volumeFactor, audioMute, playLoop);
         }
@@ -210,11 +220,11 @@ private:
         Real m_rfBandwidth;
         float m_modFactor;
         float m_toneFrequency;
-        int m_volumeFactor;
+        float m_volumeFactor;
         bool m_audioMute;
         bool m_playLoop;
 
-        MsgConfigureAMMod(Real rfBandwidth, float modFactor, float toneFrequency, int volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureAMMod(Real rfBandwidth, float modFactor, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_modFactor(modFactor),
@@ -244,7 +254,7 @@ private:
         Real m_rfBandwidth;
         float m_modFactor;
         float m_toneFrequency;
-        int m_volumeFactor;
+        float m_volumeFactor;
         quint32 m_audioSampleRate;
         bool m_audioMute;
         bool m_playLoop;
@@ -255,7 +265,7 @@ private:
             m_rfBandwidth(-1),
             m_modFactor(0.2f),
             m_toneFrequency(100),
-            m_volumeFactor(20),
+            m_volumeFactor(1.0f),
             m_audioSampleRate(0),
             m_audioMute(false),
 			m_playLoop(false)
@@ -293,9 +303,14 @@ private:
     int m_sampleRate;
 
     AMModInputAF m_afInput;
+    quint32 m_levelCalcCount;
+    Real m_peakLevel;
+    Real m_levelSum;
+    static const int m_levelNbSamples;
 
     void apply();
     void pullAF(Real& sample);
+    void calculateLevel(Real& sample);
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);

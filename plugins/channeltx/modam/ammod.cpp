@@ -33,6 +33,7 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
+const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod() :
     m_audioFifo(4, 48000),
@@ -40,7 +41,10 @@ AMMod::AMMod() :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(AMModInputNone)
+	m_afInput(AMModInputNone),
+	m_levelCalcCount(0),
+	m_peakLevel(0.0f),
+	m_levelSum(0.0f)
 {
 	setObjectName("AMMod");
 
@@ -73,11 +77,11 @@ void AMMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		float modFactor,
 		float toneFrequency,
-		int volumeTenths,
+		float volumeFactor,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, toneFrequency, volumeTenths, audioMute, playLoop);
+	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, toneFrequency, volumeFactor, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -124,6 +128,7 @@ void AMMod::modulateSample()
 	Real t;
 
     pullAF(t);
+    calculateLevel(t);
 
     m_modSample.real((t*m_running.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
     m_modSample.imag(0.0f);
@@ -159,6 +164,7 @@ void AMMod::pullAF(Real& sample)
             else
             {
             	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
+            	sample *= m_running.m_volumeFactor;
             }
         }
         else
@@ -168,12 +174,31 @@ void AMMod::pullAF(Real& sample)
         break;
     case AMModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1]) * m_running.m_volumeFactor) / 6553600.0f;
+        sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
         break;
     case AMModInputNone:
     default:
         sample = 0.0f;
         break;
+    }
+}
+
+void AMMod::calculateLevel(Real& sample)
+{
+    if (m_levelCalcCount < m_levelNbSamples)
+    {
+        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
+        m_levelSum += sample * sample;
+        m_levelCalcCount++;
+    }
+    else
+    {
+        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
+        emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_levelCalcCount = 0;
     }
 }
 
