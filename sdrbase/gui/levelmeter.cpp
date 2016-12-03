@@ -64,9 +64,9 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_peakDecayRate(PeakDecayRate)
     ,   m_peakHoldLevel(0.0)
     ,   m_redrawTimer(new QTimer(this))
-    ,   m_rmsColor(Qt::green)                  // m_rmsColor(Qt::red)
-    ,   m_decayedPeakColor(Qt::yellow)
-    ,   m_peakColor(255, 0, 0, 255)            // r,g,b,a m_peakColor(255, 200, 200, 255)
+    ,   m_rmsColor(QColor(0x97, 0x54, 0x00))          // color mapper 59%
+    ,   m_decayedPeakColor(QColor(0xff, 0x8b, 0x00))  // color mapper foreground
+    ,   m_peakColor(255, 0, 0, 255)                   // just red
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setMinimumWidth(30);
@@ -133,7 +133,8 @@ void LevelMeter::paintEvent(QPaintEvent *event)
 
     // red zone on top half
     QRect barTop = rect();
-    barTop.setBottom(0.5 * rect().height());
+    barTop.setBottom(0.5 * rect().height() - 2);
+    barTop.setTop(2);
     barTop.setLeft(0.75* rect().width());
     painter.fillRect(barTop, Qt::red);
 
@@ -146,7 +147,8 @@ void LevelMeter::paintEvent(QPaintEvent *event)
 
     // Bottom moving gauge
 
-    bar.setTop(0.5 * rect().height());
+    bar.setTop(0.5 * rect().height() + 2);
+    bar.setBottom(rect().height() - 3);
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_peakHoldLevel) * rect().width());
     bar.setLeft(bar.right() - 5);
