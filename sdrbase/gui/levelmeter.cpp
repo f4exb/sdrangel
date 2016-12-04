@@ -129,21 +129,26 @@ void LevelMeter::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     QPainter painter(this);
-    painter.fillRect(rect(), QColor(42, 42, 42, 255));
+    render(&painter);
+}
+
+void LevelMeter::render(QPainter *painter)
+{
+    painter->fillRect(rect(), QColor(42, 42, 42, 255));
 
     // red zone on top half
     QRect barTop = rect();
     barTop.setBottom(0.5 * rect().height() - 2);
     barTop.setTop(2);
     barTop.setLeft(0.75* rect().width());
-    painter.fillRect(barTop, Qt::red);
+    painter->fillRect(barTop, Qt::red);
 
     QRect bar = rect();
 
     // 100% full height white line
     bar.setLeft(0.75* rect().width() - 2);
     bar.setRight(0.75* rect().width());
-    painter.fillRect(bar, Qt::white);
+    painter->fillRect(bar, Qt::white);
 
     // Bottom moving gauge
 
@@ -152,12 +157,12 @@ void LevelMeter::paintEvent(QPaintEvent *event)
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_peakHoldLevel) * rect().width());
     bar.setLeft(bar.right() - 5);
-    painter.fillRect(bar, m_peakColor);
+    painter->fillRect(bar, m_peakColor);
     bar.setLeft(rect().left());
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_decayedPeakLevel) * rect().width());
-    painter.fillRect(bar, m_decayedPeakColor);
+    painter->fillRect(bar, m_decayedPeakColor);
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_rmsLevel) * rect().width());
-    painter.fillRect(bar, m_rmsColor);
+    painter->fillRect(bar, m_rmsColor);
 }

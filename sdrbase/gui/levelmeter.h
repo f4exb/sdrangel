@@ -120,6 +120,7 @@ private:
     QColor m_peakColor;
     QColor m_decayedPeakColor;
 
+    void render(QPainter *painter);
 };
 
 #endif /* SDRBASE_GUI_LEVELMETER_H_ */
