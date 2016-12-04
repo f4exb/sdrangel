@@ -4,6 +4,7 @@
  * - use the widget horizontally
  * - differentiate each area with a different color
  * - allow overload by 25% with indication of 100% threshold and overload
+ * - make it generic to fit many cases: VU, signal strength ...
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -77,7 +78,7 @@ protected:
      * Height of RMS level bar.
      * Range 0.0 - 1.0.
      */
-    qreal m_rmsLevel;
+    qreal m_avgLevel;
 
     /**
      * Most recent peak level.
@@ -116,7 +117,7 @@ protected:
 
     QTimer *m_redrawTimer;
 
-    QColor m_rmsColor;
+    QColor m_avgColor;
     QColor m_peakColor;
     QColor m_decayedPeakColor;
 

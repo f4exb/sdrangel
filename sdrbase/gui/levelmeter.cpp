@@ -4,6 +4,7 @@
  * - use the widget horizontally
  * - differentiate each area with a different color
  * - allow overload by 25% with indication of 100% threshold and overload
+ * - make it generic to fit many cases: VU, signal strength ...
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -58,13 +59,13 @@ const int PeakHoldLevelDuration = 2000; // ms
 
 LevelMeter::LevelMeter(QWidget *parent)
     :   QWidget(parent)
-    ,   m_rmsLevel(0.0)
+    ,   m_avgLevel(0.0)
     ,   m_peakLevel(0.0)
     ,   m_decayedPeakLevel(0.0)
     ,   m_peakDecayRate(PeakDecayRate)
     ,   m_peakHoldLevel(0.0)
     ,   m_redrawTimer(new QTimer(this))
-    ,   m_rmsColor(QColor(0x97, 0x54, 0x00))          // color mapper 59%
+    ,   m_avgColor(QColor(0x97, 0x54, 0x00))          // color mapper 59%
     ,   m_decayedPeakColor(QColor(0xff, 0x8b, 0x00))  // color mapper foreground
     ,   m_peakColor(255, 0, 0, 255)                   // just red
 {
@@ -82,16 +83,16 @@ LevelMeter::~LevelMeter()
 
 void LevelMeter::reset()
 {
-    m_rmsLevel = 0.0;
+    m_avgLevel = 0.0;
     m_peakLevel = 0.0;
     update();
 }
 
-void LevelMeter::levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples)
+void LevelMeter::levelChanged(qreal avgLevel, qreal peakLevel, int numSamples)
 {
     // Smooth the RMS signal
     const qreal smooth = pow(qreal(0.9), static_cast<qreal>(numSamples) / 256); // TODO: remove this magic number
-    m_rmsLevel = (m_rmsLevel * smooth) + (rmsLevel * (1.0 - smooth));
+    m_avgLevel = (m_avgLevel * smooth) + (avgLevel * (1.0 - smooth));
 
     if (peakLevel > m_decayedPeakLevel) {
         m_peakLevel = peakLevel;
@@ -172,6 +173,6 @@ void LevelMeterVU::render(QPainter *painter)
     bar.setRight(rect().right() - (1.0 - 0.75*m_decayedPeakLevel) * rect().width());
     painter->fillRect(bar, m_decayedPeakColor);
 
-    bar.setRight(rect().right() - (1.0 - 0.75*m_rmsLevel) * rect().width());
-    painter->fillRect(bar, m_rmsColor);
+    bar.setRight(rect().right() - (1.0 - 0.75*m_avgLevel) * rect().width());
+    painter->fillRect(bar, m_avgColor);
 }
