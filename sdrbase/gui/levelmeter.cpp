@@ -143,6 +143,8 @@ void LevelMeter::resizeEvent(QResizeEvent * event)
     resized();
 }
 
+// ====================================================================
+
 LevelMeterVU::LevelMeterVU(QWidget *parent) :
         LevelMeter(parent)
 {
@@ -232,3 +234,106 @@ void LevelMeterVU::render(QPainter *painter)
     bar.setRight(rect().right() - (1.0 - 0.75*m_avgLevel) * rect().width());
     painter->fillRect(bar, m_avgColor);
 }
+
+// ====================================================================
+
+const QColor LevelMeterSignalDB::m_avgColor[2] = {
+        QColor(0xff, 0x8b, 0x00, 128),
+        QColor(0x8c, 0xff, 0x00, 128)
+};
+
+const QColor LevelMeterSignalDB::m_decayedPeakColor[2] = {
+        QColor(0x97, 0x54, 0x00, 128),
+        QColor(0x53, 0x96, 0x00, 128)
+};
+
+const QColor LevelMeterSignalDB::m_peakColor[2] = {
+        Qt::red,
+        Qt::green
+};
+
+LevelMeterSignalDB::LevelMeterSignalDB(QWidget *parent) :
+        m_colorTheme(ColorGold),
+        LevelMeter(parent)
+{
+    m_scaleEngine.setFont(font());
+    m_scaleEngine.setOrientation(Qt::Horizontal);
+    m_scaleEngine.setRange(Unit::Decibel, -100, 0);
+
+    resized();
+}
+
+LevelMeterSignalDB::~LevelMeterSignalDB()
+{
+}
+
+void LevelMeterSignalDB::resized()
+{
+    if (m_backgroundPixmap)
+    {
+        delete m_backgroundPixmap;
+    }
+
+    m_backgroundPixmap = new QPixmap(rect().width(), rect().height());
+    m_backgroundPixmap->fill(QColor(42, 42, 42, 255));
+
+    QPainter painter(m_backgroundPixmap);
+    QRect bar = m_backgroundPixmap->rect();
+
+    // 100% full height white line
+    painter.setPen(Qt::white);
+
+    m_scaleEngine.setSize(bar.width());
+    const ScaleEngine::TickList& scaleTickList = m_scaleEngine.getTickList();
+
+
+    for (int i = 0; i < scaleTickList.count(); i++)
+    {
+//        qDebug() << "LevelMeterVU::resized: tick #" << i
+//                << " major: " << scaleTickList[i].major
+//                << " pos: " << scaleTickList[i].pos
+//                << " text: " << scaleTickList[i].text
+//                << " textPos: " << scaleTickList[i].textPos
+//                << " textSize: " << scaleTickList[i].textSize;
+        const ScaleEngine::Tick tick = scaleTickList[i];
+
+        if(tick.major)
+        {
+            if ((tick.textSize > 0) && (tick.textPos > 0))
+            {
+                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2), tick.text);
+            }
+
+            painter.drawLine(tick.pos, 0, scaleTickList[i].pos, bar.height());
+        }
+        else
+        {
+            painter.drawLine(tick.pos, bar.height()/4, scaleTickList[i].pos, bar.height()/2);
+        }
+    }
+}
+
+void LevelMeterSignalDB::render(QPainter *painter)
+{
+    painter->drawPixmap(rect(), *m_backgroundPixmap);
+
+    QRect bar = rect();
+
+    // Bottom moving gauge
+
+    bar.setTop(0.5 * rect().height() + 2);
+    bar.setBottom(rect().height() - 3);
+
+    bar.setRight(rect().right() - (1.0 - m_avgLevel) * rect().width());
+    bar.setLeft(1);
+    painter->fillRect(bar, m_avgColor[m_colorTheme]);
+
+    bar.setRight(rect().right() - (1.0 - m_decayedPeakLevel) * rect().width());
+    bar.setLeft(rect().right() - (1.0 - m_avgLevel) * rect().width());
+    painter->fillRect(bar, m_decayedPeakColor[m_colorTheme]);
+
+    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
+    bar.setLeft(bar.right() - 2);
+    painter->fillRect(bar, m_peakColor[m_colorTheme]);
+}
+

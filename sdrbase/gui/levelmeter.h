@@ -141,5 +141,29 @@ protected:
     virtual void resized();
 };
 
+class LevelMeterSignalDB : public LevelMeter
+{
+public:
+    typedef enum
+    {
+        ColorGold,
+        ColorGreenYellow
+    } ColorTheme;
+
+    LevelMeterSignalDB(QWidget *parent = 0);
+    virtual ~LevelMeterSignalDB();
+
+    void setColorTheme(ColorTheme colorTheme) { m_colorTheme = colorTheme; }
+
+    static const QColor m_avgColor[2];
+    static const QColor m_decayedPeakColor[2];
+    static const QColor m_peakColor[2];
+
+protected:
+    virtual void render(QPainter *painter);
+    virtual void resized();
+
+    ColorTheme m_colorTheme;
+};
 
 #endif /* SDRBASE_GUI_LEVELMETER_H_ */
