@@ -65,9 +65,10 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_peakDecayRate(PeakDecayRate)
     ,   m_peakHoldLevel(0.0)
     ,   m_redrawTimer(new QTimer(this))
-    ,   m_avgColor(QColor(0x97, 0x54, 0x00))          // color mapper 59%
-    ,   m_decayedPeakColor(QColor(0xff, 0x8b, 0x00))  // color mapper foreground
-    ,   m_peakColor(255, 0, 0, 255)                   // just red
+    ,   m_avgColor(0x97, 0x54, 0x00, 128)          // color mapper 59%
+    ,   m_decayedPeakColor(0xff, 0x8b, 0x00, 128)  // color mapper foreground
+    ,   m_peakColor(255, 0, 0, 128)                   // just red
+    ,   m_backgroundPixmap(0)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     setMinimumWidth(30);
@@ -78,7 +79,9 @@ LevelMeter::LevelMeter(QWidget *parent)
 
 LevelMeter::~LevelMeter()
 {
-
+    if (m_backgroundPixmap) {
+        delete m_backgroundPixmap;
+    }
 }
 
 void LevelMeter::reset()
@@ -133,32 +136,85 @@ void LevelMeter::paintEvent(QPaintEvent *event)
     render(&painter);
 }
 
+void LevelMeter::resizeEvent(QResizeEvent * event)
+{
+    Q_UNUSED(event)
+
+    resized();
+}
+
 LevelMeterVU::LevelMeterVU(QWidget *parent) :
         LevelMeter(parent)
 {
+    m_scaleEngine.setFont(font());
+    m_scaleEngine.setOrientation(Qt::Horizontal);
+    m_scaleEngine.setRange(Unit::Percent, 0, 100);
+
+    resized();
 }
 
 LevelMeterVU::~LevelMeterVU()
 {
 }
 
-void LevelMeterVU::render(QPainter *painter)
+void LevelMeterVU::resized()
 {
-    painter->fillRect(rect(), QColor(42, 42, 42, 255));
+    if (m_backgroundPixmap)
+    {
+        delete m_backgroundPixmap;
+    }
 
-    // red zone on top half
-    QRect barTop = rect();
+    m_backgroundPixmap = new QPixmap(rect().width(), rect().height());
+    m_backgroundPixmap->fill(QColor(42, 42, 42, 255));
+
+    QPainter painter(m_backgroundPixmap);
+    QRect barTop = m_backgroundPixmap->rect();
     barTop.setBottom(0.5 * rect().height() - 2);
     barTop.setTop(2);
     barTop.setLeft(0.75* rect().width());
-    painter->fillRect(barTop, Qt::red);
+    painter.fillRect(barTop, Qt::red);
 
-    QRect bar = rect();
+    QRect bar = m_backgroundPixmap->rect();
 
     // 100% full height white line
-    bar.setLeft(0.75* rect().width() - 2);
-    bar.setRight(0.75* rect().width());
-    painter->fillRect(bar, Qt::white);
+    painter.setPen(Qt::white);
+//    painter.drawLine(0.75*bar.width(), 0, 0.75*bar.width(), bar.height());
+
+    m_scaleEngine.setSize(0.75*bar.width());
+    const ScaleEngine::TickList& scaleTickList = m_scaleEngine.getTickList();
+
+
+    for (int i = 0; i < scaleTickList.count(); i++)
+    {
+//        qDebug() << "LevelMeterVU::resized: tick #" << i
+//                << " major: " << scaleTickList[i].major
+//                << " pos: " << scaleTickList[i].pos
+//                << " text: " << scaleTickList[i].text
+//                << " textPos: " << scaleTickList[i].textPos
+//                << " textSize: " << scaleTickList[i].textSize;
+        const ScaleEngine::Tick tick = scaleTickList[i];
+
+        if(tick.major)
+        {
+            if ((tick.textSize > 0) && (tick.textPos > 0))
+            {
+                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2), tick.text);
+            }
+
+            painter.drawLine(tick.pos, 0, scaleTickList[i].pos, bar.height());
+        }
+        else
+        {
+            painter.drawLine(tick.pos, bar.height()/4, scaleTickList[i].pos, bar.height()/2);
+        }
+    }
+}
+
+void LevelMeterVU::render(QPainter *painter)
+{
+    painter->drawPixmap(rect(), *m_backgroundPixmap);
+
+    QRect bar = rect();
 
     // Bottom moving gauge
 

@@ -49,7 +49,9 @@
 
 #include <QTime>
 #include <QWidget>
-#include <dsp/dsptypes.h>
+
+#include "dsp/dsptypes.h"
+#include "gui/scaleengine.h"
 
 /**
  * Widget which displays a vertical audio level meter, indicating the
@@ -65,6 +67,7 @@ public:
     virtual ~LevelMeter();
 
     void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent * event);
 
 public slots:
     void reset();
@@ -121,7 +124,11 @@ protected:
     QColor m_peakColor;
     QColor m_decayedPeakColor;
 
+    ScaleEngine m_scaleEngine;
+    QPixmap *m_backgroundPixmap;
+
     virtual void render(QPainter *painter) = 0;
+    virtual void resized() = 0;
 };
 
 class LevelMeterVU : public LevelMeter
@@ -131,6 +138,7 @@ public:
     virtual ~LevelMeterVU();
 protected:
     virtual void render(QPainter *painter);
+    virtual void resized();
 };
 
 
