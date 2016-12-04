@@ -132,7 +132,16 @@ void LevelMeter::paintEvent(QPaintEvent *event)
     render(&painter);
 }
 
-void LevelMeter::render(QPainter *painter)
+LevelMeterVU::LevelMeterVU(QWidget *parent) :
+        LevelMeter(parent)
+{
+}
+
+LevelMeterVU::~LevelMeterVU()
+{
+}
+
+void LevelMeterVU::render(QPainter *painter)
 {
     painter->fillRect(rect(), QColor(42, 42, 42, 255));
 

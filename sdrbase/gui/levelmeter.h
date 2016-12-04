@@ -60,8 +60,8 @@ class LevelMeter : public QWidget
     Q_OBJECT
 
 public:
-    explicit LevelMeter(QWidget *parent = 0);
-    ~LevelMeter();
+    LevelMeter(QWidget *parent = 0);
+    virtual ~LevelMeter();
 
     void paintEvent(QPaintEvent *event);
 
@@ -69,10 +69,10 @@ public slots:
     void reset();
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
-private slots:
+protected slots:
     void redrawTimerExpired();
 
-private:
+protected:
     /**
      * Height of RMS level bar.
      * Range 0.0 - 1.0.
@@ -120,7 +120,17 @@ private:
     QColor m_peakColor;
     QColor m_decayedPeakColor;
 
-    void render(QPainter *painter);
+    virtual void render(QPainter *painter) = 0;
 };
+
+class LevelMeterVU : public LevelMeter
+{
+public:
+    LevelMeterVU(QWidget *parent = 0);
+    virtual ~LevelMeterVU();
+protected:
+    virtual void render(QPainter *painter);
+};
+
 
 #endif /* SDRBASE_GUI_LEVELMETER_H_ */

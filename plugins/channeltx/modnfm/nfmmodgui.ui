@@ -381,7 +381,7 @@
        </widget>
       </item>
       <item>
-       <widget class="LevelMeter" name="volumeMeter" native="true">
+       <widget class="LevelMeterVU" name="volumeMeter" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -686,7 +686,7 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>LevelMeter</class>
+   <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
