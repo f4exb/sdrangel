@@ -30,7 +30,10 @@ MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 AMDemod::AMDemod() :
     m_squelchOpen(false),
 	m_audioFifo(4, 48000),
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+	m_magsqSum(0.0f),
+	m_magsqPeak(0.0f),
+	m_magsqCount(0)
 {
 	setObjectName("AMDemod");
 

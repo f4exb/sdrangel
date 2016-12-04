@@ -218,7 +218,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0),
 	m_squelchOpen(false)
 {
 	ui->setupUi(this);
@@ -235,6 +234,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+//	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::yellow);
@@ -304,9 +304,14 @@ void AMDemodGUI::enterEvent(QEvent*)
 
 void AMDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_amDemod->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+    Real magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_amDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    Real powDbAvg = CalcDb::dbPower(magsqAvg);
+    Real powDbPeak = CalcDb::dbPower(magsqPeak);
+//    ui->channelPowerMeter->levelChanged(powDbAvg, powDbPeak, nbMagsqSamples);
+    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+
 	bool squelchOpen = m_amDemod->getSquelchOpen();
 
 	if (squelchOpen != m_squelchOpen)

@@ -60,7 +60,6 @@ private:
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
-	MovingAverage<Real> m_channelPowerDbAvg;
 	bool m_squelchOpen;
 
 	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);

@@ -43,6 +43,16 @@ public:
 	Real getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
+	void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+	{
+	    avg = m_magsqSum / m_magsqCount;
+	    peak = m_magsqPeak;
+	    nbSamples = m_magsqCount;
+	    m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+	}
+
 private:
 	class MsgConfigureAMDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -116,6 +126,9 @@ private:
 	int m_squelchCount;
 	bool m_squelchOpen;
 	Real m_magsq;
+	Real m_magsqSum;
+	Real m_magsqPeak;
+	int  m_magsqCount;
 
 	MovingAverage<Real> m_movingAverage;
 	SimpleAGC m_volumeAGC;
@@ -134,6 +147,14 @@ private:
         magsq /= (1<<30);
         m_movingAverage.feed(magsq);
         m_magsq = m_movingAverage.average();
+        m_magsqSum += magsq;
+
+        if (magsq > m_magsqPeak)
+        {
+            m_magsqPeak = magsq;
+        }
+
+        m_magsqCount++;
 
         if (m_magsq >= m_squelchLevel)
         {
