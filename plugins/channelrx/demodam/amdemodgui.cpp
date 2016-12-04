@@ -218,7 +218,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false)
+	m_squelchOpen(false),
+	m_powerMeterTickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -231,10 +232,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-//	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
+	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::yellow);
@@ -304,13 +305,27 @@ void AMDemodGUI::enterEvent(QEvent*)
 
 void AMDemodGUI::tick()
 {
-    Real magsqAvg, magsqPeak;
-    int nbMagsqSamples;
-    m_amDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-    Real powDbAvg = CalcDb::dbPower(magsqAvg);
-    Real powDbPeak = CalcDb::dbPower(magsqPeak);
-//    ui->channelPowerMeter->levelChanged(powDbAvg, powDbPeak, nbMagsqSamples);
-    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    if (m_powerMeterTickCount < 4) // 200 ms
+    {
+        m_powerMeterTickCount++;
+    }
+    else
+    {
+        Real magsqAvg, magsqPeak;
+        int nbMagsqSamples;
+        m_amDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+        Real powDbAvg = CalcDb::dbPower(magsqAvg);
+        Real powDbPeak = CalcDb::dbPower(magsqPeak);
+
+        ui->channelPowerMeter->levelChanged(
+                (100.0f + powDbAvg) / 100.0f,
+                (100.0f + powDbPeak) / 100.0f,
+                nbMagsqSamples);
+
+        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+
+        m_powerMeterTickCount = 0;
+    }
 
 	bool squelchOpen = m_amDemod->getSquelchOpen();
 
