@@ -38,6 +38,7 @@ NFMDemod::NFMDemod() :
 	m_squelchGate(2400),
 	m_audioMute(false),
 	m_squelchOpen(false),
+	m_magsq(0.0f),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
@@ -171,7 +172,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if (m_movingAverage.average() > m_squelchLevel)
+				if (m_magsq > m_squelchLevel)
 				{
 					if (m_squelchCount < m_squelchGate)
 					{

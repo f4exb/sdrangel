@@ -74,6 +74,7 @@ public:
     void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
     {
         avg = m_magsqSum / m_magsqCount;
+        m_magsq = avg;
         peak = m_magsqPeak;
         nbSamples = m_magsqCount;
         m_magsqSum = 0.0f;
@@ -197,6 +198,7 @@ private:
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;
+	Real m_magsq; //!< displayed averaged value
     Real m_magsqSum;
     Real m_magsqPeak;
     int  m_magsqCount;
