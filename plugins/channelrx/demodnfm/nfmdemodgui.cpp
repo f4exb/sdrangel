@@ -291,7 +291,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
 	}
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -337,15 +338,15 @@ void NFMDemodGUI::applySettings()
 
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
-		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
+		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0f, 0, 'f', 0));
 
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
-			ui->afBW->value() * 1000.0,
+			ui->afBW->value() * 1000.0f,
 			m_fmDev[ui->rfBW->currentIndex()],
-			ui->volume->value() / 10.0,
+			ui->volume->value() / 10.0f,
 			ui->squelchGate->value(), // in 10ths of ms
-			ui->squelch->value(),
+			ui->squelch->value() / 10.0f,
 			ui->ctcssOn->isChecked(),
 			ui->audioMute->isChecked());
 	}
@@ -384,10 +385,33 @@ void NFMDemodGUI::blockApplySettings(bool block)
 
 void NFMDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_nfmDemod->getMag()) * 2;
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
-	bool squelchOpen = m_nfmDemod->getSquelchOpen();
+    if (m_powerMeterTickCount < 4) // 200 ms
+    {
+        m_powerMeterTickCount++;
+    }
+    else
+    {
+        Real magsqAvg, magsqPeak;
+        int nbMagsqSamples;
+        m_nfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+        Real powDbAvg = CalcDb::dbPower(magsqAvg);
+        Real powDbPeak = CalcDb::dbPower(magsqPeak);
+
+        ui->channelPowerMeter->levelChanged(
+                (100.0f + powDbAvg) / 100.0f,
+                (100.0f + powDbPeak) / 100.0f,
+                nbMagsqSamples);
+
+        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+
+        m_powerMeterTickCount = 0;
+    }
+
+//	Real powDb = CalcDb::dbPower(m_nfmDemod->getMag()) * 2;
+//	m_channelPowerDbAvg.feed(powDb);
+//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+    bool squelchOpen = m_nfmDemod->getSquelchOpen();
 
 	if (squelchOpen != m_squelchOpen)
 	{

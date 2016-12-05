@@ -71,6 +71,16 @@ public:
 	Real getMag() { return m_AGC.getAverage() / (1<<15); }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
+    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    {
+        avg = m_magsqSum / m_magsqCount;
+        peak = m_magsqPeak;
+        nbSamples = m_magsqCount;
+        m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+    }
+
 private:
 	class MsgConfigureNFMDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -187,6 +197,9 @@ private:
 
 	double m_squelchLevel;
 	bool m_squelchOpen;
+    Real m_magsqSum;
+    Real m_magsqPeak;
+    int  m_magsqCount;
 
 	Real m_lastArgument;
 	//Complex m_m1Sample;

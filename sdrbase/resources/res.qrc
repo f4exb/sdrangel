@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>minusrx.png</file>
+    <file>plusrx.png</file>
     <file>microphone.png</file>
     <file>checkmark.png</file>
     <file>questionmark.png</file>

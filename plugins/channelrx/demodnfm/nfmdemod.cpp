@@ -38,6 +38,9 @@ NFMDemod::NFMDemod() :
 	m_agcAttack(2400),
 	m_audioMute(false),
 	m_squelchOpen(false),
+    m_magsqSum(0.0f),
+    m_magsqPeak(0.0f),
+    m_magsqCount(0),
 	m_afSquelch(2, afSqTones),
 	m_audioFifo(4, 48000),
 	m_fmExcursion(2400),
@@ -146,6 +149,16 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				qint16 sample;
 
 				m_AGC.feed(ci);
+				Real magsq = m_AGC.getMagSq();
+		        magsq /= (1<<30);
+		        m_magsqSum += magsq;
+
+		        if (magsq > m_magsqPeak)
+		        {
+		            m_magsqPeak = magsq;
+		        }
+
+		        m_magsqCount++;
 
 				Real demod = m_phaseDiscri.phaseDiscriminator2(ci);
 
@@ -155,7 +168,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if (getMag() > m_squelchLevel)
+				if (m_AGC.getAverage()/(1<<30) > m_squelchLevel)
 				{
 					if (m_squelchCount < m_agcAttack)
 					{
@@ -369,7 +382,7 @@ void NFMDemod::apply()
 	if (m_config.m_squelch != m_running.m_squelch)
 	{
 		// input is a value in tenths of dB
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 200.0);
+		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 10.0);
 		//m_squelchLevel *= m_squelchLevel;
 		m_afSquelch.setThreshold(m_squelchLevel);
 	}

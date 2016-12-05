@@ -69,6 +69,7 @@ private:
 	bool m_ctcssOn;
 	bool m_audioMute;
 	bool m_squelchOpen;
+	int m_powerMeterTickCount;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
