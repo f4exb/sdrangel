@@ -10,9 +10,15 @@
     <height>182</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
-    <width>290</width>
+    <width>0</width>
     <height>0</height>
    </size>
   </property>
@@ -389,7 +395,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Volume meter. White line is 100% and shoul not be exceeded (red zone)</string>
+         <string>Level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
         </property>
        </widget>
       </item>

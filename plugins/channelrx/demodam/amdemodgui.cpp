@@ -235,7 +235,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
+	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::yellow);

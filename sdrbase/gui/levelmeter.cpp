@@ -65,9 +65,9 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_peakDecayRate(PeakDecayRate)
     ,   m_peakHoldLevel(0.0)
     ,   m_redrawTimer(new QTimer(this))
-    ,   m_avgColor(0x97, 0x54, 0x00, 128)          // color mapper 59%
-    ,   m_decayedPeakColor(0xff, 0x8b, 0x00, 128)  // color mapper foreground
-    ,   m_peakColor(255, 0, 0, 128)                   // just red
+    ,   m_avgColor(0xff, 0x8b, 0x00, 128)          // color mapper foreground
+    ,   m_decayedPeakColor(0x97, 0x54, 0x00, 128)  // color mapper 59%
+    ,   m_peakColor(Qt::red)                       // just red 100% opaque
     ,   m_backgroundPixmap(0)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -221,18 +221,24 @@ void LevelMeterVU::render(QPainter *painter)
     // Bottom moving gauge
 
     bar.setTop(0.5 * rect().height() + 2);
-    bar.setBottom(rect().height() - 3);
+    bar.setBottom(rect().height() - 1);
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_peakHoldLevel) * rect().width());
-    bar.setLeft(bar.right() - 5);
+    bar.setLeft(bar.right() - 2);
     painter->fillRect(bar, m_peakColor);
-    bar.setLeft(rect().left());
+
+    bar.setBottom(0.75*rect().height());
+
+    bar.setRight(rect().right() - (1.0 - 0.75*m_avgLevel) * rect().width());
+    bar.setLeft(1);
+    painter->fillRect(bar, m_avgColor);
+
+    bar.setTop(0.75 * rect().height() + 1);
+    bar.setBottom(rect().height() - 1);
 
     bar.setRight(rect().right() - (1.0 - 0.75*m_decayedPeakLevel) * rect().width());
     painter->fillRect(bar, m_decayedPeakColor);
 
-    bar.setRight(rect().right() - (1.0 - 0.75*m_avgLevel) * rect().width());
-    painter->fillRect(bar, m_avgColor);
 }
 
 // ====================================================================
@@ -325,18 +331,23 @@ void LevelMeterSignalDB::render(QPainter *painter)
     // Bottom moving gauge
 
     bar.setTop(0.5 * rect().height() + 2);
-    bar.setBottom(rect().height() - 3);
+    bar.setBottom(rect().height() - 1);
+
+    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
+    bar.setLeft(bar.right() - 2);
+    painter->fillRect(bar, m_peakColor[m_colorTheme]);
+
+    bar.setBottom(0.75*rect().height());
 
     bar.setRight(rect().right() - (1.0 - m_avgLevel) * rect().width());
     bar.setLeft(1);
     painter->fillRect(bar, m_avgColor[m_colorTheme]);
 
+    bar.setTop(0.75 * rect().height() + 1);
+    bar.setBottom(rect().height() - 1);
+
     bar.setRight(rect().right() - (1.0 - m_decayedPeakLevel) * rect().width());
-    bar.setLeft(rect().right() - (1.0 - m_avgLevel) * rect().width());
     painter->fillRect(bar, m_decayedPeakColor[m_colorTheme]);
 
-    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
-    bar.setLeft(bar.right() - 2);
-    painter->fillRect(bar, m_peakColor[m_colorTheme]);
 }
 
