@@ -35,7 +35,7 @@ NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_squelchCount(0),
-	m_agcAttack(2400),
+	m_squelchGate(2400),
 	m_audioMute(false),
 	m_squelchOpen(false),
     m_magsqSum(0.0f),
@@ -66,7 +66,8 @@ NFMDemod::NFMDemod() :
 	m_audioBufferFill = 0;
 
 	m_agcLevel = 1.0;
-	m_AGC.resize(m_agcAttack, m_agcLevel);
+	m_AGC.resize(m_squelchGate, m_agcLevel);
+	m_movingAverage.resize(16, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
@@ -149,16 +150,18 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				qint16 sample;
 
 				m_AGC.feed(ci);
-				Real magsq = m_AGC.getMagSq();
-		        magsq /= (1<<30);
-		        m_magsqSum += magsq;
 
-		        if (magsq > m_magsqPeak)
-		        {
-		            m_magsqPeak = magsq;
-		        }
+                double magsqRaw = m_AGC.getMagSq();
+                Real magsq = magsqRaw / (1<<30);
+                m_movingAverage.feed(magsq);
+                m_magsqSum += magsq;
 
-		        m_magsqCount++;
+                if (magsq > m_magsqPeak)
+                {
+                    m_magsqPeak = magsq;
+                }
+
+                m_magsqCount++;
 
 				Real demod = m_phaseDiscri.phaseDiscriminator2(ci);
 
@@ -168,9 +171,9 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if (m_AGC.getAverage()/(1<<30) > m_squelchLevel)
+				if (m_movingAverage.average() > m_squelchLevel)
 				{
-					if (m_squelchCount < m_agcAttack)
+					if (m_squelchCount < m_squelchGate)
 					{
 						m_squelchCount++;
 					}
@@ -181,7 +184,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				}
 
 				//squelchOpen = (getMag() > m_squelchLevel);
-				m_squelchOpen = m_squelchCount == m_agcAttack; // wait for AGC to stabilize
+				m_squelchOpen = m_squelchCount == m_squelchGate; // wait for AGC to stabilize
 
 				/*
 				if (m_afSquelch.analyze(demod))
@@ -374,8 +377,7 @@ void NFMDemod::apply()
 
 	if (m_config.m_squelchGate != m_running.m_squelchGate)
 	{
-		m_agcAttack = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
-		m_AGC.resize(m_agcAttack, m_agcLevel);
+		m_squelchGate = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
 		m_squelchCount = 0; // reset squelch open counter
 	}
 

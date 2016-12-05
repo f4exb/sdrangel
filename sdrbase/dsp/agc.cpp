@@ -82,9 +82,9 @@ MagAGC::~MagAGC()
 
 void MagAGC::feed(Complex& ci)
 {
-	m_magsq = sqrt(ci.real()*ci.real() + ci.imag()*ci.imag());
+	m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
 	m_moving_average.feed(m_magsq);
-	m_u0 = m_R / m_moving_average.average();
+	m_u0 = m_R / sqrt(m_moving_average.average());
 	ci *= m_u0;
 }
 

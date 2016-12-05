@@ -68,7 +68,7 @@ public:
 		m_ctcssIndexSelected = selectedCtcssIndex;
 	}
 
-	Real getMag() { return m_AGC.getAverage() / (1<<15); }
+	Real getMag() { return m_movingAverage.average(); }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
     void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
@@ -192,10 +192,10 @@ private:
 	int m_ctcssIndexSelected;
 	int m_sampleCount;
 	int m_squelchCount;
-	int m_agcAttack;
+	int m_squelchGate;
 	bool m_audioMute;
 
-	double m_squelchLevel;
+	Real m_squelchLevel;
 	bool m_squelchOpen;
     Real m_magsqSum;
     Real m_magsqPeak;
@@ -205,6 +205,7 @@ private:
 	//Complex m_m1Sample;
 	//Complex m_m2Sample;
 	MagAGC m_AGC;
+	MovingAverage<Real> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
