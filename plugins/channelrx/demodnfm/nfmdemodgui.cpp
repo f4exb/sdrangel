@@ -260,8 +260,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false),
-	m_channelPowerDbAvg(20,0)
+	m_squelchOpen(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -406,10 +405,6 @@ void NFMDemodGUI::tick()
 
         m_powerMeterTickCount = 0;
     }
-
-//	Real powDb = CalcDb::dbPower(m_nfmDemod->getMag()) * 2;
-//	m_channelPowerDbAvg.feed(powDb);
-//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 
     bool squelchOpen = m_nfmDemod->getSquelchOpen();
 
