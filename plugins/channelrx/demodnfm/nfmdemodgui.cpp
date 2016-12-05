@@ -291,7 +291,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	}
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
+    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);

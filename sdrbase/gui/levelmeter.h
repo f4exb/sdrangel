@@ -147,7 +147,8 @@ public:
     typedef enum
     {
         ColorGold,
-        ColorGreenYellow
+        ColorGreenYellow,
+		ColorGreenAndBlue
     } ColorTheme;
 
     LevelMeterSignalDB(QWidget *parent = 0);
@@ -155,9 +156,9 @@ public:
 
     void setColorTheme(ColorTheme colorTheme) { m_colorTheme = colorTheme; }
 
-    static const QColor m_avgColor[2];
-    static const QColor m_decayedPeakColor[2];
-    static const QColor m_peakColor[2];
+    static const QColor m_avgColor[3];
+    static const QColor m_decayedPeakColor[3];
+    static const QColor m_peakColor[3];
 
 protected:
     virtual void render(QPainter *painter);

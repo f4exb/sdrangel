@@ -237,19 +237,22 @@ void LevelMeterVU::render(QPainter *painter)
 
 // ====================================================================
 
-const QColor LevelMeterSignalDB::m_avgColor[2] = {
+const QColor LevelMeterSignalDB::m_avgColor[3] = {
         QColor(0xff, 0x8b, 0x00, 128),
-        QColor(0x8c, 0xff, 0x00, 128)
+        QColor(0x8c, 0xff, 0x00, 128),
+		QColor(0x8c, 0xff, 0x00, 128)
 };
 
-const QColor LevelMeterSignalDB::m_decayedPeakColor[2] = {
+const QColor LevelMeterSignalDB::m_decayedPeakColor[3] = {
         QColor(0x97, 0x54, 0x00, 128),
-        QColor(0x53, 0x96, 0x00, 128)
+        QColor(0x53, 0x96, 0x00, 128),
+        QColor(0x00, 0x96, 0x53, 128)
 };
 
-const QColor LevelMeterSignalDB::m_peakColor[2] = {
+const QColor LevelMeterSignalDB::m_peakColor[3] = {
         Qt::red,
-        Qt::green
+        Qt::green,
+		Qt::green
 };
 
 LevelMeterSignalDB::LevelMeterSignalDB(QWidget *parent) :
