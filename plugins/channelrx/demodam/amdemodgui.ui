@@ -67,8 +67,8 @@
           </property>
           <property name="icon">
            <iconset>
-            <selectedoff>:/plusrx.png</selectedoff>
-            <selectedon>:/minusrx.png</selectedon>
+            <selectedoff>:/plus.png</selectedoff>
+            <selectedon>:/minus.png</selectedon>
            </iconset>
           </property>
           <property name="checkable">

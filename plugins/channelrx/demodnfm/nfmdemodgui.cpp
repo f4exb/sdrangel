@@ -291,7 +291,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
 	}
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenYellow);
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
