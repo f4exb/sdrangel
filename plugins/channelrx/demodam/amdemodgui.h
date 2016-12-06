@@ -61,7 +61,6 @@ private:
 	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
-	int m_powerMeterTickCount;
 
 	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~AMDemodGUI();

@@ -218,8 +218,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false),
-	m_powerMeterTickCount(0)
+	m_squelchOpen(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -305,27 +304,18 @@ void AMDemodGUI::enterEvent(QEvent*)
 
 void AMDemodGUI::tick()
 {
-    if (m_powerMeterTickCount < 4) // 200 ms
-    {
-        m_powerMeterTickCount++;
-    }
-    else
-    {
-        Real magsqAvg, magsqPeak;
-        int nbMagsqSamples;
-        m_amDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-        Real powDbAvg = CalcDb::dbPower(magsqAvg);
-        Real powDbPeak = CalcDb::dbPower(magsqPeak);
+    Real magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_amDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    Real powDbAvg = CalcDb::dbPower(magsqAvg);
+    Real powDbPeak = CalcDb::dbPower(magsqPeak);
 
-        ui->channelPowerMeter->levelChanged(
-                (100.0f + powDbAvg) / 100.0f,
-                (100.0f + powDbPeak) / 100.0f,
-                nbMagsqSamples);
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
 
-        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
-
-        m_powerMeterTickCount = 0;
-    }
+    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
 
 	bool squelchOpen = m_amDemod->getSquelchOpen();
 

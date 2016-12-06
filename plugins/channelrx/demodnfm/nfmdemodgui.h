@@ -69,7 +69,6 @@ private:
 	bool m_ctcssOn;
 	bool m_audioMute;
 	bool m_squelchOpen;
-	int m_powerMeterTickCount;
 
 	static const int m_rfBW[];
 	static const int m_fmDev[];

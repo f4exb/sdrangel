@@ -384,27 +384,18 @@ void NFMDemodGUI::blockApplySettings(bool block)
 
 void NFMDemodGUI::tick()
 {
-    if (m_powerMeterTickCount < 4) // 200 ms
-    {
-        m_powerMeterTickCount++;
-    }
-    else
-    {
-        Real magsqAvg, magsqPeak;
-        int nbMagsqSamples;
-        m_nfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-        Real powDbAvg = CalcDb::dbPower(magsqAvg);
-        Real powDbPeak = CalcDb::dbPower(magsqPeak);
+    Real magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_nfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    Real powDbAvg = CalcDb::dbPower(magsqAvg);
+    Real powDbPeak = CalcDb::dbPower(magsqPeak);
 
-        ui->channelPowerMeter->levelChanged(
-                (100.0f + powDbAvg) / 100.0f,
-                (100.0f + powDbPeak) / 100.0f,
-                nbMagsqSamples);
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
 
-        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
-
-        m_powerMeterTickCount = 0;
-    }
+    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
 
     bool squelchOpen = m_nfmDemod->getSquelchOpen();
 
