@@ -347,6 +347,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
@@ -499,7 +500,16 @@ void SSBDemodGUI::enterEvent(QEvent*)
 
 void SSBDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_ssbDemod->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+    Real magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_ssbDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    Real powDbAvg = CalcDb::dbPower(magsqAvg);
+    Real powDbPeak = CalcDb::dbPower(magsqPeak);
+
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
+
+    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
 }

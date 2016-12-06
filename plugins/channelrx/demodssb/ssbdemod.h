@@ -51,6 +51,17 @@ public:
 
 	Real getMagSq() const { return m_magsq; }
 
+    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    {
+        avg = m_magsqSum / m_magsqCount;
+        m_magsq = avg;
+        peak = m_magsqPeak;
+        nbSamples = m_magsqCount;
+        m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+    }
+
 private:
 	class MsgConfigureSSBDemod : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -127,7 +138,10 @@ private:
 	bool m_usb;
 	bool m_dsb;
 	bool m_audioMute;
-	Real m_magsq;
+    Real m_magsq;
+    Real m_magsqSum;
+    Real m_magsqPeak;
+    int  m_magsqCount;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

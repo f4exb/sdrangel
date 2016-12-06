@@ -55,6 +55,10 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 
 	m_usb = true;
 	m_magsq = 0.0f;
+	m_magsqSum = 0.0f;
+	m_magsqPeak = 0.0f;
+	m_magsqCount = 0;
+
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
@@ -131,6 +135,15 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				Real avgr = m_sum.real() / decim;
 				Real avgi = m_sum.imag() / decim;
 				m_magsq = (avgr * avgr + avgi * avgi) / (1<<30);
+
+                m_magsqSum += m_magsq;
+
+                if (m_magsq > m_magsqPeak)
+                {
+                    m_magsqPeak = m_magsq;
+                }
+
+                m_magsqCount++;
 
 				if (!m_dsb & !m_usb)
 				{ // invert spectrum for LSB

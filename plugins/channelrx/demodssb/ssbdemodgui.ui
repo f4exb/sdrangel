@@ -220,6 +220,33 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="channelPowerMeterLayout">
+      <item>
+       <widget class="QLabel" name="channelPowerMeterUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="spanLayout">
       <item>
        <widget class="QLabel" name="spanLabel">
@@ -496,6 +523,12 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
