@@ -374,6 +374,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->setupUi(this);
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -476,9 +477,22 @@ void BFMDemodGUI::enterEvent(QEvent*)
 
 void BFMDemodGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+    Real magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_bfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    Real powDbAvg = CalcDb::dbPower(magsqAvg);
+    Real powDbPeak = CalcDb::dbPower(magsqPeak);
+
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
+
+    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+
+//	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
+//	m_channelPowerDbAvg.feed(powDb);
+//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 
 	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
 	QString pilotPowDbStr;

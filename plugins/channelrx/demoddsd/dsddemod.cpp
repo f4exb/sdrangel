@@ -67,7 +67,11 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	m_sampleBuffer = new qint16[1<<17]; // 128 kS
 	m_sampleBufferIndex = 0;
 
-    m_movingAverage.resize(50, 0);
+//    m_movingAverage.resize(50, 0);
+	m_magsq = 0.0f;
+    m_magsqSum = 0.0f;
+    m_magsqPeak = 0.0f;
+    m_magsqCount = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
     DSPEngine::instance()->addAudioSink(&m_audioFifo2);
@@ -136,8 +140,17 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         {
             qint16 sample, delayedSample;
 
-            m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag()));
-            m_movingAverage.feed(m_magsq);
+            Real magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag()))  / (1<<30);
+//            m_movingAverage.feed(m_magsq);
+
+            m_magsqSum += magsq;
+
+            if (magsq > m_magsqPeak)
+            {
+                m_magsqPeak = magsq;
+            }
+
+            m_magsqCount++;
 
             Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
             m_sampleCount++;

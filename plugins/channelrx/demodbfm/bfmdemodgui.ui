@@ -28,7 +28,7 @@
      <x>10</x>
      <y>20</y>
      <width>411</width>
-     <height>121</height>
+     <height>151</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -38,7 +38,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -238,6 +247,36 @@
          </widget>
         </item>
        </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="channelPowerMeterLayout">
+      <item>
+       <widget class="QLabel" name="channelPowerMeterUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -443,7 +482,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -465,7 +513,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>150</y>
+     <y>170</y>
      <width>791</width>
      <height>301</height>
     </rect>
@@ -1776,6 +1824,12 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -1789,6 +1843,26 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
  </resources>
  <connections/>

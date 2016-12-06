@@ -58,7 +58,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-	Real getMagSq() const { return m_movingAverage.average(); }
+	Real getMagSq() const { return m_magsq; }
 
 	bool getPilotLock() const { return m_pilotPLL.locked(); }
 	Real getPilotLevel() const { return m_pilotPLL.get_pilot_level(); }
@@ -68,6 +68,17 @@ public:
 	Real getDemodAcc() const { return m_rdsDemod.m_report.acc; }
 	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
 	Real getDemodFclk() const { return m_rdsDemod.m_report.fclk; }
+
+    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    {
+        avg = m_magsqSum / m_magsqCount;
+        m_magsq = avg;
+        peak = m_magsqPeak;
+        nbSamples = m_magsqCount;
+        m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+    }
 
 private:
 	class MsgConfigureBFMDemod : public Message {
@@ -196,7 +207,11 @@ private:
 
 	Real m_m1Arg; //!> x^-1 real sample
 
-	MovingAverage<Real> m_movingAverage;
+//	MovingAverage<Real> m_movingAverage;
+    Real m_magsq;
+    Real m_magsqSum;
+    Real m_magsqPeak;
+    int  m_magsqCount;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

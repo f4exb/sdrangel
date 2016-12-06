@@ -63,7 +63,11 @@ BFMDemod::BFMDemod(BasebandSampleSink* sampleSink, RDSParser *rdsParser) :
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
 
-	m_movingAverage.resize(16, 0);
+//	m_movingAverage.resize(16, 0);
+	m_magsq = 0.0f;
+    m_magsqSum = 0.0f;
+    m_magsqPeak = 0.0f;
+    m_magsqCount = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -121,10 +125,20 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		{
 			msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
 
-			m_movingAverage.feed(msq);
+            m_magsqSum += msq;
 
-			if(m_movingAverage.average() >= m_squelchLevel)
+            if (msq > m_magsqPeak)
+            {
+                m_magsqPeak = msq;
+            }
+
+            m_magsqCount++;
+
+//			m_movingAverage.feed(msq);
+
+			if(m_magsq >= m_squelchLevel) {
 				m_squelchState = m_running.m_rfBandwidth / 20; // decay rate
+			}
 
 			if(m_squelchState > 0)
 			{

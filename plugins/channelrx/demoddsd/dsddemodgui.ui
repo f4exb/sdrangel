@@ -371,6 +371,36 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="channelPowerMeterLayout">
+      <item>
+       <widget class="QLabel" name="channelPowerMeterUnits">
+        <property name="toolTip">
+         <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+        </property>
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>26</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="rfBWLayout">
       <item>
        <widget class="QLabel" name="rfBWLabel">
@@ -909,6 +939,17 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GLScope</class>
    <extends>QWidget</extends>
    <header>gui/glscope.h</header>
@@ -920,13 +961,11 @@
    <header>gui/glscopegui.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>

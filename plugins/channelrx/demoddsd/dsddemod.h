@@ -67,10 +67,21 @@ public:
 		m_dsdDemodGUI = dsdDemodGUI;
 	}
 
-	double getMagSq() { return m_movingAverage.average() / (double) (1<<30); }
+	double getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
 	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }
+
+    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    {
+        avg = m_magsqSum / m_magsqCount;
+        m_magsq = avg;
+        peak = m_magsqPeak;
+        nbSamples = m_magsqCount;
+        m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+    }
 
 private:
 	class MsgConfigureMyPosition : public Message {
@@ -251,8 +262,11 @@ private:
 	bool m_squelchOpen;
 
 	Real m_lastArgument;
-    MovingAverage<double> m_movingAverage;
-    double m_magsq;
+//    MovingAverage<double> m_movingAverage;
+    Real m_magsq;
+    Real m_magsqSum;
+    Real m_magsqPeak;
+    int  m_magsqCount;
 
 	Real m_fmExcursion;
 
