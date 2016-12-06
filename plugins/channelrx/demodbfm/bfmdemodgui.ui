@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
-    <height>729</height>
+    <width>798</width>
+    <height>472</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>502</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -27,9 +39,15 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>411</width>
+     <width>500</width>
      <height>151</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>500</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -38,16 +56,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -482,16 +491,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
