@@ -68,7 +68,7 @@ NFMDemod::NFMDemod() :
 
 	m_agcLevel = 1.0;
 	m_AGC.resize(m_squelchGate, m_agcLevel);
-	m_movingAverage.resize(16, 0);
+//	m_movingAverage.resize(16, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
@@ -154,7 +154,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
                 double magsqRaw = m_AGC.getMagSq();
                 Real magsq = magsqRaw / (1<<30);
-                m_movingAverage.feed(magsq);
+//                m_movingAverage.feed(magsq);
                 m_magsqSum += magsq;
 
                 if (magsq > m_magsqPeak)
@@ -172,7 +172,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if ((m_magsq > m_squelchLevel) && (m_magsqPeak > m_magsq/2.0f))
+                if (m_magsq > m_squelchLevel)
 				{
 					if (m_squelchCount < m_squelchGate)
 					{
