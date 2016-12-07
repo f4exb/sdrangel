@@ -291,6 +291,7 @@ void LevelMeterSignalDB::resized()
 
     // 100% full height white line
     painter.setPen(Qt::white);
+    painter.setFont(font());
 
     m_scaleEngine.setSize(bar.width());
     const ScaleEngine::TickList& scaleTickList = m_scaleEngine.getTickList();
@@ -310,7 +311,7 @@ void LevelMeterSignalDB::resized()
         {
             if ((tick.textSize > 0) && (tick.textPos > 0))
             {
-                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2), tick.text);
+                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2 - 1), tick.text);
             }
 
             painter.drawLine(tick.pos, 0, scaleTickList[i].pos, bar.height());
