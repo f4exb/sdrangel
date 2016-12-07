@@ -331,12 +331,6 @@ void LevelMeterSignalDB::render(QPainter *painter)
     // Bottom moving gauge
 
     bar.setTop(0.5 * rect().height() + 2);
-    bar.setBottom(rect().height() - 1);
-
-    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
-    bar.setLeft(bar.right() - 2);
-    painter->fillRect(bar, m_peakColor[m_colorTheme]);
-
     bar.setBottom(0.75*rect().height());
 
     bar.setRight(rect().right() - (1.0 - m_avgLevel) * rect().width());
@@ -349,5 +343,11 @@ void LevelMeterSignalDB::render(QPainter *painter)
     bar.setRight(rect().right() - (1.0 - m_decayedPeakLevel) * rect().width());
     painter->fillRect(bar, m_decayedPeakColor[m_colorTheme]);
 
+    bar.setTop(0.5 * rect().height() + 2);
+    bar.setBottom(rect().height() - 1);
+
+    bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
+    bar.setLeft(bar.right() - 2);
+    painter->fillRect(bar, m_peakColor[m_colorTheme]);
 }
 
