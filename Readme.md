@@ -95,7 +95,7 @@ If you use your own location for librtlsdr install directory you need to specify
 
 Linux only.
 
-SDRplay devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Windows and Debian packages of SDRangel contain a pre-compiled version of this library.
+SDRplay devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
 
 If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
 
@@ -196,7 +196,7 @@ Then in a terminal do:
   - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
   - `sudo apt-get -f install` this will install missing dependencies
     
-The software is installed in `\opt\sdrangel` you can start it from the command line with:
+The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
 
 <h1>Software build</h1>
