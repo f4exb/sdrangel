@@ -59,16 +59,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -202,6 +193,7 @@
         <property name="font">
          <font>
           <family>DejaVu Sans Mono</family>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -897,16 +889,7 @@
     <string>Discriminator Scope</string>
    </property>
    <layout class="QVBoxLayout" name="scopeContainer">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -916,6 +899,12 @@
         <width>632</width>
         <height>250</height>
        </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Monospace</family>
+        <pointsize>8</pointsize>
+       </font>
       </property>
      </widget>
     </item>
