@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to listen to a narrowband amplitude modulated signal. By "narrowband" it means that the bandwidth can vary from 1 to 40 kHz.
+This plugin can be used to listen to a narrowband amplitude modulated signal. "Narrowband" means that the bandwidth can vary from 1 to 40 kHz.
 
 <h2>Interface</h2>
 
@@ -10,11 +10,11 @@ This plugin can be used to listen to a narrowband amplitude modulated signal. By
 
 <h3>1: Frequency shift from center frequency of reception direction</h3>
 
-The "+/-" button on the left side toggles between positive and negative shift.
+The "+/-" button on the left side of the dial toggles between positive and negative shift.
 
 <h3>2: Frequency shift from center frequency of reception value</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors at the digit position.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
 
 <h3>3: Channel power</h3>
 
