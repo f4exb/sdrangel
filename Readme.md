@@ -39,8 +39,8 @@ Transmission or signal generation support for eligible devices (BladeRF and Hack
   - 2.3.0: SDRplay came into play ...
   - Phase 3:  version 2.3.1: Improve AM modulator with audio file input and audio input (Mic) support
   - Phase 4a: version 2.4.0: FM modulator
-  - Phase 4b: version 2.4.x: WFM modulator
-  - Phase 4c: version 2.4.x: SSB modulator
+  - Phase 4b: version 2.5.0: SSB modulator and CW keyer
+  - Phase 4c: version 2.5.x: WFM modulator
   - phase 5:  version 3.0.0: BladeRF and HackRF support including final interpolation stage.
 
 <h2>Airspy</h2>
