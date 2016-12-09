@@ -102,6 +102,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/upchannelizer.cpp
     sdrbase/dsp/channelmarker.cpp
     sdrbase/dsp/ctcssdetector.cpp
+    sdrbase/dsp/cwkeyer.cpp
     sdrbase/dsp/dspcommands.cpp
     sdrbase/dsp/dspengine.cpp
     sdrbase/dsp/dspdevicesourceengine.cpp
@@ -194,6 +195,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/upchannelizer.h
     sdrbase/dsp/channelmarker.h
     sdrbase/dsp/complex.h
+    sdrbase/dsp/cwkeyer.h
     sdrbase/dsp/decimators.h
     sdrbase/dsp/dspcommands.h
     sdrbase/dsp/dspengine.h

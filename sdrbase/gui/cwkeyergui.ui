@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GLSpectrumGUI</class>
- <widget class="QWidget" name="GLSpectrumGUI">
+ <class>CWKeyerGUI</class>
+ <widget class="QWidget" name="CWKeyerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,19 +17,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Oscilloscope</string>
+   <string>CW Keyer</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <property name="spacing">
@@ -96,6 +87,11 @@
      </item>
      <item>
       <widget class="QLabel" name="cwAudioVolume">
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>1.0</string>
        </property>
@@ -132,6 +128,11 @@
      </item>
      <item>
       <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
        <property name="toolTip">
         <string>CW speed display (WPM)</string>
        </property>
@@ -191,9 +192,14 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>30</width>
+         <width>35</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="toolTip">
         <string>Morse key assignment</string>
@@ -295,9 +301,14 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>30</width>
+         <width>35</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="toolTip">
         <string>Iambic key dot assignment</string>
@@ -364,9 +375,14 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>30</width>
+         <width>35</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="toolTip">
         <string>Iambic key dash assignment</string>
