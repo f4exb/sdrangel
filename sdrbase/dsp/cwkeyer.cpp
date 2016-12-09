@@ -15,8 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QChar>
 #include "cwkeyer.h"
 
+/**
+ * 0:  dot
+ * 1:  dash
+ * -1: end of sequence
+ */
 const char m_asciiToMorse[][128] = {
         {-1}, // 0
         {-1}, // 1
@@ -50,7 +56,7 @@ const char m_asciiToMorse[][128] = {
         {-1}, // 29
         {-1}, // 30
         {-1}, // 31
-        {-1}, // 32
+        {-1}, // 32 space is treated as word separator
         {1,0,1,0,1,1,-1}, // 33 !
         {0,1,0,0,1,0,-1}, // 34 "
         {-1}, // 35
@@ -115,7 +121,7 @@ const char m_asciiToMorse[][128] = {
         {-1}, // 94 ^
         {-1}, // 95 _
         {-1}, // 96 `
-        {0,1,-1},         // 97 A
+        {0,1,-1},         // 97 A lowercase same as uppercase
         {1,0,0,0,-1},     // 98 B
         {1,0,1,0,-1},     // 99 C
         {1,0,0,-1},       // 100 D
@@ -151,15 +157,18 @@ const char m_asciiToMorse[][128] = {
 CWKeyer::CWKeyer() :
     m_sampleRate(48000),
     m_textPointer(0),
-    m_elementPointer(0),
+	m_elementPointer(0),
+    m_samplePointer(0),
     m_elementSpace(false),
     m_characterSpace(false),
     m_key(false),
     m_dot(false),
     m_dash(false),
     m_elementOn(false),
+	m_asciiChar('\0'),
     m_mode(CWKey),
-    m_keyState(KeySilent)
+    m_keyIambicState(KeySilent),
+	m_textState(TextStart)
 {
     setWPM(13);
 }
@@ -211,83 +220,212 @@ int CWKeyer::getSample()
     }
     else if (m_mode == CWIambic)
     {
-        switch (m_keyState)
-        {
-        case KeySilent:
-            if (m_dot)
-            {
-                m_keyState = KeyDot;
-                m_elementPointer = 0;
-            }
-            else if (m_dash)
-            {
-                m_keyState = KeyDash;
-                m_elementPointer = 0;
-            }
-
-            m_key = false;
-            break;
-        case KeyDot:
-            if (m_elementPointer < m_dotLength) // dot key
-            {
-                m_key = true;
-                m_elementPointer++;
-            }
-            else if (m_elementPointer < 2*m_dotLength) // dot silence
-            {
-                m_key = false;
-                m_elementPointer++;
-            }
-            else // end
-            {
-                if (m_dash)
-                {
-                    m_elementPointer = 0;
-                    m_keyState = KeyDash;
-                }
-                else if (!m_dot)
-                {
-                    m_keyState = KeySilent;
-                }
-
-                m_elementPointer = 0;
-                m_key = false;
-            }
-            break;
-        case KeyDash:
-            if (m_elementPointer < 3*m_dotLength) // dash key
-            {
-                m_key = true;
-                m_elementPointer++;
-            }
-            else if (m_elementPointer < 4*m_dotLength) // dash silence
-            {
-                m_key = false;
-                m_elementPointer++;
-            }
-            else // end
-            {
-                if (m_dot)
-                {
-                    m_elementPointer = 0;
-                    m_keyState = KeyDot;
-                }
-                else if (!m_dash)
-                {
-                    m_keyState = KeySilent;
-                }
-
-                m_elementPointer = 0;
-                m_key = false;
-            }
-            break;
-        default:
-            m_elementPointer = 0;
-            m_key = false;
-            break;
-        }
-
+    	nextStateIambic();
         return m_key ? 1 : 0;
+    }
+    else if (m_mode == CWText)
+    {
+    	nextStateText();
+        return m_key ? 1 : 0;
+    }
+    else
+    {
+    	return 0;
     }
 }
 
+void CWKeyer::nextStateIambic()
+{
+    switch (m_keyIambicState)
+    {
+    case KeySilent:
+        if (m_dot)
+        {
+            m_keyIambicState = KeyDot;
+            m_samplePointer = 0;
+        }
+        else if (m_dash)
+        {
+            m_keyIambicState = KeyDash;
+            m_samplePointer = 0;
+        }
+
+        m_key = false;
+        break;
+    case KeyDot:
+        if (m_samplePointer < m_dotLength) // dot key
+        {
+            m_key = true;
+            m_samplePointer++;
+        }
+        else if (m_samplePointer < 2*m_dotLength) // dot silence (+1 dot length)
+        {
+            m_key = false;
+            m_samplePointer++;
+        }
+        else // end
+        {
+            if (m_dash)
+            {
+                m_samplePointer = 0;
+                m_keyIambicState = KeyDash;
+            }
+            else if (!m_dot)
+            {
+                m_keyIambicState = KeySilent;
+            }
+
+            m_samplePointer = 0;
+            m_key = false;
+        }
+        break;
+    case KeyDash:
+        if (m_samplePointer < 3*m_dotLength) // dash key
+        {
+            m_key = true;
+            m_samplePointer++;
+        }
+        else if (m_samplePointer < 4*m_dotLength) // dash silence (+1 dot length)
+        {
+            m_key = false;
+            m_samplePointer++;
+        }
+        else // end
+        {
+            if (m_dot)
+            {
+                m_samplePointer = 0;
+                m_keyIambicState = KeyDot;
+            }
+            else if (!m_dash)
+            {
+                m_keyIambicState = KeySilent;
+            }
+
+            m_samplePointer = 0;
+            m_key = false;
+        }
+        break;
+    default:
+        m_samplePointer = 0;
+        m_key = false;
+        break;
+    }
+}
+
+
+void CWKeyer::nextStateText()
+{
+	// TODO...
+	switch (m_textState)
+	{
+	case TextStart:
+		m_samplePointer = 0;
+		m_elementPointer = 0;
+		m_textPointer = 0;
+		m_textState = TextStartChar;
+		nextStateText();
+		break;
+	case TextStartChar:
+		m_samplePointer = 0;
+		m_elementPointer = 0;
+		m_textState = TextStartElement;
+		break;
+	case TextStartElement:
+		m_samplePointer = 0;
+		m_textState = TextElement;
+		break;
+	case TextElement:
+		nextStateIambic(); // dash or dot
+		if (m_samplePointer == 0) // done
+		{
+			m_textState = TextStartElement; // next element
+		}
+		break;
+	case TextCharSpace:
+		if (m_samplePointer < 3*m_dotLength)
+		{
+			m_samplePointer++;
+			m_key = false;
+		}
+		else
+		{
+			m_samplePointer = 0;
+			m_textState = TextStartChar;
+		}
+		break;
+	case TextWordSpace:
+		if (m_samplePointer < 7*m_dotLength)
+		{
+			m_samplePointer++;
+			m_key = false;
+		}
+		else
+		{
+			m_samplePointer = 0;
+			m_textState = TextStartChar;
+		}
+		break;
+	case TextEnd:
+	default:
+		m_key = false;
+		break;
+	}
+
+
+	if (m_samplePointer == 0) // element not started or finished
+	{
+		if (m_asciiToMorse[m_elementPointer][m_asciiChar] == -1) // end of morse symbol
+		{
+			m_keyIambicState = KeyCharSpace;
+			m_samplePointer++;
+			m_key = false;
+		}
+		else
+		{
+			if (m_asciiToMorse[m_elementPointer][m_asciiChar] == 0) // dot
+			{
+				m_dot = true;
+				m_dash = false;
+			}
+			else // dash
+			{
+				m_dot = false;
+				m_dash = true;
+			}
+
+			nextStateIambic();
+		}
+
+		if (m_textPointer < m_text.length())
+		{
+			m_asciiChar = (m_text[m_textPointer]).toAscii();
+
+			if (m_asciiChar < 0) {
+				m_asciiChar = 0;
+			}
+
+			m_elementPointer = 0;
+			m_textPointer++;
+		}
+		else
+		{
+			// TODO: end of text
+		}
+	}
+	else
+	{
+		if ((m_keyIambicState == KeyDot) || (m_keyIambicState == KeyDash))
+		{
+			nextStateIambic();
+		}
+		else if (m_keyIambicState == KeyCharSpace)
+		{
+			if (m_samplePointer < 2*m_dotLength) // rest of a dash period (+2 dot periods)
+			{
+				m_samplePointer++;
+				m_key = false;
+			}
+		}
+	}
+}

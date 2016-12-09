@@ -37,7 +37,18 @@ public:
         KeySilent,
         KeyDot,
         KeyDash
-    } CWKeyState;
+    } CWKeyIambicState;
+
+    typedef enum
+    {
+    	TextStart,
+		TextStartChar,
+		TextStartElement,
+		TextElement,
+		TextCharSpace,
+		TextWordSpace,
+		TextEnd
+    } CWTextState;
 
     CWKeyer();
     ~CWKeyer();
@@ -61,16 +72,22 @@ private:
     QString m_text;
     int m_textPointer;
     int m_elementPointer;
+    int m_samplePointer;
     bool m_elementSpace;
     bool m_characterSpace;
     bool m_key;
     bool m_dot;
     bool m_dash;
     bool m_elementOn;
+    char m_asciiChar;
     CWMode m_mode;
-    CWKeyState m_keyState;
+    CWKeyIambicState m_keyIambicState;
+    CWTextState m_textState;
 
     static const char m_asciiToMorse[][128];
+
+    void nextStateIambic();
+    void nextStateText();
 };
 
 
