@@ -23,7 +23,7 @@
  * 1:  dash
  * -1: end of sequence
  */
-const char m_asciiToMorse[][128] = {
+const char CWKeyer::m_asciiToMorse[][128] = {
         {-1}, // 0
         {-1}, // 1
         {-1}, // 2
@@ -313,7 +313,6 @@ void CWKeyer::nextStateIambic()
     }
 }
 
-
 void CWKeyer::nextStateText()
 {
 	// TODO...
@@ -324,16 +323,55 @@ void CWKeyer::nextStateText()
 		m_elementPointer = 0;
 		m_textPointer = 0;
 		m_textState = TextStartChar;
-		nextStateText();
 		break;
 	case TextStartChar:
 		m_samplePointer = 0;
 		m_elementPointer = 0;
-		m_textState = TextStartElement;
+		if (m_textPointer < m_text.length())
+		{
+            m_asciiChar = (m_text.at(m_textPointer)).toLatin1();
+
+            if (m_asciiChar < 0) { // non ASCII
+                m_asciiChar = 0;
+            }
+
+            if (m_asciiChar == ' ')
+            {
+                m_textState = TextWordSpace;
+            }
+            else
+            {
+                m_textState = TextStartElement;
+            }
+            m_textPointer++;
+		}
+		else // end of text
+		{
+		    m_textState = TextEnd;
+		}
 		break;
 	case TextStartElement:
 		m_samplePointer = 0;
-		m_textState = TextElement;
+		if (m_asciiToMorse[m_elementPointer][m_asciiChar] == -1) // end of morse character
+		{
+		    m_elementPointer = 0;
+		    m_textState = TextCharSpace;
+		}
+		else
+		{
+            if (m_asciiToMorse[m_elementPointer][m_asciiChar] == 0) // dot
+            {
+                m_dot = true;
+                m_dash = false;
+            }
+            else // dash
+            {
+                m_dot = false;
+                m_dash = true;
+            }
+	        m_textState = TextElement;
+            m_elementPointer++;
+		}
 		break;
 	case TextElement:
 		nextStateIambic(); // dash or dot
@@ -343,14 +381,13 @@ void CWKeyer::nextStateText()
 		}
 		break;
 	case TextCharSpace:
-		if (m_samplePointer < 3*m_dotLength)
+		if (m_samplePointer < 2*m_dotLength) // 1 dot length space from element
 		{
 			m_samplePointer++;
 			m_key = false;
 		}
 		else
 		{
-			m_samplePointer = 0;
 			m_textState = TextStartChar;
 		}
 		break;
@@ -362,7 +399,6 @@ void CWKeyer::nextStateText()
 		}
 		else
 		{
-			m_samplePointer = 0;
 			m_textState = TextStartChar;
 		}
 		break;
@@ -371,61 +407,9 @@ void CWKeyer::nextStateText()
 		m_key = false;
 		break;
 	}
+}
 
-
-	if (m_samplePointer == 0) // element not started or finished
-	{
-		if (m_asciiToMorse[m_elementPointer][m_asciiChar] == -1) // end of morse symbol
-		{
-			m_keyIambicState = KeyCharSpace;
-			m_samplePointer++;
-			m_key = false;
-		}
-		else
-		{
-			if (m_asciiToMorse[m_elementPointer][m_asciiChar] == 0) // dot
-			{
-				m_dot = true;
-				m_dash = false;
-			}
-			else // dash
-			{
-				m_dot = false;
-				m_dash = true;
-			}
-
-			nextStateIambic();
-		}
-
-		if (m_textPointer < m_text.length())
-		{
-			m_asciiChar = (m_text[m_textPointer]).toAscii();
-
-			if (m_asciiChar < 0) {
-				m_asciiChar = 0;
-			}
-
-			m_elementPointer = 0;
-			m_textPointer++;
-		}
-		else
-		{
-			// TODO: end of text
-		}
-	}
-	else
-	{
-		if ((m_keyIambicState == KeyDot) || (m_keyIambicState == KeyDash))
-		{
-			nextStateIambic();
-		}
-		else if (m_keyIambicState == KeyCharSpace)
-		{
-			if (m_samplePointer < 2*m_dotLength) // rest of a dash period (+2 dot periods)
-			{
-				m_samplePointer++;
-				m_key = false;
-			}
-		}
-	}
+bool CWKeyer::eom()
+{
+    return !(m_textPointer < m_text.length());
 }
