@@ -55,7 +55,7 @@ public:
 
     void setSampleRate(int sampleRate) { m_sampleRate = sampleRate; }
     void setWPM(int wpm);
-    void setText(QString& text) { m_text = text; }
+    void setText(const QString& text) { m_text = text; }
     void setMode(CWMode mode) { m_mode = mode; }
 
     void setKey(bool key) { m_key = key; };
@@ -64,6 +64,7 @@ public:
 
     int getSample();
     bool eom();
+    void resetText() { m_textState = TextStart; }
 
 private:
     int m_sampleRate;
@@ -84,7 +85,7 @@ private:
     CWKeyIambicState m_keyIambicState;
     CWTextState m_textState;
 
-    static const char m_asciiToMorse[][128];
+    static const char m_asciiToMorse[128][7];
 
     void nextStateIambic();
     void nextStateText();

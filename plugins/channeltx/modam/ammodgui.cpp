@@ -242,6 +242,7 @@ void AMModGUI::on_playLoop_toggled(bool checked)
 void AMModGUI::on_play_toggled(bool checked)
 {
     ui->tone->setEnabled(!checked); // release other source inputs
+    ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_modAFInput = checked ? AMMod::AMModInputFile : AMMod::AMModInputNone;
     AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
@@ -253,8 +254,19 @@ void AMModGUI::on_play_toggled(bool checked)
 void AMModGUI::on_tone_toggled(bool checked)
 {
     ui->play->setEnabled(!checked); // release other source inputs
+    ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_modAFInput = checked ? AMMod::AMModInputTone : AMMod::AMModInputNone;
+    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
+    m_amMod->getInputMessageQueue()->push(message);
+}
+
+void AMModGUI::on_morseKeyer_toggled(bool checked)
+{
+    ui->play->setEnabled(!checked); // release other source inputs
+    ui->tone->setEnabled(!checked); // release other source inputs
+    ui->mic->setEnabled(!checked);
+    m_modAFInput = checked ? AMMod::AMModInputCWTone : AMMod::AMModInputNone;
     AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_amMod->getInputMessageQueue()->push(message);
 }
@@ -262,6 +274,7 @@ void AMModGUI::on_tone_toggled(bool checked)
 void AMModGUI::on_mic_toggled(bool checked)
 {
     ui->play->setEnabled(!checked); // release other source inputs
+    ui->morseKeyer->setEnabled(!checked);
     ui->tone->setEnabled(!checked); // release other source inputs
     m_modAFInput = checked ? AMMod::AMModInputAudio : AMMod::AMModInputNone;
     AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);

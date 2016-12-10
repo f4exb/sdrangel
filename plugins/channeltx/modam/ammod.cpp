@@ -66,6 +66,13 @@ AMMod::AMMod() :
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+
+	// test CW keyer
+	// TODO: link to CW keyer GUI
+	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+	m_cwKeyer.setWPM(5);
+	m_cwKeyer.setText("PARIS PARIS PARIS PARIS PARIS");
+	m_cwKeyer.setMode(CWKeyer::CWText);
 }
 
 AMMod::~AMMod()
@@ -175,6 +182,20 @@ void AMMod::pullAF(Real& sample)
     case AMModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
         sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        break;
+    case AMModInputCWTone:
+        if (m_cwKeyer.getSample())
+        {
+            sample = m_toneNco.next();
+        }
+        else
+        {
+            sample = 0.0f;
+            m_toneNco.setPhase(0);
+//            if (m_cwKeyer.eom()) {
+//                m_cwKeyer.resetText();
+//            }
+        }
         break;
     case AMModInputNone:
     default:
@@ -329,6 +350,11 @@ void AMMod::apply()
         m_settingsMutex.lock();
         m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
         m_settingsMutex.unlock();
+	}
+
+	if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
+	{
+	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
 	}
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;

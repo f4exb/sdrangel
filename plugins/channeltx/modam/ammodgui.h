@@ -68,6 +68,7 @@ private slots:
     void on_toneFrequency_valueChanged(int value);
     void on_mic_toggled(bool checked);
     void on_play_toggled(bool checked);
+    void on_morseKeyer_toggled(bool checked);
 
     void on_playLoop_toggled(bool checked);
     void on_navTimeSlider_valueChanged(int value);

@@ -38,6 +38,7 @@ public:
 	NCO();
 
 	void setFreq(Real freq, Real sampleRate);
+	void setPhase(int phase) { m_phase = phase; }
 
 	void nextPhase()        //!< Increment phase
 	{

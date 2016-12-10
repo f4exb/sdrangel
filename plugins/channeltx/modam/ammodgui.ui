@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>342</width>
-    <height>195</height>
+    <height>249</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,7 +40,7 @@
      <x>10</x>
      <y>10</y>
      <width>320</width>
-     <height>161</height>
+     <height>211</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -378,6 +378,20 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="morseKeyer">
+        <property name="toolTip">
+         <string>Morse keyer at tone frequency</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/morsekey.png</normaloff>:/morsekey.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="toneFrequency">
         <property name="maximumSize">
          <size>
@@ -635,6 +649,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
@@ -645,11 +664,6 @@
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>

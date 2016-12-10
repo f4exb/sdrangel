@@ -27,6 +27,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -39,7 +40,8 @@ public:
         AMModInputNone,
         AMModInputTone,
         AMModInputFile,
-        AMModInputAudio
+        AMModInputAudio,
+        AMModInputCWTone
     } AMModInputAF;
 
     class MsgConfigureFileSourceName : public Message
@@ -306,6 +308,8 @@ private:
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
+    CWKeyer m_cwKeyer;
+
     static const int m_levelNbSamples;
 
     void apply();
