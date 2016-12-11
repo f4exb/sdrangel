@@ -69,6 +69,7 @@ public:
     };
 
     static const int samplesPerBlock = (SDRDAEMONFEC_UDPSIZE - sizeof(Header)) / sizeof(Sample);
+    static const int framesSize = SDRDAEMONFEC_NBDECODERSLOTS * (SDRDAEMONFEC_NBORIGINALBLOCKS - 1) * (SDRDAEMONFEC_UDPSIZE - sizeof(Header));
 
     struct ProtectedBlock
     {

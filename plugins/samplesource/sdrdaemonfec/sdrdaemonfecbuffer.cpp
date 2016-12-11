@@ -402,6 +402,11 @@ uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
 
     m_nbReads++;
 
+    // SEGFAULT FIX: arbitratily truncate so that it does not exceed buffer length
+    if (length > framesSize) {
+        length = framesSize;
+    }
+
     if (m_readIndex + length < m_framesNbBytes) // ends before buffer bound
     {
         m_readIndex += length;
