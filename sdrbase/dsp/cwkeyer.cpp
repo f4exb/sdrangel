@@ -169,7 +169,7 @@ CWKeyer::CWKeyer() :
     m_elementOn(false),
     m_loop(false),
 	m_asciiChar('\0'),
-    m_mode(CWKey),
+    m_mode(CWNone),
     m_keyIambicState(KeySilent),
 	m_textState(TextStart)
 {
@@ -215,49 +215,20 @@ void CWKeyer::setMode(CWMode mode)
         {
             m_textState = TextStart;
         }
-
-        m_mode = mode;
-    }
-}
-
-void CWKeyer::setKey(bool key)
-{
-    if (m_mode == CWKey)
-    {
-        qDebug() << "CWKeyer::setKey: " << key;
-        m_key = key;
-    }
-}
-
-void CWKeyer::setDot(bool dotOn)
-{
-    if (m_mode == CWIambic)
-    {
-        if (dotOn)
+        else if (mode == CWDots)
         {
-            m_dash = false;
             m_dot = true;
+            m_dash = false;
+            m_keyIambicState = KeySilent;
         }
-        else
-        {
-            m_dot = false;
-        }
-    }
-}
-
-void CWKeyer::setDash(bool dashOn)
-{
-    if (m_mode == CWIambic)
-    {
-        if (dashOn)
+        else if (mode == CWDashes)
         {
             m_dot = false;
             m_dash = true;
+            m_keyIambicState = KeySilent;
         }
-        else
-        {
-            m_dash = false;
-        }
+
+        m_mode = mode;
     }
 }
 
@@ -265,18 +236,14 @@ int CWKeyer::getSample()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_mode == CWKey)
-    {
-        return m_key ? 1 : 0;
-    }
-    else if (m_mode == CWIambic)
-    {
-    	nextStateIambic();
-        return m_key ? 1 : 0;
-    }
-    else if (m_mode == CWText)
+    if (m_mode == CWText)
     {
     	nextStateText();
+        return m_key ? 1 : 0;
+    }
+    else if ((m_mode == CWDots) || (m_mode == CWDashes))
+    {
+        nextStateIambic();
         return m_key ? 1 : 0;
     }
     else

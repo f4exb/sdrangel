@@ -42,18 +42,11 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
-protected:
-    void keyPressEvent(QKeyEvent* keyEvent);
-    void keyReleaseEvent(QKeyEvent* keyEvent);
-
 private:
     Ui::CWKeyerGUI* ui;
 
     MessageQueue* m_messageQueue;
     CWKeyer* m_cwKeyer;
-    int m_key;
-    int m_keyDot;
-    int m_keyDash;
 
     void applySettings();
 
@@ -61,11 +54,8 @@ private slots:
     void on_cwTextClear_clicked(bool checked);
     void on_cwTextEdit_editingFinished();
     void on_cwSpeed_valueChanged(int value);
-    void on_morseKey_toggled(bool checked);
-    void on_morseKeyAssign_currentIndexChanged(int index);
-    void on_iambicKey_toggled(bool checked);
-    void on_iambicKeyDotAssign_currentIndexChanged(int index);
-    void on_iambicKeyDashAssign_currentIndexChanged(int index);
+    void on_playDots_toggled(bool checked);
+    void on_playDashes_toggled(bool checked);
     void on_playText_toggled(bool checked);
     void on_playLoop_toggled(bool checked);
     void on_playStop_toggled(bool checked);

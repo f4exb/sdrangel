@@ -31,8 +31,8 @@ public:
     {
         CWNone,
         CWText,
-        CWKey,
-        CWIambic
+        CWDots,
+        CWDashes
     } CWMode;
 
     typedef enum
@@ -66,10 +66,6 @@ public:
     void setText(const QString& text);
     void setMode(CWMode mode);
     void setLoop(bool loop) { m_loop = loop; }
-
-    void setKey(bool key);
-    void setDot(bool dotOn);
-    void setDash(bool dashOn);
 
     int getSample();
     bool eom();

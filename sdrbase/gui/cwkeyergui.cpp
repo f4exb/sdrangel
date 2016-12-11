@@ -27,10 +27,7 @@ CWKeyerGUI::CWKeyerGUI(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::CWKeyerGUI),
     m_messageQueue(0),
-    m_cwKeyer(0),
-    m_key(0x30),
-    m_keyDot(0x31),
-    m_keyDash(0x32)
+    m_cwKeyer(0)
 {
     ui->setupUi(this);
 }
@@ -50,9 +47,8 @@ void CWKeyerGUI::setBuddies(MessageQueue* messageQueue, CWKeyer* cwKeyer)
 
 void CWKeyerGUI::resetToDefaults()
 {
-    m_key = false;
-    m_keyDot = false;
-    m_keyDash = false;
+    ui->cwTextEdit->setText("");
+    ui->cwSpeed->setValue(13);
 }
 
 QByteArray CWKeyerGUI::serialize() const
@@ -61,9 +57,6 @@ QByteArray CWKeyerGUI::serialize() const
 
     s.writeString(1, ui->cwTextEdit->text());
     s.writeS32(2, ui->cwSpeed->value());
-    s.writeS32(3, ui->morseKeyAssign->currentIndex());
-    s.writeS32(4, ui->iambicKeyDotAssign->currentIndex());
-    s.writeS32(5, ui->iambicKeyDashAssign->currentIndex());
 
     return s.final();
 }
@@ -87,12 +80,6 @@ bool CWKeyerGUI::deserialize(const QByteArray& data)
         ui->cwTextEdit->setText(aString);
         d.readS32(2, &aValue, 13);
         ui->cwSpeed->setValue(aValue);
-        d.readS32(3, &aValue, 0);
-        ui->morseKeyAssign->setCurrentIndex(aValue);
-        d.readS32(4, &aValue, 1);
-        ui->iambicKeyDotAssign->setCurrentIndex(aValue);
-        d.readS32(5, &aValue, 2);
-        ui->iambicKeyDashAssign->setCurrentIndex(aValue);
 
         applySettings();
         return true;
@@ -118,49 +105,37 @@ void CWKeyerGUI::on_cwSpeed_valueChanged(int value)
     m_cwKeyer->setWPM(value);
 }
 
-void CWKeyerGUI::on_morseKey_toggled(bool checked)
+void CWKeyerGUI::on_playDots_toggled(bool checked)
 {
-    //ui->morseKey->setEnabled(!checked);
-    ui->iambicKey->setEnabled(!checked);
-    ui->playStop->setEnabled(!checked);
-    m_cwKeyer->setMode(checked ? CWKeyer::CWKey : CWKeyer::CWNone);
+    //ui->playDots->setEnabled(!checked); // release other source inputs
+    ui->playDashes->setEnabled(!checked);
+    ui->playText->setEnabled(!checked);
+
+    m_cwKeyer->setMode(checked ? CWKeyer::CWDots : CWKeyer::CWNone);
 }
 
-void CWKeyerGUI::on_morseKeyAssign_currentIndexChanged(int index)
+void CWKeyerGUI::on_playDashes_toggled(bool checked)
 {
-    if ((index >= 0) && (index < 9)) {
-        m_key = 0x30 + index;
-    }
-}
+    ui->playDots->setEnabled(!checked); // release other source inputs
+    //ui->playDashes->setEnabled(!checked);
+    ui->playText->setEnabled(!checked);
 
-void CWKeyerGUI::on_iambicKey_toggled(bool checked)
-{
-    ui->morseKey->setEnabled(!checked);
-    //ui->iambicKey->setEnabled(!checked);
-    ui->playStop->setEnabled(!checked);
-    m_cwKeyer->setMode(checked ? CWKeyer::CWIambic : CWKeyer::CWNone);
-}
-
-void CWKeyerGUI::on_iambicKeyDotAssign_currentIndexChanged(int index)
-{
-    if ((index >= 0) && (index < 9)) {
-        m_keyDot = 0x30 + index;
-    }
-}
-
-void CWKeyerGUI::on_iambicKeyDashAssign_currentIndexChanged(int index)
-{
-    if ((index >= 0) && (index < 9)) {
-        m_keyDash = 0x30 + index;
-    }
+    m_cwKeyer->setMode(checked ? CWKeyer::CWDashes : CWKeyer::CWNone);
 }
 
 void CWKeyerGUI::on_playText_toggled(bool checked)
 {
-    ui->morseKey->setEnabled(!checked);
-    ui->iambicKey->setEnabled(!checked);
-    //ui->playStop->setEnabled(!checked);
+    ui->playDots->setEnabled(!checked); // release other source inputs
+    ui->playDashes->setEnabled(!checked);
+    //ui->playText->setEnabled(!checked);
+
     m_cwKeyer->setMode(checked ? CWKeyer::CWText : CWKeyer::CWNone);
+
+    if (checked) {
+        ui->playStop->setChecked(true);
+    } else {
+        ui->playStop->setChecked(false);
+    }
 }
 
 void CWKeyerGUI::on_playLoop_toggled(bool checked)
@@ -191,79 +166,4 @@ void CWKeyerGUI::applySettings()
     value = ui->cwSpeed->value();
     ui->cwSpeedText->setText(QString("%1").arg(value));
     m_cwKeyer->setWPM(value);
-
-    value = ui->morseKeyAssign->currentIndex();
-    if ((value >= 0) && (value < 9)) {
-        m_key = 0x30 + value;
-    }
-
-    value = ui->iambicKeyDotAssign->currentIndex();
-    if ((value >= 0) && (value < 9)) {
-        m_keyDot = 0x30 + value;
-    }
-
-    value = ui->iambicKeyDashAssign->currentIndex();
-    if ((value >= 0) && (value < 9)) {
-        m_keyDash = 0x30 + value;
-    }
 }
-
-void CWKeyerGUI::keyPressEvent(QKeyEvent* keyEvent)
-{
-    int key = keyEvent->key();
-
-    // Escape halts CW engine and releases keyboard immediately
-    // Thus keyboard cannot be left stuck
-    if (key == Qt::Key_Escape)
-    {
-        m_cwKeyer->setMode(CWKeyer::CWNone);
-        ui->morseKey->setChecked(false);
-        ui->iambicKey->setChecked(false);
-        ui->playStop->setChecked(false);
-        ui->morseKey->setEnabled(true);
-        ui->iambicKey->setEnabled(true);
-        ui->playStop->setEnabled(true);
-        this->releaseKeyboard();
-        return;
-    }
-
-    if (!keyEvent->isAutoRepeat())
-    {
-        qDebug() << "CWKeyerGUI::keyPressEvent: key"
-                << ": " << key;
-        if (key == m_key)
-        {
-            m_cwKeyer->setKey(true);
-        }
-        else if (key == m_keyDot)
-        {
-            m_cwKeyer->setDot(true);
-        }
-        else if (key == m_keyDash)
-        {
-            m_cwKeyer->setDash(true);
-        }
-    }
-}
-
-void CWKeyerGUI::keyReleaseEvent(QKeyEvent* keyEvent)
-{
-    if (!keyEvent->isAutoRepeat())
-    {
-        qDebug() << "CWKeyerGUI::keyReleaseEvent: key"
-                << ": " << keyEvent->key();
-        if (keyEvent->key() == m_key)
-        {
-            m_cwKeyer->setKey(false);
-        }
-        else if (keyEvent->key() == m_keyDot)
-        {
-            m_cwKeyer->setDot(false);
-        }
-        else if (keyEvent->key() == m_keyDash)
-        {
-            m_cwKeyer->setDash(false);
-        }
-    }
-}
-
