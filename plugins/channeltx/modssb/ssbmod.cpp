@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "ammod.h"
+#include "ssbmod.h"
 
 #include <QTime>
 #include <QDebug>
@@ -25,33 +25,32 @@
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
 
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAFInput, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceName, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceSeek, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureAFInput, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
+MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 
-const int AMMod::m_levelNbSamples = 480; // every 10ms
+const int SSBMod::m_levelNbSamples = 480; // every 10ms
 
-AMMod::AMMod() :
+SSBMod::SSBMod() :
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(AMModInputNone),
+	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
 {
-	setObjectName("AMMod");
+	setObjectName("SSBMod");
 
 	m_config.m_outputSampleRate = 48000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 12500;
-	m_config.m_modFactor = 0.2f;
 	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
@@ -73,24 +72,23 @@ AMMod::AMMod() :
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 }
 
-AMMod::~AMMod()
+SSBMod::~SSBMod()
 {
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
-void AMMod::configure(MessageQueue* messageQueue,
+void SSBMod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
-		float modFactor,
 		float toneFrequency,
 		float volumeFactor,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, toneFrequency, volumeFactor, audioMute, playLoop);
+	Message* cmd = MsgConfigureSSBMod::create(rfBandwidth, toneFrequency, volumeFactor, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
-void AMMod::pull(Sample& sample)
+void SSBMod::pull(Sample& sample)
 {
 	Complex ci;
 
@@ -128,27 +126,27 @@ void AMMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
-void AMMod::modulateSample()
+void SSBMod::modulateSample()
 {
 	Real t;
 
     pullAF(t);
     calculateLevel(t);
 
-    m_modSample.real((t*m_running.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+    m_modSample.real(0.0f); // TOOO
     m_modSample.imag(0.0f);
 }
 
-void AMMod::pullAF(Real& sample)
+void SSBMod::pullAF(Real& sample)
 {
     int16_t audioSample[2];
 
     switch (m_afInput)
     {
-    case AMModInputTone:
+    case SSBModInputTone:
         sample = m_toneNco.next();
         break;
-    case AMModInputFile:
+    case SSBModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
@@ -177,11 +175,11 @@ void AMMod::pullAF(Real& sample)
             sample = 0.0f;
         }
         break;
-    case AMModInputAudio:
+    case SSBModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
         sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
         break;
-    case AMModInputCWTone:
+    case SSBModInputCWTone:
         if (m_cwKeyer.getSample())
         {
             sample = m_toneNco.next();
@@ -192,14 +190,14 @@ void AMMod::pullAF(Real& sample)
             m_toneNco.setPhase(0);
         }
         break;
-    case AMModInputNone:
+    case SSBModInputNone:
     default:
         sample = 0.0f;
         break;
     }
 }
 
-void AMMod::calculateLevel(Real& sample)
+void SSBMod::calculateLevel(Real& sample)
 {
     if (m_levelCalcCount < m_levelNbSamples)
     {
@@ -218,19 +216,19 @@ void AMMod::calculateLevel(Real& sample)
     }
 }
 
-void AMMod::start()
+void SSBMod::start()
 {
-	qDebug() << "AMMod::start: m_outputSampleRate: " << m_config.m_outputSampleRate
+	qDebug() << "SSBMod::start: m_outputSampleRate: " << m_config.m_outputSampleRate
 			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 	m_audioFifo.clear();
 }
 
-void AMMod::stop()
+void SSBMod::stop()
 {
 }
 
-bool AMMod::handleMessage(const Message& cmd)
+bool SSBMod::handleMessage(const Message& cmd)
 {
 	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
 	{
@@ -241,18 +239,17 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "AMMod::handleMessage: MsgChannelizerNotification:"
+		qDebug() << "SSBMod::handleMessage: MsgChannelizerNotification:"
 				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;
 	}
-	else if (MsgConfigureAMMod::match(cmd))
+	else if (MsgConfigureSSBMod::match(cmd))
 	{
-		MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
+	    MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_modFactor = cfg.getModFactor();
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
 		m_config.m_audioMute = cfg.getAudioMute();
@@ -260,9 +257,8 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
+		qDebug() << "SSBMod::handleMessage: MsgConfigureSSBMod:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_modFactor: " << m_config.m_modFactor
                 << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
 				<< " m_audioMute: " << m_config.m_audioMute
@@ -314,7 +310,7 @@ bool AMMod::handleMessage(const Message& cmd)
 	}
 }
 
-void AMMod::apply()
+void SSBMod::apply()
 {
 
 	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
@@ -353,7 +349,6 @@ void AMMod::apply()
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-	m_running.m_modFactor = m_config.m_modFactor;
 	m_running.m_toneFrequency = m_config.m_toneFrequency;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
@@ -361,7 +356,7 @@ void AMMod::apply()
 	m_running.m_playLoop = m_config.m_playLoop;
 }
 
-void AMMod::openFileStream()
+void SSBMod::openFileStream()
 {
     if (m_ifstream.is_open()) {
         m_ifstream.close();
@@ -383,7 +378,7 @@ void AMMod::openFileStream()
     getOutputMessageQueue()->push(report);
 }
 
-void AMMod::seekFileStream(int seekPercentage)
+void SSBMod::seekFileStream(int seekPercentage)
 {
     QMutexLocker mutexLocker(&m_settingsMutex);
 
