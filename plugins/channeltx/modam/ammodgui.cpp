@@ -90,6 +90,7 @@ QByteArray AMModGUI::serialize() const
 	s.writeS32(4, ui->modPercent->value());
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	s.writeS32(6, ui->volume->value());
+	s.writeBlob(7, ui->cwKeyerGUI->serialize());
 
 	return s.final();
 }
@@ -129,6 +130,9 @@ bool AMModGUI::deserialize(const QByteArray& data)
 
         d.readS32(6, &tmp, 10);
         ui->volume->setValue(tmp);
+
+        d.readBlob(7, &bytetmp);
+        ui->cwKeyerGUI->deserialize(bytetmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -266,6 +270,13 @@ void AMModGUI::on_morseKeyer_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
+
+    if (checked) {
+        ui->cwKeyerGUI->grabKeyboard();
+    } else {
+        ui->cwKeyerGUI->releaseKeyboard();
+    }
+
     m_modAFInput = checked ? AMMod::AMModInputCWTone : AMMod::AMModInputNone;
     AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_amMod->getInputMessageQueue()->push(message);
@@ -374,7 +385,10 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
     ui->play->setEnabled(false);
     ui->play->setChecked(false);
     ui->tone->setChecked(false);
+    ui->morseKeyer->setChecked(false);
     ui->mic->setChecked(false);
+
+    ui->cwKeyerGUI->setBuddies(m_amMod->getInputMessageQueue(), m_amMod->getCWKeyer());
 
 	applySettings();
 

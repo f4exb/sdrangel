@@ -190,6 +190,8 @@ public:
 
     Real getMagSq() const { return m_magsq; }
 
+    CWKeyer *getCWKeyer() { return &m_cwKeyer; }
+
 signals:
 	/**
 	 * Level changed

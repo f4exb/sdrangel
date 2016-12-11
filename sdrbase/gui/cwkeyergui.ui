@@ -32,79 +32,6 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="ButtonSwitch" name="cwAudio">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Audio tone</string>
-       </property>
-       <property name="text">
-        <string>Histogram</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/mono.png</normaloff>:/mono.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="decay">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Audio tone volume</string>
-       </property>
-       <property name="maximum">
-        <number>240</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="cwAudioVolume">
-       <property name="font">
-        <font>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>1.0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QDial" name="cwSpeed">
        <property name="maximumSize">
         <size>
@@ -116,18 +43,21 @@
         <string>CW speed (WPM)</string>
        </property>
        <property name="minimum">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="maximum">
-        <number>20</number>
+        <number>26</number>
        </property>
        <property name="pageStep">
         <number>1</number>
        </property>
+       <property name="value">
+        <number>13</number>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="cwSpeedText">
        <property name="font">
         <font>
          <pointsize>9</pointsize>
@@ -157,9 +87,6 @@
        </property>
        <property name="toolTip">
         <string>Morse key</string>
-       </property>
-       <property name="text">
-        <string>Max Hold</string>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
@@ -273,9 +200,6 @@
        <property name="toolTip">
         <string>Iambic key</string>
        </property>
-       <property name="text">
-        <string>Max Hold</string>
-       </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/iambickey.png</normaloff>:/iambickey.png</iconset>
@@ -312,6 +236,9 @@
        </property>
        <property name="toolTip">
         <string>Iambic key dot assignment</string>
+       </property>
+       <property name="currentIndex">
+        <number>1</number>
        </property>
        <item>
         <property name="text">
@@ -387,6 +314,9 @@
        <property name="toolTip">
         <string>Iambic key dash assignment</string>
        </property>
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
        <item>
         <property name="text">
          <string>0</string>
@@ -447,6 +377,73 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="playText">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>106</red>
+             <green>104</green>
+             <blue>100</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Serif</family>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>T</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="playLoop">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -462,9 +459,6 @@
        </property>
        <property name="toolTip">
         <string>Play text in a loop</string>
-       </property>
-       <property name="text">
-        <string>Inv</string>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
@@ -482,7 +476,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="playPause">
+      <widget class="ButtonSwitch" name="playStop">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -496,15 +490,12 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Play / pause text</string>
-       </property>
-       <property name="text">
-        <string>Waterfall</string>
+        <string>Play / pause text coding</string>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/play.png</normaloff>
-         <normalon>:/pause.png</normalon>:/play.png</iconset>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
        </property>
        <property name="iconSize">
         <size>

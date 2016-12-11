@@ -70,9 +70,8 @@ AMMod::AMMod() :
 	// test CW keyer
 	// TODO: link to CW keyer GUI
 	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-	m_cwKeyer.setWPM(5);
-	m_cwKeyer.setText("PARIS PARIS PARIS PARIS PARIS");
-	m_cwKeyer.setMode(CWKeyer::CWText);
+	m_cwKeyer.setWPM(13);
+	m_cwKeyer.setMode(CWKeyer::CWNone);
 }
 
 AMMod::~AMMod()
@@ -192,9 +191,6 @@ void AMMod::pullAF(Real& sample)
         {
             sample = 0.0f;
             m_toneNco.setPhase(0);
-//            if (m_cwKeyer.eom()) {
-//                m_cwKeyer.resetText();
-//            }
         }
         break;
     case AMModInputNone:

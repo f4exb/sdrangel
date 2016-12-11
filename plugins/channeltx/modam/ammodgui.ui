@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>342</width>
-    <height>249</height>
+    <height>363</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,7 +40,7 @@
      <x>10</x>
      <y>10</y>
      <width>320</width>
-     <height>211</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -475,6 +475,13 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="cwKeyerLayout">
+      <item>
+       <widget class="CWKeyerGUI" name="cwKeyerGUI" native="true"/>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="Line" name="line_3">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -669,6 +676,12 @@
    <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CWKeyerGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/cwkeyergui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

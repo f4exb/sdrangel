@@ -19,6 +19,8 @@
 #define SDRBASE_DSP_CWKEYER_H_
 
 #include <QObject>
+#include <QMutex>
+
 #include "util/export.h"
 
 class SDRANGEL_API CWKeyer : public QObject {
@@ -27,6 +29,7 @@ class SDRANGEL_API CWKeyer : public QObject {
 public:
     typedef enum
     {
+        CWNone,
         CWText,
         CWKey,
         CWIambic
@@ -47,26 +50,34 @@ public:
 		TextElement,
 		TextCharSpace,
 		TextWordSpace,
-		TextEnd
+		TextEnd,
+		TextStop
     } CWTextState;
 
     CWKeyer();
     ~CWKeyer();
 
-    void setSampleRate(int sampleRate) { m_sampleRate = sampleRate; }
-    void setWPM(int wpm);
-    void setText(const QString& text) { m_text = text; }
-    void setMode(CWMode mode) { m_mode = mode; }
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 
-    void setKey(bool key) { m_key = key; };
+    void setSampleRate(int sampleRate);
+    void setWPM(int wpm);
+    void setText(const QString& text);
+    void setMode(CWMode mode);
+    void setLoop(bool loop) { m_loop = loop; }
+
+    void setKey(bool key);
     void setDot(bool dotOn);
     void setDash(bool dashOn);
 
     int getSample();
     bool eom();
     void resetText() { m_textState = TextStart; }
+    void stopText() { m_textState = TextStop; }
 
 private:
+    QMutex m_mutex;
     int m_sampleRate;
     int m_wpm;
     int m_dotLength;   //!< dot length in samples
@@ -80,6 +91,7 @@ private:
     bool m_dot;
     bool m_dash;
     bool m_elementOn;
+    bool m_loop;
     char m_asciiChar;
     CWMode m_mode;
     CWKeyIambicState m_keyIambicState;
