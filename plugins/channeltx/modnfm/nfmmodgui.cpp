@@ -253,6 +253,7 @@ void NFMModGUI::on_play_toggled(bool checked)
 {
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
+    ui->morseKeyer->setEnabled(!checked);
     m_modAFInput = checked ? NFMMod::NFMModInputFile : NFMMod::NFMModInputNone;
     NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_nfmMod->getInputMessageQueue()->push(message);
@@ -264,7 +265,18 @@ void NFMModGUI::on_tone_toggled(bool checked)
 {
     ui->play->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
+    ui->morseKeyer->setEnabled(!checked);
     m_modAFInput = checked ? NFMMod::NFMModInputTone : NFMMod::NFMModInputNone;
+    NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
+    m_nfmMod->getInputMessageQueue()->push(message);
+}
+
+void NFMModGUI::on_morseKeyer_toggled(bool checked)
+{
+    ui->tone->setEnabled(!checked); // release other source inputs
+    ui->mic->setEnabled(!checked);
+    ui->play->setEnabled(!checked);
+    m_modAFInput = checked ? NFMMod::NFMModInputCWTone : NFMMod::NFMModInputNone;
     NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_nfmMod->getInputMessageQueue()->push(message);
 }
@@ -273,6 +285,7 @@ void NFMModGUI::on_mic_toggled(bool checked)
 {
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
+    ui->morseKeyer->setEnabled(!checked);
     m_modAFInput = checked ? NFMMod::NFMModInputAudio : NFMMod::NFMModInputNone;
     NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_nfmMod->getInputMessageQueue()->push(message);
@@ -382,6 +395,8 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->play->setChecked(false);
     ui->tone->setChecked(false);
     ui->mic->setChecked(false);
+
+    ui->cwKeyerGUI->setBuddies(m_nfmMod->getInputMessageQueue(), m_nfmMod->getCWKeyer());
 
 	applySettings();
 

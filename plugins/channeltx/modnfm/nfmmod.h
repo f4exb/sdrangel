@@ -29,6 +29,7 @@
 #include "dsp/bandpass.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -41,7 +42,8 @@ public:
         NFMModInputNone,
         NFMModInputTone,
         NFMModInputFile,
-        NFMModInputAudio
+        NFMModInputAudio,
+        NFMModInputCWTone
     } NFMModInputAF;
 
     class MsgConfigureFileSourceName : public Message
@@ -191,6 +193,8 @@ public:
 
     Real getMagSq() const { return m_magsq; }
 
+    CWKeyer *getCWKeyer() { return &m_cwKeyer; }
+
 signals:
     /**
      * Level changed
@@ -317,6 +321,7 @@ private:
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
+    CWKeyer m_cwKeyer;
     static const int m_levelNbSamples;
 
     void apply();

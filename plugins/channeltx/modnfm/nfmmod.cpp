@@ -68,6 +68,11 @@ NFMMod::NFMMod() :
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+
+    // CW keyer
+    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+    m_cwKeyer.setWPM(13);
+    m_cwKeyer.setMode(CWKeyer::CWNone);
 }
 
 NFMMod::~NFMMod()
@@ -181,6 +186,17 @@ void NFMMod::pullAF(Real& sample)
     case NFMModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
         sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        break;
+    case NFMModInputCWTone:
+        if (m_cwKeyer.getSample())
+        {
+            sample = m_toneNco.next();
+        }
+        else
+        {
+            sample = 0.0f;
+            m_toneNco.setPhase(0);
+        }
         break;
     case NFMModInputNone:
     default:
@@ -346,6 +362,11 @@ void NFMMod::apply()
         m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
         m_settingsMutex.unlock();
 	}
+
+    if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
+    {
+        m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+    }
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;

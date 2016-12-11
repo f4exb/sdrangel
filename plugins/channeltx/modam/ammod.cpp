@@ -67,8 +67,7 @@ AMMod::AMMod() :
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 
-	// test CW keyer
-	// TODO: link to CW keyer GUI
+	// CW keyer
 	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);

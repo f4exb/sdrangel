@@ -270,13 +270,6 @@ void AMModGUI::on_morseKeyer_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
-
-    if (checked) {
-        ui->cwKeyerGUI->grabKeyboard();
-    } else {
-        ui->cwKeyerGUI->releaseKeyboard();
-    }
-
     m_modAFInput = checked ? AMMod::AMModInputCWTone : AMMod::AMModInputNone;
     AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
     m_amMod->getInputMessageQueue()->push(message);
