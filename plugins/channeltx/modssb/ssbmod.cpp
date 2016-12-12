@@ -34,8 +34,11 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 
 const int SSBMod::m_levelNbSamples = 480; // every 10ms
+const int SSBMod::m_ssbFftLen = 1024;
 
 SSBMod::SSBMod() :
+    m_SSBFilter(0),
+    m_DSBFilter(0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -70,10 +73,21 @@ SSBMod::SSBMod() :
 	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
+
+    m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate, m_ssbFftLen);
+    m_DSBFilter = new fftfilt((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate, 2 * m_ssbFftLen);
 }
 
 SSBMod::~SSBMod()
 {
+    if (m_SSBFilter) {
+        delete m_SSBFilter;
+    }
+
+    if (m_DSBFilter) {
+        delete m_DSBFilter;
+    }
+
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
@@ -142,23 +156,23 @@ void SSBMod::pull(Sample& sample)
 
 void SSBMod::modulateSample()
 {
-	Real t;
+	Complex c;
 
-    pullAF(t);
-    calculateLevel(t);
+    pullAF(c);
+    calculateLevel(c);
 
     m_modSample.real(0.0f); // TOOO
     m_modSample.imag(0.0f);
 }
 
-void SSBMod::pullAF(Real& sample)
+void SSBMod::pullAF(Complex& sample)
 {
     int16_t audioSample[2];
 
     switch (m_afInput)
     {
     case SSBModInputTone:
-        sample = m_toneNco.next();
+        sample = m_toneNco.nextIQ();
         break;
     case SSBModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
@@ -176,31 +190,37 @@ void SSBMod::pullAF(Real& sample)
 
             if (m_ifstream.eof())
             {
-            	sample = 0.0f;
+            	sample.real() = 0.0f;
+                sample.imag() = 0.0f;
             }
             else
             {
-            	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_running.m_volumeFactor;
+                Real real;
+            	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
+            	sample.real() = real * m_running.m_volumeFactor;
+                sample.imag() = 0.0f;
             }
         }
         else
         {
-            sample = 0.0f;
+            sample.real() = 0.0f;
+            sample.imag() = 0.0f;
         }
         break;
     case SSBModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        sample.real() = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        sample.imag() = 0.0f;
         break;
     case SSBModInputCWTone:
         if (m_cwKeyer.getSample())
         {
-            sample = m_toneNco.next();
+            sample = m_toneNco.nextIQ();
         }
         else
         {
-            sample = 0.0f;
+            sample.real() = 0.0f;
+            sample.imag() = 0.0f;
             m_toneNco.setPhase(0);
         }
         break;
@@ -211,12 +231,14 @@ void SSBMod::pullAF(Real& sample)
     }
 }
 
-void SSBMod::calculateLevel(Real& sample)
+void SSBMod::calculateLevel(Complex& sample)
 {
+    Real t = sample.real(); // TODO: possibly adjust depending on sample type
+
     if (m_levelCalcCount < m_levelNbSamples)
     {
-        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
-        m_levelSum += sample * sample;
+        m_peakLevel = std::max(std::fabs(m_peakLevel), t);
+        m_levelSum += t * t;
         m_levelCalcCount++;
     }
     else
@@ -267,7 +289,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 	    m_settingsMutex.lock();
 
 		band = cfg.getBandwidth();
-		lowCutoff = cfg.getLoCutoff();
+		lowCutoff = cfg.getLowCutoff();
 
 		if (band < 0) // negative means LSB
 		{
@@ -288,10 +310,6 @@ bool SSBMod::handleMessage(const Message& cmd)
 
 		m_config.m_bandwidth = band;
 		m_config.m_lowCutoff = lowCutoff;
-
-		// TODO: move to apply
-		SSBFilter->create_filter(m_config.m_lowCutoff / (float) m_config.m_audioSampleRate, m_config.m_bandwidth / (float) m_config.m_audioSampleRate);
-		DSBFilter->create_dsb_filter((2.0f * m_config.m_bandwidth) / (float) m_config.m_audioSampleRate);
 
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
@@ -366,6 +384,13 @@ bool SSBMod::handleMessage(const Message& cmd)
 
 void SSBMod::apply()
 {
+    if ((m_config.m_bandwidth != m_running.m_bandwidth) ||
+        (m_config.m_lowCutoff != m_running.m_lowCutoff) ||
+        (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+    {
+        m_SSBFilter->create_filter(m_config.m_lowCutoff / (float) m_config.m_audioSampleRate, m_config.m_bandwidth / (float) m_config.m_audioSampleRate);
+        m_DSBFilter->create_dsb_filter((2.0f * m_config.m_bandwidth) / (float) m_config.m_audioSampleRate);
+    }
 
 	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 	    (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
@@ -404,6 +429,7 @@ void SSBMod::apply()
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_bandwidth = m_config.m_bandwidth;
 	m_running.m_lowCutoff = m_config.m_lowCutoff;
+	m_running.m_usb = m_config.m_usb;
 	m_running.m_toneFrequency = m_config.m_toneFrequency;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;

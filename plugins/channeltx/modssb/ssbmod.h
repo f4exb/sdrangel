@@ -342,8 +342,9 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
-	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
+	fftfilt* m_SSBFilter;
+	fftfilt* m_DSBFilter;
+	static const int m_ssbFftLen;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;
@@ -371,8 +372,8 @@ private:
     static const int m_levelNbSamples;
 
     void apply();
-    void pullAF(Real& sample);
-    void calculateLevel(Real& sample);
+    void pullAF(Complex& sample);
+    void calculateLevel(Complex& sample);
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
