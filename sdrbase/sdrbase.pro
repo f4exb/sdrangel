@@ -43,6 +43,7 @@ SOURCES += mainwindow.cpp\
         dsp/upchannelizer.cpp\
         dsp/channelmarker.cpp\
         dsp/ctcssdetector.cpp\
+        dsp/cwkeyer.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
@@ -80,6 +81,7 @@ SOURCES += mainwindow.cpp\
         gui/buttonswitch.cpp\
         gui/channelwindow.cpp\
         gui/colormapper.cpp\
+        gui/cwkeyergui.cpp\
         gui/glscope.cpp\
         gui/glscopegui.cpp\
         gui/glshadersimple.cpp\
@@ -125,6 +127,7 @@ HEADERS  += mainwindow.h\
         dsp/downchannelizer.h\
         dsp/upchannelizer.h\
         dsp/channelmarker.h\
+        dsp/cwkeyer.h\
         dsp/complex.h\
         dsp/decimators.h\
         dsp/dspcommands.h\
@@ -177,6 +180,7 @@ HEADERS  += mainwindow.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
         gui/colormapper.h\
+        gui/cwkeyergui.h\
         gui/glscope.h\
         gui/glscopegui.h\
         gui/glshadersimple.h\
@@ -217,6 +221,7 @@ FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\
         gui/basicchannelsettingswidget.ui\
+        gui/cwkeyergui.ui\
         gui/audiodialog.ui\
         gui/glscopegui.ui\
         gui/aboutdialog.ui\
