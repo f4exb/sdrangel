@@ -73,14 +73,21 @@ void SSBModGUI::resetToDefaults()
     ui->BW->setValue(30);
     ui->lowCut->setValue(3);
     ui->spanLog2->setValue(3);
+    m_spanLog2 = 3;
 	ui->toneFrequency->setValue(100);
 	ui->deltaFrequency->setValue(0);
-	m_audioBinaural = false;
-	m_audioFlipChannels = false;
-	m_dsb = false;
+	ui->audioBinaural->setChecked(false);
+	ui->audioFlipChannels->setChecked(false);
+	ui->dsb->setChecked(false);
+	ui->audioMute->setChecked(false);
+
+    ui->play->setEnabled(false);
+    ui->play->setChecked(false);
+    ui->tone->setChecked(false);
+    ui->morseKeyer->setChecked(false);
+    ui->mic->setChecked(false);
 
 	blockApplySettings(false);
-	applySettings();
 }
 
 QByteArray SSBModGUI::serialize() const
@@ -95,9 +102,9 @@ QByteArray SSBModGUI::serialize() const
 	s.writeBlob(6, ui->cwKeyerGUI->serialize());
     s.writeS32(7, ui->lowCut->value());
     s.writeS32(8, ui->spanLog2->value());
-    s.writeBool(9, m_audioBinaural);
-    s.writeBool(10, m_audioFlipChannels);
-    s.writeBool(11, m_dsb);
+    s.writeBool(9, ui->audioBinaural->isChecked());
+    s.writeBool(10, ui->audioFlipChannels->isChecked());
+    s.writeBool(11, ui->dsb->isChecked());
 
 	return s.final();
 }
@@ -109,6 +116,7 @@ bool SSBModGUI::deserialize(const QByteArray& data)
 	if(!d.isValid())
     {
 		resetToDefaults();
+		applySettings();
 		return false;
 	}
 
@@ -117,13 +125,14 @@ bool SSBModGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool booltmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 4);
+		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
 		d.readS32(3, &tmp, 100);
 		ui->toneFrequency->setValue(tmp);
@@ -140,15 +149,15 @@ bool SSBModGUI::deserialize(const QByteArray& data)
 
         d.readS32(7, &tmp, 3);
         ui->lowCut->setValue(tmp);
-        d.readS32(8, &tmp, 20);
+        d.readS32(8, &tmp, 3);
         ui->spanLog2->setValue(tmp);
         setNewRate(tmp);
-        d.readBool(9, &m_audioBinaural);
-        ui->audioBinaural->setChecked(m_audioBinaural);
-        d.readBool(10, &m_audioFlipChannels);
-        ui->audioFlipChannels->setChecked(m_audioFlipChannels);
-        d.readBool(11, &m_dsb);
-        ui->dsb->setChecked(m_dsb);
+        d.readBool(9, &booltmp);
+        ui->audioBinaural->setChecked(booltmp);
+        d.readBool(10, &booltmp);
+        ui->audioFlipChannels->setChecked(booltmp);
+        d.readBool(11, &booltmp);
+        ui->dsb->setChecked(booltmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -159,6 +168,7 @@ bool SSBModGUI::deserialize(const QByteArray& data)
     else
     {
 		resetToDefaults();
+		applySettings();
 		return false;
 	}
 }
@@ -370,6 +380,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
+    resetToDefaults();
+
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
@@ -393,12 +405,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
-
-    ui->play->setEnabled(false);
-    ui->play->setChecked(false);
-    ui->tone->setChecked(false);
-    ui->morseKeyer->setChecked(false);
-    ui->mic->setChecked(false);
 
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
 
@@ -462,7 +468,7 @@ bool SSBModGUI::setNewRate(int spanLog2)
 
 	//ui->glSpectrum->setCenterFrequency(m_rate/2);
 	//ui->glSpectrum->setSampleRate(m_rate);
-	if (!m_dsb)
+	if (!ui->dsb->isChecked())
 	{
 		if (ui->BW->value() < 0) {
 			m_channelMarker.setSidebands(ChannelMarker::lsb);
@@ -505,9 +511,14 @@ void SSBModGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
-			ui->BW->value() * 100.0,
+			ui->BW->value() * 100.0f,
+			ui->lowCut->value() * 100.0f,
 			ui->toneFrequency->value() * 10.0f,
-            ui->volume->value() / 10.0f ,
+            ui->volume->value() / 10.0f,
+			m_spanLog2,
+			ui->audioBinaural->isChecked(),
+			ui->audioFlipChannels->isChecked(),
+			ui->dsb->isChecked(),
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked());
 	}

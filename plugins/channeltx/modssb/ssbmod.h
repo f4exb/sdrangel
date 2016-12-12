@@ -27,6 +27,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/fftfilt.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
@@ -176,10 +177,15 @@ public:
     ~SSBMod();
 
     void configure(MessageQueue* messageQueue,
-            Real rfBandwidth,
+            Real bandwidth,
+			Real lowCutoff,
             float toneFrequency,
 			float volumeFactor,
-            bool audioMute,
+			int spanLog2,
+			bool audioBinaural,
+			bool audioFlipChannels,
+			bool dsb,
+			bool audioMute,
             bool playLoop);
 
     virtual void pull(Sample& sample);
@@ -207,29 +213,71 @@ private:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        Real getRFBandwidth() const { return m_rfBandwidth; }
+        Real getBandwidth() const { return m_bandwidth; }
+        Real getLowCutoff() const { return m_lowCutoff; }
         float getToneFrequency() const { return m_toneFrequency; }
         float getVolumeFactor() const { return m_volumeFactor; }
+        int getSpanLog2() const { return m_spanLog2; }
+        bool getAudioBinaural() const { return m_audioBinaural; }
+        bool getAudioFlipChannels() const { return m_audioFlipChannels; }
+        bool getDSB() const { return m_dsb; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureSSBMod* create(Real rfBandwidth, float toneFreqeuncy, float volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureSSBMod* create(Real bandwidth,
+        		Real lowCutoff,
+        		float toneFrequency,
+				float volumeFactor,
+				int spanLog2,
+				bool audioBinaural,
+				bool audioFlipChannels,
+				bool dsb,
+				bool audioMute,
+				bool playLoop)
         {
-            return new MsgConfigureSSBMod(rfBandwidth, toneFreqeuncy, volumeFactor, audioMute, playLoop);
+            return new MsgConfigureSSBMod(bandwidth,
+            		lowCutoff,
+					toneFrequency,
+					volumeFactor,
+					spanLog2,
+					audioBinaural,
+					audioFlipChannels,
+					dsb,
+					audioMute,
+					playLoop);
         }
 
     private:
-        Real m_rfBandwidth;
+        Real m_bandwidth;
+        Real m_lowCutoff;
         float m_toneFrequency;
         float m_volumeFactor;
+		int  m_spanLog2;
+		bool m_audioBinaural;
+		bool m_audioFlipChannels;
+		bool m_dsb;
         bool m_audioMute;
         bool m_playLoop;
 
-        MsgConfigureSSBMod(Real rfBandwidth, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureSSBMod(Real bandwidth,
+        		Real lowCutoff,
+        		float toneFrequency,
+				float volumeFactor,
+				int spanLog2,
+				bool audioBinaural,
+				bool audioFlipChannels,
+				bool dsb,
+				bool audioMute,
+				bool playLoop) :
             Message(),
-            m_rfBandwidth(rfBandwidth),
+            m_bandwidth(bandwidth),
+			m_lowCutoff(lowCutoff),
             m_toneFrequency(toneFrequency),
             m_volumeFactor(volumeFactor),
+			m_spanLog2(spanLog2),
+			m_audioBinaural(audioBinaural),
+			m_audioFlipChannels(audioFlipChannels),
+			m_dsb(dsb),
             m_audioMute(audioMute),
 			m_playLoop(playLoop)
         { }
@@ -251,20 +299,32 @@ private:
     struct Config {
         int m_outputSampleRate;
         qint64 m_inputFrequencyOffset;
-        Real m_rfBandwidth;
+        Real m_bandwidth;
+        Real m_lowCutoff;
+        bool m_usb;
         float m_toneFrequency;
         float m_volumeFactor;
         quint32 m_audioSampleRate;
-        bool m_audioMute;
+		int  m_spanLog2;
+		bool m_audioBinaural;
+		bool m_audioFlipChannels;
+		bool m_dsb;
+		bool m_audioMute;
         bool m_playLoop;
 
         Config() :
-            m_outputSampleRate(-1),
+            m_outputSampleRate(0),
             m_inputFrequencyOffset(0),
-            m_rfBandwidth(-1),
-            m_toneFrequency(100),
+            m_bandwidth(3000.0f),
+			m_lowCutoff(300.0f),
+			m_usb(true),
+            m_toneFrequency(1000.0f),
             m_volumeFactor(1.0f),
             m_audioSampleRate(0),
+			m_spanLog2(3),
+			m_audioBinaural(false),
+			m_audioFlipChannels(false),
+			m_dsb(false),
             m_audioMute(false),
 			m_playLoop(false)
         { }
@@ -282,6 +342,8 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
+	fftfilt* SSBFilter;
+	fftfilt* DSBFilter;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;

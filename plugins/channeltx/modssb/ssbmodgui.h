@@ -102,10 +102,6 @@ private:
     bool m_enableNavTime;
     SSBMod::SSBModInputAF m_modAFInput;
 
-    bool m_audioBinaural;
-    bool m_audioFlipChannels;
-    bool m_dsb;
-
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SSBModGUI();
 

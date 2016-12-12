@@ -50,7 +50,7 @@ SSBMod::SSBMod() :
 
 	m_config.m_outputSampleRate = 48000;
 	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 12500;
+	m_config.m_bandwidth = 12500;
 	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
@@ -78,13 +78,27 @@ SSBMod::~SSBMod()
 }
 
 void SSBMod::configure(MessageQueue* messageQueue,
-		Real rfBandwidth,
+		Real bandwidth,
+		Real lowCutoff,
 		float toneFrequency,
 		float volumeFactor,
+		int spanLog2,
+		bool audioBinaural,
+		bool audioFlipChannels,
+		bool dsb,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureSSBMod::create(rfBandwidth, toneFrequency, volumeFactor, audioMute, playLoop);
+	Message* cmd = MsgConfigureSSBMod::create(bandwidth,
+			lowCutoff,
+			toneFrequency,
+			volumeFactor,
+			spanLog2,
+			audioBinaural,
+			audioFlipChannels,
+			dsb,
+			audioMute,
+			playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -247,20 +261,60 @@ bool SSBMod::handleMessage(const Message& cmd)
 	}
 	else if (MsgConfigureSSBMod::match(cmd))
 	{
-	    MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
+		float band, lowCutoff;
 
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
+	    MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
+	    m_settingsMutex.lock();
+
+		band = cfg.getBandwidth();
+		lowCutoff = cfg.getLoCutoff();
+
+		if (band < 0) // negative means LSB
+		{
+			band = -band;            // turn to positive
+			lowCutoff = -lowCutoff;
+			m_config.m_usb = false;  // and take note of side band
+		}
+		else
+		{
+			m_config.m_usb = true;
+		}
+
+		if (band < 100.0f) // at least 100 Hz
+		{
+			band = 100.0f;
+			lowCutoff = 0;
+		}
+
+		m_config.m_bandwidth = band;
+		m_config.m_lowCutoff = lowCutoff;
+
+		// TODO: move to apply
+		SSBFilter->create_filter(m_config.m_lowCutoff / (float) m_config.m_audioSampleRate, m_config.m_bandwidth / (float) m_config.m_audioSampleRate);
+		DSBFilter->create_dsb_filter((2.0f * m_config.m_bandwidth) / (float) m_config.m_audioSampleRate);
+
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
+		m_config.m_spanLog2 = cfg.getSpanLog2();
+		m_config.m_audioBinaural = cfg.getAudioBinaural();
+		m_config.m_audioFlipChannels = cfg.getAudioFlipChannels();
+		m_config.m_dsb = cfg.getDSB();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
 
+		m_settingsMutex.unlock();
+
 		qDebug() << "SSBMod::handleMessage: MsgConfigureSSBMod:"
-				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
+				<< " m_bandwidth: " << m_config.m_bandwidth
+				<< " m_lowCutoff: " << m_config.m_lowCutoff
                 << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
+				<< " m_spanLog2: " << m_config.m_spanLog2
+				<< " m_audioBinaural: " << m_config.m_audioBinaural
+				<< " m_audioFlipChannels: " << m_config.m_audioFlipChannels
+				<< " m_dsb: " << m_config.m_dsb
 				<< " m_audioMute: " << m_config.m_audioMute
 				<< " m_playLoop: " << m_config.m_playLoop;
 
@@ -322,14 +376,14 @@ void SSBMod::apply()
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
-	   (m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+	   (m_config.m_bandwidth != m_running.m_bandwidth) ||
 	   (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_bandwidth / 2.2, 3.0);
 		m_settingsMutex.unlock();
 	}
 
@@ -348,10 +402,15 @@ void SSBMod::apply()
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
-	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
+	m_running.m_bandwidth = m_config.m_bandwidth;
+	m_running.m_lowCutoff = m_config.m_lowCutoff;
 	m_running.m_toneFrequency = m_config.m_toneFrequency;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
+	m_running.m_spanLog2 = m_config.m_spanLog2;
+	m_running.m_audioBinaural = m_config.m_audioBinaural;
+	m_running.m_audioFlipChannels = m_config.m_audioFlipChannels;
+	m_running.m_dsb = m_config.m_dsb;
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_playLoop = m_config.m_playLoop;
 }
