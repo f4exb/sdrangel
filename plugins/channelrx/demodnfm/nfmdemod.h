@@ -207,7 +207,7 @@ private:
 	//Complex m_m1Sample;
 	//Complex m_m2Sample;
 	MagAGC m_AGC;
-//	MovingAverage<Real> m_movingAverage;
+	MovingAverage<Real> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level
