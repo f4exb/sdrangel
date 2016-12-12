@@ -172,7 +172,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-                if (m_magsq > m_squelchLevel)
+                if (magsq > m_squelchLevel)
 				{
 					if (m_squelchCount < m_squelchGate)
 					{
