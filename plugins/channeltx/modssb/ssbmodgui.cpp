@@ -349,6 +349,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
+	m_rate(6000),
+	m_spanLog2(3),
 	m_channelPowerDbAvg(20,0),
     m_recordLength(0),
     m_recordSampleRate(48000),
@@ -368,13 +370,21 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
+	ui->glSpectrum->setCenterFrequency(m_rate/2);
+	ui->glSpectrum->setSampleRate(m_rate);
+	ui->glSpectrum->setDisplayWaterfall(true);
+	ui->glSpectrum->setDisplayMaxHold(true);
+	ui->glSpectrum->setSsbSpectrum(true);
+	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::green);
-	m_channelMarker.setBandwidth(5000);
+	m_channelMarker.setBandwidth(m_rate);
+	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
@@ -393,6 +403,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
 
 	applySettings();
+	setNewRate(m_spanLog2);
 
 	connect(m_ssbMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
@@ -407,6 +418,72 @@ SSBModGUI::~SSBModGUI()
 	delete m_ssbMod;
 	//delete m_channelMarker;
 	delete ui;
+}
+
+bool SSBModGUI::setNewRate(int spanLog2)
+{
+	if ((spanLog2 < 1) || (spanLog2 > 5))
+	{
+		return false;
+	}
+
+	m_spanLog2 = spanLog2;
+	m_rate = 48000 / (1<<spanLog2);
+
+	if (ui->BW->value() < -m_rate/100)
+	{
+		ui->BW->setValue(-m_rate/100);
+		m_channelMarker.setBandwidth(-m_rate*2);
+	}
+	else if (ui->BW->value() > m_rate/100)
+	{
+		ui->BW->setValue(m_rate/100);
+		m_channelMarker.setBandwidth(m_rate*2);
+	}
+
+	if (ui->lowCut->value() < -m_rate/100)
+	{
+		ui->lowCut->setValue(-m_rate/100);
+		m_channelMarker.setLowCutoff(-m_rate);
+	}
+	else if (ui->lowCut->value() > m_rate/100)
+	{
+		ui->lowCut->setValue(m_rate/100);
+		m_channelMarker.setLowCutoff(m_rate);
+	}
+
+	ui->BW->setMinimum(-m_rate/100);
+	ui->lowCut->setMinimum(-m_rate/100);
+	ui->BW->setMaximum(m_rate/100);
+	ui->lowCut->setMaximum(m_rate/100);
+
+	QString s = QString::number(m_rate/1000.0, 'f', 1);
+	ui->spanText->setText(tr("%1k").arg(s));
+
+	//ui->glSpectrum->setCenterFrequency(m_rate/2);
+	//ui->glSpectrum->setSampleRate(m_rate);
+	if (!m_dsb)
+	{
+		if (ui->BW->value() < 0) {
+			m_channelMarker.setSidebands(ChannelMarker::lsb);
+		} else {
+			m_channelMarker.setSidebands(ChannelMarker::usb);
+		}
+
+		ui->glSpectrum->setCenterFrequency(m_rate/2);
+		ui->glSpectrum->setSampleRate(m_rate);
+		ui->glSpectrum->setSsbSpectrum(true);
+	}
+	else
+	{
+		m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+		ui->glSpectrum->setCenterFrequency(0);
+		ui->glSpectrum->setSampleRate(2*m_rate);
+		ui->glSpectrum->setSsbSpectrum(false);
+	}
+
+	return true;
 }
 
 void SSBModGUI::blockApplySettings(bool block)

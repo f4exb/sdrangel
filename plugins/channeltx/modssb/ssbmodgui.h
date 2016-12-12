@@ -86,6 +86,8 @@ private:
     ChannelMarker m_channelMarker;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
+	int m_rate;
+	int m_spanLog2;
 
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
