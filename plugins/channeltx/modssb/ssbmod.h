@@ -23,6 +23,7 @@
 #include <fstream>
 
 #include "dsp/basebandsamplesource.h"
+#include "dsp/basebandsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
@@ -173,7 +174,7 @@ public:
 
     //=================================================================
 
-    SSBMod();
+    SSBMod(BasebandSampleSink* sampleSink);
     ~SSBMod();
 
     void configure(MessageQueue* messageQueue,
@@ -350,6 +351,17 @@ private:
 	int m_DSBFilterBufferIndex;
 	static const int m_ssbFftLen;
 
+	BasebandSampleSink* m_sampleSink;
+	SampleVector m_sampleBuffer;
+
+//    Real m_magsqSpectrum;
+//    Real m_magsqSum;
+//    Real m_magsqPeak;
+//    int  m_magsqCount;
+    fftfilt::cmplx m_sum;
+    int m_undersampleCount;
+    int m_sumCount;
+
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;
     SimpleAGC m_volumeAGC;
@@ -358,7 +370,6 @@ private:
     //uint m_audioBufferFill;
 
     AudioFifo m_audioFifo;
-    SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;
 
     std::ifstream m_ifstream;

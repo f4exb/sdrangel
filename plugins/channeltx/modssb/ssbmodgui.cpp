@@ -24,7 +24,7 @@
 
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
-
+#include "dsp/spectrumvis.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "ui_ssbmodgui.h"
 #include "plugin/pluginapi.h"
@@ -446,7 +446,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_ssbMod = new SSBMod();
+	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	m_ssbMod = new SSBMod(m_spectrumVis);
 	m_channelizer = new UpChannelizer(m_ssbMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
@@ -479,6 +480,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_deviceAPI->addRollupWidget(this);
 
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
+    ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	applySettings();
 	setNewRate(m_spanLog2);
@@ -494,6 +496,7 @@ SSBModGUI::~SSBModGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_ssbMod;
+	delete m_spectrumVis;
 	//delete m_channelMarker;
 	delete ui;
 }

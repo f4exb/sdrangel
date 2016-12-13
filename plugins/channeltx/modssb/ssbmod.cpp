@@ -36,7 +36,8 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 const int SSBMod::m_levelNbSamples = 480; // every 10ms
 const int SSBMod::m_ssbFftLen = 1024;
 
-SSBMod::SSBMod() :
+SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
+    m_sampleSink(sampleSink),
     m_SSBFilter(0),
     m_DSBFilter(0),
 	m_SSBFilterBuffer(0),
@@ -70,6 +71,15 @@ SSBMod::SSBMod() :
 
 	//m_audioBuffer.resize(1<<14);
 	//m_audioBufferFill = 0;
+
+//    m_magsqSpectrum = 0.0f;
+//    m_magsqSum = 0.0f;
+//    m_magsqPeak = 0.0f;
+//    m_magsqCount = 0;
+    m_sum.real(0.0f);
+    m_sum.imag(0.0f);
+    m_undersampleCount = 0;
+    m_sumCount = 0;
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
@@ -157,7 +167,7 @@ void SSBMod::pull(Sample& sample)
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
-    ci *= 16368.0f; //scaling
+    ci *= 29204.0f; //scaling at -1 dB to account for filter overshoot
 //    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
     m_settingsMutex.unlock();
@@ -188,7 +198,10 @@ void SSBMod::pullAF(Complex& sample)
     int16_t audioSample[2];
     Complex ci;
     fftfilt::cmplx *filtered;
-    int n_out;
+    int n_out = 0;
+
+    int decim = 1<<(m_running.m_spanLog2 - 1);
+    unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
     switch (m_afInput)
     {
@@ -304,6 +317,98 @@ void SSBMod::pullAF(Complex& sample)
     		sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
     		m_SSBFilterBufferIndex++;
     	}
+
+    	if (n_out > 0)
+    	{
+            for (int i = 0; i < n_out; i++)
+            {
+                // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+                // smart decimation with bit gain using float arithmetic (23 bits significand)
+
+                m_sum += filtered[i];
+
+                if (!(m_undersampleCount++ & decim_mask))
+                {
+                    Real avgr = m_sum.real() / decim;
+                    Real avgi = m_sum.imag() / decim;
+//                    m_magsqSpectrum = (avgr * avgr + avgi * avgi) / (1<<30);
+//
+//                    m_magsqSum += m_magsqSpectrum;
+//
+//                    if (m_magsqSpectrum > m_magsqPeak)
+//                    {
+//                        m_magsqPeak = m_magsqSpectrum;
+//                    }
+//
+//                    m_magsqCount++;
+
+                    if (!m_running.m_dsb & !m_running.m_usb)
+                    { // invert spectrum for LSB
+                        m_sampleBuffer.push_back(Sample(avgi, avgr));
+                    }
+                    else
+                    {
+                        m_sampleBuffer.push_back(Sample(avgr, avgi));
+                    }
+
+                    m_sum.real(0.0);
+                    m_sum.imag(0.0);
+                }
+            }
+    	}
+    } // Real audio
+    else if ((m_afInput == SSBModInputTone) || (m_afInput == SSBModInputCWTone)) // tone
+    {
+        m_sum += sample;
+
+        if (!(m_undersampleCount++ & decim_mask))
+        {
+            Real avgr = m_sum.real() / decim;
+            Real avgi = m_sum.imag() / decim;
+//            m_magsqSpectrum = (avgr * avgr + avgi * avgi) / (1<<30);
+//
+//            m_magsqSum += m_magsqSpectrum;
+//
+//            if (m_magsqSpectrum > m_magsqPeak)
+//            {
+//                m_magsqPeak = m_magsqSpectrum;
+//            }
+//
+//            m_magsqCount++;
+
+            if (!m_running.m_dsb & !m_running.m_usb)
+            { // invert spectrum for LSB
+                m_sampleBuffer.push_back(Sample(avgi, avgr));
+            }
+            else
+            {
+                m_sampleBuffer.push_back(Sample(avgr, avgi));
+            }
+
+            m_sum.real(0.0);
+            m_sum.imag(0.0);
+        }
+
+        if (m_sumCount < (m_running.m_dsb ? m_ssbFftLen : m_ssbFftLen>>1))
+        {
+            n_out = 0;
+            m_sumCount++;
+        }
+        else
+        {
+            n_out = m_sumCount;
+            m_sumCount = 0;
+        }
+    }
+
+    if (n_out > 0)
+    {
+        if (m_sampleSink != 0)
+        {
+            m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_running.m_dsb);
+        }
+
+        m_sampleBuffer.clear();
     }
 }
 
@@ -544,7 +649,7 @@ void SSBMod::openFileStream()
     m_sampleRate = 48000; // fixed rate
     m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
 
-    qDebug() << "AMMod::openFileStream: " << m_fileName.toStdString().c_str()
+    qDebug() << "SSBMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
             << " length: " << m_recordLength << " seconds";
 

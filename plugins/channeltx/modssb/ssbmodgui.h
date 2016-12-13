@@ -29,6 +29,7 @@ class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class SSBMod;
+class SpectrumVis;
 
 namespace Ui {
     class SSBModGUI;
@@ -93,6 +94,7 @@ private:
 
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
+    SpectrumVis* m_spectrumVis;
     SSBMod* m_ssbMod;
     MovingAverage<Real> m_channelPowerDbAvg;
 
