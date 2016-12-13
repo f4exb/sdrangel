@@ -190,27 +190,27 @@ void SSBMod::pullAF(Complex& sample)
 
             if (m_ifstream.eof())
             {
-            	sample.real() = 0.0f;
-                sample.imag() = 0.0f;
+                sample.real(0.0f);
+                sample.imag(0.0f);
             }
             else
             {
                 Real real;
             	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-            	sample.real() = real * m_running.m_volumeFactor;
-                sample.imag() = 0.0f;
+                sample.real(real * m_running.m_volumeFactor);
+                sample.imag(0.0f);
             }
         }
         else
         {
-            sample.real() = 0.0f;
-            sample.imag() = 0.0f;
+            sample.real(0.0f);
+            sample.imag(0.0f);
         }
         break;
     case SSBModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample.real() = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
-        sample.imag() = 0.0f;
+        sample.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
+        sample.imag(0.0f);
         break;
     case SSBModInputCWTone:
         if (m_cwKeyer.getSample())
@@ -219,8 +219,8 @@ void SSBMod::pullAF(Complex& sample)
         }
         else
         {
-            sample.real() = 0.0f;
-            sample.imag() = 0.0f;
+            sample.real(0.0f);
+            sample.imag(0.0f);
             m_toneNco.setPhase(0);
         }
         break;
