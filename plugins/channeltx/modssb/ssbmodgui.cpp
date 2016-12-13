@@ -233,11 +233,83 @@ void SSBModGUI::on_deltaFrequency_changed(quint64 value)
 	}
 }
 
+void SSBModGUI::on_dsb_toggled(bool checked)
+{
+    if (!checked)
+    {
+        if (ui->BW->value() < 0) {
+            m_channelMarker.setSidebands(ChannelMarker::lsb);
+        } else {
+            m_channelMarker.setSidebands(ChannelMarker::usb);
+        }
+
+        ui->glSpectrum->setCenterFrequency(m_rate/4);
+        ui->glSpectrum->setSampleRate(m_rate/2);
+        ui->glSpectrum->setSsbSpectrum(true);
+
+        on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
+    }
+    else
+    {
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(m_rate);
+        ui->glSpectrum->setSsbSpectrum(false);
+
+        applySettings();
+    }
+
+    setNewRate(m_spanLog2);
+}
+
 void SSBModGUI::on_BW_valueChanged(int value)
 {
 	ui->BWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 100);
 	applySettings();
+}
+
+void SSBModGUI::on_lowCut_valueChanged(int value)
+{
+    int lowCutoff = getEffectiveLowCutoff(value * 100);
+    m_channelMarker.setLowCutoff(lowCutoff);
+    QString s = QString::number(lowCutoff/1000.0, 'f', 1);
+    ui->lowCutText->setText(tr("%1k").arg(s));
+    ui->lowCut->setValue(lowCutoff/100);
+    applySettings();
+}
+
+int SSBModGUI::getEffectiveLowCutoff(int lowCutoff)
+{
+    int ssbBW = m_channelMarker.getBandwidth() / 2;
+    int effectiveLowCutoff = lowCutoff;
+    const int guard = 100;
+
+    if (ssbBW < 0)
+    {
+        if (effectiveLowCutoff < ssbBW + guard)
+        {
+            effectiveLowCutoff = ssbBW + guard;
+        }
+        if (effectiveLowCutoff > 0)
+        {
+            effectiveLowCutoff = 0;
+        }
+    }
+    else
+    {
+        if (effectiveLowCutoff > ssbBW - guard)
+        {
+            effectiveLowCutoff = ssbBW - guard;
+        }
+        if (effectiveLowCutoff < 0)
+        {
+            effectiveLowCutoff = 0;
+        }
+    }
+
+    return effectiveLowCutoff;
 }
 
 void SSBModGUI::on_toneFrequency_valueChanged(int value)

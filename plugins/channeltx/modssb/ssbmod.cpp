@@ -55,13 +55,18 @@ SSBMod::SSBMod() :
 {
 	setObjectName("SSBMod");
 
-	m_config.m_outputSampleRate = 48000;
+    m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate, m_ssbFftLen);
+    m_DSBFilter = new fftfilt((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate, 2 * m_ssbFftLen);
+    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
+    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
+    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+
+    m_config.m_outputSampleRate = 48000;
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_bandwidth = 12500;
 	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-
-	apply();
 
 	//m_audioBuffer.resize(1<<14);
 	//m_audioBufferFill = 0;
@@ -78,12 +83,7 @@ SSBMod::SSBMod() :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 
-    m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate, m_ssbFftLen);
-    m_DSBFilter = new fftfilt((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate, 2 * m_ssbFftLen);
-    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
-    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
-    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
-    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+    apply();
 }
 
 SSBMod::~SSBMod()
@@ -157,7 +157,8 @@ void SSBMod::pull(Sample& sample)
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
-    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+    ci *= 16368.0f; //scaling
+//    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
     m_settingsMutex.unlock();
 

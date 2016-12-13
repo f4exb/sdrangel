@@ -60,7 +60,9 @@ private slots:
 
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
+    void on_dsb_toggled(bool checked);
     void on_BW_valueChanged(int value);
+    void on_lowCut_valueChanged(int value);
     void on_volume_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
     void on_tone_toggled(bool checked);
@@ -105,6 +107,7 @@ private:
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SSBModGUI();
 
+    int  getEffectiveLowCutoff(int lowCutoff);
     bool setNewRate(int spanLog2);
 
     void blockApplySettings(bool block);
