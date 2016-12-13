@@ -344,6 +344,10 @@ private:
     bool m_interpolatorConsumed;
 	fftfilt* m_SSBFilter;
 	fftfilt* m_DSBFilter;
+	Complex* m_SSBFilterBuffer;
+	Complex* m_DSBFilterBuffer;
+	int m_SSBFilterBufferIndex;
+	int m_DSBFilterBufferIndex;
 	static const int m_ssbFftLen;
 
     Real m_magsq;

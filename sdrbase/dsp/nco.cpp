@@ -59,6 +59,12 @@ Complex NCO::nextIQ()
 	return Complex(m_table[m_phase], -m_table[(m_phase + TableSize / 4) % TableSize]);
 }
 
+Complex NCO::nextQI()
+{
+	nextPhase();
+	return Complex(-m_table[(m_phase + TableSize / 4) % TableSize], m_table[m_phase]);
+}
+
 float NCO::get()
 {
 	return m_table[m_phase];
@@ -73,4 +79,15 @@ void NCO::getIQ(Complex& c)
 {
 	c.real(m_table[m_phase]);
 	c.imag(-m_table[(m_phase + TableSize / 4) % TableSize]);
+}
+
+Complex NCO::getQI()
+{
+	return Complex(-m_table[(m_phase + TableSize / 4) % TableSize], m_table[m_phase]);
+}
+
+void NCO::getQI(Complex& c)
+{
+	c.imag(m_table[m_phase]);
+	c.real(-m_table[(m_phase + TableSize / 4) % TableSize]);
 }

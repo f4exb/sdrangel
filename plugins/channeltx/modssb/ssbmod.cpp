@@ -39,6 +39,10 @@ const int SSBMod::m_ssbFftLen = 1024;
 SSBMod::SSBMod() :
     m_SSBFilter(0),
     m_DSBFilter(0),
+	m_SSBFilterBuffer(0),
+	m_DSBFilterBuffer(0),
+	m_SSBFilterBufferIndex(0),
+	m_DSBFilterBufferIndex(0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -76,6 +80,10 @@ SSBMod::SSBMod() :
 
     m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate, 2 * m_ssbFftLen);
+    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
+    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
+    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 }
 
 SSBMod::~SSBMod()
@@ -86,6 +94,14 @@ SSBMod::~SSBMod()
 
     if (m_DSBFilter) {
         delete m_DSBFilter;
+    }
+
+    if (m_SSBFilterBuffer) {
+        delete m_SSBFilterBuffer;
+    }
+
+    if (m_DSBFilterBuffer) {
+        delete m_DSBFilterBuffer;
     }
 
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
@@ -161,18 +177,35 @@ void SSBMod::modulateSample()
     pullAF(c);
     calculateLevel(c);
 
-    m_modSample.real(0.0f); // TOOO
-    m_modSample.imag(0.0f);
+    // TODO: feed spectrum
+
+	m_modSample = m_carrierNco.nextIQ() * c;
 }
 
 void SSBMod::pullAF(Complex& sample)
 {
     int16_t audioSample[2];
+    Complex ci;
+    fftfilt::cmplx *filtered;
+    int n_out;
 
     switch (m_afInput)
     {
     case SSBModInputTone:
-        sample = m_toneNco.nextIQ();
+    	if (m_running.m_dsb)
+    	{
+    		Real t = m_toneNco.next();
+    		sample.real(t);
+    		sample.imag(t);
+    	}
+    	else
+    	{
+    		if (m_running.m_usb) {
+    			sample = m_toneNco.nextIQ();
+    		} else {
+    			sample = m_toneNco.nextQI();
+    		}
+    	}
         break;
     case SSBModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
@@ -190,32 +223,45 @@ void SSBMod::pullAF(Complex& sample)
 
             if (m_ifstream.eof())
             {
-                sample.real(0.0f);
-                sample.imag(0.0f);
+                ci.real(0.0f);
+                ci.imag(0.0f);
             }
             else
             {
                 Real real;
             	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-                sample.real(real * m_running.m_volumeFactor);
-                sample.imag(0.0f);
+                ci.real(real * m_running.m_volumeFactor);
+                ci.imag(0.0f);
             }
         }
         else
         {
-            sample.real(0.0f);
-            sample.imag(0.0f);
+            ci.real(0.0f);
+            ci.imag(0.0f);
         }
         break;
     case SSBModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
-        sample.imag(0.0f);
+        ci.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
+        ci.imag(0.0f);
         break;
     case SSBModInputCWTone:
         if (m_cwKeyer.getSample())
         {
-            sample = m_toneNco.nextIQ();
+        	if (m_running.m_dsb)
+        	{
+        		Real t = m_toneNco.next();
+        		sample.real(t);
+        		sample.imag(t);
+        	}
+        	else
+        	{
+        		if (m_running.m_usb) {
+        			sample = m_toneNco.nextIQ();
+        		} else {
+        			sample = m_toneNco.nextQI();
+        		}
+        	}
         }
         else
         {
@@ -226,8 +272,37 @@ void SSBMod::pullAF(Complex& sample)
         break;
     case SSBModInputNone:
     default:
-        sample = 0.0f;
         break;
+    }
+
+    if ((m_afInput == SSBModInputFile) || (m_afInput == SSBModInputAudio)) // real audio
+    {
+    	if (m_running.m_dsb)
+    	{
+    		n_out = m_DSBFilter->runDSB(ci, &filtered);
+
+    		if (n_out > 0)
+    		{
+    			memcpy((void *) m_DSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+    			m_DSBFilterBufferIndex = 0;
+    		}
+
+    		sample = m_DSBFilterBuffer[m_DSBFilterBufferIndex];
+    		m_DSBFilterBufferIndex++;
+    	}
+    	else
+    	{
+    		n_out = m_SSBFilter->runSSB(ci, &filtered, m_running.m_usb);
+
+    		if (n_out > 0)
+    		{
+    			memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+    			m_SSBFilterBufferIndex = 0;
+    		}
+
+    		sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
+    		m_SSBFilterBufferIndex++;
+    	}
     }
 }
 
@@ -423,6 +498,20 @@ void SSBMod::apply()
 	if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
 	{
 	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+	}
+
+	if (m_config.m_dsb != m_running.m_dsb)
+	{
+		if (m_config.m_dsb)
+		{
+			memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+			m_DSBFilterBufferIndex = 0;
+		}
+		else
+		{
+			memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+			m_SSBFilterBufferIndex = 0;
+		}
 	}
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
