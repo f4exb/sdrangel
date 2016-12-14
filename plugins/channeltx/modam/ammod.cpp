@@ -71,6 +71,7 @@ AMMod::AMMod() :
 	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
+	m_cwSmoother.setNbFadeSamples(96); // 2 ms @ 48 kHz
 }
 
 AMMod::~AMMod()
@@ -182,14 +183,24 @@ void AMMod::pullAF(Real& sample)
         sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
         break;
     case AMModInputCWTone:
+        Real fadeFactor;
+
         if (m_cwKeyer.getSample())
         {
-            sample = m_toneNco.next();
+            m_cwSmoother.getFadeSample(true, fadeFactor);
+            sample = m_toneNco.next() * fadeFactor;
         }
         else
         {
-            sample = 0.0f;
-            m_toneNco.setPhase(0);
+            if (m_cwSmoother.getFadeSample(false, fadeFactor))
+            {
+                sample = m_toneNco.next() * fadeFactor;
+            }
+            else
+            {
+                sample = 0.0f;
+                m_toneNco.setPhase(0);
+            }
         }
         break;
     case AMModInputNone:
@@ -348,6 +359,7 @@ void AMMod::apply()
 	if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
 	{
 	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+	    m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 500); // 2 ms
 	}
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
