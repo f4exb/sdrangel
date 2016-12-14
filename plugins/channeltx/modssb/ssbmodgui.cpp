@@ -264,6 +264,16 @@ void SSBModGUI::on_dsb_toggled(bool checked)
     setNewRate(m_spanLog2);
 }
 
+void SSBModGUI::on_audioBinaural_toggled(bool checked)
+{
+	applySettings();
+}
+
+void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
+{
+	applySettings();
+}
+
 void SSBModGUI::on_spanLog2_valueChanged(int value)
 {
     if (setNewRate(value))

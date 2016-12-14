@@ -189,6 +189,13 @@ void SSBMod::modulateSample()
 
 void SSBMod::pullAF(Complex& sample)
 {
+	if (m_running.m_audioMute)
+	{
+        sample.real(0.0f);
+        sample.imag(0.0f);
+        return;
+	}
+
     int16_t audioSample[2];
     Complex ci;
     fftfilt::cmplx *filtered;
@@ -216,8 +223,12 @@ void SSBMod::pullAF(Complex& sample)
     	}
         break;
     case SSBModInputFile:
+    	// Monaural (mono):
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
+    	// Binaural (stereo):
+        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
+        // ffplay -f f32le -ar 48k -ac 2 f4exb_call.raw
         if (m_ifstream.is_open())
         {
             if (m_ifstream.eof())
@@ -236,10 +247,28 @@ void SSBMod::pullAF(Complex& sample)
             }
             else
             {
-                Real real;
-            	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-                ci.real(real * m_running.m_volumeFactor);
-                ci.imag(0.0f);
+            	if (m_running.m_audioBinaural)
+            	{
+            		Complex c;
+                	m_ifstream.read(reinterpret_cast<char*>(&c), sizeof(Complex));
+
+                	if (m_running.m_audioFlipChannels)
+                	{
+                        ci.real(c.imag() * m_running.m_volumeFactor);
+                        ci.imag(c.real() * m_running.m_volumeFactor);
+                	}
+                	else
+                	{
+                    	ci = c * m_running.m_volumeFactor;
+                	}
+            	}
+            	else
+            	{
+                    Real real;
+                	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
+                    ci.real(real * m_running.m_volumeFactor);
+                    ci.imag(0.0f);
+            	}
             }
         }
         else
@@ -250,8 +279,26 @@ void SSBMod::pullAF(Complex& sample)
         break;
     case SSBModInputAudio:
         m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        ci.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
-        ci.imag(0.0f);
+
+        if (m_running.m_audioBinaural)
+    	{
+        	if (m_running.m_audioFlipChannels)
+        	{
+                ci.real((audioSample[1] / 32768.0f) * m_running.m_volumeFactor);
+                ci.imag((audioSample[0] / 32768.0f) * m_running.m_volumeFactor);
+        	}
+        	else
+        	{
+                ci.real((audioSample[0] / 32768.0f) * m_running.m_volumeFactor);
+                ci.imag((audioSample[1] / 32768.0f) * m_running.m_volumeFactor);
+        	}
+    	}
+        else
+        {
+            ci.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
+            ci.imag(0.0f);
+        }
+
         break;
     case SSBModInputCWTone:
         if (m_cwKeyer.getSample())
