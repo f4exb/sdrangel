@@ -484,8 +484,11 @@ void CWSmoother::setNbFadeSamples(unsigned int nbFadeSamples)
 
         for (int i = 0; i < m_nbFadeSamples; i++)
         {
-            m_fadeInSamples[i] = sin((i/ (float) m_nbFadeSamples) * M_PI_2);
-            m_fadeOutSamples[i] = cos((i/ (float) m_nbFadeSamples) * M_PI_2);
+            float x = i/ (float) m_nbFadeSamples;
+            float y = 1.0f -x;
+
+            m_fadeInSamples[i] = smootherstep(x);
+            m_fadeOutSamples[i] = smootherstep(y);
         }
 
         m_fadeInCounter = 0;
@@ -529,4 +532,13 @@ bool CWSmoother::getFadeSample(bool on, float& sample)
             return false;
         }
     }
+}
+
+float CWSmoother::smootherstep(float x)
+{
+    double x3 = x * x * x;
+    double x4 = x * x3;
+    double x5 = x * x4;
+
+    return (float) (6.0*x5 - 15.0*x4 + 10.0*x3);
 }
