@@ -162,7 +162,8 @@ bool SSBModGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
-		applySettings();
+	    applySettings();
+
 		return true;
 	}
     else
@@ -276,6 +277,8 @@ void SSBModGUI::on_BW_valueChanged(int value)
 {
 	ui->BWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 200);
+    int lowCutoff = getEffectiveLowCutoff(ui->lowCut->value() * 100);
+    m_channelMarker.setLowCutoff(lowCutoff);
 	applySettings();
 }
 
