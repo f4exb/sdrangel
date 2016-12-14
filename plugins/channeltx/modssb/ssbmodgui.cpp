@@ -338,7 +338,13 @@ void SSBModGUI::on_volume_valueChanged(int value)
 
 void SSBModGUI::on_audioMute_toggled(bool checked)
 {
+    qDebug() << "SSBModGUI::on_audioMute_toggled: " << checked << ":" << ui->audioMute->isChecked();
 	applySettings();
+}
+
+void SSBModGUI::on_playLoop_toggled(bool checked)
+{
+    applySettings();
 }
 
 void SSBModGUI::on_play_toggled(bool checked)
@@ -601,7 +607,8 @@ void SSBModGUI::applySettings()
 			ui->audioBinaural->isChecked(),
 			ui->audioFlipChannels->isChecked(),
 			ui->dsb->isChecked(),
-			ui->audioMute->isChecked());
+			ui->audioMute->isChecked(),
+			ui->playLoop->isChecked());
 	}
 }
 
