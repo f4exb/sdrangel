@@ -99,6 +99,25 @@ private:
     void nextStateText();
 };
 
+/**
+ * Ancillary class to smooth out CW transitions with a sine shape
+ */
+class CWSmoother
+{
+public:
+    CWSmoother();
+    ~CWSmoother();
 
+    void setNbFadeSamples(unsigned int nbFadeSamples);
+    bool getFadeSample(bool on, float& sample);
+
+private:
+    QMutex m_mutex;
+    int m_fadeInCounter;
+    int m_fadeOutCounter;
+    unsigned int m_nbFadeSamples;
+    float *m_fadeInSamples;
+    float *m_fadeOutSamples;
+};
 
 #endif /* SDRBASE_DSP_CWKEYER_H_ */

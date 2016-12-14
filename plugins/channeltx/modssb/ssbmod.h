@@ -383,11 +383,7 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
-    int m_fadeInCounter;
-    int m_fadeOutCounter;
-    int m_nbFadeSamples;
-    Real *m_fadeInSamples;
-    Real *m_fadeOutSamples;
+    CWSmoother m_cwSmoother;
 
     static const int m_levelNbSamples;
 
@@ -395,7 +391,6 @@ private:
     void pullAF(Complex& sample);
     void calculateLevel(Complex& sample);
     void modulateSample();
-    void makeFadeSamples();
     void openFileStream();
     void seekFileStream(int seekPercentage);
 };

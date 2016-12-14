@@ -451,3 +451,82 @@ bool CWKeyer::eom()
 {
     return !(m_textPointer < m_text.length());
 }
+
+CWSmoother::CWSmoother() :
+        m_fadeInCounter(0),
+        m_fadeOutCounter(0),
+        m_nbFadeSamples(0),
+        m_fadeInSamples(0),
+        m_fadeOutSamples(0)
+{
+    setNbFadeSamples(96); // default is 2ms at 48 kHz sample rate
+}
+
+CWSmoother::~CWSmoother()
+{
+    delete[] m_fadeInSamples;
+    delete[] m_fadeOutSamples;
+}
+
+void CWSmoother::setNbFadeSamples(unsigned int nbFadeSamples)
+{
+    if (nbFadeSamples != m_nbFadeSamples)
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+
+        m_nbFadeSamples = nbFadeSamples;
+
+        if (m_fadeInSamples) delete[] m_fadeInSamples;
+        if (m_fadeOutSamples) delete[] m_fadeOutSamples;
+
+        m_fadeInSamples = new float[m_nbFadeSamples];
+        m_fadeOutSamples = new float[m_nbFadeSamples];
+
+        for (int i = 0; i < m_nbFadeSamples; i++)
+        {
+            m_fadeInSamples[i] = sin((i/ (float) m_nbFadeSamples) * M_PI_2);
+            m_fadeOutSamples[i] = cos((i/ (float) m_nbFadeSamples) * M_PI_2);
+        }
+
+        m_fadeInCounter = 0;
+        m_fadeOutCounter = 0;
+    }
+}
+
+bool CWSmoother::getFadeSample(bool on, float& sample)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (on)
+    {
+        m_fadeOutCounter = 0;
+
+        if (m_fadeInCounter < m_nbFadeSamples)
+        {
+            sample = m_fadeInSamples[m_fadeInCounter];
+            m_fadeInCounter++;
+            return true;
+        }
+        else
+        {
+            sample = 1.0f;
+            return false;
+        }
+    }
+    else
+    {
+        m_fadeInCounter = 0;
+
+        if (m_fadeOutCounter < m_nbFadeSamples)
+        {
+            sample = m_fadeOutSamples[m_fadeOutCounter];
+            m_fadeOutCounter++;
+            return true;
+        }
+        else
+        {
+            sample = 0.0f;
+            return false;
+        }
+    }
+}
