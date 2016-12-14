@@ -167,8 +167,8 @@ void SSBMod::pull(Sample& sample)
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
-    ci *= 29204.0f; //scaling at -1 dB to account for filter overshoot
-//    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+    ci *= 29204.0f; //scaling at -1 dB to account for possible filter overshoot
 
     m_settingsMutex.unlock();
 
@@ -183,14 +183,8 @@ void SSBMod::pull(Sample& sample)
 
 void SSBMod::modulateSample()
 {
-	Complex c;
-
-    pullAF(c);
-    calculateLevel(c);
-
-    // TODO: feed spectrum
-
-	m_modSample = m_carrierNco.nextIQ() * c;
+    pullAF(m_modSample);
+    calculateLevel(m_modSample);
 }
 
 void SSBMod::pullAF(Complex& sample)
@@ -329,8 +323,8 @@ void SSBMod::pullAF(Complex& sample)
 
                 if (!(m_undersampleCount++ & decim_mask))
                 {
-                    Real avgr = m_sum.real() / decim;
-                    Real avgi = m_sum.imag() / decim;
+                    Real avgr = (m_sum.real() / decim) * 29204.0f; //scaling at -1 dB to account for possible filter overshoot
+                    Real avgi = (m_sum.imag() / decim) * 29204.0f;
 //                    m_magsqSpectrum = (avgr * avgr + avgi * avgi) / (1<<30);
 //
 //                    m_magsqSum += m_magsqSpectrum;
@@ -363,8 +357,8 @@ void SSBMod::pullAF(Complex& sample)
 
         if (!(m_undersampleCount++ & decim_mask))
         {
-            Real avgr = m_sum.real() / decim;
-            Real avgi = m_sum.imag() / decim;
+            Real avgr = (m_sum.real() / decim) * 29204.0f; //scaling at -1 dB to account for possible filter overshoot
+            Real avgi = (m_sum.imag() / decim) * 29204.0f;
 //            m_magsqSpectrum = (avgr * avgr + avgi * avgi) / (1<<30);
 //
 //            m_magsqSum += m_magsqSpectrum;
@@ -569,8 +563,13 @@ void SSBMod::apply()
         (m_config.m_lowCutoff != m_running.m_lowCutoff) ||
         (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
     {
-        m_SSBFilter->create_filter(m_config.m_lowCutoff / (float) m_config.m_audioSampleRate, m_config.m_bandwidth / (float) m_config.m_audioSampleRate);
-        m_DSBFilter->create_dsb_filter((2.0f * m_config.m_bandwidth) / (float) m_config.m_audioSampleRate);
+        m_settingsMutex.lock();
+//        m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate, m_ssbFftLen);
+//        m_DSBFilter = new fftfilt((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate, 2 * m_ssbFftLen);
+
+        m_SSBFilter->create_filter(m_config.m_lowCutoff / m_config.m_audioSampleRate, m_config.m_bandwidth / m_config.m_audioSampleRate);
+        m_DSBFilter->create_dsb_filter((2.0f * m_config.m_bandwidth) / m_config.m_audioSampleRate);
+        m_settingsMutex.unlock();
     }
 
 	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
@@ -589,7 +588,7 @@ void SSBMod::apply()
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_bandwidth / 2.2, 3.0);
+        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_bandwidth, 3.0);
 		m_settingsMutex.unlock();
 	}
 
