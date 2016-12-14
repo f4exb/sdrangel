@@ -275,7 +275,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="playLoop">
+      <widget class="ButtonSwitch" name="playLoopCW">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -410,7 +410,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>playLoop</tabstop>
+  <tabstop>playLoopCW</tabstop>
  </tabstops>
  <resources>
   <include location="../resources/res.qrc"/>

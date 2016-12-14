@@ -57,7 +57,7 @@ private slots:
     void on_playDots_toggled(bool checked);
     void on_playDashes_toggled(bool checked);
     void on_playText_toggled(bool checked);
-    void on_playLoop_toggled(bool checked);
+    void on_playLoopCW_toggled(bool checked);
     void on_playStop_toggled(bool checked);
 };
 

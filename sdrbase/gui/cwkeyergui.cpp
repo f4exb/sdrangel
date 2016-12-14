@@ -138,7 +138,7 @@ void CWKeyerGUI::on_playText_toggled(bool checked)
     }
 }
 
-void CWKeyerGUI::on_playLoop_toggled(bool checked)
+void CWKeyerGUI::on_playLoopCW_toggled(bool checked)
 {
     m_cwKeyer->setLoop(checked);
 }
