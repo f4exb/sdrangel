@@ -52,7 +52,12 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+	m_fadeInCounter(0),
+	m_fadeOutCounter(0),
+	m_nbFadeSamples(96),
+	m_fadeInSamples(0),
+	m_fadeOutSamples(0)
 {
 	setObjectName("SSBMod");
 
@@ -93,6 +98,7 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 
+	makeFadeSamples();
     apply();
 }
 
@@ -113,6 +119,9 @@ SSBMod::~SSBMod()
     if (m_DSBFilterBuffer) {
         delete m_DSBFilterBuffer;
     }
+
+    delete[] m_fadeInSamples;
+    delete[] m_fadeOutSamples;
 
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
@@ -301,29 +310,69 @@ void SSBMod::pullAF(Complex& sample)
 
         break;
     case SSBModInputCWTone:
+    	Real fadeFactor;
+
         if (m_cwKeyer.getSample())
         {
+        	m_fadeOutCounter = 0;
+
+        	if (m_fadeInCounter < m_nbFadeSamples)
+        	{
+        		fadeFactor = m_fadeInSamples[m_fadeInCounter];
+        		m_fadeInCounter++;
+        	}
+        	else
+        	{
+        		fadeFactor = 1.0f;
+        	}
+
         	if (m_running.m_dsb)
         	{
-        		Real t = m_toneNco.next();
+        		Real t = m_toneNco.next() * fadeFactor;
         		sample.real(t);
         		sample.imag(t);
         	}
         	else
         	{
         		if (m_running.m_usb) {
-        			sample = m_toneNco.nextIQ();
+        			sample = m_toneNco.nextIQ() * fadeFactor;
         		} else {
-        			sample = m_toneNco.nextQI();
+        			sample = m_toneNco.nextQI() * fadeFactor;
         		}
         	}
         }
         else
         {
-            sample.real(0.0f);
-            sample.imag(0.0f);
-            m_toneNco.setPhase(0);
+        	m_fadeInCounter = 0;
+
+        	if (m_fadeOutCounter < m_nbFadeSamples)
+        	{
+        		fadeFactor = m_fadeOutSamples[m_fadeOutCounter];
+        		m_fadeOutCounter++;
+
+            	if (m_running.m_dsb)
+            	{
+            		Real t = m_toneNco.next() * fadeFactor;
+            		sample.real(t);
+            		sample.imag(t);
+            	}
+            	else
+            	{
+            		if (m_running.m_usb) {
+            			sample = m_toneNco.nextIQ() * fadeFactor;
+            		} else {
+            			sample = m_toneNco.nextQI() * fadeFactor;
+            		}
+            	}
+        	}
+        	else
+        	{
+                sample.real(0.0f);
+                sample.imag(0.0f);
+                m_toneNco.setPhase(0);
+        	}
         }
+
         break;
     case SSBModInputNone:
     default:
@@ -451,6 +500,29 @@ void SSBMod::pullAF(Complex& sample)
 
         m_sampleBuffer.clear();
     }
+}
+
+void SSBMod::makeFadeSamples()
+{
+	if (m_fadeInSamples) {
+		delete[] m_fadeInSamples;
+	}
+
+	if (m_fadeOutSamples) {
+		delete[] m_fadeOutSamples;
+	}
+
+	m_fadeInSamples = new Real[m_nbFadeSamples];
+	m_fadeOutSamples = new Real[m_nbFadeSamples];
+
+	for (int i = 0; i < m_nbFadeSamples; i++)
+	{
+		m_fadeInSamples[i] = sin((i/ (Real) m_nbFadeSamples) * M_PI_2);
+		m_fadeOutSamples[i] = cos((i/ (Real) m_nbFadeSamples) * M_PI_2);
+	}
+
+	m_fadeInCounter = 0;
+	m_fadeOutCounter = 0;
 }
 
 void SSBMod::calculateLevel(Complex& sample)
@@ -646,7 +718,11 @@ void SSBMod::apply()
 
 	if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
 	{
+        m_settingsMutex.lock();
 	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+	    m_nbFadeSamples = m_config.m_audioSampleRate / 500;     // 2ms
+	    makeFadeSamples();
+        m_settingsMutex.unlock();
 	}
 
 	if (m_config.m_dsb != m_running.m_dsb)
