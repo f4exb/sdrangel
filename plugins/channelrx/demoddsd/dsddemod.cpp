@@ -67,7 +67,7 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	m_sampleBuffer = new qint16[1<<17]; // 128 kS
 	m_sampleBufferIndex = 0;
 
-//    m_movingAverage.resize(50, 0);
+    m_movingAverage.resize(16, 0);
 	m_magsq = 0.0f;
     m_magsqSum = 0.0f;
     m_magsqPeak = 0.0f;
@@ -141,7 +141,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             qint16 sample, delayedSample;
 
             Real magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag()))  / (1<<30);
-//            m_movingAverage.feed(m_magsq);
+            m_movingAverage.feed(magsq);
 
             m_magsqSum += magsq;
 
@@ -157,7 +157,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             // AF processing
 
-            if (getMagSq() > m_squelchLevel)
+            if (m_movingAverage.average() > m_squelchLevel)
             {
                 if (m_squelchGate > 0)
                 {
