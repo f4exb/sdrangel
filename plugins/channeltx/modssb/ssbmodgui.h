@@ -62,6 +62,7 @@ private slots:
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
     void on_dsb_toggled(bool checked);
+    void on_spanLog2_valueChanged(int value);
     void on_BW_valueChanged(int value);
     void on_lowCut_valueChanged(int value);
     void on_volume_valueChanged(int value);
@@ -72,7 +73,6 @@ private slots:
     void on_play_toggled(bool checked);
     void on_morseKeyer_toggled(bool checked);
 
-    void on_playLoop_toggled(bool checked);
     void on_navTimeSlider_valueChanged(int value);
     void on_showFileDialog_clicked(bool checked);
 

@@ -126,8 +126,7 @@ void SSBMod::configure(MessageQueue* messageQueue,
 		bool audioBinaural,
 		bool audioFlipChannels,
 		bool dsb,
-		bool audioMute,
-		bool playLoop)
+		bool audioMute)
 {
 	Message* cmd = MsgConfigureSSBMod::create(bandwidth,
 			lowCutoff,
@@ -137,8 +136,7 @@ void SSBMod::configure(MessageQueue* messageQueue,
 			audioBinaural,
 			audioFlipChannels,
 			dsb,
-			audioMute,
-			playLoop);
+			audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -220,15 +218,6 @@ void SSBMod::pullAF(Complex& sample)
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
         {
-            if (m_ifstream.eof())
-            {
-            	if (m_running.m_playLoop)
-            	{
-                    m_ifstream.clear();
-                    m_ifstream.seekg(0, std::ios::beg);
-            	}
-            }
-
             if (m_ifstream.eof())
             {
                 ci.real(0.0f);
@@ -493,7 +482,6 @@ bool SSBMod::handleMessage(const Message& cmd)
 		m_config.m_audioFlipChannels = cfg.getAudioFlipChannels();
 		m_config.m_dsb = cfg.getDSB();
 		m_config.m_audioMute = cfg.getAudioMute();
-		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
 
@@ -508,8 +496,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 				<< " m_audioBinaural: " << m_config.m_audioBinaural
 				<< " m_audioFlipChannels: " << m_config.m_audioFlipChannels
 				<< " m_dsb: " << m_config.m_dsb
-				<< " m_audioMute: " << m_config.m_audioMute
-				<< " m_playLoop: " << m_config.m_playLoop;
+				<< " m_audioMute: " << m_config.m_audioMute;
 
 		return true;
 	}
@@ -632,7 +619,6 @@ void SSBMod::apply()
 	m_running.m_audioFlipChannels = m_config.m_audioFlipChannels;
 	m_running.m_dsb = m_config.m_dsb;
 	m_running.m_audioMute = m_config.m_audioMute;
-	m_running.m_playLoop = m_config.m_playLoop;
 }
 
 void SSBMod::openFileStream()

@@ -186,8 +186,7 @@ public:
 			bool audioBinaural,
 			bool audioFlipChannels,
 			bool dsb,
-			bool audioMute,
-            bool playLoop);
+			bool audioMute);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -223,7 +222,6 @@ private:
         bool getAudioFlipChannels() const { return m_audioFlipChannels; }
         bool getDSB() const { return m_dsb; }
         bool getAudioMute() const { return m_audioMute; }
-        bool getPlayLoop() const { return m_playLoop; }
 
         static MsgConfigureSSBMod* create(Real bandwidth,
         		Real lowCutoff,
@@ -233,8 +231,7 @@ private:
 				bool audioBinaural,
 				bool audioFlipChannels,
 				bool dsb,
-				bool audioMute,
-				bool playLoop)
+				bool audioMute)
         {
             return new MsgConfigureSSBMod(bandwidth,
             		lowCutoff,
@@ -244,8 +241,7 @@ private:
 					audioBinaural,
 					audioFlipChannels,
 					dsb,
-					audioMute,
-					playLoop);
+					audioMute);
         }
 
     private:
@@ -258,7 +254,6 @@ private:
 		bool m_audioFlipChannels;
 		bool m_dsb;
         bool m_audioMute;
-        bool m_playLoop;
 
         MsgConfigureSSBMod(Real bandwidth,
         		Real lowCutoff,
@@ -268,8 +263,7 @@ private:
 				bool audioBinaural,
 				bool audioFlipChannels,
 				bool dsb,
-				bool audioMute,
-				bool playLoop) :
+				bool audioMute) :
             Message(),
             m_bandwidth(bandwidth),
 			m_lowCutoff(lowCutoff),
@@ -279,8 +273,7 @@ private:
 			m_audioBinaural(audioBinaural),
 			m_audioFlipChannels(audioFlipChannels),
 			m_dsb(dsb),
-            m_audioMute(audioMute),
-			m_playLoop(playLoop)
+            m_audioMute(audioMute)
         { }
     };
 
@@ -311,7 +304,6 @@ private:
 		bool m_audioFlipChannels;
 		bool m_dsb;
 		bool m_audioMute;
-        bool m_playLoop;
 
         Config() :
             m_outputSampleRate(0),
@@ -326,8 +318,7 @@ private:
 			m_audioBinaural(false),
 			m_audioFlipChannels(false),
 			m_dsb(false),
-            m_audioMute(false),
-			m_playLoop(false)
+            m_audioMute(false)
         { }
     };
 

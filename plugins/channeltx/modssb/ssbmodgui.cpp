@@ -263,10 +263,19 @@ void SSBModGUI::on_dsb_toggled(bool checked)
     setNewRate(m_spanLog2);
 }
 
+void SSBModGUI::on_spanLog2_valueChanged(int value)
+{
+    if (setNewRate(value))
+    {
+        applySettings();
+    }
+
+}
+
 void SSBModGUI::on_BW_valueChanged(int value)
 {
 	ui->BWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
-	m_channelMarker.setBandwidth(value * 100);
+	m_channelMarker.setBandwidth(value * 200);
 	applySettings();
 }
 
@@ -325,11 +334,6 @@ void SSBModGUI::on_volume_valueChanged(int value)
 }
 
 void SSBModGUI::on_audioMute_toggled(bool checked)
-{
-	applySettings();
-}
-
-void SSBModGUI::on_playLoop_toggled(bool checked)
 {
 	applySettings();
 }
@@ -594,8 +598,7 @@ void SSBModGUI::applySettings()
 			ui->audioBinaural->isChecked(),
 			ui->audioFlipChannels->isChecked(),
 			ui->dsb->isChecked(),
-			ui->audioMute->isChecked(),
-			ui->playLoop->isChecked());
+			ui->audioMute->isChecked());
 	}
 }
 
