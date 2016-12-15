@@ -73,7 +73,7 @@ NFMMod::NFMMod() :
     m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
-    m_cwSmoother.setNbFadeSamples(96); // 2 ms @ 48 kHz
+    m_cwSmoother.setNbFadeSamples(192); // 2 ms @ 48 kHz
 }
 
 NFMMod::~NFMMod()
@@ -377,7 +377,7 @@ void NFMMod::apply()
     if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
     {
         m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-        m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 500); // 2 ms
+        m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 250); // 4 ms
     }
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;

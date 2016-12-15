@@ -459,7 +459,7 @@ CWSmoother::CWSmoother() :
         m_fadeInSamples(0),
         m_fadeOutSamples(0)
 {
-    setNbFadeSamples(96); // default is 2ms at 48 kHz sample rate
+    setNbFadeSamples(192); // default is 4 ms at 48 kHz sample rate
 }
 
 CWSmoother::~CWSmoother()

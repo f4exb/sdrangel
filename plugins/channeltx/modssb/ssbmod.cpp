@@ -93,7 +93,7 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 
-	m_cwSmoother.setNbFadeSamples(96); // 2 ms at 48 kHz
+	m_cwSmoother.setNbFadeSamples(192); // 4 ms at 48 kHz
     apply();
 }
 
@@ -674,7 +674,7 @@ void SSBMod::apply()
 	{
         m_settingsMutex.lock();
 	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-	    m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 500); // 2 ms
+	    m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 250); // 4 ms
         m_settingsMutex.unlock();
 	}
 
