@@ -22,7 +22,7 @@
 class CalcDb
 {
 public:
-	static Real dbPower(Real magsq);
+	static Real dbPower(Real magsq, Real floordB = -100.0f);
 };
 
 #endif /* INCLUDE_UTIL_DB_H_ */

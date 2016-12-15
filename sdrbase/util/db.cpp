@@ -17,7 +17,7 @@
 #include "util/db.h"
 #include <cmath>
 
-Real CalcDb::dbPower(Real magsq)
+Real CalcDb::dbPower(Real magsq, Real floordB)
 {
 	if (magsq > 0)
 	{
@@ -25,6 +25,6 @@ Real CalcDb::dbPower(Real magsq)
 	}
 	else
 	{
-		return 0;
+		return floordB;
 	}
 }
