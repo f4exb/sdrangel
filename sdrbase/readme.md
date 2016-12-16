@@ -89,9 +89,18 @@ This is where the plugin GUI specific to the device is displayed. Control of one
   - When a square icon is displayed with a green background the device is currently running
   - When a play icon is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
   
-<h4>2.2. Record I/Q</h2>
+<h4>2.2. Record I/Q</h4>
 
-This is the I/Q from device record toggle. When a red background is displayed the recording is currently active. The name of the file created is `test_<n>.sdriq` where `<n>` is the slot number.
+This is the I/Q from device record toggle. When a red background is displayed the recording is currently active. The name of the file created is `test_n.sdriq` where `n` is the slot number.
+
+The format is S16LE I/Q samples. Thus there are 4 bytes per sample. I and Q values are 16 bit signed integers. The file starts with a context header containing information about center frequency, sample rate and timestamp of the start of the recording. This header has a length which is a multiple of a sample size (normally 24 bytes thus 6 samples). Thus this file can be used as a raw I/Q file with S16LE samples tolerating a glitch at the start corresponding to the 6 "random" samples. 
+
+You can also zap the 24 bytes header with this Linux command: `tail -c +25 myfile.sdriq > myfile.raw`
+
+To convert in another format you may use the sox utility. For example to convert to 32 bit (float) complex samples do:
+`sox -r 48k −b 16 −e signed-integer -c 2 myfile.raw -e float -c 2 myfilec.raw`
+
+Note that you have to specify the sampling rate and use `.raw` for the file extensions.
 
 <h4>2.3. Device sampling rate</h4>
 
