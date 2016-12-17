@@ -32,7 +32,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle">
-   <string>NFM Modulator</string>
+   <string>WFM Modulator</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
@@ -243,7 +243,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>3</number>
+         <number>8</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -259,7 +259,7 @@
          </size>
         </property>
         <property name="text">
-         <string>3k</string>
+         <string>8k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

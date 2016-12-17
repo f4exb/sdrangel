@@ -249,8 +249,6 @@ void NFMMod::stop()
 
 bool NFMMod::handleMessage(const Message& cmd)
 {
-	qDebug() << "NFMMod::handleMessage";
-
 	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;

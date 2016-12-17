@@ -298,7 +298,6 @@ private:
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
     Lowpass<Real> m_lowpass;
-    Bandpass<Real> m_bandpass;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;
@@ -326,9 +325,8 @@ private:
     static const int m_levelNbSamples;
 
     void apply();
-    void pullAF(Real& sample);
+    void pullAF(Complex& sample);
     void calculateLevel(Real& sample);
-    void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
 };

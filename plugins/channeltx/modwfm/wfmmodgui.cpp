@@ -436,7 +436,7 @@ void WFMModGUI::applySettings()
 		m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
-			ui->fmDev->value() * 100.0f, // value is in '100 Hz
+			ui->fmDev->value() * 1000.0f, // value is in '100 Hz
 			ui->toneFrequency->value() * 10.0f,
 			ui->volume->value() / 10.0f,
 			ui->audioMute->isChecked(),

@@ -96,29 +96,22 @@ void WFMMod::configure(MessageQueue* messageQueue,
 
 void WFMMod::pull(Sample& sample)
 {
-	Complex ci;
+	Complex ci, ri;
 	Real t;
 
 	m_settingsMutex.lock();
 
-    if (m_interpolatorDistance > 1.0f) // decimate
+    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
     {
-    	modulateSample();
-
-        while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-        {
-        	modulateSample();
-        }
-    }
-    else
-    {
-        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-        {
-        	modulateSample();
-        }
+        pullAF(m_modSample);
+        calculateLevel(m_modSample.real());
     }
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
+
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI_2;
+    ci.real(cos(m_modPhasor) * 32678.0f);
+    ci.imag(sin(m_modPhasor) * 32678.0f);
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
@@ -133,27 +126,15 @@ void WFMMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
-void WFMMod::modulateSample()
-{
-	Real t;
-
-    pullAF(t);
-    calculateLevel(t);
-
-    // 378 = 302 * 1.25; 302 = number of filter taps (established experimentally)
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 378.0f);
-    m_modSample.real(cos(m_modPhasor) * 32678.0f);
-    m_modSample.imag(sin(m_modPhasor) * 32678.0f);
-}
-
-void WFMMod::pullAF(Real& sample)
+void WFMMod::pullAF(Complex& sample)
 {
     int16_t audioSample[2];
 
     switch (m_afInput)
     {
     case WFMModInputTone:
-        sample = m_toneNco.next();
+        sample.real(m_toneNco.next());
+        sample.imag(0.0f);
         break;
     case WFMModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
@@ -171,22 +152,32 @@ void WFMMod::pullAF(Real& sample)
 
             if (m_ifstream.eof())
             {
-            	sample = 0.0f;
+            	sample.real(0.0f);
+                sample.imag(0.0f);
             }
             else
             {
-            	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_running.m_volumeFactor;
+                Real s;
+            	m_ifstream.read(reinterpret_cast<char*>(&s), sizeof(Real));
+            	m_lowpass.filter(s);
+            	sample.real(s * m_running.m_volumeFactor);
+                sample.imag(0.0f);
             }
         }
         else
         {
-            sample = 0.0f;
+            sample.real(0.0f);
+            sample.imag(0.0f);
         }
         break;
     case WFMModInputAudio:
-        m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        {
+            Real s = (audioSample[0] + audioSample[1])  / 65536.0f;
+            m_lowpass.filter(s);
+            m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
+            sample.real(s * m_running.m_volumeFactor);
+            sample.imag(0.0f);
+        }
         break;
     case WFMModInputCWTone:
         Real fadeFactor;
@@ -194,24 +185,28 @@ void WFMMod::pullAF(Real& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwSmoother.getFadeSample(true, fadeFactor);
-            sample = m_toneNco.next() * fadeFactor;
+            sample.real(m_toneNco.next() * fadeFactor);
+            sample.imag(0.0f);
         }
         else
         {
             if (m_cwSmoother.getFadeSample(false, fadeFactor))
             {
-                sample = m_toneNco.next() * fadeFactor;
+                sample.real(m_toneNco.next() * fadeFactor);
+                sample.imag(0.0f);
             }
             else
             {
-                sample = 0.0f;
+                sample.real(0.0f);
+                sample.imag(0.0f);
                 m_toneNco.setPhase(0);
             }
         }
         break;
     case WFMModInputNone:
     default:
-        sample = 0.0f;
+        sample.real(0.0f);
+        sample.imag(0.0f);
         break;
     }
 }
@@ -249,8 +244,6 @@ void WFMMod::stop()
 
 bool WFMMod::handleMessage(const Message& cmd)
 {
-	qDebug() << "WFMMod::handleMessage";
-
 	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
@@ -353,7 +346,7 @@ void WFMMod::apply()
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth, 3.0);
 		m_settingsMutex.unlock();
 	}
 
@@ -361,8 +354,7 @@ void WFMMod::apply()
 		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
 	{
 		m_settingsMutex.lock();
-		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
-		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
+		m_lowpass.create(101, m_config.m_audioSampleRate, m_config.m_afBandwidth);
 		m_settingsMutex.unlock();
 	}
 
