@@ -219,7 +219,7 @@ private:
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, int volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop)
         {
             return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
         }
