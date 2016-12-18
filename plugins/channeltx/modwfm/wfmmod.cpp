@@ -114,8 +114,8 @@ void WFMMod::pull(Sample& sample)
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
-    ci.real(cos(m_modPhasor) * 16384.0f); // -6 dB
-    ci.imag(sin(m_modPhasor) * 16384.0f);
+    ci.real(cos(m_modPhasor) * 29204.0f); // -1 dB
+    ci.imag(sin(m_modPhasor) * 29204.0f);
 
     // RF filtering is unnecessary
 

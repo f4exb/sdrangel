@@ -40,6 +40,15 @@ const int NFMModGUI::m_rfBW[] = {
 };
 const int NFMModGUI::m_nbRfBW = 11;
 
+const float NFMModGUI::m_ctcssTones[] = {
+         67.0,  71.9,  74.4,  77.0,  79.7,  82.5,  85.4,  88.5,  91.5,  94.8,
+         97.4, 100.0, 103.5, 107.2, 110.9, 114.8, 118.8, 123.0, 127.3, 131.8,
+        136.5, 141.3, 146.2, 151.4, 156.7, 162.2, 167.9, 173.8, 179.9, 186.2,
+        192.8, 203.5
+};
+const int NFMModGUI::m_nbCTCSSTones = 32;
+
+
 NFMModGUI* NFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
     NFMModGUI* gui = new NFMModGUI(pluginAPI, deviceAPI);
@@ -398,6 +407,11 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->play->setChecked(false);
     ui->tone->setChecked(false);
     ui->mic->setChecked(false);
+
+    for (int i=0; i<m_nbCTCSSTones; i++)
+    {
+        ui->ctcss->addItem(QString("%1").arg((double) m_ctcssTones[i], 0, 'f', 1));
+    }
 
     ui->cwKeyerGUI->setBuddies(m_nfmMod->getInputMessageQueue(), m_nfmMod->getCWKeyer());
 

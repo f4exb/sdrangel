@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>298</width>
+    <width>363</width>
     <height>300</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>280</width>
+     <width>341</width>
      <height>271</height>
     </rect>
    </property>
@@ -511,6 +511,43 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ctcssLabel">
+        <property name="text">
+         <string>CTCSS</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ctcssOn">
+        <property name="toolTip">
+         <string>Activate CTCSS</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ctcss">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Set CTCSS Frequency</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

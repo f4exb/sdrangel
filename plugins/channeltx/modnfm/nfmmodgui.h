@@ -106,6 +106,9 @@ private:
     static const int m_rfBW[];
     static const int m_nbRfBW;
 
+    static const float m_ctcssTones[];
+    static const int m_nbCTCSSTones;
+
     explicit NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~NFMModGUI();
 
