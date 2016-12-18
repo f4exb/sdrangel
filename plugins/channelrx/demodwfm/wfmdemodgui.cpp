@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QDebug>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_wfmdemodgui.h"
 #include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
@@ -15,12 +15,12 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "mainwindow.h"
 
-#include "../../channelrx/demodwfm/wfmdemod.h"
+#include "wfmdemod.h"
 
 const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
 
 const int WFMDemodGUI::m_rfBW[] = {
-	48000, 80000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
+	48000, 80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
 
 int requiredBW(int rfBW)
@@ -244,7 +244,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::blue);
-	m_channelMarker.setBandwidth(12500);
+	m_channelMarker.setBandwidth(m_rfBW[4]);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 

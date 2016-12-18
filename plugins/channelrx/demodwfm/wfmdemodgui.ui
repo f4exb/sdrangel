@@ -155,7 +155,7 @@
          <string>Demodulator (RF) bandwidth</string>
         </property>
         <property name="maximum">
-         <number>8</number>
+         <number>9</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -177,7 +177,7 @@
          </size>
         </property>
         <property name="text">
-         <string>12.5kHz</string>
+         <string>140kHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
