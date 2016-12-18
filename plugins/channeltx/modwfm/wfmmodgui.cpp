@@ -95,6 +95,7 @@ QByteArray WFMModGUI::serialize() const
 	s.writeU32(5, m_channelMarker.getColor().rgb());
 	s.writeS32(6, ui->toneFrequency->value());
 	s.writeS32(7, ui->volume->value());
+	s.writeBlob(8, ui->cwKeyerGUI->serialize());
 	return s.final();
 }
 
@@ -135,6 +136,8 @@ bool WFMModGUI::deserialize(const QByteArray& data)
         ui->toneFrequency->setValue(tmp);
         d.readS32(7, &tmp, 10);
         ui->volume->setValue(tmp);
+        d.readBlob(8, &bytetmp);
+        ui->cwKeyerGUI->deserialize(bytetmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);

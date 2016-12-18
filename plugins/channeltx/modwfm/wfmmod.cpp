@@ -34,6 +34,7 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
 
 const int WFMMod::m_levelNbSamples = 480; // every 10ms
+const int WFMMod::m_rfFilterFFTLength = 1024;
 
 WFMMod::WFMMod() :
 	m_modPhasor(0.0f),
@@ -57,6 +58,8 @@ WFMMod::WFMMod() :
 	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
+	m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
+
 	apply();
 
 	//m_audioBuffer.resize(1<<14);
@@ -78,6 +81,7 @@ WFMMod::WFMMod() :
 
 WFMMod::~WFMMod()
 {
+    delete m_rfFilter;
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
@@ -109,9 +113,11 @@ void WFMMod::pull(Sample& sample)
 
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI_2;
-    ci.real(cos(m_modPhasor) * 32678.0f);
-    ci.imag(sin(m_modPhasor) * 32678.0f);
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
+    ci.real(cos(m_modPhasor) * 16384.0f); // -6 dB
+    ci.imag(sin(m_modPhasor) * 16384.0f);
+
+    // RF filtering is unnecessary
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
@@ -133,7 +139,7 @@ void WFMMod::pullAF(Complex& sample)
     switch (m_afInput)
     {
     case WFMModInputTone:
-        sample.real(m_toneNco.next());
+        sample.real(m_toneNco.next() * m_running.m_volumeFactor);
         sample.imag(0.0f);
         break;
     case WFMModInputFile:
@@ -159,7 +165,6 @@ void WFMMod::pullAF(Complex& sample)
             {
                 Real s;
             	m_ifstream.read(reinterpret_cast<char*>(&s), sizeof(Real));
-            	m_lowpass.filter(s);
             	sample.real(s * m_running.m_volumeFactor);
                 sample.imag(0.0f);
             }
@@ -173,7 +178,6 @@ void WFMMod::pullAF(Complex& sample)
     case WFMModInputAudio:
         {
             Real s = (audioSample[0] + audioSample[1])  / 65536.0f;
-            m_lowpass.filter(s);
             m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
             sample.real(s * m_running.m_volumeFactor);
             sample.imag(0.0f);
@@ -185,14 +189,14 @@ void WFMMod::pullAF(Complex& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwSmoother.getFadeSample(true, fadeFactor);
-            sample.real(m_toneNco.next() * fadeFactor);
+            sample.real(m_toneNco.next() * m_running.m_volumeFactor * fadeFactor);
             sample.imag(0.0f);
         }
         else
         {
             if (m_cwSmoother.getFadeSample(false, fadeFactor))
             {
-                sample.real(m_toneNco.next() * fadeFactor);
+                sample.real(m_toneNco.next() * m_running.m_volumeFactor * fadeFactor);
                 sample.imag(0.0f);
             }
             else
@@ -340,21 +344,24 @@ void WFMMod::apply()
 	}
 
 	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
+	    (m_config.m_audioSampleRate != m_running.m_audioSampleRate) ||
+		(m_config.m_afBandwidth != m_running.m_afBandwidth))
 	{
 		m_settingsMutex.lock();
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorConsumed = false;
 		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth, 3.0);
+        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_afBandwidth, 3.0);
 		m_settingsMutex.unlock();
 	}
 
-	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+	if ((m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+		(m_config.m_outputSampleRate != m_running.m_outputSampleRate))
 	{
 		m_settingsMutex.lock();
-		m_lowpass.create(101, m_config.m_audioSampleRate, m_config.m_afBandwidth);
+        Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_outputSampleRate;
+        Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_outputSampleRate;
+        m_rfFilter->create_filter(lowCut, hiCut);
 		m_settingsMutex.unlock();
 	}
 

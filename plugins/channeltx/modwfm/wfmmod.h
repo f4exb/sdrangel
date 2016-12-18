@@ -25,8 +25,7 @@
 #include "dsp/basebandsamplesource.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
-#include "dsp/bandpass.h"
+#include "dsp/fftfilt.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/cwkeyer.h"
@@ -219,7 +218,7 @@ private:
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureWFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, int volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureWFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop)
         {
             return new MsgConfigureWFMMod(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
         }
@@ -297,7 +296,8 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
-    Lowpass<Real> m_lowpass;
+    fftfilt* m_rfFilter;
+    static const int m_rfFilterFFTLength;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;
