@@ -233,7 +233,7 @@ void AMModGUI::on_toneFrequency_valueChanged(int value)
 }
 
 
-void AMModGUI::on_audioMute_toggled(bool checked)
+void AMModGUI::on_channelMute_toggled(bool checked)
 {
 	applySettings();
 }
@@ -423,7 +423,7 @@ void AMModGUI::applySettings()
 			ui->modPercent->value() / 100.0f,
 			ui->toneFrequency->value() * 10.0f,
 			ui->volume->value() / 10.0f ,
-			ui->audioMute->isChecked(),
+			ui->channelMute->isChecked(),
 			ui->playLoop->isChecked());
 	}
 }

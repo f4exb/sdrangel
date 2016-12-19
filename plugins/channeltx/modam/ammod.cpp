@@ -93,6 +93,13 @@ void AMMod::configure(MessageQueue* messageQueue,
 
 void AMMod::pull(Sample& sample)
 {
+	if (m_running.m_channelMute)
+	{
+		sample.m_real = 0.0f;
+		sample.m_imag = 0.0f;
+		return;
+	}
+
 	Complex ci;
 
 	m_settingsMutex.lock();
@@ -266,7 +273,7 @@ bool AMMod::handleMessage(const Message& cmd)
 		m_config.m_modFactor = cfg.getModFactor();
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
-		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_channelMute = cfg.getChannelMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
@@ -276,7 +283,7 @@ bool AMMod::handleMessage(const Message& cmd)
 				<< " m_modFactor: " << m_config.m_modFactor
                 << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
-				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_audioMute: " << m_config.m_channelMute
 				<< " m_playLoop: " << m_config.m_playLoop;
 
 		return true;
@@ -369,7 +376,7 @@ void AMMod::apply()
 	m_running.m_toneFrequency = m_config.m_toneFrequency;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_channelMute = m_config.m_channelMute;
 	m_running.m_playLoop = m_config.m_playLoop;
 }
 

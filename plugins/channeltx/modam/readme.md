@@ -20,9 +20,9 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 Average total power in dB relative to a +/- 1.0 amplitude signal generated in the pass band.
 
-<h3>4: Audio mute</h3>
+<h3>4: Channel mute</h3>
 
-Use this button to toggle audio mute for this channel.
+Use this button to toggle mute for this channel.
 
 <h3>5: RF bandwidth</h3>
 
