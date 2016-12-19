@@ -326,7 +326,7 @@ private:
 
     void apply();
     void pullAF(Complex& sample);
-    void calculateLevel(Real& sample);
+    void calculateLevel(const Real& sample);
     void openFileStream();
     void seekFileStream(int seekPercentage);
 };

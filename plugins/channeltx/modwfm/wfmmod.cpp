@@ -215,7 +215,7 @@ void WFMMod::pullAF(Complex& sample)
     }
 }
 
-void WFMMod::calculateLevel(Real& sample)
+void WFMMod::calculateLevel(const Real& sample)
 {
     if (m_levelCalcCount < m_levelNbSamples)
     {
