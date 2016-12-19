@@ -51,6 +51,7 @@ void FileSinkThread::startWork()
     if (m_ofstream->is_open())
     {
         qDebug() << "FileSinkThread::startWork: file stream open, starting...";
+        m_maxThrottlems = 0;
         m_startWaitMutex.lock();
         m_elapsedTimer.start();
         start();
@@ -85,7 +86,7 @@ void FileSinkThread::setSamplerate(int samplerate)
 
 		// resize sample FIFO
 		if (m_sampleFifo) {
-		    m_sampleFifo->resize(samplerate, samplerate/4); // 1s buffer with 250ms write chunk size
+		    m_sampleFifo->resize(2*samplerate, samplerate/2); // 2s buffer with 500ms write chunk size
 		}
 
 		m_samplerate = samplerate;
@@ -126,6 +127,12 @@ void FileSinkThread::tick()
             m_samplesChunkSize = (m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
             m_throttleToggle = !m_throttleToggle;
         }
+
+//        if (m_throttlems > m_maxThrottlems)
+//        {
+//            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
+//            m_maxThrottlems = m_throttlems;
+//        }
 
         SampleVector::iterator readUntil;
 

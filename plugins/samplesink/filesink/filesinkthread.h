@@ -62,6 +62,7 @@ private:
 
 	int m_samplerate;
     int m_throttlems;
+    int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 
