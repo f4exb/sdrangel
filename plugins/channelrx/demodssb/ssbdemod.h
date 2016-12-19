@@ -21,7 +21,7 @@
 #include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
@@ -143,7 +143,7 @@ private:
     Real m_magsqPeak;
     int  m_magsqCount;
 
-	NCO m_nco;
+	NCOF m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
 	fftfilt* SSBFilter;
