@@ -28,25 +28,25 @@ When in monaural mode the icon shows a single loudspeaker and when in binaural m
 
 <h3>5: Reverse left and right channels in binaural mode</h3>
 
-Effective only in binaural mode: reverts left and right audio channels so that the left is connected to Q and the right to the I complex signal channels. 
+Effective only in binaural mode: reverses left and right audio channels so that the left is connected to Q and the right to the I complex signal channel. 
 
 <h3>6: SSB/DSB</h3>
 
-Selects between SSB and DSB operation. When in SSB mode the icon shows a single sideband spectrum (USB). When in DSB mode the icon shows a duble sideband spectrum. 
+Selects between SSB and DSB operation. When in SSB mode the icon shows a single sideband spectrum (USB side). When in DSB mode the icon shows a double sideband spectrum. 
 
 <h3>7: Spectrum display frequency span</h3>
 
-The transmitted signal in the sideband (SSB) or sidebands (DSB) is further decimated in powers of two before being applied to the spectrum analyzer. The frequency span is the audio sample rate (48 kHz) divided by the decimation factor.
+The transmitted signal in the sideband (SSB) or sidebands (DSB) is further decimated by a power of two before being applied to the channel spectrum display. Thus the frequency span of the spectrum display is the audio sample rate (48 kHz) divided by the decimation factor.
 
 <h3>8: Signal bandwidth</h3>
 
-The modulating signal is bandpass filtered (SSB) or lowpass filtered (DSB) before being multiplied by the local oscillator NCO. This is the upper limit of the filter.
+The modulating signal is bandpass filtered (SSB) or lowpass filtered (DSB) before being multiplied by the local oscillator NCO. This is the upper limit of the filter in absolute value.
 
 When this limit is positive the signal is transmitted in the upper sideband (USB). When this limit is negative the signal is transmitted in the lower sideband (LSB).
 
 <h3>9: Filter low frequency cutoff</h3>
 
-In SSB mode this is the lower limit (in absolute value) of the modulating signal bandpass filter
+In SSB mode this is the lower limit in absolute value of the modulating signal bandpass filter
 
 <h3>10: Volume</h3>
 
@@ -74,7 +74,7 @@ Switches to the Morse keyer input. You must switch it off to make other inputs a
 
 <h4>12.3: Tone frequency (kHz)</h4>
 
-Adjusts the tone frequqncy from 0.1 to 2.5 kHz in 0.01 kHz steps
+Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
 <h4>12.4: Audio input select</h4>
 
@@ -99,7 +99,7 @@ Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" s
   - Element (dot or dash) silence separator: 1 dot length
   - Dash: 3 dot lengths
   - Character silence separator: 3 dot lengths
-  - Word separator: 7 dot lengths
+  - Word silence separator: 7 dot lengths
   
 <h4>15.2: Dots keying</h4>
 
@@ -111,7 +111,7 @@ Switch this button to send dashes continuously
 
 <h4>15.4: Text keying</h4>
 
-Switch this button to send the text typed into the text box (14)
+Switch this button to send the text typed into the text box (13)
 
 <h4>15.5: Text auto repeat</h4>
 
@@ -135,11 +135,11 @@ Opens a file dialog to select the audio file to be played. It must be mono 48 kH
 
 <h4>17.2: Audio file loop</h4>
 
-Autio replay file at the end
+Audio replay file at the end
 
 <h4>17.3: Play/pause file play</h4>
 
-Toggle play/pause file play. When paused the slider below (17) can be used to randomly set the position in the file when re-starting.
+Toggle play/pause file play. When paused the slider below (20) can be used to randomly set the position in the file when re-starting.
 
 <h3>18: Play file current position</h3>
 
@@ -147,12 +147,12 @@ This is the current audio file play position in time units relative to the start
 
 <h3>19: Play file length</h3>
 
-This isthe audio file play length in time units
+This is the audio file play length in time units
 
-<h3>28: Play file position slider</h3>
+<h3>20: Play file position slider</h3>
 
 This slider can be used to randomly set the currennt position in the file when file play is in pause state (button 17.3)
 
-<h3>21: Signal spectrum display</h3>
+<h3>21: Channel spectrum display</h3>
 
-This is the spectrum display in the modulating signal passband. Controls at the bottom of the panel are the same as with the central spectrum display.
+This is the channel spectrum display. Controls at the bottom of the panel are the same as with the central spectrum display.

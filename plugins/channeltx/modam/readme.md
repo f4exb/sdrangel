@@ -58,7 +58,7 @@ Switches to the Morse keyer input. You must switch it off to make other inputs a
 
 <h4>9.3: Tone frequency (kHz)</h4>
 
-Adjusts the tone frequqncy from 0.1 to 2.5 kHz in 0.01 kHz steps
+Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
 <h4>9.4: Audio input select</h4>
 
@@ -83,7 +83,7 @@ Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" s
   - Element (dot or dash) silence separator: 1 dot length
   - Dash: 3 dot lengths
   - Character silence separator: 3 dot lengths
-  - Word separator: 7 dot lengths
+  - Word silence separator: 7 dot lengths
   
 <h4>12.2: Dots keying</h4>
 
@@ -119,7 +119,7 @@ Opens a file dialog to select the audio file to be played. It must be mono 48 kH
 
 <h4>14.2: Audio file loop</h4>
 
-Autio replay file at the end
+Audio replay file at the end
 
 <h4>14.3: Play/pause file play</h4>
 
@@ -131,7 +131,7 @@ This is the current audio file play position in time units relative to the start
 
 <h3>16: Play file length</h3>
 
-This isthe audio file play length in time units
+This is the audio file play length in time units
 
 <h3>17: Play file position slider</h3>
 
