@@ -62,6 +62,7 @@ SOURCES += mainwindow.cpp\
         dsp/lowpass.cpp\
         dsp/movingaverage.cpp\
         dsp/nco.cpp\
+        dsp/ncof.cpp\
         dsp/pidcontroller.cpp\
         dsp/phaselock.cpp\
         dsp/samplesinkfifo.cpp\
@@ -159,6 +160,7 @@ HEADERS  += mainwindow.h\
         dsp/misc.h\
         dsp/movingaverage.h\
         dsp/nco.h\
+        dsp/ncof.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
         dsp/pidcontroller.h\

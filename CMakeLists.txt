@@ -118,6 +118,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/lowpass.cpp
     sdrbase/dsp/movingaverage.cpp
     sdrbase/dsp/nco.cpp
+    sdrbase/dsp/ncof.cpp
     sdrbase/dsp/pidcontroller.cpp
     sdrbase/dsp/phaselock.cpp
     sdrbase/dsp/samplesinkfifo.cpp
@@ -225,6 +226,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/misc.h
     sdrbase/dsp/movingaverage.h
     sdrbase/dsp/nco.h
+    sdrbase/dsp/ncof.h
     sdrbase/dsp/phasediscri.h
     sdrbase/dsp/phaselock.h
     sdrbase/dsp/pidcontroller.h
