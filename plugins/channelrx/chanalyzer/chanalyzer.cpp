@@ -35,7 +35,6 @@ ChannelAnalyzer::ChannelAnalyzer(BasebandSampleSink* sampleSink) :
 	m_sampleRate = 96000;
 	m_frequency = 0;
 	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_nco_test.setFreq(m_frequency, m_sampleRate);
 	m_undersampleCount = 0;
 	m_sum = 0;
 	m_usb = true;

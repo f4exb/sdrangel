@@ -20,7 +20,7 @@
 #include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
-#include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
@@ -93,8 +93,7 @@ private:
 	bool m_ssb;
 	Real m_magsq;
 
-	NCO m_nco;
-	NCO m_nco_test;
+	NCOF m_nco;
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
