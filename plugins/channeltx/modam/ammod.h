@@ -24,6 +24,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
@@ -282,7 +283,7 @@ private:
     Config m_running;
 
     NCO m_carrierNco;
-    NCO m_toneNco;
+    NCOF m_toneNco;
     Complex m_modSample;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
