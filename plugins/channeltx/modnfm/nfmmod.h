@@ -24,6 +24,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
@@ -184,7 +185,9 @@ public:
             float toneFrequency,
 			float volumeFactor,
             bool audioMute,
-            bool playLoop);
+            bool playLoop,
+            bool ctcssOn,
+            float ctcssFrequency);
 
     virtual void pull(Sample& sample);
     virtual void start();
@@ -218,10 +221,28 @@ private:
         float getVolumeFactor() const { return m_volumeFactor; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
+        bool getCTCSSOn() const { return m_ctcssOn; }
+        float getCTCSSFrequency() const { return m_ctcssFrequency; }
 
-        static MsgConfigureNFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureNFMMod* create(Real rfBandwidth,
+                Real afBandwidth,
+                float fmDeviation,
+                float toneFrequency,
+                float volumeFactor,
+                bool audioMute,
+                bool playLoop,
+                bool ctcssOn,
+                float ctcssFrequency)
         {
-            return new MsgConfigureNFMMod(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
+            return new MsgConfigureNFMMod(rfBandwidth,
+                    afBandwidth,
+                    fmDeviation,
+                    toneFrequency,
+                    volumeFactor,
+                    audioMute,
+                    playLoop,
+                    ctcssOn,
+                    ctcssFrequency);
         }
 
     private:
@@ -232,8 +253,18 @@ private:
         float m_volumeFactor;
         bool m_audioMute;
         bool m_playLoop;
+        bool m_ctcssOn;
+        float m_ctcssFrequency;
 
-        MsgConfigureNFMMod(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureNFMMod(Real rfBandwidth,
+                Real afBandwidth,
+                float fmDeviation,
+                float toneFrequency,
+                float volumeFactor,
+                bool audioMute,
+                bool playLoop,
+                bool ctcssOn,
+                float ctcssFrequency) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
@@ -241,7 +272,9 @@ private:
             m_toneFrequency(toneFrequency),
             m_volumeFactor(volumeFactor),
             m_audioMute(audioMute),
-			m_playLoop(playLoop)
+			m_playLoop(playLoop),
+			m_ctcssOn(ctcssOn),
+			m_ctcssFrequency(ctcssFrequency)
         { }
     };
 
@@ -269,6 +302,8 @@ private:
         quint32 m_audioSampleRate;
         bool m_audioMute;
         bool m_playLoop;
+        bool m_ctcssOn;
+        float m_ctcssFrequency;
 
         Config() :
             m_outputSampleRate(-1),
@@ -280,7 +315,9 @@ private:
             m_volumeFactor(1.0f),
             m_audioSampleRate(0),
             m_audioMute(false),
-			m_playLoop(false)
+			m_playLoop(false),
+			m_ctcssOn(false),
+			m_ctcssFrequency(88.5)
         { }
     };
 
@@ -290,7 +327,8 @@ private:
     Config m_running;
 
     NCO m_carrierNco;
-    NCO m_toneNco;
+    NCOF m_toneNco;
+    NCOF m_ctcssNco;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
     Interpolator m_interpolator;

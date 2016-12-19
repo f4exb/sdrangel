@@ -76,6 +76,9 @@ private slots:
     void on_navTimeSlider_valueChanged(int value);
     void on_showFileDialog_clicked(bool checked);
 
+    void on_ctcss_currentIndexChanged(int index);
+    void on_ctcssOn_toggled(bool checked);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 

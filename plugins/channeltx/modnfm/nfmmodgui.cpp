@@ -330,6 +330,17 @@ void NFMModGUI::on_showFileDialog_clicked(bool checked)
     }
 }
 
+void NFMModGUI::on_ctcss_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
+void NFMModGUI::on_ctcssOn_toggled(bool checked)
+{
+    applySettings();
+}
+
+
 void NFMModGUI::configureFileName()
 {
     qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
@@ -457,7 +468,9 @@ void NFMModGUI::applySettings()
 			ui->toneFrequency->value() * 10.0f,
 			ui->volume->value() / 10.0f,
 			ui->audioMute->isChecked(),
-			ui->playLoop->isChecked());
+			ui->playLoop->isChecked(),
+			ui->ctcssOn->isChecked(),
+			m_ctcssTones[ui->ctcss->currentIndex()]);
 	}
 }
 
