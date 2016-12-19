@@ -89,6 +89,8 @@ void NFMModGUI::resetToDefaults()
 	ui->toneFrequency->setValue(100);
 	ui->volume->setValue(10);
 	ui->deltaFrequency->setValue(0);
+	ui->ctcssOn->setChecked(false);
+	ui->ctcss->setCurrentIndex(0);
 
 	blockApplySettings(false);
 	applySettings();
@@ -105,6 +107,8 @@ QByteArray NFMModGUI::serialize() const
 	s.writeS32(6, ui->toneFrequency->value());
 	s.writeS32(7, ui->volume->value());
     s.writeBlob(8, ui->cwKeyerGUI->serialize());
+    s.writeBool(9, ui->ctcssOn->isChecked());
+	s.writeS32(10, ui->ctcss->currentIndex());
 	return s.final();
 }
 
@@ -123,6 +127,7 @@ bool NFMModGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool booltmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -147,6 +152,11 @@ bool NFMModGUI::deserialize(const QByteArray& data)
         ui->volume->setValue(tmp);
         d.readBlob(8, &bytetmp);
         ui->cwKeyerGUI->deserialize(bytetmp);
+
+        d.readBool(9, &booltmp, false);
+        ui->ctcssOn->setChecked(booltmp);
+        d.readS32(10, &tmp, 0);
+		ui->ctcss->setCurrentIndex(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
