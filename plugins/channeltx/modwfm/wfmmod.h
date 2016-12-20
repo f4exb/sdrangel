@@ -216,12 +216,24 @@ private:
         float getFMDeviation() const { return m_fmDeviation; }
         float getToneFrequency() const { return m_toneFrequency; }
         float getVolumeFactor() const { return m_volumeFactor; }
-        bool getAudioMute() const { return m_audioMute; }
+        bool getChannelMute() const { return m_channelMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureWFMMod* create(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop)
+        static MsgConfigureWFMMod* create(Real rfBandwidth,
+        		Real afBandwidth,
+				float fmDeviation,
+				float toneFrequency,
+				float volumeFactor,
+				bool channelMute,
+				bool playLoop)
         {
-            return new MsgConfigureWFMMod(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
+            return new MsgConfigureWFMMod(rfBandwidth,
+            		afBandwidth,
+					fmDeviation,
+					toneFrequency,
+					volumeFactor,
+					channelMute,
+					playLoop);
         }
 
     private:
@@ -230,17 +242,23 @@ private:
         float m_fmDeviation;
         float m_toneFrequency;
         float m_volumeFactor;
-        bool m_audioMute;
+        bool m_channelMute;
         bool m_playLoop;
 
-        MsgConfigureWFMMod(Real rfBandwidth, Real afBandwidth, float fmDeviation, float toneFrequency, float volumeFactor, bool audioMute, bool playLoop) :
+        MsgConfigureWFMMod(Real rfBandwidth,
+        		Real afBandwidth,
+				float fmDeviation,
+				float toneFrequency,
+				float volumeFactor,
+				bool channelMute,
+				bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
             m_fmDeviation(fmDeviation),
             m_toneFrequency(toneFrequency),
             m_volumeFactor(volumeFactor),
-            m_audioMute(audioMute),
+            m_channelMute(channelMute),
 			m_playLoop(playLoop)
         { }
     };
@@ -267,7 +285,7 @@ private:
         float m_toneFrequency;
         float m_volumeFactor;
         quint32 m_audioSampleRate;
-        bool m_audioMute;
+        bool m_channelMute;
         bool m_playLoop;
 
         Config() :
@@ -279,7 +297,7 @@ private:
             m_toneFrequency(1000.0f),
             m_volumeFactor(1.0f),
             m_audioSampleRate(0),
-            m_audioMute(false),
+            m_channelMute(false),
 			m_playLoop(false)
         { }
     };

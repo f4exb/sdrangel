@@ -242,7 +242,7 @@ void WFMModGUI::on_toneFrequency_valueChanged(int value)
     applySettings();
 }
 
-void WFMModGUI::on_audioMute_toggled(bool checked)
+void WFMModGUI::on_channelMute_toggled(bool checked)
 {
 	applySettings();
 }
@@ -442,7 +442,7 @@ void WFMModGUI::applySettings()
 			ui->fmDev->value() * 1000.0f, // value is in '100 Hz
 			ui->toneFrequency->value() * 10.0f,
 			ui->volume->value() / 10.0f,
-			ui->audioMute->isChecked(),
+			ui->channelMute->isChecked(),
 			ui->playLoop->isChecked());
 	}
 }

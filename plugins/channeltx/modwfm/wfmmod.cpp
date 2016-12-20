@@ -91,15 +91,22 @@ void WFMMod::configure(MessageQueue* messageQueue,
 		float fmDeviation,
 		float toneFrequency,
 		float volumeFactor,
-		bool audioMute,
+		bool channelMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureWFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, audioMute, playLoop);
+	Message* cmd = MsgConfigureWFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, channelMute, playLoop);
 	messageQueue->push(cmd);
 }
 
 void WFMMod::pull(Sample& sample)
 {
+	if (m_running.m_channelMute)
+	{
+		sample.m_real = 0.0f;
+		sample.m_imag = 0.0f;
+		return;
+	}
+
 	Complex ci, ri;
 	Real t;
 
@@ -272,7 +279,7 @@ bool WFMMod::handleMessage(const Message& cmd)
 		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
-		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_channelMute = cfg.getChannelMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 
 		apply();
@@ -283,7 +290,7 @@ bool WFMMod::handleMessage(const Message& cmd)
 				<< " m_fmDeviation: " << m_config.m_fmDeviation
                 << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
-				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_channelMute: " << m_config.m_channelMute
 				<< " m_playLoop: " << m_config.m_playLoop;
 
 		return true;
@@ -386,7 +393,7 @@ void WFMMod::apply()
 	m_running.m_fmDeviation = m_config.m_fmDeviation;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_channelMute = m_config.m_channelMute;
 	m_running.m_playLoop = m_config.m_playLoop;
 }
 
