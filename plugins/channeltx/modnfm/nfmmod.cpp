@@ -107,6 +107,13 @@ void NFMMod::configure(MessageQueue* messageQueue,
 
 void NFMMod::pull(Sample& sample)
 {
+	if (m_running.m_channelMute)
+	{
+		sample.m_real = 0.0f;
+		sample.m_imag = 0.0f;
+		return;
+	}
+
 	Complex ci;
 	Real t;
 
@@ -292,7 +299,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_toneFrequency = cfg.getToneFrequency();
 		m_config.m_volumeFactor = cfg.getVolumeFactor();
-		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_channelMute = cfg.getChannelMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 		m_config.m_ctcssOn = cfg.getCTCSSOn();
 		m_config.m_ctcssFrequency = cfg.getCTCSSFrequency();
@@ -305,7 +312,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 				<< " m_fmDeviation: " << m_config.m_fmDeviation
                 << " m_toneFrequency: " << m_config.m_toneFrequency
                 << " m_volumeFactor: " << m_config.m_volumeFactor
-				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_channelMute: " << m_config.m_channelMute
 				<< " m_playLoop: " << m_config.m_playLoop
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
 				<< " m_ctcssFrequency: " << m_config.m_ctcssFrequency;
@@ -416,7 +423,7 @@ void NFMMod::apply()
 	m_running.m_fmDeviation = m_config.m_fmDeviation;
     m_running.m_volumeFactor = m_config.m_volumeFactor;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_channelMute = m_config.m_channelMute;
 	m_running.m_playLoop = m_config.m_playLoop;
 	m_running.m_ctcssOn = m_config.m_ctcssOn;
 	m_running.m_ctcssFrequency = m_config.m_ctcssFrequency;

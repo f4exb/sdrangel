@@ -261,7 +261,7 @@ void NFMModGUI::on_toneFrequency_valueChanged(int value)
     applySettings();
 }
 
-void NFMModGUI::on_audioMute_toggled(bool checked)
+void NFMModGUI::on_channelMute_toggled(bool checked)
 {
 	applySettings();
 }
@@ -477,7 +477,7 @@ void NFMModGUI::applySettings()
 			ui->fmDev->value() * 100.0f, // value is in '100 Hz
 			ui->toneFrequency->value() * 10.0f,
 			ui->volume->value() / 10.0f,
-			ui->audioMute->isChecked(),
+			ui->channelMute->isChecked(),
 			ui->playLoop->isChecked(),
 			ui->ctcssOn->isChecked(),
 			m_ctcssTones[ui->ctcss->currentIndex()]);

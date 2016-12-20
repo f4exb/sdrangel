@@ -184,7 +184,7 @@ public:
             float fmDeviation,
             float toneFrequency,
 			float volumeFactor,
-            bool audioMute,
+            bool channelMute,
             bool playLoop,
             bool ctcssOn,
             float ctcssFrequency);
@@ -219,7 +219,7 @@ private:
         float getFMDeviation() const { return m_fmDeviation; }
         float getToneFrequency() const { return m_toneFrequency; }
         float getVolumeFactor() const { return m_volumeFactor; }
-        bool getAudioMute() const { return m_audioMute; }
+        bool getChannelMute() const { return m_channelMute; }
         bool getPlayLoop() const { return m_playLoop; }
         bool getCTCSSOn() const { return m_ctcssOn; }
         float getCTCSSFrequency() const { return m_ctcssFrequency; }
@@ -229,7 +229,7 @@ private:
                 float fmDeviation,
                 float toneFrequency,
                 float volumeFactor,
-                bool audioMute,
+                bool channelMute,
                 bool playLoop,
                 bool ctcssOn,
                 float ctcssFrequency)
@@ -239,7 +239,7 @@ private:
                     fmDeviation,
                     toneFrequency,
                     volumeFactor,
-                    audioMute,
+                    channelMute,
                     playLoop,
                     ctcssOn,
                     ctcssFrequency);
@@ -251,7 +251,7 @@ private:
         float m_fmDeviation;
         float m_toneFrequency;
         float m_volumeFactor;
-        bool m_audioMute;
+        bool m_channelMute;
         bool m_playLoop;
         bool m_ctcssOn;
         float m_ctcssFrequency;
@@ -261,7 +261,7 @@ private:
                 float fmDeviation,
                 float toneFrequency,
                 float volumeFactor,
-                bool audioMute,
+                bool channelMute,
                 bool playLoop,
                 bool ctcssOn,
                 float ctcssFrequency) :
@@ -271,7 +271,7 @@ private:
             m_fmDeviation(fmDeviation),
             m_toneFrequency(toneFrequency),
             m_volumeFactor(volumeFactor),
-            m_audioMute(audioMute),
+            m_channelMute(channelMute),
 			m_playLoop(playLoop),
 			m_ctcssOn(ctcssOn),
 			m_ctcssFrequency(ctcssFrequency)
@@ -300,7 +300,7 @@ private:
         float m_toneFrequency;
         float m_volumeFactor;
         quint32 m_audioSampleRate;
-        bool m_audioMute;
+        bool m_channelMute;
         bool m_playLoop;
         bool m_ctcssOn;
         float m_ctcssFrequency;
@@ -314,7 +314,7 @@ private:
             m_toneFrequency(1000.0f),
             m_volumeFactor(1.0f),
             m_audioSampleRate(0),
-            m_audioMute(false),
+            m_channelMute(false),
 			m_playLoop(false),
 			m_ctcssOn(false),
 			m_ctcssFrequency(88.5)
