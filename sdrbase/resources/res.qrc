@@ -67,5 +67,7 @@
         <file>slot2_on.png</file>
         <file>iambickey.png</file>
         <file>morsekey.png</file>
+        <file>txoff.png</file>
+        <file>txon.png</file>
     </qresource>
 </RCC>
