@@ -41,7 +41,8 @@ Transmission or signal generation support for eligible devices (BladeRF and Hack
   - Phase 4a: version 2.4.0: FM modulator
   - Phase 4b: version 2.5.0: SSB modulator and CW keyer
   - Phase 4c: version 2.5.1: WFM modulator
-  - phase 5:  version 3.0.0: BladeRF and HackRF support including final interpolation stage.
+  - Phase 4d: version 2.5.2: limit to one channel plugin due to bug #11
+  - phase 5:  version 2.6.0: BladeRF and HackRF support including final interpolation stage. Degraded with only one channel plugin allowed due to bug #11
 
 <h2>Airspy</h2>
 
