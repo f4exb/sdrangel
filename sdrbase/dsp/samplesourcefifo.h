@@ -54,8 +54,8 @@ private:
     QMutex m_mutex;
 
 signals:
-    void dataWrite();             // signal data is read past a read chunk of samples and write is needed
-    void dataRead(int nbSamples); // signal a read has been done for a number of samples
+    void dataWrite(int nbSamples); // signal data is read past a threshold and writing new samples to fill in is needed
+    void dataRead(int nbSamples);  // signal a read has been done for a number of samples
 };
 
 #endif /* SDRBASE_DSP_SAMPLESOURCEFIFO_H_ */

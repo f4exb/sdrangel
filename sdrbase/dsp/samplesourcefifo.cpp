@@ -52,7 +52,7 @@ void SampleSourceFifo::init()
 
 void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+//    QMutexLocker mutexLocker(&m_mutex);
     assert(nbSamples < m_samplesChunkSize/2);
 
     m_ir = (m_ir + nbSamples) % m_size;
@@ -63,21 +63,21 @@ void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned i
 
     if (m_init)
     {
-        emit dataWrite();
+        emit dataWrite(m_size);
         m_init = false;
     }
     else if (i_delta > 0)
     {
-        if (i_delta <= m_samplesChunkSize)
+        if (i_delta <= m_size/2) // m_samplesChunkSize)
         {
-            emit dataWrite();
+            emit dataWrite(m_size/2);
         }
     }
     else
     {
-        if (i_delta + m_size <= m_samplesChunkSize)
+        if (i_delta + m_size <= m_size/2) //m_samplesChunkSize)
         {
-            emit dataWrite();
+            emit dataWrite(m_size/2);
         }
     }
 }
@@ -88,7 +88,7 @@ void SampleSourceFifo::write(const Sample& sample)
     m_data[m_iw+m_size] = sample;
 
     {
-        QMutexLocker mutexLocker(&m_mutex);
+//        QMutexLocker mutexLocker(&m_mutex);
         m_iw = (m_iw+1) % m_size;
     }
 }
@@ -108,7 +108,7 @@ void SampleSourceFifo::bumpIndex(SampleVector::iterator& writeAt)
     m_data[m_iw+m_size] = m_data[m_iw];
 
     {
-        QMutexLocker mutexLocker(&m_mutex);
+//        QMutexLocker mutexLocker(&m_mutex);
         m_iw = (m_iw+1) % m_size;
     }
 

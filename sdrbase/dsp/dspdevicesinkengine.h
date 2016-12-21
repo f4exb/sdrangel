@@ -105,7 +105,7 @@ private:
 	quint64 m_centerFrequency;
 
 	void run();
-	void work(); //!< transfer samples from beseband sources to sink if in running state
+	void work(int nbWriteSamples); //!< transfer samples from beseband sources to sink if in running state
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
@@ -115,7 +115,7 @@ private:
 	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
 
 private slots:
-	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
+	void handleData(int nbSamples); //!< Handle data when samples have to be written to the sample FIFO
 	void handleInputMessages(); //!< Handle input message queue
 	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 	void handleForwardToSpectrumSink(int nbSamples);

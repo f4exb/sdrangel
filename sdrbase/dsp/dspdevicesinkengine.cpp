@@ -168,10 +168,10 @@ QString DSPDeviceSinkEngine::sinkDeviceDescription()
 	return cmd.getDeviceDescription();
 }
 
-void DSPDeviceSinkEngine::work()
+void DSPDeviceSinkEngine::work(int nbWriteSamples)
 {
 	SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
-	unsigned int nbWriteSamples = sampleFifo->getChunkSize();
+	//unsigned int nbWriteSamples = sampleFifo->getChunkSize();
 	SampleVector::iterator writeBegin;
 	sampleFifo->getWriteIterator(writeBegin);
 	SampleVector::iterator writeAt = writeBegin;
@@ -407,7 +407,7 @@ void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink* sink)
 	if(m_deviceSampleSink != 0)
 	{
 		qDebug("DSPDeviceSinkEngine::handleSetSink: set %s", qPrintable(sink->getDeviceDescription()));
-		connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataWrite()), this, SLOT(handleData()), Qt::QueuedConnection);
+		connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataWrite(int)), this, SLOT(handleData(int)), Qt::QueuedConnection);
 	}
 	else
 	{
@@ -415,11 +415,11 @@ void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink* sink)
 	}
 }
 
-void DSPDeviceSinkEngine::handleData()
+void DSPDeviceSinkEngine::handleData(int nbSamples)
 {
 	if(m_state == StRunning)
 	{
-		work();
+		work(nbSamples);
 	}
 }
 
