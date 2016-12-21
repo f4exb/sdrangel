@@ -21,4 +21,4 @@ Description: SDR/Analyzer/Generator front-end for various hardware
    Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa
    Analyzer: Generic channel
  Transmission modes supported:
-   Analog: AM
+   Analog: AM, NFM, SSB, WFM

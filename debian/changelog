@@ -1,10 +1,10 @@
-sdrangel (2.5.0-1) unstable; urgency=medium
+sdrangel (2.5.1-1) unstable; urgency=medium
 
   * WFM Modulator
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Dec 2016 23:14:18 +0100
 
-sdrangel (2.5.1-1) unstable; urgency=medium
+sdrangel (2.5.0-1) unstable; urgency=medium
 
   * SSB Modulator
   * CW Keyer
