@@ -151,19 +151,6 @@ void NFMMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
-void NFMMod::feed(SampleSourceFifo* sampleFifo,
-            int nbSamples)
-{
-    SampleVector::iterator writeAt;
-    sampleFifo->getWriteIterator(writeAt);
-
-    for (int i = 0; i < nbSamples; i++)
-    {
-        pull((*writeAt));
-        sampleFifo->bumpIndex(writeAt);
-    }
-}
-
 void NFMMod::modulateSample()
 {
 	Real t;

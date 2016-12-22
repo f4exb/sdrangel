@@ -190,11 +190,6 @@ public:
             float ctcssFrequency);
 
     virtual void pull(Sample& sample);
-
-    /** direct feeding of sample source FIFO */
-	virtual void feed(SampleSourceFifo* sampleFifo,
-			int nbSamples);
-
     virtual void start();
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);

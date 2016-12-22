@@ -37,8 +37,17 @@ public:
 	virtual void pull(Sample& sample) = 0;
 
     /** direct feeding of sample source FIFO */
-	virtual void feed(SampleSourceFifo* sampleFifo,
-			int nbSamples) = 0;
+	void feed(SampleSourceFifo* sampleFifo, int nbSamples)
+	{
+	    SampleVector::iterator writeAt;
+	    sampleFifo->getWriteIterator(writeAt);
+
+	    for (int i = 0; i < nbSamples; i++)
+	    {
+	        pull((*writeAt));
+	        sampleFifo->bumpIndex(writeAt);
+	    }
+	}
 
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 

@@ -139,19 +139,6 @@ void WFMMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
-void WFMMod::feed(SampleSourceFifo* sampleFifo,
-            int nbSamples)
-{
-    SampleVector::iterator writeAt;
-    sampleFifo->getWriteIterator(writeAt);
-
-    for (int i = 0; i < nbSamples; i++)
-    {
-        pull((*writeAt));
-        sampleFifo->bumpIndex(writeAt);
-    }
-}
-
 void WFMMod::pullAF(Complex& sample)
 {
     int16_t audioSample[2];
