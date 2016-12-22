@@ -1,3 +1,9 @@
+sdrangel (2.5.2-1) unstable; urgency=medium
+
+  * Changed modulators source device feeding
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 25 Dec 2016 23:14:18 +0100
+
 sdrangel (2.5.1-1) unstable; urgency=medium
 
   * WFM Modulator
