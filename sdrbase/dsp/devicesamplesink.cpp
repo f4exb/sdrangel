@@ -18,7 +18,7 @@
 #include "dsp/devicesamplesink.h"
 
 DeviceSampleSink::DeviceSampleSink() :
-    m_sampleSourceFifo(1<<19, 1<<17)
+    m_sampleSourceFifo(1<<19)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

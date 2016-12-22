@@ -19,7 +19,8 @@
 #define SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_
 
 #include <QObject>
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
+#include "dsp/samplesourcefifo.h"
 #include "util/export.h"
 #include "util/messagequeue.h"
 
@@ -34,6 +35,11 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void pull(Sample& sample) = 0;
+
+    /** direct feeding of sample source FIFO */
+	virtual void feed(SampleSourceFifo* sampleFifo,
+			int nbSamples) = 0;
+
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication

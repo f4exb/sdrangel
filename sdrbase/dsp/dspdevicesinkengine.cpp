@@ -172,15 +172,29 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 {
 	SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
 	//unsigned int nbWriteSamples = sampleFifo->getChunkSize();
-	SampleVector::iterator writeBegin;
-	sampleFifo->getWriteIterator(writeBegin);
-	SampleVector::iterator writeAt = writeBegin;
-	Sample s;
-	int sourceOccurence = 0;
 
-	if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 0)
+	// single channel source handling
+	if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) == 1)
 	{
-		for (int is = 0; is < nbWriteSamples; is++)
+		for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
+		{
+			(*it)->feed(sampleFifo, nbWriteSamples);
+		}
+		for (BasebandSampleSources::iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
+		{
+			(*it)->feed(sampleFifo, nbWriteSamples);
+		}
+	}
+	// multiple channel sources handling
+	else if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 1)
+	{
+	    SampleVector::iterator writeBegin;
+	    sampleFifo->getWriteIterator(writeBegin);
+	    SampleVector::iterator writeAt = writeBegin;
+	    Sample s;
+	    int sourceOccurence = 0;
+
+	    for (int is = 0; is < nbWriteSamples; is++)
 		{
 			// pull data from threaded sources and merge them in the device sample FIFO
 			for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)

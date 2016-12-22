@@ -182,6 +182,19 @@ void SSBMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
+void SSBMod::feed(SampleSourceFifo* sampleFifo,
+            int nbSamples)
+{
+    SampleVector::iterator writeAt;
+    sampleFifo->getWriteIterator(writeAt);
+
+    for (int i = 0; i < nbSamples; i++)
+    {
+        pull((*writeAt));
+        sampleFifo->bumpIndex(writeAt);
+    }
+}
+
 void SSBMod::modulateSample()
 {
     pullAF(m_modSample);

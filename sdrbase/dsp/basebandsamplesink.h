@@ -19,7 +19,7 @@
 #define INCLUDE_SAMPLESINK_H
 
 #include <QObject>
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
 #include "util/export.h"
 #include "util/messagequeue.h"
 

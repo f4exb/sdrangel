@@ -18,10 +18,9 @@
 #ifndef SDRBASE_DSP_THREADEDBASEBANDSAMPLESOURCE_H_
 #define SDRBASE_DSP_THREADEDBASEBANDSAMPLESOURCE_H_
 
-#include <dsp/basebandsamplesource.h>
 #include <QMutex>
 
-#include "samplesourcefifo.h"
+#include "dsp/basebandsamplesource.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 
@@ -47,6 +46,10 @@ public:
 
 	bool handleSourceMessage(const Message& cmd);  //!< Send message to source synchronously
 	void pull(Sample& sample);                     //!< Pull one sample from source
+
+    /** direct feeding of sample source FIFO */
+	void feed(SampleSourceFifo* sampleFifo,
+		int nbSamples);
 
 	QString getSampleSourceObjectName() const;
 

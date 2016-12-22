@@ -128,11 +128,11 @@ void FileSinkThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-        if (m_throttlems > m_maxThrottlems)
-        {
-            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
-            m_maxThrottlems = m_throttlems;
-        }
+//        if (m_throttlems > m_maxThrottlems)
+//        {
+//            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
+//            m_maxThrottlems = m_throttlems;
+//        }
 
         SampleVector::iterator readUntil;
 

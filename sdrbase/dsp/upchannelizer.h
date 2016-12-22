@@ -63,6 +63,11 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(Sample& sample);
+
+    /** direct feeding of sample source FIFO */
+	virtual void feed(SampleSourceFifo* sampleFifo,
+			int nbSamples);
+
     virtual bool handleMessage(const Message& cmd);
 
 protected:

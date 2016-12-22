@@ -59,6 +59,12 @@ void ThreadedBasebandSampleSource::pull(Sample& sample)
 	m_basebandSampleSource->pull(sample);
 }
 
+void ThreadedBasebandSampleSource::feed(SampleSourceFifo* sampleFifo,
+	int nbSamples)
+{
+	m_basebandSampleSource->feed(sampleFifo, nbSamples);
+}
+
 bool ThreadedBasebandSampleSource::handleSourceMessage(const Message& cmd)
 {
     return m_basebandSampleSource->handleMessage(cmd);

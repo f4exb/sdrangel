@@ -17,12 +17,10 @@
 #include <assert.h>
 #include "samplesourcefifo.h"
 
-SampleSourceFifo::SampleSourceFifo(uint32_t size, uint32_t samplesChunkSize) :
+SampleSourceFifo::SampleSourceFifo(uint32_t size) :
     m_size(size),
-    m_samplesChunkSize(samplesChunkSize),
     m_init(false)
 {
-    assert(samplesChunkSize <= m_size/4);
     m_data.resize(2*m_size);
     init();
 }
@@ -37,7 +35,6 @@ void SampleSourceFifo::resize(uint32_t size, uint32_t samplesChunkSize)
     assert(samplesChunkSize <= size/4);
 
     m_size = size;
-    m_samplesChunkSize = samplesChunkSize;
     m_data.resize(2*m_size);
     init();
 }
@@ -46,14 +43,14 @@ void SampleSourceFifo::init()
 {
     memset(&m_data[0], 0, sizeof(2*m_size*sizeof(Sample)));
     m_ir = 0;
-    m_iw = m_samplesChunkSize*2;
+    m_iw = m_size/2;
     m_init = true;
 }
 
 void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
-    assert(nbSamples < m_samplesChunkSize/2);
+    assert(nbSamples < m_size/4);
 
     m_ir = (m_ir + nbSamples) % m_size;
     readUntil =  m_data.begin() + m_size + m_ir;

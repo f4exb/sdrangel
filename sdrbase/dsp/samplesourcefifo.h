@@ -28,10 +28,8 @@ class SDRANGEL_API SampleSourceFifo : public QObject {
     Q_OBJECT
 
 public:
-    SampleSourceFifo(uint32_t size, uint32_t samplesChunkSize);
+    SampleSourceFifo(uint32_t size);
     ~SampleSourceFifo();
-
-    unsigned int getChunkSize() const { return m_samplesChunkSize; }
 
     void resize(uint32_t size, uint32_t samplesChunkSize);
     void init();
@@ -46,7 +44,6 @@ public:
 
 private:
     uint32_t m_size;
-    uint32_t m_samplesChunkSize;
     SampleVector m_data;
     uint32_t m_iw;
     uint32_t m_ir;

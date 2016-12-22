@@ -102,6 +102,19 @@ void UpChannelizer::pull(Sample& sample)
     }
 }
 
+void UpChannelizer::feed(SampleSourceFifo* sampleFifo,
+            int nbSamples)
+{
+    SampleVector::iterator writeAt;
+    sampleFifo->getWriteIterator(writeAt);
+
+    for (int i = 0; i < nbSamples; i++)
+    {
+        pull((*writeAt));
+        sampleFifo->bumpIndex(writeAt);
+    }
+}
+
 void UpChannelizer::start()
 {
     if (m_sampleSource != 0)
