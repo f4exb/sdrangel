@@ -29,10 +29,9 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size) :
 SampleSourceFifo::~SampleSourceFifo()
 {}
 
-void SampleSourceFifo::resize(uint32_t size, uint32_t samplesChunkSize)
+void SampleSourceFifo::resize(uint32_t size)
 {
-    qDebug("SampleSourceFifo::resize: %d, %d", size, samplesChunkSize);
-    assert(samplesChunkSize <= size/4);
+    qDebug("SampleSourceFifo::resize: %d", size);
 
     m_size = size;
     m_data.resize(2*m_size);
@@ -60,7 +59,7 @@ void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned i
 
     if (m_init)
     {
-        emit dataWrite(m_size);
+        emit dataWrite(m_size/2);
         m_init = false;
     }
     else if (i_delta > 0)

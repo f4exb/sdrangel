@@ -57,6 +57,7 @@ public:
 protected:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 	MessageQueue m_outputMessageQueue; //!< Queue for asynchronous outbound communication
+	SampleSourceFifo m_sampleFifo;    //!< Internal FIFO for multi-channel processing
 
 protected slots:
 	void handleInputMessages();

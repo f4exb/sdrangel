@@ -86,7 +86,7 @@ void FileSinkThread::setSamplerate(int samplerate)
 
 		// resize sample FIFO
 		if (m_sampleFifo) {
-		    m_sampleFifo->resize(samplerate, samplerate/4); // 1s buffer with 250ms write chunk size
+		    m_sampleFifo->resize(samplerate); // 1s buffer
 		}
 
 		m_samplerate = samplerate;

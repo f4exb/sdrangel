@@ -31,7 +31,7 @@ public:
     SampleSourceFifo(uint32_t size);
     ~SampleSourceFifo();
 
-    void resize(uint32_t size, uint32_t samplesChunkSize);
+    void resize(uint32_t size);
     void init();
     /** advance read pointer for the given length and activate R/W signals */
     void readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples);

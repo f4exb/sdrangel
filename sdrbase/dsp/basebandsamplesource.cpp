@@ -18,7 +18,8 @@
 #include "dsp/basebandsamplesource.h"
 #include "util/message.h"
 
-BasebandSampleSource::BasebandSampleSource()
+BasebandSampleSource::BasebandSampleSource() :
+	m_sampleFifo(48000) // arbitrary, will be adjusted to match device sink FIFO size
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

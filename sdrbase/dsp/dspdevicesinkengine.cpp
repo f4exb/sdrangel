@@ -380,12 +380,14 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 	{
         qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
+        // TODO: equalize channel source FIFO size with device sink FIFO size
 		(*it)->start();
 	}
 
 	for (ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
 	{
 		qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
+        // TODO: equalize channel source FIFO size with device sink FIFO size
 		(*it)->start();
 	}
 
