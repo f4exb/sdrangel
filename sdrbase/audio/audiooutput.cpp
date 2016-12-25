@@ -158,10 +158,11 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {
     //qDebug("AudioOutput::readData: %lld", maxLen);
 
-    // @TODO: Study this mutex on OSX, for now deadlocks possible
-#ifndef __APPLE__
-    QMutexLocker mutexLocker(&m_mutex);
-#endif
+    // Study this mutex on OSX, for now deadlocks possible
+    // Removed as it may indeed cause lockups and is in fact useless.
+//#ifndef __APPLE__
+//    QMutexLocker mutexLocker(&m_mutex);
+//#endif
 
 	unsigned int framesPerBuffer = maxLen / 4;
 

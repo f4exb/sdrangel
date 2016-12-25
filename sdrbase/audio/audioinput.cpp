@@ -155,10 +155,11 @@ qint64 AudioInput::readData(char* data, qint64 maxLen)
 
 qint64 AudioInput::writeData(const char *data, qint64 len)
 {
-    // @TODO: Study this mutex on OSX, for now deadlocks possible
-#ifndef __APPLE__
-    QMutexLocker mutexLocker(&m_mutex);
-#endif
+    // Study this mutex on OSX, for now deadlocks possible
+    // Removed as it may indeed cause lockups and is in fact useless.
+//#ifndef __APPLE__
+//    QMutexLocker mutexLocker(&m_mutex);
+//#endif
 
     if ((m_audioFormat.sampleSize() != 16)
     		|| (m_audioFormat.sampleType() != QAudioFormat::SignedInt)
