@@ -188,6 +188,7 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 	// multiple channel sources handling
 	else if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 1)
 	{
+	    qDebug("DSPDeviceSinkEngine::work: multiple channel sources handling");
 	    SampleVector::iterator writeBegin;
 	    sampleFifo->getWriteIterator(writeBegin);
 	    SampleVector::iterator writeAt = writeBegin;
@@ -268,11 +269,13 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 	{
+        qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping " << (*it)->objectName().toStdString().c_str();
 		(*it)->stop();
 	}
 
 	for(ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); it++)
 	{
+	    qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
 		(*it)->stop();
 	}
 
