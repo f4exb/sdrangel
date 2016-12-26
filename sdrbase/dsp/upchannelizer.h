@@ -63,6 +63,7 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(Sample& sample);
+    virtual void pullAudio(int nbSamples) { if (m_sampleSource) m_sampleSource->pullAudio(nbSamples); }
 
     virtual bool handleMessage(const Message& cmd);
 

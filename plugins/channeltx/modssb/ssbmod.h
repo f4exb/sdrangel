@@ -190,6 +190,7 @@ public:
             bool playLoop);
 
     virtual void pull(Sample& sample);
+    virtual void pullAudio(int nbSamples);
     virtual void start();
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
@@ -366,8 +367,8 @@ private:
     MovingAverage<Real> m_movingAverage;
     SimpleAGC m_volumeAGC;
 
-    //AudioVector m_audioBuffer;
-    //uint m_audioBufferFill;
+    AudioVector m_audioBuffer;
+    uint m_audioBufferFill;
 
     AudioFifo m_audioFifo;
     QMutex m_settingsMutex;

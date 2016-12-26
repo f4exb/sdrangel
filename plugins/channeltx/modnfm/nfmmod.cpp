@@ -59,8 +59,8 @@ NFMMod::NFMMod() :
 
 	apply();
 
-	//m_audioBuffer.resize(1<<14);
-	//m_audioBufferFill = 0;
+	m_audioBuffer.resize(1<<14);
+	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
@@ -136,6 +136,7 @@ void NFMMod::pull(Sample& sample)
         }
     }
 
+    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
@@ -149,6 +150,17 @@ void NFMMod::pull(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void NFMMod::pullAudio(int nbSamples)
+{
+    if (nbSamples > m_audioBuffer.size())
+    {
+        m_audioBuffer.resize(nbSamples);
+    }
+
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioBufferFill = 0;
 }
 
 void NFMMod::modulateSample()
@@ -174,8 +186,6 @@ void NFMMod::modulateSample()
 
 void NFMMod::pullAF(Real& sample)
 {
-    int16_t audioSample[2];
-
     switch (m_afInput)
     {
     case NFMModInputTone:
@@ -211,8 +221,7 @@ void NFMMod::pullAF(Real& sample)
         }
         break;
     case NFMModInputAudio:
-        m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-        sample = ((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor;
+        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_running.m_volumeFactor;
         break;
     case NFMModInputCWTone:
         Real fadeFactor;

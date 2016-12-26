@@ -35,12 +35,14 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void pull(Sample& sample) = 0;
+	virtual void pullAudio(int nbSamples) {}
 
     /** direct feeding of sample source FIFO */
 	void feed(SampleSourceFifo* sampleFifo, int nbSamples)
 	{
 	    SampleVector::iterator writeAt;
 	    sampleFifo->getWriteIterator(writeAt);
+	    pullAudio(nbSamples); // Pre-fetch input audio samples this is mandatory to keep things running smoothly
 
 	    for (int i = 0; i < nbSamples; i++)
 	    {

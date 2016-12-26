@@ -62,8 +62,8 @@ WFMMod::WFMMod() :
 
 	apply();
 
-	//m_audioBuffer.resize(1<<14);
-	//m_audioBufferFill = 0;
+	m_audioBuffer.resize(1<<14);
+	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
 	m_volumeAGC.resize(4096, 0.003, 0);
@@ -116,8 +116,10 @@ void WFMMod::pull(Sample& sample)
     {
         pullAF(m_modSample);
         calculateLevel(m_modSample.real());
+        m_audioBufferFill++;
     }
 
+    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
@@ -139,10 +141,19 @@ void WFMMod::pull(Sample& sample)
 	sample.m_imag = (FixReal) ci.imag();
 }
 
+void WFMMod::pullAudio(int nbSamples)
+{
+    if (nbSamples > m_audioBuffer.size())
+    {
+        m_audioBuffer.resize(nbSamples);
+    }
+
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioBufferFill = 0;
+}
+
 void WFMMod::pullAF(Complex& sample)
 {
-    int16_t audioSample[2];
-
     switch (m_afInput)
     {
     case WFMModInputTone:
@@ -184,9 +195,7 @@ void WFMMod::pullAF(Complex& sample)
         break;
     case WFMModInputAudio:
         {
-            Real s = (audioSample[0] + audioSample[1])  / 65536.0f;
-            m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-            sample.real(s * m_running.m_volumeFactor);
+            sample.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_running.m_volumeFactor);
             sample.imag(0.0f);
         }
         break;

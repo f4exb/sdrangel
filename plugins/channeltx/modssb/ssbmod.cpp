@@ -69,8 +69,8 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_config.m_toneFrequency = 1000.0f;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
-	//m_audioBuffer.resize(1<<14);
-	//m_audioBufferFill = 0;
+	m_audioBuffer.resize(1<<14);
+	m_audioBufferFill = 0;
 
 //    m_magsqSpectrum = 0.0f;
 //    m_magsqSum = 0.0f;
@@ -166,6 +166,7 @@ void SSBMod::pull(Sample& sample)
         }
     }
 
+    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
@@ -180,6 +181,17 @@ void SSBMod::pull(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void SSBMod::pullAudio(int nbSamples)
+{
+    if (nbSamples > m_audioBuffer.size())
+    {
+        m_audioBuffer.resize(nbSamples);
+    }
+
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioBufferFill = 0;
 }
 
 void SSBMod::modulateSample()
@@ -197,7 +209,6 @@ void SSBMod::pullAF(Complex& sample)
         return;
 	}
 
-    int16_t audioSample[2];
     Complex ci;
     fftfilt::cmplx *filtered;
     int n_out = 0;
@@ -279,24 +290,22 @@ void SSBMod::pullAF(Complex& sample)
         }
         break;
     case SSBModInputAudio:
-        m_audioFifo.read(reinterpret_cast<quint8*>(audioSample), 1, 10);
-
         if (m_running.m_audioBinaural)
     	{
         	if (m_running.m_audioFlipChannels)
         	{
-                ci.real((audioSample[1] / 32768.0f) * m_running.m_volumeFactor);
-                ci.imag((audioSample[0] / 32768.0f) * m_running.m_volumeFactor);
+                ci.real((m_audioBuffer[m_audioBufferFill].r / 32768.0f) * m_running.m_volumeFactor);
+                ci.imag((m_audioBuffer[m_audioBufferFill].l / 32768.0f) * m_running.m_volumeFactor);
         	}
         	else
         	{
-                ci.real((audioSample[0] / 32768.0f) * m_running.m_volumeFactor);
-                ci.imag((audioSample[1] / 32768.0f) * m_running.m_volumeFactor);
+                ci.real((m_audioBuffer[m_audioBufferFill].l / 32768.0f) * m_running.m_volumeFactor);
+                ci.imag((m_audioBuffer[m_audioBufferFill].r / 32768.0f) * m_running.m_volumeFactor);
         	}
     	}
         else
         {
-            ci.real(((audioSample[0] + audioSample[1])  / 65536.0f) * m_running.m_volumeFactor);
+            ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_running.m_volumeFactor);
             ci.imag(0.0f);
         }
 
