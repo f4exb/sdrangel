@@ -450,7 +450,11 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
 void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
+#if QT_VERSION >= 0x050400
     m_showSystemWidget = new QLabel("SDRangel v2.5.2 " + qtVersionStr + QSysInfo::prettyProductName(), this);
+#else
+    m_showSystemWidget = new QLabel("SDRangel v2.5.2 " + qtVersionStr, this);
+#endif
     statusBar()->addPermanentWidget(m_showSystemWidget);
 
 	m_dateTimeWidget = new QLabel(tr("Date"), this);
