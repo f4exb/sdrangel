@@ -35,6 +35,7 @@ DSPEngine::DSPEngine() :
 DSPEngine::~DSPEngine()
 {
     m_audioOutput.setOnExit(true);
+    m_audioInput.setOnExit(true);
 
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
