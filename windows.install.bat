@@ -29,6 +29,7 @@ copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
 copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
 copy plugins\channeltx\modnfm\%1\modnfm.dll %2\plugins\channeltx
 copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
+copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrf\%1\inputhackrf.dll %2\plugins\samplesource
