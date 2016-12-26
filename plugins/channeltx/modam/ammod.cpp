@@ -121,7 +121,6 @@ void AMMod::pull(Sample& sample)
         }
     }
 
-    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
@@ -140,13 +139,14 @@ void AMMod::pull(Sample& sample)
 void AMMod::pullAudio(int nbSamples)
 {
 //    qDebug("AMMod::pullAudio: %d", nbSamples);
+    int nbAudioSamples = nbSamples * m_interpolatorDistance;
 
-    if (nbSamples > m_audioBuffer.size())
+    if (nbAudioSamples > m_audioBuffer.size())
     {
-        m_audioBuffer.resize(nbSamples);
+        m_audioBuffer.resize(nbAudioSamples);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples*sizeof(AudioSample), 10);
     m_audioBufferFill = 0;
 }
 
@@ -156,6 +156,7 @@ void AMMod::modulateSample()
 
     pullAF(t);
     calculateLevel(t);
+    m_audioBufferFill++;
 
     m_modSample.real((t*m_running.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
     m_modSample.imag(0.0f);

@@ -119,7 +119,6 @@ void WFMMod::pull(Sample& sample)
         m_audioBufferFill++;
     }
 
-    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
@@ -143,12 +142,14 @@ void WFMMod::pull(Sample& sample)
 
 void WFMMod::pullAudio(int nbSamples)
 {
-    if (nbSamples > m_audioBuffer.size())
+    int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+
+    if (nbSamplesAudio > m_audioBuffer.size())
     {
-        m_audioBuffer.resize(nbSamples);
+        m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio*sizeof(AudioSample), 10);
     m_audioBufferFill = 0;
 }
 

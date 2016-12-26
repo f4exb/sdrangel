@@ -136,7 +136,6 @@ void NFMMod::pull(Sample& sample)
         }
     }
 
-    m_audioBufferFill++;
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
@@ -154,12 +153,14 @@ void NFMMod::pull(Sample& sample)
 
 void NFMMod::pullAudio(int nbSamples)
 {
-    if (nbSamples > m_audioBuffer.size())
+    int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+
+    if (nbSamplesAudio > m_audioBuffer.size())
     {
-        m_audioBuffer.resize(nbSamples);
+        m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples*sizeof(AudioSample), 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio*sizeof(AudioSample), 10);
     m_audioBufferFill = 0;
 }
 
@@ -169,6 +170,7 @@ void NFMMod::modulateSample()
 
     pullAF(t);
     calculateLevel(t);
+    m_audioBufferFill++;
 
     if (m_running.m_ctcssOn)
     {
