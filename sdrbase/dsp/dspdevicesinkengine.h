@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
+#include <stdint.h>
 #include <list>
 #include <map>
 #include "dsp/dsptypes.h"
@@ -47,10 +48,10 @@ public:
 		StError        //!< engine is in error
 	};
 
-	DSPDeviceSinkEngine(uint uid, QObject* parent = NULL);
+	DSPDeviceSinkEngine(uint32_t uid, QObject* parent = NULL);
 	~DSPDeviceSinkEngine();
 
-	uint getUID() const { return m_uid; }
+	uint32_t getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
@@ -80,7 +81,7 @@ public:
 	QString sinkDeviceDescription(); //!< Return the sink device description
 
 private:
-	uint m_uid; //!< unique ID
+	uint32_t m_uid; //!< unique ID
 
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
 	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
@@ -110,8 +111,9 @@ private:
 
 	BasebandSampleSink *m_spectrumSink;
 
-	uint m_sampleRate;
+	uint32_t m_sampleRate;
 	quint64 m_centerFrequency;
+	uint32_t m_multipleSourcesDivisionFactor;
 
 	void run();
 	void work(int nbWriteSamples); //!< transfer samples from beseband sources to sink if in running state
