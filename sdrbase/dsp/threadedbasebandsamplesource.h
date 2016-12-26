@@ -46,10 +46,13 @@ public:
 
 	bool handleSourceMessage(const Message& cmd);  //!< Send message to source synchronously
 	void pull(Sample& sample);                     //!< Pull one sample from source
+	void pullAudio(int nbSamples) { if (m_basebandSampleSource) m_basebandSampleSource->pullAudio(nbSamples); }
 
     /** direct feeding of sample source FIFO */
 	void feed(SampleSourceFifo* sampleFifo,
 		int nbSamples);
+
+	SampleSourceFifo& getSampleSourceFifo() { return m_basebandSampleSource->getSampleSourceFifo(); }
 
 	QString getSampleSourceObjectName() const;
 

@@ -49,7 +49,7 @@ void SampleSourceFifo::init()
 void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
-    assert(nbSamples < m_size/4);
+    assert(nbSamples <= m_size/2);
 
     m_ir = (m_ir + nbSamples) % m_size;
     readUntil =  m_data.begin() + m_size + m_ir;

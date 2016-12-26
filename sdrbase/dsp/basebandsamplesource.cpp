@@ -22,6 +22,7 @@ BasebandSampleSource::BasebandSampleSource() :
 	m_sampleFifo(48000) // arbitrary, will be adjusted to match device sink FIFO size
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+	connect(&m_sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToFifo(int)));
 }
 
 BasebandSampleSource::~BasebandSampleSource()
@@ -41,6 +42,17 @@ void BasebandSampleSource::handleInputMessages()
 	}
 }
 
+void BasebandSampleSource::handleWriteToFifo(int nbSamples)
+{
+    SampleVector::iterator writeAt;
+    m_sampleFifo.getWriteIterator(writeAt);
+    pullAudio(nbSamples); // Pre-fetch input audio samples this is mandatory to keep things running smoothly
 
+    for (int i = 0; i < nbSamples; i++)
+    {
+        pull((*writeAt));
+        m_sampleFifo.bumpIndex(writeAt);
+    }
+}
 
 

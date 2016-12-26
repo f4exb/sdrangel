@@ -51,6 +51,8 @@ public:
 	    }
 	}
 
+	SampleSourceFifo& getSampleSourceFifo() { return m_sampleFifo; }
+
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
@@ -63,6 +65,7 @@ protected:
 
 protected slots:
 	void handleInputMessages();
+	void handleWriteToFifo(int nbSamples);
 };
 
 #endif /* SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_ */

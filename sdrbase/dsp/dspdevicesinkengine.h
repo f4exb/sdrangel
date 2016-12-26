@@ -23,6 +23,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <list>
+#include <map>
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
@@ -98,6 +99,14 @@ private:
 
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	ThreadedBasebandSampleSources m_threadedBasebandSampleSources; //!< baseband sample sources on their own threads (usually channels)
+
+	typedef std::map<BasebandSampleSource*, SampleVector::iterator> BasebandSampleSourcesIteratorMap;
+	typedef std::pair<BasebandSampleSource*, SampleVector::iterator> BasebandSampleSourcesIteratorMapKV;
+	BasebandSampleSourcesIteratorMap m_basebandSampleSourcesIteratorMap;
+
+    typedef std::map<ThreadedBasebandSampleSource*, SampleVector::iterator> ThreadedBasebandSampleSourcesIteratorMap;
+    typedef std::pair<ThreadedBasebandSampleSource*, SampleVector::iterator> ThreadedBasebandSampleSourcesIteratorMapKV;
+    ThreadedBasebandSampleSourcesIteratorMap m_threadedBasebandSampleSourcesIteratorMap;
 
 	BasebandSampleSink *m_spectrumSink;
 
