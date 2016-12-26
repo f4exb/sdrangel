@@ -160,7 +160,7 @@ void NFMMod::pullAudio(int nbSamples)
         m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio*sizeof(AudioSample), 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio, 10);
     m_audioBufferFill = 0;
 }
 

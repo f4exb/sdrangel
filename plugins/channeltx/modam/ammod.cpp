@@ -146,7 +146,7 @@ void AMMod::pullAudio(int nbSamples)
         m_audioBuffer.resize(nbAudioSamples);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples*sizeof(AudioSample), 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples, 10);
     m_audioBufferFill = 0;
 }
 
