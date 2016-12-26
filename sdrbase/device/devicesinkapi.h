@@ -47,6 +47,7 @@ public:
     void removeSource(BasebandSampleSource* sink);                 //!< Remove a baseband sample source from device engine
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine
     void removeThreadedSource(ThreadedBasebandSampleSource* sink); //!< Remove a baseband sample source that runs on its own thread from device engine
+    uint32_t getNumberOfSources();
     void setSink(DeviceSampleSink* sink);                          //!< Set device engine sample sink type
     bool initGeneration();                                         //!< Initialize device engine generation sequence
     bool startGeneration();                                        //!< Start device engine generation sequence
