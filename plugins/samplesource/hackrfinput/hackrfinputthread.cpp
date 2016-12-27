@@ -14,11 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../hackrfinput/hackrfinputthread.h"
+
 #include <stdio.h>
 #include <errno.h>
 
 #include "../../../sdrbase/dsp/samplesinkfifo.h"
-#include "hackrfinputthread.h"
 
 HackRFInputThread *HackRFInputThread::m_this = 0;
 

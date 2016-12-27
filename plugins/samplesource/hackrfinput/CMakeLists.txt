@@ -1,6 +1,6 @@
-project(hackrf)
+project(hackrfinput)
 
-set(hackrf_SOURCES
+set(hackrfinput_SOURCES
     hackrfinputgui.cpp
     hackrfinput.cpp
     hackrfinputplugin.cpp
@@ -8,7 +8,7 @@ set(hackrf_SOURCES
     hackrfinputthread.cpp
 )
 
-set(hackrf_HEADERS
+set(hackrfinput_HEADERS
     hackrfinputgui.h
     hackrfinput.h
     hackrfinputplugin.h
@@ -16,7 +16,7 @@ set(hackrf_HEADERS
     hackrfinputthread.h
 )
 
-set(hackrf_FORMS
+set(hackrfinput_FORMS
     hackrfinputgui.ui
 )
 
@@ -41,13 +41,13 @@ add_definitions("${QT_DEFINITIONS} -DLIBHACKRF_DYN_RATES")
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt4_wrap_cpp(hackrf_HEADERS_MOC ${hackrf_HEADERS})
-qt5_wrap_ui(hackrf_FORMS_HEADERS ${hackrf_FORMS})
+#qt4_wrap_cpp(hackrfinput_HEADERS_MOC ${hackrfinput_HEADERS})
+qt5_wrap_ui(hackrfinput_FORMS_HEADERS ${hackrfinput_FORMS})
 
 add_library(inputhackrf SHARED
-    ${hackrf_SOURCES}
-    ${hackrf_HEADERS_MOC}
-    ${hackrf_FORMS_HEADERS}
+    ${hackrfinput_SOURCES}
+    ${hackrfinput_HEADERS_MOC}
+    ${hackrfinput_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)

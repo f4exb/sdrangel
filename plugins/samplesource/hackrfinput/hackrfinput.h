@@ -20,7 +20,8 @@
 #include <dsp/devicesamplesource.h>
 #include "libhackrf/hackrf.h"
 #include <QString>
-#include "hackrfinputsettings.h"
+
+#include "../hackrfinput/hackrfinputsettings.h"
 
 class DeviceSourceAPI;
 class HackRFInputThread;

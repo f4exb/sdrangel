@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../hackrfinput/hackrfinputplugin.h"
+
 #include <QtPlugin>
 #include <QAction>
 #include "libhackrf/hackrf.h"
@@ -22,8 +24,8 @@
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "hackrfinputplugin.h"
-#include "hackrfinputgui.h"
+
+#include "../hackrfinput/hackrfinputgui.h"
 
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),

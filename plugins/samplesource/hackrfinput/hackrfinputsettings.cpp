@@ -14,10 +14,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../hackrfinput/hackrfinputsettings.h"
+
 #include <QtGlobal>
 #include "util/simpleserializer.h"
 
-#include "hackrfinputsettings.h"
 
 HackRFInputSettings::HackRFInputSettings()
 {

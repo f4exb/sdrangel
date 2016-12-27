@@ -17,6 +17,8 @@
 #ifndef _HACKRF_HACKRFINPUTSETTINGS_H_
 #define _HACKRF_HACKRFINPUTSETTINGS_H_
 
+#include <QtGlobal>
+
 struct HackRFInputSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,

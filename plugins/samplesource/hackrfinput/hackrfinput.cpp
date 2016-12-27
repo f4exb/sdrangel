@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../hackrfinput/hackrfinput.h"
+
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
@@ -21,12 +23,10 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "hackrfinput.h"
-
 #include <device/devicesourceapi.h>
 
-#include "hackrfinputgui.h"
-#include "hackrfinputthread.h"
+#include "../hackrfinput/hackrfinputgui.h"
+#include "../hackrfinput/hackrfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)

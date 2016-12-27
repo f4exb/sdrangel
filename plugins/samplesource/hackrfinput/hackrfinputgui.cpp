@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../hackrfinput/hackrfinputgui.h"
+
 #include <QDebug>
 #include <QMessageBox>
 
@@ -26,7 +28,6 @@
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
-#include "hackrfinputgui.h"
 #include "ui_hackrfinputgui.h"
 
 HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :

@@ -19,8 +19,8 @@
 
 #include <QTimer>
 
-#include "hackrfinput.h"
 #include "plugin/plugingui.h"
+#include "../hackrfinput/hackrfinput.h"
 
 #define HACKRF_MAX_DEVICE (32)
 
