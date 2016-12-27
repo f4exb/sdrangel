@@ -18,15 +18,14 @@
 #include <QAction>
 #include "libhackrf/hackrf.h"
 
-#include "hackrfplugin.h"
-
 #include <device/devicesourceapi.h>
 
-#include "hackrfgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "hackrfinputplugin.h"
+#include "hackrfinputgui.h"
 
-const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
+const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),
 	QString("2.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
@@ -35,24 +34,24 @@ const PluginDescriptor HackRFPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString HackRFPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
+const QString HackRFInputPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
 
-HackRFPlugin::HackRFPlugin(QObject* parent) :
+HackRFInputPlugin::HackRFInputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& HackRFPlugin::getPluginDescriptor() const
+const PluginDescriptor& HackRFInputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void HackRFPlugin::initPlugin(PluginAPI* pluginAPI)
+void HackRFInputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices HackRFPlugin::enumSampleSources()
+PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 {
 	hackrf_error rc = (hackrf_error) hackrf_init();
 
@@ -112,11 +111,11 @@ PluginInterface::SamplingDevices HackRFPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* HackRFPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginGUI* HackRFInputPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		HackRFGui* gui = new HackRFGui(deviceAPI);
+		HackRFInputGui* gui = new HackRFInputGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

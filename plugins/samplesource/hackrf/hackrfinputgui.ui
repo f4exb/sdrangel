@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>HackRFGui</class>
- <widget class="QWidget" name="HackRFGui">
+ <class>HackRFInputGui</class>
+ <widget class="QWidget" name="HackRFInputGui">
   <property name="geometry">
    <rect>
     <x>0</x>

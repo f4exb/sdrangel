@@ -25,19 +25,19 @@ INCLUDEPATH += $$LIBHACKRFSRC
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += hackrfgui.cpp\
+SOURCES += hackrfinputgui.cpp\
   hackrfinput.cpp\
-  hackrfplugin.cpp\
-  hackrfsettings.cpp\
-  hackrfthread.cpp
+  hackrfinputplugin.cpp\
+  hackrfinputsettings.cpp\
+  hackrfinputthread.cpp
 
-HEADERS += hackrfgui.h\
+HEADERS += hackrfinputgui.h\
   hackrfinput.h\
-  hackrfplugin.h\
-  hackrfsettings.h\
-  hackrfthread.h
+  hackrfinputplugin.h\
+  hackrfinputsettings.h\
+  hackrfinputthread.h
 
-FORMS += hackrfgui.ui
+FORMS += hackrfinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf

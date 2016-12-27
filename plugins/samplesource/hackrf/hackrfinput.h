@@ -19,11 +19,11 @@
 
 #include <dsp/devicesamplesource.h>
 #include "libhackrf/hackrf.h"
-#include "hackrfsettings.h"
 #include <QString>
+#include "hackrfinputsettings.h"
 
 class DeviceSourceAPI;
-class HackRFThread;
+class HackRFInputThread;
 
 class HackRFInput : public DeviceSampleSource {
 public:
@@ -32,17 +32,17 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const HackRFSettings& getSettings() const { return m_settings; }
+		const HackRFInputSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureHackRF* create(const HackRFSettings& settings)
+		static MsgConfigureHackRF* create(const HackRFInputSettings& settings)
 		{
 			return new MsgConfigureHackRF(settings);
 		}
 
 	private:
-		HackRFSettings m_settings;
+		HackRFInputSettings m_settings;
 
-		MsgConfigureHackRF(const HackRFSettings& settings) :
+		MsgConfigureHackRF(const HackRFInputSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -79,15 +79,15 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	bool applySettings(const HackRFSettings& settings, bool force);
+	bool applySettings(const HackRFInputSettings& settings, bool force);
 	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	HackRFSettings m_settings;
+	HackRFInputSettings m_settings;
 	struct hackrf_device* m_dev;
-	HackRFThread* m_hackRFThread;
+	HackRFInputThread* m_hackRFThread;
 	QString m_deviceDescription;
 };
 

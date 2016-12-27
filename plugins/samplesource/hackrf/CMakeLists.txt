@@ -1,23 +1,23 @@
 project(hackrf)
 
 set(hackrf_SOURCES
-    hackrfgui.cpp
+    hackrfinputgui.cpp
     hackrfinput.cpp
-    hackrfplugin.cpp
-    hackrfsettings.cpp
-    hackrfthread.cpp
+    hackrfinputplugin.cpp
+    hackrfinputsettings.cpp
+    hackrfinputthread.cpp
 )
 
 set(hackrf_HEADERS
-    hackrfgui.h
+    hackrfinputgui.h
     hackrfinput.h
-    hackrfplugin.h
-    hackrfsettings.h
-    hackrfthread.h
+    hackrfinputplugin.h
+    hackrfinputsettings.h
+    hackrfinputthread.h
 )
 
 set(hackrf_FORMS
-    hackrfgui.ui
+    hackrfinputgui.ui
 )
 
 if (BUILD_DEBIAN)

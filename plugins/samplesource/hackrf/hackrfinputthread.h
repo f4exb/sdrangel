@@ -14,34 +14,52 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_HACKRFPLUGIN_H
-#define INCLUDE_HACKRFPLUGIN_H
+#ifndef INCLUDE_HACKRFINPUTTHREAD_H
+#define INCLUDE_HACKRFINPUTTHREAD_H
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <libhackrf/hackrf.h>
 
-#define HACKRF_DEVICE_TYPE_ID "sdrangel.samplesource.hackrf"
+#include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
 
-class PluginAPI;
+#define HACKRF_BLOCKSIZE (1<<17)
 
-class HackRFPlugin : public QObject, public PluginInterface {
+class HackRFInputThread : public QThread {
 	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID HACKRF_DEVICE_TYPE_ID)
 
 public:
-	explicit HackRFPlugin(QObject* parent = NULL);
+	HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	~HackRFInputThread();
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
-
-	static const QString m_deviceTypeID;
+	void startWork();
+	void stopWork();
+	void setSamplerate(uint32_t samplerate);
+	void setLog2Decimation(unsigned int log2_decim);
+	void setFcPos(int fcPos);
 
 private:
-	static const PluginDescriptor m_pluginDescriptor;
+	QMutex m_startWaitMutex;
+	QWaitCondition m_startWaiter;
+	bool m_running;
+
+	hackrf_device* m_dev;
+	qint16 m_buf[2*HACKRF_BLOCKSIZE];
+	SampleVector m_convertBuffer;
+	SampleSinkFifo* m_sampleFifo;
+
+	int m_samplerate;
+	unsigned int m_log2Decim;
+	int m_fcPos;
+	static HackRFInputThread *m_this;
+
+	Decimators<qint8, SDR_SAMP_SZ, 8> m_decimators;
+
+	void run();
+	void callback(const qint8* buf, qint32 len);
+	static int rx_callback(hackrf_transfer* transfer);
 };
 
-#endif // INCLUDE_HACKRFPLUGIN_H
+#endif // INCLUDE_HACKRFINPUTTHREAD_H

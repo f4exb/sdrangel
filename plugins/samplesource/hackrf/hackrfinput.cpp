@@ -25,8 +25,8 @@
 
 #include <device/devicesourceapi.h>
 
-#include "hackrfgui.h"
-#include "hackrfthread.h"
+#include "hackrfinputgui.h"
+#include "hackrfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
@@ -79,7 +79,7 @@ bool HackRFInput::start(int device)
 		return false;
 	}
 
-	if((m_hackRFThread = new HackRFThread(m_dev, &m_sampleFifo)) == 0)
+	if((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
 	{
 		qFatal("HackRFInput::start: out of memory");
 		stop();
@@ -174,7 +174,7 @@ void HackRFInput::setCenterFrequency(quint64 freq_hz)
 	}
 }
 
-bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
+bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -247,19 +247,19 @@ bool HackRFInput::applySettings(const HackRFSettings& settings, bool force)
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFSettings::FC_POS_CENTER))
+		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
-			if (settings.m_fcPos == HackRFSettings::FC_POS_INFRA)
+			if (settings.m_fcPos == HackRFInputSettings::FC_POS_INFRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
-			else if (settings.m_fcPos == HackRFSettings::FC_POS_SUPRA)
+			else if (settings.m_fcPos == HackRFInputSettings::FC_POS_SUPRA)
 			{
 				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;

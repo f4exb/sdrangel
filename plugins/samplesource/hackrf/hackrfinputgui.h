@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_HACKRFGUI_H
-#define INCLUDE_HACKRFGUI_H
+#ifndef INCLUDE_HACKRFINPUTGUI_H
+#define INCLUDE_HACKRFINPUTGUI_H
 
 #include <QTimer>
 
@@ -28,10 +28,10 @@ class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
-	class HackRFGui;
+	class HackRFInputGui;
 }
 
-class HackRFGui : public QWidget, public PluginGUI {
+class HackRFInputGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
@@ -43,8 +43,8 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
-	virtual ~HackRFGui();
+	explicit HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	virtual ~HackRFInputGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -58,10 +58,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::HackRFGui* ui;
+	Ui::HackRFInputGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
-	HackRFSettings m_settings;
+	HackRFInputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
@@ -112,4 +112,4 @@ public:
 	static unsigned int m_bw_k[m_nb_bw];
 };
 
-#endif // INCLUDE_HACKRFGUI_H
+#endif // INCLUDE_HACKRFINPUTGUI_H

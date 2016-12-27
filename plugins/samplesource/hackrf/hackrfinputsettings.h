@@ -14,10 +14,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _HACKRF_HACKRFSETTINGS_H_
-#define _HACKRF_HACKRFSETTINGS_H_
+#ifndef _HACKRF_HACKRFINPUTSETTINGS_H_
+#define _HACKRF_HACKRFINPUTSETTINGS_H_
 
-struct HackRFSettings {
+struct HackRFInputSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
 		FC_POS_SUPRA,
@@ -37,10 +37,10 @@ struct HackRFSettings {
 	bool m_dcBlock;
 	bool m_iqCorrection;
 
-	HackRFSettings();
+	HackRFInputSettings();
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 };
 
-#endif /* _HACKRF_HACKRFSETTINGS_H_ */
+#endif /* _HACKRF_HACKRFINPUTSETTINGS_H_ */

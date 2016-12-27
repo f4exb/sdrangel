@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "hackrfthread.h"
 #include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "hackrfinputthread.h"
 
-HackRFThread *HackRFThread::m_this = 0;
+HackRFInputThread *HackRFInputThread::m_this = 0;
 
-HackRFThread::HackRFThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+HackRFInputThread::HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -35,13 +35,13 @@ HackRFThread::HackRFThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObje
 	m_this = this;
 }
 
-HackRFThread::~HackRFThread()
+HackRFInputThread::~HackRFInputThread()
 {
 	stopWork();
 	m_this = 0;
 }
 
-void HackRFThread::startWork()
+void HackRFInputThread::startWork()
 {
 	//m_startWaitMutex.lock();
 	m_running = true;
@@ -52,29 +52,29 @@ void HackRFThread::startWork()
 	m_startWaitMutex.unlock();*/
 }
 
-void HackRFThread::stopWork()
+void HackRFInputThread::stopWork()
 {
 	qDebug("HackRFThread::stopWork");
 	m_running = false;
 	wait();
 }
 
-void HackRFThread::setSamplerate(uint32_t samplerate)
+void HackRFInputThread::setSamplerate(uint32_t samplerate)
 {
 	m_samplerate = samplerate;
 }
 
-void HackRFThread::setLog2Decimation(unsigned int log2_decim)
+void HackRFInputThread::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void HackRFThread::setFcPos(int fcPos)
+void HackRFInputThread::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void HackRFThread::run()
+void HackRFInputThread::run()
 {
 	hackrf_error rc;
 
@@ -110,7 +110,7 @@ void HackRFThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void HackRFThread::callback(const qint8* buf, qint32 len)
+void HackRFInputThread::callback(const qint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -204,7 +204,7 @@ void HackRFThread::callback(const qint8* buf, qint32 len)
 }
 
 
-int HackRFThread::rx_callback(hackrf_transfer* transfer)
+int HackRFInputThread::rx_callback(hackrf_transfer* transfer)
 {
 	qint32 bytes_to_write = transfer->valid_length;
 	m_this->callback((qint8 *) transfer->buffer, bytes_to_write);

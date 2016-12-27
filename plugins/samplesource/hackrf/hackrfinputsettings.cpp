@@ -16,14 +16,15 @@
 
 #include <QtGlobal>
 #include "util/simpleserializer.h"
-#include "hackrfsettings.h"
 
-HackRFSettings::HackRFSettings()
+#include "hackrfinputsettings.h"
+
+HackRFInputSettings::HackRFInputSettings()
 {
 	resetToDefaults();
 }
 
-void HackRFSettings::resetToDefaults()
+void HackRFInputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000 * 1000;
 	m_LOppmTenths = 0;
@@ -39,7 +40,7 @@ void HackRFSettings::resetToDefaults()
 	m_iqCorrection = false;
 }
 
-QByteArray HackRFSettings::serialize() const
+QByteArray HackRFInputSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
@@ -58,7 +59,7 @@ QByteArray HackRFSettings::serialize() const
 	return s.final();
 }
 
-bool HackRFSettings::deserialize(const QByteArray& data)
+bool HackRFInputSettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
