@@ -16,14 +16,15 @@
 
 #include <QtGlobal>
 #include "util/simpleserializer.h"
-#include "bladerfsettings.h"
 
-BladeRFSettings::BladeRFSettings()
+#include "bladerfinputsettings.h"
+
+BladeRFInputSettings::BladeRFInputSettings()
 {
 	resetToDefaults();
 }
 
-void BladeRFSettings::resetToDefaults()
+void BladeRFInputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
 	m_devSampleRate = 3072000;
@@ -40,7 +41,7 @@ void BladeRFSettings::resetToDefaults()
 	m_iqCorrection = false;
 }
 
-QByteArray BladeRFSettings::serialize() const
+QByteArray BladeRFInputSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
@@ -60,7 +61,7 @@ QByteArray BladeRFSettings::serialize() const
 	return s.final();
 }
 
-bool BladeRFSettings::deserialize(const QByteArray& data)
+bool BladeRFInputSettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 

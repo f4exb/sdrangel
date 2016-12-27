@@ -25,19 +25,19 @@ INCLUDEPATH += $$LIBBLADERFSRC
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += bladerfgui.cpp\
+SOURCES += bladerfinputgui.cpp\
     bladerfinput.cpp\
-    bladerfplugin.cpp\
-    bladerfsettings.cpp\
-    bladerfthread.cpp
+    bladerfinputplugin.cpp\
+    bladerfinputsettings.cpp\
+    bladerfinputthread.cpp
 
-HEADERS += bladerfgui.h\
+HEADERS += bladerfinputgui.h\
     bladerfinput.h\
-    bladerfplugin.h\
-    bladerfsettings.h\
-    bladerfthread.h
+    bladerfinputplugin.h\
+    bladerfinputsettings.h\
+    bladerfinputthread.h
 
-FORMS += bladerfgui.ui
+FORMS += bladerfinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../libbladerf/$${build_subdir} -llibbladerf

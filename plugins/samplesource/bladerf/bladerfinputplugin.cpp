@@ -19,11 +19,11 @@
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "bladerfgui.h"
-#include "bladerfplugin.h"
 #include <device/devicesourceapi.h>
+#include "bladerfinputplugin.h"
+#include "bladerfinputgui.h"
 
-const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
+const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
 	QString("2.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
@@ -32,24 +32,24 @@ const PluginDescriptor BlderfPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString BlderfPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
+const QString BlderfInputPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
 
-BlderfPlugin::BlderfPlugin(QObject* parent) :
+BlderfInputPlugin::BlderfInputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& BlderfPlugin::getPluginDescriptor() const
+const PluginDescriptor& BlderfInputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void BlderfPlugin::initPlugin(PluginAPI* pluginAPI)
+void BlderfInputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices BlderfPlugin::enumSampleSources()
+PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 {
 	SamplingDevices result;
 	struct bladerf_devinfo *devinfo = 0;
@@ -74,11 +74,11 @@ PluginInterface::SamplingDevices BlderfPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* BlderfPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginGUI* BlderfInputPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		BladerfGui* gui = new BladerfGui(deviceAPI);
+		BladerfInputGui* gui = new BladerfInputGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

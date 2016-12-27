@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFGUI_H
-#define INCLUDE_BLADERFGUI_H
+#ifndef INCLUDE_BLADERFINPUTGUI_H
+#define INCLUDE_BLADERFINPUTGUI_H
 
 #include <QTimer>
 #include "plugin/plugingui.h"
@@ -26,16 +26,16 @@ class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
-	class BladerfGui;
+	class BladerfInputGui;
 	class BladerfSampleRates;
 }
 
-class BladerfGui : public QWidget, public PluginGUI {
+class BladerfInputGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
-	virtual ~BladerfGui();
+	explicit BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	virtual ~BladerfInputGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -49,10 +49,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::BladerfGui* ui;
+	Ui::BladerfInputGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
-	BladeRFSettings m_settings;
+	BladeRFInputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
@@ -106,4 +106,4 @@ private:
 	static unsigned int m_nb_halfbw;
 };
 
-#endif // INCLUDE_BLADERFGUI_H
+#endif // INCLUDE_BLADERFINPUTGUI_H

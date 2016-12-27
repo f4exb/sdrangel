@@ -19,12 +19,12 @@
 
 #include <dsp/devicesamplesource.h>
 
-#include "bladerfsettings.h"
 #include <libbladeRF.h>
 #include <QString>
+#include "bladerfinputsettings.h"
 
 class DeviceSourceAPI;
-class BladerfThread;
+class BladerfInputThread;
 
 class BladerfInput : public DeviceSampleSource {
 public:
@@ -32,17 +32,17 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const BladeRFSettings& getSettings() const { return m_settings; }
+		const BladeRFInputSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureBladerf* create(const BladeRFSettings& settings)
+		static MsgConfigureBladerf* create(const BladeRFInputSettings& settings)
 		{
 			return new MsgConfigureBladerf(settings);
 		}
 
 	private:
-		BladeRFSettings m_settings;
+		BladeRFInputSettings m_settings;
 
-		MsgConfigureBladerf(const BladeRFSettings& settings) :
+		MsgConfigureBladerf(const BladeRFInputSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -79,15 +79,15 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	bool applySettings(const BladeRFSettings& settings, bool force);
+	bool applySettings(const BladeRFInputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
 	struct bladerf *open_bladerf_from_serial(const char *serial);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	BladeRFSettings m_settings;
+	BladeRFInputSettings m_settings;
 	struct bladerf* m_dev;
-	BladerfThread* m_bladerfThread;
+	BladerfInputThread* m_bladerfThread;
 	QString m_deviceDescription;
 };
 

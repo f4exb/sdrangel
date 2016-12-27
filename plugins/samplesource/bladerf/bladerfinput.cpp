@@ -21,12 +21,12 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "bladerfgui.h"
 #include "bladerfinput.h"
 
 #include <device/devicesourceapi.h>
 
-#include "bladerfthread.h"
+#include "bladerfinputgui.h"
+#include "bladerfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
@@ -101,7 +101,7 @@ bool BladerfInput::start(int device)
     	goto failed;
     }
 
-	if((m_bladerfThread = new BladerfThread(m_dev, &m_sampleFifo)) == NULL) {
+	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == NULL) {
 		qFatal("out of memory");
 		goto failed;
 	}
@@ -174,7 +174,7 @@ bool BladerfInput::handleMessage(const Message& message)
 	}
 }
 
-bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
+bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool force)
 {
 	bool forwardChange = false;
 	QMutexLocker mutexLocker(&m_mutex);
@@ -382,7 +382,7 @@ bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
 	qint64 f_img = deviceCenterFrequency;
 	qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 
-	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == BladeRFSettings::FC_POS_CENTER))
+	if ((m_settings.m_log2Decim == 0) || (m_settings.m_fcPos == BladeRFInputSettings::FC_POS_CENTER))
 	{
 		deviceCenterFrequency = m_settings.m_centerFrequency;
 		f_img = deviceCenterFrequency;
@@ -390,13 +390,13 @@ bool BladerfInput::applySettings(const BladeRFSettings& settings, bool force)
 	}
 	else
 	{
-		if (m_settings.m_fcPos == BladeRFSettings::FC_POS_INFRA)
+		if (m_settings.m_fcPos == BladeRFInputSettings::FC_POS_INFRA)
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency + (m_settings.m_devSampleRate / 4);
 			f_img = deviceCenterFrequency + m_settings.m_devSampleRate/2;
 			f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
 		}
-		else if (m_settings.m_fcPos == BladeRFSettings::FC_POS_SUPRA)
+		else if (m_settings.m_fcPos == BladeRFInputSettings::FC_POS_SUPRA)
 		{
 			deviceCenterFrequency = m_settings.m_centerFrequency - (m_settings.m_devSampleRate / 4);
 			f_img = deviceCenterFrequency - m_settings.m_devSampleRate/2;

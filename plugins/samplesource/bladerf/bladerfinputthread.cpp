@@ -16,12 +16,12 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "bladerfthread.h"
 #include "dsp/samplesinkfifo.h"
+#include "bladerfinputthread.h"
 
 
 
-BladerfThread::BladerfThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+BladerfInputThread::BladerfInputThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -32,12 +32,12 @@ BladerfThread::BladerfThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QO
 {
 }
 
-BladerfThread::~BladerfThread()
+BladerfInputThread::~BladerfInputThread()
 {
 	stopWork();
 }
 
-void BladerfThread::startWork()
+void BladerfInputThread::startWork()
 {
 	m_startWaitMutex.lock();
 	start();
@@ -46,23 +46,23 @@ void BladerfThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void BladerfThread::stopWork()
+void BladerfInputThread::stopWork()
 {
 	m_running = false;
 	wait();
 }
 
-void BladerfThread::setLog2Decimation(unsigned int log2_decim)
+void BladerfInputThread::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void BladerfThread::setFcPos(int fcPos)
+void BladerfInputThread::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void BladerfThread::run()
+void BladerfInputThread::run()
 {
 	int res;
 
@@ -82,7 +82,7 @@ void BladerfThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void BladerfThread::callback(const qint16* buf, qint32 len)
+void BladerfInputThread::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 

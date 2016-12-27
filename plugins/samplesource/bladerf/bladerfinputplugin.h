@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFPLUGIN_H
-#define INCLUDE_BLADERFPLUGIN_H
+#ifndef INCLUDE_BLADERFINPUTPLUGIN_H
+#define INCLUDE_BLADERFINPUTPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
@@ -24,13 +24,13 @@ class PluginAPI;
 
 #define BLADERF_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf"
 
-class BlderfPlugin : public QObject, public PluginInterface {
+class BlderfInputPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID BLADERF_DEVICE_TYPE_ID)
 
 public:
-	explicit BlderfPlugin(QObject* parent = NULL);
+	explicit BlderfInputPlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
@@ -44,4 +44,4 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif // INCLUDE_BLADERFPLUGIN_H
+#endif // INCLUDE_BLADERFINPUTPLUGIN_H

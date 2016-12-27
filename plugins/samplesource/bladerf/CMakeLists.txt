@@ -1,23 +1,23 @@
 project(bladerf)
 
 set(bladerf_SOURCES
-	bladerfgui.cpp
+	bladerfinputgui.cpp
 	bladerfinput.cpp
-	bladerfplugin.cpp
-	bladerfsettings.cpp
-	bladerfthread.cpp
+	bladerfinputplugin.cpp
+	bladerfinputsettings.cpp
+	bladerfinputthread.cpp
 )
 
 set(bladerf_HEADERS
-	bladerfgui.h
+	bladerfinputgui.h
 	bladerfinput.h
-	bladerfplugin.h
-	bladerfsettings.h
-	bladerfthread.h
+	bladerfinputplugin.h
+	bladerfinputsettings.h
+	bladerfinputthread.h
 )
 
 set(bladerf_FORMS
-	bladerfgui.ui
+	bladerfinputgui.ui
 )
 
 if (BUILD_DEBIAN)

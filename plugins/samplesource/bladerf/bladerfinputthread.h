@@ -14,36 +14,47 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _BLADERF_BLADERFSETTINGS_H_
-#define _BLADERF_BLADERFSETTINGS_H_
+#ifndef INCLUDE_BLADERFINPUTTHREAD_H
+#define INCLUDE_BLADERFINPUTTHREAD_H
 
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 #include <libbladeRF.h>
+#include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
 
-struct BladeRFSettings {
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
+#define BLADERF_BLOCKSIZE (1<<14)
 
-	quint64 m_centerFrequency;
-	qint32 m_devSampleRate;
-	qint32 m_lnaGain;
-	qint32 m_vga1;
-	qint32 m_vga2;
-	qint32 m_bandwidth;
-	quint32 m_log2Decim;
-	fcPos_t m_fcPos;
-	bool m_xb200;
-	bladerf_xb200_path m_xb200Path;
-	bladerf_xb200_filter m_xb200Filter;
-	bool m_dcBlock;
-	bool m_iqCorrection;
+class BladerfInputThread : public QThread {
+	Q_OBJECT
 
-	BladeRFSettings();
-	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
+public:
+    BladerfInputThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	~BladerfInputThread();
+
+	void startWork();
+	void stopWork();
+	void setLog2Decimation(unsigned int log2_decim);
+	void setFcPos(int fcPos);
+
+private:
+	QMutex m_startWaitMutex;
+	QWaitCondition m_startWaiter;
+	bool m_running;
+
+	struct bladerf* m_dev;
+	qint16 m_buf[2*BLADERF_BLOCKSIZE];
+	SampleVector m_convertBuffer;
+    SampleSinkFifo* m_sampleFifo;
+
+	unsigned int m_log2Decim;
+	int m_fcPos;
+
+	Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
+
+	void run();
+	void callback(const qint16* buf, qint32 len);
 };
 
-#endif /* _BLADERF_BLADERFSETTINGS_H_ */
+#endif // INCLUDE_BLADERFINPUTTHREAD_H
