@@ -20,7 +20,7 @@
 #include <QTimer>
 #include "plugin/plugingui.h"
 
-#include "bladerfinput.h"
+#include "../bladerfinput/bladerfinput.h"
 
 class DeviceSourceAPI;
 class FileRecord;

@@ -14,14 +14,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../bladerfinput/bladerfinputplugin.h"
+
 #include <QtPlugin>
 #include <QAction>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include <device/devicesourceapi.h>
-#include "bladerfinputplugin.h"
-#include "bladerfinputgui.h"
+
+#include "../bladerfinput/bladerfinputgui.h"
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),

@@ -14,10 +14,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "bladerfinputsettings.h"
+
 #include <QtGlobal>
 #include "util/simpleserializer.h"
 
-#include "bladerfinputsettings.h"
 
 BladeRFInputSettings::BladeRFInputSettings()
 {

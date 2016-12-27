@@ -17,6 +17,7 @@
 #ifndef _BLADERF_BLADERFINPUTSETTINGS_H_
 #define _BLADERF_BLADERFINPUTSETTINGS_H_
 
+#include <QtGlobal>
 #include <libbladeRF.h>
 
 struct BladeRFInputSettings {

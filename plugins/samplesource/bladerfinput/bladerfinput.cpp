@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../bladerfinput/bladerfinput.h"
+
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
@@ -21,12 +23,10 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "bladerfinput.h"
-
 #include <device/devicesourceapi.h>
 
-#include "bladerfinputgui.h"
-#include "bladerfinputthread.h"
+#include "../bladerfinput/bladerfinputgui.h"
+#include "../bladerfinput/bladerfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)

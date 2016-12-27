@@ -29,7 +29,7 @@ endif(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 
 find_package(LibBLADERF)
 if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-    add_subdirectory(bladerf)
+    add_subdirectory(bladerfinput)
 endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 
 find_package(LibAIRSPY)
@@ -68,7 +68,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(airspy)
     add_subdirectory(hackrf)
     add_subdirectory(rtlsdr)
-    add_subdirectory(bladerf)
+    add_subdirectory(bladerfinput)
     add_subdirectory(sdrplay)
 endif (BUILD_DEBIAN)
 

@@ -1,6 +1,6 @@
-project(bladerf)
+project(bladerfinput)
 
-set(bladerf_SOURCES
+set(bladerfinput_SOURCES
 	bladerfinputgui.cpp
 	bladerfinput.cpp
 	bladerfinputplugin.cpp
@@ -8,7 +8,7 @@ set(bladerf_SOURCES
 	bladerfinputthread.cpp
 )
 
-set(bladerf_HEADERS
+set(bladerfinput_HEADERS
 	bladerfinputgui.h
 	bladerfinput.h
 	bladerfinputplugin.h
@@ -16,7 +16,7 @@ set(bladerf_HEADERS
 	bladerfinputthread.h
 )
 
-set(bladerf_FORMS
+set(bladerfinput_FORMS
 	bladerfinputgui.ui
 )
 
@@ -40,13 +40,13 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt4_wrap_cpp(bladerf_HEADERS_MOC ${bladerf_HEADERS})
-qt5_wrap_ui(bladerf_FORMS_HEADERS ${bladerf_FORMS})
+#qt4_wrap_cpp(bladerfinput_HEADERS_MOC ${bladerfinput_HEADERS})
+qt5_wrap_ui(bladerfinput_FORMS_HEADERS ${bladerfinput_FORMS})
 
 add_library(inputbladerf SHARED
-	${bladerf_SOURCES}
-	${bladerf_HEADERS_MOC}
-	${bladerf_FORMS_HEADERS}
+	${bladerfinput_SOURCES}
+	${bladerfinput_HEADERS_MOC}
+	${bladerfinput_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)

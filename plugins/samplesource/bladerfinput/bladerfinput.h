@@ -21,7 +21,8 @@
 
 #include <libbladeRF.h>
 #include <QString>
-#include "bladerfinputsettings.h"
+
+#include "../bladerfinput/bladerfinputsettings.h"
 
 class DeviceSourceAPI;
 class BladerfInputThread;
