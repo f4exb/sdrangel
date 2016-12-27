@@ -32,7 +32,7 @@ copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
-copy plugins\samplesource\hackrf\%1\inputhackrf.dll %2\plugins\samplesource
+copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
-copy plugins\samplesource\bladerf\%1\inputbladerf.dll %2\plugins\samplesource
+copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
