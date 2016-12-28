@@ -41,8 +41,8 @@ Transmission or signal generation support for eligible devices (BladeRF and Hack
   - Phase 4a: version 2.4.0: FM modulator
   - Phase 4b: version 2.5.0: SSB modulator and CW keyer
   - Phase 4c: version 2.5.1: WFM modulator
-  - Phase 4d: version 2.5.2: Fix issue #11 or limit to a single channel plugin
-  - phase 5:  version 3.0.0: BladeRF and HackRF support including final interpolation stage. Degraded with only one channel plugin allowed due to bug #11
+  - Phase 4d: version 2.5.2: Fixed issue #11
+  - phase 5:  version 3.0.0: BladeRF and HackRF support including final interpolation stage.
 
 <h2>Airspy</h2>
 
@@ -92,11 +92,11 @@ If you use your own location for librtlsdr install directory you need to specify
 
 `-DLIBRTLSDR_LIBRARIES=/opt/install/librtlsdr/lib/librtlsdr.so -DLIBRTLSDR_INCLUDE_DIR=/opt/install/librtlsdr/include`
 
-<h2>SDRplay</h2>
+<h2>SDRplay RSP1</h2>
 
 Linux only.
 
-SDRplay devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
+SDRplay RSP1 devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
 
 If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
 

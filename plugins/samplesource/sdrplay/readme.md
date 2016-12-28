@@ -1,8 +1,8 @@
-<h1>SDRplay plugin</h1>
+<h1>SDRplay RSP1 plugin</h1>
 
 <h2>Introduction</h2>
 
-This plugin supports input from SDRplay devices. SDRplay is based on the MSi001 and MSi2500 chips from Mirics. The standard API provided by Mirics is closed source moreover it could not be implemented successfully in SDRangel. An open source API libmirisdr-2 has been written by Miroslav Slugen and later amended by Leif Asbrink SM5BSZ. This API uses a new flavour called [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) in this very same Github space. It contains enhancements and bug fixes.
+This plugin supports input from SDRplay RSP1 devices. SDRplay is based on the MSi001 and MSi2500 chips from Mirics. The standard API provided by Mirics is closed source moreover it could not be implemented successfully in SDRangel. An open source API libmirisdr-2 has been written by Miroslav Slugen and later amended by Leif Asbrink SM5BSZ. This API uses a new flavour called [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) in this very same Github space. It contains enhancements and bug fixes.
 
 <b>No Windows support</b> 
 
