@@ -29,13 +29,14 @@
 
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),
-	QString("2.0.0"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString HackRFInputPlugin::m_hardwareID = "HackRF";
 const QString HackRFInputPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
 
 HackRFInputPlugin::HackRFInputPlugin(QObject* parent) :
@@ -92,7 +93,9 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 			uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 			QString displayedName(QString("HackRF[%1] %2").arg(i).arg(serial_str));
 
-			result.append(SamplingDevice(displayedName, m_deviceTypeID,
+			result.append(SamplingDevice(displayedName,
+			        m_hardwareID,
+			        m_deviceTypeID,
 					serial_str,
 					i));
 

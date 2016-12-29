@@ -25,13 +25,14 @@
 
 const PluginDescriptor SDRdaemonPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon input"),
-	QString("2.0.0"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString SDRdaemonPlugin::m_hardwareID = "SDRdaemon";
 const QString SDRdaemonPlugin::m_deviceTypeID = SDRDAEMON_DEVICE_TYPE_ID;
 
 SDRdaemonPlugin::SDRdaemonPlugin(QObject* parent) :
@@ -59,6 +60,7 @@ PluginInterface::SamplingDevices SDRdaemonPlugin::enumSampleSources()
 		QString displayedName(QString("SDRdaemon[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString::null,
 				i));

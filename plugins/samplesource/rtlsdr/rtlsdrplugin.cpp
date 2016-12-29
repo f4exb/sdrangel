@@ -11,13 +11,14 @@
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QString("RTL-SDR Input"),
-	QString("2.1.6"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString RTLSDRPlugin::m_hardwareID = "RTLSDR";
 const QString RTLSDRPlugin::m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
 
 RTLSDRPlugin::RTLSDRPlugin(QObject* parent) :
@@ -53,6 +54,7 @@ PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources()
 		QString displayedName(QString("RTL-SDR[%1] %2").arg(i).arg(serial));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString(serial),
 				i));

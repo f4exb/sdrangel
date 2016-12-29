@@ -89,17 +89,20 @@ private:
 	struct SamplingDevice {
 		PluginInterface* m_plugin;
 		QString m_displayName;
+		QString m_hadrwareId;
 		QString m_deviceId;
 		QString m_deviceSerial;
 		int m_deviceSequence;
 
 		SamplingDevice(PluginInterface* plugin,
 				const QString& displayName,
+				const QString& hadrwareId,
 				const QString& deviceId,
 				const QString& deviceSerial,
 				int deviceSequence) :
 			m_plugin(plugin),
 			m_displayName(displayName),
+			m_hadrwareId(hadrwareId),
 			m_deviceId(deviceId),
 			m_deviceSerial(deviceSerial),
 			m_deviceSequence(deviceSequence)
@@ -121,8 +124,11 @@ private:
 	SamplingDevices m_sampleSinkDevices;                      //!< Instances of output sinks present in the system
 
 	// "Local" sample source device IDs
+    static const QString m_sdrDaemonHardwareID;       //!< SDRdaemon hardware ID
 	static const QString m_sdrDaemonDeviceTypeID;     //!< SDRdaemon source plugin ID
+	static const QString m_sdrDaemonFECHardwareID;    //!< SDRdaemon with FEC hardware ID
     static const QString m_sdrDaemonFECDeviceTypeID;  //!< SDRdaemon with FEC source plugin ID
+    static const QString m_fileSourceHardwareID;      //!< FileSource source hardware ID
     static const QString m_fileSourceDeviceTypeID;    //!< FileSource source plugin ID
 
     // "Local" sample sink device IDs

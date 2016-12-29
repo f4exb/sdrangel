@@ -451,9 +451,9 @@ void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
 #if QT_VERSION >= 0x050400
-    m_showSystemWidget = new QLabel("SDRangel v2.5.2 " + qtVersionStr + QSysInfo::prettyProductName(), this);
+    m_showSystemWidget = new QLabel("SDRangel v3.0.0 " + qtVersionStr + QSysInfo::prettyProductName(), this);
 #else
-    m_showSystemWidget = new QLabel("SDRangel v2.5.2 " + qtVersionStr, this);
+    m_showSystemWidget = new QLabel("SDRangel v3.0.0 " + qtVersionStr, this);
 #endif
     statusBar()->addPermanentWidget(m_showSystemWidget);
 
@@ -787,18 +787,44 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
     {
         qDebug("MainWindow::on_sampleSource_confirmClicked: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceUI->m_deviceSourceAPI->removeFromBuddies(); // remove old API from buddies lists
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
-        m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI);
-        deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset());
+        m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
+        deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
+
+        // add to buddies list
+        std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+        for (; it != m_deviceUIs.end(); ++it)
+        {
+            if (*it != deviceUI) // do not add to itself
+            {
+                if ((*it)->m_deviceSourceEngine) // it is a source device
+                {
+                    if ((deviceUI->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSourceAPI->getHardwareId()) &&
+                        (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
+                    {
+                        (*it)->m_deviceSourceAPI->addSourceBuddy(deviceUI->m_deviceSourceAPI);
+                    }
+                }
+
+                if ((*it)->m_deviceSinkEngine) // it is a sink device
+                {
+                    if ((deviceUI->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSinkAPI->getHardwareId()) &&
+                        (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
+                    {
+                        (*it)->m_deviceSinkAPI->addSourceBuddy(deviceUI->m_deviceSourceAPI);
+                    }
+                }
+            }
+        }
 
         if (currentSourceTabIndex == 0)
         {
             m_settings.setSourceIndex(deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex());
         }
     }
-
 }
 
 void MainWindow::on_sampleSink_confirmClicked(bool checked)
@@ -810,11 +836,38 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked)
     {
         qDebug("MainWindow::on_sampleSink_confirmClicked: tab at %d", currentSinkTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSinkTabIndex];
-        deviceUI->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset());
+        deviceUI->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceUI->m_deviceSinkAPI->removeFromBuddies(); // remove old API from buddies lists
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
-        m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI);
-        deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset());
+        m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
+        deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
+
+        // add to buddies list
+        std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+        for (; it != m_deviceUIs.end(); ++it)
+        {
+            if (*it != deviceUI) // do not add to itself
+            {
+                if ((*it)->m_deviceSourceEngine) // it is a source device
+                {
+                    if ((deviceUI->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSourceAPI->getHardwareId()) &&
+                        (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
+                    {
+                        (*it)->m_deviceSourceAPI->addSinkBuddy(deviceUI->m_deviceSinkAPI);
+                    }
+                }
+
+                if ((*it)->m_deviceSinkEngine) // it is a sink device
+                {
+                    if ((deviceUI->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSinkAPI->getHardwareId()) &&
+                        (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
+                    {
+                        (*it)->m_deviceSinkAPI->addSinkBuddy(deviceUI->m_deviceSinkAPI);
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -32,8 +32,11 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 
+const QString PluginManager::m_sdrDaemonHardwareID = "SDRdaemon";
 const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemon";
+const QString PluginManager::m_sdrDaemonFECHardwareID = "SDRdaemonFEC";
 const QString PluginManager::m_sdrDaemonFECDeviceTypeID = "sdrangel.samplesource.sdrdaemonfec";
+const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
 
@@ -120,6 +123,7 @@ void PluginManager::updateSampleSourceDevices()
 		{
 			m_sampleSourceDevices.append(SamplingDevice(m_sampleSourceRegistrations[i].m_plugin,
 					ssd[j].displayedName,
+                    ssd[j].hardwareId,
 					ssd[j].id,
 					ssd[j].serial,
 					ssd[j].sequence));
@@ -139,7 +143,8 @@ void PluginManager::updateSampleSinkDevices()
 		{
 			m_sampleSinkDevices.append(SamplingDevice(m_sampleSinkRegistrations[i].m_plugin,
 					ssd[j].displayedName,
-					ssd[j].id,
+					ssd[j].hardwareId,
+                    ssd[j].id,
 					ssd[j].serial,
 					ssd[j].sequence));
 		}
@@ -196,6 +201,7 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
             SamplingDevice(
                 sdrDaemonSSD0->m_plugin,
                 QString("SDRdaemon[%1]").arg(deviceUID),
+                sdrDaemonSSD0->m_hadrwareId,
                 sdrDaemonSSD0->m_deviceId,
                 sdrDaemonSSD0->m_deviceSerial,
                 deviceUID
@@ -209,6 +215,7 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
             SamplingDevice(
                 sdrDaemonFECSSD0->m_plugin,
                 QString("SDRdaemonFEC[%1]").arg(deviceUID),
+                sdrDaemonFECSSD0->m_hadrwareId,
                 sdrDaemonFECSSD0->m_deviceId,
                 sdrDaemonFECSSD0->m_deviceSerial,
                 deviceUID
@@ -222,6 +229,7 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
             SamplingDevice(
                 fileSourceSSD0->m_plugin,
                 QString("FileSource[%1]").arg(deviceUID),
+                fileSourceSSD0->m_hadrwareId,
                 fileSourceSSD0->m_deviceId,
                 fileSourceSSD0->m_deviceSerial,
                 deviceUID
@@ -258,6 +266,7 @@ void PluginManager::duplicateLocalSampleSinkDevices(uint deviceUID)
             SamplingDevice(
             	fileSinkSSD0->m_plugin,
                 QString("FileSink[%1]").arg(deviceUID),
+                fileSinkSSD0->m_hadrwareId,
 				fileSinkSSD0->m_deviceId,
 				fileSinkSSD0->m_deviceSerial,
                 deviceUID
@@ -324,6 +333,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
 	}
 
     qDebug() << "PluginManager::selectSampleSourceByIndex: m_sampleSource at index " << index
+            << " hid: " << m_sampleSourceDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSourceDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSourceDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSourceDevices[index].m_deviceSequence;
@@ -336,6 +346,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
+	deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
 	deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
 	deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
 	deviceAPI->setSampleSourcePluginGUI(pluginGUI);
@@ -364,6 +375,7 @@ int PluginManager::selectSampleSinkByIndex(int index, DeviceSinkAPI *deviceAPI)
 	}
 
     qDebug() << "PluginManager::selectSampleSinkByIndex: m_sampleSink at index " << index
+            << " hid: " << m_sampleSinkDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSinkDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSinkDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSinkDevices[index].m_deviceSequence;
@@ -376,6 +388,7 @@ int PluginManager::selectSampleSinkByIndex(int index, DeviceSinkAPI *deviceAPI)
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
+	deviceAPI->setHardwareId(m_sampleSinkDevices[index].m_hadrwareId);
 	deviceAPI->setSampleSinkId(m_sampleSinkDevices[index].m_deviceId);
 	deviceAPI->setSampleSinkSerial(m_sampleSinkDevices[index].m_deviceSerial);
 	deviceAPI->setSampleSinkPluginGUI(pluginGUI);
@@ -414,6 +427,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceSource
 	}
 
     qDebug() << "PluginManager::selectFirstSampleSource: m_sampleSource at index " << index
+            << " hid: " << m_sampleSourceDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSourceDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSourceDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSourceDevices[index].m_deviceSequence;
@@ -426,6 +440,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceSource
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
+    deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
@@ -464,6 +479,7 @@ int PluginManager::selectFirstSampleSink(const QString& sinkId, DeviceSinkAPI *d
 	}
 
     qDebug() << "PluginManager::selectFirstSampleSink: m_sampleSink at index " << index
+            << " hid: " << m_sampleSinkDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSinkDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSinkDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSinkDevices[index].m_deviceSequence;
@@ -476,6 +492,7 @@ int PluginManager::selectFirstSampleSink(const QString& sinkId, DeviceSinkAPI *d
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
+    deviceAPI->setHardwareId(m_sampleSinkDevices[index].m_hadrwareId);
     deviceAPI->setSampleSinkId(m_sampleSinkDevices[index].m_deviceId);
     deviceAPI->setSampleSinkSerial(m_sampleSinkDevices[index].m_deviceSerial);
     deviceAPI->setSampleSinkPluginGUI(pluginGUI);
@@ -538,6 +555,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 	}
 
     qDebug() << "PluginManager::selectSampleSourceBySequence: m_sampleSource at index " << index
+            << " hid: " << m_sampleSourceDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSourceDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSourceDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSourceDevices[index].m_deviceSequence;
@@ -550,6 +568,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
+    deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
@@ -612,6 +631,7 @@ int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, con
 	}
 
     qDebug() << "PluginManager::selectSampleSinkBySerialOrSequence: m_sampleSink at index " << index
+            << " hid: " << m_sampleSinkDevices[index].m_hadrwareId.toStdString().c_str()
             << " id: " << m_sampleSinkDevices[index].m_deviceId.toStdString().c_str()
             << " ser: " << m_sampleSinkDevices[index].m_deviceSerial.toStdString().c_str()
             << " seq: " << m_sampleSinkDevices[index].m_deviceSequence;
@@ -624,6 +644,7 @@ int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, con
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
+    deviceAPI->setHardwareId(m_sampleSinkDevices[index].m_hadrwareId);
     deviceAPI->setSampleSinkId(m_sampleSinkDevices[index].m_deviceId);
     deviceAPI->setSampleSinkSerial(m_sampleSinkDevices[index].m_deviceSerial);
     deviceAPI->setSampleSinkPluginGUI(pluginGUI);
@@ -637,6 +658,7 @@ void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI 
     SamplingDevice *sampleSourceDevice = (SamplingDevice *) devicePtr;
 
     qDebug() << "PluginManager::selectSampleSourceByDevice: "
+            << " hid: " << sampleSourceDevice->m_hadrwareId.toStdString().c_str()
             << " id: " << sampleSourceDevice->m_deviceId.toStdString().c_str()
             << " ser: " << sampleSourceDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSourceDevice->m_deviceSequence;
@@ -649,6 +671,7 @@ void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI 
 
     //  m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(sampleSourceDevice->m_deviceSequence);
+    deviceAPI->setHardwareId(sampleSourceDevice->m_hadrwareId);
     deviceAPI->setSampleSourceId(sampleSourceDevice->m_deviceId);
     deviceAPI->setSampleSourceSerial(sampleSourceDevice->m_deviceSerial);
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
@@ -660,6 +683,7 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
     SamplingDevice *sampleSinkDevice = (SamplingDevice *) devicePtr;
 
     qDebug() << "PluginManager::selectSampleSinkByDevice: "
+            << " hid: " << sampleSinkDevice->m_hadrwareId.toStdString().c_str()
             << " id: " << sampleSinkDevice->m_deviceId.toStdString().c_str()
             << " ser: " << sampleSinkDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSinkDevice->m_deviceSequence;
@@ -672,6 +696,7 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
 
     //  m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(sampleSinkDevice->m_deviceSequence);
+    deviceAPI->setHardwareId(sampleSinkDevice->m_hadrwareId);
     deviceAPI->setSampleSinkId(sampleSinkDevice->m_deviceId);
     deviceAPI->setSampleSinkSerial(sampleSinkDevice->m_deviceSerial);
     deviceAPI->setSampleSinkPluginGUI(pluginGUI);

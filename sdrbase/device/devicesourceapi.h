@@ -36,6 +36,7 @@ class QWidget;
 class PluginGUI;
 class PluginAPI;
 class Preset;
+class DeviceSinkAPI;
 
 class SDRANGEL_API DeviceSourceAPI : public QObject {
     Q_OBJECT
@@ -64,10 +65,16 @@ public:
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
     void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
+    void setHardwareId(const QString& id);
     void setSampleSourceId(const QString& id);
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceSequence(int sequence);
     void setSampleSourcePluginGUI(PluginGUI *gui);
+
+    const QString& getHardwareId() const { return m_hardwareId; }
+    const QString& getSampleSourceId() const { return m_sampleSourceId; }
+    const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
+    int getSampleSourceSequence() const { return m_sampleSourceSequence; }
 
     void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
     void removeChannelInstance(PluginGUI* pluginGUI);
@@ -80,6 +87,15 @@ public:
     void saveChannelSettings(Preset* preset);
 
     MainWindow *getMainWindow() { return m_mainWindow; }
+    DSPDeviceSourceEngine *getDeviceSourceEngine() { return m_deviceSourceEngine; }
+
+    const std::vector<DeviceSourceAPI*>& getSourceBuddies() const { return m_sourceBuddies; }
+    const std::vector<DeviceSinkAPI*>& getSinkBuddies() const { return m_sinkBuddies; }
+    void addSourceBuddy(DeviceSourceAPI* buddy);
+    void addSinkBuddy(DeviceSinkAPI* buddy);
+    void removeSourceBuddy(DeviceSourceAPI* buddy);
+    void removeSinkBuddy(DeviceSinkAPI* buddy);
+    void removeFromBuddies();
 
 protected:
     struct ChannelInstanceRegistration
@@ -117,12 +133,16 @@ protected:
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
 
+    QString m_hardwareId;
     QString m_sampleSourceId;
     QString m_sampleSourceSerial;
     int m_sampleSourceSequence;
     PluginGUI* m_sampleSourcePluginGUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
+
+    std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
+    std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
 
     friend class MainWindow;
 };

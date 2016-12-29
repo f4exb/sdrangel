@@ -35,6 +35,7 @@ class QWidget;
 class PluginGUI;
 class PluginAPI;
 class Preset;
+class DeviceSourceAPI;
 
 class SDRANGEL_API DeviceSinkAPI : public QObject {
     Q_OBJECT
@@ -64,10 +65,16 @@ public:
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
     void setOutputGUI(QWidget* outputGUI, const QString& sinkDisplayName);
 
+    void setHardwareId(const QString& id);
     void setSampleSinkId(const QString& id);
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkSequence(int sequence);
     void setSampleSinkPluginGUI(PluginGUI *gui);
+
+    const QString& getHardwareId() const { return m_hardwareId; }
+    const QString& getSampleSinkId() const { return m_sampleSinkId; }
+    const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
+    int getSampleSinkSequence() const { return m_sampleSinkSequence; }
 
     void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
     void removeChannelInstance(PluginGUI* pluginGUI);
@@ -80,6 +87,15 @@ public:
     void saveChannelSettings(Preset* preset);
 
     MainWindow *getMainWindow() { return m_mainWindow; }
+    DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }
+
+    const std::vector<DeviceSourceAPI*>& getSourceBuddies() const { return m_sourceBuddies; }
+    const std::vector<DeviceSinkAPI*>& getSinkBuddies() const { return m_sinkBuddies; }
+    void addSourceBuddy(DeviceSourceAPI* buddy);
+    void addSinkBuddy(DeviceSinkAPI* buddy);
+    void removeSourceBuddy(DeviceSourceAPI* buddy);
+    void removeSinkBuddy(DeviceSinkAPI* buddy);
+    void removeFromBuddies();
 
 protected:
     struct ChannelInstanceRegistration
@@ -117,12 +133,16 @@ protected:
     GLSpectrum *m_spectrum;
     ChannelWindow *m_channelWindow;
 
+    QString m_hardwareId;
     QString m_sampleSinkId;
     QString m_sampleSinkSerial;
     int m_sampleSinkSequence;
     PluginGUI* m_sampleSinkPluginGUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
+
+    std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
+    std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
 
     friend class MainWindow;
 };

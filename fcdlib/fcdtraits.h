@@ -25,6 +25,7 @@ struct fcd_traits
 	static const int convBufSize = (1<<11);
 	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
+    static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;
     static const char *pluginDisplayedName;
@@ -40,6 +41,7 @@ struct fcd_traits<Pro>
 	static const int convBufSize = (1<<11);
 	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
+    static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;
     static const char *pluginDisplayedName;
@@ -55,6 +57,7 @@ struct fcd_traits<ProPlus>
 	static const int convBufSize = (1<<12);
 	static const int fcdBufSize = (1<<18);
 	static const char *alsaDeviceName;
+    static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;
     static const char *pluginDisplayedName;
@@ -62,6 +65,7 @@ struct fcd_traits<ProPlus>
 };
 
 template <fcd_type FCDType> const char *fcd_traits<FCDType>::alsaDeviceName = "";
+template <fcd_type FCDType> const char *fcd_traits<FCDType>::hardwareID = "";
 template <fcd_type FCDType> const char *fcd_traits<FCDType>::interfaceIID = "";
 template <fcd_type FCDType> const char *fcd_traits<FCDType>::displayedName = "";
 template <fcd_type FCDType> const char *fcd_traits<FCDType>::pluginDisplayedName = "";

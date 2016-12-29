@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/devicesinkapi.h"
+#include "device/devicesourceapi.h"
 #include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
@@ -144,6 +145,11 @@ void DeviceSinkAPI::addRollupWidget(QWidget *widget)
 void DeviceSinkAPI::setOutputGUI(QWidget* outputGUI, const QString& sinkDisplayName)
 {
     m_mainWindow->setDeviceGUI(m_deviceTabIndex, outputGUI, sinkDisplayName, false);
+}
+
+void DeviceSinkAPI::setHardwareId(const QString& id)
+{
+    m_hardwareId = id;
 }
 
 void DeviceSinkAPI::setSampleSinkId(const QString& id)
@@ -377,4 +383,107 @@ bool DeviceSinkAPI::ChannelInstanceRegistration::operator<(const ChannelInstance
     }
 }
 
+void DeviceSinkAPI::addSourceBuddy(DeviceSourceAPI* buddy)
+{
+    std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
+
+    for (;it != m_sourceBuddies.end(); ++it)
+    {
+        if (((*it)->getHardwareId() == buddy->getHardwareId()) &&
+            ((*it)->getSampleSourceSerial() == buddy->getSampleSourceSerial()))
+        {
+            qDebug("DeviceSinkAPI::addSourceBuddy: buddy %s(%s) already in the list",
+                    qPrintable(buddy->getHardwareId()),
+                    qPrintable(buddy->getSampleSourceSerial()));
+            return;
+        }
+    }
+
+    m_sourceBuddies.push_back(buddy);
+    qDebug("DeviceSinkAPI::addSourceBuddy: added buddy %s(%s) to the list",
+            qPrintable(buddy->getHardwareId()),
+            qPrintable(buddy->getSampleSourceSerial()));
+}
+
+void DeviceSinkAPI::addSinkBuddy(DeviceSinkAPI* buddy)
+{
+    std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
+
+    for (;it != m_sinkBuddies.end(); ++it)
+    {
+        if (((*it)->getHardwareId() == buddy->getHardwareId()) &&
+            ((*it)->getSampleSinkSerial() == buddy->getSampleSinkSerial()))
+        {
+            qDebug("DeviceSinkAPI::addSinkBuddy: buddy %s(%s) already in the list",
+                    qPrintable(buddy->getHardwareId()),
+                    qPrintable(buddy->getSampleSinkSerial()));
+            return;
+        }
+    }
+
+    m_sinkBuddies.push_back(buddy);
+    qDebug("DeviceSinkAPI::addSinkBuddy: added buddy %s(%s) to the list",
+            qPrintable(buddy->getHardwareId()),
+            qPrintable(buddy->getSampleSinkSerial()));
+}
+
+void DeviceSinkAPI::removeSourceBuddy(DeviceSourceAPI* buddy)
+{
+    std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
+
+    for (;it != m_sourceBuddies.end(); ++it)
+    {
+        if (((*it)->getHardwareId() == buddy->getHardwareId()) &&
+            ((*it)->getSampleSourceSerial() == buddy->getSampleSourceSerial()))
+        {
+            m_sourceBuddies.erase(it);
+            qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) removed from the list",
+                    qPrintable(buddy->getHardwareId()),
+                    qPrintable(buddy->getSampleSourceSerial()));
+            return;
+        }
+    }
+
+    qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) not found in the list",
+            qPrintable(buddy->getHardwareId()),
+            qPrintable(buddy->getSampleSourceSerial()));
+}
+
+void DeviceSinkAPI::removeSinkBuddy(DeviceSinkAPI* buddy)
+{
+    std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
+
+    for (;it != m_sinkBuddies.end(); ++it)
+    {
+        if (((*it)->getHardwareId() == buddy->getHardwareId()) &&
+            ((*it)->getSampleSinkSerial() == buddy->getSampleSinkSerial()))
+        {
+            m_sinkBuddies.erase(it);
+            qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) removed from the list",
+                    qPrintable(buddy->getHardwareId()),
+                    qPrintable(buddy->getSampleSinkSerial()));
+            return;
+        }
+    }
+
+    qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) not found in the list",
+            qPrintable(buddy->getHardwareId()),
+            qPrintable(buddy->getSampleSinkSerial()));
+}
+
+void DeviceSinkAPI::removeFromBuddies()
+{
+    std::vector<DeviceSourceAPI*>::iterator itSource = m_sourceBuddies.begin();
+    std::vector<DeviceSinkAPI*>::iterator itSink = m_sinkBuddies.begin();
+
+    for (;itSource != m_sourceBuddies.end(); ++itSource)
+    {
+        (*itSource)->removeSinkBuddy(this);
+    }
+
+    for (;itSink != m_sinkBuddies.end(); ++itSink)
+    {
+        (*itSink)->removeSinkBuddy(this);
+    }
+}
 

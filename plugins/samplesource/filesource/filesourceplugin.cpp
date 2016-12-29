@@ -25,13 +25,14 @@
 
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("File source input"),
-	QString("2.1.5"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString FileSourcePlugin::m_hardwareID = "FileSource";
 const QString FileSourcePlugin::m_deviceTypeID = FILESOURCE_DEVICE_TYPE_ID;
 
 FileSourcePlugin::FileSourcePlugin(QObject* parent) :
@@ -59,6 +60,7 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 		QString displayedName(QString("FileSource[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString::null,
 				i));

@@ -25,13 +25,14 @@
 
 const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
 	QString("File sink output"),
-	QString("2.2.1"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString FileSinkPlugin::m_hardwareID = "FileSink";
 const QString FileSinkPlugin::m_deviceTypeID = FILESINK_DEVICE_TYPE_ID;
 
 FileSinkPlugin::FileSinkPlugin(QObject* parent) :
@@ -59,6 +60,7 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 		QString displayedName(QString("FileSink[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString::null,
 				i));

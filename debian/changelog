@@ -1,3 +1,9 @@
+sdrangel (3.0.0-1) unstable; urgency=medium
+
+  * Implemented real Tx devices (BladeRF and HackRF) for real transmission
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 01 Jan 2017 23:14:18 +0100
+
 sdrangel (2.5.2-1) unstable; urgency=medium
 
   * Changed modulators source device feeding

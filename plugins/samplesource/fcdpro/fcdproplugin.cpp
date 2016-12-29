@@ -34,8 +34,6 @@ const PluginDescriptor FCDProPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString FCDProPlugin::m_deviceTypeID = FCDPRO_DEVICE_TYPE_ID;
-
 FCDProPlugin::FCDProPlugin(QObject* parent) :
 	QObject(parent)
 {
@@ -64,7 +62,8 @@ PluginInterface::SamplingDevices FCDProPlugin::enumSampleSources()
 		QString displayedName(QString("%1[%2] %3").arg(fcd_traits<Pro>::displayedName).arg(i).arg(serialNumber));
 
 		result.append(SamplingDevice(displayedName,
-				fcd_traits<Pro>::interfaceIID,
+		        fcd_traits<Pro>::hardwareID,
+		        fcd_traits<Pro>::interfaceIID,
 				serialNumber,
 				i));
 

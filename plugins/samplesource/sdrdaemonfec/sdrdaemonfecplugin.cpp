@@ -27,13 +27,14 @@
 
 const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon with FEC input"),
-	QString("2.1.0"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString SDRdaemonFECPlugin::m_hardwareID = "SDRdaemonFEC";
 const QString SDRdaemonFECPlugin::m_deviceTypeID = SDRDAEMONFEC_DEVICE_TYPE_ID;
 
 SDRdaemonFECPlugin::SDRdaemonFECPlugin(QObject* parent) :
@@ -61,6 +62,7 @@ PluginInterface::SamplingDevices SDRdaemonFECPlugin::enumSampleSources()
 		QString displayedName(QString("SDRdaemonFEC[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString::null,
 				i));

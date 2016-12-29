@@ -24,14 +24,15 @@
 #include <device/devicesourceapi.h>
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
-    QString("SDRPlay Input"),
-    QString("2.3.0"),
+    QString("SDRPlay RSP1 Input"),
+    QString("3.0.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
     QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString SDRPlayPlugin::m_hardwareID = "SDRplay1";
 const QString SDRPlayPlugin::m_deviceTypeID = SDRPLAY_DEVICE_TYPE_ID;
 
 SDRPlayPlugin::SDRPlayPlugin(QObject* parent) :
@@ -73,6 +74,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
 		QString displayedName(QString("SDRPlay[%1] %2").arg(i).arg(serial));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString(serial),
 				i));

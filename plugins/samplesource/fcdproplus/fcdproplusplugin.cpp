@@ -64,6 +64,7 @@ PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 		QString displayedName(QString("%1[%2] %3").arg(fcd_traits<ProPlus>::displayedName).arg(i).arg(serialNumber));
 
 		result.append(SamplingDevice(displayedName,
+		        fcd_traits<ProPlus>::hardwareID,
 				fcd_traits<ProPlus>::interfaceIID,
 				serialNumber,
 				i));

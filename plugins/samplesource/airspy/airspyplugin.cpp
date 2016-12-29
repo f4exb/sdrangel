@@ -27,13 +27,14 @@
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("Airspy Input"),
-	QString("2.0.0"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString AirspyPlugin::m_hardwareID = "Airspy";
 const QString AirspyPlugin::m_deviceTypeID = AIRSPY_DEVICE_TYPE_ID;
 
 AirspyPlugin::AirspyPlugin(QObject* parent) :
@@ -95,6 +96,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 				QString displayedName(QString("Airspy[%1] %2").arg(i).arg(serial_str));
 
 				result.append(SamplingDevice(displayedName,
+				        m_hardwareID,
 						m_deviceTypeID,
 						serial_str,
 						i));

@@ -27,13 +27,14 @@
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
-	QString("2.0.0"),
+	QString("3.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
+const QString BlderfInputPlugin::m_hardwareID = "BladeRF";
 const QString BlderfInputPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
 
 BlderfInputPlugin::BlderfInputPlugin(QObject* parent) :
@@ -63,6 +64,7 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 		QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
 
 		result.append(SamplingDevice(displayedName,
+		        m_hardwareID,
 				m_deviceTypeID,
 				QString(devinfo[i].serial),
 				i));

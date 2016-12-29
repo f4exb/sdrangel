@@ -25,15 +25,18 @@ public:
 	struct SamplingDevice
 	{
 		QString displayedName;
+		QString hardwareId;
 		QString id;
 		QString serial;
 		int sequence;
 
 		SamplingDevice(const QString& _displayedName,
+                const QString& _hardwareId,
 				const QString& _id,
 				const QString& _serial,
 				int _sequence) :
 			displayedName(_displayedName),
+			hardwareId(_hardwareId),
 			id(_id),
 			serial(_serial),
 			sequence(_sequence)
