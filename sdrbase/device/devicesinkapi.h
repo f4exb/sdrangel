@@ -95,7 +95,7 @@ public:
     void addSinkBuddy(DeviceSinkAPI* buddy);
     void removeSourceBuddy(DeviceSourceAPI* buddy);
     void removeSinkBuddy(DeviceSinkAPI* buddy);
-    void removeFromBuddies();
+    void clearBuddiesLists();
 
 protected:
     struct ChannelInstanceRegistration

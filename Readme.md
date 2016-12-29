@@ -2,8 +2,6 @@
 
 **SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware.
 
-Although it keeps the same look and feel as its parent application **SDRangelove** it is a major redesign from it hitting more than half the lines of the code. Therefore the code base cannot be kept in sync anymore with its parent. It also contains enhancements and major differences. So it should now fly with its own wings and with its own name: **SDRangel**
-
 <h1>Source code</h1>
 
 <h2>Repository branches</h2>

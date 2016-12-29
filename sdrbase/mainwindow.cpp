@@ -271,6 +271,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
 	    m_deviceUIs.back()->m_deviceSourceAPI->freeAll();
+        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // remove old API from buddies lists
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -301,6 +302,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
 	    m_deviceUIs.back()->m_deviceSinkAPI->freeAll();
+        m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -788,9 +790,10 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
         qDebug("MainWindow::on_sampleSource_confirmClicked: tab at %d", currentSourceTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
         deviceUI->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset()); // save old API settings
-        deviceUI->m_deviceSourceAPI->removeFromBuddies(); // remove old API from buddies lists
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
+        deviceUI->m_deviceSourceAPI->stopAcquisition();
+        deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
@@ -837,9 +840,10 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked)
         qDebug("MainWindow::on_sampleSink_confirmClicked: tab at %d", currentSinkTabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[currentSinkTabIndex];
         deviceUI->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset()); // save old API settings
-        deviceUI->m_deviceSinkAPI->removeFromBuddies(); // remove old API from buddies lists
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
+        deviceUI->m_deviceSinkAPI->stopGeneration();
+        deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
         m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
         deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
 

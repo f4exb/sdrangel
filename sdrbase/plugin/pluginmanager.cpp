@@ -663,7 +663,6 @@ void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI 
             << " ser: " << sampleSourceDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSourceDevice->m_deviceSequence;
 
-    deviceAPI->stopAcquisition();
     deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
@@ -688,7 +687,6 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
             << " ser: " << sampleSinkDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSinkDevice->m_deviceSequence;
 
-    deviceAPI->stopGeneration();
     deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
