@@ -96,6 +96,8 @@ public:
     void removeSourceBuddy(DeviceSourceAPI* buddy);
     void removeSinkBuddy(DeviceSinkAPI* buddy);
     void clearBuddiesLists();
+    void *getBuddySharedPtr() const { return m_buddySharedPtr; }
+    void setBuddySharedPtr(void *ptr) { m_buddySharedPtr = ptr; }
 
 protected:
     struct ChannelInstanceRegistration
@@ -143,6 +145,7 @@ protected:
 
     std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
+    void *m_buddySharedPtr;
 
     friend class MainWindow;
 };

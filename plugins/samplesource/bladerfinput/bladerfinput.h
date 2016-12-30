@@ -18,6 +18,8 @@
 #define INCLUDE_BLADERFINPUT_H
 
 #include <dsp/devicesamplesource.h>
+#include "bladerf/devicebladerf.h"
+#include "bladerf/devicebladerfparam.h"
 
 #include <libbladeRF.h>
 #include <QString>
@@ -82,7 +84,7 @@ public:
 private:
 	bool applySettings(const BladeRFInputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
-	struct bladerf *open_bladerf_from_serial(const char *serial);
+//	struct bladerf *open_bladerf_from_serial(const char *serial);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -90,6 +92,7 @@ private:
 	struct bladerf* m_dev;
 	BladerfInputThread* m_bladerfThread;
 	QString m_deviceDescription;
+	DeviceBladeRFParams m_sharedParams;
 };
 
 #endif // INCLUDE_BLADERFINPUT_H

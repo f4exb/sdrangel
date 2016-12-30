@@ -549,6 +549,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(libmirisdr)
 endif (BUILD_DEBIAN)
 
+add_subdirectory(devices)
 add_subdirectory(plugins)
 
 if(LIBUSB_FOUND AND UNIX)

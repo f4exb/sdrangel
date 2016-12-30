@@ -35,7 +35,8 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow),
     m_sampleSinkSequence(0),
-    m_sampleSinkPluginGUI(0)
+    m_sampleSinkPluginGUI(0),
+    m_buddySharedPtr(0)
 {
 }
 

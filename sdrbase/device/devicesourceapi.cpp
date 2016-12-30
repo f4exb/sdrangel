@@ -35,7 +35,8 @@ DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow),
     m_sampleSourceSequence(0),
-    m_sampleSourcePluginGUI(0)
+    m_sampleSourcePluginGUI(0),
+    m_buddySharedPtr(0)
 {
 }
 

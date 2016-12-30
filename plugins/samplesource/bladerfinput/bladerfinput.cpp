@@ -23,10 +23,11 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
 
-#include "../bladerfinput/bladerfinputgui.h"
-#include "../bladerfinput/bladerfinputthread.h"
+#include "bladerfinputgui.h"
+#include "bladerfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgReportBladerf, Message)
@@ -38,11 +39,13 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
 	m_bladerfThread(0),
 	m_deviceDescription("BladeRF")
 {
+    m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 BladerfInput::~BladerfInput()
 {
 	stop();
+	m_deviceAPI->setBuddySharedPtr(0);
 }
 
 bool BladerfInput::init(const Message& cmd)
@@ -68,25 +71,66 @@ bool BladerfInput::start(int device)
 		return false;
 	}
 
-	if ((m_dev = open_bladerf_from_serial(0)) == 0) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+	if (m_deviceAPI->getSinkBuddies().size() > 0)
 	{
-		qCritical("could not open BladeRF");
-		return false;
+	    DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+	    DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+
+	    if (buddySharedParams == 0)
+	    {
+            qCritical("BladerfInput::start: could not get shared parameters from buddy");
+            return false;
+	    }
+
+	    if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
+	    {
+            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
+            {
+                qCritical("BladerfInput::start: could not get BladeRF handle from buddy");
+                return false;
+            }
+	    }
+	    else // Tx is not running so Rx opens device and takes ownership
+	    {
+            if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+            {
+                qCritical("BladerfInput::start: could not open BladeRF");
+                return false;
+            }
+
+            m_sharedParams.m_dev = m_dev;
+	    }
+	}
+	else // No Tx part open so Rx opens device and takes ownership
+	{
+        if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+        {
+            qCritical("BladerfInput::start: could not open BladeRF");
+            return false;
+        }
+
+        m_sharedParams.m_dev = m_dev;
 	}
 
-    fpga_loaded = bladerf_is_fpga_configured(m_dev);
-
-    if (fpga_loaded < 0)
-    {
-    	qCritical("Failed to check FPGA state: %s",
-                  bladerf_strerror(fpga_loaded));
-    	return false;
-    }
-    else if (fpga_loaded == 0)
-    {
-    	qCritical("The device's FPGA is not loaded.");
-    	return false;
-    }
+//	if ((m_dev = open_bladerf_from_serial(0)) == 0) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+//	{
+//		qCritical("could not open BladeRF");
+//		return false;
+//	}
+//
+//    fpga_loaded = bladerf_is_fpga_configured(m_dev);
+//
+//    if (fpga_loaded < 0)
+//    {
+//    	qCritical("Failed to check FPGA state: %s",
+//                  bladerf_strerror(fpga_loaded));
+//    	return false;
+//    }
+//    else if (fpga_loaded == 0)
+//    {
+//    	qCritical("The device's FPGA is not loaded.");
+//    	return false;
+//    }
 
     // TODO: adjust USB transfer data according to sample rate
     if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
@@ -131,11 +175,43 @@ void BladerfInput::stop()
 		m_bladerfThread = 0;
 	}
 
-	if(m_dev != 0)
-	{
-		bladerf_close(m_dev);
-		m_dev = 0;
-	}
+    if (m_deviceAPI->getSinkBuddies().size() > 0)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+
+        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
+        {
+            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Rx has the ownership but not the Tx
+            {
+                buddySharedParams->m_dev = m_dev; // transfer ownership
+            }
+        }
+        else // Tx is not running so Rx must have the ownership
+        {
+            if(m_dev != 0) // close BladeRF
+            {
+                bladerf_close(m_dev);
+                m_dev = 0;
+            }
+        }
+    }
+    else // No Tx part open
+    {
+        if(m_dev != 0) // close BladeRF
+        {
+            bladerf_close(m_dev);
+            m_dev = 0;
+        }
+    }
+
+    m_sharedParams.m_dev = 0;
+
+//	if(m_dev != 0)
+//	{
+//		bladerf_close(m_dev);
+//		m_dev = 0;
+//	}
 }
 
 const QString& BladerfInput::getDeviceDescription() const
@@ -250,28 +326,54 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 		if (m_dev != 0)
 		{
-			if (m_settings.m_xb200)
-			{
-				if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0)
-				{
-					qDebug("bladerf_expansion_attach(xb200) failed");
-				}
-				else
-				{
-					qDebug() << "BladerfInput: Attach XB200";
-				}
-			}
-			else
-			{
-				if (bladerf_expansion_attach(m_dev, BLADERF_XB_NONE) != 0)
-				{
-					qDebug("bladerf_expansion_attach(none) failed");
-				}
-				else
-				{
-					qDebug() << "BladerfInput: Detach XB200";
-				}
-			}
+		    bool changeSettings;
+
+		    if (m_deviceAPI->getSinkBuddies().size() > 0)
+		    {
+		        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+		        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+
+		        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
+		        {
+		            changeSettings = false;
+		        }
+		        else
+		        {
+		            changeSettings = true;
+		        }
+		    }
+		    else // No Tx open
+		    {
+                changeSettings = true;
+		    }
+
+		    if (changeSettings)
+		    {
+	            if (m_settings.m_xb200)
+	            {
+	                if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0)
+	                {
+	                    qDebug("bladerf_expansion_attach(xb200) failed");
+	                }
+	                else
+	                {
+	                    qDebug() << "BladerfInput: Attach XB200";
+	                }
+	            }
+	            else
+	            {
+	                if (bladerf_expansion_attach(m_dev, BLADERF_XB_NONE) != 0)
+	                {
+	                    qDebug("bladerf_expansion_attach(none) failed");
+	                }
+	                else
+	                {
+	                    qDebug() << "BladerfInput: Detach XB200";
+	                }
+	            }
+
+	            m_sharedParams.m_xb200Attached = m_settings.m_xb200;
+		    }
 		}
 	}
 
@@ -447,41 +549,41 @@ bladerf_lna_gain BladerfInput::getLnaGain(int lnaGain)
 	}
 }
 
-struct bladerf *BladerfInput::open_bladerf_from_serial(const char *serial)
-{
-    int status;
-    struct bladerf *dev;
-    struct bladerf_devinfo info;
-
-    /* Initialize all fields to "don't care" wildcard values.
-     *
-     * Immediately passing this to bladerf_open_with_devinfo() would cause
-     * libbladeRF to open any device on any available backend. */
-    bladerf_init_devinfo(&info);
-
-    /* Specify the desired device's serial number, while leaving all other
-     * fields in the info structure wildcard values */
-    if (serial != NULL)
-    {
-		strncpy(info.serial, serial, BLADERF_SERIAL_LENGTH - 1);
-		info.serial[BLADERF_SERIAL_LENGTH - 1] = '\0';
-    }
-
-    status = bladerf_open_with_devinfo(&dev, &info);
-
-    if (status == BLADERF_ERR_NODEV)
-    {
-        fprintf(stderr, "No devices available with serial=%s\n", serial);
-        return NULL;
-    }
-    else if (status != 0)
-    {
-        fprintf(stderr, "Failed to open device with serial=%s (%s)\n",
-                serial, bladerf_strerror(status));
-        return NULL;
-    }
-    else
-    {
-        return dev;
-    }
-}
+//struct bladerf *BladerfInput::open_bladerf_from_serial(const char *serial)
+//{
+//    int status;
+//    struct bladerf *dev;
+//    struct bladerf_devinfo info;
+//
+//    /* Initialize all fields to "don't care" wildcard values.
+//     *
+//     * Immediately passing this to bladerf_open_with_devinfo() would cause
+//     * libbladeRF to open any device on any available backend. */
+//    bladerf_init_devinfo(&info);
+//
+//    /* Specify the desired device's serial number, while leaving all other
+//     * fields in the info structure wildcard values */
+//    if (serial != NULL)
+//    {
+//		strncpy(info.serial, serial, BLADERF_SERIAL_LENGTH - 1);
+//		info.serial[BLADERF_SERIAL_LENGTH - 1] = '\0';
+//    }
+//
+//    status = bladerf_open_with_devinfo(&dev, &info);
+//
+//    if (status == BLADERF_ERR_NODEV)
+//    {
+//        fprintf(stderr, "No devices available with serial=%s\n", serial);
+//        return NULL;
+//    }
+//    else if (status != 0)
+//    {
+//        fprintf(stderr, "Failed to open device with serial=%s (%s)\n",
+//                serial, bladerf_strerror(status));
+//        return NULL;
+//    }
+//    else
+//    {
+//        return dev;
+//    }
+//}

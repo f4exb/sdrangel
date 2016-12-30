@@ -24,6 +24,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/devices
     ${LIBBLADERFLIBSRC}/include
     ${LIBBLADERFLIBSRC}/src
 )
@@ -31,6 +32,7 @@ else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/devices
 	${LIBBLADERF_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -54,12 +56,14 @@ target_link_libraries(inputbladerf
     ${QT_LIBRARIES}
     bladerf
     sdrbase
+    bladerfdevice
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputbladerf
 	${QT_LIBRARIES}
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
+	bladerfdevice
 )
 endif (BUILD_DEBIAN)
 
