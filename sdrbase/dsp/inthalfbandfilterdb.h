@@ -402,6 +402,28 @@ public:
         advancePointer();
     }
 
+    void myInterpolate(Sample* sample1, Sample* sample2)
+    {
+        storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
+        doFIR(sample1);
+        advancePointer();
+
+        storeSample(0, 0);
+        doFIR(sample2);
+        advancePointer();
+    }
+
+    void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    {
+        storeSample(*x1, *y1);
+        doFIR(x1, y1);
+        advancePointer();
+
+        storeSample(0, 0);
+        doFIR(x2, y2);
+        advancePointer();
+    }
+
 protected:
 	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
 	int m_ptr;

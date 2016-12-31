@@ -403,6 +403,28 @@ public:
         advancePointer();
     }
 
+    void myInterpolate(Sample* sample1, Sample* sample2)
+    {
+        storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
+        doFIR(sample1);
+        advancePointer();
+
+        storeSample(0, 0);
+        doFIR(sample2);
+        advancePointer();
+    }
+
+    void myInterpolate(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
+    {
+        storeSample(*x1, *y1);
+        doFIR(x1, y1);
+        advancePointer();
+
+        storeSample(0, 0);
+        doFIR(x2, y2);
+        advancePointer();
+    }
+
 protected:
 	int32_t m_samplesDB[2*HBFilterOrder][2]; // double buffer technique with even/odd amnd I/Q stride
 	int32_t m_samplesAligned[HBFilterOrder][2] __attribute__ ((aligned (16)));

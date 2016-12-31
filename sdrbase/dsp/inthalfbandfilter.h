@@ -510,6 +510,40 @@ public:
         m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
     }
 
+    void myInterpolate(Sample* sample1, Sample* sample2)
+    {
+        m_samples[m_ptr][0] = sample1->real();
+        m_samples[m_ptr][1] = sample1->imag();
+
+        doFIR(sample1);
+
+        m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
+
+        m_samples[m_ptr][0] = 0;
+        m_samples[m_ptr][1] = 0;
+
+        doFIR(sample2);
+
+        m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
+    }
+
+    void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    {
+        m_samples[m_ptr][0] = *x1;
+        m_samples[m_ptr][1] = *y1;
+
+        doFIR(x1, y1);
+
+        m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
+
+        m_samples[m_ptr][0] = 0;
+        m_samples[m_ptr][1] = 0;
+
+        doFIR(x2, y2);
+
+        m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
+    }
+
 protected:
 	qint32 m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2];     // Valgrind optim (from qint16)
 	qint16 m_ptr;
