@@ -399,6 +399,7 @@ void DeviceSourceAPI::addSinkBuddy(DeviceSinkAPI* buddy)
     std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
 
     m_sinkBuddies.push_back(buddy);
+    buddy->m_sourceBuddies.push_back(this);
     qDebug("DeviceSourceAPI::addSinkBuddy: added buddy %s(%s) [%lx] <-> [%lx]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSinkSerial()),

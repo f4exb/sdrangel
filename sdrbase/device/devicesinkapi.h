@@ -148,6 +148,7 @@ protected:
     void *m_buddySharedPtr;
 
     friend class MainWindow;
+    friend class DeviceSourceAPI;
 };
 
 

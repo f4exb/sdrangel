@@ -389,6 +389,7 @@ void DeviceSinkAPI::addSourceBuddy(DeviceSourceAPI* buddy)
     std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
 
     m_sourceBuddies.push_back(buddy);
+    buddy->m_sinkBuddies.push_back(this);
     qDebug("DeviceSinkAPI::addSourceBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSourceSerial()),
@@ -401,6 +402,7 @@ void DeviceSinkAPI::addSinkBuddy(DeviceSinkAPI* buddy)
     std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
 
     m_sinkBuddies.push_back(buddy);
+    buddy->m_sinkBuddies.push_back(this);
     qDebug("DeviceSinkAPI::addSinkBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSinkSerial()),
