@@ -22,6 +22,7 @@
 struct FileSinkSettings {
     quint64 m_centerFrequency;
     qint32 m_sampleRate;
+    quint32 m_log2Interp;
 
     FileSinkSettings();
     void resetToDefaults();

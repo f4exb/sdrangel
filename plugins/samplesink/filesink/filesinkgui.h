@@ -81,6 +81,7 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
+	void on_interp_currentIndexChanged(int index);
     void on_sampleRate_currentIndexChanged(int index);
     void updateHardware();
     void updateStatus();

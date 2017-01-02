@@ -31,8 +31,10 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* s
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
     m_samplerate(0),
+    m_log2Interpolation(0),
     m_throttlems(FILESINK_THROTTLE_MS),
-    m_throttleToggle(false)
+    m_throttleToggle(false),
+    m_buf(0)
 {
     assert(m_ofstream != 0);
 }
@@ -42,6 +44,8 @@ FileSinkThread::~FileSinkThread()
 	if (m_running) {
 		stopWork();
 	}
+
+    if (m_buf) delete[] m_buf;
 }
 
 void FileSinkThread::startWork()
@@ -74,14 +78,18 @@ void FileSinkThread::stopWork()
 
 void FileSinkThread::setSamplerate(int samplerate)
 {
-	qDebug() << "FileSinkThread::setSamplerate:"
-			<< " new:" << samplerate
-			<< " old:" << m_samplerate;
-
 	if (samplerate != m_samplerate)
 	{
-		if (m_running) {
+	    qDebug() << "FileSinkThread::setSamplerate:"
+	            << " new:" << samplerate
+	            << " old:" << m_samplerate;
+
+	    bool wasRunning = false;
+
+		if (m_running)
+		{
 			stopWork();
+			wasRunning = true;
 		}
 
 		// resize sample FIFO
@@ -89,9 +97,50 @@ void FileSinkThread::setSamplerate(int samplerate)
 		    m_sampleFifo->resize(samplerate); // 1s buffer
 		}
 
-		m_samplerate = samplerate;
+        // resize output buffer
+        if (m_buf) delete[] m_buf;
+        m_buf = new int16_t[samplerate*(1<<m_log2Interpolation)*2];
+
+        m_samplerate = samplerate;
         m_samplesChunkSize = (m_samplerate * m_throttlems) / 1000;
+
+        if (wasRunning) {
+            startWork();
+        }
 	}
+}
+
+void FileSinkThread::setLog2Interpolation(int log2Interpolation)
+{
+    if ((log2Interpolation < 0) || (log2Interpolation > 6))
+    {
+        return;
+    }
+
+    if (log2Interpolation != m_log2Interpolation)
+    {
+        qDebug() << "FileSinkThread::setLog2Interpolation:"
+                << " new:" << log2Interpolation
+                << " old:" << m_log2Interpolation;
+
+        bool wasRunning = false;
+
+        if (m_running)
+        {
+            stopWork();
+            wasRunning = true;
+        }
+
+        // resize output buffer
+        if (m_buf) delete[] m_buf;
+        m_buf = new int16_t[m_samplerate*(1<<log2Interpolation)*2];
+
+        m_log2Interpolation = log2Interpolation;
+
+        if (wasRunning) {
+            startWork();
+        }
+    }
 }
 
 void FileSinkThread::run()
@@ -138,7 +187,40 @@ void FileSinkThread::tick()
 
         m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize);
         SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
-        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
         m_samplesCount += m_samplesChunkSize;
+
+        if (m_log2Interpolation == 0)
+        {
+            m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
+        }
+        else
+        {
+            switch (m_log2Interpolation)
+            {
+            case 1:
+                m_interpolators.interpolate2_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            case 2:
+                m_interpolators.interpolate4_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            case 3:
+                m_interpolators.interpolate8_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            case 4:
+                m_interpolators.interpolate16_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            case 5:
+                m_interpolators.interpolate32_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            case 6:
+                m_interpolators.interpolate64_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                break;
+            default:
+                break;
+            }
+
+            m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
+        }
+
 	}
 }

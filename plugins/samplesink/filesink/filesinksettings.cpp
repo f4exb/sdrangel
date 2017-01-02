@@ -26,6 +26,7 @@ void FileSinkSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
+    m_log2Interp = 0;
 }
 
 QByteArray FileSinkSettings::serialize() const
@@ -33,6 +34,7 @@ QByteArray FileSinkSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeS32(1, m_sampleRate);
+    s.writeU32(2, m_log2Interp);
 
     return s.final();
 }
@@ -51,6 +53,7 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
     {
         int intval;
         d.readS32(1, &m_sampleRate, 48000);
+        d.readU32(2, &m_log2Interp, 0);
         return true;
     }
     else

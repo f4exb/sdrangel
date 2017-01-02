@@ -60,7 +60,9 @@ void FileSinkOutput::openFileStream()
 
 	m_ofstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
 
-	m_ofstream.write((const char *) &m_settings.m_sampleRate, sizeof(int));
+	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
+	m_ofstream.write((const char *) &actualSampleRate, sizeof(int));
+    //m_ofstream.write((const char *) &m_settings.m_sampleRate, sizeof(int));
 	m_ofstream.write((const char *) &m_settings.m_centerFrequency, sizeof(quint64));
     m_startingTimeStamp = time(0);
     m_ofstream.write((const char *) &m_startingTimeStamp, sizeof(std::time_t));
@@ -88,6 +90,7 @@ bool FileSinkOutput::start(int device)
 	}
 
 	m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
+	m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileSinkThread->connectTimer(m_masterTimer);
 	m_fileSinkThread->startWork();
 
@@ -217,11 +220,24 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
         forwardChange = true;
     }
 
+    if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
+    {
+        m_settings.m_log2Interp = settings.m_log2Interp;
+
+        if (m_fileSinkThread != 0)
+        {
+            m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
+        }
+
+        forwardChange = true;
+    }
+
     if (forwardChange)
     {
-        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %d",
+        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %d m_log2Interp: %d",
                 m_settings.m_centerFrequency,
-                m_settings.m_sampleRate);
+                m_settings.m_sampleRate,
+                m_settings.m_log2Interp);
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }

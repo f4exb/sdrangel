@@ -25,8 +25,10 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <stdint.h>
 
 #include "dsp/inthalfbandfilter.h"
+#include "dsp/interpolators.h"
 
 #define FILESINK_THROTTLE_MS 50
 
@@ -42,6 +44,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
+	void setLog2Interpolation(int log2Interpolation);
     void setBuffer(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
     std::size_t getSamplesCount() const { return m_samplesCount; }
@@ -61,10 +64,14 @@ private:
     std::size_t m_samplesCount;
 
 	int m_samplerate;
+	int m_log2Interpolation;
     int m_throttlems;
     int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
+
+    Interpolators<qint16, SDR_SAMP_SZ, 16> m_interpolators;
+    int16_t *m_buf;
 
 	void run();
 

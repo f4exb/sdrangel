@@ -199,6 +199,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/complex.h
     sdrbase/dsp/cwkeyer.h
     sdrbase/dsp/decimators.h
+    sdrbase/dsp/interpolators.h
     sdrbase/dsp/dspcommands.h
     sdrbase/dsp/dspengine.h
     sdrbase/dsp/dspdevicesourceengine.h

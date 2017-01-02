@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../bladerfinput/bladerfinput.h"
+#include "bladerfinput.h"
 
 #include <string.h>
 #include <errno.h>
@@ -37,7 +37,7 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_bladerfThread(0),
-	m_deviceDescription("BladeRF")
+	m_deviceDescription("BladeRFInput")
 {
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
@@ -63,11 +63,10 @@ bool BladerfInput::start(int device)
 	}
 
 	int res;
-	int fpga_loaded;
 
 	if (!m_sampleFifo.setSize(96000 * 4))
 	{
-		qCritical("Could not allocate SampleFifo");
+		qCritical("BladerfInput::start: could not allocate SampleFifo");
 		return false;
 	}
 
@@ -135,18 +134,18 @@ bool BladerfInput::start(int device)
     // TODO: adjust USB transfer data according to sample rate
     if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
-    	qCritical("bladerf_sync_config with return code %d", res);
+    	qCritical("BladerfInput::start: bladerf_sync_config with return code %d", res);
     	goto failed;
     }
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_RX, true)) < 0)
     {
-    	qCritical("bladerf_enable_module with return code %d", res);
+    	qCritical("BladerfInput::start: bladerf_enable_module with return code %d", res);
     	goto failed;
     }
 
 	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == NULL) {
-		qFatal("out of memory");
+		qFatal("BladerfInput::start: out of memory");
 		goto failed;
 	}
 
@@ -277,11 +276,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		{
 			if(bladerf_set_lna_gain(m_dev, getLnaGain(m_settings.m_lnaGain)) != 0)
 			{
-				qDebug("bladerf_set_lna_gain() failed");
+				qDebug("BladerfInput::applySettings: bladerf_set_lna_gain() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput: LNA gain set to " << getLnaGain(m_settings.m_lnaGain);
+				qDebug() << "BladerfInput::applySettings: LNA gain set to " << getLnaGain(m_settings.m_lnaGain);
 			}
 		}
 	}
@@ -294,11 +293,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		{
 			if(bladerf_set_rxvga1(m_dev, m_settings.m_vga1) != 0)
 			{
-				qDebug("bladerf_set_rxvga1() failed");
+				qDebug("BladerfInput::applySettings: bladerf_set_rxvga1() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput: VGA1 gain set to " << m_settings.m_vga1;
+				qDebug() << "BladerfInput::applySettings: VGA1 gain set to " << m_settings.m_vga1;
 			}
 		}
 	}
@@ -311,11 +310,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		{
 			if(bladerf_set_rxvga2(m_dev, m_settings.m_vga2) != 0)
 			{
-				qDebug("bladerf_set_rxvga2() failed");
+				qDebug("BladerfInput::applySettings: bladerf_set_rxvga2() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput: VGA2 gain set to " << m_settings.m_vga2;
+				qDebug() << "BladerfInput::applySettings: VGA2 gain set to " << m_settings.m_vga2;
 			}
 		}
 	}
@@ -353,22 +352,22 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	            {
 	                if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0)
 	                {
-	                    qDebug("bladerf_expansion_attach(xb200) failed");
+	                    qDebug("BladerfInput::applySettings: bladerf_expansion_attach(xb200) failed");
 	                }
 	                else
 	                {
-	                    qDebug() << "BladerfInput: Attach XB200";
+	                    qDebug() << "BladerfInput::applySettings: Attach XB200";
 	                }
 	            }
 	            else
 	            {
 	                if (bladerf_expansion_attach(m_dev, BLADERF_XB_NONE) != 0)
 	                {
-	                    qDebug("bladerf_expansion_attach(none) failed");
+	                    qDebug("BladerfInput::applySettings: bladerf_expansion_attach(none) failed");
 	                }
 	                else
 	                {
-	                    qDebug() << "BladerfInput: Detach XB200";
+	                    qDebug() << "BladerfInput::applySettings: Detach XB200";
 	                }
 	            }
 
@@ -385,11 +384,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		{
 			if(bladerf_xb200_set_path(m_dev, BLADERF_MODULE_RX, m_settings.m_xb200Path) != 0)
 			{
-				qDebug("bladerf_xb200_set_path(BLADERF_MODULE_RX) failed");
+				qDebug("BladerfInput::applySettings: bladerf_xb200_set_path(BLADERF_MODULE_RX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput: set xb200 path to " << m_settings.m_xb200Path;
+				qDebug() << "BladerfInput::applySettings: set xb200 path to " << m_settings.m_xb200Path;
 			}
 		}
 	}
@@ -402,11 +401,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		{
 			if(bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_RX, m_settings.m_xb200Filter) != 0)
 			{
-				qDebug("bladerf_xb200_set_filterbank(BLADERF_MODULE_RX) failed");
+				qDebug("BladerfInput::applySettings: bladerf_xb200_set_filterbank(BLADERF_MODULE_RX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput: set xb200 filter to " << m_settings.m_xb200Filter;
+				qDebug() << "BladerfInput::applySettings: set xb200 filter to " << m_settings.m_xb200Filter;
 			}
 		}
 	}
@@ -422,11 +421,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 			if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_RX, m_settings.m_devSampleRate, &actualSamplerate) < 0)
 			{
-				qCritical("could not set sample rate: %d", m_settings.m_devSampleRate);
+				qCritical("BladerfInput::applySettings: could not set sample rate: %d", m_settings.m_devSampleRate);
 			}
 			else
 			{
-				qDebug() << "bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
+				qDebug() << "BladerfInput::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
 			}
 		}
 	}
@@ -441,11 +440,11 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_RX, m_settings.m_bandwidth, &actualBandwidth) < 0)
 			{
-				qCritical("could not set bandwidth: %d", m_settings.m_bandwidth);
+				qCritical("BladerfInput::applySettings: could not set bandwidth: %d", m_settings.m_bandwidth);
 			}
 			else
 			{
-				qDebug() << "bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth;
+				qDebug() << "BladerfInput::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth;
 			}
 		}
 	}
@@ -458,7 +457,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		if(m_dev != 0)
 		{
 			m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
-			qDebug() << "BladerfInput: set decimation to " << (1<<m_settings.m_log2Decim);
+			qDebug() << "BladerfInput::applySettings: set decimation to " << (1<<m_settings.m_log2Decim);
 		}
 	}
 
@@ -469,7 +468,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		if(m_dev != 0)
 		{
 			m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
-			qDebug() << "BladerfInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+			qDebug() << "BladerfInput::applySettings: set fc pos (enum) to " << (int) m_settings.m_fcPos;
 		}
 	}
 
@@ -510,7 +509,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	{
 		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0)
 		{
-			qDebug("bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
+			qDebug("BladerfInput::applySettings: bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
 		}
 	}
 

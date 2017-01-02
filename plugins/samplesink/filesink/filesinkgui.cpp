@@ -189,7 +189,7 @@ void FileSinkGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
 }
 
 void FileSinkGui::displaySettings()
@@ -253,6 +253,17 @@ void FileSinkGui::on_sampleRate_currentIndexChanged(int index)
 {
 	int newrate = FileSinkSampleRates::getRate(index);
     m_settings.m_sampleRate = newrate * 1000;
+    sendSettings();
+}
+
+void FileSinkGui::on_interp_currentIndexChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    m_settings.m_log2Interp = index;
+    updateSampleRateAndFrequency();
     sendSettings();
 }
 

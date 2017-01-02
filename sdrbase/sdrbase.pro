@@ -131,6 +131,7 @@ HEADERS  += mainwindow.h\
         dsp/cwkeyer.h\
         dsp/complex.h\
         dsp/decimators.h\
+        dsp/interpolators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
         dsp/dspdevicesourceengine.h\
