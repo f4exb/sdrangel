@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,38 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICESDBLADERF_H_
-#define DEVICES_BLADERF_DEVICESDBLADERF_H_
+#ifndef _BLADERF_BLADERFOUTPUTSETTINGS_H_
+#define _BLADERF_BLADERFOUTPUTSETTINGS_H_
 
+#include <QtGlobal>
 #include <libbladeRF.h>
 
-class DeviceBladeRF
-{
-public:
-    static bool open_bladerf(struct bladerf **dev, const char *serial);
+struct BladeRFOutputSettings {
+	quint64 m_centerFrequency;
+	qint32 m_devSampleRate;
+	qint32 m_vga1;
+	qint32 m_vga2;
+	qint32 m_bandwidth;
+	quint32 m_log2Interp;
+	bool m_xb200;
+	bladerf_xb200_path m_xb200Path;
+	bladerf_xb200_filter m_xb200Filter;
 
-private:
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
+	BladeRFOutputSettings();
+	void resetToDefaults();
+	QByteArray serialize() const;
+	bool deserialize(const QByteArray& data);
 };
 
-class BladerfSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_rates[21];
-    static unsigned int m_nb_rates;
-};
-
-class BladerfBandwidths {
-public:
-    static unsigned int getBandwidth(unsigned int bandwidth_index);
-    static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static unsigned int getNbBandwidths();
-private:
-    static unsigned int m_halfbw[16];
-    static unsigned int m_nb_halfbw;
-};
-
-#endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */
+#endif /* _BLADERF_BLADERFOUTPUTSETTINGS_H_ */

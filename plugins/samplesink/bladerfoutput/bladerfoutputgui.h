@@ -14,27 +14,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFINPUTGUI_H
-#define INCLUDE_BLADERFINPUTGUI_H
+#ifndef INCLUDE_BLADERFOUTPUTGUI_H
+#define INCLUDE_BLADERFOUTPUTGUI_H
 
 #include <QTimer>
 #include "plugin/plugingui.h"
 
-#include "../bladerfinput/bladerfinput.h"
+#include "bladerfoutput.h"
 
-class DeviceSourceAPI;
+class DeviceSinkAPI;
+class DeviceSampleSink;
 class FileRecord;
 
 namespace Ui {
-	class BladerfInputGui;
+	class BladerfOutputGui;
 }
 
-class BladerfInputGui : public QWidget, public PluginGUI {
+class BladerfOutputGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
-	virtual ~BladerfInputGui();
+	explicit BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	virtual ~BladerfOutputGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -48,15 +49,14 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::BladerfInputGui* ui;
+	Ui::BladerfOutputGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
-	BladeRFInputSettings m_settings;
+	DeviceSinkAPI* m_deviceAPI;
+	BladeRFOutputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
-	std::vector<int> m_gains;
-	DeviceSampleSource* m_sampleSource;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
+	DeviceSampleSink* m_deviceSampleSink;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output TODO: change to file input
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
@@ -69,20 +69,16 @@ private:
 private slots:
     void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
-	void on_dcOffset_toggled(bool checked);
-	void on_iqImbalance_toggled(bool checked);
 	void on_samplerate_currentIndexChanged(int index);
 	void on_bandwidth_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
-	void on_lna_currentIndexChanged(int index);
 	void on_vga1_valueChanged(int value);
 	void on_vga2_valueChanged(int value);
 	void on_xb200_currentIndexChanged(int index);
-	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
 };
 
-#endif // INCLUDE_BLADERFINPUTGUI_H
+#endif // INCLUDE_BLADERFOUTPUTGUI_H

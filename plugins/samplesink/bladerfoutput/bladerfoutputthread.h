@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,38 +14,46 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICESDBLADERF_H_
-#define DEVICES_BLADERF_DEVICESDBLADERF_H_
+#ifndef INCLUDE_BLADERFOUTPUTTHREAD_H
+#define INCLUDE_BLADERFOUTPUTTHREAD_H
 
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 #include <libbladeRF.h>
+#include "dsp/samplesourcefifo.h"
+#include "dsp/interpolators.h"
 
-class DeviceBladeRF
-{
+#define BLADERFOUTPUT_BLOCKSIZE (1<<14)
+
+class BladerfOutputThread : public QThread {
+	Q_OBJECT
+
 public:
-    static bool open_bladerf(struct bladerf **dev, const char *serial);
+	BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent = NULL);
+	~BladerfOutputThread();
+
+	void startWork();
+	void stopWork();
+	void setLog2Interpolation(unsigned int log2_interp);
+	void setFcPos(int fcPos);
 
 private:
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
+	QMutex m_startWaitMutex;
+	QWaitCondition m_startWaiter;
+	bool m_running;
+
+	struct bladerf* m_dev;
+	qint16 m_buf[2*BLADERFOUTPUT_BLOCKSIZE];
+    SampleSourceFifo* m_sampleFifo;
+
+	unsigned int m_log2Interp;
+	int m_fcPos;
+
+	Interpolators<qint16, SDR_SAMP_SZ, 12> m_interpolators;
+
+	void run();
+	void callback(qint16* buf, qint32 len);
 };
 
-class BladerfSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_rates[21];
-    static unsigned int m_nb_rates;
-};
-
-class BladerfBandwidths {
-public:
-    static unsigned int getBandwidth(unsigned int bandwidth_index);
-    static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static unsigned int getNbBandwidths();
-private:
-    static unsigned int m_halfbw[16];
-    static unsigned int m_nb_halfbw;
-};
-
-#endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */
+#endif // INCLUDE_BLADERFOUTPUTTHREAD_H

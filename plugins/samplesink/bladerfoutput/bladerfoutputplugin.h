@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,38 +14,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICESDBLADERF_H_
-#define DEVICES_BLADERF_DEVICESDBLADERF_H_
+#ifndef INCLUDE_BLADERFOUTPUTPLUGIN_H
+#define INCLUDE_BLADERFOUTPUTPLUGIN_H
 
-#include <libbladeRF.h>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-class DeviceBladeRF
-{
+class PluginAPI;
+
+#define BLADERFOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerfoutput"
+
+class BladerfOutputPlugin : public QObject, public PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID BLADERFOUTPUT_DEVICE_TYPE_ID)
+
 public:
-    static bool open_bladerf(struct bladerf **dev, const char *serial);
+	explicit BladerfOutputPlugin(QObject* parent = NULL);
+
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
+
+	virtual SamplingDevices enumSampleSinks();
+	virtual PluginGUI* createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI);
+
+	static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
 
 private:
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
+	static const PluginDescriptor m_pluginDescriptor;
 };
 
-class BladerfSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_rates[21];
-    static unsigned int m_nb_rates;
-};
-
-class BladerfBandwidths {
-public:
-    static unsigned int getBandwidth(unsigned int bandwidth_index);
-    static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static unsigned int getNbBandwidths();
-private:
-    static unsigned int m_halfbw[16];
-    static unsigned int m_nb_halfbw;
-};
-
-#endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */
+#endif // INCLUDE_BLADERFOUTPUTPLUGIN_H

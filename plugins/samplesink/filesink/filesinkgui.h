@@ -57,7 +57,6 @@ private:
     QString m_fileName;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
-	std::vector<int> m_gains;
 	DeviceSampleSink* m_deviceSampleSink;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
