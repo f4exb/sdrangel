@@ -25,7 +25,7 @@ bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
 
     if ((*dev = open_bladerf_from_serial(0)) == 0)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf: could not open BladeRF");
+        fprintf(stderr, "DeviceBladeRF::open_bladerf: could not open BladeRF\n");
         return false;
     }
 
@@ -33,13 +33,13 @@ bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
 
     if (fpga_loaded < 0)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf: failed to check FPGA state: %s",
+        fprintf(stderr, "DeviceBladeRF::open_bladerf: failed to check FPGA state: %s\n",
                   bladerf_strerror(fpga_loaded));
         return false;
     }
     else if (fpga_loaded == 0)
     {
-        fprintf(stderr, "BladerfOutput::start: the device's FPGA is not loaded.");
+        fprintf(stderr, "BladerfOutput::start: the device's FPGA is not loaded.\n");
         return false;
     }
 

@@ -24,7 +24,7 @@
 #include "dsp/samplesourcefifo.h"
 #include "dsp/interpolators.h"
 
-#define BLADERFOUTPUT_BLOCKSIZE (1<<14)
+#define BLADERFOUTPUT_BLOCKSIZE (1<<16)
 
 class BladerfOutputThread : public QThread {
 	Q_OBJECT

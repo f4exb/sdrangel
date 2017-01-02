@@ -28,8 +28,8 @@ void BladeRFOutputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
 	m_devSampleRate = 3072000;
-	m_vga1 = 20;
-	m_vga2 = 9;
+	m_vga1 = -20;
+	m_vga2 = 20;
 	m_bandwidth = 1500000;
 	m_log2Interp = 0;
 	m_xb200 = false;

@@ -219,9 +219,9 @@ void BladerfOutputGui::on_bandwidth_currentIndexChanged(int index)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_decim_currentIndexChanged(int index)
+void BladerfOutputGui::on_interp_currentIndexChanged(int index)
 {
-	if ((index <0) || (index > 5))
+	if ((index <0) || (index > 6))
 		return;
 	m_settings.m_log2Interp = index;
 	sendSettings();
@@ -229,7 +229,7 @@ void BladerfOutputGui::on_decim_currentIndexChanged(int index)
 
 void BladerfOutputGui::on_vga1_valueChanged(int value)
 {
-	if ((value < BLADERF_RXVGA1_GAIN_MIN) || (value > BLADERF_RXVGA1_GAIN_MAX))
+	if ((value < BLADERF_TXVGA1_GAIN_MIN) || (value > BLADERF_TXVGA1_GAIN_MAX))
 		return;
 
 	ui->vga1Text->setText(tr("%1dB").arg(value));
@@ -239,7 +239,7 @@ void BladerfOutputGui::on_vga1_valueChanged(int value)
 
 void BladerfOutputGui::on_vga2_valueChanged(int value)
 {
-	if ((value < BLADERF_RXVGA2_GAIN_MIN) || (value > BLADERF_RXVGA2_GAIN_MAX))
+	if ((value < BLADERF_TXVGA2_GAIN_MIN) || (value > BLADERF_TXVGA2_GAIN_MAX))
 		return;
 
 	ui->vga2Text->setText(tr("%1dB").arg(value));

@@ -71,7 +71,7 @@ private slots:
 	void on_centerFrequency_changed(quint64 value);
 	void on_samplerate_currentIndexChanged(int index);
 	void on_bandwidth_currentIndexChanged(int index);
-	void on_decim_currentIndexChanged(int index);
+	void on_interp_currentIndexChanged(int index);
 	void on_vga1_valueChanged(int value);
 	void on_vga2_valueChanged(int value);
 	void on_xb200_currentIndexChanged(int index);

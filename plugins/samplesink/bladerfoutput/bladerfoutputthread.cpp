@@ -28,7 +28,7 @@ BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* 
 	m_log2Interp(0),
 	m_fcPos(0)
 {
-    m_sampleFifo->resize(BLADERFOUTPUT_BLOCKSIZE);
+    m_sampleFifo->resize(16*BLADERFOUTPUT_BLOCKSIZE);
 }
 
 BladerfOutputThread::~BladerfOutputThread()
@@ -81,34 +81,34 @@ void BladerfOutputThread::run()
 void BladerfOutputThread::callback(qint16* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
-    m_sampleFifo->readAdvance(beginRead, len);
+    m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));
     beginRead -= len;
 
     if (m_log2Interp == 0)
 	{
-		m_interpolators.interpolate1(&beginRead, buf, len);
+		m_interpolators.interpolate1(&beginRead, buf, len*2);
 	}
 	else
 	{
         switch (m_log2Interp)
         {
         case 1:
-            m_interpolators.interpolate2_cen(&beginRead, buf, len);
+            m_interpolators.interpolate2_cen(&beginRead, buf, len*2);
             break;
         case 2:
-            m_interpolators.interpolate4_cen(&beginRead, buf, len);
+            m_interpolators.interpolate4_cen(&beginRead, buf, len*2);
             break;
         case 3:
-            m_interpolators.interpolate8_cen(&beginRead, buf, len);
+            m_interpolators.interpolate8_cen(&beginRead, buf, len*2);
             break;
         case 4:
-            m_interpolators.interpolate16_cen(&beginRead, buf, len);
+            m_interpolators.interpolate16_cen(&beginRead, buf, len*2);
             break;
         case 5:
-            m_interpolators.interpolate32_cen(&beginRead, buf, len);
+            m_interpolators.interpolate32_cen(&beginRead, buf, len*2);
             break;
         case 6:
-            m_interpolators.interpolate64_cen(&beginRead, buf, len);
+            m_interpolators.interpolate64_cen(&beginRead, buf, len*2);
             break;
         default:
             break;

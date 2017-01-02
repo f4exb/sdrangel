@@ -265,7 +265,7 @@
         <string>Interpolation factor</string>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
@@ -425,16 +425,16 @@
         <string>Amplifier before filtering gain (dB)</string>
        </property>
        <property name="minimum">
-        <number>5</number>
+        <number>-35</number>
        </property>
        <property name="maximum">
-        <number>30</number>
+        <number>-4</number>
        </property>
        <property name="pageStep">
         <number>1</number>
        </property>
        <property name="value">
-        <number>20</number>
+        <number>-20</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -450,7 +450,7 @@
         </size>
        </property>
        <property name="text">
-        <string>20</string>
+        <string>-20</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -491,16 +491,16 @@
         <string>Amplifier before ADC gain (dB)</string>
        </property>
        <property name="maximum">
-        <number>30</number>
+        <number>25</number>
        </property>
        <property name="singleStep">
-        <number>3</number>
+        <number>1</number>
        </property>
        <property name="pageStep">
-        <number>3</number>
+        <number>1</number>
        </property>
        <property name="value">
-        <number>9</number>
+        <number>20</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -516,7 +516,7 @@
         </size>
        </property>
        <property name="text">
-        <string>9</string>
+        <string>20</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
