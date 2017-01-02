@@ -54,7 +54,7 @@ bool BladerfOutput::init(const Message& cmd)
 
 bool BladerfOutput::start(int device)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_dev != 0)
 	{
@@ -78,6 +78,8 @@ bool BladerfOutput::start(int device)
 
         if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side is running so it must have device ownership
         {
+            qDebug("BladerfOutput::start: Rx side is running");
+
             if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Rx but do not take ownership
             {
                 qCritical("BladerfOutput::start: could not get BladeRF handle from buddy");
@@ -86,6 +88,8 @@ bool BladerfOutput::start(int device)
         }
         else // Rx is not running so Tx opens device and takes ownership
         {
+            qDebug("BladerfOutput::start: Rx side is not running");
+
             if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
             {
                 qCritical("BladerfOutput::start: could not open BladeRF");
@@ -97,6 +101,8 @@ bool BladerfOutput::start(int device)
     }
     else // No Rx part open so Tx opens device and takes ownership
     {
+        qDebug("BladerfOutput::start: Rx side is not open");
+
         if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
         {
             qCritical("BladerfOutput::start: could not open BladeRF");
@@ -127,7 +133,7 @@ bool BladerfOutput::start(int device)
 
 	m_bladerfThread->startWork();
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
 	qDebug("BladerfOutput::start: started");
@@ -141,14 +147,20 @@ failed:
 
 void BladerfOutput::stop()
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
+    int res;
 
-	if(m_bladerfThread != 0)
+    if(m_bladerfThread != 0)
 	{
 		m_bladerfThread->stopWork();
 		delete m_bladerfThread;
 		m_bladerfThread = 0;
 	}
+
+    if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_TX, false)) < 0)
+    {
+        qCritical("BladerfOutput::stop: bladerf_enable_module with return code %d", res);
+    }
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -157,6 +169,8 @@ void BladerfOutput::stop()
 
         if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side running
         {
+            qDebug("BladerfOutput::stop: Rx side is running");
+
             if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Tx has the ownership but not the Rx
             {
                 buddySharedParams->m_dev = m_dev; // transfer ownership
@@ -164,6 +178,8 @@ void BladerfOutput::stop()
         }
         else // Rx is not running so Tx must have the ownership
         {
+            qDebug("BladerfOutput::stop: Rx side is not running");
+
             if(m_dev != 0) // close BladeRF
             {
                 bladerf_close(m_dev);
@@ -173,6 +189,8 @@ void BladerfOutput::stop()
     }
     else // No Rx part open
     {
+        qDebug("BladerfOutput::stop: Rx side is not open");
+
         if(m_dev != 0) // close BladeRF
         {
             bladerf_close(m_dev);
@@ -222,7 +240,7 @@ bool BladerfOutput::handleMessage(const Message& message)
 bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool force)
 {
 	bool forwardChange = false;
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	qDebug() << "BladerfOutput::applySettings: m_dev: " << m_dev;
 

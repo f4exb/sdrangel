@@ -55,7 +55,7 @@ bool BladerfInput::init(const Message& cmd)
 
 bool BladerfInput::start(int device)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_dev != 0)
 	{
@@ -151,7 +151,7 @@ bool BladerfInput::start(int device)
 
 	m_bladerfThread->startWork();
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
 	qDebug("BladerfInput::startInput: started");
@@ -165,7 +165,8 @@ failed:
 
 void BladerfInput::stop()
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
+    int res;
 
 	if(m_bladerfThread != 0)
 	{
@@ -173,6 +174,11 @@ void BladerfInput::stop()
 		delete m_bladerfThread;
 		m_bladerfThread = 0;
 	}
+
+    if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_RX, false)) < 0)
+    {
+        qCritical("BladerfInput::stop: bladerf_enable_module with return code %d", res);
+    }
 
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
@@ -252,7 +258,7 @@ bool BladerfInput::handleMessage(const Message& message)
 bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool force)
 {
 	bool forwardChange = false;
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	qDebug() << "BladerfInput::applySettings: m_dev: " << m_dev;
 
