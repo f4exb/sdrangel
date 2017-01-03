@@ -44,8 +44,12 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
 
 BladerfInput::~BladerfInput()
 {
-	stop();
-	m_deviceAPI->setBuddySharedPtr(0);
+    if (m_dev != 0)
+    {
+        stop();
+    }
+
+    m_deviceAPI->setBuddySharedPtr(0);
 }
 
 bool BladerfInput::init(const Message& cmd)
@@ -197,7 +201,6 @@ void BladerfInput::stop()
             if(m_dev != 0) // close BladeRF
             {
                 bladerf_close(m_dev);
-                m_dev = 0;
             }
         }
     }
@@ -206,11 +209,11 @@ void BladerfInput::stop()
         if(m_dev != 0) // close BladeRF
         {
             bladerf_close(m_dev);
-            m_dev = 0;
         }
     }
 
     m_sharedParams.m_dev = 0;
+    m_dev = 0;
 
 //	if(m_dev != 0)
 //	{

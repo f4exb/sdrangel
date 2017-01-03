@@ -43,8 +43,12 @@ BladerfOutput::BladerfOutput(DeviceSinkAPI *deviceAPI) :
 
 BladerfOutput::~BladerfOutput()
 {
-	stop();
-	m_deviceAPI->setBuddySharedPtr(0);
+    if (m_dev != 0)
+    {
+        stop();
+    }
+
+    m_deviceAPI->setBuddySharedPtr(0);
 }
 
 bool BladerfOutput::init(const Message& cmd)
@@ -183,7 +187,6 @@ void BladerfOutput::stop()
             if(m_dev != 0) // close BladeRF
             {
                 bladerf_close(m_dev);
-                m_dev = 0;
             }
         }
     }
@@ -194,11 +197,11 @@ void BladerfOutput::stop()
         if(m_dev != 0) // close BladeRF
         {
             bladerf_close(m_dev);
-            m_dev = 0;
         }
     }
 
     m_sharedParams.m_dev = 0;
+    m_dev = 0;
 }
 
 const QString& BladerfOutput::getDeviceDescription() const
