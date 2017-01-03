@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <algorithm>
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
@@ -195,25 +196,27 @@ void FileSinkThread::tick()
         }
         else
         {
+            int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate);
+
             switch (m_log2Interpolation)
             {
             case 1:
-                m_interpolators.interpolate2_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             case 2:
-                m_interpolators.interpolate4_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             case 3:
-                m_interpolators.interpolate8_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             case 4:
-                m_interpolators.interpolate16_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             case 5:
-                m_interpolators.interpolate32_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             case 6:
-                m_interpolators.interpolate64_cen(&beginRead, m_buf, m_samplesChunkSize*(1<<m_log2Interpolation)*2);
+                m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
                 break;
             default:
                 break;
