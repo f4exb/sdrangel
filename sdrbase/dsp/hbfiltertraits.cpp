@@ -18,6 +18,18 @@
 
 #include "dsp/hbfiltertraits.h"
 
+const int16_t HBFIRFilterTraits<16>::hbMod[16+6] = {
+        15,16,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,1,2
+};
+
+const int32_t HBFIRFilterTraits<16>::hbCoeffs[4] = {
+        //* Firwin as in https://www.dsprelated.com/showcode/270.php */
+        (int32_t)(-0.0052391810630145274965685509016566356877 * (1 << hbShift)),
+        (int32_t)(0.0232111017863650750947535073009930783883 * (1 << hbShift)),
+        (int32_t)(-0.0761058457486735451258397233686991967261 * (1 << hbShift)),
+        (int32_t)(0.3076987787367443383246268240327481180429 * (1 << hbShift)),
+};
+
 const int16_t HBFIRFilterTraits<32>::hbMod[32+6] = {
         31,32,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20,21,22,
         23,24,25,26,27,28,29,30,31,32,0,1,2

@@ -24,7 +24,9 @@
 #include "dsp/inthalfbandfilterdb.h"
 #endif
 
-#define INTERPOLATORS_HB_FILTER_ORDER 64
+#define INTERPOLATORS_HB_FILTER_ORDER_FIRST  64
+#define INTERPOLATORS_HB_FILTER_ORDER_SECOND 32
+#define INTERPOLATORS_HB_FILTER_ORDER_NEXT   16
 
 template<uint SdrBits, uint OutputBits>
 struct interpolation_shifts
@@ -113,19 +115,19 @@ public:
 
 private:
 #ifdef USE_SSE4_1
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator2;  // 1st stages
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator4;  // 2nd stages
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator8;  // 3rd stages
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator16; // 4th stages
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator32; // 5th stages
-    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator64; // 6th stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_FIRST> m_interpolator2;  // 1st stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_SECOND> m_interpolator4;  // 2nd stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator8;  // 3rd stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator16; // 4th stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator32; // 5th stages
+    IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator64; // 6th stages
 #else
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator2;  // 1st stages
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator4;  // 2nd stages
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator8;  // 3rd stages
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator16; // 4th stages
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator32; // 5th stages
-	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER> m_interpolator64; // 6th stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_FIRST> m_interpolator2;  // 1st stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_SECOND> m_interpolator4;  // 2nd stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator8;  // 3rd stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator16; // 4th stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator32; // 5th stages
+	IntHalfbandFilterDB<INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator64; // 6th stages
 #endif
 };
 

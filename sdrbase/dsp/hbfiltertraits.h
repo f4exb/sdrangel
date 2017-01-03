@@ -32,6 +32,15 @@ struct HBFIRFilterTraits
 };
 
 template<>
+struct HBFIRFilterTraits<16>
+{
+    static const int32_t hbOrder = 16;
+    static const int32_t hbShift = 14;
+    static const int16_t hbMod[16+6];
+    static const int32_t hbCoeffs[4] __attribute__ ((aligned (16)));
+};
+
+template<>
 struct HBFIRFilterTraits<32>
 {
     static const int32_t hbOrder = 32;
