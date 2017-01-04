@@ -324,20 +324,6 @@ void BladerfOutputGui::on_startStop_toggled(bool checked)
     }
 }
 
-void BladerfOutputGui::on_record_toggled(bool checked)
-{
-//    if (checked)
-//    {
-//        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-//        m_fileSink->startRecording();
-//    }
-//    else
-//    {
-//        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-//        m_fileSink->stopRecording();
-//    }
-}
-
 void BladerfOutputGui::updateHardware()
 {
 	qDebug() << "BladerfGui::updateHardware";

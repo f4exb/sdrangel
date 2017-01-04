@@ -76,7 +76,6 @@ private slots:
 	void on_vga2_valueChanged(int value);
 	void on_xb200_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
 };

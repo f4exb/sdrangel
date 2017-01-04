@@ -54,8 +54,8 @@
            </property>
            <property name="icon">
             <iconset resource="../../../sdrbase/resources/res.qrc">
-             <normaloff>:/record_off.png</normaloff>
-             <normalon>:/stop.png</normalon>:/record_off.png</iconset>
+             <normaloff>:/play.png</normaloff>
+             <normalon>:/stop.png</normalon>:/play.png</iconset>
            </property>
           </widget>
          </item>

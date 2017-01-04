@@ -59,21 +59,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="ButtonSwitch" name="record">
-           <property name="toolTip">
-            <string>Toggle record I/Q samples from device</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../sdrbase/resources/res.qrc">
-             <normaloff>:/record_off.png</normaloff>
-             <normalon>:/record_on.png</normalon>:/record_off.png</iconset>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -275,26 +260,6 @@
        <item>
         <property name="text">
          <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>32</string>
         </property>
        </item>
       </widget>
