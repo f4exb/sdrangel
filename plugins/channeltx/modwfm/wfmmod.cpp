@@ -78,10 +78,10 @@ WFMMod::WFMMod() :
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 
     // CW keyer
-    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+    m_cwKeyer.setSampleRate(m_config.m_outputSampleRate);
+    m_cwSmoother.setNbFadeSamples(m_config.m_outputSampleRate / 250); // 4 ms
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
-    m_cwSmoother.setNbFadeSamples(192); // 2 ms @ 48 kHz
 }
 
 WFMMod::~WFMMod()
@@ -120,7 +120,7 @@ void WFMMod::pull(Sample& sample)
 
 	m_settingsMutex.lock();
 
-	if ((m_afInput == WFMModInputFile) || (m_afInput == WFMModInputAudio) || (m_afInput == WFMModInputCWTone))
+	if ((m_afInput == WFMModInputFile) || (m_afInput == WFMModInputAudio))
 	{
 	    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
 	    {
@@ -230,21 +230,21 @@ void WFMMod::pullAF(Complex& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwSmoother.getFadeSample(true, fadeFactor);
-            sample.real(m_toneNco.next() * m_running.m_volumeFactor * fadeFactor);
+            sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor * fadeFactor);
             sample.imag(0.0f);
         }
         else
         {
             if (m_cwSmoother.getFadeSample(false, fadeFactor))
             {
-                sample.real(m_toneNco.next() * m_running.m_volumeFactor * fadeFactor);
+                sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor * fadeFactor);
                 sample.imag(0.0f);
             }
             else
             {
                 sample.real(0.0f);
                 sample.imag(0.0f);
-                m_toneNco.setPhase(0);
+                m_toneNcoRF.setPhase(0);
             }
         }
         break;
@@ -422,10 +422,10 @@ void WFMMod::apply()
         m_settingsMutex.unlock();
     }
 
-    if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
+    if (m_config.m_outputSampleRate != m_running.m_outputSampleRate)
     {
-        m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-        m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 250); // 4 ms
+        m_cwKeyer.setSampleRate(m_config.m_outputSampleRate);
+        m_cwSmoother.setNbFadeSamples(m_config.m_outputSampleRate / 250); // 4 ms
     }
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
