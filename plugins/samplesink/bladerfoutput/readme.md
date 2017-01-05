@@ -20,11 +20,11 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Red square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured
+  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 <h3>2: Baseband sample rate</h3>
 
-This is the baseband stream sample rate in kS/s before interpolation (4) to produce the final stream that is sent to the BladeRF device. Thus this is the device sample rate (6) divided by the interpolation factor (4).
+This is the baseband sample rate in kS/s before interpolation (4) to produce the final stream that is sent to the BladeRF device. Thus this is the device sample rate (6) divided by the interpolation factor (4).
   
 <h3>3: Frequency</h3>
 
@@ -62,8 +62,8 @@ This is the Tx filter bandwidth in kHz in the LMS6002D device. Possible values a
 
 <h3>8: Variable gain amplifier #1 gain</h3>
 
-The VGA1 (relative) gain can be adjusted from -35 dB to -4 dB in 1 dB steps. The VGA1 is inside the LM6002D chip and is placed between the baseband filter and the RF mixer. 
+The VGA1 (relative) gain can be adjusted from -35 dB to -4 dB in 1 dB steps. The VGA1 is inside the LMS6002D chip and is placed between the baseband filter and the RF mixer. 
 
-<h3>10: Variable gain amplifier #2 gain</h3>
+<h3>9: Variable gain amplifier #2 gain</h3>
 
-The VGA2 gain can be adjusted from 0 dB to 25 dB in 1 dB steps. The VGA2 is inside the LM6002D chip and is placed after the RF mixer. It can be considered as the PA (Power AMplifier). The maximum output power when both VGA1 and VGA2 are at their maximum is about 4 mW (6 dBm).
+The VGA2 gain can be adjusted from 0 dB to 25 dB in 1 dB steps. The VGA2 is inside the LMS6002D chip and is placed after the RF mixer. It can be considered as the PA (Power AMplifier). The maximum output power when both VGA1 and VGA2 are at their maximum is about 4 mW (6 dBm).

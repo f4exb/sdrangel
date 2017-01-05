@@ -30,17 +30,10 @@ From version 2 SDRangel can integrate more than one hardware device running conc
 
 <h3>Transmission support</h3>
 
-Transmission or signal generation support for eligible devices (BladeRF and HackRF) is progressively introduced with the following roadmap:
+From version 3 transmission or signal generation is supported for BladeRF (HackRF is in the plans for the 3.1 version) using a sample sink plugin:
 
-  - Phase 1:  version 2.2.0: generation to file (File Sink) with AM modulator with simple sine modulation. Fixed sample rate of 48 kS/s (no effective interpolation)
-  - Phase 2:  version 2.2.2: full baseband interpolation chain: in AM modulator and Up Channelizer.
-  - 2.3.0: SDRplay came into play ...
-  - Phase 3:  version 2.3.1: Improve AM modulator with audio file input and audio input (Mic) support
-  - Phase 4a: version 2.4.0: FM modulator
-  - Phase 4b: version 2.5.0: SSB modulator and CW keyer
-  - Phase 4c: version 2.5.1: WFM modulator
-  - Phase 4d: version 2.5.2: Fixed issue #11
-  - phase 5:  version 3.0.0: BladeRF and HackRF support including final interpolation stage.
+  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
+  - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
 
 <h2>Airspy</h2>
 
