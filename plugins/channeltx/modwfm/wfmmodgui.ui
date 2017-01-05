@@ -56,16 +56,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -455,7 +446,7 @@
          <number>10</number>
         </property>
         <property name="maximum">
-         <number>250</number>
+         <number>1000</number>
         </property>
         <property name="pageStep">
          <number>1</number>

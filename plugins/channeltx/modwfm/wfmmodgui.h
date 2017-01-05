@@ -109,6 +109,7 @@ private:
     explicit WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~WFMModGUI();
 
+    int requiredBW(int rfBW);
     void blockApplySettings(bool block);
     void applySettings();
     void updateWithStreamData();

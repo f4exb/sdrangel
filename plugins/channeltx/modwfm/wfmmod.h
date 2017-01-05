@@ -310,14 +310,18 @@ private:
 
     NCO m_carrierNco;
     NCOF m_toneNco;
+    NCOF m_toneNcoRF;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
+
     fftfilt* m_rfFilter;
     static const int m_rfFilterFFTLength;
+    fftfilt::cmplx *m_rfFilterBuffer;
+    int m_rfFilterBufferIndex;
 
     Real m_magsq;
     MovingAverage<Real> m_movingAverage;

@@ -59,8 +59,12 @@ WFMMod::WFMMod() :
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
+    m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
+    memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
+    m_rfFilterBufferIndex = 0;
 
 	apply();
+
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -70,6 +74,7 @@ WFMMod::WFMMod() :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
+	m_toneNcoRF.setFreq(1000.0, m_config.m_outputSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 
     // CW keyer
@@ -82,6 +87,7 @@ WFMMod::WFMMod() :
 WFMMod::~WFMMod()
 {
     delete m_rfFilter;
+    delete[] m_rfFilterBuffer;
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
@@ -109,25 +115,43 @@ void WFMMod::pull(Sample& sample)
 
 	Complex ci, ri;
 	Real t;
+    fftfilt::cmplx *rf;
+    int rf_out;
 
 	m_settingsMutex.lock();
 
-    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
-    {
-        pullAF(m_modSample);
-        calculateLevel(m_modSample.real());
-        m_audioBufferFill++;
-    }
+	if ((m_afInput == WFMModInputFile) || (m_afInput == WFMModInputAudio) || (m_afInput == WFMModInputCWTone))
+	{
+	    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
+	    {
+	        pullAF(m_modSample);
+	        calculateLevel(m_modSample.real());
+	        m_audioBufferFill++;
+	    }
 
-    m_interpolatorDistanceRemain += m_interpolatorDistance;
+	    m_interpolatorDistanceRemain += m_interpolatorDistance;
+	}
+	else
+	{
+	    pullAF(ri);
+	}
 
     m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
     ci.real(cos(m_modPhasor) * 29204.0f); // -1 dB
     ci.imag(sin(m_modPhasor) * 29204.0f);
 
-    // RF filtering is unnecessary
+    // RF filtering
+    rf_out = m_rfFilter->runFilt(ci, &rf);
 
-    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+    if (rf_out > 0)
+    {
+        memcpy((void *) m_rfFilterBuffer, (const void *) rf, rf_out*sizeof(Complex));
+        m_rfFilterBufferIndex = 0;
+
+    }
+
+    ci = m_rfFilterBuffer[m_rfFilterBufferIndex] * m_carrierNco.nextIQ(); // shift to carrier frequency
+    m_rfFilterBufferIndex++;
 
     m_settingsMutex.unlock();
 
@@ -158,7 +182,7 @@ void WFMMod::pullAF(Complex& sample)
     switch (m_afInput)
     {
     case WFMModInputTone:
-        sample.real(m_toneNco.next() * m_running.m_volumeFactor);
+        sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor);
         sample.imag(0.0f);
         break;
     case WFMModInputFile:
@@ -389,6 +413,14 @@ void WFMMod::apply()
         m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
         m_settingsMutex.unlock();
 	}
+
+    if ((m_config.m_toneFrequency != m_running.m_toneFrequency) ||
+        (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
+    {
+        m_settingsMutex.lock();
+        m_toneNcoRF.setFreq(m_config.m_toneFrequency, m_config.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
 
     if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
     {

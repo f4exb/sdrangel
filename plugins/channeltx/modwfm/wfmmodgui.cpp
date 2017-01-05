@@ -40,6 +40,16 @@ const int WFMModGUI::m_rfBW[] = {
 };
 const int WFMModGUI::m_nbRfBW = 14;
 
+int WFMModGUI::requiredBW(int rfBW)
+{
+    if (rfBW <= 48000)
+        return 48000;
+    else if (rfBW < 100000)
+        return 96000;
+    else
+        return 384000;
+}
+
 WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
     WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceAPI);
@@ -430,7 +440,7 @@ void WFMModGUI::applySettings()
 		setTitleColor(m_channelMarker.getColor());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
+		   requiredBW(m_rfBW[ui->rfBW->currentIndex()]),
 			m_channelMarker.getCenterFrequency());
 
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
