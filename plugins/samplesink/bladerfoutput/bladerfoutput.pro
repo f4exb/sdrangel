@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia opengl
 
-TARGET = inputbladerf
+TARGET = outputbladerf
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -20,6 +20,7 @@ CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\incl
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
+INCLUDEPATH += ../../../devices
 INCLUDEPATH += $$LIBBLADERFSRC
 
 CONFIG(Release):build_subdir = release
@@ -41,5 +42,6 @@ FORMS += bladerfoutputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../libbladerf/$${build_subdir} -llibbladerf
+LIBS += -L../../../devices/$${build_subdir} -ldevices
 
 RESOURCES = ../../../sdrbase/resources/res.qrc

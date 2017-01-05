@@ -6,6 +6,7 @@
 
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
+SUBDIRS += devices
 SUBDIRS += lz4
 CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
@@ -26,6 +27,7 @@ SUBDIRS += plugins/samplesource/hackrfinput
 SUBDIRS += plugins/samplesource/airspy
 SUBDIRS += plugins/samplesource/bladerfinput
 SUBDIRS += plugins/samplesink/filesink
+SUBDIRS += plugins/samplesink/bladerfoutput
 SUBDIRS += plugins/channelrx/chanalyzer
 SUBDIRS += plugins/channelrx/demodam
 SUBDIRS += plugins/channelrx/demodbfm

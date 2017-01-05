@@ -14,6 +14,7 @@ copy %msys2dir%\mingw64\bin\zlib1.dll %2
 move %2\icudt56.dll %2\libicudt56.dll
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
+copy devices\%1\devices.dll %2
 copy cm256cc\%1\cm256cc.dll %2
 copy mbelib\%1\mbelib.dll %2
 copy dsdcc\%1\dsdcc.dll %2
@@ -51,3 +52,4 @@ copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
+copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
