@@ -114,7 +114,6 @@ private:
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
-	Lowpass<Real> m_lowpass;
 	fftfilt* m_rfFilter;
 
 	Real m_squelchLevel;

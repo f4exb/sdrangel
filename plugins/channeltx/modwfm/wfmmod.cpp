@@ -136,7 +136,7 @@ void WFMMod::pull(Sample& sample)
 	    pullAF(ri);
 	}
 
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI;
+    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI * 2.0f;
     ci.real(cos(m_modPhasor) * 29204.0f); // -1 dB
     ci.imag(sin(m_modPhasor) * 29204.0f);
 
@@ -389,10 +389,10 @@ void WFMMod::apply()
 		(m_config.m_afBandwidth != m_running.m_afBandwidth))
 	{
 		m_settingsMutex.lock();
-		m_interpolatorDistanceRemain = 0;
-		m_interpolatorConsumed = false;
-		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_afBandwidth, 3.0);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
+        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
 		m_settingsMutex.unlock();
 	}
 
