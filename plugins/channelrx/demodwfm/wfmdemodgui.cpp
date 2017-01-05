@@ -20,8 +20,9 @@
 const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
 
 const int WFMDemodGUI::m_rfBW[] = {
-	48000, 80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
+        12500, 25000, 40000, 60000, 75000, 80000, 100000, 125000, 140000, 160000, 180000, 200000, 220000, 250000
 };
+const int WFMDemodGUI::m_nbRfBW = 14;
 
 int requiredBW(int rfBW)
 {
@@ -69,7 +70,7 @@ void WFMDemodGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
-	ui->rfBW->setValue(4);
+	ui->rfBW->setCurrentIndex(6);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
@@ -83,7 +84,7 @@ QByteArray WFMDemodGUI::serialize() const
 {
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
+	s.writeS32(2, ui->rfBW->currentIndex());
 	s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
@@ -113,9 +114,8 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 
-		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
-		ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[tmp] / 1000.0));
+		d.readS32(2, &tmp, 6);
+		ui->rfBW->setCurrentIndex(tmp);
 		m_channelMarker.setBandwidth(m_rfBW[tmp]);
 
 		d.readS32(3, &tmp, 3);
@@ -178,10 +178,9 @@ void WFMDemodGUI::on_deltaFrequency_changed(quint64 value)
 	}
 }
 
-void WFMDemodGUI::on_rfBW_valueChanged(int value)
+void WFMDemodGUI::on_rfBW_currentIndexChanged(int index)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker.setBandwidth(m_rfBW[value]);
+    m_channelMarker.setBandwidth(m_rfBW[index]);
 	applySettings();
 }
 
@@ -232,6 +231,15 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
 	setAttribute(Qt::WA_DeleteOnClose, true);
+
+    blockApplySettings(true);
+    ui->rfBW->clear();
+    for (int i = 0; i < m_nbRfBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    }
+    ui->rfBW->setCurrentIndex(6);
+    blockApplySettings(false);
+
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
@@ -280,14 +288,14 @@ void WFMDemodGUI::applySettings()
 		setTitleColor(m_channelMarker.getColor());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
+			requiredBW(m_rfBW[ui->rfBW->currentIndex()]), // TODO: this is where requested sample rate is specified
 			m_channelMarker.getCenterFrequency());
 
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->value()],
+		    m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
 			ui->squelch->value());

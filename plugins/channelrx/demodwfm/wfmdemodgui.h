@@ -41,7 +41,7 @@ private slots:
 	void viewChanged();
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
-	void on_rfBW_valueChanged(int value);
+	void on_rfBW_currentIndexChanged(int index);
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
@@ -63,6 +63,7 @@ private:
 	MovingAverage<Real> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
+    static const int m_nbRfBW;
 
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~WFMDemodGUI();

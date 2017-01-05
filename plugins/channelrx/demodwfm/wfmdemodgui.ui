@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>263</width>
-    <height>143</height>
+    <width>288</width>
+    <height>147</height>
    </rect>
   </property>
   <property name="font">
@@ -24,7 +24,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>235</width>
+     <width>261</width>
      <height>121</height>
     </rect>
    </property>
@@ -141,57 +141,28 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="rfBandwidthLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>RF BW</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="rfBW">
-        <property name="toolTip">
-         <string>Demodulator (RF) bandwidth</string>
-        </property>
-        <property name="maximum">
-         <number>9</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="rfBWText">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>140kHz</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="afBandwidthLayout">
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="rfBWLabel">
         <property name="text">
-         <string>AF BW</string>
+         <string>RFBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="rfBW">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="afBWLabel">
+        <property name="text">
+         <string>AFBW</string>
         </property>
        </widget>
       </item>
