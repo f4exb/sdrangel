@@ -42,9 +42,7 @@ const int WFMModGUI::m_nbRfBW = 14;
 
 int WFMModGUI::requiredBW(int rfBW)
 {
-    if (rfBW <= 48000)
-        return 48000;
-    else if (rfBW < 100000)
+    if (rfBW < 96000)
         return 96000;
     else
         return 384000;

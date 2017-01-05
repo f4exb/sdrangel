@@ -66,6 +66,7 @@ public:
     void setText(const QString& text);
     void setMode(CWMode mode);
     void setLoop(bool loop) { m_loop = loop; }
+    void reset() { m_keyIambicState = KeySilent; }
 
     int getSample();
     bool eom();

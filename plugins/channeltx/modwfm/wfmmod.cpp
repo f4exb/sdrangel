@@ -82,6 +82,7 @@ WFMMod::WFMMod() :
     m_cwSmoother.setNbFadeSamples(m_config.m_outputSampleRate / 250); // 4 ms
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
+    m_cwKeyer.reset();
 }
 
 WFMMod::~WFMMod()
@@ -426,6 +427,7 @@ void WFMMod::apply()
     {
         m_cwKeyer.setSampleRate(m_config.m_outputSampleRate);
         m_cwSmoother.setNbFadeSamples(m_config.m_outputSampleRate / 250); // 4 ms
+        m_cwKeyer.reset();
     }
 
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
