@@ -50,12 +50,14 @@ public:
 	void stopAudioOutput();
     void startAudioOutputImmediate();
     void stopAudioOutputImmediate();
+    void setAudioOutputDeviceIndex(int index) { m_audioOutputDeviceIndex = index; }
 
     void startAudioInput();
     void stopAudioInput();
     void startAudioInputImmediate();
     void stopAudioInputImmediate();
     void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
+    void setAudioInputDeviceIndex(int index) { m_audioInputDeviceIndex = index; }
 
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
@@ -105,6 +107,8 @@ private:
 	AudioInput m_audioInput;
 	uint m_audioOutputSampleRate;
     uint m_audioInputSampleRate;
+    int m_audioInputDeviceIndex;
+    int m_audioOutputDeviceIndex;
 	bool m_dvSerialSupport;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;

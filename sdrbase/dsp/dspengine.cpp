@@ -27,7 +27,9 @@ DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
 	m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
-    m_audioInputSampleRate(48000)   // Use default input device at 48 kHz
+    m_audioInputSampleRate(48000),  // Use default input device at 48 kHz
+    m_audioInputDeviceIndex(-1),    // default device
+    m_audioOutputDeviceIndex(-1)    // default device
 {
 	m_dvSerialSupport = false;
 }
@@ -90,7 +92,7 @@ void DSPEngine::removeLastDeviceSinkEngine()
 
 void DSPEngine::startAudioOutput()
 {
-    m_audioOutput.start(-1, m_audioOutputSampleRate);
+    m_audioOutput.start(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
     m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
@@ -101,7 +103,7 @@ void DSPEngine::stopAudioOutput()
 
 void DSPEngine::startAudioOutputImmediate()
 {
-    m_audioOutput.start(-1, m_audioOutputSampleRate);
+    m_audioOutput.start(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
     m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
@@ -112,7 +114,7 @@ void DSPEngine::stopAudioOutputImmediate()
 
 void DSPEngine::startAudioInput()
 {
-    m_audioInput.start(-1, m_audioInputSampleRate);
+    m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);
     m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
 }
 
@@ -123,7 +125,7 @@ void DSPEngine::stopAudioInput()
 
 void DSPEngine::startAudioInputImmediate()
 {
-    m_audioInput.start(-1, m_audioInputSampleRate);
+    m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);
     m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
 }
 

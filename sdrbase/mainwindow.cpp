@@ -740,6 +740,8 @@ void MainWindow::on_action_Audio_triggered()
 	AudioDialog audioDialog(m_audioDeviceInfo, this);
 	audioDialog.exec();
 	m_dspEngine->setAudioInputVolume(m_audioDeviceInfo->getInputVolume());
+	m_dspEngine->setAudioInputDeviceIndex(m_audioDeviceInfo->getInputDeviceIndex());
+	m_dspEngine->setAudioOutputDeviceIndex(m_audioDeviceInfo->getOutputDeviceIndex());
 }
 
 void MainWindow::on_action_My_Position_triggered()
