@@ -9,55 +9,62 @@ AudioDialog::AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
 	m_audioDeviceInfo(audioDeviceInfo)
 {
 	ui->setupUi(this);
+	QTreeWidgetItem* treeItem;
+	int i;
 
-	const AudioDeviceInfo::Devices& devices = audioDeviceInfo->getDevices();
+	// out panel
 
-	QTreeWidgetItem* api;
-	QStringList sl;
-	sl.append(tr("Default (use first suitable device)"));
-	api = new QTreeWidgetItem(ui->audioOutTree, sl, ATDefault);
-	api->setFirstColumnSpanned(true);
+	treeItem = new QTreeWidgetItem(ui->audioOutTree);
+	treeItem->setText(0, tr("Default (use first suitable device)"));
 
-	for(AudioDeviceInfo::Devices::const_iterator it = devices.begin(); it != devices.end(); ++it)
-	{
-		int apiIndex;
-		sl.clear();
+	const QList<QAudioDeviceInfo>& outputDevices = m_audioDeviceInfo->getOutputDevices();
+	i = 0;
 
-		for(apiIndex = 0; apiIndex < ui->audioOutTree->topLevelItemCount(); ++apiIndex)
-		{
-			if(ui->audioOutTree->topLevelItem(apiIndex)->text(0) == it->api)
-				break;
-		}
+    for(QList<QAudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
+    {
+        treeItem = new QTreeWidgetItem(ui->audioOutTree);
+        treeItem->setText(0, qPrintable(it->deviceName()));
 
-		if(apiIndex >= ui->audioOutTree->topLevelItemCount())
-		{
-			sl.append(it->api);
-			api = new QTreeWidgetItem(ui->audioOutTree, sl, ATInterface);
-			api->setExpanded(true);
-			api->setFirstColumnSpanned(true);
-			sl.clear();
-		}
-		else
-		{
-			api = ui->audioOutTree->topLevelItem(apiIndex);
-		}
+        if (i == m_audioDeviceInfo->getOutputDeviceIndex())
+        {
+            ui->audioOutTree->setCurrentItem(treeItem);
+        }
 
-		sl.append(it->name);
-		new QTreeWidgetItem(api, sl, ATDevice);
-	}
+        i++;
+    }
+
+    // in panel
+
+    treeItem = new QTreeWidgetItem(ui->audioInTree);
+    treeItem->setText(0, tr("Default (use first suitable device)"));
+
+    const QList<QAudioDeviceInfo>& inputDevices = m_audioDeviceInfo->getInputDevices();
+    i = 0;
+
+    for(QList<QAudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
+    {
+        treeItem = new QTreeWidgetItem(ui->audioInTree);
+        treeItem->setText(0, qPrintable(it->deviceName()));
+
+        if (i == m_audioDeviceInfo->getInputDeviceIndex())
+        {
+            ui->audioInTree->setCurrentItem(treeItem);
+        }
+
+        i++;
+    }
 
     if(ui->audioOutTree->currentItem() == NULL)
         ui->audioOutTree->setCurrentItem(ui->audioOutTree->topLevelItem(0));
-
-    sl.clear();
-    sl.append(tr("Default (use first suitable device)"));
-    api = new QTreeWidgetItem(ui->audioInTree, sl, ATDefault);
-    api->setFirstColumnSpanned(true);
 
 	if(ui->audioInTree->currentItem() == NULL)
 		ui->audioInTree->setCurrentItem(ui->audioInTree->topLevelItem(0));
 
 	ui->tabWidget->setCurrentIndex(0);
+
+    m_inputVolume = m_audioDeviceInfo->m_inputVolume;
+	ui->inputVolume->setValue((int) (m_inputVolume * 100.0f));
+	ui->inputVolumeText->setText(QString("%1").arg(m_inputVolume, 0, 'f', 2));
 }
 
 AudioDialog::~AudioDialog()
@@ -67,11 +74,18 @@ AudioDialog::~AudioDialog()
 
 void AudioDialog::accept()
 {
+    int inIndex = ui->audioInTree->indexOfTopLevelItem(ui->audioInTree->currentItem());
+    int outIndex = ui->audioOutTree->indexOfTopLevelItem(ui->audioOutTree->currentItem());
+
+    m_audioDeviceInfo->m_inputDeviceIndex = inIndex - 1;
+    m_audioDeviceInfo->m_outputDeviceIndex = outIndex - 1;
+    m_audioDeviceInfo->m_inputVolume = m_inputVolume;
+
 	QDialog::accept();
 }
 
 void AudioDialog::on_inputVolume_valueChanged(int value)
 {
-    float inputVolume = (float) value / 100.0f;
-    ui->inputVolumeText->setText(QString("%1").arg(inputVolume, 0, 'f', 2));
+    m_inputVolume = (float) value / 100.0f;
+    ui->inputVolumeText->setText(QString("%1").arg(m_inputVolume, 0, 'f', 2));
 }

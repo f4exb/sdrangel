@@ -17,12 +17,11 @@
 
 #include "audio/audiodeviceinfo.h"
 
-AudioDeviceInfo::AudioDeviceInfo()
+AudioDeviceInfo::AudioDeviceInfo() :
+    m_inputDeviceIndex(-1),  // default device
+    m_outputDeviceIndex(-1), // default device
+    m_inputVolume(0.5f)
 {
-}
-
-int AudioDeviceInfo::match(const QString& api, const QString device) const
-{
-	// nothing found - fall back to default
-	return 0;
+    m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 }

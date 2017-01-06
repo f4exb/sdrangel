@@ -17,15 +17,10 @@ public:
 	~AudioDialog();
 
 private:
-	enum Audio {
-		ATDefault,
-		ATInterface,
-		ATDevice
-	};
-
 	Ui::AudioDialog* ui;
 
 	AudioDeviceInfo* m_audioDeviceInfo;
+	float m_inputVolume;
 
 private slots:
 	void accept();

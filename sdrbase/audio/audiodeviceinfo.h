@@ -19,31 +19,29 @@
 #define INCLUDE_AUDIODEVICEINFO_H
 
 #include <QStringList>
+#include <QList>
+#include <QAudioDeviceInfo>
+
 #include "util/export.h"
 
 class SDRANGEL_API AudioDeviceInfo {
 public:
-	struct Device {
-		QString name;
-		QString api;
-		int id;
-
-		Device(const QString& _name, const QString& _api, int _id) :
-			name(_name),
-			api(_api),
-			id(_id)
-		{ }
-	};
-	typedef QList<Device> Devices;
-
 	AudioDeviceInfo();
 
-	int match(const QString& api, const QString device) const;
-
-	const Devices& getDevices() const { return m_devices; }
+	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
+    const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
+    int getInputDeviceIndex() const { return m_inputDeviceIndex; }
+    int getOutputDeviceIndex() const { return m_outputDeviceIndex; }
+    float getInputVolume() const { return m_inputVolume; }
 
 private:
-	Devices m_devices;
+	QList<QAudioDeviceInfo> m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    QList<QAudioDeviceInfo> m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    int m_inputDeviceIndex;
+    int m_outputDeviceIndex;
+    float m_inputVolume;
+
+	friend class AudioDialog;
 };
 
 #endif // INCLUDE_AUDIODEVICEINFO_H
