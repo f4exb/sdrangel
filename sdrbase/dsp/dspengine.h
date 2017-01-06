@@ -55,6 +55,7 @@ public:
     void stopAudioInput();
     void startAudioInputImmediate();
     void stopAudioInputImmediate();
+    void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);

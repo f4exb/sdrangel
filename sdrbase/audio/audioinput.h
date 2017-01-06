@@ -42,12 +42,14 @@ public:
 
 	uint getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
+	void setVolume(float volume) { m_volume = volume; }
 
 private:
 	QMutex m_mutex;
 	QAudioInput* m_audioInput;
 	uint m_audioUsageCount;
 	bool m_onExit;
+	float m_volume;
 
 	typedef std::list<AudioFifo*> AudioFifos;
 	AudioFifos m_audioFifos;
