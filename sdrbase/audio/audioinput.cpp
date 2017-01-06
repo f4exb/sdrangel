@@ -95,6 +95,7 @@ bool AudioInput::start(int device, int rate)
         }
 
         m_audioInput = new QAudioInput(devInfo, m_audioFormat);
+        m_audioInput->setVolume(0.2); // TODO: take it from global parameters
 
         QIODevice::open(QIODevice::ReadWrite);
 
