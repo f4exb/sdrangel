@@ -69,3 +69,9 @@ void AudioDialog::accept()
 {
 	QDialog::accept();
 }
+
+void AudioDialog::on_inputVolume_valueChanged(int value)
+{
+    float inputVolume = (float) value / 100.0f;
+    ui->inputVolumeText->setText(QString("%1").arg(inputVolume, 0, 'f', 2));
+}

@@ -29,6 +29,7 @@ private:
 
 private slots:
 	void accept();
+	void on_inputVolume_valueChanged(int value);
 };
 
 #endif // INCLUDE_AUDIODIALOG_H
