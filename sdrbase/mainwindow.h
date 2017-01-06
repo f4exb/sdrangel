@@ -101,7 +101,7 @@ private:
 	};
 
 	Ui::MainWindow* ui;
-	AudioDeviceInfo* m_audioDeviceInfo;
+	AudioDeviceInfo m_audioDeviceInfo;
 	MessageQueue m_inputMessageQueue;
 	MainSettings m_settings;
 	std::vector<DeviceUISet*> m_deviceUIs;

@@ -57,7 +57,6 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	m_audioDeviceInfo(new AudioDeviceInfo),
 	m_masterTabIndex(0),
 	m_settings(),
 	m_dspEngine(DSPEngine::instance()),
@@ -69,7 +68,7 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	qDebug() << "MainWindow::MainWindow: start";
 
-	m_settings.setAudioDeviceInfo(m_audioDeviceInfo);
+	m_settings.setAudioDeviceInfo(&m_audioDeviceInfo);
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -739,11 +738,11 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 
 void MainWindow::on_action_Audio_triggered()
 {
-	AudioDialog audioDialog(m_audioDeviceInfo, this);
+	AudioDialog audioDialog(&m_audioDeviceInfo, this);
 	audioDialog.exec();
-	m_dspEngine->setAudioInputVolume(m_audioDeviceInfo->getInputVolume());
-	m_dspEngine->setAudioInputDeviceIndex(m_audioDeviceInfo->getInputDeviceIndex());
-	m_dspEngine->setAudioOutputDeviceIndex(m_audioDeviceInfo->getOutputDeviceIndex());
+	m_dspEngine->setAudioInputVolume(m_audioDeviceInfo.getInputVolume());
+	m_dspEngine->setAudioInputDeviceIndex(m_audioDeviceInfo.getInputDeviceIndex());
+	m_dspEngine->setAudioOutputDeviceIndex(m_audioDeviceInfo.getOutputDeviceIndex());
 }
 
 void MainWindow::on_action_My_Position_triggered()
