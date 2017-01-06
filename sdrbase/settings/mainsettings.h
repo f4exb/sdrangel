@@ -4,6 +4,7 @@
 #include <QString>
 #include "preferences.h"
 #include "preset.h"
+#include "audio/audiodeviceinfo.h"
 
 class MainSettings {
 public:
@@ -30,8 +31,12 @@ public:
 	float getLatitude() const { return m_preferences.getLatitude(); }
 	float getLongitude() const { return m_preferences.getLongitude(); }
 
+	const AudioDeviceInfo *getAudioDeviceInfo() const { return m_audioDeviceInfo; }
+	void setAudioDeviceInfo(AudioDeviceInfo *audioDeviceInfo) { m_audioDeviceInfo = audioDeviceInfo; }
+
 protected:
 	Preferences m_preferences;
+	AudioDeviceInfo *m_audioDeviceInfo;
 	Preset m_workingPreset;
 	typedef QList<Preset*> Presets;
 	Presets m_presets;

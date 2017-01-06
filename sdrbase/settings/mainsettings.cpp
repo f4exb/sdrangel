@@ -23,6 +23,11 @@ void MainSettings::load()
 	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
 	m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
 
+	if (m_audioDeviceInfo)
+	{
+	    m_audioDeviceInfo->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
+	}
+
 	QStringList groups = s.childGroups();
 
 	for(int i = 0; i < groups.size(); ++i)
@@ -52,6 +57,11 @@ void MainSettings::save() const
 
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
 	s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
+
+	if (m_audioDeviceInfo)
+	{
+	    s.setValue("audio", qCompress(m_audioDeviceInfo->serialize()).toBase64());
+	}
 
 	QStringList groups = s.childGroups();
 

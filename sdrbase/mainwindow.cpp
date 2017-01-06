@@ -69,6 +69,8 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	qDebug() << "MainWindow::MainWindow: start";
 
+	m_settings.setAudioDeviceInfo(m_audioDeviceInfo);
+
 	ui->setupUi(this);
 	createStatusBar();
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -35,13 +35,18 @@ public:
     float getInputVolume() const { return m_inputVolume; }
 
 private:
-	QList<QAudioDeviceInfo> m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-    QList<QAudioDeviceInfo> m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+	QList<QAudioDeviceInfo> m_inputDevicesInfo;
+    QList<QAudioDeviceInfo> m_outputDevicesInfo;
     int m_inputDeviceIndex;
     int m_outputDeviceIndex;
     float m_inputVolume;
 
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+
 	friend class AudioDialog;
+	friend class MainSettings;
 };
 
 #endif // INCLUDE_AUDIODEVICEINFO_H

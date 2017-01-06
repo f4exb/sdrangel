@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,12 +16,52 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "audio/audiodeviceinfo.h"
+#include "util/simpleserializer.h"
 
 AudioDeviceInfo::AudioDeviceInfo() :
     m_inputDeviceIndex(-1),  // default device
     m_outputDeviceIndex(-1), // default device
-    m_inputVolume(0.5f)
+    m_inputVolume(1.0f)
 {
     m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
     m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+}
+
+void AudioDeviceInfo::resetToDefaults()
+{
+    m_inputDeviceIndex = -1;
+    m_outputDeviceIndex = -1;
+    m_inputVolume = 1.0f;
+}
+
+QByteArray AudioDeviceInfo::serialize() const
+{
+    SimpleSerializer s(1);
+    s.writeS32(1, m_inputDeviceIndex);
+    s.writeS32(2, m_outputDeviceIndex);
+    s.writeFloat(3, m_inputVolume);
+    return s.final();
+}
+
+bool AudioDeviceInfo::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if(!d.isValid()) {
+        resetToDefaults();
+        return false;
+    }
+
+    if(d.getVersion() == 1)
+    {
+        d.readS32(1, &m_inputDeviceIndex, -1);
+        d.readS32(2, &m_outputDeviceIndex, -1);
+        d.readFloat(3, &m_inputVolume, 1.0f);
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
 }
