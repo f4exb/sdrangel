@@ -15,31 +15,47 @@ AudioDialog::AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
 	QTreeWidgetItem* api;
 	QStringList sl;
 	sl.append(tr("Default (use first suitable device)"));
-	api = new QTreeWidgetItem(ui->audioTree, sl, ATDefault);
+	api = new QTreeWidgetItem(ui->audioOutTree, sl, ATDefault);
 	api->setFirstColumnSpanned(true);
-	for(AudioDeviceInfo::Devices::const_iterator it = devices.begin(); it != devices.end(); ++it) {
+
+	for(AudioDeviceInfo::Devices::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	{
 		int apiIndex;
 		sl.clear();
 
-		for(apiIndex = 0; apiIndex < ui->audioTree->topLevelItemCount(); ++apiIndex) {
-			if(ui->audioTree->topLevelItem(apiIndex)->text(0) == it->api)
+		for(apiIndex = 0; apiIndex < ui->audioOutTree->topLevelItemCount(); ++apiIndex)
+		{
+			if(ui->audioOutTree->topLevelItem(apiIndex)->text(0) == it->api)
 				break;
 		}
-		if(apiIndex >= ui->audioTree->topLevelItemCount()) {
+
+		if(apiIndex >= ui->audioOutTree->topLevelItemCount())
+		{
 			sl.append(it->api);
-			api = new QTreeWidgetItem(ui->audioTree, sl, ATInterface);
+			api = new QTreeWidgetItem(ui->audioOutTree, sl, ATInterface);
 			api->setExpanded(true);
 			api->setFirstColumnSpanned(true);
 			sl.clear();
-		} else {
-			api = ui->audioTree->topLevelItem(apiIndex);
+		}
+		else
+		{
+			api = ui->audioOutTree->topLevelItem(apiIndex);
 		}
 
 		sl.append(it->name);
 		new QTreeWidgetItem(api, sl, ATDevice);
 	}
-	if(ui->audioTree->currentItem() == NULL)
-		ui->audioTree->setCurrentItem(ui->audioTree->topLevelItem(0));
+
+    if(ui->audioOutTree->currentItem() == NULL)
+        ui->audioOutTree->setCurrentItem(ui->audioOutTree->topLevelItem(0));
+
+    sl.clear();
+    sl.append(tr("Default (use first suitable device)"));
+    api = new QTreeWidgetItem(ui->audioInTree, sl, ATDefault);
+    api->setFirstColumnSpanned(true);
+
+	if(ui->audioInTree->currentItem() == NULL)
+		ui->audioInTree->setCurrentItem(ui->audioInTree->topLevelItem(0));
 
 	ui->tabWidget->setCurrentIndex(0);
 }

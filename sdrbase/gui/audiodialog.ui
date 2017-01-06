@@ -31,13 +31,91 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTreeWidget" name="audioTree">
+        <widget class="QTreeWidget" name="audioOutTree">
          <column>
           <property name="text">
            <string notr="true">Device</string>
           </property>
          </column>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabInput">
+      <attribute name="title">
+       <string>Audio Input</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QTreeWidget" name="audioInTree">
+         <column>
+          <property name="text">
+           <string>Device</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="inputVolumeLayout">
+         <item>
+          <widget class="QLabel" name="inputVolumeLabel">
+           <property name="maximumSize">
+            <size>
+             <width>60</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Volume</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDial" name="inputVolume">
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="inputVolumeText">
+           <property name="maximumSize">
+            <size>
+             <width>35</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1.00</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -58,7 +136,7 @@
  <tabstops>
   <tabstop>buttonBox</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>audioTree</tabstop>
+  <tabstop>audioOutTree</tabstop>
  </tabstops>
  <resources/>
  <connections>
