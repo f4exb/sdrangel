@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/). 
+This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/). It is supported in Linux only.
 
 <h2>Build</h2>
 

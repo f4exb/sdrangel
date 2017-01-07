@@ -37,4 +37,3 @@ copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
-copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink

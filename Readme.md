@@ -30,9 +30,11 @@ From version 2 SDRangel can integrate more than one hardware device running conc
 
 <h3>Transmission support</h3>
 
+Transmision with "real" devices (BladeRF and HackRF) is supported in Linux versions only
+
 From version 3 transmission or signal generation is supported for BladeRF (HackRF is in the plans for the 3.1 version) using a sample sink plugin:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
+  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) Linux only
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
 
 <h2>Airspy</h2>
