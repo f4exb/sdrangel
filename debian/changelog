@@ -1,3 +1,9 @@
+sdrangel (3.0.1-1) unstable; urgency=medium
+
+  * Fixed audio preferences dialog and handling
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 07 Jan 2017 11:14:18 +0100
+
 sdrangel (3.0.0-1) unstable; urgency=medium
 
   * Implemented real Tx devices (BladeRF and HackRF) for real transmission
