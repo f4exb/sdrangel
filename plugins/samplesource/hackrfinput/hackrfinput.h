@@ -22,6 +22,7 @@
 #include <QString>
 
 #include "hackrf/devicehackrf.h"
+#include "hackrf/devicehackrfparam.h"
 #include "hackrfinputsettings.h"
 
 class DeviceSourceAPI;
@@ -91,6 +92,7 @@ private:
 	struct hackrf_device* m_dev;
 	HackRFInputThread* m_hackRFThread;
 	QString m_deviceDescription;
+	DeviceHackRFParams m_sharedParams;
 };
 
 #endif // INCLUDE_HACKRFINPUT_H

@@ -14,42 +14,29 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include "devicehackrf.h"
+#ifndef DEVICES_HACKRF_DEVICEHACKRFPARAM_H_
+#define DEVICES_HACKRF_DEVICEHACKRFPARAM_H_
 
-hackrf_device *DeviceHackRF::open_hackrf(int sequence)
+#include "libhackrf/hackrf.h"
+
+/**
+ * This structure is owned by each of the parties sharing the same physical device
+ * It allows exchange of information on the common resources
+ */
+/**
+ * This structure is owned by each of the parties sharing the same physical device
+ * It allows exchange of information on the common resources
+ */
+struct DeviceHackRFParams
 {
-    hackrf_error rc;
+    struct hackrf_device* m_dev; //!< device handle if the party has ownership else 0
 
-    rc = (hackrf_error) hackrf_init();
-
-    // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-    if (rc != HACKRF_SUCCESS)
+    DeviceHackRFParams() :
+        m_dev(0)
     {
-        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
-        return 0;
     }
-
-    return open_hackrf_from_sequence(sequence);
-}
-
-hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
-{
-    hackrf_device_list_t *hackrf_devices = hackrf_device_list();
-    hackrf_device *hackrf_ptr;
-    hackrf_error rc;
-
-    rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
-
-    if (rc == HACKRF_SUCCESS)
-    {
-        return hackrf_ptr;
-    }
-    else
-    {
-        return 0;
-    }
-}
+};
 
 
 
+#endif /* DEVICES_HACKRF_DEVICEHACKRFPARAM_H_ */

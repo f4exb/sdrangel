@@ -6,6 +6,7 @@ set(hackrfdevice_SOURCES
 
 set(hackrfdevice_HEADERS
     devicehackrf.h
+    devicehackrfparam.h
 )
 
 if (BUILD_DEBIAN)

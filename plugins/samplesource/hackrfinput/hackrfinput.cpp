@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../hackrfinput/hackrfinput.h"
+#include "hackrfinput.h"
 
 #include <string.h>
 #include <errno.h>
@@ -23,7 +23,9 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
+
 
 #include "hackrfinputgui.h"
 #include "hackrfinputthread.h"
@@ -38,11 +40,17 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
 	m_hackRFThread(0),
 	m_deviceDescription("HackRF")
 {
+    m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 HackRFInput::~HackRFInput()
 {
-	stop();
+    if (m_dev != 0)
+    {
+        stop();
+    }
+
+	m_deviceAPI->setBuddySharedPtr(0);
 }
 
 bool HackRFInput::init(const Message& cmd)
@@ -52,20 +60,20 @@ bool HackRFInput::init(const Message& cmd)
 
 bool HackRFInput::start(int device)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	hackrf_error rc;
+//	QMutexLocker mutexLocker(&m_mutex);
+    if (m_dev != 0)
+    {
+        stop();
+    }
 
-	rc = (hackrf_error) hackrf_init();
-
-	if (rc != HACKRF_SUCCESS)
-	{
-		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
-	}
-
-	if (m_dev != 0)
-	{
-		stop();
-	}
+//    hackrf_error rc;
+//
+//	rc = (hackrf_error) hackrf_init();
+//
+//	if (rc != HACKRF_SUCCESS)
+//	{
+//		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
+//	}
 
 	if (!m_sampleFifo.setSize(1<<19))
 	{
@@ -73,11 +81,47 @@ bool HackRFInput::start(int device)
 		return false;
 	}
 
-	if ((m_dev = DeviceHackRF::open_hackrf_from_sequence(device)) == 0)
-	{
-		qCritical("HackRFInput::start: could not open HackRF #%d", device);
-		return false;
-	}
+
+    if (m_deviceAPI->getSinkBuddies().size() > 0)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
+
+        if (buddySharedParams == 0)
+        {
+            qCritical("HackRFInput::start: could not get shared parameters from buddy");
+            return false;
+        }
+
+        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
+        {
+            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
+            {
+                qCritical("HackRFInput::start: could not get HackRF handle from buddy");
+                return false;
+            }
+        }
+        else // Tx is not running so Rx opens device and takes ownership
+        {
+            if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
+            {
+                qCritical("HackRFInput::start: could not open HackRF #%d", device);
+                return false;
+            }
+
+            m_sharedParams.m_dev = m_dev;
+        }
+    }
+    else // No Tx part open so Rx opens device and takes ownership
+    {
+        if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
+        {
+            qCritical("HackRFInput::start: could not open HackRF #%d", device);
+            return false;
+        }
+
+        m_sharedParams.m_dev = m_dev;
+    }
 
 	if((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
 	{
@@ -86,7 +130,7 @@ bool HackRFInput::start(int device)
 		return false;
 	}
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
 
@@ -100,7 +144,7 @@ bool HackRFInput::start(int device)
 void HackRFInput::stop()
 {
 	qDebug("HackRFInput::stop");
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	if(m_hackRFThread != 0)
 	{
@@ -109,14 +153,52 @@ void HackRFInput::stop()
 		m_hackRFThread = 0;
 	}
 
-	if(m_dev != 0)
-	{
-		hackrf_stop_rx(m_dev);
-		hackrf_close(m_dev);
-		m_dev = 0;
-	}
+    if(m_dev != 0)
+    {
+        hackrf_stop_rx(m_dev);
+    }
 
-	hackrf_exit();
+    if (m_deviceAPI->getSinkBuddies().size() > 0)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
+
+        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
+        {
+            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Rx has the ownership but not the Tx
+            {
+                buddySharedParams->m_dev = m_dev; // transfer ownership
+            }
+        }
+        else // Tx is not running so Rx must have the ownership
+        {
+            if(m_dev != 0) // close BladeRF
+            {
+                hackrf_close(m_dev);
+                hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+            }
+        }
+    }
+    else // No Tx part open
+    {
+        if(m_dev != 0) // close BladeRF
+        {
+            hackrf_close(m_dev);
+            hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+        }
+    }
+
+    m_sharedParams.m_dev = 0;
+    m_dev = 0;
+
+//	if(m_dev != 0)
+//	{
+//		hackrf_stop_rx(m_dev);
+//		hackrf_close(m_dev);
+//		m_dev = 0;
+//	}
+//
+//	hackrf_exit();
 }
 
 const QString& HackRFInput::getDeviceDescription() const
@@ -176,7 +258,7 @@ void HackRFInput::setCenterFrequency(quint64 freq_hz)
 
 bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	bool forwardChange = false;
 	hackrf_error rc;
