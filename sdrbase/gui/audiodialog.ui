@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Audio Preferences</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

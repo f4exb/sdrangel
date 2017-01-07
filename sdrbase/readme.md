@@ -43,14 +43,32 @@ The following items are presented hierarchically from left to right:
    - Presets: the saved presets
    - Channels: the channels active for each device
   - Preferences:
-   - Audio: opens a dialog to choose the audio output device
+   - Audio: opens a dialog to choose the audio output device (see 1.1 below for details)
    - DV Serial: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
    - My Position: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channel/demoddsd/readme.md) for details on how to decode Digital Voice modes.
   - Help:
-    - Loaded Plugins: shows details about the loaded plugins (see next)
+    - Loaded Plugins: shows details about the loaded plugins (see 1.2 below for details)
     - About: current version and blah blah.    
 
-<h4>1.1. Loaded plugins display</h4>
+<h4>1.1. Preferences - Audio</h4>
+
+Audio output preferences:
+
+![Main Window audio output preferences](../doc/img/MainWindow_PreferencesAudioOutput.png)
+
+In the "Audio Output" tab of the audio preferences dialog you can choose which device is used for audio output. This choice is global for the application and is persistent. If the device is not available anymore at a later stage it reverts to the default devuce (first row).
+
+Audio input preferences:
+
+![Main Window audio output preferences](../doc/img/MainWindow_PreferencesAudioInput.png)
+
+In the "Audio Input" tab of the dialog you can choose the device used for audio input in a similar way as you do for the output device.
+
+In addition you can adjust the global volume using the dial knob at the bottom. Audio input behaves slightly differently than audio output and when the audio engine is started the volume is forced to a value that by default is maximum (1.0). This is not always desirable and using this control you can set it at a lower level (0.00 to 1.00 in 0.01 steps). 
+
+Eventually select "OK" to confirm the settings or "Cancel" to dismiss without change.
+
+<h4>1.2. Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
