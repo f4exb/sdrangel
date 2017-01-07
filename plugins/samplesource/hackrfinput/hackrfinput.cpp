@@ -25,8 +25,8 @@
 #include "dsp/dspengine.h"
 #include <device/devicesourceapi.h>
 
-#include "../hackrfinput/hackrfinputgui.h"
-#include "../hackrfinput/hackrfinputthread.h"
+#include "hackrfinputgui.h"
+#include "hackrfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
@@ -73,7 +73,7 @@ bool HackRFInput::start(int device)
 		return false;
 	}
 
-	if ((m_dev = open_hackrf_from_sequence(device)) == 0)
+	if ((m_dev = DeviceHackRF::open_hackrf_from_sequence(device)) == 0)
 	{
 		qCritical("HackRFInput::start: could not open HackRF #%d", device);
 		return false;
@@ -405,20 +405,20 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	return true;
 }
 
-hackrf_device *HackRFInput::open_hackrf_from_sequence(int sequence)
-{
-	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
-	hackrf_device *hackrf_ptr;
-	hackrf_error rc;
-
-	rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
-
-	if (rc == HACKRF_SUCCESS)
-	{
-		return hackrf_ptr;
-	}
-	else
-	{
-		return 0;
-	}
-}
+//hackrf_device *HackRFInput::open_hackrf_from_sequence(int sequence)
+//{
+//	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
+//	hackrf_device *hackrf_ptr;
+//	hackrf_error rc;
+//
+//	rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
+//
+//	if (rc == HACKRF_SUCCESS)
+//	{
+//		return hackrf_ptr;
+//	}
+//	else
+//	{
+//		return 0;
+//	}
+//}

@@ -24,6 +24,7 @@ if (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/devices    
     ${LIBHACKRFSRC}
     ${LIBHACKRFSRC}/libhackrf/src
 )
@@ -31,6 +32,7 @@ else (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/devices    
     ${LIBHACKRF_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -55,12 +57,14 @@ target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
     hackrf
     sdrbase
+    hackrfdevice
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
     ${LIBHACKRF_LIBRARIES}
     sdrbase
+    hackrfdevice
 )
 endif (BUILD_DEBIAN)
 

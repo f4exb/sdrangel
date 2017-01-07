@@ -21,7 +21,8 @@
 #include "libhackrf/hackrf.h"
 #include <QString>
 
-#include "../hackrfinput/hackrfinputsettings.h"
+#include "hackrf/devicehackrf.h"
+#include "hackrfinputsettings.h"
 
 class DeviceSourceAPI;
 class HackRFInputThread;
@@ -81,7 +82,7 @@ public:
 
 private:
 	bool applySettings(const HackRFInputSettings& settings, bool force);
-	hackrf_device *open_hackrf_from_sequence(int sequence);
+//	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
 
 	DeviceSourceAPI *m_deviceAPI;
