@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "dsp/samplesourcefifo.h"
 
@@ -81,7 +82,7 @@ void HackRFOutputThread::run()
 	{
 		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
-			sleep(1);
+			usleep(200000);
 		}
 	}
 
