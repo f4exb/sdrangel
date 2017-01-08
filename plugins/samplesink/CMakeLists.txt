@@ -10,7 +10,7 @@ endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 #find_package(LibHACKRF)
 #if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 #    add_subdirectory(hackrfoutput)
-3endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
+#endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
 if (BUILD_DEBIAN)
     add_subdirectory(bladerfoutput)

@@ -14,14 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../hackrfinput/hackrfinputthread.h"
+#include "hackrfinputthread.h"
 
 #include <stdio.h>
 #include <errno.h>
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
-
-HackRFInputThread *HackRFInputThread::m_this = 0;
+#include "dsp/samplesinkfifo.h"
 
 HackRFInputThread::HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
@@ -33,13 +31,11 @@ HackRFInputThread::HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleF
 	m_log2Decim(0),
 	m_fcPos(0)
 {
-	m_this = this;
 }
 
 HackRFInputThread::~HackRFInputThread()
 {
 	stopWork();
-	m_this = 0;
 }
 
 void HackRFInputThread::startWork()
@@ -82,7 +78,7 @@ void HackRFInputThread::run()
 	//m_running = true;
 	m_startWaiter.wakeAll();
 
-	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, NULL);
+	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
 
 	if (rc != HACKRF_SUCCESS)
 	{
@@ -207,7 +203,8 @@ void HackRFInputThread::callback(const qint8* buf, qint32 len)
 
 int HackRFInputThread::rx_callback(hackrf_transfer* transfer)
 {
+    HackRFInputThread *thread = (HackRFInputThread *) transfer->rx_ctx;
 	qint32 bytes_to_write = transfer->valid_length;
-	m_this->callback((qint8 *) transfer->buffer, bytes_to_write);
+	thread->callback((qint8 *) transfer->buffer, bytes_to_write);
 	return 0;
 }

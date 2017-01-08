@@ -53,7 +53,6 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 	int m_fcPos;
-	static HackRFInputThread *m_this;
 
 	Decimators<qint8, SDR_SAMP_SZ, 8> m_decimators;
 
