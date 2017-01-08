@@ -77,7 +77,6 @@ bool HackRFOutput::start(int device)
 
     m_sampleSourceFifo.resize(m_settings.m_devSampleRate); // 1s long
 
-
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
         DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];

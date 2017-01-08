@@ -21,8 +21,6 @@
 
 #include "dsp/samplesourcefifo.h"
 
-HackRFOutputThread *HackRFOutputThread::m_this = 0;
-
 HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
@@ -32,13 +30,12 @@ HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sam
 	m_samplerate(10),
 	m_log2Interp(0)
 {
-	m_this = this;
+    qDebug("HackRFOutputThread::HackRFOutputThread: m_dev: %lx m_sampleFifo: %lx", (uint64_t) m_dev, (uint64_t) m_sampleFifo);
 }
 
 HackRFOutputThread::~HackRFOutputThread()
 {
 	stopWork();
-	m_this = 0;
 }
 
 void HackRFOutputThread::startWork()
@@ -76,7 +73,7 @@ void HackRFOutputThread::run()
 	//m_running = true;
 	m_startWaiter.wakeAll();
 
-	rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, NULL);
+	rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, this);
 
 	if (rc != HACKRF_SUCCESS)
 	{
@@ -84,6 +81,11 @@ void HackRFOutputThread::run()
 	}
 	else
 	{
+	    qDebug("HackRFOutputThread::run: this: %lx start HackRF Tx: m_dev: %lx m_sampleFifo: %lx",
+	            (uint64_t) this,
+	            (uint64_t) m_dev,
+	            (uint64_t) m_sampleFifo);
+
 		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
 			sleep(1);
@@ -143,10 +145,10 @@ void HackRFOutputThread::callback(qint16* buf, qint32 len)
 	}
 }
 
-
 int HackRFOutputThread::tx_callback(hackrf_transfer* transfer)
 {
+    HackRFOutputThread *thread = (HackRFOutputThread *) transfer->tx_ctx;
 	qint32 bytes_to_write = transfer->valid_length;
-	m_this->callback((qint16 *) transfer->buffer, bytes_to_write);
+	thread->callback((qint16 *) transfer->buffer, bytes_to_write);
 	return 0;
 }
