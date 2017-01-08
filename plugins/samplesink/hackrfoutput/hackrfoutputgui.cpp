@@ -330,10 +330,10 @@ void HackRFOutputGui::updateStatus()
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DSPDeviceSinkEngine::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 break;
             case DSPDeviceSinkEngine::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : magenta; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
             default:
