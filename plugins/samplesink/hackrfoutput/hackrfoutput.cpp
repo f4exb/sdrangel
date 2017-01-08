@@ -75,7 +75,7 @@ bool HackRFOutput::start(int device)
 //		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
 //	}
 
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate); // 1s long
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/2); // 500ms long
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {

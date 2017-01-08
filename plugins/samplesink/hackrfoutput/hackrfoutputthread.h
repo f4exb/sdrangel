@@ -25,7 +25,7 @@
 #include "dsp/samplesourcefifo.h"
 #include "dsp/interpolators.h"
 
-#define HACKRF_BLOCKSIZE (1<<18)
+#define HACKRF_BLOCKSIZE (1<<17)
 
 class HackRFOutputThread : public QThread {
 	Q_OBJECT
