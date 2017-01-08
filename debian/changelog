@@ -1,3 +1,9 @@
+sdrangel (3.1.0-1) unstable; urgency=medium
+
+  * HackRF Tx support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 08 Jan 2017 23:14:18 +0100
+
 sdrangel (3.0.1-1) unstable; urgency=medium
 
   * Fixed audio preferences dialog and handling

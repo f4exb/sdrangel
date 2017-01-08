@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,21 +14,21 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../hackrfinput/hackrfinputplugin.h"
+#include "hackrfoutputplugin.h"
 
 #include <QtPlugin>
 #include <QAction>
 #include "libhackrf/hackrf.h"
 
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 
-#include "../hackrfinput/hackrfinputgui.h"
+#include "hackrfoutputgui.h"
 
-const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
-	QString("HackRF Input"),
+const PluginDescriptor HackRFOutputPlugin::m_pluginDescriptor = {
+	QString("HackRF Output"),
 	QString("3.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -36,31 +36,31 @@ const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString HackRFInputPlugin::m_hardwareID = "HackRF";
-const QString HackRFInputPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
+const QString HackRFOutputPlugin::m_hardwareID = "HackRF";
+const QString HackRFOutputPlugin::m_deviceTypeID = HACKRFOUTPUT_DEVICE_TYPE_ID;
 
-HackRFInputPlugin::HackRFInputPlugin(QObject* parent) :
+HackRFOutputPlugin::HackRFOutputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& HackRFInputPlugin::getPluginDescriptor() const
+const PluginDescriptor& HackRFOutputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void HackRFInputPlugin::initPlugin(PluginAPI* pluginAPI)
+void HackRFOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-	pluginAPI->registerSampleSource(m_deviceTypeID, this);
+	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
+PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 {
 	hackrf_error rc = (hackrf_error) hackrf_init();
 
 	if (rc != HACKRF_SUCCESS)
 	{
-		qCritical("HackRFPlugin::SampleSourceDevices: failed to initiate HackRF library: %s", hackrf_error_name(rc));
+		qCritical("HackRFOutputPlugin::enumSampleSinks: failed to initiate HackRF library: %s", hackrf_error_name(rc));
 	}
 
 	SamplingDevices result;
@@ -75,13 +75,13 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 
 		if (rc == HACKRF_SUCCESS)
 		{
-			qDebug("HackRFPlugin::enumSampleSources: try to enumerate HackRF device #%d", i);
+			qDebug("HackRFOutputPlugin::enumSampleSinks: try to enumerate HackRF device #%d", i);
 
 			rc = (hackrf_error) hackrf_board_partid_serialno_read(hackrf_ptr, &read_partid_serialno);
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qDebug("HackRFPlugin::enumSampleSources: failed to read serial no: %s", hackrf_error_name(rc));
+				qDebug("HackRFOutputPlugin::enumSampleSinks: failed to read serial no: %s", hackrf_error_name(rc));
 				hackrf_close(hackrf_ptr);
 				continue; // next
 			}
@@ -99,28 +99,28 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 					serial_str,
 					i));
 
-			qDebug("HackRFPlugin::enumSampleSources: enumerated HackRF device #%d", i);
+			qDebug("HackRFOutputPlugin::enumSampleSinks: enumerated HackRF device #%d", i);
 
 			hackrf_close(hackrf_ptr);
 		}
 		else
 		{
-			qDebug("HackRFPlugin::enumSampleSources: failed to enumerate HackRF device #%d: %s", i, hackrf_error_name(rc));
+			qDebug("HackRFOutputPlugin::enumSampleSinks: failed to enumerate HackRF device #%d: %s", i, hackrf_error_name(rc));
 		}
 	}
 
 	hackrf_device_list_free(hackrf_devices);
 	rc = (hackrf_error) hackrf_exit();
-	qDebug("HackRFPlugin::enumSampleSources: hackrf_exit: %s", hackrf_error_name(rc));
+	qDebug("HackRFOutputPlugin::enumSampleSinks: hackrf_exit: %s", hackrf_error_name(rc));
 
 	return result;
 }
 
-PluginGUI* HackRFInputPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginGUI* HackRFOutputPlugin::createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
-	if(sourceId == m_deviceTypeID)
+	if(sinkId == m_deviceTypeID)
 	{
-		HackRFInputGui* gui = new HackRFInputGui(deviceAPI);
+		HackRFOutputGui* gui = new HackRFOutputGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

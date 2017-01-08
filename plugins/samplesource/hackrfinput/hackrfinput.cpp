@@ -278,12 +278,12 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
-		forwardChange = true;
-		m_settings.m_devSampleRate = settings.m_devSampleRate;
+        m_settings.m_devSampleRate = settings.m_devSampleRate;
+        forwardChange = true;
 
-		if (m_dev != 0)
+        if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, m_settings.m_devSampleRate, 1);
+	        rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, m_settings.m_devSampleRate, 1);
 
 			if (rc != HACKRF_SUCCESS)
 			{
@@ -404,9 +404,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-		if (m_dev != 0)
+        m_settings.m_bandwidth = settings.m_bandwidth;
+
+        if (m_dev != 0)
 		{
-			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth);
+	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth);
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
