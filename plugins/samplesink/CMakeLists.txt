@@ -14,7 +14,7 @@ endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
 if (BUILD_DEBIAN)
     add_subdirectory(bladerfoutput)
-#    add_subdirectory(hackrfoutput)
+    add_subdirectory(hackrfoutput)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesink)
