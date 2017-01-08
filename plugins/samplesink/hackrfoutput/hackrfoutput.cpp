@@ -287,8 +287,6 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	quint32 devSampleRate = m_settings.m_devSampleRate;
-
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
 	{
@@ -299,9 +297,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		{
 			setCenterFrequency(m_settings.m_centerFrequency);
 
-			qDebug() << "HackRFOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-					<< " device sample rate: " << devSampleRate << "Hz"
-					<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Interp) << "Hz";
+			qDebug() << "HackRFOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz";
 		}
 
 		forwardChange = true;
@@ -386,7 +382,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if (forwardChange)
 	{
-		int sampleRate = devSampleRate/(1<<m_settings.m_log2Interp);
+		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 	}
