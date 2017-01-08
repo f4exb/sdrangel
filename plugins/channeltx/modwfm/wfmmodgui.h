@@ -109,7 +109,6 @@ private:
     explicit WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~WFMModGUI();
 
-    int requiredBW(int rfBW);
     void blockApplySettings(bool block);
     void applySettings();
     void updateWithStreamData();
@@ -117,6 +116,15 @@ private:
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+    static int requiredBW(int rfBW)
+    {
+        if (rfBW <= 96000) {
+            return 96000;
+        } else {
+            return (3*rfBW)/2;
+        }
+    }
 };
 
 #endif /* PLUGINS_CHANNELTX_MODWFM_WFMMODGUI_H_ */

@@ -40,14 +40,6 @@ const int WFMModGUI::m_rfBW[] = {
 };
 const int WFMModGUI::m_nbRfBW = 14;
 
-int WFMModGUI::requiredBW(int rfBW)
-{
-    if (rfBW < 96000)
-        return 96000;
-    else
-        return 384000;
-}
-
 WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
     WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceAPI);

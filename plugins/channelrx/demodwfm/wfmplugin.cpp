@@ -1,13 +1,13 @@
-#include "../../channelrx/demodwfm/wfmplugin.h"
+#include "wfmplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/demodwfm/wfmdemodgui.h"
+#include "wfmdemodgui.h"
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("3.0.0"),
+	QString("3.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

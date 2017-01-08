@@ -1,4 +1,4 @@
-#include "../../channelrx/demodwfm/wfmdemodgui.h"
+#include "wfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
