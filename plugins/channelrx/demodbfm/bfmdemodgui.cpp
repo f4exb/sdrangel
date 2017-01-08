@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodbfm/bfmdemodgui.h"
+#include "bfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
@@ -27,7 +27,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
@@ -37,8 +37,8 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "mainwindow.h"
 
-#include "../../channelrx/demodbfm/bfmdemod.h"
-#include "../../channelrx/demodbfm/rdstmc.h"
+#include "bfmdemod.h"
+#include "rdstmc.h"
 #include "ui_bfmdemodgui.h"
 
 const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
@@ -47,15 +47,15 @@ const int BFMDemodGUI::m_rfBW[] = {
 	80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
 };
 
-int requiredBW(int rfBW)
-{
-	if (rfBW <= 48000)
-		return 48000;
-	else if (rfBW < 100000)
-		return 96000;
-	else
-		return 384000;
-}
+//int requiredBW(int rfBW)
+//{
+//	if (rfBW <= 48000)
+//		return 48000;
+//	else if (rfBW < 100000)
+//		return 96000;
+//	else
+//		return 384000;
+//}
 
 BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {

@@ -23,7 +23,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
-#include "../../channelrx/demodbfm/rdsparser.h"
+#include "rdsparser.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -112,6 +112,15 @@ private:
 	void enterEvent(QEvent*);
 
 	void changeFrequency(qint64 f);
+
+    static int requiredBW(int rfBW)
+    {
+        if (rfBW <= 48000) {
+            return 48000;
+        } else {
+            return (3*rfBW)/2;
+        }
+    }
 };
 
 #endif // INCLUDE_BFMDEMODGUI_H
