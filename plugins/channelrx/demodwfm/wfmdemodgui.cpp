@@ -24,16 +24,6 @@ const int WFMDemodGUI::m_rfBW[] = {
 };
 const int WFMDemodGUI::m_nbRfBW = 14;
 
-int requiredBW(int rfBW)
-{
-	if (rfBW <= 48000)
-		return 48000;
-	else if (rfBW < 100000)
-		return 96000;
-	else
-		return 384000;
-}
-
 WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceAPI);

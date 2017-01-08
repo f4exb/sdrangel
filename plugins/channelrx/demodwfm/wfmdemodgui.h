@@ -73,6 +73,15 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+	static int requiredBW(int rfBW)
+	{
+	    if (rfBW <= 48000) {
+	        return 48000;
+	    } else {
+	        return (3*rfBW)/2;
+	    }
+	}
 };
 
 #endif // INCLUDE_WFMDEMODGUI_H
