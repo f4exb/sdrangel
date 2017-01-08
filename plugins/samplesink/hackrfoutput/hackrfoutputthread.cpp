@@ -25,12 +25,10 @@ HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sam
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
-	m_convertBuffer(HACKRF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(10),
 	m_log2Interp(0)
 {
-    qDebug("HackRFOutputThread::HackRFOutputThread: m_dev: %lx m_sampleFifo: %lx", (uint64_t) m_dev, (uint64_t) m_sampleFifo);
 }
 
 HackRFOutputThread::~HackRFOutputThread()
@@ -81,11 +79,6 @@ void HackRFOutputThread::run()
 	}
 	else
 	{
-	    qDebug("HackRFOutputThread::run: this: %lx start HackRF Tx: m_dev: %lx m_sampleFifo: %lx",
-	            (uint64_t) this,
-	            (uint64_t) m_dev,
-	            (uint64_t) m_sampleFifo);
-
 		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
 			sleep(1);
@@ -107,37 +100,37 @@ void HackRFOutputThread::run()
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => interp=16)
-void HackRFOutputThread::callback(qint16* buf, qint32 len)
+void HackRFOutputThread::callback(qint8* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
-    m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));
-    beginRead -= len;
+    m_sampleFifo->readAdvance(beginRead, len/(2*(1<<m_log2Interp)));
+    beginRead -= len/2;
 
 	if (m_log2Interp == 0)
 	{
-	    m_interpolators.interpolate1(&beginRead, buf, len*2);
+	    m_interpolators.interpolate1(&beginRead, buf, len);
 	}
 	else
 	{
         switch (m_log2Interp)
         {
         case 1:
-            m_interpolators.interpolate2_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate2_cen(&beginRead, buf, len);
             break;
         case 2:
-            m_interpolators.interpolate4_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate4_cen(&beginRead, buf, len);
             break;
         case 3:
-            m_interpolators.interpolate8_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate8_cen(&beginRead, buf, len);
             break;
         case 4:
-            m_interpolators.interpolate16_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate16_cen(&beginRead, buf, len);
             break;
         case 5:
-            m_interpolators.interpolate32_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate32_cen(&beginRead, buf, len);
             break;
         case 6:
-            m_interpolators.interpolate64_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate64_cen(&beginRead, buf, len);
             break;
         default:
             break;
@@ -148,7 +141,7 @@ void HackRFOutputThread::callback(qint16* buf, qint32 len)
 int HackRFOutputThread::tx_callback(hackrf_transfer* transfer)
 {
     HackRFOutputThread *thread = (HackRFOutputThread *) transfer->tx_ctx;
-	qint32 bytes_to_write = transfer->valid_length;
-	thread->callback((qint16 *) transfer->buffer, bytes_to_write);
+    qint32 bytes_to_write = transfer->valid_length;
+	thread->callback((qint8 *) transfer->buffer, bytes_to_write);
 	return 0;
 }

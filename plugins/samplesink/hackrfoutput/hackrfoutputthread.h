@@ -25,7 +25,7 @@
 #include "dsp/samplesourcefifo.h"
 #include "dsp/interpolators.h"
 
-#define HACKRF_BLOCKSIZE (1<<17)
+#define HACKRF_BLOCKSIZE (1<<18)
 
 class HackRFOutputThread : public QThread {
 	Q_OBJECT
@@ -45,17 +45,16 @@ private:
 	bool m_running;
 
 	hackrf_device* m_dev;
-	qint16 m_buf[2*HACKRF_BLOCKSIZE];
-	SampleVector m_convertBuffer;
+	qint8 m_buf[2*HACKRF_BLOCKSIZE];
 	SampleSourceFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Interp;
 
-    Interpolators<qint16, SDR_SAMP_SZ, 12> m_interpolators;
+    Interpolators<qint8, SDR_SAMP_SZ, 8> m_interpolators;
 
 	void run();
-	void callback(qint16* buf, qint32 len);
+	void callback(qint8* buf, qint32 len);
 	static int tx_callback(hackrf_transfer* transfer);
 };
 
