@@ -96,20 +96,4 @@ private slots:
 	void updateStatus();
 };
 
-class HackRFSampleRates {
-public:
-	static unsigned int getRate(unsigned int rate_index);
-	static unsigned int getRateIndex(unsigned int rate);
-	static const unsigned int m_nb_rates = 9;
-	static unsigned int m_rates_k[m_nb_rates];
-};
-
-class HackRFBandwidths {
-public:
-	static unsigned int getBandwidth(unsigned int bandwidth_index);
-	static unsigned int getBandwidthIndex(unsigned int bandwidth);
-	static const unsigned int m_nb_bw = 16;
-	static unsigned int m_bw_k[m_nb_bw];
-};
-
 #endif // INCLUDE_HACKRFINPUTGUI_H

@@ -28,8 +28,8 @@ struct HackRFInputSettings {
 
 	quint64 m_centerFrequency;
 	qint32  m_LOppmTenths;
-	quint32 m_devSampleRateIndex;
-	quint32 m_bandwidthIndex;
+	quint32 m_devSampleRate;
+	quint32 m_bandwidth;
 	quint32 m_lnaGain;
 	quint32 m_vgaGain;
 	quint32 m_log2Decim;

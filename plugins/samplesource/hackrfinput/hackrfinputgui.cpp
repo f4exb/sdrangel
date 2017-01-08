@@ -27,6 +27,7 @@
 #include "dsp/dspcommands.h"
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
+#include "hackrf/devicehackrfvalues.h"
 
 #include "ui_hackrfinputgui.h"
 
@@ -112,11 +113,14 @@ QByteArray HackRFInputGui::serialize() const
 
 bool HackRFInputGui::deserialize(const QByteArray& data)
 {
-	if(m_settings.deserialize(data)) {
+	if(m_settings.deserialize(data))
+	{
 		displaySettings();
 		sendSettings();
 		return true;
-	} else {
+	}
+	else
+	{
 		resetToDefaults();
 		return false;
 	}
@@ -124,7 +128,15 @@ bool HackRFInputGui::deserialize(const QByteArray& data)
 
 bool HackRFInputGui::handleMessage(const Message& message)
 {
-	return false;
+    if (HackRFInput::MsgReportHackRF::match(message))
+    {
+        displaySettings();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void HackRFInputGui::handleDSPMessages()
@@ -166,7 +178,8 @@ void HackRFInputGui::displaySettings()
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
+    unsigned int sampleRateIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate/1000);
+    ui->sampleRate->setCurrentIndex(sampleRateIndex);
 
 	ui->biasT->setChecked(m_settings.m_biasT);
 
@@ -178,7 +191,8 @@ void HackRFInputGui::displaySettings()
 	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
 
-	ui->bbFilter->setCurrentIndex(m_settings.m_bandwidthIndex);
+    unsigned int bandwidthIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
+	ui->bbFilter->setCurrentIndex(bandwidthIndex);
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->vga->setValue(m_settings.m_vgaGain);
@@ -186,7 +200,7 @@ void HackRFInputGui::displaySettings()
 
 void HackRFInputGui::displaySampleRates()
 {
-	int savedIndex = m_settings.m_devSampleRateIndex;
+	int savedIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate/1000);
 	ui->sampleRate->blockSignals(true);
 	ui->sampleRate->clear();
 
@@ -209,7 +223,7 @@ void HackRFInputGui::displaySampleRates()
 
 void HackRFInputGui::displayBandwidths()
 {
-	int savedIndex = m_settings.m_bandwidthIndex;
+	int savedIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->blockSignals(true);
 	ui->bbFilter->clear();
 
@@ -263,13 +277,15 @@ void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 
 void HackRFInputGui::on_sampleRate_currentIndexChanged(int index)
 {
-	m_settings.m_devSampleRateIndex = index;
+    int newrate = HackRFSampleRates::getRate(index);
+    m_settings.m_devSampleRate = newrate * 1000;
 	sendSettings();
 }
 
 void HackRFInputGui::on_bbFilter_currentIndexChanged(int index)
 {
-	m_settings.m_bandwidthIndex = index;
+    int newBandwidth = HackRFBandwidths::getBandwidth(index);
+	m_settings.m_bandwidth = newBandwidth * 1000;
 	sendSettings();
 }
 
@@ -361,7 +377,7 @@ void HackRFInputGui::on_record_toggled(bool checked)
 void HackRFInputGui::updateHardware()
 {
 	qDebug() << "HackRFGui::updateHardware";
-	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create( m_settings);
+	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_updateTimer.stop();
 }
@@ -393,58 +409,4 @@ void HackRFInputGui::updateStatus()
 
         m_lastEngineState = state;
     }
-}
-
-unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200};
-
-unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
-{
-	if (rate_index < m_nb_rates)
-	{
-		return m_rates_k[rate_index];
-	}
-	else
-	{
-		return m_rates_k[0];
-	}
-}
-
-unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
-{
-	for (unsigned int i=0; i < m_nb_rates; i++)
-	{
-		if (rate/1000 == m_rates_k[i])
-		{
-			return i;
-		}
-	}
-
-	return 0;
-}
-
-unsigned int HackRFBandwidths::m_bw_k[] = {1750, 2500, 3500, 5000, 5500, 6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 20000, 24000, 28000};
-
-unsigned int HackRFBandwidths::getBandwidth(unsigned int bandwidth_index)
-{
-	if (bandwidth_index < m_nb_bw)
-	{
-		return m_bw_k[bandwidth_index];
-	}
-	else
-	{
-		return m_bw_k[0];
-	}
-}
-
-unsigned int HackRFBandwidths::getBandwidthIndex(unsigned int bandwidth)
-{
-	for (unsigned int i=0; i < m_nb_bw; i++)
-	{
-		if (bandwidth == m_bw_k[i])
-		{
-			return i;
-		}
-	}
-
-	return 0;
 }

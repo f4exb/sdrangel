@@ -14,42 +14,60 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include "devicehackrf.h"
+#include "devicehackrfvalues.h"
 
-hackrf_device *DeviceHackRF::open_hackrf(int sequence)
+unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200};
+
+unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {
-    hackrf_error rc;
-
-    // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-    rc = (hackrf_error) hackrf_init();
-
-    if (rc != HACKRF_SUCCESS)
+    if (rate_index < m_nb_rates)
     {
-        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
-        return 0;
-    }
-
-    return open_hackrf_from_sequence(sequence);
-}
-
-hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
-{
-    hackrf_device_list_t *hackrf_devices = hackrf_device_list();
-    hackrf_device *hackrf_ptr;
-    hackrf_error rc;
-
-    rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
-
-    if (rc == HACKRF_SUCCESS)
-    {
-        return hackrf_ptr;
+        return m_rates_k[rate_index];
     }
     else
     {
-        return 0;
+        return m_rates_k[0];
     }
 }
 
+unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
+{
+    for (unsigned int i=0; i < m_nb_rates; i++)
+    {
+        if (rate == m_rates_k[i])
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+unsigned int HackRFBandwidths::m_bw_k[] = {1750, 2500, 3500, 5000, 5500, 6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 20000, 24000, 28000};
+
+unsigned int HackRFBandwidths::getBandwidth(unsigned int bandwidth_index)
+{
+    if (bandwidth_index < m_nb_bw)
+    {
+        return m_bw_k[bandwidth_index];
+    }
+    else
+    {
+        return m_bw_k[0];
+    }
+}
+
+unsigned int HackRFBandwidths::getBandwidthIndex(unsigned int bandwidth)
+{
+    for (unsigned int i=0; i < m_nb_bw; i++)
+    {
+        if (bandwidth == m_bw_k[i])
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
 
 

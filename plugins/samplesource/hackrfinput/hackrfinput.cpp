@@ -25,7 +25,7 @@
 #include "dsp/dspengine.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
-
+#include "hackrf/devicehackrfvalues.h"
 
 #include "hackrfinputgui.h"
 #include "hackrfinputthread.h"
@@ -208,8 +208,7 @@ const QString& HackRFInput::getDeviceDescription() const
 
 int HackRFInput::getSampleRate() const
 {
-	int rate = HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex] * 1000;
-	return (rate / (1<<m_settings.m_log2Decim));
+	return (m_settings.m_devSampleRate / (1<<m_settings.m_log2Decim));
 }
 
 quint64 HackRFInput::getCenterFrequency() const
@@ -277,31 +276,23 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
-	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
 		forwardChange = true;
-
-		if (settings.m_devSampleRateIndex < HackRFSampleRates::m_nb_rates)
-		{
-			m_settings.m_devSampleRateIndex = settings.m_devSampleRateIndex;
-		}
-		else
-		{
-			m_settings.m_devSampleRateIndex = HackRFSampleRates::m_nb_rates - 1;
-		}
+		m_settings.m_devSampleRate = settings.m_devSampleRate;
 
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex]*1000, 1);
+			rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, m_settings.m_devSampleRate, 1);
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qCritical("HackRFInput::applySettings: could not set sample rate index %u (%d kS/s): %s", m_settings.m_devSampleRateIndex, HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex], hackrf_error_name(rc));
+				qCritical("HackRFInput::applySettings: could not set sample rate TO %d kS/s: %s", m_settings.m_devSampleRate, hackrf_error_name(rc));
 			}
 			else
 			{
-				qDebug("HackRFInput::applySettings: sample rate set to index: %u (%d kS/s)", m_settings.m_devSampleRateIndex, HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex]);
-				m_hackRFThread->setSamplerate(HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex]);
+				qDebug("HackRFInput::applySettings: sample rate set to %d kS/s", m_settings.m_devSampleRate);
+				m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 			}
 		}
 	}
@@ -320,7 +311,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
 	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate = HackRFSampleRates::m_rates_k[m_settings.m_devSampleRateIndex] * 1000;
+	quint32 devSampleRate =m_settings.m_devSampleRate;
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
@@ -411,21 +402,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_bandwidthIndex != settings.m_bandwidthIndex) || force)
+	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-
-		if (settings.m_bandwidthIndex < HackRFBandwidths::m_nb_bw)
-		{
-			m_settings.m_bandwidthIndex = settings.m_bandwidthIndex;
-		}
-		else
-		{
-			m_settings.m_bandwidthIndex = HackRFBandwidths::m_nb_bw - 1;
-		}
-
 		if (m_dev != 0)
 		{
-			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex]*1000);
+			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth);
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
@@ -434,7 +415,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << HackRFBandwidths::m_bw_k[m_settings.m_bandwidthIndex] << " kHz";
+				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << m_settings.m_bandwidth << " Hz";
 			}
 		}
 	}
@@ -483,6 +464,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 	}
+
+    qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " device center freq: " << deviceCenterFrequency << " Hz"
+            << " device sample rate: " << m_settings.m_devSampleRate << "Hz"
+            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "Hz";
 
 	return true;
 }
