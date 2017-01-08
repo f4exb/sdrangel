@@ -174,14 +174,11 @@ void HackRFOutputGui::displaySettings()
 	ui->interp->setCurrentIndex(m_settings.m_log2Interp);
 
 	ui->lnaExt->setChecked(m_settings.m_lnaExt);
-	ui->vgaGainText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
-	ui->vga->setValue(m_settings.m_vgaGain);
+	ui->txvgaGainText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
+	ui->txvga->setValue(m_settings.m_vgaGain);
 
     unsigned int bandwidthIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->setCurrentIndex(bandwidthIndex);
-
-	ui->txvgaGainText->setText(tr("%1dB").arg(m_settings.m_txvgaGain));
-	ui->txvga->setValue(m_settings.m_txvgaGain);
 }
 
 void HackRFOutputGui::displaySampleRates()
@@ -280,16 +277,6 @@ void HackRFOutputGui::on_interp_currentIndexChanged(int index)
 	if ((index <0) || (index > 6))
 		return;
 	m_settings.m_log2Interp = index;
-	sendSettings();
-}
-
-void HackRFOutputGui::on_vga_valueChanged(int value)
-{
-	if ((value < 0) || (value > 62))
-		return;
-
-	ui->vgaGainText->setText(tr("%1dB").arg(value));
-	m_settings.m_vgaGain = value;
 	sendSettings();
 }
 

@@ -25,7 +25,6 @@ struct HackRFOutputSettings {
 	quint32 m_devSampleRate;
 	quint32 m_bandwidth;
 	quint32 m_vgaGain;
-    quint32 m_txvgaGain;
 	quint32 m_log2Interp;
 	bool m_biasT;
 	bool m_lnaExt;

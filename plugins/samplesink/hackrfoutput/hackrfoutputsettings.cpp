@@ -33,9 +33,8 @@ void HackRFOutputSettings::resetToDefaults()
 	m_biasT = false;
 	m_log2Interp = 0;
 	m_lnaExt = false;
-	m_vgaGain = 30;
+	m_vgaGain = 22;
 	m_bandwidth = 1750000;
-	m_txvgaGain = 22;
 }
 
 QByteArray HackRFOutputSettings::serialize() const
@@ -49,7 +48,6 @@ QByteArray HackRFOutputSettings::serialize() const
 	s.writeBool(5, m_lnaExt);
 	s.writeU32(6, m_vgaGain);
 	s.writeU32(7, m_bandwidth);
-	s.writeU32(8, m_txvgaGain);
 
 	return s.final();
 }
@@ -75,7 +73,6 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 		d.readBool(5, &m_lnaExt, false);
 		d.readU32(6, &m_vgaGain, 30);
 		d.readU32(7, &m_bandwidth, 1750000);
-		d.readU32(8, &m_txvgaGain, 22);
 
 		return true;
 	}

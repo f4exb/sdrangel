@@ -313,34 +313,15 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_vga_gain(m_dev, m_settings.m_vgaGain);
+			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, m_settings.m_vgaGain);
 
 			if(rc != HACKRF_SUCCESS)
-			{
-				qDebug("HackRFOutput::applySettings: hackrf_set_vga_gain failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
-				qDebug() << "HackRFOutput:applySettings: VGA gain set to " << m_settings.m_vgaGain;
-			}
-		}
-	}
-
-	if ((m_settings.m_txvgaGain != settings.m_txvgaGain) || force)
-	{
-		m_settings.m_txvgaGain = settings.m_txvgaGain;
-
-		if (m_dev != 0)
-		{
-			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, m_settings.m_txvgaGain);
-
-			if (rc != HACKRF_SUCCESS)
 			{
 				qDebug("HackRFOutput::applySettings: hackrf_set_txvga_gain failed: %s", hackrf_error_name(rc));
 			}
 			else
 			{
-				qDebug() << "HackRFOutput:applySettings: TxVGA gain set to " << m_settings.m_txvgaGain;
+				qDebug() << "HackRFOutput:applySettings: TxVGA gain set to " << m_settings.m_vgaGain;
 			}
 		}
 	}
