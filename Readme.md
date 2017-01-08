@@ -20,22 +20,23 @@ channelrx:
   - demodlora
   - tcpsrc (although it has evolved please use the udpsrc plugin instead)
 
-<h1>Supported hardware</h1>
+<h1>Specific features</h1>
 
-<h2>General</h2>
-
-<h3>Multiple device support</h3>
+<h2>Multiple device support</h2>
 
 From version 2 SDRangel can integrate more than one hardware device running concurrently.
 
-<h3>Transmission support</h3>
+<h2>Transmission support</h2>
 
-Transmision with "real" devices (BladeRF and HackRF) is supported in Linux versions only
-
-From version 3 transmission or signal generation is supported for BladeRF (HackRF is in the plans for the 3.1 version) using a sample sink plugin:
+From version 3 transmission or signal generation is supported for BladeRF and HackRF (since version 3.1) using a sample sink plugin. These plugins are:
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) Linux only
+  - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput) Linux only
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
+
+Transmision with "real" devices (BladeRF and HackRF) is supported in Linux versions only. Be also aware that this is **very experimental**. Code is not very efficient so you may experience **performance problems**. Contributions are welcome to enhance the transmission side.
+
+<h1>Supported hardware</h1>
 
 <h2>Airspy</h2>
 

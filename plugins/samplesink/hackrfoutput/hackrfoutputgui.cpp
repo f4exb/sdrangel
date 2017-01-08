@@ -297,13 +297,13 @@ void HackRFOutputGui::on_startStop_toggled(bool checked)
         if (m_deviceAPI->initGeneration())
         {
             m_deviceAPI->startGeneration();
-            DSPEngine::instance()->startAudioOutput();
+            DSPEngine::instance()->startAudioInput();
         }
     }
     else
     {
         m_deviceAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioOutput();
+        DSPEngine::instance()->startAudioInput();
     }
 }
 
