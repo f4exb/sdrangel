@@ -15,8 +15,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBHACKRFLIBSRC}/include
-    ${LIBHACKRFLIBSRC}/src
+    ${LIBHACKRFLIBSRC}
 )
 else (BUILD_DEBIAN)
 include_directories(
