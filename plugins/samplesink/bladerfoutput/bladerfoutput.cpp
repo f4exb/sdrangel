@@ -67,7 +67,7 @@ bool BladerfOutput::start(int device)
 
 	int res;
 
-	m_sampleSourceFifo.resize(m_settings.m_devSampleRate); // 1s long
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -135,10 +135,10 @@ bool BladerfOutput::start(int device)
 		goto failed;
 	}
 
-	m_bladerfThread->startWork();
-
 //	mutexLocker.unlock();
 	applySettings(m_settings, true);
+
+    m_bladerfThread->startWork();
 
 	qDebug("BladerfOutput::start: started");
 
@@ -247,44 +247,89 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 
 	qDebug() << "BladerfOutput::applySettings: m_dev: " << m_dev;
 
+	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+	{
+	    bool wasRunning = false;
+
+	    if ((m_bladerfThread != 0) && (m_bladerfThread->isRunning()))
+	    {
+	        m_bladerfThread->stopWork();
+	        wasRunning = true;
+	    }
+
+	    // FIFO size:
+	    // 1 s length up to interpolation by 16
+	    // 2 s for interpolation by 32
+	    m_sampleSourceFifo.resize(settings.m_devSampleRate/(1<<(settings.m_log2Interp <= 4 ? settings.m_log2Interp : 4)));
+
+	    if (wasRunning)
+	    {
+	        m_bladerfThread->startWork();
+	    }
+	}
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    {
+        forwardChange = true;
+
+        if (m_dev != 0)
+        {
+            unsigned int actualSamplerate;
+
+            if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_TX, settings.m_devSampleRate, &actualSamplerate) < 0)
+            {
+                qCritical("BladerfOutput::applySettings: could not set sample rate: %d", settings.m_devSampleRate);
+            }
+            else
+            {
+                qDebug() << "BladerfOutput::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_TX) actual sample rate is " << actualSamplerate;
+            }
+        }
+    }
+
+    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        forwardChange = true;
+
+        if (m_bladerfThread != 0)
+        {
+            m_bladerfThread->setLog2Interpolation(settings.m_log2Interp);
+            qDebug() << "BladerfOutput::applySettings: set interpolation to " << (1<<settings.m_log2Interp);
+        }
+    }
+
 	if ((m_settings.m_vga1 != settings.m_vga1) || force)
 	{
-		m_settings.m_vga1 = settings.m_vga1;
-
 		if (m_dev != 0)
 		{
-			if(bladerf_set_txvga1(m_dev, m_settings.m_vga1) != 0)
+			if(bladerf_set_txvga1(m_dev, settings.m_vga1) != 0)
 			{
 				qDebug("BladerfOutput::applySettings: bladerf_set_txvga1() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfOutput::applySettings: VGA1 gain set to " << m_settings.m_vga1;
+				qDebug() << "BladerfOutput::applySettings: VGA1 gain set to " << settings.m_vga1;
 			}
 		}
 	}
 
 	if ((m_settings.m_vga2 != settings.m_vga2) || force)
 	{
-		m_settings.m_vga2 = settings.m_vga2;
-
 		if(m_dev != 0)
 		{
-			if(bladerf_set_txvga2(m_dev, m_settings.m_vga2) != 0)
+			if(bladerf_set_txvga2(m_dev, settings.m_vga2) != 0)
 			{
 				qDebug("BladerfOutput::applySettings:bladerf_set_rxvga2() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfOutput::applySettings: VGA2 gain set to " << m_settings.m_vga2;
+				qDebug() << "BladerfOutput::applySettings: VGA2 gain set to " << settings.m_vga2;
 			}
 		}
 	}
 
 	if ((m_settings.m_xb200 != settings.m_xb200) || force)
 	{
-		m_settings.m_xb200 = settings.m_xb200;
-
 		if (m_dev != 0)
 		{
             bool changeSettings;
@@ -310,7 +355,7 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 
             if (changeSettings)
             {
-                if (m_settings.m_xb200)
+                if (settings.m_xb200)
                 {
                     if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0)
                     {
@@ -333,76 +378,50 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
                     }
                 }
 
-                m_sharedParams.m_xb200Attached = m_settings.m_xb200;
+                m_sharedParams.m_xb200Attached = settings.m_xb200;
             }
         }
 	}
 
 	if ((m_settings.m_xb200Path != settings.m_xb200Path) || force)
 	{
-		m_settings.m_xb200Path = settings.m_xb200Path;
-
 		if (m_dev != 0)
 		{
-			if(bladerf_xb200_set_path(m_dev, BLADERF_MODULE_TX, m_settings.m_xb200Path) != 0)
+			if(bladerf_xb200_set_path(m_dev, BLADERF_MODULE_TX, settings.m_xb200Path) != 0)
 			{
 				qDebug("BladerfOutput::applySettings: bladerf_xb200_set_path(BLADERF_MODULE_TX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfOutput::applySettings: set xb200 path to " << m_settings.m_xb200Path;
+				qDebug() << "BladerfOutput::applySettings: set xb200 path to " << settings.m_xb200Path;
 			}
 		}
 	}
 
 	if ((m_settings.m_xb200Filter != settings.m_xb200Filter) || force)
 	{
-		m_settings.m_xb200Filter = settings.m_xb200Filter;
-
 		if (m_dev != 0)
 		{
-			if(bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_TX, m_settings.m_xb200Filter) != 0)
+			if(bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_TX, settings.m_xb200Filter) != 0)
 			{
 				qDebug("BladerfOutput::applySettings: bladerf_xb200_set_filterbank(BLADERF_MODULE_TX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfOutput::applySettings: set xb200 filter to " << m_settings.m_xb200Filter;
-			}
-		}
-	}
-
-	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
-	{
-		m_settings.m_devSampleRate = settings.m_devSampleRate;
-		forwardChange = true;
-
-		if (m_dev != 0)
-		{
-			unsigned int actualSamplerate;
-
-			if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_TX, m_settings.m_devSampleRate, &actualSamplerate) < 0)
-			{
-				qCritical("BladerfOutput::applySettings: could not set sample rate: %d", m_settings.m_devSampleRate);
-			}
-			else
-			{
-				qDebug() << "BladerfOutput::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_TX) actual sample rate is " << actualSamplerate;
+				qDebug() << "BladerfOutput::applySettings: set xb200 filter to " << settings.m_xb200Filter;
 			}
 		}
 	}
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-		m_settings.m_bandwidth = settings.m_bandwidth;
-
 		if(m_dev != 0)
 		{
 			unsigned int actualBandwidth;
 
-			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_TX, m_settings.m_bandwidth, &actualBandwidth) < 0)
+			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_TX, settings.m_bandwidth, &actualBandwidth) < 0)
 			{
-				qCritical("BladerfOutput::applySettings: could not set bandwidth: %d", m_settings.m_bandwidth);
+				qCritical("BladerfOutput::applySettings: could not set bandwidth: %d", settings.m_bandwidth);
 			}
 			else
 			{
@@ -411,40 +430,28 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 		}
 	}
 
-	if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
-	{
-		m_settings.m_log2Interp = settings.m_log2Interp;
-		forwardChange = true;
-
-		if(m_dev != 0)
-		{
-			m_bladerfThread->setLog2Interpolation(m_settings.m_log2Interp);
-			qDebug() << "BladerfOutput::applySettings: set interpolation to " << (1<<m_settings.m_log2Interp);
-		}
-	}
-
 	if (m_settings.m_centerFrequency != settings.m_centerFrequency)
 	{
 		forwardChange = true;
 	}
 
-	m_settings.m_centerFrequency = settings.m_centerFrequency;
-
-	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-
-    deviceCenterFrequency = m_settings.m_centerFrequency;
-    f_img = deviceCenterFrequency;
-    f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-
 	if (m_dev != NULL)
 	{
-		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_TX, deviceCenterFrequency ) != 0)
+		if (bladerf_set_frequency( m_dev, BLADERF_MODULE_TX, settings.m_centerFrequency ) != 0)
 		{
-			qDebug("BladerfOutput::applySettings: bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
+			qDebug("BladerfOutput::applySettings: bladerf_set_frequency(%lld) failed", settings.m_centerFrequency);
 		}
 	}
+
+    m_settings.m_centerFrequency = settings.m_centerFrequency;
+    m_settings.m_bandwidth = settings.m_bandwidth;
+    m_settings.m_xb200Filter = settings.m_xb200Filter;
+    m_settings.m_xb200 = settings.m_xb200;
+    m_settings.m_xb200Path = settings.m_xb200Path;
+    m_settings.m_vga2 = settings.m_vga2;
+    m_settings.m_vga1 = settings.m_vga1;
+    m_settings.m_devSampleRate = settings.m_devSampleRate;
+    m_settings.m_log2Interp = settings.m_log2Interp;
 
 	if (forwardChange)
 	{
@@ -454,13 +461,9 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 	}
 
 	qDebug() << "BladerfOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-			<< " device center freq: " << deviceCenterFrequency << " Hz"
 			<< " device sample rate: " << m_settings.m_devSampleRate << "Hz"
 			<< " baseband sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp) << "Hz"
-			<< " BW: " << m_settings.m_bandwidth << "Hz"
-			<< " img: " << f_img << "Hz"
-			<< " cut: " << f_cut << "Hz"
-			<< " img - cut: " << f_img - f_cut;
+			<< " BW: " << m_settings.m_bandwidth << "Hz";
 
 	return true;
 }

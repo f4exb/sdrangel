@@ -37,6 +37,7 @@ public:
 	void stopWork();
 	void setLog2Interpolation(unsigned int log2_interp);
 	void setFcPos(int fcPos);
+	bool isRunning() const { return m_running; }
 
 private:
 	QMutex m_startWaitMutex;
