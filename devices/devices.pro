@@ -40,3 +40,4 @@ HEADERS  += bladerf/devicebladerf.h\
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
+LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
