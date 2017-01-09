@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a [HackRF device](https://greatscottgadgets.com/hackrf/). It is supported in Linux only.
+This output sample sink plugin sends its samples to a [HackRF device](https://greatscottgadgets.com/hackrf/).
 
 <h2>Build</h2>
 
@@ -43,9 +43,13 @@ Use this slider to adjust LO correction in ppm. It can be varied from -10.0 to 1
 The baseband stream is interpolated by this value before being sent to the HackRF device. Possible values are:
 
   - **1**: no interpolation
-  - **2**: multiply sample rate by 2
-  
-Larger values introduce performance problems.
+  - **2**: multiply baseband stream sample rate by 2
+  - **4**: multiply baseband stream sample rate by 4
+  - **8**: multiply baseband stream sample rate by 8
+  - **16**: multiply baseband stream sample rate by 16
+  - **32**: multiply baseband stream sample rate by 32
+
+Be aware that the main samples buffer is based on the final sample rate so the larger the integration factor the larger will be the delay introduced by this buffer.  
 
 <h3>6: Bias tee</h3>
 

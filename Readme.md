@@ -30,11 +30,9 @@ From version 2 SDRangel can integrate more than one hardware device running conc
 
 From version 3 transmission or signal generation is supported for BladeRF and HackRF (since version 3.1) using a sample sink plugin. These plugins are:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) Linux only
-  - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput) Linux only
+  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
+  - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
-
-Transmision with "real" devices (BladeRF and HackRF) is supported in Linux versions only. Be also aware that this is **very experimental**. Code is not very efficient so you may experience **performance problems**. Contributions are welcome to enhance the transmission side.
 
 <h1>Supported hardware</h1>
 

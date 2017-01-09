@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/). It is supported in Linux only.
+This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/).
 
 <h2>Build</h2>
 
@@ -35,9 +35,13 @@ This is the center frequency of transmission in kHz.
 The baseband stream is interpolated by this value before being sent to the BladeRF device. Possible values are:
 
   - **1**: no interpolation
-  - **2**: multiply sample rate by 2
-  
-Larger values introduce performance problems.
+  - **2**: multiply baseband stream sample rate by 2
+  - **4**: multiply baseband stream sample rate by 4
+  - **8**: multiply baseband stream sample rate by 8
+  - **16**: multiply baseband stream sample rate by 16
+  - **32**: multiply baseband stream sample rate by 32
+
+Be aware that the main samples buffer is based on the final sample rate so the larger the integration factor the larger will be the delay introduced by this buffer.  
 
 <h3>5: XB-200 add-on control</h3>
 
