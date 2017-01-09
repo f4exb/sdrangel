@@ -54,28 +54,7 @@ void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned i
     m_ir = (m_ir + nbSamples) % m_size;
     readUntil =  m_data.begin() + m_size + m_ir;
     emit dataRead(nbSamples);
-
-    int i_delta = m_iw - m_ir;
-
-    if (m_init)
-    {
-        emit dataWrite(m_size/2);
-        m_init = false;
-    }
-    else if (i_delta > 0)
-    {
-        if (i_delta <= m_size/2) // m_samplesChunkSize)
-        {
-            emit dataWrite(m_size/2);
-        }
-    }
-    else
-    {
-        if (i_delta + m_size <= m_size/2) //m_samplesChunkSize)
-        {
-            emit dataWrite(m_size/2);
-        }
-    }
+    emit dataWrite(nbSamples);
 }
 
 void SampleSourceFifo::write(const Sample& sample)
