@@ -1,5 +1,7 @@
 project(rtlsdr)
 
+add_definitions(-DDETACH_KERNEL_DRIVER=ON)
+
 find_package(LibUSB)
 
 set(rtlsdr_SOURCES

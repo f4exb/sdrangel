@@ -1,5 +1,7 @@
 project(mirisdr)
 
+add_definitions(-DDETACH_KERNEL_DRIVER=ON)
+
 find_package(LibUSB)
 
 set(mirisdr_SOURCES
