@@ -84,7 +84,7 @@ public:
 private:
 	bool applySettings(const HackRFOutputSettings& settings, bool force);
 //	hackrf_device *open_hackrf_from_sequence(int sequence);
-	void setCenterFrequency(quint64 freq);
+	void setCenterFrequency(quint64 freq_hz, qint32 LOppmTenths);
 
 	DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;

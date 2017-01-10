@@ -39,13 +39,11 @@ HackRFOutputThread::~HackRFOutputThread()
 
 void HackRFOutputThread::startWork()
 {
-	//m_startWaitMutex.lock();
-	m_running = true;
+	m_startWaitMutex.lock();
 	start();
-	/*
 	while(!m_running)
 		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();*/
+	m_startWaitMutex.unlock();
 }
 
 void HackRFOutputThread::stopWork()
@@ -69,7 +67,7 @@ void HackRFOutputThread::run()
 {
 	hackrf_error rc;
 
-	//m_running = true;
+	m_running = true;
 	m_startWaiter.wakeAll();
 
 	rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, this);
@@ -80,7 +78,7 @@ void HackRFOutputThread::run()
 	}
 	else
 	{
-		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
+	    while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
 			usleep(200000);
 		}
@@ -97,7 +95,7 @@ void HackRFOutputThread::run()
 		qDebug("HackRFOutputThread::run: failed to stop HackRF Tx: %s", hackrf_error_name(rc));
 	}
 
-	//m_running = false;
+	m_running = false;
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => interp=16)

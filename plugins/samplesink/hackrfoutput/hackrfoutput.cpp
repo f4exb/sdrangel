@@ -75,7 +75,7 @@ bool HackRFOutput::start(int device)
 //		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
 //	}
 
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/2); // 500ms long
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -148,7 +148,7 @@ void HackRFOutput::stop()
 		m_hackRFThread = 0;
 	}
 
-    if(m_dev != 0)
+    if (m_dev != 0)
     {
         hackrf_stop_tx(m_dev);
     }
@@ -225,9 +225,9 @@ bool HackRFOutput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFOutput::setCenterFrequency(quint64 freq_hz)
+void HackRFOutput::setCenterFrequency(quint64 freq_hz, qint32 LOppmTenths)
 {
-	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+	qint64 df = ((qint64)freq_hz * LOppmTenths) / 10000000LL;
 	freq_hz += df;
 
 	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
@@ -251,53 +251,53 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	qDebug() << "HackRFOutput::applySettings";
 
-	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
-	{
-		m_settings.m_devSampleRate = settings.m_devSampleRate;
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
         forwardChange = true;
 
+        // FIFO size:
+        // 1 s length up to interpolation by 16
+        // 2 s for interpolation by 32
+        m_sampleSourceFifo.resize(settings.m_devSampleRate/(1<<(settings.m_log2Interp <= 4 ? settings.m_log2Interp : 4)));
+    }
+
+	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+	{
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, m_settings.m_devSampleRate, 1);
+			rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, settings.m_devSampleRate, 1);
 
 			if (rc != HACKRF_SUCCESS)
 			{
 				qCritical("HackRFOutput::applySettings: could not set sample rate to %d S/s: %s",
-				        m_settings.m_devSampleRate,
+				        settings.m_devSampleRate,
 				        hackrf_error_name(rc));
 			}
 			else
 			{
 				qDebug("HackRFOutput::applySettings: sample rate set to %d S/s",
-				        m_settings.m_devSampleRate);
-				m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+				        settings.m_devSampleRate);
+				m_hackRFThread->setSamplerate(settings.m_devSampleRate);
 			}
 		}
 	}
 
 	if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
-		m_settings.m_log2Interp = settings.m_log2Interp;
-		forwardChange = true;
-
-		if(m_dev != 0)
+		if(m_hackRFThread != 0)
 		{
-			m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
-			qDebug() << "HackRFOutput: set interpolation to " << (1<<m_settings.m_log2Interp);
+			m_hackRFThread->setLog2Interpolation(settings.m_log2Interp);
+			qDebug() << "HackRFOutput: set interpolation to " << (1<<settings.m_log2Interp);
 		}
 	}
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
 	{
-		m_settings.m_centerFrequency = settings.m_centerFrequency;
-		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
-
 		if (m_dev != 0)
 		{
-			setCenterFrequency(m_settings.m_centerFrequency);
-
-			qDebug() << "HackRFOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz";
+			setCenterFrequency(settings.m_centerFrequency, settings.m_LOppmTenths);
+			qDebug() << "HackRFOutput::applySettings: center freq: " << settings.m_centerFrequency << " Hz LOppm: " << settings.m_LOppmTenths;
 		}
 
 		forwardChange = true;
@@ -305,11 +305,9 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
 	{
-		m_settings.m_vgaGain = settings.m_vgaGain;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, m_settings.m_vgaGain);
+			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, settings.m_vgaGain);
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -317,18 +315,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-				qDebug() << "HackRFOutput:applySettings: TxVGA gain set to " << m_settings.m_vgaGain;
+				qDebug() << "HackRFOutput:applySettings: TxVGA gain set to " << settings.m_vgaGain;
 			}
 		}
 	}
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-		m_settings.m_bandwidth = settings.m_bandwidth;
-
 		if (m_dev != 0)
 		{
-			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth);
+			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth);
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
@@ -337,18 +333,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << m_settings.m_bandwidth << " Hz";
+				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << settings.m_bandwidth << " Hz";
 			}
 		}
 	}
 
 	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
-		m_settings.m_biasT = settings.m_biasT;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (m_settings.m_biasT ? 1 : 0));
+			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -356,18 +350,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: bias tee set to " << m_settings.m_biasT;
+				qDebug() << "HackRFInput:applySettings: bias tee set to " << settings.m_biasT;
 			}
 		}
 	}
 
 	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
 	{
-		m_settings.m_lnaExt = settings.m_lnaExt;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (m_settings.m_lnaExt ? 1 : 0));
+			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -375,10 +367,19 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: extra LNA set to " << m_settings.m_lnaExt;
+				qDebug() << "HackRFInput:applySettings: extra LNA set to " << settings.m_lnaExt;
 			}
 		}
 	}
+
+    m_settings.m_devSampleRate = settings.m_devSampleRate;
+    m_settings.m_log2Interp = settings.m_log2Interp;
+    m_settings.m_centerFrequency = settings.m_centerFrequency;
+    m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+    m_settings.m_vgaGain = settings.m_vgaGain;
+    m_settings.m_bandwidth = settings.m_bandwidth;
+    m_settings.m_biasT = settings.m_biasT;
+    m_settings.m_lnaExt = settings.m_lnaExt;
 
 	if (forwardChange)
 	{
