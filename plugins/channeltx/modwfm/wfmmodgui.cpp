@@ -120,7 +120,7 @@ bool WFMModGUI::deserialize(const QByteArray& data)
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 6);
+		d.readS32(2, &tmp, 7);
 		ui->rfBW->setCurrentIndex(tmp);
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
@@ -365,7 +365,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     for (int i = 0; i < m_nbRfBW; i++) {
         ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
     }
-    ui->rfBW->setCurrentIndex(6);
+    ui->rfBW->setCurrentIndex(7);
     blockApplySettings(false);
 
 
@@ -384,7 +384,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::blue);
-	m_channelMarker.setBandwidth(12500);
+	m_channelMarker.setBandwidth(m_rfBW[ui->rfBW->currentIndex()]);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
