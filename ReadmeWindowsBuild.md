@@ -33,7 +33,7 @@ Just update the following line with the location of your Boost installation:
 
 <h4>USB support (libusb)</h4>
 
-You have to download an archive of libusb that supports MinGW32 from the following [location](https://sourceforge.net/projects/libusb/files/libusb-1.0/). You will have the choice among various versions and various archive formats in each version folder. It works with version `1.0.19` and is untested with later version(s). In our example it will be installed in `D:\libusb-1.0.19`.
+You have to download an archive of libusb that supports MinGW32 from the following [location](https://sourceforge.net/projects/libusb/files/libusb-1.0/). You will have the choice among various versions and various archive formats in each version folder. It works with version `1.0.20`. In our example it will be installed in `D:\softs\libusb-1.0.20`.
 
 You then need to update the .pro files that depend on libusb. They are:
 
@@ -44,8 +44,8 @@ You then need to update the .pro files that depend on libusb. They are:
 
 Just update the following lines with the location of your libusb installation:
 
-  - `CONFIG(MINGW32):INCLUDEPATH += "D:\libusb-1.0.19\include\libusb-1.0"`
-  - `CONFIG(MINGW32):LIBS += -LD:\libusb-1.0.19\MinGW32\dll -llibusb-1.0`
+  - `CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"`
+  - `CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0`
 
 <h4>Airspy library (libairspy)</h4>
 
@@ -161,4 +161,4 @@ It is possible to use a MinGW64 tool-chain by following these steps:
 
 Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to your target installation directory in a similar way as this is done for MinGW32 (see above).
 
-The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\libusb-1.0.19\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.
+The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\softs\libusb-1.0.20\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.

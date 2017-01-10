@@ -1,4 +1,4 @@
-SET libusbdir="D:\libusb-1.0.19\MinGW32"
+SET libusbdir="D:\softs\libusb-1.0.20\MinGW32"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2

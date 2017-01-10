@@ -1,4 +1,4 @@
-SET libusbdir="D:\libusb-1.0.19\MinGW64"
+SET libusbdir="D:\softs\libusb-1.0.20\MinGW64"
 SET msys2dir="D:\msys64"
 
 copy %msys2dir%\mingw64\bin\libbz2-1.dll %2
