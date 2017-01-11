@@ -67,10 +67,10 @@ void HackRFOutputThread::run()
 {
 	hackrf_error rc;
 
-	m_running = true;
-	m_startWaiter.wakeAll();
-
 	rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, this);
+
+    m_running = true;
+    m_startWaiter.wakeAll();
 
 	if (rc != HACKRF_SUCCESS)
 	{

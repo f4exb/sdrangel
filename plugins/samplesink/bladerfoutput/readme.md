@@ -4,6 +4,8 @@
 
 This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/).
 
+Warning to Windows users: concurrent use of Rx and Tx does not work correctly hence full duplex is not fully operational. For best results use BladeRF as a half duplex device like HackRF i.e. do not run Tx and Rx concurrently.
+
 <h2>Build</h2>
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include -DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so` to the cmake command line.

@@ -41,13 +41,11 @@ HackRFInputThread::~HackRFInputThread()
 
 void HackRFInputThread::startWork()
 {
-	//m_startWaitMutex.lock();
-	m_running = true;
+	m_startWaitMutex.lock();
 	start();
-	/*
 	while(!m_running)
 		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();*/
+	m_startWaitMutex.unlock();
 }
 
 void HackRFInputThread::stopWork()
@@ -76,10 +74,10 @@ void HackRFInputThread::run()
 {
 	hackrf_error rc;
 
-	//m_running = true;
-	m_startWaiter.wakeAll();
-
 	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
+
+    m_running = true;
+    m_startWaiter.wakeAll();
 
 	if (rc != HACKRF_SUCCESS)
 	{
@@ -104,7 +102,7 @@ void HackRFInputThread::run()
 		qDebug("HackRFThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
 	}
 
-	//m_running = false;
+	m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
