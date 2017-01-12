@@ -977,7 +977,7 @@ void MainWindow::on_action_reloadDevices_triggered()
             QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
             bool sampleSinkSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
             m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, (*it)->m_deviceSinkEngine->getUID());
-            int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
+            int newIndex = m_pluginManager->getSampleSinkSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSinkAPI);
             deviceSelectorComboBox->setCurrentIndex(newIndex);
             deviceSelectorComboBox->blockSignals(sampleSinkSignalsBlocked);
         }
