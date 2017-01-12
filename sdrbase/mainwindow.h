@@ -162,6 +162,7 @@ private slots:
 	void on_action_addSourceDevice_triggered();
 	void on_action_addSinkDevice_triggered();
 	void on_action_removeLastDevice_triggered();
+	void on_action_reloadDevices_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
 };

@@ -53,10 +53,12 @@ public:
 	void updateSampleSourceDevices();
 	void duplicateLocalSampleSourceDevices(uint deviceUID);
 	void fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID);
+	int getSampleSourceSelectorIndex(QComboBox* comboBox, DeviceSourceAPI *deviceSourceAPI);
 
 	void updateSampleSinkDevices();
 	void duplicateLocalSampleSinkDevices(uint deviceUID);
 	void fillSampleSinkSelector(QComboBox* comboBox, uint deviceUID);
+	int getSampleSinkSelectorIndex(QComboBox* comboBox, DeviceSinkAPI *deviceSinkAPI);
 
 	int selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI);
 	int selectFirstSampleSource(const QString& sourceId, DeviceSourceAPI *deviceAPI);

@@ -29,26 +29,27 @@ In each slave tab group (2), (3), (4) and (5) an individual tab corresponding to
 The following items are presented hierarchically from left to right:
 
   - File:
-   - Exit (shortcut Ctl-Q): Exit the program
+    - _Exit_ (shortcut Ctl-Q): Exit the program
   - View:
-   - Fullscreen (Shortcut F11): Toggle full screen mode
+    - _Fullscreen_ (Shortcut F11): Toggle full screen mode
   - Devices:
-   - Add source device: adds a new source (receiver) device slot to the device stack (last position)
-   - Add sink device: adds a new sink (transmitter) device slot to the device stack (last position)
-   - Remove device: removes the last device slot from thte device stack
+    - _Add source device_: adds a new source (receiver) device slot to the device stack (last position)
+    - _Add sink device_: adds a new sink (transmitter) device slot to the device stack (last position)
+    - _Remove device_: removes the last device slot from thte device stack
+    - _Reload devices_: re-scan the system for devices. Devices selectors are updated with new devices and missing devices are removed. All devices must be stopped for this to take effect. 
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
-   - Sampling devices control: control of which sampling devices is used and add channels
-   - Sampling devices: the sampling devices UIs
-   - Spectrum display: the main spectrum displays (output from the sampling devices)
-   - Presets: the saved presets
-   - Channels: the channels active for each device
+    - _Sampling devices control_: control of which sampling devices is used and add channels
+    - _Sampling devices_: the sampling devices UIs
+    - _Spectrum display_: the main spectrum displays (output from the sampling devices)
+    - _Presets_: the saved presets
+    - _Channels_: the channels active for each device
   - Preferences:
-   - Audio: opens a dialog to choose the audio output device (see 1.1 below for details)
-   - DV Serial: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
-   - My Position: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channel/demoddsd/readme.md) for details on how to decode Digital Voice modes.
+    - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
+    - _DV Serial_: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
+    - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channel/demoddsd/readme.md) for details on how to decode Digital Voice modes.
   - Help:
-    - Loaded Plugins: shows details about the loaded plugins (see 1.2 below for details)
-    - About: current version and blah blah.    
+    - _Loaded Plugins_: shows details about the loaded plugins (see 1.2 below for details)
+    - _About_: current version and blah blah.    
 
 <h4>1.1. Preferences - Audio</h4>
 

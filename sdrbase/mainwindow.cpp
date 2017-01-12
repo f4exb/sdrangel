@@ -22,7 +22,6 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QTextStream>
-#include <QMessageBox>
 #include <QDateTime>
 #include <QSysInfo>
 
@@ -278,7 +277,7 @@ void MainWindow::removeLastDevice()
 
 	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
-	    m_deviceWidgetTabs.removeLast();
+	    m_deviceWidgetTabs.removeLast();m_pluginManager->loadPlugins();
 	    ui->tabInputsView->clear();
 
 	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
@@ -927,6 +926,61 @@ void MainWindow::on_action_removeLastDevice_triggered()
     if (m_deviceUIs.size() > 1)
     {
         removeLastDevice();
+    }
+}
+
+void MainWindow::on_action_reloadDevices_triggered()
+{
+    // all devices must be stopped
+    std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+    for (; it != m_deviceUIs.end(); ++it)
+    {
+        if ((*it)->m_deviceSourceEngine) // it is a source device
+        {
+            if ((*it)->m_deviceSourceEngine->state() == DSPDeviceSourceEngine::StRunning)
+            {
+                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
+                return;
+            }
+        }
+
+        if ((*it)->m_deviceSinkEngine) // it is a sink device
+        {
+            if ((*it)->m_deviceSinkEngine->state() == DSPDeviceSinkEngine::StRunning)
+            {
+                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
+                return;
+            }
+        }
+    }
+
+    // re-scan devices
+    m_pluginManager->updateSampleSourceDevices();
+    m_pluginManager->updateSampleSinkDevices();
+
+    // re-populate device selectors keeping the same selection
+    it = m_deviceUIs.begin();
+    for (; it != m_deviceUIs.end(); ++it)
+    {
+        if ((*it)->m_deviceSourceEngine) // it is a source device
+        {
+            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
+            bool sampleSourceSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
+            m_pluginManager->fillSampleSourceSelector(deviceSelectorComboBox, (*it)->m_deviceSourceEngine->getUID());
+            int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
+            deviceSelectorComboBox->setCurrentIndex(newIndex);
+            deviceSelectorComboBox->blockSignals(sampleSourceSignalsBlocked);
+        }
+
+        if ((*it)->m_deviceSinkEngine) // it is a sink device
+        {
+            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
+            bool sampleSinkSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
+            m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, (*it)->m_deviceSinkEngine->getUID());
+            int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
+            deviceSelectorComboBox->setCurrentIndex(newIndex);
+            deviceSelectorComboBox->blockSignals(sampleSinkSignalsBlocked);
+        }
     }
 }
 
