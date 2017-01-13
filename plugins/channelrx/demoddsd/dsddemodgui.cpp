@@ -42,39 +42,6 @@ unsigned int DSDDemodBaudRates::m_rates[] = {2400, 4800};
 unsigned int DSDDemodBaudRates::m_nb_rates = 2;
 unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
 
-char DSDDemodGUI::m_dpmrFrameTypes[][3] = {
-		"--", // 0: no frame sync
-		"XS", // 1: no frame - extensive search of FS2
-		"HD", // 2: header frame
-		"PY", // 3: payload super frame not categorized yet
-		"VO", // 4: voice super frame
-		"VD", // 5: voice and data superframe
-		"D1", // 6: data type 1 super frame
-		"D2", // 7: data type 2 super frame
-		"EN", // 8: end frame
-};
-
-const char * DSDDemodGUI::m_ysfChannelTypeText[4] = {
-        "H", //!< Header Channel
-        "C", //!< Communications Channel
-        "T", //!< Termination Channel
-        "S"  //!< Test
-};
-
-const char * DSDDemodGUI::m_ysfDataTypeText[4] = {
-        "V1", //!< Voice/Data type 1
-        "DF", //!< Data Full Rate
-        "V2", //!< Voice/Data type 2
-        "VF"  //!< Voice Full Rate
-};
-
-const char * DSDDemodGUI::m_ysfCallModeText[4] = {
-        "GC", //!< Group CQ
-        "RI", //!< Radio ID
-        "RS", //!< Reserved
-        "IN"  //!< Individual
-};
-
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
@@ -505,8 +472,8 @@ void DSDDemodGUI::formatStatusText()
             break;
         }
 
-        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getSlot0Text(), 26);
-        memcpy(&m_formatStatusText[43], m_dsdDemod->getDecoder().getSlot1Text(), 26);
+        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getDMRDecoder().getSlot0Text(), 26);
+        memcpy(&m_formatStatusText[43], m_dsdDemod->getDecoder().getDMRDecoder().getSlot1Text(), 26);
         m_signalFormat = signalFormatDMR;
         break;
     case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
@@ -551,7 +518,7 @@ void DSDDemodGUI::formatStatusText()
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
         sprintf(m_formatStatusText, "%s CC: %04d OI: %08d CI: %08d",
-                m_dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
+                DSDcc::DSDdPMR::dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
                 m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode(),
                 m_dsdDemod->getDecoder().getDPMRDecoder().getOwnId(),
                 m_dsdDemod->getDecoder().getDPMRDecoder().getCalledId());
@@ -563,7 +530,7 @@ void DSDDemodGUI::formatStatusText()
         // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
-            sprintf(m_formatStatusText, "%s ", m_ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
+            sprintf(m_formatStatusText, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
     	}
     	else
     	{
@@ -571,8 +538,8 @@ void DSDDemodGUI::formatStatusText()
     	}
 
         sprintf(&m_formatStatusText[2], "%s %s %d:%d %c%c",
-    			m_ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
-				m_ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
+                DSDcc::DSDYSF::ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
+                DSDcc::DSDYSF::ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
 				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
 				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
 				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),

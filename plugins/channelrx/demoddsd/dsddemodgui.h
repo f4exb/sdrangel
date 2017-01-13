@@ -115,11 +115,6 @@ private:
 	float m_myLatitude;
 	float m_myLongitude;
 
-	static char m_dpmrFrameTypes[9][3];
-    static const char *m_ysfChannelTypeText[4];
-    static const char *m_ysfDataTypeText[4];
-    static const char *m_ysfCallModeText[4];
-
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();

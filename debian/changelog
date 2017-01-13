@@ -1,3 +1,9 @@
+sdrangel (3.1.1-1) unstable; urgency=medium
+
+  * DSD demod: adapt to dsdcc version 1.6
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 13 Jan 2017 03:14:18 +0100
+
 sdrangel (3.1.0-1) unstable; urgency=medium
 
   * HackRF Tx support
