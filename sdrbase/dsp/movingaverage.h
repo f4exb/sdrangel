@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <algorithm>
 #include "dsp/dsptypes.h"
 
 template<class Type> class MovingAverage {
@@ -24,11 +25,7 @@ public:
 	void resize(int historySize, Type initial)
 	{
 		m_history.resize(historySize);
-
-		for(size_t i = 0; i < m_history.size(); i++) {
-			m_history[i] = initial;
-		}
-
+		std::fill(m_history.begin(), m_history.end(), initial);
 		m_sum = (Type) m_history.size() * initial;
 		m_index = 0;
 	}
@@ -39,19 +36,16 @@ public:
         m_sum += value - oldest;
         oldest = value;
 
-	    m_index++;
-
-	    if(m_index >= m_history.size()) {
-	        m_index = 0;
-	    }
+        if (m_index < m_history.size()) {
+            m_index++;
+        } else {
+            m_index = 0;
+        }
 	}
 
 	void fill(Type value)
 	{
-		for(size_t i = 0; i < m_history.size(); i++) {
-			m_history[i] = value;
-		}
-
+        std::fill(m_history.begin(), m_history.end(), value);
 		m_sum = (Type) m_history.size() * value;
 	}
 

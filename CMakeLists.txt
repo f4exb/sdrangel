@@ -116,7 +116,6 @@ set(sdrbase_SOURCES
     sdrbase/dsp/interpolator.cpp
     sdrbase/dsp/hbfiltertraits.cpp
     sdrbase/dsp/lowpass.cpp
-    sdrbase/dsp/movingaverage.cpp
     sdrbase/dsp/nco.cpp
     sdrbase/dsp/ncof.cpp
     sdrbase/dsp/pidcontroller.cpp
