@@ -262,7 +262,7 @@ private:
 	bool m_squelchOpen;
 
 	Real m_lastArgument;
-    MovingAverage<Real> m_movingAverage;
+    MovingAverage<double> m_movingAverage;
     Real m_magsq;
     Real m_magsqSum;
     Real m_magsqPeak;
