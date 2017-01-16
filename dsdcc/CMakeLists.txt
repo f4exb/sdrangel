@@ -32,6 +32,7 @@ set(dsdcc_HEADERS
     ${LIBDSDCCSRC}/dsd_filters.h
     ${LIBDSDCCSRC}/dsd_logger.h
     ${LIBDSDCCSRC}/dsd_mbe.h
+    ${LIBDSDCCSRC}/dsd_mbelib.h
     ${LIBDSDCCSRC}/dsd_opts.h
     ${LIBDSDCCSRC}/dsd_state.h
     ${LIBDSDCCSRC}/dsd_symbol.h
