@@ -290,6 +290,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
 	}
 
+	ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }"); // squelch closed
+
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
@@ -401,12 +403,12 @@ void NFMDemodGUI::tick()
 
 	if (squelchOpen != m_squelchOpen)
 	{
-		m_squelchOpen = squelchOpen;
-
-		if (m_squelchOpen) {
+		if (squelchOpen) {
 			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+
+        m_squelchOpen = squelchOpen;
 	}
 }

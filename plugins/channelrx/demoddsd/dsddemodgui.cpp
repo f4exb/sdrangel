@@ -336,6 +336,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
@@ -608,13 +610,13 @@ void DSDDemodGUI::tick()
 
 	if (squelchOpen != m_squelchOpen)
 	{
-		m_squelchOpen = squelchOpen;
-
-		if (m_squelchOpen) {
+		if (squelchOpen) {
 			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+
+        m_squelchOpen = squelchOpen;
 	}
 
 	// "slow" updates
