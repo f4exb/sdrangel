@@ -42,12 +42,48 @@ public:
 		ProjectionDPhase   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
 	};
 
+	struct TraceData
+	{
+        ProjectionType m_projectionType; //!< Complex to real projection type
+        uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
+        float m_amp;                     //!< Amplification factor
+        float m_ofs;                     //!< Offset factor
+        int m_traceDelay;                //!< Trace delay in number of samples
+
+        TraceData() :
+            m_projectionType(ProjectionReal),
+            m_inputIndex(0),
+            m_amp(1.0f),
+            m_ofs(0.0f),
+            m_traceDelay(0)
+        {}
+	};
+
 	struct DisplayTrace
 	{
+	    TraceData m_traceData;           //!< Trace data
 	    float *m_trace;                  //!< Displayable trace (interleaved x,y of GLfloat)
-	    ProjectionType m_projectionType; //!< Complex to real projection type
-	    float m_amp;                     //!< Amplification factor
-	    float m_ofs;                     //!< Offset factor
+	};
+
+	struct TriggerData
+	{
+        ProjectionType m_projectionType; //!< Complex to real projection type
+        uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
+        Real m_triggerLevel;             //!< Level in real units
+        bool m_triggerPositiveEdge;      //!< Trigger on the positive edge (else negative)
+        bool m_triggerBothEdges;         //!< Trigger on both edges (else only one)
+        uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples
+        uint32_t m_triggerCounts;        //!< Number of trigger conditions before the final decisive trigger
+
+        TriggerData() :
+            m_projectionType(ProjectionReal),
+            m_inputIndex(0),
+            m_triggerLevel(0.0f),
+            m_triggerPositiveEdge(true),
+            m_triggerBothEdges(false),
+            m_triggerDelay(0),
+            m_triggerCounts(0)
+        {}
 	};
 
     typedef std::vector<DisplayTrace> DisplayTraces;
@@ -231,46 +267,29 @@ private:
     {
     public:
     	Projector *m_projector;       //!< Projector transform from complex trace to reaL trace usable for triggering
-    	uint32_t m_inputIndex;        //!< Input or feed index this trigger is associated with
-        Real m_triggerLevel;          //!< Level in real units
-        bool m_triggerPositiveEdge;   //!< Trigger on the positive edge (else negative)
-        bool m_triggerBothEdges;      //!< Trigger on both edges (else only one)
+    	TriggerData m_triggerData;    //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
-        uint32_t m_triggerDelay;      //!< Delay before the trigger is kicked off in number of samples
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
-        uint32_t m_triggerCounts;     //!< Number of trigger conditions before the final decisive trigger
+        uint32_t m_triggerCounter;    //!< Counter of trigger occurences
 
         TriggerCondition(Projector *projector) :
         	m_projector(projector),
-			m_inputIndex(0),
-            m_triggerLevel(0.0f),
-            m_triggerPositiveEdge(true),
-            m_triggerBothEdges(false),
 			m_prevCondition(false),
-            m_triggerDelay(0),
             m_triggerDelayCount(0),
-            m_triggerCounts(0)
+            m_triggerCounter(0)
         {}
     };
 
     struct Trace : public DisplayTrace
     {
     	Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
-    	uint32_t m_inputIndex;  //!< Input or feed index this trace is associated with
-    	int m_traceDelay;       //!< Trace delay in number of samples
     	int m_traceCount;       //!< Count of samples processed
-    	float m_amp;            //!< Linear trace amplifier factor
-    	float m_shift;          //!< Linear trace shift
 
     	Trace(Projector *projector, Real *displayTraceBuffer) :
     		m_projector(projector),
-    		m_inputIndex(0),
-			m_traceDelay(0),
-			m_traceCount(0),
-			m_amp(1.0f),
-			m_shift(0.0f)
+			m_traceCount(0)
     	{
-    	    m_projectionType = m_projector->getProjectionType();
+    	    m_traceData.m_projectionType = m_projector->getProjectionType();
     	    m_trace = displayTraceBuffer;
     	}
     };

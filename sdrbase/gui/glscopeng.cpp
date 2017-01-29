@@ -270,7 +270,7 @@ void GLScopeNG::paintGL()
             float rectX = m_glScopeRect1.x();
             float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
             float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
-            float rectH = -(m_glScopeRect1.height() / 2.0f) * trace.m_amp;
+            float rectH = -(m_glScopeRect1.height() / 2.0f) * trace.m_traceData.m_amp;
 
             QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
             QMatrix4x4 mat;
@@ -943,19 +943,19 @@ void GLScopeNG::applyConfig()
 void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 {
     ScopeVisNG::DisplayTrace trace = (*m_traces)[highlightedTraceIndex];
-    float amp_range = 2.0 / trace.m_amp;
-    float amp_ofs = trace.m_ofs;
-    float pow_floor = -100.0 + trace.m_ofs * 100.0;
-    float pow_range = 100.0 / trace.m_amp;
+    float amp_range = 2.0 / trace.m_traceData.m_amp;
+    float amp_ofs = trace.m_traceData.m_ofs;
+    float pow_floor = -100.0 + trace.m_traceData.m_ofs * 100.0;
+    float pow_range = 100.0 / trace.m_traceData.m_amp;
 
-    switch (trace.m_projectionType)
+    switch (trace.m_traceData.m_projectionType)
     {
     case ScopeVisNG::ProjectionMagDB: // dB scale
         scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
         break;
     case ScopeVisNG::ProjectionPhase: // Phase or frequency
     case ScopeVisNG::ProjectionDPhase:
-        scale.setRange(Unit::None, -1.0/trace.m_amp + amp_ofs, 1.0/trace.m_amp + amp_ofs);
+        scale.setRange(Unit::None, -1.0/trace.m_traceData.m_amp + amp_ofs, 1.0/trace.m_traceData.m_amp + amp_ofs);
         break;
     case ScopeVisNG::ProjectionReal: // Linear generic
     case ScopeVisNG::ProjectionImag:

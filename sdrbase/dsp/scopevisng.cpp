@@ -107,33 +107,33 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex];
 
 	// trigger process
-	if ((m_triggerConditions.size() > 0) && (feedIndex == triggerCondition.m_inputIndex))
+	if ((m_triggerConditions.size() > 0) && (feedIndex == triggerCondition.m_triggerData.m_inputIndex))
 	{
         while (begin < end)
         {
             if (m_triggerState == TriggerUntriggered)
             {
-				bool condition = triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerLevel;
+				bool condition = triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
 				bool trigger;
 
-				if (triggerCondition.m_triggerBothEdges) {
+				if (triggerCondition.m_triggerData.m_triggerBothEdges) {
 					trigger = triggerCondition.m_prevCondition ^ condition;
 				} else {
-					trigger = condition ^ !triggerCondition.m_triggerPositiveEdge;
+					trigger = condition ^ !triggerCondition.m_triggerData.m_triggerPositiveEdge;
 				}
 
 				if (trigger)
 				{
-					if (triggerCondition.m_triggerDelay > 0)
+					if (triggerCondition.m_triggerData.m_triggerDelay > 0)
 					{
-						triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerDelay;
+						triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerData.m_triggerDelay;
 						m_triggerState == TriggerDelay;
 					}
 					else
 					{
-					    if (triggerCondition.m_triggerCounts > 0)
+					    if (triggerCondition.m_triggerCounter > 0)
 					    {
-					        triggerCondition.m_triggerCounts--;
+					        triggerCondition.m_triggerCounter--;
 					        m_triggerState = TriggerUntriggered;
 					    }
 					    else
@@ -146,6 +146,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	                            m_currentTriggerIndex = 0;
 	                            m_triggerState = TriggerTriggered;
 	                            m_triggerPoint = begin;
+	                            triggerCondition.m_triggerCounter = triggerCondition.m_triggerData.m_triggerCounts;
 	                            m_traceStart = true;
 	                            break;
 	                        }
@@ -175,6 +176,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
                         m_currentTriggerIndex = 0;
                         m_triggerState = TriggerTriggered;
                         m_triggerPoint = begin;
+                        triggerCondition.m_triggerCounter = triggerCondition.m_triggerData.m_triggerCounts;
                         m_traceStart = true;
                         break;
                     }
@@ -210,10 +212,10 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 	        for (;itTrace != m_traces.end(); ++itTrace)
 	        {
-	            if (itTrace->m_inputIndex == feedIndex)
+	            if (itTrace->m_traceData.m_inputIndex == feedIndex)
 	            {
 	                SampleVector::const_iterator startPoint = m_tracebackBuffers[feedIndex].getCurrent() - count;
-                    SampleVector::const_iterator prevPoint = m_tracebackBuffers[feedIndex].getCurrent() - count - m_preTriggerDelay - itTrace->m_traceDelay;
+                    SampleVector::const_iterator prevPoint = m_tracebackBuffers[feedIndex].getCurrent() - count - m_preTriggerDelay - itTrace->m_traceData.m_traceDelay;
                     processPrevTrace(prevPoint, startPoint, itTrace);
 	            }
 	        }
@@ -229,14 +231,14 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	    {
 	        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace)
 	        {
-	            if (itTrace->m_inputIndex == feedIndex)
+	            if (itTrace->m_traceData.m_inputIndex == feedIndex)
 	            {
-	                float posLimit = 1.0 / itTrace->m_amp;
-	                float negLimit = -1.0 / itTrace->m_amp;
+	                float posLimit = 1.0 / itTrace->m_traceData.m_amp;
+	                float negLimit = -1.0 / itTrace->m_traceData.m_amp;
 
 	                if (itTrace->m_traceCount < m_traceSize)
 	                {
-	                    float v = itTrace->m_projector->run(*begin) * itTrace->m_amp + itTrace->m_shift;
+	                    float v = itTrace->m_projector->run(*begin) * itTrace->m_traceData.m_amp + itTrace->m_traceData.m_ofs;
 
 	                    if(v > posLimit) {
 	                        v = posLimit;
@@ -274,12 +276,12 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 void ScopeVisNG::processPrevTrace(SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, std::vector<Trace>::iterator& trace)
 {
     int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
-    float posLimit = 1.0 / trace->m_amp;
-    float negLimit = -1.0 / trace->m_amp;
+    float posLimit = 1.0 / trace->m_traceData.m_amp;
+    float negLimit = -1.0 / trace->m_traceData.m_amp;
 
     while (begin < end)
     {
-        float v = trace->m_projector->run(*begin) * trace->m_amp + trace->m_shift;
+        float v = trace->m_projector->run(*begin) * trace->m_traceData.m_amp + trace->m_traceData.m_ofs;
 
         if(v > posLimit) {
             v = posLimit;
