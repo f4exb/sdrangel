@@ -2,7 +2,6 @@ project(demod)
 
 add_subdirectory(demodlora)
 add_subdirectory(demodam)
-add_subdirectory(demodatv)
 add_subdirectory(demodbfm)
 add_subdirectory(demodnfm)
 add_subdirectory(demodssb)
