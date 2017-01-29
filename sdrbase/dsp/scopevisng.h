@@ -95,8 +95,13 @@ public:
     virtual ~ScopeVisNG();
 
     void setSampleRate(int sampleRate);
-    void configure(MessageQueue* msgQueue,
-            uint32_t traceSize);
+    void configure(uint32_t traceSize);
+    void addTrace(const TraceData& traceData);
+    void changeTrace(const TraceData& traceData, uint32_t traceIndex);
+    void removeTrace(uint32_t traceIndex);
+    void addTrigger(const TriggerData& triggerData);
+    void changeTrigger(const TriggerData& triggerData, uint32_t traceIndex);
+    void removeTrigger(uint32_t triggerIndex);
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void start();
@@ -133,16 +138,37 @@ private:
 
     public:
         static MsgScopeVisNGAddTrigger* create(
-        		ProjectionType projectionType)
+                const TriggerData& triggerData)
         {
-            return new MsgScopeVisNGAddTrigger(projectionType);
+            return new MsgScopeVisNGAddTrigger(triggerData);
         }
 
     private:
-        ProjectionType m_projectionType;
+        TriggerData m_triggerData;
 
-        MsgScopeVisNGAddTrigger(ProjectionType projectionType) :
-        	m_projectionType(projectionType)
+        MsgScopeVisNGAddTrigger(const TriggerData& triggerData) :
+            m_triggerData(triggerData)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGChangeTrigger : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGChangeTrigger* create(
+                const TriggerData& triggerData, uint32_t triggerIndex)
+        {
+            return new MsgScopeVisNGChangeTrigger(triggerData, triggerIndex);
+        }
+
+    private:
+        TriggerData m_triggerData;
+        uint32_t m_triggerIndex;
+
+        MsgScopeVisNGChangeTrigger(const TriggerData& triggerData, uint32_t triggerIndex) :
+            m_triggerData(triggerData),
+            m_triggerIndex(triggerIndex)
         {}
     };
 
@@ -162,6 +188,65 @@ private:
 
         MsgScopeVisNGRemoveTrigger(uint32_t triggerIndex) :
         	m_triggerIndex(triggerIndex)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGAddTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGAddTrace* create(
+                const TraceData& traceData)
+        {
+            return new MsgScopeVisNGAddTrace(traceData);
+        }
+
+    private:
+        TraceData m_traceData;
+
+        MsgScopeVisNGAddTrace(const TraceData& traceData) :
+            m_traceData(traceData)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGChangeTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGChangeTrace* create(
+                const TraceData& traceData, uint32_t traceIndex)
+        {
+            return new MsgScopeVisNGChangeTrace(traceData, traceIndex);
+        }
+
+    private:
+        TraceData m_traceData;
+        uint32_t m_traceIndex;
+
+        MsgScopeVisNGChangeTrace(TraceData traceData, uint32_t traceIndex) :
+            m_traceData(traceData),
+            m_traceIndex(traceIndex)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGRemoveTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGRemoveTrace* create(
+                uint32_t traceIndex)
+        {
+            return new MsgScopeVisNGRemoveTrace(traceIndex);
+        }
+
+    private:
+        uint32_t m_traceIndex;
+
+        MsgScopeVisNGRemoveTrace(uint32_t traceIndex) :
+            m_traceIndex(traceIndex)
         {}
     };
 

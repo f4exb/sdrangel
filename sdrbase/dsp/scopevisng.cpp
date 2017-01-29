@@ -21,7 +21,11 @@
 
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 const Real ScopeVisNG::ProjectorMagDB::mult = (10.0f / log2f(10.0f));
@@ -64,11 +68,46 @@ void ScopeVisNG::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVisNG::configure(MessageQueue* msgQueue,
-        uint traceSize)
+void ScopeVisNG::configure(uint traceSize)
 {
     Message* cmd = MsgConfigureScopeVisNG::create(traceSize);
-    msgQueue->push(cmd);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::addTrace(const TraceData& traceData)
+{
+    Message* cmd = MsgScopeVisNGAddTrace::create(traceData);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
+{
+    Message* cmd = MsgScopeVisNGChangeTrace::create(traceData, traceIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::removeTrace(uint32_t traceIndex)
+{
+    Message* cmd = MsgScopeVisNGRemoveTrace::create(traceIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::addTrigger(const TriggerData& triggerData)
+{
+    Message* cmd = MsgScopeVisNGAddTrigger::create(triggerData);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex)
+{
+    Message* cmd = MsgScopeVisNGChangeTrigger::create(triggerData, triggerIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::removeTrigger(uint32_t triggerIndex)
+{
+    Message* cmd = MsgScopeVisNGRemoveTrigger::create(triggerIndex);
+    getInputMessageQueue()->push(cmd);
 }
 
 
