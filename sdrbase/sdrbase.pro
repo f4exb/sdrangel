@@ -72,6 +72,7 @@ SOURCES += mainwindow.cpp\
         dsp/basebandsamplesource.cpp\
         dsp/nullsink.cpp\
         dsp/spectrumscopecombovis.cpp\
+        dsp/spectrumscopengcombovis.cpp\
         dsp/scopevis.cpp\
         dsp/spectrumvis.cpp\
         dsp/threadedbasebandsamplesink.cpp\
@@ -85,6 +86,8 @@ SOURCES += mainwindow.cpp\
         gui/cwkeyergui.cpp\
         gui/glscope.cpp\
         gui/glscopegui.cpp\
+        gui/glscopeng.cpp\
+        gui/glscopenggui.cpp\
         gui/glshadersimple.cpp\
         gui/glshadertextured.cpp\
         gui/glspectrum.cpp\
@@ -172,6 +175,8 @@ HEADERS  += mainwindow.h\
         dsp/basebandsamplesink.h\
         dsp/basebandsamplesource.h\
         dsp/nullsink.h\
+        dsp/spectrumscopecombovis.h\
+        dsp/spectrumscopengcombovis.h\        
         dsp/scopevis.h\
         dsp/spectrumvis.h\
         dsp/threadedbasebandsamplesink.h\
@@ -186,6 +191,8 @@ HEADERS  += mainwindow.h\
         gui/cwkeyergui.h\
         gui/glscope.h\
         gui/glscopegui.h\
+        gui/glscopeng.h\
+        gui/glscopenggui.h\
         gui/glshadersimple.h\
         gui/glshadertextured.h\
         gui/glspectrum.h\
@@ -227,6 +234,7 @@ FORMS    += mainwindow.ui\
         gui/cwkeyergui.ui\
         gui/audiodialog.ui\
         gui/glscopegui.ui\
+        gui/glscopenggui.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
         gui/samplingdevicecontrol.ui\
