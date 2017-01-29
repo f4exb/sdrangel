@@ -532,11 +532,11 @@ void DSDDemodGUI::formatStatusText()
         // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
     	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
     	{
-            sprintf(m_formatStatusText, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
+            snprintf(m_formatStatusText, 82, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
     	}
     	else
     	{
-            sprintf(m_formatStatusText, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
+            snprintf(m_formatStatusText, 82, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
     	}
 
         sprintf(&m_formatStatusText[2], "%s %s %d:%d %c%c",
@@ -549,11 +549,11 @@ void DSDDemodGUI::formatStatusText()
 
         if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
     	{
-            sprintf(&m_formatStatusText[14], "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
+            snprintf(&m_formatStatusText[14], 82-14, "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
     	}
     	else
     	{
-            strcpy(&m_formatStatusText[14], "---");
+            strncpy(&m_formatStatusText[14], "---", 82-14);
     	}
 
         char dest[11];
@@ -569,7 +569,7 @@ void DSDDemodGUI::formatStatusText()
             sprintf(dest, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
         }
 
-        sprintf(&m_formatStatusText[17], "|%-10s>%s|%-10s>%-10s|%-5s",
+        snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
                 m_dsdDemod->getDecoder().getYSFDecoder().getSrc(),
                 dest,
                 m_dsdDemod->getDecoder().getYSFDecoder().getUplink(),
