@@ -437,7 +437,7 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 	}
 
 	ui->glScope->setSampleRate(m_rate);
-	//m_scopeVis->setSampleRate(m_rate); TODO: not needed anymore?
+	m_scopeVis->setSampleRate(m_rate);
 
 	return true;
 }

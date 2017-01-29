@@ -36,7 +36,9 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
 	m_traceStart(true),
 	m_traceFill(0),
 	m_zTraceIndex(-1),
-	m_traceCompleteCount(0)
+	m_traceCompleteCount(0),
+	m_timeOfsProMill(0),
+	m_sampleRate(0)
 {
     setObjectName("ScopeVisNG");
     m_tracebackBuffers.resize(1);
@@ -51,6 +53,15 @@ ScopeVisNG::~ScopeVisNG()
 	{
 		delete it->m_projector;
 	}
+}
+
+void ScopeVisNG::setSampleRate(int sampleRate)
+{
+    if (sampleRate != m_sampleRate)
+    {
+        m_sampleRate = sampleRate;
+        if (m_glScope) m_glScope->setSampleRate(m_sampleRate);
+    }
 }
 
 void ScopeVisNG::configure(MessageQueue* msgQueue,

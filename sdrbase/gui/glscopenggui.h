@@ -58,6 +58,8 @@ private:
 
     void applySettings();
 
+private slots:
+    void on_scope_sampleRateChanged(int value);
 };
 
 

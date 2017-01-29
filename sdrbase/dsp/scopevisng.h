@@ -58,6 +58,7 @@ public:
     ScopeVisNG(GLScopeNG* glScope = 0);
     virtual ~ScopeVisNG();
 
+    void setSampleRate(int sampleRate);
     void configure(MessageQueue* msgQueue,
             uint32_t traceSize);
 
@@ -70,6 +71,8 @@ public:
 private:
     typedef DoubleBufferSimple<Sample> TraceBuffer;
 
+    // === messages ===
+    // ---------------------------------------------
     class MsgConfigureScopeVisNG : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -88,6 +91,7 @@ private:
         {}
     };
 
+    // ---------------------------------------------
     class MsgScopeVisNGAddTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -106,6 +110,7 @@ private:
         {}
     };
 
+    // ---------------------------------------------
     class MsgScopeVisNGRemoveTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -124,6 +129,8 @@ private:
         {}
     };
 
+    // === projectors ===
+    // ---------------------------------------------
     class Projector
     {
     public:
@@ -135,6 +142,7 @@ private:
         ProjectionType m_projectionType;
     };
 
+    // ---------------------------------------------
     class ProjectorReal : public Projector
     {
     public:
@@ -142,6 +150,7 @@ private:
         virtual Real run(const Sample& s) { return s.m_real / 32768.0f; }
     };
 
+    // ---------------------------------------------
     class ProjectorImag : public Projector
     {
     public:
@@ -149,6 +158,7 @@ private:
         virtual Real run(const Sample& s) { return s.m_imag / 32768.0f; }
     };
 
+    // ---------------------------------------------
     class ProjectorMagLin : public Projector
     {
     public:
@@ -160,6 +170,7 @@ private:
         }
     };
 
+    // ---------------------------------------------
     class ProjectorMagDB : public Projector
     {
     public:
@@ -173,6 +184,7 @@ private:
         static const Real mult;
     };
 
+    // ---------------------------------------------
     class ProjectorPhase : public Projector
     {
     public:
@@ -180,6 +192,7 @@ private:
         virtual Real run(const Sample& s) { return std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;  }
     };
 
+    // ---------------------------------------------
     class ProjectorDPhase : public Projector
     {
     public:
@@ -202,6 +215,7 @@ private:
     private:
         Real m_prevArg;
     };
+
 
     enum TriggerState
 	{
@@ -276,6 +290,7 @@ private:
     int m_zTraceIndex;                           //!< Index of the trace used for Z input (luminance or false colors)
     int m_traceCompleteCount;                    //!< Count of completed traces
     SampleVector::const_iterator m_triggerPoint; //!< Trigger start location in the samples vector
+    int m_sampleRate;
 
     void processPrevTrace(SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, std::vector<Trace>::iterator& trace);
 };

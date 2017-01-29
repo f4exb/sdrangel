@@ -290,6 +290,7 @@ void GLScopeNG::setSampleRate(int sampleRate)
     m_sampleRate = sampleRate;
     m_configChanged = true;
     update();
+    emit sampleRateChanged(m_sampleRate);
 }
 
 void GLScopeNG::setTimeBase(int timeBase)

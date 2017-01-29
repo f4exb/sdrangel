@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "glscopenggui.h"
+#include "glscopeng.h"
 #include "ui_glscopenggui.h"
 #include "util/simpleserializer.h"
 
@@ -40,12 +41,20 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     m_messageQueue = messageQueue;
     m_scopeVis = scopeVis;
     m_glScope = glScope;
+    connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
     applySettings();
 }
 
 void GLScopeNGGUI::setSampleRate(int sampleRate)
 {
     m_sampleRate = sampleRate;
+}
+
+void GLScopeNGGUI::on_scope_sampleRateChanged(int sampleRate)
+{
+    //m_sampleRate = m_glScope->getSampleRate();
+    m_sampleRate = sampleRate;
+    ui->sampleRateText->setText(tr("%1\nkS/s").arg(m_sampleRate / 1000.0f, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::resetToDefaults()

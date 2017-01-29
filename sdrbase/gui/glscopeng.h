@@ -54,6 +54,8 @@ public:
     void setTraces(const ScopeVisNG::DisplayTraces *traces) { m_traces = traces; m_configChanged = true; }
     void newTraces();
 
+    int getSampleRate() const { return m_sampleRate; }
+
     void setTriggerPre(Real triggerPre);
     void setTimeOfsProMill(int timeOfsProMill);
     void setSampleRate(int sampleRate);
@@ -61,6 +63,9 @@ public:
     void setHighlightedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
     void setTraceSize(int trceSize);
+
+signals:
+    void sampleRateChanged(int);
 
 private:
     DisplayMode m_displayMode;
