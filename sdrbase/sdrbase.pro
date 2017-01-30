@@ -60,7 +60,6 @@ SOURCES += mainwindow.cpp\
         dsp/interpolator.cpp\
         dsp/hbfiltertraits.cpp\
         dsp/lowpass.cpp\
-        dsp/movingaverage.cpp\
         dsp/nco.cpp\
         dsp/ncof.cpp\
         dsp/pidcontroller.cpp\
@@ -74,6 +73,7 @@ SOURCES += mainwindow.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/spectrumscopengcombovis.cpp\
         dsp/scopevis.cpp\
+        dsp/scopevisng.cpp\
         dsp/spectrumvis.cpp\
         dsp/threadedbasebandsamplesink.cpp\
         dsp/threadedbasebandsamplesource.cpp\
@@ -178,6 +178,7 @@ HEADERS  += mainwindow.h\
         dsp/spectrumscopecombovis.h\
         dsp/spectrumscopengcombovis.h\        
         dsp/scopevis.h\
+        dsp/scopevisng.h\
         dsp/spectrumvis.h\
         dsp/threadedbasebandsamplesink.h\
         dsp/threadedbasebandsamplesource.h\
