@@ -150,9 +150,13 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				qint16 sample;
 
-				m_AGC.feed(ci);
+				//m_AGC.feed(ci);
 
-                double magsqRaw = m_AGC.getMagSq();
+                //double magsqRaw = m_AGC.getMagSq();
+				long double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
+
+				Real demod = m_phaseDiscri.phaseDiscriminator3(ci, magsqRaw);
+
                 Real magsq = magsqRaw / (1<<30);
                 m_movingAverage.feed(magsq);
                 m_magsqSum += magsq;
@@ -163,8 +167,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
 
                 m_magsqCount++;
-
-				Real demod = m_phaseDiscri.phaseDiscriminator2(ci);
 
 				//m_m2Sample = m_m1Sample;
 				//m_m1Sample = ci;

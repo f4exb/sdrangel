@@ -70,10 +70,47 @@ public:
 		return (h1 - h2) * m_fmScaling;
 	}
 
+	/**
+	 * Second alternative
+	 */
+    Real phaseDiscriminator3(const Complex& sample, long double& magsq)
+    {
+        Real fltI = sample.real();
+        Real fltQ = sample.imag();
+        double fltNorm;
+        Real fltNormI;
+        Real fltNormQ;
+        Real fltVal;
+
+        magsq = fltI*fltI + fltQ*fltQ;
+        fltNorm = std::sqrt(magsq);
+
+        fltNormI= fltI/fltNorm;
+        fltNormQ= fltQ/fltNorm;
+
+        fltVal = m_fltPreviousI*(fltNormQ - m_fltPreviousQ2);
+        fltVal -= m_fltPreviousQ*(fltNormI - m_fltPreviousI2);
+        fltVal += 2.0f;
+        fltVal /= 2.0f; // normally it is /4
+
+        m_fltPreviousQ2 = m_fltPreviousQ;
+        m_fltPreviousI2 = m_fltPreviousI;
+
+        m_fltPreviousQ = fltNormQ;
+        m_fltPreviousI = fltNormI;
+
+        return fltVal * m_fmScaling;
+    }
+
 private:
 	Complex m_m1Sample;
 	Complex m_m2Sample;
 	Real m_fmScaling;
+	Real m_fltPreviousI;
+	Real m_fltPreviousQ;
+    Real m_fltPreviousI2;
+    Real m_fltPreviousQ2;
+
 };
 
 #endif /* INCLUDE_DSP_PHASEDISCRI_H_ */
