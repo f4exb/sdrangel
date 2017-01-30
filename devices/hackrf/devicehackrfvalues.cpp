@@ -16,7 +16,7 @@
 
 #include "devicehackrfvalues.h"
 
-unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200};
+unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4000, 4800, 5600, 6000, 6400, 8000, 9600, 12000, 12800, 16000, 18000, 19200, 20000};
 
 unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {
