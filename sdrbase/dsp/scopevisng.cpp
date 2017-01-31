@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include "scopevisng.h"
+#include "dsp/dspcommands.h"
 #include "gui/glscopeng.h"
 
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgConfigureScopeVisNG, Message)
@@ -246,13 +247,14 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 	    if (m_traceStart)
 	    {
-	        int count = begin - cbegin; // number of samples consumed since begin
+	        int count = end - begin; // number of samples in traceback buffer past the current point
 	        std::vector<Trace>::iterator itTrace = m_traces.begin();
 
 	        for (;itTrace != m_traces.end(); ++itTrace)
 	        {
 	            if (itTrace->m_traceData.m_inputIndex == feedIndex)
 	            {
+	                // TODO: store current point in traceback (current - count)
 	                SampleVector::const_iterator startPoint = m_tracebackBuffers[feedIndex].getCurrent() - count;
                     SampleVector::const_iterator prevPoint = m_tracebackBuffers[feedIndex].getCurrent() - count - m_preTriggerDelay - itTrace->m_traceData.m_traceDelay;
                     processPrevTrace(prevPoint, startPoint, itTrace);
@@ -300,7 +302,9 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	                    }
 	                    else
 	                    {
-	                        //m_glScope->newTraces((DisplayTraces&) m_traces);  // TODO: glScopeNG new traces
+	                        // TODO: glScopeNG new traces
+	                        // TODO: mark end point in traceback buffer: current - (end - begin)
+	                        //m_glScope->newTraces((DisplayTraces&) m_traces);
 	                        m_traceCompleteCount = 0;
 	                    }
 	                }
@@ -347,5 +351,19 @@ void ScopeVisNG::stop()
 bool ScopeVisNG::handleMessage(const Message& message)
 {
     qDebug() << "ScopeVisNG::handleMessage" << message.getIdentifier();
+
+    if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        setSampleRate(notif.getSampleRate());
+        qDebug() << "ScopeVisNG::handleMessage: DSPSignalNotification: m_sampleRate: " << m_sampleRate;
+        return true;
+    }
+    else if (MsgConfigureScopeVisNG::match(message))
+    {
+        MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
+
+    }
+
 }
 

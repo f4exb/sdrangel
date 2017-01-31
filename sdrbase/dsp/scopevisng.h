@@ -32,18 +32,18 @@ class GLScopeNG;
 class SDRANGEL_API ScopeVisNG : public BasebandSampleSink {
 
 public:
-	enum ProjectionType
-	{
-		ProjectionReal,    //!< Extract real part
-		ProjectionImag,    //!< Extract imaginary part
-		ProjectionMagLin,  //!< Calculate linear magnitude or modulus
-		ProjectionMagDB,   //!< Calculate logarithmic (dB) of squared magnitude
-		ProjectionPhase,   //!< Calculate phase
-		ProjectionDPhase   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
-	};
+    enum ProjectionType
+    {
+        ProjectionReal,    //!< Extract real part
+        ProjectionImag,    //!< Extract imaginary part
+        ProjectionMagLin,  //!< Calculate linear magnitude or modulus
+        ProjectionMagDB,   //!< Calculate logarithmic (dB) of squared magnitude
+        ProjectionPhase,   //!< Calculate phase
+        ProjectionDPhase   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
+    };
 
-	struct TraceData
-	{
+    struct TraceData
+    {
         ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
         float m_amp;                     //!< Amplification factor
@@ -57,16 +57,21 @@ public:
             m_ofs(0.0f),
             m_traceDelay(0)
         {}
-	};
+    };
 
-	struct DisplayTrace
-	{
-	    TraceData m_traceData;           //!< Trace data
-	    float *m_trace;                  //!< Displayable trace (interleaved x,y of GLfloat)
-	};
+    struct DisplayTrace
+    {
+        TraceData m_traceData;           //!< Trace data
+        float *m_trace;                  //!< Displayable trace (interleaved x,y of GLfloat)
 
-	struct TriggerData
-	{
+        DisplayTrace(const TraceData& traceData) :
+            m_traceData(traceData),
+            m_trace(0)
+        {}
+    };
+
+    struct TriggerData
+    {
         ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
         Real m_triggerLevel;             //!< Level in real units
@@ -84,7 +89,7 @@ public:
             m_triggerDelay(0),
             m_triggerCounts(0)
         {}
-	};
+    };
 
     typedef std::vector<DisplayTrace> DisplayTraces;
 
@@ -123,6 +128,8 @@ private:
         {
             return new MsgConfigureScopeVisNG(traceSize);
         }
+
+        uint32_t getTraceSize() const { return m_traceSize; }
 
     private:
         uint32_t m_traceSize;
@@ -187,7 +194,7 @@ private:
         uint32_t m_triggerIndex;
 
         MsgScopeVisNGRemoveTrigger(uint32_t triggerIndex) :
-        	m_triggerIndex(triggerIndex)
+            m_triggerIndex(triggerIndex)
         {}
     };
 
@@ -258,7 +265,7 @@ private:
         Projector(ProjectionType projectionType) : m_projectionType(projectionType) {}
 
         ProjectionType getProjectionType() const { return m_projectionType; }
-        virtual Real run(const Sample& s) = 0;
+        virtual Real run(const Sample& s) {}
     private:
         ProjectionType m_projectionType;
     };
@@ -339,44 +346,97 @@ private:
 
 
     enum TriggerState
-	{
+    {
         TriggerFreeRun,     //!< Trigger is disabled
-    	TriggerUntriggered, //!< Trigger is not kicked off yet (or trigger list is empty)
-		TriggerTriggered,   //!< Trigger has been kicked off
-		TriggerWait,        //!< In one shot mode trigger waits for manual re-enabling
-		TriggerDelay,       //!< Trigger conditions have been kicked off but it is waiting for delay before final kick off
-		TriggerNewConfig,   //!< Special condition when a new configuration has been received
-	};
+        TriggerUntriggered, //!< Trigger is not kicked off yet (or trigger list is empty)
+        TriggerTriggered,   //!< Trigger has been kicked off
+        TriggerWait,        //!< In one shot mode trigger waits for manual re-enabling
+        TriggerDelay,       //!< Trigger conditions have been kicked off but it is waiting for delay before final kick off
+        TriggerNewConfig,   //!< Special condition when a new configuration has been received
+    };
 
     struct TriggerCondition
     {
     public:
-    	Projector *m_projector;       //!< Projector transform from complex trace to reaL trace usable for triggering
-    	TriggerData m_triggerData;    //!< Trigger data
+        Projector *m_projector;       //!< Projector transform from complex trace to reaL trace usable for triggering
+        TriggerData m_triggerData;    //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
         uint32_t m_triggerCounter;    //!< Counter of trigger occurences
 
-        TriggerCondition(Projector *projector) :
-        	m_projector(projector),
-			m_prevCondition(false),
+        TriggerCondition(const TriggerData& triggerData) :
+            m_triggerData(triggerData),
+            m_prevCondition(false),
             m_triggerDelayCount(0),
             m_triggerCounter(0)
-        {}
+        {
+            m_projector = new Projector(m_triggerData.m_projectionType);
+        }
+
+        ~TriggerCondition() { delete m_projector; }
+
+        void setData(const TriggerData& triggerData)
+        {
+            m_triggerData = triggerData;
+
+            if (m_projector->getProjectionType() != m_triggerData.m_projectionType)
+            {
+                delete m_projector;
+                m_projector = new Projector(m_triggerData.m_projectionType);
+            }
+
+            m_prevCondition = false;
+            m_triggerDelayCount = 0;
+            m_triggerCounter = 0;
+        }
     };
 
     struct Trace : public DisplayTrace
     {
-    	Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
-    	int m_traceCount;       //!< Count of samples processed
+        Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
+        int m_traceSize;        //!< Size of the trace in buffer
+        int m_maxTraceSize;
+        int m_traceCount;       //!< Count of samples processed
 
-    	Trace(Projector *projector, Real *displayTraceBuffer) :
-    		m_projector(projector),
-			m_traceCount(0)
-    	{
-    	    m_traceData.m_projectionType = m_projector->getProjectionType();
-    	    m_trace = displayTraceBuffer;
-    	}
+        Trace(const TraceData& traceData, int traceSize) :
+            DisplayTrace(traceData),
+            m_traceSize(traceSize),
+            m_maxTraceSize(traceSize),
+            m_traceCount(0)
+        {
+            m_projector = new Projector(m_traceData.m_projectionType);
+            m_trace = new float[2*traceSize];
+        }
+
+        ~Trace()
+        {
+            delete m_projector;
+            delete[] m_trace;
+        }
+
+        void setData(const TraceData& traceData)
+        {
+            m_traceData = traceData;
+
+            if (m_projector->getProjectionType() != m_traceData.m_projectionType)
+            {
+                delete m_projector;
+                m_projector = new Projector(m_traceData.m_projectionType);
+            }
+        }
+
+        void resize(int traceSize)
+        {
+            m_traceSize = traceSize;
+            m_traceCount = 0;
+
+            if (m_traceSize > m_maxTraceSize)
+            {
+                delete[] m_trace;
+                m_trace = new float[2*m_traceSize];
+                m_maxTraceSize = m_traceSize;
+            }
+        }
     };
 
     GLScopeNG* m_glScope;
