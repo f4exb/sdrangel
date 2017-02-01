@@ -78,7 +78,7 @@ public:
         bool m_triggerPositiveEdge;      //!< Trigger on the positive edge (else negative)
         bool m_triggerBothEdges;         //!< Trigger on both edges (else only one)
         uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples
-        uint32_t m_triggerCounts;        //!< Number of trigger conditions before the final decisive trigger
+        uint32_t m_triggerRepeat;        //!< Number of trigger conditions before the final decisive trigger
 
         TriggerData() :
             m_projectionType(ProjectionReal),
@@ -87,7 +87,7 @@ public:
             m_triggerPositiveEdge(true),
             m_triggerBothEdges(false),
             m_triggerDelay(0),
-            m_triggerCounts(0)
+			m_triggerRepeat(0)
         {}
     };
 
@@ -115,8 +115,6 @@ public:
     SampleVector::const_iterator getTriggerPoint() const { return m_triggerPoint; }
 
 private:
-    typedef DoubleBufferSimple<Sample> TraceBuffer;
-
     // === messages ===
     // ---------------------------------------------
     class MsgConfigureScopeVisNG : public Message {
@@ -345,6 +343,9 @@ private:
     };
 
 
+    /**
+     * Trigger stuff
+     */
     enum TriggerState
     {
         TriggerFreeRun,     //!< Trigger is disabled
@@ -391,6 +392,95 @@ private:
         }
     };
 
+    /**
+     * Complex trace stuff
+     */
+    typedef DoubleBufferSimple<Sample> TraceBuffer;
+
+    struct TraceBackBuffer
+    {
+    	TraceBuffer m_traceBuffer;
+    	SampleVector::iterator m_endPoint;
+
+    	TraceBackBuffer()
+    	{
+    		m_startPoint = m_traceBuffer.getCurrent();
+    		m_endPoint = m_traceBuffer.getCurrent();
+    	}
+
+    	void resize(uint32_t size)
+    	{
+    		m_traceBuffer.resize(size);
+    	}
+
+    	void write(const SampleVector::const_iterator begin, const SampleVector::const_iterator end)
+    	{
+    		m_traceBuffer.write(begin, end);
+    	}
+
+    	unsigned int absoluteFill() const {
+    		return m_traceBuffer.absoluteFill();
+    	}
+
+    	SampleVector::iterator current() { return m_traceBuffer.getCurrent(); }
+    };
+
+    struct TraceBackDiscreteMemory
+    {
+    	std::vector<TraceBackBuffer> m_traceBackBuffers;
+    	uint32_t m_memSize;
+    	uint32_t m_currentMemIndex;
+
+    	/**
+    	 * Give memory size in number of traces
+    	 */
+    	TraceBackDiscreteMemory(uint32_t size) : m_memSize(size), m_currentMemIndex(0)
+    	{
+    		m_traceBackBuffers.resize(m_memSize);
+    	}
+
+    	/**
+    	 * Resize all trace buffers in memory
+    	 */
+    	void resize(uint32_t size)
+    	{
+    		for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffers.begin(); it != m_traceBackBuffers.end(); ++it)
+    		{
+    			it->resize(size);
+    		}
+    	}
+
+    	/**
+    	 * Move index forward by one position and return reference to the trace at this position
+    	 */
+    	TraceBackBuffer &store()
+    	{
+    		m_currentMemIndex = m_currentMemIndex < m_memSize ? m_currentMemIndex+1 : 0;
+    		m_traceBackBuffers[m_currentMemIndex].reset();
+    		return m_traceBackBuffers[m_currentMemIndex]; // new trace
+    	}
+
+    	/**
+    	 * Recalls trace at shift positions back. Therefore 0 is current. Wraps around memory size.
+    	 */
+    	TraceBackBuffer& recall(uint32_t shift)
+    	{
+    		int index = (m_currentMemIndex + (m_memSize - (shift % m_memSize))) % m_memSize;
+    		return m_traceBackBuffers[index];
+    	}
+
+    	/**
+    	 * Return trace at current memory position
+    	 */
+    	TraceBackBuffer& current()
+    	{
+    		return m_traceBackBuffers[m_currentMemIndex];
+    	}
+    };
+
+    /**
+     * Displayable trace stuff
+     */
     struct Trace : public DisplayTrace
     {
         Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
@@ -440,23 +530,24 @@ private:
     };
 
     GLScopeNG* m_glScope;
-    std::vector<TraceBuffer> m_tracebackBuffers; //!< One complex (Sample type) trace buffer per input source or feed
-    DoubleBufferSimple<Sample> m_traceback;      //!< FIFO to handle delayed processes
-    int m_preTriggerDelay;                       //!< Pre-trigger delay in number of samples
+    int m_preTriggerDelay;                         //!< Pre-trigger delay in number of samples
     std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
-    int m_currentTriggerIndex;                   //!< Index of current index in the chain
-    TriggerState m_triggerState;                 //!< Current trigger state
-    std::vector<Trace> m_traces;                 //!< One trace control object per display trace allocated to X, Y[n] or Z
-    int m_traceSize;                             //!< Size of traces in number of samples
-    int m_timeOfsProMill;                        //!< Start trace shift in 1/1000 trace size
-    bool m_traceStart;                           //!< Trace is at start point
-    int m_traceFill;                             //!< Count of samples accumulated into trace
-    int m_zTraceIndex;                           //!< Index of the trace used for Z input (luminance or false colors)
-    int m_traceCompleteCount;                    //!< Count of completed traces
-    SampleVector::const_iterator m_triggerPoint; //!< Trigger start location in the samples vector
+    int m_currentTriggerIndex;                     //!< Index of current index in the chain
+    TriggerState m_triggerState;                   //!< Current trigger state
+    std::vector<Trace> m_traces;                   //!< One trace control object per display trace allocated to X, Y[n] or Z
+    int m_traceSize;                               //!< Size of traces in number of samples
+    int m_memTraceSize;                            //!< Trace size in memory in number of samples up to trace size
+    int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size
+    bool m_traceStart;                             //!< Trace is at start point
+    int m_traceFill;                               //!< Count of samples accumulated into trace
+    int m_zTraceIndex;                             //!< Index of the trace used for Z input (luminance or false colors)
+    int m_traceCompleteCount;                      //!< Count of completed traces
+    SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
     int m_sampleRate;
+    TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
 
-    void processPrevTrace(SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, std::vector<Trace>::iterator& trace);
+    bool nextTrigger();
+    void processPrevTraces(int beginPoint, int endPoint, TraceBackBuffer& traceBuffer);
 };
 
 

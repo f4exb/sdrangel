@@ -67,6 +67,8 @@ public:
 	}
 
 	typename std::vector<T>::iterator getCurrent() const { return m_current + m_size; }
+	unsigned int absoluteFill() const { return m_current - m_data.begin(); }
+	void reset() { m_current = m_data.begin(); }
 
 private:
 	int m_size;

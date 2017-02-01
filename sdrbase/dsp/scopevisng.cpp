@@ -38,16 +38,17 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
 	m_currentTriggerIndex(0),
 	m_triggerState(TriggerUntriggered),
 	m_traceSize(m_traceChunkSize),
+	m_memTraceSize(0),
 	m_traceStart(true),
 	m_traceFill(0),
 	m_zTraceIndex(-1),
 	m_traceCompleteCount(0),
 	m_timeOfsProMill(0),
-	m_sampleRate(0)
+	m_sampleRate(0),
+	m_traceDiscreteMemory(10)
 {
     setObjectName("ScopeVisNG");
-    m_tracebackBuffers.resize(1);
-    m_tracebackBuffers[0].resize(4*m_traceChunkSize);
+    m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
 }
 
 ScopeVisNG::~ScopeVisNG()
@@ -114,8 +115,6 @@ void ScopeVisNG::removeTrigger(uint32_t triggerIndex)
 
 void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-	uint32_t feedIndex = 0; // TODO: redefine feed interface so it can be passed a feed index
-
     if (m_triggerState == TriggerFreeRun) {
         m_triggerPoint = cbegin;
     }
@@ -142,19 +141,51 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 		return;
 	}
 
-	m_tracebackBuffers[feedIndex].write(cbegin, end);
 	SampleVector::const_iterator begin(cbegin);
-	TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex];
+
+	// memory storage
+
+	if ((m_triggerState == TriggerFreeRun) && (m_triggerConditions.size() > 0))
+	{
+		m_traceDiscreteMemory.current().write(cbegin, end);
+
+		if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
+		{
+			return; // not enough samples in memory
+		}
+	}
+	else
+	{
+		// TODO: continuous memory
+	}
 
 	// trigger process
-	if ((m_triggerConditions.size() > 0) && (feedIndex == triggerCondition.m_triggerData.m_inputIndex))
+
+	if ((m_triggerConditions.size() > 0) && ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)))
 	{
+		TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+
         while (begin < end)
         {
-            if (m_triggerState == TriggerUntriggered)
-            {
-				bool condition = triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
-				bool trigger;
+        	if (m_triggerState == TriggerDelay)
+        	{
+                if (triggerCondition.m_triggerDelayCount > 0)
+                {
+                    triggerCondition.m_triggerDelayCount--; // pass
+                }
+                else // delay expired => fire this trigger
+                {
+                	if (!nextTrigger()) // finished
+                	{
+                		m_traceStart = true; // start trace processing
+                		break;
+                	}
+                }
+        	}
+        	else // look for trigger
+        	{
+        		bool condition = triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
+        		bool trigger;
 
 				if (triggerCondition.m_triggerData.m_triggerBothEdges) {
 					trigger = triggerCondition.m_prevCondition ^ condition;
@@ -162,103 +193,68 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 					trigger = condition ^ !triggerCondition.m_triggerData.m_triggerPositiveEdge;
 				}
 
-				if (trigger)
+				if (trigger) // trigger condition
 				{
-					if (triggerCondition.m_triggerData.m_triggerDelay > 0)
+					if (triggerCondition.m_triggerData.m_triggerDelay > 0) // there is a delay => initialize the delay
 					{
 						triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerData.m_triggerDelay;
 						m_triggerState == TriggerDelay;
 					}
 					else
 					{
-					    if (triggerCondition.m_triggerCounter > 0)
-					    {
-					        triggerCondition.m_triggerCounter--;
-					        m_triggerState = TriggerUntriggered;
-					    }
-					    else
-					    {
-					        // next trigger
-	                        m_currentTriggerIndex++;
-
-	                        if (m_currentTriggerIndex == m_triggerConditions.size())
-	                        {
-	                            m_currentTriggerIndex = 0;
-	                            m_triggerState = TriggerTriggered;
-	                            m_triggerPoint = begin;
-	                            triggerCondition.m_triggerCounter = triggerCondition.m_triggerData.m_triggerCounts;
-	                            m_traceStart = true;
-	                            break;
-	                        }
-	                        else
-	                        {
-	                            m_triggerState = TriggerUntriggered;
-	                        }
-					    }
+	                	if (!nextTrigger()) // finished
+	                	{
+	                		m_traceStart = true; // start trace processing
+	                		break;
+	                	}
 					}
 				}
-			}
-            else if (m_triggerState == TriggerDelay)
-            {
-                if (triggerCondition.m_triggerDelayCount > 0)
-                {
-                    triggerCondition.m_triggerDelayCount--;
-                }
-                else
-                {
-                    triggerCondition.m_triggerDelayCount = 0;
-
-                    // next trigger
-                    m_currentTriggerIndex++;
-
-                    if (m_currentTriggerIndex == m_triggerConditions.size())
-                    {
-                        m_currentTriggerIndex = 0;
-                        m_triggerState = TriggerTriggered;
-                        m_triggerPoint = begin;
-                        triggerCondition.m_triggerCounter = triggerCondition.m_triggerData.m_triggerCounts;
-                        m_traceStart = true;
-                        break;
-                    }
-                    else
-                    {
-                        // initialize a new trace
-                        m_triggerState = TriggerUntriggered;
-                        m_traceCompleteCount = 0;
-                        m_triggerState = TriggerUntriggered;
-
-                        feed(begin, end, positiveOnly); // process the rest of samples
-                    }
-                }
-            }
-            else
-            {
-                break;
-            }
+        	}
 
             ++begin;
 		} // begin < end
 	}
 
 	// trace process
-	if ((m_triggerConditions.size() == 0) || (m_triggerState == TriggerTriggered))
+	if ((m_triggerState == TriggerFreeRun) || (m_triggerConditions.size() == 0) || (m_triggerState == TriggerTriggered))
 	{
 	    // trace back
 
 	    if (m_traceStart)
 	    {
 	        int count = end - begin; // number of samples in traceback buffer past the current point
-	        std::vector<Trace>::iterator itTrace = m_traces.begin();
+        	int maxTraceDelay = 0;
 
-	        for (;itTrace != m_traces.end(); ++itTrace)
+	        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace)
 	        {
-	            if (itTrace->m_traceData.m_inputIndex == feedIndex)
-	            {
-	                // TODO: store current point in traceback (current - count)
-	                SampleVector::const_iterator startPoint = m_tracebackBuffers[feedIndex].getCurrent() - count;
-                    SampleVector::const_iterator prevPoint = m_tracebackBuffers[feedIndex].getCurrent() - count - m_preTriggerDelay - itTrace->m_traceData.m_traceDelay;
-                    processPrevTrace(prevPoint, startPoint, itTrace);
-	            }
+	        	if (itTrace->m_traceData.m_traceDelay > maxTraceDelay)
+	        	{
+	        		maxTraceDelay = itTrace->m_traceData.m_traceDelay;
+	        	}
+	        }
+
+	        if ((m_triggerState != TriggerFreeRun) && (m_triggerConditions.size() > 0)) // trigger mode
+	        {
+				processPrevTraces(count + m_preTriggerDelay + maxTraceDelay, count, m_traceDiscreteMemory.current());
+	        }
+	        else
+	        {
+	        	// TODO: continuous memory mode
+	        }
+
+
+
+
+	        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace)
+	        {
+				if ((m_triggerState != TriggerFreeRun) && (m_triggerConditions.size() > 0)) // trigger mode
+				{
+					SampleVector::const_iterator prevPoint = startPoint - m_preTriggerDelay - itTrace->m_traceData.m_traceDelay;
+				}
+				else // free run mode
+				{
+					// TODO:
+				}
 	        }
 
 	        m_traceStart = false;
@@ -316,7 +312,39 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	}
 }
 
-void ScopeVisNG::processPrevTrace(SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, std::vector<Trace>::iterator& trace)
+bool ScopeVisNG::nextTrigger()
+{
+	TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+
+	if (triggerCondition.m_triggerData.m_triggerRepeat > 0)
+	{
+		if (triggerCondition.m_triggerCounter < triggerCondition.m_triggerData.m_triggerRepeat)
+		{
+			triggerCondition.m_triggerCounter++;
+			m_triggerState = TriggerUntriggered; // repeat operations for next occurence
+			return true;
+		}
+		else
+		{
+			triggerCondition.m_triggerCounter = 0; // reset for next time
+		}
+	}
+
+	if (m_currentTriggerIndex < m_triggerConditions.size())
+	{
+		m_currentTriggerIndex++;
+		m_triggerState = TriggerUntriggered; // repeat operations for next trigger
+		return true; // not final keep going
+	}
+
+	// now this is really finished
+	m_triggerState == TriggerTriggered;
+	m_currentTriggerIndex = 0;
+	return false; // final
+}
+
+// TODO: should handle previous and live traces the same way from a stored buffer
+void ScopeVisNG::processPrevTraces(int beginPoint, int endPoint, TraceBackBuffer& traceBuffer)
 {
     int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     float posLimit = 1.0 / trace->m_traceData.m_amp;
