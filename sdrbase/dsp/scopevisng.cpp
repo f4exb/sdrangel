@@ -192,7 +192,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 					if (triggerCondition.m_triggerData.m_triggerDelay > 0) // there is a delay => initialize the delay
 					{
 						triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerData.m_triggerDelay;
-						m_triggerState == TriggerDelay;
+						m_triggerState = TriggerDelay;
 					}
 					else
 					{
@@ -297,7 +297,6 @@ bool ScopeVisNG::nextTrigger()
 	return false; // final
 }
 
-// TODO: should handle previous and live traces the same way from a stored buffer
 int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart)
 {
     SampleVector::iterator begin = traceBuffer.current() - beginPointDelta;

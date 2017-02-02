@@ -555,7 +555,18 @@ private:
     int m_sampleRate;
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
 
-    bool nextTrigger();
+    /**
+     * Moves on to the next trigger if any or increments trigger count if in repeat mode
+     * - If not final it returns true
+     * - If final i.e. signal is actually triggerd it returns false
+     */
+    bool nextTrigger(); //!< Returns true if not final
+
+    /**
+     * Process traces from complex trace memory buffer.
+     * - if finished it returns the number of unprocessed samples left in the buffer
+     * - if not finished it returns -1
+     */
     int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart = false);
 };
 
