@@ -404,13 +404,17 @@ private:
 
     	TraceBackBuffer()
     	{
-    		m_startPoint = m_traceBuffer.getCurrent();
     		m_endPoint = m_traceBuffer.getCurrent();
     	}
 
     	void resize(uint32_t size)
     	{
     		m_traceBuffer.resize(size);
+    	}
+
+    	void reset()
+    	{
+    	    m_traceBuffer.reset();
     	}
 
     	void write(const SampleVector::const_iterator begin, const SampleVector::const_iterator end)
@@ -527,6 +531,11 @@ private:
                 m_maxTraceSize = m_traceSize;
             }
         }
+
+        void reset()
+        {
+            m_traceCount = 0;
+        }
     };
 
     GLScopeNG* m_glScope;
@@ -547,7 +556,7 @@ private:
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
 
     bool nextTrigger();
-    void processPrevTraces(int beginPoint, int endPoint, TraceBackBuffer& traceBuffer);
+    int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart = false);
 };
 
 
