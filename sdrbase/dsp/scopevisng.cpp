@@ -381,8 +381,77 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgConfigureScopeVisNG::match(message))
     {
         MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
+        m_traceSize = conf.getTraceSize();
+        std::vector<Trace>::iterator it = m_traces.begin();
 
+        for (; it != m_traces.end(); ++it) {
+            it->resize(m_traceSize);
+        }
+
+        m_traceDiscreteMemory.resize(m_traceSize);
+
+        qDebug() << "ScopeVisNG::handleMessage: MsgConfigureScopeVisNG: m_traceSize: " << m_traceSize;
+        return true;
     }
+    else if (MsgScopeVisNGAddTrigger::match(message))
+    {
+        MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
+        m_triggerConditions.push_back(TriggerCondition(conf.getTriggerData()));
+        return true;
+    }
+    else if (MsgScopeVisNGChangeTrigger::match(message))
+    {
+        MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
+        int triggerIndex = conf.getTriggerIndex();
 
+        if (triggerIndex < m_triggerConditions.size()) {
+            m_triggerConditions[triggerIndex].setData(conf.getTriggerData());
+        }
+
+        return true;
+    }
+    else if (MsgScopeVisNGRemoveTrigger::match(message))
+    {
+        MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
+        int triggerIndex = conf.getTriggerIndex();
+
+        if (triggerIndex < m_triggerConditions.size()) {
+            m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
+        }
+
+        return true;
+    }
+    else if (MsgScopeVisNGAddTrace::match(message))
+    {
+        MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
+        m_traces.push_back(Trace(conf.getTraceData(), m_traceSize));
+        return true;
+    }
+    else if (MsgScopeVisNGChangeTrace::match(message))
+    {
+        MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
+        int traceIndex = conf.getTraceIndex();
+
+        if (traceIndex < m_traces.size()) {
+            m_traces[traceIndex].setData(conf.getTraceData());
+        }
+
+        return true;
+    }
+    else if (MsgScopeVisNGRemoveTrace::match(message))
+    {
+        MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
+        int traceIndex = conf.getTraceIndex();
+
+        if (traceIndex < m_traces.size()) {
+            m_traces.erase(m_traces.begin() + traceIndex);
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 

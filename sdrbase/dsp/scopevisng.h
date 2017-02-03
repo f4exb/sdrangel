@@ -148,6 +148,8 @@ private:
             return new MsgScopeVisNGAddTrigger(triggerData);
         }
 
+        const TriggerData& getTriggerData() const { return m_triggerData; }
+
     private:
         TriggerData m_triggerData;
 
@@ -166,6 +168,9 @@ private:
         {
             return new MsgScopeVisNGChangeTrigger(triggerData, triggerIndex);
         }
+
+        const TriggerData& getTriggerData() const { return m_triggerData; }
+        uint32_t getTriggerIndex() const { return m_triggerIndex; }
 
     private:
         TriggerData m_triggerData;
@@ -188,6 +193,8 @@ private:
             return new MsgScopeVisNGRemoveTrigger(triggerIndex);
         }
 
+        uint32_t getTriggerIndex() const { return m_triggerIndex; }
+
     private:
         uint32_t m_triggerIndex;
 
@@ -207,6 +214,8 @@ private:
             return new MsgScopeVisNGAddTrace(traceData);
         }
 
+        const TraceData& getTraceData() const { return m_traceData; }
+
     private:
         TraceData m_traceData;
 
@@ -225,6 +234,9 @@ private:
         {
             return new MsgScopeVisNGChangeTrace(traceData, traceIndex);
         }
+
+        const TraceData& getTraceData() const { return m_traceData; }
+        uint32_t getTraceIndex() const { return m_traceIndex; }
 
     private:
         TraceData m_traceData;
@@ -246,6 +258,8 @@ private:
         {
             return new MsgScopeVisNGRemoveTrace(traceIndex);
         }
+
+        uint32_t getTraceIndex() const { return m_traceIndex; }
 
     private:
         uint32_t m_traceIndex;
@@ -499,7 +513,7 @@ private:
             m_traceCount(0)
         {
             m_projector = new Projector(m_traceData.m_projectionType);
-            m_trace = new float[2*traceSize];
+            m_trace = new float[2*m_traceSize];
         }
 
         ~Trace()

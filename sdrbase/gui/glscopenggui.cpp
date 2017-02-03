@@ -87,6 +87,86 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
     }
 }
 
+void GLScopeNGGUI::on_onlyX_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->onlyY->setChecked(false);
+        ui->horizontalXY->setChecked(false);
+        ui->verticalXY->setChecked(false);
+        ui->polar->setChecked(false);
+        m_glScope->setDisplayMode(GLScopeNG::DisplayX);
+    }
+}
+
+void GLScopeNGGUI::on_onlyY_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->onlyX->setChecked(false);
+        ui->horizontalXY->setChecked(false);
+        ui->verticalXY->setChecked(false);
+        ui->polar->setChecked(false);
+        m_glScope->setDisplayMode(GLScopeNG::DisplayY);
+    }
+}
+
+void GLScopeNGGUI::on_horizontalXY_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->onlyX->setChecked(false);
+        ui->onlyY->setChecked(false);
+        ui->verticalXY->setChecked(false);
+        ui->polar->setChecked(false);
+        m_glScope->setDisplayMode(GLScopeNG::DisplayXYH);
+    }
+}
+
+void GLScopeNGGUI::on_verticalXY_toggled(bool checked)
+{
+    ui->onlyX->setChecked(false);
+    ui->onlyY->setChecked(false);
+    ui->horizontalXY->setChecked(false);
+    ui->polar->setChecked(false);
+    m_glScope->setDisplayMode(GLScopeNG::DisplayXYV);
+}
+
+void GLScopeNGGUI::on_polar_toggled(bool checked)
+{
+    ui->onlyX->setChecked(false);
+    ui->onlyY->setChecked(false);
+    ui->horizontalXY->setChecked(false);
+    ui->verticalXY->setChecked(false);
+    m_glScope->setDisplayMode(GLScopeNG::DisplayPol);
+}
+
+void GLScopeNGGUI::on_traceIntensity_valueChanged(int value)
+{
+
+}
+
+void GLScopeNGGUI::on_gridIntensity_valueChanged(int value)
+{
+
+}
+
+void GLScopeNGGUI::on_time_valueChanged(int value)
+{
+
+}
+
+void GLScopeNGGUI::on_timeOfs_valueChanged(int value)
+{
+
+}
+
+void GLScopeNGGUI::on_traceLen_valueChanged(int value)
+{
+
+}
+
+
 void GLScopeNGGUI::applySettings()
 {
 }

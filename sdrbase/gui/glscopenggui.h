@@ -60,6 +60,16 @@ private:
 
 private slots:
     void on_scope_sampleRateChanged(int value);
+    void on_onlyX_toggled(bool checked);
+    void on_onlyY_toggled(bool checked);
+    void on_horizontalXY_toggled(bool checked);
+    void on_verticalXY_toggled(bool checked);
+    void on_polar_toggled(bool checked);
+    void on_traceIntensity_valueChanged(int value);
+    void on_gridIntensity_valueChanged(int value);
+    void on_time_valueChanged(int value);
+    void on_timeOfs_valueChanged(int value);
+    void on_traceLen_valueChanged(int value);
 };
 
 
