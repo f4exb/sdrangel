@@ -74,17 +74,19 @@ void SDRdaemonFECUDPHandler::start()
 		m_dataSocket = new QUdpSocket(this);
 	}
 
-	if (!m_dataConnected)
+    if (!m_dataConnected)
 	{
-		if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
+
+        if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
 			qDebug("SDRdaemonFECUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
-			connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
 			m_dataConnected = true;
 		}
 		else
 		{
 			qWarning("SDRdaemonFECUDPHandler::start: cannot bind data port %d", m_dataPort);
+	        disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
 			m_dataConnected = false;
 		}
 	}
@@ -99,9 +101,10 @@ void SDRdaemonFECUDPHandler::stop()
 {
 	qDebug("SDRdaemonFECUDPHandler::stop");
 
-	if (m_dataConnected) {
-		disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+    if (m_dataConnected)
+    {
 		m_dataConnected = false;
+	    disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
 	}
 
 	if (m_dataSocket)
