@@ -539,7 +539,7 @@ void DSDDemodGUI::formatStatusText()
             snprintf(m_formatStatusText, 82, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
     	}
 
-        sprintf(&m_formatStatusText[2], "%s %s %d:%d %c%c",
+        snprintf(&m_formatStatusText[2], 80, "%s %s %d:%d %c%c",
                 DSDcc::DSDYSF::ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
                 DSDcc::DSDYSF::ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
 				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
@@ -560,13 +560,13 @@ void DSDDemodGUI::formatStatusText()
 
         if ( m_dsdDemod->getDecoder().getYSFDecoder().radioIdMode())
         {
-            sprintf(dest, "%-5s:%-5s",
+            snprintf(dest, 10, "%-5s:%-5s",
                     m_dsdDemod->getDecoder().getYSFDecoder().getDestId(),
                     m_dsdDemod->getDecoder().getYSFDecoder().getSrcId());
         }
         else
         {
-            sprintf(dest, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
+            snprintf(dest, 10, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
         }
 
         snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
