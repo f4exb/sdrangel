@@ -67,6 +67,9 @@ private:
     void setTimeScaleDisplay();
     void setTraceLenDisplay();
     void setTimeOfsDisplay();
+    void setAmpScaleDisplay();
+
+    void changeCurrentTrace();
 
     void fillTraceData(ScopeVisNG::TraceData& traceData);
     void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
@@ -85,6 +88,8 @@ private slots:
     void on_time_valueChanged(int value);
     void on_timeOfs_valueChanged(int value);
     void on_traceLen_valueChanged(int value);
+    void on_traceMode_currentIndexChanged(int index);
+    void on_amp_valueChanged(int value);
 };
 
 

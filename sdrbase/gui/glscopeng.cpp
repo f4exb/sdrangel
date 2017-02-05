@@ -67,6 +67,7 @@ void GLScopeNG::addTrace(ScopeVisNG::DisplayTrace *trace)
 {
     m_traces.push_back(trace);
     m_configChanged = true;
+    update();
 }
 
 void GLScopeNG::removeTrace(int index)
@@ -76,6 +77,7 @@ void GLScopeNG::removeTrace(int index)
     }
 
     m_configChanged = true;
+    update();
 }
 
 void GLScopeNG::setDisplayGridIntensity(int intensity)
@@ -369,6 +371,12 @@ void GLScopeNG::setDisplayMode(DisplayMode displayMode)
 void GLScopeNG::setTraceSize(int traceSize)
 {
     m_traceSize = traceSize;
+    m_configChanged = true;
+    update();
+}
+
+void GLScopeNG::updateDisplay()
+{
     m_configChanged = true;
     update();
 }

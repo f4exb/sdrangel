@@ -65,6 +65,7 @@ public:
     void setHighlightedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
     void setTraceSize(int trceSize);
+    void updateDisplay();
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
 

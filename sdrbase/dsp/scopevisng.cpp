@@ -78,6 +78,7 @@ void ScopeVisNG::addTrace(const TraceData& traceData)
 
 void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
 {
+    qDebug("ScopeVisNG::changeTrace: trace #%d", traceIndex);
     Message* cmd = MsgScopeVisNGChangeTrace::create(traceData, traceIndex);
     getInputMessageQueue()->push(cmd);
 }
@@ -471,6 +472,8 @@ bool ScopeVisNG::handleMessage(const Message& message)
         if (traceIndex < m_traces.size()) {
             m_traces[traceIndex].setData(conf.getTraceData());
         }
+
+        m_glScope->updateDisplay();
 
         return true;
     }

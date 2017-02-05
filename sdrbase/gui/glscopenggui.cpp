@@ -33,14 +33,9 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     m_timeBase(1),
     m_timeOffset(0)
 {
-    ui->setupUi(this);
+    qDebug("GLScopeNGGUI::GLScopeNGGUI");
     setEnabled(false);
-
-    ui->traceMode->clear();
-    fillProjectionCombo(ui->traceMode);
-
-    ui->trigMode->clear();
-    fillProjectionCombo(ui->trigMode);
+    ui->setupUi(this);
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -50,6 +45,8 @@ GLScopeNGGUI::~GLScopeNGGUI()
 
 void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope)
 {
+    qDebug("GLScopeNGGUI::setBuddies");
+
     m_messageQueue = messageQueue;
     m_scopeVis = scopeVis;
     m_glScope = glScope;
@@ -81,12 +78,19 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
 
+    ui->traceMode->clear();
+    fillProjectionCombo(ui->traceMode);
+
+    ui->trigMode->clear();
+    fillProjectionCombo(ui->trigMode);
+
     m_scopeVis->configure(2*m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
     m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
 
     setTraceLenDisplay();
     setTimeScaleDisplay();
     setTimeOfsDisplay();
+    setAmpScaleDisplay();
 }
 
 void GLScopeNGGUI::setSampleRate(int sampleRate)
@@ -237,6 +241,18 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     setTimeOfsDisplay();
 }
 
+void GLScopeNGGUI::on_traceMode_currentIndexChanged(int index)
+{
+    setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
+void GLScopeNGGUI::on_amp_valueChanged(int value)
+{
+    setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
 void GLScopeNGGUI::setTimeScaleDisplay()
 {
     m_sampleRate = m_glScope->getSampleRate();
@@ -301,6 +317,45 @@ void GLScopeNGGUI::setTimeOfsDisplay()
         ui->timeOfsText->setText(tr("%1\nms").arg(dt * 1000.0));
     else
         ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0));
+}
+
+void GLScopeNGGUI::setAmpScaleDisplay()
+{
+    ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
+    float ampValue = amps[ui->amp->value()];
+
+    if (projectionType == ScopeVisNG::ProjectionMagDB)
+    {
+        float displayValue = ampValue*500.0f;
+
+        if (displayValue < 10.0f) {
+            ui->ampText->setText(tr("%1\ndB").arg(displayValue, 0, 'f', 2));
+        }
+        else {
+            ui->ampText->setText(tr("%1\ndB").arg(displayValue, 0, 'f', 1));
+        }
+    }
+    else
+    {
+        qreal a = ampValue*10.0f;
+
+        if(a < 0.000001)
+            ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
+        else if(a < 0.001)
+            ui->ampText->setText(tr("%1\nµ").arg(a * 1000000.0));
+        else if(a < 1.0)
+            ui->ampText->setText(tr("%1\nm").arg(a * 1000.0));
+        else
+            ui->ampText->setText(tr("%1").arg(a * 1.0));
+    }
+}
+
+void GLScopeNGGUI::changeCurrentTrace()
+{
+    ScopeVisNG::TraceData traceData;
+    fillTraceData(traceData);
+    uint32_t currentTraceIndex = ui->trace->value();
+    m_scopeVis->changeTrace(traceData, currentTraceIndex);
 }
 
 void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)

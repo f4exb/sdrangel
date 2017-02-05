@@ -643,7 +643,7 @@ kS/s</string>
       <widget class="QComboBox" name="traceMode">
        <property name="maximumSize">
         <size>
-         <width>56</width>
+         <width>65</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1149,7 +1149,7 @@ kS/s</string>
       <widget class="QComboBox" name="trigMode">
        <property name="maximumSize">
         <size>
-         <width>56</width>
+         <width>65</width>
          <height>16777215</height>
         </size>
        </property>
