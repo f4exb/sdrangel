@@ -53,12 +53,6 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
 
 ScopeVisNG::~ScopeVisNG()
 {
-	std::vector<TriggerCondition>::iterator it = m_triggerConditions.begin();
-
-	for (; it != m_triggerConditions.end(); ++it)
-	{
-		delete it->m_projector;
-	}
 }
 
 void ScopeVisNG::setSampleRate(int sampleRate)
@@ -70,9 +64,9 @@ void ScopeVisNG::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVisNG::configure(uint traceSize)
+void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill)
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(traceSize);
+    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -359,6 +353,18 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
 
 }
 
+void ScopeVisNG::initTrace(Trace& trace)
+{
+    int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
+
+    for (int i = 0; i < m_traceSize; i++)
+    {
+        trace.m_trace[2*(trace.m_traceCount)] = (trace.m_traceCount - shift); // display x
+        trace.m_trace[2*(trace.m_traceCount) + 1] = 0.0f;                     // display y
+        trace.m_traceCount++;
+    }
+}
+
 void ScopeVisNG::start()
 {
 }
@@ -381,22 +387,49 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgConfigureScopeVisNG::match(message))
     {
         MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
-        m_traceSize = conf.getTraceSize();
-        std::vector<Trace>::iterator it = m_traces.begin();
 
-        for (; it != m_traces.end(); ++it) {
-            it->resize(m_traceSize);
+        uint32_t traceSize = conf.getTraceSize();
+        uint32_t timeOfsProMill = conf.getTimeOfsProMill();
+
+        if (m_traceSize != traceSize)
+        {
+            m_traceSize = traceSize;
+
+            std::vector<Trace>::iterator it = m_traces.begin();
+
+            for (; it != m_traces.end(); ++it)
+            {
+                it->resize(m_traceSize);
+                initTrace(*it);
+            }
+
+            m_traceDiscreteMemory.resize(m_traceSize);
+
+            if (m_glScope) {
+                m_glScope->setTraceSize(m_traceSize);
+            }
         }
 
-        m_traceDiscreteMemory.resize(m_traceSize);
+        if (m_timeOfsProMill != timeOfsProMill)
+        {
+            m_timeOfsProMill = timeOfsProMill;
 
-        qDebug() << "ScopeVisNG::handleMessage: MsgConfigureScopeVisNG: m_traceSize: " << m_traceSize;
+            if (m_glScope) {
+                m_glScope->setTimeOfsProMill(m_timeOfsProMill);
+            }
+        }
+
+        qDebug() << "ScopeVisNG::handleMessage: MsgConfigureScopeVisNG:"
+                << " m_traceSize: " << m_traceSize
+                << " m_timeOfsProMill: " << m_timeOfsProMill;
+
         return true;
     }
     else if (MsgScopeVisNGAddTrigger::match(message))
     {
         MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
         m_triggerConditions.push_back(TriggerCondition(conf.getTriggerData()));
+        m_triggerConditions.back().init();
         return true;
     }
     else if (MsgScopeVisNGChangeTrigger::match(message))
@@ -425,6 +458,9 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
         m_traces.push_back(Trace(conf.getTraceData(), m_traceSize));
+        m_traces.back().init();
+        initTrace(m_traces.back());
+        m_glScope->addTrace(&m_traces.back());
         return true;
     }
     else if (MsgScopeVisNGChangeTrace::match(message))
@@ -445,6 +481,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         if (traceIndex < m_traces.size()) {
             m_traces.erase(m_traces.begin() + traceIndex);
+            m_glScope->removeTrace(traceIndex);
         }
 
         return true;

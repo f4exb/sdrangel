@@ -19,9 +19,12 @@
 #define SDRBASE_GUI_GLSCOPENGGUI_H_
 
 #include <QWidget>
+#include <QComboBox>
+
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 #include "util/message.h"
+#include "dsp/scopevisng.h"
 
 namespace Ui {
     class GLScopeNGGUI;
@@ -29,7 +32,6 @@ namespace Ui {
 
 class MessageQueue;
 class GLScopeNG;
-class ScopeVisNG;
 
 class SDRANGEL_API GLScopeNGGUI : public QWidget {
     Q_OBJECT
@@ -55,8 +57,21 @@ private:
     GLScopeNG* m_glScope;
 
     int m_sampleRate;
+    int m_timeBase;
+    int m_timeOffset;
+    int m_traceLenMult;
+
+    static const double amps[11];
 
     void applySettings();
+    void setTimeScaleDisplay();
+    void setTraceLenDisplay();
+    void setTimeOfsDisplay();
+
+    void fillTraceData(ScopeVisNG::TraceData& traceData);
+    void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
+
+    void fillProjectionCombo(QComboBox* comboBox);
 
 private slots:
     void on_scope_sampleRateChanged(int value);

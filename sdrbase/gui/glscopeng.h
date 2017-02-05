@@ -51,10 +51,12 @@ public:
 
     void connectTimer(const QTimer& timer);
 
-    void setTraces(const ScopeVisNG::DisplayTraces *traces) { m_traces = traces; m_configChanged = true; }
+    void addTrace(ScopeVisNG::DisplayTrace *trace);
+    void removeTrace(int index);
     void newTraces();
 
     int getSampleRate() const { return m_sampleRate; }
+    int getTraceSize() const { return m_traceSize; }
 
     void setTriggerPre(Real triggerPre);
     void setTimeOfsProMill(int timeOfsProMill);
@@ -63,6 +65,8 @@ public:
     void setHighlightedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
     void setTraceSize(int trceSize);
+    void setDisplayGridIntensity(int intensity);
+    void setDisplayTraceIntensity(int intensity);
 
 signals:
     void sampleRateChanged(int);
@@ -73,12 +77,13 @@ private:
     QMutex m_mutex;
     bool m_dataChanged;
     bool m_configChanged;
-    const ScopeVisNG::DisplayTraces *m_traces;
+    ScopeVisNG::DisplayTraces m_traces;
     int m_sampleRate;
     int m_timeOfsProMill;
     Real m_triggerPre;
     int m_traceSize;
     int m_timeBase;
+    int m_timeOffset;
     uint32_t m_highlightedTraceIndex;
 
     // graphics stuff

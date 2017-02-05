@@ -91,7 +91,7 @@ public:
         {}
     };
 
-    typedef std::vector<DisplayTrace> DisplayTraces;
+    typedef std::vector<DisplayTrace*> DisplayTraces;
 
     static const uint m_traceChunkSize;
     static const uint m_nbTriggers = 10;
@@ -100,7 +100,7 @@ public:
     virtual ~ScopeVisNG();
 
     void setSampleRate(int sampleRate);
-    void configure(uint32_t traceSize);
+    void configure(uint32_t traceSize, uint32_t timeOfsProMill);
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
@@ -122,18 +122,23 @@ private:
 
     public:
         static MsgConfigureScopeVisNG* create(
-            uint32_t traceSize)
+            uint32_t traceSize,
+            uint32_t timeOfsProMill)
         {
-            return new MsgConfigureScopeVisNG(traceSize);
+            return new MsgConfigureScopeVisNG(traceSize, timeOfsProMill);
         }
 
         uint32_t getTraceSize() const { return m_traceSize; }
+        uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
 
     private:
         uint32_t m_traceSize;
+        uint32_t m_timeOfsProMill;
 
-        MsgConfigureScopeVisNG(uint32_t traceSize) :
-            m_traceSize(traceSize)
+        MsgConfigureScopeVisNG(uint32_t traceSize,
+                uint32_t timeOfsProMill) :
+            m_traceSize(traceSize),
+            m_timeOfsProMill(timeOfsProMill)
         {}
     };
 
@@ -275,9 +280,10 @@ private:
     {
     public:
         Projector(ProjectionType projectionType) : m_projectionType(projectionType) {}
+        virtual ~Projector() {}
 
         ProjectionType getProjectionType() const { return m_projectionType; }
-        virtual Real run(const Sample& s) {}
+        virtual Real run(const Sample& s) = 0;
     private:
         ProjectionType m_projectionType;
     };
@@ -287,6 +293,7 @@ private:
     {
     public:
         ProjectorReal() : Projector(ProjectionReal) {}
+        virtual ~ProjectorReal() {}
         virtual Real run(const Sample& s) { return s.m_real / 32768.0f; }
     };
 
@@ -295,6 +302,7 @@ private:
     {
     public:
         ProjectorImag() : Projector(ProjectionImag) {}
+        virtual ~ProjectorImag() {}
         virtual Real run(const Sample& s) { return s.m_imag / 32768.0f; }
     };
 
@@ -303,6 +311,7 @@ private:
     {
     public:
         ProjectorMagLin() : Projector(ProjectionMagLin) {}
+        virtual ~ProjectorMagLin() {}
         virtual Real run(const Sample& s)
         {
             uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
@@ -315,6 +324,7 @@ private:
     {
     public:
         ProjectorMagDB() : Projector(ProjectionMagDB) {}
+        virtual ~ProjectorMagDB() {}
         virtual Real run(const Sample& s)
         {
             uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
@@ -329,6 +339,7 @@ private:
     {
     public:
         ProjectorPhase() : Projector(ProjectionPhase) {}
+        virtual ~ProjectorPhase() {}
         virtual Real run(const Sample& s) { return std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;  }
     };
 
@@ -337,6 +348,7 @@ private:
     {
     public:
         ProjectorDPhase() : Projector(ProjectionDPhase), m_prevArg(0.0f) {}
+        virtual ~ProjectorDPhase() {}
         virtual Real run(const Sample& s)
         {
             Real curArg = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
@@ -356,6 +368,26 @@ private:
         Real m_prevArg;
     };
 
+    static Projector *createProjector(ProjectionType projectionType)
+    {
+        //qDebug("ScopeVisNG::createProjector: projectionType: %d", projectionType);
+        switch (projectionType)
+        {
+        case ProjectionImag:
+            return new ProjectorImag();
+        case ProjectionMagLin:
+            return new ProjectorMagLin();
+        case ProjectionMagDB:
+            return new ProjectorMagDB();
+        case ProjectionPhase:
+            return new ProjectorPhase();
+        case ProjectionDPhase:
+            return new ProjectorDPhase();
+        case ProjectionReal:
+        default:
+            return new ProjectorReal();
+        }
+    }
 
     /**
      * Trigger stuff
@@ -373,22 +405,30 @@ private:
     struct TriggerCondition
     {
     public:
-        Projector *m_projector;       //!< Projector transform from complex trace to reaL trace usable for triggering
+        Projector *m_projector;
         TriggerData m_triggerData;    //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
         uint32_t m_triggerCounter;    //!< Counter of trigger occurences
 
         TriggerCondition(const TriggerData& triggerData) :
+            m_projector(0),
             m_triggerData(triggerData),
             m_prevCondition(false),
             m_triggerDelayCount(0),
             m_triggerCounter(0)
         {
-            m_projector = new Projector(m_triggerData.m_projectionType);
         }
 
-        ~TriggerCondition() { delete m_projector; }
+        ~TriggerCondition()
+        {
+            if (m_projector) delete m_projector;
+        }
+
+        void init()
+        {
+            m_projector = createProjector(m_triggerData.m_projectionType);
+        }
 
         void setData(const TriggerData& triggerData)
         {
@@ -397,7 +437,7 @@ private:
             if (m_projector->getProjectionType() != m_triggerData.m_projectionType)
             {
                 delete m_projector;
-                m_projector = new Projector(m_triggerData.m_projectionType);
+                m_projector = createProjector(m_triggerData.m_projectionType);
             }
 
             m_prevCondition = false;
@@ -508,18 +548,23 @@ private:
 
         Trace(const TraceData& traceData, int traceSize) :
             DisplayTrace(traceData),
+            m_projector(0),
             m_traceSize(traceSize),
             m_maxTraceSize(traceSize),
             m_traceCount(0)
         {
-            m_projector = new Projector(m_traceData.m_projectionType);
-            m_trace = new float[2*m_traceSize];
         }
 
         ~Trace()
         {
-            delete m_projector;
-            delete[] m_trace;
+            if (m_projector) delete m_projector;
+            if (m_trace) delete[] m_trace;
+        }
+
+        void init()
+        {
+            m_projector = createProjector(m_traceData.m_projectionType);
+            m_trace = new float[2*m_traceSize];
         }
 
         void setData(const TraceData& traceData)
@@ -529,7 +574,7 @@ private:
             if (m_projector->getProjectionType() != m_traceData.m_projectionType)
             {
                 delete m_projector;
-                m_projector = new Projector(m_traceData.m_projectionType);
+                m_projector = createProjector(m_traceData.m_projectionType);
             }
         }
 
@@ -582,6 +627,11 @@ private:
      * - if not finished it returns -1
      */
     int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart = false);
+
+    /**
+     * Initialize a trace with zero values
+     */
+    void initTrace(Trace& trace);
 };
 
 

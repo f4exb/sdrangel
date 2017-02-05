@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
+    <width>692</width>
     <height>120</height>
    </rect>
   </property>
@@ -246,6 +246,9 @@
        <property name="pageStep">
         <number>1</number>
        </property>
+       <property name="value">
+        <number>50</number>
+       </property>
       </widget>
      </item>
      <item>
@@ -265,6 +268,9 @@
        <property name="pageStep">
         <number>1</number>
        </property>
+       <property name="value">
+        <number>10</number>
+       </property>
       </widget>
      </item>
      <item>
@@ -277,7 +283,7 @@
      <item>
       <widget class="QLabel" name="timeLabel">
        <property name="text">
-        <string>t:</string>
+        <string>T:</string>
        </property>
       </widget>
      </item>
@@ -326,7 +332,7 @@
      <item>
       <widget class="QLabel" name="timeOfsLabel">
        <property name="text">
-        <string>d:</string>
+        <string>O:</string>
        </property>
       </widget>
      </item>
@@ -407,7 +413,7 @@
         <number>1</number>
        </property>
        <property name="value">
-        <number>20</number>
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -472,12 +478,15 @@ kS/s</string>
       <widget class="QLabel" name="traceText">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>10</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
         <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -491,6 +500,12 @@ kS/s</string>
        </property>
        <property name="toolTip">
         <string>Trace index (0 is X trace)</string>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -726,7 +741,7 @@ kS/s</string>
      <item>
       <widget class="QLabel" name="ofsLabel">
        <property name="text">
-        <string>d:</string>
+        <string>O:</string>
        </property>
       </widget>
      </item>
@@ -808,6 +823,49 @@ kS/s</string>
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="traceDelayLabel">
+       <property name="text">
+        <string>D:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="traceDelayText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="traceDelay">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_17">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="zSelect">
        <property name="toolTip">
         <string>Select this trace as Z input</string>
@@ -846,6 +904,13 @@ kS/s</string>
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_15">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -857,13 +922,6 @@ kS/s</string>
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="Line" name="line_15">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QLabel" name="memLabel">
@@ -926,12 +984,15 @@ kS/s</string>
       <widget class="QLabel" name="trigText">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>10</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
         <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -945,6 +1006,12 @@ kS/s</string>
        </property>
        <property name="toolTip">
         <string>Sellect triggger in trigger chain</string>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -1132,6 +1199,12 @@ kS/s</string>
        <property name="toolTip">
         <string>Number of trigger condition before trigger is actuated</string>
        </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
       </widget>
      </item>
      <item>
@@ -1317,6 +1390,12 @@ kS/s</string>
        <property name="toolTip">
         <string>Trigger delay</string>
        </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -1368,6 +1447,19 @@ kS/s</string>
         <enum>Qt::Vertical</enum>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="ButtonSwitch" name="trigOneShot">
