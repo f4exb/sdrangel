@@ -306,8 +306,17 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
             {
                 float posLimit = 1.0 / itData->m_amp;
                 float negLimit = -1.0 / itData->m_amp;
+                ProjectionType projectionType = itData->m_projectionType;
+                float v;
 
-                float v = itCtl->m_projector->run(*begin) * itData->m_amp + itData->m_ofs;
+                if (projectionType == ProjectionMagLin) {
+                    v = itCtl->m_projector->run(*begin)*itData->m_amp - itData->m_ofs - 1.0/itData->m_amp;
+                } else if (projectionType == ProjectionMagDB) {
+                    v = 1.0f + 2.0f*(((itCtl->m_projector->run(*begin))/100.0f) - itData->m_ofs)  + 1.0f - 1.0f/itData->m_amp;
+                    //v = itCtl->m_projector->run(*begin) * itData->m_amp - itData->m_ofs;
+                } else {
+                    v = itCtl->m_projector->run(*begin) * itData->m_amp - itData->m_ofs;
+                }
 
                 if(v > posLimit) {
                     v = posLimit;

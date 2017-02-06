@@ -93,6 +93,7 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     setTimeScaleDisplay();
     setTimeOfsDisplay();
     setAmpScaleDisplay();
+    setAmpOfsDisplay();
 }
 
 void GLScopeNGGUI::setSampleRate(int sampleRate)
@@ -246,6 +247,7 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
 void GLScopeNGGUI::on_traceMode_currentIndexChanged(int index)
 {
     setAmpScaleDisplay();
+    setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
@@ -464,17 +466,26 @@ void GLScopeNGGUI::setAmpOfsDisplay()
 
     if (projectionType == ScopeVisNG::ProjectionMagDB)
     {
-    	ui->ofsText->setText(tr("%1").arg(o/1000.0, 0, 'f', 4));
+    	ui->ofsText->setText(tr("%1\ndB").arg(o/10.0f - 100.0f, 0, 'f', 1));
     }
     else
     {
-    	float a = o/1000.0f;
+        float a;
 
-		if(fabs(a) < 0.000001)
+        if (projectionType == ScopeVisNG::ProjectionMagLin)
+        {
+            a = o/2000.0f;
+        }
+        else
+        {
+            a = o/1000.0f;
+        }
+
+		if(fabs(a) < 0.000001f)
 			ui->ofsText->setText(tr("%1\nn").arg(a * 1000000000.0));
-		else if(fabs(a) < 0.001)
+		else if(fabs(a) < 0.001f)
 			ui->ofsText->setText(tr("%1\nµ").arg(a * 1000000.0));
-		else if(fabs(a) < 1.0)
+		else if(fabs(a) < 1.0f)
 			ui->ofsText->setText(tr("%1\nm").arg(a * 1000.0));
 		else
 			ui->ofsText->setText(tr("%1").arg(a * 1.0));
@@ -585,7 +596,7 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
-    traceData.m_ofs = (10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0);
+    traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
     traceData.m_traceDelay = 0;
 }
 

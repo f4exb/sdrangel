@@ -983,7 +983,7 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
     ScopeVisNG::TraceData& traceData = (*m_tracesData)[highlightedTraceIndex];
     float amp_range = 2.0 / traceData.m_amp;
     float amp_ofs = traceData.m_ofs;
-    float pow_floor = -100.0 + traceData.m_ofs * 100.0 + 50.0f - 50.0f/traceData.m_amp;
+    float pow_floor = -100.0 + traceData.m_ofs * 100.0;
     float pow_range = 100.0 / traceData.m_amp;
 
     switch (traceData.m_projectionType)
@@ -991,13 +991,19 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
     case ScopeVisNG::ProjectionMagDB: // dB scale
         scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
         break;
+    case ScopeVisNG::ProjectionMagLin:
+        if (amp_range < 2.0) {
+            scale.setRange(Unit::None, amp_ofs * 500.0, amp_range * 1000.0 + amp_ofs * 500.0);
+        } else {
+            scale.setRange(Unit::None, amp_ofs/2.0, amp_range + amp_ofs/2.0);
+        }
+        break;
     case ScopeVisNG::ProjectionPhase: // Phase or frequency
     case ScopeVisNG::ProjectionDPhase:
         scale.setRange(Unit::None, -1.0/traceData.m_amp + amp_ofs, 1.0/traceData.m_amp + amp_ofs);
         break;
     case ScopeVisNG::ProjectionReal: // Linear generic
     case ScopeVisNG::ProjectionImag:
-    case ScopeVisNG::ProjectionMagLin:
     default:
         if (amp_range < 2.0) {
             scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);

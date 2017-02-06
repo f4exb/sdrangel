@@ -321,7 +321,7 @@ private:
         {
             uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
             //return mult * log2f(magsq/1073741824.0f);
-            return (log10f(magsq/1073741824.0f) / 5.0f) + 1.0f;
+            return log10f(magsq/1073741824.0f) * 10.0f;
         }
     private:
         static const Real mult;
