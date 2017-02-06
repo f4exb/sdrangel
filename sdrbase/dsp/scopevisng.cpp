@@ -182,8 +182,10 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 				if (triggerCondition.m_triggerData.m_triggerBothEdges) {
 					trigger = triggerCondition.m_prevCondition ^ condition;
 				} else {
-					trigger = condition ^ !triggerCondition.m_triggerData.m_triggerPositiveEdge;
+					trigger = (triggerCondition.m_prevCondition ^ condition) && (condition ^ !triggerCondition.m_triggerData.m_triggerPositiveEdge);
 				}
+
+				triggerCondition.m_prevCondition = condition;
 
 				if (trigger) // trigger condition
 				{

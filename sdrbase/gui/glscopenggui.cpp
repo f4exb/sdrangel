@@ -63,6 +63,8 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     ui->trigPos->setChecked(true);
     ui->trigNeg->setChecked(false);
     ui->trigBoth->setChecked(false);
+    ui->trigOneShot->setChecked(false);
+    ui->trigOneShot->setEnabled(false);
     ui->freerun->setChecked(true);
 
     // Add a trace
@@ -253,9 +255,109 @@ void GLScopeNGGUI::on_amp_valueChanged(int value)
     changeCurrentTrace();
 }
 
+void GLScopeNGGUI::on_ofsCoarse_valueChanged(int value)
+{
+	setAmpOfsDisplay();
+    changeCurrentTrace();
+}
+
+void GLScopeNGGUI::on_ofsFine_valueChanged(int value)
+{
+	setAmpOfsDisplay();
+    changeCurrentTrace();
+}
+
+void GLScopeNGGUI::on_traceDelay_valueChanged(int value)
+{
+	// TODO
+}
+
+void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
+{
+	setTrigLevelDisplay();
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigCount_valueChanged(int value)
+{
+	QString text;
+	text.sprintf("%02d", value);
+	ui->trigCountText->setText(text);
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigPos_toggled(bool checked)
+{
+    if (checked)
+    {
+    	ui->trigNeg->setChecked(false);
+    	ui->trigBoth->setChecked(false);
+    }
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigNeg_toggled(bool checked)
+{
+    if (checked)
+    {
+    	ui->trigPos->setChecked(false);
+    	ui->trigBoth->setChecked(false);
+    }
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigBoth_toggled(bool checked)
+{
+    if (checked)
+    {
+    	ui->trigNeg->setChecked(false);
+    	ui->trigPos->setChecked(false);
+    }
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigLevelCoarse_valueChanged(int value)
+{
+	setTrigLevelDisplay();
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigLevelFine_valueChanged(int value)
+{
+	setTrigLevelDisplay();
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigDelay_valueChanged(int value)
+{
+	setTrigDelayDisplay();
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigPre_valueChanged(int value)
+{
+	setTrigPreDisplay();
+	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
+{
+	m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked()); // TODO: implement one shot feature
+}
+
 void GLScopeNGGUI::on_freerun_toggled(bool checked)
 {
-    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
+	if (checked)
+	{
+		ui->trigOneShot->setChecked(false);
+        ui->trigOneShot->setEnabled(false);
+	}
+	else
+	{
+        ui->trigOneShot->setEnabled(true);
+	}
+
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked()); // TODO: implement one shot feature
 }
 
 void GLScopeNGGUI::setTimeScaleDisplay()
@@ -355,12 +457,117 @@ void GLScopeNGGUI::setAmpScaleDisplay()
     }
 }
 
+void GLScopeNGGUI::setAmpOfsDisplay()
+{
+	ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
+	float o = (ui->ofsCoarse->value() * 10.0f) + (ui->ofsFine->value() / 20.0f);
+
+    if (projectionType == ScopeVisNG::ProjectionMagDB)
+    {
+    	ui->ofsText->setText(tr("%1").arg(o/1000.0, 0, 'f', 4));
+    }
+    else
+    {
+    	float a = o/1000.0f;
+
+		if(fabs(a) < 0.000001)
+			ui->ofsText->setText(tr("%1\nn").arg(a * 1000000000.0));
+		else if(fabs(a) < 0.001)
+			ui->ofsText->setText(tr("%1\nµ").arg(a * 1000000.0));
+		else if(fabs(a) < 1.0)
+			ui->ofsText->setText(tr("%1\nm").arg(a * 1000.0));
+		else
+			ui->ofsText->setText(tr("%1").arg(a * 1.0));
+    }
+}
+
+void GLScopeNGGUI::setTrigLevelDisplay()
+{
+    float t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 20000.0f);
+	ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->trigMode->currentIndex();
+
+    ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(ui->trigLevelCoarse->value() / 100.0f));
+    ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(ui->trigLevelFine->value() * 50));
+
+	if (projectionType == ScopeVisNG::ProjectionMagDB) {
+		ui->trigLevelText->setText(tr("%1\ndB").arg(100.0 * (t - 1.0), 0, 'f', 1));
+	}
+	else
+	{
+		float a;
+
+		if (projectionType == ScopeVisNG::ProjectionMagLin) {
+			a = 1.0 + t;
+		} else {
+			a = t;
+		}
+
+		if(fabs(a) < 0.000001)
+			ui->trigLevelText->setText(tr("%1\nn").arg(a * 1000000000.0f));
+		else if(fabs(a) < 0.001)
+			ui->trigLevelText->setText(tr("%1\nµ").arg(a * 1000000.0f));
+		else if(fabs(a) < 1.0)
+			ui->trigLevelText->setText(tr("%1\nm").arg(a * 1000.0f));
+		else
+			ui->trigLevelText->setText(tr("%1").arg(a * 1.0f));
+	}
+}
+
+void GLScopeNGGUI::setTrigDelayDisplay()
+{
+    unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * ui->trigDelay->value();
+
+	if (n_samples_delay < 1000) {
+		ui->trigDelayText->setToolTip(tr("%1S").arg(n_samples_delay));
+	} else if (n_samples_delay < 1000000) {
+		ui->trigDelayText->setToolTip(tr("%1kS").arg(n_samples_delay/1000.0));
+	} else if (n_samples_delay < 1000000000) {
+		ui->trigDelayText->setToolTip(tr("%1MS").arg(n_samples_delay/1000000.0));
+	} else {
+		ui->trigDelayText->setToolTip(tr("%1GS").arg(n_samples_delay/1000000000.0));
+	}
+
+	m_sampleRate = m_glScope->getSampleRate();
+	float t = (n_samples_delay * 1.0f / m_sampleRate);
+
+	if(t < 0.000001)
+		ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0));
+	else if(t < 0.001)
+		ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0));
+	else if(t < 1.0)
+		ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0));
+	else
+		ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0));
+}
+
+void GLScopeNGGUI::setTrigPreDisplay()
+{
+    float dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
+
+	if(dt < 0.000001)
+		ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f));
+	else if(dt < 0.001)
+		ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0f));
+	else if(dt < 1.0)
+		ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0f));
+	else
+		ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0f));
+}
+
 void GLScopeNGGUI::changeCurrentTrace()
 {
     ScopeVisNG::TraceData traceData;
     fillTraceData(traceData);
     uint32_t currentTraceIndex = ui->trace->value();
     m_scopeVis->changeTrace(traceData, currentTraceIndex);
+}
+
+void GLScopeNGGUI::changeCurrentTrigger()
+{
+    ScopeVisNG::TriggerData triggerData;
+    fillTriggerData(triggerData);
+    uint32_t currentTriggerIndex = ui->trig->value();
+    m_scopeVis->changeTrigger(triggerData, currentTriggerIndex);
 }
 
 void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)

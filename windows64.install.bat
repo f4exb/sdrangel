@@ -31,6 +31,7 @@ mkdir %2\plugins\channeltx
 mkdir %2\plugins\samplesource
 mkdir %2\plugins\samplesink
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
+copy plugins\channelrx\chanalyzerng\%1\chanalyzerng.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx

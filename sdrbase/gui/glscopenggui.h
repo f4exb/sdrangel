@@ -64,12 +64,20 @@ private:
     static const double amps[11];
 
     void applySettings();
+    // First row
     void setTimeScaleDisplay();
     void setTraceLenDisplay();
     void setTimeOfsDisplay();
+    // Second row
     void setAmpScaleDisplay();
+    void setAmpOfsDisplay();
+    // Third row
+	void setTrigLevelDisplay();
+	void setTrigDelayDisplay();
+	void setTrigPreDisplay();
 
     void changeCurrentTrace();
+    void changeCurrentTrigger();
 
     void fillTraceData(ScopeVisNG::TraceData& traceData);
     void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
@@ -92,7 +100,20 @@ private slots:
     // Second row
     void on_traceMode_currentIndexChanged(int index);
     void on_amp_valueChanged(int value);
+    void on_ofsCoarse_valueChanged(int value);
+    void on_ofsFine_valueChanged(int value);
+    void on_traceDelay_valueChanged(int value);
     // Third row
+    void on_trigMode_currentIndexChanged(int index);
+    void on_trigCount_valueChanged(int value);
+    void on_trigPos_toggled(bool checked);
+    void on_trigNeg_toggled(bool checked);
+    void on_trigBoth_toggled(bool checked);
+    void on_trigLevelCoarse_valueChanged(int value);
+    void on_trigLevelFine_valueChanged(int value);
+    void on_trigDelay_valueChanged(int value);
+    void on_trigPre_valueChanged(int value);
+    void on_trigOneShot_toggled(bool checked);
     void on_freerun_toggled(bool checked);
 };
 
