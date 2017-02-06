@@ -27,10 +27,12 @@
 
 GLScopeNG::GLScopeNG(QWidget* parent) :
     QGLWidget(parent),
+    m_tracesData(0),
+    m_traces(0),
+    m_bufferIndex(0),
     m_displayMode(DisplayX),
     m_dataChanged(false),
     m_configChanged(false),
-    m_traces(0),
     m_displayGridIntensity(10),
     m_displayTraceIntensity(50),
     m_timeBase(1),
@@ -63,23 +65,6 @@ GLScopeNG::~GLScopeNG()
     cleanup();
 }
 
-void GLScopeNG::addTrace(ScopeVisNG::DisplayTrace *trace)
-{
-    m_traces.push_back(trace);
-    m_configChanged = true;
-    update();
-}
-
-void GLScopeNG::removeTrace(int index)
-{
-    if (index < m_traces.size()) {
-        m_traces.erase(m_traces.begin() + index);
-    }
-
-    m_configChanged = true;
-    update();
-}
-
 void GLScopeNG::setDisplayGridIntensity(int intensity)
 {
     m_displayGridIntensity = intensity;
@@ -102,13 +87,20 @@ void GLScopeNG::setDisplayTraceIntensity(int intensity)
     update();
 }
 
-void GLScopeNG::newTraces()
+void GLScopeNG::setTraces(std::vector<ScopeVisNG::TraceData>* tracesData, std::vector<float *>* traces)
 {
-    if (m_traces.size() > 0)
+    m_tracesData = tracesData;
+    m_traces = traces;
+}
+
+void GLScopeNG::newTraces(std::vector<float *>* traces)
+{
+    if (traces->size() > 0)
     {
         if(!m_mutex.tryLock(2))
             return;
 
+        m_traces = traces;
         m_dataChanged = true;
 
         m_mutex.unlock();
@@ -301,23 +293,26 @@ void GLScopeNG::paintGL()
         // paint trace #1
         if (m_traceSize > 0)
         {
-            const ScopeVisNG::DisplayTrace* trace = m_traces[0];
+            const float *trace = (*m_traces)[0];
+            const ScopeVisNG::TraceData& traceData = (*m_tracesData)[0];
+
             int start = (m_timeOfsProMill/1000.0) * m_traceSize;
             int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
+
             if(end - start < 2)
                 start--;
 
             float rectX = m_glScopeRect1.x();
             float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
             float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
-            float rectH = -(m_glScopeRect1.height() / 2.0f) * trace->m_traceData.m_amp;
+            float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
 
             QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
             QMatrix4x4 mat;
             mat.setToIdentity();
             mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
             mat.scale(2.0f * rectW, -2.0f * rectH);
-            m_glShaderSimple.drawPolyline(mat, color, (GLfloat *) &trace->m_trace[2*start], end - start);
+            m_glShaderSimple.drawPolyline(mat, color, (GLfloat *) &trace[2*start], end - start);
         }
     }
 
@@ -393,12 +388,12 @@ void GLScopeNG::applyConfig()
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
     m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
 
-    if (m_traces.size() > 0)
+    if (m_traces->size() > 0)
     {
         setYScale(m_y1Scale, 0); // This is always the X trace (trace #0)
     }
 
-    if ((m_traces.size() > 1) && (m_highlightedTraceIndex < m_traces.size()))
+    if ((m_traces->size() > 1) && (m_highlightedTraceIndex < m_traces->size()))
     {
         setYScale(m_y2Scale, m_highlightedTraceIndex > 0 ? m_highlightedTraceIndex : 1); // if Highlighted trace is #0 (X trace) set it to first Y trace (trace #1)
     }
@@ -985,20 +980,20 @@ void GLScopeNG::applyConfig()
 
 void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 {
-    ScopeVisNG::DisplayTrace *trace = m_traces[highlightedTraceIndex];
-    float amp_range = 2.0 / trace->m_traceData.m_amp;
-    float amp_ofs = trace->m_traceData.m_ofs;
-    float pow_floor = -100.0 + trace->m_traceData.m_ofs * 100.0;
-    float pow_range = 100.0 / trace->m_traceData.m_amp;
+    ScopeVisNG::TraceData& traceData = (*m_tracesData)[highlightedTraceIndex];
+    float amp_range = 2.0 / traceData.m_amp;
+    float amp_ofs = traceData.m_ofs;
+    float pow_floor = -100.0 + traceData.m_ofs * 100.0 + 50.0f - 50.0f/traceData.m_amp;
+    float pow_range = 100.0 / traceData.m_amp;
 
-    switch (trace->m_traceData.m_projectionType)
+    switch (traceData.m_projectionType)
     {
     case ScopeVisNG::ProjectionMagDB: // dB scale
         scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
         break;
     case ScopeVisNG::ProjectionPhase: // Phase or frequency
     case ScopeVisNG::ProjectionDPhase:
-        scale.setRange(Unit::None, -1.0/trace->m_traceData.m_amp + amp_ofs, 1.0/trace->m_traceData.m_amp + amp_ofs);
+        scale.setRange(Unit::None, -1.0/traceData.m_amp + amp_ofs, 1.0/traceData.m_amp + amp_ofs);
         break;
     case ScopeVisNG::ProjectionReal: // Linear generic
     case ScopeVisNG::ProjectionImag:
@@ -1015,8 +1010,9 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 
 void GLScopeNG::tick()
 {
-    if(m_dataChanged)
+    if(m_dataChanged) {
         update();
+    }
 }
 
 void GLScopeNG::connectTimer(const QTimer& timer)

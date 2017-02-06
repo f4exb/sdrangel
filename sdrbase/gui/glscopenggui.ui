@@ -465,7 +465,7 @@ kS/s</string>
       <widget class="QLabel" name="traceLabel">
        <property name="minimumSize">
         <size>
-         <width>20</width>
+         <width>24</width>
          <height>0</height>
         </size>
        </property>
@@ -971,7 +971,7 @@ kS/s</string>
       <widget class="QLabel" name="trigLabel">
        <property name="minimumSize">
         <size>
-         <width>20</width>
+         <width>24</width>
          <height>0</height>
         </size>
        </property>

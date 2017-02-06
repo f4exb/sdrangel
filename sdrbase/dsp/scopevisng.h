@@ -59,17 +59,6 @@ public:
         {}
     };
 
-    struct DisplayTrace
-    {
-        TraceData m_traceData;           //!< Trace data
-        float *m_trace;                  //!< Displayable trace (interleaved x,y of GLfloat)
-
-        DisplayTrace(const TraceData& traceData) :
-            m_traceData(traceData),
-            m_trace(0)
-        {}
-    };
-
     struct TriggerData
     {
         ProjectionType m_projectionType; //!< Complex to real projection type
@@ -91,8 +80,6 @@ public:
         {}
     };
 
-    typedef std::vector<DisplayTrace*> DisplayTraces;
-
     static const uint m_traceChunkSize;
     static const uint m_nbTriggers = 10;
 
@@ -100,7 +87,7 @@ public:
     virtual ~ScopeVisNG();
 
     void setSampleRate(int sampleRate);
-    void configure(uint32_t traceSize, uint32_t timeOfsProMill);
+    void configure(uint32_t traceSize, uint32_t timeOfsProMill, bool freeRun);
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
@@ -123,22 +110,27 @@ private:
     public:
         static MsgConfigureScopeVisNG* create(
             uint32_t traceSize,
-            uint32_t timeOfsProMill)
+            uint32_t timeOfsProMill,
+            bool freeRun)
         {
-            return new MsgConfigureScopeVisNG(traceSize, timeOfsProMill);
+            return new MsgConfigureScopeVisNG(traceSize, timeOfsProMill, freeRun);
         }
 
         uint32_t getTraceSize() const { return m_traceSize; }
         uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
+        bool getFreeRun() const { return m_freeRun; }
 
     private:
         uint32_t m_traceSize;
         uint32_t m_timeOfsProMill;
+        bool m_freeRun;
 
         MsgConfigureScopeVisNG(uint32_t traceSize,
-                uint32_t timeOfsProMill) :
+                uint32_t timeOfsProMill,
+                bool freeRun) :
             m_traceSize(traceSize),
-            m_timeOfsProMill(timeOfsProMill)
+            m_timeOfsProMill(timeOfsProMill),
+            m_freeRun(freeRun)
         {}
     };
 
@@ -328,7 +320,8 @@ private:
         virtual Real run(const Sample& s)
         {
             uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-            return mult * log2f(magsq/1073741824.0f);
+            //return mult * log2f(magsq/1073741824.0f);
+            return (log10f(magsq/1073741824.0f) / 5.0f) + 1.0f;
         }
     private:
         static const Real mult;
@@ -351,7 +344,7 @@ private:
         virtual ~ProjectorDPhase() {}
         virtual Real run(const Sample& s)
         {
-            Real curArg = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
+            Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
             Real dPhi = curArg - m_prevArg;
             m_prevArg = curArg;
 
@@ -361,7 +354,7 @@ private:
                 dPhi -= 2.0 * M_PI;
             }
 
-            return dPhi;
+            return dPhi/M_PI;
         }
 
     private:
@@ -394,7 +387,6 @@ private:
      */
     enum TriggerState
     {
-        TriggerFreeRun,     //!< Trigger is disabled
         TriggerUntriggered, //!< Trigger is not kicked off yet (or trigger list is empty)
         TriggerTriggered,   //!< Trigger has been kicked off
         TriggerWait,        //!< In one shot mode trigger waits for manual re-enabling
@@ -488,11 +480,12 @@ private:
     	std::vector<TraceBackBuffer> m_traceBackBuffers;
     	uint32_t m_memSize;
     	uint32_t m_currentMemIndex;
+    	uint32_t m_traceSize;
 
     	/**
     	 * Give memory size in number of traces
     	 */
-    	TraceBackDiscreteMemory(uint32_t size) : m_memSize(size), m_currentMemIndex(0)
+    	TraceBackDiscreteMemory(uint32_t size) : m_memSize(size), m_currentMemIndex(0), m_traceSize(0)
     	{
     		m_traceBackBuffers.resize(m_memSize);
     	}
@@ -502,19 +495,25 @@ private:
     	 */
     	void resize(uint32_t size)
     	{
+    	    m_traceSize = size;
+
     		for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffers.begin(); it != m_traceBackBuffers.end(); ++it)
     		{
-    			it->resize(size);
+    			it->resize(4*m_traceSize);
     		}
     	}
 
     	/**
     	 * Move index forward by one position and return reference to the trace at this position
+    	 * Copy a trace length of samples into the new memory slot
     	 */
     	TraceBackBuffer &store()
     	{
-    		m_currentMemIndex = m_currentMemIndex < m_memSize ? m_currentMemIndex+1 : 0;
-    		m_traceBackBuffers[m_currentMemIndex].reset();
+    	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
+            m_traceBackBuffers[nextMemIndex].reset();
+            m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - m_traceSize,
+                    m_traceBackBuffers[m_currentMemIndex].m_endPoint);
+    	    m_currentMemIndex = nextMemIndex;
     		return m_traceBackBuffers[m_currentMemIndex]; // new trace
     	}
 
@@ -534,66 +533,133 @@ private:
     	{
     		return m_traceBackBuffers[m_currentMemIndex];
     	}
+
+    	/**
+    	 * Return current memory index
+    	 */
+    	uint32_t currentIndex() const { return m_currentMemIndex; }
     };
 
     /**
      * Displayable trace stuff
      */
-    struct Trace : public DisplayTrace
+    struct TraceControl
     {
         Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
-        int m_traceSize;        //!< Size of the trace in buffer
-        int m_maxTraceSize;
-        int m_traceCount;       //!< Count of samples processed
+        int m_traceCount[2];    //!< Count of samples processed (double buffered)
 
-        Trace(const TraceData& traceData, int traceSize) :
-            DisplayTrace(traceData),
-            m_projector(0),
-            m_traceSize(traceSize),
-            m_maxTraceSize(traceSize),
-            m_traceCount(0)
+        TraceControl() : m_projector(0)
         {
+            reset();
         }
 
-        ~Trace()
+        ~TraceControl()
         {
             if (m_projector) delete m_projector;
-            if (m_trace) delete[] m_trace;
         }
 
-        void init()
+        void init(ProjectionType projectionType)
         {
-            m_projector = createProjector(m_traceData.m_projectionType);
-            m_trace = new float[2*m_traceSize];
+            if (m_projector) delete m_projector;
+            m_projector = createProjector(projectionType);
         }
 
-        void setData(const TraceData& traceData)
+        void reset()
         {
-            m_traceData = traceData;
+            m_traceCount[0] = 0;
+            m_traceCount[1] = 0;
+        }
+    };
 
-            if (m_projector->getProjectionType() != m_traceData.m_projectionType)
+    struct Traces
+    {
+        std::vector<TraceControl> m_tracesControl;    //!< Corresponding traces control data
+        std::vector<TraceData> m_tracesData;          //!< Corresponding traces data
+        std::vector<float *> m_traces[2];             //!< Double buffer of traces processed by glScope
+        int m_traceSize;                              //!< Current size of a trace in buffer
+        int m_maxTraceSize;                           //!< Maximum Size of a trace in buffer
+        bool evenOddIndex;                            //!< Even (true) or odd (false) index
+
+        Traces() : evenOddIndex(true), m_traceSize(0), m_maxTraceSize(0) {}
+
+        ~Traces()
+        {
+            std::vector<float *>::iterator it0 = m_traces[0].begin();
+            std::vector<float *>::iterator it1 = m_traces[1].begin();
+
+            for (; it0 != m_traces[0].end(); ++it0, ++it1)
             {
-                delete m_projector;
-                m_projector = createProjector(m_traceData.m_projectionType);
+                delete[] (*it0);
+                delete[] (*it1);
+            }
+        }
+
+        void addTrace(const TraceData& traceData, int traceSize)
+        {
+            resize(traceSize);
+
+            m_tracesData.push_back(traceData);
+            m_tracesControl.push_back(TraceControl());
+            m_tracesControl.back().init(traceData.m_projectionType);
+            float *x0 = new float[2*m_traceSize];
+            float *x1 = new float[2*m_traceSize];
+            m_traces[0].push_back(x0);
+            m_traces[1].push_back(x1);
+        }
+
+        void changeTrace(const TraceData& traceData, uint32_t traceIndex)
+        {
+            if (traceIndex < m_tracesControl.size()) {
+                m_tracesControl[traceIndex].init(traceData.m_projectionType);
+                m_tracesData[traceIndex] = traceData;
+            }
+        }
+
+        void removeTrace(uint32_t traceIndex)
+        {
+            if (traceIndex < m_tracesControl.size())
+            {
+                m_tracesControl.erase(m_tracesControl.begin() + traceIndex);
+                m_tracesData.erase(m_tracesData.begin() + traceIndex);
+                delete[] (m_traces[0])[traceIndex];
+                delete[] (m_traces[1])[traceIndex];
+                m_traces[0].erase(m_traces[0].begin() + traceIndex);
+                m_traces[1].erase(m_traces[1].begin() + traceIndex);
             }
         }
 
         void resize(int traceSize)
         {
             m_traceSize = traceSize;
-            m_traceCount = 0;
 
             if (m_traceSize > m_maxTraceSize)
             {
-                delete[] m_trace;
-                m_trace = new float[2*m_traceSize];
+                std::vector<float *>::iterator it0 = m_traces[0].begin();
+                std::vector<float *>::iterator it1 = m_traces[1].begin();
+
+                for (; it0 != m_traces[0].end(); ++it0, ++it1)
+                {
+                    delete[] (*it0);
+                    delete[] (*it1);
+                    *it0 = new float[2*m_traceSize];
+                    *it1 = new float[2*m_traceSize];
+                }
+
                 m_maxTraceSize = m_traceSize;
             }
         }
 
-        void reset()
+        uint32_t currentBufferIndex() const { return evenOddIndex? 0 : 1; }
+        uint32_t size() const { return m_tracesControl.size(); }
+
+        void switchBuffer()
         {
-            m_traceCount = 0;
+            evenOddIndex = !evenOddIndex;
+
+            for (std::vector<TraceControl>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it)
+            {
+                it->m_traceCount[currentBufferIndex()] = 0;
+            }
         }
     };
 
@@ -602,7 +668,7 @@ private:
     std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
     int m_currentTriggerIndex;                     //!< Index of current index in the chain
     TriggerState m_triggerState;                   //!< Current trigger state
-    std::vector<Trace> m_traces;                   //!< One trace control object per display trace allocated to X, Y[n] or Z
+    Traces m_traces;                               //!< Displayable traces
     int m_traceSize;                               //!< Size of traces in number of samples
     int m_memTraceSize;                            //!< Trace size in memory in number of samples up to trace size
     int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size
@@ -613,6 +679,8 @@ private:
     SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
     int m_sampleRate;
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
+    bool m_freeRun;                                //!< True if free running (trigger globally disabled)
+    int m_maxTraceDelay;                           //!< Maximum trace delay
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode
@@ -626,12 +694,17 @@ private:
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
      */
-    int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart = false);
+    int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceBack = false);
 
     /**
-     * Initialize a trace with zero values
+     * Get maximum trace delay
      */
-    void initTrace(Trace& trace);
+    void updateMaxTraceDelay();
+
+    /**
+     * Initialize trace buffers
+     */
+    void initTraceBuffers();
 };
 
 

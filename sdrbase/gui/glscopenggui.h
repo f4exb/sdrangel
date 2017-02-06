@@ -78,6 +78,7 @@ private:
 
 private slots:
     void on_scope_sampleRateChanged(int value);
+    // First row
     void on_onlyX_toggled(bool checked);
     void on_onlyY_toggled(bool checked);
     void on_horizontalXY_toggled(bool checked);
@@ -88,8 +89,11 @@ private slots:
     void on_time_valueChanged(int value);
     void on_timeOfs_valueChanged(int value);
     void on_traceLen_valueChanged(int value);
+    // Second row
     void on_traceMode_currentIndexChanged(int index);
     void on_amp_valueChanged(int value);
+    // Third row
+    void on_freerun_toggled(bool checked);
 };
 
 

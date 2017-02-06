@@ -45,10 +45,13 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
 	m_traceCompleteCount(0),
 	m_timeOfsProMill(0),
 	m_sampleRate(0),
-	m_traceDiscreteMemory(10)
+	m_traceDiscreteMemory(10),
+	m_freeRun(true),
+	m_maxTraceDelay(0)
 {
     setObjectName("ScopeVisNG");
     m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
+    m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
 }
 
 ScopeVisNG::~ScopeVisNG()
@@ -64,9 +67,9 @@ void ScopeVisNG::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill)
+void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill, bool freeRun)
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill);
+    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill, freeRun);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -110,7 +113,7 @@ void ScopeVisNG::removeTrigger(uint32_t triggerIndex)
 
 void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-    if (m_triggerState == TriggerFreeRun) {
+    if (m_freeRun) {
         m_triggerPoint = cbegin;
     }
     else if (m_triggerState == TriggerTriggered) {
@@ -147,9 +150,9 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
         return; // not enough samples in memory
     }
 
-	// trigger process
+    // trigger process
 
-	if ((m_triggerConditions.size() > 0) && ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)))
+	if (!m_freeRun && (m_triggerConditions.size() > 0) && ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)))
 	{
 		TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
 
@@ -204,6 +207,10 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
             ++begin;
 		} // begin < end
 	}
+	else
+	{
+	    m_traceStart = true;
+	}
 
 	int remainder = -1;
     int count = end - begin; // number of samples in traceback buffer past the current point
@@ -211,23 +218,13 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
     SampleVector::iterator nbegin = nend - count;
 
 	// trace process
-	if ((m_triggerState == TriggerFreeRun) || (m_triggerConditions.size() == 0) || (m_triggerState == TriggerTriggered))
+	if ((m_freeRun) || (m_triggerConditions.size() == 0) || (m_triggerState == TriggerTriggered))
 	{
 	    // trace back
 
-	    if (m_traceStart)
+	    if ((m_traceStart) && (m_preTriggerDelay + m_maxTraceDelay > 0))
 	    {
-        	int maxTraceDelay = 0;
-
-	        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace)
-	        {
-	        	if (itTrace->m_traceData.m_traceDelay > maxTraceDelay)
-	        	{
-	        		maxTraceDelay = itTrace->m_traceData.m_traceDelay;
-	        	}
-	        }
-
-	        remainder = processTraces(count + m_preTriggerDelay + maxTraceDelay, count, m_traceDiscreteMemory.current(), true);
+	        remainder = processTraces(count + m_preTriggerDelay + m_maxTraceDelay, count, m_traceDiscreteMemory.current(), true);
 	        m_traceStart = false;
 	    }
 
@@ -239,16 +236,9 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 	    if (remainder >= 0) // finished
 	    {
-	        m_glScope->newTraces();
-
 	        nbegin = nend - remainder;
 	        m_traceDiscreteMemory.current().m_endPoint = nbegin;
 	        m_traceDiscreteMemory.store(); // next memory trace
-
-	        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace) {
-                itTrace->reset();
-            }
-
             m_traceCompleteCount = 0;
 	    }
 	}
@@ -292,7 +282,7 @@ bool ScopeVisNG::nextTrigger()
 	return false; // final
 }
 
-int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceStart)
+int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceBack)
 {
     SampleVector::iterator begin = traceBuffer.current() - beginPointDelta;
     SampleVector::const_iterator end = traceBuffer.current() - endPointDelta;
@@ -300,18 +290,22 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
 
     while (begin < end)
     {
-        for (std::vector<Trace>::iterator itTrace = m_traces.begin(); itTrace != m_traces.end(); ++itTrace)
+        std::vector<TraceControl>::iterator itCtl = m_traces.m_tracesControl.begin();
+        std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+        std::vector<float *>::iterator itTrace = m_traces.m_traces[m_traces.currentBufferIndex()].begin();
+
+        for (; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace)
         {
-            if (traceStart && ((end - begin) > m_preTriggerDelay + itTrace->m_traceData.m_traceDelay)) {
+            if (traceBack && ((end - begin) > m_preTriggerDelay + itData->m_traceDelay)) {
                 continue;
             }
 
-            if (itTrace->m_traceCount < m_traceSize)
+            if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
-                float posLimit = 1.0 / itTrace->m_traceData.m_amp;
-                float negLimit = -1.0 / itTrace->m_traceData.m_amp;
+                float posLimit = 1.0 / itData->m_amp;
+                float negLimit = -1.0 / itData->m_amp;
 
-                float v = itTrace->m_projector->run(*begin) * itTrace->m_traceData.m_amp + itTrace->m_traceData.m_ofs;
+                float v = itCtl->m_projector->run(*begin) * itData->m_amp + itData->m_ofs;
 
                 if(v > posLimit) {
                     v = posLimit;
@@ -319,13 +313,14 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
                     v = negLimit;
                 }
 
-                itTrace->m_trace[2*(itTrace->m_traceCount)] = (itTrace->m_traceCount - shift); // display x
-                itTrace->m_trace[2*(itTrace->m_traceCount) + 1] = v;                           // display y
-                itTrace->m_traceCount++;
+                (*itTrace)[2*(itCtl->m_traceCount[m_traces.currentBufferIndex()])]
+                           = (itCtl->m_traceCount[m_traces.currentBufferIndex()] - shift);   // display x
+                (*itTrace)[2*(itCtl->m_traceCount[m_traces.currentBufferIndex()]) + 1] = v;  // display y
+                itCtl->m_traceCount[m_traces.currentBufferIndex()]++;
             }
-            else if (itTrace->m_traceCount < m_traceSize)
+            else
             {
-                itTrace->m_traceCount++;
+                itCtl->m_traceCount[m_traces.currentBufferIndex()]++;
 
                 if (m_traceCompleteCount < m_traces.size())
                 {
@@ -338,31 +333,19 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
             }
         }
 
-        begin++;
+        ++begin;
     }
 
     if (m_traceCompleteCount == m_traces.size()) // finished
     {
-        m_glScope->newTraces();
+        m_glScope->newTraces(&m_traces.m_traces[m_traces.currentBufferIndex()]);
+        m_traces.switchBuffer();
         traceBuffer.m_endPoint = begin;
         return end - begin; // return remainder count
     }
     else
     {
         return -1; // mark not finished
-    }
-
-}
-
-void ScopeVisNG::initTrace(Trace& trace)
-{
-    int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
-
-    for (int i = 0; i < m_traceSize; i++)
-    {
-        trace.m_trace[2*(trace.m_traceCount)] = (trace.m_traceCount - shift); // display x
-        trace.m_trace[2*(trace.m_traceCount) + 1] = 0.0f;                     // display y
-        trace.m_traceCount++;
     }
 }
 
@@ -391,20 +374,14 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         uint32_t traceSize = conf.getTraceSize();
         uint32_t timeOfsProMill = conf.getTimeOfsProMill();
+        bool freeRun = conf.getFreeRun();
 
         if (m_traceSize != traceSize)
         {
             m_traceSize = traceSize;
-
-            std::vector<Trace>::iterator it = m_traces.begin();
-
-            for (; it != m_traces.end(); ++it)
-            {
-                it->resize(m_traceSize);
-                initTrace(*it);
-            }
-
+            m_traces.resize(m_traceSize);
             m_traceDiscreteMemory.resize(m_traceSize);
+            initTraceBuffers();
 
             if (m_glScope) {
                 m_glScope->setTraceSize(m_traceSize);
@@ -420,9 +397,15 @@ bool ScopeVisNG::handleMessage(const Message& message)
             }
         }
 
+        if (freeRun != m_freeRun)
+        {
+            m_freeRun = freeRun;
+        }
+
         qDebug() << "ScopeVisNG::handleMessage: MsgConfigureScopeVisNG:"
                 << " m_traceSize: " << m_traceSize
-                << " m_timeOfsProMill: " << m_timeOfsProMill;
+                << " m_timeOfsProMill: " << m_timeOfsProMill
+                << " m_freeRun: " << m_freeRun;
 
         return true;
     }
@@ -458,21 +441,16 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgScopeVisNGAddTrace::match(message))
     {
         MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
-        m_traces.push_back(Trace(conf.getTraceData(), m_traceSize));
-        m_traces.back().init();
-        initTrace(m_traces.back());
-        m_glScope->addTrace(&m_traces.back());
+        m_traces.addTrace(conf.getTraceData(), m_traceSize);
+        initTraceBuffers();
+        updateMaxTraceDelay();
         return true;
     }
     else if (MsgScopeVisNGChangeTrace::match(message))
     {
         MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
-        int traceIndex = conf.getTraceIndex();
-
-        if (traceIndex < m_traces.size()) {
-            m_traces[traceIndex].setData(conf.getTraceData());
-        }
-
+        m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
+        updateMaxTraceDelay();
         m_glScope->updateDisplay();
 
         return true;
@@ -480,18 +458,48 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgScopeVisNGRemoveTrace::match(message))
     {
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
-        int traceIndex = conf.getTraceIndex();
-
-        if (traceIndex < m_traces.size()) {
-            m_traces.erase(m_traces.begin() + traceIndex);
-            m_glScope->removeTrace(traceIndex);
-        }
-
+        m_traces.removeTrace(conf.getTraceIndex());
+        updateMaxTraceDelay();
         return true;
     }
     else
     {
         return false;
+    }
+}
+
+
+void ScopeVisNG::updateMaxTraceDelay()
+{
+    int maxTraceDelay = 0;
+
+    for (std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin(); itData != m_traces.m_tracesData.end(); ++itData)
+    {
+        if (itData->m_traceDelay > maxTraceDelay)
+        {
+            maxTraceDelay = itData->m_traceDelay;
+        }
+    }
+
+    m_maxTraceDelay = maxTraceDelay;
+}
+
+void ScopeVisNG::initTraceBuffers()
+{
+    int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
+
+    std::vector<float *>::iterator it0 = m_traces.m_traces[0].begin();
+    std::vector<float *>::iterator it1 = m_traces.m_traces[1].begin();
+
+    for (; it0 != m_traces.m_traces[0].end(); ++it0, ++it1)
+    {
+        for (int i = 0; i < m_traceSize; i++)
+        {
+            (*it0)[2*i] = (i - shift); // display x
+            (*it0)[2*i + 1] = 0.0f;    // display y
+            (*it1)[2*i] = (i - shift); // display x
+            (*it1)[2*i + 1] = 0.0f;    // display y
+        }
     }
 }
 

@@ -51,9 +51,8 @@ public:
 
     void connectTimer(const QTimer& timer);
 
-    void addTrace(ScopeVisNG::DisplayTrace *trace);
-    void removeTrace(int index);
-    void newTraces();
+    void setTraces(std::vector<ScopeVisNG::TraceData>* tracesData, std::vector<float *>* traces);
+    void newTraces(std::vector<float *>* traces);
 
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
@@ -73,12 +72,14 @@ signals:
     void sampleRateChanged(int);
 
 private:
+    std::vector<ScopeVisNG::TraceData> *m_tracesData;
+    std::vector<float *> *m_traces;
+    uint32_t m_bufferIndex;
     DisplayMode m_displayMode;
     QTimer m_timer;
     QMutex m_mutex;
     bool m_dataChanged;
     bool m_configChanged;
-    ScopeVisNG::DisplayTraces m_traces;
     int m_sampleRate;
     int m_timeOfsProMill;
     Real m_triggerPre;

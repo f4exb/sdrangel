@@ -84,8 +84,8 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     ui->trigMode->clear();
     fillProjectionCombo(ui->trigMode);
 
-    m_scopeVis->configure(2*m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
-    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
+    m_scopeVis->configure(2*m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
 
     setTraceLenDisplay();
     setTimeScaleDisplay();
@@ -225,7 +225,7 @@ void GLScopeNGGUI::on_timeOfs_valueChanged(int value)
 
     m_timeOffset = value;
     setTimeOfsDisplay();
-    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
 }
 
 void GLScopeNGGUI::on_traceLen_valueChanged(int value)
@@ -235,7 +235,7 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     }
 
     m_traceLenMult = value;
-    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10);
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
     setTraceLenDisplay();
     setTimeScaleDisplay();
     setTimeOfsDisplay();
@@ -251,6 +251,11 @@ void GLScopeNGGUI::on_amp_valueChanged(int value)
 {
     setAmpScaleDisplay();
     changeCurrentTrace();
+}
+
+void GLScopeNGGUI::on_freerun_toggled(bool checked)
+{
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize, m_timeOffset*10, ui->freerun->isChecked());
 }
 
 void GLScopeNGGUI::setTimeScaleDisplay()
