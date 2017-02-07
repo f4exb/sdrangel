@@ -67,9 +67,9 @@ void ScopeVisNG::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill, bool freeRun)
+void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun)
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill, freeRun);
+    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill, triggerPre, freeRun);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -176,7 +176,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
         	}
         	else // look for trigger
         	{
-        		bool condition = triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
+        		bool condition = compareTrigger(*begin, triggerCondition);  //  triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
         		bool trigger;
 
 				if (triggerCondition.m_triggerData.m_triggerBothEdges) {
@@ -314,7 +314,7 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
 
                 if (projectionType == ProjectionMagLin) {
                     v = itCtl->m_projector->run(*begin)*itData->m_amp - itData->m_ofs - 1.0/itData->m_amp;
-                } else if (projectionType == ProjectionMagDB) {
+                } else if (projectionType == ProjectionMagDB) { // TODO: optimize computation using a specialized projector (2 projectors: value and trace)
                     v = 1.0f + 2.0f*(((itCtl->m_projector->run(*begin))/100.0f) - itData->m_ofs)  + 1.0f - 1.0f/itData->m_amp;
                     //v = itCtl->m_projector->run(*begin) * itData->m_amp - itData->m_ofs;
                 } else {
@@ -388,6 +388,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         uint32_t traceSize = conf.getTraceSize();
         uint32_t timeOfsProMill = conf.getTimeOfsProMill();
+        uint32_t triggerPre = conf.getTriggerPre();
         bool freeRun = conf.getFreeRun();
 
         if (m_traceSize != traceSize)
@@ -411,6 +412,12 @@ bool ScopeVisNG::handleMessage(const Message& message)
             }
         }
 
+        if (m_preTriggerDelay != triggerPre)
+        {
+        	m_preTriggerDelay = triggerPre;
+        	m_glScope->setTriggerPre(m_preTriggerDelay);
+        }
+
         if (freeRun != m_freeRun)
         {
             m_freeRun = freeRun;
@@ -419,6 +426,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         qDebug() << "ScopeVisNG::handleMessage: MsgConfigureScopeVisNG:"
                 << " m_traceSize: " << m_traceSize
                 << " m_timeOfsProMill: " << m_timeOfsProMill
+                << " m_preTriggerDelay: " << m_preTriggerDelay
                 << " m_freeRun: " << m_freeRun;
 
         return true;

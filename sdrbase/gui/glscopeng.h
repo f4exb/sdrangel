@@ -57,7 +57,7 @@ public:
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
 
-    void setTriggerPre(Real triggerPre);
+    void setTriggerPre(uint32_t triggerPre); //!< number of samples
     void setTimeOfsProMill(int timeOfsProMill);
     void setSampleRate(int sampleRate);
     void setTimeBase(int timeBase);
@@ -82,7 +82,7 @@ private:
     bool m_configChanged;
     int m_sampleRate;
     int m_timeOfsProMill;
-    Real m_triggerPre;
+    uint32_t m_triggerPre;
     int m_traceSize;
     int m_timeBase;
     int m_timeOffset;

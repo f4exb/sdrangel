@@ -335,7 +335,7 @@ void GLScopeNG::setTimeBase(int timeBase)
     update();
 }
 
-void GLScopeNG::setTriggerPre(Real triggerPre)
+void GLScopeNG::setTriggerPre(uint32_t triggerPre)
 {
     m_triggerPre = triggerPre;
     m_configChanged = true;
@@ -382,7 +382,8 @@ void GLScopeNG::applyConfig()
 
     QFontMetrics fm(font());
     int M = fm.width("-");
-    float t_start = ((m_timeOfsProMill / 1000.0) - m_triggerPre) * ((float) m_traceSize / m_sampleRate);
+    //float t_start = ((m_timeOfsProMill / 1000.0) * ((float) m_traceSize / m_sampleRate)) - ((float) m_triggerPre / m_sampleRate);
+    float t_start = (((m_timeOfsProMill / 1000.0f) * (float) m_traceSize) / m_sampleRate) - ((float) m_triggerPre / m_sampleRate);
     float t_len = ((float) m_traceSize / m_sampleRate) / (float) m_timeBase;
 
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
