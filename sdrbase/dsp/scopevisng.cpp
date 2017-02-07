@@ -242,6 +242,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	        m_traceDiscreteMemory.current().m_endPoint = nbegin;
 	        m_traceDiscreteMemory.store(); // next memory trace
             m_traceCompleteCount = 0;
+            m_triggerState = TriggerUntriggered;
 	    }
 	}
 
@@ -271,17 +272,19 @@ bool ScopeVisNG::nextTrigger()
 		}
 	}
 
-	if (m_currentTriggerIndex < m_triggerConditions.size())
+	if (m_currentTriggerIndex < m_triggerConditions.size() - 1)
 	{
 		m_currentTriggerIndex++;
 		m_triggerState = TriggerUntriggered; // repeat operations for next trigger
 		return true; // not final keep going
 	}
-
-	// now this is really finished
-	m_triggerState == TriggerTriggered;
-	m_currentTriggerIndex = 0;
-	return false; // final
+	else
+	{
+	    // now this is really finished
+	    m_triggerState = TriggerTriggered;
+	    m_currentTriggerIndex = 0;
+	    return false; // final
+	}
 }
 
 int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceBack)
