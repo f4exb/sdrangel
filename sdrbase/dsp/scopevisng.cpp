@@ -144,6 +144,25 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 	SampleVector::const_iterator begin(cbegin);
 
+	while (begin < end)
+	{
+	    if (begin + m_traceSize > end)
+	    {
+	        processTrace(begin, end);
+	        begin = end;
+	    }
+	    else
+	    {
+	        processTrace(begin, begin + m_traceSize);
+	        begin += m_traceSize;
+	    }
+	}
+}
+
+void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end)
+{
+	SampleVector::const_iterator begin(cbegin);
+
 	// memory storage
 
     m_traceDiscreteMemory.current().write(cbegin, end);
@@ -215,7 +234,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 	if (remainder > 0)
 	{
-	    feed(nbegin, nend, positiveOnly);
+	    processTrace(nbegin, nend);
 	}
 }
 

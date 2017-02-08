@@ -778,6 +778,11 @@ private:
     bool nextTrigger(); //!< Returns true if not final
 
     /**
+     * Process a sample trace which length is at most the trace length (m_traceSize)
+     */
+    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+
+    /**
      * Process traces from complex trace memory buffer.
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
