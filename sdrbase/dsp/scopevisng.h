@@ -350,16 +350,27 @@ private:
         virtual Real run(const Sample& s)
         {
             Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
-            Real dPhi = curArg - m_prevArg;
+            Real dPhi = (curArg - m_prevArg) / M_PI;
             m_prevArg = curArg;
 
-            if (dPhi < -M_PI) {
-                dPhi += 2.0 * M_PI;
-            } else if (dPhi > M_PI) {
-                dPhi -= 2.0 * M_PI;
+            if (dPhi < -1.0f) {
+                dPhi += 2.0f;
+            } else if (dPhi > 1.0f) {
+                dPhi -= 2.0f;
             }
 
-            return dPhi/M_PI;
+            return dPhi;
+
+//            Real dPhi = curArg - m_prevArg;
+//            m_prevArg = curArg;
+//
+//            if (dPhi < -M_PI) {
+//                dPhi += 2.0 * M_PI;
+//            } else if (dPhi > M_PI) {
+//                dPhi -= 2.0 * M_PI;
+//            }
+//
+//            return dPhi/M_PI;
         }
 
     private:
@@ -668,6 +679,77 @@ private:
         }
     };
 
+    class TriggerComparator
+    {
+    public:
+        TriggerComparator() : m_level(0), m_reset(true)
+        {
+            computeLevels();
+        }
+
+        bool triggered(const Sample& s, TriggerCondition& triggerCondition)
+        {
+            if (triggerCondition.m_triggerData.m_triggerLevel != m_level)
+            {
+                m_level = triggerCondition.m_triggerData.m_triggerLevel;
+                computeLevels();
+            }
+
+            bool condition, trigger;
+
+            if (triggerCondition.m_projector->getProjectionType() == ProjectionMagDB) {
+                condition = triggerCondition.m_projector->run(s) > m_levelPwoerDB;
+            } else if (triggerCondition.m_projector->getProjectionType() == ProjectionMagLin) {
+                condition = triggerCondition.m_projector->run(s) > m_levelPowerLin;
+            } else {
+                condition = triggerCondition.m_projector->run(s) > m_level;
+            }
+
+            if (m_reset)
+            {
+                triggerCondition.m_prevCondition = condition;
+                m_reset = false;
+                return false;
+            }
+
+            if (triggerCondition.m_triggerData.m_triggerBothEdges) {
+                trigger = triggerCondition.m_prevCondition ? !condition : condition; // This is a XOR between bools
+            } else if (triggerCondition.m_triggerData.m_triggerPositiveEdge) {
+                trigger = !triggerCondition.m_prevCondition && condition;
+            } else {
+                trigger = triggerCondition.m_prevCondition && !condition;
+            }
+
+//            if (trigger) {
+//                qDebug("ScopeVisNG::triggered: %s/%s %f/%f",
+//                        triggerCondition.m_prevCondition ? "T" : "F",
+//                        condition ? "T" : "F",
+//                        triggerCondition.m_projector->run(s),
+//                        triggerCondition.m_triggerData.m_triggerLevel);
+//            }
+
+            triggerCondition.m_prevCondition = condition;
+            return trigger;
+        }
+
+        void reset()
+        {
+            m_reset = true;
+        }
+
+    private:
+        void computeLevels()
+        {
+            m_levelPowerLin = m_level + 1.0f;
+            m_levelPwoerDB = (100.0f * (m_level - 1.0f));
+        }
+
+        Real m_level;
+        Real m_levelPwoerDB;
+        Real m_levelPowerLin;
+        bool m_reset;
+    };
+
     GLScopeNG* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
@@ -686,21 +768,7 @@ private:
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
-
-    /**
-     * Test sample against trigger level. Returns true if sample is above level.
-     * TODO: optimize power level computation by storing value when it changes
-     */
-    bool compareTrigger(const Sample& s, TriggerCondition& triggerCondition)
-    {
-    	if (triggerCondition.m_projector->getProjectionType() == ProjectionMagDB) {
-        	return triggerCondition.m_projector->run(s) > (100.0f * (triggerCondition.m_triggerData.m_triggerLevel - 1.0f));
-    	} else if (triggerCondition.m_projector->getProjectionType() == ProjectionMagLin) {
-    		return triggerCondition.m_projector->run(s) > triggerCondition.m_triggerData.m_triggerLevel + 1.0f;
-    	} else {
-        	return triggerCondition.m_projector->run(s) > triggerCondition.m_triggerData.m_triggerLevel;
-    	}
-    }
+    TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode

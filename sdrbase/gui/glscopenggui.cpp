@@ -352,7 +352,10 @@ void GLScopeNGGUI::on_trigDelay_valueChanged(int value)
 void GLScopeNGGUI::on_trigPre_valueChanged(int value)
 {
 	setTrigPreDisplay();
-	changeCurrentTrigger();
+    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize,
+            m_timeOffset*10,
+            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+            ui->freerun->isChecked()); // TODO: implement one shot feature
 }
 
 void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
@@ -615,8 +618,13 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
-    traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
     traceData.m_traceDelay = 0;
+
+    if (traceData.m_projectionType == ScopeVisNG::ProjectionMagLin) {
+        traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 2000.0f;
+    } else {
+        traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
+    }
 }
 
 void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)

@@ -81,7 +81,10 @@ void ScopeVisNG::addTrace(const TraceData& traceData)
 
 void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
 {
-    qDebug("ScopeVisNG::changeTrace: trace #%d", traceIndex);
+    qDebug() << "ScopeVisNG::changeTrace:"
+            << " trace: " << traceIndex
+            << " m_amp: " << traceData.m_amp
+            << " m_ofs: " << traceData.m_ofs;
     Message* cmd = MsgScopeVisNGChangeTrace::create(traceData, traceIndex);
     getInputMessageQueue()->push(cmd);
 }
@@ -158,56 +161,18 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
         while (begin < end)
         {
-        	if (m_triggerState == TriggerDelay)
-        	{
-                if (triggerCondition.m_triggerDelayCount > 0)
-                {
-                    triggerCondition.m_triggerDelayCount--; // pass
-                }
-                else // delay expired => fire this trigger
-                {
-                	if (!nextTrigger()) // finished
-                	{
-                		m_traceStart = true; // start trace processing
-                		m_triggerPoint = begin;
-                		break;
-                	}
-                }
-        	}
-        	else // look for trigger
-        	{
-        		bool condition = compareTrigger(*begin, triggerCondition);  //  triggerCondition.m_projector->run(*begin) > triggerCondition.m_triggerData.m_triggerLevel;
-        		bool trigger;
-
-				if (triggerCondition.m_triggerData.m_triggerBothEdges) {
-					trigger = triggerCondition.m_prevCondition ^ condition;
-				} else {
-					trigger = (triggerCondition.m_prevCondition ^ condition) && (condition ^ !triggerCondition.m_triggerData.m_triggerPositiveEdge);
-				}
-
-				triggerCondition.m_prevCondition = condition;
-
-				if (trigger) // trigger condition
-				{
-					if (triggerCondition.m_triggerData.m_triggerDelay > 0) // there is a delay => initialize the delay
-					{
-						triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerData.m_triggerDelay;
-						m_triggerState = TriggerDelay;
-					}
-					else
-					{
-	                	if (!nextTrigger()) // finished
-	                	{
-	                		m_traceStart = true; // start trace processing
-	                		m_triggerPoint = begin;
-	                		break;
-	                	}
-					}
-				}
-        	}
+            // look for trigger
+            if (m_triggerComparator.triggered(*begin, triggerCondition))
+            {
+                m_traceStart = true; // start trace processing
+                m_triggerPoint = begin;
+                m_triggerComparator.reset();
+                m_triggerState = TriggerTriggered;
+                break;
+            }
 
             ++begin;
-		} // begin < end
+        }
 	}
 	else
 	{
@@ -307,24 +272,22 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
 
             if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
-                float posLimit = 1.0 / itData->m_amp;
-                float negLimit = -1.0 / itData->m_amp;
                 ProjectionType projectionType = itData->m_projectionType;
                 float v;
 
                 if (projectionType == ProjectionMagLin) {
-                    v = itCtl->m_projector->run(*begin)*itData->m_amp - itData->m_ofs - 1.0/itData->m_amp;
-                } else if (projectionType == ProjectionMagDB) { // TODO: optimize computation using a specialized projector (2 projectors: value and trace)
-                    v = 1.0f + 2.0f*(((itCtl->m_projector->run(*begin))/100.0f) - itData->m_ofs)  + 1.0f - 1.0f/itData->m_amp;
-                    //v = itCtl->m_projector->run(*begin) * itData->m_amp - itData->m_ofs;
+                    v = (itCtl->m_projector->run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
+                } else if (projectionType == ProjectionMagDB) {
+                    float p = itCtl->m_projector->run(*begin) - (100.0f * itData->m_ofs);
+                    v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
                 } else {
-                    v = itCtl->m_projector->run(*begin) * itData->m_amp - itData->m_ofs;
+                    v = (itCtl->m_projector->run(*begin) - itData->m_ofs) * itData->m_amp;
                 }
 
-                if(v > posLimit) {
-                    v = posLimit;
-                } else if (v < negLimit) {
-                    v = negLimit;
+                if(v > 1.0f) {
+                    v = 1.0f;
+                } else if (v < -1.0f) {
+                    v = -1.0f;
                 }
 
                 (*itTrace)[2*(itCtl->m_traceCount[m_traces.currentBufferIndex()])]

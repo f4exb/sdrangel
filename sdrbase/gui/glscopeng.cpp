@@ -305,7 +305,8 @@ void GLScopeNG::paintGL()
             float rectX = m_glScopeRect1.x();
             float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
             float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
-            float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
+            //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
+            float rectH = -m_glScopeRect1.height() / 2.0f;
 
             QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
             QMatrix4x4 mat;
@@ -994,9 +995,9 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
         break;
     case ScopeVisNG::ProjectionMagLin:
         if (amp_range < 2.0) {
-            scale.setRange(Unit::None, amp_ofs * 500.0, amp_range * 1000.0 + amp_ofs * 500.0);
+            scale.setRange(Unit::None, amp_ofs * 1000.0, amp_range * 1000.0 + amp_ofs * 1000.0);
         } else {
-            scale.setRange(Unit::None, amp_ofs/2.0, amp_range + amp_ofs/2.0);
+            scale.setRange(Unit::None, amp_ofs, amp_range + amp_ofs);
         }
         break;
     case ScopeVisNG::ProjectionPhase: // Phase or frequency
