@@ -202,14 +202,14 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
         }
     }
 
-	int remainder = -1;
-    int count = end - begin; // number of samples in traceback buffer past the current point
-    SampleVector::iterator nend = m_traceDiscreteMemory.current().current();
-    SampleVector::iterator nbegin = nend - count;
-
 	// trace process
 	if (m_triggerState == TriggerTriggered)
 	{
+	    int remainder = -1;
+	    int count = end - begin; // number of samples in traceback buffer past the current point
+	    SampleVector::iterator nend = m_traceDiscreteMemory.current().current();
+	    SampleVector::iterator nbegin = nend - count;
+
 	    // trace back
 
 	    if ((m_traceStart) && (m_preTriggerDelay + m_maxTraceDelay > 0))
@@ -231,14 +231,13 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 	        m_traceDiscreteMemory.store(); // next memory trace
             m_traceCompleteCount = 0;
             m_triggerState = TriggerUntriggered;
+
+            // process remainder recursively
+            if (remainder != 0)
+            {
+                processTrace(nbegin, nend);
+            }
 	    }
-	}
-
-	// process remainder recursively
-
-	if (remainder > 0)
-	{
-	    processTrace(nbegin, nend);
 	}
 }
 
