@@ -787,7 +787,7 @@ private:
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
      */
-    int processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceBack = false);
+    int processTraces(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool traceBack = false);
 
     /**
      * Get maximum trace delay

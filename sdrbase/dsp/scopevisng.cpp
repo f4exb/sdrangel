@@ -207,27 +207,27 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 	{
 	    int remainder = -1;
 	    int count = end - begin; // number of samples in traceback buffer past the current point
-	    SampleVector::iterator nend = m_traceDiscreteMemory.current().current();
-	    SampleVector::iterator nbegin = nend - count;
+	    SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
+	    SampleVector::iterator mbegin = mend - count;
 
 	    // trace back
 
 	    if ((m_traceStart) && (m_preTriggerDelay + m_maxTraceDelay > 0))
 	    {
-	        remainder = processTraces(count + m_preTriggerDelay + m_maxTraceDelay, count, m_traceDiscreteMemory.current(), true);
+	        remainder = processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, mbegin, true);
 	        m_traceStart = false;
 	    }
 
 	    if (remainder < 0)
         {
 	        // live trace
-            remainder = processTraces(count, 0, m_traceDiscreteMemory.current());
+            remainder = processTraces(mbegin, mend);
         }
 
 	    if (remainder >= 0) // finished
 	    {
-	        nbegin = nend - remainder;
-	        m_traceDiscreteMemory.current().m_endPoint = nbegin;
+	        mbegin = mend - remainder;
+	        m_traceDiscreteMemory.current().m_endPoint = mbegin;
 	        m_traceDiscreteMemory.store(); // next memory trace
             m_traceCompleteCount = 0;
             m_triggerState = TriggerUntriggered;
@@ -235,7 +235,7 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
             // process remainder recursively
             if (remainder != 0)
             {
-                processTrace(nbegin, nend);
+                processTrace(mbegin, mend);
             }
 	    }
 	}
@@ -274,10 +274,9 @@ bool ScopeVisNG::nextTrigger()
 	}
 }
 
-int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackBuffer& traceBuffer, bool traceBack)
+int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool traceBack)
 {
-    SampleVector::iterator begin = traceBuffer.current() - beginPointDelta;
-    SampleVector::const_iterator end = traceBuffer.current() - endPointDelta;
+    SampleVector::const_iterator begin(cbegin);
     int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
 
     while (begin < end)
@@ -339,7 +338,6 @@ int ScopeVisNG::processTraces(int beginPointDelta, int endPointDelta, TraceBackB
     {
         m_glScope->newTraces(&m_traces.m_traces[m_traces.currentBufferIndex()]);
         m_traces.switchBuffer();
-        traceBuffer.m_endPoint = begin;
         return end - begin; // return remainder count
     }
     else
