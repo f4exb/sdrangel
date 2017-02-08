@@ -413,7 +413,7 @@ void GLScopeNGGUI::setTimeScaleDisplay()
 
 void GLScopeNGGUI::setTraceLenDisplay()
 {
-    uint n_samples = m_traceLenMult * ScopeVisNG::m_traceChunkSize;
+    unsigned int n_samples = m_traceLenMult * ScopeVisNG::m_traceChunkSize;
 
     if (n_samples < 1000) {
         ui->traceLenText->setToolTip(tr("%1S").arg(n_samples));
@@ -424,7 +424,7 @@ void GLScopeNGGUI::setTraceLenDisplay()
     }
 
     m_sampleRate = m_glScope->getSampleRate();
-    qreal t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate);
+    double t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate);
 
     if(t < 0.000001)
         ui->traceLenText->setText(tr("%1\nns").arg(t * 1000000000.0));
@@ -438,7 +438,7 @@ void GLScopeNGGUI::setTraceLenDisplay()
 
 void GLScopeNGGUI::setTimeOfsDisplay()
 {
-    qreal dt = m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate;
+    double dt = m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate;
 
     if(dt < 0.000001)
         ui->timeOfsText->setText(tr("%1\nns").arg(dt * 1000000000.0));
@@ -453,11 +453,11 @@ void GLScopeNGGUI::setTimeOfsDisplay()
 void GLScopeNGGUI::setAmpScaleDisplay()
 {
     ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
-    float ampValue = amps[ui->amp->value()];
+    double ampValue = amps[ui->amp->value()];
 
     if (projectionType == ScopeVisNG::ProjectionMagDB)
     {
-        float displayValue = ampValue*500.0f;
+        double displayValue = ampValue*500.0f;
 
         if (displayValue < 10.0f) {
             ui->ampText->setText(tr("%1\ndB").arg(displayValue, 0, 'f', 2));
@@ -468,7 +468,7 @@ void GLScopeNGGUI::setAmpScaleDisplay()
     }
     else
     {
-        qreal a = ampValue*10.0f;
+        double a = ampValue*10.0f;
 
         if(a < 0.000001)
             ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
@@ -484,7 +484,7 @@ void GLScopeNGGUI::setAmpScaleDisplay()
 void GLScopeNGGUI::setAmpOfsDisplay()
 {
 	ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
-	float o = (ui->ofsCoarse->value() * 10.0f) + (ui->ofsFine->value() / 20.0f);
+	double o = (ui->ofsCoarse->value() * 10.0f) + (ui->ofsFine->value() / 20.0f);
 
     if (projectionType == ScopeVisNG::ProjectionMagDB)
     {
@@ -492,7 +492,7 @@ void GLScopeNGGUI::setAmpOfsDisplay()
     }
     else
     {
-        float a;
+        double a;
 
         if (projectionType == ScopeVisNG::ProjectionMagLin)
         {
@@ -516,7 +516,7 @@ void GLScopeNGGUI::setAmpOfsDisplay()
 
 void GLScopeNGGUI::setTrigLevelDisplay()
 {
-    float t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 20000.0f);
+    double t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 20000.0f);
 	ScopeVisNG::ProjectionType projectionType = (ScopeVisNG::ProjectionType) ui->trigMode->currentIndex();
 
     ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(ui->trigLevelCoarse->value() / 100.0f));
@@ -527,7 +527,7 @@ void GLScopeNGGUI::setTrigLevelDisplay()
 	}
 	else
 	{
-		float a;
+	    double a;
 
 		if (projectionType == ScopeVisNG::ProjectionMagLin) {
 			a = 1.0 + t;
@@ -561,7 +561,7 @@ void GLScopeNGGUI::setTrigDelayDisplay()
 	}
 
 	m_sampleRate = m_glScope->getSampleRate();
-	float t = (n_samples_delay * 1.0f / m_sampleRate);
+	double t = (n_samples_delay * 1.0f / m_sampleRate);
 
 	if(t < 0.000001)
 		ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0));
@@ -575,7 +575,7 @@ void GLScopeNGGUI::setTrigDelayDisplay()
 
 void GLScopeNGGUI::setTrigPreDisplay()
 {
-    float dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
+    double dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
 
 	if(dt < 0.000001)
 		ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f));
