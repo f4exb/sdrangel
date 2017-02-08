@@ -210,13 +210,23 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 	    SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
 	    SampleVector::iterator mbegin = mend - count;
 
-	    // trace back
-
-	    if ((m_traceStart) && (m_preTriggerDelay + m_maxTraceDelay > 0))
+	    if (m_traceStart)
 	    {
-	        remainder = processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, mbegin, true);
+	        // trace back
+	        if (m_maxTraceDelay > 0)
+	        {
+	            processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, mbegin - m_preTriggerDelay, true);
+	        }
+
+	        // pre-trigger
+	        if (m_preTriggerDelay > 0)
+	        {
+	            remainder = processTraces(mbegin - m_preTriggerDelay, mbegin);
+	        }
+
 	        m_traceStart = false;
 	    }
+
 
 	    if (remainder < 0)
         {
@@ -287,7 +297,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 
         for (; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace)
         {
-            if (traceBack && ((end - begin) > m_preTriggerDelay + itData->m_traceDelay)) {
+            if (traceBack && ((end - begin) > itData->m_traceDelay)) {
                 continue;
             }
 
