@@ -174,29 +174,33 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 
     // trigger process
 
-	if (!m_freeRun && (m_triggerConditions.size() > 0) && ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)))
-	{
-		TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
-
-        while (begin < end)
+    if ((m_freeRun) || (m_triggerConditions.size() == 0)) // immediate re-trigger
+    {
+        m_traceStart = true; // start trace processing
+        m_triggerState = TriggerTriggered;
+    }
+    else
+    {
+        if ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay))
         {
-            // look for trigger
-            if (m_triggerComparator.triggered(*begin, triggerCondition))
-            {
-                m_traceStart = true; // start trace processing
-                m_triggerPoint = begin;
-                m_triggerComparator.reset();
-                m_triggerState = TriggerTriggered;
-                break;
-            }
+            TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
 
-            ++begin;
+            while (begin < end)
+            {
+                // look for trigger
+                if (m_triggerComparator.triggered(*begin, triggerCondition))
+                {
+                    m_traceStart = true; // start trace processing
+                    m_triggerPoint = begin;
+                    m_triggerComparator.reset();
+                    m_triggerState = TriggerTriggered;
+                    break;
+                }
+
+                ++begin;
+            }
         }
-	}
-	else
-	{
-	    m_traceStart = true;
-	}
+    }
 
 	int remainder = -1;
     int count = end - begin; // number of samples in traceback buffer past the current point
@@ -204,7 +208,7 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
     SampleVector::iterator nbegin = nend - count;
 
 	// trace process
-	if ((m_freeRun) || (m_triggerConditions.size() == 0) || (m_triggerState == TriggerTriggered))
+	if (m_triggerState == TriggerTriggered)
 	{
 	    // trace back
 
