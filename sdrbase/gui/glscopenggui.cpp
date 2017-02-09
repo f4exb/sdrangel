@@ -384,6 +384,11 @@ void GLScopeNGGUI::on_freerun_toggled(bool checked)
 			ui->freerun->isChecked()); // TODO: implement one shot feature
 }
 
+void GLScopeNGGUI::setTraceIndexDisplay()
+{
+	ui->traceText->setText(tr("%1").arg(ui->trace->value()));
+}
+
 void GLScopeNGGUI::setTimeScaleDisplay()
 {
     m_sampleRate = m_glScope->getSampleRate();
@@ -512,6 +517,11 @@ void GLScopeNGGUI::setAmpOfsDisplay()
 		else
 			ui->ofsText->setText(tr("%1").arg(a * 1.0));
     }
+}
+
+void GLScopeNGGUI::setTrigIndexDisplay()
+{
+	ui->trigText->setText(tr("%1").arg(ui->trig->value()));
 }
 
 void GLScopeNGGUI::setTrigLevelDisplay()

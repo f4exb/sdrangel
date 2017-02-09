@@ -65,6 +65,7 @@ private:
 
     void applySettings();
     // First row
+    void setTraceIndexDisplay();
     void setTimeScaleDisplay();
     void setTraceLenDisplay();
     void setTimeOfsDisplay();
@@ -72,6 +73,7 @@ private:
     void setAmpScaleDisplay();
     void setAmpOfsDisplay();
     // Third row
+    void setTrigIndexDisplay();
 	void setTrigLevelDisplay();
 	void setTrigDelayDisplay();
 	void setTrigPreDisplay();
