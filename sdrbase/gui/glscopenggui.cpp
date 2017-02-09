@@ -343,10 +343,16 @@ void GLScopeNGGUI::on_trigLevelFine_valueChanged(int value)
 	changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigDelay_valueChanged(int value)
+void GLScopeNGGUI::on_trigDelayCoarse_valueChanged(int value)
 {
 	setTrigDelayDisplay();
 	changeCurrentTrigger();
+}
+
+void GLScopeNGGUI::on_trigDelayFine_valueChanged(int value)
+{
+    setTrigDelayDisplay();
+    changeCurrentTrigger();
 }
 
 void GLScopeNGGUI::on_trigPre_valueChanged(int value)
@@ -558,7 +564,8 @@ void GLScopeNGGUI::setTrigLevelDisplay()
 
 void GLScopeNGGUI::setTrigDelayDisplay()
 {
-    unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * ui->trigDelay->value();
+    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
+    unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult;
 
 	if (n_samples_delay < 1000) {
 		ui->trigDelayText->setToolTip(tr("%1S").arg(n_samples_delay));
@@ -644,8 +651,9 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.m_triggerLevel = (ui->trigLevelCoarse->value() / 100.0) + (ui->trigLevelFine->value() / 20000.0);
     triggerData.m_triggerPositiveEdge = ui->trigPos->isChecked();
     triggerData.m_triggerBothEdges = ui->trigBoth->isChecked();
-    triggerData.m_triggerDelay = ui->trigDelay->value();
     triggerData.m_triggerRepeat = ui->trigCount->value();
+    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
+    triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult);
 }
 
 void GLScopeNGGUI::applySettings()

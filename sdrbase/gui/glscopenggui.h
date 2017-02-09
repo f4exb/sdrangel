@@ -113,7 +113,8 @@ private slots:
     void on_trigBoth_toggled(bool checked);
     void on_trigLevelCoarse_valueChanged(int value);
     void on_trigLevelFine_valueChanged(int value);
-    void on_trigDelay_valueChanged(int value);
+    void on_trigDelayCoarse_valueChanged(int value);
+    void on_trigDelayFine_valueChanged(int value);
     void on_trigPre_valueChanged(int value);
     void on_trigOneShot_toggled(bool checked);
     void on_freerun_toggled(bool checked);
