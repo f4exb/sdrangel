@@ -757,12 +757,11 @@ private:
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
     int m_traceSize;                               //!< Size of traces in number of samples
-    int m_memTraceSize;                            //!< Trace size in memory in number of samples up to trace size
+    int m_nbSamples;                               //!< Number of samples yet to process in one complex trace
     int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
     int m_traceFill;                               //!< Count of samples accumulated into trace
     int m_zTraceIndex;                             //!< Index of the trace used for Z input (luminance or false colors)
-    int m_traceCompleteCount;                      //!< Count of completed traces
     SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
     int m_sampleRate;
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
@@ -780,7 +779,7 @@ private:
     /**
      * Process a sample trace which length is at most the trace length (m_traceSize)
      */
-    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, int& triggerPoint);
 
     /**
      * Process traces from complex trace memory buffer.
