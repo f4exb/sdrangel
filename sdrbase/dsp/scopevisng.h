@@ -779,7 +779,7 @@ private:
     /**
      * Process a sample trace which length is at most the trace length (m_traceSize)
      */
-    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, int& triggerPoint);
+    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, int& triggerPointToEnd);
 
     /**
      * Process traces from complex trace memory buffer.

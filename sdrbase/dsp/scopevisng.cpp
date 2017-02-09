@@ -142,32 +142,32 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 	}
 
 	SampleVector::const_iterator begin(cbegin);
-	int triggerPoint;
+	int triggerPointToEnd;
 
 	while (begin < end)
 	{
 	    if (begin + m_traceSize > end)
 	    {
-	        triggerPoint = -1;
-	        processTrace(begin, end, triggerPoint);
-	        if (triggerPoint >= 0) {
-	            m_triggerPoint = begin + triggerPoint;
+	        triggerPointToEnd = -1;
+	        processTrace(begin, end, triggerPointToEnd);
+	        if (triggerPointToEnd >= 0) {
+	            m_triggerPoint = end - triggerPointToEnd;
 	        }
 	        begin = end;
 	    }
 	    else
 	    {
-            triggerPoint = -1;
-	        processTrace(begin, begin + m_traceSize, triggerPoint);
-            if (triggerPoint >= 0) {
-                m_triggerPoint = begin + triggerPoint;
+            triggerPointToEnd = -1;
+	        processTrace(begin, begin + m_traceSize, triggerPointToEnd);
+            if (triggerPointToEnd >= 0) {
+                m_triggerPoint = begin + m_traceSize -triggerPointToEnd;
             }
 	        begin += m_traceSize;
 	    }
 	}
 }
 
-void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, int& triggerPoint)
+void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, int& triggerPointToEnd)
 {
 	SampleVector::const_iterator begin(cbegin);
 
@@ -206,7 +206,7 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
                     m_nbSamples = m_traceSize + m_maxTraceDelay;
                     m_triggerComparator.reset();
                     m_triggerState = TriggerTriggered;
-                    triggerPoint = begin - cbegin;
+                    triggerPointToEnd = end - begin;
                     break;
                 }
 
@@ -220,7 +220,6 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 	{
 	    int remainder = -1;
 	    int count = end - begin; // number of samples in traceback buffer past the current point
-	    int mpoint = begin -cbegin;
 	    SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
 	    SampleVector::iterator mbegin = mend - count;
 
@@ -250,7 +249,6 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 
 	    if (remainder >= 0) // finished
 	    {
-	        mpoint += (mend - mbegin) - remainder;
 	        mbegin = mend - remainder;
 	        m_traceDiscreteMemory.current().m_endPoint = mbegin;
 	        m_traceDiscreteMemory.store(); // next memory trace
@@ -259,12 +257,12 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
             // process remainder recursively
             if (remainder != 0)
             {
-                int mTriggerPoint = -1;
+                int mTriggerPointToEnd = -1;
 
-                processTrace(mbegin, mend, mTriggerPoint);
+                processTrace(mbegin, mend, mTriggerPointToEnd);
 
-                if (mTriggerPoint >= 0) {
-                    triggerPoint = mpoint + mTriggerPoint;
+                if (mTriggerPointToEnd >= 0) {
+                    triggerPointToEnd = mTriggerPointToEnd;
                 }
 
                 //qDebug("ScopeVisNG::processTrace: process remainder recursively (%d %d)", mpoint, mTriggerPoint);
