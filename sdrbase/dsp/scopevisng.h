@@ -51,13 +51,15 @@ public:
         float m_amp;                     //!< Amplification factor
         float m_ofs;                     //!< Offset factor
         int m_traceDelay;                //!< Trace delay in number of samples
+        float m_triggerDisplayLevel;     //!< Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
 
         TraceData() :
             m_projectionType(ProjectionReal),
             m_inputIndex(0),
             m_amp(1.0f),
             m_ofs(0.0f),
-            m_traceDelay(0)
+            m_traceDelay(0),
+			m_triggerDisplayLevel(2.0)   // OVer scale by default (2.0)
         {}
     };
 
@@ -590,10 +592,14 @@ private:
             if (m_projector) delete m_projector;
         }
 
-        void init(ProjectionType projectionType)
+        void initProjector(ProjectionType projectionType)
         {
-            if (m_projector) delete m_projector;
             m_projector = createProjector(projectionType);
+        }
+
+        void releaseProjector()
+        {
+            delete m_projector;
         }
 
         void reset()
@@ -626,13 +632,20 @@ private:
             }
         }
 
+        bool isVerticalDisplayChange(const TraceData& traceData, uint32_t traceIndex)
+        {
+        	return (m_tracesData[traceIndex].m_projectionType != traceData.m_projectionType)
+        			|| (m_tracesData[traceIndex].m_amp != traceData.m_amp)
+					|| (m_tracesData[traceIndex].m_ofs != traceData.m_ofs);
+        }
+
         void addTrace(const TraceData& traceData, int traceSize)
         {
             resize(traceSize);
 
             m_tracesData.push_back(traceData);
             m_tracesControl.push_back(TraceControl());
-            m_tracesControl.back().init(traceData.m_projectionType);
+            m_tracesControl.back().initProjector(traceData.m_projectionType);
             float *x0 = new float[2*m_traceSize];
             float *x1 = new float[2*m_traceSize];
             m_traces[0].push_back(x0);
@@ -642,7 +655,8 @@ private:
         void changeTrace(const TraceData& traceData, uint32_t traceIndex)
         {
             if (traceIndex < m_tracesControl.size()) {
-                m_tracesControl[traceIndex].init(traceData.m_projectionType);
+                m_tracesControl[traceIndex].releaseProjector();
+                m_tracesControl[traceIndex].initProjector(traceData.m_projectionType);
                 m_tracesData[traceIndex] = traceData;
             }
         }
@@ -651,6 +665,7 @@ private:
         {
             if (traceIndex < m_tracesControl.size())
             {
+            	m_tracesControl[traceIndex].releaseProjector();
                 m_tracesControl.erase(m_tracesControl.begin() + traceIndex);
                 m_tracesData.erase(m_tracesData.begin() + traceIndex);
                 delete[] (m_traces[0])[traceIndex];
@@ -770,6 +785,7 @@ private:
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
     int m_currentTriggerIndex;                     //!< Index of current index in the chain
+    int m_focusedTriggerIndex;                     //!< Index of the trigger that has focus
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
     int m_traceSize;                               //!< Size of traces in number of samples
@@ -813,6 +829,15 @@ private:
      * Initialize trace buffers
      */
     void initTraceBuffers();
+
+    /**
+     * Calculate trigger levels on display
+     * - every time a trigger condition focus changes TBD
+     * - every time the focused trigger condition changes its projection type or level
+     * - every time a trace data changes: projection type, amp, offset
+     * - every time a trace data is added or removed
+     */
+    void computeTriggerLevelsOnDisplay();
 };
 
 

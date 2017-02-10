@@ -31,10 +31,12 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 const Real ScopeVisNG::ProjectorMagDB::mult = (10.0f / log2f(10.0f));
 
+
 ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
     m_currentTriggerIndex(0),
+	m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
     m_traceSize(m_traceChunkSize),
     m_nbSamples(0),
@@ -101,13 +103,6 @@ void ScopeVisNG::addTrigger(const TriggerData& triggerData)
 
 void ScopeVisNG::changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex)
 {
-    qDebug() << "ScopeVisNG::changeTrigger:"
-            << " trigger: " << triggerIndex
-            << " m_projectionType: " << triggerData.m_projectionType
-            << " m_triggerRepeat: " << triggerData.m_triggerRepeat
-            << " m_triggerPositiveEdge: " << triggerData.m_triggerPositiveEdge
-            << " m_triggerBothEdges: " << triggerData.m_triggerBothEdges;
-;
     Message* cmd = MsgScopeVisNGChangeTrigger::create(triggerData, triggerIndex);
     getInputMessageQueue()->push(cmd);
 }
@@ -493,8 +488,13 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
         int triggerIndex = conf.getTriggerIndex();
 
-        if (triggerIndex < m_triggerConditions.size()) {
+        if (triggerIndex < m_triggerConditions.size())
+        {
             m_triggerConditions[triggerIndex].setData(conf.getTriggerData());
+
+            if (triggerIndex == m_focusedTriggerIndex) {
+            	computeTriggerLevelsOnDisplay();
+            }
         }
 
         return true;
@@ -505,7 +505,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         int triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size()) {
-            m_triggerConditions[triggerIndex].releaseProjector();
             m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
         }
 
@@ -517,15 +516,18 @@ bool ScopeVisNG::handleMessage(const Message& message)
         m_traces.addTrace(conf.getTraceData(), m_traceSize);
         initTraceBuffers();
         updateMaxTraceDelay();
+        computeTriggerLevelsOnDisplay();
+        m_glScope->updateDisplay();
         return true;
     }
     else if (MsgScopeVisNGChangeTrace::match(message))
     {
         MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
+        bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
         m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
         updateMaxTraceDelay();
+        if (doComputeTriggerLevelsOnDisplay) computeTriggerLevelsOnDisplay();
         m_glScope->updateDisplay();
-
         return true;
     }
     else if (MsgScopeVisNGRemoveTrace::match(message))
@@ -533,6 +535,8 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
+        computeTriggerLevelsOnDisplay();
+        m_glScope->updateDisplay();
         return true;
     }
     else
@@ -576,3 +580,34 @@ void ScopeVisNG::initTraceBuffers()
     }
 }
 
+void ScopeVisNG::computeTriggerLevelsOnDisplay()
+{
+	const TriggerCondition& focusedTriggerCondition = m_triggerConditions[m_focusedTriggerIndex];
+    std::vector<TraceData>::const_iterator itData = m_traces.m_tracesData.begin();
+	float v;
+
+    for (; itData != m_traces.m_tracesData.end(); ++itData)
+	{
+		if (focusedTriggerCondition.m_projector->getProjectionType() == itData->m_projectionType)
+		{
+            if (itData->m_projectionType == ProjectionMagLin) {
+                v = (focusedTriggerCondition.m_triggerData.m_triggerLevel - itData->m_ofs)*itData->m_amp - 1.0f;
+            } else if (itData->m_projectionType == ProjectionMagDB) {
+                float p = focusedTriggerCondition.m_triggerData.m_triggerLevel - (100.0f * itData->m_ofs);
+                v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
+            } else {
+                v = (focusedTriggerCondition.m_triggerData.m_triggerLevel - itData->m_ofs) * itData->m_amp;
+            }
+
+            if(v > 1.0f) {
+                v = 1.0f;
+            } else if (v < -1.0f) {
+                v = -1.0f;
+            }
+		}
+		else
+		{
+			v = 2.0f; // clamp high
+		}
+	}
+}
