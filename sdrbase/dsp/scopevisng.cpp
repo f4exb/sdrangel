@@ -491,10 +491,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         if (triggerIndex < m_triggerConditions.size())
         {
             m_triggerConditions[triggerIndex].setData(conf.getTriggerData());
-
-            if (triggerIndex == m_focusedTriggerIndex) {
-            	computeTriggerLevelsOnDisplay();
-            }
         }
 
         return true;
@@ -516,7 +512,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         m_traces.addTrace(conf.getTraceData(), m_traceSize);
         initTraceBuffers();
         updateMaxTraceDelay();
-        computeTriggerLevelsOnDisplay();
         m_glScope->updateDisplay();
         return true;
     }
@@ -526,7 +521,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
         m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
         updateMaxTraceDelay();
-        if (doComputeTriggerLevelsOnDisplay) computeTriggerLevelsOnDisplay();
         m_glScope->updateDisplay();
         return true;
     }
@@ -535,7 +529,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
-        computeTriggerLevelsOnDisplay();
         m_glScope->updateDisplay();
         return true;
     }
@@ -578,36 +571,4 @@ void ScopeVisNG::initTraceBuffers()
             (*it1)[2*i + 1] = 0.0f;    // display y
         }
     }
-}
-
-void ScopeVisNG::computeTriggerLevelsOnDisplay()
-{
-	const TriggerCondition& focusedTriggerCondition = m_triggerConditions[m_focusedTriggerIndex];
-    std::vector<TraceData>::const_iterator itData = m_traces.m_tracesData.begin();
-	float v;
-
-    for (; itData != m_traces.m_tracesData.end(); ++itData)
-	{
-		if (focusedTriggerCondition.m_projector->getProjectionType() == itData->m_projectionType)
-		{
-            if (itData->m_projectionType == ProjectionMagLin) {
-                v = (focusedTriggerCondition.m_triggerData.m_triggerLevel - itData->m_ofs)*itData->m_amp - 1.0f;
-            } else if (itData->m_projectionType == ProjectionMagDB) {
-                float p = focusedTriggerCondition.m_triggerData.m_triggerLevel - (100.0f * itData->m_ofs);
-                v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
-            } else {
-                v = (focusedTriggerCondition.m_triggerData.m_triggerLevel - itData->m_ofs) * itData->m_amp;
-            }
-
-            if(v > 1.0f) {
-                v = 1.0f;
-            } else if (v < -1.0f) {
-                v = -1.0f;
-            }
-		}
-		else
-		{
-			v = 2.0f; // clamp high
-		}
-	}
 }

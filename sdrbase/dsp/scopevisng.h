@@ -837,7 +837,6 @@ private:
      * - every time a trace data changes: projection type, amp, offset
      * - every time a trace data is added or removed
      */
-    void computeTriggerLevelsOnDisplay();
 };
 
 
