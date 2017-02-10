@@ -18,6 +18,8 @@
 #ifndef SDRBASE_DSP_SCOPEVISNG_H_
 #define SDRBASE_DSP_SCOPEVISNG_H_
 
+#include <QDebug>
+
 #include <stdint.h>
 #include <vector>
 #include <boost/circular_buffer.hpp>
@@ -64,18 +66,28 @@ public:
         ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
         Real m_triggerLevel;             //!< Level in real units
+        int  m_triggerLevelCoarse;
+        int  m_triggerLevelFine;
         bool m_triggerPositiveEdge;      //!< Trigger on the positive edge (else negative)
         bool m_triggerBothEdges;         //!< Trigger on both edges (else only one)
-        uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples
+        uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples (trigger delay)
+        double m_triggerDelayMult;       //!< Trigger delay as a multiplier of trace length
+        int m_triggerDelayCoarse;
+        int m_triggerDelayFine;
         uint32_t m_triggerRepeat;        //!< Number of trigger conditions before the final decisive trigger
 
         TriggerData() :
             m_projectionType(ProjectionReal),
             m_inputIndex(0),
             m_triggerLevel(0.0f),
+            m_triggerLevelCoarse(0),
+            m_triggerLevelFine(0),
             m_triggerPositiveEdge(true),
             m_triggerBothEdges(false),
             m_triggerDelay(0),
+            m_triggerDelayMult(0.0),
+            m_triggerDelayCoarse(0),
+            m_triggerDelayFine(0),
 			m_triggerRepeat(0)
         {}
     };
@@ -92,8 +104,19 @@ public:
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
     void addTrigger(const TriggerData& triggerData);
-    void changeTrigger(const TriggerData& triggerData, uint32_t traceIndex);
+    void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
+
+    void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
+    {
+        if (triggerIndex < m_triggerConditions.size())
+        {
+            qDebug() << "copeVisNG::getTriggerData:"
+                    << " index: " <<  triggerIndex
+                    << " projection: " << (int) m_triggerConditions[triggerIndex].m_triggerData.m_projectionType;
+            triggerData = m_triggerConditions[triggerIndex].m_triggerData;
+        }
+    }
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void start();

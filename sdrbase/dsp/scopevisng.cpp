@@ -101,6 +101,13 @@ void ScopeVisNG::addTrigger(const TriggerData& triggerData)
 
 void ScopeVisNG::changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex)
 {
+    qDebug() << "ScopeVisNG::changeTrigger:"
+            << " trigger: " << triggerIndex
+            << " m_projectionType: " << triggerData.m_projectionType
+            << " m_triggerRepeat: " << triggerData.m_triggerRepeat
+            << " m_triggerPositiveEdge: " << triggerData.m_triggerPositiveEdge
+            << " m_triggerBothEdges: " << triggerData.m_triggerBothEdges;
+;
     Message* cmd = MsgScopeVisNGChangeTrigger::create(triggerData, triggerIndex);
     getInputMessageQueue()->push(cmd);
 }

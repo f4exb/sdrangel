@@ -74,6 +74,7 @@ private:
     void setAmpOfsDisplay();
     // Third row
     void setTrigIndexDisplay();
+    void setTrigCountDisplay();
 	void setTrigLevelDisplay();
 	void setTrigDelayDisplay();
 	void setTrigPreDisplay();

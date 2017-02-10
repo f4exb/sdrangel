@@ -19,3 +19,8 @@ void ButtonSwitch::onToggled(bool checked)
 		setPalette(m_originalPalette);
 	}
 }
+
+void ButtonSwitch::doToggle(bool checked)
+{
+    onToggled(checked);
+}

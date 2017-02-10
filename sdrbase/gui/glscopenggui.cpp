@@ -260,6 +260,18 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
 void GLScopeNGGUI::on_trig_valueChanged(int value)
 {
     ui->trigText->setText(tr("%1").arg(value));
+
+    ScopeVisNG::TriggerData triggerData;
+    m_scopeVis->getTriggerData(triggerData, value);
+
+    qDebug() << "GLScopeNGGUI::on_trig_valueChanged:"
+            << " m_projectionType: " << (int) triggerData.m_projectionType
+            << " m_triggerRepeat" << triggerData.m_triggerRepeat
+            << " m_triggerPositiveEdge" << triggerData.m_triggerPositiveEdge
+            << " m_triggerBothEdges" << triggerData.m_triggerBothEdges
+            << " m_triggerLevel" << triggerData.m_triggerLevel;
+
+    setTriggerUI(triggerData);
 }
 
 void GLScopeNGGUI::on_trigAdd_clicked(bool checked)
@@ -275,7 +287,7 @@ void GLScopeNGGUI::on_trigAdd_clicked(bool checked)
 
 void GLScopeNGGUI::on_trigDel_clicked(bool checked)
 {
-    if (ui->trig->maximum() > 0)
+    if (ui->trig->value() > 0)
     {
         m_scopeVis->removeTrigger(ui->trig->value());
         ui->trig->setMaximum(ui->trig->maximum() - 1);
@@ -320,10 +332,8 @@ void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
 
 void GLScopeNGGUI::on_trigCount_valueChanged(int value)
 {
-	QString text;
-	text.sprintf("%02d", value);
-	ui->trigCountText->setText(text);
-	changeCurrentTrigger();
+    setTrigCountDisplay();
+    changeCurrentTrigger();
 }
 
 void GLScopeNGGUI::on_trigPos_toggled(bool checked)
@@ -418,6 +428,13 @@ void GLScopeNGGUI::on_freerun_toggled(bool checked)
 void GLScopeNGGUI::setTraceIndexDisplay()
 {
 	ui->traceText->setText(tr("%1").arg(ui->trace->value()));
+}
+
+void GLScopeNGGUI::setTrigCountDisplay()
+{
+    QString text;
+    text.sprintf("%02d", ui->trigCount->value());
+    ui->trigCountText->setText(text);
 }
 
 void GLScopeNGGUI::setTimeScaleDisplay()
@@ -671,19 +688,80 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
 
 void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
 {
-    triggerData.m_projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
+    triggerData.m_projectionType = (ScopeVisNG::ProjectionType) ui->trigMode->currentIndex();
     triggerData.m_inputIndex = 0;
     triggerData.m_triggerLevel = (ui->trigLevelCoarse->value() / 100.0) + (ui->trigLevelFine->value() / 20000.0);
+    triggerData.m_triggerLevelCoarse = ui->trigLevelCoarse->value();
+    triggerData.m_triggerLevelFine = ui->trigLevelFine->value();
     triggerData.m_triggerPositiveEdge = ui->trigPos->isChecked();
     triggerData.m_triggerBothEdges = ui->trigBoth->isChecked();
     triggerData.m_triggerRepeat = ui->trigCount->value();
-    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
-    triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult);
+    triggerData.m_triggerDelayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
+    triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * triggerData.m_triggerDelayMult);
+    triggerData.m_triggerDelayCoarse = ui->trigDelayCoarse->value();
+    triggerData.m_triggerDelayFine = ui->trigDelayFine->value();
 }
 
 void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
 {
+    bool oldStateTrigMode        = ui->trigMode->blockSignals(true);
+    bool oldStateTrigCount       = ui->trigCount->blockSignals(true);
+    bool oldStateTrigPos         = ui->trigPos->blockSignals(true);
+    bool oldStateTrigNeg         = ui->trigNeg->blockSignals(true);
+    bool oldStateTrigBoth        = ui->trigBoth->blockSignals(true);
+    bool oldStateTrigLevelCoarse = ui->trigLevelCoarse->blockSignals(true);
+    bool oldStateTrigLevelFine   = ui->trigLevelFine->blockSignals(true);
+    bool oldStateTrigDelayCoarse = ui->trigDelayCoarse->blockSignals(true);
+    bool oldStateTrigDelayFine   = ui->trigDelayFine->blockSignals(true);
 
+    ui->trigMode->setCurrentIndex((int) triggerData.m_projectionType);
+    ui->trigCount->setValue(triggerData.m_triggerRepeat);
+    setTrigCountDisplay();
+
+    ui->trigPos->setChecked(false);
+    ui->trigNeg->setChecked(false);
+    ui->trigPos->doToggle(false);
+    ui->trigNeg->doToggle(false);
+
+    if (triggerData.m_triggerBothEdges)
+    {
+        ui->trigBoth->setChecked(true);
+        ui->trigBoth->doToggle(true);
+    }
+    else
+    {
+        ui->trigBoth->setChecked(false);
+        ui->trigBoth->doToggle(false);
+
+        if (triggerData.m_triggerPositiveEdge)
+        {
+            ui->trigPos->setChecked(true);
+            ui->trigPos->doToggle(true);
+        }
+        else
+        {
+            ui->trigNeg->setChecked(true);
+            ui->trigNeg->doToggle(true);
+        }
+    }
+
+    ui->trigLevelCoarse->setValue(triggerData.m_triggerLevelCoarse);
+    ui->trigLevelFine->setValue(triggerData.m_triggerLevelFine);
+    setTrigLevelDisplay();
+
+    ui->trigDelayCoarse->setValue(triggerData.m_triggerDelayCoarse);
+    ui->trigDelayFine->setValue(triggerData.m_triggerDelayFine);
+    setTrigDelayDisplay();
+
+    ui->trigMode->blockSignals(oldStateTrigMode);
+    ui->trigCount->blockSignals(oldStateTrigCount);
+    ui->trigPos->blockSignals(oldStateTrigPos);
+    ui->trigNeg->blockSignals(oldStateTrigNeg);
+    ui->trigBoth->blockSignals(oldStateTrigBoth);
+    ui->trigLevelCoarse->blockSignals(oldStateTrigLevelCoarse);
+    ui->trigLevelFine->blockSignals(oldStateTrigLevelFine);
+    ui->trigDelayCoarse->blockSignals(oldStateTrigDelayCoarse);
+    ui->trigDelayFine->blockSignals(oldStateTrigDelayFine);
 }
 
 void GLScopeNGGUI::applySettings()

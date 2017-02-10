@@ -8,6 +8,7 @@ class ButtonSwitch : public QToolButton {
 
 public:
 	ButtonSwitch(QWidget* parent = NULL);
+	void doToggle(bool checked);
 
 private slots:
 	void onToggled(bool checked);
