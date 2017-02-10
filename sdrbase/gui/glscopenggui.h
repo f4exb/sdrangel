@@ -83,6 +83,7 @@ private:
 
     void fillTraceData(ScopeVisNG::TraceData& traceData);
     void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
+    void setTriggerUI(ScopeVisNG::TriggerData& triggerData);
 
     void fillProjectionCombo(QComboBox* comboBox);
 
@@ -106,6 +107,9 @@ private slots:
     void on_ofsFine_valueChanged(int value);
     void on_traceDelay_valueChanged(int value);
     // Third row
+    void on_trig_valueChanged(int value);
+    void on_trigAdd_clicked(bool checked);
+    void on_trigDel_clicked(bool checked);
     void on_trigMode_currentIndexChanged(int index);
     void on_trigCount_valueChanged(int value);
     void on_trigPos_toggled(bool checked);

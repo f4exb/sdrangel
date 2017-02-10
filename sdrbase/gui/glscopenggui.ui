@@ -700,7 +700,7 @@ kS/s</string>
       <widget class="QLabel" name="ampText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>36</width>
          <height>0</height>
         </size>
        </property>
@@ -749,7 +749,7 @@ kS/s</string>
       <widget class="QLabel" name="ofsText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>36</width>
          <height>0</height>
         </size>
        </property>
@@ -1292,7 +1292,7 @@ kS/s</string>
       <widget class="QLabel" name="trigLevelText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>36</width>
          <height>0</height>
         </size>
        </property>

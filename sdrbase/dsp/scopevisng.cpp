@@ -31,7 +31,6 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 const Real ScopeVisNG::ProjectorMagDB::mult = (10.0f / log2f(10.0f));
 
-
 ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
@@ -479,7 +478,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
         m_triggerConditions.push_back(TriggerCondition(conf.getTriggerData()));
-        m_triggerConditions.back().init();
+        m_triggerConditions.back().initProjector();
         return true;
     }
     else if (MsgScopeVisNGChangeTrigger::match(message))
@@ -499,6 +498,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         int triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size()) {
+            m_triggerConditions[triggerIndex].releaseProjector();
             m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
         }
 

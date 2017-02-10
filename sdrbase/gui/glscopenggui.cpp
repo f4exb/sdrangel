@@ -257,6 +257,31 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     setTimeOfsDisplay();
 }
 
+void GLScopeNGGUI::on_trig_valueChanged(int value)
+{
+    ui->trigText->setText(tr("%1").arg(value));
+}
+
+void GLScopeNGGUI::on_trigAdd_clicked(bool checked)
+{
+    if (ui->trig->maximum() < 9)
+    {
+        ScopeVisNG::TriggerData triggerData;
+        fillTriggerData(triggerData);
+        m_scopeVis->addTrigger(triggerData);
+        ui->trig->setMaximum(ui->trig->maximum() + 1);
+    }
+}
+
+void GLScopeNGGUI::on_trigDel_clicked(bool checked)
+{
+    if (ui->trig->maximum() > 0)
+    {
+        m_scopeVis->removeTrigger(ui->trig->value());
+        ui->trig->setMaximum(ui->trig->maximum() - 1);
+    }
+}
+
 void GLScopeNGGUI::on_traceMode_currentIndexChanged(int index)
 {
     setAmpScaleDisplay();
@@ -654,6 +679,11 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.m_triggerRepeat = ui->trigCount->value();
     double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
     triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult);
+}
+
+void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
+{
+
 }
 
 void GLScopeNGGUI::applySettings()

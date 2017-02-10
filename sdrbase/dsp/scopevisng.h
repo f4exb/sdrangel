@@ -360,17 +360,6 @@ private:
             }
 
             return dPhi;
-
-//            Real dPhi = curArg - m_prevArg;
-//            m_prevArg = curArg;
-//
-//            if (dPhi < -M_PI) {
-//                dPhi += 2.0 * M_PI;
-//            } else if (dPhi > M_PI) {
-//                dPhi -= 2.0 * M_PI;
-//            }
-//
-//            return dPhi/M_PI;
         }
 
     private:
@@ -430,12 +419,16 @@ private:
 
         ~TriggerCondition()
         {
-            if (m_projector) delete m_projector;
         }
 
-        void init()
+        void initProjector()
         {
             m_projector = createProjector(m_triggerData.m_projectionType);
+        }
+
+        void releaseProjector()
+        {
+            delete m_projector;
         }
 
         void setData(const TriggerData& triggerData)
