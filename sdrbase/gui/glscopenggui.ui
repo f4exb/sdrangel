@@ -904,6 +904,25 @@ kS/s</string>
       </widget>
      </item>
      <item>
+      <widget class="ClickableLabel" name="traceColor">
+       <property name="minimumSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="Line" name="line_15">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -1611,6 +1630,11 @@ kS/s</string>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>gui/clickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -60,6 +60,7 @@ private:
     int m_timeBase;
     int m_timeOffset;
     int m_traceLenMult;
+    QColor m_focusedTraceColor;
 
     static const double amps[11];
 
@@ -107,6 +108,7 @@ private slots:
     void on_ofsCoarse_valueChanged(int value);
     void on_ofsFine_valueChanged(int value);
     void on_traceDelay_valueChanged(int value);
+    void on_traceColor_clicked();
     // Third row
     void on_trig_valueChanged(int value);
     void on_trigAdd_clicked(bool checked);

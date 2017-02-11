@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColorDialog>
+
 #include "glscopenggui.h"
 #include "glscopeng.h"
 #include "ui_glscopenggui.h"
@@ -37,6 +39,8 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     setEnabled(false);
     ui->setupUi(this);
     ui->trigDelayFine->setMaximum(ScopeVisNG::m_traceChunkSize / 10.0);
+    ui->traceColor->setStyleSheet("QLabel { background-color : rgb(255,255,64); }");
+    m_focusedTraceColor.setRgb(255,255,64);
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -327,6 +331,17 @@ void GLScopeNGGUI::on_ofsFine_valueChanged(int value)
 void GLScopeNGGUI::on_traceDelay_valueChanged(int value)
 {
 	// TODO
+}
+
+void GLScopeNGGUI::on_traceColor_clicked()
+{
+    qDebug("GLScopeNGGUI::on_traceColor_clicked");
+    QColor newColor = QColorDialog::getColor();
+    m_focusedTraceColor = newColor;
+    int r,g,b,a;
+    m_focusedTraceColor.getRgb(&r, &g, &b, &a);
+    ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+    changeCurrentTrace();
 }
 
 void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
@@ -689,6 +704,8 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     } else {
         traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
     }
+
+    traceData.setColor(m_focusedTraceColor);
 }
 
 void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)

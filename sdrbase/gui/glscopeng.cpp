@@ -308,7 +308,8 @@ void GLScopeNG::paintGL()
             //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
             float rectH = -m_glScopeRect1.height() / 2.0f;
 
-            QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+            //QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+            QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
             QMatrix4x4 mat;
             mat.setToIdentity();
             mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);

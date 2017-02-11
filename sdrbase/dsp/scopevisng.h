@@ -19,6 +19,7 @@
 #define SDRBASE_DSP_SCOPEVISNG_H_
 
 #include <QDebug>
+#include <QColor>
 
 #include <stdint.h>
 #include <vector>
@@ -52,6 +53,10 @@ public:
         float m_ofs;                     //!< Offset factor
         int m_traceDelay;                //!< Trace delay in number of samples
         float m_triggerDisplayLevel;     //!< Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
+        QColor m_traceColor;             //!< Trace display color
+        float m_traceColorR;             //!< Trace display color - red shortcut
+        float m_traceColorG;             //!< Trace display color - green shortcut
+        float m_traceColorB;             //!< Trace display color - blue shortcut
 
         TraceData() :
             m_projectionType(ProjectionReal),
@@ -59,9 +64,22 @@ public:
             m_amp(1.0f),
             m_ofs(0.0f),
             m_traceDelay(0),
-			m_triggerDisplayLevel(2.0)   // OVer scale by default (2.0)
-        {}
+			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
+			m_traceColor(255,255,64)
+        {
+            setColor(m_traceColor);
+        }
+
+        void setColor(QColor color) {
+            m_traceColor = color;
+            qreal r,g,b,a;
+            m_traceColor.getRgbF(&r, &g, &b, &a);
+            m_traceColorR = r;
+            m_traceColorG = g;
+            m_traceColorB = b;
+        }
     };
+
 
     struct TriggerData
     {
@@ -114,10 +132,15 @@ public:
     {
         if (triggerIndex < m_triggerConditions.size())
         {
-            qDebug() << "copeVisNG::getTriggerData:"
-                    << " index: " <<  triggerIndex
-                    << " projection: " << (int) m_triggerConditions[triggerIndex].m_triggerData.m_projectionType;
             triggerData = m_triggerConditions[triggerIndex].m_triggerData;
+        }
+    }
+
+    void getTraceData(TraceData& traceData, uint32_t traceIndex)
+    {
+        if (traceIndex < m_traces.m_tracesData.size())
+        {
+            traceData = m_traces.m_tracesData[traceIndex];
         }
     }
 

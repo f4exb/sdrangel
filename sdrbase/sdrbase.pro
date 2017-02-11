@@ -82,6 +82,7 @@ SOURCES += mainwindow.cpp\
         gui/basicchannelsettingswidget.cpp\
         gui/buttonswitch.cpp\
         gui/channelwindow.cpp\
+        gui/clickablelabel.cpp\
         gui/colormapper.cpp\
         gui/cwkeyergui.cpp\
         gui/glscope.cpp\
@@ -188,6 +189,7 @@ HEADERS  += mainwindow.h\
         gui/basicchannelsettingswidget.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
+        gui/clickablelabel.h\
         gui/colormapper.h\
         gui/cwkeyergui.h\
         gui/glscope.h\

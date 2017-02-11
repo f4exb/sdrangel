@@ -139,6 +139,7 @@ set(sdrbase_SOURCES
     sdrbase/gui/basicchannelsettingswidget.cpp
     sdrbase/gui/buttonswitch.cpp
     sdrbase/gui/channelwindow.cpp
+    sdrbase/gui/clickablelabel.cpp
     sdrbase/gui/colormapper.cpp
     sdrbase/gui/cwkeyergui.cpp
     sdrbase/gui/glscope.cpp
