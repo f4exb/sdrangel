@@ -24,6 +24,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
@@ -110,6 +111,12 @@ void ScopeVisNG::changeTrigger(const TriggerData& triggerData, uint32_t triggerI
 void ScopeVisNG::removeTrigger(uint32_t triggerIndex)
 {
     Message* cmd = MsgScopeVisNGRemoveTrigger::create(triggerIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::focusOnTrigger(uint32_t triggerIndex)
+{
+    Message* cmd = MsgScopeVisNGFocusOnTrigger::create(triggerIndex);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -512,12 +519,27 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgScopeVisNGFocusOnTrigger::match(message))
+    {
+        MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;
+        int triggerIndex = conf.getTriggerIndex();
+
+        if (triggerIndex < m_triggerConditions.size())
+        {
+            m_focusedTriggerIndex = triggerIndex;
+            computeDisplayTriggerLevels();
+            m_glScope->updateDisplay();
+        }
+
+        return true;
+    }
     else if (MsgScopeVisNGAddTrace::match(message))
     {
         MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
         m_traces.addTrace(conf.getTraceData(), m_traceSize);
         initTraceBuffers();
         updateMaxTraceDelay();
+        computeDisplayTriggerLevels();
         m_glScope->updateDisplay();
         return true;
     }
@@ -527,6 +549,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
         m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
         updateMaxTraceDelay();
+        if (doComputeTriggerLevelsOnDisplay) computeDisplayTriggerLevels();
         m_glScope->updateDisplay();
         return true;
     }
@@ -535,6 +558,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
+        computeDisplayTriggerLevels();
         m_glScope->updateDisplay();
         return true;
     }
@@ -585,7 +609,7 @@ void ScopeVisNG::computeDisplayTriggerLevels()
 
     for (; itData != m_traces.m_tracesData.end(); ++itData)
     {
-        if (m_triggerConditions[m_focusedTriggerIndex].m_projector->getProjectionType() == itData->m_projectionType)
+        if ((m_focusedTriggerIndex < m_triggerConditions.size()) && (m_triggerConditions[m_focusedTriggerIndex].m_projector->getProjectionType() == itData->m_projectionType))
         {
             float level = m_triggerConditions[m_focusedTriggerIndex].m_triggerData.m_triggerLevel;
             float levelPowerLin = level + 1.0f;

@@ -67,15 +67,15 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     ui->trigOneShot->setEnabled(false);
     ui->freerun->setChecked(true);
 
-    // Add a trace
-    ScopeVisNG::TraceData traceData;
-    fillTraceData(traceData);
-    m_scopeVis->addTrace(traceData);
-
     // Add a trigger
     ScopeVisNG::TriggerData triggerData;
     fillTriggerData(triggerData);
     m_scopeVis->addTrigger(triggerData);
+
+    // Add a trace
+    ScopeVisNG::TraceData traceData;
+    fillTraceData(traceData);
+    m_scopeVis->addTrace(traceData);
 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
@@ -272,6 +272,8 @@ void GLScopeNGGUI::on_trig_valueChanged(int value)
             << " m_triggerLevel" << triggerData.m_triggerLevel;
 
     setTriggerUI(triggerData);
+
+    m_scopeVis->focusOnTrigger(value);
 }
 
 void GLScopeNGGUI::on_trigAdd_clicked(bool checked)

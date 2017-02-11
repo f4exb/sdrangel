@@ -108,6 +108,7 @@ public:
     void addTrigger(const TriggerData& triggerData);
     void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
+    void focusOnTrigger(uint32_t triggerIndex);
 
     void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
     {
@@ -226,6 +227,27 @@ private:
         uint32_t m_triggerIndex;
 
         MsgScopeVisNGRemoveTrigger(uint32_t triggerIndex) :
+            m_triggerIndex(triggerIndex)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGFocusOnTrigger : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGFocusOnTrigger* create(
+                uint32_t triggerIndex)
+        {
+            return new MsgScopeVisNGFocusOnTrigger(triggerIndex);
+        }
+
+        uint32_t getTriggerIndex() const { return m_triggerIndex; }
+
+    private:
+        uint32_t m_triggerIndex;
+
+        MsgScopeVisNGFocusOnTrigger(uint32_t triggerIndex) :
             m_triggerIndex(triggerIndex)
         {}
     };
