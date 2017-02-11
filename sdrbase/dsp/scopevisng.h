@@ -729,7 +729,7 @@ private:
             bool condition, trigger;
 
             if (triggerCondition.m_projector->getProjectionType() == ProjectionMagDB) {
-                condition = triggerCondition.m_projector->run(s) > m_levelPwoerDB;
+                condition = triggerCondition.m_projector->run(s) > m_levelPowerDB;
             } else if (triggerCondition.m_projector->getProjectionType() == ProjectionMagLin) {
                 condition = triggerCondition.m_projector->run(s) > m_levelPowerLin;
             } else {
@@ -772,11 +772,11 @@ private:
         void computeLevels()
         {
             m_levelPowerLin = m_level + 1.0f;
-            m_levelPwoerDB = (100.0f * (m_level - 1.0f));
+            m_levelPowerDB = (100.0f * (m_level - 1.0f));
         }
 
         Real m_level;
-        Real m_levelPwoerDB;
+        Real m_levelPowerDB;
         Real m_levelPowerLin;
         bool m_reset;
     };
@@ -837,6 +837,7 @@ private:
      * - every time a trace data changes: projection type, amp, offset
      * - every time a trace data is added or removed
      */
+    void computeDisplayTriggerLevels();
 };
 
 

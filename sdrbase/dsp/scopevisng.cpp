@@ -491,6 +491,12 @@ bool ScopeVisNG::handleMessage(const Message& message)
         if (triggerIndex < m_triggerConditions.size())
         {
             m_triggerConditions[triggerIndex].setData(conf.getTriggerData());
+
+            if (triggerIndex == m_focusedTriggerIndex)
+            {
+                computeDisplayTriggerLevels();
+                m_glScope->updateDisplay();
+            }
         }
 
         return true;
@@ -569,6 +575,48 @@ void ScopeVisNG::initTraceBuffers()
             (*it0)[2*i + 1] = 0.0f;    // display y
             (*it1)[2*i] = (i - shift); // display x
             (*it1)[2*i + 1] = 0.0f;    // display y
+        }
+    }
+}
+
+void ScopeVisNG::computeDisplayTriggerLevels()
+{
+    std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+
+    for (; itData != m_traces.m_tracesData.end(); ++itData)
+    {
+        if (m_triggerConditions[m_focusedTriggerIndex].m_projector->getProjectionType() == itData->m_projectionType)
+        {
+            float level = m_triggerConditions[m_focusedTriggerIndex].m_triggerData.m_triggerLevel;
+            float levelPowerLin = level + 1.0f;
+            float levelPowerdB = (100.0f * (level - 1.0f));
+            float v;
+
+            if (itData->m_projectionType == ProjectionMagLin)
+            {
+                v = (levelPowerLin - itData->m_ofs)*itData->m_amp - 1.0f;
+            }
+            else if (itData->m_projectionType == ProjectionMagDB)
+            {
+                float ofsdB = itData->m_ofs * 100.0f;
+                v = ((levelPowerdB + 100.0f - ofsdB)*itData->m_amp)/50.0f - 1.0f;
+            }
+            else
+            {
+                v = (level - itData->m_ofs) * itData->m_amp;
+            }
+
+            if(v > 1.0f) {
+                v = 1.0f;
+            } else if (v < -1.0f) {
+                v = -1.0f;
+            }
+
+            itData->m_triggerDisplayLevel = v;
+        }
+        else
+        {
+            itData->m_triggerDisplayLevel = 2.0f;
         }
     }
 }
