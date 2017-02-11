@@ -36,6 +36,7 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     qDebug("GLScopeNGGUI::GLScopeNGGUI");
     setEnabled(false);
     ui->setupUi(this);
+    ui->trigDelayFine->setMaximum(ScopeVisNG::m_traceChunkSize / 10.0);
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -255,6 +256,8 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     setTraceLenDisplay();
     setTimeScaleDisplay();
     setTimeOfsDisplay();
+    setTrigDelayDisplay();
+    setTrigPreDisplay();
 }
 
 void GLScopeNGGUI::on_trig_valueChanged(int value)
@@ -608,7 +611,7 @@ void GLScopeNGGUI::setTrigLevelDisplay()
 
 void GLScopeNGGUI::setTrigDelayDisplay()
 {
-    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
+    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / (ScopeVisNG::m_traceChunkSize / 10.0);
     unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult;
 
 	if (n_samples_delay < 1000) {
@@ -625,13 +628,13 @@ void GLScopeNGGUI::setTrigDelayDisplay()
 	double t = (n_samples_delay * 1.0f / m_sampleRate);
 
 	if(t < 0.000001)
-		ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0));
+		ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 1));
 	else if(t < 0.001)
-		ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0));
+		ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 1));
 	else if(t < 1.0)
-		ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0));
+		ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 1));
 	else
-		ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0));
+		ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 1));
 }
 
 void GLScopeNGGUI::setTrigPreDisplay()
@@ -698,7 +701,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.m_triggerPositiveEdge = ui->trigPos->isChecked();
     triggerData.m_triggerBothEdges = ui->trigBoth->isChecked();
     triggerData.m_triggerRepeat = ui->trigCount->value();
-    triggerData.m_triggerDelayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / 100.0;
+    triggerData.m_triggerDelayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / (ScopeVisNG::m_traceChunkSize / 10.0);
     triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * triggerData.m_triggerDelayMult);
     triggerData.m_triggerDelayCoarse = ui->trigDelayCoarse->value();
     triggerData.m_triggerDelayFine = ui->trigDelayFine->value();
