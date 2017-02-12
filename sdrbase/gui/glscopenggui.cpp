@@ -41,6 +41,8 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     ui->trigDelayFine->setMaximum(ScopeVisNG::m_traceChunkSize / 10.0);
     ui->traceColor->setStyleSheet("QLabel { background-color : rgb(255,255,64); }");
     m_focusedTraceColor.setRgb(255,255,64);
+    ui->trigColor->setStyleSheet("QLabel { background-color : rgb(0,255,0); }");
+    m_focusedTriggerColor.setRgb(0,255,0);
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -335,7 +337,6 @@ void GLScopeNGGUI::on_traceDelay_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceColor_clicked()
 {
-    qDebug("GLScopeNGGUI::on_traceColor_clicked");
     QColor newColor = QColorDialog::getColor();
     m_focusedTraceColor = newColor;
     int r,g,b,a;
@@ -417,6 +418,16 @@ void GLScopeNGGUI::on_trigPre_valueChanged(int value)
             m_timeOffset*10,
             (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
             ui->freerun->isChecked()); // TODO: implement one shot feature
+}
+
+void GLScopeNGGUI::on_trigColor_clicked()
+{
+    QColor newColor = QColorDialog::getColor();
+    m_focusedTriggerColor = newColor;
+    int r,g,b,a;
+    m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
+    ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+    changeCurrentTrigger();
 }
 
 void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
@@ -722,6 +733,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVisNG::m_traceChunkSize * triggerData.m_triggerDelayMult);
     triggerData.m_triggerDelayCoarse = ui->trigDelayCoarse->value();
     triggerData.m_triggerDelayFine = ui->trigDelayFine->value();
+    triggerData.setColor(m_focusedTriggerColor);
 }
 
 void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
@@ -774,6 +786,11 @@ void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
     ui->trigDelayCoarse->setValue(triggerData.m_triggerDelayCoarse);
     ui->trigDelayFine->setValue(triggerData.m_triggerDelayFine);
     setTrigDelayDisplay();
+
+    m_focusedTriggerColor = triggerData.m_triggerColor;
+    int r, g, b, a;
+    m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
+    ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
 
     ui->trigMode->blockSignals(oldStateTrigMode);
     ui->trigCount->blockSignals(oldStateTrigCount);

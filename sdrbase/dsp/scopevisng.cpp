@@ -379,6 +379,9 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                 if (projectionType == ProjectionMagLin) {
                     v = (itCtl->m_projector->run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
                 } else if (projectionType == ProjectionMagDB) {
+                   // there is no processing advantage in direct calculation without projector
+//                    uint32_t magsq = begin->m_real*begin->m_real + begin->m_imag*begin->m_imag;
+//                    v = ((log10f(magsq/1073741824.0f)*0.2f - 2.0f*itData->m_ofs) + 2.0f)*itData->m_amp - 1.0f;
                     float p = itCtl->m_projector->run(*begin) - (100.0f * itData->m_ofs);
                     v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
                 } else {
@@ -502,6 +505,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
             if (triggerIndex == m_focusedTriggerIndex)
             {
                 computeDisplayTriggerLevels();
+                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
                 m_glScope->updateDisplay();
             }
         }
@@ -528,6 +532,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         {
             m_focusedTriggerIndex = triggerIndex;
             computeDisplayTriggerLevels();
+            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
             m_glScope->updateDisplay();
         }
 

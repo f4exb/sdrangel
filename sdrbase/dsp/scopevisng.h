@@ -70,7 +70,8 @@ public:
             setColor(m_traceColor);
         }
 
-        void setColor(QColor color) {
+        void setColor(QColor color)
+        {
             m_traceColor = color;
             qreal r,g,b,a;
             m_traceColor.getRgbF(&r, &g, &b, &a);
@@ -95,6 +96,10 @@ public:
         int m_triggerDelayCoarse;
         int m_triggerDelayFine;
         uint32_t m_triggerRepeat;        //!< Number of trigger conditions before the final decisive trigger
+        QColor m_triggerColor;           //!< Trigger line display color
+        float m_triggerColorR;           //!< Trigger line display color - red shortcut
+        float m_triggerColorG;           //!< Trigger line display color - green shortcut
+        float m_triggerColorB;           //!< Trigger line display color - blue shortcut
 
         TriggerData() :
             m_projectionType(ProjectionReal),
@@ -108,8 +113,21 @@ public:
             m_triggerDelayMult(0.0),
             m_triggerDelayCoarse(0),
             m_triggerDelayFine(0),
-			m_triggerRepeat(0)
-        {}
+			m_triggerRepeat(0),
+			m_triggerColor(0,255,0)
+        {
+            setColor(m_triggerColor);
+        }
+
+        void setColor(QColor color)
+        {
+            m_triggerColor = color;
+            qreal r,g,b,a;
+            m_triggerColor.getRgbF(&r, &g, &b, &a);
+            m_triggerColorR = r;
+            m_triggerColorG = g;
+            m_triggerColorB = b;
+        }
     };
 
     static const uint m_traceChunkSize;
@@ -681,7 +699,8 @@ private:
         {
         	return (m_tracesData[traceIndex].m_projectionType != traceData.m_projectionType)
         			|| (m_tracesData[traceIndex].m_amp != traceData.m_amp)
-					|| (m_tracesData[traceIndex].m_ofs != traceData.m_ofs);
+					|| (m_tracesData[traceIndex].m_ofs != traceData.m_ofs
+					|| (m_tracesData[traceIndex].m_traceColor != traceData.m_traceColor));
         }
 
         void addTrace(const TraceData& traceData, int traceSize)

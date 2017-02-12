@@ -329,7 +329,11 @@ void GLScopeNG::paintGL()
 				float rectW = m_glScopeRect1.width();
 				float rectH = -m_glScopeRect1.height() / 2.0f;
 
-				QVector4D color(0.0f, 1.0f, 0.0f, 0.4f);
+				QVector4D color(
+				        m_focusedTriggerData.m_triggerColorR,
+				        m_focusedTriggerData.m_triggerColorG,
+				        m_focusedTriggerData.m_triggerColorB,
+				        0.4f);
 				QMatrix4x4 mat;
 				mat.setToIdentity();
 				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
