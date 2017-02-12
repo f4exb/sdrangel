@@ -269,6 +269,11 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
     }
 
     // trace process
+    if (m_glScope->getDataChanged()) // optimization: process trace only if required by glScope
+    {
+        m_triggerState = TriggerUntriggered;
+    }
+
     if (m_triggerState == TriggerTriggered)
     {
         int remainder = -1;
@@ -306,6 +311,7 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
             m_traceDiscreteMemory.current().m_endPoint = mbegin;
             m_traceDiscreteMemory.store(); // next memory trace
             m_triggerState = TriggerUntriggered;
+            //if (m_glScope) m_glScope->incrementTraceCounter();
 
             // process remainder recursively
             if (remainder != 0)

@@ -58,6 +58,8 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
 
     m_powerOverlayFont.setBold(true);
     m_powerOverlayFont.setPointSize(font().pointSize()+1);
+
+    //m_traceCounter = 0;
 }
 
 GLScopeNG::~GLScopeNG()
@@ -176,6 +178,11 @@ void GLScopeNG::paintGL()
 
     if(m_configChanged)
         applyConfig();
+
+//    qDebug("GLScopeNG::paintGL: m_traceCounter: %d", m_traceCounter);
+//    m_traceCounter = 0;
+
+    m_dataChanged = false;
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -343,7 +350,10 @@ void GLScopeNG::paintGL()
         }
     }
 
-    m_dataChanged = false;
+    else if (m_displayMode == DisplayY) // display only traces #1..n
+    {
+    }
+
     m_mutex.unlock();
 }
 
@@ -424,6 +434,10 @@ void GLScopeNG::applyConfig()
     if ((m_traces->size() > 1) && (m_highlightedTraceIndex < m_traces->size()))
     {
         setYScale(m_y2Scale, m_highlightedTraceIndex > 0 ? m_highlightedTraceIndex : 1); // if Highlighted trace is #0 (X trace) set it to first Y trace (trace #1)
+    }
+    else
+    {
+        setYScale(m_y1Scale, 0); // Default to the X trace (trace #0) - If there is only one trace it should not get there (Y displays disabled in the UI)
     }
 
     if ((m_displayMode == DisplayX) || (m_displayMode == DisplayY)) // unique display

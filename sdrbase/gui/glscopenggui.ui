@@ -917,6 +917,9 @@ kS/s</string>
          <height>16</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Current trace color (click to change)</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -1311,7 +1314,7 @@ kS/s</string>
       <widget class="QLabel" name="trigLevelText">
        <property name="minimumSize">
         <size>
-         <width>36</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -1528,6 +1531,9 @@ kS/s</string>
          <width>16</width>
          <height>16</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Current trigger color (click to change)</string>
        </property>
        <property name="text">
         <string/>

@@ -68,6 +68,9 @@ public:
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
     void setFocusedTriggerData(ScopeVisNG::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
+    //void incrementTraceCounter() { m_traceCounter++; }
+
+    bool getDataChanged() const { return m_dataChanged; }
 
 signals:
     void sampleRateChanged(int);
@@ -76,6 +79,7 @@ private:
     std::vector<ScopeVisNG::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
     ScopeVisNG::TriggerData m_focusedTriggerData;
+    //int m_traceCounter;
     uint32_t m_bufferIndex;
     DisplayMode m_displayMode;
     QTimer m_timer;

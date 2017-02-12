@@ -64,6 +64,10 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     ui->horizontalXY->setChecked(false);
     ui->verticalXY->setChecked(false);
     ui->polar->setChecked(false);
+    ui->onlyY->setEnabled(false);
+    ui->horizontalXY->setEnabled(false);
+    ui->verticalXY->setEnabled(false);
+    ui->polar->setEnabled(false);
     m_glScope->setDisplayMode(GLScopeNG::DisplayX);
 
     // initialize trigger combo
@@ -337,12 +341,16 @@ void GLScopeNGGUI::on_traceDelay_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceColor_clicked()
 {
-    QColor newColor = QColorDialog::getColor();
-    m_focusedTraceColor = newColor;
-    int r,g,b,a;
-    m_focusedTraceColor.getRgb(&r, &g, &b, &a);
-    ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-    changeCurrentTrace();
+    QColor newColor = QColorDialog::getColor(m_focusedTraceColor);
+
+    if (newColor.isValid()) // user clicked OK and selected a color
+    {
+        m_focusedTraceColor = newColor;
+        int r,g,b,a;
+        m_focusedTraceColor.getRgb(&r, &g, &b, &a);
+        ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+        changeCurrentTrace();
+    }
 }
 
 void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
@@ -422,12 +430,16 @@ void GLScopeNGGUI::on_trigPre_valueChanged(int value)
 
 void GLScopeNGGUI::on_trigColor_clicked()
 {
-    QColor newColor = QColorDialog::getColor();
-    m_focusedTriggerColor = newColor;
-    int r,g,b,a;
-    m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
-    ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-    changeCurrentTrigger();
+    QColor newColor = QColorDialog::getColor(m_focusedTriggerColor);
+
+    if (newColor.isValid()) // user clicked "OK"
+    {
+        m_focusedTriggerColor = newColor;
+        int r,g,b,a;
+        m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
+        ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+        changeCurrentTrigger();
+    }
 }
 
 void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
@@ -625,13 +637,13 @@ void GLScopeNGGUI::setTrigLevelDisplay()
 		}
 
 		if(fabs(a) < 0.000001)
-			ui->trigLevelText->setText(tr("%1\nn").arg(a * 1000000000.0f));
+			ui->trigLevelText->setText(tr("%1\nn").arg(a * 1000000000.0f, 0, 'f', 2));
 		else if(fabs(a) < 0.001)
-			ui->trigLevelText->setText(tr("%1\nµ").arg(a * 1000000.0f));
+			ui->trigLevelText->setText(tr("%1\nµ").arg(a * 1000000.0f, 0, 'f', 2));
 		else if(fabs(a) < 1.0)
-			ui->trigLevelText->setText(tr("%1\nm").arg(a * 1000.0f));
+			ui->trigLevelText->setText(tr("%1\nm").arg(a * 1000.0f, 0, 'f', 2));
 		else
-			ui->trigLevelText->setText(tr("%1").arg(a * 1.0f));
+			ui->trigLevelText->setText(tr("%1").arg(a * 1.0f, 0, 'f', 2));
 	}
 }
 
