@@ -40,7 +40,7 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     m_sampleRate(0),
     m_triggerPre(0),
     m_timeOfsProMill(0),
-    m_highlightedTraceIndex(0),
+    m_focusedTraceIndex(0),
     m_timeOffset(0)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -295,8 +295,6 @@ void GLScopeNG::paintGL()
             m_glShaderBottom1Scale.drawSurface(m_glBot1ScaleMatrix, tex1, vtx1, 4);
         }
 
-        // TODO: paint trigger level #1
-
         // paint trace #1
         if (m_traceSize > 0)
         {
@@ -346,13 +344,172 @@ void GLScopeNG::paintGL()
 				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
 				mat.scale(2.0f * rectW, -2.0f * rectH);
 				m_glShaderSimple.drawSegments(mat, color, q3, 2);
-            }
-        }
-    }
+            } // display trace
+        } // trace length > 0
+    } // Display X only
 
     else if (m_displayMode == DisplayY) // display only traces #1..n
     {
-    }
+        // draw rect around
+        {
+            GLfloat q3[] {
+                1, 1,
+                0, 1,
+                0, 0,
+                1, 0
+            };
+
+            QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+            m_glShaderSimple.drawContour(m_glScopeMatrix1, color, q3, 4);
+        }
+
+        // paint grid
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
+
+        // Y2 (Focused Y trace)
+        {
+            tickList = &m_y2Scale.getTickList();
+
+            GLfloat q3[4*tickList->count()];
+            int effectiveTicks = 0;
+
+            for (int i= 0; i < tickList->count(); i++)
+            {
+                tick = &(*tickList)[i];
+
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                    {
+                        float y = 1 - (tick->pos / m_y2Scale.getSize());
+                        q3[4*effectiveTicks] = 0;
+                        q3[4*effectiveTicks+1] = y;
+                        q3[4*effectiveTicks+2] = 1;
+                        q3[4*effectiveTicks+3] = y;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            float blue = 1.0f;
+            QVector4D color(1.0f, 1.0f, blue, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+        }
+
+        // X1 (time)
+        {
+            tickList = &m_x1Scale.getTickList();
+
+            GLfloat q3[4*tickList->count()];
+            int effectiveTicks = 0;
+            for(int i= 0; i < tickList->count(); i++) {
+                tick = &(*tickList)[i];
+                if(tick->major) {
+                    if(tick->textSize > 0) {
+                        float x = tick->pos / m_x1Scale.getSize();
+                        q3[4*effectiveTicks] = x;
+                        q3[4*effectiveTicks+1] = 0;
+                        q3[4*effectiveTicks+2] = x;
+                        q3[4*effectiveTicks+3] = 1;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+        }
+
+        // paint left #1 scale
+        {
+            GLfloat vtx1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            m_glShaderLeft1Scale.drawSurface(m_glLeft1ScaleMatrix, tex1, vtx1, 4);
+        }
+
+        // paint bottom #1 scale
+        {
+            GLfloat vtx1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            m_glShaderBottom1Scale.drawSurface(m_glBot1ScaleMatrix, tex1, vtx1, 4);
+        }
+
+        // paint traces #1..n
+        if (m_traceSize > 0)
+        {
+            for (int i = 1; i < m_traces->size(); i++)
+            {
+                const float *trace = (*m_traces)[i];
+                const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
+
+                int start = (m_timeOfsProMill/1000.0) * m_traceSize;
+                int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
+
+                if(end - start < 2)
+                    start--;
+
+                float rectX = m_glScopeRect1.x();
+                float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
+                float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
+                //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
+                float rectH = -m_glScopeRect1.height() / 2.0f;
+
+                //QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+                QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
+                QMatrix4x4 mat;
+                mat.setToIdentity();
+                mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+                mat.scale(2.0f * rectW, -2.0f * rectH);
+                m_glShaderSimple.drawPolyline(mat, color, (GLfloat *) &trace[2*start], end - start);
+
+                // Paint trigger level if any
+                if ((traceData.m_triggerDisplayLevel > -1.0f) && (traceData.m_triggerDisplayLevel < 1.0f))
+                {
+                    GLfloat q3[] {
+                        0, traceData.m_triggerDisplayLevel,
+                        1, traceData.m_triggerDisplayLevel
+                    };
+
+                    float rectX = m_glScopeRect1.x();
+                    float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
+                    float rectW = m_glScopeRect1.width();
+                    float rectH = -m_glScopeRect1.height() / 2.0f;
+
+                    QVector4D color(
+                            m_focusedTriggerData.m_triggerColorR,
+                            m_focusedTriggerData.m_triggerColorG,
+                            m_focusedTriggerData.m_triggerColorB,
+                            0.4f);
+                    QMatrix4x4 mat;
+                    mat.setToIdentity();
+                    mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+                    mat.scale(2.0f * rectW, -2.0f * rectH);
+                    m_glShaderSimple.drawSegments(mat, color, q3, 2);
+                }
+            } // one trace display
+        } // trace length > 0
+    } // Display Y only
 
     m_mutex.unlock();
 }
@@ -386,9 +543,9 @@ void GLScopeNG::setTimeOfsProMill(int timeOfsProMill)
     update();
 }
 
-void GLScopeNG::setHighlightedTraceIndex(uint32_t traceIndex)
+void GLScopeNG::setFocusedTraceIndex(uint32_t traceIndex)
 {
-    m_highlightedTraceIndex = traceIndex;
+    m_focusedTraceIndex = traceIndex;
     m_configChanged = true;
     update();
 }
@@ -431,9 +588,9 @@ void GLScopeNG::applyConfig()
         setYScale(m_y1Scale, 0); // This is always the X trace (trace #0)
     }
 
-    if ((m_traces->size() > 1) && (m_highlightedTraceIndex < m_traces->size()))
+    if ((m_traces->size() > 1) && (m_focusedTraceIndex < m_traces->size()))
     {
-        setYScale(m_y2Scale, m_highlightedTraceIndex > 0 ? m_highlightedTraceIndex : 1); // if Highlighted trace is #0 (X trace) set it to first Y trace (trace #1)
+        setYScale(m_y2Scale, m_focusedTraceIndex > 0 ? m_focusedTraceIndex : 1); // if Highlighted trace is #0 (X trace) set it to first Y trace (trace #1)
     }
     else
     {

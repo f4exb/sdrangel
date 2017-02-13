@@ -50,8 +50,12 @@ public:
         ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
         float m_amp;                     //!< Amplification factor
+        uint32_t m_ampIndex;             //!< Index in list of amplification factors
         float m_ofs;                     //!< Offset factor
+        int m_ofsCoarse;                 //!< Coarse offset slider value
+        int m_ofsFine;                   //!< Fine offset slider value
         int m_traceDelay;                //!< Trace delay in number of samples
+        int m_traceDelayValue;           //!< Trace delay slider value
         float m_triggerDisplayLevel;     //!< Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
         QColor m_traceColor;             //!< Trace display color
         float m_traceColorR;             //!< Trace display color - red shortcut
@@ -62,8 +66,12 @@ public:
             m_projectionType(ProjectionReal),
             m_inputIndex(0),
             m_amp(1.0f),
+            m_ampIndex(0),
             m_ofs(0.0f),
+            m_ofsCoarse(0),
+            m_ofsFine(0),
             m_traceDelay(0),
+            m_traceDelayValue(0),
 			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
 			m_traceColor(255,255,64)
         {
@@ -141,6 +149,7 @@ public:
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
+    void focusOnTrace(uint32_t traceIndex);
     void addTrigger(const TriggerData& triggerData);
     void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
@@ -355,6 +364,27 @@ private:
         uint32_t m_traceIndex;
 
         MsgScopeVisNGRemoveTrace(uint32_t traceIndex) :
+            m_traceIndex(traceIndex)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGFocusOnTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGFocusOnTrace* create(
+                uint32_t traceIndex)
+        {
+            return new MsgScopeVisNGFocusOnTrace(traceIndex);
+        }
+
+        uint32_t getTraceIndex() const { return m_traceIndex; }
+
+    private:
+        uint32_t m_traceIndex;
+
+        MsgScopeVisNGFocusOnTrace(uint32_t traceIndex) :
             m_traceIndex(traceIndex)
         {}
     };
@@ -852,6 +882,7 @@ private:
     int m_focusedTriggerIndex;                     //!< Index of the trigger that has focus
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
+    int m_focusedTraceIndex;                       //!< Index of the trace that has focus
     int m_traceSize;                               //!< Size of traces in number of samples
     int m_nbSamples;                               //!< Number of samples yet to process in one complex trace
     int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size

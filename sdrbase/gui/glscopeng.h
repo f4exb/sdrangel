@@ -61,7 +61,7 @@ public:
     void setTimeOfsProMill(int timeOfsProMill);
     void setSampleRate(int sampleRate);
     void setTimeBase(int timeBase);
-    void setHighlightedTraceIndex(uint32_t traceIndex);
+    void setFocusedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
     void setTraceSize(int trceSize);
     void updateDisplay();
@@ -92,7 +92,7 @@ private:
     int m_traceSize;
     int m_timeBase;
     int m_timeOffset;
-    uint32_t m_highlightedTraceIndex;
+    uint32_t m_focusedTraceIndex;
 
     // graphics stuff
     QRectF m_glScopeRect1;

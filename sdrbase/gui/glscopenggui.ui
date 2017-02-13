@@ -515,7 +515,7 @@ kS/s</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QPushButton" name="addTrace">
+        <widget class="QPushButton" name="traceAdd">
          <property name="maximumSize">
           <size>
            <width>18</width>
@@ -573,7 +573,7 @@ kS/s</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="delTrace">
+        <widget class="QPushButton" name="traceDel">
          <property name="maximumSize">
           <size>
            <width>18</width>

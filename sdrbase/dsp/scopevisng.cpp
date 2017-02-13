@@ -28,6 +28,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrace, Message)
 
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 const Real ScopeVisNG::ProjectorMagDB::mult = (10.0f / log2f(10.0f));
@@ -39,6 +40,7 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_currentTriggerIndex(0),
 	m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
+    m_focusedTraceIndex(0),
     m_traceSize(m_traceChunkSize),
     m_nbSamples(0),
     m_traceStart(true),
@@ -93,6 +95,12 @@ void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
 void ScopeVisNG::removeTrace(uint32_t traceIndex)
 {
     Message* cmd = MsgScopeVisNGRemoveTrace::create(traceIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::focusOnTrace(uint32_t traceIndex)
+{
+    Message* cmd = MsgScopeVisNGFocusOnTrace::create(traceIndex);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -571,6 +579,21 @@ bool ScopeVisNG::handleMessage(const Message& message)
         updateMaxTraceDelay();
         computeDisplayTriggerLevels();
         m_glScope->updateDisplay();
+        return true;
+    }
+    else if (MsgScopeVisNGFocusOnTrace::match(message))
+    {
+        MsgScopeVisNGFocusOnTrace& conf = (MsgScopeVisNGFocusOnTrace&) message;
+        int traceIndex = conf.getTraceIndex();
+
+        if (traceIndex < m_traces.m_tracesData.size())
+        {
+            m_focusedTraceIndex = traceIndex;
+            computeDisplayTriggerLevels();
+            m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
+            m_glScope->updateDisplay();
+        }
+
         return true;
     }
     else

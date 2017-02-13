@@ -270,6 +270,64 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     setTrigPreDisplay();
 }
 
+void GLScopeNGGUI::on_trace_valueChanged(int value)
+{
+    ui->traceText->setText(tr("%1").arg(value));
+
+    ScopeVisNG::TraceData traceData;
+    m_scopeVis->getTraceData(traceData, value);
+
+    qDebug() << "GLScopeNGGUI::on_trace_valueChanged:"
+            << " m_projectionType: " << (int) traceData.m_projectionType
+            << " m_amp" << traceData.m_amp
+            << " m_ofs" << traceData.m_ofs
+            << " m_traceDelay" << traceData.m_traceDelay;
+
+    setTraceUI(traceData);
+
+    m_scopeVis->focusOnTrace(value);
+}
+
+void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
+{
+    if (ui->trace->maximum() < 9)
+    {
+        if (ui->trace->value() == 0)
+        {
+            ui->onlyY->setEnabled(true);
+            ui->horizontalXY->setEnabled(true);
+            ui->verticalXY->setEnabled(true);
+            ui->polar->setEnabled(true);
+        }
+
+        ScopeVisNG::TraceData traceData;
+        fillTraceData(traceData);
+        m_scopeVis->addTrace(traceData);
+        ui->trace->setMaximum(ui->trace->maximum() + 1);
+    }
+}
+
+void GLScopeNGGUI::on_traceDel_clicked(bool checked)
+{
+    if (ui->trace->value() > 0)
+    {
+        ui->trace->setMaximum(ui->trace->maximum() - 1);
+
+        if (ui->trace->value() == 0)
+        {
+            ui->onlyX->setChecked(true);
+            ui->onlyY->setEnabled(false);
+            ui->horizontalXY->setEnabled(false);
+            ui->verticalXY->setEnabled(false);
+            ui->polar->setEnabled(false);
+            m_glScope->setDisplayMode(GLScopeNG::DisplayX);
+        }
+
+        m_scopeVis->removeTrace(ui->trace->value());
+    }
+}
+
+
 void GLScopeNGGUI::on_trig_valueChanged(int value)
 {
     ui->trigText->setText(tr("%1").arg(value));
@@ -720,7 +778,12 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
-    traceData.m_traceDelay = 0;
+    traceData.m_ampIndex = ui->amp->value();
+    traceData.m_traceDelay = 0; // TODO
+    traceData.m_traceDelayValue = 0; // TODO
+
+    traceData.m_ofsCoarse = ui->ofsCoarse->value();
+    traceData.m_ofsFine = ui->ofsFine->value();
 
     if (traceData.m_projectionType == ScopeVisNG::ProjectionMagLin) {
         traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 2000.0f;
@@ -746,6 +809,43 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.m_triggerDelayCoarse = ui->trigDelayCoarse->value();
     triggerData.m_triggerDelayFine = ui->trigDelayFine->value();
     triggerData.setColor(m_focusedTriggerColor);
+}
+
+void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
+{
+    bool oldStateTraceMode  = ui->traceMode->blockSignals(true);
+    bool oldStateAmp        = ui->amp->blockSignals(true);
+    bool oldStateOfsCoarse  = ui->ofsCoarse->blockSignals(true);
+    bool oldStateOfsFine    = ui->ofsFine->blockSignals(true);
+    bool oldStateTraceDelay = ui->traceDelay->blockSignals(true);
+    bool oldStateZSelect    = ui->zSelect->blockSignals(true);
+    bool oldStateZTraceMode = ui->zTraceMode->blockSignals(true);
+    bool oldStateTraceColor = ui->traceColor->blockSignals(true);
+
+    ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
+    ui->amp->setValue(traceData.m_ampIndex);
+    setAmpScaleDisplay();
+
+    ui->ofsCoarse->setValue(traceData.m_ofsCoarse);
+    ui->ofsFine->setValue(traceData.m_ofsFine);
+    setAmpOfsDisplay();
+
+    ui->traceDelay->setValue(traceData.m_traceDelayValue);
+    // TODO: set trace delay display
+
+    m_focusedTraceColor = traceData.m_traceColor;
+    int r, g, b, a;
+    m_focusedTraceColor.getRgb(&r, &g, &b, &a);
+    ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+
+    ui->traceMode->blockSignals(oldStateTraceMode);
+    ui->amp->blockSignals(oldStateAmp);
+    ui->ofsCoarse->blockSignals(oldStateOfsCoarse);
+    ui->ofsFine->blockSignals(oldStateOfsFine);
+    ui->traceDelay->blockSignals(oldStateTraceDelay);
+    ui->zSelect->blockSignals(oldStateZSelect);
+    ui->zTraceMode->blockSignals(oldStateZTraceMode);
+    ui->traceColor->blockSignals(oldStateTraceColor);
 }
 
 void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
