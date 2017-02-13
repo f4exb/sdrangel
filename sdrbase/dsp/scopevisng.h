@@ -682,7 +682,6 @@ private:
 
         ~TraceControl()
         {
-            if (m_projector) delete m_projector;
         }
 
         void initProjector(ProjectionType projectionType)
@@ -895,6 +894,7 @@ private:
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
+    QMutex m_mutex;
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode

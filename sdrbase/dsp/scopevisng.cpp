@@ -16,6 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMutexLocker>
+
 #include "scopevisng.h"
 #include "dsp/dspcommands.h"
 #include "gui/glscopeng.h"
@@ -147,15 +149,18 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
         m_triggerPoint = cbegin;
     }
 
-    if (m_triggerState == TriggerNewConfig)
-    {
-        m_triggerState = TriggerUntriggered;
-        return;
-    }
+//    if (m_triggerState == TriggerNewConfig)
+//    {
+//        m_triggerState = TriggerUntriggered;
+//        return;
+//    }
 
     if ((m_triggerConditions.size() > 0) && (m_triggerState == TriggerWait)) {
         return;
     }
+
+    if(!m_mutex.tryLock(2))
+        return;
 
     SampleVector::const_iterator begin(cbegin);
     int triggerPointToEnd;
@@ -181,6 +186,8 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
             begin += m_traceSize;
         }
     }
+
+    m_mutex.unlock();
 }
 
 void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, int& triggerPointToEnd)
@@ -453,6 +460,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgConfigureScopeVisNG::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
 
         uint32_t traceSize = conf.getTraceSize();
@@ -554,6 +562,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGAddTrace::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
         m_traces.addTrace(conf.getTraceData(), m_traceSize);
         initTraceBuffers();
@@ -564,6 +573,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGChangeTrace::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
         bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
         m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
@@ -574,6 +584,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGRemoveTrace::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
