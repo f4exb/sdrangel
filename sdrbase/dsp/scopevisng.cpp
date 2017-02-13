@@ -40,7 +40,7 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
     m_currentTriggerIndex(0),
-	m_focusedTriggerIndex(0),
+    m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
     m_focusedTraceIndex(0),
     m_traceSize(m_traceChunkSize),
@@ -159,7 +159,7 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
         return;
     }
 
-    if(!m_mutex.tryLock(2))
+    if(!m_mutex.tryLock(2)) // prevent conflicts with configuration process
         return;
 
     SampleVector::const_iterator begin(cbegin);
@@ -510,6 +510,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGAddTrigger::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
         m_triggerConditions.push_back(TriggerCondition(conf.getTriggerData()));
         m_triggerConditions.back().initProjector();
@@ -517,6 +518,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGChangeTrigger::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
         int triggerIndex = conf.getTriggerIndex();
 
@@ -536,6 +538,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGRemoveTrigger::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
         int triggerIndex = conf.getTriggerIndex();
 
