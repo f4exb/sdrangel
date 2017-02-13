@@ -326,6 +326,7 @@ void GLScopeNGGUI::on_traceDel_clicked(bool checked)
         }
 
         m_scopeVis->removeTrace(ui->trace->value());
+        changeCurrentTrace();
     }
 }
 
