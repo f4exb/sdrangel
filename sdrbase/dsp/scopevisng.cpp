@@ -33,7 +33,6 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrace, Message)
 
 const uint ScopeVisNG::m_traceChunkSize = 4800;
-const Real ScopeVisNG::ProjectorMagDB::mult = (10.0f / log2f(10.0f));
 
 
 ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
@@ -398,15 +397,15 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                 float v;
 
                 if (projectionType == ProjectionMagLin) {
-                    v = (itCtl->m_projector->run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
+                    v = (itCtl->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
                 } else if (projectionType == ProjectionMagDB) {
                    // there is no processing advantage in direct calculation without projector
 //                    uint32_t magsq = begin->m_real*begin->m_real + begin->m_imag*begin->m_imag;
 //                    v = ((log10f(magsq/1073741824.0f)*0.2f - 2.0f*itData->m_ofs) + 2.0f)*itData->m_amp - 1.0f;
-                    float p = itCtl->m_projector->run(*begin) - (100.0f * itData->m_ofs);
+                    float p = itCtl->m_projector.run(*begin) - (100.0f * itData->m_ofs);
                     v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
                 } else {
-                    v = (itCtl->m_projector->run(*begin) - itData->m_ofs) * itData->m_amp;
+                    v = (itCtl->m_projector.run(*begin) - itData->m_ofs) * itData->m_amp;
                 }
 
                 if(v > 1.0f) {
@@ -657,7 +656,7 @@ void ScopeVisNG::computeDisplayTriggerLevels()
 
     for (; itData != m_traces.m_tracesData.end(); ++itData)
     {
-        if ((m_focusedTriggerIndex < m_triggerConditions.size()) && (m_triggerConditions[m_focusedTriggerIndex].m_projector->getProjectionType() == itData->m_projectionType))
+        if ((m_focusedTriggerIndex < m_triggerConditions.size()) && (m_triggerConditions[m_focusedTriggerIndex].m_projector.getProjectionType() == itData->m_projectionType))
         {
             float level = m_triggerConditions[m_focusedTriggerIndex].m_triggerData.m_triggerLevel;
             float levelPowerLin = level + 1.0f;

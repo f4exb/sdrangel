@@ -389,121 +389,73 @@ private:
         {}
     };
 
-    // === projectors ===
     // ---------------------------------------------
+
+    /**
+     * Projection stuff
+     */
     class Projector
     {
     public:
-        Projector(ProjectionType projectionType) : m_projectionType(projectionType) {}
-        virtual ~Projector() {}
+        Projector(ProjectionType projectionType) :
+            m_projectionType(projectionType),
+            m_prevArg(0.0f)
+        {}
+
+        ~Projector()
+        {}
 
         ProjectionType getProjectionType() const { return m_projectionType; }
-        virtual Real run(const Sample& s) = 0;
+        void settProjectionType(ProjectionType projectionType) { m_projectionType = projectionType; }
+
+        Real run(const Sample& s)
+        {
+            switch (m_projectionType)
+            {
+            case ProjectionImag:
+                return s.m_imag / 32768.0f;
+                break;
+            case ProjectionMagLin:
+            {
+                uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
+                return std::sqrt(magsq/1073741824.0f);
+            }
+                break;
+            case ProjectionMagDB:
+            {
+                uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
+                return log10f(magsq/1073741824.0f) * 10.0f;
+            }
+                break;
+            case ProjectionPhase:
+                return std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
+                break;
+            case ProjectionDPhase:
+            {
+                Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
+                Real dPhi = (curArg - m_prevArg) / M_PI;
+                m_prevArg = curArg;
+
+                if (dPhi < -1.0f) {
+                    dPhi += 2.0f;
+                } else if (dPhi > 1.0f) {
+                    dPhi -= 2.0f;
+                }
+
+                return dPhi;
+            }
+                break;
+            case ProjectionReal:
+            default:
+                return s.m_real / 32768.0f;
+                break;
+            }
+        }
+
     private:
         ProjectionType m_projectionType;
-    };
-
-    // ---------------------------------------------
-    class ProjectorReal : public Projector
-    {
-    public:
-        ProjectorReal() : Projector(ProjectionReal) {}
-        virtual ~ProjectorReal() {}
-        virtual Real run(const Sample& s) { return s.m_real / 32768.0f; }
-    };
-
-    // ---------------------------------------------
-    class ProjectorImag : public Projector
-    {
-    public:
-        ProjectorImag() : Projector(ProjectionImag) {}
-        virtual ~ProjectorImag() {}
-        virtual Real run(const Sample& s) { return s.m_imag / 32768.0f; }
-    };
-
-    // ---------------------------------------------
-    class ProjectorMagLin : public Projector
-    {
-    public:
-        ProjectorMagLin() : Projector(ProjectionMagLin) {}
-        virtual ~ProjectorMagLin() {}
-        virtual Real run(const Sample& s)
-        {
-            uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-            return std::sqrt(magsq/1073741824.0f);
-        }
-    };
-
-    // ---------------------------------------------
-    class ProjectorMagDB : public Projector
-    {
-    public:
-        ProjectorMagDB() : Projector(ProjectionMagDB) {}
-        virtual ~ProjectorMagDB() {}
-        virtual Real run(const Sample& s)
-        {
-            uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-            //return mult * log2f(magsq/1073741824.0f);
-            return log10f(magsq/1073741824.0f) * 10.0f;
-        }
-    private:
-        static const Real mult;
-    };
-
-    // ---------------------------------------------
-    class ProjectorPhase : public Projector
-    {
-    public:
-        ProjectorPhase() : Projector(ProjectionPhase) {}
-        virtual ~ProjectorPhase() {}
-        virtual Real run(const Sample& s) { return std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;  }
-    };
-
-    // ---------------------------------------------
-    class ProjectorDPhase : public Projector
-    {
-    public:
-        ProjectorDPhase() : Projector(ProjectionDPhase), m_prevArg(0.0f) {}
-        virtual ~ProjectorDPhase() {}
-        virtual Real run(const Sample& s)
-        {
-            Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
-            Real dPhi = (curArg - m_prevArg) / M_PI;
-            m_prevArg = curArg;
-
-            if (dPhi < -1.0f) {
-                dPhi += 2.0f;
-            } else if (dPhi > 1.0f) {
-                dPhi -= 2.0f;
-            }
-
-            return dPhi;
-        }
-
-    private:
         Real m_prevArg;
     };
-
-    static Projector *createProjector(ProjectionType projectionType)
-    {
-        //qDebug("ScopeVisNG::createProjector: projectionType: %d", projectionType);
-        switch (projectionType)
-        {
-        case ProjectionImag:
-            return new ProjectorImag();
-        case ProjectionMagLin:
-            return new ProjectorMagLin();
-        case ProjectionMagDB:
-            return new ProjectorMagDB();
-        case ProjectionPhase:
-            return new ProjectorPhase();
-        case ProjectionDPhase:
-            return new ProjectorDPhase();
-        case ProjectionReal:
-        default:
-            return new ProjectorReal();
-        }
-    }
 
     /**
      * Trigger stuff
@@ -520,14 +472,14 @@ private:
     struct TriggerCondition
     {
     public:
-        Projector *m_projector;
+        Projector m_projector;
         TriggerData m_triggerData;    //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
         uint32_t m_triggerCounter;    //!< Counter of trigger occurences
 
         TriggerCondition(const TriggerData& triggerData) :
-            m_projector(0),
+            m_projector(ProjectionReal),
             m_triggerData(triggerData),
             m_prevCondition(false),
             m_triggerDelayCount(0),
@@ -541,22 +493,20 @@ private:
 
         void initProjector()
         {
-            m_projector = createProjector(m_triggerData.m_projectionType);
+            m_projector.settProjectionType(m_triggerData.m_projectionType);
         }
 
         void releaseProjector()
         {
-            delete m_projector;
         }
 
         void setData(const TriggerData& triggerData)
         {
             m_triggerData = triggerData;
 
-            if (m_projector->getProjectionType() != m_triggerData.m_projectionType)
+            if (m_projector.getProjectionType() != m_triggerData.m_projectionType)
             {
-                delete m_projector;
-                m_projector = createProjector(m_triggerData.m_projectionType);
+                m_projector.settProjectionType(m_triggerData.m_projectionType);
             }
 
             m_prevCondition = false;
@@ -672,10 +622,10 @@ private:
      */
     struct TraceControl
     {
-        Projector *m_projector; //!< Projector transform from complex trace to real (displayable) trace
+        Projector m_projector;  //!< Projector transform from complex trace to real (displayable) trace
         int m_traceCount[2];    //!< Count of samples processed (double buffered)
 
-        TraceControl() : m_projector(0)
+        TraceControl() : m_projector(ProjectionReal)
         {
             reset();
         }
@@ -686,12 +636,11 @@ private:
 
         void initProjector(ProjectionType projectionType)
         {
-            m_projector = createProjector(projectionType);
+            m_projector.settProjectionType(projectionType);
         }
 
         void releaseProjector()
         {
-            delete m_projector;
         }
 
         void reset()
@@ -821,12 +770,12 @@ private:
 
             bool condition, trigger;
 
-            if (triggerCondition.m_projector->getProjectionType() == ProjectionMagDB) {
-                condition = triggerCondition.m_projector->run(s) > m_levelPowerDB;
-            } else if (triggerCondition.m_projector->getProjectionType() == ProjectionMagLin) {
-                condition = triggerCondition.m_projector->run(s) > m_levelPowerLin;
+            if (triggerCondition.m_projector.getProjectionType() == ProjectionMagDB) {
+                condition = triggerCondition.m_projector.run(s) > m_levelPowerDB;
+            } else if (triggerCondition.m_projector.getProjectionType() == ProjectionMagLin) {
+                condition = triggerCondition.m_projector.run(s) > m_levelPowerLin;
             } else {
-                condition = triggerCondition.m_projector->run(s) > m_level;
+                condition = triggerCondition.m_projector.run(s) > m_level;
             }
 
             if (m_reset)
