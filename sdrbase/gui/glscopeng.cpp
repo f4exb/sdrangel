@@ -421,7 +421,7 @@ void GLScopeNG::paintGL()
             m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
         }
 
-        // paint left #1 scale
+        // paint left #2 scale
         {
             GLfloat vtx1[] = {
                     0, 1,
@@ -435,7 +435,7 @@ void GLScopeNG::paintGL()
                     1, 0,
                     0, 0
             };
-            m_glShaderLeft1Scale.drawSurface(m_glLeft1ScaleMatrix, tex1, vtx1, 4);
+            m_glShaderLeft2Scale.drawSurface(m_glLeft1ScaleMatrix, tex1, vtx1, 4);
         }
 
         // paint bottom #1 scale
@@ -594,7 +594,7 @@ void GLScopeNG::applyConfig()
     }
     else
     {
-        setYScale(m_y1Scale, 0); // Default to the X trace (trace #0) - If there is only one trace it should not get there (Y displays disabled in the UI)
+        setYScale(m_y2Scale, 0); // Default to the X trace (trace #0) - If there is only one trace it should not get there (Y displays disabled in the UI)
     }
 
     if ((m_displayMode == DisplayX) || (m_displayMode == DisplayY)) // unique display
