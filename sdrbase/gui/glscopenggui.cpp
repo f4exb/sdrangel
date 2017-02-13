@@ -43,6 +43,7 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     m_focusedTraceColor.setRgb(255,255,64);
     ui->trigColor->setStyleSheet("QLabel { background-color : rgb(0,255,0); }");
     m_focusedTriggerColor.setRgb(0,255,0);
+    ui->traceText->setText("X"); // TODO: remove when more than 2 traces are supported
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -272,7 +273,8 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
 
 void GLScopeNGGUI::on_trace_valueChanged(int value)
 {
-    ui->traceText->setText(tr("%1").arg(value));
+    //ui->traceText->setText(tr("%1").arg(value)); TODO: restore when more than 2 traces are supported
+    ui->traceText->setText(value == 0 ? "X" : "Y");
 
     ScopeVisNG::TraceData traceData;
     m_scopeVis->getTraceData(traceData, value);
@@ -290,7 +292,7 @@ void GLScopeNGGUI::on_trace_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
 {
-    if (ui->trace->maximum() < 9)
+    if (ui->trace->maximum() < 1) // TODO: extend to more traces when 2 traces are fully stable
     {
         if (ui->trace->value() == 0)
         {
