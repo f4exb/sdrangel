@@ -297,9 +297,9 @@ void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
         if (ui->trace->value() == 0)
         {
             ui->onlyY->setEnabled(true);
-            ui->horizontalXY->setEnabled(true);
-            ui->verticalXY->setEnabled(true);
-            ui->polar->setEnabled(true);
+//            ui->horizontalXY->setEnabled(true); TODO: re-activate when these displays become active
+//            ui->verticalXY->setEnabled(true);
+//            ui->polar->setEnabled(true);
         }
 
         ScopeVisNG::TraceData traceData;
