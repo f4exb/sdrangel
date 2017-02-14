@@ -360,7 +360,7 @@ void GLScopeNG::paintGL()
             };
 
             QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
-            m_glShaderSimple.drawContour(m_glScopeMatrix1, color, q3, 4);
+            m_glShaderSimple.drawContour(m_glScopeMatrix2, color, q3, 4);
         }
 
         // paint grid
@@ -394,12 +394,12 @@ void GLScopeNG::paintGL()
 
             float blue = 1.0f;
             QVector4D color(1.0f, 1.0f, blue, (float) m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
         }
 
-        // X1 (time)
+        // X2 (time)
         {
-            tickList = &m_x1Scale.getTickList();
+            tickList = &m_x2Scale.getTickList();
 
             GLfloat q3[4*tickList->count()];
             int effectiveTicks = 0;
@@ -407,7 +407,7 @@ void GLScopeNG::paintGL()
                 tick = &(*tickList)[i];
                 if(tick->major) {
                     if(tick->textSize > 0) {
-                        float x = tick->pos / m_x1Scale.getSize();
+                        float x = tick->pos / m_x2Scale.getSize();
                         q3[4*effectiveTicks] = x;
                         q3[4*effectiveTicks+1] = 0;
                         q3[4*effectiveTicks+2] = x;
@@ -418,7 +418,7 @@ void GLScopeNG::paintGL()
             }
 
             QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix1, color, q3, 2*effectiveTicks);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
         }
 
         // paint left #2 scale
@@ -435,10 +435,10 @@ void GLScopeNG::paintGL()
                     1, 0,
                     0, 0
             };
-            m_glShaderLeft2Scale.drawSurface(m_glLeft1ScaleMatrix, tex1, vtx1, 4);
+            m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
         }
 
-        // paint bottom #1 scale
+        // paint bottom #2 scale
         {
             GLfloat vtx1[] = {
                     0, 1,
@@ -452,7 +452,7 @@ void GLScopeNG::paintGL()
                     1, 0,
                     0, 0
             };
-            m_glShaderBottom1Scale.drawSurface(m_glBot1ScaleMatrix, tex1, vtx1, 4);
+            m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
         }
 
         // paint traces #1..n
@@ -469,11 +469,11 @@ void GLScopeNG::paintGL()
                 if(end - start < 2)
                     start--;
 
-                float rectX = m_glScopeRect1.x();
-                float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
-                float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
+                float rectX = m_glScopeRect2.x();
+                float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+                float rectW = m_glScopeRect2.width() * (float)m_timeBase / (float)(m_traceSize - 1);
                 //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
-                float rectH = -m_glScopeRect1.height() / 2.0f;
+                float rectH = -m_glScopeRect2.height() / 2.0f;
 
                 //QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
                 QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
@@ -491,10 +491,10 @@ void GLScopeNG::paintGL()
                         1, traceData.m_triggerDisplayLevel
                     };
 
-                    float rectX = m_glScopeRect1.x();
-                    float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
-                    float rectW = m_glScopeRect1.width();
-                    float rectH = -m_glScopeRect1.height() / 2.0f;
+                    float rectX = m_glScopeRect2.x();
+                    float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+                    float rectW = m_glScopeRect2.width();
+                    float rectH = -m_glScopeRect2.height() / 2.0f;
 
                     QVector4D color(
                             m_focusedTriggerData.m_triggerColorR,
@@ -580,6 +580,8 @@ void GLScopeNG::applyConfig()
     float t_start = (((m_timeOfsProMill / 1000.0f) * (float) m_traceSize) / m_sampleRate) - ((float) m_triggerPre / m_sampleRate);
     float t_len = ((float) m_traceSize / m_sampleRate) / (float) m_timeBase;
 
+    // scales
+
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
     m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
 
@@ -597,584 +599,224 @@ void GLScopeNG::applyConfig()
         setYScale(m_y2Scale, 0); // Default to the X trace (trace #0) - If there is only one trace it should not get there (Y displays disabled in the UI)
     }
 
-    if ((m_displayMode == DisplayX) || (m_displayMode == DisplayY)) // unique display
+    // display arrangements
+
+    if ((m_displayMode == DisplayX) || (m_displayMode == DisplayY)) // unique displays
     {
-        int scopeHeight = height() - m_topMargin - m_botMargin;
-        int scopeWidth = width() - m_leftMargin - m_rightMargin;
-
-        m_glScopeRect1 = QRectF(
-            (float) m_leftMargin / (float) width(),
-            (float) m_topMargin / (float) height(),
-            (float) scopeWidth / (float) width(),
-            (float) scopeHeight / (float) height()
-        );
-        m_glScopeMatrix1.setToIdentity();
-        m_glScopeMatrix1.translate (
-            -1.0f + ((float) 2*m_leftMargin / (float) width()),
-             1.0f - ((float) 2*m_topMargin / (float) height())
-        );
-        m_glScopeMatrix1.scale (
-            (float) 2*scopeWidth / (float) width(),
-            (float) -2*scopeHeight / (float) height()
-        );
-
-        m_glBot1ScaleMatrix.setToIdentity();
-        m_glBot1ScaleMatrix.translate (
-            -1.0f + ((float) 2*m_leftMargin / (float) width()),
-             1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
-        );
-        m_glBot1ScaleMatrix.scale (
-            (float) 2*scopeWidth / (float) width(),
-            (float) -2*(m_botMargin - 1) / (float) height()
-        );
-
-        m_glLeft1ScaleMatrix.setToIdentity();
-        m_glLeft1ScaleMatrix.translate (
-            -1.0f,
-             1.0f - ((float) 2*m_topMargin / (float) height())
-        );
-        m_glLeft1ScaleMatrix.scale (
-            (float) 2*(m_leftMargin-1) / (float) width(),
-            (float) -2*scopeHeight / (float) height()
-        );
-
-        { // X1 scale
-            m_x1Scale.setSize(scopeWidth);
-
-            m_bot1ScalePixmap = QPixmap(
-                scopeWidth,
-                m_botMargin - 1
-            );
-
-            const ScaleEngine::TickList* tickList;
-            const ScaleEngine::Tick* tick;
-
-            m_bot1ScalePixmap.fill(Qt::black);
-            QPainter painter(&m_bot1ScalePixmap);
-            painter.setPen(QColor(0xf0, 0xf0, 0xff));
-            painter.setFont(font());
-            tickList = &m_x1Scale.getTickList();
-
-            for(int i = 0; i < tickList->count(); i++) {
-                tick = &(*tickList)[i];
-                if(tick->major) {
-                    if(tick->textSize > 0) {
-                        painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
-                    }
-                }
-            }
-
-            m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
-
-        } // X1 scale
-
-        if (m_displayMode == DisplayX) // use Y1 scale
-        {
-            m_y1Scale.setSize(scopeHeight);
-
-            m_left1ScalePixmap = QPixmap(
-                m_leftMargin - 1,
-                scopeHeight
-            );
-
-            const ScaleEngine::TickList* tickList;
-            const ScaleEngine::Tick* tick;
-
-            m_left1ScalePixmap.fill(Qt::black);
-            QPainter painter(&m_left1ScalePixmap);
-            painter.setPen(QColor(0xf0, 0xf0, 0xff));
-            painter.setFont(font());
-            tickList = &m_y1Scale.getTickList();
-
-            for(int i = 0; i < tickList->count(); i++) {
-                tick = &(*tickList)[i];
-                if(tick->major) {
-                    if(tick->textSize > 0) {
-                        painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                    }
-                }
-            }
-
-            m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
-        }
-        else if (m_displayMode == DisplayY) // use Y2 scale
-        {
-            m_y2Scale.setSize(scopeHeight);
-
-            m_left2ScalePixmap = QPixmap(
-                m_leftMargin - 1,
-                scopeHeight
-            );
-
-            const ScaleEngine::TickList* tickList;
-            const ScaleEngine::Tick* tick;
-
-            m_left2ScalePixmap.fill(Qt::black);
-            QPainter painter(&m_left2ScalePixmap);
-            painter.setPen(QColor(0xf0, 0xf0, 0xff));
-            painter.setFont(font());
-            tickList = &m_y2Scale.getTickList();
-
-            for(int i = 0; i < tickList->count(); i++) {
-                tick = &(*tickList)[i];
-                if(tick->major) {
-                    if(tick->textSize > 0) {
-                        painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                    }
-                }
-            }
-
-            m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
-        } // Y scales
-    } // single display
-    else // dual display (X+Y or polar)
+        setUniqueDisplays();
+    }
+    else if (m_displayMode == DisplayXYV) // both displays vertically arranged
     {
-        // left (first) display
-        if ((m_displayMode == DisplayXYH) || (m_displayMode == DisplayPol)) // horizontal split of first display
-        {
-            int scopeHeight = height() - m_topMargin - m_botMargin;
-            int scopeWidth = (width() - m_rightMargin)/2 - m_leftMargin;
 
-            m_glScopeRect1 = QRectF(
-                (float) m_leftMargin / (float) width(),
-                (float) m_topMargin / (float) height(),
-                (float) scopeWidth / (float) width(),
-                (float) scopeHeight / (float) height()
-            );
-            m_glScopeMatrix1.setToIdentity();
-            m_glScopeMatrix1.translate (
-                -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glScopeMatrix1.scale (
-                (float) 2*scopeWidth / (float) width(),
-                (float) -2*scopeHeight / (float) height()
-            );
+    }
+    else if (m_displayMode == DisplayXYH) // both displays horizontally arranged
+    {
 
-            m_glBot1ScaleMatrix.setToIdentity();
-            m_glBot1ScaleMatrix.translate (
-                -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                 1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
-            );
-            m_glBot1ScaleMatrix.scale (
-                (float) 2*scopeWidth / (float) width(),
-                (float) -2*(m_botMargin - 1) / (float) height()
-            );
+    }
+    else if (m_displayMode == DisplayPol) // horizontal arrangement: XY stacked on left and polar on right
+    {
 
-            m_glLeft1ScaleMatrix.setToIdentity();
-            m_glLeft1ScaleMatrix.translate (
-                -1.0f,
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glLeft1ScaleMatrix.scale (
-                (float) 2*(m_leftMargin-1) / (float) width(),
-                (float) -2*scopeHeight / (float) height()
-            );
+    }
+}
 
-            { // Y1 scale
-                m_y1Scale.setSize(scopeHeight);
+void GLScopeNG::setUniqueDisplays()
+{
+    QFontMetrics fm(font());
+    int M = fm.width("-");
+    int scopeHeight = height() - m_topMargin - m_botMargin;
+    int scopeWidth = width() - m_leftMargin - m_rightMargin;
 
-                m_left1ScalePixmap = QPixmap(
-                    m_leftMargin - 1,
-                    scopeHeight
-                );
+    // X display
 
-                const ScaleEngine::TickList* tickList;
-                const ScaleEngine::Tick* tick;
+    m_glScopeRect1 = QRectF(
+        (float) m_leftMargin / (float) width(),
+        (float) m_topMargin / (float) height(),
+        (float) scopeWidth / (float) width(),
+        (float) scopeHeight / (float) height()
+    );
+    m_glScopeMatrix1.setToIdentity();
+    m_glScopeMatrix1.translate (
+        -1.0f + ((float) 2*m_leftMargin / (float) width()),
+         1.0f - ((float) 2*m_topMargin / (float) height())
+    );
+    m_glScopeMatrix1.scale (
+        (float) 2*scopeWidth / (float) width(),
+        (float) -2*scopeHeight / (float) height()
+    );
 
-                m_left1ScalePixmap.fill(Qt::black);
-                QPainter painter(&m_left1ScalePixmap);
-                painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                painter.setFont(font());
-                tickList = &m_y1Scale.getTickList();
+    m_glBot1ScaleMatrix.setToIdentity();
+    m_glBot1ScaleMatrix.translate (
+        -1.0f + ((float) 2*m_leftMargin / (float) width()),
+         1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
+    );
+    m_glBot1ScaleMatrix.scale (
+        (float) 2*scopeWidth / (float) width(),
+        (float) -2*(m_botMargin - 1) / (float) height()
+    );
 
-                for(int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if(tick->major) {
-                        if(tick->textSize > 0) {
-                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                        }
-                    }
+    m_glLeft1ScaleMatrix.setToIdentity();
+    m_glLeft1ScaleMatrix.translate (
+        -1.0f,
+         1.0f - ((float) 2*m_topMargin / (float) height())
+    );
+    m_glLeft1ScaleMatrix.scale (
+        (float) 2*(m_leftMargin-1) / (float) width(),
+        (float) -2*scopeHeight / (float) height()
+    );
+
+    // Y displays
+
+    m_glScopeRect2 = QRectF(
+        (float) m_leftMargin / (float) width(),
+        (float) m_topMargin / (float) height(),
+        (float) scopeWidth / (float) width(),
+        (float) scopeHeight / (float) height()
+    );
+    m_glScopeMatrix2.setToIdentity();
+    m_glScopeMatrix2.translate (
+        -1.0f + ((float) 2*m_leftMargin / (float) width()),
+         1.0f - ((float) 2*m_topMargin / (float) height())
+    );
+    m_glScopeMatrix2.scale (
+        (float) 2*scopeWidth / (float) width(),
+        (float) -2*scopeHeight / (float) height()
+    );
+
+    m_glBot2ScaleMatrix.setToIdentity();
+    m_glBot2ScaleMatrix.translate (
+        -1.0f + ((float) 2*m_leftMargin / (float) width()),
+         1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
+    );
+    m_glBot2ScaleMatrix.scale (
+        (float) 2*scopeWidth / (float) width(),
+        (float) -2*(m_botMargin - 1) / (float) height()
+    );
+
+    m_glLeft2ScaleMatrix.setToIdentity();
+    m_glLeft2ScaleMatrix.translate (
+        -1.0f,
+         1.0f - ((float) 2*m_topMargin / (float) height())
+    );
+    m_glLeft2ScaleMatrix.scale (
+        (float) 2*(m_leftMargin-1) / (float) width(),
+        (float) -2*scopeHeight / (float) height()
+    );
+
+    { // X horizontal scale (X1)
+        m_x1Scale.setSize(scopeWidth);
+
+        m_bot1ScalePixmap = QPixmap(
+            scopeWidth,
+            m_botMargin - 1
+        );
+
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
+
+        m_bot1ScalePixmap.fill(Qt::black);
+        QPainter painter(&m_bot1ScalePixmap);
+        painter.setPen(QColor(0xf0, 0xf0, 0xff));
+        painter.setFont(font());
+        tickList = &m_x1Scale.getTickList();
+
+        for(int i = 0; i < tickList->count(); i++) {
+            tick = &(*tickList)[i];
+            if(tick->major) {
+                if(tick->textSize > 0) {
+                    painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
                 }
-
-                m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
-
-            } // Y1 scale
-            { // X1 scale
-                m_x1Scale.setSize(scopeWidth);
-
-                m_bot1ScalePixmap = QPixmap(
-                    scopeWidth,
-                    m_botMargin - 1
-                );
-
-                const ScaleEngine::TickList* tickList;
-                const ScaleEngine::Tick* tick;
-
-                m_bot1ScalePixmap.fill(Qt::black);
-                QPainter painter(&m_bot1ScalePixmap);
-                painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                painter.setFont(font());
-                tickList = &m_x1Scale.getTickList();
-
-                for(int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if(tick->major) {
-                        if(tick->textSize > 0) {
-                            painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
-                        }
-                    }
-                }
-
-                m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
-
-            } // X1 scale
-        }
-        else // vertical split of first display
-        {
-            int scopeHeight = (height() - m_topMargin) / 2 - m_botMargin;
-            int scopeWidth = width() - m_leftMargin - m_rightMargin;
-
-            m_glScopeRect1 = QRectF(
-                (float) m_leftMargin / (float) width(),
-                (float) m_topMargin / (float) height(),
-                (float) scopeWidth / (float) width(),
-                (float) scopeHeight / (float) height()
-            );
-            m_glScopeMatrix1.setToIdentity();
-            m_glScopeMatrix1.translate (
-                -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glScopeMatrix1.scale (
-                (float) 2*scopeWidth / (float) width(),
-                (float) -2*scopeHeight / (float) height()
-            );
-
-            m_glBot1ScaleMatrix.setToIdentity();
-            m_glBot1ScaleMatrix.translate (
-                -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                 1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
-            );
-            m_glBot1ScaleMatrix.scale (
-                (float) 2*scopeWidth / (float) width(),
-                (float) -2*(m_botMargin - 1) / (float) height()
-            );
-
-            m_glLeft1ScaleMatrix.setToIdentity();
-            m_glLeft1ScaleMatrix.translate (
-                -1.0f,
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glLeft1ScaleMatrix.scale (
-                (float) 2*(m_leftMargin-1) / (float) width(),
-                (float) -2*scopeHeight / (float) height()
-            );
-
-            { // Y1 scale
-                m_y1Scale.setSize(scopeHeight);
-
-                m_left1ScalePixmap = QPixmap(
-                    m_leftMargin - 1,
-                    scopeHeight
-                );
-
-                const ScaleEngine::TickList* tickList;
-                const ScaleEngine::Tick* tick;
-
-                m_left1ScalePixmap.fill(Qt::black);
-                QPainter painter(&m_left1ScalePixmap);
-                painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                painter.setFont(font());
-                tickList = &m_y1Scale.getTickList();
-
-                for(int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if(tick->major) {
-                        if(tick->textSize > 0) {
-                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                        }
-                    }
-                }
-
-                m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
-
-            } // Y1 scale
-            { // X1 scale
-                m_x1Scale.setSize(scopeWidth);
-
-                m_bot1ScalePixmap = QPixmap(
-                    scopeWidth,
-                    m_botMargin - 1
-                );
-
-                const ScaleEngine::TickList* tickList;
-                const ScaleEngine::Tick* tick;
-
-                m_bot1ScalePixmap.fill(Qt::black);
-                QPainter painter(&m_bot1ScalePixmap);
-                painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                painter.setFont(font());
-                tickList = &m_x1Scale.getTickList();
-
-                for(int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if(tick->major) {
-                        if(tick->textSize > 0) {
-                            painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
-                        }
-                    }
-                }
-
-                m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
-
-            } // X1 scale
-        } // hotizontal or vertical split of first display
-        // right (second) display
-        if (m_displayMode == DisplayPol) // in Polar mode second display is square and split is horizontal
-        {
-            int scopeHeight = height() - m_topMargin - m_botMargin;
-            int scopeWidth = (width() - m_rightMargin)/2 - m_leftMargin;
-
-            int scopeDim = std::min(scopeWidth, scopeHeight);
-
-            m_glScopeRect2 = QRectF(
-                (float)(m_leftMargin + scopeWidth + m_leftMargin) / (float)width(),
-                (float)m_topMargin / (float)height(),
-                (float) scopeDim / (float)width(),
-                (float)(height() - m_topMargin - m_botMargin) / (float)height()
-            );
-            m_glScopeMatrix2.setToIdentity();
-            m_glScopeMatrix2.translate (
-                -1.0f + ((float) 2*(m_leftMargin + scopeWidth + m_leftMargin) / (float) width()),
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glScopeMatrix2.scale (
-                (float) 2*scopeDim / (float) width(),
-                (float) -2*(height() - m_topMargin - m_botMargin) / (float) height()
-            );
-
-            m_glLeft2ScaleMatrix.setToIdentity();
-            m_glLeft2ScaleMatrix.translate (
-                -1.0f + (float) 2*(m_leftMargin + scopeWidth) / (float) width(),
-                 1.0f - ((float) 2*m_topMargin / (float) height())
-            );
-            m_glLeft2ScaleMatrix.scale (
-                (float) 2*(m_leftMargin-1) / (float) width(),
-                (float) -2*scopeHeight / (float) height()
-            );
-
-            m_glBot2ScaleMatrix.setToIdentity();
-            m_glBot2ScaleMatrix.translate (
-                -1.0f + ((float) 2*(m_leftMargin + m_leftMargin + scopeWidth) / (float) width()),
-                 1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
-            );
-            m_glBot2ScaleMatrix.scale (
-                (float) 2*scopeDim / (float) width(),
-                (float) -2*(m_botMargin - 1) / (float) height()
-            );
-        }
-        else // both displays are similar and share space equally
-        {
-            if (m_displayMode == DisplayXYH) // horizontal split of second display
-            {
-                int scopeHeight = height() - m_topMargin - m_botMargin;
-                int scopeWidth = (width() - m_rightMargin)/2 - m_leftMargin;
-
-                m_glScopeRect2 = QRectF(
-                    (float)(m_leftMargin + m_leftMargin + ((width() - m_leftMargin - m_leftMargin - m_rightMargin) / 2)) / (float)width(),
-                    (float)m_topMargin / (float)height(),
-                    (float)((width() - m_leftMargin - m_leftMargin - m_rightMargin) / 2) / (float)width(),
-                    (float)(height() - m_topMargin - m_botMargin) / (float)height()
-                );
-                m_glScopeMatrix2.setToIdentity();
-                m_glScopeMatrix2.translate (
-                    -1.0f + ((float) 2*(m_leftMargin + m_leftMargin + ((width() - m_leftMargin - m_leftMargin - m_rightMargin) / 2)) / (float) width()),
-                     1.0f - ((float) 2*m_topMargin / (float) height())
-                );
-                m_glScopeMatrix2.scale (
-                    (float) 2*((width() - m_leftMargin - m_leftMargin - m_rightMargin) / 2) / (float) width(),
-                    (float) -2*(height() - m_topMargin - m_botMargin) / (float) height()
-                );
-
-                m_glLeft2ScaleMatrix.setToIdentity();
-                m_glLeft2ScaleMatrix.translate (
-                    -1.0f + (float) 2*(m_leftMargin + scopeWidth) / (float) width(),
-                     1.0f - ((float) 2*m_topMargin / (float) height())
-                );
-                m_glLeft2ScaleMatrix.scale (
-                    (float) 2*(m_leftMargin-1) / (float) width(),
-                    (float) -2*scopeHeight / (float) height()
-                );
-
-                m_glBot2ScaleMatrix.setToIdentity();
-                m_glBot2ScaleMatrix.translate (
-                    -1.0f + ((float) 2*(m_leftMargin + m_leftMargin + scopeWidth) / (float) width()),
-                     1.0f - ((float) 2*(scopeHeight + m_topMargin + 1) / (float) height())
-                );
-                m_glBot2ScaleMatrix.scale (
-                    (float) 2*scopeWidth / (float) width(),
-                    (float) -2*(m_botMargin - 1) / (float) height()
-                );
-
-                { // Y2 scale
-                    m_y2Scale.setSize(scopeHeight);
-
-                    m_left2ScalePixmap = QPixmap(
-                        m_leftMargin - 1,
-                        scopeHeight
-                    );
-
-                    const ScaleEngine::TickList* tickList;
-                    const ScaleEngine::Tick* tick;
-
-                    m_left2ScalePixmap.fill(Qt::black);
-                    QPainter painter(&m_left2ScalePixmap);
-                    painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                    painter.setFont(font());
-                    tickList = &m_y2Scale.getTickList();
-
-                    for(int i = 0; i < tickList->count(); i++) {
-                        tick = &(*tickList)[i];
-                        if(tick->major) {
-                            if(tick->textSize > 0) {
-                                painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                            }
-                        }
-                    }
-
-                    m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
-
-                } // Y2 scale
-                { // X2 scale
-                    m_x2Scale.setSize(scopeWidth);
-                    m_bot2ScalePixmap = QPixmap(
-                        scopeWidth,
-                        m_botMargin - 1
-                    );
-
-                    const ScaleEngine::TickList* tickList;
-                    const ScaleEngine::Tick* tick;
-
-                    m_bot2ScalePixmap.fill(Qt::black);
-                    QPainter painter(&m_bot2ScalePixmap);
-                    painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                    painter.setFont(font());
-                    tickList = &m_x2Scale.getTickList();
-
-                    for(int i = 0; i < tickList->count(); i++) {
-                        tick = &(*tickList)[i];
-                        if(tick->major) {
-                            if(tick->textSize > 0) {
-                                painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
-                            }
-                        }
-                    }
-
-                    m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
-
-                } // X2 scale
             }
-            else // vertical split of second display
-            {
-                int scopeHeight = (height() - m_topMargin) / 2 - m_botMargin;
-                int scopeWidth = width() - m_leftMargin - m_rightMargin;
+        }
 
-                m_glScopeRect2 = QRectF(
-                    (float) m_leftMargin / (float)width(),
-                    (float) (m_botMargin + m_topMargin + scopeHeight) / (float)height(),
-                    (float) scopeWidth / (float)width(),
-                    (float) scopeHeight / (float)height()
-                );
-                m_glScopeMatrix2.setToIdentity();
-                m_glScopeMatrix2.translate (
-                    -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                     1.0f - ((float) 2*(m_botMargin + m_topMargin + scopeHeight) / (float) height())
-                );
-                m_glScopeMatrix2.scale (
-                    (float) 2*scopeWidth / (float) width(),
-                    (float) -2*scopeHeight / (float) height()
-                );
+        m_glShaderBottom1Scale.initTexture(m_bot1ScalePixmap.toImage());
+    } // X horizontal scale
 
-                m_glLeft2ScaleMatrix.setToIdentity();
-                m_glLeft2ScaleMatrix.translate (
-                    -1.0f,
-                     1.0f - ((float) 2*(m_topMargin + scopeHeight + m_botMargin) / (float) height())
-                );
-                m_glLeft2ScaleMatrix.scale (
-                    (float) 2*(m_leftMargin-1) / (float) width(),
-                    (float) -2*scopeHeight / (float) height()
-                );
+    { // Y horizontal scale (X2)
+        m_x2Scale.setSize(scopeWidth);
 
-                m_glBot2ScaleMatrix.setToIdentity();
-                m_glBot2ScaleMatrix.translate (
-                    -1.0f + ((float) 2*m_leftMargin / (float) width()),
-                     1.0f - ((float) 2*(scopeHeight + m_topMargin + scopeHeight + m_botMargin + 1) / (float) height())
-                );
-                m_glBot2ScaleMatrix.scale (
-                    (float) 2*scopeWidth / (float) width(),
-                    (float) -2*(m_botMargin - 1) / (float) height()
-                );
+        m_bot2ScalePixmap = QPixmap(
+            scopeWidth,
+            m_botMargin - 1
+        );
 
-                { // Y2 scale
-                    m_y2Scale.setSize(scopeHeight);
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
 
-                    m_left2ScalePixmap = QPixmap(
-                        m_leftMargin - 1,
-                        scopeHeight
-                    );
+        m_bot2ScalePixmap.fill(Qt::black);
+        QPainter painter(&m_bot2ScalePixmap);
+        painter.setPen(QColor(0xf0, 0xf0, 0xff));
+        painter.setFont(font());
+        tickList = &m_x2Scale.getTickList();
 
-                    const ScaleEngine::TickList* tickList;
-                    const ScaleEngine::Tick* tick;
+        for(int i = 0; i < tickList->count(); i++) {
+            tick = &(*tickList)[i];
+            if(tick->major) {
+                if(tick->textSize > 0) {
+                    painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
+                }
+            }
+        }
 
-                    m_left2ScalePixmap.fill(Qt::black);
-                    QPainter painter(&m_left2ScalePixmap);
-                    painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                    painter.setFont(font());
-                    tickList = &m_y2Scale.getTickList();
+        m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
+    } // Y horizontal scale
 
-                    for(int i = 0; i < tickList->count(); i++) {
-                        tick = &(*tickList)[i];
-                        if(tick->major) {
-                            if(tick->textSize > 0) {
-                                painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
-                            }
-                        }
-                    }
+    { //  X vertical scale (Y1)
+        m_y1Scale.setSize(scopeHeight);
 
-                    m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+        m_left1ScalePixmap = QPixmap(
+            m_leftMargin - 1,
+            scopeHeight
+        );
 
-                } // Y2 scale
-                { // X2 scale
-                    m_x2Scale.setSize(scopeWidth);
-                    m_bot2ScalePixmap = QPixmap(
-                        scopeWidth,
-                        m_botMargin - 1
-                    );
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
 
-                    const ScaleEngine::TickList* tickList;
-                    const ScaleEngine::Tick* tick;
+        m_left1ScalePixmap.fill(Qt::black);
+        QPainter painter(&m_left1ScalePixmap);
+        painter.setPen(QColor(0xf0, 0xf0, 0xff));
+        painter.setFont(font());
+        tickList = &m_y1Scale.getTickList();
 
-                    m_bot2ScalePixmap.fill(Qt::black);
-                    QPainter painter(&m_bot2ScalePixmap);
-                    painter.setPen(QColor(0xf0, 0xf0, 0xff));
-                    painter.setFont(font());
-                    tickList = &m_x2Scale.getTickList();
+        for(int i = 0; i < tickList->count(); i++) {
+            tick = &(*tickList)[i];
+            if(tick->major) {
+                if(tick->textSize > 0) {
+                    painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
+                }
+            }
+        }
 
-                    for(int i = 0; i < tickList->count(); i++) {
-                        tick = &(*tickList)[i];
-                        if(tick->major) {
-                            if(tick->textSize > 0) {
-                                painter.drawText(QPointF(tick->textPos, fm.height() - 1), tick->text);
-                            }
-                        }
-                    }
+        m_glShaderLeft1Scale.initTexture(m_left1ScalePixmap.toImage());
+    } // X vertical scale
 
-                    m_glShaderBottom2Scale.initTexture(m_bot2ScalePixmap.toImage());
-                } // X2 scale
-            } // vertical or horizontal split of second display
-        } // second display square (polar mode) or half space
-    } // single or dual display
+    { // Y vertical scale (Y2)
+        m_y2Scale.setSize(scopeHeight);
+
+        m_left2ScalePixmap = QPixmap(
+            m_leftMargin - 1,
+            scopeHeight
+        );
+
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
+
+        m_left2ScalePixmap.fill(Qt::black);
+        QPainter painter(&m_left2ScalePixmap);
+        painter.setPen(QColor(0xf0, 0xf0, 0xff));
+        painter.setFont(font());
+        tickList = &m_y2Scale.getTickList();
+
+        for(int i = 0; i < tickList->count(); i++) {
+            tick = &(*tickList)[i];
+            if(tick->major) {
+                if(tick->textSize > 0) {
+                    painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + scopeHeight - tick->textPos - fm.ascent()/2), tick->text);
+                }
+            }
+        }
+
+        m_glShaderLeft2Scale.initTexture(m_left2ScalePixmap.toImage());
+    } // Y vertical scale
 }
 
 void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)

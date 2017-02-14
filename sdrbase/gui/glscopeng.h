@@ -139,6 +139,7 @@ private:
 
     void applyConfig();
     void setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex);
+    void setUniqueDisplays();
 
 protected slots:
     void cleanup();
