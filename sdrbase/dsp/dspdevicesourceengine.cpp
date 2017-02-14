@@ -570,6 +570,10 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
 	{
 		ThreadedBasebandSampleSink *threadedSink = ((DSPAddThreadedSampleSink*) message)->getThreadedSampleSink();
 		m_threadedBasebandSampleSinks.push_back(threadedSink);
+		// initialize sample rate and center frequency in the sink:
+		DSPSignalNotification msg(m_sampleRate, m_centerFrequency);
+		threadedSink->handleSinkMessage(msg);
+		// start the sink:
 		threadedSink->start();
 	}
 	else if (DSPRemoveThreadedSampleSink::match(*message))
