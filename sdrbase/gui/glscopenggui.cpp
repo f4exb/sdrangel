@@ -298,7 +298,7 @@ void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
         {
             ui->onlyY->setEnabled(true);
 //            ui->horizontalXY->setEnabled(true); TODO: re-activate when these displays become active
-//            ui->verticalXY->setEnabled(true);
+            ui->verticalXY->setEnabled(true);
 //            ui->polar->setEnabled(true);
         }
 
