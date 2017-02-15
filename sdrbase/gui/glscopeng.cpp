@@ -827,11 +827,42 @@ void GLScopeNG::paintGL()
             if(end - start < 2)
                 start--;
 
-            for (int i = 0; i < m_traces->size(); i++)
+            GLfloat q3[2*(end - start)];
+            const float *trace0 = (*m_traces)[0];
+            //memcpy(q3, &(trace0[1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
+
+            for (int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
 
+                for(int i = start; i < end; i++)
+                {
+                    float x = trace0[2*(i-start)+1];
+                    float y = trace[2*(i-start)+1];
+                    if(x > 1.0f)
+                        x = 1.0f;
+                    else if(x < -1.0f)
+                        x = -1.0f;
+                    if(y > 1.0f)
+                        y = 1.0f;
+                    else if(y < -1.0f)
+                        y = -1.0f;
+                    q3[2*(i-start)] = x;
+                    q3[2*(i-start)+1] = y;
+                }
+
+                float rectX = m_glScopeRect2.x() + m_glScopeRect2.width() / 2.0f;
+                float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
+                float rectW = m_glScopeRect2.width() / 2.0f;
+                float rectH = -(m_glScopeRect2.height() / 2.0f);
+
+                QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
+                QMatrix4x4 mat;
+                mat.setToIdentity();
+                mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+                mat.scale(2.0f * rectW, -2.0f * rectH);
+                m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
             } // XY polar display
         } // trace length > 0
     } // XY mixed + polar display
