@@ -139,8 +139,9 @@ private:
 
     void applyConfig();
     void setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex);
-    void setUniqueDisplays();   //!< Arrange displays when X and Y are unique on screen
-    void setVerticalDisplays(); //!< Arrange displays when X and Y are stacked vertically
+    void setUniqueDisplays();     //!< Arrange displays when X and Y are unique on screen
+    void setVerticalDisplays();   //!< Arrange displays when X and Y are stacked vertically
+    void setHorizontalDisplays(); //!< Arrange displays when X and Y are stacked horizontally
 
 protected slots:
     void cleanup();
