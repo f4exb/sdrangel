@@ -720,6 +720,105 @@ void GLScopeNG::paintGL()
 
         // paint right display: polar XY
 
+        // draw rect around
+        {
+            GLfloat q3[] {
+                1, 1,
+                0, 1,
+                0, 0,
+                1, 0
+            };
+
+            QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+            m_glShaderSimple.drawContour(m_glScopeMatrix2, color, q3, 4);
+        }
+
+        // paint grid
+
+        // Horizontal Y2
+        tickList = &m_y2Scale.getTickList();
+        {
+            GLfloat q3[4*tickList->count()];
+            int effectiveTicks = 0;
+            for(int i= 0; i < tickList->count(); i++) {
+                tick = &(*tickList)[i];
+                if(tick->major) {
+                    if(tick->textSize > 0) {
+                        float y = 1 - (tick->pos / m_y2Scale.getSize());
+                        q3[4*effectiveTicks] = 0;
+                        q3[4*effectiveTicks+1] = y;
+                        q3[4*effectiveTicks+2] = 1;
+                        q3[4*effectiveTicks+3] = y;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
+        }
+
+        // Vertical X2
+        tickList = &m_x2Scale.getTickList();
+        {
+            GLfloat q3[4*tickList->count()];
+            int effectiveTicks = 0;
+            for(int i= 0; i < tickList->count(); i++) {
+                tick = &(*tickList)[i];
+                if(tick->major) {
+                    if(tick->textSize > 0) {
+                        float x = tick->pos / m_x2Scale.getSize();
+                        q3[4*effectiveTicks] = x;
+                        q3[4*effectiveTicks+1] = 0;
+                        q3[4*effectiveTicks+2] = x;
+                        q3[4*effectiveTicks+3] = 1;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2*effectiveTicks);
+        }
+
+        // paint left #2 scale
+        {
+            GLfloat vtx1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+
+            m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
+        }
+
+        // paint bottom #2 scale
+        {
+            GLfloat vtx1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+
+            m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
+        }
+
+        // paint polar traces
+
         if (m_traceSize > 0)
         {
             int start = (m_timeOfsProMill/1000.0) * m_traceSize;
@@ -809,7 +908,15 @@ void GLScopeNG::applyConfig()
     // scales
 
     m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
-    m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
+
+    if (m_displayMode == DisplayPol)
+    {
+        setYScale(m_x2Scale, 0); // polar scale (X)
+    }
+    else
+    {
+        m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
+    }
 
     if (m_traces->size() > 0)
     {
