@@ -142,6 +142,7 @@ private:
     void setUniqueDisplays();     //!< Arrange displays when X and Y are unique on screen
     void setVerticalDisplays();   //!< Arrange displays when X and Y are stacked vertically
     void setHorizontalDisplays(); //!< Arrange displays when X and Y are stacked horizontally
+    void setPolarDisplays();      //!< Arrange displays when X and Y are stacked over on the left and polar display is on the right
 
 protected slots:
     void cleanup();
