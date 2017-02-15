@@ -831,12 +831,6 @@ void GLScopeNG::paintGL()
             const float *trace0 = (*m_traces)[0];
             memcpy(q3, &(trace0[1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
 
-//            for(int i = start; i < end; i++)
-//            {
-//                float x = trace0[2*(i-start)+1];
-//                q3[2*(i-start)] = x;
-//            }
-
             for (int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
@@ -1589,6 +1583,7 @@ void GLScopeNG::setPolarDisplays()
     int scopeHeight = height() - m_topMargin - m_botMargin;
     int scopeWidth = (width() - m_rightMargin)/2 - m_leftMargin;
     int scopeDim = std::min(scopeWidth, scopeHeight);
+    scopeWidth += scopeWidth - scopeDim;
 
     // Mixed XY display (left)
 
