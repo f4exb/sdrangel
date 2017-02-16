@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QColor>
+#include <algorithm>
 
 #include <stdint.h>
 #include <vector>
@@ -138,8 +139,9 @@ public:
         }
     };
 
-    static const uint m_traceChunkSize;
-    static const uint m_nbTriggers = 10;
+    static const uint32_t m_traceChunkSize;
+    static const uint32_t m_maxNbTriggers = 10;
+    static const uint32_t m_maxNbTraces = 10;
 
     ScopeVisNG(GLScopeNG* glScope = 0);
     virtual ~ScopeVisNG();
@@ -659,18 +661,15 @@ private:
         int m_maxTraceSize;                           //!< Maximum Size of a trace in buffer
         bool evenOddIndex;                            //!< Even (true) or odd (false) index
 
-        Traces() : evenOddIndex(true), m_traceSize(0), m_maxTraceSize(0) {}
+        Traces() : evenOddIndex(true), m_traceSize(0), m_maxTraceSize(0), m_x0(0), m_x1(0)
+        {
+        }
 
         ~Traces()
         {
-            std::vector<float *>::iterator it0 = m_traces[0].begin();
-            std::vector<float *>::iterator it1 = m_traces[1].begin();
-
-            for (; it0 != m_traces[0].end(); ++it0, ++it1)
-            {
-                delete[] (*it0);
-                delete[] (*it1);
-            }
+            if (m_x0) delete[] m_x0;
+            if (m_x1) delete[] m_x1;
+            m_maxTraceSize = 0;
         }
 
         bool isVerticalDisplayChange(const TraceData& traceData, uint32_t traceIndex)
@@ -683,15 +682,16 @@ private:
 
         void addTrace(const TraceData& traceData, int traceSize)
         {
-            resize(traceSize);
+            if (m_traces[0].size() < m_maxNbTraces)
+            {
+                m_traces[0].push_back(0);
+                m_traces[1].push_back(0);
+                m_tracesData.push_back(traceData);
+                m_tracesControl.push_back(TraceControl());
+                m_tracesControl.back().initProjector(traceData.m_projectionType);
 
-            m_tracesData.push_back(traceData);
-            m_tracesControl.push_back(TraceControl());
-            m_tracesControl.back().initProjector(traceData.m_projectionType);
-            float *x0 = new float[2*m_traceSize];
-            float *x1 = new float[2*m_traceSize];
-            m_traces[0].push_back(x0);
-            m_traces[1].push_back(x1);
+                resize(traceSize);
+            }
         }
 
         void changeTrace(const TraceData& traceData, uint32_t traceIndex)
@@ -707,14 +707,15 @@ private:
         {
             if (traceIndex < m_tracesControl.size())
             {
+                m_traces[0].erase(m_traces[0].begin() + traceIndex);
+                m_traces[1].erase(m_traces[1].begin() + traceIndex);
             	m_tracesControl[traceIndex].releaseProjector();
                 m_tracesControl.erase(m_tracesControl.begin() + traceIndex);
                 m_tracesData.erase(m_tracesData.begin() + traceIndex);
-                delete[] (m_traces[0])[traceIndex];
-                delete[] (m_traces[1])[traceIndex];
-                m_traces[0].erase(m_traces[0].begin() + traceIndex);
-                m_traces[1].erase(m_traces[1].begin() + traceIndex);
+
+                resize(m_traceSize); // reallocate pointers
             }
+
         }
 
         void resize(int traceSize)
@@ -723,18 +724,21 @@ private:
 
             if (m_traceSize > m_maxTraceSize)
             {
-                std::vector<float *>::iterator it0 = m_traces[0].begin();
-                std::vector<float *>::iterator it1 = m_traces[1].begin();
-
-                for (; it0 != m_traces[0].end(); ++it0, ++it1)
-                {
-                    delete[] (*it0);
-                    delete[] (*it1);
-                    *it0 = new float[2*m_traceSize];
-                    *it1 = new float[2*m_traceSize];
-                }
+                delete[] m_x0;
+                delete[] m_x1;
+                m_x0 = new float[2*m_traceSize*m_maxNbTraces];
+                m_x1 = new float[2*m_traceSize*m_maxNbTraces];
 
                 m_maxTraceSize = m_traceSize;
+            }
+
+            std::fill_n(m_x0, 2*m_traceSize*m_traces[0].size(), 0.0f);
+            std::fill_n(m_x1, 2*m_traceSize*m_traces[0].size(), 0.0f);
+
+            for (int i = 0; i < m_traces[0].size(); i++)
+            {
+                (m_traces[0])[i] = &m_x0[2*m_traceSize*i];
+                (m_traces[1])[i] = &m_x1[2*m_traceSize*i];
             }
         }
 
@@ -750,6 +754,10 @@ private:
                 it->m_traceCount[currentBufferIndex()] = 0;
             }
         }
+
+    private:
+        float *m_x0;
+        float *m_x1;
     };
 
     class TriggerComparator
