@@ -38,12 +38,13 @@ class SDRANGEL_API ScopeVisNG : public BasebandSampleSink {
 public:
     enum ProjectionType
     {
-        ProjectionReal,    //!< Extract real part
-        ProjectionImag,    //!< Extract imaginary part
-        ProjectionMagLin,  //!< Calculate linear magnitude or modulus
-        ProjectionMagDB,   //!< Calculate logarithmic (dB) of squared magnitude
-        ProjectionPhase,   //!< Calculate phase
-        ProjectionDPhase   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
+        ProjectionReal = 0, //!< Extract real part
+        ProjectionImag,     //!< Extract imaginary part
+        ProjectionMagLin,   //!< Calculate linear magnitude or modulus
+        ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
+        ProjectionPhase,    //!< Calculate phase
+        ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
+		nbProjectionTypes   //!< Gives the number of projections in the enum
     };
 
     struct TraceData
@@ -401,7 +402,9 @@ private:
     public:
         Projector(ProjectionType projectionType) :
             m_projectionType(projectionType),
-            m_prevArg(0.0f)
+            m_prevArg(0.0f),
+			m_cache(0),
+			m_cacheMaster(true)
         {}
 
         ~Projector()
@@ -409,54 +412,72 @@ private:
 
         ProjectionType getProjectionType() const { return m_projectionType; }
         void settProjectionType(ProjectionType projectionType) { m_projectionType = projectionType; }
+        void setCache(Real *cache) { m_cache = cache; }
+        void setCacheMaster(bool cacheMaster) { m_cacheMaster = cacheMaster; }
 
         Real run(const Sample& s)
         {
-            switch (m_projectionType)
-            {
-            case ProjectionImag:
-                return s.m_imag / 32768.0f;
-                break;
-            case ProjectionMagLin:
-            {
-                uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-                return std::sqrt(magsq/1073741824.0f);
-            }
-                break;
-            case ProjectionMagDB:
-            {
-                uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-                return log10f(magsq/1073741824.0f) * 10.0f;
-            }
-                break;
-            case ProjectionPhase:
-                return std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
-                break;
-            case ProjectionDPhase:
-            {
-                Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
-                Real dPhi = (curArg - m_prevArg) / M_PI;
-                m_prevArg = curArg;
+        	Real v;
 
-                if (dPhi < -1.0f) {
-                    dPhi += 2.0f;
-                } else if (dPhi > 1.0f) {
-                    dPhi -= 2.0f;
+        	if ((m_cache) && !m_cacheMaster) {
+        		return m_cache[(int) m_projectionType];
+        	}
+        	else
+        	{
+                switch (m_projectionType)
+                {
+                case ProjectionImag:
+                    v = s.m_imag / 32768.0f;
+                    break;
+                case ProjectionMagLin:
+                {
+                    uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
+                    v = std::sqrt(magsq/1073741824.0f);
+                }
+                    break;
+                case ProjectionMagDB:
+                {
+                    uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
+                    v = log10f(magsq/1073741824.0f) * 10.0f;
+                }
+                    break;
+                case ProjectionPhase:
+                    v = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
+                    break;
+                case ProjectionDPhase:
+                {
+                    Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
+                    Real dPhi = (curArg - m_prevArg) / M_PI;
+                    m_prevArg = curArg;
+
+                    if (dPhi < -1.0f) {
+                        dPhi += 2.0f;
+                    } else if (dPhi > 1.0f) {
+                        dPhi -= 2.0f;
+                    }
+
+                    v = dPhi;
+                }
+                    break;
+                case ProjectionReal:
+                default:
+                    v = s.m_real / 32768.0f;
+                    break;
                 }
 
-                return dPhi;
-            }
-                break;
-            case ProjectionReal:
-            default:
-                return s.m_real / 32768.0f;
-                break;
-            }
+                if (m_cache) {
+                	m_cache[(int) m_projectionType] = v;
+                }
+
+                return v;
+        	}
         }
 
     private:
         ProjectionType m_projectionType;
         Real m_prevArg;
+        Real *m_cache;
+        bool m_cacheMaster;
     };
 
     /**
