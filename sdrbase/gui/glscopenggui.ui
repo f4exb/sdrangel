@@ -407,7 +407,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>20</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -833,7 +833,7 @@ kS/s</string>
       <widget class="QLabel" name="traceDelayText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -846,17 +846,49 @@ kS/s</string>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="traceDelay">
-       <property name="maximum">
-        <number>100</number>
+      <layout class="QVBoxLayout" name="traceDelayLayout">
+       <property name="spacing">
+        <number>2</number>
        </property>
-       <property name="pageStep">
-        <number>1</number>
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-      </widget>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QSlider" name="traceDelayCoarse">
+         <property name="maximum">
+          <number>48</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="traceDelayFine">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="Line" name="line_17">

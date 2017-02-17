@@ -113,6 +113,7 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     setTimeOfsDisplay();
     setAmpScaleDisplay();
     setAmpOfsDisplay();
+    setTraceDelayDisplay();
 }
 
 void GLScopeNGGUI::setSampleRate(int sampleRate)
@@ -128,6 +129,7 @@ void GLScopeNGGUI::on_scope_sampleRateChanged(int sampleRate)
     setTraceLenDisplay();
     setTimeScaleDisplay();
     setTimeOfsDisplay();
+    setTraceDelayDisplay();
 }
 
 void GLScopeNGGUI::resetToDefaults()
@@ -236,6 +238,7 @@ void GLScopeNGGUI::on_time_valueChanged(int value)
 {
     m_timeBase = value;
     setTimeScaleDisplay();
+    setTraceDelayDisplay();
     m_glScope->setTimeBase(m_timeBase);
 }
 
@@ -395,9 +398,16 @@ void GLScopeNGGUI::on_ofsFine_valueChanged(int value)
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_traceDelay_valueChanged(int value)
+void GLScopeNGGUI::on_traceDelayCoarse_valueChanged(int value)
 {
-	// TODO
+	setTraceDelayDisplay();
+	changeCurrentTrace();
+}
+
+void GLScopeNGGUI::on_traceDelayFine_valueChanged(int value)
+{
+    setTraceDelayDisplay();
+    changeCurrentTrace();
 }
 
 void GLScopeNGGUI::on_traceColor_clicked()
@@ -671,6 +681,29 @@ void GLScopeNGGUI::setAmpOfsDisplay()
     }
 }
 
+void GLScopeNGGUI::setTraceDelayDisplay()
+{
+    int n_samples = ui->traceDelayCoarse->value()*100 + ui->traceDelayFine->value();
+    double t = ((double) n_samples) / m_sampleRate;
+
+    if (n_samples < 1000) {
+        ui->traceDelayText->setToolTip(tr("%1 S").arg(n_samples));
+    } else if (n_samples < 1000000) {
+        ui->traceDelayText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
+    } else {
+        ui->traceDelayText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
+    }
+
+    if(t < 0.000001)
+        ui->traceDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
+    else if(t < 0.001)
+        ui->traceDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
+    else if(t < 1.0)
+        ui->traceDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
+    else
+        ui->traceDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
+}
+
 void GLScopeNGGUI::setTrigIndexDisplay()
 {
 	ui->trigText->setText(tr("%1").arg(ui->trig->value()));
@@ -782,8 +815,6 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
     traceData.m_ampIndex = ui->amp->value();
-    traceData.m_traceDelay = 0; // TODO
-    traceData.m_traceDelayValue = 0; // TODO
 
     traceData.m_ofsCoarse = ui->ofsCoarse->value();
     traceData.m_ofsFine = ui->ofsFine->value();
@@ -793,6 +824,10 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     } else {
         traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
     }
+
+    traceData.m_traceDelayCoarse = ui->traceDelayCoarse->value();
+    traceData.m_traceDelayFine = ui->traceDelayFine->value();
+    traceData.m_traceDelay = traceData.m_traceDelayCoarse * 100 + traceData.m_traceDelayFine;
 
     traceData.setColor(m_focusedTraceColor);
 }
@@ -816,14 +851,15 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
 
 void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
 {
-    bool oldStateTraceMode  = ui->traceMode->blockSignals(true);
-    bool oldStateAmp        = ui->amp->blockSignals(true);
-    bool oldStateOfsCoarse  = ui->ofsCoarse->blockSignals(true);
-    bool oldStateOfsFine    = ui->ofsFine->blockSignals(true);
-    bool oldStateTraceDelay = ui->traceDelay->blockSignals(true);
-    bool oldStateZSelect    = ui->zSelect->blockSignals(true);
-    bool oldStateZTraceMode = ui->zTraceMode->blockSignals(true);
-    bool oldStateTraceColor = ui->traceColor->blockSignals(true);
+    bool oldStateTraceMode        = ui->traceMode->blockSignals(true);
+    bool oldStateAmp              = ui->amp->blockSignals(true);
+    bool oldStateOfsCoarse        = ui->ofsCoarse->blockSignals(true);
+    bool oldStateOfsFine          = ui->ofsFine->blockSignals(true);
+    bool oldStateTraceDelayCoarse = ui->traceDelayCoarse->blockSignals(true);
+    bool oldStateTraceDelayFine   = ui->traceDelayFine->blockSignals(true);
+    bool oldStateZSelect          = ui->zSelect->blockSignals(true);
+    bool oldStateZTraceMode       = ui->zTraceMode->blockSignals(true);
+    bool oldStateTraceColor       = ui->traceColor->blockSignals(true);
 
     ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
     ui->amp->setValue(traceData.m_ampIndex);
@@ -833,8 +869,9 @@ void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
     ui->ofsFine->setValue(traceData.m_ofsFine);
     setAmpOfsDisplay();
 
-    ui->traceDelay->setValue(traceData.m_traceDelayValue);
-    // TODO: set trace delay display
+    ui->traceDelayCoarse->setValue(traceData.m_traceDelayCoarse);
+    ui->traceDelayFine->setValue(traceData.m_traceDelayFine);
+    setTraceDelayDisplay();
 
     m_focusedTraceColor = traceData.m_traceColor;
     int r, g, b, a;
@@ -845,7 +882,8 @@ void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
     ui->amp->blockSignals(oldStateAmp);
     ui->ofsCoarse->blockSignals(oldStateOfsCoarse);
     ui->ofsFine->blockSignals(oldStateOfsFine);
-    ui->traceDelay->blockSignals(oldStateTraceDelay);
+    ui->traceDelayCoarse->blockSignals(oldStateTraceDelayCoarse);
+    ui->traceDelayFine->blockSignals(oldStateTraceDelayFine);
     ui->zSelect->blockSignals(oldStateZSelect);
     ui->zTraceMode->blockSignals(oldStateZTraceMode);
     ui->traceColor->blockSignals(oldStateTraceColor);

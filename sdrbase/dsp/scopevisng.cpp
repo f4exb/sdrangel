@@ -88,7 +88,8 @@ void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
     qDebug() << "ScopeVisNG::changeTrace:"
             << " trace: " << traceIndex
             << " m_amp: " << traceData.m_amp
-            << " m_ofs: " << traceData.m_ofs;
+            << " m_ofs: " << traceData.m_ofs
+            << " m_traceDelay: " << traceData.m_traceDelay;
     Message* cmd = MsgScopeVisNGChangeTrace::create(traceData, traceIndex);
     getInputMessageQueue()->push(cmd);
 }

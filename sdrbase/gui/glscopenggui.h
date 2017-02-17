@@ -74,6 +74,7 @@ private:
     // Second row
     void setAmpScaleDisplay();
     void setAmpOfsDisplay();
+    void setTraceDelayDisplay();
     // Third row
     void setTrigIndexDisplay();
     void setTrigCountDisplay();
@@ -112,7 +113,8 @@ private slots:
     void on_amp_valueChanged(int value);
     void on_ofsCoarse_valueChanged(int value);
     void on_ofsFine_valueChanged(int value);
-    void on_traceDelay_valueChanged(int value);
+    void on_traceDelayCoarse_valueChanged(int value);
+    void on_traceDelayFine_valueChanged(int value);
     void on_traceColor_clicked();
     // Third row
     void on_trig_valueChanged(int value);

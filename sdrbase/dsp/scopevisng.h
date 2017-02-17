@@ -57,7 +57,8 @@ public:
         int m_ofsCoarse;                 //!< Coarse offset slider value
         int m_ofsFine;                   //!< Fine offset slider value
         int m_traceDelay;                //!< Trace delay in number of samples
-        int m_traceDelayValue;           //!< Trace delay slider value
+        int m_traceDelayCoarse;          //!< Coarse delay slider value
+        int m_traceDelayFine;            //!< Fine delay slider value
         float m_triggerDisplayLevel;     //!< Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
         QColor m_traceColor;             //!< Trace display color
         float m_traceColorR;             //!< Trace display color - red shortcut
@@ -73,7 +74,8 @@ public:
             m_ofsCoarse(0),
             m_ofsFine(0),
             m_traceDelay(0),
-            m_traceDelayValue(0),
+            m_traceDelayCoarse(0),
+            m_traceDelayFine(0),
 			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
 			m_traceColor(255,255,64)
         {
