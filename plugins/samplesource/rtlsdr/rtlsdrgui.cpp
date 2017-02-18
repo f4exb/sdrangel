@@ -44,7 +44,7 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	for (int i = 0; i < RTLSDRSampleRates::getNbRates(); i++)
 	{
-		ui->sampleRate->addItem(QString::number(RTLSDRSampleRates::getRate(i)));
+		ui->sampleRate->addItem(QString::number(RTLSDRSampleRates::getRate(i)/1000));
 	}
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -306,7 +306,7 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 void RTLSDRGui::on_sampleRate_currentIndexChanged(int index)
 {
 	int newrate = RTLSDRSampleRates::getRate(index);
-	m_settings.m_devSampleRate = newrate * 1000;
+	m_settings.m_devSampleRate = newrate;
 
 	sendSettings();
 }
@@ -402,8 +402,21 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
-unsigned int RTLSDRSampleRates::m_rates[] = {250, 256, 1000, 1024, 1152, 1200, 1536, 1600, 2000, 2048, 2304, 2400};
-unsigned int RTLSDRSampleRates::m_nb_rates = 12;
+const unsigned int RTLSDRSampleRates::m_nb_rates = 13;
+const unsigned int RTLSDRSampleRates::m_rates[] = {
+        250000,
+        256000,
+       1000000,
+       1024000,
+       1152000,
+       1200000,
+       1536000,
+       1600000,
+       2000000,
+       2048000,
+       2166667, // for GSM
+       2304000,
+       2400000};
 
 unsigned int RTLSDRSampleRates::getRate(unsigned int rate_index)
 {
@@ -421,7 +434,7 @@ unsigned int RTLSDRSampleRates::getRateIndex(unsigned int rate)
 {
 	for (unsigned int i=0; i < m_nb_rates; i++)
 	{
-		if (rate/1000 == m_rates[i])
+		if (rate == m_rates[i])
 		{
 			return i;
 		}
