@@ -45,7 +45,7 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->samplerate->clear();
 	for (int i = 0; i < BladerfSampleRates::getNbRates(); i++)
 	{
-		ui->samplerate->addItem(QString::number(BladerfSampleRates::getRate(i)));
+		ui->samplerate->addItem(QString::number(BladerfSampleRates::getRate(i)/1000));
 	}
 
 	ui->bandwidth->clear();
@@ -227,7 +227,7 @@ void BladerfInputGui::on_iqImbalance_toggled(bool checked)
 void BladerfInputGui::on_samplerate_currentIndexChanged(int index)
 {
 	int newrate = BladerfSampleRates::getRate(index);
-	m_settings.m_devSampleRate = newrate * 1000;
+	m_settings.m_devSampleRate = newrate;
 	sendSettings();
 }
 

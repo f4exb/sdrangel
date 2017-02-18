@@ -85,8 +85,30 @@ struct bladerf *DeviceBladeRF::open_bladerf_from_serial(const char *serial)
     }
 }
 
-unsigned int BladerfSampleRates::m_rates[] = {1536, 1600, 2000, 2304, 2400, 3072, 3200, 4608, 4800, 6144, 7680, 9216, 9600, 10752, 12288, 18432, 19200, 24576, 30720, 36864, 39936};
-unsigned int BladerfSampleRates::m_nb_rates = 21;
+const unsigned int BladerfSampleRates::m_nb_rates = 22;
+const unsigned int BladerfSampleRates::m_rates[BladerfSampleRates::m_nb_rates] = {
+        1536000,
+        1600000,
+        2000000,
+        2304000,
+        2400000,
+        3072000,
+        3200000,
+        4333333, // for GSM
+        4608000,
+        4800000,
+        6144000,
+        7680000,
+        9216000,
+        9600000,
+       10752000,
+       12288000,
+       18432000,
+       19200000,
+       24576000,
+       30720000,
+       36864000,
+       39936000};
 
 unsigned int BladerfSampleRates::getRate(unsigned int rate_index)
 {
@@ -104,7 +126,7 @@ unsigned int BladerfSampleRates::getRateIndex(unsigned int rate)
 {
     for (unsigned int i=0; i < m_nb_rates; i++)
     {
-        if (rate/1000 == m_rates[i])
+        if (rate == m_rates[i])
         {
             return i;
         }
@@ -118,8 +140,24 @@ unsigned int BladerfSampleRates::getNbRates()
     return BladerfSampleRates::m_nb_rates;
 }
 
-unsigned int BladerfBandwidths::m_halfbw[] = {750, 875, 1250, 1375, 1500, 1920, 2500, 2750, 3000, 3500, 4375, 5000, 6000, 7000, 10000, 14000};
-unsigned int BladerfBandwidths::m_nb_halfbw = 16;
+const unsigned int BladerfBandwidths::m_nb_halfbw = 16;
+const unsigned int BladerfBandwidths::m_halfbw[BladerfBandwidths::m_nb_halfbw] = {
+        750,
+        875,
+       1250,
+       1375,
+       1500,
+       1920,
+       2500,
+       2750,
+       3000,
+       3500,
+       4375,
+       5000,
+       6000,
+       7000,
+      10000,
+      14000};
 
 unsigned int BladerfBandwidths::getBandwidth(unsigned int bandwidth_index)
 {

@@ -34,8 +34,8 @@ public:
     static unsigned int getRateIndex(unsigned int rate);
     static unsigned int getNbRates();
 private:
-    static unsigned int m_rates[21];
-    static unsigned int m_nb_rates;
+    static const unsigned int m_nb_rates;
+    static const unsigned int m_rates[];
 };
 
 class BladerfBandwidths {
@@ -44,8 +44,8 @@ public:
     static unsigned int getBandwidthIndex(unsigned int bandwidth);
     static unsigned int getNbBandwidths();
 private:
-    static unsigned int m_halfbw[16];
-    static unsigned int m_nb_halfbw;
+    static const unsigned int m_nb_halfbw;
+    static const unsigned int m_halfbw[];
 };
 
 #endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */
