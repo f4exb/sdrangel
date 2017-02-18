@@ -16,17 +16,32 @@
 
 #include "devicehackrfvalues.h"
 
-unsigned int HackRFSampleRates::m_rates_k[] = {2400, 3200, 4000, 4800, 5600, 6000, 6400, 8000, 9600, 12000, 12800, 16000, 18000, 19200, 20000};
+unsigned int HackRFSampleRates::m_rates[] = {
+        2400000,
+        3200000,
+        4000000,
+        4800000,
+        5600000,
+        6000000,
+        6400000,
+        8000000,
+        9600000,
+       12000000,
+       12800000,
+       16000000,
+       18000000,
+       19200000,
+       20000000};
 
 unsigned int HackRFSampleRates::getRate(unsigned int rate_index)
 {
     if (rate_index < m_nb_rates)
     {
-        return m_rates_k[rate_index];
+        return m_rates[rate_index];
     }
     else
     {
-        return m_rates_k[0];
+        return m_rates[0];
     }
 }
 
@@ -34,7 +49,7 @@ unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
 {
     for (unsigned int i=0; i < m_nb_rates; i++)
     {
-        if (rate == m_rates_k[i])
+        if (rate == m_rates[i])
         {
             return i;
         }
@@ -43,7 +58,23 @@ unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
     return 0;
 }
 
-unsigned int HackRFBandwidths::m_bw_k[] = {1750, 2500, 3500, 5000, 5500, 6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 20000, 24000, 28000};
+unsigned int HackRFBandwidths::m_bw_k[] = {
+        1750,
+        2500,
+        3500,
+        5000,
+        5500,
+        6000,
+        7000,
+        8000,
+        9000,
+       10000,
+       12000,
+       14000,
+       15000,
+       20000,
+       24000,
+       28000};
 
 unsigned int HackRFBandwidths::getBandwidth(unsigned int bandwidth_index)
 {

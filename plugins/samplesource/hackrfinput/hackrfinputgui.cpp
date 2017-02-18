@@ -178,7 +178,7 @@ void HackRFInputGui::displaySettings()
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-    unsigned int sampleRateIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate/1000);
+    unsigned int sampleRateIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate);
     ui->sampleRate->setCurrentIndex(sampleRateIndex);
 
 	ui->biasT->setChecked(m_settings.m_biasT);
@@ -200,13 +200,13 @@ void HackRFInputGui::displaySettings()
 
 void HackRFInputGui::displaySampleRates()
 {
-	int savedIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate/1000);
+	int savedIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate);
 	ui->sampleRate->blockSignals(true);
 	ui->sampleRate->clear();
 
 	for (int i = 0; i < HackRFSampleRates::m_nb_rates; i++)
 	{
-		ui->sampleRate->addItem(QString("%1M").arg(QString::number(HackRFSampleRates::m_rates_k[i]/1000.0, 'f', 1)));
+		ui->sampleRate->addItem(QString("%1M").arg(QString::number(HackRFSampleRates::m_rates[i] / 1000000.0f, 'f', 1)));
 	}
 
 	ui->sampleRate->blockSignals(false);
@@ -278,7 +278,7 @@ void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 void HackRFInputGui::on_sampleRate_currentIndexChanged(int index)
 {
     int newrate = HackRFSampleRates::getRate(index);
-    m_settings.m_devSampleRate = newrate * 1000;
+    m_settings.m_devSampleRate = newrate;
 	sendSettings();
 }
 

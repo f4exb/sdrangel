@@ -22,7 +22,7 @@ public:
     static unsigned int getRate(unsigned int rate_index);
     static unsigned int getRateIndex(unsigned int rate);
     static const unsigned int m_nb_rates = 15;
-    static unsigned int m_rates_k[m_nb_rates];
+    static unsigned int m_rates[m_nb_rates];
 };
 
 class HackRFBandwidths {
