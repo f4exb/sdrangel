@@ -21,16 +21,16 @@ class HackRFSampleRates {
 public:
     static unsigned int getRate(unsigned int rate_index);
     static unsigned int getRateIndex(unsigned int rate);
-    static const unsigned int m_nb_rates = 15;
-    static unsigned int m_rates[m_nb_rates];
+    static const unsigned int m_nb_rates;
+    static const unsigned int m_rates[];
 };
 
 class HackRFBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
     static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static const unsigned int m_nb_bw = 16;
-    static unsigned int m_bw_k[m_nb_bw];
+    static const unsigned int m_nb_bw;
+    static const unsigned int m_bw_k[];
 };
 
 #endif /* DEVICES_HACKRF_DEVICEHACKRFVALUES_H_ */

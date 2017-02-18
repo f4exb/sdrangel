@@ -16,10 +16,12 @@
 
 #include "devicehackrfvalues.h"
 
-unsigned int HackRFSampleRates::m_rates[] = {
+const unsigned int HackRFSampleRates::m_nb_rates = 16;
+const unsigned int HackRFSampleRates::m_rates[HackRFSampleRates::m_nb_rates] = {
         2400000,
         3200000,
         4000000,
+        4333333, // for GSM
         4800000,
         5600000,
         6000000,
@@ -58,7 +60,8 @@ unsigned int HackRFSampleRates::getRateIndex(unsigned int rate)
     return 0;
 }
 
-unsigned int HackRFBandwidths::m_bw_k[] = {
+const unsigned int HackRFBandwidths::m_nb_bw = 16;
+const unsigned int HackRFBandwidths::m_bw_k[HackRFBandwidths::m_nb_bw] = {
         1750,
         2500,
         3500,
