@@ -875,6 +875,7 @@ private:
     int m_maxTraceDelay;                           //!< Maximum trace delay
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
     QMutex m_mutex;
+    Real m_projectorCache[(int) nbProjectionTypes];
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode

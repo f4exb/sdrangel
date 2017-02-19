@@ -620,12 +620,40 @@ bool ScopeVisNG::handleMessage(const Message& message)
 void ScopeVisNG::updateMaxTraceDelay()
 {
     int maxTraceDelay = 0;
+    bool allocateCache = false;
+    uint32_t projectorCounts[(int) nbProjectionTypes];
+    memset(projectorCounts, 0, ((int) nbProjectionTypes)*sizeof(uint32_t));
+    std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+    std::vector<TraceControl>::iterator itCtrl = m_traces.m_tracesControl.begin();
 
-    for (std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin(); itData != m_traces.m_tracesData.end(); ++itData)
+    for (; itData != m_traces.m_tracesData.end(); ++itData, ++itCtrl)
     {
         if (itData->m_traceDelay > maxTraceDelay)
         {
             maxTraceDelay = itData->m_traceDelay;
+        }
+
+        if (projectorCounts[(int) itData->m_projectionType] > 0)
+        {
+            allocateCache = true;
+            itCtrl->m_projector.setCacheMaster(false);
+        }
+        else
+        {
+            itCtrl->m_projector.setCacheMaster(true);
+        }
+
+        projectorCounts[(int) itData->m_projectionType]++;
+    }
+
+    itCtrl = m_traces.m_tracesControl.begin();
+
+    for (; itCtrl != m_traces.m_tracesControl.end(); ++itCtrl)
+    {
+        if (allocateCache) {
+            itCtrl->m_projector.setCache(m_projectorCache);
+        } else {
+            itCtrl->m_projector.setCache(0);
         }
     }
 
