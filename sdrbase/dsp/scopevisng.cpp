@@ -79,6 +79,10 @@ void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill, uint32_t
 
 void ScopeVisNG::addTrace(const TraceData& traceData)
 {
+    qDebug() << "ScopeVisNG::addTrace:"
+            << " m_amp: " << traceData.m_amp
+            << " m_ofs: " << traceData.m_ofs
+            << " m_traceDelay: " << traceData.m_traceDelay;
     Message* cmd = MsgScopeVisNGAddTrace::create(traceData);
     getInputMessageQueue()->push(cmd);
 }
@@ -96,6 +100,8 @@ void ScopeVisNG::changeTrace(const TraceData& traceData, uint32_t traceIndex)
 
 void ScopeVisNG::removeTrace(uint32_t traceIndex)
 {
+    qDebug() << "ScopeVisNG::removeTrace:"
+            << " trace: " << traceIndex;
     Message* cmd = MsgScopeVisNGRemoveTrace::create(traceIndex);
     getInputMessageQueue()->push(cmd);
 }

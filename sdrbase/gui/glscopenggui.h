@@ -81,6 +81,9 @@ private:
 
     private:
         Ui::GLScopeNGGUI *m_ui;
+        bool m_oldStateTrace;
+        bool m_oldStateTraceAdd;
+        bool m_oldStateTraceDel;
         bool m_oldStateTraceMode;
         bool m_oldStateAmp;
         bool m_oldStateOfsCoarse;
