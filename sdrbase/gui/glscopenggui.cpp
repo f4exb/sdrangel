@@ -176,12 +176,16 @@ QByteArray GLScopeNGGUI::serialize() const
     {
         const ScopeVisNG::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
         s.writeS32(210 + 16*i, (int) triggerData.m_projectionType);
-        s.writeBool(211 + 16*i, triggerData.m_triggerPositiveEdge);
-        s.writeBool(212 + 16*i, triggerData.m_triggerBothEdges);
-        s.writeBool(213 + 16*i, triggerData.m_triggerLevelCoarse);
-        s.writeBool(214 + 16*i, triggerData.m_triggerLevelFine);
-        s.writeBool(215 + 16*i, triggerData.m_triggerDelayCoarse);
-        s.writeBool(216 + 16*i, triggerData.m_triggerDelayFine);
+        s.writeS32(211 + 16*i, triggerData.m_triggerRepeat);
+        s.writeBool(212 + 16*i, triggerData.m_triggerPositiveEdge);
+        s.writeBool(213 + 16*i, triggerData.m_triggerBothEdges);
+        s.writeS32(214 + 16*i, triggerData.m_triggerLevelCoarse);
+        s.writeS32(215 + 16*i, triggerData.m_triggerLevelFine);
+        s.writeS32(216 + 16*i, triggerData.m_triggerDelayCoarse);
+        s.writeS32(217 + 16*i, triggerData.m_triggerDelayFine);
+        s.writeFloat(218 + 16*i, triggerData.m_triggerColorR);
+        s.writeFloat(219 + 16*i, triggerData.m_triggerColorG);
+        s.writeFloat(220 + 16*i, triggerData.m_triggerColorB);
     }
 
     return s.final();
@@ -200,8 +204,10 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         TraceUIBlocker traceUIBlocker(ui);
+        TrigUIBlocker trigUIBlocker(ui);
         int intValue;
         uint32_t uintValue;
+        bool boolValue;
 
         ui->onlyX->setEnabled(false);
         ui->onlyY->setEnabled(false);
@@ -317,6 +323,74 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
         ui->horizontalXY->setEnabled(nbTracesSaved > 1);
         ui->verticalXY->setEnabled(nbTracesSaved > 1);
         ui->polar->setEnabled(nbTracesSaved > 1);
+
+        // trigger stuff
+
+        uint32_t nbTriggersSaved;
+        d.readU32(200, &nbTriggersSaved, 1);
+        uint32_t nbTriggers = m_scopeVis->getNbTriggers();
+        int iTrigger = nbTriggers;
+
+        d.readS32(201, &intValue, 0);
+        ui->trigPre->setValue(intValue);
+
+        qDebug("GLScopeNGGUI::deserialize: nbTriggersSaved: %u nbTriggers: %u", nbTriggersSaved, nbTriggers);
+
+        while (iTrigger > nbTriggersSaved) // remove possible triggers in excess
+        {
+            m_scopeVis->removeTrigger(iTrigger - 1);
+            iTrigger--;
+        }
+
+        for (iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
+        {
+            ScopeVisNG::TriggerData triggerData = m_scopeVis->getTriggerData(iTrigger);
+            float r, g, b;
+
+            d.readS32(210 + 16*iTrigger, &intValue, 0);
+            ui->trigMode->setCurrentIndex(intValue);
+            d.readS32(211 + 16*iTrigger, &intValue, 1);
+            ui->trigCount->setValue(intValue);
+            d.readBool(212 + 16*iTrigger, &boolValue, true);
+            ui->trigPos->setChecked(boolValue);
+            d.readBool(213 + 16*iTrigger, &boolValue, false);
+            ui->trigBoth->setChecked(boolValue);
+            d.readS32(214 + 16*iTrigger, &intValue, 1);
+            ui->trigLevelCoarse->setValue(intValue);
+            d.readS32(215 + 16*iTrigger, &intValue, 1);
+            ui->trigLevelFine->setValue(intValue);
+            d.readS32(216 + 16*iTrigger, &intValue, 1);
+            ui->trigDelayCoarse->setValue(intValue);
+            d.readS32(217 + 16*iTrigger, &intValue, 1);
+            ui->trigDelayFine->setValue(intValue);
+            d.readFloat(218 + 16*iTrigger, &r, 1.0f);
+            d.readFloat(219 + 16*iTrigger, &g, 1.0f);
+            d.readFloat(220 + 16*iTrigger, &b, 1.0f);
+            m_focusedTriggerColor.setRgbF(r, g, b);
+
+            fillTriggerData(triggerData);
+
+            if (iTrigger < nbTriggers) // change existing triggers
+            {
+                m_scopeVis->changeTrigger(triggerData, iTrigger);
+            }
+            else // add new trigers
+            {
+                m_scopeVis->addTrigger(triggerData);
+            }
+        }
+
+        ui->trig->setMaximum(nbTriggersSaved-1);
+        ui->trig->setValue(nbTriggersSaved-1);
+
+        m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
+        ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+
+        setTrigCountDisplay();
+        setTrigDelayDisplay();
+        setTrigIndexDisplay();
+        setTrigLevelDisplay();
+        setTrigPreDisplay();
 
         return true;
     }
