@@ -50,6 +50,68 @@ public:
     bool handleMessage(Message* message);
 
 private:
+    class TrigUIBlocker
+    {
+    public:
+        TrigUIBlocker(Ui::GLScopeNGGUI *ui);
+        ~TrigUIBlocker();
+
+        void unBlock();
+
+    private:
+        Ui::GLScopeNGGUI *m_ui;
+        bool m_oldStateTrigMode;
+        bool m_oldStateTrigCount;
+        bool m_oldStateTrigPos;
+        bool m_oldStateTrigNeg;
+        bool m_oldStateTrigBoth;
+        bool m_oldStateTrigLevelCoarse;
+        bool m_oldStateTrigLevelFine;
+        bool m_oldStateTrigDelayCoarse;
+        bool m_oldStateTrigDelayFine;
+    };
+
+    class TraceUIBlocker
+    {
+    public:
+        TraceUIBlocker(Ui::GLScopeNGGUI *ui);
+        ~TraceUIBlocker();
+
+        void unBlock();
+
+    private:
+        Ui::GLScopeNGGUI *m_ui;
+        bool m_oldStateTraceMode;
+        bool m_oldStateAmp;
+        bool m_oldStateOfsCoarse;
+        bool m_oldStateOfsFine;
+        bool m_oldStateTraceDelayCoarse;
+        bool m_oldStateTraceDelayFine;
+        bool m_oldStateZSelect;
+        bool m_oldStateZTraceMode;
+        bool m_oldStateTraceColor;
+    };
+
+    class MainUIBlocker
+    {
+    public:
+        MainUIBlocker(Ui::GLScopeNGGUI *ui);
+        ~MainUIBlocker();
+
+        void unBlock();
+
+    private:
+        Ui::GLScopeNGGUI *m_ui;
+        bool m_oldStateOnlyX;
+        bool m_oldStateOnlyY;
+        bool m_oldStateHorizontalXY;
+        bool m_oldStateVerticalXY;
+        bool m_oldStatePolar;
+//        bool m_oldStateTime;
+//        bool m_oldStateTimeOfs;
+//        bool m_oldStateTraceLen;
+    };
+
     Ui::GLScopeNGGUI* ui;
 
     MessageQueue* m_messageQueue;

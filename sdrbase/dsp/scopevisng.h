@@ -176,6 +176,10 @@ public:
         }
     }
 
+    const TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex].m_triggerData; }
+    const std::vector<TraceData>& getTracesData() const { return m_traces.m_tracesData; }
+    uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
+
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void start();
     virtual void stop();

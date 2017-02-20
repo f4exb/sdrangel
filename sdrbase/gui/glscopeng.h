@@ -71,6 +71,7 @@ public:
     //void incrementTraceCounter() { m_traceCounter++; }
 
     bool getDataChanged() const { return m_dataChanged; }
+    DisplayMode getDisplayMode() const { return m_displayMode; }
 
 signals:
     void sampleRateChanged(int);

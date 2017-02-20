@@ -139,14 +139,57 @@ void GLScopeNGGUI::resetToDefaults()
 
 QByteArray GLScopeNGGUI::serialize() const
 {
-    // TODO
     SimpleSerializer s(1);
+
+    // first row
+    s.writeS32(1, (int) m_glScope->getDisplayMode());
+    s.writeS32(2, ui->traceIntensity->value());
+    s.writeS32(3, ui->gridIntensity->value());
+    s.writeS32(4, ui->time->value());
+    s.writeS32(5, ui->timeOfs->value());
+    s.writeS32(6, ui->traceLen->value());
+
+    // second row - by trace
+    const std::vector<ScopeVisNG::TraceData>& tracesData = m_scopeVis->getTracesData();
+    std::vector<ScopeVisNG::TraceData>::const_iterator traceDataIt = tracesData.begin();
+    s.writeU32(10, (uint32_t) tracesData.size());
+    int i = 0;
+
+    for (; traceDataIt != tracesData.end(); ++traceDataIt, i++)
+    {
+        s.writeS32(20 + 16*i, (int) traceDataIt->m_projectionType);
+        s.writeU32(21 + 16*i, traceDataIt->m_ampIndex);
+        s.writeS32(22 + 16*i, traceDataIt->m_ofsCoarse);
+        s.writeS32(23 + 16*i, traceDataIt->m_ofsFine);
+        s.writeS32(24 + 16*i, traceDataIt->m_traceDelayCoarse);
+        s.writeS32(25 + 16*i, traceDataIt->m_traceDelayFine);
+        s.writeFloat(26 + 16*i, traceDataIt->m_traceColorR);
+        s.writeFloat(27 + 16*i, traceDataIt->m_traceColorG);
+        s.writeFloat(28 + 16*i, traceDataIt->m_traceColorB);
+    }
+
+    // third row - by trigger
+    s.writeU32(200, (uint32_t) m_scopeVis->getNbTriggers());
+    s.writeS32(201, ui->trigPre->value());
+
+    for (int i = 0; i < m_scopeVis->getNbTriggers(); i++)
+    {
+        const ScopeVisNG::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
+        s.writeS32(210 + 16*i, (int) triggerData.m_projectionType);
+        s.writeBool(211 + 16*i, triggerData.m_triggerPositiveEdge);
+        s.writeBool(212 + 16*i, triggerData.m_triggerBothEdges);
+        s.writeBool(213 + 16*i, triggerData.m_triggerLevelCoarse);
+        s.writeBool(214 + 16*i, triggerData.m_triggerLevelFine);
+        s.writeBool(215 + 16*i, triggerData.m_triggerDelayCoarse);
+        s.writeBool(216 + 16*i, triggerData.m_triggerDelayFine);
+    }
+
     return s.final();
 }
 
 bool GLScopeNGGUI::deserialize(const QByteArray& data)
 {
-    // TODO
+    qDebug("GLScopeNGGUI::deserialize");
     SimpleDeserializer d(data);
 
     if(!d.isValid()) {
@@ -154,9 +197,55 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
         return false;
     }
 
-    if(d.getVersion() == 1) {
+    if(d.getVersion() == 1)
+    {
+        MainUIBlocker mainUIBlocker(ui);
+        int intValue;
+
+        d.readS32(1, &intValue, (int) GLScopeNG::DisplayX);
+        m_glScope->setDisplayMode((GLScopeNG::DisplayMode) intValue);
+
+        ui->onlyX->setChecked(false);
+        ui->onlyY->setChecked(false);
+        ui->horizontalXY->setChecked(false);
+        ui->verticalXY->setChecked(false);
+        ui->polar->setChecked(false);
+
+        switch (m_glScope->getDisplayMode())
+        {
+        case GLScopeNG::DisplayY:
+            ui->onlyY->setChecked(true);
+            break;
+        case GLScopeNG::DisplayXYH:
+            ui->horizontalXY->setChecked(true);
+            break;
+        case GLScopeNG::DisplayXYV:
+            ui->verticalXY->setChecked(true);
+            break;
+        case GLScopeNG::DisplayPol:
+            ui->polar->setChecked(true);
+            break;
+        case GLScopeNG::DisplayX:
+        default:
+            ui->onlyX->setChecked(true);
+            break;
+        }
+
+        d.readS32(2, &intValue, 50);
+        ui->traceIntensity->setValue(intValue);
+        d.readS32(3, &intValue, 10);
+        ui->gridIntensity->setValue(intValue);
+        d.readS32(4, &intValue, 1);
+        ui->time->setValue(intValue);
+        d.readS32(5, &intValue, 0);
+        ui->timeOfs->setValue(intValue);
+        d.readS32(6, &intValue, 1);
+        ui->traceLen->setValue(intValue);
+
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -851,15 +940,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
 
 void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
 {
-    bool oldStateTraceMode        = ui->traceMode->blockSignals(true);
-    bool oldStateAmp              = ui->amp->blockSignals(true);
-    bool oldStateOfsCoarse        = ui->ofsCoarse->blockSignals(true);
-    bool oldStateOfsFine          = ui->ofsFine->blockSignals(true);
-    bool oldStateTraceDelayCoarse = ui->traceDelayCoarse->blockSignals(true);
-    bool oldStateTraceDelayFine   = ui->traceDelayFine->blockSignals(true);
-    bool oldStateZSelect          = ui->zSelect->blockSignals(true);
-    bool oldStateZTraceMode       = ui->zTraceMode->blockSignals(true);
-    bool oldStateTraceColor       = ui->traceColor->blockSignals(true);
+    TraceUIBlocker traceUIBlocker(ui);
 
     ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
     ui->amp->setValue(traceData.m_ampIndex);
@@ -877,29 +958,11 @@ void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
     int r, g, b, a;
     m_focusedTraceColor.getRgb(&r, &g, &b, &a);
     ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-
-    ui->traceMode->blockSignals(oldStateTraceMode);
-    ui->amp->blockSignals(oldStateAmp);
-    ui->ofsCoarse->blockSignals(oldStateOfsCoarse);
-    ui->ofsFine->blockSignals(oldStateOfsFine);
-    ui->traceDelayCoarse->blockSignals(oldStateTraceDelayCoarse);
-    ui->traceDelayFine->blockSignals(oldStateTraceDelayFine);
-    ui->zSelect->blockSignals(oldStateZSelect);
-    ui->zTraceMode->blockSignals(oldStateZTraceMode);
-    ui->traceColor->blockSignals(oldStateTraceColor);
 }
 
 void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
 {
-    bool oldStateTrigMode        = ui->trigMode->blockSignals(true);
-    bool oldStateTrigCount       = ui->trigCount->blockSignals(true);
-    bool oldStateTrigPos         = ui->trigPos->blockSignals(true);
-    bool oldStateTrigNeg         = ui->trigNeg->blockSignals(true);
-    bool oldStateTrigBoth        = ui->trigBoth->blockSignals(true);
-    bool oldStateTrigLevelCoarse = ui->trigLevelCoarse->blockSignals(true);
-    bool oldStateTrigLevelFine   = ui->trigLevelFine->blockSignals(true);
-    bool oldStateTrigDelayCoarse = ui->trigDelayCoarse->blockSignals(true);
-    bool oldStateTrigDelayFine   = ui->trigDelayFine->blockSignals(true);
+    TrigUIBlocker trigUIBlocker(ui);
 
     ui->trigMode->setCurrentIndex((int) triggerData.m_projectionType);
     ui->trigCount->setValue(triggerData.m_triggerRepeat);
@@ -944,16 +1007,6 @@ void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
     int r, g, b, a;
     m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
     ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-
-    ui->trigMode->blockSignals(oldStateTrigMode);
-    ui->trigCount->blockSignals(oldStateTrigCount);
-    ui->trigPos->blockSignals(oldStateTrigPos);
-    ui->trigNeg->blockSignals(oldStateTrigNeg);
-    ui->trigBoth->blockSignals(oldStateTrigBoth);
-    ui->trigLevelCoarse->blockSignals(oldStateTrigLevelCoarse);
-    ui->trigLevelFine->blockSignals(oldStateTrigLevelFine);
-    ui->trigDelayCoarse->blockSignals(oldStateTrigDelayCoarse);
-    ui->trigDelayFine->blockSignals(oldStateTrigDelayFine);
 }
 
 void GLScopeNGGUI::applySettings()
@@ -964,3 +1017,98 @@ bool GLScopeNGGUI::handleMessage(Message* message)
 {
     return false;
 }
+
+GLScopeNGGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeNGGUI *ui) :
+        m_ui(ui)
+{
+    m_oldStateTrigMode        = ui->trigMode->blockSignals(true);
+    m_oldStateTrigCount       = ui->trigCount->blockSignals(true);
+    m_oldStateTrigPos         = ui->trigPos->blockSignals(true);
+    m_oldStateTrigNeg         = ui->trigNeg->blockSignals(true);
+    m_oldStateTrigBoth        = ui->trigBoth->blockSignals(true);
+    m_oldStateTrigLevelCoarse = ui->trigLevelCoarse->blockSignals(true);
+    m_oldStateTrigLevelFine   = ui->trigLevelFine->blockSignals(true);
+    m_oldStateTrigDelayCoarse = ui->trigDelayCoarse->blockSignals(true);
+    m_oldStateTrigDelayFine   = ui->trigDelayFine->blockSignals(true);
+}
+
+GLScopeNGGUI::TrigUIBlocker::~TrigUIBlocker()
+{
+    unBlock();
+}
+
+void GLScopeNGGUI::TrigUIBlocker::unBlock()
+{
+    m_ui->trigMode->blockSignals(m_oldStateTrigMode);
+    m_ui->trigCount->blockSignals(m_oldStateTrigCount);
+    m_ui->trigPos->blockSignals(m_oldStateTrigPos);
+    m_ui->trigNeg->blockSignals(m_oldStateTrigNeg);
+    m_ui->trigBoth->blockSignals(m_oldStateTrigBoth);
+    m_ui->trigLevelCoarse->blockSignals(m_oldStateTrigLevelCoarse);
+    m_ui->trigLevelFine->blockSignals(m_oldStateTrigLevelFine);
+    m_ui->trigDelayCoarse->blockSignals(m_oldStateTrigDelayCoarse);
+    m_ui->trigDelayFine->blockSignals(m_oldStateTrigDelayFine);
+}
+
+GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeNGGUI* ui) :
+        m_ui(ui)
+{
+    m_oldStateTraceMode        = m_ui->traceMode->blockSignals(true);
+    m_oldStateAmp              = m_ui->amp->blockSignals(true);
+    m_oldStateOfsCoarse        = m_ui->ofsCoarse->blockSignals(true);
+    m_oldStateOfsFine          = m_ui->ofsFine->blockSignals(true);
+    m_oldStateTraceDelayCoarse = m_ui->traceDelayCoarse->blockSignals(true);
+    m_oldStateTraceDelayFine   = m_ui->traceDelayFine->blockSignals(true);
+    m_oldStateZSelect          = m_ui->zSelect->blockSignals(true);
+    m_oldStateZTraceMode       = m_ui->zTraceMode->blockSignals(true);
+    m_oldStateTraceColor       = m_ui->traceColor->blockSignals(true);
+}
+
+GLScopeNGGUI::TraceUIBlocker::~TraceUIBlocker()
+{
+    unBlock();
+}
+
+void GLScopeNGGUI::TraceUIBlocker::unBlock()
+{
+    m_ui->traceMode->blockSignals(m_oldStateTraceMode);
+    m_ui->amp->blockSignals(m_oldStateAmp);
+    m_ui->ofsCoarse->blockSignals(m_oldStateOfsCoarse);
+    m_ui->ofsFine->blockSignals(m_oldStateOfsFine);
+    m_ui->traceDelayCoarse->blockSignals(m_oldStateTraceDelayCoarse);
+    m_ui->traceDelayFine->blockSignals(m_oldStateTraceDelayFine);
+    m_ui->zSelect->blockSignals(m_oldStateZSelect);
+    m_ui->zTraceMode->blockSignals(m_oldStateZTraceMode);
+    m_ui->traceColor->blockSignals(m_oldStateTraceColor);
+}
+
+GLScopeNGGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeNGGUI* ui) :
+        m_ui(ui)
+{
+    m_oldStateOnlyX        = m_ui->onlyX->blockSignals(true);
+    m_oldStateOnlyY        = m_ui->onlyY->blockSignals(true);
+    m_oldStateHorizontalXY = m_ui->horizontalXY->blockSignals(true);
+    m_oldStateVerticalXY   = m_ui->verticalXY->blockSignals(true);
+    m_oldStatePolar        = m_ui->polar->blockSignals(true);
+//    m_oldStateTime         = m_ui->time->blockSignals(true);
+//    m_oldStateTimeOfs      = m_ui->timeOfs->blockSignals(true);
+//    m_oldStateTraceLen     = m_ui->traceLen->blockSignals(true);
+}
+
+GLScopeNGGUI::MainUIBlocker::~MainUIBlocker()
+{
+    unBlock();
+}
+
+void GLScopeNGGUI::MainUIBlocker::unBlock()
+{
+    m_ui->onlyX->blockSignals(m_oldStateOnlyX);
+    m_ui->onlyY->blockSignals(m_oldStateOnlyY);
+    m_ui->horizontalXY->blockSignals(m_oldStateHorizontalXY);
+    m_ui->verticalXY->blockSignals(m_oldStateVerticalXY);
+    m_ui->polar->blockSignals(m_oldStatePolar);
+//    m_ui->time->blockSignals(m_oldStateTime);
+//    m_ui->timeOfs->blockSignals(m_oldStateTimeOfs);
+//    m_ui->traceLen->blockSignals(m_oldStateTraceLen);
+}
+
