@@ -132,7 +132,9 @@ void ChannelAnalyzerNG::stop()
 
 bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
-	float bandwidth, lowCutoff;
+	float band, lowCutoff;
+
+	qDebug() << "ChannelAnalyzerNG::handleMessage";
 
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
@@ -140,8 +142,6 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 
 		m_sampleRate = notif.getSampleRate();
 		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
-        SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
-        DSBFilter->create_dsb_filter(m_Bandwidth / m_sampleRate);
 
 		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
@@ -152,12 +152,12 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	{
 		MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
-		bandwidth = cfg.getBandwidth();
+		band = cfg.getBandwidth();
 		lowCutoff = cfg.getLoCutoff();
 
-		if (bandwidth < 0)
+		if (band < 0)
 		{
-			bandwidth = -bandwidth;
+			band = -band;
 			lowCutoff = -lowCutoff;
 			m_usb = false;
 		}
@@ -166,15 +166,15 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 			m_usb = true;
 		}
 
-		if (bandwidth < 100.0f)
+		if (band < 100.0f)
 		{
-			bandwidth = 100.0f;
+			band = 100.0f;
 			lowCutoff = 0;
 		}
 
 		m_settingsMutex.lock();
 
-		m_Bandwidth = bandwidth;
+		m_Bandwidth = band;
 		m_LowCutoff = lowCutoff;
 
 		SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
@@ -185,8 +185,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
-		        << " m_Bandwidth: " << m_Bandwidth
+		qDebug() << "  - MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff
 				<< " m_spanLog2: " << m_spanLog2
 				<< " m_ssb: " << m_ssb;
