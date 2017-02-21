@@ -833,13 +833,13 @@ void GLScopeNGGUI::setTraceLenDisplay()
     double t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate);
 
     if(t < 0.000001)
-        ui->traceLenText->setText(tr("%1\nns").arg(t * 1000000000.0));
+        ui->traceLenText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
     else if(t < 0.001)
-        ui->traceLenText->setText(tr("%1\nµs").arg(t * 1000000.0));
+        ui->traceLenText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
     else if(t < 1.0)
-        ui->traceLenText->setText(tr("%1\nms").arg(t * 1000.0));
+        ui->traceLenText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
     else
-        ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0));
+        ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::setTimeOfsDisplay()
