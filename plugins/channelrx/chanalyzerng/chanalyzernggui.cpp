@@ -111,16 +111,16 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
     {
 		QByteArray bytetmp;
 		quint32 u32tmp;
-		qint32 tmp, bw, lowCut;
+		qint32 tmp, spanLog2, bw, lowCut;
 		bool tmpBool;
 
-		blockApplySettings(true);
+        blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &bw, 30);
-		ui->BW->setValue(bw);
+        d.readS32(2, &bw, 30);
+        ui->BW->setValue(bw);
 		d.readBlob(3, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
 
@@ -129,23 +129,28 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 			m_channelMarker.setColor(u32tmp);
 		}
 
-		d.readS32(5, &lowCut, 3);
-		ui->lowCut->setValue(lowCut);
-		d.readS32(6, &tmp, 20);
-		ui->spanLog2->setValue(tmp);
-		setNewRate(tmp);
-		d.readBool(7, &tmpBool, false);
-		ui->ssb->setChecked(tmpBool);
+        d.readS32(5, &lowCut, 3);
+        ui->lowCut->setValue(lowCut);
+        d.readS32(6, &spanLog2, 3);
+        ui->spanLog2->setValue(spanLog2);
+        d.readBool(7, &tmpBool, false);
+        ui->ssb->setChecked(tmpBool);
 		d.readBlob(8, &bytetmp);
 		ui->scopeGUI->deserialize(bytetmp);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
 
-		ui->BW->setValue(bw);
-		ui->lowCut->setValue(lowCut); // does applySettings();
+//	    qDebug() << "ChannelAnalyzerNGGUI::deserialize:"
+//            << " spanLog2: " << spanLog2
+//            << " bw: " << bw
+//            << " lowCut: " << lowCut;
 
-		return true;
+	    setNewRate(spanLog2);
+        ui->BW->setValue(bw);
+        ui->lowCut->setValue(lowCut);
+
+        return true;
 	}
     else
     {
@@ -258,7 +263,6 @@ void ChannelAnalyzerNGGUI::on_spanLog2_valueChanged(int value)
 	if (setNewRate(value)) {
 		applySettings();
 	}
-
 }
 
 void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
