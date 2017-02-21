@@ -220,6 +220,19 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 {
     bool forwardChange = false;
 
+    if ((m_settings.m_gain != settings.m_gain) || force)
+    {
+        m_settings.m_gain = settings.m_gain;
+
+        if(m_dev != 0)
+        {
+            if(rtlsdr_set_tuner_gain(m_dev, m_settings.m_gain) != 0)
+            {
+                qDebug("rtlsdr_set_tuner_gain() failed");
+            }
+        }
+    }
+
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
         m_settings.m_dcBlock = settings.m_dcBlock;
