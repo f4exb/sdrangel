@@ -120,22 +120,22 @@ void RTLSDRGui::on_iqImbalance_toggled(bool checked)
 
 QByteArray RTLSDRGui::serialize() const
 {
-	return m_settings.serialize();
+    return m_settings.serialize();
 }
 
 bool RTLSDRGui::deserialize(const QByteArray& data)
 {
-	if (m_settings.deserialize(data))
-	{
-		displaySettings();
-		sendSettings();
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
+    if(m_settings.deserialize(data))
+    {
+        displaySettings();
+        sendSettings();
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
 }
 
 bool RTLSDRGui::handleMessage(const Message& message)
