@@ -790,7 +790,16 @@ void GLScopeNGGUI::setTrigCountDisplay()
 void GLScopeNGGUI::setTimeScaleDisplay()
 {
     m_sampleRate = m_glScope->getSampleRate();
+    unsigned int n_samples = (m_glScope->getTraceSize() * 1.0) / (double) m_timeBase;
     double t = (m_glScope->getTraceSize() * 1.0 / m_sampleRate) / (double) m_timeBase;
+
+    if (n_samples < 1000) {
+        ui->timeText->setToolTip(tr("%1 S").arg(n_samples));
+    } else if (n_samples < 1000000) {
+        ui->timeText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
+    } else {
+        ui->timeText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
+    }
 
     if(t < 0.000001)
     {
@@ -819,11 +828,11 @@ void GLScopeNGGUI::setTraceLenDisplay()
     unsigned int n_samples = m_traceLenMult * ScopeVisNG::m_traceChunkSize;
 
     if (n_samples < 1000) {
-        ui->traceLenText->setToolTip(tr("%1S").arg(n_samples));
+        ui->traceLenText->setToolTip(tr("%1 S").arg(n_samples));
     } else if (n_samples < 1000000) {
-        ui->traceLenText->setToolTip(tr("%1kS").arg(n_samples/1000.0));
+        ui->traceLenText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
     } else {
-        ui->traceLenText->setToolTip(tr("%1MS").arg(n_samples/1000000.0));
+        ui->traceLenText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
     }
 
     m_sampleRate = m_glScope->getSampleRate();
@@ -841,16 +850,25 @@ void GLScopeNGGUI::setTraceLenDisplay()
 
 void GLScopeNGGUI::setTimeOfsDisplay()
 {
+    unsigned int n_samples = m_glScope->getTraceSize() * (m_timeOffset/100.0);
     double dt = m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate;
 
+    if (n_samples < 1000) {
+        ui->timeOfsText->setToolTip(tr("%1 S").arg(n_samples));
+    } else if (n_samples < 1000000) {
+        ui->timeOfsText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
+    } else {
+        ui->timeOfsText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
+    }
+
     if(dt < 0.000001)
-        ui->timeOfsText->setText(tr("%1\nns").arg(dt * 1000000000.0));
+        ui->timeOfsText->setText(tr("%1\nns").arg(dt * 1000000000.0, 0, 'f', 2));
     else if(dt < 0.001)
-        ui->timeOfsText->setText(tr("%1\nµs").arg(dt * 1000000.0));
+        ui->timeOfsText->setText(tr("%1\nµs").arg(dt * 1000000.0, 0, 'f', 2));
     else if(dt < 1.0)
-        ui->timeOfsText->setText(tr("%1\nms").arg(dt * 1000.0));
+        ui->timeOfsText->setText(tr("%1\nms").arg(dt * 1000.0, 0, 'f', 2));
     else
-        ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0));
+        ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::setAmpScaleDisplay()
@@ -983,40 +1001,51 @@ void GLScopeNGGUI::setTrigDelayDisplay()
     unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult;
 
     if (n_samples_delay < 1000) {
-        ui->trigDelayText->setToolTip(tr("%1S").arg(n_samples_delay));
+        ui->trigDelayText->setToolTip(tr("%1 S").arg(n_samples_delay));
     } else if (n_samples_delay < 1000000) {
-        ui->trigDelayText->setToolTip(tr("%1kS").arg(n_samples_delay/1000.0));
+        ui->trigDelayText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
     } else if (n_samples_delay < 1000000000) {
-        ui->trigDelayText->setToolTip(tr("%1MS").arg(n_samples_delay/1000000.0));
+        ui->trigDelayText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
     } else {
-        ui->trigDelayText->setToolTip(tr("%1GS").arg(n_samples_delay/1000000000.0));
+        ui->trigDelayText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
     }
 
     m_sampleRate = m_glScope->getSampleRate();
     double t = (n_samples_delay * 1.0f / m_sampleRate);
 
     if(t < 0.000001)
-        ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 1));
+        ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
     else if(t < 0.001)
-        ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 1));
+        ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
     else if(t < 1.0)
-        ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 1));
+        ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
     else
-        ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 1));
+        ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::setTrigPreDisplay()
 {
+    unsigned int n_samples_delay = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f);
     double dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
 
+    if (n_samples_delay < 1000) {
+        ui->trigPreText->setToolTip(tr("%1 S").arg(n_samples_delay));
+    } else if (n_samples_delay < 1000000) {
+        ui->trigPreText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
+    } else if (n_samples_delay < 1000000000) {
+        ui->trigPreText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
+    } else {
+        ui->trigPreText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
+    }
+
     if(dt < 0.000001)
-        ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f));
+        ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f, 0, 'f', 2));
     else if(dt < 0.001)
-        ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0f));
+        ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0f, 0, 'f', 2));
     else if(dt < 1.0)
-        ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0f));
+        ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0f, 0, 'f', 2));
     else
-        ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0f));
+        ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0f, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::changeCurrentTrace()

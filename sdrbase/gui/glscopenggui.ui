@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>731</width>
+    <width>758</width>
     <height>120</height>
    </rect>
   </property>
@@ -282,6 +282,9 @@
      </item>
      <item>
       <widget class="QLabel" name="timeLabel">
+       <property name="toolTip">
+        <string>Time range</string>
+       </property>
        <property name="text">
         <string>T:</string>
        </property>
@@ -291,7 +294,7 @@
       <widget class="QLabel" name="timeText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -331,6 +334,9 @@
      </item>
      <item>
       <widget class="QLabel" name="timeOfsLabel">
+       <property name="toolTip">
+        <string>Time offset</string>
+       </property>
        <property name="text">
         <string>O:</string>
        </property>
@@ -340,7 +346,7 @@
       <widget class="QLabel" name="timeOfsText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -377,6 +383,9 @@
      </item>
      <item>
       <widget class="QLabel" name="traceLenLabel">
+       <property name="toolTip">
+        <string>Trace length</string>
+       </property>
        <property name="text">
         <string>L:</string>
        </property>
@@ -386,7 +395,7 @@
       <widget class="QLabel" name="traceLenText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -691,6 +700,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="ampLabel">
+       <property name="toolTip">
+        <string>Vertical range</string>
+       </property>
        <property name="text">
         <string>A:</string>
        </property>
@@ -705,7 +717,7 @@ kS/s</string>
         </size>
        </property>
        <property name="toolTip">
-        <string>Amplification value</string>
+        <string>Vertical range value</string>
        </property>
        <property name="text">
         <string>000</string>
@@ -718,7 +730,7 @@ kS/s</string>
      <item>
       <widget class="QSlider" name="amp">
        <property name="toolTip">
-        <string>Amplification</string>
+        <string>Vertical range</string>
        </property>
        <property name="maximum">
         <number>10</number>
@@ -740,6 +752,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="ofsLabel">
+       <property name="toolTip">
+        <string>Vertical offset</string>
+       </property>
        <property name="text">
         <string>O:</string>
        </property>
@@ -754,7 +769,7 @@ kS/s</string>
         </size>
        </property>
        <property name="toolTip">
-        <string>Offset value</string>
+        <string>Vertical offset value</string>
        </property>
        <property name="text">
         <string>0</string>
@@ -778,7 +793,7 @@ kS/s</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>Coarse offset</string>
+          <string>Vertical offset coarse</string>
          </property>
          <property name="minimum">
           <number>-100</number>
@@ -800,7 +815,7 @@ kS/s</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>Fine offset</string>
+          <string>Vertical offset fine</string>
          </property>
          <property name="maximum">
           <number>200</number>
@@ -824,6 +839,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="traceDelayLabel">
+       <property name="toolTip">
+        <string>Trace delay</string>
+       </property>
        <property name="text">
         <string>D:</string>
        </property>
@@ -864,6 +882,9 @@ kS/s</string>
        </property>
        <item>
         <widget class="QSlider" name="traceDelayCoarse">
+         <property name="toolTip">
+          <string>Trace delay coarse</string>
+         </property>
          <property name="maximum">
           <number>48</number>
          </property>
@@ -877,6 +898,9 @@ kS/s</string>
        </item>
        <item>
         <widget class="QSlider" name="traceDelayFine">
+         <property name="toolTip">
+          <string>Trace delay fine</string>
+         </property>
          <property name="maximum">
           <number>100</number>
          </property>
@@ -894,6 +918,28 @@ kS/s</string>
       <widget class="Line" name="line_17">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ClickableLabel" name="traceColor">
+       <property name="minimumSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Current trace color (click to change)</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -933,28 +979,6 @@ kS/s</string>
          <string>Col</string>
         </property>
        </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="ClickableLabel" name="traceColor">
-       <property name="minimumSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Current trace color (click to change)</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
       </widget>
      </item>
      <item>
@@ -1004,6 +1028,12 @@ kS/s</string>
        </property>
        <property name="toolTip">
         <string>Select trace memory (0 is live)</string>
+       </property>
+       <property name="maximum">
+        <number>15</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -1337,6 +1367,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigLevelLabel">
+       <property name="toolTip">
+        <string>Triger level</string>
+       </property>
        <property name="text">
         <string>L:</string>
        </property>
@@ -1418,6 +1451,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigDelayLabel">
+       <property name="toolTip">
+        <string>Trigger delay</string>
+       </property>
        <property name="text">
         <string>D:</string>
        </property>
@@ -1427,7 +1463,7 @@ kS/s</string>
       <widget class="QLabel" name="trigDelayText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
@@ -1499,6 +1535,9 @@ kS/s</string>
      </item>
      <item>
       <widget class="QLabel" name="trigPreLabel">
+       <property name="toolTip">
+        <string>Pre-trigger delay</string>
+       </property>
        <property name="text">
         <string>P:</string>
        </property>
@@ -1508,7 +1547,7 @@ kS/s</string>
       <widget class="QLabel" name="trigPreText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
