@@ -31,6 +31,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGOneShot, Message)
 
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 
@@ -51,7 +52,9 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_sampleRate(0),
     m_traceDiscreteMemory(10),
     m_freeRun(true),
-    m_maxTraceDelay(0)
+    m_maxTraceDelay(0),
+    m_triggerOneShot(false),
+    m_triggerWaitForReset(false)
 {
     setObjectName("ScopeVisNG");
     m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
@@ -136,6 +139,11 @@ void ScopeVisNG::focusOnTrigger(uint32_t triggerIndex)
     getInputMessageQueue()->push(cmd);
 }
 
+void ScopeVisNG::setOneShot(bool oneShot)
+{
+    Message* cmd = MsgScopeVisNGOneShot::create(oneShot);
+    getInputMessageQueue()->push(cmd);
+}
 
 void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
@@ -148,20 +156,14 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
     else if (m_triggerState == TriggerUntriggered) {
         m_triggerPoint = end;
     }
-    else if (m_triggerState == TriggerWait) {
+    else if (m_triggerWaitForReset) {
         m_triggerPoint = end;
     }
     else {
         m_triggerPoint = cbegin;
     }
 
-//    if (m_triggerState == TriggerNewConfig)
-//    {
-//        m_triggerState = TriggerUntriggered;
-//        return;
-//    }
-
-    if ((m_triggerConditions.size() > 0) && (m_triggerState == TriggerWait)) {
+    if (m_triggerWaitForReset) {
         return;
     }
 
@@ -332,6 +334,8 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
             m_traceDiscreteMemory.current().m_endPoint = mbegin;
             m_traceDiscreteMemory.store(); // next memory trace
             m_triggerState = TriggerUntriggered;
+            m_triggerWaitForReset = m_triggerOneShot;
+
             //if (m_glScope) m_glScope->incrementTraceCounter();
 
             // process remainder recursively
@@ -615,6 +619,13 @@ bool ScopeVisNG::handleMessage(const Message& message)
         }
 
         return true;
+    }
+    else if (MsgScopeVisNGOneShot::match(message))
+    {
+        MsgScopeVisNGOneShot& conf = (MsgScopeVisNGOneShot&) message;
+        bool oneShot = conf.getOneShot();
+        m_triggerOneShot = oneShot;
+        if (m_triggerWaitForReset && !oneShot) m_triggerWaitForReset = false;
     }
     else
     {

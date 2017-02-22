@@ -159,6 +159,7 @@ public:
     void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
     void focusOnTrigger(uint32_t triggerIndex);
+    void setOneShot(bool oneShot);
 
     void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
     {
@@ -399,6 +400,27 @@ private:
     };
 
     // ---------------------------------------------
+    class MsgScopeVisNGOneShot : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGOneShot* create(
+                bool oneShot)
+        {
+            return new MsgScopeVisNGOneShot(oneShot);
+        }
+
+        bool getOneShot() const { return m_oneShot; }
+
+    private:
+        bool m_oneShot;
+
+        MsgScopeVisNGOneShot(bool oneShot) :
+            m_oneShot(oneShot)
+        {}
+    };
+
+    // ---------------------------------------------
 
     /**
      * Projection stuff
@@ -493,7 +515,6 @@ private:
     {
         TriggerUntriggered, //!< Trigger is not kicked off yet (or trigger list is empty)
         TriggerTriggered,   //!< Trigger has been kicked off
-        TriggerWait,        //!< In one shot mode trigger waits for manual re-enabling
         TriggerDelay,       //!< Trigger conditions have been kicked off but it is waiting for delay before final kick off
         TriggerNewConfig,   //!< Special condition when a new configuration has been received
     };
@@ -880,6 +901,8 @@ private:
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
     QMutex m_mutex;
     Real m_projectorCache[(int) nbProjectionTypes];
+    bool m_triggerOneShot;                         //!< True when one shot mode is active
+    bool m_triggerWaitForReset;                    //!< In one shot mode suspended until reset by UI
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode

@@ -754,10 +754,7 @@ void GLScopeNGGUI::on_trigColor_clicked()
 
 void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
 {
-    m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked()); // TODO: implement one shot feature
+    m_scopeVis->setOneShot(checked);
 }
 
 void GLScopeNGGUI::on_freerun_toggled(bool checked)
