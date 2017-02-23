@@ -156,6 +156,7 @@ private:
     void setTraceUI(ScopeVisNG::TraceData& traceData);
 
     void fillProjectionCombo(QComboBox* comboBox);
+    void disableLiveMode(bool disable);
 
 private slots:
     void on_scope_sampleRateChanged(int value);
@@ -181,6 +182,7 @@ private slots:
     void on_traceDelayCoarse_valueChanged(int value);
     void on_traceDelayFine_valueChanged(int value);
     void on_traceColor_clicked();
+    void on_mem_valueChanged(int value);
     // Third row
     void on_trig_valueChanged(int value);
     void on_trigAdd_clicked(bool checked);

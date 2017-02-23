@@ -44,6 +44,7 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     ui->trigColor->setStyleSheet("QLabel { background-color : rgb(0,255,0); }");
     m_focusedTriggerColor.setRgb(0,255,0);
     ui->traceText->setText("X"); // TODO: remove when more than 2 traces are supported
+    ui->mem->setMaximum(ScopeVisNG::m_nbTraceMemories - 1);
 }
 
 GLScopeNGGUI::~GLScopeNGGUI()
@@ -663,6 +664,22 @@ void GLScopeNGGUI::on_traceColor_clicked()
     }
 }
 
+void GLScopeNGGUI::on_mem_valueChanged(int value)
+{
+    QString text;
+    text.sprintf("%02d", value);
+    ui->memText->setText(text);
+
+    if (value > 0)
+    {
+    	disableLiveMode(true); // block trigger UI line
+    }
+    else
+    {
+        disableLiveMode(false); // unblock trigger UI line
+    }
+}
+
 void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
 {
     setTrigLevelDisplay();
@@ -1072,6 +1089,26 @@ void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)
     comboBox->addItem("MagdB", ScopeVisNG::ProjectionMagDB);
     comboBox->addItem("Phi", ScopeVisNG::ProjectionPhase);
     comboBox->addItem("dPhi", ScopeVisNG::ProjectionDPhase);
+}
+
+void GLScopeNGGUI::disableLiveMode(bool disable)
+{
+    ui->traceLen->setEnabled(!disable);
+    ui->trig->setEnabled(!disable);
+    ui->trigAdd->setEnabled(!disable);
+    ui->trigDel->setEnabled(!disable);
+    ui->trigMode->setEnabled(!disable);
+    ui->trigCount->setEnabled(!disable);
+    ui->trigPos->setEnabled(!disable);
+    ui->trigNeg->setEnabled(!disable);
+    ui->trigBoth->setEnabled(!disable);
+    ui->trigLevelCoarse->setEnabled(!disable);
+    ui->trigLevelFine->setEnabled(!disable);
+    ui->trigDelayCoarse->setEnabled(!disable);
+    ui->trigDelayFine->setEnabled(!disable);
+    ui->trigPre->setEnabled(!disable);
+    ui->trigOneShot->setEnabled(!disable);
+    ui->freerun->setEnabled(!disable);
 }
 
 void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)

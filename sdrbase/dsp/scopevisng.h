@@ -145,6 +145,7 @@ public:
     static const uint32_t m_traceChunkSize;
     static const uint32_t m_maxNbTriggers = 10;
     static const uint32_t m_maxNbTraces = 10;
+    static const uint32_t m_nbTraceMemories = 16;
 
     ScopeVisNG(GLScopeNG* glScope = 0);
     virtual ~ScopeVisNG();
@@ -160,6 +161,7 @@ public:
     void removeTrigger(uint32_t triggerIndex);
     void focusOnTrigger(uint32_t triggerIndex);
     void setOneShot(bool oneShot);
+    void setMemoryIndex(uint32_t memoryIndex);
 
     void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
     {
@@ -417,6 +419,27 @@ private:
 
         MsgScopeVisNGOneShot(bool oneShot) :
             m_oneShot(oneShot)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGMemoryTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGMemoryTrace* create(
+                uint32_t memoryIndex)
+        {
+            return new MsgScopeVisNGMemoryTrace(memoryIndex);
+        }
+
+        bool getMemoryIndex() const { return m_memoryIndex; }
+
+    private:
+        uint32_t m_memoryIndex;
+
+        MsgScopeVisNGMemoryTrace(uint32_t memoryIndex) :
+            m_memoryIndex(memoryIndex)
         {}
     };
 

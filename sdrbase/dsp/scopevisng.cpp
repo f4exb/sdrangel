@@ -32,6 +32,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGOneShot, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGMemoryTrace, Message)
 
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 
@@ -50,7 +51,7 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_zTraceIndex(-1),
     m_timeOfsProMill(0),
     m_sampleRate(0),
-    m_traceDiscreteMemory(10),
+    m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
     m_triggerOneShot(false),
@@ -142,6 +143,12 @@ void ScopeVisNG::focusOnTrigger(uint32_t triggerIndex)
 void ScopeVisNG::setOneShot(bool oneShot)
 {
     Message* cmd = MsgScopeVisNGOneShot::create(oneShot);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::setMemoryIndex(uint32_t memoryIndex)
+{
+    Message* cmd = MsgScopeVisNGMemoryTrace::create(memoryIndex);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -626,6 +633,11 @@ bool ScopeVisNG::handleMessage(const Message& message)
         bool oneShot = conf.getOneShot();
         m_triggerOneShot = oneShot;
         if (m_triggerWaitForReset && !oneShot) m_triggerWaitForReset = false;
+    }
+    else if (MsgScopeVisNGMemoryTrace::match(message))
+    {
+        MsgScopeVisNGMemoryTrace& conf = (MsgScopeVisNGMemoryTrace&) message;
+        uint32_t memoryIndex = conf.getMemoryIndex();
     }
     else
     {
