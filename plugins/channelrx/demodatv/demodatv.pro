@@ -7,9 +7,9 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-QT += core gui widgets multimedia
+QT += core gui widgets multimedia opengl
 
-TARGET = demodam
+TARGET = demodatv
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -21,6 +21,9 @@ INCLUDEPATH += ../../../sdrbase
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
+
+CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
 
 SOURCES += atvdemod.cpp\
 	atvdemodgui.cpp\
