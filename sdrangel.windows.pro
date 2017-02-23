@@ -32,6 +32,7 @@ SUBDIRS += plugins/samplesink/hackrfoutput
 SUBDIRS += plugins/channelrx/chanalyzer
 SUBDIRS += plugins/channelrx/chanalyzerng
 SUBDIRS += plugins/channelrx/demodam
+SUBDIRS += plugins/channelrx/demodatv
 SUBDIRS += plugins/channelrx/demodbfm
 SUBDIRS += plugins/channelrx/demoddsd
 SUBDIRS += plugins/channelrx/demodlora
