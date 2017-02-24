@@ -213,6 +213,7 @@ void ScopeVisNG::processMemoryTrace()
         SampleVector::const_iterator mend = m_traceDiscreteMemory.at(m_currentTraceMemoryIndex).m_endPoint;
         SampleVector::const_iterator mbegin = mend - m_traceSize;
         SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
+        m_nbSamples = m_traceSize + m_maxTraceDelay;
 
         processTraces(mbegin_tb, mbegin, true); // traceback
         processTraces(mbegin, mend, false);
@@ -658,7 +659,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
             m_currentTraceMemoryIndex = memoryIndex;
 
             if (m_currentTraceMemoryIndex > 0) {
-
+                processMemoryTrace();
             }
         }
     }

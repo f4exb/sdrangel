@@ -433,7 +433,7 @@ private:
             return new MsgScopeVisNGMemoryTrace(memoryIndex);
         }
 
-        bool getMemoryIndex() const { return m_memoryIndex; }
+        uint32_t getMemoryIndex() const { return m_memoryIndex; }
 
     private:
         uint32_t m_memoryIndex;
