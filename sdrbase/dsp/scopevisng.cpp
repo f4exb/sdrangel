@@ -55,7 +55,8 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_freeRun(true),
     m_maxTraceDelay(0),
     m_triggerOneShot(false),
-    m_triggerWaitForReset(false)
+    m_triggerWaitForReset(false),
+    m_currentTraceMemoryIndex(0)
 {
     setObjectName("ScopeVisNG");
     m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
@@ -163,14 +164,14 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
     else if (m_triggerState == TriggerUntriggered) {
         m_triggerPoint = end;
     }
-    else if (m_triggerWaitForReset) {
+    else if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
         m_triggerPoint = end;
     }
     else {
         m_triggerPoint = cbegin;
     }
 
-    if (m_triggerWaitForReset) {
+    if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
         return;
     }
 
@@ -203,6 +204,19 @@ void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVe
     }
 
     m_mutex.unlock();
+}
+
+void ScopeVisNG::processMemoryTrace()
+{
+    if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex < m_nbTraceMemories))
+    {
+        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(m_currentTraceMemoryIndex).m_endPoint;
+        SampleVector::const_iterator mbegin = mend - m_traceSize;
+        SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
+
+        processTraces(mbegin_tb, mbegin, true); // traceback
+        processTraces(mbegin, mend, false);
+    }
 }
 
 void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, int& triggerPointToEnd)
@@ -638,6 +652,15 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGMemoryTrace& conf = (MsgScopeVisNGMemoryTrace&) message;
         uint32_t memoryIndex = conf.getMemoryIndex();
+
+        if (memoryIndex != m_currentTraceMemoryIndex)
+        {
+            m_currentTraceMemoryIndex = memoryIndex;
+
+            if (m_currentTraceMemoryIndex > 0) {
+
+            }
+        }
     }
     else
     {

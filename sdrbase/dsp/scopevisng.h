@@ -684,6 +684,14 @@ private:
     		return m_traceBackBuffers[m_currentMemIndex];
     	}
 
+        /**
+         * Return trace at given memory position
+         */
+        TraceBackBuffer& at(int index)
+        {
+            return m_traceBackBuffers[index];
+        }
+
     	/**
     	 * Return current memory index
     	 */
@@ -926,6 +934,7 @@ private:
     Real m_projectorCache[(int) nbProjectionTypes];
     bool m_triggerOneShot;                         //!< True when one shot mode is active
     bool m_triggerWaitForReset;                    //!< In one shot mode suspended until reset by UI
+    uint32_t m_currentTraceMemoryIndex;            //!< The current index of trace in memory (0: current)
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode
@@ -938,6 +947,11 @@ private:
      * Process a sample trace which length is at most the trace length (m_traceSize)
      */
     void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, int& triggerPointToEnd);
+
+    /**
+     * process a trace in memory at current trace index in memory
+     */
+    void processMemoryTrace();
 
     /**
      * Process traces from complex trace memory buffer.

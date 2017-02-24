@@ -669,15 +669,8 @@ void GLScopeNGGUI::on_mem_valueChanged(int value)
     QString text;
     text.sprintf("%02d", value);
     ui->memText->setText(text);
-
-    if (value > 0)
-    {
-    	disableLiveMode(true); // block trigger UI line
-    }
-    else
-    {
-        disableLiveMode(false); // unblock trigger UI line
-    }
+   	disableLiveMode(value > 0); // block trigger UI line if memory is active
+   	m_scopeVis->setMemoryIndex(value);
 }
 
 void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index)
