@@ -35,6 +35,7 @@ ATVDemod::ATVDemod() :
     m_intRowIndex(0),
     m_intSynchroPoints(0),
     m_blnSynchroDetected(false),
+    m_blnLineSynchronized(false),
     m_blnVerticalSynchroDetected(false),
     m_fltLevelSynchroTop(0.0),
     m_fltLevelSynchroBlack(1.0),
@@ -423,14 +424,24 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_blnSynchroDetected=false;
             m_blnImageDetecting=true;
 
-            //New line + Interleaving
-            m_intRowIndex ++;
-            m_intRowIndex ++;
             m_intColIndex=0;
 
-            if(m_intRowIndex<m_intNumberOfLines)
+            if((m_blnSynchroDetected==false) || (m_blnLineSynchronized==true))
             {
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                //New line + Interleaving
+                m_intRowIndex ++;
+                m_intRowIndex ++;
+
+                if(m_intRowIndex<m_intNumberOfLines)
+                {
+                    m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                }
+
+                m_blnLineSynchronized=false;
+            }
+            else
+            {
+                m_blnLineSynchronized=m_blnSynchroDetected;
             }
 
             m_fltAmpLineAverage=0.0f;
