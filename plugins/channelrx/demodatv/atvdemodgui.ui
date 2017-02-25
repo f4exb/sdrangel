@@ -43,7 +43,7 @@
      <height>361</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="signalLevelLayout">
+   <layout class="QHBoxLayout" name="screenTVLayout">
     <property name="sizeConstraint">
      <enum>QLayout::SetMinimumSize</enum>
     </property>
@@ -74,7 +74,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="settingsGroup">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -92,7 +92,7 @@
    <property name="title">
     <string>ATV Settings</string>
    </property>
-   <widget class="QSlider" name="horizontalSlider_2">
+   <widget class="QSlider" name="blackLevel">
     <property name="geometry">
      <rect>
       <x>310</x>
@@ -100,6 +100,9 @@
       <width>101</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Black level</string>
     </property>
     <property name="maximum">
      <number>999</number>
@@ -117,14 +120,17 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="fps">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>120</x>
       <y>30</y>
       <width>72</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Frames per second</string>
     </property>
     <item>
      <property name="text">
@@ -137,7 +143,7 @@
      </property>
     </item>
    </widget>
-   <widget class="QSlider" name="horizontalSlider">
+   <widget class="QSlider" name="synchLevel">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -145,6 +151,9 @@
       <width>101</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Horizontal synchronization level</string>
     </property>
     <property name="maximum">
      <number>999</number>
@@ -162,33 +171,39 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="hSync">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>220</x>
       <y>30</y>
       <width>61</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Toggle horizontal synchronization</string>
     </property>
     <property name="text">
      <string>HSync</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_2">
+   <widget class="QCheckBox" name="vSync">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>300</x>
       <y>30</y>
       <width>61</width>
       <height>20</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>Toggle vertical synchronization</string>
+    </property>
     <property name="text">
      <string>VSync</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="synchLevelLabel">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -201,7 +216,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Synch&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="synchLevelText">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -217,7 +232,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="blackLevelLabel">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -230,7 +245,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Black Lvl&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="blackLevelText">
     <property name="geometry">
      <rect>
       <x>420</x>
@@ -246,20 +261,23 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_3">
+   <widget class="QCheckBox" name="halfImage">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>380</x>
       <y>30</y>
       <width>51</width>
       <height>20</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>Half image (no interleave)</string>
+    </property>
     <property name="text">
      <string>Half</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="lineTimeLabel">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -272,7 +290,7 @@
      <string>Line</string>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider_3">
+   <widget class="QSlider" name="lineTime">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -280,6 +298,9 @@
       <width>101</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Line length in time units</string>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -300,7 +321,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="lineTimeText">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -316,7 +337,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="topTimeLabel">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -329,7 +350,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Top&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider_4">
+   <widget class="QSlider" name="topTime">
     <property name="geometry">
      <rect>
       <x>310</x>
@@ -337,6 +358,9 @@
       <width>101</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Horizontal top length in time units</string>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -357,7 +381,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="topTimeText">
     <property name="geometry">
      <rect>
       <x>420</x>
@@ -373,7 +397,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox_2">
+   <widget class="QComboBox" name="modulation">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -381,6 +405,9 @@
       <width>72</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Modulation type</string>
     </property>
     <item>
      <property name="text">
@@ -397,6 +424,22 @@
       <string>AM</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="reset">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>30</y>
+      <width>24</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Reset to default values</string>
+    </property>
+    <property name="text">
+     <string>R</string>
+    </property>
    </widget>
   </widget>
  </widget>

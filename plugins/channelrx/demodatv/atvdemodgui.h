@@ -61,15 +61,16 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
     void tick();
-    void on_horizontalSlider_valueChanged(int value);
-    void on_horizontalSlider_2_valueChanged(int value);
-    void on_horizontalSlider_3_valueChanged(int value);
-    void on_horizontalSlider_4_valueChanged(int value);
-    void on_checkBox_clicked();
-    void on_checkBox_2_clicked();
-    void on_checkBox_3_clicked();
-    void on_comboBox_currentIndexChanged(int index);
-    void on_comboBox_2_currentIndexChanged(int index);
+    void on_synchLevel_valueChanged(int value);
+    void on_blackLevel_valueChanged(int value);
+    void on_lineTime_valueChanged(int value);
+    void on_topTime_valueChanged(int value);
+    void on_hSync_clicked();
+    void on_vSync_clicked();
+    void on_halfImage_clicked();
+    void on_modulation_currentIndexChanged(int index);
+    void on_fps_currentIndexChanged(int index);
+    void on_reset_clicked(bool checked);
 
 private:
 	Ui::ATVDemodGUI* ui;

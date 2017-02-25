@@ -36,10 +36,11 @@
 
 const QString ATVDemodGUI::m_strChannelID = "sdrangel.channel.demodatv";
 
-ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI)
+ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
+        DeviceSourceAPI *objDeviceAPI)
 {
     ATVDemodGUI* gui = new ATVDemodGUI(objPluginAPI, objDeviceAPI);
-	return gui;
+    return gui;
 }
 
 void ATVDemodGUI::destroy()
@@ -54,7 +55,7 @@ void ATVDemodGUI::setName(const QString& strName)
 
 QString ATVDemodGUI::getName() const
 {
-	return objectName();
+    return objectName();
 }
 
 qint64 ATVDemodGUI::getCenterFrequency() const
@@ -65,22 +66,31 @@ qint64 ATVDemodGUI::getCenterFrequency() const
 void ATVDemodGUI::setCenterFrequency(qint64 intCenterFrequency)
 {
     m_objChannelMarker.setCenterFrequency(intCenterFrequency);
-	applySettings();
+    applySettings();
 }
 
 void ATVDemodGUI::resetToDefaults()
 {
-	blockApplySettings(true);
+    blockApplySettings(true);
 
-    //ui->rfBW->setValue(50);
+    //********** ATV Default values **********
+    ui->synchLevel->setValue(100);
+    ui->blackLevel->setValue(310);
+    ui->lineTime->setValue(640);
+    ui->topTime->setValue(3);
+    ui->modulation->setCurrentIndex(0);
+    ui->fps->setCurrentIndex(0);
+    ui->hSync->setChecked(true);
+    ui->vSync->setChecked(true);
+    ui->halfImage->setChecked(false);
 
     blockApplySettings(false);
-	applySettings();
+    applySettings();
 }
 
 QByteArray ATVDemodGUI::serialize() const
 {
-	SimpleSerializer s(1);
+    SimpleSerializer s(1);
 
     //s.writeS32(2, ui->rfBW->value());
 
@@ -91,27 +101,27 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
 {
     SimpleDeserializer d(arrData);
 
-	if(!d.isValid())
+    if (!d.isValid())
     {
-		resetToDefaults();
-		return false;
-	}
+        resetToDefaults();
+        return false;
+    }
 
-	if(d.getVersion() == 1)
+    if (d.getVersion() == 1)
     {
-		QByteArray bytetmp;
-		quint32 u32tmp;
-		qint32 tmp;
+        QByteArray bytetmp;
+        quint32 u32tmp;
+        qint32 tmp;
 
-		blockApplySettings(true);
+        blockApplySettings(true);
         m_objChannelMarker.blockSignals(true);
 
-		d.readS32(1, &tmp, 0);
+        d.readS32(1, &tmp, 0);
         m_objChannelMarker.setCenterFrequency(tmp);
         //d.readS32(2, &tmp, 4);
         //ui->rfBW->setValue(tmp);
 
-        if(d.readU32(7, &u32tmp))
+        if (d.readU32(7, &u32tmp))
         {
             m_objChannelMarker.setColor(u32tmp);
         }
@@ -119,24 +129,24 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
 
-		applySettings();
-		return true;
-	}
+        applySettings();
+        return true;
+    }
     else
     {
-		resetToDefaults();
-		return false;
-	}
+        resetToDefaults();
+        return false;
+    }
 }
 
 bool ATVDemodGUI::handleMessage(const Message& objMessage)
 {
-	return false;
+    return false;
 }
 
 void ATVDemodGUI::viewChanged()
 {
-	applySettings();
+    applySettings();
 }
 
 void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -145,35 +155,35 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void ATVDemodGUI::onMenuDoubleClicked()
 {
-    if(!m_blnBasicSettingsShown)
+    if (!m_blnBasicSettingsShown)
     {
         m_blnBasicSettingsShown = true;
-        BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_objChannelMarker, this);
+        BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(
+                &m_objChannelMarker, this);
         bcsw->show();
     }
 }
 
-
-
-ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent) :
-    RollupWidget(objParent),
-	ui(new Ui::ATVDemodGUI),
-    m_objPluginAPI(objPluginAPI),
-    m_objDeviceAPI(objDeviceAPI),
-    m_objChannelMarker(this),
-    m_blnBasicSettingsShown(false),
-    m_blnDoApplySettings(true)
+ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
+        QWidget* objParent) :
+        RollupWidget(objParent), ui(new Ui::ATVDemodGUI), m_objPluginAPI(
+                objPluginAPI), m_objDeviceAPI(objDeviceAPI), m_objChannelMarker(
+                this), m_blnBasicSettingsShown(false), m_blnDoApplySettings(
+                true)
 {
-	ui->setupUi(this);
-	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this,
+            SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(menuDoubleClickEvent()), this,
+            SLOT(onMenuDoubleClicked()));
 
     m_objATVDemod = new ATVDemod();
     m_objATVDemod->SetATVScreen(ui->screenTV);
 
     m_objChannelizer = new DownChannelizer(m_objATVDemod);
-    m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
+    m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer,
+            this);
     m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
 
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
@@ -193,17 +203,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
-    //********** ATV Default values **********
-    ui->horizontalSlider->setValue(100);
-    ui->horizontalSlider_2->setValue(310);
-    ui->horizontalSlider_3->setValue(640);
-    ui->horizontalSlider_4->setValue(3);
-    ui->comboBox_2->setCurrentIndex(0);
-    ui->comboBox->setCurrentIndex(0);
-    ui->checkBox->setChecked(true);
-    ui->checkBox_2->setChecked(true);
-
-	applySettings();
+    resetToDefaults(); // does applySettings()
 }
 
 ATVDemodGUI::~ATVDemodGUI()
@@ -226,112 +226,117 @@ void ATVDemodGUI::applySettings()
     ATVModulation enmSelectedModulation;
 
     if (m_blnDoApplySettings)
-	{
+    {
         setTitleColor(m_objChannelMarker.getColor());
 
-        m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),	m_objATVDemod->GetSampleRate(), m_objChannelMarker.getCenterFrequency());
+        m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
+                m_objATVDemod->GetSampleRate(),
+                m_objChannelMarker.getCenterFrequency());
 
-        switch(ui->comboBox_2->currentIndex())
+        switch (ui->modulation->currentIndex())
         {
-            case 0:
-                enmSelectedModulation=ATV_FM1;
+        case 0:
+            enmSelectedModulation = ATV_FM1;
             break;
 
-            case 1:
-                enmSelectedModulation=ATV_FM2;
+        case 1:
+            enmSelectedModulation = ATV_FM2;
             break;
 
-            case 2:
-                enmSelectedModulation=ATV_AM;
+        case 2:
+            enmSelectedModulation = ATV_AM;
             break;
 
-            default:
-                enmSelectedModulation=ATV_FM1;
+        default:
+            enmSelectedModulation = ATV_FM1;
             break;
         }
 
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
-                                 ui->horizontalSlider_3->value(),
-                                 ui->horizontalSlider_4->value(),
-                                 (ui->comboBox->currentIndex()==0)?25:30,
-                                 (ui->checkBox_3->checkState()==Qt::Checked)?50:100,
-                                 ((float)(ui->horizontalSlider->value()))/1000.0f,
-                                 ((float)(ui->horizontalSlider_2->value()))/1000.0f,
-                                 enmSelectedModulation,
-                                 ui->checkBox->isChecked(),
-                                 ui->checkBox_2->isChecked());
+                ui->lineTime->value(),
+                ui->topTime->value(),
+                (ui->fps->currentIndex() == 0) ? 25 : 30,
+                (ui->halfImage->checkState() == Qt::Checked) ? 50 : 100,
+                ((float) (ui->synchLevel->value())) / 1000.0f,
+                ((float) (ui->blackLevel->value())) / 1000.0f,
+                enmSelectedModulation, ui->hSync->isChecked(),
+                ui->vSync->isChecked());
 
         m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate());
 
-	}
+    }
 }
 
 void ATVDemodGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
+    blockApplySettings(true);
     m_objChannelMarker.setHighlighted(false);
-	blockApplySettings(false);
+    blockApplySettings(false);
 }
 
 void ATVDemodGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
+    blockApplySettings(true);
     m_objChannelMarker.setHighlighted(true);
-	blockApplySettings(false);
+    blockApplySettings(false);
 }
 
 void ATVDemodGUI::tick()
 {
-    return ;
+    return;
 }
 
-
-void ATVDemodGUI::on_horizontalSlider_valueChanged(int value)
+void ATVDemodGUI::on_synchLevel_valueChanged(int value)
 {
     applySettings();
-    ui->label_2->setText(QString("%1 mV").arg(value));
+    ui->synchLevelText->setText(QString("%1 mV").arg(value));
 }
 
-void ATVDemodGUI::on_horizontalSlider_2_valueChanged(int value)
+void ATVDemodGUI::on_blackLevel_valueChanged(int value)
 {
     applySettings();
-    ui->label_4->setText(QString("%1 mV").arg(value));
+    ui->blackLevelText->setText(QString("%1 mV").arg(value));
 }
 
-void ATVDemodGUI::on_horizontalSlider_3_valueChanged(int value)
+void ATVDemodGUI::on_lineTime_valueChanged(int value)
 {
-    ui->label_6->setText(QString("%1 uS").arg(((float)value)/10.0f));
+    ui->lineTimeText->setText(QString("%1 uS").arg(((float) value) / 10.0f));
     applySettings();
 
 }
 
-void ATVDemodGUI::on_horizontalSlider_4_valueChanged(int value)
+void ATVDemodGUI::on_topTime_valueChanged(int value)
 {
-     ui->label_8->setText(QString("%1 uS").arg(value));
-     applySettings();
+    ui->topTimeText->setText(QString("%1 uS").arg(value));
+    applySettings();
 }
 
-void ATVDemodGUI::on_checkBox_clicked()
-{
-     applySettings();
-}
-
-void ATVDemodGUI::on_checkBox_2_clicked()
-{
-     applySettings();
-}
-
-void ATVDemodGUI::on_checkBox_3_clicked()
-{
-     applySettings();
-}
-
-void ATVDemodGUI::on_comboBox_currentIndexChanged(int index)
+void ATVDemodGUI::on_hSync_clicked()
 {
     applySettings();
 }
 
-void ATVDemodGUI::on_comboBox_2_currentIndexChanged(int index)
+void ATVDemodGUI::on_vSync_clicked()
 {
     applySettings();
+}
+
+void ATVDemodGUI::on_halfImage_clicked()
+{
+    applySettings();
+}
+
+void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
+void ATVDemodGUI::on_fps_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
+void ATVDemodGUI::on_reset_clicked(bool checked)
+{
+    resetToDefaults();
 }
