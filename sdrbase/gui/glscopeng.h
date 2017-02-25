@@ -68,6 +68,7 @@ public:
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
     void setFocusedTriggerData(ScopeVisNG::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
+    void setConfigChanged() { m_configChanged = true; }
     //void incrementTraceCounter() { m_traceCounter++; }
 
     bool getDataChanged() const { return m_dataChanged; }

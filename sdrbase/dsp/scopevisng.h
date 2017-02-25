@@ -978,6 +978,13 @@ private:
      * - every time a trace data is added or removed
      */
     void computeDisplayTriggerLevels();
+
+    /**
+     * Update glScope display
+     * - Live trace: call glScipe update method
+     * - Trace in memory: call process memory trace
+     */
+    void updateGLScopeDisplay();
 };
 
 

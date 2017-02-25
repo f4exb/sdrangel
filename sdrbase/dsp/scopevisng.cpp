@@ -538,6 +538,10 @@ bool ScopeVisNG::handleMessage(const Message& message)
                 << " m_preTriggerDelay: " << m_preTriggerDelay
                 << " m_freeRun: " << m_freeRun;
 
+        if ((m_glScope) && (m_currentTraceMemoryIndex > 0)) {
+            processMemoryTrace();
+        }
+
         return true;
     }
     else if (MsgScopeVisNGAddTrigger::match(message))
@@ -562,7 +566,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
             {
                 computeDisplayTriggerLevels();
                 m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
-                m_glScope->updateDisplay();
+                updateGLScopeDisplay();
             }
         }
 
@@ -590,7 +594,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
             m_focusedTriggerIndex = triggerIndex;
             computeDisplayTriggerLevels();
             m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
-            m_glScope->updateDisplay();
+            updateGLScopeDisplay();
         }
 
         return true;
@@ -603,7 +607,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         initTraceBuffers();
         updateMaxTraceDelay();
         computeDisplayTriggerLevels();
-        m_glScope->updateDisplay();
+        updateGLScopeDisplay();
         return true;
     }
     else if (MsgScopeVisNGChangeTrace::match(message))
@@ -614,7 +618,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
         updateMaxTraceDelay();
         if (doComputeTriggerLevelsOnDisplay) computeDisplayTriggerLevels();
-        m_glScope->updateDisplay();
+        updateGLScopeDisplay();
         return true;
     }
     else if (MsgScopeVisNGRemoveTrace::match(message))
@@ -624,7 +628,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
         computeDisplayTriggerLevels();
-        m_glScope->updateDisplay();
+        updateGLScopeDisplay();
         return true;
     }
     else if (MsgScopeVisNGFocusOnTrace::match(message))
@@ -637,7 +641,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
             m_focusedTraceIndex = traceIndex;
             computeDisplayTriggerLevels();
             m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
-            m_glScope->updateDisplay();
+            updateGLScopeDisplay();
         }
 
         return true;
@@ -771,5 +775,15 @@ void ScopeVisNG::computeDisplayTriggerLevels()
         {
             itData->m_triggerDisplayLevel = 2.0f;
         }
+    }
+}
+
+void ScopeVisNG::updateGLScopeDisplay()
+{
+    if (m_currentTraceMemoryIndex > 0) {
+        m_glScope->setConfigChanged();
+        processMemoryTrace();
+    } else {
+        m_glScope->updateDisplay();
     }
 }
