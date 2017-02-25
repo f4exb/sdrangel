@@ -43,7 +43,7 @@ NCOF::NCOF()
 void NCOF::setFreq(Real freq, Real sampleRate)
 {
 	m_phaseIncrement = (freq * TableSize) / sampleRate;
-	qDebug("NCO freq: %f phase inc %f", freq, m_phaseIncrement);
+	qDebug("NCOF::setFreq: freq: %f m_phaseIncrement: %f", freq, m_phaseIncrement);
 }
 
 float NCOF::next()
