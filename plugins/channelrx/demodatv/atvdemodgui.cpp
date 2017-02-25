@@ -259,7 +259,8 @@ void ATVDemodGUI::applySettings()
         setTitleColor(m_objChannelMarker.getColor());
 
         m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
-                m_objATVDemod->GetSampleRate(),
+                //m_objATVDemod->GetSampleRate(),
+                m_objChannelizer->getInputSampleRate(), // always use maximum available bandwidth
                 m_objChannelMarker.getCenterFrequency());
 
         switch (ui->modulation->currentIndex())
