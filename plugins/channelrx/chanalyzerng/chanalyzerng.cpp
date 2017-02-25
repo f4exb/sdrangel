@@ -134,7 +134,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
 	float bandwidth, lowCutoff;
 
-	qDebug() << "ChannelAnalyzerNG::handleMessage";
+	qDebug() << "ChannelAnalyzerNG::handleMessage: " << cmd.getIdentifier();
 
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
@@ -185,7 +185,8 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "  - MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
+		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
+		        << " m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff
 				<< " m_spanLog2: " << m_spanLog2
 				<< " m_ssb: " << m_ssb;

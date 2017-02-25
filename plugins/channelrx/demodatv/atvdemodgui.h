@@ -58,6 +58,7 @@ public:
 
 private slots:
 	void viewChanged();
+    void channelSampleRateChanged();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
     void tick();

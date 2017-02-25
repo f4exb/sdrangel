@@ -178,6 +178,11 @@ void ATVDemodGUI::viewChanged()
     applySettings();
 }
 
+void ATVDemodGUI::channelSampleRateChanged()
+{
+    applySettings();
+}
+
 void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 }
@@ -214,6 +219,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer,
             this);
     m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
+
+    connect(m_objChannelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
     //connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -293,7 +300,6 @@ void ATVDemodGUI::applySettings()
                 ui->vSync->isChecked());
 
         m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate());
-
     }
 }
 
