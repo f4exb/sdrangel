@@ -829,7 +829,7 @@ void GLScopeNG::paintGL()
 
             GLfloat q3[2*(end - start)];
             const float *trace0 = (*m_traces)[0];
-            memcpy(q3, &(trace0[1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
+            memcpy(q3, &(trace0[2*start+1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
 
             for (int i = 1; i < m_traces->size(); i++)
             {
@@ -838,7 +838,7 @@ void GLScopeNG::paintGL()
 
                 for(int i = start; i < end; i++)
                 {
-                    float y = trace[2*(i-start)+1];
+                    float y = trace[2*i+1];
                     q3[2*(i-start)+1] = y;
                 }
 
