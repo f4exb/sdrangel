@@ -28,15 +28,12 @@
 #include <QFont>
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
-#include "dsp/scopevis.h"
-#include "gui/scaleengine.h"
 #include "glshaderarray.h"
 #include "gui/glshadertextured.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
 
-class ScopeVis;
 class QPainter;
 
 

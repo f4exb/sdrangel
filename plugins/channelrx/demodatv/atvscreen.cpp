@@ -28,30 +28,30 @@
 #include <QDebug>
 
 ATVScreen::ATVScreen(QWidget* parent) :
-    QGLWidget(parent),
-    m_objMutex(QMutex::NonRecursive)
+        QGLWidget(parent), m_objMutex(QMutex::NonRecursive)
 {
-	setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_OpaquePaintEvent);
     //connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
     //m_objTimer.start(50);
 
-    m_chrLastData=NULL;
-    m_blnDataChanged=false;
-    m_blnGLContextInitialized=false;
+    m_chrLastData = NULL;
+    m_blnConfigChanged = false;
+    m_blnDataChanged = false;
+    m_blnGLContextInitialized = false;
 
-    m_intAskedCols=0;
-    m_intAskedRows=0;
+    m_intAskedCols = 0;
+    m_intAskedRows = 0;
 
 }
 
 ATVScreen::~ATVScreen()
-{    
-	cleanup();
+{
+    cleanup();
 }
 
 QRgb* ATVScreen::getRowBuffer(int intRow)
 {
-    if(m_blnGLContextInitialized==false)
+    if (m_blnGLContextInitialized == false)
     {
         return NULL;
     }
@@ -60,97 +60,101 @@ QRgb* ATVScreen::getRowBuffer(int intRow)
 }
 
 void ATVScreen::renderImage(unsigned char * objData)
-{   
-    m_chrLastData=objData;
+{
+    m_chrLastData = objData;
     update();
 }
 
 void ATVScreen::resetImage()
-{   
+{
     m_objGLShaderArray.ResetPixels();
 }
 
 void ATVScreen::resizeATVScreen(int intCols, int intRows)
 {
-    m_intAskedCols=intCols;
-    m_intAskedRows=intRows;
+    m_intAskedCols = intCols;
+    m_intAskedRows = intRows;
 }
 
 void ATVScreen::initializeGL()
 {
     m_objMutex.lock();
 
-    QOpenGLContext *objGlCurrentContext =  QOpenGLContext::currentContext();
+    QOpenGLContext *objGlCurrentContext = QOpenGLContext::currentContext();
 
     if (objGlCurrentContext)
     {
         if (QOpenGLContext::currentContext()->isValid())
         {
-			qDebug() << "ATVScreen::initializeGL: context:"
-				<< " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
-				<< " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
-				<< " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
-		}
+            qDebug() << "ATVScreen::initializeGL: context:"
+                    << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
+                    << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
+                    << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
+        }
         else
         {
-			qDebug() << "ATVScreen::initializeGL: current context is invalid";
-		}
+            qDebug() << "ATVScreen::initializeGL: current context is invalid";
+        }
     }
     else
     {
-		qCritical() << "ATVScreen::initializeGL: no current context";
-		return;
-	}
+        qCritical() << "ATVScreen::initializeGL: no current context";
+        return;
+    }
 
     QSurface *objSurface = objGlCurrentContext->surface();
 
     if (objSurface == NULL)
-	{
-		qCritical() << "ATVScreen::initializeGL: no surface attached";
-		return;
-	}
-	else
-	{
+    {
+        qCritical() << "ATVScreen::initializeGL: no surface attached";
+        return;
+    }
+    else
+    {
         if (objSurface->surfaceType() != QSurface::OpenGLSurface)
-		{
-            qCritical() << "ATVScreen::initializeGL: surface is not an OpenGLSurface: " << objSurface->surfaceType() << " cannot use an OpenGL context";
-			return;
-		}
-		else
-		{
-            qDebug() << "ATVScreen::initializeGL: OpenGL surface:" << " class: " << (objSurface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
-		}
-	}
+        {
+            qCritical() << "ATVScreen::initializeGL: surface is not an OpenGLSurface: "
+                    << objSurface->surfaceType()
+                    << " cannot use an OpenGL context";
+            return;
+        }
+        else
+        {
+            qDebug() << "ATVScreen::initializeGL: OpenGL surface:"
+                    << " class: " << (objSurface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
+        }
+    }
 
-    connect(objGlCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &ATVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
+    connect(objGlCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this,
+            &ATVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
 
     //Par défaut
     m_intAskedCols = ATV_COLS;
     m_intAskedRows = ATV_ROWS;
 
-    m_blnGLContextInitialized=true;
+    m_blnGLContextInitialized = true;
 
-    m_objMutex.unlock();  
+    m_objMutex.unlock();
 }
 
 void ATVScreen::resizeGL(int intWidth, int intHeight)
-{   
+{
     QOpenGLFunctions *ptrF = QOpenGLContext::currentContext()->functions();
     ptrF->glViewport(0, 0, intWidth, intHeight);
     m_blnConfigChanged = true;
 }
 
 void ATVScreen::paintGL()
-{    
+{
     m_objMutex.lock();
 
-    if(m_blnGLContextInitialized)
+    if (m_blnGLContextInitialized)
     {
-        if((m_intAskedCols!=0) && (m_intAskedRows!=0))
-        {            
+        if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
+        {
             m_objGLShaderArray.InitializeGL(m_intAskedCols, m_intAskedRows);
-            m_intAskedCols=0;
-            m_intAskedRows=0;
+            m_intAskedCols = 0;
+            m_intAskedRows = 0;
         }
 
         m_objGLShaderArray.RenderPixels(m_chrLastData);
@@ -163,43 +167,41 @@ void ATVScreen::mousePressEvent(QMouseEvent* event)
 {
 }
 
-
 void ATVScreen::tick()
-{    
+{
 }
-
 
 void ATVScreen::connectTimer(const QTimer& objTimer)
 {
     /*
-	qDebug() << "ATVScreen::connectTimer";
-    disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-    connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-    m_objTimer.stop();
-    */
+     qDebug() << "ATVScreen::connectTimer";
+     disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+     connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+     m_objTimer.stop();
+     */
 }
 
 void ATVScreen::cleanup()
-{	    
-    if(m_blnGLContextInitialized)
+{
+    if (m_blnGLContextInitialized)
     {
         m_objGLShaderArray.Cleanup();
     }
 }
 
-
 bool ATVScreen::selectRow(int intLine)
 {
-    if(m_blnGLContextInitialized)
+    if (m_blnGLContextInitialized)
     {
         return m_objGLShaderArray.SelectRow(intLine);
     }
 }
 
-bool ATVScreen::setDataColor(int intCol,int intRed, int intGreen, int intBlue)
+bool ATVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
 {
-    if(m_blnGLContextInitialized)
+    if (m_blnGLContextInitialized)
     {
-        return m_objGLShaderArray.SetDataColor(intCol, qRgb(intRed, intGreen, intBlue));
+        return m_objGLShaderArray.SetDataColor(intCol,
+                qRgb(intRed, intGreen, intBlue));
     }
 }
