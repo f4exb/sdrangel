@@ -39,9 +39,9 @@ ATVScreen::ATVScreen(QWidget* parent) :
     m_blnDataChanged = false;
     m_blnGLContextInitialized = false;
 
-    m_intAskedCols = 0;
-    m_intAskedRows = 0;
-
+    //Par défaut
+    m_intAskedCols = ATV_COLS;
+    m_intAskedRows = ATV_ROWS;
 }
 
 ATVScreen::~ATVScreen()
@@ -129,10 +129,6 @@ void ATVScreen::initializeGL()
     connect(objGlCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this,
             &ATVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
 
-    //Par défaut
-    m_intAskedCols = ATV_COLS;
-    m_intAskedRows = ATV_ROWS;
-
     m_blnGLContextInitialized = true;
 
     m_objMutex.unlock();
@@ -147,21 +143,19 @@ void ATVScreen::resizeGL(int intWidth, int intHeight)
 
 void ATVScreen::paintGL()
 {
-    m_objMutex.lock();
+    if (!m_objMutex.tryLock(2))
+        return;
 
     m_blnDataChanged = false;
 
-    if (m_blnGLContextInitialized)
+    if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
     {
-        if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
-        {
-            m_objGLShaderArray.InitializeGL(m_intAskedCols, m_intAskedRows);
-            m_intAskedCols = 0;
-            m_intAskedRows = 0;
-        }
-
-        m_objGLShaderArray.RenderPixels(m_chrLastData);
+        m_objGLShaderArray.InitializeGL(m_intAskedCols, m_intAskedRows);
+        m_intAskedCols = 0;
+        m_intAskedRows = 0;
     }
+
+    m_objGLShaderArray.RenderPixels(m_chrLastData);
 
     m_objMutex.unlock();
 }
