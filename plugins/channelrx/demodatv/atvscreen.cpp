@@ -31,8 +31,8 @@ ATVScreen::ATVScreen(QWidget* parent) :
         QGLWidget(parent), m_objMutex(QMutex::NonRecursive)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
-    //connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-    //m_objTimer.start(50);
+    connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_objTimer.start(40); // capped at 25 FPS
 
     m_chrLastData = NULL;
     m_blnConfigChanged = false;
@@ -62,7 +62,8 @@ QRgb* ATVScreen::getRowBuffer(int intRow)
 void ATVScreen::renderImage(unsigned char * objData)
 {
     m_chrLastData = objData;
-    update();
+    m_blnDataChanged = true;
+    //update();
 }
 
 void ATVScreen::resetImage()
@@ -148,6 +149,8 @@ void ATVScreen::paintGL()
 {
     m_objMutex.lock();
 
+    m_blnDataChanged = false;
+
     if (m_blnGLContextInitialized)
     {
         if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
@@ -169,16 +172,17 @@ void ATVScreen::mousePressEvent(QMouseEvent* event)
 
 void ATVScreen::tick()
 {
+    if (m_blnDataChanged) {
+        update();
+    }
 }
 
 void ATVScreen::connectTimer(const QTimer& objTimer)
 {
-    /*
      qDebug() << "ATVScreen::connectTimer";
      disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
      connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
      m_objTimer.stop();
-     */
 }
 
 void ATVScreen::cleanup()

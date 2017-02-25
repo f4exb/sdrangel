@@ -191,7 +191,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     m_objDeviceAPI->addChannelMarker(&m_objChannelMarker);
     m_objDeviceAPI->addRollupWidget(this);
 
-    ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
+    //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
     //********** ATV Default values **********
     ui->horizontalSlider->setValue(100);
@@ -226,7 +226,7 @@ void ATVDemodGUI::applySettings()
     ATVModulation enmSelectedModulation;
 
     if (m_blnDoApplySettings)
-	{        
+	{
         setTitleColor(m_objChannelMarker.getColor());
 
         m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),	m_objATVDemod->GetSampleRate(), m_objChannelMarker.getCenterFrequency());
@@ -301,7 +301,7 @@ void ATVDemodGUI::on_horizontalSlider_2_valueChanged(int value)
 void ATVDemodGUI::on_horizontalSlider_3_valueChanged(int value)
 {
     ui->label_6->setText(QString("%1 uS").arg(((float)value)/10.0f));
-    applySettings();    
+    applySettings();
 
 }
 
@@ -317,7 +317,7 @@ void ATVDemodGUI::on_checkBox_clicked()
 }
 
 void ATVDemodGUI::on_checkBox_2_clicked()
-{     
+{
      applySettings();
 }
 
@@ -328,7 +328,7 @@ void ATVDemodGUI::on_checkBox_3_clicked()
 
 void ATVDemodGUI::on_comboBox_currentIndexChanged(int index)
 {
-    applySettings();    
+    applySettings();
 }
 
 void ATVDemodGUI::on_comboBox_2_currentIndexChanged(int index)
