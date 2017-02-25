@@ -92,7 +92,17 @@ QByteArray ATVDemodGUI::serialize() const
 {
     SimpleSerializer s(1);
 
-    //s.writeS32(2, ui->rfBW->value());
+    s.writeS32(1, m_objChannelMarker.getCenterFrequency());
+    s.writeU32(2, m_objChannelMarker.getColor().rgb());
+    s.writeS32(3, ui->synchLevel->value());
+    s.writeS32(4, ui->blackLevel->value());
+    s.writeS32(5, ui->lineTime->value());
+    s.writeS32(6, ui->topTime->value());
+    s.writeS32(7, ui->modulation->currentIndex());
+    s.writeS32(8, ui->fps->currentIndex());
+    s.writeBool(9, ui->hSync->isChecked());
+    s.writeBool(10, ui->vSync->isChecked());
+    s.writeBool(11, ui->halfImage->isChecked());
 
     return s.final();
 }
@@ -110,21 +120,40 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
     if (d.getVersion() == 1)
     {
         QByteArray bytetmp;
-        quint32 u32tmp;
-        qint32 tmp;
+        uint32_t u32tmp;
+        int tmp;
+        bool booltmp;
 
         blockApplySettings(true);
         m_objChannelMarker.blockSignals(true);
 
         d.readS32(1, &tmp, 0);
         m_objChannelMarker.setCenterFrequency(tmp);
-        //d.readS32(2, &tmp, 4);
-        //ui->rfBW->setValue(tmp);
 
-        if (d.readU32(7, &u32tmp))
-        {
+        if (d.readU32(2, &u32tmp)) {
             m_objChannelMarker.setColor(u32tmp);
+        } else {
+            m_objChannelMarker.setColor(Qt::white);
         }
+
+        d.readS32(3, &tmp, 100);
+        ui->synchLevel->setValue(tmp);
+        d.readS32(4, &tmp, 310);
+        ui->blackLevel->setValue(tmp);
+        d.readS32(5, &tmp, 640);
+        ui->lineTime->setValue(tmp);
+        d.readS32(6, &tmp, 3);
+        ui->topTime->setValue(tmp);
+        d.readS32(7, &tmp, 0);
+        ui->modulation->setCurrentIndex(tmp);
+        d.readS32(8, &tmp, 0);
+        ui->fps->setCurrentIndex(tmp);
+        d.readBool(9, &booltmp, true);
+        ui->hSync->setChecked(booltmp);
+        d.readBool(10, &booltmp, true);
+        ui->vSync->setChecked(booltmp);
+        d.readBool(11, &booltmp, false);
+        ui->halfImage->setChecked(booltmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
