@@ -180,6 +180,7 @@ void ATVDemodGUI::viewChanged()
 
 void ATVDemodGUI::channelSampleRateChanged()
 {
+    qDebug("ATVDemodGUI::channelSampleRateChanged");
     applySettings();
 }
 
@@ -299,7 +300,12 @@ void ATVDemodGUI::applySettings()
                 enmSelectedModulation, ui->hSync->isChecked(),
                 ui->vSync->isChecked());
 
-        m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate());
+        qDebug() << "ATVDemodGUI::applySettings:"
+                << " m_objChannelizer.inputSampleRate: " << m_objChannelizer->getInputSampleRate()
+                << " m_objATVDemod.sampleRate: " << m_objATVDemod->GetSampleRate();
+
+        //m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate()); it is unreliable at this moment
+        m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
     }
 }
 

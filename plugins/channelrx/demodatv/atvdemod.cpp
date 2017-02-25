@@ -151,7 +151,7 @@ void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopD
     m_objRunning.m_blnHSync = blnHSync;
     m_objRunning.m_blnVSync = blnVSync;
 
-    qDebug()  << "ATV Settings "
+    qDebug()  << "ATVDemod::InitATVParameters:"
                 <<  " - Msps: " << intMsps
                 <<  " - Line us: " << intLineDurationUs
                 <<  " - Top us: " << intTopDurationUs
