@@ -50,16 +50,16 @@ struct ATVConfig
     bool m_blnVSync;
 
     ATVConfig() :
-    m_intMsps(0),
-    m_intLineDurationUs(0),
-    m_intTopDurationUs(0),
-    m_intFramePerS(0),
-    m_intPercentOfRowsToDisplay(0),
-    m_fltVoltLevelSynchroTop(0),
-    m_fltVoltLevelSynchroBlack(0),
-    m_enmModulation(ATV_FM1),
-    m_blnHSync(false),
-    m_blnVSync(false)
+        m_intMsps(0),
+        m_intLineDurationUs(0),
+        m_intTopDurationUs(0),
+        m_intFramePerS(0),
+        m_intPercentOfRowsToDisplay(0),
+        m_fltVoltLevelSynchroTop(0),
+        m_fltVoltLevelSynchroBlack(0),
+        m_enmModulation(ATV_FM1),
+        m_blnHSync(false),
+        m_blnVSync(false)
     {
     }
 };
@@ -73,7 +73,16 @@ public:
     ATVDemod();
 	~ATVDemod();
 
-    void configure(MessageQueue* objMessageQueue, int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync);
+    void configure(MessageQueue* objMessageQueue,
+            int intLineDurationUs,
+            int intTopDurationUs,
+            int intFramePerS,
+            int intPercentOfRowsToDisplay,
+            float fltVoltLevelSynchroTop,
+            float fltVoltLevelSynchroBlack,
+            ATVModulation enmModulation,
+            bool blnHSync,
+            bool blnVSync);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -81,7 +90,16 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
     bool SetATVScreen(ATVScreen *objScreen);
-    void InitATVParameters(int intMsps, int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync);
+    void InitATVParameters(int intMsps,
+            int intLineDurationUs,
+            int intTopDurationUs,
+            int intFramePerS,
+            int intPercentOfRowsToDisplay,
+            float fltVoltLevelSynchroTop,
+            float fltVoltLevelSynchroBlack,
+            ATVModulation enmModulation,
+            bool blnHSync,
+            bool blnVSync);
     int GetSampleRate();
 
 private:
@@ -134,15 +152,39 @@ private:
 		MESSAGE_CLASS_DECLARATION
 
         public:
-            static MsgConfigureATVDemod* create(int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync)
+            static MsgConfigureATVDemod* create(int intLineDurationUs,
+                    int intTopDurationUs,
+                    int intFramePerS,
+                    int intPercentOfRowsToDisplay,
+                    float fltVoltLevelSynchroTop,
+                    float fltVoltLevelSynchroBlack,
+                    ATVModulation enmModulation,
+                    bool blnHSync,
+                    bool blnVSync)
             {
-                return new MsgConfigureATVDemod(intLineDurationUs, intTopDurationUs, intFramePerS, intPercentOfRowsToDisplay, fltVoltLevelSynchroTop, fltVoltLevelSynchroBlack, enmModulation, blnHSync, blnVSync);
+                return new MsgConfigureATVDemod(intLineDurationUs,
+                        intTopDurationUs,
+                        intFramePerS,
+                        intPercentOfRowsToDisplay,
+                        fltVoltLevelSynchroTop,
+                        fltVoltLevelSynchroBlack,
+                        enmModulation,
+                        blnHSync,
+                        blnVSync);
             }
 
             ATVConfig m_objMsgConfig;
 
         private:
-            MsgConfigureATVDemod(int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync) :
+            MsgConfigureATVDemod(int intLineDurationUs,
+                    int intTopDurationUs,
+                    int intFramePerS,
+                    int intPercentOfRowsToDisplay,
+                    float fltVoltLevelSynchroTop,
+                    float fltVoltLevelSynchroBlack,
+                    ATVModulation enmModulation,
+                    bool blnHSync,
+                    bool blnVSync) :
                 Message()
             {
                 m_objMsgConfig.m_enmModulation = enmModulation;

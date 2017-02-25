@@ -47,7 +47,8 @@ ATVDemod::ATVDemod() :
     m_fltAmpMin(-2000000000.0f),
     m_fltAmpMax(2000000000.0f),
     m_fltAmpDelta(1.0),
-    m_fltAmpLineAverage(0.0f)
+    m_fltAmpLineAverage(0.0f),
+    m_intNumberSamplePerTop(0)
 {
 	setObjectName("ATVDemod");
 
@@ -55,7 +56,7 @@ ATVDemod::ATVDemod() :
     m_intNumberSamplePerLine=0;
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
-    m_blnInitialized=false;    
+    m_blnInitialized=false;
     m_intNumberOfRowsToDisplay=0;
 
     memset((void*)m_fltBufferI,0,6*sizeof(float));
@@ -64,12 +65,12 @@ ATVDemod::ATVDemod() :
 }
 
 ATVDemod::~ATVDemod()
-{   
+{
 }
 
 bool ATVDemod::SetATVScreen(ATVScreen *objScreen)
 {
-    m_objRegisteredATVScreen = objScreen;    
+    m_objRegisteredATVScreen = objScreen;
 }
 
 void ATVDemod::configure(MessageQueue* objMessageQueue, int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync)
@@ -92,7 +93,6 @@ void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopD
     m_blnInitialized=false;
 
     m_objSettingsMutex.lock();
-
 
     if(m_objRegisteredATVScreen==NULL)
     {
@@ -118,7 +118,7 @@ void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopD
     if((intNumberSamplePerLine!=m_intNumberSamplePerLine)
        || (intNumberOfLines!=m_intNumberOfLines))
     {
-        blnNewOpenGLScreen=true;        
+        blnNewOpenGLScreen=true;
     }
 
     m_intNumberSamplePerLine= intNumberSamplePerLine;
@@ -135,10 +135,9 @@ void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopD
     m_intRowsLimit=0;
 
     if(blnNewOpenGLScreen)
-    {        
+    {
        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine,m_intNumberOfLines);
     }
-
 
     //Mise à jour de la config
     m_objRunning.m_enmModulation = m_enmModulation;
@@ -167,7 +166,6 @@ void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopD
     m_objSettingsMutex.unlock();
 
     m_blnInitialized=true;
-
 }
 
 void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -468,7 +466,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             //Rendering when odd image processed
             if(m_intImageIndex%2==1)
-            {               
+            {
                 //interleave
                 if(blnComputeImage)
                 {
@@ -490,7 +488,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
             }
             else
-            {                
+            {
                 if(m_intNumberOfLines%2==1)
                 {
                     m_intRowsLimit = m_intNumberOfLines;
@@ -518,7 +516,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void ATVDemod::start()
 {
-    //m_objTimer.start();    
+    //m_objTimer.start();
 }
 
 void ATVDemod::stop()
@@ -526,7 +524,7 @@ void ATVDemod::stop()
 }
 
 bool ATVDemod::handleMessage(const Message& cmd)
-{   
+{
 	qDebug() << "ATVDemod::handleMessage";
 
     if (DownChannelizer::MsgChannelizerNotification::match(cmd))
@@ -535,7 +533,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
 
         if(m_objRunning.m_intMsps!=objNotif.getSampleRate())
         {
-            m_objRunning.m_intMsps = objNotif.getSampleRate();           
+            m_objRunning.m_intMsps = objNotif.getSampleRate();
             ApplySettings();
         }
 
@@ -580,7 +578,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
 }
 
 void ATVDemod::ApplySettings()
-{    
+{
 
     if(m_objRunning.m_intMsps==0)
     {
