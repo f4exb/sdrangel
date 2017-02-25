@@ -948,6 +948,9 @@ kS/s</string>
        <property name="toolTip">
         <string>Select this trace as Z input</string>
        </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
        <property name="text">
         <string>Z</string>
        </property>
