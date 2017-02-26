@@ -531,7 +531,7 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
 void GLScopeNGGUI::on_trace_valueChanged(int value)
 {
     //ui->traceText->setText(tr("%1").arg(value)); TODO: restore when more than 2 traces are supported
-    ui->traceText->setText(value == 0 ? "X" : "Y");
+    ui->traceText->setText(value == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 
     ScopeVisNG::TraceData traceData;
     m_scopeVis->getTraceData(traceData, value);
@@ -549,7 +549,7 @@ void GLScopeNGGUI::on_trace_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
 {
-    if (ui->trace->maximum() < 1) // TODO: extend to more traces when 2 traces are fully stable
+    if (ui->trace->maximum() < 3) // TODO: extend to more traces when 2 traces are fully stable
     {
         if (ui->trace->value() == 0)
         {
@@ -858,7 +858,7 @@ void GLScopeNGGUI::on_freerun_toggled(bool checked)
 
 void GLScopeNGGUI::setTraceIndexDisplay()
 {
-    ui->traceText->setText(ui->trace->value() == 0 ? "X" : "Y");
+    ui->traceText->setText(ui->trace->value() == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 }
 
 void GLScopeNGGUI::setTrigCountDisplay()

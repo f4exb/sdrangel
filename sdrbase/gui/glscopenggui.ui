@@ -487,7 +487,7 @@ kS/s</string>
       <widget class="QLabel" name="traceText">
        <property name="minimumSize">
         <size>
-         <width>10</width>
+         <width>15</width>
          <height>0</height>
         </size>
        </property>
@@ -495,7 +495,7 @@ kS/s</string>
         <string>0</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -1130,7 +1130,7 @@ kS/s</string>
       <widget class="QLabel" name="trigText">
        <property name="minimumSize">
         <size>
-         <width>10</width>
+         <width>15</width>
          <height>0</height>
         </size>
        </property>
@@ -1138,7 +1138,7 @@ kS/s</string>
         <string>0</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
