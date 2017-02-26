@@ -446,25 +446,28 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                     float p = pdB - (100.0f * itData->m_ofs);
                     v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
 
-                    if ((traceCount - shift) == 0)
+                    if ((traceCount >= shift) && (traceCount < shift+length)) // power display overlay values construction
                     {
-                        itCtl->m_maxPow = -200.0f;
-                        itCtl->m_sumPow = 0.0f;
-                        itCtl->m_nbPow = 1;
-                    }
-
-                    if (pdB > -200.0f)
-                    {
-                        if (pdB > itCtl->m_maxPow)
+                        if (traceCount == shift)
                         {
-                            itCtl->m_maxPow = pdB;
+                            itCtl->m_maxPow = -200.0f;
+                            itCtl->m_sumPow = 0.0f;
+                            itCtl->m_nbPow = 1;
                         }
 
-                        itCtl->m_sumPow += pdB;
-                        itCtl->m_nbPow++;
+                        if (pdB > -200.0f)
+                        {
+                            if (pdB > itCtl->m_maxPow)
+                            {
+                                itCtl->m_maxPow = pdB;
+                            }
+
+                            itCtl->m_sumPow += pdB;
+                            itCtl->m_nbPow++;
+                        }
                     }
 
-                    if ((m_nbSamples == 1) && (itCtl->m_nbPow > 0))
+                    if ((m_nbSamples == 1) && (itCtl->m_nbPow > 0)) // on last sample create power display overlay
                     {
                         double avgPow = itCtl->m_sumPow / itCtl->m_nbPow;
                         double peakToAvgPow = itCtl->m_maxPow - avgPow;
@@ -487,12 +490,6 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                            = traceCount - shift;   // display x
                 (*itTrace)[2*traceCount + 1] = v;  // display y
                 traceCount++;
-            }
-            else
-            {
-//                if (projectionType == ProjectionMagDB) // create power display overlay
-//                {
-//                }
             }
         }
 
