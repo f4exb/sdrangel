@@ -719,6 +719,11 @@ void GLScopeNGGUI::on_traceDelayFine_valueChanged(int value)
     changeCurrentTrace();
 }
 
+void GLScopeNGGUI::on_traceView_toggled(bool checked)
+{
+    changeCurrentTrace();
+}
+
 void GLScopeNGGUI::on_traceColor_clicked()
 {
     QColor newColor = QColorDialog::getColor(m_focusedTraceColor);
@@ -1196,8 +1201,8 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_traceDelayCoarse = ui->traceDelayCoarse->value();
     traceData.m_traceDelayFine = ui->traceDelayFine->value();
     traceData.m_traceDelay = traceData.m_traceDelayCoarse * 100 + traceData.m_traceDelayFine;
-
     traceData.setColor(m_focusedTraceColor);
+    traceData.m_viewTrace = ui->traceView->isChecked();
 }
 
 void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
@@ -1237,6 +1242,8 @@ void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
     int r, g, b, a;
     m_focusedTraceColor.getRgb(&r, &g, &b, &a);
     ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+
+    ui->traceView->setChecked(traceData.m_viewTrace);
 }
 
 void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)

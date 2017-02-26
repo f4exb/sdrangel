@@ -981,6 +981,19 @@ kS/s</string>
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="traceView">
+       <property name="toolTip">
+        <string>View trace toggle</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ClickableLabel" name="traceColor">
        <property name="minimumSize">
         <size>

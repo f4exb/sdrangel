@@ -303,60 +303,63 @@ void GLScopeNG::paintGL()
             const float *trace = (*m_traces)[0];
             const ScopeVisNG::TraceData& traceData = (*m_tracesData)[0];
 
-            int start = (m_timeOfsProMill/1000.0) * m_traceSize;
-            int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
-
-            if(end - start < 2)
-                start--;
-
-            float rectX = m_glScopeRect1.x();
-            float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
-            float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
-            //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
-            float rectH = -m_glScopeRect1.height() / 2.0f;
-
-            //QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
-            QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
-            QMatrix4x4 mat;
-            mat.setToIdentity();
-            mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
-            mat.scale(2.0f * rectW, -2.0f * rectH);
-            m_glShaderSimple.drawPolyline(mat, color, (GLfloat *) &trace[2*start], end - start);
-
-            // Paint trigger level if any
-            if ((traceData.m_triggerDisplayLevel > -1.0f) && (traceData.m_triggerDisplayLevel < 1.0f))
+            if (traceData.m_viewTrace)
             {
-				GLfloat q3[] {
-					0, traceData.m_triggerDisplayLevel,
-					1, traceData.m_triggerDisplayLevel
-				};
+                int start = (m_timeOfsProMill/1000.0) * m_traceSize;
+                int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
 
-				float rectX = m_glScopeRect1.x();
-				float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
-				float rectW = m_glScopeRect1.width();
-				float rectH = -m_glScopeRect1.height() / 2.0f;
+                if(end - start < 2)
+                    start--;
 
-				QVector4D color(
-				        m_focusedTriggerData.m_triggerColorR,
-				        m_focusedTriggerData.m_triggerColorG,
-				        m_focusedTriggerData.m_triggerColorB,
-				        0.4f);
-				QMatrix4x4 mat;
-				mat.setToIdentity();
-				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
-				mat.scale(2.0f * rectW, -2.0f * rectH);
-				m_glShaderSimple.drawSegments(mat, color, q3, 2);
-            } // display trigger
+                float rectX = m_glScopeRect1.x();
+                float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
+                float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
+                //float rectH = -(m_glScopeRect1.height() / 2.0f) * traceData.m_amp;
+                float rectH = -m_glScopeRect1.height() / 2.0f;
 
-            // Paint overlay if any
-            if ((m_focusedTraceIndex == 0) && (traceData.m_hasTextOverlay))
-            {
-                drawChannelOverlay(
-                        traceData.m_textOverlay,
-                        traceData.m_traceColor,
-                        m_channelOverlayPixmap1,
-                        m_glScopeRect1);
-            }
+                //QVector4D color(1.0f, 1.0f, 0.25f, m_displayTraceIntensity / 100.0f);
+                QVector4D color(traceData.m_traceColorR, traceData.m_traceColorG, traceData.m_traceColorB, m_displayTraceIntensity / 100.0f);
+                QMatrix4x4 mat;
+                mat.setToIdentity();
+                mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+                mat.scale(2.0f * rectW, -2.0f * rectH);
+                m_glShaderSimple.drawPolyline(mat, color, (GLfloat *) &trace[2*start], end - start);
+
+                // Paint trigger level if any
+                if ((traceData.m_triggerDisplayLevel > -1.0f) && (traceData.m_triggerDisplayLevel < 1.0f))
+                {
+                    GLfloat q3[] {
+                        0, traceData.m_triggerDisplayLevel,
+                        1, traceData.m_triggerDisplayLevel
+                    };
+
+                    float rectX = m_glScopeRect1.x();
+                    float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
+                    float rectW = m_glScopeRect1.width();
+                    float rectH = -m_glScopeRect1.height() / 2.0f;
+
+                    QVector4D color(
+                            m_focusedTriggerData.m_triggerColorR,
+                            m_focusedTriggerData.m_triggerColorG,
+                            m_focusedTriggerData.m_triggerColorB,
+                            0.4f);
+                    QMatrix4x4 mat;
+                    mat.setToIdentity();
+                    mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+                    mat.scale(2.0f * rectW, -2.0f * rectH);
+                    m_glShaderSimple.drawSegments(mat, color, q3, 2);
+                } // display trigger
+
+                // Paint overlay if any
+                if ((m_focusedTraceIndex == 0) && (traceData.m_hasTextOverlay))
+                {
+                    drawChannelOverlay(
+                            traceData.m_textOverlay,
+                            traceData.m_traceColor,
+                            m_channelOverlayPixmap1,
+                            m_glScopeRect1);
+                } // display overlay
+            } // displayable trace
         } // trace length > 0
     } // Display X
 
@@ -480,6 +483,10 @@ void GLScopeNG::paintGL()
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
+
+                if (!traceData.m_viewTrace) {
+                    continue;
+                }
 
                 float rectX = m_glScopeRect2.x();
                 float rectY = m_glScopeRect2.y() + m_glScopeRect2.height() / 2.0f;
@@ -700,6 +707,10 @@ void GLScopeNG::paintGL()
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
 
+                if (!traceData.m_viewTrace) {
+                    continue;
+                }
+
                 float rectX = m_glScopeRect1.x();
                 float rectY = m_glScopeRect1.y() + m_glScopeRect1.height() / 2.0f;
                 float rectW = m_glScopeRect1.width() * (float)m_timeBase / (float)(m_traceSize - 1);
@@ -868,6 +879,10 @@ void GLScopeNG::paintGL()
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
+
+                if (!traceData.m_viewTrace) {
+                    continue;
+                }
 
                 for(int i = start; i < end; i++)
                 {

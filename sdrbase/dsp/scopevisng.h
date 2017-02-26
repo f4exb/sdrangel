@@ -67,6 +67,7 @@ public:
         float m_traceColorB;             //!< Trace display color - blue shortcut
         bool m_hasTextOverlay;           //!< True if a text overlay has to be displayed
         QString m_textOverlay;           //!< Text overlay to display
+        bool m_viewTrace;                //!< Trace visibility
 
         TraceData() :
             m_projectionType(ProjectionReal),
@@ -81,7 +82,8 @@ public:
             m_traceDelayFine(0),
 			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
 			m_traceColor(255,255,64),
-			m_hasTextOverlay(false)
+			m_hasTextOverlay(false),
+			m_viewTrace(true)
         {
             setColor(m_traceColor);
         }
