@@ -568,7 +568,7 @@ void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
 
 void GLScopeNGGUI::on_traceDel_clicked(bool checked)
 {
-    if (ui->trace->value() > 0)
+    if (ui->trace->value() > 0) // not the X trace
     {
         ui->trace->setMaximum(ui->trace->maximum() - 1);
 
@@ -587,6 +587,33 @@ void GLScopeNGGUI::on_traceDel_clicked(bool checked)
     }
 }
 
+void GLScopeNGGUI::on_traceUp_clicked(bool checked)
+{
+    if (ui->trace->maximum() > 0) // more than one trace
+    {
+        int newTraceIndex = (ui->trace->value() + 1) % (ui->trace->maximum()+1);
+        m_scopeVis->moveTrace(ui->trace->value(), true);
+        ui->trace->setValue(newTraceIndex); // follow trace
+        ScopeVisNG::TraceData traceData;
+        m_scopeVis->getTraceData(traceData, ui->trace->value());
+        setTraceUI(traceData);
+        m_scopeVis->focusOnTrace(ui->trace->value());
+    }
+}
+
+void GLScopeNGGUI::on_traceDown_clicked(bool checked)
+{
+    if (ui->trace->value() > 0) // not the X (lowest) trace
+    {
+        int newTraceIndex = (ui->trace->value() - 1) % (ui->trace->maximum()+1);
+        m_scopeVis->moveTrace(ui->trace->value(), false);
+        ui->trace->setValue(newTraceIndex); // follow trace
+        ScopeVisNG::TraceData traceData;
+        m_scopeVis->getTraceData(traceData, ui->trace->value());
+        setTraceUI(traceData);
+        m_scopeVis->focusOnTrace(ui->trace->value());
+    }
+}
 
 void GLScopeNGGUI::on_trig_valueChanged(int value)
 {

@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QColor>
 #include <algorithm>
+#include <utility>
 
 #include <stdint.h>
 #include <vector>
@@ -158,10 +159,12 @@ public:
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
+    void moveTrace(uint32_t traceIndex, bool upElseDown);
     void focusOnTrace(uint32_t traceIndex);
     void addTrigger(const TriggerData& triggerData);
     void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
+    void moveTrigger(uint32_t triggerIndex, bool upElseDown);
     void focusOnTrigger(uint32_t triggerIndex);
     void setOneShot(bool oneShot);
     void setMemoryIndex(uint32_t memoryIndex);
@@ -302,6 +305,31 @@ private:
     };
 
     // ---------------------------------------------
+    class MsgScopeVisNGMoveTrigger : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGMoveTrigger* create(
+                uint32_t triggerIndex,
+                bool moveUpElseDown)
+        {
+            return new MsgScopeVisNGMoveTrigger(triggerIndex, moveUpElseDown);
+        }
+
+        uint32_t getTriggerIndex() const { return m_triggerIndex; }
+        bool getMoveUp() const { return m_moveUpElseDown; }
+
+    private:
+        uint32_t m_triggerIndex;
+        bool m_moveUpElseDown;
+
+        MsgScopeVisNGMoveTrigger(uint32_t triggerIndex, bool moveUpElseDown) :
+            m_triggerIndex(triggerIndex),
+            m_moveUpElseDown(moveUpElseDown)
+        {}
+    };
+
+    // ---------------------------------------------
     class MsgScopeVisNGFocusOnTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -385,6 +413,31 @@ private:
 
         MsgScopeVisNGRemoveTrace(uint32_t traceIndex) :
             m_traceIndex(traceIndex)
+        {}
+    };
+
+    // ---------------------------------------------
+    class MsgScopeVisNGMoveTrace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgScopeVisNGMoveTrace* create(
+                uint32_t traceIndex,
+                bool moveUpElseDown)
+        {
+            return new MsgScopeVisNGMoveTrace(traceIndex, moveUpElseDown);
+        }
+
+        uint32_t getTraceIndex() const { return m_traceIndex; }
+        bool getMoveUp() const { return m_moveUpElseDown; }
+
+    private:
+        uint32_t m_traceIndex;
+        bool m_moveUpElseDown;
+
+        MsgScopeVisNGMoveTrace(uint32_t traceIndex, bool moveUpElseDown) :
+            m_traceIndex(traceIndex),
+            m_moveUpElseDown(moveUpElseDown)
         {}
     };
 
@@ -808,7 +861,30 @@ private:
 
                 resize(m_traceSize); // reallocate pointers
             }
+        }
 
+        void moveTrace(uint32_t traceIndex, bool upElseDown)
+        {
+            if ((!upElseDown) && (traceIndex == 0)) {
+                return;
+            }
+
+            int nextControlIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesControl.size());
+            int nextDataIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesData.size()); // should be the same
+
+            m_tracesControl[traceIndex].releaseProjector();
+            m_tracesControl[nextControlIndex].releaseProjector();
+
+            TraceControl nextControl = m_tracesControl[nextControlIndex];
+            m_tracesControl[nextControlIndex] = m_tracesControl[traceIndex];
+            m_tracesControl[traceIndex] = nextControl;
+
+            TraceData nextData = m_tracesData[nextDataIndex];
+            m_tracesData[nextDataIndex] = m_tracesData[traceIndex];
+            m_tracesData[traceIndex] = nextData;
+
+            m_tracesControl[traceIndex].initProjector(m_tracesData[traceIndex].m_projectionType);
+            m_tracesControl[nextControlIndex].initProjector(m_tracesData[nextDataIndex].m_projectionType);
         }
 
         void resize(int traceSize)

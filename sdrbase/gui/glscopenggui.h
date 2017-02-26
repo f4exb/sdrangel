@@ -175,6 +175,8 @@ private slots:
     void on_trace_valueChanged(int value);
     void on_traceAdd_clicked(bool checked);
     void on_traceDel_clicked(bool checked);
+    void on_traceUp_clicked(bool checked);
+    void on_traceDown_clicked(bool checked);
     void on_traceMode_currentIndexChanged(int index);
     void on_amp_valueChanged(int value);
     void on_ofsCoarse_valueChanged(int value);

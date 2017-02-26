@@ -26,10 +26,12 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGMoveTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGRemoveTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGMoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGOneShot, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGMemoryTrace, Message)
@@ -112,6 +114,15 @@ void ScopeVisNG::removeTrace(uint32_t traceIndex)
     getInputMessageQueue()->push(cmd);
 }
 
+void ScopeVisNG::moveTrace(uint32_t traceIndex, bool upElseDown)
+{
+    qDebug() << "ScopeVisNG::moveTrace:"
+            << " trace: " << traceIndex
+            << " up: " << upElseDown;
+    Message* cmd = MsgScopeVisNGMoveTrace::create(traceIndex, upElseDown);
+    getInputMessageQueue()->push(cmd);
+}
+
 void ScopeVisNG::focusOnTrace(uint32_t traceIndex)
 {
     Message* cmd = MsgScopeVisNGFocusOnTrace::create(traceIndex);
@@ -133,6 +144,12 @@ void ScopeVisNG::changeTrigger(const TriggerData& triggerData, uint32_t triggerI
 void ScopeVisNG::removeTrigger(uint32_t triggerIndex)
 {
     Message* cmd = MsgScopeVisNGRemoveTrigger::create(triggerIndex);
+    getInputMessageQueue()->push(cmd);
+}
+
+void ScopeVisNG::moveTrigger(uint32_t triggerIndex, bool upElseDown)
+{
+    Message* cmd = MsgScopeVisNGMoveTrigger::create(triggerIndex, upElseDown);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -676,6 +693,16 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
         m_traces.removeTrace(conf.getTraceIndex());
         updateMaxTraceDelay();
+        computeDisplayTriggerLevels();
+        updateGLScopeDisplay();
+        return true;
+    }
+    else if (MsgScopeVisNGMoveTrace::match(message))
+    {
+        QMutexLocker configLocker(&m_mutex);
+        MsgScopeVisNGMoveTrace& conf = (MsgScopeVisNGMoveTrace&) message;
+        m_traces.moveTrace(conf.getTraceIndex(), conf.getMoveUp());
+        //updateMaxTraceDelay();
         computeDisplayTriggerLevels();
         updateGLScopeDisplay();
         return true;
