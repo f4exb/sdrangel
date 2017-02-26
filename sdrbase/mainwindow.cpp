@@ -405,14 +405,14 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
         if (deviceUI->m_deviceSourceEngine) // source device
         {
             deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-            deviceUI->m_deviceSourceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
             deviceUI->m_deviceSourceAPI->loadSourceSettings(preset);
+            deviceUI->m_deviceSourceAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device
         {
             deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-            deviceUI->m_deviceSinkAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
             deviceUI->m_deviceSinkAPI->loadSinkSettings(preset);
+            deviceUI->m_deviceSinkAPI->loadChannelSettings(preset, &(m_pluginManager->m_pluginAPI));
         }
 	}
 
