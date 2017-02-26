@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
+    <width>739</width>
     <height>756</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
+    <width>720</width>
     <height>0</height>
    </size>
   </property>
@@ -28,7 +28,7 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>10</y>
      <width>631</width>
      <height>131</height>
@@ -383,15 +383,15 @@
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>150</y>
-     <width>636</width>
+     <width>720</width>
      <height>284</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>636</width>
+     <width>716</width>
      <height>0</height>
     </size>
    </property>
@@ -431,24 +431,22 @@
      </widget>
     </item>
     <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
-      <zorder>glSpectrum</zorder>
-     </widget>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
     </item>
    </layout>
   </widget>
   <widget class="QWidget" name="scopeContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>450</y>
-     <width>636</width>
+     <width>720</width>
      <height>284</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>636</width>
+     <width>716</width>
      <height>0</height>
     </size>
    </property>
@@ -492,11 +490,6 @@
     </item>
    </layout>
   </widget>
-  <zorder>settingsContainer</zorder>
-  <zorder>spectrumContainer</zorder>
-  <zorder>scopeContainer</zorder>
-  <zorder>glSpectrum</zorder>
-  <zorder>glSpectrum</zorder>
  </widget>
  <customwidgets>
   <customwidget>
