@@ -654,6 +654,34 @@ void GLScopeNGGUI::on_trigDel_clicked(bool checked)
     }
 }
 
+void GLScopeNGGUI::on_trigUp_clicked(bool checked)
+{
+    if (ui->trig->maximum() > 0) // more than one trigger
+    {
+        int newTriggerIndex = (ui->trig->value() + 1) % (ui->trig->maximum()+1);
+        m_scopeVis->moveTrigger(ui->trace->value(), true);
+        ui->trig->setValue(newTriggerIndex); // follow trigger
+        ScopeVisNG::TriggerData triggerData;
+        m_scopeVis->getTriggerData(triggerData, ui->trig->value());
+        setTriggerUI(triggerData);
+        m_scopeVis->focusOnTrigger(ui->trig->value());
+    }
+}
+
+void GLScopeNGGUI::on_trigDown_clicked(bool checked)
+{
+    if (ui->trig->value() > 0) // not the 0 (lowest) trigger
+    {
+        int newTriggerIndex = (ui->trig->value() - 1) % (ui->trig->maximum()+1);
+        m_scopeVis->moveTrigger(ui->trace->value(), false);
+        ui->trig->setValue(newTriggerIndex); // follow trigger
+        ScopeVisNG::TriggerData triggerData;
+        m_scopeVis->getTriggerData(triggerData, ui->trig->value());
+        setTriggerUI(triggerData);
+        m_scopeVis->focusOnTrigger(ui->trig->value());
+    }
+}
+
 void GLScopeNGGUI::on_traceMode_currentIndexChanged(int index)
 {
     setAmpScaleDisplay();

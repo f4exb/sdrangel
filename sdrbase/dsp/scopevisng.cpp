@@ -650,6 +650,28 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgScopeVisNGMoveTrigger::match(message))
+    {
+        QMutexLocker configLocker(&m_mutex);
+        MsgScopeVisNGMoveTrigger& conf = (MsgScopeVisNGMoveTrigger&) message;
+        int triggerIndex = conf.getTriggerIndex();
+
+        if (!conf.getMoveUp() && (triggerIndex == 0)) {
+            return true;
+        }
+
+        int nextTriggerIndex = (triggerIndex + (conf.getMoveUp() ? 1 : -1)) % m_triggerConditions.size();
+
+        TriggerCondition nextTrigger = m_triggerConditions[nextTriggerIndex];
+        m_triggerConditions[nextTriggerIndex] = m_triggerConditions[triggerIndex];
+        m_triggerConditions[triggerIndex] = nextTrigger;
+
+        computeDisplayTriggerLevels();
+        m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
+        updateGLScopeDisplay();
+
+        return true;
+    }
     else if (MsgScopeVisNGFocusOnTrigger::match(message))
     {
         MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;

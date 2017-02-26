@@ -189,6 +189,8 @@ private slots:
     void on_trig_valueChanged(int value);
     void on_trigAdd_clicked(bool checked);
     void on_trigDel_clicked(bool checked);
+    void on_trigUp_clicked(bool checked);
+    void on_trigDown_clicked(bool checked);
     void on_trigMode_currentIndexChanged(int index);
     void on_trigCount_valueChanged(int value);
     void on_trigPos_toggled(bool checked);

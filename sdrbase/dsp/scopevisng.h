@@ -647,6 +647,11 @@ private:
             m_triggerDelayCount = 0;
             m_triggerCounter = 0;
         }
+
+        void operator=(const TriggerCondition& other)
+        {
+            setData(other.m_triggerData);
+        }
     };
 
     /**
