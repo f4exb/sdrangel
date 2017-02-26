@@ -471,7 +471,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                     {
                         double avgPow = itCtl->m_sumPow / itCtl->m_nbPow;
                         double peakToAvgPow = itCtl->m_maxPow - avgPow;
-                        itData->m_textOverlay = QString("%1  %2  %3").arg(itCtl->m_maxPow, 0, 'f', 1).arg(avgPow, 0, 'f', 1).arg(peakToAvgPow, 0, 'f', 1);
+                        itData->m_textOverlay = QString("%1  %2  %3").arg(itCtl->m_maxPow, 0, 'f', 1).arg(avgPow, 0, 'f', 1).arg(peakToAvgPow, 4, 'f', 1, ' ');
                         itCtl->m_nbPow = 0;
                     }
                 }
@@ -701,6 +701,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         bool oneShot = conf.getOneShot();
         m_triggerOneShot = oneShot;
         if (m_triggerWaitForReset && !oneShot) m_triggerWaitForReset = false;
+        return true;
     }
     else if (MsgScopeVisNGMemoryTrace::match(message))
     {
@@ -715,6 +716,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
                 processMemoryTrace();
             }
         }
+        return true;
     }
     else
     {

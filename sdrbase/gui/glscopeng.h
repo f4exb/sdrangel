@@ -149,8 +149,9 @@ private:
 
     void drawChannelOverlay(      //!< Draws a text overlay
             const QString& text,
+            const QColor& color,
             QPixmap& channelOverlayPixmap,
-            QRectF& glScopeRect);
+            const QRectF& glScopeRect);
 
 protected slots:
     void cleanup();

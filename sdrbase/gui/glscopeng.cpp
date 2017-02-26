@@ -20,6 +20,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QSurface>
+#include <QFontDatabase>
 #include <QDebug>
 #include <algorithm>
 
@@ -56,6 +57,7 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     m_x2Scale.setFont(font());
     m_x2Scale.setOrientation(Qt::Horizontal);
 
+    m_channelOverlayFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     m_channelOverlayFont.setBold(true);
     m_channelOverlayFont.setPointSize(font().pointSize()+1);
 
@@ -719,7 +721,11 @@ void GLScopeNG::paintGL()
                 // Paint overlay if any
                 if ((i == m_focusedTraceIndex) && (traceData.m_hasTextOverlay))
                 {
-                    drawChannelOverlay(traceData.m_textOverlay, m_channelOverlayPixmap1, m_glScopeRect1);
+                    drawChannelOverlay(
+                            traceData.m_textOverlay,
+                            traceData.m_traceColor,
+                            m_channelOverlayPixmap1,
+                            m_glScopeRect1);
                 }
             } // all traces display
         } // trace length > 0
@@ -1830,7 +1836,11 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
     }
 }
 
-void GLScopeNG::drawChannelOverlay(const QString& text, QPixmap& channelOverlayPixmap, QRectF& glScopeRect)
+void GLScopeNG::drawChannelOverlay(
+        const QString& text,
+        const QColor& color,
+        QPixmap& channelOverlayPixmap,
+        const QRectF& glScopeRect)
 {
     if (text.isEmpty()) {
         return;
@@ -1843,7 +1853,9 @@ void GLScopeNG::drawChannelOverlay(const QString& text, QPixmap& channelOverlayP
     QPainter painter(&channelOverlayPixmap);
     painter.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing, false);
     painter.fillRect(rect, QColor(0, 0, 0, 0x80));
-    painter.setPen(QColor(0xff, 0xff, 0xff, 0x80));
+    QColor textColor(color);
+    textColor.setAlpha(0xC0);
+    painter.setPen(textColor);
     painter.setFont(m_channelOverlayFont);
     painter.drawText(QPointF(0, rect.height() - 2.0f), text);
     painter.end();
@@ -1872,7 +1884,7 @@ void GLScopeNG::drawChannelOverlay(const QString& text, QPixmap& channelOverlayP
 
         QMatrix4x4 mat;
         mat.setToIdentity();
-        mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+        mat.translate(-1.0f + 2.0f * rectX, 0.96f - 2.0f * rectY);
         mat.scale(2.0f * rectW, -2.0f * rectH);
         m_glShaderPowerOverlay.drawSurface(mat, tex1, vtx1, 4);
     }
