@@ -1899,13 +1899,13 @@ void GLScopeNG::drawChannelOverlay(
 
         float shiftX = glScopeRect.width() - ((rect.width() + 4.0f) / width());
         float rectX = glScopeRect.x() + shiftX;
-        float rectY = 0;
+        float rectY = glScopeRect.y();
         float rectW = rect.width() / (float) width();
         float rectH = rect.height() / (float) height();
 
         QMatrix4x4 mat;
         mat.setToIdentity();
-        mat.translate(-1.0f + 2.0f * rectX, 0.96f - 2.0f * rectY);
+        mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
         mat.scale(2.0f * rectW, -2.0f * rectH);
         m_glShaderPowerOverlay.drawSurface(mat, tex1, vtx1, 4);
     }
