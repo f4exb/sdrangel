@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>739</width>
-    <height>756</height>
+    <height>778</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -441,7 +441,7 @@
      <x>0</x>
      <y>450</y>
      <width>720</width>
-     <height>284</height>
+     <height>314</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -474,7 +474,7 @@
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>250</height>
+        <height>280</height>
        </size>
       </property>
       <property name="font">
