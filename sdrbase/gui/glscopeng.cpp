@@ -346,7 +346,17 @@ void GLScopeNG::paintGL()
 				mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
 				mat.scale(2.0f * rectW, -2.0f * rectH);
 				m_glShaderSimple.drawSegments(mat, color, q3, 2);
-            } // display trace
+            } // display trigger
+
+            // Paint overlay if any
+            if ((m_focusedTraceIndex == 0) && (traceData.m_hasTextOverlay))
+            {
+                drawChannelOverlay(
+                        traceData.m_textOverlay,
+                        traceData.m_traceColor,
+                        m_channelOverlayPixmap1,
+                        m_glScopeRect1);
+            }
         } // trace length > 0
     } // Display X
 
@@ -509,6 +519,17 @@ void GLScopeNG::paintGL()
                     mat.scale(2.0f * rectW, -2.0f * rectH);
                     m_glShaderSimple.drawSegments(mat, color, q3, 2);
                 }
+
+                // Paint overlay if any
+                if ((i == m_focusedTraceIndex) && (traceData.m_hasTextOverlay))
+                {
+                    drawChannelOverlay(
+                            traceData.m_textOverlay,
+                            traceData.m_traceColor,
+                            m_channelOverlayPixmap2,
+                            m_glScopeRect2);
+                }
+
             } // one trace display
         } // trace length > 0
     } // Display Y
