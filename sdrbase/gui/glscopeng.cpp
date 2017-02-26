@@ -56,8 +56,8 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     m_x2Scale.setFont(font());
     m_x2Scale.setOrientation(Qt::Horizontal);
 
-    m_powerOverlayFont.setBold(true);
-    m_powerOverlayFont.setPointSize(font().pointSize()+1);
+    m_channelOverlayFont.setBold(true);
+    m_channelOverlayFont.setPointSize(font().pointSize()+1);
 
     //m_traceCounter = 0;
 }
@@ -714,6 +714,12 @@ void GLScopeNG::paintGL()
                     mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
                     mat.scale(2.0f * rectW, -2.0f * rectH);
                     m_glShaderSimple.drawSegments(mat, color, q3, 2);
+                }
+
+                // Paint overlay if any
+                if ((i == m_focusedTraceIndex) && (traceData.m_hasTextOverlay))
+                {
+                    drawChannelOverlay(traceData.m_textOverlay, m_channelOverlayPixmap1, m_glScopeRect1);
                 }
             } // all traces display
         } // trace length > 0
@@ -1821,6 +1827,54 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
             scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
         }
         break;
+    }
+}
+
+void GLScopeNG::drawChannelOverlay(const QString& text, QPixmap& channelOverlayPixmap, QRectF& glScopeRect)
+{
+    if (text.isEmpty()) {
+        return;
+    }
+
+    QFontMetricsF metrics(m_channelOverlayFont);
+    QRectF rect = metrics.boundingRect(text);
+    channelOverlayPixmap = QPixmap(rect.width() + 4.0f, rect.height());
+    channelOverlayPixmap.fill(Qt::transparent);
+    QPainter painter(&channelOverlayPixmap);
+    painter.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing, false);
+    painter.fillRect(rect, QColor(0, 0, 0, 0x80));
+    painter.setPen(QColor(0xff, 0xff, 0xff, 0x80));
+    painter.setFont(m_channelOverlayFont);
+    painter.drawText(QPointF(0, rect.height() - 2.0f), text);
+    painter.end();
+
+    m_glShaderPowerOverlay.initTexture(channelOverlayPixmap.toImage());
+
+    {
+        GLfloat vtx1[] = {
+                0, 1,
+                1, 1,
+                1, 0,
+                0, 0
+        };
+        GLfloat tex1[] = {
+                0, 1,
+                1, 1,
+                1, 0,
+                0, 0
+        };
+
+        float shiftX = glScopeRect.width() - ((rect.width() + 4.0f) / width());
+        float rectX = glScopeRect.x() + shiftX;
+        float rectY = 0;
+        float rectW = rect.width() / (float) width();
+        float rectH = rect.height() / (float) height();
+
+        QMatrix4x4 mat;
+        mat.setToIdentity();
+        mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+        mat.scale(2.0f * rectW, -2.0f * rectH);
+        m_glShaderPowerOverlay.drawSurface(mat, tex1, vtx1, 4);
     }
 }
 

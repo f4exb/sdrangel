@@ -64,6 +64,8 @@ public:
         float m_traceColorR;             //!< Trace display color - red shortcut
         float m_traceColorG;             //!< Trace display color - green shortcut
         float m_traceColorB;             //!< Trace display color - blue shortcut
+        bool m_hasTextOverlay;           //!< True if a text overlay has to be displayed
+        QString m_textOverlay;           //!< Text overlay to display
 
         TraceData() :
             m_projectionType(ProjectionReal),
@@ -77,7 +79,8 @@ public:
             m_traceDelayCoarse(0),
             m_traceDelayFine(0),
 			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
-			m_traceColor(255,255,64)
+			m_traceColor(255,255,64),
+			m_hasTextOverlay(false)
         {
             setColor(m_traceColor);
         }
@@ -705,6 +708,9 @@ private:
     {
         Projector m_projector;  //!< Projector transform from complex trace to real (displayable) trace
         int m_traceCount[2];    //!< Count of samples processed (double buffered)
+        Real m_maxPow;          //!< Maximum power over the current trace for MagDB overlay display
+        Real m_sumPow;          //!< Cumulative power over the current trace for MagDB overlay display
+        int m_nbPow;            //!< Number of power samples over the current trace for MagDB overlay display
 
         TraceControl() : m_projector(ProjectionReal)
         {
@@ -728,6 +734,9 @@ private:
         {
             m_traceCount[0] = 0;
             m_traceCount[1] = 0;
+            m_maxPow = 0.0f;
+            m_sumPow = 0.0f;
+            m_nbPow = 0;
         }
     };
 
@@ -920,6 +929,7 @@ private:
     int m_focusedTraceIndex;                       //!< Index of the trace that has focus
     int m_traceSize;                               //!< Size of traces in number of samples
     int m_nbSamples;                               //!< Number of samples yet to process in one complex trace
+    int m_timeBase;                                //!< Trace display time divisor
     int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
     int m_traceFill;                               //!< Count of samples accumulated into trace

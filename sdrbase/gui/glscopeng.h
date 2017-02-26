@@ -111,7 +111,8 @@ private:
     QPixmap m_left2ScalePixmap;
     QPixmap m_bot1ScalePixmap;
     QPixmap m_bot2ScalePixmap;
-    QPixmap m_powerOverlayPixmap1;
+    QPixmap m_channelOverlayPixmap1;
+    QPixmap m_channelOverlayPixmap2;
 
     int m_displayGridIntensity;
     int m_displayTraceIntensity;
@@ -121,7 +122,7 @@ private:
     ScaleEngine m_y1Scale; //!< Display #1 Y scale. Always connected to trace #0 (X trace)
     ScaleEngine m_y2Scale; //!< Display #2 Y scale. Connected to highlighted Y trace (#1..n)
 
-    QFont m_powerOverlayFont;
+    QFont m_channelOverlayFont;
 
     GLShaderSimple m_glShaderSimple;
     GLShaderTextured m_glShaderLeft1Scale;
@@ -145,6 +146,11 @@ private:
     void setVerticalDisplays();   //!< Arrange displays when X and Y are stacked vertically
     void setHorizontalDisplays(); //!< Arrange displays when X and Y are stacked horizontally
     void setPolarDisplays();      //!< Arrange displays when X and Y are stacked over on the left and polar display is on the right
+
+    void drawChannelOverlay(      //!< Draws a text overlay
+            const QString& text,
+            QPixmap& channelOverlayPixmap,
+            QRectF& glScopeRect);
 
 protected slots:
     void cleanup();

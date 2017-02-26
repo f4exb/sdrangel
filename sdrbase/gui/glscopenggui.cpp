@@ -309,6 +309,7 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
 
         ui->trace->setMaximum(nbTracesSaved-1);
         ui->trace->setValue(nbTracesSaved-1);
+        m_glScope->setFocusedTraceIndex(nbTracesSaved-1);
 
         int r,g,b,a;
         m_focusedTraceColor.getRgb(&r, &g, &b, &a);
@@ -378,6 +379,11 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
             else // add new trigers
             {
                 m_scopeVis->addTrigger(triggerData);
+            }
+
+            if (iTrigger == nbTriggersSaved-1)
+            {
+                m_glScope->setFocusedTriggerData(triggerData);
             }
         }
 
@@ -1107,6 +1113,8 @@ void GLScopeNGGUI::disableLiveMode(bool disable)
 void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
 {
     traceData.m_projectionType = (ScopeVisNG::ProjectionType) ui->traceMode->currentIndex();
+    traceData.m_hasTextOverlay = (traceData.m_projectionType == ScopeVisNG::ProjectionMagDB);
+    traceData.m_textOverlay.clear();
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
     traceData.m_ampIndex = ui->amp->value();
