@@ -412,6 +412,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 {
     SampleVector::const_iterator begin(cbegin);
     int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
+    int length = m_traceSize / m_timeBase;
 
     while ((begin < end) && (m_nbSamples > 0))
     {
@@ -429,6 +430,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 
             if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
+                int& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
 
                 if (projectionType == ProjectionMagLin)
@@ -444,7 +446,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                     float p = pdB - (100.0f * itData->m_ofs);
                     v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
 
-                    if (itCtl->m_nbPow == 0)
+                    if ((traceCount - shift) == 0)
                     {
                         itCtl->m_maxPow = -200.0f;
                         itCtl->m_sumPow = 0.0f;
@@ -481,10 +483,10 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                     v = -1.0f;
                 }
 
-                (*itTrace)[2*(itCtl->m_traceCount[m_traces.currentBufferIndex()])]
-                           = (itCtl->m_traceCount[m_traces.currentBufferIndex()] - shift);   // display x
-                (*itTrace)[2*(itCtl->m_traceCount[m_traces.currentBufferIndex()]) + 1] = v;  // display y
-                itCtl->m_traceCount[m_traces.currentBufferIndex()]++;
+                (*itTrace)[2*traceCount]
+                           = traceCount - shift;   // display x
+                (*itTrace)[2*traceCount + 1] = v;  // display y
+                traceCount++;
             }
             else
             {
@@ -722,7 +724,6 @@ bool ScopeVisNG::handleMessage(const Message& message)
         return false;
     }
 }
-
 
 void ScopeVisNG::updateMaxTraceDelay()
 {
