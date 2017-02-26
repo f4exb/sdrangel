@@ -77,9 +77,9 @@ void ScopeVisNG::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun)
+void ScopeVisNG::configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun)
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeOfsProMill, triggerPre, freeRun);
+    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -536,6 +536,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
 
         uint32_t traceSize = conf.getTraceSize();
+        uint32_t timeBase = conf.getTimeBase();
         uint32_t timeOfsProMill = conf.getTimeOfsProMill();
         uint32_t triggerPre = conf.getTriggerPre();
         bool freeRun = conf.getFreeRun();
@@ -549,6 +550,15 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
             if (m_glScope) {
                 m_glScope->setTraceSize(m_traceSize);
+            }
+        }
+
+        if (m_timeBase != timeBase)
+        {
+            m_timeBase = timeBase;
+
+            if (m_glScope) {
+                m_glScope->setTimeBase(m_timeBase);
             }
         }
 

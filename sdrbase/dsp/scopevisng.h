@@ -154,7 +154,7 @@ public:
     virtual ~ScopeVisNG();
 
     void setSampleRate(int sampleRate);
-    void configure(uint32_t traceSize, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
+    void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
@@ -201,29 +201,34 @@ private:
     public:
         static MsgConfigureScopeVisNG* create(
             uint32_t traceSize,
+            uint32_t timeBase,
             uint32_t timeOfsProMill,
 			uint32_t triggerPre,
             bool freeRun)
         {
-            return new MsgConfigureScopeVisNG(traceSize, timeOfsProMill, triggerPre, freeRun);
+            return new MsgConfigureScopeVisNG(traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
         }
 
         uint32_t getTraceSize() const { return m_traceSize; }
+        uint32_t getTimeBase() const { return m_timeBase; }
         uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
         uint32_t getTriggerPre() const { return m_triggerPre; }
         bool getFreeRun() const { return m_freeRun; }
 
     private:
         uint32_t m_traceSize;
+        uint32_t m_timeBase;
         uint32_t m_timeOfsProMill;
         uint32_t m_triggerPre;
         bool m_freeRun;
 
         MsgConfigureScopeVisNG(uint32_t traceSize,
+                uint32_t timeBase,
                 uint32_t timeOfsProMill,
 				uint32_t triggerPre,
                 bool freeRun) :
             m_traceSize(traceSize),
+            m_timeBase(timeBase),
             m_timeOfsProMill(timeOfsProMill),
 			m_triggerPre(triggerPre),
             m_freeRun(freeRun)
