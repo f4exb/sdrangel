@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>814</height>
+    <width>656</width>
+    <height>756</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,9 +28,9 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>10</y>
-     <width>301</width>
+     <width>631</width>
      <height>131</height>
     </rect>
    </property>
@@ -272,16 +272,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="ssb">
-        <property name="toolTip">
-         <string>SSB/DSB togggle</string>
-        </property>
-        <property name="text">
-         <string>SSB</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -289,7 +279,7 @@
       <item>
        <widget class="QLabel" name="BWLabel">
         <property name="text">
-         <string>BW</string>
+         <string>Hi</string>
         </property>
        </widget>
       </item>
@@ -331,14 +321,10 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="LowCutLayout">
       <item>
        <widget class="QLabel" name="lowCutLabel">
         <property name="text">
-         <string>Low cut.</string>
+         <string>Low</string>
         </property>
        </widget>
       </item>
@@ -380,6 +366,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="ssb">
+        <property name="toolTip">
+         <string>SSB/DSB togggle</string>
+        </property>
+        <property name="text">
+         <string>SSB</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -388,7 +384,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>180</y>
+     <y>150</y>
      <width>636</width>
      <height>284</height>
     </rect>
@@ -435,15 +431,17 @@
      </widget>
     </item>
     <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
+      <zorder>glSpectrum</zorder>
+     </widget>
     </item>
    </layout>
   </widget>
   <widget class="QWidget" name="scopeContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>470</y>
+     <x>10</x>
+     <y>450</y>
      <width>636</width>
      <height>284</height>
     </rect>
@@ -494,6 +492,11 @@
     </item>
    </layout>
   </widget>
+  <zorder>settingsContainer</zorder>
+  <zorder>spectrumContainer</zorder>
+  <zorder>scopeContainer</zorder>
+  <zorder>glSpectrum</zorder>
+  <zorder>glSpectrum</zorder>
  </widget>
  <customwidgets>
   <customwidget>
