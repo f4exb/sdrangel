@@ -322,6 +322,13 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="lowCutLabel">
         <property name="text">
          <string>Low</string>

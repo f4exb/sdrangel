@@ -43,7 +43,7 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     m_focusedTraceColor.setRgb(255,255,64);
     ui->trigColor->setStyleSheet("QLabel { background-color : rgb(0,255,0); }");
     m_focusedTriggerColor.setRgb(0,255,0);
-    ui->traceText->setText("X"); // TODO: remove when more than 2 traces are supported
+    ui->traceText->setText("X");
     ui->mem->setMaximum(ScopeVisNG::m_nbTraceMemories - 1);
 }
 
@@ -530,7 +530,6 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
 
 void GLScopeNGGUI::on_trace_valueChanged(int value)
 {
-    //ui->traceText->setText(tr("%1").arg(value)); TODO: restore when more than 2 traces are supported
     ui->traceText->setText(value == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 
     ScopeVisNG::TraceData traceData;
@@ -549,7 +548,7 @@ void GLScopeNGGUI::on_trace_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
 {
-    if (ui->trace->maximum() < 3) // TODO: extend to more traces when 2 traces are fully stable
+    if (ui->trace->maximum() < 3)
     {
         if (ui->trace->value() == 0)
         {
@@ -1348,8 +1347,6 @@ GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeNGGUI* ui) :
     m_oldStateOfsFine          = m_ui->ofsFine->blockSignals(true);
     m_oldStateTraceDelayCoarse = m_ui->traceDelayCoarse->blockSignals(true);
     m_oldStateTraceDelayFine   = m_ui->traceDelayFine->blockSignals(true);
-    m_oldStateZSelect          = m_ui->zSelect->blockSignals(true);
-    m_oldStateZTraceMode       = m_ui->zTraceMode->blockSignals(true);
     m_oldStateTraceColor       = m_ui->traceColor->blockSignals(true);
 }
 
@@ -1369,8 +1366,6 @@ void GLScopeNGGUI::TraceUIBlocker::unBlock()
     m_ui->ofsFine->blockSignals(m_oldStateOfsFine);
     m_ui->traceDelayCoarse->blockSignals(m_oldStateTraceDelayCoarse);
     m_ui->traceDelayFine->blockSignals(m_oldStateTraceDelayFine);
-    m_ui->zSelect->blockSignals(m_oldStateZSelect);
-    m_ui->zTraceMode->blockSignals(m_oldStateZTraceMode);
     m_ui->traceColor->blockSignals(m_oldStateTraceColor);
 }
 

@@ -90,8 +90,6 @@ private:
         bool m_oldStateOfsFine;
         bool m_oldStateTraceDelayCoarse;
         bool m_oldStateTraceDelayFine;
-        bool m_oldStateZSelect;
-        bool m_oldStateZTraceMode;
         bool m_oldStateTraceColor;
     };
 

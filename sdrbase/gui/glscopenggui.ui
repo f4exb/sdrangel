@@ -1016,54 +1016,6 @@ kS/s</string>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="zSelect">
-       <property name="toolTip">
-        <string>Select this trace as Z input</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="text">
-        <string>Z</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="zTraceMode">
-       <property name="maximumSize">
-        <size>
-         <width>52</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trace Z modulation mode (none, luminance, false colors)</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>No</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Lum</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Col</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_15">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -1075,6 +1027,13 @@ kS/s</string>
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="line_15">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="memLabel">
