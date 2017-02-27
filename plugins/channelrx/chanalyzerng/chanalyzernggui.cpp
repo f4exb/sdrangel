@@ -75,9 +75,10 @@ void ChannelAnalyzerNGGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
+	ui->useRationalDownsampler->setChecked(false);
 	ui->BW->setValue(30);
 	ui->deltaFrequency->setValue(0);
-	ui->spanLog2->setValue(3);
+	ui->spanLog2->setCurrentIndex(3);
 
 	blockApplySettings(false);
 	applySettings();
@@ -91,7 +92,7 @@ QByteArray ChannelAnalyzerNGGUI::serialize() const
 	s.writeBlob(3, ui->spectrumGUI->serialize());
 	s.writeU32(4, m_channelMarker.getColor().rgb());
 	s.writeS32(5, ui->lowCut->value());
-	s.writeS32(6, ui->spanLog2->value());
+	s.writeS32(6, ui->spanLog2->currentIndex());
 	s.writeBool(7, ui->ssb->isChecked());
 	s.writeBlob(8, ui->scopeGUI->serialize());
 	return s.final();
@@ -138,7 +139,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
 
-        ui->spanLog2->setValue(spanLog2);
+        ui->spanLog2->setCurrentIndex(spanLog2);
         setNewRate(spanLog2);
 		ui->BW->setValue(bw);
 		ui->lowCut->setValue(lowCut); // does applySettings();
@@ -167,6 +168,7 @@ void ChannelAnalyzerNGGUI::tick()
 	Real powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+//	ui->channelPower->setText(QString::number(powDb, 'f', 1));
 }
 
 void ChannelAnalyzerNGGUI::channelSampleRateChanged()
@@ -251,9 +253,9 @@ void ChannelAnalyzerNGGUI::on_lowCut_valueChanged(int value)
 	applySettings();
 }
 
-void ChannelAnalyzerNGGUI::on_spanLog2_valueChanged(int value)
+void ChannelAnalyzerNGGUI::on_spanLog2_currentIndexChanged(int index)
 {
-	if (setNewRate(value)) {
+	if (setNewRate(index)) {
 		applySettings();
 	}
 
@@ -333,6 +335,9 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
+	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+	ui->channelSampleRate->setValueRange(7, 0U, 9999999U);
+
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
@@ -380,6 +385,9 @@ ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
 bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 {
 	qDebug("ChannelAnalyzerNGGUI::setNewRate");
+
+	ui->channelSampleRate->setValueRange(7, 0, m_channelAnalyzer->getSampleRate());
+	ui->channelSampleRate->setValue(m_channelAnalyzer->getSampleRate());
 
 	if ((spanLog2 < 0) || (spanLog2 > 6)) {
 		return false;

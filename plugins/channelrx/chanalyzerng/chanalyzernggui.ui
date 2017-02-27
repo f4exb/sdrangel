@@ -31,7 +31,7 @@
      <x>0</x>
      <y>10</y>
      <width>631</width>
-     <height>131</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -54,7 +54,7 @@
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="DeltaFreqPowLayout">
+     <layout class="QHBoxLayout" name="HeaderLayout">
       <item>
        <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
         <item>
@@ -184,6 +184,117 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="ChannelSamplingLayout">
+        <item>
+         <widget class="ButtonSwitch" name="useRationalDownsampler">
+          <property name="toolTip">
+           <string>Use rational downsampler</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDial" name="channelSampleRate" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Rational downsampler output rate</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelSampleRateUnits">
+          <property name="text">
+           <string>S/s</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="spanLog2">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channel downsampling</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>32</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>64</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="spanText">
+          <property name="toolTip">
+           <string>Channel final sample rate</string>
+          </property>
+          <property name="text">
+           <string>6.0k</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -223,63 +334,11 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="SpanLayout">
-      <item>
-       <widget class="QLabel" name="spanLabel">
-        <property name="text">
-         <string>Rate</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="spanLog2">
-        <property name="toolTip">
-         <string>Channel sample rate</string>
-        </property>
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>6</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>3</number>
-        </property>
-        <property name="sliderPosition">
-         <number>3</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="invertedAppearance">
-         <bool>true</bool>
-        </property>
-        <property name="invertedControls">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="spanText">
-        <property name="text">
-         <string>6.0k</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="BWLayout">
       <item>
        <widget class="QLabel" name="BWLabel">
         <property name="text">
-         <string>Hi</string>
+         <string>LP</string>
         </property>
        </widget>
       </item>
@@ -331,7 +390,7 @@
       <item>
        <widget class="QLabel" name="lowCutLabel">
         <property name="text">
-         <string>Low</string>
+         <string>HP</string>
         </property>
        </widget>
       </item>
@@ -391,7 +450,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>150</y>
+     <y>98</y>
      <width>720</width>
      <height>284</height>
     </rect>
@@ -446,9 +505,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>450</y>
+     <y>390</y>
      <width>720</width>
-     <height>314</height>
+     <height>334</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -481,7 +540,7 @@
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>280</height>
+        <height>300</height>
        </size>
       </property>
       <property name="font">
@@ -534,6 +593,11 @@
    <extends>QWidget</extends>
    <header>gui/glscopenggui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

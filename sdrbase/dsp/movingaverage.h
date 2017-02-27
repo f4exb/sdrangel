@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "dsp/dsptypes.h"
 
-template<class Type> class MovingAverage {
+template<typename Type> class MovingAverage {
 public:
 	MovingAverage() :
 		m_history(),

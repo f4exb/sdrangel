@@ -63,7 +63,7 @@ private slots:
 	void on_deltaMinus_toggled(bool minus);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
-	void on_spanLog2_valueChanged(int value);
+	void on_spanLog2_currentIndexChanged(int index);
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
@@ -78,7 +78,7 @@ private:
 	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
