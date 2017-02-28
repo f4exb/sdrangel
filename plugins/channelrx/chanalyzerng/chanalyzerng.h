@@ -41,7 +41,7 @@ public:
 			int spanLog2,
 			bool ssb);
 
-	int getSampleRate() const {	return m_running.m_inputSampleRate; }
+	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
 	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -99,24 +99,26 @@ private:
 	    int m_channelSampleRate;
 	    Real m_Bandwidth;
 	    Real m_LowCutoff;
+	    int m_spanLog2;
+	    bool m_ssb;
 
 	    Config() :
 	        m_frequency(0),
 	        m_inputSampleRate(96000),
 	        m_channelSampleRate(96000),
 	        m_Bandwidth(5000),
-	        m_LowCutoff(300)
+	        m_LowCutoff(300),
+	        m_spanLog2(3),
+	        m_ssb(false)
 	    {}
 	};
 
 	Config m_config;
 	Config m_running;
 
-	int m_spanLog2;
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
 	bool m_usb;
-	bool m_ssb;
 	Real m_magsq;
 
 	NCOF m_nco;

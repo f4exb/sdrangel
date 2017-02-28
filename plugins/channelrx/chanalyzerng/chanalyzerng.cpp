@@ -29,11 +29,9 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_settingsMutex(QMutex::Recursive)
 {
-	m_spanLog2 = 3;
 	m_undersampleCount = 0;
 	m_sum = 0;
 	m_usb = true;
-	m_ssb = true;
 	m_magsq = 0;
 	m_interpolatorDistance = 1.0f;
 	m_interpolatorDistanceRemain = 0.0f;
@@ -63,7 +61,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 {
 	fftfilt::cmplx *sideband;
 	int n_out;
-	int decim = 1<<m_spanLog2;
+	int decim = 1<<m_running.m_spanLog2;
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
 	m_settingsMutex.lock();
@@ -74,7 +72,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if (m_ssb)
+		if (m_running.m_ssb)
 		{
 			n_out = SSBFilter->runSSB(c, &sideband, m_usb);
 		}
@@ -95,7 +93,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 				m_sum /= decim;
 				m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);
 
-				if (m_ssb & !m_usb)
+				if (m_running.m_ssb & !m_usb)
 				{ // invert spectrum for LSB
 					//m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
 					m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
@@ -113,7 +111,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 
 	if(m_sampleSink != NULL)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_ssb); // m_ssb = positive only
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_running.m_ssb); // m_ssb = positive only
 	}
 
 	m_sampleBuffer.clear();
@@ -156,23 +154,17 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		m_config.m_channelSampleRate = cfg.getChannelSampleRate();
 		m_config.m_Bandwidth = cfg.getBandwidth();
 		m_config.m_LowCutoff = cfg.getLoCutoff();
+		m_config.m_spanLog2 = cfg.getSpanLog2();
+		m_config.m_ssb = cfg.getSSB();
 
         qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
                 << " m_channelSampleRate: " << m_config.m_channelSampleRate
                 << " m_Bandwidth: " << m_config.m_Bandwidth
                 << " m_LowCutoff: " << m_config.m_LowCutoff
-                << " m_spanLog2: " << m_spanLog2
-                << " m_ssb: " << m_ssb;
+                << " m_spanLog2: " << m_config.m_spanLog2
+                << " m_ssb: " << m_config.m_ssb;
 
         apply();
-
-        //m_settingsMutex.lock();
-
-        m_spanLog2 = cfg.getSpanLog2();
-		m_ssb = cfg.getSSB();
-
-		//m_settingsMutex.unlock();
-
 		return true;
 	}
 	else
@@ -246,4 +238,9 @@ void ChannelAnalyzerNG::apply(bool force)
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
     m_running.m_Bandwidth = m_config.m_Bandwidth;
     m_running.m_LowCutoff = m_config.m_LowCutoff;
+
+    //m_settingsMutex.lock();
+    m_running.m_spanLog2 = m_config.m_spanLog2;
+    m_running.m_ssb = m_config.m_ssb;
+    //m_settingsMutex.unlock();
 }

@@ -392,8 +392,8 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 {
 	qDebug("ChannelAnalyzerNGGUI::setNewRate");
 
-	ui->channelSampleRate->setValueRange(7, 0, m_channelAnalyzer->getSampleRate());
-	ui->channelSampleRate->setValue(m_channelAnalyzer->getSampleRate());
+	ui->channelSampleRate->setValueRange(7, 0, m_channelAnalyzer->getInputSampleRate());
+	ui->channelSampleRate->setValue(m_channelAnalyzer->getInputSampleRate());
 
 	if ((spanLog2 < 0) || (spanLog2 > 6)) {
 		return false;
@@ -401,7 +401,7 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
-	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
+	m_rate = m_channelAnalyzer->getInputSampleRate() / (1<<spanLog2);
 
 	setFiltersUIBoundaries();
 
