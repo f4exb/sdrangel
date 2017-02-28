@@ -37,6 +37,8 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_usb = true;
 	m_ssb = true;
 	m_magsq = 0;
+	m_interpolatorDistance = 1.0f;
+	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_LowCutoff / m_running.m_inputSampleRate, m_Bandwidth / m_running.m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_Bandwidth / m_running.m_inputSampleRate, 2*ssbFftLen);
 }
@@ -212,6 +214,17 @@ void ChannelAnalyzerNG::apply(bool force)
         force)
     {
         m_nco.setFreq(-m_config.m_frequency, m_config.m_inputSampleRate);
+    }
+
+    if ((m_running.m_inputSampleRate != m_config.m_inputSampleRate) ||
+        (m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
+        force)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_inputSampleRate / 2.2);
+        m_interpolatorDistanceRemain = 0.0f;
+        m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_channelSampleRate;
+        m_settingsMutex.unlock();
     }
 
     if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||

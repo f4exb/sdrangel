@@ -20,6 +20,8 @@
 #include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/interpolator.h"
 #include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
@@ -115,6 +117,10 @@ private:
 	Real m_magsq;
 
 	NCOF m_nco;
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
