@@ -29,8 +29,6 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_settingsMutex(QMutex::Recursive)
 {
-	m_Bandwidth = 5000;
-	m_LowCutoff = 300;
 	m_spanLog2 = 3;
 	m_undersampleCount = 0;
 	m_sum = 0;
@@ -39,8 +37,9 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_magsq = 0;
 	m_interpolatorDistance = 1.0f;
 	m_interpolatorDistanceRemain = 0.0f;
-	SSBFilter = new fftfilt(m_LowCutoff / m_running.m_inputSampleRate, m_Bandwidth / m_running.m_inputSampleRate, ssbFftLen);
-	DSBFilter = new fftfilt(m_Bandwidth / m_running.m_inputSampleRate, 2*ssbFftLen);
+	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
+	apply(true);
 }
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()
@@ -154,43 +153,25 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	{
 		MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
-		bandwidth = cfg.getBandwidth();
-		lowCutoff = cfg.getLoCutoff();
+		m_config.m_channelSampleRate = cfg.getChannelSampleRate();
+		m_config.m_Bandwidth = cfg.getBandwidth();
+		m_config.m_LowCutoff = cfg.getLoCutoff();
 
-		if (bandwidth < 0)
-		{
-			bandwidth = -bandwidth;
-			lowCutoff = -lowCutoff;
-			m_usb = false;
-		}
-		else
-		{
-			m_usb = true;
-		}
+        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
+                << " m_channelSampleRate: " << m_config.m_channelSampleRate
+                << " m_Bandwidth: " << m_config.m_Bandwidth
+                << " m_LowCutoff: " << m_config.m_LowCutoff
+                << " m_spanLog2: " << m_spanLog2
+                << " m_ssb: " << m_ssb;
 
-		if (bandwidth < 100.0f)
-		{
-			bandwidth = 100.0f;
-			lowCutoff = 0;
-		}
+        apply();
 
-		m_settingsMutex.lock();
+        //m_settingsMutex.lock();
 
-		m_Bandwidth = bandwidth;
-		m_LowCutoff = lowCutoff;
-
-		apply();
-
-		m_spanLog2 = cfg.getSpanLog2();
+        m_spanLog2 = cfg.getSpanLog2();
 		m_ssb = cfg.getSSB();
 
-		m_settingsMutex.unlock();
-
-		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
-		        << " m_Bandwidth: " << m_Bandwidth
-				<< " m_LowCutoff: " << m_LowCutoff
-				<< " m_spanLog2: " << m_spanLog2
-				<< " m_ssb: " << m_ssb;
+		//m_settingsMutex.unlock();
 
 		return true;
 	}
@@ -228,13 +209,41 @@ void ChannelAnalyzerNG::apply(bool force)
     }
 
     if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
+        (m_running.m_Bandwidth != m_config.m_Bandwidth) ||
+        (m_running.m_LowCutoff != m_config.m_LowCutoff) ||
          force)
     {
-        SSBFilter->create_filter(m_LowCutoff / m_config.m_channelSampleRate, m_Bandwidth / m_config.m_channelSampleRate);
-        DSBFilter->create_dsb_filter(m_Bandwidth / m_config.m_channelSampleRate);
+        float bandwidth = m_config.m_Bandwidth;
+        float lowCutoff = m_config.m_LowCutoff;
+
+        if (bandwidth < 0)
+        {
+            bandwidth = -bandwidth;
+            lowCutoff = -lowCutoff;
+            m_usb = false;
+        }
+        else
+        {
+            m_usb = true;
+        }
+
+        if (bandwidth < 100.0f)
+        {
+            bandwidth = 100.0f;
+            lowCutoff = 0;
+        }
+
+        m_settingsMutex.lock();
+
+        SSBFilter->create_filter(lowCutoff / m_config.m_channelSampleRate, bandwidth / m_config.m_channelSampleRate);
+        DSBFilter->create_dsb_filter(bandwidth / m_config.m_channelSampleRate);
+
+        m_settingsMutex.unlock();
     }
 
     m_running.m_frequency = m_config.m_frequency;
     m_running.m_channelSampleRate = m_config.m_channelSampleRate;
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
+    m_running.m_Bandwidth = m_config.m_Bandwidth;
+    m_running.m_LowCutoff = m_config.m_LowCutoff;
 }

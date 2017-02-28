@@ -54,6 +54,7 @@ private:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
+		int  getChannelSampleRate() const { return m_channelSampleRate; }
 		Real getBandwidth() const { return m_Bandwidth; }
 		Real getLoCutoff() const { return m_LowCutoff; }
 		int  getSpanLog2() const { return m_spanLog2; }
@@ -96,19 +97,21 @@ private:
 	    int m_frequency;
 	    int m_inputSampleRate;
 	    int m_channelSampleRate;
+	    Real m_Bandwidth;
+	    Real m_LowCutoff;
 
 	    Config() :
 	        m_frequency(0),
 	        m_inputSampleRate(96000),
-	        m_channelSampleRate(96000)
+	        m_channelSampleRate(96000),
+	        m_Bandwidth(5000),
+	        m_LowCutoff(300)
 	    {}
 	};
 
 	Config m_config;
 	Config m_running;
 
-	Real m_Bandwidth;
-	Real m_LowCutoff;
 	int m_spanLog2;
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
