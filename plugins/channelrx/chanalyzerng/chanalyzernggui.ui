@@ -240,7 +240,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Channel downsampling</string>
+           <string>Channel decimation</string>
           </property>
           <item>
            <property name="text">
@@ -388,6 +388,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="ssb">
+        <property name="toolTip">
+         <string>SSB/DSB togggle</string>
+        </property>
+        <property name="text">
+         <string>SSB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="lowCutLabel">
         <property name="text">
          <string>HP</string>
@@ -429,16 +439,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="ssb">
-        <property name="toolTip">
-         <string>SSB/DSB togggle</string>
-        </property>
-        <property name="text">
-         <string>SSB</string>
         </property>
        </widget>
       </item>

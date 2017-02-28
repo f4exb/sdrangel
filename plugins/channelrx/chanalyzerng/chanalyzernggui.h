@@ -92,6 +92,7 @@ private:
 
 	int  getEffectiveLowCutoff(int lowCutoff);
 	bool setNewRate(int spanLog2);
+	void setFiltersUIBoundaries();
 
 	void blockApplySettings(bool block);
 	void applySettings();

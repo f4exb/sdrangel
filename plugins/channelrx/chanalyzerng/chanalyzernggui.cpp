@@ -263,6 +263,8 @@ void ChannelAnalyzerNGGUI::on_spanLog2_currentIndexChanged(int index)
 
 void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 {
+    setFiltersUIBoundaries();
+
 	if (checked)
 	{
 		if (ui->BW->value() < 0) {
@@ -276,10 +278,14 @@ void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 		ui->glSpectrum->setSsbSpectrum(true);
 
 		on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
+
+        ui->lowCut->setEnabled(true);
 	}
 	else
 	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
+        ui->lowCut->setEnabled(false);
+
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
 
 		ui->glSpectrum->setCenterFrequency(0);
 		ui->glSpectrum->setSampleRate(m_rate);
@@ -397,29 +403,10 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
 
-	if (ui->BW->value() < -m_rate/200) {
-		ui->BW->setValue(-m_rate/200);
-		m_channelMarker.setBandwidth(-m_rate*2);
-	} else if (ui->BW->value() > m_rate/200) {
-		ui->BW->setValue(m_rate/200);
-		m_channelMarker.setBandwidth(m_rate*2);
-	}
-
-	if (ui->lowCut->value() < -m_rate/200) {
-		ui->lowCut->setValue(-m_rate/200);
-		m_channelMarker.setLowCutoff(-m_rate);
-	} else if (ui->lowCut->value() > m_rate/200) {
-		ui->lowCut->setValue(m_rate/200);
-		m_channelMarker.setLowCutoff(m_rate);
-	}
-
-	ui->BW->setMinimum(-m_rate/200);
-	ui->lowCut->setMinimum(-m_rate/200);
-	ui->BW->setMaximum(m_rate/200);
-	ui->lowCut->setMaximum(m_rate/200);
+	setFiltersUIBoundaries();
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
-	ui->spanText->setText(tr("%1k").arg(s));
+	ui->spanText->setText(tr("%1 kS/s").arg(s));
 
 	if (ui->ssb->isChecked())
 	{
@@ -446,6 +433,37 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 	m_scopeVis->setSampleRate(m_rate);
 
 	return true;
+}
+
+void ChannelAnalyzerNGGUI::setFiltersUIBoundaries()
+{
+    if (ui->BW->value() < -m_rate/200) {
+        ui->BW->setValue(-m_rate/200);
+        m_channelMarker.setBandwidth(-m_rate*2);
+    } else if (ui->BW->value() > m_rate/200) {
+        ui->BW->setValue(m_rate/200);
+        m_channelMarker.setBandwidth(m_rate*2);
+    }
+
+    if (ui->lowCut->value() < -m_rate/200) {
+        ui->lowCut->setValue(-m_rate/200);
+        m_channelMarker.setLowCutoff(-m_rate);
+    } else if (ui->lowCut->value() > m_rate/200) {
+        ui->lowCut->setValue(m_rate/200);
+        m_channelMarker.setLowCutoff(m_rate);
+    }
+
+    if (ui->ssb->isChecked()) {
+        ui->BW->setMinimum(-m_rate/200);
+        ui->lowCut->setMinimum(-m_rate/200);
+    } else {
+        ui->BW->setMinimum(0);
+        ui->lowCut->setMinimum(-m_rate/200);
+        ui->lowCut->setValue(0);
+    }
+
+    ui->BW->setMaximum(m_rate/200);
+    ui->lowCut->setMaximum(m_rate/200);
 }
 
 void ChannelAnalyzerNGGUI::blockApplySettings(bool block)
