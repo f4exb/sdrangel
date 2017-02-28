@@ -32,16 +32,16 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
 	m_spanLog2 = 3;
-	m_sampleRate = 96000;
+	m_inputSampleRate = 96000;
 	m_frequency = 0;
-	m_nco.setFreq(m_frequency, m_sampleRate);
+	m_nco.setFreq(m_frequency, m_inputSampleRate);
 	m_undersampleCount = 0;
 	m_sum = 0;
 	m_usb = true;
 	m_ssb = true;
 	m_magsq = 0;
-	SSBFilter = new fftfilt(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate, ssbFftLen);
-	DSBFilter = new fftfilt(m_Bandwidth / m_sampleRate, 2*ssbFftLen);
+	SSBFilter = new fftfilt(m_LowCutoff / m_inputSampleRate, m_Bandwidth / m_inputSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt(m_Bandwidth / m_inputSampleRate, 2*ssbFftLen);
 }
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()
@@ -51,12 +51,13 @@ ChannelAnalyzerNG::~ChannelAnalyzerNG()
 }
 
 void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
+		int channelSampleRate,
 		Real Bandwidth,
 		Real LowCutoff,
 		int  spanLog2,
 		bool ssb)
 {
-	Message* cmd = MsgConfigureChannelAnalyzer::create(Bandwidth, LowCutoff, spanLog2, ssb);
+	Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb);
 	messageQueue->push(cmd);
 }
 
@@ -140,10 +141,10 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_sampleRate = notif.getSampleRate();
-		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
+		m_inputSampleRate = notif.getSampleRate();
+		m_nco.setFreq(-notif.getFrequencyOffset(), m_inputSampleRate);
 
-		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
+		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_inputSampleRate
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;
@@ -177,8 +178,8 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		m_Bandwidth = bandwidth;
 		m_LowCutoff = lowCutoff;
 
-		SSBFilter->create_filter(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate);
-		DSBFilter->create_dsb_filter(m_Bandwidth / m_sampleRate);
+		SSBFilter->create_filter(m_LowCutoff / m_inputSampleRate, m_Bandwidth / m_inputSampleRate);
+		DSBFilter->create_dsb_filter(m_Bandwidth / m_inputSampleRate);
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_ssb = cfg.getSSB();

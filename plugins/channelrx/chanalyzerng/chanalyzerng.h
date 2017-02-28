@@ -33,12 +33,13 @@ public:
 	virtual ~ChannelAnalyzerNG();
 
 	void configure(MessageQueue* messageQueue,
+			int channelSampleRate,
 			Real Bandwidth,
 			Real LowCutoff,
 			int spanLog2,
 			bool ssb);
 
-	int getSampleRate() const {	return m_sampleRate; }
+	int getSampleRate() const {	return m_inputSampleRate; }
 	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -56,25 +57,31 @@ private:
 		int  getSpanLog2() const { return m_spanLog2; }
 		bool getSSB() const { return m_ssb; }
 
-		static MsgConfigureChannelAnalyzer* create(Real Bandwidth,
+		static MsgConfigureChannelAnalyzer* create(
+				int channelSampleRate,
+				Real Bandwidth,
 				Real LowCutoff,
 				int spanLog2,
 				bool ssb)
 		{
-			return new MsgConfigureChannelAnalyzer(Bandwidth, LowCutoff, spanLog2, ssb);
+			return new MsgConfigureChannelAnalyzer(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb);
 		}
 
 	private:
+		int  m_channelSampleRate;
 		Real m_Bandwidth;
 		Real m_LowCutoff;
 		int  m_spanLog2;
 		bool m_ssb;
 
-		MsgConfigureChannelAnalyzer(Real Bandwidth,
+		MsgConfigureChannelAnalyzer(
+				int channelSampleRate,
+				Real Bandwidth,
 				Real LowCutoff,
 				int spanLog2,
 				bool ssb) :
 			Message(),
+			m_channelSampleRate(channelSampleRate),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
 			m_spanLog2(spanLog2),
@@ -87,7 +94,7 @@ private:
 	int m_spanLog2;
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
-	int m_sampleRate;
+	int m_inputSampleRate;
 	int m_frequency;
 	bool m_usb;
 	bool m_ssb;

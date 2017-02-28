@@ -486,6 +486,7 @@ void ChannelAnalyzerNGGUI::applySettings()
 			m_channelMarker.getCenterFrequency());
 
 		m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
+			m_channelizer->getInputSampleRate(), // TODO: specify required channel sample rate
 			ui->BW->value() * 100.0,
 			ui->lowCut->value() * 100.0,
 			m_spanLog2,
