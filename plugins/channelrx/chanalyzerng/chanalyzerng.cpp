@@ -32,16 +32,13 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
 	m_spanLog2 = 3;
-	m_inputSampleRate = 96000;
-	m_frequency = 0;
-	m_nco.setFreq(m_frequency, m_inputSampleRate);
 	m_undersampleCount = 0;
 	m_sum = 0;
 	m_usb = true;
 	m_ssb = true;
 	m_magsq = 0;
-	SSBFilter = new fftfilt(m_LowCutoff / m_inputSampleRate, m_Bandwidth / m_inputSampleRate, ssbFftLen);
-	DSBFilter = new fftfilt(m_Bandwidth / m_inputSampleRate, 2*ssbFftLen);
+	SSBFilter = new fftfilt(m_LowCutoff / m_running.m_inputSampleRate, m_Bandwidth / m_running.m_inputSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt(m_Bandwidth / m_running.m_inputSampleRate, 2*ssbFftLen);
 }
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()
@@ -141,12 +138,14 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_inputSampleRate = notif.getSampleRate();
-		m_nco.setFreq(-notif.getFrequencyOffset(), m_inputSampleRate);
+		m_config.m_inputSampleRate = notif.getSampleRate();
+		m_config.m_frequency = notif.getFrequencyOffset();
 
-		qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_inputSampleRate
-				<< " frequencyOffset: " << notif.getFrequencyOffset();
+        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification:"
+                << " m_sampleRate: " << m_config.m_inputSampleRate
+                << " frequencyOffset: " << m_config.m_frequency;
 
+		apply();
 		return true;
 	}
 	else if (MsgConfigureChannelAnalyzer::match(cmd))
@@ -178,8 +177,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		m_Bandwidth = bandwidth;
 		m_LowCutoff = lowCutoff;
 
-		SSBFilter->create_filter(m_LowCutoff / m_inputSampleRate, m_Bandwidth / m_inputSampleRate);
-		DSBFilter->create_dsb_filter(m_Bandwidth / m_inputSampleRate);
+		apply();
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_ssb = cfg.getSSB();
@@ -205,4 +203,25 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 			return false;
 		}
 	}
+}
+
+void ChannelAnalyzerNG::apply(bool force)
+{
+    if ((m_running.m_frequency != m_config.m_frequency) ||
+        (m_running.m_inputSampleRate != m_config.m_inputSampleRate) ||
+        force)
+    {
+        m_nco.setFreq(-m_config.m_frequency, m_config.m_inputSampleRate);
+    }
+
+    if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
+         force)
+    {
+        SSBFilter->create_filter(m_LowCutoff / m_config.m_channelSampleRate, m_Bandwidth / m_config.m_channelSampleRate);
+        DSBFilter->create_dsb_filter(m_Bandwidth / m_config.m_channelSampleRate);
+    }
+
+    m_running.m_frequency = m_config.m_frequency;
+    m_running.m_channelSampleRate = m_config.m_channelSampleRate;
+    m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 }

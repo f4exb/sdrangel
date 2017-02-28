@@ -39,7 +39,7 @@ public:
 			int spanLog2,
 			bool ssb);
 
-	int getSampleRate() const {	return m_inputSampleRate; }
+	int getSampleRate() const {	return m_running.m_inputSampleRate; }
 	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -89,13 +89,27 @@ private:
 		{ }
 	};
 
+	struct Config
+	{
+	    int m_frequency;
+	    int m_inputSampleRate;
+	    int m_channelSampleRate;
+
+	    Config() :
+	        m_frequency(0),
+	        m_inputSampleRate(96000),
+	        m_channelSampleRate(96000)
+	    {}
+	};
+
+	Config m_config;
+	Config m_running;
+
 	Real m_Bandwidth;
 	Real m_LowCutoff;
 	int m_spanLog2;
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
-	int m_inputSampleRate;
-	int m_frequency;
 	bool m_usb;
 	bool m_ssb;
 	Real m_magsq;
@@ -107,6 +121,8 @@ private:
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
+
+	void apply(bool force = false);
 };
 
 #endif // INCLUDE_CHANALYZERNG_H
