@@ -42,6 +42,7 @@ public:
 			bool ssb);
 
 	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
+    int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
 	Real getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
