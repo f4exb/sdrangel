@@ -76,7 +76,7 @@ private:
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
-	int m_rate;
+	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
 	int m_spanLog2;
 	MovingAverage<double> m_channelPowerDbAvg;
 
@@ -90,8 +90,9 @@ private:
 	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~ChannelAnalyzerNGGUI();
 
+	int  getRequestedChannelSampleRate();
 	int  getEffectiveLowCutoff(int lowCutoff);
-	bool setNewRate(int spanLog2);
+	bool setNewFinalRate(int spanLog2); //!< set sample rate after final in-channel decimation
 	void setFiltersUIBoundaries();
 
 	void blockApplySettings(bool block);

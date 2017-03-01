@@ -140,7 +140,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 	    m_channelMarker.blockSignals(false);
 
         ui->spanLog2->setCurrentIndex(spanLog2);
-        setNewRate(spanLog2);
+        setNewFinalRate(spanLog2);
 		ui->BW->setValue(bw);
 		ui->lowCut->setValue(lowCut); // does applySettings();
 
@@ -175,7 +175,8 @@ void ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged()
 {
     qDebug("ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged(): %d", m_channelizer->getInputSampleRate());
     ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
-	setNewRate(m_spanLog2);
+	setNewFinalRate(m_spanLog2);
+	applySettings();
 }
 
 void ChannelAnalyzerNGGUI::on_deltaMinus_toggled(bool minus)
@@ -187,6 +188,15 @@ void ChannelAnalyzerNGGUI::on_deltaMinus_toggled(bool minus)
 	{
 		m_channelMarker.setCenterFrequency(-deltaFrequency);
 	}
+}
+
+int ChannelAnalyzerNGGUI::getRequestedChannelSampleRate()
+{
+    if (ui->useRationalDownsampler->isChecked()) {
+        return ui->channelSampleRate->getValue();
+    } else {
+        return m_channelizer->getInputSampleRate();
+    }
 }
 
 void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(quint64 value)
@@ -257,7 +267,7 @@ void ChannelAnalyzerNGGUI::on_lowCut_valueChanged(int value)
 
 void ChannelAnalyzerNGGUI::on_spanLog2_currentIndexChanged(int index)
 {
-	if (setNewRate(index)) {
+	if (setNewFinalRate(index)) {
 		applySettings();
 	}
 
@@ -373,7 +383,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	applySettings();
-	setNewRate(m_spanLog2);
+	setNewFinalRate(m_spanLog2);
 }
 
 ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
@@ -390,7 +400,7 @@ ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
 	delete ui;
 }
 
-bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
+bool ChannelAnalyzerNGGUI::setNewFinalRate(int spanLog2)
 {
 	qDebug("ChannelAnalyzerNGGUI::setNewRate");
 
@@ -400,7 +410,8 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
-	m_rate = m_channelizer->getInputSampleRate() / (1<<spanLog2);
+	//m_rate = m_channelizer->getInputSampleRate() / (1<<spanLog2);
+    m_rate = getRequestedChannelSampleRate() / (1<<spanLog2);
 
 	setFiltersUIBoundaries();
 
@@ -481,11 +492,13 @@ void ChannelAnalyzerNGGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			m_channelizer->getInputSampleRate(),
+			//m_channelizer->getInputSampleRate(),
+            getRequestedChannelSampleRate(),
 			m_channelMarker.getCenterFrequency());
 
 		m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
-			m_channelizer->getInputSampleRate(), // TODO: specify required channel sample rate
+			//m_channelizer->getInputSampleRate(), // TODO: specify required channel sample rate
+            getRequestedChannelSampleRate(), // TODO: specify required channel sample rate
 			ui->BW->value() * 100.0,
 			ui->lowCut->value() * 100.0,
 			m_spanLog2,
