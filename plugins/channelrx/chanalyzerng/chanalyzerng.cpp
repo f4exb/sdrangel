@@ -71,42 +71,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
-
-		if (m_running.m_ssb)
-		{
-			n_out = SSBFilter->runSSB(c, &sideband, m_usb);
-		}
-		else
-		{
-			n_out = DSBFilter->runDSB(c, &sideband);
-		}
-
-		for (int i = 0; i < n_out; i++)
-		{
-			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-			// smart decimation with bit gain using float arithmetic (23 bits significand)
-
-			m_sum += sideband[i];
-
-			if (!(m_undersampleCount++ & decim_mask))
-			{
-				m_sum /= decim;
-				m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);
-
-				if (m_running.m_ssb & !m_usb)
-				{ // invert spectrum for LSB
-					//m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
-					m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
-				}
-				else
-				{
-					//m_sampleBuffer.push_back(Sample(m_sum.real() * 32768.0, m_sum.imag() * 32768.0));
-					m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
-				}
-
-				m_sum = 0;
-			}
-		}
+		processOneSample(c, sideband);
 	}
 
 	if(m_sampleSink != NULL)
