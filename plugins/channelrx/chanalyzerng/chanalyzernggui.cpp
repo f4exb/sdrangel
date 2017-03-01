@@ -190,10 +190,26 @@ void ChannelAnalyzerNGGUI::on_deltaMinus_toggled(bool minus)
 	}
 }
 
+void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
+{
+    if (ui->useRationalDownsampler->isChecked())
+    {
+        qDebug("ChannelAnalyzerNGGUI::on_channelSampleRate_changed: %llu", value);
+        setNewFinalRate(m_spanLog2);
+        applySettings();
+    }
+}
+
+void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked)
+{
+    setNewFinalRate(m_spanLog2);
+    applySettings();
+}
+
 int ChannelAnalyzerNGGUI::getRequestedChannelSampleRate()
 {
     if (ui->useRationalDownsampler->isChecked()) {
-        return ui->channelSampleRate->getValue();
+        return ui->channelSampleRate->getValueNew();
     } else {
         return m_channelizer->getInputSampleRate();
     }

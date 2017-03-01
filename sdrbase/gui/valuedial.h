@@ -32,6 +32,7 @@ public:
 	void setBold(bool bold);
 	void setColorMapper(ColorMapper colorMapper);
 	quint64 getValue() const { return m_value; }
+	quint64 getValueNew() const { return m_valueNew; }
 
 signals:
 	void changed(quint64 value);
