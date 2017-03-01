@@ -751,6 +751,41 @@ kS/s</string>
       </widget>
      </item>
      <item>
+      <widget class="QDial" name="sourcePort">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Source port selection</string>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sourcePortText">
+       <property name="minimumSize">
+        <size>
+         <width>12</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Source port number</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="Line" name="line_16">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
