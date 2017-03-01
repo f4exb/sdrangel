@@ -58,7 +58,7 @@ public:
 
 private slots:
 	void viewChanged();
-	void channelSampleRateChanged();
+	void channelizerInputSampleRateChanged();
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
 	void on_BW_valueChanged(int value);

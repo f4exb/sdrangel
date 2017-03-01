@@ -171,8 +171,10 @@ void ChannelAnalyzerNGGUI::tick()
 //	ui->channelPower->setText(QString::number(powDb, 'f', 1));
 }
 
-void ChannelAnalyzerNGGUI::channelSampleRateChanged()
+void ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged()
 {
+    qDebug("ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged(): %d", m_channelizer->getInputSampleRate());
+    ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
 	setNewRate(m_spanLog2);
 }
 
@@ -321,7 +323,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(3),
+	m_spanLog2(0),
 	m_channelPowerDbAvg(40,0)
 {
 	ui->setupUi(this);
@@ -335,14 +337,14 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	m_channelAnalyzer = new ChannelAnalyzerNG(m_spectrumScopeComboVis);
 	m_channelizer = new DownChannelizer(m_channelAnalyzer);
 	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
 	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
-	ui->channelSampleRate->setValueRange(7, 0U, 9999999U);
+	ui->channelSampleRate->setValueRange(7, 2000U, 9999999U);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
@@ -392,16 +394,13 @@ bool ChannelAnalyzerNGGUI::setNewRate(int spanLog2)
 {
 	qDebug("ChannelAnalyzerNGGUI::setNewRate");
 
-	ui->channelSampleRate->setValueRange(7, 0, m_channelAnalyzer->getInputSampleRate());
-	ui->channelSampleRate->setValue(m_channelAnalyzer->getChannelSampleRate());
-
 	if ((spanLog2 < 0) || (spanLog2 > 6)) {
 		return false;
 	}
 
 	m_spanLog2 = spanLog2;
 	//m_rate = 48000 / (1<<spanLog2);
-	m_rate = m_channelAnalyzer->getChannelSampleRate() / (1<<spanLog2);
+	m_rate = m_channelizer->getInputSampleRate() / (1<<spanLog2);
 
 	setFiltersUIBoundaries();
 
