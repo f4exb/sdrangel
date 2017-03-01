@@ -121,6 +121,7 @@ private:
 	fftfilt::cmplx m_sum;
 	bool m_usb;
 	Real m_magsq;
+	bool m_useInterpolator;
 
 	NCOF m_nco;
     Interpolator m_interpolator;
@@ -157,7 +158,7 @@ private:
 
             m_sum += sideband[i];
 
-            if (!(m_undersampleCount++ & (decim - 1)))
+            if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
             {
                 m_sum /= decim;
                 m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);

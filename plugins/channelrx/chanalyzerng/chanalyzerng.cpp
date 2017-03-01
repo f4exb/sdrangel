@@ -33,6 +33,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_sum = 0;
 	m_usb = true;
 	m_magsq = 0;
+	m_useInterpolator = false;
 	m_interpolatorDistance = 1.0f;
 	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
@@ -60,21 +61,30 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	fftfilt::cmplx *sideband;
-	int n_out;
-	int decim = 1<<m_running.m_spanLog2;
-	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+	Complex ci;
 
 	m_settingsMutex.lock();
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
-		processOneSample(c, sideband);
+
+		if (m_useInterpolator)
+		{
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci, sideband);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+		}
+		else
+		{
+	        processOneSample(c, sideband);
+		}
 	}
 
-	if(m_sampleSink != NULL)
+	if(m_sampleSink != 0)
 	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_running.m_ssb); // m_ssb = positive only
 	}
@@ -162,6 +172,7 @@ void ChannelAnalyzerNG::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_inputSampleRate / 2.2);
         m_interpolatorDistanceRemain = 0.0f;
         m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_channelSampleRate;
+        m_useInterpolator = (m_config.m_inputSampleRate != m_config.m_channelSampleRate); // optim
         m_settingsMutex.unlock();
     }
 
