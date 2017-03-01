@@ -95,6 +95,7 @@ QByteArray ChannelAnalyzerNGGUI::serialize() const
 	s.writeS32(6, ui->spanLog2->currentIndex());
 	s.writeBool(7, ui->ssb->isChecked());
 	s.writeBlob(8, ui->scopeGUI->serialize());
+	s.writeU64(9, ui->channelSampleRate->getValueNew());
 	return s.final();
 }
 
@@ -112,6 +113,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
     {
 		QByteArray bytetmp;
 		quint32 u32tmp;
+		quint64 u64tmp;
 		qint32 tmp, spanLog2, bw, lowCut;
 		bool tmpBool;
 
@@ -135,6 +137,8 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 		ui->ssb->setChecked(tmpBool);
 		d.readBlob(8, &bytetmp);
 		ui->scopeGUI->deserialize(bytetmp);
+		d.readU64(9, &u64tmp, 2000U);
+		ui->channelSampleRate->setValue(u64tmp);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -173,8 +177,7 @@ void ChannelAnalyzerNGGUI::tick()
 
 void ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged()
 {
-    qDebug("ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged(): %d", m_channelizer->getInputSampleRate());
-    ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
+    //ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
 	setNewFinalRate(m_spanLog2);
 	applySettings();
 }
@@ -192,6 +195,8 @@ void ChannelAnalyzerNGGUI::on_deltaMinus_toggled(bool minus)
 
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
 {
+    ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
+
     if (ui->useRationalDownsampler->isChecked())
     {
         qDebug("ChannelAnalyzerNGGUI::on_channelSampleRate_changed: %llu", value);
