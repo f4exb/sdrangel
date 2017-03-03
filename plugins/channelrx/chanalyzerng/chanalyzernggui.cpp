@@ -434,6 +434,10 @@ bool ChannelAnalyzerNGGUI::setNewFinalRate(int spanLog2)
 	//m_rate = m_channelizer->getInputSampleRate() / (1<<spanLog2);
     m_rate = getRequestedChannelSampleRate() / (1<<spanLog2);
 
+    if (m_rate == 0) {
+        m_rate = 6000;
+    }
+
 	setFiltersUIBoundaries();
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
