@@ -2,42 +2,67 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to view ATV. 
+This plugin can be used to view amateur analog television transmissions a.k.a ATV. The video signal is in fact a 625 lines standard signal black and white or color (PAL, NTSC) but only the black and white levels (luminance) is retained. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM.
+
+The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin. It expects an integer number of MS/s and acceptable results require a sample rate of at least 6 MS/s (Airspy Mini, Airspy, BladerRF, HackRF).
 
 <h2>Interface</h2>
 
-![ATV Demodulator plugin GUI](../../../doc/img/ATVemod_plugin.png)
+![ATV Demodulator plugin GUI](../../../doc/img/ATVDemod_plugin.png)
 
-<h3>1: Frequency shift from center frequency of reception direction</h3>
+<h3>1: Image</h3>
 
-The "+/-" button on the left side of the dial toggles between positive and negative shift.
+This is where the TV image appears.
 
-<h3>2: Frequency shift from center frequency of reception value</h3>
+<h3>2: Modulation</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
+  - FM1: this is Frequency Modulation with approximative demodulation algorithm not using atan2
+  - FM2: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
+  - AM: this is Amplitude Modulation
+  
+For FM choose the algorithm that best suits your conditions.
 
-<h3>3: Channel power</h3>
+<h3>3: Frames Per Second</h3>
 
-Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
+This combo lets you chose between a 25 FPS or 30 FPS standard.
 
-<h3>4: Audio mute</h3>
+<h3>4: Horizontal sync</h3>
 
-Use this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+Use this button to toggle horizontal synchronization processing.
 
-<h3>5: Level meter in dB</h3>
+<h3>5: Vertical sync</h3>
 
-  - top bar (green): average value
-  - bottom bar (blue green): instantaneous peak value
-  - tip vertical bar (bright green): peak hold value
+Use this button to toggle vertical synchronization processing.
 
-<h3>6: RF bandwidth</h3>
+<h3>6: Half image</h3>
 
-This is the bandwidth in kHz of the channel signal before demodulation. It can be set continuously in 1 kHz steps from 1 to 40 kHz.
+Use this button to disable (on) or enable interlacing of the two half images (off).
 
-<h3>7: Volume</h3>
+<h3>7: Reset defaults</h3>
 
-This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can be varied continuously in 0.1 steps using the dial button.
+Use this push button to reset values to a standard setting:
 
-<h3>8: Squelch threshold</h3>
+  - FM1 modulation
+  - 25 FPS
+  - Horizontal and vertical syncs active
+  - Interlacing
+  - 100 mV sync level
+  - 310 mV black level
+  - 64 microsecond line length
+  - 3 microsecond sync length
+  
+<h3>8: Synchronization level</h3>
 
-This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
+Use this slider to adjust the top level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 100 mV.
+
+<h3>9: Black level</h3>
+
+Use this slider to adjust the black level of the video signal on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 310 mV.
+
+<h3>10: Line length</h3>
+
+This is the line length in time units. The value in microseconds appears on the right of the slider. Nominal value: 64 microseconds.
+
+<h3>10: Top length</h3>
+
+This is the length in time units of a synchronization top. The value in microseconds appears on the right of the slider. Nominal value 3 microseconds.
