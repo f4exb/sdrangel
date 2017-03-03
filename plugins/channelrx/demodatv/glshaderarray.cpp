@@ -149,15 +149,21 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
     QOpenGLFunctions *ptrF;
     int intI;
     int intJ;
-    int intNbVertices = 4;
+    int intNbVertices = 6;
 
     QMatrix4x4 objQMatrix;
 
     GLfloat arrVertices[] =
-    { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f };
+    // 2 3
+    // 1 4
+    //1             2            3           3           4            1
+    { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f };
 
     GLfloat arrTextureCoords[] =
-    { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f };
+    // 1 4
+    // 2 3
+    //1           2           3           3           4           1
+    { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
 
     QRgb *ptrLine;
     int intVal;
@@ -209,7 +215,7 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
     ptrF->glEnableVertexAttribArray(1); // texture coordinates
     ptrF->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
 
-    ptrF->glDrawArrays(GL_POLYGON, 0, intNbVertices);
+    ptrF->glDrawArrays(GL_TRIANGLES, 0, intNbVertices);
 
     //cleanup
     ptrF->glDisableVertexAttribArray(0);
