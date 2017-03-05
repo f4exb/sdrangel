@@ -53,7 +53,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -391,6 +400,25 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="deltaSquelch">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Toggle frequency deviation (on) or channel power (off) based squelch</string>
+        </property>
+        <property name="text">
+         <string>D</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="squelch">
         <property name="maximumSize">
          <size>
@@ -422,13 +450,13 @@
        <widget class="QLabel" name="squelchText">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>34</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>40</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -595,6 +623,11 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

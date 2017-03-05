@@ -46,6 +46,7 @@ public:
 			int  fmDeviation,
 			Real volume,
 			int  squelchGate,
+            bool deltaSquelch,
 			Real squelch,
 			bool ctcssOn,
 			bool audioMute);
@@ -92,6 +93,7 @@ private:
 		int  getFMDeviation() const { return m_fmDeviation; }
 		Real getVolume() const { return m_volume; }\
 		int  getSquelchGate() const { return m_squelchGate; }
+		bool getDeltaSquelch() const { return m_deltaSquelch; }
 		Real getSquelch() const { return m_squelch; }
 		bool getCtcssOn() const { return m_ctcssOn; }
 		bool getAudioMute() const { return m_audioMute; }
@@ -101,11 +103,21 @@ private:
 				int  fmDeviation,
 				Real volume,
 				int  squelchGate,
+				bool deltaSquelch,
 				Real squelch,
 				bool ctcssOn,
 				bool audioMute)
 		{
-			return new MsgConfigureNFMDemod(rfBandwidth, afBandwidth, fmDeviation, volume, squelchGate, squelch, ctcssOn, audioMute);
+			return new MsgConfigureNFMDemod(
+			        rfBandwidth,
+			        afBandwidth,
+			        fmDeviation,
+			        volume,
+			        squelchGate,
+			        deltaSquelch,
+			        squelch,
+			        ctcssOn,
+			        audioMute);
 		}
 
 	private:
@@ -114,6 +126,7 @@ private:
 		int  m_fmDeviation;
 		Real m_volume;
 		int  m_squelchGate;
+		bool m_deltaSquelch;
 		Real m_squelch;
 		bool m_ctcssOn;
 		bool m_audioMute;
@@ -123,6 +136,7 @@ private:
 				int  fmDeviation,
 				Real volume,
 				int  squelchGate,
+				bool deltaSquelch,
 				Real squelch,
 				bool ctcssOn,
 				bool audioMute) :
@@ -132,6 +146,7 @@ private:
 			m_fmDeviation(fmDeviation),
 			m_volume(volume),
 			m_squelchGate(squelchGate),
+			m_deltaSquelch(deltaSquelch),
 			m_squelch(squelch),
 			m_ctcssOn(ctcssOn),
 			m_audioMute(audioMute)
@@ -156,6 +171,7 @@ private:
 		Real m_afBandwidth;
 		int  m_fmDeviation;
 		int  m_squelchGate;
+		bool m_deltaSquelch;
 		Real m_squelch;
 		Real m_volume;
 		bool m_ctcssOn;
@@ -170,6 +186,7 @@ private:
 			m_afBandwidth(-1),
 			m_fmDeviation(1),
 			m_squelchGate(1),
+			m_deltaSquelch(false),
 			m_squelch(0),
 			m_volume(0),
 			m_ctcssOn(false),

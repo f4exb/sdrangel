@@ -89,6 +89,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeBool(9, ui->ctcssOn->isChecked());
 	s.writeBool(10, ui->audioMute->isChecked());
 	s.writeS32(11, ui->squelchGate->value());
+	s.writeBool(12, ui->deltaSquelch->isChecked());
 	return s.final();
 }
 
@@ -136,6 +137,8 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		ui->audioMute->setChecked(boolTmp);
 		d.readS32(11, &tmp, 5);
 		ui->squelchGate->setValue(tmp);
+        d.readBool(12, &boolTmp, false);
+        ui->deltaSquelch->setChecked(boolTmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -208,9 +211,33 @@ void NFMDemodGUI::on_squelchGate_valueChanged(int value)
 	applySettings();
 }
 
+void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
+{
+    if (ui->deltaSquelch->isChecked())
+    {
+        ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 10.0, 0, 'f', 1));
+        ui->squelchText->setToolTip(tr("Squelch deviation threshold (%)"));
+    }
+    else
+    {
+        ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 10.0, 0, 'f', 1));
+        ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
+    }
+    applySettings();
+}
+
 void NFMDemodGUI::on_squelch_valueChanged(int value)
 {
-	ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    if (ui->deltaSquelch->isChecked())
+    {
+        ui->squelchText->setText(QString("%1").arg(-value / 10.0, 0, 'f', 1));
+        ui->squelchText->setToolTip(tr("Squelch deviation threshold (%)"));
+    }
+    else
+    {
+        ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+        ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
+    }
 	applySettings();
 }
 
@@ -311,6 +338,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
+	QChar delta = QChar(0x94, 0x03);
+	ui->deltaSquelch->setText(delta);
+
 	applySettings();
 }
 
@@ -347,7 +377,8 @@ void NFMDemodGUI::applySettings()
 			m_fmDev[ui->rfBW->currentIndex()],
 			ui->volume->value() / 10.0f,
 			ui->squelchGate->value(), // in 10ths of ms
-			ui->squelch->value() / 10.0f,
+			ui->deltaSquelch->isChecked(),
+			ui->squelch->value(), // -1000 -> 0
 			ui->ctcssOn->isChecked(),
 			ui->audioMute->isChecked());
 	}

@@ -55,6 +55,7 @@ NFMDemod::NFMDemod() :
 	m_config.m_afBandwidth = 3000;
 	m_config.m_fmDeviation = 2000;
 	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
+	m_config.m_deltaSquelch = false;
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
 	m_config.m_ctcssOn = false;
@@ -68,7 +69,7 @@ NFMDemod::NFMDemod() :
 
 	m_agcLevel = 1.0;
 	m_AGC.resize(m_squelchGate, m_agcLevel);
-	m_movingAverage.resize(16, 0);
+	m_movingAverage.resize(32, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
@@ -87,6 +88,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		int  fmDeviation,
 		Real volume,
 		int  squelchGate,
+		bool deltaSquelch,
 		Real squelch,
 		bool ctcssOn,
 		bool audioMute)
@@ -96,6 +98,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 			fmDeviation,
 			volume,
 			squelchGate,
+			deltaSquelch,
 			squelch,
 			ctcssOn,
 			audioMute);
@@ -154,8 +157,9 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
                 //double magsqRaw = m_AGC.getMagSq();
 				long double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
+				Real deviation;
 
-				Real demod = m_phaseDiscri.phaseDiscriminator3(ci, magsqRaw);
+				Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);
 
                 Real magsq = magsqRaw / (1<<30);
                 m_movingAverage.feed(magsq);
@@ -174,20 +178,28 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-                if (m_movingAverage.average() > m_squelchLevel)
+				if ( (m_running.m_deltaSquelch && ((deviation > m_squelchLevel) || (deviation < -m_squelchLevel))) ||
+				     (!m_running.m_deltaSquelch && (m_movingAverage.average() < m_squelchLevel)) )
 				{
-					if (m_squelchCount < m_squelchGate)
-					{
-						m_squelchCount++;
-					}
+                    if (m_squelchCount < m_squelchGate)
+                    {
+                        m_squelchCount = 0;  // return to 0
+                    }
+                    else
+                    {
+                        m_squelchCount--;    // grace period
+                    }
 				}
 				else
 				{
-					m_squelchCount = 0;
+                    if (m_squelchCount < m_squelchGate + 2)
+                    {
+                        m_squelchCount++;
+                    }
 				}
 
 				//squelchOpen = (getMag() > m_squelchLevel);
-				m_squelchOpen = m_squelchCount == m_squelchGate; // wait for AGC to stabilize
+				m_squelchOpen = m_squelchCount >= m_squelchGate; // wait for AGC to stabilize
 
 				/*
 				if (m_afSquelch.analyze(demod))
@@ -322,6 +334,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_fmDeviation = cfg.getFMDeviation();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelchGate = cfg.getSquelchGate();
+		m_config.m_deltaSquelch = cfg.getDeltaSquelch();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_ctcssOn = cfg.getCtcssOn();
 		m_config.m_audioMute = cfg.getAudioMute();
@@ -332,8 +345,9 @@ bool NFMDemod::handleMessage(const Message& cmd)
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_fmDeviation: " << m_config.m_fmDeviation
 				<< " m_volume: " << m_config.m_volume
-				<< " m_squelchGate" << m_config.m_squelchGate
-				<< " m_squelch: " << m_config.m_squelch
+				<< " m_squelchGate: " << m_config.m_squelchGate
+				<< " m_deltaSquelch: " << m_config.m_deltaSquelch
+				<< " m_squelch: " << m_squelchLevel
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
 				<< " m_audioMute: " << m_config.m_audioMute;
 
@@ -360,13 +374,13 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_phaseDiscri.setFMScaling(m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
+		m_phaseDiscri.setFMScaling((2.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation);
 		m_settingsMutex.unlock();
 	}
 
 	if (m_config.m_fmDeviation != m_running.m_fmDeviation)
 	{
-		m_phaseDiscri.setFMScaling(m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
+		m_phaseDiscri.setFMScaling((2.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation);
 	}
 
 	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
@@ -384,12 +398,16 @@ void NFMDemod::apply()
 		m_squelchCount = 0; // reset squelch open counter
 	}
 
-	if (m_config.m_squelch != m_running.m_squelch)
+	if ((m_config.m_squelch != m_running.m_squelch) ||
+	    (m_config.m_deltaSquelch != m_running.m_deltaSquelch))
 	{
-		// input is a value in tenths of dB
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 10.0);
+	    if (m_config.m_deltaSquelch) { // input is a value in negative millis
+	        m_squelchLevel = - m_config.m_squelch / 1000.0;
+	    } else { // input is a value in centi-Bels
+	        m_squelchLevel = std::pow(10.0, m_config.m_squelch / 100.0);
+	    }
 		//m_squelchLevel *= m_squelchLevel;
-		m_afSquelch.setThreshold(m_squelchLevel);
+		//m_afSquelch.setThreshold(m_squelchLevel);
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
@@ -398,7 +416,8 @@ void NFMDemod::apply()
 	m_running.m_afBandwidth = m_config.m_afBandwidth;
 	m_running.m_fmDeviation = m_config.m_fmDeviation;
 	m_running.m_squelchGate = m_config.m_squelchGate;
-	m_running.m_squelch = m_config.m_squelch;
+	m_running.m_deltaSquelch = m_config.m_deltaSquelch;
+    m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_ctcssOn = m_config.m_ctcssOn;
