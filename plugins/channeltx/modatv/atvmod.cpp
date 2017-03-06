@@ -125,8 +125,8 @@ void ATVMod::modulateSample()
     pullVideo(t);
     calculateLevel(t);
 
-    // TODO For now do AM 95%
-    m_modSample.real((t*0.95 + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+    // TODO For now do AM 90%
+    m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
     m_modSample.imag(0.0f);
 }
 
@@ -134,26 +134,28 @@ void ATVMod::pullVideo(Real& sample)
 {
     if ((m_lineCount < 21) || (m_lineCount > 621) || ((m_lineCount > 309) && (m_lineCount < 335)))
     {
-        pullVSyncLine(m_horizontalCount - (m_pointsPerSync + m_pointsPerBP), sample);
+        pullVSyncLine(sample);
     }
     else
     {
         pullImageLine(sample);
     }
 
-    if (m_horizontalCount < m_nbHorizPoints)
+    if (m_horizontalCount < m_nbHorizPoints - 1)
     {
         m_horizontalCount++;
     }
     else
     {
-        if (m_lineCount < m_nbLines)
+        if (m_lineCount < m_nbLines - 1)
         {
             m_lineCount++;
+            if (m_lineCount > (m_nbLines/2)) m_evenImage = !m_evenImage;
         }
         else
         {
             m_lineCount = 0;
+            m_evenImage = !m_evenImage;
         }
 
         m_horizontalCount = 0;
@@ -237,8 +239,8 @@ void ATVMod::apply(bool force)
         (m_config.m_atvStd != m_running.m_atvStd) ||
         (m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
     {
-        int rateMultiple = getSampleRateMultiple(m_config.m_atvStd);
-        m_tvSampleRate = (m_config.m_outputSampleRate / rateMultiple) * rateMultiple;
+        int rateUnits = getSampleRateUnits(m_config.m_atvStd);
+        m_tvSampleRate = (m_config.m_outputSampleRate / rateUnits) * rateUnits; // make sure working sample rate is a multiple of rate units
 
         m_settingsMutex.lock();
 
@@ -273,33 +275,49 @@ void ATVMod::apply(bool force)
     m_running.m_uniformLevel = m_config.m_uniformLevel;
 }
 
-int ATVMod::getSampleRateMultiple(ATVStd std)
+int ATVMod::getSampleRateUnits(ATVStd std)
 {
     switch(std)
     {
+    case ATVStdPAL525:
+    	return 1008000;
+    	break;
     case ATVStdPAL625:
     default:
-        return 1000000;
+        return 1000000; // Exact MS/s - us
     }
 }
 
 void ATVMod::applyStandard()
 {
-    int rateMultiple = getSampleRateMultiple(m_config.m_atvStd);
-    m_pointsPerTU = m_tvSampleRate / rateMultiple;
+    int rateUnits = getSampleRateUnits(m_config.m_atvStd);
+    m_pointsPerTU = m_tvSampleRate / rateUnits; // TV sample rate is already set at a multiple of rate units
 
     switch(m_config.m_atvStd)
     {
+    case ATVStdPAL525:
+        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/1.008 us)
+        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/1.008 us)
+        m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5/1.008 us)
+        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/1.008 us)
+        // what is left in a 64/1.008 us line for the image
+        m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
+        m_pointsPerBar     = 10 * m_pointsPerTU; // set a bar length to 10/1.008 us (~5 bars per line)
+        m_nbLines          = 525;
+        m_interlaced       = true;
+        m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
+        break;
     case ATVStdPAL625:
     default:
-        m_pointsPerSync = 5 * m_pointsPerTU;         // would be 4.7 us actually
-        m_pointsPerBP = 5 * m_pointsPerTU;           // would be 4.7 us actually
-        m_pointsPerFP = 2 * m_pointsPerTU;           // would be 1.5 us actually
-        m_pointsPerFSync = 3 * m_pointsPerTU;        // would be 2.3 us actually
-        m_pointsPerLine = (64 - 12) * m_pointsPerTU; // what is left in a 64 us line
-        m_pointsPerBar = 10 * m_pointsPerTU;         // set a bar length to 10 us (~5 bars per line)
-        m_nbLines = 625;
-        m_interlaced = true;
-        m_nbHorizPoints = 64 * m_pointsPerTU;
+        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7 us)
+        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7 us)
+        m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5 us)
+        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3 us)
+        // what is left in a 64 us line for the image
+        m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
+        m_pointsPerBar     = 10 * m_pointsPerTU; // set a bar length to 10 us (~5 bars per line)
+        m_nbLines          = 625;
+        m_interlaced       = true;
+        m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
     }
 }
