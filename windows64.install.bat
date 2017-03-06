@@ -43,6 +43,7 @@ copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
 copy plugins\channelrx\tcpsrc\%1\tcpsrc.dll %2\plugins\channelrx
 copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
 copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
+copy plugins\channeltx\modatv\%1\modatv.dll %2\plugins\channeltx
 copy plugins\channeltx\modnfm\%1\modnfm.dll %2\plugins\channeltx
 copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
