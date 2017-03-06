@@ -50,7 +50,7 @@ ATVDemod::ATVDemod() :
     m_fltAmpLineAverage(0.0f),
     m_intNumberSamplePerTop(0)
 {
-	setObjectName("ATVDemod");
+    setObjectName("ATVDemod");
 
     //*************** ATV PARAMETERS  ***************
     m_intNumberSamplePerLine=0;
@@ -226,6 +226,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         ptrBuffer ++;
         fltQ= ((qint32) (*ptrBuffer)) << 4;
         ptrBuffer ++;
+
 #else
 
     for (SampleVector::const_iterator it = begin; it != end; ++it /* ++it **/)
@@ -485,6 +486,10 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                     {
                         m_fltAmpDelta=1.0f;
                     }
+
+                    //Reset extrema
+                    m_fltEffMin=2000000.0f;
+                    m_fltEffMax=-2000000.0f;
                 }
             }
             else
@@ -525,10 +530,10 @@ void ATVDemod::stop()
 
 bool ATVDemod::handleMessage(const Message& cmd)
 {
-	qDebug() << "ATVDemod::handleMessage";
+    qDebug() << "ATVDemod::handleMessage";
 
     if (DownChannelizer::MsgChannelizerNotification::match(cmd))
-	{
+    {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
         if(m_objRunning.m_intMsps!=objNotif.getSampleRate())
@@ -540,10 +545,10 @@ bool ATVDemod::handleMessage(const Message& cmd)
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
                 << " m_intMsps: " << m_objRunning.m_intMsps;
 
-		return true;
-	}
-	else if (MsgConfigureATVDemod::match(cmd))
-	{
+        return true;
+    }
+    else if (MsgConfigureATVDemod::match(cmd))
+    {
         MsgConfigureATVDemod& objCfg = (MsgConfigureATVDemod&) cmd;
 
         if((objCfg.m_objMsgConfig.m_enmModulation != m_objRunning.m_enmModulation)
@@ -569,12 +574,12 @@ bool ATVDemod::handleMessage(const Message& cmd)
             ApplySettings();
          }
 
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void ATVDemod::ApplySettings()
@@ -593,3 +598,4 @@ int ATVDemod::GetSampleRate()
 {
     return m_objRunning.m_intMsps;
 }
+
