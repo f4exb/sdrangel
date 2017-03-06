@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ATVModGUI</class>
+ <widget class="RollupWidget" name="ATVModGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>342</width>
+    <height>363</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Sans Serif</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>ATV Modulator</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>320</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>280</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="deltaFreqPowLayout">
+      <item>
+       <layout class="QHBoxLayout" name="deltaFrequencyLayout">
+        <item>
+         <widget class="QToolButton" name="deltaMinus">
+          <property name="toolTip">
+           <string>Frequency shift direction</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <selectedoff>:/plus.png</selectedoff>
+            <selectedon>:/minus.png</selectedon>
+           </iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDial" name="deltaFrequency" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>SizeVerCursor</cursorShape>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Demod shift frequency from center in Hz</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="deltaUnits">
+          <property name="text">
+           <string>Hz </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="channelPowerLayout">
+        <item>
+         <widget class="QLabel" name="channelPower">
+          <property name="toolTip">
+           <string>Channel power</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelPowerUnits">
+          <property name="text">
+           <string> dB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="channelMute">
+          <property name="toolTip">
+           <string>Mute/Unmute channel</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrbase/resources/res.qrc">
+            <normaloff>:/txon.png</normaloff>
+            <normalon>:/txoff.png</normalon>:/txon.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rfBandwidthLayout">
+      <item>
+       <widget class="QComboBox" name="standard">
+        <item>
+         <property name="text">
+          <string>PAL625L</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>RFBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="rfBW">
+        <property name="toolTip">
+         <string>Demodulator (RF) bandwidth</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>1.0 MHz</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_4">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="volumeLayout">
+      <item>
+       <widget class="QLabel" name="volLabel">
+        <property name="text">
+         <string>Vol</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="volume">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input gain</string>
+        </property>
+        <property name="maximum">
+         <number>20</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="volumeText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input gain value</string>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="text">
+         <string>1.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterVU" name="volumeMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="recordFileSelectLayout">
+      <item>
+       <widget class="QComboBox" name="inputSelect">
+        <item>
+         <property name="text">
+          <string>Uniform</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>H Bars</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Gradient</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="uniformLevel">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency</string>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="uniformLevelText">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency (kHz)</string>
+        </property>
+        <property name="text">
+         <string>50</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="fileNameLayout">
+      <item>
+       <widget class="QLabel" name="recordFileText">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="playControllLayout">
+      <item>
+       <widget class="QPushButton" name="showFileDialog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Open record file (48 kHz 32 bit float LE mono)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="playLoop">
+        <property name="toolTip">
+         <string>Play record file in a loop</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="play">
+        <property name="toolTip">
+         <string>Record file play/pause</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/pause.png</normalon>
+          <disabledoff>:/play.png</disabledoff>
+          <disabledon>:/play.png</disabledon>:/play.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="linePlay1">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="relTimeText">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Record time from start</string>
+        </property>
+        <property name="text">
+         <string>00:00:00.000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="linePlay2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="recordLengthText">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Total record time</string>
+        </property>
+        <property name="text">
+         <string>00:00:00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_nav">
+      <item>
+       <widget class="QSlider" name="navTimeSlider">
+        <property name="toolTip">
+         <string>Record file time navigator</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterVU</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
