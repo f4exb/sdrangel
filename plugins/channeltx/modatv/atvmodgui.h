@@ -60,6 +60,7 @@ private slots:
 
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
+    void on_modulation_currentIndexChanged(int index);
     void on_rfBW_valueChanged(int value);
     void on_uniformLevel_valueChanged(int value);
     void on_inputSelect_currentIndexChanged(int index);

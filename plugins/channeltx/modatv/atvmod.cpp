@@ -26,6 +26,7 @@ const float ATVMod::m_spanLevel = 0.7f;
 const int ATVMod::m_levelNbSamples = 10000; // every 10ms
 
 ATVMod::ATVMod() :
+	m_modPhasor(0.0f),
     m_evenImage(true),
     m_tvSampleRate(1000000),
     m_settingsMutex(QMutex::Recursive),
@@ -59,9 +60,10 @@ void ATVMod::configure(MessageQueue* messageQueue,
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
+			ATVModulation atvModulation,
             bool channelMute)
 {
-    Message* cmd = MsgConfigureATVMod::create(rfBandwidth, atvStd, atvModInput, uniformLevel);
+    Message* cmd = MsgConfigureATVMod::create(rfBandwidth, atvStd, atvModInput, uniformLevel, atvModulation);
     messageQueue->push(cmd);
 }
 
@@ -125,9 +127,20 @@ void ATVMod::modulateSample()
     pullVideo(t);
     calculateLevel(t);
 
-    // TODO For now do AM 90%
-    m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
-    m_modSample.imag(0.0f);
+    switch (m_running.m_atvModulation)
+    {
+    case ATVModulationFM: // FM half bandwidth deviation
+    	m_modPhasor += (t - 0.5f) * M_PI;
+    	if (m_modPhasor > 2.0f * M_PI) m_modPhasor -= 2.0f * M_PI; // limit growth
+    	if (m_modPhasor < 2.0f * M_PI) m_modPhasor += 2.0f * M_PI; // limit growth
+    	m_modSample.real(cos(m_modPhasor) * 29204.0f); // -1 dB
+    	m_modSample.imag(sin(m_modPhasor) * 29204.0f);
+    	break;
+    case ATVModulationAM: // AM 90%
+    default:
+        m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
+        m_modSample.imag(0.0f);
+    }
 }
 
 void ATVMod::pullVideo(Real& sample)
@@ -216,6 +229,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_atvModInput = cfg.getATVModInput();
         m_config.m_atvStd = cfg.getATVStd();
         m_config.m_uniformLevel = cfg.getUniformLevel();
+        m_config.m_atvModulation = cfg.getModulation();
 
         apply();
 
@@ -223,7 +237,8 @@ bool ATVMod::handleMessage(const Message& cmd)
                 << " m_rfBandwidth: " << m_config.m_rfBandwidth
                 << " m_atvStd: " << (int) m_config.m_atvStd
                 << " m_atvModInput: " << (int) m_config.m_atvModInput
-                << " m_uniformLevel: " << m_config.m_uniformLevel;
+                << " m_uniformLevel: " << m_config.m_uniformLevel
+				<< " m_atvModulation: " << (int) m_config.m_atvModulation;
 
         return true;
     }
@@ -273,6 +288,7 @@ void ATVMod::apply(bool force)
     m_running.m_atvModInput = m_config.m_atvModInput;
     m_running.m_atvStd = m_config.m_atvStd;
     m_running.m_uniformLevel = m_config.m_uniformLevel;
+    m_running.m_atvModulation = m_config.m_atvModulation;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)

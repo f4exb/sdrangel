@@ -47,6 +47,12 @@ public:
         ATVModInputVGradient
     } ATVModInput;
 
+    typedef enum
+    {
+    	ATVModulationAM,
+		ATVModulationFM
+    } ATVModulation;
+
     ATVMod();
     ~ATVMod();
 
@@ -55,6 +61,7 @@ public:
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
+			ATVModulation atvModulation,
             bool channelMute);
 
     virtual void pull(Sample& sample);
@@ -86,43 +93,49 @@ private:
         ATVStd getATVStd() const { return m_atvStd; }
         ATVModInput getATVModInput() const { return m_atvModInput; }
         Real getUniformLevel() const { return m_uniformLevel; }
+        ATVModulation getModulation() const { return m_atvModulation; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
             ATVStd atvStd,
             ATVModInput atvModInput,
-            Real uniformLevel)
+            Real uniformLevel,
+			ATVModulation atvModulation)
         {
-            return new MsgConfigureATVMod(rfBandwidth, atvStd, atvModInput, uniformLevel);
+            return new MsgConfigureATVMod(rfBandwidth, atvStd, atvModInput, uniformLevel, atvModulation);
         }
 
     private:
-        Real        m_rfBandwidth;
-        ATVStd      m_atvStd;
-        ATVModInput m_atvModInput;
-        Real    m_uniformLevel;
+        Real          m_rfBandwidth;
+        ATVStd        m_atvStd;
+        ATVModInput   m_atvModInput;
+        Real          m_uniformLevel;
+        ATVModulation m_atvModulation;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
                 ATVStd atvStd,
                 ATVModInput atvModInput,
-                Real uniformLevel) :
+                Real uniformLevel,
+				ATVModulation atvModulation) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_atvStd(atvStd),
             m_atvModInput(atvModInput),
-            m_uniformLevel(uniformLevel)
+            m_uniformLevel(uniformLevel),
+			m_atvModulation(atvModulation)
         { }
     };
 
     struct Config
     {
-        int         m_outputSampleRate;     //!< sample rate from channelizer
-        qint64      m_inputFrequencyOffset; //!< offset from baseband center frequency
-        Real        m_rfBandwidth;          //!< Bandwidth of modulated signal
-        ATVStd      m_atvStd;               //!< Standard
-        ATVModInput m_atvModInput;          //!< Input source type
-        Real        m_uniformLevel;         //!< Percentage between black and white for uniform screen display
+        int           m_outputSampleRate;     //!< sample rate from channelizer
+        qint64        m_inputFrequencyOffset; //!< offset from baseband center frequency
+        Real          m_rfBandwidth;          //!< Bandwidth of modulated signal
+        ATVStd        m_atvStd;               //!< Standard
+        ATVModInput   m_atvModInput;          //!< Input source type
+        Real          m_uniformLevel;         //!< Percentage between black and white for uniform screen display
+        ATVModulation m_atvModulation;        //!< RF modulation type
 
         Config() :
             m_outputSampleRate(-1),
@@ -130,7 +143,8 @@ private:
             m_rfBandwidth(0),
             m_atvStd(ATVStdPAL625),
             m_atvModInput(ATVModInputHBars),
-            m_uniformLevel(0.5f)
+            m_uniformLevel(0.5f),
+			m_atvModulation(ATVModulationAM)
         { }
     };
 
@@ -139,6 +153,7 @@ private:
 
     NCO m_carrierNco;
     Complex m_modSample;
+    float m_modPhasor; //!< For FM modulation
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;

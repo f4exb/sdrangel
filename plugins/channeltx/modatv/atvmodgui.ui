@@ -191,16 +191,30 @@
     <item>
      <layout class="QHBoxLayout" name="rfBandwidthLayout">
       <item>
-       <widget class="QComboBox" name="standard">
+       <widget class="QComboBox" name="modulation">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Modulation type</string>
+        </property>
         <item>
          <property name="text">
-          <string>PAL625L</string>
+          <string>AM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>FM</string>
          </property>
         </item>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="rfBWLabel">
         <property name="text">
          <string>RFBW</string>
         </property>
@@ -322,7 +336,23 @@
      </layout>
     </item>
     <item>
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="recordFileSelectLayout">
+      <item>
+       <widget class="QComboBox" name="standard">
+        <item>
+         <property name="text">
+          <string>PAL625L</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item>
        <widget class="QComboBox" name="inputSelect">
         <item>
@@ -361,7 +391,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Tone frequency</string>
+         <string>Uniform level luminance (%)</string>
         </property>
         <property name="minimum">
          <number>0</number>
@@ -419,7 +449,7 @@
      </layout>
     </item>
     <item>
-     <widget class="Line" name="line_3">
+     <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -617,6 +647,11 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>

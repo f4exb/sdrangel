@@ -75,6 +75,7 @@ void ATVModGUI::resetToDefaults()
 	ui->standard->setCurrentIndex(0);
 	ui->inputSelect->setCurrentIndex(0);
 	ui->deltaFrequency->setValue(0);
+	ui->modulation->setCurrentIndex(0);
 
 	blockApplySettings(false);
 	applySettings();
@@ -91,6 +92,7 @@ QByteArray ATVModGUI::serialize() const
     s.writeS32(5, ui->inputSelect->currentIndex());
 	s.writeU32(6, m_channelMarker.getColor().rgb());
 	s.writeS32(7, ui->volume->value());
+    s.writeS32(8, ui->modulation->currentIndex());
 
 	return s.final();
 }
@@ -132,6 +134,8 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 
         d.readS32(7, &tmp, 10);
         ui->volume->setValue(tmp);
+        d.readS32(8, &tmp, 0);
+        ui->modulation->setCurrentIndex(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -187,6 +191,11 @@ void ATVModGUI::on_deltaFrequency_changed(quint64 value)
 	} else {
 		m_channelMarker.setCenterFrequency(value);
 	}
+}
+
+void ATVModGUI::on_modulation_currentIndexChanged(int index)
+{
+    applySettings();
 }
 
 void ATVModGUI::on_rfBW_valueChanged(int value)
@@ -313,6 +322,7 @@ void ATVModGUI::applySettings()
 			(ATVMod::ATVStd) ui->standard->currentIndex(),
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
+			(ATVMod::ATVModulation) ui->modulation->currentIndex(),
 			ui->channelMute->isChecked());
 	}
 }
