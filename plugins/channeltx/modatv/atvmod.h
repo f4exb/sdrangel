@@ -41,8 +41,10 @@ public:
     typedef enum
     {
         ATVModInputUniform,
-        ATVModInputBarChart,
-        ATVModInputGradient
+        ATVModInputHBars,
+        ATVModInputVBars,
+        ATVModInputHGradient,
+        ATVModInputVGradient
     } ATVModInput;
 
     ATVMod();
@@ -127,7 +129,7 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(0),
             m_atvStd(ATVStdPAL625),
-            m_atvModInput(ATVModInputBarChart),
+            m_atvModInput(ATVModInputHBars),
             m_uniformLevel(0.5f)
         { }
     };
@@ -146,10 +148,16 @@ private:
     uint32_t m_pointsPerImgLine; //!< number of line points for the image line
     uint32_t m_pointsPerFP;      //!< number of line points for the front porch
     uint32_t m_pointsPerFSync;   //!< number of line points for the field first sync
-    uint32_t m_pointsPerBar;     //!< number of line points for a bar of the bar chart
+    uint32_t m_pointsPerHBar;    //!< number of line points for a bar of the bar chart
+    uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
     uint32_t m_pointsPerTU;      //!< number of line points per time unit
     uint32_t m_nbLines;          //!< number of lines per complete frame
+    uint32_t m_nbLines2;
+    uint32_t m_nbImageLines;
+    uint32_t m_nbImageLines2;
     uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
+    float    m_hBarIncrement;
+    float    m_vBarIncrement;
     bool     m_interlaced;       //!< true if image is interlaced (2 half frames per frame)
     bool     m_evenImage;
     QMutex   m_settingsMutex;
@@ -185,14 +193,21 @@ private:
         else if (m_horizontalCount < m_pointsPerSync + m_pointsPerBP + m_pointsPerImgLine)
         {
             int pointIndex = m_horizontalCount - (m_pointsPerSync + m_pointsPerBP);
+            int iLine = m_lineCount % m_nbLines2;
 
             switch(m_running.m_atvModInput)
             {
-            case ATVModInputBarChart:
-                sample = (pointIndex / m_pointsPerBar) * (m_spanLevel/5.0f) + m_blackLevel;
+            case ATVModInputHBars:
+                sample = (pointIndex / m_pointsPerHBar) * m_hBarIncrement + m_blackLevel;
                 break;
-            case ATVModInputGradient:
+            case ATVModInputVBars:
+                sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
+                break;
+            case ATVModInputHGradient:
                 sample = (pointIndex / (float) m_pointsPerImgLine) * m_spanLevel + m_blackLevel;
+                break;
+            case ATVModInputVGradient:
+                sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
                 break;
             case ATVModInputUniform:
             default:

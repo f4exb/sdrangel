@@ -337,7 +337,17 @@
         </item>
         <item>
          <property name="text">
-          <string>Gradient</string>
+          <string>V Bars</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>H Grad</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>V Grad</string>
          </property>
         </item>
        </widget>

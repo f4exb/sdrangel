@@ -37,7 +37,7 @@ ATVMod::ATVMod() :
     m_config.m_outputSampleRate = 1000000;
     m_config.m_inputFrequencyOffset = 0;
     m_config.m_rfBandwidth = 1000000;
-    m_config.m_atvModInput = ATVModInputBarChart;
+    m_config.m_atvModInput = ATVModInputHBars;
     m_config.m_atvStd = ATVStdPAL625;
 
     applyStandard();
@@ -132,7 +132,7 @@ void ATVMod::modulateSample()
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if ((m_lineCount < 21) || (m_lineCount > 621) || ((m_lineCount > 309) && (m_lineCount < 335)))
+    if ((m_lineCount < 21) || (m_lineCount > 621) || ((m_lineCount > 309) && (m_lineCount < 333)))
     {
         pullVSyncLine(sample);
     }
@@ -302,10 +302,16 @@ void ATVMod::applyStandard()
         m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/1.008 us)
         // what is left in a 64/1.008 us line for the image
         m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
-        m_pointsPerBar     = 10 * m_pointsPerTU; // set a bar length to 10/1.008 us (~5 bars per line)
+        m_pointsPerHBar    = 10 * m_pointsPerTU; // set a bar length to 10/1.008 us (~5 bars per line)
+        m_linesPerVBar     = 30;
         m_nbLines          = 525;
+        m_nbLines2         = 262;
+        m_nbImageLines     = 510;
+        m_nbImageLines2    = 205;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
+        m_hBarIncrement    = m_spanLevel / 5.0f;
+        m_vBarIncrement    = m_spanLevel / 10.0f;
         break;
     case ATVStdPAL625:
     default:
@@ -315,9 +321,15 @@ void ATVMod::applyStandard()
         m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3 us)
         // what is left in a 64 us line for the image
         m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
-        m_pointsPerBar     = 10 * m_pointsPerTU; // set a bar length to 10 us (~5 bars per line)
+        m_pointsPerHBar    = 10 * m_pointsPerTU; // set a bar length to 10 us (~5 bars per line)
+        m_linesPerVBar     = 30;
         m_nbLines          = 625;
+        m_nbLines2         = 312;
+        m_nbImageLines     = 610;
+        m_nbImageLines2    = 305;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
+        m_hBarIncrement    = m_spanLevel / 5.0f;
+        m_vBarIncrement    = m_spanLevel / 10.0f;
     }
 }
