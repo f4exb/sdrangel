@@ -43,6 +43,7 @@ public:
         ATVModInputUniform,
         ATVModInputHBars,
         ATVModInputVBars,
+        ATVModInputCheckbox,
         ATVModInputHGradient,
         ATVModInputVGradient
     } ATVModInput;
@@ -171,6 +172,7 @@ private:
     uint32_t m_nbImageLines;
     uint32_t m_nbImageLines2;
     uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
+    uint32_t m_nbBlankLines;
     float    m_hBarIncrement;
     float    m_vBarIncrement;
     bool     m_interlaced;       //!< true if image is interlaced (2 half frames per frame)
@@ -217,6 +219,10 @@ private:
                 break;
             case ATVModInputVBars:
                 sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
+                break;
+            case ATVModInputCheckbox:
+
+                sample = (((iLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 break;
             case ATVModInputHGradient:
                 sample = (pointIndex / (float) m_pointsPerImgLine) * m_spanLevel + m_blackLevel;

@@ -372,6 +372,11 @@
         </item>
         <item>
          <property name="text">
+          <string>Chekbox</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>H Grad</string>
          </property>
         </item>
