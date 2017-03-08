@@ -250,6 +250,7 @@ bool ATVMod::handleMessage(const Message& cmd)
     else if (MsgConfigureImageFileName::match(cmd))
     {
         MsgConfigureImageFileName& conf = (MsgConfigureImageFileName&) cmd;
+        openImage(conf.getFileName());
 //        m_fileName = conf.getFileName(); // TODO
 //        openFileStream();
         return true;
@@ -366,7 +367,7 @@ void ATVMod::applyStandard()
     }
 }
 
-void ATVMod::openImage(QString& fileName)
+void ATVMod::openImage(const QString& fileName)
 {
 	cv::Mat tmpImage = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
 	m_imageOK = tmpImage.data != 0;

@@ -227,7 +227,7 @@ private:
     void calculateLevel(Real& sample);
     void modulateSample();
     void applyStandard();
-    void openImage(QString& fileName);
+    void openImage(const QString& fileName);
 
     inline void pullImageLine(Real& sample)
     {

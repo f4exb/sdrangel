@@ -385,6 +385,11 @@
           <string>V Grad</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Image</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
