@@ -331,11 +331,12 @@ void ATVMod::applyStandard()
         // what is left in a 64/1.008 us line for the image
         m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
         m_nbLines          = 525;
-        m_nbLines2         = 262;
+        m_nbLines2         = 263;
         m_nbImageLines     = 510;
         m_nbImageLines2    = 255;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
+        m_nbSyncLinesH     = 5;
         m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
         m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
         m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
@@ -351,11 +352,12 @@ void ATVMod::applyStandard()
         // what is left in a 64 us line for the image
         m_pointsPerImgLine = 64 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
         m_nbLines          = 625;
-        m_nbLines2         = 312;
+        m_nbLines2         = 313;
         m_nbImageLines     = 610;
         m_nbImageLines2    = 305;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
+        m_nbSyncLinesH     = 5;
         m_nbBlankLines     = 17; // yields 576 lines (305 - 17) * 2
         m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
         m_linesPerVBar     = m_nbImageLines2 / m_nbBars;
