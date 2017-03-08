@@ -45,7 +45,9 @@ public:
         ATVModInputVBars,
         ATVModInputCheckbox,
         ATVModInputHGradient,
-        ATVModInputVGradient
+        ATVModInputVGradient,
+        ATVModInputImage,
+        ATVModInputVideo
     } ATVModInput;
 
     typedef enum
@@ -53,6 +55,27 @@ public:
     	ATVModulationAM,
 		ATVModulationFM
     } ATVModulation;
+
+    class MsgConfigureImageFileName : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getFileName() const { return m_fileName; }
+
+        static MsgConfigureImageFileName* create(const QString& fileName)
+        {
+            return new MsgConfigureImageFileName(fileName);
+        }
+
+    private:
+        QString m_fileName;
+
+        MsgConfigureImageFileName(const QString& fileName) :
+            Message(),
+            m_fileName(fileName)
+        { }
+    };
 
     ATVMod();
     ~ATVMod();

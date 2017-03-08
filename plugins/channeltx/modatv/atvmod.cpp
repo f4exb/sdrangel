@@ -20,6 +20,7 @@
 #include "atvmod.h"
 
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVMod, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureImageFileName, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -240,6 +241,13 @@ bool ATVMod::handleMessage(const Message& cmd)
                 << " m_uniformLevel: " << m_config.m_uniformLevel
 				<< " m_atvModulation: " << (int) m_config.m_atvModulation;
 
+        return true;
+    }
+    else if (MsgConfigureImageFileName::match(cmd))
+    {
+        MsgConfigureImageFileName& conf = (MsgConfigureImageFileName&) cmd;
+//        m_fileName = conf.getFileName(); // TODO
+//        openFileStream();
         return true;
     }
     else

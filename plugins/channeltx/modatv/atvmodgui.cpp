@@ -227,6 +227,26 @@ void ATVModGUI::on_channelMute_toggled(bool checked)
 	applySettings();
 }
 
+void ATVModGUI::on_imageFileDialog_clicked(bool checked)
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp)"));
+
+    if (fileName != "")
+    {
+        m_imageFileName = fileName;
+        ui->recordFileText->setText(m_imageFileName);
+        configureImageFileName();
+    }
+}
+
+void ATVModGUI::configureImageFileName()
+{
+    qDebug() << "ATVModGUI::configureImageFileName: " << m_imageFileName.toStdString().c_str();
+    ATVMod::MsgConfigureImageFileName* message = ATVMod::MsgConfigureImageFileName::create(m_imageFileName);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
 void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 }

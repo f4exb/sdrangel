@@ -66,10 +66,12 @@ private slots:
     void on_inputSelect_currentIndexChanged(int index);
     void on_volume_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
+    void on_imageFileDialog_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 
+    void configureImageFileName();
     void tick();
 
 private:
@@ -85,7 +87,7 @@ private:
     ATVMod* m_atvMod;
     MovingAverage<Real> m_channelPowerDbAvg;
 
-    QString m_fileName;
+    QString m_imageFileName;
     quint32 m_recordLength;
     int m_recordSampleRate;
     int m_samplesCount;

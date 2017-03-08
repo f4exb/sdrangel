@@ -71,5 +71,8 @@
         <file>txon.png</file>
         <file>arrow_down.png</file>
         <file>arrow_up.png</file>
+        <file>film_reel.png</file>
+        <file>film.png</file>
+        <file>picture.png</file>
     </qresource>
 </RCC>

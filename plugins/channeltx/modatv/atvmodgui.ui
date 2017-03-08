@@ -372,7 +372,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Chekbox</string>
+          <string>Chekbd</string>
          </property>
         </item>
         <item>
@@ -474,7 +474,7 @@
     <item>
      <layout class="QHBoxLayout" name="playControllLayout">
       <item>
-       <widget class="QPushButton" name="showFileDialog">
+       <widget class="QPushButton" name="imageFileDialog">
         <property name="minimumSize">
          <size>
           <width>24</width>
@@ -488,14 +488,47 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Open record file (48 kHz 32 bit float LE mono)</string>
+         <string>Open still image file</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
+          <normaloff>:/picture.png</normaloff>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="videoFileDialog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Open video file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/film_reel.png</normaloff>:/film_reel.png</iconset>
         </property>
        </widget>
       </item>
