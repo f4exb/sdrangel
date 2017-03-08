@@ -16,8 +16,11 @@ set(modatv_FORMS
 	atvmodgui.ui
 )
 
+# OpenCV variables defined in /usr/share/OpenCV/OpenCVConfig.cmake (Ubuntu)
+
 include_directories(
 	.
+	${OpenCV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -34,6 +37,7 @@ add_library(modatv SHARED
 )
 
 target_link_libraries(modatv
+    ${OpenCV_LIBS}
 	${QT_LIBRARIES}
 	sdrbase
 )

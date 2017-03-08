@@ -20,6 +20,9 @@
 #include <QObject>
 #include <QMutex>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <stdint.h>
 
 #include "dsp/basebandsamplesource.h"
@@ -208,6 +211,8 @@ private:
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
+
+    cv::Mat m_image;
 
     static const float m_blackLevel;
     static const float m_spanLevel;
