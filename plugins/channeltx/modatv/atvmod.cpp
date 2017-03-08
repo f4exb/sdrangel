@@ -16,6 +16,8 @@
 
 #include <QDebug>
 
+#include "opencv2/imgproc/imgproc.hpp"
+
 #include "dsp/upchannelizer.h"
 #include "atvmod.h"
 
@@ -25,6 +27,7 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureImageFileName, Message)
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
 const int ATVMod::m_levelNbSamples = 10000; // every 10ms
+const int ATVMod::m_nbBars = 6;
 
 ATVMod::ATVMod() :
 	m_modPhasor(0.0f),
@@ -32,7 +35,8 @@ ATVMod::ATVMod() :
     m_tvSampleRate(1000000),
     m_settingsMutex(QMutex::Recursive),
     m_horizontalCount(0),
-    m_lineCount(0)
+    m_lineCount(0),
+	m_imageOK(false)
 {
     setObjectName("ATVMod");
 
@@ -319,7 +323,7 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
-    case ATVStdPAL525:
+    case ATVStdPAL525: // Follows PAL-M standard
         m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/1.008 us)
         m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/1.008 us)
         m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5/1.008 us)
@@ -329,16 +333,16 @@ void ATVMod::applyStandard()
         m_nbLines          = 525;
         m_nbLines2         = 262;
         m_nbImageLines     = 510;
-        m_nbImageLines2    = 205;
+        m_nbImageLines2    = 255;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
-        m_nbBlankLines     = 16;
-        m_pointsPerHBar    = m_pointsPerImgLine / 6;
-        m_linesPerVBar     = m_nbImageLines2  / 6;
-        m_hBarIncrement    = m_spanLevel / 6.0f;
-        m_vBarIncrement    = m_spanLevel / 6.0f;
+        m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
+        m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
+        m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
+        m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
         break;
-    case ATVStdPAL625:
+    case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
         m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7 us)
         m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7 us)
@@ -352,10 +356,25 @@ void ATVMod::applyStandard()
         m_nbImageLines2    = 305;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
-        m_nbBlankLines     = 16;
-        m_pointsPerHBar    = m_pointsPerImgLine / 6;
-        m_linesPerVBar     = m_nbImageLines2 / 6;
-        m_hBarIncrement    = m_spanLevel / 6.0f;
-        m_vBarIncrement    = m_spanLevel / 6.0f;
+        m_nbBlankLines     = 17; // yields 576 lines (305 - 17) * 2
+        m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
+        m_linesPerVBar     = m_nbImageLines2 / m_nbBars;
+        m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
     }
+}
+
+void ATVMod::openImage(QString& fileName)
+{
+	cv::Mat tmpImage = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
+	m_imageOK = tmpImage.data != 0;
+
+	if (m_imageOK)
+	{
+		float fy = (m_nbImageLines - 2*m_nbBlankLines) / (float) tmpImage.rows;
+		float fx = m_pointsPerImgLine / (float) tmpImage.cols;
+        cv::resize(tmpImage, m_image, cv::Size(), fx, fy);
+        qDebug("ATVMod::openImage: %d x %d -> %d x %d", tmpImage.cols, tmpImage.rows, m_image.cols, m_image.rows);
+        // later: image.at<char>(49,39);
+	}
 }

@@ -46,7 +46,7 @@ public:
         ATVModInputUniform,
         ATVModInputHBars,
         ATVModInputVBars,
-        ATVModInputCheckbox,
+        ATVModInputChessboard,
         ATVModInputHGradient,
         ATVModInputVGradient,
         ATVModInputImage,
@@ -194,15 +194,15 @@ private:
     uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
     uint32_t m_pointsPerTU;      //!< number of line points per time unit
     uint32_t m_nbLines;          //!< number of lines per complete frame
-    uint32_t m_nbLines2;
-    uint32_t m_nbImageLines;
-    uint32_t m_nbImageLines2;
+    uint32_t m_nbLines2;         //!< same number as above (non interlaced) or half the number above (interlaced)
+    uint32_t m_nbImageLines;     //!< number of image lines excluding synchronization lines
+    uint32_t m_nbImageLines2;    //!< same number as above (non interlaced) or half the number above (interlaced)
     uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
-    uint32_t m_nbBlankLines;
-    float    m_hBarIncrement;
-    float    m_vBarIncrement;
+    uint32_t m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
+    float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
+    float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
     bool     m_interlaced;       //!< true if image is interlaced (2 half frames per frame)
-    bool     m_evenImage;
+    bool     m_evenImage;        //!< in interlaced mode true if this is an even image
     QMutex   m_settingsMutex;
     int      m_horizontalCount;  //!< current point index on line
     int      m_lineCount;        //!< current line index in frame
@@ -213,10 +213,12 @@ private:
     Real m_levelSum;
 
     cv::Mat m_image;
+    bool m_imageOK;
 
     static const float m_blackLevel;
     static const float m_spanLevel;
     static const int m_levelNbSamples;
+    static const int m_nbBars; // number of bars in bar or chessboard patterns
 
     void apply(bool force = false);
     void pullFinalize(Complex& ci, Sample& sample);
@@ -224,6 +226,7 @@ private:
     void calculateLevel(Real& sample);
     void modulateSample();
     void applyStandard();
+    void openImage(QString& fileName);
 
     inline void pullImageLine(Real& sample)
     {
@@ -248,7 +251,7 @@ private:
             case ATVModInputVBars:
                 sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
                 break;
-            case ATVModInputCheckbox:
+            case ATVModInputChessboard:
 
                 sample = (((iLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 break;
@@ -258,6 +261,7 @@ private:
             case ATVModInputVGradient:
                 sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
                 break;
+            case ATVModInputImage:
             case ATVModInputUniform:
             default:
                 sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
