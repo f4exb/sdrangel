@@ -365,19 +365,28 @@ void ATVMod::applyStandard()
         m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
         m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
     }
+
+    if (m_imageOK)
+    {
+        resizeImage();
+    }
 }
 
 void ATVMod::openImage(const QString& fileName)
 {
-	cv::Mat tmpImage = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
-	m_imageOK = tmpImage.data != 0;
+    m_imageOriginal = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
+	m_imageOK = m_imageOriginal.data != 0;
 
 	if (m_imageOK)
 	{
-		float fy = (m_nbImageLines - 2*m_nbBlankLines) / (float) tmpImage.rows;
-		float fx = m_pointsPerImgLine / (float) tmpImage.cols;
-        cv::resize(tmpImage, m_image, cv::Size(), fx, fy);
-        qDebug("ATVMod::openImage: %d x %d -> %d x %d", tmpImage.cols, tmpImage.rows, m_image.cols, m_image.rows);
-        // later: image.at<char>(49,39);
+	    resizeImage();
 	}
+}
+
+void ATVMod::resizeImage()
+{
+    float fy = (m_nbImageLines - 2*m_nbBlankLines) / (float) m_imageOriginal.rows;
+    float fx = m_pointsPerImgLine / (float) m_imageOriginal.cols;
+    cv::resize(m_imageOriginal, m_image, cv::Size(), fx, fy);
+    qDebug("ATVMod::resizeImage: %d x %d -> %d x %d", m_imageOriginal.cols, m_imageOriginal.rows, m_image.cols, m_image.rows);
 }

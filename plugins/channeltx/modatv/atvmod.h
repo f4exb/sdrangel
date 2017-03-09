@@ -213,7 +213,8 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
 
-    cv::Mat m_image;
+    cv::Mat m_imageOriginal;     //!< original non resized image
+    cv::Mat m_image;             //!< resized image for transmission at given rate
     bool m_imageOK;
 
     static const float m_blackLevel;
@@ -228,6 +229,7 @@ private:
     void modulateSample();
     void applyStandard();
     void openImage(const QString& fileName);
+    void resizeImage();
 
     inline void pullImageLine(Real& sample)
     {
