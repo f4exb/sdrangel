@@ -1,4 +1,5 @@
 SET libusbdir="D:\softs\libusb-1.0.20\MinGW32"
+SET opencvdir="D:\softs\opencv\build\mw32\install\x86\mingw\bin"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
@@ -12,6 +13,7 @@ copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
+copy %opencvdir%\*.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
 mkdir %2\plugins\channeltx

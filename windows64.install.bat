@@ -1,5 +1,6 @@
 SET libusbdir="D:\softs\libusb-1.0.20\MinGW64"
 SET msys2dir="D:\msys64"
+SET opencvdir="D:\softs\opencv\build\mw64\install\x64\mingw\bin"
 
 copy %msys2dir%\mingw64\bin\libbz2-1.dll %2
 copy %msys2dir%\mingw64\bin\libfreetype-6.dll %2
@@ -25,6 +26,7 @@ copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
+copy %opencvdir%\*.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
 mkdir %2\plugins\channeltx
