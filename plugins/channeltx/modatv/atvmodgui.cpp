@@ -69,7 +69,7 @@ void ATVModGUI::resetToDefaults()
 {
 	blockApplySettings(true);
 
-	ui->rfBW->setValue(12);
+	ui->rfBW->setValue(10);
 	ui->uniformLevel->setValue(35);
 	ui->volume->setValue(10);
 	ui->standard->setCurrentIndex(0);

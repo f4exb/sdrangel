@@ -219,7 +219,7 @@ private:
     uint32_t m_nbImageLines;     //!< number of image lines excluding synchronization lines
     uint32_t m_nbImageLines2;    //!< same number as above (non interlaced) or half the number above (interlaced)
     uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
-    uint32_t m_nbSyncLinesH;     //!< number of header sync lines
+    uint32_t m_nbSyncLinesHead;  //!< number of header sync lines
     uint32_t m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
@@ -240,10 +240,16 @@ private:
     bool m_imageOK;
 
     cv::VideoCapture m_video;    //!< current video capture
-    cv::Mat m_frame;             //!< current frame
-    float m_videoFPS;
-    int m_videoWidth;
-    int m_videoHeight;
+    cv::Mat m_frameOriginal;     //!< current frame from video
+    cv::Mat m_frame;             //!< current displayable video frame
+    float m_videoFPS;            //!< current video FPS rate
+    int m_videoWidth;            //!< current video frame width
+    int m_videoHeight;           //!< current video frame height
+    float m_videoFx;             //!< current video horizontal scaling factor
+    float m_videoFy;             //!< current video vertictal scaling factor
+    float m_videoFPSq;           //!< current video FPS sacaling factor
+    float m_videoFPSCount;       //!< current video FPS fractional counter
+    int m_videoPrevFPSCount;     //!< current video FPS previous integer counter
     bool m_videoOK;
 
     static const float m_blackLevel;
@@ -260,6 +266,8 @@ private:
     void openImage(const QString& fileName);
     void openVideo(const QString& fileName);
     void resizeImage();
+    void calculateVideoSizes();
+    void resizeVideo();
 
     inline void pullImageLine(Real& sample)
     {
@@ -276,7 +284,7 @@ private:
             int pointIndex = m_horizontalCount - (m_pointsPerSync + m_pointsPerBP);
             int iLine = m_lineCount % m_nbLines2;
             int oddity = m_lineCount < m_nbLines2 ? 0 : 1;
-            int iLineImage = iLine - m_nbSyncLinesH - m_nbBlankLines;
+            int iLineImage = iLine - m_nbSyncLinesHead - m_nbBlankLines;
 
             switch(m_running.m_atvModInput)
             {
@@ -296,16 +304,41 @@ private:
                 sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
                 break;
             case ATVModInputImage:
-                if (!m_imageOK || (iLineImage < 0))
+                if (!m_imageOK || (iLineImage < 0) || m_image.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 }
                 else
                 {
-                    unsigned char pixv = m_image.at<unsigned char>(2*iLineImage+ oddity, pointIndex); // row (y), col (x)
+                	unsigned char pixv;
+
+                	if (m_interlaced) {
+                        pixv = m_image.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
+                	} else {
+                        pixv = m_image.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
+                	}
+
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
                 break;
+            case ATVModInputVideo:
+                if (!m_videoOK || (iLineImage < 0) || m_frame.empty())
+                {
+                    sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
+                }
+                else
+                {
+                	unsigned char pixv;
+
+                	if (m_interlaced) {
+                        pixv = m_frame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
+                	} else {
+                        pixv = m_frame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
+                	}
+
+                    sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
+                }
+            	break;
             case ATVModInputUniform:
             default:
                 sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;

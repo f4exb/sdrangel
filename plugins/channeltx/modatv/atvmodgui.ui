@@ -390,6 +390,11 @@
           <string>Image</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Video</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

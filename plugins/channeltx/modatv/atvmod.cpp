@@ -37,7 +37,11 @@ ATVMod::ATVMod() :
     m_settingsMutex(QMutex::Recursive),
     m_horizontalCount(0),
     m_lineCount(0),
-	m_imageOK(false)
+	m_imageOK(false),
+	m_videoFPSq(1.0f),
+    m_videoFPSCount(0.0f),
+	m_videoPrevFPSCount(0),
+	m_videoOK(false)
 {
     setObjectName("ATVMod");
 
@@ -59,6 +63,7 @@ ATVMod::ATVMod() :
 
 ATVMod::~ATVMod()
 {
+	if (m_video.isOpened()) m_video.release();
 }
 
 void ATVMod::configure(MessageQueue* messageQueue,
@@ -171,10 +176,48 @@ void ATVMod::pullVideo(Real& sample)
             m_lineCount++;
             if (m_lineCount > (m_nbLines/2)) m_evenImage = !m_evenImage;
         }
-        else
+        else // new image
         {
             m_lineCount = 0;
             m_evenImage = !m_evenImage;
+
+            if (m_running.m_atvModInput == ATVModInputVideo)
+            {
+            	int grabOK;
+            	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
+
+            	// move a number of frames according to increment
+            	// use grab to test for EOF then retrieve to preserve last valid frame as the current original frame
+            	// TODO: handle pause (no move)
+            	for (int i = 0; i < fpsIncrement; i++)
+            	{
+            		grabOK = m_video.grab();
+            		if (!grabOK) break;
+            	}
+
+            	if (grabOK)
+            	{
+            		cv::Mat colorFrame;
+            		m_video.retrieve(colorFrame);
+            		cv::cvtColor(colorFrame, m_frameOriginal, CV_BGR2GRAY);
+            		resizeVideo();
+            	}
+            	else
+            	{
+            		// TODO: handle play loop
+            	}
+
+            	if (m_videoFPSCount < m_videoFPS)
+            	{
+            		m_videoPrevFPSCount = (int) m_videoFPSCount;
+                	m_videoFPSCount += m_videoFPSq;
+            	}
+            	else
+            	{
+            		m_videoPrevFPSCount = 0;
+            		m_videoFPSCount = m_videoFPSq;
+            	}
+            }
         }
 
         m_horizontalCount = 0;
@@ -342,7 +385,7 @@ void ATVMod::applyStandard()
         m_nbImageLines2    = 255;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
-        m_nbSyncLinesH     = 5;
+        m_nbSyncLinesHead  = 5;
         m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
         m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
         m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
@@ -364,7 +407,7 @@ void ATVMod::applyStandard()
         m_nbImageLines2    = 305;
         m_interlaced       = true;
         m_nbHorizPoints    = 64 * m_pointsPerTU; // full line
-        m_nbSyncLinesH     = 5;
+        m_nbSyncLinesHead  = 5;
         m_nbBlankLines     = 17; // yields 576 lines (305 - 17) * 2
         m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
         m_linesPerVBar     = m_nbImageLines2 / m_nbBars;
@@ -376,6 +419,12 @@ void ATVMod::applyStandard()
     if (m_imageOK)
     {
         resizeImage();
+    }
+
+    if (m_videoOK)
+    {
+    	calculateVideoSizes();
+    	resizeVideo();
     }
 }
 
@@ -392,6 +441,8 @@ void ATVMod::openImage(const QString& fileName)
 
 void ATVMod::openVideo(const QString& fileName)
 {
+	//if (m_videoOK && m_video.isOpened()) m_video.release(); should be done by OpenCV in open method
+
     m_videoOK = m_video.open(qPrintable(fileName));
 
     if (m_videoOK)
@@ -400,6 +451,7 @@ void ATVMod::openVideo(const QString& fileName)
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
         qDebug("ATVMod::openVideo(: FPS: %f size: %d x %d", m_videoFPS, m_videoWidth, m_videoHeight);
+        calculateVideoSizes();
     }
 }
 
@@ -409,4 +461,20 @@ void ATVMod::resizeImage()
     float fx = m_pointsPerImgLine / (float) m_imageOriginal.cols;
     cv::resize(m_imageOriginal, m_image, cv::Size(), fx, fy);
     qDebug("ATVMod::resizeImage: %d x %d -> %d x %d", m_imageOriginal.cols, m_imageOriginal.rows, m_image.cols, m_image.rows);
+}
+
+void ATVMod::calculateVideoSizes()
+{
+	m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) m_videoHeight;
+	m_videoFx = m_pointsPerImgLine / (float) m_videoWidth;
+	m_videoFPSq = m_videoFPS / m_fps;
+
+	qDebug("ATVMod::resizeVideo: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
+}
+
+void ATVMod::resizeVideo()
+{
+	if (!m_frameOriginal.empty()) {
+		cv::resize(m_frameOriginal, m_frame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
+	}
 }
