@@ -13,7 +13,10 @@ copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
-copy %opencvdir%\*.dll %2
+copy %opencvdir%\opencv_ffmpeg2413.dll %2
+copy %opencvdir%\libopencv_imgproc2413.dll %2
+copy %opencvdir%\libopencv_highgui2413.dll %2
+copy %opencvdir%\libopencv_core2413.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
 mkdir %2\plugins\channeltx
