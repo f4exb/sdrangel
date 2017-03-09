@@ -67,11 +67,13 @@ private slots:
     void on_volume_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
     void on_imageFileDialog_clicked(bool checked);
+    void on_videoFileDialog_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 
     void configureImageFileName();
+    void configureVideoFileName();
     void tick();
 
 private:
@@ -88,6 +90,7 @@ private:
     MovingAverage<Real> m_channelPowerDbAvg;
 
     QString m_imageFileName;
+    QString m_videoFileName;
     quint32 m_recordLength;
     int m_recordSampleRate;
     int m_samplesCount;

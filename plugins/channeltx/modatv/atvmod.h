@@ -80,6 +80,27 @@ public:
         { }
     };
 
+    class MsgConfigureVideoFileName : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getFileName() const { return m_fileName; }
+
+        static MsgConfigureVideoFileName* create(const QString& fileName)
+        {
+            return new MsgConfigureVideoFileName(fileName);
+        }
+
+    private:
+        QString m_fileName;
+
+        MsgConfigureVideoFileName(const QString& fileName) :
+            Message(),
+            m_fileName(fileName)
+        { }
+    };
+
     ATVMod();
     ~ATVMod();
 
@@ -207,6 +228,7 @@ private:
     QMutex   m_settingsMutex;
     int      m_horizontalCount;  //!< current point index on line
     int      m_lineCount;        //!< current line index in frame
+    float    m_fps;              //!< resulting frames per second
 
     MovingAverage<Real> m_movingAverage;
     quint32 m_levelCalcCount;
@@ -216,6 +238,13 @@ private:
     cv::Mat m_imageOriginal;     //!< original non resized image
     cv::Mat m_image;             //!< resized image for transmission at given rate
     bool m_imageOK;
+
+    cv::VideoCapture m_video;    //!< current video capture
+    cv::Mat m_frame;             //!< current frame
+    float m_videoFPS;
+    int m_videoWidth;
+    int m_videoHeight;
+    bool m_videoOK;
 
     static const float m_blackLevel;
     static const float m_spanLevel;
@@ -229,6 +258,7 @@ private:
     void modulateSample();
     void applyStandard();
     void openImage(const QString& fileName);
+    void openVideo(const QString& fileName);
     void resizeImage();
 
     inline void pullImageLine(Real& sample)

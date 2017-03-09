@@ -235,8 +235,21 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked)
     if (fileName != "")
     {
         m_imageFileName = fileName;
-        ui->recordFileText->setText(m_imageFileName);
+        ui->imageFileText->setText(m_imageFileName);
         configureImageFileName();
+    }
+}
+
+void ATVModGUI::on_videoFileDialog_clicked(bool checked)
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v)"));
+
+    if (fileName != "")
+    {
+        m_videoFileName = fileName;
+        ui->videoFileText->setText(m_videoFileName);
+        configureVideoFileName();
     }
 }
 
@@ -244,6 +257,13 @@ void ATVModGUI::configureImageFileName()
 {
     qDebug() << "ATVModGUI::configureImageFileName: " << m_imageFileName.toStdString().c_str();
     ATVMod::MsgConfigureImageFileName* message = ATVMod::MsgConfigureImageFileName::create(m_imageFileName);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
+void ATVModGUI::configureVideoFileName()
+{
+    qDebug() << "ATVModGUI::configureVideoFileName: " << m_videoFileName.toStdString().c_str();
+    ATVMod::MsgConfigureVideoFileName* message = ATVMod::MsgConfigureVideoFileName::create(m_videoFileName);
     m_atvMod->getInputMessageQueue()->push(message);
 }
 

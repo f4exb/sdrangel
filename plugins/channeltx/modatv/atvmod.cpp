@@ -23,6 +23,7 @@
 
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVMod, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureImageFileName, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileName, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -251,8 +252,12 @@ bool ATVMod::handleMessage(const Message& cmd)
     {
         MsgConfigureImageFileName& conf = (MsgConfigureImageFileName&) cmd;
         openImage(conf.getFileName());
-//        m_fileName = conf.getFileName(); // TODO
-//        openFileStream();
+        return true;
+    }
+    else if (MsgConfigureVideoFileName::match(cmd))
+    {
+        MsgConfigureVideoFileName& conf = (MsgConfigureVideoFileName&) cmd;
+        openVideo(conf.getFileName());
         return true;
     }
     else
@@ -343,6 +348,7 @@ void ATVMod::applyStandard()
         m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
         m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
         m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_fps              = 30.0f;
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
@@ -364,6 +370,7 @@ void ATVMod::applyStandard()
         m_linesPerVBar     = m_nbImageLines2 / m_nbBars;
         m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
         m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_fps              = 25.0f;
     }
 
     if (m_imageOK)
@@ -381,6 +388,19 @@ void ATVMod::openImage(const QString& fileName)
 	{
 	    resizeImage();
 	}
+}
+
+void ATVMod::openVideo(const QString& fileName)
+{
+    m_videoOK = m_video.open(qPrintable(fileName));
+
+    if (m_videoOK)
+    {
+        m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
+        m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
+        m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
+        qDebug("ATVMod::openVideo(: FPS: %f size: %d x %d", m_videoFPS, m_videoWidth, m_videoHeight);
+    }
 }
 
 void ATVMod::resizeImage()

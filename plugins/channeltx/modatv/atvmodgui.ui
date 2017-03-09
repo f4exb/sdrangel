@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>342</width>
-    <height>363</height>
+    <height>366</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -466,18 +466,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="fileNameLayout">
-      <item>
-       <widget class="QLabel" name="recordFileText">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="playControllLayout">
+     <layout class="QHBoxLayout" name="imagFileLayout">
       <item>
        <widget class="QPushButton" name="imageFileDialog">
         <property name="minimumSize">
@@ -505,12 +494,23 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QLabel" name="imageFileText">
+        <property name="text">
+         <string>...</string>
         </property>
        </widget>
       </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="videoFileLayout">
       <item>
        <widget class="QPushButton" name="videoFileDialog">
         <property name="minimumSize">
@@ -537,6 +537,17 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QLabel" name="videoFileText">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="playControllLayout">
       <item>
        <widget class="ButtonSwitch" name="playLoop">
         <property name="toolTip">
