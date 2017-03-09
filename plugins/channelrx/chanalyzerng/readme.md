@@ -87,7 +87,7 @@ This is the cut-off frequency of the highpass filter in kHz
 
 ![Channel Analyzer NG plugin scope1 controls](../../../doc/img/ChAnalyzerNG_plugin_scope1.png)
 
-<h3>1. X only display</h2>
+<h3>1. X only display</h3>
 
 ![Channel Analyzer NG plugin scope1 controls](../../../doc/img/ChAnalyzerNG_plugin_x.png)
 
@@ -95,7 +95,7 @@ Scope displays are categorized in the X display for trace index 0 and Y display 
 
 This button selects the "X" trace display only on the whole surface of the scope screen
 
-<h3>2. Y only display</h2>
+<h3>2. Y only display</h3>
 
 ![Channel Analyzer NG plugin scope1 controls](../../../doc/img/ChAnalyzerNG_plugin_y.png)
 
