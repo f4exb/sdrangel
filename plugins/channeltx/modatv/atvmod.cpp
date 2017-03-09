@@ -76,9 +76,18 @@ void ATVMod::configure(MessageQueue* messageQueue,
             ATVModInput atvModInput,
             Real uniformLevel,
 			ATVModulation atvModulation,
+            bool videoPlayLoop,
+            bool videoPlay,
             bool channelMute)
 {
-    Message* cmd = MsgConfigureATVMod::create(rfBandwidth, atvStd, atvModInput, uniformLevel, atvModulation);
+    Message* cmd = MsgConfigureATVMod::create(
+            rfBandwidth,
+            atvStd,
+            atvModInput,
+            uniformLevel,
+            atvModulation,
+            videoPlayLoop,
+            videoPlay);
     messageQueue->push(cmd);
 }
 
@@ -185,7 +194,7 @@ void ATVMod::pullVideo(Real& sample)
             m_lineCount = 0;
             m_evenImage = !m_evenImage;
 
-            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK)
+            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay))
             {
             	int grabOK;
             	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
@@ -212,7 +221,10 @@ void ATVMod::pullVideo(Real& sample)
             	}
             	else
             	{
-            		// TODO: handle play loop
+            	    if (m_running.m_videoPlayLoop) // play loop
+            	    {
+            	        seekVideoFileStream(0);
+            	    }
             	}
 
             	if (m_videoFPSCount < m_videoFPS)
@@ -287,6 +299,8 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_atvStd = cfg.getATVStd();
         m_config.m_uniformLevel = cfg.getUniformLevel();
         m_config.m_atvModulation = cfg.getModulation();
+        m_config.m_videoPlayLoop = cfg.getVideoPlayLoop();
+        m_config.m_videoPlay = cfg.getVideoPlay();
 
         apply();
 
@@ -295,7 +309,9 @@ bool ATVMod::handleMessage(const Message& cmd)
                 << " m_atvStd: " << (int) m_config.m_atvStd
                 << " m_atvModInput: " << (int) m_config.m_atvModInput
                 << " m_uniformLevel: " << m_config.m_uniformLevel
-				<< " m_atvModulation: " << (int) m_config.m_atvModulation;
+				<< " m_atvModulation: " << (int) m_config.m_atvModulation
+				<< " m_videoPlayLoop: " << m_config.m_videoPlayLoop
+				<< " m_videoPlay: " << m_config.m_videoPlay;
 
         return true;
     }
@@ -382,6 +398,8 @@ void ATVMod::apply(bool force)
     m_running.m_atvStd = m_config.m_atvStd;
     m_running.m_uniformLevel = m_config.m_uniformLevel;
     m_running.m_atvModulation = m_config.m_atvModulation;
+    m_running.m_videoPlayLoop = m_config.m_videoPlayLoop;
+    m_running.m_videoPlay = m_config.m_videoPlay;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)

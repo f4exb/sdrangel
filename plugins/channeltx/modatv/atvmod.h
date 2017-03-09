@@ -194,6 +194,8 @@ public:
             ATVModInput atvModInput,
             Real uniformLevel,
 			ATVModulation atvModulation,
+			bool videoPlayLoop,
+			bool videoPlay,
             bool channelMute);
 
     virtual void pull(Sample& sample);
@@ -226,15 +228,26 @@ private:
         ATVModInput getATVModInput() const { return m_atvModInput; }
         Real getUniformLevel() const { return m_uniformLevel; }
         ATVModulation getModulation() const { return m_atvModulation; }
+        bool getVideoPlayLoop() const { return m_videoPlayLoop; }
+        bool getVideoPlay() const { return m_videoPlay; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
-			ATVModulation atvModulation)
+			ATVModulation atvModulation,
+			bool videoPlayLoop,
+			bool videoPlay)
         {
-            return new MsgConfigureATVMod(rfBandwidth, atvStd, atvModInput, uniformLevel, atvModulation);
+            return new MsgConfigureATVMod(
+                    rfBandwidth,
+                    atvStd,
+                    atvModInput,
+                    uniformLevel,
+                    atvModulation,
+                    videoPlayLoop,
+                    videoPlay);
         }
 
     private:
@@ -243,19 +256,25 @@ private:
         ATVModInput   m_atvModInput;
         Real          m_uniformLevel;
         ATVModulation m_atvModulation;
+        bool          m_videoPlayLoop;
+        bool          m_videoPlay;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
                 ATVStd atvStd,
                 ATVModInput atvModInput,
                 Real uniformLevel,
-				ATVModulation atvModulation) :
+				ATVModulation atvModulation,
+				bool videoPlayLoop,
+				bool videoPlay) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_atvStd(atvStd),
             m_atvModInput(atvModInput),
             m_uniformLevel(uniformLevel),
-			m_atvModulation(atvModulation)
+			m_atvModulation(atvModulation),
+			m_videoPlayLoop(videoPlayLoop),
+			m_videoPlay(videoPlay)
         { }
     };
 
@@ -268,6 +287,8 @@ private:
         ATVModInput   m_atvModInput;          //!< Input source type
         Real          m_uniformLevel;         //!< Percentage between black and white for uniform screen display
         ATVModulation m_atvModulation;        //!< RF modulation type
+        bool          m_videoPlayLoop;        //!< Play video in a loop
+        bool          m_videoPlay;            //!< True to play video and false to pause
 
         Config() :
             m_outputSampleRate(-1),
@@ -276,7 +297,9 @@ private:
             m_atvStd(ATVStdPAL625),
             m_atvModInput(ATVModInputHBars),
             m_uniformLevel(0.5f),
-			m_atvModulation(ATVModulationAM)
+			m_atvModulation(ATVModulationAM),
+			m_videoPlayLoop(false),
+			m_videoPlay(false)
         { }
     };
 

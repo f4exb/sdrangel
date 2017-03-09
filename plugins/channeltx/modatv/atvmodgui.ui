@@ -169,7 +169,7 @@
         <item>
          <widget class="QToolButton" name="channelMute">
           <property name="toolTip">
-           <string>Mute/Unmute channel</string>
+           <string>Mute/Unmute channel (not implemented)</string>
           </property>
           <property name="text">
            <string>...</string>
@@ -223,7 +223,7 @@
       <item>
        <widget class="QSlider" name="rfBW">
         <property name="toolTip">
-         <string>Demodulator (RF) bandwidth</string>
+         <string>Modulator (RF) bandwidth when interpolation takes place</string>
         </property>
         <property name="minimum">
          <number>1</number>
@@ -285,7 +285,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio input gain</string>
+         <string>Video input gain (not implemented)</string>
         </property>
         <property name="maximum">
          <number>20</number>
@@ -346,6 +346,9 @@
      <layout class="QHBoxLayout" name="recordFileSelectLayout">
       <item>
        <widget class="QComboBox" name="standard">
+        <property name="toolTip">
+         <string>TV standard</string>
+        </property>
         <item>
          <property name="text">
           <string>PAL625L</string>
@@ -355,6 +358,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="inputSelect">
+        <property name="toolTip">
+         <string>Video pattern or input source</string>
+        </property>
         <item>
          <property name="text">
           <string>Uniform</string>

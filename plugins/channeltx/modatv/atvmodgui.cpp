@@ -270,6 +270,29 @@ void ATVModGUI::on_videoFileDialog_clicked(bool checked)
     }
 }
 
+void ATVModGUI::on_playLoop_toggled(bool checked)
+{
+    applySettings();
+}
+
+void ATVModGUI::on_play_toggled(bool checked)
+{
+    ui->navTimeSlider->setEnabled(!checked);
+    m_enableNavTime = !checked;
+    applySettings();
+}
+
+void ATVModGUI::on_navTimeSlider_valueChanged(int value)
+{
+    if (m_enableNavTime && ((value >= 0) && (value <= 100)))
+    {
+        int seekFame = (m_videoLength * value) / 100;
+        ATVMod::MsgConfigureVideoFileSourceSeek* message = ATVMod::MsgConfigureVideoFileSourceSeek::create(value);
+        m_atvMod->getInputMessageQueue()->push(message);
+    }
+}
+
+
 void ATVModGUI::configureImageFileName()
 {
     qDebug() << "ATVModGUI::configureImageFileName: " << m_imageFileName.toStdString().c_str();
@@ -380,6 +403,8 @@ void ATVModGUI::applySettings()
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
 			(ATVMod::ATVModulation) ui->modulation->currentIndex(),
+			ui->playLoop->isChecked(),
+			ui->play->isChecked(),
 			ui->channelMute->isChecked());
 	}
 }

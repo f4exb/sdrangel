@@ -69,6 +69,10 @@ private slots:
     void on_imageFileDialog_clicked(bool checked);
     void on_videoFileDialog_clicked(bool checked);
 
+    void on_play_toggled(bool checked);
+    void on_playLoop_toggled(bool checked);
+    void on_navTimeSlider_valueChanged(int value);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 
