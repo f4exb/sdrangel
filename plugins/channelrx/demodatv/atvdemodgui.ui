@@ -271,7 +271,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Half image (no interleave)</string>
+     <string>Render only half of the frames for slow processors</string>
     </property>
     <property name="text">
      <string>Half</string>

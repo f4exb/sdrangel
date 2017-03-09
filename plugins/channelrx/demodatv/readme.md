@@ -28,15 +28,15 @@ This combo lets you chose between a 25 FPS or 30 FPS standard.
 
 <h3>4: Horizontal sync</h3>
 
-Use this button to toggle horizontal synchronization processing.
+Check/uncheck this box to toggle horizontal synchronization processing.
 
 <h3>5: Vertical sync</h3>
 
-Use this button to toggle vertical synchronization processing.
+Check/uncheck this box to toggle vertical synchronization processing.
 
-<h3>6: Half image</h3>
+<h3>6: Half frames</h3>
 
-Use this button to disable (on) or enable interlacing of the two half images (off).
+Check this box to render only half of the frames for slow processors.
 
 <h3>7: Reset defaults</h3>
 
