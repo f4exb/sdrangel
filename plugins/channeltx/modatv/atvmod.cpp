@@ -181,7 +181,7 @@ void ATVMod::pullVideo(Real& sample)
             m_lineCount = 0;
             m_evenImage = !m_evenImage;
 
-            if (m_running.m_atvModInput == ATVModInputVideo)
+            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK)
             {
             	int grabOK;
             	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
@@ -199,8 +199,12 @@ void ATVMod::pullVideo(Real& sample)
             	{
             		cv::Mat colorFrame;
             		m_video.retrieve(colorFrame);
-            		cv::cvtColor(colorFrame, m_frameOriginal, CV_BGR2GRAY);
-            		resizeVideo();
+
+            		if (!colorFrame.empty()) // some frames may not come out properly
+            		{
+            		    cv::cvtColor(colorFrame, m_frameOriginal, CV_BGR2GRAY);
+            		    resizeVideo();
+            		}
             	}
             	else
             	{
@@ -450,8 +454,19 @@ void ATVMod::openVideo(const QString& fileName)
         m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
-        qDebug("ATVMod::openVideo(: FPS: %f size: %d x %d", m_videoFPS, m_videoWidth, m_videoHeight);
+        int ex = static_cast<int>(m_video.get(CV_CAP_PROP_FOURCC));
+        char ext[] = {(char)(ex & 0XFF),(char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24),0};
+        qDebug("ATVMod::openVideo: %s FPS: %f size: %d x %d codec: %s",
+                m_video.isOpened() ? "OK" : "KO",
+                m_videoFPS,
+                m_videoWidth,
+                m_videoHeight,
+                ext);
         calculateVideoSizes();
+    }
+    else
+    {
+        qDebug("ATVMod::openVideo: cannot open video file");
     }
 }
 
