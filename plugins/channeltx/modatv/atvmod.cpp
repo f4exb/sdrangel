@@ -24,6 +24,10 @@
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVMod, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureImageFileName, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileName, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceSeek, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -307,6 +311,30 @@ bool ATVMod::handleMessage(const Message& cmd)
         openVideo(conf.getFileName());
         return true;
     }
+    else if (MsgConfigureVideoFileSourceSeek::match(cmd))
+    {
+        MsgConfigureVideoFileSourceSeek& conf = (MsgConfigureVideoFileSourceSeek&) cmd;
+        int seekPercentage = conf.getPercentage();
+        seekVideoFileStream(seekPercentage);
+        return true;
+    }
+    else if (MsgConfigureVideoFileSourceStreamTiming::match(cmd))
+    {
+        int framesCount;
+
+        if (m_videoOK && m_video.isOpened())
+        {
+            framesCount = m_video.get(CV_CAP_PROP_POS_FRAMES);;
+        } else {
+            framesCount = 0;
+        }
+
+        MsgReportVideoFileSourceStreamTiming *report;
+        report = MsgReportVideoFileSourceStreamTiming::create(framesCount);
+        getOutputMessageQueue()->push(report);
+
+        return true;
+    }
     else
     {
         return false;
@@ -454,15 +482,22 @@ void ATVMod::openVideo(const QString& fileName)
         m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
+        m_videoLength = (int) m_video.get(CV_CAP_PROP_FRAME_COUNT);
         int ex = static_cast<int>(m_video.get(CV_CAP_PROP_FOURCC));
         char ext[] = {(char)(ex & 0XFF),(char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24),0};
-        qDebug("ATVMod::openVideo: %s FPS: %f size: %d x %d codec: %s",
+
+        qDebug("ATVMod::openVideo: %s FPS: %f size: %d x %d #frames: %d codec: %s",
                 m_video.isOpened() ? "OK" : "KO",
                 m_videoFPS,
                 m_videoWidth,
                 m_videoHeight,
+                m_videoLength,
                 ext);
         calculateVideoSizes();
+
+        MsgReportVideoFileSourceStreamData *report;
+        report = MsgReportVideoFileSourceStreamData::create(m_videoFPS, m_videoLength);
+        getOutputMessageQueue()->push(report);
     }
     else
     {
@@ -493,3 +528,16 @@ void ATVMod::resizeVideo()
 		cv::resize(m_frameOriginal, m_frame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
 	}
 }
+
+void ATVMod::seekVideoFileStream(int seekPercentage)
+{
+    QMutexLocker mutexLocker(&m_settingsMutex);
+
+    if ((m_videoOK) && m_video.isOpened())
+    {
+        int seekPoint = ((m_videoLength * seekPercentage) / 100);
+        m_video.set(CV_CAP_PROP_POS_FRAMES, seekPoint);
+    }
+}
+
+

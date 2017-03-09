@@ -152,7 +152,24 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 
 bool ATVModGUI::handleMessage(const Message& message)
 {
-    return false;
+    if (ATVMod::MsgReportVideoFileSourceStreamData::match(message))
+    {
+        m_videoFrameRate = ((ATVMod::MsgReportVideoFileSourceStreamData&)message).getFrameRate();
+        m_videoLength = ((ATVMod::MsgReportVideoFileSourceStreamData&)message).getVideoLength();
+        m_frameCount = 0;
+        updateWithStreamData();
+        return true;
+    }
+    else if (ATVMod::MsgReportVideoFileSourceStreamTiming::match(message))
+    {
+        m_frameCount = ((ATVMod::MsgReportVideoFileSourceStreamTiming&)message).getFrameCount();
+        updateWithStreamTime();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void ATVModGUI::viewChanged()
@@ -289,9 +306,9 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_channelPowerDbAvg(20,0),
-    m_recordLength(0),
-    m_recordSampleRate(48000),
-    m_samplesCount(0),
+    m_videoLength(0),
+    m_videoFrameRate(48000),
+    m_frameCount(0),
     m_tickCount(0),
     m_enableNavTime(false)
 {
@@ -386,4 +403,46 @@ void ATVModGUI::tick()
 	Real powDb = CalcDb::dbPower(m_atvMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+    if (((++m_tickCount & 0xf) == 0) && (ui->inputSelect->currentIndex() == (int) ATVMod::ATVModInputVideo))
+    {
+        ATVMod::MsgConfigureVideoFileSourceStreamTiming* message = ATVMod::MsgConfigureVideoFileSourceStreamTiming::create();
+        m_atvMod->getInputMessageQueue()->push(message);
+    }
 }
+
+void ATVModGUI::updateWithStreamData()
+{
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(m_videoLength / m_videoFrameRate);
+    QString s_time = recordLength.toString("hh:mm:ss");
+    ui->recordLengthText->setText(s_time);
+    updateWithStreamTime();
+}
+
+void ATVModGUI::updateWithStreamTime()
+{
+    int t_sec = 0;
+    int t_msec = 0;
+
+    if (m_videoFrameRate > 0.0f)
+    {
+        float secs = m_frameCount / m_videoFrameRate;
+        t_sec = (int) secs;
+        t_msec = (int) ((secs - t_sec) * 1000.0f);
+    }
+
+    QTime t(0, 0, 0, 0);
+    t = t.addSecs(t_sec);
+    t = t.addMSecs(t_msec);
+    QString s_timems = t.toString("hh:mm:ss.zzz");
+    QString s_time = t.toString("hh:mm:ss");
+    ui->relTimeText->setText(s_timems);
+
+    if (!m_enableNavTime)
+    {
+        float posRatio = (t_sec *  m_videoFrameRate) / m_videoLength;
+        ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+    }
+}
+

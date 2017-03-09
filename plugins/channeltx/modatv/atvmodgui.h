@@ -91,9 +91,9 @@ private:
 
     QString m_imageFileName;
     QString m_videoFileName;
-    quint32 m_recordLength;
-    int m_recordSampleRate;
-    int m_samplesCount;
+    quint32 m_videoLength;   //!< video file length in seconds
+    float m_videoFrameRate;  //!< video file frame rate
+    int m_frameCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
 
@@ -102,6 +102,8 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+    void updateWithStreamData();
+    void updateWithStreamTime();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

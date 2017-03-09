@@ -101,6 +101,90 @@ public:
         { }
     };
 
+    class MsgConfigureVideoFileSourceSeek : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getPercentage() const { return m_seekPercentage; }
+
+        static MsgConfigureVideoFileSourceSeek* create(int seekPercentage)
+        {
+            return new MsgConfigureVideoFileSourceSeek(seekPercentage);
+        }
+
+    protected:
+        int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
+
+        MsgConfigureVideoFileSourceSeek(int seekPercentage) :
+            Message(),
+            m_seekPercentage(seekPercentage)
+        { }
+    };
+
+    class MsgConfigureVideoFileSourceStreamTiming : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgConfigureVideoFileSourceStreamTiming* create()
+        {
+            return new MsgConfigureVideoFileSourceStreamTiming();
+        }
+
+    private:
+
+        MsgConfigureVideoFileSourceStreamTiming() :
+            Message()
+        { }
+    };
+
+    class MsgReportVideoFileSourceStreamTiming : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFrameCount() const { return m_frameCount; }
+
+        static MsgReportVideoFileSourceStreamTiming* create(int frameCount)
+        {
+            return new MsgReportVideoFileSourceStreamTiming(frameCount);
+        }
+
+    protected:
+        int m_frameCount;
+
+        MsgReportVideoFileSourceStreamTiming(int frameCount) :
+            Message(),
+            m_frameCount(frameCount)
+        { }
+    };
+
+    class MsgReportVideoFileSourceStreamData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFrameRate() const { return m_frameRate; }
+        quint32 getVideoLength() const { return m_videoLength; }
+
+        static MsgReportVideoFileSourceStreamData* create(int frameRate,
+                quint32 recordLength)
+        {
+            return new MsgReportVideoFileSourceStreamData(frameRate, recordLength);
+        }
+
+    protected:
+        int m_frameRate;
+        int m_videoLength; //!< Video length in frames
+
+        MsgReportVideoFileSourceStreamData(int frameRate,
+                int videoLength) :
+            Message(),
+            m_frameRate(frameRate),
+            m_videoLength(videoLength)
+        { }
+    };
+
     ATVMod();
     ~ATVMod();
 
@@ -250,6 +334,7 @@ private:
     float m_videoFPSq;           //!< current video FPS sacaling factor
     float m_videoFPSCount;       //!< current video FPS fractional counter
     int m_videoPrevFPSCount;     //!< current video FPS previous integer counter
+    int m_videoLength;           //!< current video length in frames
     bool m_videoOK;
 
     static const float m_blackLevel;
@@ -268,6 +353,7 @@ private:
     void resizeImage();
     void calculateVideoSizes();
     void resizeVideo();
+    void seekVideoFileStream(int seekPercentage);
 
     inline void pullImageLine(Real& sample)
     {
