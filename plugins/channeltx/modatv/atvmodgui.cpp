@@ -260,7 +260,7 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked)
 void ATVModGUI::on_videoFileDialog_clicked(bool checked)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v)"));
+        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.vob)"));
 
     if (fileName != "")
     {
