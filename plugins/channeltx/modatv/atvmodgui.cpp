@@ -71,7 +71,6 @@ void ATVModGUI::resetToDefaults()
 
 	ui->rfBW->setValue(10);
 	ui->uniformLevel->setValue(35);
-	ui->volume->setValue(10);
 	ui->standard->setCurrentIndex(0);
 	ui->inputSelect->setCurrentIndex(0);
 	ui->deltaFrequency->setValue(0);
@@ -91,7 +90,6 @@ QByteArray ATVModGUI::serialize() const
 	s.writeS32(4, ui->standard->currentIndex());
     s.writeS32(5, ui->inputSelect->currentIndex());
 	s.writeU32(6, m_channelMarker.getColor().rgb());
-	s.writeS32(7, ui->volume->value());
     s.writeS32(8, ui->modulation->currentIndex());
 
 	return s.final();
@@ -132,8 +130,6 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 			m_channelMarker.setColor(u32tmp);
         }
 
-        d.readS32(7, &tmp, 10);
-        ui->volume->setValue(tmp);
         d.readS32(8, &tmp, 0);
         ui->modulation->setCurrentIndex(tmp);
 
@@ -233,12 +229,6 @@ void ATVModGUI::on_inputSelect_currentIndexChanged(int index)
     applySettings();
 }
 
-void ATVModGUI::on_volume_valueChanged(int value)
-{
-    ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-    applySettings();
-}
-
 void ATVModGUI::on_channelMute_toggled(bool checked)
 {
 	applySettings();
@@ -260,7 +250,7 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked)
 void ATVModGUI::on_videoFileDialog_clicked(bool checked)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.vob)"));
+        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.vob *.wmv)"));
 
     if (fileName != "")
     {
