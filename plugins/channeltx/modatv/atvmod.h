@@ -52,7 +52,8 @@ public:
         ATVModInputHGradient,
         ATVModInputVGradient,
         ATVModInputImage,
-        ATVModInputVideo
+        ATVModInputVideo,
+		ATVModInputCamera
     } ATVModInput;
 
     typedef enum
@@ -60,12 +61,6 @@ public:
     	ATVModulationAM,
 		ATVModulationFM
     } ATVModulation;
-
-    typedef struct
-    {
-    	cv::VideoCapture m_camera;
-    	int m_cameraNumber;
-    } ATVCamera;
 
     class MsgConfigureImageFileName : public Message
     {
@@ -193,6 +188,68 @@ public:
         { }
     };
 
+    class MsgConfigureCameraIndex : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getIndex() const { return m_index; }
+
+        static MsgConfigureCameraIndex* create(int index)
+        {
+            return new MsgConfigureCameraIndex(index);
+        }
+
+    private:
+        int m_index;
+
+        MsgConfigureCameraIndex(int index) :
+            Message(),
+			m_index(index)
+        { }
+    };
+
+    class MsgReportCameraData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getdeviceNumber() const { return m_deviceNumber; }
+        int getFPS() const { return m_fps; }
+        int getWidth() const { return m_width; }
+        int getHeight() const { return m_height; }
+
+        static MsgReportCameraData* create(
+        		int deviceNumber,
+				int fps,
+				int width,
+				int height)
+        {
+            return new MsgReportCameraData(
+            		deviceNumber,
+					fps,
+					width,
+					height);
+        }
+
+    protected:
+        int m_deviceNumber;
+        int m_fps;
+        int m_width;
+        int m_height;
+
+        MsgReportCameraData(
+        		int deviceNumber,
+                int fps,
+				int width,
+				int height) :
+            Message(),
+			m_deviceNumber(deviceNumber),
+			m_fps(fps),
+			m_width(width),
+			m_height(height)
+        { }
+    };
+
     ATVMod();
     ~ATVMod();
 
@@ -292,6 +349,30 @@ private:
         { }
     };
 
+    typedef struct ATVCamera
+    {
+    	cv::VideoCapture m_camera;    //!< camera object
+        cv::Mat m_videoframeOriginal; //!< camera non resized image
+        cv::Mat m_videoFrame;         //!< displayable camera frame
+    	int m_cameraNumber;           //!< camera device number
+        float m_videoFPS;             //!< camera FPS rate
+        int m_videoWidth;             //!< camera frame width
+        int m_videoHeight;            //!< camera frame height
+        float m_videoFx;              //!< camera horizontal scaling factor
+        float m_videoFy;              //!< camera vertictal scaling factor
+        float m_videoFPSq;            //!< camera FPS sacaling factor
+
+        ATVCamera() :
+        	m_cameraNumber(-1),
+			m_videoFPS(25),
+        	m_videoWidth(1),
+			m_videoHeight(1),
+			m_videoFx(1.0f),
+			m_videoFy(1.0f),
+			m_videoFPSq(1.0f)
+        {}
+    };
+
     struct Config
     {
         int           m_outputSampleRate;     //!< sample rate from channelizer
@@ -361,8 +442,8 @@ private:
     bool m_imageOK;
 
     cv::VideoCapture m_video;    //!< current video capture
-    cv::Mat m_frameOriginal;     //!< current frame from video
-    cv::Mat m_frame;             //!< current displayable video frame
+    cv::Mat m_videoframeOriginal; //!< current frame from video
+    cv::Mat m_videoFrame;        //!< current displayable video frame
     float m_videoFPS;            //!< current video FPS rate
     int m_videoWidth;            //!< current video frame width
     int m_videoHeight;           //!< current video frame height
@@ -376,6 +457,7 @@ private:
     bool m_videoOK;
 
     std::vector<ATVCamera> m_cameras; //!< vector of available cameras
+    int m_cameraIndex;           //!< curent camera index in list of available cameras
 
     static const float m_blackLevel;
     static const float m_spanLevel;
@@ -396,6 +478,8 @@ private:
     void seekVideoFileStream(int seekPercentage);
     void scanCameras();
     void releaseCameras();
+    void calculateCamerasSizes();
+    void resizeCameras();
 
     inline void pullImageLine(Real& sample)
     {
@@ -450,7 +534,7 @@ private:
                 }
                 break;
             case ATVModInputVideo:
-                if (!m_videoOK || (iLineImage < 0) || m_frame.empty())
+                if (!m_videoOK || (iLineImage < 0) || m_videoFrame.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 }
@@ -459,9 +543,9 @@ private:
                 	unsigned char pixv;
 
                 	if (m_interlaced) {
-                        pixv = m_frame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
+                        pixv = m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                 	} else {
-                        pixv = m_frame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
+                        pixv = m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
                 	}
 
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;

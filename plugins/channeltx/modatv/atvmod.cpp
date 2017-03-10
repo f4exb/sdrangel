@@ -28,6 +28,8 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -46,7 +48,8 @@ ATVMod::ATVMod() :
     m_videoFPSCount(0.0f),
 	m_videoPrevFPSCount(0),
 	m_videoEOF(false),
-	m_videoOK(false)
+	m_videoOK(false),
+	m_cameraIndex(-1)
 {
     setObjectName("ATVMod");
     scanCameras();
@@ -218,7 +221,7 @@ void ATVMod::pullVideo(Real& sample)
 
             		if (!colorFrame.empty()) // some frames may not come out properly
             		{
-            		    cv::cvtColor(colorFrame, m_frameOriginal, CV_BGR2GRAY);
+            		    cv::cvtColor(colorFrame, m_videoframeOriginal, CV_BGR2GRAY);
             		    resizeVideo();
             		}
             	}
@@ -354,6 +357,23 @@ bool ATVMod::handleMessage(const Message& cmd)
         getOutputMessageQueue()->push(report);
 
         return true;
+    }
+    else if (MsgConfigureCameraIndex::match(cmd))
+    {
+    	MsgConfigureCameraIndex& cfg = (MsgConfigureCameraIndex&) cmd;
+    	int index = cfg.getIndex();
+
+    	if (index < m_cameras.size())
+    	{
+    		m_cameraIndex = index;
+    		MsgReportCameraData *report;
+            report = MsgReportCameraData::create(
+            		m_cameras[m_cameraIndex].m_cameraNumber,
+    				m_cameras[m_cameraIndex].m_videoFPS,
+    				m_cameras[m_cameraIndex].m_videoWidth,
+    				m_cameras[m_cameraIndex].m_videoHeight);
+            getOutputMessageQueue()->push(report);
+    	}
     }
     else
     {
@@ -545,13 +565,34 @@ void ATVMod::calculateVideoSizes()
     m_videoFPSCount = m_videoFPSq;
     m_videoPrevFPSCount = 0;
 
-	qDebug("ATVMod::resizeVideo: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
+	qDebug("ATVMod::calculateVideoSizes: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
 }
 
 void ATVMod::resizeVideo()
 {
-	if (!m_frameOriginal.empty()) {
-		cv::resize(m_frameOriginal, m_frame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
+	if (!m_videoframeOriginal.empty()) {
+		cv::resize(m_videoframeOriginal, m_videoFrame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
+	}
+}
+
+void ATVMod::calculateCamerasSizes()
+{
+    for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
+	{
+		it->m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) it->m_videoHeight;
+		it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
+		it->m_videoFPSq = it->m_videoFPS / m_fps;
+        qDebug("ATVMod::calculateCamerasSizes: [%d] factors: %f x %f FPSq: %f", (int) (it - m_cameras.begin()),  it->m_videoFx, it->m_videoFy, it->m_videoFPSq);
+	}
+}
+
+void ATVMod::resizeCameras()
+{
+    for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
+	{
+		if (!it->m_videoframeOriginal.empty()) {
+			cv::resize(it->m_videoframeOriginal, it->m_videoFrame, cv::Size(), it->m_videoFx, it->m_videoFy); // resize current frame
+		}
 	}
 }
 
@@ -578,10 +619,28 @@ void ATVMod::scanCameras()
 		m_cameras.back().m_cameraNumber = i;
 		m_cameras.back().m_camera.open(i);
 
-		if (!m_cameras.back().m_camera.isOpened())
+		if (m_cameras.back().m_camera.isOpened())
+		{
+			m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(CV_CAP_PROP_FPS);
+			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_WIDTH);
+			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+		}
+		else
 		{
 			m_cameras.pop_back();
 		}
+	}
+
+	if (m_cameras.size() > 0)
+	{
+		m_cameraIndex = 0;
+		MsgReportCameraData *report;
+        report = MsgReportCameraData::create(
+        		m_cameras[0].m_cameraNumber,
+				m_cameras[0].m_videoFPS,
+				m_cameras[0].m_videoWidth,
+				m_cameras[0].m_videoHeight);
+        getOutputMessageQueue()->push(report);
 	}
 }
 

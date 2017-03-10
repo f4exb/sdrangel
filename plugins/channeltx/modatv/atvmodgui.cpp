@@ -162,6 +162,11 @@ bool ATVModGUI::handleMessage(const Message& message)
         updateWithStreamTime();
         return true;
     }
+    else if (ATVMod::MsgReportCameraData::match(message))
+    {
+    	// TODO
+    	return true;
+    }
     else
     {
         return false;
