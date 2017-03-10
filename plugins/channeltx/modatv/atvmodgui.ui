@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>342</width>
-    <height>366</height>
+    <height>364</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -283,6 +283,12 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="toolTip">
          <string>video signal level in % of 0:1 range</string>
@@ -636,6 +642,40 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_6">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="camLayout">
+      <item>
+       <widget class="QLabel" name="camLabel">
+        <property name="text">
+         <string>Cam</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="camSelect"/>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

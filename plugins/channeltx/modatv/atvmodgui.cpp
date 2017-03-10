@@ -356,6 +356,13 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	connect(m_atvMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     connect(m_atvMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+
+    std::vector<int> cameraNumbers;
+    m_atvMod->getCameraNumbers(cameraNumbers);
+
+    for (std::vector<int>::iterator it = cameraNumbers.begin(); it != cameraNumbers.end(); ++it) {
+        ui->camSelect->addItem(tr("%1").arg(*it));
+    }
 }
 
 ATVModGUI::~ATVModGUI()

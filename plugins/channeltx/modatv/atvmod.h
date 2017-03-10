@@ -20,6 +20,8 @@
 #include <QObject>
 #include <QMutex>
 
+#include <vector>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -58,6 +60,12 @@ public:
     	ATVModulationAM,
 		ATVModulationFM
     } ATVModulation;
+
+    typedef struct
+    {
+    	cv::VideoCapture m_camera;
+    	int m_cameraNumber;
+    } ATVCamera;
 
     class MsgConfigureImageFileName : public Message
     {
@@ -205,6 +213,12 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     Real getMagSq() const { return m_movingAverage.average(); }
+
+    void getCameraNumbers(std::vector<int>& numbers) {
+    	for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it) {
+    		numbers.push_back(it->m_cameraNumber);
+    	}
+    }
 
     static int getSampleRateUnits(ATVStd std);
 
@@ -361,6 +375,8 @@ private:
     bool m_videoEOF;             //!< current video has reached end of file
     bool m_videoOK;
 
+    std::vector<ATVCamera> m_cameras; //!< vector of available cameras
+
     static const float m_blackLevel;
     static const float m_spanLevel;
     static const int m_levelNbSamples;
@@ -378,6 +394,8 @@ private:
     void calculateVideoSizes();
     void resizeVideo();
     void seekVideoFileStream(int seekPercentage);
+    void scanCameras();
+    void releaseCameras();
 
     inline void pullImageLine(Real& sample)
     {

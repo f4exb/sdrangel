@@ -49,6 +49,7 @@ ATVMod::ATVMod() :
 	m_videoOK(false)
 {
     setObjectName("ATVMod");
+    scanCameras();
 
     m_config.m_outputSampleRate = 1000000;
     m_config.m_inputFrequencyOffset = 0;
@@ -69,6 +70,7 @@ ATVMod::ATVMod() :
 ATVMod::~ATVMod()
 {
 	if (m_video.isOpened()) m_video.release();
+	releaseCameras();
 }
 
 void ATVMod::configure(MessageQueue* messageQueue,
@@ -567,4 +569,27 @@ void ATVMod::seekVideoFileStream(int seekPercentage)
     }
 }
 
+void ATVMod::scanCameras()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		ATVCamera newCamera;
+		m_cameras.push_back(newCamera);
+		m_cameras.back().m_cameraNumber = i;
+		m_cameras.back().m_camera.open(i);
+
+		if (!m_cameras.back().m_camera.isOpened())
+		{
+			m_cameras.pop_back();
+		}
+	}
+}
+
+void ATVMod::releaseCameras()
+{
+	for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
+	{
+		if (it->m_camera.isOpened()) it->m_camera.release();
+	}
+}
 
