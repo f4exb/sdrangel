@@ -45,6 +45,7 @@ ATVMod::ATVMod() :
 	m_videoFPSq(1.0f),
     m_videoFPSCount(0.0f),
 	m_videoPrevFPSCount(0),
+	m_videoEOF(false),
 	m_videoOK(false)
 {
     setObjectName("ATVMod");
@@ -194,7 +195,7 @@ void ATVMod::pullVideo(Real& sample)
             m_lineCount = 0;
             m_evenImage = !m_evenImage;
 
-            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay))
+            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay) && !m_videoEOF)
             {
             	int grabOK;
             	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
@@ -221,9 +222,10 @@ void ATVMod::pullVideo(Real& sample)
             	}
             	else
             	{
-            	    if (m_running.m_videoPlayLoop) // play loop
-            	    {
+            	    if (m_running.m_videoPlayLoop) { // play loop
             	        seekVideoFileStream(0);
+            	    } else { // stops
+            	        m_videoEOF = true;
             	    }
             	}
 
@@ -511,7 +513,9 @@ void ATVMod::openVideo(const QString& fileName)
                 m_videoHeight,
                 m_videoLength,
                 ext);
+
         calculateVideoSizes();
+        m_videoEOF = false;
 
         MsgReportVideoFileSourceStreamData *report;
         report = MsgReportVideoFileSourceStreamData::create(m_videoFPS, m_videoLength);
@@ -536,6 +540,8 @@ void ATVMod::calculateVideoSizes()
 	m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) m_videoHeight;
 	m_videoFx = m_pointsPerImgLine / (float) m_videoWidth;
 	m_videoFPSq = m_videoFPS / m_fps;
+    m_videoFPSCount = m_videoFPSq;
+    m_videoPrevFPSCount = 0;
 
 	qDebug("ATVMod::resizeVideo: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
 }
@@ -555,6 +561,9 @@ void ATVMod::seekVideoFileStream(int seekPercentage)
     {
         int seekPoint = ((m_videoLength * seekPercentage) / 100);
         m_video.set(CV_CAP_PROP_POS_FRAMES, seekPoint);
+        m_videoFPSCount = m_videoFPSq;
+        m_videoPrevFPSCount = 0;
+        m_videoEOF = false;
     }
 }
 

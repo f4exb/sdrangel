@@ -358,6 +358,7 @@ private:
     float m_videoFPSCount;       //!< current video FPS fractional counter
     int m_videoPrevFPSCount;     //!< current video FPS previous integer counter
     int m_videoLength;           //!< current video length in frames
+    bool m_videoEOF;             //!< current video has reached end of file
     bool m_videoOK;
 
     static const float m_blackLevel;
