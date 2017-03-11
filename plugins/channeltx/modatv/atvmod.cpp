@@ -177,13 +177,68 @@ void ATVMod::modulateSample()
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if ((m_lineCount < 5 + m_nbBlankLines) || (m_lineCount > 621) || ((m_lineCount > 309) && (m_lineCount < 317 + m_nbBlankLines)))
+    if (m_interlaced)
     {
-        pullVSyncLine(sample);
+        int iLine = m_lineCount % m_nbLines2;
+
+        if (m_lineCount < m_nbLines2) // even image
+        {
+            if (iLine < m_nbSyncLinesHead)
+            {
+                pullVSyncLine(sample);
+            }
+            else if (iLine < m_nbSyncLinesHead + m_nbBlankLines)
+            {
+                pullVSyncLine(sample); // pull black line
+            }
+            else if (iLine < m_nbLines2 - 3)
+            {
+                pullImageLine(sample);
+            }
+            else
+            {
+                pullVSyncLine(sample);
+            }
+        }
+        else // odd image
+        {
+            if (iLine < m_nbSyncLinesHead - 1)
+            {
+                pullVSyncLine(sample);
+            }
+            else if (iLine < m_nbSyncLinesHead + m_nbBlankLines - 1)
+            {
+                pullVSyncLine(sample); // pull black line
+            }
+            else if (iLine < m_nbLines2 - 4)
+            {
+                pullImageLine(sample);
+            }
+            else
+            {
+                pullVSyncLine(sample);
+            }
+        }
     }
-    else
+    else // non interlaced
     {
-        pullImageLine(sample);
+        if (m_lineCount < m_nbSyncLinesHead)
+        {
+            pullVSyncLine(sample);
+        }
+        else if (m_lineCount < m_nbSyncLinesHead + m_nbBlankLines)
+        {
+            pullVSyncLine(sample); // pull black line
+        }
+        else if (m_lineCount < m_nbLines - 3)
+        {
+            pullImageLine(sample);
+        }
+        else
+        {
+            pullVSyncLine(sample);
+        }
+
     }
 
     if (m_horizontalCount < m_nbHorizPoints - 1)
