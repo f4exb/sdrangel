@@ -214,7 +214,7 @@ public:
 
     public:
         int getdeviceNumber() const { return m_deviceNumber; }
-        int getFPS() const { return m_fps; }
+        float getFPS() const { return m_fps; }
         int getWidth() const { return m_width; }
         int getHeight() const { return m_height; }
 
@@ -233,13 +233,13 @@ public:
 
     protected:
         int m_deviceNumber;
-        int m_fps;
+        float m_fps;
         int m_width;
         int m_height;
 
         MsgReportCameraData(
         		int deviceNumber,
-                int fps,
+        		float fps,
 				int width,
 				int height) :
             Message(),
@@ -271,11 +271,7 @@ public:
 
     Real getMagSq() const { return m_movingAverage.average(); }
 
-    void getCameraNumbers(std::vector<int>& numbers) {
-    	for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it) {
-    		numbers.push_back(it->m_cameraNumber);
-    	}
-    }
+    void getCameraNumbers(std::vector<int>& numbers);
 
     static int getSampleRateUnits(ATVStd std);
 
@@ -349,7 +345,7 @@ private:
         { }
     };
 
-    typedef struct ATVCamera
+    struct ATVCamera
     {
     	cv::VideoCapture m_camera;    //!< camera object
         cv::Mat m_videoframeOriginal; //!< camera non resized image
@@ -364,7 +360,7 @@ private:
 
         ATVCamera() :
         	m_cameraNumber(-1),
-			m_videoFPS(25),
+			m_videoFPS(25.0f),
         	m_videoWidth(1),
 			m_videoHeight(1),
 			m_videoFx(1.0f),

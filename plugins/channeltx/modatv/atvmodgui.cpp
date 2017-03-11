@@ -164,7 +164,10 @@ bool ATVModGUI::handleMessage(const Message& message)
     }
     else if (ATVMod::MsgReportCameraData::match(message))
     {
-    	// TODO
+        ATVMod::MsgReportCameraData& rpt = (ATVMod::MsgReportCameraData&) message;
+        ui->cameraDeviceNumber->setText(tr("#%1").arg(rpt.getdeviceNumber()));
+        ui->camerFPS->setText(tr("%1 FPS").arg(rpt.getFPS(), 0, 'f', 2));
+        ui->cameraImageSize->setText(tr("%1x%2").arg(rpt.getWidth()).arg(rpt.getHeight()));
     	return true;
     }
     else
@@ -270,7 +273,7 @@ void ATVModGUI::on_playLoop_toggled(bool checked)
     applySettings();
 }
 
-void ATVModGUI::on_play_toggled(bool checked)
+void ATVModGUI::on_playVideo_toggled(bool checked)
 {
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
@@ -406,7 +409,7 @@ void ATVModGUI::applySettings()
 			ui->uniformLevel->value() / 100.0f,
 			(ATVMod::ATVModulation) ui->modulation->currentIndex(),
 			ui->playLoop->isChecked(),
-			ui->play->isChecked(),
+			ui->playVideo->isChecked(),
 			ui->channelMute->isChecked());
 	}
 }

@@ -74,5 +74,6 @@
         <file>film_reel.png</file>
         <file>film.png</file>
         <file>picture.png</file>
+        <file>camera.png</file>
     </qresource>
 </RCC>

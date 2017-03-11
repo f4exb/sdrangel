@@ -624,6 +624,14 @@ void ATVMod::scanCameras()
 			m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(CV_CAP_PROP_FPS);
 			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_WIDTH);
 			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+			m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 25.0f : m_cameras.back().m_videoFPS;
+
+			qDebug("ATVMod::scanCameras: [%d] FPS: %f %dx%d",
+			        i,
+			        m_cameras.back().m_videoFPS,
+			        m_cameras.back().m_videoWidth ,
+			        m_cameras.back().m_videoHeight);
 		}
 		else
 		{
@@ -634,13 +642,6 @@ void ATVMod::scanCameras()
 	if (m_cameras.size() > 0)
 	{
 		m_cameraIndex = 0;
-		MsgReportCameraData *report;
-        report = MsgReportCameraData::create(
-        		m_cameras[0].m_cameraNumber,
-				m_cameras[0].m_videoFPS,
-				m_cameras[0].m_videoWidth,
-				m_cameras[0].m_videoHeight);
-        getOutputMessageQueue()->push(report);
 	}
 }
 
@@ -652,3 +653,21 @@ void ATVMod::releaseCameras()
 	}
 }
 
+void ATVMod::getCameraNumbers(std::vector<int>& numbers)
+{
+    for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it) {
+        numbers.push_back(it->m_cameraNumber);
+    }
+
+    if (m_cameras.size() > 0)
+    {
+        m_cameraIndex = 0;
+        MsgReportCameraData *report;
+        report = MsgReportCameraData::create(
+                m_cameras[0].m_cameraNumber,
+                m_cameras[0].m_videoFPS,
+                m_cameras[0].m_videoWidth,
+                m_cameras[0].m_videoHeight);
+        getOutputMessageQueue()->push(report);
+    }
+}
