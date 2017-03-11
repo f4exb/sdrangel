@@ -17,8 +17,31 @@
 #include "devicebladerfvalues.h"
 
 
-unsigned int DeviceBladeRFSampleRates::m_rates[] = {1536, 1600, 2000, 2304, 2400, 3072, 3200, 4608, 4800, 6144, 7680, 9216, 9600, 10752, 12288, 18432, 19200, 24576, 30720, 36864, 39936};
-unsigned int DeviceBladeRFSampleRates::m_nb_rates = 21;
+unsigned int DeviceBladeRFSampleRates::m_nb_rates = 23;
+unsigned int DeviceBladeRFSampleRates::m_rates[] = {
+        1536,
+        1600,
+        2000,
+        2304,
+        2400,
+        3000,
+        3072,
+        3200,
+        4608,
+        4800,
+        6000,
+        6144,
+        7680,
+        9216,
+        9600,
+       10752,
+       12288,
+       18432,
+       19200,
+       24576,
+       30720,
+       36864,
+       39936};
 
 unsigned int DeviceBladeRFSampleRates::getRate(unsigned int rate_index)
 {
@@ -50,8 +73,24 @@ unsigned int DeviceBladeRFSampleRates::getNbRates()
     return DeviceBladeRFSampleRates::m_nb_rates;
 }
 
-unsigned int DeviceBladeRFBandwidths::m_halfbw[] = {750, 875, 1250, 1375, 1500, 1920, 2500, 2750, 3000, 3500, 4375, 5000, 6000, 7000, 10000, 14000};
 unsigned int DeviceBladeRFBandwidths::m_nb_halfbw = 16;
+unsigned int DeviceBladeRFBandwidths::m_halfbw[] = {
+        750,
+        875,
+       1250,
+       1375,
+       1500,
+       1920,
+       2500,
+       2750,
+       3000,
+       3500,
+       4375,
+       5000,
+       6000,
+       7000,
+      10000,
+      14000};
 
 unsigned int DeviceBladeRFBandwidths::getBandwidth(unsigned int bandwidth_index)
 {

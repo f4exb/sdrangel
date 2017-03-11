@@ -24,7 +24,7 @@ public:
     static unsigned int getRateIndex(unsigned int rate);
     static unsigned int getNbRates();
 private:
-    static unsigned int m_rates[21];
+    static unsigned int m_rates[];
     static unsigned int m_nb_rates;
 };
 
@@ -34,7 +34,7 @@ public:
     static unsigned int getBandwidthIndex(unsigned int bandwidth);
     static unsigned int getNbBandwidths();
 private:
-    static unsigned int m_halfbw[16];
+    static unsigned int m_halfbw[];
     static unsigned int m_nb_halfbw;
 };
 

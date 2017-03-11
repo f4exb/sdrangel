@@ -16,9 +16,10 @@
 
 #include "devicehackrfvalues.h"
 
-const unsigned int HackRFSampleRates::m_nb_rates = 16;
+const unsigned int HackRFSampleRates::m_nb_rates = 17;
 const unsigned int HackRFSampleRates::m_rates[HackRFSampleRates::m_nb_rates] = {
         2400000,
+        3000000,
         3200000,
         4000000,
         4333333, // for GSM
