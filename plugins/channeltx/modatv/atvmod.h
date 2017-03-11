@@ -526,7 +526,7 @@ private:
                 sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
                 break;
             case ATVModInputImage:
-                if (!m_imageOK || (iLineImage < 0) || m_image.empty())
+                if (!m_imageOK || (iLineImage < -oddity) || m_image.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 }
@@ -544,7 +544,7 @@ private:
                 }
                 break;
             case ATVModInputVideo:
-                if (!m_videoOK || (iLineImage < 0) || m_videoFrame.empty())
+                if (!m_videoOK || (iLineImage < -oddity) || m_videoFrame.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 }
@@ -562,7 +562,7 @@ private:
                 }
             	break;
             case ATVModInputCamera:
-                if ((iLineImage < 0) || (m_cameraIndex < 0))
+                if ((iLineImage < -oddity) || (m_cameraIndex < 0))
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 }
