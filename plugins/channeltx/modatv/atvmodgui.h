@@ -72,6 +72,9 @@ private slots:
     void on_playLoop_toggled(bool checked);
     void on_navTimeSlider_valueChanged(int value);
 
+    void on_playCamera_toggled(bool checked);
+    void on_camSelect_currentIndexChanged(int index);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 

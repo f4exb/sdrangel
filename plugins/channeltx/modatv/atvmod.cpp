@@ -84,6 +84,7 @@ void ATVMod::configure(MessageQueue* messageQueue,
 			ATVModulation atvModulation,
             bool videoPlayLoop,
             bool videoPlay,
+            bool cameraPlay,
             bool channelMute)
 {
     Message* cmd = MsgConfigureATVMod::create(
@@ -93,7 +94,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             uniformLevel,
             atvModulation,
             videoPlayLoop,
-            videoPlay);
+            videoPlay,
+            cameraPlay);
     messageQueue->push(cmd);
 }
 
@@ -245,6 +247,44 @@ void ATVMod::pullVideo(Real& sample)
             		m_videoFPSCount = m_videoFPSq;
             	}
             }
+            else if ((m_running.m_atvModInput == ATVModInputCamera) && (m_running.m_cameraPlay))
+            {
+                ATVCamera& camera = m_cameras[m_cameraIndex]; // currently selected canera
+                int grabOK;
+                int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
+
+                // move a number of frames according to increment
+                // use grab to test for EOF then retrieve to preserve last valid frame as the current original frame
+                // TODO: handle pause (no move)
+                for (int i = 0; i < fpsIncrement; i++)
+                {
+                    grabOK = camera.m_camera.grab();
+                    if (!grabOK) break;
+                }
+
+                if (grabOK)
+                {
+                    cv::Mat colorFrame;
+                    camera.m_camera.retrieve(colorFrame);
+
+                    if (!colorFrame.empty()) // some frames may not come out properly
+                    {
+                        cv::cvtColor(colorFrame, camera.m_videoframeOriginal, CV_BGR2GRAY);
+                        resizeCamera();
+                    }
+
+                    if (camera.m_videoFPSCount < camera.m_videoFPS)
+                    {
+                        camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
+                        camera.m_videoFPSCount += camera.m_videoFPSq;
+                    }
+                    else
+                    {
+                        camera.m_videoPrevFPSCount = 0;
+                        camera.m_videoFPSCount = camera.m_videoFPSq;
+                    }
+                }
+            }
         }
 
         m_horizontalCount = 0;
@@ -308,6 +348,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_atvModulation = cfg.getModulation();
         m_config.m_videoPlayLoop = cfg.getVideoPlayLoop();
         m_config.m_videoPlay = cfg.getVideoPlay();
+        m_config.m_cameraPlay = cfg.getCameraPlay();
 
         apply();
 
@@ -318,7 +359,8 @@ bool ATVMod::handleMessage(const Message& cmd)
                 << " m_uniformLevel: " << m_config.m_uniformLevel
 				<< " m_atvModulation: " << (int) m_config.m_atvModulation
 				<< " m_videoPlayLoop: " << m_config.m_videoPlayLoop
-				<< " m_videoPlay: " << m_config.m_videoPlay;
+				<< " m_videoPlay: " << m_config.m_videoPlay
+				<< " m_cameraPlay: " << m_config.m_cameraPlay;
 
         return true;
     }
@@ -424,6 +466,7 @@ void ATVMod::apply(bool force)
     m_running.m_atvModulation = m_config.m_atvModulation;
     m_running.m_videoPlayLoop = m_config.m_videoPlayLoop;
     m_running.m_videoPlay = m_config.m_videoPlay;
+    m_running.m_cameraPlay = m_config.m_cameraPlay;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)
@@ -500,6 +543,8 @@ void ATVMod::applyStandard()
     	calculateVideoSizes();
     	resizeVideo();
     }
+
+    calculateCamerasSizes();
 }
 
 void ATVMod::openImage(const QString& fileName)
@@ -582,6 +627,9 @@ void ATVMod::calculateCamerasSizes()
 		it->m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) it->m_videoHeight;
 		it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
 		it->m_videoFPSq = it->m_videoFPS / m_fps;
+	    it->m_videoFPSCount = it->m_videoFPSq;
+	    it->m_videoPrevFPSCount = 0;
+
         qDebug("ATVMod::calculateCamerasSizes: [%d] factors: %f x %f FPSq: %f", (int) (it - m_cameras.begin()),  it->m_videoFx, it->m_videoFy, it->m_videoFPSq);
 	}
 }
@@ -594,6 +642,15 @@ void ATVMod::resizeCameras()
 			cv::resize(it->m_videoframeOriginal, it->m_videoFrame, cv::Size(), it->m_videoFx, it->m_videoFy); // resize current frame
 		}
 	}
+}
+
+void ATVMod::resizeCamera()
+{
+    ATVCamera& camera = m_cameras[m_cameraIndex];
+
+    if (!camera.m_videoframeOriginal.empty()) {
+        cv::resize(camera.m_videoframeOriginal, camera.m_videoFrame, cv::Size(), camera.m_videoFx, camera.m_videoFy); // resize current frame
+    }
 }
 
 void ATVMod::seekVideoFileStream(int seekPercentage)
@@ -641,6 +698,7 @@ void ATVMod::scanCameras()
 
 	if (m_cameras.size() > 0)
 	{
+	    calculateCamerasSizes();
 		m_cameraIndex = 0;
 	}
 }

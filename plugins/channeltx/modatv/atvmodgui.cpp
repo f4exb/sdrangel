@@ -290,6 +290,16 @@ void ATVModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
+void ATVModGUI::on_playCamera_toggled(bool checked)
+{
+    applySettings();
+}
+
+void ATVModGUI::on_camSelect_currentIndexChanged(int index)
+{
+    ATVMod::MsgConfigureCameraIndex* message = ATVMod::MsgConfigureCameraIndex::create(index);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
 
 void ATVModGUI::configureImageFileName()
 {
@@ -410,6 +420,7 @@ void ATVModGUI::applySettings()
 			(ATVMod::ATVModulation) ui->modulation->currentIndex(),
 			ui->playLoop->isChecked(),
 			ui->playVideo->isChecked(),
+			ui->playCamera->isChecked(),
 			ui->channelMute->isChecked());
 	}
 }

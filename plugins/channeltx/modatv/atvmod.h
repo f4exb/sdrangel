@@ -261,6 +261,7 @@ public:
 			ATVModulation atvModulation,
 			bool videoPlayLoop,
 			bool videoPlay,
+			bool cameraPLay,
             bool channelMute);
 
     virtual void pull(Sample& sample);
@@ -297,6 +298,7 @@ private:
         ATVModulation getModulation() const { return m_atvModulation; }
         bool getVideoPlayLoop() const { return m_videoPlayLoop; }
         bool getVideoPlay() const { return m_videoPlay; }
+        bool getCameraPlay() const { return m_cameraPlay; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -305,7 +307,8 @@ private:
             Real uniformLevel,
 			ATVModulation atvModulation,
 			bool videoPlayLoop,
-			bool videoPlay)
+			bool videoPlay,
+			bool cameraPlay)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -314,7 +317,8 @@ private:
                     uniformLevel,
                     atvModulation,
                     videoPlayLoop,
-                    videoPlay);
+                    videoPlay,
+                    cameraPlay);
         }
 
     private:
@@ -325,6 +329,7 @@ private:
         ATVModulation m_atvModulation;
         bool          m_videoPlayLoop;
         bool          m_videoPlay;
+        bool          m_cameraPlay;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -333,7 +338,8 @@ private:
                 Real uniformLevel,
 				ATVModulation atvModulation,
 				bool videoPlayLoop,
-				bool videoPlay) :
+				bool videoPlay,
+				bool cameraPlay) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_atvStd(atvStd),
@@ -341,7 +347,8 @@ private:
             m_uniformLevel(uniformLevel),
 			m_atvModulation(atvModulation),
 			m_videoPlayLoop(videoPlayLoop),
-			m_videoPlay(videoPlay)
+			m_videoPlay(videoPlay),
+			m_cameraPlay(cameraPlay)
         { }
     };
 
@@ -357,6 +364,8 @@ private:
         float m_videoFx;              //!< camera horizontal scaling factor
         float m_videoFy;              //!< camera vertictal scaling factor
         float m_videoFPSq;            //!< camera FPS sacaling factor
+        float m_videoFPSCount;        //!< camera FPS fractional counter
+        int m_videoPrevFPSCount;      //!< camera FPS previous integer counter
 
         ATVCamera() :
         	m_cameraNumber(-1),
@@ -365,7 +374,9 @@ private:
 			m_videoHeight(1),
 			m_videoFx(1.0f),
 			m_videoFy(1.0f),
-			m_videoFPSq(1.0f)
+			m_videoFPSq(1.0f),
+		    m_videoFPSCount(0.0f),
+		    m_videoPrevFPSCount(0)
         {}
     };
 
@@ -380,6 +391,7 @@ private:
         ATVModulation m_atvModulation;        //!< RF modulation type
         bool          m_videoPlayLoop;        //!< Play video in a loop
         bool          m_videoPlay;            //!< True to play video and false to pause
+        bool          m_cameraPlay;           //!< True to play camera video and false to pause
 
         Config() :
             m_outputSampleRate(-1),
@@ -390,7 +402,8 @@ private:
             m_uniformLevel(0.5f),
 			m_atvModulation(ATVModulationAM),
 			m_videoPlayLoop(false),
-			m_videoPlay(false)
+			m_videoPlay(false),
+			m_cameraPlay(false)
         { }
     };
 
@@ -476,6 +489,7 @@ private:
     void releaseCameras();
     void calculateCamerasSizes();
     void resizeCameras();
+    void resizeCamera();
 
     inline void pullImageLine(Real& sample)
     {
@@ -547,6 +561,33 @@ private:
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
             	break;
+            case ATVModInputCamera:
+                if ((iLineImage < 0) || (m_cameraIndex < 0))
+                {
+                    sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
+                }
+                else
+                {
+                    ATVCamera& camera = m_cameras[m_cameraIndex];
+
+                    if (camera.m_videoFrame.empty())
+                    {
+                        sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
+                    }
+                    else
+                    {
+                        unsigned char pixv;
+
+                        if (m_interlaced) {
+                            pixv = camera.m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
+                        } else {
+                            pixv = camera.m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
+                        }
+
+                        sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
+                    }
+                }
+                break;
             case ATVModInputUniform:
             default:
                 sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
