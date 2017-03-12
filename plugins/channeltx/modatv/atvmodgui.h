@@ -77,6 +77,9 @@ private slots:
     void on_playCamera_toggled(bool checked);
     void on_camSelect_currentIndexChanged(int index);
 
+    void on_overlayTextShow_toggled(bool checked);
+    void on_overlayText_textEdited(const QString& arg1);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
 

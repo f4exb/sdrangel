@@ -256,6 +256,48 @@ public:
         { }
     };
 
+    class MsgConfigureOverlayText : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getOverlayText() const { return m_overlayText; }
+
+        static MsgConfigureOverlayText* create(const QString& overlayText)
+        {
+            return new MsgConfigureOverlayText(overlayText);
+        }
+
+    private:
+        QString m_overlayText;
+
+        MsgConfigureOverlayText(const QString& overlayText) :
+            Message(),
+            m_overlayText(overlayText)
+        { }
+    };
+
+    class MsgConfigureShowOverlayText : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getShowOverlayText() const { return m_showOverlayText; }
+
+        static MsgConfigureShowOverlayText* create(bool showOverlayText)
+        {
+            return new MsgConfigureShowOverlayText(showOverlayText);
+        }
+
+    private:
+        bool m_showOverlayText;
+
+        MsgConfigureShowOverlayText(bool showOverlayText) :
+            Message(),
+            m_showOverlayText(showOverlayText)
+        { }
+    };
+
     ATVMod();
     ~ATVMod();
 
@@ -452,7 +494,8 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
 
-    cv::Mat m_imageOriginal;     //!< original non resized image
+    cv::Mat m_imageFromFile;     //!< original image not resized not overlaid by text
+    cv::Mat m_imageOriginal;     //!< original not resized image
     cv::Mat m_image;             //!< resized image for transmission at given rate
     bool m_imageOK;
 
@@ -473,6 +516,9 @@ private:
 
     std::vector<ATVCamera> m_cameras; //!< vector of available cameras
     int m_cameraIndex;           //!< curent camera index in list of available cameras
+
+    std::string m_overlayText;
+    bool m_showOverlayText;
 
     static const float m_blackLevel;
     static const float m_spanLevel;
@@ -496,6 +542,7 @@ private:
     void calculateCamerasSizes();
     void resizeCameras();
     void resizeCamera();
+    void mixImageAndText(cv::Mat& image);
 
     inline void pullImageLine(Real& sample)
     {

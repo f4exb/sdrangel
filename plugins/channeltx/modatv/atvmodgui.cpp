@@ -324,6 +324,18 @@ void ATVModGUI::on_camSelect_currentIndexChanged(int index)
     m_atvMod->getInputMessageQueue()->push(message);
 }
 
+void ATVModGUI::on_overlayTextShow_toggled(bool checked)
+{
+    ATVMod::MsgConfigureShowOverlayText* message = ATVMod::MsgConfigureShowOverlayText::create(checked);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
+void ATVModGUI::on_overlayText_textEdited(const QString& arg1)
+{
+    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
 void ATVModGUI::configureImageFileName()
 {
     qDebug() << "ATVModGUI::configureImageFileName: " << m_imageFileName.toStdString().c_str();

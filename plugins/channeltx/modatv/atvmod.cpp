@@ -31,6 +31,8 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -50,7 +52,8 @@ ATVMod::ATVMod() :
 	m_videoPrevFPSCount(0),
 	m_videoEOF(false),
 	m_videoOK(false),
-	m_cameraIndex(-1)
+	m_cameraIndex(-1),
+	m_showOverlayText(false)
 {
     setObjectName("ATVMod");
     scanCameras();
@@ -489,6 +492,34 @@ bool ATVMod::handleMessage(const Message& cmd)
             getOutputMessageQueue()->push(report);
     	}
     }
+    else if (MsgConfigureOverlayText::match(cmd))
+    {
+        MsgConfigureOverlayText& cfg = (MsgConfigureOverlayText&) cmd;
+        m_overlayText = cfg.getOverlayText().toStdString();
+        return true;
+    }
+    else if (MsgConfigureShowOverlayText::match(cmd))
+    {
+        MsgConfigureShowOverlayText& cfg = (MsgConfigureShowOverlayText&) cmd;
+        bool showOverlayText = cfg.getShowOverlayText();
+
+        if (!m_imageFromFile.empty())
+        {
+            m_imageFromFile.copyTo(m_imageOriginal);
+
+            if (showOverlayText) {
+                qDebug("ATVMod::handleMessage: overlay text");
+                mixImageAndText(m_imageOriginal);
+            } else{
+                qDebug("ATVMod::handleMessage: clear text");
+            }
+
+            resizeImage();
+        }
+
+        m_showOverlayText = showOverlayText;
+        return true;
+    }
     else
     {
         return false;
@@ -621,11 +652,17 @@ void ATVMod::applyStandard()
 
 void ATVMod::openImage(const QString& fileName)
 {
-    m_imageOriginal = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
-	m_imageOK = m_imageOriginal.data != 0;
+    m_imageFromFile = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
+	m_imageOK = m_imageFromFile.data != 0;
 
 	if (m_imageOK)
 	{
+        m_imageFromFile.copyTo(m_imageOriginal);
+
+        if (m_showOverlayText) {
+            mixImageAndText(m_imageOriginal);
+	    }
+
 	    resizeImage();
 	}
 }
@@ -802,3 +839,22 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
         getOutputMessageQueue()->push(report);
     }
 }
+
+void ATVMod::mixImageAndText(cv::Mat& image)
+{
+    int fontFace = cv::FONT_HERSHEY_PLAIN;
+    double fontScale = image.rows / 100.0;
+    int thickness = 3;
+    int baseline=0;
+
+    qDebug("ATVMod::mixImageAndText: fontScale: %f m_overlayText: %s", fontScale, m_overlayText.c_str());
+
+    cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
+    baseline += thickness;
+
+    // position the text in the top left corner
+    cv::Point textOrg(2, textSize.height+4);
+    // then put the text itself
+    cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_running.m_uniformLevel), thickness, CV_AA);
+}
+
