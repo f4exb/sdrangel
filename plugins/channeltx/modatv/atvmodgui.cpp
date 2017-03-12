@@ -273,7 +273,7 @@ void ATVModGUI::on_channelMute_toggled(bool checked)
 void ATVModGUI::on_imageFileDialog_clicked(bool checked)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp)"));
+        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"));
 
     if (fileName != "")
     {
