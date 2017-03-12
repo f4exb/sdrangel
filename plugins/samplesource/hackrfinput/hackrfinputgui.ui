@@ -35,7 +35,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -300,26 +309,32 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="sampleRate">
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Device sample rate</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="4">
       <widget class="QLabel" name="bbFiltLabel">
        <property name="text">
         <string>BBF</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="0" column="5">
       <widget class="QComboBox" name="bbFilter">
        <property name="toolTip">
         <string>RF bandpas filter</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -331,6 +346,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="sampleRateUnits">
+       <property name="text">
+        <string>kS/s</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

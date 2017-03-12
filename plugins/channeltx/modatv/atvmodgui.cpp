@@ -249,6 +249,11 @@ void ATVModGUI::on_rfBW_valueChanged(int value)
 	applySettings();
 }
 
+void ATVModGUI::on_standard_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
 void ATVModGUI::on_uniformLevel_valueChanged(int value)
 {
 	ui->uniformLevelText->setText(QString("%1").arg(value));
