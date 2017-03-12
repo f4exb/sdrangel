@@ -56,6 +56,7 @@ public:
 
 private slots:
     void viewChanged();
+    void channelizerOutputSampleRateChanged();
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(quint64 value);

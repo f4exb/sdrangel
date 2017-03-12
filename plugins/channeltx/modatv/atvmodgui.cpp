@@ -181,6 +181,11 @@ void ATVModGUI::viewChanged()
 	applySettings();
 }
 
+void ATVModGUI::channelizerOutputSampleRateChanged()
+{
+    ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+}
+
 void ATVModGUI::handleSourceMessages()
 {
     Message* message;
@@ -352,6 +357,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_channelizer = new UpChannelizer(m_atvMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
+    connect(m_channelizer, SIGNAL(outputSampleRateChanged()), this, SLOT(channelizerOutputSampleRateChanged()));
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
