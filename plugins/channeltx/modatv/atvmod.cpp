@@ -259,6 +259,10 @@ void ATVMod::pullVideo(Real& sample)
 
             		if (!colorFrame.empty()) // some frames may not come out properly
             		{
+            		    if (m_showOverlayText) {
+            		        mixImageAndText(colorFrame);
+            		    }
+
             		    cv::cvtColor(colorFrame, m_videoframeOriginal, CV_BGR2GRAY);
             		    resizeVideo();
             		}
@@ -343,6 +347,10 @@ void ATVMod::pullVideo(Real& sample)
 
                     if (!colorFrame.empty()) // some frames may not come out properly
                     {
+                        if (m_showOverlayText) {
+                            mixImageAndText(colorFrame);
+                        }
+
                         cv::cvtColor(colorFrame, camera.m_videoframeOriginal, CV_BGR2GRAY);
                         resizeCamera();
                     }
@@ -844,16 +852,14 @@ void ATVMod::mixImageAndText(cv::Mat& image)
 {
     int fontFace = cv::FONT_HERSHEY_PLAIN;
     double fontScale = image.rows / 100.0;
-    int thickness = 3;
+    int thickness = image.cols / 160;
     int baseline=0;
-
-    qDebug("ATVMod::mixImageAndText: fontScale: %f m_overlayText: %s", fontScale, m_overlayText.c_str());
 
     cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 
     // position the text in the top left corner
-    cv::Point textOrg(2, textSize.height+4);
+    cv::Point textOrg(4, textSize.height+4);
     // then put the text itself
     cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_running.m_uniformLevel), thickness, CV_AA);
 }
