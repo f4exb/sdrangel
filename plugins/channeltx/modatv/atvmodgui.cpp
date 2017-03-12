@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
+#include <QMessageBox>
 
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
@@ -168,6 +169,23 @@ bool ATVModGUI::handleMessage(const Message& message)
         ui->cameraDeviceNumber->setText(tr("#%1").arg(rpt.getdeviceNumber()));
         ui->camerFPS->setText(tr("%1 FPS").arg(rpt.getFPS(), 0, 'f', 2));
         ui->cameraImageSize->setText(tr("%1x%2").arg(rpt.getWidth()).arg(rpt.getHeight()));
+
+        int status = rpt.getStatus();
+
+        if (status == 1) // camera FPS scan is startng
+        {
+            m_camBusyFPSMessageBox = new QMessageBox();
+            m_camBusyFPSMessageBox->setText("Computing camera FPS. Please wait…");
+            m_camBusyFPSMessageBox->setStandardButtons(0);
+            m_camBusyFPSMessageBox->show();
+        }
+        else if (status == 2) // camera FPS scan is finished
+        {
+            m_camBusyFPSMessageBox->close();
+            if (m_camBusyFPSMessageBox) delete m_camBusyFPSMessageBox;
+            m_camBusyFPSMessageBox = 0;
+        }
+
     	return true;
     }
     else
@@ -346,7 +364,8 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_videoFrameRate(48000),
     m_frameCount(0),
     m_tickCount(0),
-    m_enableNavTime(false)
+    m_enableNavTime(false),
+    m_camBusyFPSMessageBox(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);

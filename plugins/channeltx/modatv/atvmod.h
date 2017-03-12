@@ -217,18 +217,21 @@ public:
         float getFPS() const { return m_fps; }
         int getWidth() const { return m_width; }
         int getHeight() const { return m_height; }
+        int getStatus() const { return m_status; }
 
         static MsgReportCameraData* create(
         		int deviceNumber,
-				int fps,
+				float fps,
 				int width,
-				int height)
+				int height,
+				int status)
         {
             return new MsgReportCameraData(
             		deviceNumber,
 					fps,
 					width,
-					height);
+					height,
+					status);
         }
 
     protected:
@@ -236,17 +239,20 @@ public:
         float m_fps;
         int m_width;
         int m_height;
+        int m_status;
 
         MsgReportCameraData(
         		int deviceNumber,
         		float fps,
 				int width,
-				int height) :
+				int height,
+				int status) :
             Message(),
 			m_deviceNumber(deviceNumber),
 			m_fps(fps),
 			m_width(width),
-			m_height(height)
+			m_height(height),
+			m_status(status)
         { }
     };
 

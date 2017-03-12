@@ -29,6 +29,7 @@ class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class ATVMod;
+class QMessageBox;
 
 namespace Ui {
     class ATVModGUI;
@@ -103,6 +104,7 @@ private:
     int m_frameCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
+    QMessageBox *m_camBusyFPSMessageBox;
 
     explicit ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~ATVModGUI();

@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <time.h>
 
 #include "opencv2/imgproc/imgproc.hpp"
 
@@ -282,6 +283,44 @@ void ATVMod::pullVideo(Real& sample)
             else if ((m_running.m_atvModInput == ATVModInputCamera) && (m_running.m_cameraPlay))
             {
                 ATVCamera& camera = m_cameras[m_cameraIndex]; // currently selected canera
+
+                if (camera.m_videoFPS < 0.0f) // default frame rate when it could not be obtained via get
+                {
+                    time_t start, end;
+                    cv::Mat frame;
+
+                    MsgReportCameraData *report;
+                    report = MsgReportCameraData::create(
+                            camera.m_cameraNumber,
+                            0.0f,
+                            camera.m_videoWidth,
+                            camera.m_videoHeight,
+                            1); // open splash screen on GUI side
+                    getOutputMessageQueue()->push(report);
+
+                    time(&start);
+
+                    for (int i = 0; i < 120; i++) {
+                        camera.m_camera >> frame;
+                    }
+
+                    time(&end);
+
+                    double seconds = difftime (end, start);
+                    camera.m_videoFPS = (120 / seconds) * 0.95; // take a 5% guard
+                    camera.m_videoFPSq = camera.m_videoFPS / m_fps;
+                    camera.m_videoFPSCount = camera.m_videoFPSq;
+                    camera.m_videoPrevFPSCount = 0;
+
+                    report = MsgReportCameraData::create(
+                            camera.m_cameraNumber,
+                            camera.m_videoFPS,
+                            camera.m_videoWidth,
+                            camera.m_videoHeight,
+                            2); // close splash screen on GUI side
+                    getOutputMessageQueue()->push(report);
+                }
+
                 int grabOK;
                 int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
 
@@ -445,7 +484,8 @@ bool ATVMod::handleMessage(const Message& cmd)
             		m_cameras[m_cameraIndex].m_cameraNumber,
     				m_cameras[m_cameraIndex].m_videoFPS,
     				m_cameras[m_cameraIndex].m_videoWidth,
-    				m_cameras[m_cameraIndex].m_videoHeight);
+    				m_cameras[m_cameraIndex].m_videoHeight,
+    				0);
             getOutputMessageQueue()->push(report);
     	}
     }
@@ -714,7 +754,7 @@ void ATVMod::scanCameras()
 			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_WIDTH);
 			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-			m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 25.0f : m_cameras.back().m_videoFPS;
+			//m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 16.3f : m_cameras.back().m_videoFPS;
 
 			qDebug("ATVMod::scanCameras: [%d] FPS: %f %dx%d",
 			        i,
@@ -757,7 +797,8 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
                 m_cameras[0].m_cameraNumber,
                 m_cameras[0].m_videoFPS,
                 m_cameras[0].m_videoWidth,
-                m_cameras[0].m_videoHeight);
+                m_cameras[0].m_videoHeight,
+                0);
         getOutputMessageQueue()->push(report);
     }
 }
