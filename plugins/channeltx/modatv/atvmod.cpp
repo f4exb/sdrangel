@@ -856,7 +856,7 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     baseline += thickness;
 
     // position the text in the top left corner
-    cv::Point textOrg(4, textSize.height+4);
+    cv::Point textOrg(6, textSize.height+10);
     // then put the text itself
     cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_running.m_uniformLevel), thickness, CV_AA);
 }
