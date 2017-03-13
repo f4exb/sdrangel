@@ -304,17 +304,20 @@ void ATVMod::pullVideo(Real& sample)
                             camera.m_videoHeight,
                             1); // open splash screen on GUI side
                     getOutputMessageQueue()->push(report);
+                    int nbFrames = 0;
 
                     time(&start);
 
-                    for (int i = 0; i < 120; i++) {
+                    for (int i = 0; i < 120; i++)
+                    {
                         camera.m_camera >> frame;
+                        if (!frame.empty()) nbFrames++;
                     }
 
                     time(&end);
 
                     double seconds = difftime (end, start);
-                    camera.m_videoFPS = (120 / seconds) * 0.95; // take a 5% guard
+                    camera.m_videoFPS = (nbFrames / seconds) * 0.95; // take a 5% guard
                     camera.m_videoFPSq = camera.m_videoFPS / m_fps;
                     camera.m_videoFPSCount = camera.m_videoFPSq;
                     camera.m_videoPrevFPSCount = 0;
