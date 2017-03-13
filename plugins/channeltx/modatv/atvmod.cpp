@@ -328,43 +328,37 @@ void ATVMod::pullVideo(Real& sample)
                     getOutputMessageQueue()->push(report);
                 }
 
-                int grabOK;
                 int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
 
                 // move a number of frames according to increment
                 // use grab to test for EOF then retrieve to preserve last valid frame as the current original frame
-                // TODO: handle pause (no move)
+                cv::Mat colorFrame;
+
                 for (int i = 0; i < fpsIncrement; i++)
                 {
-                    grabOK = camera.m_camera.grab();
-                    if (!grabOK) break;
+                    camera.m_camera >> colorFrame;
+                    if (colorFrame.empty()) break;
                 }
 
-                if (grabOK)
+                if (!colorFrame.empty()) // some frames may not come out properly
                 {
-                    cv::Mat colorFrame;
-                    camera.m_camera.retrieve(colorFrame);
-
-                    if (!colorFrame.empty()) // some frames may not come out properly
-                    {
-                        if (m_showOverlayText) {
-                            mixImageAndText(colorFrame);
-                        }
-
-                        cv::cvtColor(colorFrame, camera.m_videoframeOriginal, CV_BGR2GRAY);
-                        resizeCamera();
+                    if (m_showOverlayText) {
+                        mixImageAndText(colorFrame);
                     }
 
-                    if (camera.m_videoFPSCount < camera.m_videoFPS)
-                    {
-                        camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
-                        camera.m_videoFPSCount += camera.m_videoFPSq;
-                    }
-                    else
-                    {
-                        camera.m_videoPrevFPSCount = 0;
-                        camera.m_videoFPSCount = camera.m_videoFPSq;
-                    }
+                    cv::cvtColor(colorFrame, camera.m_videoframeOriginal, CV_BGR2GRAY);
+                    resizeCamera();
+                }
+
+                if (camera.m_videoFPSCount < camera.m_videoFPS)
+                {
+                    camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
+                    camera.m_videoFPSCount += camera.m_videoFPSq;
+                }
+                else
+                {
+                    camera.m_videoPrevFPSCount = 0;
+                    camera.m_videoFPSCount = camera.m_videoFPSq;
                 }
             }
         }
