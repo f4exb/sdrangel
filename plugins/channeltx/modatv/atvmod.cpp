@@ -330,6 +330,22 @@ void ATVMod::pullVideo(Real& sample)
                             2); // close splash screen on GUI side
                     getOutputMessageQueue()->push(report);
                 }
+                else if (camera.m_videoFPS == 0.0f) // Hideous hack for windows
+                {
+                    camera.m_videoFPS = 5.0f;
+                    camera.m_videoFPSq = camera.m_videoFPS / m_fps;
+                    camera.m_videoFPSCount = camera.m_videoFPSq;
+                    camera.m_videoPrevFPSCount = 0;
+
+                    MsgReportCameraData *report;
+                    report = MsgReportCameraData::create(
+                            camera.m_cameraNumber,
+                            camera.m_videoFPS,
+                            camera.m_videoWidth,
+                            camera.m_videoHeight,
+                            0);
+                    getOutputMessageQueue()->push(report);
+                }
 
                 int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
 
