@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to generate an analog TV signal mostly used in amateur radio.
+This plugin can be used to generate an analog TV signal mostly used in amateur radio. It is limited to black and white images as only the luminance (256 levels) is supported.
 
 <h2>Interface</h2>
 
@@ -29,17 +29,19 @@ Use this button to toggle mute for this channel.
 The video signal can modulate the carrier in the following modes:
 
   - AM: Amplitude modulation. Modulation index is 90%.
-  - FM: Frequency modulation. Excursion is half the bandwidth available given the channel sample rate.
+  - FM: Frequency modulation. Excursion is half the bandwidth available given the channel sample rate. e.g. for 4 MS/s sample rate this is +/-1 MHz (2 MHz total) 
   
 <h3>6: RF bandwidth</h3>
 
-This is the bandwidth in MHz of the channel filter when the interpolator is engaged. If the sink sample rate is a log2 multiple of the base rate that depends on the standard then there is no interpolation else the channel rate is set to the integer multiple of the base rate just below the sink sample rate.
+This is the bandwidth in MHz of the channel filter when the interpolator is engaged. If the sink sample rate is an integer multiple of the base rate that depends on the standard then there is no interpolation else the channel rate is set to the integer multiple of the base rate just below the sink sample rate. 
 
 The base rate depending on the standard is:
 
   - PAL625L: 1 MS/s
   - PAL525L: 1.008 MS/s
-  
+
+Each horizontal line (including sync and porchs) is split in a number of points so that each point represents a sample. e.g. for a 3 MS/s sample rate in PAL625L standard each point will last 1/3 us (3 points per base rate period).
+
 <h3>7: Video signal level meter</h3>
 
 This is the level meter fed with the video signal. Units are the percentage of the 0.0 to 1.0 modulating video signal.

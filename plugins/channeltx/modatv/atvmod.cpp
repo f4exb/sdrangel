@@ -38,6 +38,7 @@ const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
 const int ATVMod::m_levelNbSamples = 10000; // every 10ms
 const int ATVMod::m_nbBars = 6;
+const int ATVMod::m_cameraFPSTestNbFrames = 100;
 
 ATVMod::ATVMod() :
 	m_modPhasor(0.0f),
@@ -308,7 +309,7 @@ void ATVMod::pullVideo(Real& sample)
 
                     time(&start);
 
-                    for (int i = 0; i < 120; i++)
+                    for (int i = 0; i < m_cameraFPSTestNbFrames; i++)
                     {
                         camera.m_camera >> frame;
                         if (!frame.empty()) nbFrames++;

@@ -523,7 +523,8 @@ private:
     static const float m_blackLevel;
     static const float m_spanLevel;
     static const int m_levelNbSamples;
-    static const int m_nbBars; // number of bars in bar or chessboard patterns
+    static const int m_nbBars; //!< number of bars in bar or chessboard patterns
+    static const int m_cameraFPSTestNbFrames; //!< number of frames for camera FPS test
 
     void apply(bool force = false);
     void pullFinalize(Complex& ci, Sample& sample);
