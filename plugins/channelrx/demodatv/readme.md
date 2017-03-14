@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to view amateur analog television transmissions a.k.a ATV. The video signal is in fact a 625 lines standard signal black and white or color (PAL, NTSC) but only the black and white levels (luminance) is retained. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM.
+This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white levels (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM. A plugin supporting audio can be used in the same passband to demodulate an audio carrier but not a subcarrier which excludes FM.
 
-The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin. It expects an integer number of MS/s and acceptable results require a sample rate of at least 6 MS/s (Airspy Mini, Airspy, BladerRF, HackRF).
+The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin. It expects an integer number of MS/s and standard image quality requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. Anything below should be considered experimental quality.
 
 <h2>Interface</h2>
 
@@ -25,6 +25,9 @@ For FM choose the algorithm that best suits your conditions.
 <h3>3: Frames Per Second</h3>
 
 This combo lets you chose between a 25 FPS or 30 FPS standard.
+
+  - 25 FPS corresponds to the PAL 625 lines standard (PAL B,G,I,L)
+  - 30 FPS corresponds to the PAL 525 lines standard (PAL M)
 
 <h3>4: Horizontal sync</h3>
 
