@@ -347,6 +347,7 @@ private:
         bool getVideoPlayLoop() const { return m_videoPlayLoop; }
         bool getVideoPlay() const { return m_videoPlay; }
         bool getCameraPlay() const { return m_cameraPlay; }
+        bool getChannelMute() const { return m_channelMute; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -356,7 +357,8 @@ private:
 			ATVModulation atvModulation,
 			bool videoPlayLoop,
 			bool videoPlay,
-			bool cameraPlay)
+			bool cameraPlay,
+			bool channelMute)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -366,7 +368,8 @@ private:
                     atvModulation,
                     videoPlayLoop,
                     videoPlay,
-                    cameraPlay);
+                    cameraPlay,
+					channelMute);
         }
 
     private:
@@ -378,6 +381,7 @@ private:
         bool          m_videoPlayLoop;
         bool          m_videoPlay;
         bool          m_cameraPlay;
+        bool          m_channelMute;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -387,7 +391,8 @@ private:
 				ATVModulation atvModulation,
 				bool videoPlayLoop,
 				bool videoPlay,
-				bool cameraPlay) :
+				bool cameraPlay,
+				bool channelMute) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_atvStd(atvStd),
@@ -396,7 +401,8 @@ private:
 			m_atvModulation(atvModulation),
 			m_videoPlayLoop(videoPlayLoop),
 			m_videoPlay(videoPlay),
-			m_cameraPlay(cameraPlay)
+			m_cameraPlay(cameraPlay),
+			m_channelMute(channelMute)
         { }
     };
 
@@ -440,6 +446,7 @@ private:
         bool          m_videoPlayLoop;        //!< Play video in a loop
         bool          m_videoPlay;            //!< True to play video and false to pause
         bool          m_cameraPlay;           //!< True to play camera video and false to pause
+        bool          m_channelMute;          //!< Mute channel baseband output
 
         Config() :
             m_outputSampleRate(-1),
@@ -451,7 +458,8 @@ private:
 			m_atvModulation(ATVModulationAM),
 			m_videoPlayLoop(false),
 			m_videoPlay(false),
-			m_cameraPlay(false)
+			m_cameraPlay(false),
+			m_channelMute(false)
         { }
     };
 

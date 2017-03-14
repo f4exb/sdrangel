@@ -62,12 +62,12 @@ private slots:
 
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
+    void on_channelMute_toggled(bool checked);
     void on_modulation_currentIndexChanged(int index);
     void on_rfBW_valueChanged(int value);
     void on_standard_currentIndexChanged(int index);
     void on_uniformLevel_valueChanged(int value);
     void on_inputSelect_currentIndexChanged(int index);
-    void on_channelMute_toggled(bool checked);
     void on_imageFileDialog_clicked(bool checked);
     void on_videoFileDialog_clicked(bool checked);
 

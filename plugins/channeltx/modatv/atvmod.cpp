@@ -100,7 +100,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             atvModulation,
             videoPlayLoop,
             videoPlay,
-            cameraPlay);
+            cameraPlay,
+            channelMute);
     messageQueue->push(cmd);
 }
 
@@ -110,6 +111,13 @@ void ATVMod::pullAudio(int nbSamples)
 
 void ATVMod::pull(Sample& sample)
 {
+	if (m_running.m_channelMute)
+	{
+		sample.m_real = 0.0f;
+		sample.m_imag = 0.0f;
+		return;
+	}
+
     Complex ci;
 
     m_settingsMutex.lock();
@@ -446,6 +454,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_videoPlayLoop = cfg.getVideoPlayLoop();
         m_config.m_videoPlay = cfg.getVideoPlay();
         m_config.m_cameraPlay = cfg.getCameraPlay();
+        m_config.m_channelMute = cfg.getChannelMute();
 
         apply();
 
@@ -457,7 +466,8 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_atvModulation: " << (int) m_config.m_atvModulation
 				<< " m_videoPlayLoop: " << m_config.m_videoPlayLoop
 				<< " m_videoPlay: " << m_config.m_videoPlay
-				<< " m_cameraPlay: " << m_config.m_cameraPlay;
+				<< " m_cameraPlay: " << m_config.m_cameraPlay
+				<< " m_channelMute: " << m_config.m_channelMute;
 
         return true;
     }
@@ -595,6 +605,7 @@ void ATVMod::apply(bool force)
     m_running.m_videoPlayLoop = m_config.m_videoPlayLoop;
     m_running.m_videoPlay = m_config.m_videoPlay;
     m_running.m_cameraPlay = m_config.m_cameraPlay;
+    m_running.m_channelMute = m_config.m_channelMute;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)
