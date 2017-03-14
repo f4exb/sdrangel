@@ -317,7 +317,8 @@ void ATVMod::pullVideo(Real& sample)
                     time(&end);
 
                     double seconds = difftime (end, start);
-                    camera.m_videoFPS = (nbFrames / seconds) * 0.95; // take a 5% guard
+                    // take a 10% guard and divide bandwidth between all cameras as a hideous hack
+                    camera.m_videoFPS = ((nbFrames / seconds) * 0.9) / m_cameras.size();
                     camera.m_videoFPSq = camera.m_videoFPS / m_fps;
                     camera.m_videoFPSCount = camera.m_videoFPSq;
                     camera.m_videoPrevFPSCount = 0;
@@ -512,6 +513,8 @@ bool ATVMod::handleMessage(const Message& cmd)
     				0);
             getOutputMessageQueue()->push(report);
     	}
+
+    	return true;
     }
     else if (MsgConfigureOverlayText::match(cmd))
     {
