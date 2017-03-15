@@ -199,7 +199,7 @@ int fftfilt::runFilt(const cmplx & in, cmplx **out)
 }
 
 // Second version for single sideband
-int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
+int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb, bool getDC)
 {
 	data[inptr++] = in;
 	if (inptr < flen2)
@@ -208,17 +208,24 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb)
 
 	fft->ComplexFFT(data);
 
+	// get or reject DC component
+	data[0] = getDC ? data[0]*filter[0] : 0;
+
 	// Discard frequencies for ssb
-	if ( usb )
-		for (int i = 0; i < flen2; i++) {
+	if (usb)
+	{
+		for (int i = 1; i < flen2; i++) {
 			data[i] *= filter[i];
 			data[flen2 + i] = 0;
 		}
+	}
 	else
-		for (int i = 0; i < flen2; i++) {
+	{
+		for (int i = 1; i < flen2; i++) {
 			data[i] = 0;
 			data[flen2 + i] *= filter[flen2 + i];
 		}
+	}
 
 	// in-place FFT: freqdata overwritten with filtered timedata
 	fft->InverseComplexFFT(data);
