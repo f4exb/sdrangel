@@ -201,7 +201,15 @@ void ATVModGUI::viewChanged()
 
 void ATVModGUI::channelizerOutputSampleRateChanged()
 {
-    ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+    if ((ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB) ||
+        (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationUSB))
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+    }
+    else
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+    }
 }
 
 void ATVModGUI::handleSourceMessages()
@@ -239,13 +247,45 @@ void ATVModGUI::on_deltaFrequency_changed(quint64 value)
 
 void ATVModGUI::on_modulation_currentIndexChanged(int index)
 {
+    if (index == (int) ATVMod::ATVModulationLSB)
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        m_channelMarker.setBandwidth(-ui->rfBW->value()*200000);
+        m_channelMarker.setSidebands(ChannelMarker::lsb);
+    }
+    else if (index == (int) ATVMod::ATVModulationUSB)
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        m_channelMarker.setBandwidth(ui->rfBW->value()*200000);
+        m_channelMarker.setSidebands(ChannelMarker::usb);
+    }
+    else
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+        m_channelMarker.setBandwidth(ui->rfBW->value()*100000);
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+    }
+
     applySettings();
 }
 
 void ATVModGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 MHz").arg(value / 10.0, 0, 'f', 1));
-	m_channelMarker.setBandwidth(value * 100000);
+
+    if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB)
+    {
+        m_channelMarker.setBandwidth(-ui->rfBW->value()*200000);
+    }
+    else if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationUSB)
+    {
+        m_channelMarker.setBandwidth(ui->rfBW->value()*200000);
+    }
+    else
+    {
+        m_channelMarker.setBandwidth(ui->rfBW->value()*100000);
+    }
+
 	applySettings();
 }
 

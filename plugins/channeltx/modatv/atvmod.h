@@ -59,7 +59,9 @@ public:
     typedef enum
     {
     	ATVModulationAM,
-		ATVModulationFM
+		ATVModulationFM,
+		ATVModulationUSB,
+		ATVModulationLSB
     } ATVModulation;
 
     class MsgConfigureImageFileName : public Message

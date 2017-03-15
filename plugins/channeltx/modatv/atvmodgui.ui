@@ -211,6 +211,16 @@
           <string>FM</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>USB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>LSB</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
