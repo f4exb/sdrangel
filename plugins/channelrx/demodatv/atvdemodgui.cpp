@@ -73,6 +73,8 @@ void ATVDemodGUI::resetToDefaults()
 {
     blockApplySettings(true);
 
+    //********** RF Default values **********
+    ui->deltaFrequency->setValue(0);
     //********** ATV Default values **********
     ui->synchLevel->setValue(100);
     ui->blackLevel->setValue(310);
@@ -226,13 +228,16 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
     //connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+
     m_objChannelMarker.setColor(Qt::white);
     m_objChannelMarker.setBandwidth(6000000);
 
     m_objChannelMarker.setCenterFrequency(0);
     m_objChannelMarker.setVisible(true);
 
-    //connect(&m_objchannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+    connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
     m_objDeviceAPI->registerChannelInstance(m_strChannelID, this);
     m_objDeviceAPI->addChannelMarker(&m_objChannelMarker);
@@ -265,6 +270,8 @@ void ATVDemodGUI::applySettings()
     if (m_blnDoApplySettings)
     {
         setTitleColor(m_objChannelMarker.getColor());
+		ui->deltaFrequency->setValue(abs(m_objChannelMarker.getCenterFrequency()));
+        ui->deltaFrequencyMinus->setChecked(m_objChannelMarker.getCenterFrequency() < 0);
 
         m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
                 //m_objATVDemod->GetSampleRate(),
