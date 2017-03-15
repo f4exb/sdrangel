@@ -4,9 +4,10 @@
 
 This plugin can be used to generate an analog TV signal mostly used in amateur radio. It is limited to black and white images as only the luminance (256 levels) is supported. 
 
-There is no sound either but you may use any of the plugins supporting audio to create a mixed signal. Be aware that in this case the power of the video and audio channels is reduced by 3 dB. There is also a performance hit due to the high interpolation factor on the audio side (from 48 kS/s to several MS/s). Another option is to use two different physical devices for video and audio and mix their RF outputs at the PA input or antenna.
+There is no sound either. You coud imagine using any of the plugins supporting audio to create a mixed signal. This is not working well however for various reasons. It is better to use two physical transmitters and two physical receivers.
 
-In practice 4 MS/s is the lowest sample rate that produces a standard image quality. Lower sample rates down to 1 MS/s produce low quality images that may still be acceptable depending on requirements.
+In practice 4 MS/s is the lowest sample rate that produces a standard image quality. Lower sample rates down to 1 MS/s produce low quality images that may still be acceptable for experiments.
+
 <h2>Interface</h2>
 
 ![ATV Modulator plugin GUI](../../../doc/img/ATVMod_plugin.png)
