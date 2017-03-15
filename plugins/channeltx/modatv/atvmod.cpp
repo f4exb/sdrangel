@@ -39,6 +39,7 @@ const float ATVMod::m_spanLevel = 0.7f;
 const int ATVMod::m_levelNbSamples = 10000; // every 10ms
 const int ATVMod::m_nbBars = 6;
 const int ATVMod::m_cameraFPSTestNbFrames = 100;
+const int ATVMod::m_ssbFftLen = 1024;
 
 ATVMod::ATVMod() :
 	m_modPhasor(0.0f),
@@ -54,7 +55,9 @@ ATVMod::ATVMod() :
 	m_videoEOF(false),
 	m_videoOK(false),
 	m_cameraIndex(-1),
-	m_showOverlayText(false)
+	m_showOverlayText(false),
+    m_SSBFilter(0),
+    m_SSBFilterBuffer(0)
 {
     setObjectName("ATVMod");
     scanCameras();
@@ -64,6 +67,10 @@ ATVMod::ATVMod() :
     m_config.m_rfBandwidth = 1000000;
     m_config.m_atvModInput = ATVModInputHBars;
     m_config.m_atvStd = ATVStdPAL625;
+
+    m_SSBFilter = new fftfilt(0, m_config.m_rfBandwidth / m_config.m_outputSampleRate, m_ssbFftLen);
+    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
+    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
 
     applyStandard();
 
@@ -582,6 +589,10 @@ void ATVMod::apply(bool force)
         {
             m_tvSampleRate = m_config.m_outputSampleRate;
         }
+
+        m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_config.m_outputSampleRate);
+        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilterBufferIndex = 0;
 
         applyStandard(); // set all timings
         m_settingsMutex.unlock();

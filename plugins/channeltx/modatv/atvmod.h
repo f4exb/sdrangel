@@ -31,6 +31,7 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
+#include "dsp/fftfilt.h"
 #include "util/message.h"
 
 class ATVMod : public BasebandSampleSource {
@@ -529,6 +530,11 @@ private:
 
     std::string m_overlayText;
     bool m_showOverlayText;
+
+    fftfilt* m_SSBFilter;
+    Complex* m_SSBFilterBuffer;
+    int m_SSBFilterBufferIndex;
+    static const int m_ssbFftLen;
 
     static const float m_blackLevel;
     static const float m_spanLevel;
