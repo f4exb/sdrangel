@@ -1,9 +1,15 @@
+sdrangel (3.3.1-1) unstable; urgency=medium
+
+  * ATV modulator: SSB support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 16 Mar 2017 23:14:18 +0100
+
 sdrangel (3.3.0-1) unstable; urgency=medium
 
   * NFM demod: new discriminator and optional FM deviation based squelch
   * ATV modulator
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 Mar 2017 23:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 15 Mar 2017 23:14:18 +0100
 
 sdrangel (3.2.0-1) unstable; urgency=medium
 

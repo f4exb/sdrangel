@@ -547,6 +547,7 @@ private:
     void pullVideo(Real& sample);
     void calculateLevel(Real& sample);
     void modulateSample();
+    Complex& modulateSSB(Real& sample);
     void applyStandard();
     void openImage(const QString& fileName);
     void openVideo(const QString& fileName);

@@ -188,11 +188,35 @@ void ATVMod::modulateSample()
     	m_modSample.real(cos(m_modPhasor) * 29204.0f); // -1 dB
     	m_modSample.imag(sin(m_modPhasor) * 29204.0f);
     	break;
+    case ATVModulationLSB:
+    case ATVModulationUSB:
+        m_modSample = modulateSSB(t);
+        m_modSample *= 29204.0f;
+        break;
     case ATVModulationAM: // AM 90%
     default:
         m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
     }
+}
+
+Complex& ATVMod::modulateSSB(Real& sample)
+{
+    int n_out;
+    Complex ci(sample, 0.0f);
+    fftfilt::cmplx *filtered;
+
+    n_out = m_SSBFilter->runSSB(ci, &filtered, m_running.m_atvModulation == ATVModulationUSB);
+
+    if (n_out > 0)
+    {
+        memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+        m_SSBFilterBufferIndex = 0;
+    }
+
+    m_SSBFilterBufferIndex++;
+
+    return m_SSBFilterBuffer[m_SSBFilterBufferIndex-1];
 }
 
 void ATVMod::pullVideo(Real& sample)

@@ -34,6 +34,8 @@ The video signal can modulate the carrier in the following modes:
 
   - AM: Amplitude modulation. Modulation index is 90%.
   - FM: Frequency modulation. Excursion is half the bandwidth available given the channel sample rate. e.g. for 4 MS/s sample rate this is &#177;1 MHz (2 MHz total) 
+  - USB: SSB upper side band: video signal is transposed only in positive frequencies including DC component
+  - LSB: SSB lower side band: video signal is transposed only in megative frequencies excluding DC component
   
 <h3>6: RF bandwidth</h3>
 
