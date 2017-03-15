@@ -33,7 +33,8 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_sidebands(dsb),
 	m_visible(false),
 	m_highlighted(false),
-	m_color(m_colorTable[m_nextColor])
+	m_color(m_colorTable[m_nextColor]),
+	m_movable(true)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)

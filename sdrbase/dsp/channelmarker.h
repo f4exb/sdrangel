@@ -42,6 +42,9 @@ public:
 	void setColor(const QColor& color);
 	const QColor& getColor() const { return m_color; }
 
+	void setMovable(bool movable) { m_movable = movable; }
+	bool getMovable() const { return m_movable; }
+
 protected:
 	static QRgb m_colorTable[];
 	static int m_nextColor;
@@ -54,6 +57,7 @@ protected:
 	bool m_visible;
 	bool m_highlighted;
 	QColor m_color;
+	bool m_movable;
 
 signals:
 	void changed();

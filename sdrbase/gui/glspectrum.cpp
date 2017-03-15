@@ -1574,7 +1574,7 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 		return;
 	} else if(m_cursorState == CSChannelMoving) {
 		Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
-		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getColor()!=Qt::blue)
+		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable())
 			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequency(freq);
 	}
 
@@ -1621,7 +1621,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 		m_cursorState = CSChannelMoving;
 		m_cursorChannel = 0;
 		Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
-		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getColor()!=Qt::blue)
+		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable())
 			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequency(freq);
 		return;
 	}

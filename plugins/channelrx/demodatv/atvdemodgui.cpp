@@ -230,6 +230,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
     m_objChannelMarker.setColor(Qt::white);
+    m_objChannelMarker.setMovable(false);
     m_objChannelMarker.setBandwidth(6000000);
     m_objChannelMarker.setCenterFrequency(0);
     m_objChannelMarker.setVisible(true);
