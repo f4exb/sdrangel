@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
+    <width>520</width>
     <height>480</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>480</width>
+    <width>520</width>
     <height>480</height>
    </size>
   </property>
@@ -39,8 +39,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>461</width>
-     <height>26</height>
+     <width>501</width>
+     <height>27</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -75,6 +75,12 @@
           <width>32</width>
           <height>16</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>12</pointsize>
+         </font>
         </property>
        </widget>
       </item>
@@ -124,6 +130,13 @@
      </widget>
     </item>
     <item>
+     <widget class="QLabel" name="rfBWText">
+      <property name="text">
+       <string>10.0</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="horizontalSpacer_3">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -139,7 +152,7 @@
     <item>
      <widget class="QLabel" name="channelSampleRateText">
       <property name="text">
-       <string>00000 kS/s</string>
+       <string>00000k</string>
       </property>
      </widget>
     </item>
@@ -150,7 +163,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>462</width>
+     <width>501</width>
      <height>347</height>
     </rect>
    </property>
@@ -193,7 +206,7 @@
     <rect>
      <x>10</x>
      <y>390</y>
-     <width>461</width>
+     <width>501</width>
      <height>80</height>
     </rect>
    </property>

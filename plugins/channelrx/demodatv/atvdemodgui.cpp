@@ -73,8 +73,6 @@ void ATVDemodGUI::resetToDefaults()
 {
     blockApplySettings(true);
 
-    //********** RF Default values **********
-    ui->deltaFrequency->setValue(0);
     //********** ATV Default values **********
     ui->synchLevel->setValue(100);
     ui->blackLevel->setValue(310);
@@ -203,41 +201,40 @@ void ATVDemodGUI::onMenuDoubleClicked()
 
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
         QWidget* objParent) :
-        RollupWidget(objParent), ui(new Ui::ATVDemodGUI), m_objPluginAPI(
-                objPluginAPI), m_objDeviceAPI(objDeviceAPI), m_objChannelMarker(
-                this), m_blnBasicSettingsShown(false), m_blnDoApplySettings(
-                true)
+        RollupWidget(objParent),
+        ui(new Ui::ATVDemodGUI),
+        m_objPluginAPI(objPluginAPI),
+        m_objDeviceAPI(objDeviceAPI),
+        m_objChannelMarker(this),
+        m_blnBasicSettingsShown(false),
+        m_blnDoApplySettings(true)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this,
-            SLOT(onWidgetRolled(QWidget*,bool)));
-    connect(this, SIGNAL(menuDoubleClickEvent()), this,
-            SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_objATVDemod = new ATVDemod();
     m_objATVDemod->SetATVScreen(ui->screenTV);
 
     m_objChannelizer = new DownChannelizer(m_objATVDemod);
-    m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer,
-            this);
+    m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
     m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
+
+    //connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
     connect(m_objChannelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
-    //connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
-
-    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
-	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
-
     m_objChannelMarker.setColor(Qt::white);
     m_objChannelMarker.setBandwidth(6000000);
-
     m_objChannelMarker.setCenterFrequency(0);
     m_objChannelMarker.setVisible(true);
 
-    connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+    //connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
     m_objDeviceAPI->registerChannelInstance(m_strChannelID, this);
     m_objDeviceAPI->addChannelMarker(&m_objChannelMarker);
