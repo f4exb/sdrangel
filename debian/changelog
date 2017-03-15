@@ -1,6 +1,7 @@
 sdrangel (3.3.0-1) unstable; urgency=medium
 
-  * NFM demod: new discriminator and optional FM deviatoin based squelch
+  * NFM demod: new discriminator and optional FM deviation based squelch
+  * ATV modulator
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 Mar 2017 23:14:18 +0100
 
