@@ -310,7 +310,9 @@ void ATVDemodGUI::applySettings()
                 << " m_objATVDemod.sampleRate: " << m_objATVDemod->GetSampleRate();
 
         //m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate()); it is unreliable at this moment
+        m_blnDoApplySettings = false; // avoid infinite recursion
         m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
+        m_blnDoApplySettings = true;
     }
 }
 
