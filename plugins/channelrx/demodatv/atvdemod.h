@@ -65,8 +65,8 @@ public:
 	        m_fltTopDurationUs(0.0f),
 	        m_fltFramePerS(0.0f),
 	        m_fltRatioOfRowsToDisplay(0.0f),
-	        m_fltVoltLevelSynchroTop(0),
-	        m_fltVoltLevelSynchroBlack(0),
+	        m_fltVoltLevelSynchroTop(0.0f),
+	        m_fltVoltLevelSynchroBlack(1.0f),
 	        m_enmModulation(ATV_FM1),
 	        m_blnHSync(false),
 	        m_blnVSync(false)
@@ -99,8 +99,6 @@ public:
             float fltTopDurationUs,
             float fltFramePerS,
             float fltRatioOfRowsToDisplay,
-            float fltVoltLevelSynchroTop,
-            float fltVoltLevelSynchroBlack,
             ATVModulation enmModulation,
             bool blnHSync,
             bool blnVSync);
@@ -169,9 +167,6 @@ private:
     int m_intNumberSamplePerTop;
     int m_intNumberOfLines;
     int m_intNumberOfRowsToDisplay;
-
-    float m_fltVoltLevelSynchroTop;
-    float m_fltVoltLevelSynchroBlack;
 
     ATVModulation m_enmModulation;
 
