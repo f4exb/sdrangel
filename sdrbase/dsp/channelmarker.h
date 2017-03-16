@@ -13,7 +13,9 @@ public:
 	{
 		dsb,
 		lsb,
-		usb
+		usb,
+		vusb, //!< USB with vestigial LSB
+		vlsb  //!< LSB with vestigial USB
 	} sidebands_t;
 
 	ChannelMarker(QObject* parent = NULL);
@@ -26,6 +28,9 @@ public:
 
 	void setBandwidth(int bandwidth);
 	int getBandwidth() const { return m_bandwidth; }
+
+    void setOppositeBandwidth(int bandwidth);
+    int getOppositeBandwidth() const { return m_oppositeBandwidth; }
 
 	void setLowCutoff(int lowCutoff);
 	int getLowCutoff() const { return m_lowCutoff; }
@@ -52,6 +57,7 @@ protected:
 	QString m_title;
 	int m_centerFrequency;
 	int m_bandwidth;
+    int m_oppositeBandwidth;
 	int m_lowCutoff;
 	sidebands_t m_sidebands;
 	bool m_visible;
