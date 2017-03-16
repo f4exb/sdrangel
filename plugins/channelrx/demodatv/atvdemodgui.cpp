@@ -278,7 +278,7 @@ void ATVDemodGUI::applySettings()
 
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
                 ui->lineTime->value() / 10.0f,
-                ui->topTime->value(),
+                ui->topTime->value() * 1.0f,
                 (ui->fps->currentIndex() == 0) ? 25 : 30,
                 (ui->halfImage->checkState() == Qt::Checked) ? 50 : 100,
                 ((float) (ui->synchLevel->value())) / 1000.0f,

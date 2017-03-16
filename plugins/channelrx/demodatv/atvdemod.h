@@ -48,9 +48,9 @@ public:
 
 	struct ATVConfig
 	{
-	    int m_intMsps;
+	    int m_intSampleRate;
 	    float m_fltLineDurationUs;
-	    int m_intTopDurationUs;
+	    float m_fltTopDurationUs;
 	    int m_intFramePerS;
 	    int m_intPercentOfRowsToDisplay;
 	    float m_fltVoltLevelSynchroTop;
@@ -60,9 +60,9 @@ public:
 	    bool m_blnVSync;
 
 	    ATVConfig() :
-	        m_intMsps(0),
+	        m_intSampleRate(0),
 	        m_fltLineDurationUs(0.0f),
-	        m_intTopDurationUs(0),
+	        m_fltTopDurationUs(0.0f),
 	        m_intFramePerS(0),
 	        m_intPercentOfRowsToDisplay(0),
 	        m_fltVoltLevelSynchroTop(0),
@@ -96,7 +96,7 @@ public:
     bool SetATVScreen(ATVScreen *objScreen);
     void InitATVParameters(int intMsps,
             float fltLineDurationUs,
-            int intTopDurationUs,
+            float fltTopDurationUs,
             int intFramePerS,
             int intPercentOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
@@ -115,7 +115,7 @@ private:
 
         public:
             static MsgConfigureATVDemod* create(float fltLineDurationUs,
-                    int intTopDurationUs,
+                    float fltTopDurationUs,
                     int intFramePerS,
                     int intPercentOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
@@ -125,7 +125,7 @@ private:
                     bool blnVSync)
             {
                 return new MsgConfigureATVDemod(fltLineDurationUs,
-                        intTopDurationUs,
+                        fltTopDurationUs,
                         intFramePerS,
                         intPercentOfRowsToDisplay,
                         fltVoltLevelSynchroTop,
@@ -139,7 +139,7 @@ private:
 
         private:
             MsgConfigureATVDemod(float fltLineDurationUs,
-                    int intTopDurationUs,
+                    float fltTopDurationUs,
                     int intFramePerS,
                     int intPercentOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
@@ -154,7 +154,7 @@ private:
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_intFramePerS = intFramePerS;
                 m_objMsgConfig.m_fltLineDurationUs = fltLineDurationUs;
-                m_objMsgConfig.m_intTopDurationUs = intTopDurationUs;
+                m_objMsgConfig.m_fltTopDurationUs = fltTopDurationUs;
                 m_objMsgConfig.m_intPercentOfRowsToDisplay = intPercentOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;

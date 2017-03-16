@@ -83,9 +83,9 @@ void ATVDemod::configure(MessageQueue* objMessageQueue, int intLineDurationUs, i
 }
 
 void ATVDemod::InitATVParameters(
-        int intMsps,
+        int intSampleRate,
         float fltLineDurationUs,
-        int intTopDurationUs,
+        float fltTopDurationUs,
         int intFramePerS,
         int intPercentOfRowsToDisplay,
         float fltVoltLevelSynchroTop,
@@ -94,7 +94,6 @@ void ATVDemod::InitATVParameters(
         bool blnHSync,
         bool blnVSync)
 {
-    float fltLineSynchroTop = (float) intTopDurationUs;
     float fltImagesPerSeconds = (float) intFramePerS;
     int intNumberSamplePerLine;
     int intNumberOfLines;
@@ -105,7 +104,7 @@ void ATVDemod::InitATVParameters(
     m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
     m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
 
-    intNumberSamplePerLine = (int) ((fltLineDurationUs * intMsps) / m_fltSecondToUs);
+    intNumberSamplePerLine = (int) ((fltLineDurationUs * intSampleRate) / m_fltSecondToUs);
     intNumberOfLines = (int) ((m_fltSecondToUs/fltImagesPerSeconds) /round(fltLineDurationUs));
 
     if((intNumberSamplePerLine != m_intNumberSamplePerLine)
@@ -115,9 +114,9 @@ void ATVDemod::InitATVParameters(
     }
 
     m_intNumberSamplePerLine= intNumberSamplePerLine;
-    m_intNumberSamplePerTop=(int)((fltLineSynchroTop * intMsps) / m_fltSecondToUs);
+    m_intNumberSamplePerTop=(int)((fltTopDurationUs * intSampleRate) / m_fltSecondToUs);
     m_intNumberOfLines = intNumberOfLines;
-    m_intNumberOfRowsToDisplay = (int)((((float)intPercentOfRowsToDisplay) * fltLineDurationUs * intMsps) / (m_fltSecondToUs*100.0f));
+    m_intNumberOfRowsToDisplay = (int)((((float)intPercentOfRowsToDisplay) * fltLineDurationUs * intSampleRate) / (m_fltSecondToUs*100.0f));
     m_intRowsLimit = m_intNumberOfLines-1;
     m_intImageIndex = 0;
 
@@ -138,8 +137,8 @@ void ATVDemod::InitATVParameters(
     m_objRunning.m_fltVoltLevelSynchroTop = m_fltVoltLevelSynchroTop;
     m_objRunning.m_intFramePerS = intFramePerS;
     m_objRunning.m_fltLineDurationUs = fltLineDurationUs;
-    m_objRunning.m_intTopDurationUs = intTopDurationUs;
-    m_objRunning.m_intMsps = intMsps;
+    m_objRunning.m_fltTopDurationUs = fltTopDurationUs;
+    m_objRunning.m_intSampleRate = intSampleRate;
     m_objRunning.m_intPercentOfRowsToDisplay = intPercentOfRowsToDisplay;
     m_objRunning.m_blnHSync = blnHSync;
     m_objRunning.m_blnVSync = blnVSync;
@@ -147,9 +146,9 @@ void ATVDemod::InitATVParameters(
     m_objSettingsMutex.unlock();
 
     qDebug()  << "ATVDemod::InitATVParameters:"
-                <<  " - Msps: " << intMsps
+                <<  " - Sample rate S/s: " << intSampleRate
                 <<  " - Line us: " << fltLineDurationUs
-                <<  " - Top us: " << intTopDurationUs
+                <<  " - Top us: " << fltTopDurationUs
                 <<  " - Frame/s: " << intFramePerS
                 <<  " <=> "
                 <<  " - Samples per Line: " << m_intNumberSamplePerLine
@@ -530,14 +529,14 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-        if(m_objRunning.m_intMsps!=objNotif.getSampleRate())
+        if(m_objRunning.m_intSampleRate!=objNotif.getSampleRate())
         {
-            m_objRunning.m_intMsps = objNotif.getSampleRate();
+            m_objRunning.m_intSampleRate = objNotif.getSampleRate();
             ApplySettings();
         }
 
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
-                << " m_intMsps: " << m_objRunning.m_intMsps;
+                << " m_intMsps: " << m_objRunning.m_intSampleRate;
 
         return true;
     }
@@ -551,7 +550,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_objConfig.m_intFramePerS              = objCfg.m_objMsgConfig.m_intFramePerS;
         m_objConfig.m_fltLineDurationUs         = objCfg.m_objMsgConfig.m_fltLineDurationUs;
         m_objConfig.m_intPercentOfRowsToDisplay = objCfg.m_objMsgConfig.m_intPercentOfRowsToDisplay;
-        m_objConfig.m_intTopDurationUs          = objCfg.m_objMsgConfig.m_intTopDurationUs;
+        m_objConfig.m_fltTopDurationUs          = objCfg.m_objMsgConfig.m_fltTopDurationUs;
         m_objConfig.m_blnHSync                  = objCfg.m_objMsgConfig.m_blnHSync;
         m_objConfig.m_blnVSync                  = objCfg.m_objMsgConfig.m_blnVSync;
 
@@ -561,7 +560,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
            || (objCfg.m_objMsgConfig.m_intFramePerS != m_objRunning.m_intFramePerS)
            || (objCfg.m_objMsgConfig.m_fltLineDurationUs != m_objRunning.m_fltLineDurationUs)
            || (objCfg.m_objMsgConfig.m_intPercentOfRowsToDisplay != m_objRunning.m_intPercentOfRowsToDisplay)
-           || (objCfg.m_objMsgConfig.m_intTopDurationUs != m_objRunning.m_intTopDurationUs)
+           || (objCfg.m_objMsgConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
            || (objCfg.m_objMsgConfig.m_blnHSync != m_objRunning.m_blnHSync)
            || (objCfg.m_objMsgConfig.m_blnVSync != m_objRunning.m_blnVSync))
          {
@@ -571,7 +570,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
             m_objRunning.m_intFramePerS = objCfg.m_objMsgConfig.m_intFramePerS;
             m_objRunning.m_fltLineDurationUs = objCfg.m_objMsgConfig.m_fltLineDurationUs;
             m_objRunning.m_intPercentOfRowsToDisplay = objCfg.m_objMsgConfig.m_intPercentOfRowsToDisplay;
-            m_objRunning.m_intTopDurationUs = objCfg.m_objMsgConfig.m_intTopDurationUs;
+            m_objRunning.m_fltTopDurationUs = objCfg.m_objMsgConfig.m_fltTopDurationUs;
             m_objRunning.m_blnHSync = objCfg.m_objMsgConfig.m_blnHSync;
             m_objRunning.m_blnVSync = objCfg.m_objMsgConfig.m_blnVSync;
 
@@ -589,16 +588,16 @@ bool ATVDemod::handleMessage(const Message& cmd)
 void ATVDemod::ApplySettings()
 {
 
-    if(m_objRunning.m_intMsps==0)
+    if(m_objRunning.m_intSampleRate==0)
     {
         return;
     }
 
 
     InitATVParameters(
-            m_objRunning.m_intMsps,
+            m_objRunning.m_intSampleRate,
             m_objRunning.m_fltLineDurationUs,
-            m_objRunning.m_intTopDurationUs,
+            m_objRunning.m_fltTopDurationUs,
             m_objRunning.m_intFramePerS,
             m_objRunning.m_intPercentOfRowsToDisplay,
             m_objRunning.m_fltVoltLevelSynchroTop,
@@ -610,6 +609,6 @@ void ATVDemod::ApplySettings()
 
 int ATVDemod::GetSampleRate()
 {
-    return m_objRunning.m_intMsps;
+    return m_objRunning.m_intSampleRate;
 }
 
