@@ -101,6 +101,7 @@ public:
             bool blnHSync,
             bool blnVSync);
     int GetSampleRate();
+    double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
 
 private:
 
@@ -143,6 +144,10 @@ private:
 
        int m_intColIndex;
        int m_intRowIndex;
+
+       //*************** RF  ***************
+
+       MovingAverage<double> m_objMagSqAverage;
 
        //QElapsedTimer m_objTimer;
 private:

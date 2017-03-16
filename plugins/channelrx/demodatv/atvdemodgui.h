@@ -85,6 +85,8 @@ private:
     bool m_blnBasicSettingsShown;
     bool m_blnDoApplySettings;
 
+    int m_intTickCount;
+
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
 	virtual ~ATVDemodGUI();
 

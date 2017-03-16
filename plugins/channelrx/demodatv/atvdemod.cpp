@@ -59,6 +59,8 @@ ATVDemod::ATVDemod() :
     m_blnInitialized=false;
     m_intNumberOfRowsToDisplay=0;
 
+    m_objMagSqAverage.resize(16, 1.0);
+
     memset((void*)m_fltBufferI,0,6*sizeof(float));
     memset((void*)m_fltBufferQ,0,6*sizeof(float));
 
@@ -239,9 +241,12 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         //********** demodulation **********
 
-        fltNorm = sqrt(fltI*fltI + fltQ*fltQ);
+        double magSq = fltI*fltI + fltQ*fltQ;
+        m_objMagSqAverage.feed(magSq);
 
-        if(m_enmModulation!=ATV_AM)
+        fltNorm = sqrt(magSq);
+
+        if ((m_enmModulation == ATV_FM1) || (m_enmModulation == ATV_FM2))
         {
             //Amplitude FM
 
@@ -290,7 +295,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_fltBufferQ[0]=fltNormQ;
 
         }
-        else
+        else if (m_enmModulation == ATV_AM)
         {
             //Amplitude AM
             fltVal = fltNorm;
@@ -310,6 +315,10 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             //Normalisation
             fltVal -= m_fltAmpMin;
             fltVal /=m_fltAmpDelta;
+        }
+        else
+        {
+            fltVal = 0.0f;
         }
 
         m_fltAmpLineAverage += fltVal;

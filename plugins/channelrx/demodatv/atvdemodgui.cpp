@@ -181,6 +181,7 @@ void ATVDemodGUI::viewChanged()
 void ATVDemodGUI::channelSampleRateChanged()
 {
     qDebug("ATVDemodGUI::channelSampleRateChanged");
+    ui->channelSampleRateText->setText(tr("%1k").arg(m_objChannelizer->getInputSampleRate()/1000.0f, 0, 'f', 0));
     applySettings();
 }
 
@@ -207,7 +208,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
         m_objDeviceAPI(objDeviceAPI),
         m_objChannelMarker(this),
         m_blnBasicSettingsShown(false),
-        m_blnDoApplySettings(true)
+        m_blnDoApplySettings(true),
+        m_intTickCount(0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -221,7 +223,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
     m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
 
-    //connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+    connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -332,6 +334,21 @@ void ATVDemodGUI::enterEvent(QEvent*)
 
 void ATVDemodGUI::tick()
 {
+    if (m_intTickCount < 10) // ~500 ms
+    {
+        m_intTickCount++;
+    }
+    else
+    {
+        if (m_objATVDemod)
+        {
+            double magSqDB = CalcDb::dbPower(m_objATVDemod->getMagSq() / (1<<30));
+            ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
+        }
+
+        m_intTickCount = 0;
+    }
+
     return;
 }
 
