@@ -34,41 +34,45 @@
 #include "atvscreen.h"
 
 
-enum ATVModulation { ATV_AM, ATV_FM1 , ATV_FM2 };
-
-struct ATVConfig
-{
-    int m_intMsps;
-    int m_intLineDurationUs;
-    int m_intTopDurationUs;
-    int m_intFramePerS;
-    int m_intPercentOfRowsToDisplay;
-    float m_fltVoltLevelSynchroTop;
-    float m_fltVoltLevelSynchroBlack;
-    ATVModulation m_enmModulation;
-    bool m_blnHSync;
-    bool m_blnVSync;
-
-    ATVConfig() :
-        m_intMsps(0),
-        m_intLineDurationUs(0),
-        m_intTopDurationUs(0),
-        m_intFramePerS(0),
-        m_intPercentOfRowsToDisplay(0),
-        m_fltVoltLevelSynchroTop(0),
-        m_fltVoltLevelSynchroBlack(0),
-        m_enmModulation(ATV_FM1),
-        m_blnHSync(false),
-        m_blnVSync(false)
-    {
-    }
-};
-
 class ATVDemod : public BasebandSampleSink
 {
 	Q_OBJECT
 
 public:
+
+	enum ATVModulation {
+	    ATV_AM,
+	    ATV_FM1,
+	    ATV_FM2
+	};
+
+	struct ATVConfig
+	{
+	    int m_intMsps;
+	    int m_intLineDurationUs;
+	    int m_intTopDurationUs;
+	    int m_intFramePerS;
+	    int m_intPercentOfRowsToDisplay;
+	    float m_fltVoltLevelSynchroTop;
+	    float m_fltVoltLevelSynchroBlack;
+	    ATVModulation m_enmModulation;
+	    bool m_blnHSync;
+	    bool m_blnVSync;
+
+	    ATVConfig() :
+	        m_intMsps(0),
+	        m_intLineDurationUs(0),
+	        m_intTopDurationUs(0),
+	        m_intFramePerS(0),
+	        m_intPercentOfRowsToDisplay(0),
+	        m_fltVoltLevelSynchroTop(0),
+	        m_fltVoltLevelSynchroBlack(0),
+	        m_enmModulation(ATV_FM1),
+	        m_blnHSync(false),
+	        m_blnVSync(false)
+	    {
+	    }
+	};
 
     ATVDemod();
 	~ATVDemod();

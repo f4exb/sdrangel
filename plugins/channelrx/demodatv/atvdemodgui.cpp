@@ -265,7 +265,7 @@ void ATVDemodGUI::blockApplySettings(bool blnBlock)
 
 void ATVDemodGUI::applySettings()
 {
-    ATVModulation enmSelectedModulation;
+    ATVDemod::ATVModulation enmSelectedModulation;
 
     if (m_blnDoApplySettings)
     {
@@ -281,19 +281,19 @@ void ATVDemodGUI::applySettings()
         switch (ui->modulation->currentIndex())
         {
         case 0:
-            enmSelectedModulation = ATV_FM1;
+            enmSelectedModulation = ATVDemod::ATV_FM1;
             break;
 
         case 1:
-            enmSelectedModulation = ATV_FM2;
+            enmSelectedModulation = ATVDemod::ATV_FM2;
             break;
 
         case 2:
-            enmSelectedModulation = ATV_AM;
+            enmSelectedModulation = ATVDemod::ATV_AM;
             break;
 
         default:
-            enmSelectedModulation = ATV_FM1;
+            enmSelectedModulation = ATVDemod::ATV_FM1;
             break;
         }
 
