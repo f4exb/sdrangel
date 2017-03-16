@@ -57,7 +57,11 @@ ATVMod::ATVMod() :
 	m_cameraIndex(-1),
 	m_showOverlayText(false),
     m_SSBFilter(0),
-    m_SSBFilterBuffer(0)
+    m_DSBFilter(0),
+    m_SSBFilterBuffer(0),
+    m_DSBFilterBuffer(0),
+    m_SSBFilterBufferIndex(0),
+    m_DSBFilterBufferIndex(0)
 {
     setObjectName("ATVMod");
     scanCameras();
@@ -71,6 +75,10 @@ ATVMod::ATVMod() :
     m_SSBFilter = new fftfilt(0, m_config.m_rfBandwidth / m_config.m_outputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+
+    m_DSBFilter = new fftfilt((2.0f * m_config.m_rfBandwidth) / m_config.m_outputSampleRate, 2 * m_ssbFftLen);
+    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
+    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
     applyStandard();
 
@@ -193,6 +201,11 @@ void ATVMod::modulateSample()
         m_modSample = modulateSSB(t);
         m_modSample *= 29204.0f;
         break;
+    case ATVModulationVestigialLSB:
+    case ATVModulationVestigialUSB:
+        m_modSample = modulateVestigialSSB(t);
+        m_modSample *= 29204.0f;
+        break;
     case ATVModulationAM: // AM 90%
     default:
         m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
@@ -217,6 +230,25 @@ Complex& ATVMod::modulateSSB(Real& sample)
     m_SSBFilterBufferIndex++;
 
     return m_SSBFilterBuffer[m_SSBFilterBufferIndex-1];
+}
+
+Complex& ATVMod::modulateVestigialSSB(Real& sample)
+{
+    int n_out;
+    Complex ci(sample, 0.0f);
+    fftfilt::cmplx *filtered;
+
+    n_out = m_DSBFilter->runVestigial(ci, &filtered, m_running.m_atvModulation == ATVModulationVestigialUSB, 0.15f);
+
+    if (n_out > 0)
+    {
+        memcpy((void *) m_DSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+        m_DSBFilterBufferIndex = 0;
+    }
+
+    m_DSBFilterBufferIndex++;
+
+    return m_DSBFilterBuffer[m_DSBFilterBufferIndex-1];
 }
 
 void ATVMod::pullVideo(Real& sample)
@@ -617,6 +649,10 @@ void ATVMod::apply(bool force)
         m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_config.m_outputSampleRate);
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
+
+        m_DSBFilter->create_dsb_filter(m_config.m_rfBandwidth / m_config.m_outputSampleRate);
+        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+        m_DSBFilterBufferIndex = 0;
 
         applyStandard(); // set all timings
         m_settingsMutex.unlock();

@@ -62,7 +62,9 @@ public:
     	ATVModulationAM,
 		ATVModulationFM,
 		ATVModulationUSB,
-		ATVModulationLSB
+		ATVModulationLSB,
+        ATVModulationVestigialUSB,
+        ATVModulationVestigialLSB
     } ATVModulation;
 
     class MsgConfigureImageFileName : public Message
@@ -532,8 +534,11 @@ private:
     bool m_showOverlayText;
 
     fftfilt* m_SSBFilter;
+    fftfilt* m_DSBFilter;
     Complex* m_SSBFilterBuffer;
+    Complex* m_DSBFilterBuffer;
     int m_SSBFilterBufferIndex;
+    int m_DSBFilterBufferIndex;
     static const int m_ssbFftLen;
 
     static const float m_blackLevel;
@@ -548,6 +553,7 @@ private:
     void calculateLevel(Real& sample);
     void modulateSample();
     Complex& modulateSSB(Real& sample);
+    Complex& modulateVestigialSSB(Real& sample);
     void applyStandard();
     void openImage(const QString& fileName);
     void openVideo(const QString& fileName);

@@ -1,5 +1,5 @@
 /*
- * Filters from Fldigi. 
+ * Filters from Fldigi.
 */
 
 #ifndef	_FFTFILT_H
@@ -28,6 +28,7 @@ public:
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb, bool getDC = true);
 	int runDSB(const cmplx& in, cmplx **out);
+	int runVestigial(const cmplx & in, cmplx **out, bool usb, float vf);
 
 protected:
 	int flen;
@@ -43,13 +44,13 @@ protected:
 	int window;
 
 	inline float fsinc(float fc, int i, int len) {
-		return (i == len/2) ? 2.0 * fc: 
+		return (i == len/2) ? 2.0 * fc:
 				sin(2 * M_PI * fc * (i - len/2)) / (M_PI * (i - len/2));
 	}
 
 	inline float _blackman(int i, int len) {
-		return (0.42 - 
-				 0.50 * cos(2.0 * M_PI * i / len) + 
+		return (0.42 -
+				 0.50 * cos(2.0 * M_PI * i / len) +
 				 0.08 * cos(4.0 * M_PI * i / len));
 	}
 

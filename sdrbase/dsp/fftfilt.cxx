@@ -271,6 +271,64 @@ int fftfilt::runDSB(const cmplx & in, cmplx **out)
 	return flen2;
 }
 
+// Version for vestigial sideband. You have to double the FFT size used for SSB.
+int fftfilt::runVestigial(const cmplx & in, cmplx **out, bool usb, float vf)
+{
+    if (vf < 0.0f) vf = 0.0f;
+    if (vf > 1.0f) vf = 1.0f;
+    if (usb) vf = 1.0f - vf;
+
+    data[inptr++] = in;
+    if (inptr < flen2)
+        return 0;
+    inptr = 0;
+
+    fft->ComplexFFT(data);
+
+    data[0] *= filter[0]; // always keep DC
+
+    if (usb)
+    {
+        for (int i = 1; i < flen2; i++)
+        {
+            data[i] *= filter[i]; // usb
+
+            if (i > (int) (vf * flen2)) { // vestigial lsb
+                data[flen2 + i] *= filter[flen2 + i];
+            } else {
+                data[flen2 + i] = 0;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 1; i < flen2; i++)
+        {
+            if (i < (int) (vf * flen2)) { // vestigial usb
+                data[i] *= filter[i];
+            } else {
+                data[i] = 0;
+            }
+
+            data[flen2 + i] *= filter[flen2 + i]; // lsb
+        }
+    }
+
+    // in-place FFT: freqdata overwritten with filtered timedata
+    fft->InverseComplexFFT(data);
+
+    // overlap and add
+    for (int i = 0; i < flen2; i++) {
+        output[i] = ovlbuf[i] + data[i];
+        ovlbuf[i] = data[i+flen2];
+    }
+
+    memset (data, 0, flen * sizeof(cmplx));
+
+    *out = output;
+    return flen2;
+}
+
 /* Sliding FFT from Fldigi */
 
 struct sfft::vrot_bins_pair {

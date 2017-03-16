@@ -194,7 +194,7 @@
        <widget class="QComboBox" name="modulation">
         <property name="maximumSize">
          <size>
-          <width>50</width>
+          <width>60</width>
           <height>16777215</height>
          </size>
         </property>
@@ -219,6 +219,16 @@
         <item>
          <property name="text">
           <string>LSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>VUSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>VLSB</string>
          </property>
         </item>
        </widget>
