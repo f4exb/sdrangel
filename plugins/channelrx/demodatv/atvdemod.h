@@ -99,7 +99,6 @@ public:
             float fltTopDurationUs,
             float fltFramePerS,
             float fltRatioOfRowsToDisplay,
-            ATVModulation enmModulation,
             bool blnHSync,
             bool blnVSync);
     int GetSampleRate();
@@ -167,8 +166,6 @@ private:
     int m_intNumberSamplePerTop;
     int m_intNumberOfLines;
     int m_intNumberOfRowsToDisplay;
-
-    ATVModulation m_enmModulation;
 
     //*************** PROCESSING  ***************
 

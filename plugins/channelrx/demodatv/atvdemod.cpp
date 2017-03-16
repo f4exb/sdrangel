@@ -39,7 +39,6 @@ ATVDemod::ATVDemod() :
     m_blnSynchroDetected(false),
     m_blnLineSynchronized(false),
     m_blnVerticalSynchroDetected(false),
-    m_enmModulation(ATV_FM1),
     m_intRowsLimit(0),
     m_blnImageDetecting(false),
     m_fltEffMin(2000000000.0f),
@@ -105,7 +104,6 @@ void ATVDemod::InitATVParameters(
         float fltTopDurationUs,
         float fltFramePerS,
         float fltRatioOfRowsToDisplay,
-        ATVModulation enmModulation,
         bool blnHSync,
         bool blnVSync)
 {
@@ -132,8 +130,6 @@ void ATVDemod::InitATVParameters(
     m_intRowsLimit = m_intNumberOfLines-1;
     m_intImageIndex = 0;
 
-    m_enmModulation = enmModulation;
-
     m_intColIndex=0;
     m_intRowIndex=0;
     m_intRowsLimit=0;
@@ -144,7 +140,6 @@ void ATVDemod::InitATVParameters(
     }
 
     //Mise à jour de la config
-    m_objRunning.m_enmModulation = m_enmModulation;
     m_objRunning.m_fltFramePerS = fltFramePerS;
     m_objRunning.m_fltLineDurationUs = fltLineDurationUs;
     m_objRunning.m_fltTopDurationUs = fltTopDurationUs;
@@ -154,19 +149,6 @@ void ATVDemod::InitATVParameters(
     m_objRunning.m_blnVSync = blnVSync;
 
     m_objSettingsMutex.unlock();
-
-    qDebug()  << "ATVDemod::InitATVParameters:"
-                <<  " - Sample rate S/s: " << intSampleRate
-                <<  " - Line us: " << fltLineDurationUs
-                <<  " - Top us: " << fltTopDurationUs
-                <<  " - Frame/s: " << fltFramePerS
-                <<  " - Frame display ratio: " << fltRatioOfRowsToDisplay
-                <<  " <=> "
-                <<  " - Samples per Line: " << m_intNumberSamplePerLine
-                <<  " - Samples per Top: " << m_intNumberSamplePerTop
-                <<  " - Lines per Frame: " << m_intNumberOfLines
-                <<  " - Rows to Display: " << m_intNumberOfRowsToDisplay
-                <<  " - Modulation: " << ((m_enmModulation==ATV_AM)?"AM" : "FM");
 }
 
 void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -245,7 +227,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         fltNorm = sqrt(magSq);
 
-        if ((m_enmModulation == ATV_FM1) || (m_enmModulation == ATV_FM2))
+        if ((m_objRunning.m_enmModulation == ATV_FM1) || (m_objRunning.m_enmModulation == ATV_FM2))
         {
             //Amplitude FM
 
@@ -255,7 +237,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             //-2 > 2 : 0 -> 1 volt
             //0->0.3 synchro  0.3->1 image
 
-            if(m_enmModulation==ATV_FM1)
+            if (m_objRunning.m_enmModulation == ATV_FM1)
             {
                 //YDiff Cd
                 fltVal = m_fltBufferI[0]*(fltNormQ - m_fltBufferQ[1]);
@@ -294,7 +276,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_fltBufferQ[0]=fltNormQ;
 
         }
-        else if (m_enmModulation == ATV_AM)
+        else if (m_objRunning.m_enmModulation == ATV_AM)
         {
             //Amplitude AM
             fltVal = fltNorm;
@@ -480,7 +462,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
                 m_intRowsLimit = m_intNumberOfLines-1;
 
-                if(m_objRunning.m_enmModulation==ATV_AM)
+                if (m_objRunning.m_enmModulation == ATV_AM)
                 {
                     m_fltAmpMin=m_fltEffMin;
                     m_fltAmpMax=m_fltEffMax;
@@ -565,23 +547,34 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_objConfig.m_blnHSync                  = objCfg.m_objMsgConfig.m_blnHSync;
         m_objConfig.m_blnVSync                  = objCfg.m_objMsgConfig.m_blnVSync;
 
-        if((objCfg.m_objMsgConfig.m_enmModulation != m_objRunning.m_enmModulation)
-           || (objCfg.m_objMsgConfig.m_fltVoltLevelSynchroBlack != m_objRunning.m_fltVoltLevelSynchroBlack)
-           || (objCfg.m_objMsgConfig.m_fltVoltLevelSynchroTop != m_objRunning.m_fltVoltLevelSynchroTop)
-           || (objCfg.m_objMsgConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
-           || (objCfg.m_objMsgConfig.m_fltLineDurationUs != m_objRunning.m_fltLineDurationUs)
-           || (objCfg.m_objMsgConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay)
-           || (objCfg.m_objMsgConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
-           || (objCfg.m_objMsgConfig.m_blnHSync != m_objRunning.m_blnHSync)
-           || (objCfg.m_objMsgConfig.m_blnVSync != m_objRunning.m_blnVSync))
+        qDebug()  << "ATVDemod::handleMessage: MsgConfigureATVDemod:"
+                << " m_enmModulation" << m_objConfig.m_enmModulation
+                << " m_fltVoltLevelSynchroBlack" << m_objConfig.m_fltVoltLevelSynchroBlack
+                << " m_fltVoltLevelSynchroTop" << m_objConfig.m_fltVoltLevelSynchroTop
+                << " m_fltFramePerS" << m_objConfig.m_fltFramePerS
+                << " m_fltLineDurationUs" << m_objConfig.m_fltLineDurationUs
+                << " m_fltRatioOfRowsToDisplay" << m_objConfig.m_fltRatioOfRowsToDisplay
+                << " m_fltTopDurationUs" << m_objConfig.m_fltTopDurationUs
+                << " m_blnHSync" << m_objConfig.m_blnHSync
+                << " m_blnVSync" << m_objConfig.m_blnVSync;
+
+        if((m_objConfig.m_enmModulation != m_objRunning.m_enmModulation)
+           || (m_objConfig.m_fltVoltLevelSynchroBlack != m_objRunning.m_fltVoltLevelSynchroBlack)
+           || (m_objConfig.m_fltVoltLevelSynchroTop != m_objRunning.m_fltVoltLevelSynchroTop)
+           || (m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
+           || (m_objConfig.m_fltLineDurationUs != m_objRunning.m_fltLineDurationUs)
+           || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay)
+           || (m_objConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
+           || (m_objConfig.m_blnHSync != m_objRunning.m_blnHSync)
+           || (m_objConfig.m_blnVSync != m_objRunning.m_blnVSync))
          {
-            m_objRunning.m_enmModulation = objCfg.m_objMsgConfig.m_enmModulation;
-            m_objRunning.m_fltFramePerS = objCfg.m_objMsgConfig.m_fltFramePerS;
-            m_objRunning.m_fltLineDurationUs = objCfg.m_objMsgConfig.m_fltLineDurationUs;
-            m_objRunning.m_fltRatioOfRowsToDisplay = objCfg.m_objMsgConfig.m_fltRatioOfRowsToDisplay;
-            m_objRunning.m_fltTopDurationUs = objCfg.m_objMsgConfig.m_fltTopDurationUs;
-            m_objRunning.m_blnHSync = objCfg.m_objMsgConfig.m_blnHSync;
-            m_objRunning.m_blnVSync = objCfg.m_objMsgConfig.m_blnVSync;
+            //m_objRunning.m_enmModulation = objCfg.m_objMsgConfig.m_enmModulation;
+            m_objRunning.m_fltFramePerS = m_objConfig.m_fltFramePerS;
+            m_objRunning.m_fltLineDurationUs = m_objConfig.m_fltLineDurationUs;
+            m_objRunning.m_fltRatioOfRowsToDisplay = m_objConfig.m_fltRatioOfRowsToDisplay;
+            m_objRunning.m_fltTopDurationUs = m_objConfig.m_fltTopDurationUs;
+            m_objRunning.m_blnHSync = m_objConfig.m_blnHSync;
+            m_objRunning.m_blnVSync = m_objConfig.m_blnVSync;
 
             ApplySettings();
          }
@@ -604,6 +597,7 @@ void ATVDemod::ApplySettings()
 
     m_objRunning.m_fltVoltLevelSynchroBlack = m_objConfig.m_fltVoltLevelSynchroBlack;
     m_objRunning.m_fltVoltLevelSynchroTop   = m_objConfig.m_fltVoltLevelSynchroTop;
+    m_objRunning.m_enmModulation = m_objConfig.m_enmModulation;
 
     InitATVParameters(
             m_objRunning.m_intSampleRate,
@@ -611,7 +605,6 @@ void ATVDemod::ApplySettings()
             m_objRunning.m_fltTopDurationUs,
             m_objRunning.m_fltFramePerS,
             m_objRunning.m_fltRatioOfRowsToDisplay,
-            m_objRunning.m_enmModulation,
             m_objRunning.m_blnHSync,
             m_objRunning.m_blnVSync);
 }
