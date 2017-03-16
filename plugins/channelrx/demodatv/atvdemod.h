@@ -210,6 +210,7 @@ private:
 
 
     ATVConfig m_objRunning;
+    ATVConfig m_objConfig;
 
     QMutex m_objSettingsMutex;
 

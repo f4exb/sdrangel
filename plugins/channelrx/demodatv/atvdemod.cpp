@@ -570,6 +570,16 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureATVDemod& objCfg = (MsgConfigureATVDemod&) cmd;
 
+        m_objConfig.m_enmModulation             = objCfg.m_objMsgConfig.m_enmModulation;
+        m_objConfig.m_fltVoltLevelSynchroBlack  = objCfg.m_objMsgConfig.m_fltVoltLevelSynchroBlack;
+        m_objConfig.m_fltVoltLevelSynchroTop    = objCfg.m_objMsgConfig.m_fltVoltLevelSynchroTop;
+        m_objConfig.m_intFramePerS              = objCfg.m_objMsgConfig.m_intFramePerS;
+        m_objConfig.m_intLineDurationUs         = objCfg.m_objMsgConfig.m_intLineDurationUs;
+        m_objConfig.m_intPercentOfRowsToDisplay = objCfg.m_objMsgConfig.m_intPercentOfRowsToDisplay;
+        m_objConfig.m_intTopDurationUs          = objCfg.m_objMsgConfig.m_intTopDurationUs;
+        m_objConfig.m_blnHSync                  = objCfg.m_objMsgConfig.m_blnHSync;
+        m_objConfig.m_blnVSync                  = objCfg.m_objMsgConfig.m_blnVSync;
+
         if((objCfg.m_objMsgConfig.m_enmModulation != m_objRunning.m_enmModulation)
            || (objCfg.m_objMsgConfig.m_fltVoltLevelSynchroBlack != m_objRunning.m_fltVoltLevelSynchroBlack)
            || (objCfg.m_objMsgConfig.m_fltVoltLevelSynchroTop != m_objRunning.m_fltVoltLevelSynchroTop)
