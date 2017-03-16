@@ -115,7 +115,6 @@ private:
        int m_intNumberSamplePerLine;
        int m_intNumberSamplePerTop;
        int m_intNumberOfLines;
-       bool m_blnInitialized;
        int m_intNumberOfRowsToDisplay;
 
        float m_fltVoltLevelSynchroTop;

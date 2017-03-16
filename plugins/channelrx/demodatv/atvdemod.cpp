@@ -56,7 +56,6 @@ ATVDemod::ATVDemod() :
     m_intNumberSamplePerLine=0;
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
-    m_blnInitialized=false;
     m_intNumberOfRowsToDisplay=0;
 
     m_objMagSqAverage.resize(16, 1.0);
@@ -102,24 +101,7 @@ void ATVDemod::InitATVParameters(
     int intNumberOfLines;
     bool blnNewOpenGLScreen=false;
 
-    m_blnInitialized=false;
-
     m_objSettingsMutex.lock();
-
-    if(m_objRegisteredATVScreen==NULL)
-    {
-        m_intNumberSamplePerLine=0;
-        m_intNumberSamplePerTop=0;
-        m_intNumberOfLines=0;
-
-        m_fltVoltLevelSynchroTop=0.0;
-        m_fltVoltLevelSynchroBlack=1.0;
-
-        m_blnInitialized=false;
-        m_objSettingsMutex.unlock();
-
-        return;
-    }
 
     m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
     m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
@@ -163,6 +145,8 @@ void ATVDemod::InitATVParameters(
     m_objRunning.m_blnHSync = blnHSync;
     m_objRunning.m_blnVSync = blnVSync;
 
+    m_objSettingsMutex.unlock();
+
     qDebug()  << "ATVDemod::InitATVParameters:"
                 <<  " - Msps: " << intMsps
                 <<  " - Line us: " << intLineDurationUs
@@ -174,10 +158,6 @@ void ATVDemod::InitATVParameters(
                 <<  " - Lines per Frame: " << m_intNumberOfLines
                 <<  " - Rows to Display: " << m_intNumberOfRowsToDisplay
                 <<  " - Modulation: " << ((m_enmModulation==ATV_AM)?"AM" : "FM");
-
-    m_objSettingsMutex.unlock();
-
-    m_blnInitialized=true;
 }
 
 void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -349,18 +329,14 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         //********** Filling pixels **********
 
-        blnComputeImage=m_blnInitialized;
+        blnComputeImage=(m_objRunning.m_intPercentOfRowsToDisplay!=50);
 
-        if(m_blnInitialized==true)
+        if (!blnComputeImage)
         {
-            blnComputeImage=(m_objRunning.m_intPercentOfRowsToDisplay!=50);
-            if(!blnComputeImage)
-            {
-                blnComputeImage=((m_intImageIndex/2)%2==0);
-            }
+            blnComputeImage=((m_intImageIndex/2)%2==0);
         }
 
-        if(blnComputeImage)
+        if (blnComputeImage)
         {
             m_objRegisteredATVScreen->setDataColor(m_intColIndex,intVal, intVal, intVal);
         }
