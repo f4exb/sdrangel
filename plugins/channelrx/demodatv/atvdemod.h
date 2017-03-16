@@ -118,8 +118,8 @@ private:
        bool m_blnInitialized;
        int m_intNumberOfRowsToDisplay;
 
-       float m_fltLevelSynchroTop;
-       float m_fltLevelSynchroBlack;
+       float m_fltVoltLevelSynchroTop;
+       float m_fltVoltLevelSynchroBlack;
 
        ATVModulation m_enmModulation;
 
