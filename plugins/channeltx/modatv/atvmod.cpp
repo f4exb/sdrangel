@@ -98,6 +98,7 @@ ATVMod::~ATVMod()
 
 void ATVMod::configure(MessageQueue* messageQueue,
             Real rfBandwidth,
+            Real rfOppBandwidth,
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
@@ -105,11 +106,11 @@ void ATVMod::configure(MessageQueue* messageQueue,
             bool videoPlayLoop,
             bool videoPlay,
             bool cameraPlay,
-            bool channelMute,
-            Real vestigialRatio)
+            bool channelMute)
 {
     Message* cmd = MsgConfigureATVMod::create(
             rfBandwidth,
+            rfOppBandwidth,
             atvStd,
             atvModInput,
             uniformLevel,
@@ -117,8 +118,7 @@ void ATVMod::configure(MessageQueue* messageQueue,
             videoPlayLoop,
             videoPlay,
             cameraPlay,
-            channelMute,
-            vestigialRatio);
+            channelMute);
     messageQueue->push(cmd);
 }
 
@@ -240,7 +240,7 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
     Complex ci(sample, 0.0f);
     fftfilt::cmplx *filtered;
 
-    n_out = m_DSBFilter->runVestigial(ci, &filtered, m_running.m_atvModulation == ATVModulationVestigialUSB, m_running.m_vestigialRatio);
+    n_out = m_DSBFilter->runAsym(ci, &filtered, m_running.m_atvModulation == ATVModulationVestigialUSB);
 
     if (n_out > 0)
     {
@@ -512,6 +512,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         MsgConfigureATVMod& cfg = (MsgConfigureATVMod&) cmd;
 
         m_config.m_rfBandwidth = cfg.getRFBandwidth();
+        m_config.m_rfOppBandwidth = cfg.getRFOppBandwidth();
         m_config.m_atvModInput = cfg.getATVModInput();
         m_config.m_atvStd = cfg.getATVStd();
         m_config.m_uniformLevel = cfg.getUniformLevel();
@@ -520,12 +521,12 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_videoPlay = cfg.getVideoPlay();
         m_config.m_cameraPlay = cfg.getCameraPlay();
         m_config.m_channelMute = cfg.getChannelMute();
-        m_config.m_vestigialRatio = cfg.getVestigialRatio();
 
         apply();
 
         qDebug() << "ATVMod::handleMessage: MsgConfigureATVMod:"
                 << " m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_rfOppBandwidth: " << m_config.m_rfOppBandwidth
                 << " m_atvStd: " << (int) m_config.m_atvStd
                 << " m_atvModInput: " << (int) m_config.m_atvModInput
                 << " m_uniformLevel: " << m_config.m_uniformLevel
@@ -533,8 +534,7 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_videoPlayLoop: " << m_config.m_videoPlayLoop
 				<< " m_videoPlay: " << m_config.m_videoPlay
 				<< " m_cameraPlay: " << m_config.m_cameraPlay
-				<< " m_channelMute: " << m_config.m_channelMute
-				<< " m_vestigialRatio: " << m_config.m_vestigialRatio;
+				<< " m_channelMute: " << m_config.m_channelMute;
 
         return true;
     }
@@ -654,11 +654,20 @@ void ATVMod::apply(bool force)
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        m_DSBFilter->create_dsb_filter(m_config.m_rfBandwidth / m_config.m_outputSampleRate);
+        applyStandard(); // set all timings
+        m_settingsMutex.unlock();
+    }
+
+    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
+        (m_config.m_rfOppBandwidth != m_running.m_rfOppBandwidth) ||
+        (m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+
+        m_DSBFilter->create_asym_filter(m_config.m_rfOppBandwidth / m_config.m_outputSampleRate, m_config.m_rfBandwidth / m_config.m_outputSampleRate);
         memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
         m_DSBFilterBufferIndex = 0;
 
-        applyStandard(); // set all timings
         m_settingsMutex.unlock();
     }
 
@@ -673,6 +682,7 @@ void ATVMod::apply(bool force)
     m_running.m_outputSampleRate = m_config.m_outputSampleRate;
     m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
     m_running.m_rfBandwidth = m_config.m_rfBandwidth;
+    m_running.m_rfOppBandwidth = m_config.m_rfOppBandwidth;
     m_running.m_atvModInput = m_config.m_atvModInput;
     m_running.m_atvStd = m_config.m_atvStd;
     m_running.m_uniformLevel = m_config.m_uniformLevel;
@@ -681,7 +691,6 @@ void ATVMod::apply(bool force)
     m_running.m_videoPlay = m_config.m_videoPlay;
     m_running.m_cameraPlay = m_config.m_cameraPlay;
     m_running.m_channelMute = m_config.m_channelMute;
-    m_running.m_vestigialRatio = m_config.m_vestigialRatio;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)

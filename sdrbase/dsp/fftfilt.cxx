@@ -54,11 +54,13 @@ void fftfilt::init_filter()
 	fft	= new g_fft<float>(flen);
 
 	filter		= new cmplx[flen];
+    filterOpp   = new cmplx[flen];
 	data		= new cmplx[flen];
 	output		= new cmplx[flen2];
 	ovlbuf		= new cmplx[flen2];
 
 	memset(filter, 0, flen * sizeof(cmplx));
+    memset(filterOpp, 0, flen * sizeof(cmplx));
 	memset(data, 0, flen * sizeof(cmplx));
 	memset(output, 0, flen2 * sizeof(cmplx));
 	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
@@ -92,6 +94,7 @@ fftfilt::~fftfilt()
 	if (fft) delete fft;
 
 	if (filter) delete [] filter;
+    if (filterOpp) delete [] filterOpp;
 	if (data) delete [] data;
 	if (output) delete [] output;
 	if (ovlbuf) delete [] ovlbuf;
@@ -160,6 +163,55 @@ void fftfilt::create_dsb_filter(float f2)
 		for (int i = 0; i < flen; i++)
 			filter[i] /= scale;
 	}
+}
+
+// Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB
+// used with runAsym for in band / opposite band asymmetrical filtering. Can be used for vestigial sideband modulation.
+void fftfilt::create_asym_filter(float fopp, float fin)
+{
+    // in band
+    // initialize the filter to zero
+    memset(filter, 0, flen * sizeof(cmplx));
+
+    for (int i = 0; i < flen2; i++) {
+        filter[i] = fsinc(fin, i, flen2);
+        filter[i] *= _blackman(i, flen2);
+    }
+
+    fft->ComplexFFT(filter);
+
+    // normalize the output filter for unity gain
+    float scale = 0, mag;
+    for (int i = 0; i < flen2; i++) {
+        mag = abs(filter[i]);
+        if (mag > scale) scale = mag;
+    }
+    if (scale != 0) {
+        for (int i = 0; i < flen; i++)
+            filter[i] /= scale;
+    }
+
+    // opposite band
+    // initialize the filter to zero
+    memset(filterOpp, 0, flen * sizeof(cmplx));
+
+    for (int i = 0; i < flen2; i++) {
+        filterOpp[i] = fsinc(fopp, i, flen2);
+        filterOpp[i] *= _blackman(i, flen2);
+    }
+
+    fft->ComplexFFT(filterOpp);
+
+    // normalize the output filter for unity gain
+    scale = 0;
+    for (int i = 0; i < flen2; i++) {
+        mag = abs(filterOpp[i]);
+        if (mag > scale) scale = mag;
+    }
+    if (scale != 0) {
+        for (int i = 0; i < flen; i++)
+            filterOpp[i] /= scale;
+    }
 }
 
 // test bypass
@@ -271,13 +323,9 @@ int fftfilt::runDSB(const cmplx & in, cmplx **out)
 	return flen2;
 }
 
-// Version for vestigial sideband. You have to double the FFT size used for SSB.
-int fftfilt::runVestigial(const cmplx & in, cmplx **out, bool usb, float vf)
+// Version for asymmetrical sidebands. You have to double the FFT size used for SSB.
+int fftfilt::runAsym(const cmplx & in, cmplx **out, bool usb)
 {
-    if (vf < 0.0f) vf = 0.0f;
-    if (vf > 1.0f) vf = 1.0f;
-    if (usb) vf = 1.0f - vf;
-
     data[inptr++] = in;
     if (inptr < flen2)
         return 0;
@@ -292,24 +340,14 @@ int fftfilt::runVestigial(const cmplx & in, cmplx **out, bool usb, float vf)
         for (int i = 1; i < flen2; i++)
         {
             data[i] *= filter[i]; // usb
-
-            if (i > (int) (vf * flen2)) { // vestigial lsb
-                data[flen2 + i] *= filter[flen2 + i];
-            } else {
-                data[flen2 + i] = 0;
-            }
+            data[flen2 + i] *= filterOpp[flen2 + i]; // lsb is the opposite
         }
     }
     else
     {
         for (int i = 1; i < flen2; i++)
         {
-            if (i < (int) (vf * flen2)) { // vestigial usb
-                data[i] *= filter[i];
-            } else {
-                data[i] = 0;
-            }
-
+            data[i] *= filterOpp[i]; // usb is the opposite
             data[flen2 + i] *= filter[flen2 + i]; // lsb
         }
     }

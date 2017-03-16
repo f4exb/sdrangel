@@ -512,6 +512,7 @@ void ATVModGUI::applySettings()
 
 		m_atvMod->configure(m_atvMod->getInputMessageQueue(),
 			ui->rfBW->value() * 100000.0f,
+			(ui->vestigial->value() / 100.0f) * ui->rfBW->value() * 100000.0f,
 			(ATVMod::ATVStd) ui->standard->currentIndex(),
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
@@ -519,8 +520,7 @@ void ATVModGUI::applySettings()
 			ui->playLoop->isChecked(),
 			ui->playVideo->isChecked(),
 			ui->playCamera->isChecked(),
-			ui->channelMute->isChecked(),
-			ui->vestigial->value() / 100.0f);
+			ui->channelMute->isChecked());
 	}
 }
 

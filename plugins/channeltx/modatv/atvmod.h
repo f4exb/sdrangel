@@ -308,6 +308,7 @@ public:
 
     void configure(MessageQueue* messageQueue,
             Real rfBandwidth,
+            Real rfOppBandwidth,
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
@@ -315,8 +316,7 @@ public:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPLay,
-            bool channelMute,
-            Real vestigialRatio);
+            bool channelMute);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -346,6 +346,7 @@ private:
 
     public:
         Real getRFBandwidth() const { return m_rfBandwidth; }
+        Real getRFOppBandwidth() const { return m_rfOppBandwidth; }
         ATVStd getATVStd() const { return m_atvStd; }
         ATVModInput getATVModInput() const { return m_atvModInput; }
         Real getUniformLevel() const { return m_uniformLevel; }
@@ -354,10 +355,10 @@ private:
         bool getVideoPlay() const { return m_videoPlay; }
         bool getCameraPlay() const { return m_cameraPlay; }
         bool getChannelMute() const { return m_channelMute; }
-        Real getVestigialRatio() const { return m_vestigialRatio; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
+            Real rfOppBandwidth,
             ATVStd atvStd,
             ATVModInput atvModInput,
             Real uniformLevel,
@@ -365,11 +366,11 @@ private:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPlay,
-			bool channelMute,
-			Real vestigialRatio)
+			bool channelMute)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
+                    rfOppBandwidth,
                     atvStd,
                     atvModInput,
                     uniformLevel,
@@ -377,12 +378,12 @@ private:
                     videoPlayLoop,
                     videoPlay,
                     cameraPlay,
-					channelMute,
-					vestigialRatio);
+					channelMute);
         }
 
     private:
         Real          m_rfBandwidth;
+        Real          m_rfOppBandwidth;
         ATVStd        m_atvStd;
         ATVModInput   m_atvModInput;
         Real          m_uniformLevel;
@@ -391,10 +392,10 @@ private:
         bool          m_videoPlay;
         bool          m_cameraPlay;
         bool          m_channelMute;
-        Real          m_vestigialRatio;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
+                Real rfOppBandwidth,
                 ATVStd atvStd,
                 ATVModInput atvModInput,
                 Real uniformLevel,
@@ -402,10 +403,10 @@ private:
 				bool videoPlayLoop,
 				bool videoPlay,
 				bool cameraPlay,
-				bool channelMute,
-				Real vestigialRatio) :
+				bool channelMute) :
             Message(),
             m_rfBandwidth(rfBandwidth),
+            m_rfOppBandwidth(rfOppBandwidth),
             m_atvStd(atvStd),
             m_atvModInput(atvModInput),
             m_uniformLevel(uniformLevel),
@@ -413,8 +414,7 @@ private:
 			m_videoPlayLoop(videoPlayLoop),
 			m_videoPlay(videoPlay),
 			m_cameraPlay(cameraPlay),
-			m_channelMute(channelMute),
-			m_vestigialRatio(vestigialRatio)
+			m_channelMute(channelMute)
         { }
     };
 
@@ -450,7 +450,8 @@ private:
     {
         int           m_outputSampleRate;     //!< sample rate from channelizer
         qint64        m_inputFrequencyOffset; //!< offset from baseband center frequency
-        Real          m_rfBandwidth;          //!< Bandwidth of modulated signal
+        Real          m_rfBandwidth;          //!< Bandwidth of modulated signal or direct sideband for SSB / vestigial SSB
+        Real          m_rfOppBandwidth;       //!< Bandwidth of opposite sideband for vestigial SSB
         ATVStd        m_atvStd;               //!< Standard
         ATVModInput   m_atvModInput;          //!< Input source type
         Real          m_uniformLevel;         //!< Percentage between black and white for uniform screen display
@@ -465,6 +466,7 @@ private:
             m_outputSampleRate(-1),
             m_inputFrequencyOffset(0),
             m_rfBandwidth(0),
+            m_rfOppBandwidth(0),
             m_atvStd(ATVStdPAL625),
             m_atvModInput(ATVModInputHBars),
             m_uniformLevel(0.5f),
@@ -542,12 +544,16 @@ private:
     std::string m_overlayText;
     bool m_showOverlayText;
 
+    // Used for standard SSB
     fftfilt* m_SSBFilter;
-    fftfilt* m_DSBFilter;
     Complex* m_SSBFilterBuffer;
-    Complex* m_DSBFilterBuffer;
     int m_SSBFilterBufferIndex;
+
+    // Used for vestigial SSB with asymmetrical filtering (needs double sideband scheme)
+    fftfilt* m_DSBFilter;
+    Complex* m_DSBFilterBuffer;
     int m_DSBFilterBufferIndex;
+
     static const int m_ssbFftLen;
 
     static const float m_blackLevel;

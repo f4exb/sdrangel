@@ -23,12 +23,13 @@ public:
 // f1 > f2 ==> band reject
 	void create_filter(float f1, float f2);
 	void create_dsb_filter(float f2);
+    void create_asym_filter(float fopp, float fin); //!< two different filters for in band and opposite band
 
 	int noFilt(const cmplx& in, cmplx **out);
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb, bool getDC = true);
 	int runDSB(const cmplx& in, cmplx **out);
-	int runVestigial(const cmplx & in, cmplx **out, bool usb, float vf);
+	int runAsym(const cmplx & in, cmplx **out, bool usb); //!< Asymmetrical fitering can be used for vestigial sideband
 
 protected:
 	int flen;
@@ -36,6 +37,7 @@ protected:
 	g_fft<float> *fft;
 	g_fft<float> *ift;
 	cmplx *filter;
+    cmplx *filterOpp;
 	cmplx *data;
 	cmplx *ovlbuf;
 	cmplx *output;
