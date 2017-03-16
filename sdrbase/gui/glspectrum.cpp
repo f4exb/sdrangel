@@ -685,7 +685,8 @@ void GLSpectrum::paintGL()
 							q3[6] = 0.5;
 						}
 
-						m_glShaderSimple.drawSegments(dv->m_glMatrixDsbHistogram, colorLine, &q3[4], 4);
+                        m_glShaderSimple.drawSegments(dv->m_glMatrixDsbHistogram, colorLine, &q3[8], 2);
+                        m_glShaderSimple.drawSegments(dv->m_glMatrixFreqScale, colorLine, q3, 2);
 					}
 				}
 			}
@@ -768,14 +769,12 @@ void GLSpectrum::paintGL()
 
 					QVector4D color(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.5f);
 					m_glShaderSimple.drawSurface(dv->m_glMatrixFreqScale, color, q3, 4);
+                    QVector4D colorLine(0.8f, 0.8f, 0.6f, 1.0f);
+                    m_glShaderSimple.drawSegments(dv->m_glMatrixDsbFreqScale, colorLine, &q3[8], 2);
 
 					if (dv->m_channelMarker->getHighlighted())
 					{
-						if (dv->m_channelMarker->getSidebands() != ChannelMarker::dsb) {
-							q3[4] = 0.5;
-						}
-						QVector4D colorLine(0.8f, 0.8f, 0.6f, 1.0f);
-						m_glShaderSimple.drawSegments(dv->m_glMatrixDsbFreqScale, colorLine, &q3[4], 4);
+	                    m_glShaderSimple.drawSegments(dv->m_glMatrixFreqScale, colorLine, &q3[4], 2);
 					}
 				}
 			}
