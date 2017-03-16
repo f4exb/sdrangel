@@ -51,8 +51,8 @@ public:
 	    int m_intSampleRate;
 	    float m_fltLineDurationUs;
 	    float m_fltTopDurationUs;
-	    int m_intFramePerS;
-	    int m_intPercentOfRowsToDisplay;
+	    float m_fltFramePerS;
+	    float m_fltRatioOfRowsToDisplay;
 	    float m_fltVoltLevelSynchroTop;
 	    float m_fltVoltLevelSynchroBlack;
 	    ATVModulation m_enmModulation;
@@ -63,8 +63,8 @@ public:
 	        m_intSampleRate(0),
 	        m_fltLineDurationUs(0.0f),
 	        m_fltTopDurationUs(0.0f),
-	        m_intFramePerS(0),
-	        m_intPercentOfRowsToDisplay(0),
+	        m_fltFramePerS(0.0f),
+	        m_fltRatioOfRowsToDisplay(0.0f),
 	        m_fltVoltLevelSynchroTop(0),
 	        m_fltVoltLevelSynchroBlack(0),
 	        m_enmModulation(ATV_FM1),
@@ -78,10 +78,10 @@ public:
 	~ATVDemod();
 
     void configure(MessageQueue* objMessageQueue,
-            int intLineDurationUs,
-            int intTopDurationUs,
-            int intFramePerS,
-            int intPercentOfRowsToDisplay,
+            float fltLineDurationUs,
+            float fltTopDurationUs,
+            float fltFramePerS,
+            float fltRatioOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
             ATVModulation enmModulation,
@@ -97,8 +97,8 @@ public:
     void InitATVParameters(int intMsps,
             float fltLineDurationUs,
             float fltTopDurationUs,
-            int intFramePerS,
-            int intPercentOfRowsToDisplay,
+            float fltFramePerS,
+            float fltRatioOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
             ATVModulation enmModulation,
@@ -116,8 +116,8 @@ private:
         public:
             static MsgConfigureATVDemod* create(float fltLineDurationUs,
                     float fltTopDurationUs,
-                    int intFramePerS,
-                    int intPercentOfRowsToDisplay,
+                    float fltFramePerS,
+                    float fltRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
                     ATVModulation enmModulation,
@@ -126,8 +126,8 @@ private:
             {
                 return new MsgConfigureATVDemod(fltLineDurationUs,
                         fltTopDurationUs,
-                        intFramePerS,
-                        intPercentOfRowsToDisplay,
+                        fltFramePerS,
+                        fltRatioOfRowsToDisplay,
                         fltVoltLevelSynchroTop,
                         fltVoltLevelSynchroBlack,
                         enmModulation,
@@ -138,10 +138,11 @@ private:
             ATVConfig m_objMsgConfig;
 
         private:
-            MsgConfigureATVDemod(float fltLineDurationUs,
+            MsgConfigureATVDemod(
+                    float fltLineDurationUs,
                     float fltTopDurationUs,
-                    int intFramePerS,
-                    int intPercentOfRowsToDisplay,
+                    float fltFramePerS,
+                    float flatRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
                     ATVModulation enmModulation,
@@ -152,10 +153,10 @@ private:
                 m_objMsgConfig.m_enmModulation = enmModulation;
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
-                m_objMsgConfig.m_intFramePerS = intFramePerS;
+                m_objMsgConfig.m_fltFramePerS = fltFramePerS;
                 m_objMsgConfig.m_fltLineDurationUs = fltLineDurationUs;
                 m_objMsgConfig.m_fltTopDurationUs = fltTopDurationUs;
-                m_objMsgConfig.m_intPercentOfRowsToDisplay = intPercentOfRowsToDisplay;
+                m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;
             }
