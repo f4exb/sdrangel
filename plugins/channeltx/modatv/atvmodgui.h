@@ -64,8 +64,8 @@ private slots:
     void on_deltaMinus_toggled(bool minus);
     void on_channelMute_toggled(bool checked);
     void on_modulation_currentIndexChanged(int index);
-    void on_vestigial_valueChanged(int value);
     void on_rfBW_valueChanged(int value);
+    void on_rfOppBW_valueChanged(int value);
     void on_standard_currentIndexChanged(int index);
     void on_uniformLevel_valueChanged(int value);
     void on_inputSelect_currentIndexChanged(int index);

@@ -234,22 +234,32 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="vestiigialLabel">
+       <widget class="QLabel" name="rfBWLabel">
         <property name="text">
-         <string>V</string>
+         <string>BW</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="vestigial">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
+       <widget class="QLabel" name="rfOppBWText">
+        <property name="text">
+         <string>1.0</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="rfOppBW">
         <property name="toolTip">
-         <string>Vestigial sideband percentage</string>
+         <string>Opposite sideband (RF) bandwidth for vestigial SSB</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -257,26 +267,8 @@
         <property name="value">
          <number>10</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="vestigialText">
-        <property name="text">
-         <string>99</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_7">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="rfBWLabel">
-        <property name="text">
-         <string>BW</string>
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>

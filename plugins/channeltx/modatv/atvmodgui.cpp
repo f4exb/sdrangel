@@ -76,7 +76,6 @@ void ATVModGUI::resetToDefaults()
 	ui->inputSelect->setCurrentIndex(0);
 	ui->deltaFrequency->setValue(0);
 	ui->modulation->setCurrentIndex(0);
-	ui->vestigial->setValue(10);
 
 	blockApplySettings(false);
 	applySettings();
@@ -92,7 +91,7 @@ QByteArray ATVModGUI::serialize() const
 	s.writeS32(4, ui->standard->currentIndex());
     s.writeS32(5, ui->inputSelect->currentIndex());
 	s.writeU32(6, m_channelMarker.getColor().rgb());
-	s.writeS32(7, ui->vestigial->value());
+	s.writeS32(7, ui->rfOppBW->value());
     s.writeS32(8, ui->modulation->currentIndex());
 
 	return s.final();
@@ -134,7 +133,7 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         }
 
         d.readS32(7, &tmp, 10);
-        ui->vestigial->setValue(tmp);
+        ui->rfOppBW->setValue(tmp);
         d.readS32(8, &tmp, 0);
         ui->modulation->setCurrentIndex(tmp);
 
@@ -211,10 +210,12 @@ void ATVModGUI::channelizerOutputSampleRateChanged()
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialUSB))
     {
         ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
     }
     else
     {
         ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
     }
 }
 
@@ -253,33 +254,42 @@ void ATVModGUI::on_deltaFrequency_changed(quint64 value)
 
 void ATVModGUI::on_modulation_currentIndexChanged(int index)
 {
-    if ((index == (int) ATVMod::ATVModulationLSB) ||
-        (index == (int) ATVMod::ATVModulationVestigialLSB))
+    if (index == (int) ATVMod::ATVModulationLSB)
     {
         ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
         m_channelMarker.setBandwidth(-ui->rfBW->value()*200000);
         m_channelMarker.setSidebands(ChannelMarker::lsb);
     }
-    else if ((index == (int) ATVMod::ATVModulationUSB) ||
-             (index == (int) ATVMod::ATVModulationVestigialUSB))
+    else if (index == (int) ATVMod::ATVModulationVestigialLSB)
     {
         ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        m_channelMarker.setBandwidth(ui->rfBW->value()*200000); // TODO: consider asymmetrical sidebands
+        m_channelMarker.setSidebands(ChannelMarker::usb);
+    }
+    else if (index == (int) ATVMod::ATVModulationUSB)
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
         m_channelMarker.setBandwidth(ui->rfBW->value()*200000);
+        m_channelMarker.setSidebands(ChannelMarker::usb);
+    }
+    else if (index == (int) ATVMod::ATVModulationVestigialUSB)
+    {
+        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        m_channelMarker.setBandwidth(ui->rfBW->value()*200000); // TODO: consider asymmetrical sidebands
         m_channelMarker.setSidebands(ChannelMarker::usb);
     }
     else
     {
         ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
         m_channelMarker.setBandwidth(ui->rfBW->value()*100000);
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     }
 
-    applySettings();
-}
-
-void ATVModGUI::on_vestigial_valueChanged(int value)
-{
-    ui->vestigialText->setText(QString("%1").arg(value));
     applySettings();
 }
 
@@ -303,6 +313,26 @@ void ATVModGUI::on_rfBW_valueChanged(int value)
     }
 
 	applySettings();
+}
+
+void ATVModGUI::on_rfOppBW_valueChanged(int value)
+{
+    ui->rfOppBWText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+
+    if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB)
+    {
+        m_channelMarker.setBandwidth(-ui->rfBW->value()*200000); // TODO
+    }
+    else if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialUSB)
+    {
+        m_channelMarker.setBandwidth(ui->rfBW->value()*200000); // TODO
+    }
+    else
+    {
+        m_channelMarker.setBandwidth(ui->rfBW->value()*100000);
+    }
+
+    applySettings();
 }
 
 void ATVModGUI::on_standard_currentIndexChanged(int index)
@@ -512,7 +542,7 @@ void ATVModGUI::applySettings()
 
 		m_atvMod->configure(m_atvMod->getInputMessageQueue(),
 			ui->rfBW->value() * 100000.0f,
-			(ui->vestigial->value() / 100.0f) * ui->rfBW->value() * 100000.0f,
+			ui->rfOppBW->value() * 100000.0f,
 			(ATVMod::ATVStd) ui->standard->currentIndex(),
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
