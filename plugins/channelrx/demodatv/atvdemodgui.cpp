@@ -265,8 +265,6 @@ void ATVDemodGUI::blockApplySettings(bool blnBlock)
 
 void ATVDemodGUI::applySettings()
 {
-    ATVDemod::ATVModulation enmSelectedModulation;
-
     if (m_blnDoApplySettings)
     {
         setTitleColor(m_objChannelMarker.getColor());
@@ -277,25 +275,6 @@ void ATVDemodGUI::applySettings()
                 //m_objATVDemod->GetSampleRate(),
                 m_objChannelizer->getInputSampleRate(), // always use maximum available bandwidth
                 m_objChannelMarker.getCenterFrequency());
-
-        switch (ui->modulation->currentIndex())
-        {
-        case 0:
-            enmSelectedModulation = ATVDemod::ATV_FM1;
-            break;
-
-        case 1:
-            enmSelectedModulation = ATVDemod::ATV_FM2;
-            break;
-
-        case 2:
-            enmSelectedModulation = ATVDemod::ATV_AM;
-            break;
-
-        default:
-            enmSelectedModulation = ATVDemod::ATV_FM1;
-            break;
-        }
 
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
                 ui->lineTime->value(),
