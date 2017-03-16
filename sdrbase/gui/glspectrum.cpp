@@ -1270,10 +1270,10 @@ void GLSpectrum::applyChanges()
 			pw = dv->m_channelMarker->getLowCutoff();
 			nw = dv->m_channelMarker->getBandwidth() / 2;
 		} else if (sidebands == ChannelMarker::vusb) {
-            nw = -dv->m_channelMarker->getOppositeBandwidth() / 2; // negative bandwidth
+            nw = -dv->m_channelMarker->getOppositeBandwidth(); // negative bandwidth
             pw = dv->m_channelMarker->getBandwidth(); // positive bandwidth
         } else if (sidebands == ChannelMarker::vlsb) {
-            pw = dv->m_channelMarker->getOppositeBandwidth() / 2; // positive bandwidth
+            pw = dv->m_channelMarker->getOppositeBandwidth(); // positive bandwidth
             nw = -dv->m_channelMarker->getBandwidth(); // negative bandwidth
 		} else {
 			pw = dsbw / 2;
