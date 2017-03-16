@@ -76,6 +76,7 @@ void ATVModGUI::resetToDefaults()
 	ui->inputSelect->setCurrentIndex(0);
 	ui->deltaFrequency->setValue(0);
 	ui->modulation->setCurrentIndex(0);
+	ui->vestigial->setValue(10);
 
 	blockApplySettings(false);
 	applySettings();
@@ -91,6 +92,7 @@ QByteArray ATVModGUI::serialize() const
 	s.writeS32(4, ui->standard->currentIndex());
     s.writeS32(5, ui->inputSelect->currentIndex());
 	s.writeU32(6, m_channelMarker.getColor().rgb());
+	s.writeS32(7, ui->vestigial->value());
     s.writeS32(8, ui->modulation->currentIndex());
 
 	return s.final();
@@ -131,6 +133,8 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 			m_channelMarker.setColor(u32tmp);
         }
 
+        d.readS32(7, &tmp, 10);
+        ui->vestigial->setValue(tmp);
         d.readS32(8, &tmp, 0);
         ui->modulation->setCurrentIndex(tmp);
 
@@ -270,6 +274,12 @@ void ATVModGUI::on_modulation_currentIndexChanged(int index)
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     }
 
+    applySettings();
+}
+
+void ATVModGUI::on_vestigial_valueChanged(int value)
+{
+    ui->vestigialText->setText(QString("%1").arg(value));
     applySettings();
 }
 
@@ -509,7 +519,8 @@ void ATVModGUI::applySettings()
 			ui->playLoop->isChecked(),
 			ui->playVideo->isChecked(),
 			ui->playCamera->isChecked(),
-			ui->channelMute->isChecked());
+			ui->channelMute->isChecked(),
+			ui->vestigial->value() / 100.0f);
 	}
 }
 

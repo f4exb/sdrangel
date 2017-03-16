@@ -315,7 +315,8 @@ public:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPLay,
-            bool channelMute);
+            bool channelMute,
+            Real vestigialRatio);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -353,6 +354,7 @@ private:
         bool getVideoPlay() const { return m_videoPlay; }
         bool getCameraPlay() const { return m_cameraPlay; }
         bool getChannelMute() const { return m_channelMute; }
+        Real getVestigialRatio() const { return m_vestigialRatio; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -363,7 +365,8 @@ private:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPlay,
-			bool channelMute)
+			bool channelMute,
+			Real vestigialRatio)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -374,7 +377,8 @@ private:
                     videoPlayLoop,
                     videoPlay,
                     cameraPlay,
-					channelMute);
+					channelMute,
+					vestigialRatio);
         }
 
     private:
@@ -387,6 +391,7 @@ private:
         bool          m_videoPlay;
         bool          m_cameraPlay;
         bool          m_channelMute;
+        Real          m_vestigialRatio;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -397,7 +402,8 @@ private:
 				bool videoPlayLoop,
 				bool videoPlay,
 				bool cameraPlay,
-				bool channelMute) :
+				bool channelMute,
+				Real vestigialRatio) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_atvStd(atvStd),
@@ -407,7 +413,8 @@ private:
 			m_videoPlayLoop(videoPlayLoop),
 			m_videoPlay(videoPlay),
 			m_cameraPlay(cameraPlay),
-			m_channelMute(channelMute)
+			m_channelMute(channelMute),
+			m_vestigialRatio(vestigialRatio)
         { }
     };
 
@@ -452,6 +459,7 @@ private:
         bool          m_videoPlay;            //!< True to play video and false to pause
         bool          m_cameraPlay;           //!< True to play camera video and false to pause
         bool          m_channelMute;          //!< Mute channel baseband output
+        Real          m_vestigialRatio;       //!< Vestigial sideband ratio to half bandwidth
 
         Config() :
             m_outputSampleRate(-1),
@@ -464,7 +472,8 @@ private:
 			m_videoPlayLoop(false),
 			m_videoPlay(false),
 			m_cameraPlay(false),
-			m_channelMute(false)
+			m_channelMute(false),
+			m_vestigialRatio(0.1f)
         { }
     };
 
