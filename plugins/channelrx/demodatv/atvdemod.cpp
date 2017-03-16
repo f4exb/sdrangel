@@ -81,7 +81,17 @@ void ATVDemod::configure(MessageQueue* objMessageQueue, int intLineDurationUs, i
     objMessageQueue->push(msgCmd);
 }
 
-void ATVDemod::InitATVParameters(int intMsps, int intLineDurationUs, int intTopDurationUs, int intFramePerS, int intPercentOfRowsToDisplay, float fltVoltLevelSynchroTop, float fltVoltLevelSynchroBlack, ATVModulation enmModulation, bool blnHSync, bool blnVSync)
+void ATVDemod::InitATVParameters(
+        int intMsps,
+        int intLineDurationUs,
+        int intTopDurationUs,
+        int intFramePerS,
+        int intPercentOfRowsToDisplay,
+        float fltVoltLevelSynchroTop,
+        float fltVoltLevelSynchroBlack,
+        ATVModulation enmModulation,
+        bool blnHSync,
+        bool blnVSync)
 {
     float fltSecondToUs = 1000000.0f;
     float fltSampling=(float) intMsps;
@@ -600,7 +610,17 @@ void ATVDemod::ApplySettings()
     }
 
 
-    InitATVParameters(m_objRunning.m_intMsps,m_objRunning.m_intLineDurationUs,m_objRunning.m_intTopDurationUs,m_objRunning.m_intFramePerS,m_objRunning.m_intPercentOfRowsToDisplay,m_objRunning.m_fltVoltLevelSynchroTop,m_objRunning.m_fltVoltLevelSynchroBlack,m_objRunning.m_enmModulation,m_objRunning.m_blnHSync, m_objRunning.m_blnVSync);
+    InitATVParameters(
+            m_objRunning.m_intMsps,
+            m_objRunning.m_intLineDurationUs,
+            m_objRunning.m_intTopDurationUs,
+            m_objRunning.m_intFramePerS,
+            m_objRunning.m_intPercentOfRowsToDisplay,
+            m_objRunning.m_fltVoltLevelSynchroTop,
+            m_objRunning.m_fltVoltLevelSynchroBlack,
+            m_objRunning.m_enmModulation,
+            m_objRunning.m_blnHSync,
+            m_objRunning.m_blnVSync);
 }
 
 int ATVDemod::GetSampleRate()

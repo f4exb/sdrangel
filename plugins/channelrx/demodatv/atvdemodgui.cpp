@@ -304,7 +304,8 @@ void ATVDemodGUI::applySettings()
                 (ui->halfImage->checkState() == Qt::Checked) ? 50 : 100,
                 ((float) (ui->synchLevel->value())) / 1000.0f,
                 ((float) (ui->blackLevel->value())) / 1000.0f,
-                enmSelectedModulation, ui->hSync->isChecked(),
+                (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
+                ui->hSync->isChecked(),
                 ui->vSync->isChecked());
 
         qDebug() << "ATVDemodGUI::applySettings:"

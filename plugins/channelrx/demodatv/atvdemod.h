@@ -41,9 +41,9 @@ class ATVDemod : public BasebandSampleSink
 public:
 
 	enum ATVModulation {
-	    ATV_AM,
 	    ATV_FM1,
-	    ATV_FM2
+	    ATV_FM2,
+        ATV_AM
 	};
 
 	struct ATVConfig
