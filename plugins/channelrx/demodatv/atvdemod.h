@@ -49,7 +49,7 @@ public:
 	struct ATVConfig
 	{
 	    int m_intMsps;
-	    int m_intLineDurationUs;
+	    float m_fltLineDurationUs;
 	    int m_intTopDurationUs;
 	    int m_intFramePerS;
 	    int m_intPercentOfRowsToDisplay;
@@ -61,7 +61,7 @@ public:
 
 	    ATVConfig() :
 	        m_intMsps(0),
-	        m_intLineDurationUs(0),
+	        m_fltLineDurationUs(0.0f),
 	        m_intTopDurationUs(0),
 	        m_intFramePerS(0),
 	        m_intPercentOfRowsToDisplay(0),
@@ -95,7 +95,7 @@ public:
 
     bool SetATVScreen(ATVScreen *objScreen);
     void InitATVParameters(int intMsps,
-            int intLineDurationUs,
+            float fltLineDurationUs,
             int intTopDurationUs,
             int intFramePerS,
             int intPercentOfRowsToDisplay,
@@ -109,58 +109,12 @@ public:
 
 private:
 
-       //*************** ATV PARAMETERS  ***************
-       ATVScreen * m_objRegisteredATVScreen;
-
-       int m_intNumberSamplePerLine;
-       int m_intNumberSamplePerTop;
-       int m_intNumberOfLines;
-       int m_intNumberOfRowsToDisplay;
-
-       float m_fltVoltLevelSynchroTop;
-       float m_fltVoltLevelSynchroBlack;
-
-       ATVModulation m_enmModulation;
-
-       //*************** PROCESSING  ***************
-
-       int m_intImageIndex;
-       int m_intRowsLimit;
-       int m_intSynchroPoints;
-
-       bool m_blnSynchroDetected;
-       bool m_blnLineSynchronized;
-       bool m_blnImageDetecting;
-       bool m_blnVerticalSynchroDetected;
-
-       float m_fltAmpLineAverage;
-
-       float m_fltEffMin;
-       float m_fltEffMax;
-
-       float m_fltAmpMin;
-       float m_fltAmpMax;
-       float m_fltAmpDelta;
-
-       float m_fltBufferI[6];
-       float m_fltBufferQ[6];
-
-       int m_intColIndex;
-       int m_intRowIndex;
-
-       //*************** RF  ***************
-
-       MovingAverage<double> m_objMagSqAverage;
-
-       //QElapsedTimer m_objTimer;
-private:
-
     class MsgConfigureATVDemod : public Message
     {
-		MESSAGE_CLASS_DECLARATION
+        MESSAGE_CLASS_DECLARATION
 
         public:
-            static MsgConfigureATVDemod* create(int intLineDurationUs,
+            static MsgConfigureATVDemod* create(float fltLineDurationUs,
                     int intTopDurationUs,
                     int intFramePerS,
                     int intPercentOfRowsToDisplay,
@@ -170,7 +124,7 @@ private:
                     bool blnHSync,
                     bool blnVSync)
             {
-                return new MsgConfigureATVDemod(intLineDurationUs,
+                return new MsgConfigureATVDemod(fltLineDurationUs,
                         intTopDurationUs,
                         intFramePerS,
                         intPercentOfRowsToDisplay,
@@ -184,7 +138,7 @@ private:
             ATVConfig m_objMsgConfig;
 
         private:
-            MsgConfigureATVDemod(int intLineDurationUs,
+            MsgConfigureATVDemod(float fltLineDurationUs,
                     int intTopDurationUs,
                     int intFramePerS,
                     int intPercentOfRowsToDisplay,
@@ -199,7 +153,7 @@ private:
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_intFramePerS = intFramePerS;
-                m_objMsgConfig.m_intLineDurationUs = intLineDurationUs;
+                m_objMsgConfig.m_fltLineDurationUs = fltLineDurationUs;
                 m_objMsgConfig.m_intTopDurationUs = intTopDurationUs;
                 m_objMsgConfig.m_intPercentOfRowsToDisplay = intPercentOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
@@ -207,11 +161,57 @@ private:
             }
     };
 
+    //*************** ATV PARAMETERS  ***************
+    ATVScreen * m_objRegisteredATVScreen;
+
+    int m_intNumberSamplePerLine;
+    int m_intNumberSamplePerTop;
+    int m_intNumberOfLines;
+    int m_intNumberOfRowsToDisplay;
+
+    float m_fltVoltLevelSynchroTop;
+    float m_fltVoltLevelSynchroBlack;
+
+    ATVModulation m_enmModulation;
+
+    //*************** PROCESSING  ***************
+
+    int m_intImageIndex;
+    int m_intRowsLimit;
+    int m_intSynchroPoints;
+
+    bool m_blnSynchroDetected;
+    bool m_blnLineSynchronized;
+    bool m_blnImageDetecting;
+    bool m_blnVerticalSynchroDetected;
+
+    float m_fltAmpLineAverage;
+
+    float m_fltEffMin;
+    float m_fltEffMax;
+
+    float m_fltAmpMin;
+    float m_fltAmpMax;
+    float m_fltAmpDelta;
+
+    float m_fltBufferI[6];
+    float m_fltBufferQ[6];
+
+    int m_intColIndex;
+    int m_intRowIndex;
+
+    //*************** RF  ***************
+
+    MovingAverage<double> m_objMagSqAverage;
+
+    //QElapsedTimer m_objTimer;
 
     ATVConfig m_objRunning;
     ATVConfig m_objConfig;
 
     QMutex m_objSettingsMutex;
+
+    static const float m_fltSecondToUs;
 
     void ApplySettings();
 

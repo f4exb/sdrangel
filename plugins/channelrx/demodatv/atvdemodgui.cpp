@@ -277,7 +277,7 @@ void ATVDemodGUI::applySettings()
                 m_objChannelMarker.getCenterFrequency());
 
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
-                ui->lineTime->value(),
+                ui->lineTime->value() / 10.0f,
                 ui->topTime->value(),
                 (ui->fps->currentIndex() == 0) ? 25 : 30,
                 (ui->halfImage->checkState() == Qt::Checked) ? 50 : 100,
