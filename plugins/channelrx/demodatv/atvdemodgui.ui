@@ -168,7 +168,7 @@
     </rect>
    </property>
    <property name="windowTitle">
-    <string>TV Screen</string>
+    <string>TV Monitor</string>
    </property>
    <layout class="QHBoxLayout" name="screenTVLayout">
     <property name="sizeConstraint">
@@ -184,13 +184,13 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>460</width>
+        <width>495</width>
         <height>345</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>460</width>
+        <width>495</width>
         <height>345</height>
        </size>
       </property>
@@ -211,7 +211,7 @@
     </rect>
    </property>
    <property name="windowTitle">
-    <string>TV Settings</string>
+    <string>Video Settings</string>
    </property>
    <layout class="QVBoxLayout" name="tvSettingsLayout" stretch="0,0">
     <property name="spacing">
