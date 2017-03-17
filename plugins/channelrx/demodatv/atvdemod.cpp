@@ -107,22 +107,7 @@ void ATVDemod::InitATVParameters(
         bool blnHSync,
         bool blnVSync)
 {
-//    float fltImagesPerSeconds = (float) intFramePerS;
-    int intNumberSamplePerLine;
-    int intNumberOfLines;
-
     m_objSettingsMutex.lock();
-
-    intNumberSamplePerLine = (int) ((fltLineDurationUs * intSampleRate) / m_fltSecondToUs);
-    intNumberOfLines = (int) ((m_fltSecondToUs/fltFramePerS) /round(fltLineDurationUs));
-
-    if((intNumberSamplePerLine != m_intNumberSamplePerLine)
-       || (intNumberOfLines != m_intNumberOfLines))
-    {
-        m_intNumberSamplePerLine= intNumberSamplePerLine;
-        m_intNumberOfLines = intNumberOfLines;
-        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
-    }
 
     m_intNumberSamplePerTop=(int)((fltTopDurationUs * intSampleRate) / m_fltSecondToUs);
     m_intNumberOfRowsToDisplay = (int) ((fltRatioOfRowsToDisplay * fltLineDurationUs * intSampleRate) / m_fltSecondToUs);
@@ -515,15 +500,17 @@ bool ATVDemod::handleMessage(const Message& cmd)
     if (DownChannelizer::MsgChannelizerNotification::match(cmd))
     {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+        m_objConfig.m_intSampleRate = objNotif.getSampleRate();
+        ApplySettings();
 
-        if(m_objRunning.m_intSampleRate!=objNotif.getSampleRate())
-        {
-            m_objRunning.m_intSampleRate = objNotif.getSampleRate();
-            ApplySettings();
-        }
+//        if(m_objRunning.m_intSampleRate!=objNotif.getSampleRate())
+//        {
+//            m_objRunning.m_intSampleRate = objNotif.getSampleRate();
+//            ApplySettings();
+//        }
 
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
-                << " m_intMsps: " << m_objRunning.m_intSampleRate;
+                << " m_intMsps: " << m_objConfig.m_intSampleRate;
 
         return true;
     }
@@ -562,9 +549,6 @@ bool ATVDemod::handleMessage(const Message& cmd)
            || (m_objConfig.m_blnHSync != m_objRunning.m_blnHSync)
            || (m_objConfig.m_blnVSync != m_objRunning.m_blnVSync))
          {
-            //m_objRunning.m_enmModulation = objCfg.m_objMsgConfig.m_enmModulation;
-            m_objRunning.m_fltFramePerS = m_objConfig.m_fltFramePerS;
-            m_objRunning.m_fltLineDurationUs = m_objConfig.m_fltLineDurationUs;
             m_objRunning.m_fltRatioOfRowsToDisplay = m_objConfig.m_fltRatioOfRowsToDisplay;
             m_objRunning.m_fltTopDurationUs = m_objConfig.m_fltTopDurationUs;
             m_objRunning.m_blnHSync = m_objConfig.m_blnHSync;
@@ -584,14 +568,30 @@ bool ATVDemod::handleMessage(const Message& cmd)
 void ATVDemod::ApplySettings()
 {
 
-    if(m_objRunning.m_intSampleRate==0)
+    if (m_objConfig.m_intSampleRate == 0)
     {
         return;
+    }
+
+    if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
+       || (m_objConfig.m_fltLineDurationUs != m_objRunning.m_fltLineDurationUs)
+       || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
+    {
+        m_objSettingsMutex.lock();
+
+        m_intNumberSamplePerLine = (int) ((m_objConfig.m_fltLineDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
+        m_intNumberOfLines = (int) ((m_fltSecondToUs / m_objConfig.m_fltFramePerS) /round(m_objConfig.m_fltLineDurationUs));
+        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
+
+        m_objSettingsMutex.unlock();
     }
 
     m_objRunning.m_fltVoltLevelSynchroBlack = m_objConfig.m_fltVoltLevelSynchroBlack;
     m_objRunning.m_fltVoltLevelSynchroTop   = m_objConfig.m_fltVoltLevelSynchroTop;
     m_objRunning.m_enmModulation = m_objConfig.m_enmModulation;
+    m_objRunning.m_intSampleRate = m_objConfig.m_intSampleRate;
+    m_objRunning.m_fltFramePerS = m_objConfig.m_fltFramePerS;
+    m_objRunning.m_fltLineDurationUs = m_objConfig.m_fltLineDurationUs;
 
     InitATVParameters(
             m_objRunning.m_intSampleRate,
