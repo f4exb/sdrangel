@@ -650,7 +650,7 @@ void ATVMod::apply(bool force)
             m_tvSampleRate = m_config.m_outputSampleRate;
         }
 
-        m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_config.m_outputSampleRate);
+        m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_tvSampleRate);
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
@@ -660,11 +660,12 @@ void ATVMod::apply(bool force)
 
     if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
         (m_config.m_rfOppBandwidth != m_running.m_rfOppBandwidth) ||
-        (m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
+        (m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+        (m_config.m_atvStd != m_running.m_atvStd) || force) // difference in TV standard may have changed TV sample rate
     {
         m_settingsMutex.lock();
 
-        m_DSBFilter->create_asym_filter(m_config.m_rfOppBandwidth / m_config.m_outputSampleRate, m_config.m_rfBandwidth / m_config.m_outputSampleRate);
+        m_DSBFilter->create_asym_filter(m_config.m_rfOppBandwidth / m_tvSampleRate, m_config.m_rfBandwidth / m_tvSampleRate);
         memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
         m_DSBFilterBufferIndex = 0;
 
@@ -672,7 +673,7 @@ void ATVMod::apply(bool force)
     }
 
     if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-        (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
+        (m_config.m_outputSampleRate != m_running.m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
