@@ -78,6 +78,7 @@ public:
 
     struct ATVRFConfig
     {
+	    int64_t       m_intFrequencyOffset;
         ATVModulation m_enmModulation;
         float         m_fltRFBandwidth;
         float         m_fltRFOppBandwidth;
@@ -85,6 +86,7 @@ public:
         bool          m_blndecimatorEnable;
 
         ATVRFConfig() :
+            m_intFrequencyOffset(0),
             m_enmModulation(ATV_FM1),
             m_fltRFBandwidth(0),
             m_fltRFOppBandwidth(0),
@@ -251,6 +253,9 @@ private:
     //*************** RF  ***************
 
     MovingAverage<double> m_objMagSqAverage;
+
+    int m_intTVSampleRate;
+    NCO m_nco;
 
     // Interpolator group for decimation and/or double sideband RF filtering
     Interpolator m_interpolator;

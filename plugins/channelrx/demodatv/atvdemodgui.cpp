@@ -296,7 +296,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     m_objChannelMarker.setCenterFrequency(0);
     m_objChannelMarker.setVisible(true);
 
-    //connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+    connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
     m_objDeviceAPI->registerChannelInstance(m_strChannelID, this);
     m_objDeviceAPI->addChannelMarker(&m_objChannelMarker);
@@ -333,7 +333,6 @@ void ATVDemodGUI::applySettings()
         ui->deltaFrequencyMinus->setChecked(m_objChannelMarker.getCenterFrequency() < 0);
 
         m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
-                //m_objATVDemod->GetSampleRate(),
                 m_objChannelizer->getInputSampleRate(), // always use maximum available bandwidth
                 m_objChannelMarker.getCenterFrequency());
 
@@ -582,5 +581,25 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
 void ATVDemodGUI::on_decimator_toggled(bool checked)
 {
     applyRFSettings();
+}
+
+void ATVDemodGUI::on_deltaFrequency_changed(quint64 value)
+{
+    if (ui->deltaFrequencyMinus->isChecked()) {
+        m_objChannelMarker.setCenterFrequency(-value);
+    } else {
+        m_objChannelMarker.setCenterFrequency(value);
+    }
+}
+
+void ATVDemodGUI::on_deltaFrequencyMinus_toggled(bool minus)
+{
+    int deltaFrequency = m_objChannelMarker.getCenterFrequency();
+    bool minusDelta = (deltaFrequency < 0);
+
+    if (minus ^ minusDelta) // sign change
+    {
+        m_objChannelMarker.setCenterFrequency(-deltaFrequency);
+    }
 }
 

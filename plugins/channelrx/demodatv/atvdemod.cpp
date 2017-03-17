@@ -63,6 +63,7 @@ ATVDemod::ATVDemod() :
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
     m_intNumberOfRowsToDisplay=0;
+    m_intTVSampleRate = 0;
 
     m_objMagSqAverage.resize(32, 1.0);
 
@@ -190,7 +191,10 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         fltI = it->real();
         fltQ = it->imag();
 #endif
-
+        if (m_objRFRunning.m_intFrequencyOffset != 0)
+        {
+            m_nco.nextIQMul(fltI, fltQ);
+        }
 
         //********** demodulation **********
 
@@ -494,9 +498,11 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
         m_objConfig.m_intSampleRate = objNotif.getSampleRate();
+        m_objRFConfig.m_intFrequencyOffset = objNotif.getFrequencyOffset();
 
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
-                << " m_intMsps: " << m_objConfig.m_intSampleRate;
+                << " m_intSampleRate: " << m_objConfig.m_intSampleRate
+                << " m_intFrequencyOffset: " << m_objRFConfig.m_intFrequencyOffset;
 
         applySettings();
 
@@ -551,6 +557,32 @@ void ATVDemod::applySettings()
     if (m_objConfig.m_intSampleRate == 0)
     {
         return;
+    }
+
+    if((m_objRFConfig.m_intFrequencyOffset != m_objRFRunning.m_intFrequencyOffset) ||
+        (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
+    {
+        m_nco.setFreq(-m_objRFConfig.m_intFrequencyOffset, m_objConfig.m_intSampleRate);
+    }
+
+    if ((m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
+        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth))
+    {
+        m_intTVSampleRate = (m_objConfig.m_intSampleRate / 1000000) * 1000000; // make sure working sample rate is a multiple of rate units
+
+        if (m_intTVSampleRate > 0)
+        {
+            m_interpolatorDistance = (Real) m_intTVSampleRate / (Real) m_objConfig.m_intSampleRate;
+        }
+        else
+        {
+            m_intTVSampleRate = m_objConfig.m_intSampleRate;
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorDistance = 1.0f;
+        }
+
+        m_interpolatorDistanceRemain = 0;
+        m_interpolator.create(48, m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
     }
 
     if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)

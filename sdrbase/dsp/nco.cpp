@@ -65,6 +65,17 @@ Complex NCO::nextQI()
 	return Complex(-m_table[(m_phase + TableSize / 4) % TableSize], m_table[m_phase]);
 }
 
+void NCO::nextIQMul(Real& i, Real& q)
+{
+    nextPhase();
+    Real x = i;
+    Real y = q;
+    const Real& u = m_table[m_phase];
+    const Real& v = -m_table[(m_phase + TableSize / 4) % TableSize];
+    i = x*u - y*v;
+    q = x*v + y*u;
+}
+
 float NCO::get()
 {
 	return m_table[m_phase];

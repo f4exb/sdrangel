@@ -52,6 +52,7 @@ public:
 	Real next();            //!< Return next real sample
 	Complex nextIQ();       //!< Return next complex sample
 	Complex nextQI();       //!< Return next complex sample (reversed)
+	void nextIQMul(Real& i, Real& q); //!< multiply I,Q separately with next sample
 	Real get();             //!< Return current real sample (no phase increment)
 	Complex getIQ();        //!< Return current complex sample (no phase increment)
 	void getIQ(Complex& c); //!< Sets to the current complex sample (no phase increment)
