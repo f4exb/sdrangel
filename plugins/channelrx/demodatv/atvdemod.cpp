@@ -82,7 +82,6 @@ void ATVDemod::configure(
         float fltRatioOfRowsToDisplay,
         float fltVoltLevelSynchroTop,
         float fltVoltLevelSynchroBlack,
-        ATVModulation enmModulation,
         bool blnHSync,
         bool blnVSync)
 {
@@ -93,7 +92,6 @@ void ATVDemod::configure(
             fltRatioOfRowsToDisplay,
             fltVoltLevelSynchroTop,
             fltVoltLevelSynchroBlack,
-            enmModulation,
             blnHSync,
             blnVSync);
     objMessageQueue->push(msgCmd);
@@ -500,7 +498,6 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_objConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureATVDemod:"
-                << " m_enmModulation" << m_objConfig.m_enmModulation
                 << " m_fltVoltLevelSynchroBlack" << m_objConfig.m_fltVoltLevelSynchroBlack
                 << " m_fltVoltLevelSynchroTop" << m_objConfig.m_fltVoltLevelSynchroTop
                 << " m_fltFramePerS" << m_objConfig.m_fltFramePerS

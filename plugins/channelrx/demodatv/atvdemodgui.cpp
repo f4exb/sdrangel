@@ -283,7 +283,6 @@ void ATVDemodGUI::applySettings()
                 (ui->halfImage->checkState() == Qt::Checked) ? 0.5f : 1.0f,
                 ui->synchLevel->value() / 1000.0f,
                 ui->blackLevel->value() / 1000.0f,
-                (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
                 ui->hSync->isChecked(),
                 ui->vSync->isChecked());
 

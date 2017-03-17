@@ -57,7 +57,6 @@ public:
 	    float m_fltRatioOfRowsToDisplay;
 	    float m_fltVoltLevelSynchroTop;
 	    float m_fltVoltLevelSynchroBlack;
-	    ATVModulation m_enmModulation;
 	    bool m_blnHSync;
 	    bool m_blnVSync;
 
@@ -69,7 +68,6 @@ public:
 	        m_fltRatioOfRowsToDisplay(0.0f),
 	        m_fltVoltLevelSynchroTop(0.0f),
 	        m_fltVoltLevelSynchroBlack(1.0f),
-	        m_enmModulation(ATV_FM1),
 	        m_blnHSync(false),
 	        m_blnVSync(false)
 	    {
@@ -102,7 +100,6 @@ public:
             float fltRatioOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
-            ATVModulation enmModulation,
             bool blnHSync,
             bool blnVSync);
 
@@ -135,7 +132,6 @@ private:
                     float fltRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
-                    ATVModulation enmModulation,
                     bool blnHSync,
                     bool blnVSync)
             {
@@ -146,7 +142,6 @@ private:
                         fltRatioOfRowsToDisplay,
                         fltVoltLevelSynchroTop,
                         fltVoltLevelSynchroBlack,
-                        enmModulation,
                         blnHSync,
                         blnVSync);
             }
@@ -161,12 +156,10 @@ private:
                     float flatRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
-                    ATVModulation enmModulation,
                     bool blnHSync,
                     bool blnVSync) :
                 Message()
             {
-                m_objMsgConfig.m_enmModulation = enmModulation;
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_fltFramePerS = fltFramePerS;
