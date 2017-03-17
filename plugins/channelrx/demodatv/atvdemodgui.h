@@ -74,7 +74,7 @@ private slots:
     void on_reset_clicked(bool checked);
     void on_rfBW_valueChanged(int value);
     void on_rfOppBW_valueChanged(int value);
-    void on_rfFFTFiltering_toggled(bool checked);
+    void on_rfFiltering_toggled(bool checked);
 
 private:
 	Ui::ATVDemodGUI* ui;

@@ -187,7 +187,7 @@
     <item>
      <layout class="QHBoxLayout" name="rfSettings2Layout">
       <item>
-       <widget class="ButtonSwitch" name="rfFFTFiltering">
+       <widget class="ButtonSwitch" name="rfFiltering">
         <property name="text">
          <string/>
         </property>
