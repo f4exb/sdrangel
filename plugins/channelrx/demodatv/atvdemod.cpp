@@ -109,7 +109,6 @@ void ATVDemod::InitATVParameters(
 {
     m_objSettingsMutex.lock();
 
-    m_intNumberSamplePerTop=(int)((fltTopDurationUs * intSampleRate) / m_fltSecondToUs);
     m_intNumberOfRowsToDisplay = (int) ((fltRatioOfRowsToDisplay * fltLineDurationUs * intSampleRate) / m_fltSecondToUs);
     m_intRowsLimit = m_intNumberOfLines-1;
     m_intImageIndex = 0;
@@ -119,10 +118,6 @@ void ATVDemod::InitATVParameters(
     m_intRowsLimit=0;
 
     //Mise à jour de la config
-    m_objRunning.m_fltFramePerS = fltFramePerS;
-    m_objRunning.m_fltLineDurationUs = fltLineDurationUs;
-    m_objRunning.m_fltTopDurationUs = fltTopDurationUs;
-    m_objRunning.m_intSampleRate = intSampleRate;
     m_objRunning.m_fltRatioOfRowsToDisplay = fltRatioOfRowsToDisplay;
     m_objRunning.m_blnHSync = blnHSync;
     m_objRunning.m_blnVSync = blnVSync;
@@ -550,7 +545,6 @@ bool ATVDemod::handleMessage(const Message& cmd)
            || (m_objConfig.m_blnVSync != m_objRunning.m_blnVSync))
          {
             m_objRunning.m_fltRatioOfRowsToDisplay = m_objConfig.m_fltRatioOfRowsToDisplay;
-            m_objRunning.m_fltTopDurationUs = m_objConfig.m_fltTopDurationUs;
             m_objRunning.m_blnHSync = m_objConfig.m_blnHSync;
             m_objRunning.m_blnVSync = m_objConfig.m_blnVSync;
 
@@ -586,12 +580,21 @@ void ATVDemod::ApplySettings()
         m_objSettingsMutex.unlock();
     }
 
+    if((m_objConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
+       || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
+    {
+        m_objSettingsMutex.lock();
+        m_intNumberSamplePerTop=(int)((m_objConfig.m_fltTopDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
+        m_objSettingsMutex.unlock();
+    }
+
     m_objRunning.m_fltVoltLevelSynchroBlack = m_objConfig.m_fltVoltLevelSynchroBlack;
     m_objRunning.m_fltVoltLevelSynchroTop   = m_objConfig.m_fltVoltLevelSynchroTop;
     m_objRunning.m_enmModulation = m_objConfig.m_enmModulation;
     m_objRunning.m_intSampleRate = m_objConfig.m_intSampleRate;
     m_objRunning.m_fltFramePerS = m_objConfig.m_fltFramePerS;
     m_objRunning.m_fltLineDurationUs = m_objConfig.m_fltLineDurationUs;
+    m_objRunning.m_fltTopDurationUs = m_objConfig.m_fltTopDurationUs;
 
     InitATVParameters(
             m_objRunning.m_intSampleRate,
