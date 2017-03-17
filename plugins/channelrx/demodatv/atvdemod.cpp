@@ -29,6 +29,7 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
 
 const float ATVDemod::m_fltSecondToUs = 1000000.0f;
+const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod() :
     m_objSettingsMutex(QMutex::NonRecursive),
@@ -48,7 +49,12 @@ ATVDemod::ATVDemod() :
     m_fltAmpMax(2000000000.0f),
     m_fltAmpDelta(1.0),
     m_fltAmpLineAverage(0.0f),
-    m_intNumberSamplePerTop(0)
+    m_intNumberSamplePerTop(0),
+    m_interpolatorDistanceRemain(0.0f),
+    m_interpolatorDistance(1.0f),
+    m_DSBFilter(0),
+    m_DSBFilterBuffer(0),
+    m_DSBFilterBufferIndex(0)
 {
     setObjectName("ATVDemod");
 
@@ -60,9 +66,12 @@ ATVDemod::ATVDemod() :
 
     m_objMagSqAverage.resize(32, 1.0);
 
+    m_DSBFilter = new fftfilt((2.0f * m_objRFConfig.m_fltRFBandwidth) / 1000000, 2 * m_ssbFftLen); // arbitrary 1 MS/s sample rate
+    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
+    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+
     memset((void*)m_fltBufferI,0,6*sizeof(float));
     memset((void*)m_fltBufferQ,0,6*sizeof(float));
-
 }
 
 ATVDemod::~ATVDemod()
@@ -102,13 +111,15 @@ void ATVDemod::configureRF(
         ATVModulation enmModulation,
         float fltRFBandwidth,
         float fltRFOppBandwidth,
-        bool blnFFTFiltering)
+        bool blnFFTFiltering,
+        bool blnDecimatorEnable)
 {
     Message* msgCmd = MsgConfigureRFATVDemod::create(
             enmModulation,
             fltRFBandwidth,
             fltRFOppBandwidth,
-            blnFFTFiltering);
+            blnFFTFiltering,
+            blnDecimatorEnable);
     objMessageQueue->push(msgCmd);
 }
 
@@ -521,7 +532,8 @@ bool ATVDemod::handleMessage(const Message& cmd)
                 << " m_enmModulation" << m_objRFConfig.m_enmModulation
                 << " m_fltRFBandwidth" << m_objRFConfig.m_fltRFBandwidth
                 << " m_fltRFOppBandwidth" << m_objRFConfig.m_fltRFOppBandwidth
-                << " m_blnFFTFiltering" << m_objRFConfig.m_blnFFTFiltering;
+                << " m_blnFFTFiltering" << m_objRFConfig.m_blnFFTFiltering
+                << " m_blnDecimatorEnable" << m_objRFConfig.m_blndecimatorEnable;
 
         applySettings();
 

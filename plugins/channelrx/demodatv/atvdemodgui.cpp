@@ -361,7 +361,8 @@ void ATVDemodGUI::applyRFSettings()
                 (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
                 ui->rfBW->value() * 100000.0f,
                 ui->rfOppBW->value() * 100000.0f,
-                ui->rfFiltering->isChecked());
+                ui->rfFiltering->isChecked(),
+                ui->decimator->isChecked());
     }
 }
 
@@ -577,3 +578,9 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
     m_blnDoApplySettings = true;
     applyRFSettings();
 }
+
+void ATVDemodGUI::on_decimator_toggled(bool checked)
+{
+    applyRFSettings();
+}
+

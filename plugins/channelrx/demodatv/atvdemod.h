@@ -18,16 +18,18 @@
 #ifndef INCLUDE_ATVDEMOD_H
 #define INCLUDE_ATVDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
-#include <dsp/devicesamplesource.h>
-#include <dsp/dspcommands.h>
-#include <dsp/downchannelizer.h>
 #include <QMutex>
 #include <QElapsedTimer>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/dspcommands.h"
+#include "dsp/downchannelizer.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
+#include "dsp/fftfilt.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
@@ -41,11 +43,11 @@ class ATVDemod : public BasebandSampleSink
 public:
 
 	enum ATVModulation {
-	    ATV_FM1,
-	    ATV_FM2,
-        ATV_AM,
-        ATV_VAMU,
-        ATV_VAML
+	    ATV_FM1,  //!< Classical frequency modulation with discriminator #1
+	    ATV_FM2,  //!< Classical frequency modulation with discriminator #2
+        ATV_AM,   //!< Classical amplitude modulation
+        ATV_VAMU, //!< AM with vestigial lower side band (main signal is in the upper side)
+        ATV_VAML  //!< AM with vestigial upper side band (main signal is in the lower side)
 	};
 
 	struct ATVConfig
@@ -80,12 +82,14 @@ public:
         float         m_fltRFBandwidth;
         float         m_fltRFOppBandwidth;
         bool          m_blnFFTFiltering;
+        bool          m_blndecimatorEnable;
 
         ATVRFConfig() :
             m_enmModulation(ATV_FM1),
             m_fltRFBandwidth(0),
             m_fltRFOppBandwidth(0),
-            m_blnFFTFiltering(false)
+            m_blnFFTFiltering(false),
+            m_blndecimatorEnable(false)
         {
         }
     };
@@ -107,7 +111,8 @@ public:
             ATVModulation enmModulation,
             float fltRFBandwidth,
             float fltRFOppBandwidth,
-            bool blnFFTFiltering);
+            bool blnFFTFiltering,
+            bool blndecimatorEnable);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -180,13 +185,15 @@ private:
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
-                    bool blnFFTFiltering)
+                    bool blnFFTFiltering,
+                    bool blndecimatorEnable)
             {
                 return new MsgConfigureRFATVDemod(
                         enmModulation,
                         fltRFBandwidth,
                         fltRFOppBandwidth,
-                        blnFFTFiltering);
+                        blnFFTFiltering,
+                        blndecimatorEnable);
             }
 
             ATVRFConfig m_objMsgConfig;
@@ -196,7 +203,8 @@ private:
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
-                    bool blnFFTFiltering) :
+                    bool blnFFTFiltering,
+                    bool blndecimatorEnable) :
                 Message()
             {
                 m_objMsgConfig.m_enmModulation = enmModulation;
@@ -243,6 +251,17 @@ private:
     //*************** RF  ***************
 
     MovingAverage<double> m_objMagSqAverage;
+
+    // Interpolator group for decimation and/or double sideband RF filtering
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+
+    // Used for vestigial SSB with asymmetrical filtering (needs double sideband scheme)
+    fftfilt* m_DSBFilter;
+    Complex* m_DSBFilterBuffer;
+    int m_DSBFilterBufferIndex;
+    static const int m_ssbFftLen;
 
     //QElapsedTimer m_objTimer;
 
