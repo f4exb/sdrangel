@@ -26,6 +26,7 @@
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
+MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
 
 const float ATVDemod::m_fltSecondToUs = 1000000.0f;
 
@@ -95,6 +96,19 @@ void ATVDemod::configure(
             enmModulation,
             blnHSync,
             blnVSync);
+    objMessageQueue->push(msgCmd);
+}
+
+void ATVDemod::configureRF(
+        MessageQueue* objMessageQueue,
+        ATVModulation enmModulation,
+        float fltRFBandwidth,
+        float fltRFOppBandwidth)
+{
+    Message* msgCmd = MsgConfigureRFATVDemod::create(
+            enmModulation,
+            fltRFBandwidth,
+            fltRFOppBandwidth);
     objMessageQueue->push(msgCmd);
 }
 

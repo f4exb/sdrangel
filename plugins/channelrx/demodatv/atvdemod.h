@@ -76,6 +76,20 @@ public:
 	    }
 	};
 
+    struct ATVRFConfig
+    {
+        ATVModulation m_enmModulation;
+        float         m_fltRFBandwidth;
+        float         m_fltRFOppBandwidth;
+
+        ATVRFConfig() :
+            m_enmModulation(ATV_FM1),
+            m_fltRFBandwidth(0),
+            m_fltRFOppBandwidth(0)
+        {
+        }
+    };
+
     ATVDemod();
 	~ATVDemod();
 
@@ -89,6 +103,11 @@ public:
             ATVModulation enmModulation,
             bool blnHSync,
             bool blnVSync);
+
+    void configureRF(MessageQueue* objMessageQueue,
+            ATVModulation enmModulation,
+            float fltRFBandwidth,
+            float fltRFOppBandwidth);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -106,7 +125,8 @@ private:
         MESSAGE_CLASS_DECLARATION
 
         public:
-            static MsgConfigureATVDemod* create(float fltLineDurationUs,
+            static MsgConfigureATVDemod* create(
+                    float fltLineDurationUs,
                     float fltTopDurationUs,
                     float fltFramePerS,
                     float fltRatioOfRowsToDisplay,
@@ -116,7 +136,8 @@ private:
                     bool blnHSync,
                     bool blnVSync)
             {
-                return new MsgConfigureATVDemod(fltLineDurationUs,
+                return new MsgConfigureATVDemod(
+                        fltLineDurationUs,
                         fltTopDurationUs,
                         fltFramePerS,
                         fltRatioOfRowsToDisplay,
@@ -151,6 +172,37 @@ private:
                 m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;
+            }
+    };
+
+    class MsgConfigureRFATVDemod : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+        public:
+            static MsgConfigureRFATVDemod* create(
+                    ATVModulation enmModulation,
+                    float fltRFBandwidth,
+                    float fltRFOppBandwidth)
+            {
+                return new MsgConfigureRFATVDemod(
+                        enmModulation,
+                        fltRFBandwidth,
+                        fltRFOppBandwidth);
+            }
+
+            ATVRFConfig m_objMsgConfig;
+
+        private:
+            MsgConfigureRFATVDemod(
+                    ATVModulation enmModulation,
+                    float fltRFBandwidth,
+                    float fltRFOppBandwidth) :
+                Message()
+            {
+                m_objMsgConfig.m_enmModulation = enmModulation;
+                m_objMsgConfig.m_fltRFBandwidth = fltRFBandwidth;
+                m_objMsgConfig.m_fltRFOppBandwidth = fltRFOppBandwidth;
             }
     };
 
