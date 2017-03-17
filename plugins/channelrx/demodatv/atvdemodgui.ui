@@ -187,13 +187,16 @@
     <item>
      <layout class="QHBoxLayout" name="rfSettings2Layout">
       <item>
-       <widget class="ButtonSwitch" name="toolButton">
+       <widget class="ButtonSwitch" name="rfFFTFiltering">
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrbase/resources/res.qrc">
           <normaloff>:/filter_bandpass.png</normaloff>:/filter_bandpass.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -237,6 +240,9 @@
         </property>
         <property name="maximum">
          <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
         </property>
         <property name="value">
          <number>10</number>

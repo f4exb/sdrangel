@@ -72,6 +72,9 @@ private slots:
     void on_modulation_currentIndexChanged(int index);
     void on_fps_currentIndexChanged(int index);
     void on_reset_clicked(bool checked);
+    void on_rfBW_valueChanged(int value);
+    void on_rfOppBW_valueChanged(int value);
+    void on_rfFFTFiltering_toggled(bool checked);
 
 private:
 	Ui::ATVDemodGUI* ui;
@@ -92,6 +95,7 @@ private:
 
     void blockApplySettings(bool blnBlock);
 	void applySettings();
+    void applyRFSettings();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

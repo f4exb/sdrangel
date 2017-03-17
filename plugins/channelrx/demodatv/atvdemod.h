@@ -81,11 +81,13 @@ public:
         ATVModulation m_enmModulation;
         float         m_fltRFBandwidth;
         float         m_fltRFOppBandwidth;
+        bool          m_blnFFTFiltering;
 
         ATVRFConfig() :
             m_enmModulation(ATV_FM1),
             m_fltRFBandwidth(0),
-            m_fltRFOppBandwidth(0)
+            m_fltRFOppBandwidth(0),
+            m_blnFFTFiltering(false)
         {
         }
     };
@@ -107,7 +109,8 @@ public:
     void configureRF(MessageQueue* objMessageQueue,
             ATVModulation enmModulation,
             float fltRFBandwidth,
-            float fltRFOppBandwidth);
+            float fltRFOppBandwidth,
+            bool blnFFTFiltering);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -183,12 +186,14 @@ private:
             static MsgConfigureRFATVDemod* create(
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
-                    float fltRFOppBandwidth)
+                    float fltRFOppBandwidth,
+                    bool blnFFTFiltering)
             {
                 return new MsgConfigureRFATVDemod(
                         enmModulation,
                         fltRFBandwidth,
-                        fltRFOppBandwidth);
+                        fltRFOppBandwidth,
+                        blnFFTFiltering);
             }
 
             ATVRFConfig m_objMsgConfig;
@@ -197,12 +202,14 @@ private:
             MsgConfigureRFATVDemod(
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
-                    float fltRFOppBandwidth) :
+                    float fltRFOppBandwidth,
+                    bool blnFFTFiltering) :
                 Message()
             {
                 m_objMsgConfig.m_enmModulation = enmModulation;
                 m_objMsgConfig.m_fltRFBandwidth = fltRFBandwidth;
                 m_objMsgConfig.m_fltRFOppBandwidth = fltRFOppBandwidth;
+                m_objMsgConfig.m_blnFFTFiltering = blnFFTFiltering;
             }
     };
 
@@ -248,6 +255,9 @@ private:
 
     ATVConfig m_objRunning;
     ATVConfig m_objConfig;
+
+    ATVRFConfig m_objRFRunning;
+    ATVRFConfig m_objRFConfig;
 
     QMutex m_objSettingsMutex;
 

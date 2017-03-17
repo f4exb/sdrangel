@@ -298,6 +298,18 @@ void ATVDemodGUI::applySettings()
     }
 }
 
+void ATVDemodGUI::applyRFSettings()
+{
+    if (m_blnDoApplySettings)
+    {
+        m_objATVDemod->configureRF(m_objATVDemod->getInputMessageQueue(),
+                (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
+                ui->rfBW->value() * 100000.0f,
+                ui->rfOppBW->value() * 100000.0f,
+                ui->rfFFTFiltering->isChecked());
+    }
+}
+
 void ATVDemodGUI::leaveEvent(QEvent*)
 {
     blockApplySettings(true);
@@ -372,11 +384,6 @@ void ATVDemodGUI::on_halfImage_clicked()
     applySettings();
 }
 
-void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
-{
-    applySettings();
-}
-
 void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 {
     applySettings();
@@ -385,4 +392,26 @@ void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 void ATVDemodGUI::on_reset_clicked(bool checked)
 {
     resetToDefaults();
+}
+
+void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
+{
+    applyRFSettings();
+}
+
+void ATVDemodGUI::on_rfBW_valueChanged(int value)
+{
+    ui->rfBWText->setText(QString("%1 MHz").arg(value / 10.0, 0, 'f', 1));
+    applyRFSettings();
+}
+
+void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
+{
+    ui->rfOppBWText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    applyRFSettings();
+}
+
+void ATVDemodGUI::on_rfFFTFiltering_toggled(bool checked)
+{
+    applyRFSettings();
 }

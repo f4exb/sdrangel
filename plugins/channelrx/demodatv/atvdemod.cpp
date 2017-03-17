@@ -103,12 +103,14 @@ void ATVDemod::configureRF(
         MessageQueue* objMessageQueue,
         ATVModulation enmModulation,
         float fltRFBandwidth,
-        float fltRFOppBandwidth)
+        float fltRFOppBandwidth,
+        bool blnFFTFiltering)
 {
     Message* msgCmd = MsgConfigureRFATVDemod::create(
             enmModulation,
             fltRFBandwidth,
-            fltRFOppBandwidth);
+            fltRFOppBandwidth,
+            blnFFTFiltering);
     objMessageQueue->push(msgCmd);
 }
 
@@ -188,7 +190,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         fltNorm = sqrt(magSq);
 
-        if ((m_objRunning.m_enmModulation == ATV_FM1) || (m_objRunning.m_enmModulation == ATV_FM2))
+        if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
         {
             //Amplitude FM
 
@@ -198,7 +200,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             //-2 > 2 : 0 -> 1 volt
             //0->0.3 synchro  0.3->1 image
 
-            if (m_objRunning.m_enmModulation == ATV_FM1)
+            if (m_objRFRunning.m_enmModulation == ATV_FM1)
             {
                 //YDiff Cd
                 fltVal = m_fltBufferI[0]*(fltNormQ - m_fltBufferQ[1]);
@@ -237,7 +239,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_fltBufferQ[0]=fltNormQ;
 
         }
-        else if ((m_objRunning.m_enmModulation == ATV_AM) || (m_objRunning.m_enmModulation == ATV_VAMU) || (m_objRunning.m_enmModulation == ATV_VAML))
+        else if ((m_objRFRunning.m_enmModulation == ATV_AM) || (m_objRFRunning.m_enmModulation == ATV_VAMU) || (m_objRFRunning.m_enmModulation == ATV_VAML))
         {
             //Amplitude AM
             fltVal = fltNorm;
@@ -423,7 +425,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
                 m_intRowsLimit = m_intNumberOfLines-1;
 
-                if (m_objRunning.m_enmModulation == ATV_AM)
+                if (m_objRFRunning.m_enmModulation == ATV_AM)
                 {
                     m_fltAmpMin=m_fltEffMin;
                     m_fltAmpMax=m_fltEffMax;
@@ -520,6 +522,22 @@ bool ATVDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgConfigureRFATVDemod::match(cmd))
+    {
+        MsgConfigureRFATVDemod& objCfg = (MsgConfigureRFATVDemod&) cmd;
+
+        m_objRFConfig = objCfg.m_objMsgConfig;
+
+        qDebug()  << "ATVDemod::handleMessage: MsgConfigureRFATVDemod:"
+                << " m_enmModulation" << m_objRFConfig.m_enmModulation
+                << " m_fltRFBandwidth" << m_objRFConfig.m_fltRFBandwidth
+                << " m_fltRFOppBandwidth" << m_objRFConfig.m_fltRFOppBandwidth
+                << " m_blnFFTFiltering" << m_objRFConfig.m_blnFFTFiltering;
+
+        applySettings();
+
+        return true;
+    }
     else
     {
         return false;
@@ -567,6 +585,8 @@ void ATVDemod::applySettings()
     m_objRunning.m_fltRatioOfRowsToDisplay = m_objConfig.m_fltRatioOfRowsToDisplay;
     m_objRunning.m_blnHSync = m_objConfig.m_blnHSync;
     m_objRunning.m_blnVSync = m_objConfig.m_blnVSync;
+
+    m_objRFRunning = m_objRFConfig;
 }
 
 int ATVDemod::getSampleRate()
