@@ -43,7 +43,9 @@ public:
 	enum ATVModulation {
 	    ATV_FM1,
 	    ATV_FM2,
-        ATV_AM
+        ATV_AM,
+        ATV_VAMU,
+        ATV_VAML
 	};
 
 	struct ATVConfig

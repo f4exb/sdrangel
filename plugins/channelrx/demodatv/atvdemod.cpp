@@ -223,7 +223,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             m_fltBufferQ[0]=fltNormQ;
 
         }
-        else if (m_objRunning.m_enmModulation == ATV_AM)
+        else if ((m_objRunning.m_enmModulation == ATV_AM) || (m_objRunning.m_enmModulation == ATV_VAMU) || (m_objRunning.m_enmModulation == ATV_VAML))
         {
             //Amplitude AM
             fltVal = fltNorm;

@@ -141,6 +141,16 @@
           <string>AM</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>VAMU</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>VAML</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
