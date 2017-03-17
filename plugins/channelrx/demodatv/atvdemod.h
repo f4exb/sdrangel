@@ -94,13 +94,6 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
     bool SetATVScreen(ATVScreen *objScreen);
-    void InitATVParameters(int intMsps,
-            float fltLineDurationUs,
-            float fltTopDurationUs,
-            float fltFramePerS,
-            float fltRatioOfRowsToDisplay,
-            bool blnHSync,
-            bool blnVSync);
     int GetSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
 
