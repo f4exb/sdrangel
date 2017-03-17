@@ -110,7 +110,6 @@ void ATVDemod::InitATVParameters(
 //    float fltImagesPerSeconds = (float) intFramePerS;
     int intNumberSamplePerLine;
     int intNumberOfLines;
-    bool blnNewOpenGLScreen = false;
 
     m_objSettingsMutex.lock();
 
@@ -120,12 +119,12 @@ void ATVDemod::InitATVParameters(
     if((intNumberSamplePerLine != m_intNumberSamplePerLine)
        || (intNumberOfLines != m_intNumberOfLines))
     {
-        blnNewOpenGLScreen = true;
+        m_intNumberSamplePerLine= intNumberSamplePerLine;
+        m_intNumberOfLines = intNumberOfLines;
+        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
     }
 
-    m_intNumberSamplePerLine= intNumberSamplePerLine;
     m_intNumberSamplePerTop=(int)((fltTopDurationUs * intSampleRate) / m_fltSecondToUs);
-    m_intNumberOfLines = intNumberOfLines;
     m_intNumberOfRowsToDisplay = (int) ((fltRatioOfRowsToDisplay * fltLineDurationUs * intSampleRate) / m_fltSecondToUs);
     m_intRowsLimit = m_intNumberOfLines-1;
     m_intImageIndex = 0;
@@ -133,11 +132,6 @@ void ATVDemod::InitATVParameters(
     m_intColIndex=0;
     m_intRowIndex=0;
     m_intRowsLimit=0;
-
-    if(blnNewOpenGLScreen)
-    {
-       m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
-    }
 
     //Mise à jour de la config
     m_objRunning.m_fltFramePerS = fltFramePerS;
