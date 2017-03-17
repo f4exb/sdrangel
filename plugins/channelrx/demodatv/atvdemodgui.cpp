@@ -217,7 +217,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_objATVDemod = new ATVDemod();
-    m_objATVDemod->SetATVScreen(ui->screenTV);
+    m_objATVDemod->setATVScreen(ui->screenTV);
 
     m_objChannelizer = new DownChannelizer(m_objATVDemod);
     m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
@@ -289,7 +289,7 @@ void ATVDemodGUI::applySettings()
 
         qDebug() << "ATVDemodGUI::applySettings:"
                 << " m_objChannelizer.inputSampleRate: " << m_objChannelizer->getInputSampleRate()
-                << " m_objATVDemod.sampleRate: " << m_objATVDemod->GetSampleRate();
+                << " m_objATVDemod.sampleRate: " << m_objATVDemod->getSampleRate();
 
         //m_objChannelMarker.setBandwidth(m_objATVDemod->GetSampleRate()); it is unreliable at this moment
         m_blnDoApplySettings = false; // avoid infinite recursion

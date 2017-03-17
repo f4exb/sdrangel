@@ -68,7 +68,7 @@ ATVDemod::~ATVDemod()
 {
 }
 
-bool ATVDemod::SetATVScreen(ATVScreen *objScreen)
+bool ATVDemod::setATVScreen(ATVScreen *objScreen)
 {
     m_objRegisteredATVScreen = objScreen;
 }
@@ -473,7 +473,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
                 << " m_intMsps: " << m_objConfig.m_intSampleRate;
 
-        ApplySettings();
+        applySettings();
 
         return true;
     }
@@ -502,7 +502,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
                 << " m_blnHSync" << m_objConfig.m_blnHSync
                 << " m_blnVSync" << m_objConfig.m_blnVSync;
 
-        ApplySettings();
+        applySettings();
 
         return true;
     }
@@ -512,7 +512,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
     }
 }
 
-void ATVDemod::ApplySettings()
+void ATVDemod::applySettings()
 {
 
     if (m_objConfig.m_intSampleRate == 0)
@@ -555,7 +555,7 @@ void ATVDemod::ApplySettings()
     m_objRunning.m_blnVSync = m_objConfig.m_blnVSync;
 }
 
-int ATVDemod::GetSampleRate()
+int ATVDemod::getSampleRate()
 {
     return m_objRunning.m_intSampleRate;
 }

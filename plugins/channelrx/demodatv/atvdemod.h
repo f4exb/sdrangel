@@ -93,8 +93,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    bool SetATVScreen(ATVScreen *objScreen);
-    int GetSampleRate();
+    bool setATVScreen(ATVScreen *objScreen);
+    int getSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
 
 private:
@@ -199,7 +199,7 @@ private:
 
     static const float m_fltSecondToUs;
 
-    void ApplySettings();
+    void applySettings();
 
 };
 
