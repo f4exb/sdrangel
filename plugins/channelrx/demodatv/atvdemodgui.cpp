@@ -304,6 +304,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
+    m_objMagSqAverage.resize(4, 1.0);
+
     resetToDefaults(); // does applySettings()
 }
 
@@ -379,7 +381,7 @@ void ATVDemodGUI::enterEvent(QEvent*)
 
 void ATVDemodGUI::tick()
 {
-    if (m_intTickCount < 10) // ~500 ms
+    if (m_intTickCount < 4) // ~200 ms
     {
         m_intTickCount++;
     }
@@ -387,7 +389,8 @@ void ATVDemodGUI::tick()
     {
         if (m_objATVDemod)
         {
-            double magSqDB = CalcDb::dbPower(m_objATVDemod->getMagSq() / (1<<30));
+            m_objMagSqAverage.feed(m_objATVDemod->getMagSq());
+            double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (1<<30));
             ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
         }
 

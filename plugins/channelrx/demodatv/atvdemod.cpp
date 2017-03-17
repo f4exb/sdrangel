@@ -58,7 +58,7 @@ ATVDemod::ATVDemod() :
     m_intNumberOfLines=0;
     m_intNumberOfRowsToDisplay=0;
 
-    m_objMagSqAverage.resize(16, 1.0);
+    m_objMagSqAverage.resize(32, 1.0);
 
     memset((void*)m_fltBufferI,0,6*sizeof(float));
     memset((void*)m_fltBufferQ,0,6*sizeof(float));

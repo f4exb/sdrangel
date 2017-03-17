@@ -209,8 +209,17 @@
       </item>
       <item>
        <widget class="QLabel" name="rfOppBWText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
-         <string>10.0</string>
+         <string>1.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -256,12 +265,12 @@
        <widget class="QLabel" name="rfBWText">
         <property name="minimumSize">
          <size>
-          <width>54</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>10.0 MHz</string>
+         <string>1.0 MHz</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

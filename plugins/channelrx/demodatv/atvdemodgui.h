@@ -88,6 +88,7 @@ private:
     bool m_blnBasicSettingsShown;
     bool m_blnDoApplySettings;
 
+    MovingAverage<double> m_objMagSqAverage;
     int m_intTickCount;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
