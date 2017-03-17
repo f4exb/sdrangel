@@ -497,15 +497,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureATVDemod& objCfg = (MsgConfigureATVDemod&) cmd;
 
-        m_objConfig.m_enmModulation             = objCfg.m_objMsgConfig.m_enmModulation;
-        m_objConfig.m_fltVoltLevelSynchroBlack  = objCfg.m_objMsgConfig.m_fltVoltLevelSynchroBlack;
-        m_objConfig.m_fltVoltLevelSynchroTop    = objCfg.m_objMsgConfig.m_fltVoltLevelSynchroTop;
-        m_objConfig.m_fltFramePerS              = objCfg.m_objMsgConfig.m_fltFramePerS;
-        m_objConfig.m_fltLineDurationUs         = objCfg.m_objMsgConfig.m_fltLineDurationUs;
-        m_objConfig.m_fltRatioOfRowsToDisplay   = objCfg.m_objMsgConfig.m_fltRatioOfRowsToDisplay;
-        m_objConfig.m_fltTopDurationUs          = objCfg.m_objMsgConfig.m_fltTopDurationUs;
-        m_objConfig.m_blnHSync                  = objCfg.m_objMsgConfig.m_blnHSync;
-        m_objConfig.m_blnVSync                  = objCfg.m_objMsgConfig.m_blnVSync;
+        m_objConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureATVDemod:"
                 << " m_enmModulation" << m_objConfig.m_enmModulation
@@ -575,17 +567,7 @@ void ATVDemod::applySettings()
         m_objSettingsMutex.unlock();
     }
 
-    m_objRunning.m_fltVoltLevelSynchroBlack = m_objConfig.m_fltVoltLevelSynchroBlack;
-    m_objRunning.m_fltVoltLevelSynchroTop   = m_objConfig.m_fltVoltLevelSynchroTop;
-    m_objRunning.m_enmModulation = m_objConfig.m_enmModulation;
-    m_objRunning.m_intSampleRate = m_objConfig.m_intSampleRate;
-    m_objRunning.m_fltFramePerS = m_objConfig.m_fltFramePerS;
-    m_objRunning.m_fltLineDurationUs = m_objConfig.m_fltLineDurationUs;
-    m_objRunning.m_fltTopDurationUs = m_objConfig.m_fltTopDurationUs;
-    m_objRunning.m_fltRatioOfRowsToDisplay = m_objConfig.m_fltRatioOfRowsToDisplay;
-    m_objRunning.m_blnHSync = m_objConfig.m_blnHSync;
-    m_objRunning.m_blnVSync = m_objConfig.m_blnVSync;
-
+    m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
 }
 
