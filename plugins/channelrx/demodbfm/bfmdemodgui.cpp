@@ -401,6 +401,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+	setTitleColor(m_channelMarker.getColor());
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
@@ -440,8 +441,6 @@ void BFMDemodGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
 			m_channelMarker.getCenterFrequency());
