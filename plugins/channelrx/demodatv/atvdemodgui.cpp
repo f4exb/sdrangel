@@ -361,7 +361,7 @@ void ATVDemodGUI::applyRFSettings()
                 ui->rfBW->value() * 100000.0f,
                 ui->rfOppBW->value() * 100000.0f,
                 ui->rfFiltering->isChecked(),
-                ui->decimator->isChecked());
+                ui->decimatorEnable->isChecked());
     }
 }
 
@@ -490,6 +490,7 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
         }
         else
         {
+            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
             m_objChannelMarker.setSidebands(ChannelMarker::dsb);
         }
     }
@@ -565,6 +566,7 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
         }
         else
         {
+            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
             m_objChannelMarker.setSidebands(ChannelMarker::dsb);
         }
     }
@@ -578,7 +580,7 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
     applyRFSettings();
 }
 
-void ATVDemodGUI::on_decimator_toggled(bool checked)
+void ATVDemodGUI::on_decimatorEnable_toggled(bool checked)
 {
     applyRFSettings();
 }

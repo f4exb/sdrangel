@@ -75,7 +75,7 @@ private slots:
     void on_rfBW_valueChanged(int value);
     void on_rfOppBW_valueChanged(int value);
     void on_rfFiltering_toggled(bool checked);
-    void on_decimator_toggled(bool checked);
+    void on_decimatorEnable_toggled(bool checked);
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaFrequencyMinus_toggled(bool minus);
 

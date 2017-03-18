@@ -213,6 +213,7 @@ private:
                 m_objMsgConfig.m_fltRFBandwidth = fltRFBandwidth;
                 m_objMsgConfig.m_fltRFOppBandwidth = fltRFOppBandwidth;
                 m_objMsgConfig.m_blnFFTFiltering = blnFFTFiltering;
+                m_objMsgConfig.m_blndecimatorEnable = blndecimatorEnable;
             }
     };
 

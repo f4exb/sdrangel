@@ -53,6 +53,20 @@
     <item>
      <layout class="QHBoxLayout" name="rfSettings1Layout">
       <item>
+       <widget class="ButtonSwitch" name="decimatorEnable">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
          <widget class="QToolButton" name="deltaFrequencyMinus">
@@ -64,6 +78,9 @@
             <selectedoff>:/plus.png</selectedoff>
             <selectedon>:/minus.png</selectedon>
            </iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -97,20 +114,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="decimator">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="QLabel" name="channelSampleRateText">
@@ -195,6 +198,9 @@
      <layout class="QHBoxLayout" name="rfSettings2Layout">
       <item>
        <widget class="ButtonSwitch" name="rfFiltering">
+        <property name="toolTip">
+         <string>Engage asymmertical bandpass FFT filter</string>
+        </property>
         <property name="text">
          <string/>
         </property>

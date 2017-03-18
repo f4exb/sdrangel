@@ -193,13 +193,13 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 #endif
         Complex c(fltI, fltQ);
 
-        if (m_objRFRunning.m_intFrequencyOffset != 0)
-        {
-            c *= m_nco.nextIQ();
-        }
-
         if (m_objRFRunning.m_blndecimatorEnable)
         {
+            if (m_objRFRunning.m_intFrequencyOffset != 0)
+            {
+                c *= m_nco.nextIQ();
+            }
+
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
                 demod(ci);
@@ -595,6 +595,7 @@ void ATVDemod::applySettings()
     if ((m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
         || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth))
     {
+        m_objSettingsMutex.lock();
         m_intTVSampleRate = (m_objConfig.m_intSampleRate / 1000000) * 1000000; // make sure working sample rate is a multiple of rate units
 
         if (m_intTVSampleRate > 0)
@@ -604,12 +605,12 @@ void ATVDemod::applySettings()
         else
         {
             m_intTVSampleRate = m_objConfig.m_intSampleRate;
-            m_interpolatorDistanceRemain = 0;
             m_interpolatorDistance = 1.0f;
         }
 
         m_interpolatorDistanceRemain = 0;
         m_interpolator.create(48, m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
+        m_objSettingsMutex.unlock();
     }
 
     if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
