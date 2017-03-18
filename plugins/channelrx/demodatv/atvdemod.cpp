@@ -27,6 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
+MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 
 const float ATVDemod::m_fltSecondToUs = 1000000.0f;
 const int ATVDemod::m_ssbFftLen = 1024;
@@ -63,7 +64,6 @@ ATVDemod::ATVDemod() :
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
     m_intNumberOfRowsToDisplay=0;
-    m_intTVSampleRate = 0;
 
     m_objMagSqAverage.resize(32, 1.0);
 
@@ -79,7 +79,7 @@ ATVDemod::~ATVDemod()
 {
 }
 
-bool ATVDemod::setATVScreen(ATVScreen *objScreen)
+void ATVDemod::setATVScreen(ATVScreen *objScreen)
 {
     m_objRegisteredATVScreen = objScreen;
 }
@@ -596,20 +596,21 @@ void ATVDemod::applySettings()
         || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth))
     {
         m_objSettingsMutex.lock();
-        m_intTVSampleRate = (m_objConfig.m_intSampleRate / 1000000) * 1000000; // make sure working sample rate is a multiple of rate units
 
-        if (m_intTVSampleRate > 0)
+        m_objConfigPrivate.m_intTVSampleRate = (m_objConfig.m_intSampleRate / 1000000) * 1000000; // make sure working sample rate is a multiple of rate units
+
+        if (m_objConfigPrivate.m_intTVSampleRate > 0)
         {
-            m_interpolatorDistance = (Real) m_intTVSampleRate / (Real) m_objConfig.m_intSampleRate;
+            m_interpolatorDistance = (Real) m_objConfigPrivate.m_intTVSampleRate / (Real) m_objConfig.m_intSampleRate;
         }
         else
         {
-            m_intTVSampleRate = m_objConfig.m_intSampleRate;
+            m_objConfigPrivate.m_intTVSampleRate = m_objConfig.m_intSampleRate;
             m_interpolatorDistance = 1.0f;
         }
 
         m_interpolatorDistanceRemain = 0;
-        m_interpolator.create(48, m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
+        m_interpolator.create(48, m_objConfigPrivate.m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
         m_objSettingsMutex.unlock();
     }
 
@@ -636,8 +637,19 @@ void ATVDemod::applySettings()
         m_objSettingsMutex.unlock();
     }
 
+    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
+        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
+        || (m_objRFConfig.m_blndecimatorEnable != m_objRFRunning.m_blndecimatorEnable))
+    {
+        int sampleRate = m_objRFConfig.m_blndecimatorEnable ? m_objConfigPrivate.m_intTVSampleRate : m_objConfig.m_intSampleRate;
+        MsgReportEffectiveSampleRate *report;
+        report = MsgReportEffectiveSampleRate::create(sampleRate);
+        getOutputMessageQueue()->push(report);
+    }
+
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
+    m_objRunningPrivate = m_objConfigPrivate;
 }
 
 int ATVDemod::getSampleRate()

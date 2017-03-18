@@ -96,6 +96,27 @@ public:
         }
     };
 
+    class MsgReportEffectiveSampleRate : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportEffectiveSampleRate* create(int sampleRate)
+        {
+            return new MsgReportEffectiveSampleRate(sampleRate);
+        }
+
+    protected:
+        int m_sampleRate;
+
+        MsgReportEffectiveSampleRate(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     ATVDemod();
 	~ATVDemod();
 
@@ -121,11 +142,19 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    bool setATVScreen(ATVScreen *objScreen);
+    void setATVScreen(ATVScreen *objScreen);
     int getSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
 
 private:
+    struct ATVConfigPrivate
+    {
+        int m_intTVSampleRate;
+
+        ATVConfigPrivate() :
+            m_intTVSampleRate(0)
+        {}
+    };
 
     class MsgConfigureATVDemod : public Message
     {
@@ -255,7 +284,6 @@ private:
 
     MovingAverage<double> m_objMagSqAverage;
 
-    int m_intTVSampleRate;
     NCO m_nco;
 
     // Interpolator group for decimation and/or double sideband RF filtering
@@ -276,6 +304,9 @@ private:
 
     ATVRFConfig m_objRFRunning;
     ATVRFConfig m_objRFConfig;
+
+    ATVConfigPrivate m_objRunningPrivate;
+    ATVConfigPrivate m_objConfigPrivate;
 
     QMutex m_objSettingsMutex;
 
