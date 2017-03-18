@@ -132,11 +132,11 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         d.readS32(1, &tmp, 0);
         m_objChannelMarker.setCenterFrequency(tmp);
 
-        if (d.readU32(2, &u32tmp)) {
-            m_objChannelMarker.setColor(u32tmp);
-        } else {
-            m_objChannelMarker.setColor(Qt::white);
-        }
+//        if (d.readU32(2, &u32tmp)) {
+//            m_objChannelMarker.setColor(u32tmp);
+//        } else {
+//            m_objChannelMarker.setColor(Qt::white);
+//        }
 
         d.readS32(3, &tmp, 100);
         ui->synchLevel->setValue(tmp);
@@ -268,6 +268,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     m_objChannelMarker.setBandwidth(6000000);
     m_objChannelMarker.setCenterFrequency(0);
     m_objChannelMarker.setVisible(true);
+    setTitleColor(m_objChannelMarker.getColor());
 
     connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
@@ -303,7 +304,6 @@ void ATVDemodGUI::applySettings()
 {
     if (m_blnDoApplySettings)
     {
-        setTitleColor(m_objChannelMarker.getColor());
 		ui->deltaFrequency->setValue(abs(m_objChannelMarker.getCenterFrequency()));
         ui->deltaFrequencyMinus->setChecked(m_objChannelMarker.getCenterFrequency() < 0);
 
