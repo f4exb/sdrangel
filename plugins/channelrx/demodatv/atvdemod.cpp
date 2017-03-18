@@ -193,13 +193,13 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 #endif
         Complex c(fltI, fltQ);
 
+        if (m_objRFRunning.m_intFrequencyOffset != 0)
+        {
+            c *= m_nco.nextIQ();
+        }
+
         if (m_objRFRunning.m_blndecimatorEnable)
         {
-            if (m_objRFRunning.m_intFrequencyOffset != 0)
-            {
-                c *= m_nco.nextIQ();
-            }
-
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
                 demod(ci);
@@ -231,10 +231,28 @@ void ATVDemod::demod(Complex& c)
     float fltVal;
     int intVal;
 
+    //********** FFT filtering **********
+
+    if (m_objRFRunning.m_blnFFTFiltering)
+    {
+        int n_out;
+        fftfilt::cmplx *filtered;
+
+        n_out = m_DSBFilter->runAsym(c, &filtered, m_objRFRunning.m_enmModulation != ATV_VAML); // all usb except explicitely lsb
+
+        if (n_out > 0)
+        {
+            memcpy((void *) m_DSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+            m_DSBFilterBufferIndex = 0;
+        }
+
+        m_DSBFilterBufferIndex++;
+    }
+
     //********** demodulation **********
 
-    float& fltI = c.real();
-    float& fltQ = c.imag();
+    float& fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
+    float& fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
 
     double magSq = fltI*fltI + fltQ*fltQ;
     m_objMagSqAverage.feed(magSq);
@@ -646,6 +664,19 @@ void ATVDemod::applySettings()
         report = MsgReportEffectiveSampleRate::create(sampleRate);
         getOutputMessageQueue()->push(report);
     }
+
+    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
+        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth)
+        || (m_objRFConfig.m_fltRFOppBandwidth != m_objRFRunning.m_fltRFOppBandwidth))
+    {
+        m_objSettingsMutex.lock();
+        m_DSBFilter->create_asym_filter(m_objRFConfig.m_fltRFOppBandwidth / m_objConfigPrivate.m_intTVSampleRate,
+                m_objRFConfig.m_fltRFBandwidth / m_objConfigPrivate.m_intTVSampleRate);
+        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+        m_DSBFilterBufferIndex = 0;
+        m_objSettingsMutex.unlock();
+    }
+
 
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;

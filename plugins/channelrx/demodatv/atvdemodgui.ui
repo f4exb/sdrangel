@@ -54,6 +54,9 @@
      <layout class="QHBoxLayout" name="rfSettings1Layout">
       <item>
        <widget class="ButtonSwitch" name="decimatorEnable">
+        <property name="toolTip">
+         <string>Toggle decimator on/off</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -70,6 +73,9 @@
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
          <widget class="QToolButton" name="deltaFrequencyMinus">
+          <property name="toolTip">
+           <string>Channel center frequency shift direction</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -104,6 +110,9 @@
             <pointsize>12</pointsize>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Channel center frequency shift</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -122,6 +131,9 @@
           <width>52</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Effective channel sample rate (kS/s)</string>
         </property>
         <property name="text">
          <string> 00000k</string>
@@ -184,6 +196,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
         <property name="text">
          <string>-100.0 dB</string>
         </property>
@@ -238,6 +253,9 @@
       </item>
       <item>
        <widget class="QSlider" name="rfOppBW">
+        <property name="toolTip">
+         <string>Asymmetrical filter opposite band cutoff</string>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>
         </property>
@@ -257,6 +275,9 @@
       </item>
       <item>
        <widget class="QSlider" name="rfBW">
+        <property name="toolTip">
+         <string>Asymmetrical filter in band cutoff / Decimator filter cutoff</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>

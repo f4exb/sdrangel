@@ -186,7 +186,9 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
 
 void ATVDemodGUI::viewChanged()
 {
+    qDebug("ATVDemodGUI::viewChanged");
     applySettings();
+    applyRFSettings();
 }
 
 void ATVDemodGUI::channelSampleRateChanged()
