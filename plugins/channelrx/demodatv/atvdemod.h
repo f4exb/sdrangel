@@ -144,6 +144,7 @@ public:
 
     void setATVScreen(ATVScreen *objScreen);
     int getSampleRate();
+    int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
 
 private:

@@ -610,7 +610,7 @@ void ATVDemod::applySettings()
         }
 
         m_interpolatorDistanceRemain = 0;
-        m_interpolator.create(48, m_objConfigPrivate.m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
+        m_interpolator.create(16, m_objConfigPrivate.m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
         m_objSettingsMutex.unlock();
     }
 
@@ -657,3 +657,7 @@ int ATVDemod::getSampleRate()
     return m_objRunning.m_intSampleRate;
 }
 
+int ATVDemod::getEffectiveSampleRate()
+{
+    return m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
+}

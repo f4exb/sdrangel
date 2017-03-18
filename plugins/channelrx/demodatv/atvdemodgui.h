@@ -101,6 +101,8 @@ private:
     void blockApplySettings(bool blnBlock);
 	void applySettings();
     void applyRFSettings();
+    void setChannelMarkerBandwidth();
+    void setRFFiltersSlidersRange(int sampleRate);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

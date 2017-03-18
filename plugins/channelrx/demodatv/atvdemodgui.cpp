@@ -174,23 +174,7 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
     {
         int sampleRate = ((ATVDemod::MsgReportEffectiveSampleRate&)objMessage).getSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 0));
-
-        // filter sliders range
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML)
-        {
-            ui->rfBW->setMaximum(sampleRate / 200000);
-            ui->rfOppBW->setMaximum(sampleRate / 200000);
-        }
-        else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU)
-        {
-            ui->rfBW->setMaximum(sampleRate / 200000);
-            ui->rfOppBW->setMaximum(sampleRate / 200000);
-        }
-        else
-        {
-            ui->rfBW->setMaximum(sampleRate / 100000);
-            ui->rfOppBW->setMaximum(sampleRate / 100000);
-        }
+        setRFFiltersSlidersRange(sampleRate);
 
         return true;
     }
@@ -208,41 +192,7 @@ void ATVDemodGUI::viewChanged()
 void ATVDemodGUI::channelSampleRateChanged()
 {
     qDebug("ATVDemodGUI::channelSampleRateChanged");
-
     applySettings();
-
-
-    // channel marker
-
-    m_blnDoApplySettings = false; // avoid infinite recursion
-
-    if (ui->rfFiltering->isChecked())
-    {
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML)
-        {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
-        }
-        else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU)
-        {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
-        }
-        else
-        {
-            m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-        }
-    }
-    else
-    {
-        m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
-        m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-
-    }
-
-    m_blnDoApplySettings = true;
     applyRFSettings();
 }
 
@@ -382,6 +332,52 @@ void ATVDemodGUI::applyRFSettings()
     }
 }
 
+void ATVDemodGUI::setChannelMarkerBandwidth()
+{
+    m_blnDoApplySettings = false; // avoid infinite recursion
+
+    if (ui->rfFiltering->isChecked()) // FFT filter
+    {
+        m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
+        m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
+
+        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML) {
+            m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
+        } else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU) {
+            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
+        } else {
+            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
+        }
+    }
+    else
+    {
+        if (ui->decimatorEnable->isChecked()) {
+            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
+        } else {
+            m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
+        }
+
+        m_objChannelMarker.setSidebands(ChannelMarker::dsb);
+    }
+
+    m_blnDoApplySettings = true;
+}
+
+void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
+{
+    // RF filters sliders range
+    if (ui->rfFiltering->isChecked())
+    {
+        ui->rfBW->setMaximum(sampleRate / 200000);
+        ui->rfOppBW->setMaximum(sampleRate / 200000);
+    }
+    else
+    {
+        ui->rfBW->setMaximum(sampleRate / 100000);
+        ui->rfOppBW->setMaximum(sampleRate / 100000);
+    }
+}
+
 void ATVDemodGUI::leaveEvent(QEvent*)
 {
     blockApplySettings(true);
@@ -469,136 +465,35 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
 
 void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 {
-    // RF filters
-
-    if (index == (int) ATVDemod::ATV_VAML)
-    {
-        ui->rfBW->setMaximum(m_objChannelizer->getInputSampleRate() / 200000);
-        ui->rfOppBW->setMaximum(m_objChannelizer->getInputSampleRate() / 200000);
-    }
-    else if (index == (int) ATVDemod::ATV_VAMU)
-    {
-        ui->rfBW->setMaximum(m_objChannelizer->getInputSampleRate() / 200000);
-        ui->rfOppBW->setMaximum(m_objChannelizer->getInputSampleRate() / 200000);
-    }
-    else
-    {
-        ui->rfBW->setMaximum(m_objChannelizer->getInputSampleRate() / 100000);
-        ui->rfOppBW->setMaximum(m_objChannelizer->getInputSampleRate() / 100000);
-    }
-
-    // channel marker
-
-    m_blnDoApplySettings = false; // avoid infinite recursion
-
-    if (ui->rfFiltering->isChecked())
-    {
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML)
-        {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
-        }
-        else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU)
-        {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
-        }
-        else
-        {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-        }
-    }
-    else
-    {
-        m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
-        m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-
-    }
-
-    m_blnDoApplySettings = true;
+    setRFFiltersSlidersRange(m_objATVDemod->getEffectiveSampleRate());
+    setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
 void ATVDemodGUI::on_rfBW_valueChanged(int value)
 {
     ui->rfBWText->setText(QString("%1 MHz").arg(value / 10.0, 0, 'f', 1));
-
-    // channel marker
-
-    if (ui->rfFiltering->isChecked())
-    {
-        m_blnDoApplySettings = false; // avoid infinite recursion
-        m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-        m_blnDoApplySettings = true;
-        applyRFSettings();
-    }
+    setChannelMarkerBandwidth();
+    applyRFSettings();
 }
 
 void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 {
     ui->rfOppBWText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-
-    // channel marker
-
-    if (ui->rfFiltering->isChecked())
-    {
-        m_blnDoApplySettings = false; // avoid infinite recursion
-
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML)
-        {
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-        }
-        else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU)
-        {
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-        }
-
-        m_blnDoApplySettings = true;
-        applyRFSettings();
-    }
+    setChannelMarkerBandwidth();
+    applyRFSettings();
 }
 
 void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
 {
-    // channel marker
-
-    m_blnDoApplySettings = false; // avoid infinite recursion
-
-    if (ui->rfFiltering->isChecked())
-    {
-        m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML)
-        {
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
-        }
-        else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU)
-        {
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
-        }
-        else
-        {
-            m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
-            m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-        }
-    }
-    else
-    {
-        m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
-        m_objChannelMarker.setSidebands(ChannelMarker::dsb);
-    }
-
-    m_blnDoApplySettings = true;
+    setRFFiltersSlidersRange(m_objATVDemod->getEffectiveSampleRate());
+    setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
 void ATVDemodGUI::on_decimatorEnable_toggled(bool checked)
 {
+    setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
