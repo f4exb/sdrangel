@@ -103,6 +103,8 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeBool(9, ui->hSync->isChecked());
     s.writeBool(10, ui->vSync->isChecked());
     s.writeBool(11, ui->halfImage->isChecked());
+    s.writeS32(12, ui->rfBW->value());
+    s.writeS32(13, ui->rfOppBW->value());
 
     return s.final();
 }
@@ -154,6 +156,10 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->vSync->setChecked(booltmp);
         d.readBool(11, &booltmp, false);
         ui->halfImage->setChecked(booltmp);
+        d.readS32(12, &tmp, 10);
+        ui->rfBW->setValue(tmp);
+        d.readS32(13, &tmp, 10);
+        ui->rfOppBW->setValue(tmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
