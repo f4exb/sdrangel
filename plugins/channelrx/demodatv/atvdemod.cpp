@@ -131,12 +131,13 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
     float fltQ;
     float fltNormI;
     float fltNormQ;
+    Complex ci;
 
     float fltNorm=0.00f;
     float fltVal;
     int intVal;
 
-    qint16 * ptrBufferToRelease=NULL;
+    qint16 * ptrBufferToRelease = 0;
 
     bool blnComputeImage=false;
 
@@ -146,7 +147,6 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
     //********** Let's rock and roll buddy ! **********
 
     m_objSettingsMutex.lock();
-
 
     //********** Accessing ATV Screen context **********
 
@@ -191,294 +191,321 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         fltI = it->real();
         fltQ = it->imag();
 #endif
+        Complex c(fltI, fltQ);
+
         if (m_objRFRunning.m_intFrequencyOffset != 0)
         {
-            m_nco.nextIQMul(fltI, fltQ);
+            c *= m_nco.nextIQ();
         }
 
-        //********** demodulation **********
-
-        double magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage.feed(magSq);
-
-        fltNorm = sqrt(magSq);
-
-        if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
+        if (m_objRFRunning.m_blndecimatorEnable)
         {
-            //Amplitude FM
-
-            fltNormI= fltI/fltNorm;
-            fltNormQ= fltQ/fltNorm;
-
-            //-2 > 2 : 0 -> 1 volt
-            //0->0.3 synchro  0.3->1 image
-
-            if (m_objRFRunning.m_enmModulation == ATV_FM1)
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                //YDiff Cd
-                fltVal = m_fltBufferI[0]*(fltNormQ - m_fltBufferQ[1]);
-                fltVal -= m_fltBufferQ[0]*(fltNormI - m_fltBufferI[1]);
-
-                fltVal += 2.0f;
-                fltVal /=4.0f;
-
+                demod(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-            else
-            {
-                //YDiff Folded
-                fltVal =  m_fltBufferI[2]*((m_fltBufferQ[5]-fltNormQ)/16.0f + m_fltBufferQ[1] - m_fltBufferQ[3]);
-                fltVal -= m_fltBufferQ[2]*((m_fltBufferI[5]-fltNormI)/16.0f + m_fltBufferI[1] - m_fltBufferI[3]);
-
-                fltVal += 2.125f;
-                fltVal /=4.25f;
-
-                m_fltBufferI[5]=m_fltBufferI[4];
-                m_fltBufferQ[5]=m_fltBufferQ[4];
-
-                m_fltBufferI[4]=m_fltBufferI[3];
-                m_fltBufferQ[4]=m_fltBufferQ[3];
-
-                m_fltBufferI[3]=m_fltBufferI[2];
-                m_fltBufferQ[3]=m_fltBufferQ[2];
-
-                m_fltBufferI[2]=m_fltBufferI[1];
-                m_fltBufferQ[2]=m_fltBufferQ[1];
-            }
-
-            m_fltBufferI[1]=m_fltBufferI[0];
-            m_fltBufferQ[1]=m_fltBufferQ[0];
-
-            m_fltBufferI[0]=fltNormI;
-            m_fltBufferQ[0]=fltNormQ;
-
-        }
-        else if ((m_objRFRunning.m_enmModulation == ATV_AM) || (m_objRFRunning.m_enmModulation == ATV_VAMU) || (m_objRFRunning.m_enmModulation == ATV_VAML))
-        {
-            //Amplitude AM
-            fltVal = fltNorm;
-
-            //********** Mini and Maxi Amplitude tracking **********
-
-            if(fltVal<m_fltEffMin)
-            {
-                m_fltEffMin=fltVal;
-            }
-
-            if(fltVal>m_fltEffMax)
-            {
-                m_fltEffMax=fltVal;
-            }
-
-            //Normalisation
-            fltVal -= m_fltAmpMin;
-            fltVal /=m_fltAmpDelta;
         }
         else
         {
-            fltVal = 0.0f;
+            demod(c);
         }
-
-        m_fltAmpLineAverage += fltVal;
-
-        //********** gray level **********
-        //-0.3 -> 0.7
-        intVal = (int) 255.0*(fltVal - m_objRunning.m_fltVoltLevelSynchroBlack) / fltDivSynchroBlack;
-
-        //0 -> 255
-        if(intVal<0)
-        {
-            intVal=0;
-        }
-        else if(intVal>255)
-        {
-            intVal=255;
-        }
-
-        //********** Filling pixels **********
-
-        blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f);
-
-        if (!blnComputeImage)
-        {
-            blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
-        }
-
-        if (blnComputeImage)
-        {
-            m_objRegisteredATVScreen->setDataColor(m_intColIndex,intVal, intVal, intVal);
-        }
-
-        m_intColIndex++;
-
-        //////////////////////
-
-        m_blnSynchroDetected=false;
-        if((m_objRunning.m_blnHSync) && (m_intRowIndex>1))
-        {
-            //********** Line Synchro  0-0-0 -> 0.3-0.3 0.3 **********
-            if(m_blnImageDetecting==false)
-            {
-                //Floor Detection 0
-                if (fltVal <= m_objRunning.m_fltVoltLevelSynchroTop)
-                {
-                    m_intSynchroPoints ++;
-                }
-                else
-                {
-                    m_intSynchroPoints=0;
-                }
-
-                if(m_intSynchroPoints>=m_intNumberSamplePerTop)
-                {
-                    m_blnSynchroDetected=true;
-                    m_blnImageDetecting=true;
-                    m_intSynchroPoints=0;
-                }
-            }
-            else
-            {
-                //Image detection Sub Black 0.3
-                if (fltVal >= m_objRunning.m_fltVoltLevelSynchroBlack)
-                {
-                    m_intSynchroPoints ++;
-                }
-                else
-                {
-                    m_intSynchroPoints=0;
-                }
-
-                if(m_intSynchroPoints>=m_intNumberSamplePerTop)
-                {
-                    m_blnSynchroDetected=false;
-                    m_blnImageDetecting=false;
-                    m_intSynchroPoints=0;
-                }
-            }
-        }
-
-        //********** Rendering if necessary **********
-
-        // Vertical Synchro : 3/4 a line necessary
-        if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
-        {
-           if(m_intColIndex>=intSynchroTimeSamples)
-           {
-                if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
-                {
-                    m_blnVerticalSynchroDetected=true;
-
-                    m_intRowIndex=m_intImageIndex%2;
-
-                    if(blnComputeImage)
-                    {
-                        m_objRegisteredATVScreen->selectRow(m_intRowIndex);
-                    }
-                }
-            }
-        }
-
-
-        //Horizontal Synchro
-        if((m_intColIndex>=m_intNumberSamplePerLine)
-           || (m_blnSynchroDetected==true))
-        {
-            m_blnSynchroDetected=false;
-            m_blnImageDetecting=true;
-
-            m_intColIndex=0;
-
-            if((m_blnSynchroDetected==false) || (m_blnLineSynchronized==true))
-            {
-                //New line + Interleaving
-                m_intRowIndex ++;
-                m_intRowIndex ++;
-
-                if(m_intRowIndex<m_intNumberOfLines)
-                {
-                    m_objRegisteredATVScreen->selectRow(m_intRowIndex);
-                }
-
-                m_blnLineSynchronized=false;
-            }
-            else
-            {
-                m_blnLineSynchronized=m_blnSynchroDetected;
-            }
-
-            m_fltAmpLineAverage=0.0f;
-
-        }
-
-        //////////////////////
-
-        if(m_intRowIndex>=m_intRowsLimit)
-        {
-
-             m_blnVerticalSynchroDetected=false;
-
-             m_fltAmpLineAverage=0.0f;
-
-            //Interleave Odd/Even images
-            m_intRowIndex=m_intImageIndex%2;
-            m_intColIndex=0;
-
-            if(blnComputeImage)
-            {
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
-            }
-
-            //Rendering when odd image processed
-            if(m_intImageIndex%2==1)
-            {
-                //interleave
-                if(blnComputeImage)
-                {
-                    m_objRegisteredATVScreen->renderImage(NULL);
-                }
-
-                m_intRowsLimit = m_intNumberOfLines-1;
-
-                if (m_objRFRunning.m_enmModulation == ATV_AM)
-                {
-                    m_fltAmpMin=m_fltEffMin;
-                    m_fltAmpMax=m_fltEffMax;
-                    m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
-
-                    if(m_fltAmpDelta<=0.0)
-                    {
-                        m_fltAmpDelta=1.0f;
-                    }
-
-                    //Reset extrema
-                    m_fltEffMin=2000000.0f;
-                    m_fltEffMax=-2000000.0f;
-                }
-            }
-            else
-            {
-                if(m_intNumberOfLines%2==1)
-                {
-                    m_intRowsLimit = m_intNumberOfLines;
-                }
-                else
-                {
-                    m_intRowsLimit = m_intNumberOfLines-2;
-                }
-            }
-
-            m_intImageIndex ++;
-        }
-
-        //////////////////////
     }
 
-    if(ptrBufferToRelease!=NULL)
+    if (ptrBufferToRelease != 0)
     {
         delete ptrBufferToRelease;
     }
 
     m_objSettingsMutex.unlock();
+}
 
+void ATVDemod::demod(Complex& c)
+{
+    float fltDivSynchroBlack = 1.0f - m_objRunning.m_fltVoltLevelSynchroBlack;
+    int intSynchroTimeSamples= (3*m_intNumberSamplePerLine)/4;
+    float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
+    float fltNormI;
+    float fltNormQ;
+    float fltNorm;
+    float fltVal;
+    int intVal;
+
+    //********** demodulation **********
+
+    float& fltI = c.real();
+    float& fltQ = c.imag();
+
+    double magSq = fltI*fltI + fltQ*fltQ;
+    m_objMagSqAverage.feed(magSq);
+
+    fltNorm = sqrt(magSq);
+
+    if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
+    {
+        //Amplitude FM
+
+        fltNormI= fltI/fltNorm;
+        fltNormQ= fltQ/fltNorm;
+
+        //-2 > 2 : 0 -> 1 volt
+        //0->0.3 synchro  0.3->1 image
+
+        if (m_objRFRunning.m_enmModulation == ATV_FM1)
+        {
+            //YDiff Cd
+            fltVal = m_fltBufferI[0]*(fltNormQ - m_fltBufferQ[1]);
+            fltVal -= m_fltBufferQ[0]*(fltNormI - m_fltBufferI[1]);
+
+            fltVal += 2.0f;
+            fltVal /=4.0f;
+
+        }
+        else
+        {
+            //YDiff Folded
+            fltVal =  m_fltBufferI[2]*((m_fltBufferQ[5]-fltNormQ)/16.0f + m_fltBufferQ[1] - m_fltBufferQ[3]);
+            fltVal -= m_fltBufferQ[2]*((m_fltBufferI[5]-fltNormI)/16.0f + m_fltBufferI[1] - m_fltBufferI[3]);
+
+            fltVal += 2.125f;
+            fltVal /=4.25f;
+
+            m_fltBufferI[5]=m_fltBufferI[4];
+            m_fltBufferQ[5]=m_fltBufferQ[4];
+
+            m_fltBufferI[4]=m_fltBufferI[3];
+            m_fltBufferQ[4]=m_fltBufferQ[3];
+
+            m_fltBufferI[3]=m_fltBufferI[2];
+            m_fltBufferQ[3]=m_fltBufferQ[2];
+
+            m_fltBufferI[2]=m_fltBufferI[1];
+            m_fltBufferQ[2]=m_fltBufferQ[1];
+        }
+
+        m_fltBufferI[1]=m_fltBufferI[0];
+        m_fltBufferQ[1]=m_fltBufferQ[0];
+
+        m_fltBufferI[0]=fltNormI;
+        m_fltBufferQ[0]=fltNormQ;
+
+    }
+    else if ((m_objRFRunning.m_enmModulation == ATV_AM) || (m_objRFRunning.m_enmModulation == ATV_VAMU) || (m_objRFRunning.m_enmModulation == ATV_VAML))
+    {
+        //Amplitude AM
+        fltVal = fltNorm;
+
+        //********** Mini and Maxi Amplitude tracking **********
+
+        if(fltVal<m_fltEffMin)
+        {
+            m_fltEffMin=fltVal;
+        }
+
+        if(fltVal>m_fltEffMax)
+        {
+            m_fltEffMax=fltVal;
+        }
+
+        //Normalisation
+        fltVal -= m_fltAmpMin;
+        fltVal /=m_fltAmpDelta;
+    }
+    else
+    {
+        fltVal = 0.0f;
+    }
+
+    m_fltAmpLineAverage += fltVal;
+
+    //********** gray level **********
+    //-0.3 -> 0.7
+    intVal = (int) 255.0*(fltVal - m_objRunning.m_fltVoltLevelSynchroBlack) / fltDivSynchroBlack;
+
+    //0 -> 255
+    if(intVal<0)
+    {
+        intVal=0;
+    }
+    else if(intVal>255)
+    {
+        intVal=255;
+    }
+
+    //********** Filling pixels **********
+
+    bool blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f);
+
+    if (!blnComputeImage)
+    {
+        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
+    }
+
+    if (blnComputeImage)
+    {
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex,intVal, intVal, intVal);
+    }
+
+    m_intColIndex++;
+
+    //////////////////////
+
+    m_blnSynchroDetected=false;
+    if((m_objRunning.m_blnHSync) && (m_intRowIndex>1))
+    {
+        //********** Line Synchro  0-0-0 -> 0.3-0.3 0.3 **********
+        if(m_blnImageDetecting==false)
+        {
+            //Floor Detection 0
+            if (fltVal <= m_objRunning.m_fltVoltLevelSynchroTop)
+            {
+                m_intSynchroPoints ++;
+            }
+            else
+            {
+                m_intSynchroPoints=0;
+            }
+
+            if(m_intSynchroPoints>=m_intNumberSamplePerTop)
+            {
+                m_blnSynchroDetected=true;
+                m_blnImageDetecting=true;
+                m_intSynchroPoints=0;
+            }
+        }
+        else
+        {
+            //Image detection Sub Black 0.3
+            if (fltVal >= m_objRunning.m_fltVoltLevelSynchroBlack)
+            {
+                m_intSynchroPoints ++;
+            }
+            else
+            {
+                m_intSynchroPoints=0;
+            }
+
+            if(m_intSynchroPoints>=m_intNumberSamplePerTop)
+            {
+                m_blnSynchroDetected=false;
+                m_blnImageDetecting=false;
+                m_intSynchroPoints=0;
+            }
+        }
+    }
+
+    //********** Rendering if necessary **********
+
+    // Vertical Synchro : 3/4 a line necessary
+    if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
+    {
+       if(m_intColIndex>=intSynchroTimeSamples)
+       {
+            if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
+            {
+                m_blnVerticalSynchroDetected=true;
+
+                m_intRowIndex=m_intImageIndex%2;
+
+                if(blnComputeImage)
+                {
+                    m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                }
+            }
+        }
+    }
+
+
+    //Horizontal Synchro
+    if((m_intColIndex>=m_intNumberSamplePerLine)
+       || (m_blnSynchroDetected==true))
+    {
+        m_blnSynchroDetected=false;
+        m_blnImageDetecting=true;
+
+        m_intColIndex=0;
+
+        if((m_blnSynchroDetected==false) || (m_blnLineSynchronized==true))
+        {
+            //New line + Interleaving
+            m_intRowIndex ++;
+            m_intRowIndex ++;
+
+            if(m_intRowIndex<m_intNumberOfLines)
+            {
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+            }
+
+            m_blnLineSynchronized=false;
+        }
+        else
+        {
+            m_blnLineSynchronized=m_blnSynchroDetected;
+        }
+
+        m_fltAmpLineAverage=0.0f;
+
+    }
+
+    //////////////////////
+
+    if(m_intRowIndex>=m_intRowsLimit)
+    {
+
+         m_blnVerticalSynchroDetected=false;
+
+         m_fltAmpLineAverage=0.0f;
+
+        //Interleave Odd/Even images
+        m_intRowIndex=m_intImageIndex%2;
+        m_intColIndex=0;
+
+        if(blnComputeImage)
+        {
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+        }
+
+        //Rendering when odd image processed
+        if(m_intImageIndex%2==1)
+        {
+            //interleave
+            if(blnComputeImage)
+            {
+                m_objRegisteredATVScreen->renderImage(NULL);
+            }
+
+            m_intRowsLimit = m_intNumberOfLines-1;
+
+            if (m_objRFRunning.m_enmModulation == ATV_AM)
+            {
+                m_fltAmpMin=m_fltEffMin;
+                m_fltAmpMax=m_fltEffMax;
+                m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
+
+                if(m_fltAmpDelta<=0.0)
+                {
+                    m_fltAmpDelta=1.0f;
+                }
+
+                //Reset extrema
+                m_fltEffMin=2000000.0f;
+                m_fltEffMax=-2000000.0f;
+            }
+        }
+        else
+        {
+            if(m_intNumberOfLines%2==1)
+            {
+                m_intRowsLimit = m_intNumberOfLines;
+            }
+            else
+            {
+                m_intRowsLimit = m_intNumberOfLines-2;
+            }
+        }
+
+        m_intImageIndex ++;
+    }
 }
 
 void ATVDemod::start()

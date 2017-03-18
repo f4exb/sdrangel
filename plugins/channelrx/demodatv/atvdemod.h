@@ -281,6 +281,7 @@ private:
     static const float m_fltSecondToUs;
 
     void applySettings();
+    void demod(Complex& c);
 
 };
 
