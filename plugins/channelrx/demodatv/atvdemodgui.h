@@ -69,6 +69,7 @@ private slots:
     void on_topTime_valueChanged(int value);
     void on_hSync_clicked();
     void on_vSync_clicked();
+    void on_invertVideo_clicked();
     void on_halfImage_clicked();
     void on_modulation_currentIndexChanged(int index);
     void on_fps_currentIndexChanged(int index);

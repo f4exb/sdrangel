@@ -83,6 +83,14 @@ void ATVDemodGUI::resetToDefaults()
     ui->hSync->setChecked(true);
     ui->vSync->setChecked(true);
     ui->halfImage->setChecked(false);
+    ui->invertVideo->setChecked(false);
+
+    //********** RF Default values **********
+    ui->decimatorEnable->setChecked(false);
+    ui->rfFiltering->setChecked(false);
+    ui->rfBW->setValue(10);
+    ui->rfOppBW->setValue(10);
+    ui->bfo->setValue(0);
 
     blockApplySettings(false);
     applySettings();
@@ -106,6 +114,7 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeS32(12, ui->rfBW->value());
     s.writeS32(13, ui->rfOppBW->value());
     s.writeS32(14, ui->bfo->value());
+    s.writeBool(15, ui->invertVideo->isChecked());
 
     return s.final();
 }
@@ -163,6 +172,8 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->rfOppBW->setValue(tmp);
         d.readS32(14, &tmp, 10);
         ui->bfo->setValue(tmp);
+        d.readBool(15, &booltmp, true);
+        ui->invertVideo->setChecked(booltmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
@@ -322,7 +333,8 @@ void ATVDemodGUI::applySettings()
                 ui->synchLevel->value() / 1000.0f,
                 ui->blackLevel->value() / 1000.0f,
                 ui->hSync->isChecked(),
-                ui->vSync->isChecked());
+                ui->vSync->isChecked(),
+                ui->invertVideo->isChecked());
 
         qDebug() << "ATVDemodGUI::applySettings:"
                 << " m_objChannelizer.inputSampleRate: " << m_objChannelizer->getInputSampleRate()
@@ -462,6 +474,11 @@ void ATVDemodGUI::on_hSync_clicked()
 }
 
 void ATVDemodGUI::on_vSync_clicked()
+{
+    applySettings();
+}
+
+void ATVDemodGUI::on_invertVideo_clicked()
 {
     applySettings();
 }

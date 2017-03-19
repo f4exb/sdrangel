@@ -63,6 +63,7 @@ public:
 	    float m_fltVoltLevelSynchroBlack;
 	    bool m_blnHSync;
 	    bool m_blnVSync;
+	    bool m_blnInvertVideo;
 
 	    ATVConfig() :
 	        m_intSampleRate(0),
@@ -73,7 +74,8 @@ public:
 	        m_fltVoltLevelSynchroTop(0.0f),
 	        m_fltVoltLevelSynchroBlack(1.0f),
 	        m_blnHSync(false),
-	        m_blnVSync(false)
+	        m_blnVSync(false),
+	        m_blnInvertVideo(false)
 	    {
 	    }
 	};
@@ -132,7 +134,8 @@ public:
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
             bool blnHSync,
-            bool blnVSync);
+            bool blnVSync,
+            bool blnInvertVideo);
 
     void configureRF(MessageQueue* objMessageQueue,
             ATVModulation enmModulation,
@@ -176,7 +179,8 @@ private:
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
                     bool blnHSync,
-                    bool blnVSync)
+                    bool blnVSync,
+                    bool blnInvertVideo)
             {
                 return new MsgConfigureATVDemod(
                         fltLineDurationUs,
@@ -186,7 +190,8 @@ private:
                         fltVoltLevelSynchroTop,
                         fltVoltLevelSynchroBlack,
                         blnHSync,
-                        blnVSync);
+                        blnVSync,
+                        blnInvertVideo);
             }
 
             ATVConfig m_objMsgConfig;
@@ -200,7 +205,8 @@ private:
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
                     bool blnHSync,
-                    bool blnVSync) :
+                    bool blnVSync,
+                    bool blnInvertVideo) :
                 Message()
             {
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
@@ -211,6 +217,7 @@ private:
                 m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;
+                m_objMsgConfig.m_blnInvertVideo = blnInvertVideo;
             }
     };
 

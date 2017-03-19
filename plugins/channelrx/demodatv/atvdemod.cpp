@@ -95,7 +95,8 @@ void ATVDemod::configure(
         float fltVoltLevelSynchroTop,
         float fltVoltLevelSynchroBlack,
         bool blnHSync,
-        bool blnVSync)
+        bool blnVSync,
+        bool blnInvertVideo)
 {
     Message* msgCmd = MsgConfigureATVDemod::create(
             fltLineDurationUs,
@@ -105,7 +106,8 @@ void ATVDemod::configure(
             fltVoltLevelSynchroTop,
             fltVoltLevelSynchroBlack,
             blnHSync,
-            blnVSync);
+            blnVSync,
+            blnInvertVideo);
     objMessageQueue->push(msgCmd);
 }
 
@@ -370,6 +372,8 @@ void ATVDemod::demod(Complex& c)
     {
         fltVal = 0.0f;
     }
+
+    fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
 
     m_fltAmpLineAverage += fltVal;
 
