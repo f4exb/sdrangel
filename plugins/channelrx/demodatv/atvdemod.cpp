@@ -51,6 +51,8 @@ ATVDemod::ATVDemod() :
     m_fltAmpDelta(1.0),
     m_fltAmpLineAverage(0.0f),
     m_intNumberSamplePerTop(0),
+    m_bfoPLL(200/1000000, 100/1000000, 0.01),
+    m_bfoFilter(200.0, 1000000.0, 0.9),
     m_interpolatorDistanceRemain(0.0f),
     m_interpolatorDistance(1.0f),
     m_DSBFilter(0),
@@ -113,14 +115,16 @@ void ATVDemod::configureRF(
         float fltRFBandwidth,
         float fltRFOppBandwidth,
         bool blnFFTFiltering,
-        bool blnDecimatorEnable)
+        bool blnDecimatorEnable,
+        float fltBFOFrequency)
 {
     Message* msgCmd = MsgConfigureRFATVDemod::create(
             enmModulation,
             fltRFBandwidth,
             fltRFOppBandwidth,
             blnFFTFiltering,
-            blnDecimatorEnable);
+            blnDecimatorEnable,
+            fltBFOFrequency);
     objMessageQueue->push(msgCmd);
 }
 
@@ -238,7 +242,7 @@ void ATVDemod::demod(Complex& c)
         int n_out;
         fftfilt::cmplx *filtered;
 
-        n_out = m_DSBFilter->runAsym(c, &filtered, m_objRFRunning.m_enmModulation != ATV_VAML); // all usb except explicitely lsb
+        n_out = m_DSBFilter->runAsym(c, &filtered, m_objRFRunning.m_enmModulation != ATV_LSB); // all usb except explicitely lsb
 
         if (n_out > 0)
         {
@@ -308,10 +312,43 @@ void ATVDemod::demod(Complex& c)
         m_fltBufferQ[0]=fltNormQ;
 
     }
-    else if ((m_objRFRunning.m_enmModulation == ATV_AM) || (m_objRFRunning.m_enmModulation == ATV_VAMU) || (m_objRFRunning.m_enmModulation == ATV_VAML))
+    else if (m_objRFRunning.m_enmModulation == ATV_AM)
     {
         //Amplitude AM
         fltVal = fltNorm;
+
+        //********** Mini and Maxi Amplitude tracking **********
+
+        if(fltVal<m_fltEffMin)
+        {
+            m_fltEffMin=fltVal;
+        }
+
+        if(fltVal>m_fltEffMax)
+        {
+            m_fltEffMax=fltVal;
+        }
+
+        //Normalisation
+        fltVal -= m_fltAmpMin;
+        fltVal /=m_fltAmpDelta;
+    }
+    else if ((m_objRFRunning.m_enmModulation == ATV_USB) || (m_objRFRunning.m_enmModulation == ATV_LSB))
+    {
+        Real bfoValues[2];
+        float fltFiltered = m_bfoFilter.run(fltI);
+        m_bfoPLL.process(fltFiltered, bfoValues);
+
+        // do the mix
+
+        float mixI = fltI * bfoValues[0] - fltQ * bfoValues[1];
+        float mixQ = fltI * bfoValues[1] + fltQ * bfoValues[0];
+
+        if (m_objRFRunning.m_enmModulation == ATV_USB) {
+            fltVal = (mixI + mixQ);
+        } else {
+            fltVal = (mixI - mixQ);
+        }
 
         //********** Mini and Maxi Amplitude tracking **********
 
@@ -560,14 +597,14 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_objConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureATVDemod:"
-                << " m_fltVoltLevelSynchroBlack" << m_objConfig.m_fltVoltLevelSynchroBlack
-                << " m_fltVoltLevelSynchroTop" << m_objConfig.m_fltVoltLevelSynchroTop
-                << " m_fltFramePerS" << m_objConfig.m_fltFramePerS
-                << " m_fltLineDurationUs" << m_objConfig.m_fltLineDurationUs
-                << " m_fltRatioOfRowsToDisplay" << m_objConfig.m_fltRatioOfRowsToDisplay
-                << " m_fltTopDurationUs" << m_objConfig.m_fltTopDurationUs
-                << " m_blnHSync" << m_objConfig.m_blnHSync
-                << " m_blnVSync" << m_objConfig.m_blnVSync;
+                << " m_fltVoltLevelSynchroBlack:" << m_objConfig.m_fltVoltLevelSynchroBlack
+                << " m_fltVoltLevelSynchroTop:" << m_objConfig.m_fltVoltLevelSynchroTop
+                << " m_fltFramePerS:" << m_objConfig.m_fltFramePerS
+                << " m_fltLineDurationUs:" << m_objConfig.m_fltLineDurationUs
+                << " m_fltRatioOfRowsToDisplay:" << m_objConfig.m_fltRatioOfRowsToDisplay
+                << " m_fltTopDurationUs:" << m_objConfig.m_fltTopDurationUs
+                << " m_blnHSync:" << m_objConfig.m_blnHSync
+                << " m_blnVSync:" << m_objConfig.m_blnVSync;
 
         applySettings();
 
@@ -580,11 +617,12 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_objRFConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureRFATVDemod:"
-                << " m_enmModulation" << m_objRFConfig.m_enmModulation
-                << " m_fltRFBandwidth" << m_objRFConfig.m_fltRFBandwidth
-                << " m_fltRFOppBandwidth" << m_objRFConfig.m_fltRFOppBandwidth
-                << " m_blnFFTFiltering" << m_objRFConfig.m_blnFFTFiltering
-                << " m_blnDecimatorEnable" << m_objRFConfig.m_blndecimatorEnable;
+                << " m_enmModulation:" << m_objRFConfig.m_enmModulation
+                << " m_fltRFBandwidth:" << m_objRFConfig.m_fltRFBandwidth
+                << " m_fltRFOppBandwidth:" << m_objRFConfig.m_fltRFOppBandwidth
+                << " m_blnFFTFiltering:" << m_objRFConfig.m_blnFFTFiltering
+                << " m_blnDecimatorEnable:" << m_objRFConfig.m_blndecimatorEnable
+                << " m_fltBFOFrequency:" << m_objRFConfig.m_fltBFOFrequency;
 
         applySettings();
 
@@ -677,6 +715,14 @@ void ATVDemod::applySettings()
         m_objSettingsMutex.unlock();
     }
 
+    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
+        || (m_objRFConfig.m_fltBFOFrequency != m_objRFRunning.m_fltBFOFrequency))
+    {
+        m_bfoPLL.configure(m_objRFConfig.m_fltBFOFrequency / m_objConfigPrivate.m_intTVSampleRate,
+                100.0 / m_objConfigPrivate.m_intTVSampleRate,
+                0.01);
+        m_bfoFilter.setFrequencies(m_objRFConfig.m_fltBFOFrequency, m_objConfigPrivate.m_intTVSampleRate);
+    }
 
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
@@ -691,4 +737,16 @@ int ATVDemod::getSampleRate()
 int ATVDemod::getEffectiveSampleRate()
 {
     return m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
+}
+
+bool ATVDemod::getBFOLocked()
+{
+    if ((m_objRFRunning.m_enmModulation == ATV_USB) || (m_objRFRunning.m_enmModulation == ATV_LSB))
+    {
+        return m_bfoPLL.locked();
+    }
+    else
+    {
+        return false;
+    }
 }

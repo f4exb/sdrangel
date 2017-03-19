@@ -40,7 +40,7 @@
      <x>10</x>
      <y>10</y>
      <width>501</width>
-     <height>71</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -52,23 +52,6 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="rfSettings1Layout">
-      <item>
-       <widget class="ButtonSwitch" name="decimatorEnable">
-        <property name="toolTip">
-         <string>Toggle decimator on/off</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
@@ -125,6 +108,30 @@
        </layout>
       </item>
       <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="decimatorEnable">
+        <property name="toolTip">
+         <string>Toggle decimator on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="channelSampleRateText">
         <property name="minimumSize">
          <size>
@@ -144,35 +151,77 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="modulation">
-        <property name="toolTip">
-         <string>Modulation type</string>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
-        <item>
-         <property name="text">
-          <string>FM 1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FM 2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>AM</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>VAMU</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>VAML</string>
-         </property>
-        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bfoLockedLabel">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="../../../sdrbase/resources/res.qrc">:/carrier.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="bfo">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>BFO frequency adjust</string>
+        </property>
+        <property name="minimum">
+         <number>-500</number>
+        </property>
+        <property name="maximum">
+         <number>500</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bfoText">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>BFO frequency (Hz)</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
        </widget>
       </item>
       <item>
@@ -211,6 +260,38 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="rfSettings2Layout">
+      <item>
+       <widget class="QComboBox" name="modulation">
+        <property name="toolTip">
+         <string>Modulation type</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>FM 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>FM 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>AM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>USB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>LSB</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item>
        <widget class="ButtonSwitch" name="rfFiltering">
         <property name="toolTip">

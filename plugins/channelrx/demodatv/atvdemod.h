@@ -31,6 +31,8 @@
 #include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
+#include "dsp/phaselock.h"
+#include "dsp/recursivefilters.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "atvscreen.h"
@@ -46,8 +48,8 @@ public:
 	    ATV_FM1,  //!< Classical frequency modulation with discriminator #1
 	    ATV_FM2,  //!< Classical frequency modulation with discriminator #2
         ATV_AM,   //!< Classical amplitude modulation
-        ATV_VAMU, //!< AM with vestigial lower side band (main signal is in the upper side)
-        ATV_VAML  //!< AM with vestigial upper side band (main signal is in the lower side)
+        ATV_USB,  //!< AM with vestigial lower side band (main signal is in the upper side)
+        ATV_LSB   //!< AM with vestigial upper side band (main signal is in the lower side)
 	};
 
 	struct ATVConfig
@@ -84,6 +86,7 @@ public:
         float         m_fltRFOppBandwidth;
         bool          m_blnFFTFiltering;
         bool          m_blndecimatorEnable;
+        float         m_fltBFOFrequency;
 
         ATVRFConfig() :
             m_intFrequencyOffset(0),
@@ -91,7 +94,8 @@ public:
             m_fltRFBandwidth(0),
             m_fltRFOppBandwidth(0),
             m_blnFFTFiltering(false),
-            m_blndecimatorEnable(false)
+            m_blndecimatorEnable(false),
+            m_fltBFOFrequency(0.0f)
         {
         }
     };
@@ -135,7 +139,8 @@ public:
             float fltRFBandwidth,
             float fltRFOppBandwidth,
             bool blnFFTFiltering,
-            bool blndecimatorEnable);
+            bool blndecimatorEnable,
+            float fltBFOFrequency);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -146,6 +151,7 @@ public:
     int getSampleRate();
     int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
+    bool getBFOLocked();
 
 private:
     struct ATVConfigPrivate
@@ -218,14 +224,16 @@ private:
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
                     bool blnFFTFiltering,
-                    bool blndecimatorEnable)
+                    bool blndecimatorEnable,
+                    int intBFOFrequency)
             {
                 return new MsgConfigureRFATVDemod(
                         enmModulation,
                         fltRFBandwidth,
                         fltRFOppBandwidth,
                         blnFFTFiltering,
-                        blndecimatorEnable);
+                        blndecimatorEnable,
+                        intBFOFrequency);
             }
 
             ATVRFConfig m_objMsgConfig;
@@ -236,7 +244,8 @@ private:
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
                     bool blnFFTFiltering,
-                    bool blndecimatorEnable) :
+                    bool blndecimatorEnable,
+                    float fltBFOFrequency) :
                 Message()
             {
                 m_objMsgConfig.m_enmModulation = enmModulation;
@@ -244,6 +253,7 @@ private:
                 m_objMsgConfig.m_fltRFOppBandwidth = fltRFOppBandwidth;
                 m_objMsgConfig.m_blnFFTFiltering = blnFFTFiltering;
                 m_objMsgConfig.m_blndecimatorEnable = blndecimatorEnable;
+                m_objMsgConfig.m_fltBFOFrequency = fltBFOFrequency;
             }
     };
 
@@ -286,6 +296,8 @@ private:
     MovingAverage<double> m_objMagSqAverage;
 
     NCO m_nco;
+    SimplePhaseLock m_bfoPLL;
+    SecondOrderRecursiveFilter m_bfoFilter;
 
     // Interpolator group for decimation and/or double sideband RF filtering
     Interpolator m_interpolator;

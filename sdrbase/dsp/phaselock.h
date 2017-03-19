@@ -112,6 +112,24 @@ private:
     std::vector<PpsEvent> m_pps_events;
 };
 
+class SimplePhaseLock : public PhaseLock
+{
+public:
+    SimplePhaseLock(Real freq, Real bandwidth, Real minsignal) :
+        PhaseLock(freq, bandwidth, minsignal)
+    {}
+
+    virtual ~SimplePhaseLock()
+    {}
+
+protected:
+    virtual void processPhase(Real *samples_out) const
+    {
+        samples_out[0] = m_psin; // f Pilot
+        samples_out[1] = m_pcos; // f Pilot
+    }
+};
+
 class StereoPhaseLock : public PhaseLock
 {
 public:

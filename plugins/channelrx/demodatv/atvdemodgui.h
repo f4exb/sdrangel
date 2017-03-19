@@ -79,6 +79,7 @@ private slots:
     void on_decimatorEnable_toggled(bool checked);
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaFrequencyMinus_toggled(bool minus);
+    void on_bfo_valueChanged(int value);
 
 private:
 	Ui::ATVDemodGUI* ui;

@@ -105,6 +105,7 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeBool(11, ui->halfImage->isChecked());
     s.writeS32(12, ui->rfBW->value());
     s.writeS32(13, ui->rfOppBW->value());
+    s.writeS32(14, ui->bfo->value());
 
     return s.final();
 }
@@ -160,6 +161,8 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->rfBW->setValue(tmp);
         d.readS32(13, &tmp, 10);
         ui->rfOppBW->setValue(tmp);
+        d.readS32(14, &tmp, 10);
+        ui->bfo->setValue(tmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
@@ -336,7 +339,8 @@ void ATVDemodGUI::applyRFSettings()
                 ui->rfBW->value() * 100000.0f,
                 ui->rfOppBW->value() * 100000.0f,
                 ui->rfFiltering->isChecked(),
-                ui->decimatorEnable->isChecked());
+                ui->decimatorEnable->isChecked(),
+                ui->bfo->value() * 10.0f);
     }
 }
 
@@ -349,9 +353,9 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
         m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
         m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
 
-        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAML) {
+        if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_LSB) {
             m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
-        } else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_VAMU) {
+        } else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_USB) {
             m_objChannelMarker.setSidebands(ChannelMarker::vusb);
         } else {
             m_objChannelMarker.setSidebands(ChannelMarker::vusb);
@@ -413,6 +417,12 @@ void ATVDemodGUI::tick()
             m_objMagSqAverage.feed(m_objATVDemod->getMagSq());
             double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (1<<30));
             ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
+
+            if (m_objATVDemod->getBFOLocked()) {
+                ui->bfoLockedLabel->setStyleSheet("QLabel { background-color : green; }");
+            } else {
+                ui->bfoLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            }
         }
 
         m_intTickCount = 0;
@@ -523,5 +533,11 @@ void ATVDemodGUI::on_deltaFrequencyMinus_toggled(bool minus)
     {
         m_objChannelMarker.setCenterFrequency(-deltaFrequency);
     }
+}
+
+void ATVDemodGUI::on_bfo_valueChanged(int value)
+{
+    ui->bfoText->setText(QString("%1").arg(value * 10.0, 0, 'f', 0));
+    applyRFSettings();
 }
 
