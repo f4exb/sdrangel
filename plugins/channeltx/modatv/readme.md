@@ -36,10 +36,14 @@ The video signal can modulate the carrier in the following modes:
   - FM: Frequency modulation. Excursion is half the bandwidth available given the channel sample rate. e.g. for 4 MS/s sample rate this is &#177;1 MHz (2 MHz total) 
   - USB: SSB upper side band: video signal is transposed only in positive frequencies including DC component
   - LSB: SSB lower side band: video signal is transposed only in megative frequencies excluding DC component
+  - VUSB: SSB upper sideband with vestigial lower sideband. The cutoff frequency of the lower sideband is controlled by the left slider of (6)
+  - VLSB: SSB lower sideband with vestigial upper sideband. The cutoff frequency of the upper sideband is controlled by the left slider of (6)
   
 <h3>6: RF bandwidth</h3>
 
-This is the bandwidth in MHz of the channel filter when the interpolator is engaged. If the sink sample rate is an integer multiple of the base rate that depends on the standard then there is no interpolation else the channel rate is set to the closest integer multiple of the base rate below the sink sample rate. 
+This control has now a couple of sliders that do not appear on the screenshot.
+
+In all but SSB modulations the right slider is is the bandwidth in MHz of the channel filter when the interpolator is engaged. If the sink sample rate is an integer multiple of the base rate that depends on the standard then there is no interpolation else the channel rate is set to the closest integer multiple of the base rate below the sink sample rate. 
 
 The base rate depending on the standard is:
 
@@ -49,6 +53,10 @@ The base rate depending on the standard is:
 The modulating video signal sample rate is the same as the channel sample rate hence for example with a channel sample rate of 4 MS/s a video sample will last 1/4 = 0.25 &#956;s. In PAL625L a complete horizontal line lasts 64 &#956;s hence it will be composed of 64 &#215; 4 = 256 samples while the useful image line that lasts about 52 &#956;s will be composed of 52 &#215; 4 = 204 samples or points. 
 
 When no interpolation and hence no soft RF filtering in the channel takes place then filtering relies on the hardware. The hardware filter bandwidth can be set in the sink plugin.
+
+In USB and LSB modulations the right slider controls the sideband FFT filter cutoff. This filter includes DC to avoid the distorsion of the video signal that has a significant DC component.
+
+In VUSB and VLSB modulations in addition the left slider controls the opposite sideband FFT filter cutoff.
 
 <h3>7: Video signal level meter</h3>
 
@@ -74,6 +82,12 @@ This combo box lets you choose between various inputs for the video signal:
   - Image: still image read from the file selected with button (13). If no image is selected an uniform image is sent with the luminance adjusted with button (10)
   - Video: video file read from the file selected with button (14). If no image is selected an uniform image is sent with the luminance adjusted with button (10).  Buttons (15) and (16) control the play.
   - Camera: video signal from a webcam or supported video source connected to the system. If no source is selected an uniform image is sent with the luminance adjusted with button (10). Button (21) selects the camera source. Button (20) plays or stops the camera on a still image.
+
+<h3>9A: Video inversion toggle</h3>
+
+This checkbox is not on the screenshot and is on the right of (9) between (9) and (10).
+
+Use this checkbox to toggle video signal inversion before modulation. 
   
 <h3>10. Luminance level</h3> 
 
