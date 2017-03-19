@@ -64,6 +64,7 @@ SOURCES += mainwindow.cpp\
         dsp/ncof.cpp\
         dsp/pidcontroller.cpp\
         dsp/phaselock.cpp\
+        dsp/recursivefilters.cpp\
         dsp/samplesinkfifo.cpp\
         dsp/samplesourcefifo.cpp\
         dsp/samplesinkfifodoublebuffered.cpp\
@@ -169,6 +170,7 @@ HEADERS  += mainwindow.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
         dsp/pidcontroller.h\
+        dsp/recursivefilters.h\
         dsp/samplesinkfifo.h\
         dsp/samplesourcefifo.h\
         dsp/samplesinkfifodoublebuffered.h\

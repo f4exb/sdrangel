@@ -257,9 +257,13 @@ void ATVDemod::demod(Complex& c)
 
     //********** demodulation **********
 
+#if defined(_WINDOWS_)
+    float fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
+    float fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
+#else
     float& fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
     float& fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
-
+#endif
     double magSq = fltI*fltI + fltQ*fltQ;
     m_objMagSqAverage.feed(magSq);
 
