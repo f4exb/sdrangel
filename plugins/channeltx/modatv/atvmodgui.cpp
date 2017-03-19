@@ -93,6 +93,7 @@ QByteArray ATVModGUI::serialize() const
 	s.writeU32(6, m_channelMarker.getColor().rgb());
 	s.writeS32(7, ui->rfOppBW->value());
     s.writeS32(8, ui->modulation->currentIndex());
+    s.writeBool(9, ui->invertVideo->isChecked());
 
 	return s.final();
 }
@@ -112,6 +113,7 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool booltmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -136,6 +138,8 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->rfOppBW->setValue(tmp);
         d.readS32(8, &tmp, 0);
         ui->modulation->setCurrentIndex(tmp);
+        d.readBool(9, &booltmp, false);
+        ui->invertVideo->setChecked(booltmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -354,6 +358,11 @@ void ATVModGUI::on_uniformLevel_valueChanged(int value)
 	applySettings();
 }
 
+void ATVModGUI::on_invertVideo_clicked()
+{
+    applySettings();
+}
+
 void ATVModGUI::on_inputSelect_currentIndexChanged(int index)
 {
     applySettings();
@@ -558,7 +567,8 @@ void ATVModGUI::applySettings()
 			ui->playLoop->isChecked(),
 			ui->playVideo->isChecked(),
 			ui->playCamera->isChecked(),
-			ui->channelMute->isChecked());
+			ui->channelMute->isChecked(),
+			ui->invertVideo->isChecked());
 	}
 }
 

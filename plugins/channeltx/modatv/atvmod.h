@@ -316,7 +316,8 @@ public:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPLay,
-            bool channelMute);
+            bool channelMute,
+            bool invertedVideo);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -355,6 +356,7 @@ private:
         bool getVideoPlay() const { return m_videoPlay; }
         bool getCameraPlay() const { return m_cameraPlay; }
         bool getChannelMute() const { return m_channelMute; }
+        bool getInvertedVideo() const { return m_invertedVideo; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -366,7 +368,8 @@ private:
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPlay,
-			bool channelMute)
+			bool channelMute,
+			bool invertedVideo)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -378,7 +381,8 @@ private:
                     videoPlayLoop,
                     videoPlay,
                     cameraPlay,
-					channelMute);
+					channelMute,
+					invertedVideo);
         }
 
     private:
@@ -392,6 +396,7 @@ private:
         bool          m_videoPlay;
         bool          m_cameraPlay;
         bool          m_channelMute;
+        bool          m_invertedVideo;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -403,7 +408,8 @@ private:
 				bool videoPlayLoop,
 				bool videoPlay,
 				bool cameraPlay,
-				bool channelMute) :
+				bool channelMute,
+				bool invertedVideo) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_rfOppBandwidth(rfOppBandwidth),
@@ -414,7 +420,8 @@ private:
 			m_videoPlayLoop(videoPlayLoop),
 			m_videoPlay(videoPlay),
 			m_cameraPlay(cameraPlay),
-			m_channelMute(channelMute)
+			m_channelMute(channelMute),
+			m_invertedVideo(invertedVideo)
         { }
     };
 
@@ -460,7 +467,7 @@ private:
         bool          m_videoPlay;            //!< True to play video and false to pause
         bool          m_cameraPlay;           //!< True to play camera video and false to pause
         bool          m_channelMute;          //!< Mute channel baseband output
-        Real          m_vestigialRatio;       //!< Vestigial sideband ratio to half bandwidth
+        bool          m_invertedVideo;        //!< True if video signal is inverted before modulation
 
         Config() :
             m_outputSampleRate(-1),
@@ -475,7 +482,7 @@ private:
 			m_videoPlay(false),
 			m_cameraPlay(false),
 			m_channelMute(false),
-			m_vestigialRatio(0.1f)
+			m_invertedVideo(false)
         { }
     };
 

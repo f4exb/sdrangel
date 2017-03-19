@@ -106,7 +106,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             bool videoPlayLoop,
             bool videoPlay,
             bool cameraPlay,
-            bool channelMute)
+            bool channelMute,
+            bool invertedVideo)
 {
     Message* cmd = MsgConfigureATVMod::create(
             rfBandwidth,
@@ -118,7 +119,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             videoPlayLoop,
             videoPlay,
             cameraPlay,
-            channelMute);
+            channelMute,
+            invertedVideo);
     messageQueue->push(cmd);
 }
 
@@ -188,6 +190,8 @@ void ATVMod::modulateSample()
 
     pullVideo(t);
     calculateLevel(t);
+
+    t = m_running.m_invertedVideo ? 1.0f - t : t;
 
     switch (m_running.m_atvModulation)
     {
@@ -521,6 +525,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_videoPlay = cfg.getVideoPlay();
         m_config.m_cameraPlay = cfg.getCameraPlay();
         m_config.m_channelMute = cfg.getChannelMute();
+        m_config.m_invertedVideo = cfg.getInvertedVideo();
 
         apply();
 
@@ -534,7 +539,8 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_videoPlayLoop: " << m_config.m_videoPlayLoop
 				<< " m_videoPlay: " << m_config.m_videoPlay
 				<< " m_cameraPlay: " << m_config.m_cameraPlay
-				<< " m_channelMute: " << m_config.m_channelMute;
+				<< " m_channelMute: " << m_config.m_channelMute
+				<< " m_invertedVideo: " << m_config.m_invertedVideo;
 
         return true;
     }
@@ -692,6 +698,7 @@ void ATVMod::apply(bool force)
     m_running.m_videoPlay = m_config.m_videoPlay;
     m_running.m_cameraPlay = m_config.m_cameraPlay;
     m_running.m_channelMute = m_config.m_channelMute;
+    m_running.m_invertedVideo = m_config.m_invertedVideo;
 }
 
 int ATVMod::getSampleRateUnits(ATVStd std)

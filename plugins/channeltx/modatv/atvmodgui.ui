@@ -428,6 +428,19 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="invertVideo">
+        <property name="toolTip">
+         <string>Toggle invert video signal</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Inv</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="uniformLevel">
         <property name="maximumSize">
          <size>
