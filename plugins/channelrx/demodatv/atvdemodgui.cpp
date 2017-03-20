@@ -94,6 +94,7 @@ void ATVDemodGUI::resetToDefaults()
     ui->bfo->setValue(0);
 
     blockApplySettings(false);
+    lineTimeUpdate();
     applySettings();
 }
 
@@ -116,6 +117,7 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeS32(13, ui->rfOppBW->value());
     s.writeS32(14, ui->bfo->value());
     s.writeBool(15, ui->invertVideo->isChecked());
+    s.writeS32(16, ui->nbLines->currentIndex());
 
     return s.final();
 }
@@ -175,10 +177,13 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->bfo->setValue(tmp);
         d.readBool(15, &booltmp, true);
         ui->invertVideo->setChecked(booltmp);
+        d.readS32(16, &tmp, 0);
+        ui->nbLines->setCurrentIndex(tmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
 
+        lineTimeUpdate();
         applySettings();
         return true;
     }
@@ -332,7 +337,7 @@ void ATVDemodGUI::applySettings()
                 m_objChannelMarker.getCenterFrequency());
 
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
-                ui->lineTime->value() / 10.0f,
+                getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) + ui->lineTime->value() * m_fltLineTimeMultiplier,
                 ui->topTime->value() * 1.0f,
                 (ui->fps->currentIndex() == 0) ? 25.0f : 30.0f,
                 (ui->halfImage->checkState() == Qt::Checked) ? 0.5f : 1.0f,
@@ -463,9 +468,8 @@ void ATVDemodGUI::on_blackLevel_valueChanged(int value)
 
 void ATVDemodGUI::on_lineTime_valueChanged(int value)
 {
-    ui->lineTimeText->setText(QString("%1 uS").arg(((float) value) / 10.0f));
+    lineTimeUpdate();
     applySettings();
-
 }
 
 void ATVDemodGUI::on_topTime_valueChanged(int value)
@@ -494,8 +498,15 @@ void ATVDemodGUI::on_halfImage_clicked()
     applySettings();
 }
 
+void ATVDemodGUI::on_nbLines_currentIndexChanged(int index)
+{
+    lineTimeUpdate();
+    applySettings();
+}
+
 void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 {
+    lineTimeUpdate();
     applySettings();
 }
 
@@ -562,5 +573,56 @@ void ATVDemodGUI::on_bfo_valueChanged(int value)
 {
     ui->bfoText->setText(QString("%1").arg(value * 10.0, 0, 'f', 0));
     applyRFSettings();
+}
+
+void ATVDemodGUI::lineTimeUpdate()
+{
+    float nominalLineTime = getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex());
+    int lineTimeScaleFactor = (int) std::log10(nominalLineTime);
+    m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
+
+    float lineTime = nominalLineTime + m_fltLineTimeMultiplier * ui->lineTime->value();
+
+    if(lineTime < 0.000001)
+        ui->lineTimeText->setText(tr("%1 ns").arg(lineTime * 1000000000.0, 0, 'f', 1));
+    else if(lineTime < 0.001)
+        ui->lineTimeText->setText(tr("%1 µs").arg(lineTime * 1000000.0, 0, 'f', 1));
+    else if(lineTime < 1.0)
+        ui->lineTimeText->setText(tr("%1 ms").arg(lineTime * 1000.0, 0, 'f', 1));
+    else
+        ui->lineTimeText->setText(tr("%1 s").arg(lineTime * 1.0, 0, 'f', 1));
+}
+
+float ATVDemodGUI::getFps(int fpsIndex)
+{
+    switch(fpsIndex)
+    {
+    case 1:
+        return 30.0f;
+        break;
+    case 0:
+    default:
+        return 25.0f;
+        break;
+    }
+}
+
+float ATVDemodGUI::getNominalLineTime(int nbLinesIndex, int fpsIndex)
+{
+    float fps = getFps(fpsIndex);
+
+    switch(nbLinesIndex)
+    {
+    case 1:
+        return 1.0f / (525 * fps);
+        break;
+    case 2:
+        return 1.0f / (405 * fps);
+        break;
+    case 0:
+    default:
+        return 1.0f / (625 * fps);
+        break;
+    }
 }
 

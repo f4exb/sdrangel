@@ -618,7 +618,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
                 << " m_fltVoltLevelSynchroBlack:" << m_objConfig.m_fltVoltLevelSynchroBlack
                 << " m_fltVoltLevelSynchroTop:" << m_objConfig.m_fltVoltLevelSynchroTop
                 << " m_fltFramePerS:" << m_objConfig.m_fltFramePerS
-                << " m_fltLineDurationUs:" << m_objConfig.m_fltLineDurationUs
+                << " m_fltLineDurationUs:" << m_objConfig.m_fltLineDuration
                 << " m_fltRatioOfRowsToDisplay:" << m_objConfig.m_fltRatioOfRowsToDisplay
                 << " m_fltTopDurationUs:" << m_objConfig.m_fltTopDurationUs
                 << " m_blnHSync:" << m_objConfig.m_blnHSync
@@ -700,18 +700,19 @@ void ATVDemod::applySettings()
     }
 
     if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
-       || (m_objConfig.m_fltLineDurationUs != m_objRunning.m_fltLineDurationUs)
+       || (m_objConfig.m_fltLineDuration != m_objRunning.m_fltLineDuration)
        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
        || (m_objConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
        || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay))
     {
         m_objSettingsMutex.lock();
 
-        m_intNumberSamplePerLine = (int) ((m_objConfig.m_fltLineDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
-        m_intNumberOfLines = (int) ((m_fltSecondToUs / m_objConfig.m_fltFramePerS) /round(m_objConfig.m_fltLineDurationUs));
-        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
+        m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
+        m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
+        m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
+
         m_intNumberSamplePerTop = (int) ((m_objConfig.m_fltTopDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
-        m_intNumberOfRowsToDisplay = (int) ((m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
+        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
 
         m_intRowsLimit = m_intNumberOfLines-1;
         m_intImageIndex = 0;

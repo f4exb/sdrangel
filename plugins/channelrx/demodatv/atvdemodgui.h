@@ -73,6 +73,7 @@ private slots:
     void on_invertVideo_clicked();
     void on_halfImage_clicked();
     void on_modulation_currentIndexChanged(int index);
+    void on_nbLines_currentIndexChanged(int index);
     void on_fps_currentIndexChanged(int index);
     void on_reset_clicked(bool checked);
     void on_rfBW_valueChanged(int value);
@@ -100,6 +101,8 @@ private:
 
     ScopeVisNG* m_objScopeVis;
 
+    float m_fltLineTimeMultiplier;
+
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
 	virtual ~ATVDemodGUI();
 
@@ -108,6 +111,9 @@ private:
     void applyRFSettings();
     void setChannelMarkerBandwidth();
     void setRFFiltersSlidersRange(int sampleRate);
+    void lineTimeUpdate();
+    static float getFps(int fpsIndex);
+    static float getNominalLineTime(int nbLinesIndex, int fpsIndex);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

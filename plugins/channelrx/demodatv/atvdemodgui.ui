@@ -415,6 +415,28 @@
     <item>
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
+       <widget class="QComboBox" name="nbLines">
+        <property name="toolTip">
+         <string>Nominal number of lines per frame</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>625 L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>525 L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>405 L</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="fps">
         <property name="toolTip">
          <string>Frames per second</string>
@@ -528,6 +550,9 @@
       </item>
       <item row="0" column="6">
        <widget class="QLabel" name="blackLevelText">
+        <property name="toolTip">
+         <string>Black level value</string>
+        </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;mV&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -538,6 +563,9 @@
       </item>
       <item row="0" column="2">
        <widget class="QLabel" name="synchLevelText">
+        <property name="toolTip">
+         <string>Horizontal synchronization level value</string>
+        </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;mV&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -592,13 +620,13 @@
       <item row="1" column="1">
        <widget class="QSlider" name="lineTime">
         <property name="toolTip">
-         <string>Line length in time units</string>
+         <string>Line length adjustment</string>
         </property>
         <property name="minimum">
-         <number>1</number>
+         <number>-100</number>
         </property>
         <property name="maximum">
-         <number>1000</number>
+         <number>100</number>
         </property>
         <property name="singleStep">
          <number>1</number>
@@ -607,7 +635,10 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>1</number>
+         <number>0</number>
+        </property>
+        <property name="sliderPosition">
+         <number>0</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -616,8 +647,17 @@
       </item>
       <item row="1" column="2">
        <widget class="QLabel" name="lineTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Effective line length value</string>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;uS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>us</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -634,7 +674,7 @@
       <item row="1" column="5">
        <widget class="QSlider" name="topTime">
         <property name="toolTip">
-         <string>Horizontal top length in time units</string>
+         <string>Horizontal top length adjustment</string>
         </property>
         <property name="minimum">
          <number>1</number>
@@ -658,8 +698,17 @@
       </item>
       <item row="1" column="6">
        <widget class="QLabel" name="topTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Horizontal top length value</string>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;uS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&amp;mu;S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
