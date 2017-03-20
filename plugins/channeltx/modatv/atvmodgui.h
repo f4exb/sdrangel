@@ -111,6 +111,7 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     QMessageBox *m_camBusyFPSMessageBox;
+    int m_rfSliderDivisor;
 
     explicit ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~ATVModGUI();

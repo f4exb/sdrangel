@@ -651,7 +651,7 @@ void ATVMod::apply(bool force)
         {
             m_interpolatorDistanceRemain = 0;
             m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_config.m_outputSampleRate;
-            m_interpolator.create(48,
+            m_interpolator.create(32,
                     m_tvSampleRate,
                     m_config.m_rfBandwidth / getRFBandwidthDivisor(m_config.m_atvModulation),
                     3.0);
@@ -734,7 +734,7 @@ float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
     case ATVModulationUSB:
     case ATVModulationVestigialLSB:
     case ATVModulationVestigialUSB:
-        return 1.1f;
+        return 1.05f;
         break;
     case ATVModulationAM:
     case ATVModulationFM:

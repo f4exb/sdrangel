@@ -21,6 +21,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#include <cmath>
+
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 
@@ -221,18 +223,21 @@ void ATVModGUI::channelizerOutputSampleRateChanged()
 
 void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
 {
+    int scaleFactor = (int) std::log10(sampleRate);
+    m_rfSliderDivisor = std::pow(10.0, scaleFactor-1);
+
     if ((ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationUSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialUSB))
     {
-        ui->rfBW->setMaximum(sampleRate / 200000);
-        ui->rfOppBW->setMaximum(sampleRate / 200000);
+        ui->rfBW->setMaximum(sampleRate / (2*m_rfSliderDivisor));
+        ui->rfOppBW->setMaximum(sampleRate / (2*m_rfSliderDivisor));
     }
     else
     {
-        ui->rfBW->setMaximum(sampleRate / 100000);
-        ui->rfOppBW->setMaximum(sampleRate / 100000);
+        ui->rfBW->setMaximum(sampleRate / m_rfSliderDivisor);
+        ui->rfOppBW->setMaximum(sampleRate / m_rfSliderDivisor);
     }
 }
 
@@ -314,7 +319,7 @@ void ATVModGUI::on_modulation_currentIndexChanged(int index)
 
 void ATVModGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 MHz").arg(value / 10.0, 0, 'f', 1));
+	ui->rfBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 
     if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB)
     {
@@ -342,7 +347,7 @@ void ATVModGUI::on_rfBW_valueChanged(int value)
 
 void ATVModGUI::on_rfOppBW_valueChanged(int value)
 {
-    ui->rfOppBWText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    ui->rfOppBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 
     if (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB)
     {
@@ -498,7 +503,8 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_frameCount(0),
     m_tickCount(0),
     m_enableNavTime(false),
-    m_camBusyFPSMessageBox(0)
+    m_camBusyFPSMessageBox(0),
+    m_rfSliderDivisor(100000)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -571,8 +577,8 @@ void ATVModGUI::applySettings()
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
 		m_atvMod->configure(m_atvMod->getInputMessageQueue(),
-			ui->rfBW->value() * 100000.0f,
-			ui->rfOppBW->value() * 100000.0f,
+			ui->rfBW->value() * m_rfSliderDivisor * 1.0f,
+			ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
 			(ATVMod::ATVStd) ui->standard->currentIndex(),
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
