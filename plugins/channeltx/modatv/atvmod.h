@@ -41,7 +41,8 @@ public:
     typedef enum
     {
         ATVStdPAL625,
-		ATVStdPAL525
+		ATVStdPAL525,
+		ATVStd405
     } ATVStd;
 
     typedef enum
@@ -303,6 +304,27 @@ public:
         { }
     };
 
+    class MsgReportEffectiveSampleRate : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportEffectiveSampleRate* create(int sampleRate)
+        {
+            return new MsgReportEffectiveSampleRate(sampleRate);
+        }
+
+    protected:
+        int m_sampleRate;
+
+        MsgReportEffectiveSampleRate(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     ATVMod();
     ~ATVMod();
 
@@ -330,6 +352,7 @@ public:
     void getCameraNumbers(std::vector<int>& numbers);
 
     static int getSampleRateUnits(ATVStd std);
+    static float getRFBandwidthDivisor(ATVModulation modulation);
 
 signals:
     /**

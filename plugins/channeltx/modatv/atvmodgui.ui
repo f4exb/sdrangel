@@ -130,6 +130,29 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line_7">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelSampleRateText">
+          <property name="minimumSize">
+           <size>
+            <width>52</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>00000k</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -371,6 +394,11 @@
         <item>
          <property name="text">
           <string>PAL525L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>405L</string>
          </property>
         </item>
        </widget>

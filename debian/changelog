@@ -1,6 +1,12 @@
+sdrangel (3.3.2-1) unstable; urgency=medium
+
+  * ATV plugins: 405 lines mode
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 16 Mar 2017 23:14:18 +0100
+
 sdrangel (3.3.1-1) unstable; urgency=medium
 
-  * ATV modulator: SSB support
+  * ATV plugins: SSB and vestigiial sideband support
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 16 Mar 2017 23:14:18 +0100
 

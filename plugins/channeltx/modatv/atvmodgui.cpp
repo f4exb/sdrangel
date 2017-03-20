@@ -195,6 +195,14 @@ bool ATVModGUI::handleMessage(const Message& message)
 
     	return true;
     }
+    else if (ATVMod::MsgReportEffectiveSampleRate::match(message))
+    {
+        int sampleRate = ((ATVMod::MsgReportEffectiveSampleRate&)message).getSampleRate();
+        ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 0));
+        //setRFFiltersSlidersRange(sampleRate);
+
+        return true;
+    }
     else
     {
         return false;
@@ -208,18 +216,23 @@ void ATVModGUI::viewChanged()
 
 void ATVModGUI::channelizerOutputSampleRateChanged()
 {
+    setRFFiltersSlidersRange(m_channelizer->getOutputSampleRate());
+}
+
+void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
+{
     if ((ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationUSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialUSB))
     {
-        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
-        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 200000);
+        ui->rfBW->setMaximum(sampleRate / 200000);
+        ui->rfOppBW->setMaximum(sampleRate / 200000);
     }
     else
     {
-        ui->rfBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
-        ui->rfOppBW->setMaximum(m_channelizer->getOutputSampleRate() / 100000);
+        ui->rfBW->setMaximum(sampleRate / 100000);
+        ui->rfOppBW->setMaximum(sampleRate / 100000);
     }
 }
 

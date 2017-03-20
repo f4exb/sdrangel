@@ -33,6 +33,7 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportEffectiveSampleRate, Message)
 
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
@@ -636,9 +637,10 @@ bool ATVMod::handleMessage(const Message& cmd)
 
 void ATVMod::apply(bool force)
 {
-    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
-        (m_config.m_atvStd != m_running.m_atvStd) ||
-        (m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
+    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
+        || (m_config.m_atvStd != m_running.m_atvStd)
+        || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
+        || (m_config.m_atvModulation != m_running.m_atvModulation) || force)
     {
         int rateUnits = getSampleRateUnits(m_config.m_atvStd);
         m_tvSampleRate = (m_config.m_outputSampleRate / rateUnits) * rateUnits; // make sure working sample rate is a multiple of rate units
@@ -649,7 +651,10 @@ void ATVMod::apply(bool force)
         {
             m_interpolatorDistanceRemain = 0;
             m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_config.m_outputSampleRate;
-            m_interpolator.create(48, m_tvSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+            m_interpolator.create(48,
+                    m_tvSampleRate,
+                    m_config.m_rfBandwidth / getRFBandwidthDivisor(m_config.m_atvModulation),
+                    3.0);
         }
         else
         {
@@ -662,6 +667,10 @@ void ATVMod::apply(bool force)
 
         applyStandard(); // set all timings
         m_settingsMutex.unlock();
+
+        MsgReportEffectiveSampleRate *report;
+        report = MsgReportEffectiveSampleRate::create(m_tvSampleRate);
+        getOutputMessageQueue()->push(report);
     }
 
     if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
@@ -705,12 +714,32 @@ int ATVMod::getSampleRateUnits(ATVStd std)
 {
     switch(std)
     {
+    case ATVStd405:
+        return 729000;  // 72 * 10125
+        break;
     case ATVStdPAL525:
-    	return 1008000;
+    	return 1008000; // 64 * 15750
     	break;
     case ATVStdPAL625:
     default:
-        return 1000000; // Exact MS/s - us
+        return 1000000; // 64 * 15625 Exact MS/s - us
+    }
+}
+
+float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
+{
+    switch(modulation)
+    {
+    case ATVModulationLSB:
+    case ATVModulationUSB:
+    case ATVModulationVestigialLSB:
+    case ATVModulationVestigialUSB:
+        return 1.1f;
+        break;
+    case ATVModulationAM:
+    case ATVModulationFM:
+    default:
+        return 2.2f;
     }
 }
 
@@ -721,6 +750,27 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
+    case ATVStd405:    // Follows loosely the 405 lines standard
+        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/1.008 us)
+        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/1.008 us)
+        m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5/1.008 us)
+        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/1.008 us)
+        // what is left in a 72/0.729 us line for the image
+        m_pointsPerImgLine = 72 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
+        m_nbLines          = 405;
+        m_nbLines2         = 203;
+        m_nbImageLines     = 390;
+        m_nbImageLines2    = 195;
+        m_interlaced       = true;
+        m_nbHorizPoints    = 72 * m_pointsPerTU; // full line
+        m_nbSyncLinesHead  = 5;
+        m_nbBlankLines     = 7; // yields 376 lines (195 - 7) * 2
+        m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
+        m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
+        m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_fps              = 25.0f;
+        break;
     case ATVStdPAL525: // Follows PAL-M standard
         m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/1.008 us)
         m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/1.008 us)

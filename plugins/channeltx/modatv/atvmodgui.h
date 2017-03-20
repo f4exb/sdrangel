@@ -119,6 +119,7 @@ private:
     void applySettings();
     void updateWithStreamData();
     void updateWithStreamTime();
+    void setRFFiltersSlidersRange(int sampleRate);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
