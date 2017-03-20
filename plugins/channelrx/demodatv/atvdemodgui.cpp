@@ -24,6 +24,7 @@
 #include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/scopevisng.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -262,13 +263,15 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-    m_objATVDemod = new ATVDemod();
+    m_objScopeVis = new ScopeVisNG(ui->glScope);
+    m_objATVDemod = new ATVDemod(m_objScopeVis);
     m_objATVDemod->setATVScreen(ui->screenTV);
 
     m_objChannelizer = new DownChannelizer(m_objATVDemod);
     m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
     m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
 
+    ui->glScope->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
     connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -294,6 +297,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     m_objMagSqAverage.resize(4, 1.0);
 
+    ui->scopeGUI->setBuddies(m_objScopeVis->getInputMessageQueue(), m_objScopeVis, ui->glScope);
+
     resetToDefaults(); // does applySettings()
 
     connect(m_objATVDemod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -306,6 +311,7 @@ ATVDemodGUI::~ATVDemodGUI()
     delete m_objThreadedChannelizer;
     delete m_objChannelizer;
     delete m_objATVDemod;
+    delete m_objScopeVis;
     delete ui;
 }
 

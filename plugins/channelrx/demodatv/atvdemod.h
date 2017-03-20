@@ -123,7 +123,7 @@ public:
         { }
     };
 
-    ATVDemod();
+    ATVDemod(BasebandSampleSink* objScopeSink);
 	~ATVDemod();
 
     void configure(MessageQueue* objMessageQueue,
@@ -263,6 +263,11 @@ private:
                 m_objMsgConfig.m_fltBFOFrequency = fltBFOFrequency;
             }
     };
+
+    //*************** SCOPE  ***************
+
+    BasebandSampleSink* m_objScopeSink;
+    SampleVector m_objScopeSampleBuffer;
 
     //*************** ATV PARAMETERS  ***************
     ATVScreen * m_objRegisteredATVScreen;

@@ -32,8 +32,9 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 const float ATVDemod::m_fltSecondToUs = 1000000.0f;
 const int ATVDemod::m_ssbFftLen = 1024;
 
-ATVDemod::ATVDemod() :
-    m_objSettingsMutex(QMutex::NonRecursive),
+ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
+    m_objScopeSink(objScopeSink),
+    m_objSettingsMutex(QMutex::Recursive),
     m_objRegisteredATVScreen(NULL),
     m_intImageIndex(0),
     m_intColIndex(0),
@@ -218,6 +219,13 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
     }
 
+    if(m_objScopeSink != 0)
+    {
+        m_objScopeSink->feed(m_objScopeSampleBuffer.begin(), m_objScopeSampleBuffer.end(), false); // m_ssb = positive only
+    }
+
+    m_objScopeSampleBuffer.clear();
+
     if (ptrBufferToRelease != 0)
     {
         delete ptrBufferToRelease;
@@ -376,6 +384,8 @@ void ATVDemod::demod(Complex& c)
     {
         fltVal = 0.0f;
     }
+
+    m_objScopeSampleBuffer.push_back(Sample(fltVal*32768.0f, 0.0f));
 
     fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
 
@@ -638,7 +648,14 @@ bool ATVDemod::handleMessage(const Message& cmd)
     }
     else
     {
-        return false;
+        if (m_objScopeSink != 0)
+        {
+           return m_objScopeSink->handleMessage(cmd);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 

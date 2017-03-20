@@ -29,6 +29,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class ATVDemod;
+class ScopeVisNG;
 
 namespace Ui
 {
@@ -96,6 +97,8 @@ private:
 
     MovingAverage<double> m_objMagSqAverage;
     int m_intTickCount;
+
+    ScopeVisNG* m_objScopeVis;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
 	virtual ~ATVDemodGUI();
