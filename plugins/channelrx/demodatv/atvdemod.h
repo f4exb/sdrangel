@@ -334,7 +334,7 @@ private:
 
     void applySettings();
     void demod(Complex& c);
-
+    static float getRFBandwidthDivisor(ATVModulation modulation);
 };
 
 #endif // INCLUDE_ATVDEMOD_H

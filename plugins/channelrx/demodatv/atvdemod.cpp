@@ -650,8 +650,9 @@ void ATVDemod::applySettings()
         return;
     }
 
-    if((m_objRFConfig.m_intFrequencyOffset != m_objRFRunning.m_intFrequencyOffset) ||
-        (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
+    if((m_objRFConfig.m_intFrequencyOffset != m_objRFRunning.m_intFrequencyOffset)
+       || (m_objRFConfig.m_enmModulation != m_objRFRunning.m_enmModulation)
+       || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
     {
         m_nco.setFreq(-m_objRFConfig.m_intFrequencyOffset, m_objConfig.m_intSampleRate);
     }
@@ -674,7 +675,10 @@ void ATVDemod::applySettings()
         }
 
         m_interpolatorDistanceRemain = 0;
-        m_interpolator.create(16, m_objConfigPrivate.m_intTVSampleRate, m_objRFConfig.m_fltRFBandwidth / 2.2, 3.0);
+        m_interpolator.create(24,
+                m_objConfigPrivate.m_intTVSampleRate,
+                m_objRFConfig.m_fltRFBandwidth / getRFBandwidthDivisor(m_objRFConfig.m_enmModulation),
+                3.0);
         m_objSettingsMutex.unlock();
     }
 
@@ -758,3 +762,20 @@ bool ATVDemod::getBFOLocked()
         return false;
     }
 }
+
+float ATVDemod::getRFBandwidthDivisor(ATVModulation modulation)
+{
+    switch(modulation)
+    {
+    case ATV_USB:
+    case ATV_LSB:
+        return 1.05f;
+        break;
+    case ATV_FM1:
+    case ATV_FM2:
+    case ATV_AM:
+    default:
+        return 2.2f;
+    }
+}
+
