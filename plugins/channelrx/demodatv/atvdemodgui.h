@@ -102,6 +102,7 @@ private:
     ScopeVisNG* m_objScopeVis;
 
     float m_fltLineTimeMultiplier;
+    int m_rfSliderDivisor;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
 	virtual ~ATVDemodGUI();

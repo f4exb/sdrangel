@@ -374,8 +374,8 @@ void ATVDemodGUI::applyRFSettings()
     {
         m_objATVDemod->configureRF(m_objATVDemod->getInputMessageQueue(),
                 (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
-                ui->rfBW->value() * 100000.0f,
-                ui->rfOppBW->value() * 100000.0f,
+                ui->rfBW->value() * m_rfSliderDivisor * 1.0f,
+                ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
                 ui->rfFiltering->isChecked(),
                 ui->decimatorEnable->isChecked(),
                 ui->bfo->value() * 10.0f);
@@ -388,8 +388,8 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
 
     if (ui->rfFiltering->isChecked()) // FFT filter
     {
-        m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
-        m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*100000);
+        m_objChannelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
+        m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
 
         if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_LSB) {
             m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
@@ -402,7 +402,7 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
     else
     {
         if (ui->decimatorEnable->isChecked()) {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*100000);
+            m_objChannelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
         } else {
             m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
         }
@@ -416,16 +416,26 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
 void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
 {
     // RF filters sliders range
+    int scaleFactor = (int) std::log10(sampleRate/2);
+    m_rfSliderDivisor = std::pow(10.0, scaleFactor-1);
+
+    if (sampleRate/m_rfSliderDivisor < 50) {
+        m_rfSliderDivisor /= 10;
+    }
+
     if (ui->rfFiltering->isChecked())
     {
-        ui->rfBW->setMaximum(sampleRate / 200000);
-        ui->rfOppBW->setMaximum(sampleRate / 200000);
+        ui->rfBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
+        ui->rfOppBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
     }
     else
     {
-        ui->rfBW->setMaximum(sampleRate / 100000);
-        ui->rfOppBW->setMaximum(sampleRate / 100000);
+        ui->rfBW->setMaximum((sampleRate) / m_rfSliderDivisor);
+        ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
     }
+
+    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
 void ATVDemodGUI::leaveEvent(QEvent*)
@@ -539,14 +549,14 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 
 void ATVDemodGUI::on_rfBW_valueChanged(int value)
 {
-    ui->rfBWText->setText(QString("%1k").arg(value * 100.0, 0, 'f', 0));
+    ui->rfBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
 void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 {
-    ui->rfOppBWText->setText(QString("%1k").arg(value * 100.0, 0, 'f', 0));
+    ui->rfOppBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
