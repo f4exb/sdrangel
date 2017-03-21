@@ -306,6 +306,21 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     resetToDefaults(); // does applySettings()
 
+    ui->scopeGUI->setPreTrigger(1);
+    ScopeVisNG::TraceData traceData;
+    traceData.m_amp = 2.0;      // amplification factor
+    traceData.m_ampIndex = 1;   // this is second step
+    traceData.m_ofs = 0.5;      // direct offset
+    traceData.m_ofsCoarse = 50; // this is 50 coarse steps
+    ui->scopeGUI->changeTrace(0, traceData);
+    ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
+    ScopeVisNG::TriggerData triggerData;
+    triggerData.m_triggerLevel = 0.1;
+    triggerData.m_triggerLevelCoarse = 10;
+    triggerData.m_triggerPositiveEdge = false;
+    ui->scopeGUI->changeTrigger(0, triggerData);
+    ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
+
     connect(m_objATVDemod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 }
 
@@ -474,7 +489,7 @@ void ATVDemodGUI::on_lineTime_valueChanged(int value)
 
 void ATVDemodGUI::on_topTime_valueChanged(int value)
 {
-    ui->topTimeText->setText(QString("%1 uS").arg(value));
+    ui->topTimeText->setText(QString("%1 µS").arg(value));
     applySettings();
 }
 
