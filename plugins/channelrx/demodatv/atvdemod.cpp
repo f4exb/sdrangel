@@ -707,9 +707,16 @@ void ATVDemod::applySettings()
     {
         m_objSettingsMutex.lock();
 
-        m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
+        m_intNumberOfLines = (int) round(1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
+
+//        qDebug() << "ATVDemod::applySettings:"
+//                << " m_fltLineDuration: " << m_objConfig.m_fltLineDuration
+//                << " m_fltFramePerS: " << m_objConfig.m_fltFramePerS
+//                << " m_intNumberOfLines: " << m_intNumberOfLines
+//                << " m_intNumberSamplePerLine: " << m_intNumberSamplePerLine
+//                << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay;
 
         m_intNumberSamplePerTop = (int) ((m_objConfig.m_fltTopDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
         m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);

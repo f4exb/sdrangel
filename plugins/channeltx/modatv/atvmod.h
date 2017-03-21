@@ -42,6 +42,7 @@ public:
     {
         ATVStdPAL625,
 		ATVStdPAL525,
+		ATVStd525L20F,
 		ATVStd405
     } ATVStd;
 

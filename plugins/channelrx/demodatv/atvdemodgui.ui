@@ -451,6 +451,11 @@
           <string comment="30">30 Fps</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>20 Fps</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

@@ -720,6 +720,9 @@ int ATVMod::getSampleRateUnits(ATVStd std)
     case ATVStdPAL525:
     	return 1008000; // 64 * 15750
     	break;
+    case ATVStd525L20F:
+        return 735000;  // 70 * 10500
+        break;
     case ATVStdPAL625:
     default:
         return 1000000; // 64 * 15625 Exact MS/s - us
@@ -751,10 +754,10 @@ void ATVMod::applyStandard()
     switch(m_config.m_atvStd)
     {
     case ATVStd405:    // Follows loosely the 405 lines standard
-        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/1.008 us)
-        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/1.008 us)
-        m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5/1.008 us)
-        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/1.008 us)
+        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/0.729 us)
+        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/0.729 us)
+        m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5/0.729 us)
+        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/0.729 us)
         // what is left in a 72/0.729 us line for the image
         m_pointsPerImgLine = 72 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
         m_nbLines          = 405;
@@ -791,6 +794,27 @@ void ATVMod::applyStandard()
         m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
         m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
         m_fps              = 30.0f;
+        break;
+    case ATVStd525L20F: // PAL M based 20 FPS
+        m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7/0.735 us)
+        m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7/0.735 us)
+        m_pointsPerFP      = (uint32_t) roundf(2.3f * m_pointsPerTU); // front porch       (2.3/0.735 us)
+        m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3/0.735 us)
+        // what is left in a 70/0.735 us line for the image
+        m_pointsPerImgLine = 70 * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
+        m_nbLines          = 525;
+        m_nbLines2         = 263;
+        m_nbImageLines     = 510;
+        m_nbImageLines2    = 255;
+        m_interlaced       = true;
+        m_nbHorizPoints    = 70 * m_pointsPerTU; // full line
+        m_nbSyncLinesHead  = 5;
+        m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
+        m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
+        m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
+        m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
+        m_fps              = 20.0f;
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:

@@ -407,6 +407,11 @@
         </item>
         <item>
          <property name="text">
+          <string>525L20F</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>405L</string>
          </property>
         </item>

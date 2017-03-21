@@ -77,7 +77,7 @@ void ATVDemodGUI::resetToDefaults()
     //********** ATV Default values **********
     ui->synchLevel->setValue(100);
     ui->blackLevel->setValue(310);
-    ui->lineTime->setValue(640);
+    ui->lineTime->setValue(0);
     ui->topTime->setValue(3);
     ui->modulation->setCurrentIndex(0);
     ui->fps->setCurrentIndex(0);
@@ -155,7 +155,7 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->synchLevel->setValue(tmp);
         d.readS32(4, &tmp, 310);
         ui->blackLevel->setValue(tmp);
-        d.readS32(5, &tmp, 640);
+        d.readS32(5, &tmp, 0);
         ui->lineTime->setValue(tmp);
         d.readS32(6, &tmp, 3);
         ui->topTime->setValue(tmp);
@@ -339,7 +339,7 @@ void ATVDemodGUI::applySettings()
         m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
                 getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) + ui->lineTime->value() * m_fltLineTimeMultiplier,
                 ui->topTime->value() * 1.0f,
-                (ui->fps->currentIndex() == 0) ? 25.0f : 30.0f,
+                getFps(ui->fps->currentIndex()),
                 (ui->halfImage->checkState() == Qt::Checked) ? 0.5f : 1.0f,
                 ui->synchLevel->value() / 1000.0f,
                 ui->blackLevel->value() / 1000.0f,
@@ -599,6 +599,9 @@ float ATVDemodGUI::getFps(int fpsIndex)
     {
     case 1:
         return 30.0f;
+        break;
+    case 2:
+        return 20.0f;
         break;
     case 0:
     default:
