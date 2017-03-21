@@ -456,6 +456,11 @@
           <string>20 Fps</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>16 Fps</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

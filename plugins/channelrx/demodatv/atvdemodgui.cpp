@@ -603,6 +603,9 @@ float ATVDemodGUI::getFps(int fpsIndex)
     case 2:
         return 20.0f;
         break;
+    case 3:
+        return 16.0f;
+        break;
     case 0:
     default:
         return 25.0f;

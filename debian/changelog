@@ -1,6 +1,6 @@
 sdrangel (3.3.2-1) unstable; urgency=medium
 
-  * ATV plugins: 405 lines mode
+  * ATV plugins: added 405 lines, 20 and 16 FPS  modes
   * ATV demodulator: added a scope panel in a tab combo with the TV screen
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 22 Mar 2017 23:14:18 +0100
