@@ -101,6 +101,7 @@ QByteArray ATVModGUI::serialize() const
     s.writeS32(10, ui->nbLines->currentIndex());
     s.writeS32(11, ui->fps->currentIndex());
     s.writeS32(12, ui->rfScaling->value());
+    s.writeS32(13, ui->fmExcursion->value());
 
 	return s.final();
 }
@@ -153,6 +154,8 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->fps->setCurrentIndex(tmp);
         d.readS32(12, &tmp, 80);
         ui->rfScaling->setValue(tmp);
+        d.readS32(13, &tmp, 50);
+        ui->fmExcursion->setValue(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -339,6 +342,12 @@ void ATVModGUI::on_modulation_currentIndexChanged(int index)
 void ATVModGUI::on_rfScaling_valueChanged(int value)
 {
     ui->rfScalingText->setText(tr("%1").arg(value));
+    applySettings();
+}
+
+void ATVModGUI::on_fmExcursion_valueChanged(int value)
+{
+    ui->fmExcursionText->setText(tr("%1").arg(value));
     applySettings();
 }
 
@@ -578,6 +587,9 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     for (std::vector<int>::iterator it = cameraNumbers.begin(); it != cameraNumbers.end(); ++it) {
         ui->camSelect->addItem(tr("%1").arg(*it));
     }
+
+    QChar delta = QChar(0x94, 0x03);
+    ui->fmExcursionLabel->setText(delta);
 }
 
 ATVModGUI::~ATVModGUI()
@@ -623,7 +635,8 @@ void ATVModGUI::applySettings()
 			ui->playCamera->isChecked(),
 			ui->channelMute->isChecked(),
 			ui->invertVideo->isChecked(),
-			ui->rfScaling->value() * 327.68f);
+			ui->rfScaling->value() * 327.68f,
+			ui->fmExcursion->value() / 100.0f);
 	}
 }
 

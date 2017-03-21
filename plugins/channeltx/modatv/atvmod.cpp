@@ -113,7 +113,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             bool cameraPlay,
             bool channelMute,
             bool invertedVideo,
-            float rfScaling)
+            float rfScaling,
+            float fmExcursion)
 {
     Message* cmd = MsgConfigureATVMod::create(
             rfBandwidth,
@@ -129,7 +130,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             cameraPlay,
             channelMute,
             invertedVideo,
-            rfScaling);
+            rfScaling,
+            fmExcursion);
     messageQueue->push(cmd);
 }
 
@@ -205,7 +207,7 @@ void ATVMod::modulateSample()
     switch (m_running.m_atvModulation)
     {
     case ATVModulationFM: // FM half bandwidth deviation
-    	m_modPhasor += (t - 0.5f) * M_PI;
+    	m_modPhasor += (t - 0.5f) * m_running.m_fmExcursion * 2.0f * M_PI;
     	if (m_modPhasor > 2.0f * M_PI) m_modPhasor -= 2.0f * M_PI; // limit growth
     	if (m_modPhasor < 2.0f * M_PI) m_modPhasor += 2.0f * M_PI; // limit growth
     	m_modSample.real(cos(m_modPhasor) * m_running.m_rfScalingFactor); // -1 dB
@@ -538,6 +540,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_channelMute = cfg.getChannelMute();
         m_config.m_invertedVideo = cfg.getInvertedVideo();
         m_config.m_rfScalingFactor = cfg.getRFScaling();
+        m_config.m_fmExcursion = cfg.getFMExcursion();
 
         apply();
 
@@ -555,7 +558,8 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_cameraPlay: " << m_config.m_cameraPlay
 				<< " m_channelMute: " << m_config.m_channelMute
 				<< " m_invertedVideo: " << m_config.m_invertedVideo
-				<< " m_rfScalingFactor: " << m_config.m_rfScalingFactor;
+				<< " m_rfScalingFactor: " << m_config.m_rfScalingFactor
+				<< " m_fmExcursion: " << m_config.m_fmExcursion;
 
         return true;
     }
@@ -730,6 +734,7 @@ void ATVMod::apply(bool force)
     m_running.m_channelMute = m_config.m_channelMute;
     m_running.m_invertedVideo = m_config.m_invertedVideo;
     m_running.m_rfScalingFactor = m_config.m_rfScalingFactor;
+    m_running.m_fmExcursion = m_config.m_fmExcursion;
 }
 
 void ATVMod::getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)

@@ -343,7 +343,8 @@ public:
 			bool cameraPLay,
             bool channelMute,
             bool invertedVideo,
-            float rfScaling);
+            float rfScaling,
+            float fmExcursion);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -387,6 +388,7 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         bool getInvertedVideo() const { return m_invertedVideo; }
         float getRFScaling() const { return m_rfScaling; }
+        float getFMExcursion() const { return m_fmExcursion; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -402,7 +404,8 @@ private:
 			bool cameraPlay,
 			bool channelMute,
 			bool invertedVideo,
-			float rfScaling)
+			float rfScaling,
+			float fmExcursion)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -418,7 +421,8 @@ private:
                     cameraPlay,
 					channelMute,
 					invertedVideo,
-					rfScaling);
+					rfScaling,
+					fmExcursion);
         }
 
     private:
@@ -436,6 +440,7 @@ private:
         bool          m_channelMute;
         bool          m_invertedVideo;
         float         m_rfScaling;
+        float         m_fmExcursion;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -451,7 +456,8 @@ private:
 				bool cameraPlay,
 				bool channelMute,
 				bool invertedVideo,
-				float rfScaling) :
+				float rfScaling,
+				float fmExcursion) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_rfOppBandwidth(rfOppBandwidth),
@@ -466,7 +472,8 @@ private:
 			m_cameraPlay(cameraPlay),
 			m_channelMute(channelMute),
 			m_invertedVideo(invertedVideo),
-			m_rfScaling(rfScaling)
+			m_rfScaling(rfScaling),
+			m_fmExcursion(fmExcursion)
         { }
     };
 
@@ -516,6 +523,7 @@ private:
         bool          m_channelMute;          //!< Mute channel baseband output
         bool          m_invertedVideo;        //!< True if video signal is inverted before modulation
         float         m_rfScalingFactor;      //!< Scaling factor from +/-1 to +/-2^15
+        float         m_fmExcursion;          //!< FM excursion factor relative to full bandwidth
 
         Config() :
             m_outputSampleRate(-1),
@@ -533,7 +541,8 @@ private:
 			m_cameraPlay(false),
 			m_channelMute(false),
 			m_invertedVideo(false),
-			m_rfScalingFactor(29204.0f) // -1dB
+			m_rfScalingFactor(29204.0f), // -1dB
+            m_fmExcursion(0.5f)          // half bandwidth
         { }
     };
 
