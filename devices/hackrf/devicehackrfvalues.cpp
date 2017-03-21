@@ -16,19 +16,21 @@
 
 #include "devicehackrfvalues.h"
 
-const unsigned int HackRFSampleRates::m_nb_rates = 19;
+const unsigned int HackRFSampleRates::m_nb_rates = 21;
 const unsigned int HackRFSampleRates::m_rates[HackRFSampleRates::m_nb_rates] = {
         2400000,
         3000000,
-        3024000, // for PAL-M
+        3150000, // for PAL-M
         3200000,
+        3250000, // For PAL-BGIL
         4000000,
         4333333, // for GSM
         4800000,
         5600000,
         6000000,
-        6048000, // for PAL-M
+        6300000, // for PAL-M
         6400000,
+        6500000, // For PAL-BGIL
         8000000,
         9600000,
        12000000,

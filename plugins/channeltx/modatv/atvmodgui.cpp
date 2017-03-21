@@ -230,7 +230,7 @@ void ATVModGUI::channelizerOutputSampleRateChanged()
 
 void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
 {
-    int scaleFactor = (int) std::log10(sampleRate);
+    int scaleFactor = (int) std::log10(sampleRate/2);
     m_rfSliderDivisor = std::pow(10.0, scaleFactor-1);
 
     if ((ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB) ||
@@ -238,13 +238,13 @@ void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialUSB))
     {
-        ui->rfBW->setMaximum(sampleRate / (2*m_rfSliderDivisor));
-        ui->rfOppBW->setMaximum(sampleRate / (2*m_rfSliderDivisor));
+        ui->rfBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
+        ui->rfOppBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
     }
     else
     {
-        ui->rfBW->setMaximum(sampleRate / m_rfSliderDivisor);
-        ui->rfOppBW->setMaximum(sampleRate / m_rfSliderDivisor);
+        ui->rfBW->setMaximum((sampleRate) / m_rfSliderDivisor);
+        ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
     }
 }
 
