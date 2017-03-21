@@ -123,6 +123,7 @@ private:
     void updateWithStreamData();
     void updateWithStreamTime();
     void setRFFiltersSlidersRange(int sampleRate);
+    void setChannelMarkerBandwidth();
     int getNbLines();
     int getFPS();
 

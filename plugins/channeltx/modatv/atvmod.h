@@ -350,8 +350,8 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
+    int getEffectiveSampleRate() const { return m_tvSampleRate; };
     Real getMagSq() const { return m_movingAverage.average(); }
-
     void getCameraNumbers(std::vector<int>& numbers);
 
     static void getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit);
