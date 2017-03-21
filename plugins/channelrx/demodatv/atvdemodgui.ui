@@ -320,12 +320,15 @@
        <widget class="QLabel" name="rfOppBWText">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>opposite band cutoff frequency (kHz)</string>
+        </property>
         <property name="text">
-         <string>1.0</string>
+         <string>0000k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -384,8 +387,11 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>in band cutoff frequency (kHz)</string>
+        </property>
         <property name="text">
-         <string>1.0 MHz</string>
+         <string>0000k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -539,14 +539,14 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 
 void ATVDemodGUI::on_rfBW_valueChanged(int value)
 {
-    ui->rfBWText->setText(QString("%1 MHz").arg(value / 10.0, 0, 'f', 1));
+    ui->rfBWText->setText(QString("%1k").arg(value * 100.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
 void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 {
-    ui->rfOppBWText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    ui->rfOppBWText->setText(QString("%1k").arg(value * 100.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
