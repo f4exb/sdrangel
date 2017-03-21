@@ -233,6 +233,10 @@ void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
     int scaleFactor = (int) std::log10(sampleRate/2);
     m_rfSliderDivisor = std::pow(10.0, scaleFactor-1);
 
+    if (sampleRate/m_rfSliderDivisor < 50) {
+        m_rfSliderDivisor /= 10;
+    }
+
     if ((ui->modulation->currentIndex() == (int) ATVMod::ATVModulationLSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationUSB) ||
         (ui->modulation->currentIndex() == (int) ATVMod::ATVModulationVestigialLSB) ||
