@@ -333,6 +333,8 @@ public:
             Real rfBandwidth,
             Real rfOppBandwidth,
             ATVStd atvStd,
+            int nbLines,
+            int fps,
             ATVModInput atvModInput,
             Real uniformLevel,
 			ATVModulation atvModulation,
@@ -352,7 +354,7 @@ public:
 
     void getCameraNumbers(std::vector<int>& numbers);
 
-    static int getSampleRateUnits(ATVStd std);
+    static void getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit);
     static float getRFBandwidthDivisor(ATVModulation modulation);
 
 signals:
@@ -374,6 +376,8 @@ private:
         Real getRFOppBandwidth() const { return m_rfOppBandwidth; }
         ATVStd getATVStd() const { return m_atvStd; }
         ATVModInput getATVModInput() const { return m_atvModInput; }
+        int getNbLines() const { return m_nbLines; }
+        int getFPS() const { return m_fps; }
         Real getUniformLevel() const { return m_uniformLevel; }
         ATVModulation getModulation() const { return m_atvModulation; }
         bool getVideoPlayLoop() const { return m_videoPlayLoop; }
@@ -386,6 +390,8 @@ private:
             Real rfBandwidth,
             Real rfOppBandwidth,
             ATVStd atvStd,
+            int nbLines,
+            int fps,
             ATVModInput atvModInput,
             Real uniformLevel,
 			ATVModulation atvModulation,
@@ -399,6 +405,8 @@ private:
                     rfBandwidth,
                     rfOppBandwidth,
                     atvStd,
+                    nbLines,
+                    fps,
                     atvModInput,
                     uniformLevel,
                     atvModulation,
@@ -413,6 +421,8 @@ private:
         Real          m_rfBandwidth;
         Real          m_rfOppBandwidth;
         ATVStd        m_atvStd;
+        int           m_nbLines;
+        int           m_fps;
         ATVModInput   m_atvModInput;
         Real          m_uniformLevel;
         ATVModulation m_atvModulation;
@@ -426,6 +436,8 @@ private:
                 Real rfBandwidth,
                 Real rfOppBandwidth,
                 ATVStd atvStd,
+                int nbLines,
+                int fps,
                 ATVModInput atvModInput,
                 Real uniformLevel,
 				ATVModulation atvModulation,
@@ -438,6 +450,8 @@ private:
             m_rfBandwidth(rfBandwidth),
             m_rfOppBandwidth(rfOppBandwidth),
             m_atvStd(atvStd),
+            m_nbLines(nbLines),
+            m_fps(fps),
             m_atvModInput(atvModInput),
             m_uniformLevel(uniformLevel),
 			m_atvModulation(atvModulation),
@@ -484,6 +498,8 @@ private:
         Real          m_rfBandwidth;          //!< Bandwidth of modulated signal or direct sideband for SSB / vestigial SSB
         Real          m_rfOppBandwidth;       //!< Bandwidth of opposite sideband for vestigial SSB
         ATVStd        m_atvStd;               //!< Standard
+        int           m_nbLines;              //!< Number of lines per full frame
+        int           m_fps;                  //!< Number of frames per second
         ATVModInput   m_atvModInput;          //!< Input source type
         Real          m_uniformLevel;         //!< Percentage between black and white for uniform screen display
         ATVModulation m_atvModulation;        //!< RF modulation type
@@ -499,6 +515,8 @@ private:
             m_rfBandwidth(0),
             m_rfOppBandwidth(0),
             m_atvStd(ATVStdPAL625),
+            m_nbLines(625),
+            m_fps(25),
             m_atvModInput(ATVModInputHBars),
             m_uniformLevel(0.5f),
 			m_atvModulation(ATVModulationAM),

@@ -241,6 +241,44 @@ void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
     }
 }
 
+int ATVModGUI::getNbLines()
+{
+    switch(ui->nbLines->currentIndex())
+    {
+    case 1:
+        return 525;
+        break;
+    case 2:
+        return 405;
+        break;
+    case 0:
+    default:
+        return 625;
+        break;
+    }
+}
+
+int ATVModGUI::getFPS()
+{
+    switch(ui->fps->currentIndex())
+    {
+    case 0:
+        return 30;
+        break;
+    case 2:
+        return 20;
+        break;
+    case 3:
+        return 16;
+        break;
+    case 1:
+    default:
+        return 25;
+        break;
+    }
+
+}
+
 void ATVModGUI::handleSourceMessages()
 {
     Message* message;
@@ -364,6 +402,17 @@ void ATVModGUI::on_rfOppBW_valueChanged(int value)
 
     applySettings();
 }
+
+void ATVModGUI::on_nbLines_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
+void ATVModGUI::on_fps_currentIndexChanged(int index)
+{
+    applySettings();
+}
+
 
 void ATVModGUI::on_standard_currentIndexChanged(int index)
 {
@@ -580,6 +629,8 @@ void ATVModGUI::applySettings()
 			ui->rfBW->value() * m_rfSliderDivisor * 1.0f,
 			ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
 			(ATVMod::ATVStd) ui->standard->currentIndex(),
+			getNbLines(),
+			getFPS(),
 			(ATVMod::ATVModInput) ui->inputSelect->currentIndex(),
 			ui->uniformLevel->value() / 100.0f,
 			(ATVMod::ATVModulation) ui->modulation->currentIndex(),

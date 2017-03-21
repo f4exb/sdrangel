@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>490</width>
+    <width>619</width>
     <height>364</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>480</width>
+     <width>611</width>
      <height>341</height>
     </rect>
    </property>
@@ -391,23 +391,106 @@
     <item>
      <layout class="QHBoxLayout" name="recordFileSelectLayout">
       <item>
-       <widget class="QComboBox" name="standard">
+       <widget class="QLabel" name="nbLinesLabel">
+        <property name="text">
+         <string>L:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="nbLines">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>TV standard</string>
+         <string>Lines per full frame</string>
         </property>
         <item>
          <property name="text">
-          <string>PAL625L</string>
+          <string>625</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>PAL525L</string>
+          <string>525</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>525L20F</string>
+          <string>405</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fpsLabel">
+        <property name="text">
+         <string>F:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="fps">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Frames per second</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>30</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>25</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>20</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="standardLabel">
+        <property name="text">
+         <string>S:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="standard">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>TV standard scheme</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>PAL625</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PAL525</string>
          </property>
         </item>
         <item>
@@ -415,6 +498,13 @@
           <string>405L</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_8">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
        </widget>
       </item>
       <item>
