@@ -802,13 +802,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>600</width>
+          <width>560</width>
           <height>420</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>600</width>
+          <width>560</width>
           <height>420</height>
          </size>
         </property>
