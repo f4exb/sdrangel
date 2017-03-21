@@ -112,7 +112,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             bool videoPlay,
             bool cameraPlay,
             bool channelMute,
-            bool invertedVideo)
+            bool invertedVideo,
+            float rfScaling)
 {
     Message* cmd = MsgConfigureATVMod::create(
             rfBandwidth,
@@ -127,7 +128,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             videoPlay,
             cameraPlay,
             channelMute,
-            invertedVideo);
+            invertedVideo,
+            rfScaling);
     messageQueue->push(cmd);
 }
 
@@ -206,22 +208,22 @@ void ATVMod::modulateSample()
     	m_modPhasor += (t - 0.5f) * M_PI;
     	if (m_modPhasor > 2.0f * M_PI) m_modPhasor -= 2.0f * M_PI; // limit growth
     	if (m_modPhasor < 2.0f * M_PI) m_modPhasor += 2.0f * M_PI; // limit growth
-    	m_modSample.real(cos(m_modPhasor) * 29204.0f); // -1 dB
-    	m_modSample.imag(sin(m_modPhasor) * 29204.0f);
+    	m_modSample.real(cos(m_modPhasor) * m_running.m_rfScalingFactor); // -1 dB
+    	m_modSample.imag(sin(m_modPhasor) * m_running.m_rfScalingFactor);
     	break;
     case ATVModulationLSB:
     case ATVModulationUSB:
         m_modSample = modulateSSB(t);
-        m_modSample *= 29204.0f;
+        m_modSample *= m_running.m_rfScalingFactor;
         break;
     case ATVModulationVestigialLSB:
     case ATVModulationVestigialUSB:
         m_modSample = modulateVestigialSSB(t);
-        m_modSample *= 29204.0f;
+        m_modSample *= m_running.m_rfScalingFactor;
         break;
     case ATVModulationAM: // AM 90%
     default:
-        m_modSample.real((t*1.8f + 0.1f) * 16384.0f); // modulate and scale zero frequency carrier
+        m_modSample.real((t*1.8f + 0.1f) * (m_running.m_rfScalingFactor/2.0f)); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
     }
 }
@@ -535,6 +537,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_cameraPlay = cfg.getCameraPlay();
         m_config.m_channelMute = cfg.getChannelMute();
         m_config.m_invertedVideo = cfg.getInvertedVideo();
+        m_config.m_rfScalingFactor = cfg.getRFScaling();
 
         apply();
 
@@ -551,7 +554,8 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_videoPlay: " << m_config.m_videoPlay
 				<< " m_cameraPlay: " << m_config.m_cameraPlay
 				<< " m_channelMute: " << m_config.m_channelMute
-				<< " m_invertedVideo: " << m_config.m_invertedVideo;
+				<< " m_invertedVideo: " << m_config.m_invertedVideo
+				<< " m_rfScalingFactor: " << m_config.m_rfScalingFactor;
 
         return true;
     }
@@ -725,6 +729,7 @@ void ATVMod::apply(bool force)
     m_running.m_cameraPlay = m_config.m_cameraPlay;
     m_running.m_channelMute = m_config.m_channelMute;
     m_running.m_invertedVideo = m_config.m_invertedVideo;
+    m_running.m_rfScalingFactor = m_config.m_rfScalingFactor;
 }
 
 void ATVMod::getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)

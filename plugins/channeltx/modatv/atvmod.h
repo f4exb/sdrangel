@@ -342,7 +342,8 @@ public:
 			bool videoPlay,
 			bool cameraPLay,
             bool channelMute,
-            bool invertedVideo);
+            bool invertedVideo,
+            float rfScaling);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -385,6 +386,7 @@ private:
         bool getCameraPlay() const { return m_cameraPlay; }
         bool getChannelMute() const { return m_channelMute; }
         bool getInvertedVideo() const { return m_invertedVideo; }
+        float getRFScaling() const { return m_rfScaling; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -399,7 +401,8 @@ private:
 			bool videoPlay,
 			bool cameraPlay,
 			bool channelMute,
-			bool invertedVideo)
+			bool invertedVideo,
+			float rfScaling)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -414,7 +417,8 @@ private:
                     videoPlay,
                     cameraPlay,
 					channelMute,
-					invertedVideo);
+					invertedVideo,
+					rfScaling);
         }
 
     private:
@@ -431,6 +435,7 @@ private:
         bool          m_cameraPlay;
         bool          m_channelMute;
         bool          m_invertedVideo;
+        float         m_rfScaling;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -445,7 +450,8 @@ private:
 				bool videoPlay,
 				bool cameraPlay,
 				bool channelMute,
-				bool invertedVideo) :
+				bool invertedVideo,
+				float rfScaling) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_rfOppBandwidth(rfOppBandwidth),
@@ -459,7 +465,8 @@ private:
 			m_videoPlay(videoPlay),
 			m_cameraPlay(cameraPlay),
 			m_channelMute(channelMute),
-			m_invertedVideo(invertedVideo)
+			m_invertedVideo(invertedVideo),
+			m_rfScaling(rfScaling)
         { }
     };
 
@@ -508,6 +515,7 @@ private:
         bool          m_cameraPlay;           //!< True to play camera video and false to pause
         bool          m_channelMute;          //!< Mute channel baseband output
         bool          m_invertedVideo;        //!< True if video signal is inverted before modulation
+        float         m_rfScalingFactor;      //!< Scaling factor from +/-1 to +/-2^15
 
         Config() :
             m_outputSampleRate(-1),
@@ -524,7 +532,8 @@ private:
 			m_videoPlay(false),
 			m_cameraPlay(false),
 			m_channelMute(false),
-			m_invertedVideo(false)
+			m_invertedVideo(false),
+			m_rfScalingFactor(29204.0f) // -1dB
         { }
     };
 

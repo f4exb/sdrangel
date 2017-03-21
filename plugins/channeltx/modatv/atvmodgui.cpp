@@ -100,6 +100,7 @@ QByteArray ATVModGUI::serialize() const
     s.writeBool(9, ui->invertVideo->isChecked());
     s.writeS32(10, ui->nbLines->currentIndex());
     s.writeS32(11, ui->fps->currentIndex());
+    s.writeS32(12, ui->rfScaling->value());
 
 	return s.final();
 }
@@ -150,6 +151,8 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->nbLines->setCurrentIndex(tmp);
         d.readS32(11, &tmp, 0);
         ui->fps->setCurrentIndex(tmp);
+        d.readS32(12, &tmp, 80);
+        ui->rfScaling->setValue(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -330,6 +333,12 @@ void ATVModGUI::on_modulation_currentIndexChanged(int index)
 {
     setRFFiltersSlidersRange(m_atvMod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
+    applySettings();
+}
+
+void ATVModGUI::on_rfScaling_valueChanged(int value)
+{
+    ui->rfScalingText->setText(tr("%1").arg(value));
     applySettings();
 }
 
@@ -613,7 +622,8 @@ void ATVModGUI::applySettings()
 			ui->playVideo->isChecked(),
 			ui->playCamera->isChecked(),
 			ui->channelMute->isChecked(),
-			ui->invertVideo->isChecked());
+			ui->invertVideo->isChecked(),
+			ui->rfScaling->value() * 327.68f);
 	}
 }
 
