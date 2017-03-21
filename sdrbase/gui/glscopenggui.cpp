@@ -133,6 +133,8 @@ void GLScopeNGGUI::on_scope_sampleRateChanged(int sampleRate)
     setTimeScaleDisplay();
     setTimeOfsDisplay();
     setTraceDelayDisplay();
+    setTrigPreDisplay();
+    setTrigDelayDisplay();
 }
 
 void GLScopeNGGUI::resetToDefaults()
@@ -548,21 +550,9 @@ void GLScopeNGGUI::on_trace_valueChanged(int value)
 
 void GLScopeNGGUI::on_traceAdd_clicked(bool checked)
 {
-    if (ui->trace->maximum() < 3)
-    {
-        if (ui->trace->value() == 0)
-        {
-            ui->onlyY->setEnabled(true);
-            ui->horizontalXY->setEnabled(true);
-            ui->verticalXY->setEnabled(true);
-            ui->polar->setEnabled(true);
-        }
-
-        ScopeVisNG::TraceData traceData;
-        fillTraceData(traceData);
-        m_scopeVis->addTrace(traceData);
-        ui->trace->setMaximum(ui->trace->maximum() + 1);
-    }
+    ScopeVisNG::TraceData traceData;
+    fillTraceData(traceData);
+    addTrace(traceData);
 }
 
 void GLScopeNGGUI::on_traceDel_clicked(bool checked)
@@ -635,13 +625,9 @@ void GLScopeNGGUI::on_trig_valueChanged(int value)
 
 void GLScopeNGGUI::on_trigAdd_clicked(bool checked)
 {
-    if (ui->trig->maximum() < 9)
-    {
-        ScopeVisNG::TriggerData triggerData;
-        fillTriggerData(triggerData);
-        m_scopeVis->addTrigger(triggerData);
-        ui->trig->setMaximum(ui->trig->maximum() + 1);
-    }
+    ScopeVisNG::TriggerData triggerData;
+    fillTriggerData(triggerData);
+    addTrigger(triggerData);
 }
 
 void GLScopeNGGUI::on_trigDel_clicked(bool checked)
@@ -1022,25 +1008,28 @@ void GLScopeNGGUI::setAmpOfsDisplay()
 
 void GLScopeNGGUI::setTraceDelayDisplay()
 {
-    int n_samples = ui->traceDelayCoarse->value()*100 + ui->traceDelayFine->value();
-    double t = ((double) n_samples) / m_sampleRate;
+    if (m_sampleRate > 0)
+    {
+        int n_samples = ui->traceDelayCoarse->value()*100 + ui->traceDelayFine->value();
+        double t = ((double) n_samples) / m_sampleRate;
 
-    if (n_samples < 1000) {
-        ui->traceDelayText->setToolTip(tr("%1 S").arg(n_samples));
-    } else if (n_samples < 1000000) {
-        ui->traceDelayText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
-    } else {
-        ui->traceDelayText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
+        if (n_samples < 1000) {
+            ui->traceDelayText->setToolTip(tr("%1 S").arg(n_samples));
+        } else if (n_samples < 1000000) {
+            ui->traceDelayText->setToolTip(tr("%1 kS").arg(n_samples/1000.0));
+        } else {
+            ui->traceDelayText->setToolTip(tr("%1 MS").arg(n_samples/1000000.0));
+        }
+
+        if(t < 0.000001)
+            ui->traceDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
+        else if(t < 0.001)
+            ui->traceDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
+        else if(t < 1.0)
+            ui->traceDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
+        else
+            ui->traceDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
     }
-
-    if(t < 0.000001)
-        ui->traceDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
-    else if(t < 0.001)
-        ui->traceDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
-    else if(t < 1.0)
-        ui->traceDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
-    else
-        ui->traceDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::setTrigIndexDisplay()
@@ -1082,55 +1071,61 @@ void GLScopeNGGUI::setTrigLevelDisplay()
 
 void GLScopeNGGUI::setTrigDelayDisplay()
 {
-    double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / (ScopeVisNG::m_traceChunkSize / 10.0);
-    unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult;
+    if (m_sampleRate > 0)
+    {
+        double delayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / (ScopeVisNG::m_traceChunkSize / 10.0);
+        unsigned int n_samples_delay = m_traceLenMult * ScopeVisNG::m_traceChunkSize * delayMult;
 
-    if (n_samples_delay < 1000) {
-        ui->trigDelayText->setToolTip(tr("%1 S").arg(n_samples_delay));
-    } else if (n_samples_delay < 1000000) {
-        ui->trigDelayText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
-    } else if (n_samples_delay < 1000000000) {
-        ui->trigDelayText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
-    } else {
-        ui->trigDelayText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
+        if (n_samples_delay < 1000) {
+            ui->trigDelayText->setToolTip(tr("%1 S").arg(n_samples_delay));
+        } else if (n_samples_delay < 1000000) {
+            ui->trigDelayText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
+        } else if (n_samples_delay < 1000000000) {
+            ui->trigDelayText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
+        } else {
+            ui->trigDelayText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
+        }
+
+        m_sampleRate = m_glScope->getSampleRate();
+        double t = (n_samples_delay * 1.0f / m_sampleRate);
+
+        if(t < 0.000001)
+            ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
+        else if(t < 0.001)
+            ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
+        else if(t < 1.0)
+            ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
+        else
+            ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
     }
-
-    m_sampleRate = m_glScope->getSampleRate();
-    double t = (n_samples_delay * 1.0f / m_sampleRate);
-
-    if(t < 0.000001)
-        ui->trigDelayText->setText(tr("%1\nns").arg(t * 1000000000.0, 0, 'f', 2));
-    else if(t < 0.001)
-        ui->trigDelayText->setText(tr("%1\nµs").arg(t * 1000000.0, 0, 'f', 2));
-    else if(t < 1.0)
-        ui->trigDelayText->setText(tr("%1\nms").arg(t * 1000.0, 0, 'f', 2));
-    else
-        ui->trigDelayText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::setTrigPreDisplay()
 {
-    unsigned int n_samples_delay = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f);
-    double dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
+    if (m_sampleRate > 0)
+    {
+        unsigned int n_samples_delay = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f);
+        double dt = m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f) / m_sampleRate;
 
-    if (n_samples_delay < 1000) {
-        ui->trigPreText->setToolTip(tr("%1 S").arg(n_samples_delay));
-    } else if (n_samples_delay < 1000000) {
-        ui->trigPreText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
-    } else if (n_samples_delay < 1000000000) {
-        ui->trigPreText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
-    } else {
-        ui->trigPreText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
+        if (n_samples_delay < 1000) {
+            ui->trigPreText->setToolTip(tr("%1 S").arg(n_samples_delay));
+        } else if (n_samples_delay < 1000000) {
+            ui->trigPreText->setToolTip(tr("%1 kS").arg(n_samples_delay/1000.0));
+        } else if (n_samples_delay < 1000000000) {
+            ui->trigPreText->setToolTip(tr("%1 MS").arg(n_samples_delay/1000000.0));
+        } else {
+            ui->trigPreText->setToolTip(tr("%1 GS").arg(n_samples_delay/1000000000.0));
+        }
+
+        if(dt < 0.000001)
+            ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f, 0, 'f', 2));
+        else if(dt < 0.001)
+            ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0f, 0, 'f', 2));
+        else if(dt < 1.0)
+            ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0f, 0, 'f', 2));
+        else
+            ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0f, 0, 'f', 2));
     }
-
-    if(dt < 0.000001)
-        ui->trigPreText->setText(tr("%1\nns").arg(dt * 1000000000.0f, 0, 'f', 2));
-    else if(dt < 0.001)
-        ui->trigPreText->setText(tr("%1\nµs").arg(dt * 1000000.0f, 0, 'f', 2));
-    else if(dt < 1.0)
-        ui->trigPreText->setText(tr("%1\nms").arg(dt * 1000.0f, 0, 'f', 2));
-    else
-        ui->trigPreText->setText(tr("%1\ns").arg(dt * 1.0f, 0, 'f', 2));
 }
 
 void GLScopeNGGUI::changeCurrentTrace()
@@ -1221,7 +1216,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.setColor(m_focusedTriggerColor);
 }
 
-void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
+void GLScopeNGGUI::setTraceUI(const ScopeVisNG::TraceData& traceData)
 {
     TraceUIBlocker traceUIBlocker(ui);
 
@@ -1245,7 +1240,7 @@ void GLScopeNGGUI::setTraceUI(ScopeVisNG::TraceData& traceData)
     ui->traceView->setChecked(traceData.m_viewTrace);
 }
 
-void GLScopeNGGUI::setTriggerUI(ScopeVisNG::TriggerData& triggerData)
+void GLScopeNGGUI::setTriggerUI(const ScopeVisNG::TriggerData& triggerData)
 {
     TrigUIBlocker trigUIBlocker(ui);
 
@@ -1398,4 +1393,137 @@ void GLScopeNGGUI::MainUIBlocker::unBlock()
 //    m_ui->timeOfs->blockSignals(m_oldStateTimeOfs);
 //    m_ui->traceLen->blockSignals(m_oldStateTraceLen);
 }
+
+void GLScopeNGGUI::setDisplayMode(DisplayMode displayMode)
+{
+    if (ui->trace->maximum() == 0)
+    {
+        ui->onlyX->setChecked(true);
+    }
+    else
+    {
+        switch (displayMode)
+        {
+        case DisplayX:
+            ui->onlyX->setChecked(true);
+            break;
+        case DisplayY:
+            ui->onlyY->setChecked(true);
+            break;
+        case DisplayXYH:
+            ui->horizontalXY->setChecked(true);
+            break;
+        case DisplayXYV:
+            ui->verticalXY->setChecked(true);
+            break;
+        case DisplayPol:
+            ui->polar->setChecked(true);
+            break;
+        default:
+            ui->onlyX->setChecked(true);
+            break;
+        }
+    }
+}
+
+void GLScopeNGGUI::setTraceIntensity(int value)
+{
+    if ((value < ui->traceIntensity->minimum()) || (value > ui->traceIntensity->maximum())) {
+        return;
+    }
+
+    ui->traceIntensity->setValue(value);
+}
+
+void GLScopeNGGUI::setGridIntensity(int value)
+{
+    if ((value < ui->gridIntensity->minimum()) || (value > ui->gridIntensity->maximum())) {
+        return;
+    }
+
+    ui->gridIntensity->setValue(value);
+}
+
+void GLScopeNGGUI::setTimeBase(int step)
+{
+    if ((step < ui->time->minimum()) || (step > ui->time->maximum())) {
+        return;
+    }
+
+    ui->time->setValue(step);
+}
+
+void GLScopeNGGUI::setTimeOffset(int step)
+{
+    if ((step < ui->timeOfs->minimum()) || (step > ui->timeOfs->maximum())) {
+        return;
+    }
+
+    ui->timeOfs->setValue(step);
+}
+
+void GLScopeNGGUI::setTraceLength(int step)
+{
+    if ((step < ui->traceLen->minimum()) || (step > ui->traceLen->maximum())) {
+        return;
+    }
+
+    ui->traceLen->setValue(step);
+}
+
+void GLScopeNGGUI::setPreTrigger(int step)
+{
+    if ((step < ui->trigPre->minimum()) || (step > ui->trigPre->maximum())) {
+        return;
+    }
+
+    ui->trigPre->setValue(step);
+}
+
+void GLScopeNGGUI::changeTrace(int traceIndex, const ScopeVisNG::TraceData& traceData)
+{
+    m_scopeVis->changeTrace(traceData, traceIndex);
+}
+
+void GLScopeNGGUI::addTrace(const ScopeVisNG::TraceData& traceData)
+{
+    if (ui->trace->maximum() < 3)
+    {
+        if (ui->trace->value() == 0)
+        {
+            ui->onlyY->setEnabled(true);
+            ui->horizontalXY->setEnabled(true);
+            ui->verticalXY->setEnabled(true);
+            ui->polar->setEnabled(true);
+        }
+
+        m_scopeVis->addTrace(traceData);
+        ui->trace->setMaximum(ui->trace->maximum() + 1);
+    }
+}
+
+void GLScopeNGGUI::focusOnTrace(int traceIndex)
+{
+    on_trace_valueChanged(traceIndex);
+}
+
+void GLScopeNGGUI::changeTrigger(int triggerIndex, const ScopeVisNG::TriggerData& triggerData)
+{
+    m_scopeVis->changeTrigger(triggerData, triggerIndex);
+}
+
+void GLScopeNGGUI::addTrigger(const ScopeVisNG::TriggerData& triggerData)
+{
+    if (ui->trig->maximum() < 9)
+    {
+        m_scopeVis->addTrigger(triggerData);
+        ui->trig->setMaximum(ui->trig->maximum() + 1);
+    }
+}
+
+void GLScopeNGGUI::focusOnTrigger(int triggerIndex)
+{
+    on_trig_valueChanged(triggerIndex);
+}
+
 

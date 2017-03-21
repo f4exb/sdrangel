@@ -37,6 +37,14 @@ class SDRANGEL_API GLScopeNGGUI : public QWidget {
     Q_OBJECT
 
 public:
+    enum DisplayMode {
+        DisplayXYH,
+        DisplayXYV,
+        DisplayX,
+        DisplayY,
+        DisplayPol
+    };
+
     explicit GLScopeNGGUI(QWidget* parent = 0);
     ~GLScopeNGGUI();
 
@@ -48,6 +56,24 @@ public:
     bool deserialize(const QByteArray& data);
 
     bool handleMessage(Message* message);
+
+    // preconfiguration methods
+    // global (first line):
+    void setDisplayMode(DisplayMode displayMode);
+    void setTraceIntensity(int value);
+    void setGridIntensity(int value);
+    void setTimeBase(int step);
+    void setTimeOffset(int step);
+    void setTraceLength(int step);
+    void setPreTrigger(int step);
+    // trace (second line):
+    void changeTrace(int traceIndex, const ScopeVisNG::TraceData& traceData);
+    void addTrace(const ScopeVisNG::TraceData& traceData);
+    void focusOnTrace(int traceIndex);
+    // trigger (third line):
+    void changeTrigger(int triggerIndex, const ScopeVisNG::TriggerData& triggerData);
+    void addTrigger(const ScopeVisNG::TriggerData& triggerData);
+    void focusOnTrigger(int triggerIndex);
 
 private:
     class TrigUIBlocker
@@ -150,8 +176,8 @@ private:
 
     void fillTraceData(ScopeVisNG::TraceData& traceData);
     void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
-    void setTriggerUI(ScopeVisNG::TriggerData& triggerData);
-    void setTraceUI(ScopeVisNG::TraceData& traceData);
+    void setTriggerUI(const ScopeVisNG::TriggerData& triggerData);
+    void setTraceUI(const ScopeVisNG::TraceData& traceData);
 
     void fillProjectionCombo(QComboBox* comboBox);
     void disableLiveMode(bool disable);
