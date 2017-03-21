@@ -250,6 +250,9 @@ void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
         ui->rfBW->setMaximum((sampleRate) / m_rfSliderDivisor);
         ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
     }
+
+    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
 int ATVModGUI::getNbLines()
