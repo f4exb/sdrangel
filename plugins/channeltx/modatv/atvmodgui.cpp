@@ -75,6 +75,8 @@ void ATVModGUI::resetToDefaults()
 	ui->rfBW->setValue(10);
 	ui->uniformLevel->setValue(35);
 	ui->standard->setCurrentIndex(0);
+	ui->nbLines->setCurrentIndex(0);
+	ui->fps->setCurrentIndex(1);
 	ui->inputSelect->setCurrentIndex(0);
 	ui->deltaFrequency->setValue(0);
 	ui->modulation->setCurrentIndex(0);
@@ -96,6 +98,8 @@ QByteArray ATVModGUI::serialize() const
 	s.writeS32(7, ui->rfOppBW->value());
     s.writeS32(8, ui->modulation->currentIndex());
     s.writeBool(9, ui->invertVideo->isChecked());
+    s.writeS32(10, ui->nbLines->currentIndex());
+    s.writeS32(11, ui->fps->currentIndex());
 
 	return s.final();
 }
@@ -142,6 +146,10 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->modulation->setCurrentIndex(tmp);
         d.readBool(9, &booltmp, false);
         ui->invertVideo->setChecked(booltmp);
+        d.readS32(10, &tmp, 0);
+        ui->nbLines->setCurrentIndex(tmp);
+        d.readS32(11, &tmp, 0);
+        ui->fps->setCurrentIndex(tmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
