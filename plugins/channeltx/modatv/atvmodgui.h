@@ -63,6 +63,7 @@ private slots:
     void on_deltaFrequency_changed(quint64 value);
     void on_deltaMinus_toggled(bool minus);
     void on_channelMute_toggled(bool checked);
+    void on_forceDecimator_toggled(bool checked);
     void on_modulation_currentIndexChanged(int index);
     void on_rfScaling_valueChanged(int value);
     void on_fmExcursion_valueChanged(int value);

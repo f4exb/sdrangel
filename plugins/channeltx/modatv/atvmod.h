@@ -349,7 +349,8 @@ public:
             bool channelMute,
             bool invertedVideo,
             float rfScaling,
-            float fmExcursion);
+            float fmExcursion,
+            bool forceDecimator);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples); // this is used for video signal actually
@@ -394,6 +395,7 @@ private:
         bool getInvertedVideo() const { return m_invertedVideo; }
         float getRFScaling() const { return m_rfScaling; }
         float getFMExcursion() const { return m_fmExcursion; }
+        bool getForceDecimator() const { return m_forceDecimator; }
 
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
@@ -410,7 +412,8 @@ private:
 			bool channelMute,
 			bool invertedVideo,
 			float rfScaling,
-			float fmExcursion)
+			float fmExcursion,
+			bool forceDecimator)
         {
             return new MsgConfigureATVMod(
                     rfBandwidth,
@@ -427,7 +430,8 @@ private:
 					channelMute,
 					invertedVideo,
 					rfScaling,
-					fmExcursion);
+					fmExcursion,
+					forceDecimator);
         }
 
     private:
@@ -446,6 +450,7 @@ private:
         bool          m_invertedVideo;
         float         m_rfScaling;
         float         m_fmExcursion;
+        bool          m_forceDecimator;
 
         MsgConfigureATVMod(
                 Real rfBandwidth,
@@ -462,7 +467,8 @@ private:
 				bool channelMute,
 				bool invertedVideo,
 				float rfScaling,
-				float fmExcursion) :
+				float fmExcursion,
+				bool forceDecimator) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_rfOppBandwidth(rfOppBandwidth),
@@ -478,7 +484,8 @@ private:
 			m_channelMute(channelMute),
 			m_invertedVideo(invertedVideo),
 			m_rfScaling(rfScaling),
-			m_fmExcursion(fmExcursion)
+			m_fmExcursion(fmExcursion),
+			m_forceDecimator(forceDecimator)
         { }
     };
 
@@ -529,6 +536,7 @@ private:
         bool          m_invertedVideo;        //!< True if video signal is inverted before modulation
         float         m_rfScalingFactor;      //!< Scaling factor from +/-1 to +/-2^15
         float         m_fmExcursion;          //!< FM excursion factor relative to full bandwidth
+        bool          m_forceDecimator;       //!< Forces decimator even when channel and source sample rates are equal
 
         Config() :
             m_outputSampleRate(-1),
@@ -547,7 +555,8 @@ private:
 			m_channelMute(false),
 			m_invertedVideo(false),
 			m_rfScalingFactor(29204.0f), // -1dB
-            m_fmExcursion(0.5f)          // half bandwidth
+            m_fmExcursion(0.5f),         // half bandwidth
+            m_forceDecimator(false)
         { }
     };
 

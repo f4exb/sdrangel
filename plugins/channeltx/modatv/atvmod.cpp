@@ -114,7 +114,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             bool channelMute,
             bool invertedVideo,
             float rfScaling,
-            float fmExcursion)
+            float fmExcursion,
+            bool forceDecimator)
 {
     Message* cmd = MsgConfigureATVMod::create(
             rfBandwidth,
@@ -131,7 +132,8 @@ void ATVMod::configure(MessageQueue* messageQueue,
             channelMute,
             invertedVideo,
             rfScaling,
-            fmExcursion);
+            fmExcursion,
+            forceDecimator);
     messageQueue->push(cmd);
 }
 
@@ -152,7 +154,7 @@ void ATVMod::pull(Sample& sample)
 
     m_settingsMutex.lock();
 
-    if (m_tvSampleRate == m_running.m_outputSampleRate) // no interpolation nor decimation
+    if ((m_tvSampleRate == m_running.m_outputSampleRate) && (!m_running.m_forceDecimator)) // no interpolation nor decimation
     {
         modulateSample();
         pullFinalize(m_modSample, sample);
@@ -541,6 +543,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         m_config.m_invertedVideo = cfg.getInvertedVideo();
         m_config.m_rfScalingFactor = cfg.getRFScaling();
         m_config.m_fmExcursion = cfg.getFMExcursion();
+        m_config.m_forceDecimator = cfg.getForceDecimator();
 
         apply();
 
@@ -559,7 +562,8 @@ bool ATVMod::handleMessage(const Message& cmd)
 				<< " m_channelMute: " << m_config.m_channelMute
 				<< " m_invertedVideo: " << m_config.m_invertedVideo
 				<< " m_rfScalingFactor: " << m_config.m_rfScalingFactor
-				<< " m_fmExcursion: " << m_config.m_fmExcursion;
+				<< " m_fmExcursion: " << m_config.m_fmExcursion
+				<< " m_forceDecimator: " << m_config.m_forceDecimator;
 
         return true;
     }
@@ -736,6 +740,7 @@ void ATVMod::apply(bool force)
     m_running.m_invertedVideo = m_config.m_invertedVideo;
     m_running.m_rfScalingFactor = m_config.m_rfScalingFactor;
     m_running.m_fmExcursion = m_config.m_fmExcursion;
+    m_running.m_forceDecimator = m_config.m_forceDecimator;
 }
 
 void ATVMod::getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)

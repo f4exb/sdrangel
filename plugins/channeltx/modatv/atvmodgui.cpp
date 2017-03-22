@@ -435,6 +435,11 @@ void ATVModGUI::on_channelMute_toggled(bool checked)
 	applySettings();
 }
 
+void ATVModGUI::on_forceDecimator_toggled(bool checked)
+{
+    applySettings();
+}
+
 void ATVModGUI::on_imageFileDialog_clicked(bool checked)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -638,7 +643,8 @@ void ATVModGUI::applySettings()
 			ui->channelMute->isChecked(),
 			ui->invertVideo->isChecked(),
 			ui->rfScaling->value() * 327.68f,
-			ui->fmExcursion->value() / 100.0f);
+			ui->fmExcursion->value() / 100.0f,
+			ui->forceDecimator->isChecked());
 	}
 }
 
