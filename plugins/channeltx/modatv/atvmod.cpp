@@ -665,6 +665,7 @@ void ATVMod::apply(bool force)
         int rateUnits, nbPointsPerRateUnit;
         getBaseValues(m_config.m_nbLines * m_config.m_fps, rateUnits, nbPointsPerRateUnit);
         m_tvSampleRate = (m_config.m_outputSampleRate / rateUnits) * rateUnits; // make sure working sample rate is a multiple of rate units
+        m_pointsPerLine = (m_tvSampleRate / rateUnits) * nbPointsPerRateUnit;
 
         m_settingsMutex.lock();
 
@@ -690,7 +691,7 @@ void ATVMod::apply(bool force)
         m_settingsMutex.unlock();
 
         MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(m_tvSampleRate);
+        report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
         getOutputMessageQueue()->push(report);
     }
 

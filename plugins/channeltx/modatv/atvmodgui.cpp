@@ -214,7 +214,9 @@ bool ATVModGUI::handleMessage(const Message& message)
     else if (ATVMod::MsgReportEffectiveSampleRate::match(message))
     {
         int sampleRate = ((ATVMod::MsgReportEffectiveSampleRate&)message).getSampleRate();
+        uint32_t nbPointsPerLine = ((ATVMod::MsgReportEffectiveSampleRate&)message).gatNbPointsPerLine();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 0));
+        ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
         setRFFiltersSlidersRange(sampleRate);
         return true;
     }

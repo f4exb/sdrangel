@@ -311,18 +311,23 @@ public:
 
     public:
         int getSampleRate() const { return m_sampleRate; }
+        uint32_t gatNbPointsPerLine() const { return m_nbPointsPerLine; }
 
-        static MsgReportEffectiveSampleRate* create(int sampleRate)
+        static MsgReportEffectiveSampleRate* create(int sampleRate, uint32_t nbPointsPerLine)
         {
-            return new MsgReportEffectiveSampleRate(sampleRate);
+            return new MsgReportEffectiveSampleRate(sampleRate, nbPointsPerLine);
         }
 
     protected:
         int m_sampleRate;
+        uint32_t m_nbPointsPerLine;
 
-        MsgReportEffectiveSampleRate(int sampleRate) :
+        MsgReportEffectiveSampleRate(
+                int sampleRate,
+                uint32_t nbPointsPerLine) :
             Message(),
-            m_sampleRate(sampleRate)
+            m_sampleRate(sampleRate),
+            m_nbPointsPerLine(nbPointsPerLine)
         { }
     };
 
@@ -556,6 +561,7 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     int      m_tvSampleRate;     //!< sample rate for generating signal
+    uint32_t m_pointsPerLine;    //!< Number of points per full line
     uint32_t m_pointsPerSync;    //!< number of line points for the horizontal sync
     uint32_t m_pointsPerBP;      //!< number of line points for the back porch
     uint32_t m_pointsPerImgLine; //!< number of line points for the image line
