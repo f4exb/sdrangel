@@ -76,6 +76,8 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
 
     memset((void*)m_fltBufferI,0,6*sizeof(float));
     memset((void*)m_fltBufferQ,0,6*sizeof(float));
+
+    m_objPhaseDiscri.setFMScaling(1.0f);
 }
 
 ATVDemod::~ATVDemod()
@@ -119,7 +121,8 @@ void ATVDemod::configureRF(
         float fltRFOppBandwidth,
         bool blnFFTFiltering,
         bool blnDecimatorEnable,
-        float fltBFOFrequency)
+        float fltBFOFrequency,
+        float fmDeviation)
 {
     Message* msgCmd = MsgConfigureRFATVDemod::create(
             enmModulation,
@@ -127,7 +130,8 @@ void ATVDemod::configureRF(
             fltRFOppBandwidth,
             blnFFTFiltering,
             blnDecimatorEnable,
-            fltBFOFrequency);
+            fltBFOFrequency,
+            fmDeviation);
     objMessageQueue->push(msgCmd);
 }
 
@@ -272,15 +276,14 @@ void ATVDemod::demod(Complex& c)
     float& fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
     float& fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
 #endif
-    double magSq = fltI*fltI + fltQ*fltQ;
-    m_objMagSqAverage.feed(magSq);
-
-    fltNorm = sqrt(magSq);
+    double magSq;
 
     if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
     {
         //Amplitude FM
-
+        magSq = fltI*fltI + fltQ*fltQ;
+        m_objMagSqAverage.feed(magSq);
+        fltNorm = sqrt(magSq);
         fltNormI= fltI/fltNorm;
         fltNormQ= fltQ/fltNorm;
 
@@ -324,11 +327,13 @@ void ATVDemod::demod(Complex& c)
 
         m_fltBufferI[0]=fltNormI;
         m_fltBufferQ[0]=fltNormQ;
-
     }
     else if (m_objRFRunning.m_enmModulation == ATV_AM)
     {
         //Amplitude AM
+        magSq = fltI*fltI + fltQ*fltQ;
+        m_objMagSqAverage.feed(magSq);
+        fltNorm = sqrt(magSq);
         fltVal = fltNorm;
 
         //********** Mini and Maxi Amplitude tracking **********
@@ -349,6 +354,10 @@ void ATVDemod::demod(Complex& c)
     }
     else if ((m_objRFRunning.m_enmModulation == ATV_USB) || (m_objRFRunning.m_enmModulation == ATV_LSB))
     {
+        magSq = fltI*fltI + fltQ*fltQ;
+        m_objMagSqAverage.feed(magSq);
+        fltNorm = sqrt(magSq);
+
         Real bfoValues[2];
         float fltFiltered = m_bfoFilter.run(fltI);
         m_bfoPLL.process(fltFiltered, bfoValues);
@@ -380,12 +389,23 @@ void ATVDemod::demod(Complex& c)
         fltVal -= m_fltAmpMin;
         fltVal /=m_fltAmpDelta;
     }
+    else if (m_objRFRunning.m_enmModulation == ATV_FM3)
+    {
+        float rawDeviation;
+        fltVal = (m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation)/ m_objRFRunning.m_fmDeviation) + 0.5f;
+        fltVal = fltVal < 0.0f ? 0.0f : fltVal > 1.0f ? 1.0f : fltVal;
+        m_objMagSqAverage.feed(magSq);
+        fltNorm = sqrt(magSq);
+    }
     else
     {
+        magSq = fltI*fltI + fltQ*fltQ;
+        m_objMagSqAverage.feed(magSq);
+        fltNorm = sqrt(magSq);
         fltVal = 0.0f;
     }
 
-    m_objScopeSampleBuffer.push_back(Sample(fltVal*32768.0f, 0.0f));
+    m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
 
     fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
 
@@ -640,7 +660,8 @@ bool ATVDemod::handleMessage(const Message& cmd)
                 << " m_fltRFOppBandwidth:" << m_objRFConfig.m_fltRFOppBandwidth
                 << " m_blnFFTFiltering:" << m_objRFConfig.m_blnFFTFiltering
                 << " m_blnDecimatorEnable:" << m_objRFConfig.m_blndecimatorEnable
-                << " m_fltBFOFrequency:" << m_objRFConfig.m_fltBFOFrequency;
+                << " m_fltBFOFrequency:" << m_objRFConfig.m_fltBFOFrequency
+                << " m_fmDeviation:" << m_objRFConfig.m_fmDeviation;
 
         applySettings();
 
@@ -760,6 +781,11 @@ void ATVDemod::applySettings()
                 0.01);
         m_bfoFilter.setFrequencies(m_objRFConfig.m_fltBFOFrequency, m_objConfigPrivate.m_intTVSampleRate);
     }
+
+//    if (m_objRFConfig.m_fmDeviation != m_objRFRunning.m_fmDeviation)
+//    {
+//        m_objPhaseDiscri.setFMScaling(m_objRFConfig.m_fmDeviation);
+//    }
 
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;

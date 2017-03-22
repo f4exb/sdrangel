@@ -33,6 +33,7 @@
 #include "dsp/agc.h"
 #include "dsp/phaselock.h"
 #include "dsp/recursivefilters.h"
+#include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "atvscreen.h"
@@ -47,6 +48,7 @@ public:
 	enum ATVModulation {
 	    ATV_FM1,  //!< Classical frequency modulation with discriminator #1
 	    ATV_FM2,  //!< Classical frequency modulation with discriminator #2
+	    ATV_FM3,  //!< Classical frequency modulation with phase derivative discriminator
         ATV_AM,   //!< Classical amplitude modulation
         ATV_USB,  //!< AM with vestigial lower side band (main signal is in the upper side)
         ATV_LSB   //!< AM with vestigial upper side band (main signal is in the lower side)
@@ -89,6 +91,7 @@ public:
         bool          m_blnFFTFiltering;
         bool          m_blndecimatorEnable;
         float         m_fltBFOFrequency;
+        float         m_fmDeviation;
 
         ATVRFConfig() :
             m_intFrequencyOffset(0),
@@ -97,7 +100,8 @@ public:
             m_fltRFOppBandwidth(0),
             m_blnFFTFiltering(false),
             m_blndecimatorEnable(false),
-            m_fltBFOFrequency(0.0f)
+            m_fltBFOFrequency(0.0f),
+            m_fmDeviation(1.0f)
         {
         }
     };
@@ -143,7 +147,8 @@ public:
             float fltRFOppBandwidth,
             bool blnFFTFiltering,
             bool blndecimatorEnable,
-            float fltBFOFrequency);
+            float fltBFOFrequency,
+            float fmDeviation);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -232,7 +237,8 @@ private:
                     float fltRFOppBandwidth,
                     bool blnFFTFiltering,
                     bool blndecimatorEnable,
-                    int intBFOFrequency)
+                    int intBFOFrequency,
+                    float fmDeviation)
             {
                 return new MsgConfigureRFATVDemod(
                         enmModulation,
@@ -240,7 +246,8 @@ private:
                         fltRFOppBandwidth,
                         blnFFTFiltering,
                         blndecimatorEnable,
-                        intBFOFrequency);
+                        intBFOFrequency,
+                        fmDeviation);
             }
 
             ATVRFConfig m_objMsgConfig;
@@ -252,7 +259,8 @@ private:
                     float fltRFOppBandwidth,
                     bool blnFFTFiltering,
                     bool blndecimatorEnable,
-                    float fltBFOFrequency) :
+                    float fltBFOFrequency,
+                    float fmDeviation) :
                 Message()
             {
                 m_objMsgConfig.m_enmModulation = enmModulation;
@@ -261,6 +269,7 @@ private:
                 m_objMsgConfig.m_blnFFTFiltering = blnFFTFiltering;
                 m_objMsgConfig.m_blndecimatorEnable = blndecimatorEnable;
                 m_objMsgConfig.m_fltBFOFrequency = fltBFOFrequency;
+                m_objMsgConfig.m_fmDeviation = fmDeviation;
             }
     };
 
@@ -321,6 +330,9 @@ private:
     Complex* m_DSBFilterBuffer;
     int m_DSBFilterBufferIndex;
     static const int m_ssbFftLen;
+
+    // Used for FM
+    PhaseDiscriminators m_objPhaseDiscri;
 
     //QElapsedTimer m_objTimer;
 

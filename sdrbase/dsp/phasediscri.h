@@ -55,7 +55,7 @@ public:
      * Discriminator with phase detection using atan2 and frequency by derivation.
      * This yields a precise deviation to sample rate ratio: Sample rate => +/-1.0
      */
-    Real phaseDiscriminatorDelta(const Complex& sample, long double& magsq, Real& fmDev)
+    Real phaseDiscriminatorDelta(const Complex& sample, double& magsq, Real& fmDev)
     {
         Real fltI = sample.real();
         Real fltQ = sample.imag();

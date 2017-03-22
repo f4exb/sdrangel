@@ -156,7 +156,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				//m_AGC.feed(ci);
 
                 //double magsqRaw = m_AGC.getMagSq();
-				long double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
+				double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
 				Real deviation;
 
 				Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);

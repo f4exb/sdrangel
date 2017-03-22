@@ -40,7 +40,7 @@
      <x>10</x>
      <y>10</y>
      <width>681</width>
-     <height>81</height>
+     <height>83</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -277,6 +277,11 @@
         </item>
         <item>
          <property name="text">
+          <string>FM 3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>AM</string>
          </property>
         </item>
@@ -290,6 +295,58 @@
           <string>LSB</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fmDeviationLabel">
+        <property name="text">
+         <string>D</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="fmDeviation">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>125</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fmDeviationText">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>100</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
        </widget>
       </item>
       <item>

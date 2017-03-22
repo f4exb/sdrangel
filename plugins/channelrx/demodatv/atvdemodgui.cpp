@@ -92,6 +92,7 @@ void ATVDemodGUI::resetToDefaults()
     ui->rfBW->setValue(10);
     ui->rfOppBW->setValue(10);
     ui->bfo->setValue(0);
+    ui->fmDeviation->setValue(100);
 
     blockApplySettings(false);
     lineTimeUpdate();
@@ -118,6 +119,7 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeS32(14, ui->bfo->value());
     s.writeBool(15, ui->invertVideo->isChecked());
     s.writeS32(16, ui->nbLines->currentIndex());
+    s.writeS32(17, ui->fmDeviation->value());
 
     return s.final();
 }
@@ -179,6 +181,8 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->invertVideo->setChecked(booltmp);
         d.readS32(16, &tmp, 0);
         ui->nbLines->setCurrentIndex(tmp);
+        d.readS32(17, &tmp, 100);
+        ui->fmDeviation->setValue(tmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
@@ -322,6 +326,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
     connect(m_objATVDemod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+
+    QChar delta = QChar(0x94, 0x03);
+    ui->fmDeviationLabel->setText(delta);
 }
 
 ATVDemodGUI::~ATVDemodGUI()
@@ -378,7 +385,8 @@ void ATVDemodGUI::applyRFSettings()
                 ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
                 ui->rfFiltering->isChecked(),
                 ui->decimatorEnable->isChecked(),
-                ui->bfo->value() * 10.0f);
+                ui->bfo->value() * 10.0f,
+                ui->fmDeviation->value() / 100.0f);
     }
 }
 
@@ -597,6 +605,12 @@ void ATVDemodGUI::on_deltaFrequencyMinus_toggled(bool minus)
 void ATVDemodGUI::on_bfo_valueChanged(int value)
 {
     ui->bfoText->setText(QString("%1").arg(value * 10.0, 0, 'f', 0));
+    applyRFSettings();
+}
+
+void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
+{
+    ui->fmDeviationText->setText(QString("%1").arg(value));
     applyRFSettings();
 }
 
