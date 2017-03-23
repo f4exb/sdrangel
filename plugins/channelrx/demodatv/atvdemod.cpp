@@ -297,7 +297,7 @@ void ATVDemod::demod(Complex& c)
             fltVal -= m_fltBufferQ[0]*(fltNormI - m_fltBufferI[1]);
 
             fltVal += 2.0f;
-            fltVal /=4.0f;
+            fltVal /= 4.0f;
 
         }
         else
@@ -307,7 +307,7 @@ void ATVDemod::demod(Complex& c)
             fltVal -= m_fltBufferQ[2]*((m_fltBufferI[5]-fltNormI)/16.0f + m_fltBufferI[1] - m_fltBufferI[3]);
 
             fltVal += 2.125f;
-            fltVal /=4.25f;
+            fltVal /= 4.25f;
 
             m_fltBufferI[5]=m_fltBufferI[4];
             m_fltBufferQ[5]=m_fltBufferQ[4];
@@ -327,6 +327,11 @@ void ATVDemod::demod(Complex& c)
 
         m_fltBufferI[0]=fltNormI;
         m_fltBufferQ[0]=fltNormQ;
+
+        if (m_objRFRunning.m_fmDeviation != 1.0f)
+        {
+            fltVal = ((fltVal - 0.5f) / m_objRFRunning.m_fmDeviation) + 0.5f;
+        }
     }
     else if (m_objRFRunning.m_enmModulation == ATV_AM)
     {
@@ -392,8 +397,8 @@ void ATVDemod::demod(Complex& c)
     else if (m_objRFRunning.m_enmModulation == ATV_FM3)
     {
         float rawDeviation;
-        fltVal = (m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation)/ m_objRFRunning.m_fmDeviation) + 0.5f;
-        fltVal = fltVal < 0.0f ? 0.0f : fltVal > 1.0f ? 1.0f : fltVal;
+        fltVal = m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation) + 0.5f;
+        //fltVal = fltVal < 0.0f ? 0.0f : fltVal > 1.0f ? 1.0f : fltVal;
         m_objMagSqAverage.feed(magSq);
         fltNorm = sqrt(magSq);
     }
@@ -782,10 +787,10 @@ void ATVDemod::applySettings()
         m_bfoFilter.setFrequencies(m_objRFConfig.m_fltBFOFrequency, m_objConfigPrivate.m_intTVSampleRate);
     }
 
-//    if (m_objRFConfig.m_fmDeviation != m_objRFRunning.m_fmDeviation)
-//    {
-//        m_objPhaseDiscri.setFMScaling(m_objRFConfig.m_fmDeviation);
-//    }
+    if (m_objRFConfig.m_fmDeviation != m_objRFRunning.m_fmDeviation)
+    {
+        m_objPhaseDiscri.setFMScaling(1.0f / m_objRFConfig.m_fmDeviation);
+    }
 
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
