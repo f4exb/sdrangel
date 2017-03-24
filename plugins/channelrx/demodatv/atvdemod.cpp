@@ -705,7 +705,7 @@ void ATVDemod::applySettings()
     {
         m_objSettingsMutex.lock();
 
-        m_objConfigPrivate.m_intTVSampleRate = (m_objConfig.m_intSampleRate / 1000000) * 1000000; // make sure working sample rate is a multiple of rate units
+        m_objConfigPrivate.m_intTVSampleRate = (m_objConfig.m_intSampleRate / 500000) * 500000; // make sure working sample rate is a multiple of rate units
 
         if (m_objConfigPrivate.m_intTVSampleRate > 0)
         {
@@ -733,7 +733,7 @@ void ATVDemod::applySettings()
     {
         m_objSettingsMutex.lock();
 
-        m_intNumberOfLines = (int) round(1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
+        m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
 
@@ -754,6 +754,11 @@ void ATVDemod::applySettings()
         m_intRowsLimit=0;
 
         m_objSettingsMutex.unlock();
+
+        int sampleRate = m_objRFConfig.m_blndecimatorEnable ? m_objConfigPrivate.m_intTVSampleRate : m_objConfig.m_intSampleRate;
+        MsgReportEffectiveSampleRate *report;
+        report = MsgReportEffectiveSampleRate::create(sampleRate, m_intNumberSamplePerLine);
+        getOutputMessageQueue()->push(report);
     }
 
     if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
@@ -762,7 +767,7 @@ void ATVDemod::applySettings()
     {
         int sampleRate = m_objRFConfig.m_blndecimatorEnable ? m_objConfigPrivate.m_intTVSampleRate : m_objConfig.m_intSampleRate;
         MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(sampleRate);
+        report = MsgReportEffectiveSampleRate::create(sampleRate, m_intNumberSamplePerLine);
         getOutputMessageQueue()->push(report);
     }
 

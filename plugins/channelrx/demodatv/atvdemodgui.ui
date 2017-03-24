@@ -151,6 +151,25 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="nbPointsPerLineText">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of points (samples) per line</string>
+        </property>
+        <property name="text">
+         <string>000p</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

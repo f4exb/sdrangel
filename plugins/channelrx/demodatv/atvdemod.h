@@ -112,18 +112,21 @@ public:
 
     public:
         int getSampleRate() const { return m_sampleRate; }
+        int getNbPointsPerLine() const { return m_nbPointsPerLine; }
 
-        static MsgReportEffectiveSampleRate* create(int sampleRate)
+        static MsgReportEffectiveSampleRate* create(int sampleRate, int nbPointsPerLine)
         {
-            return new MsgReportEffectiveSampleRate(sampleRate);
+            return new MsgReportEffectiveSampleRate(sampleRate, nbPointsPerLine);
         }
 
     protected:
         int m_sampleRate;
+        int m_nbPointsPerLine;
 
-        MsgReportEffectiveSampleRate(int sampleRate) :
+        MsgReportEffectiveSampleRate(int sampleRate, int nbPointsPerLine) :
             Message(),
-            m_sampleRate(sampleRate)
+            m_sampleRate(sampleRate),
+            m_nbPointsPerLine(nbPointsPerLine)
         { }
     };
 
