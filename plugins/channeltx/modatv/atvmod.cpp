@@ -468,15 +468,15 @@ void ATVMod::pullVideo(Real& sample)
                     resizeCamera();
                 }
 
-                if (camera.m_videoFPSCount < camera.m_videoFPS)
+                if (camera.m_videoFPSCount < camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS)
                 {
                     camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
-                    camera.m_videoFPSCount += camera.m_videoFPSq;
+                    camera.m_videoFPSCount += camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq;
                 }
                 else
                 {
                     camera.m_videoPrevFPSCount = 0;
-                    camera.m_videoFPSCount = camera.m_videoFPSq;
+                    camera.m_videoFPSCount = camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq;
                 }
             }
         }
@@ -947,7 +947,8 @@ void ATVMod::calculateCamerasSizes()
 		it->m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) it->m_videoHeight;
 		it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
 		it->m_videoFPSq = it->m_videoFPS / m_fps;
-	    it->m_videoFPSCount = it->m_videoFPSq;
+		it->m_videoFPSqManual = it->m_videoFPSManual / m_fps;
+	    it->m_videoFPSCount = 0; //it->m_videoFPSq;
 	    it->m_videoPrevFPSCount = 0;
 
         qDebug("ATVMod::calculateCamerasSizes: [%d] factors: %f x %f FPSq: %f", (int) (it - m_cameras.begin()),  it->m_videoFx, it->m_videoFy, it->m_videoFPSq);
