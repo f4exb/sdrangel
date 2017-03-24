@@ -192,6 +192,9 @@ bool ATVModGUI::handleMessage(const Message& message)
         ui->cameraDeviceNumber->setText(tr("#%1").arg(rpt.getdeviceNumber()));
         ui->camerFPS->setText(tr("%1 FPS").arg(rpt.getFPS(), 0, 'f', 2));
         ui->cameraImageSize->setText(tr("%1x%2").arg(rpt.getWidth()).arg(rpt.getHeight()));
+        ui->cameraManualFPSText->setText(tr("%1 FPS").arg(rpt.getFPSManual(), 0, 'f', 1));
+        ui->cameraManualFPSEnable->setChecked(rpt.getFPSManualEnable());
+        ui->cameraManualFPS->setValue((int) rpt.getFPSManual()*10.0f);
 
         int status = rpt.getStatus();
 
@@ -496,6 +499,25 @@ void ATVModGUI::on_playCamera_toggled(bool checked)
 void ATVModGUI::on_camSelect_currentIndexChanged(int index)
 {
     ATVMod::MsgConfigureCameraIndex* message = ATVMod::MsgConfigureCameraIndex::create(index);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
+void ATVModGUI::on_cameraManualFPSEnable_toggled(bool checked)
+{
+	ATVMod::MsgConfigureCameraData* message = ATVMod::MsgConfigureCameraData::create(
+			ui->camSelect->currentIndex(),
+			checked,
+			ui->cameraManualFPS->value() / 10.0f);
+    m_atvMod->getInputMessageQueue()->push(message);
+}
+
+void ATVModGUI::on_cameraManualFPS_valueChanged(int value)
+{
+    ui->cameraManualFPSText->setText(tr("%1 FPS").arg(value / 10.0f, 0, 'f', 1));
+	ATVMod::MsgConfigureCameraData* message = ATVMod::MsgConfigureCameraData::create(
+			ui->camSelect->currentIndex(),
+			ui->cameraManualFPSEnable->isChecked(),
+			value / 10.0f);
     m_atvMod->getInputMessageQueue()->push(message);
 }
 

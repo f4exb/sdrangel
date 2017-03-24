@@ -1134,7 +1134,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="manualFPSEnable">
+       <widget class="ButtonSwitch" name="cameraManualFPSEnable">
         <property name="toolTip">
          <string>Use manual FPS setting</string>
         </property>
@@ -1144,7 +1144,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="manualFPS">
+       <widget class="QDial" name="cameraManualFPS">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -1169,7 +1169,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="manualFPSText">
+       <widget class="QLabel" name="cameraManualFPSText">
         <property name="minimumSize">
          <size>
           <width>50</width>

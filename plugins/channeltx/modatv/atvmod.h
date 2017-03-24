@@ -216,6 +216,36 @@ public:
         { }
     };
 
+    class MsgConfigureCameraData : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getIndex() const { return m_index; }
+        float getManualFPS() const { return m_manualFPS; }
+        bool getManualFPSEnable() const { return m_manualFPSEnable; }
+
+        static MsgConfigureCameraData* create(
+        		int index,
+				float manualFPS,
+				bool manualFPSEnable)
+        {
+            return new MsgConfigureCameraData(index, manualFPS, manualFPSEnable);
+        }
+
+    private:
+        int m_index;
+        float m_manualFPS;
+        bool m_manualFPSEnable;
+
+        MsgConfigureCameraData(int index, float manualFPS, bool manualFPSEnable) :
+            Message(),
+			m_index(index),
+			m_manualFPS(manualFPS),
+			m_manualFPSEnable(manualFPSEnable)
+        { }
+    };
+
     class MsgReportCameraData : public Message {
         MESSAGE_CLASS_DECLARATION
 

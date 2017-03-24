@@ -30,6 +30,7 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceStreamTiming, Messag
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
@@ -627,6 +628,21 @@ bool ATVMod::handleMessage(const Message& cmd)
     				m_cameras[m_cameraIndex].m_videoHeight,
     				0);
             getOutputMessageQueue()->push(report);
+    	}
+
+    	return true;
+    }
+    else if (MsgConfigureCameraData::match(cmd))
+    {
+    	MsgConfigureCameraData& cfg = (MsgConfigureCameraData&) cmd;
+    	int index = cfg.getIndex();
+    	float mnaualFPS = cfg.getManualFPS();
+    	bool manualFPSEnable = cfg.getManualFPSEnable();
+
+    	if (index < m_cameras.size())
+    	{
+    		m_cameras[index].m_videoFPSManual = mnaualFPS;
+            m_cameras[index].m_videoFPSManualEnable = manualFPSEnable;
     	}
 
     	return true;
