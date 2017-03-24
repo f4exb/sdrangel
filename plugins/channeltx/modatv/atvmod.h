@@ -222,6 +222,8 @@ public:
     public:
         int getdeviceNumber() const { return m_deviceNumber; }
         float getFPS() const { return m_fps; }
+        float getFPSManual() const { return m_fpsManual; }
+        bool getFPSManualEnable() const { return m_fpsManualEnable; }
         int getWidth() const { return m_width; }
         int getHeight() const { return m_height; }
         int getStatus() const { return m_status; }
@@ -229,6 +231,8 @@ public:
         static MsgReportCameraData* create(
         		int deviceNumber,
 				float fps,
+				float fpsManual,
+				bool fpsManualEnable,
 				int width,
 				int height,
 				int status)
@@ -236,6 +240,8 @@ public:
             return new MsgReportCameraData(
             		deviceNumber,
 					fps,
+					fpsManual,
+					fpsManualEnable,
 					width,
 					height,
 					status);
@@ -244,6 +250,8 @@ public:
     protected:
         int m_deviceNumber;
         float m_fps;
+        float m_fpsManual;
+        bool m_fpsManualEnable;
         int m_width;
         int m_height;
         int m_status;
@@ -251,12 +259,16 @@ public:
         MsgReportCameraData(
         		int deviceNumber,
         		float fps,
+				float fpsManual,
+				bool fpsManualEnable,
 				int width,
 				int height,
 				int status) :
             Message(),
 			m_deviceNumber(deviceNumber),
 			m_fps(fps),
+			m_fpsManual(fpsManual),
+			m_fpsManualEnable(fpsManualEnable),
 			m_width(width),
 			m_height(height),
 			m_status(status)
@@ -496,22 +508,28 @@ private:
         cv::Mat m_videoFrame;         //!< displayable camera frame
     	int m_cameraNumber;           //!< camera device number
         float m_videoFPS;             //!< camera FPS rate
+        float m_videoFPSManual;       //!< camera FPS rate manually set
+        bool m_videoFPSManualEnable;  //!< Enable camera FPS rate manual set value
         int m_videoWidth;             //!< camera frame width
         int m_videoHeight;            //!< camera frame height
         float m_videoFx;              //!< camera horizontal scaling factor
         float m_videoFy;              //!< camera vertictal scaling factor
         float m_videoFPSq;            //!< camera FPS sacaling factor
+        float m_videoFPSqManual;      //!< camera FPS sacaling factor manually set
         float m_videoFPSCount;        //!< camera FPS fractional counter
         int m_videoPrevFPSCount;      //!< camera FPS previous integer counter
 
         ATVCamera() :
         	m_cameraNumber(-1),
 			m_videoFPS(25.0f),
+			m_videoFPSManual(20.0f),
+			m_videoFPSManualEnable(false),
         	m_videoWidth(1),
 			m_videoHeight(1),
 			m_videoFx(1.0f),
 			m_videoFy(1.0f),
 			m_videoFPSq(1.0f),
+			m_videoFPSqManual(1.0f),
 		    m_videoFPSCount(0.0f),
 		    m_videoPrevFPSCount(0)
         {}

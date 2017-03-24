@@ -391,6 +391,8 @@ void ATVMod::pullVideo(Real& sample)
                     report = MsgReportCameraData::create(
                             camera.m_cameraNumber,
                             0.0f,
+							camera.m_videoFPSManual,
+							camera.m_videoFPSManualEnable,
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             1); // open splash screen on GUI side
@@ -417,6 +419,8 @@ void ATVMod::pullVideo(Real& sample)
                     report = MsgReportCameraData::create(
                             camera.m_cameraNumber,
                             camera.m_videoFPS,
+							camera.m_videoFPSManual,
+							camera.m_videoFPSManualEnable,
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             2); // close splash screen on GUI side
@@ -433,6 +437,8 @@ void ATVMod::pullVideo(Real& sample)
                     report = MsgReportCameraData::create(
                             camera.m_cameraNumber,
                             camera.m_videoFPS,
+							camera.m_videoFPSManual,
+							camera.m_videoFPSManualEnable,
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             0);
@@ -615,6 +621,8 @@ bool ATVMod::handleMessage(const Message& cmd)
             report = MsgReportCameraData::create(
             		m_cameras[m_cameraIndex].m_cameraNumber,
     				m_cameras[m_cameraIndex].m_videoFPS,
+                    m_cameras[m_cameraIndex].m_videoFPSManual,
+                    m_cameras[m_cameraIndex].m_videoFPSManualEnable,
     				m_cameras[m_cameraIndex].m_videoWidth,
     				m_cameras[m_cameraIndex].m_videoHeight,
     				0);
@@ -1020,6 +1028,8 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
         report = MsgReportCameraData::create(
                 m_cameras[0].m_cameraNumber,
                 m_cameras[0].m_videoFPS,
+                m_cameras[0].m_videoFPSManual,
+                m_cameras[0].m_videoFPSManualEnable,
                 m_cameras[0].m_videoWidth,
                 m_cameras[0].m_videoHeight,
                 0);

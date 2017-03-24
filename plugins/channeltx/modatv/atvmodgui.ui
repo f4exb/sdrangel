@@ -1097,23 +1097,7 @@
          <string>camera device number</string>
         </property>
         <property name="text">
-         <string>--</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="camerFPS">
-        <property name="minimumSize">
-         <size>
-          <width>66</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>camera FPS</string>
-        </property>
-        <property name="text">
-         <string>--</string>
+         <string>#0</string>
         </property>
        </widget>
       </item>
@@ -1129,7 +1113,77 @@
          <string>camera image size</string>
         </property>
         <property name="text">
-         <string>--</string>
+         <string>640x320</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="camerFPS">
+        <property name="minimumSize">
+         <size>
+          <width>66</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Auto camera FPS</string>
+        </property>
+        <property name="text">
+         <string>-1 FPS</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="manualFPSEnable">
+        <property name="toolTip">
+         <string>Use manual FPS setting</string>
+        </property>
+        <property name="text">
+         <string>M</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="manualFPS">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Manual FPS setting</string>
+        </property>
+        <property name="minimum">
+         <number>20</number>
+        </property>
+        <property name="maximum">
+         <number>300</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>200</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="manualFPSText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Manual FPS</string>
+        </property>
+        <property name="text">
+         <string>20.0 FPS</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
