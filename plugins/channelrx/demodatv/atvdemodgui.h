@@ -84,6 +84,7 @@ private slots:
     void on_deltaFrequencyMinus_toggled(bool minus);
     void on_bfo_valueChanged(int value);
     void on_fmDeviation_valueChanged(int value);
+    void on_screenTabWidget_currentChanged(int index);
 
 private:
 	Ui::ATVDemodGUI* ui;

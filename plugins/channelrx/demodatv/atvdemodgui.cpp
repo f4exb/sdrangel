@@ -370,7 +370,8 @@ void ATVDemodGUI::applySettings()
                 ui->blackLevel->value() / 1000.0f,
                 ui->hSync->isChecked(),
                 ui->vSync->isChecked(),
-                ui->invertVideo->isChecked());
+                ui->invertVideo->isChecked(),
+				ui->screenTabWidget->currentIndex());
 
         qDebug() << "ATVDemodGUI::applySettings:"
                 << " m_objChannelizer.inputSampleRate: " << m_objChannelizer->getInputSampleRate()
@@ -615,6 +616,11 @@ void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
 {
     ui->fmDeviationText->setText(QString("%1").arg(value));
     applyRFSettings();
+}
+
+void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)
+{
+	applySettings();
 }
 
 void ATVDemodGUI::lineTimeUpdate()

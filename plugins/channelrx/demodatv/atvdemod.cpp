@@ -99,7 +99,8 @@ void ATVDemod::configure(
         float fltVoltLevelSynchroBlack,
         bool blnHSync,
         bool blnVSync,
-        bool blnInvertVideo)
+        bool blnInvertVideo,
+        int intVideoTabIndex)
 {
     Message* msgCmd = MsgConfigureATVDemod::create(
             fltLineDurationUs,
@@ -110,7 +111,8 @@ void ATVDemod::configure(
             fltVoltLevelSynchroBlack,
             blnHSync,
             blnVSync,
-            blnInvertVideo);
+            blnInvertVideo,
+            intVideoTabIndex);
     objMessageQueue->push(msgCmd);
 }
 
@@ -223,7 +225,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
     }
 
-    if(m_objScopeSink != 0)
+    if ((m_objRunning.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) // do only if scope tab is selected and scope is available
     {
         m_objScopeSink->feed(m_objScopeSampleBuffer.begin(), m_objScopeSampleBuffer.end(), false); // m_ssb = positive only
     }

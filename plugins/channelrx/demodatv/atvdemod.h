@@ -66,6 +66,7 @@ public:
 	    bool m_blnHSync;
 	    bool m_blnVSync;
 	    bool m_blnInvertVideo;
+	    int m_intVideoTabIndex;
 
 	    ATVConfig() :
 	        m_intSampleRate(0),
@@ -77,7 +78,8 @@ public:
 	        m_fltVoltLevelSynchroBlack(1.0f),
 	        m_blnHSync(false),
 	        m_blnVSync(false),
-	        m_blnInvertVideo(false)
+	        m_blnInvertVideo(false),
+			m_intVideoTabIndex(0)
 	    {
 	    }
 	};
@@ -142,7 +144,8 @@ public:
             float fltVoltLevelSynchroBlack,
             bool blnHSync,
             bool blnVSync,
-            bool blnInvertVideo);
+            bool blnInvertVideo,
+			int intVideoTabIndex);
 
     void configureRF(MessageQueue* objMessageQueue,
             ATVModulation enmModulation,
@@ -188,7 +191,8 @@ private:
                     float fltVoltLevelSynchroBlack,
                     bool blnHSync,
                     bool blnVSync,
-                    bool blnInvertVideo)
+                    bool blnInvertVideo,
+					int intVideoTabIndex)
             {
                 return new MsgConfigureATVDemod(
                         fltLineDurationUs,
@@ -199,7 +203,8 @@ private:
                         fltVoltLevelSynchroBlack,
                         blnHSync,
                         blnVSync,
-                        blnInvertVideo);
+                        blnInvertVideo,
+						intVideoTabIndex);
             }
 
             ATVConfig m_objMsgConfig;
@@ -214,7 +219,8 @@ private:
                     float fltVoltLevelSynchroBlack,
                     bool blnHSync,
                     bool blnVSync,
-                    bool blnInvertVideo) :
+                    bool blnInvertVideo,
+					int intVideoTabIndex) :
                 Message()
             {
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
@@ -226,6 +232,7 @@ private:
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;
                 m_objMsgConfig.m_blnInvertVideo = blnInvertVideo;
+                m_objMsgConfig.m_intVideoTabIndex = intVideoTabIndex;
             }
     };
 
