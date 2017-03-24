@@ -205,6 +205,7 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
         int sampleRate = ((ATVDemod::MsgReportEffectiveSampleRate&)objMessage).getSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 0));
         setRFFiltersSlidersRange(sampleRate);
+        lineTimeUpdate();
 
         return true;
     }
@@ -618,7 +619,12 @@ void ATVDemodGUI::lineTimeUpdate()
 {
     float nominalLineTime = getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex());
     int lineTimeScaleFactor = (int) std::log10(nominalLineTime);
-    m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
+
+    if (m_objATVDemod->getEffectiveSampleRate() == 0) {
+        m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
+    } else {
+        m_fltLineTimeMultiplier = 1.0f / m_objATVDemod->getEffectiveSampleRate();
+    }
 
     float lineTime = nominalLineTime + m_fltLineTimeMultiplier * ui->lineTime->value();
 
