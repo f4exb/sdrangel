@@ -688,10 +688,7 @@ void ATVMod::apply(bool force)
         || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
         || (m_config.m_atvModulation != m_running.m_atvModulation) || force)
     {
-        int rateUnits, nbPointsPerRateUnit;
-        getBaseValues(m_config.m_outputSampleRate, m_config.m_nbLines * m_config.m_fps, rateUnits, nbPointsPerRateUnit);
-        m_tvSampleRate = (m_config.m_outputSampleRate / rateUnits) * rateUnits; // make sure working sample rate is a multiple of rate units
-        m_pointsPerLine = (m_tvSampleRate / rateUnits) * nbPointsPerRateUnit;
+        getBaseValues(m_config.m_outputSampleRate, m_config.m_nbLines * m_config.m_fps, m_tvSampleRate, m_pointsPerLine);
 
 //        qDebug() << "ATVMod::apply: "
 //                << " m_nbLines: " << m_config.m_nbLines
@@ -722,7 +719,7 @@ void ATVMod::apply(bool force)
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        applyStandard(rateUnits, nbPointsPerRateUnit); // set all timings
+        applyStandard(m_tvSampleRate, m_pointsPerLine); // set all timings
         m_settingsMutex.unlock();
 
         MsgReportEffectiveSampleRate *report;
@@ -774,7 +771,7 @@ void ATVMod::apply(bool force)
     m_running.m_forceDecimator = m_config.m_forceDecimator;
 }
 
-void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)
+void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit)
 {
     int maxPoints = outputSampleRate / linesPerSecond;
     int i = maxPoints;
@@ -808,14 +805,14 @@ float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
 
 void ATVMod::applyStandard(int rateUnits, int nbPointsPerRateUnit)
 {
-    m_pointsPerTU = m_tvSampleRate / rateUnits; // TV sample rate is already set at a multiple of rate units
+    m_pointsPerSync  = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
+    m_pointsPerBP    = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
+    m_pointsPerFP    = (uint32_t) ((2.6f / 64.0f) * m_pointsPerLine);
+    m_pointsPerFSync = (uint32_t) ((2.3f / 64.0f) * m_pointsPerLine);
 
-    m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7 us / rateUnits)
-    m_pointsPerBP      = (uint32_t) roundf(4.7f * m_pointsPerTU); // back porch        (4.7 us / rateUnits)
-    m_pointsPerFP      = (uint32_t) roundf(1.5f * m_pointsPerTU); // front porch       (1.5 us / rateUnits)
-    m_pointsPerFSync   = (uint32_t) roundf(2.3f * m_pointsPerTU); // equalizing pulse  (2.3 us / rateUnits)
-    m_pointsPerImgLine = nbPointsPerRateUnit * m_pointsPerTU - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
-    m_nbHorizPoints    = nbPointsPerRateUnit * m_pointsPerTU; // full line
+    m_pointsPerImgLine = m_pointsPerLine - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
+    m_nbHorizPoints    = m_pointsPerLine;
+
     m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
     m_linesPerVBar     = m_nbImageLines2  / m_nbBars;
     m_hBarIncrement    = m_spanLevel / (float) m_nbBars;

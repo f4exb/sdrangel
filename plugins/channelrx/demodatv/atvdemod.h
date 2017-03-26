@@ -58,7 +58,7 @@ public:
 	{
 	    int m_intSampleRate;
 	    float m_fltLineDuration;
-	    float m_fltTopDurationUs;
+	    float m_fltTopDuration;
 	    float m_fltFramePerS;
 	    float m_fltRatioOfRowsToDisplay;
 	    float m_fltVoltLevelSynchroTop;
@@ -71,7 +71,7 @@ public:
 	    ATVConfig() :
 	        m_intSampleRate(0),
 	        m_fltLineDuration(0.0f),
-	        m_fltTopDurationUs(0.0f),
+	        m_fltTopDuration(0.0f),
 	        m_fltFramePerS(0.0f),
 	        m_fltRatioOfRowsToDisplay(0.0f),
 	        m_fltVoltLevelSynchroTop(0.0f),
@@ -227,7 +227,7 @@ private:
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_fltFramePerS = fltFramePerS;
                 m_objMsgConfig.m_fltLineDuration = fltLineDurationUs;
-                m_objMsgConfig.m_fltTopDurationUs = fltTopDurationUs;
+                m_objMsgConfig.m_fltTopDuration = fltTopDurationUs;
                 m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
                 m_objMsgConfig.m_blnHSync = blnHSync;
                 m_objMsgConfig.m_blnVSync = blnVSync;
@@ -356,8 +356,6 @@ private:
     ATVConfigPrivate m_objConfigPrivate;
 
     QMutex m_objSettingsMutex;
-
-    static const float m_fltSecondToUs;
 
     void applySettings();
     void demod(Complex& c);

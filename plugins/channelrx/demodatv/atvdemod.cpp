@@ -29,7 +29,6 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 
-const float ATVDemod::m_fltSecondToUs = 1000000.0f;
 const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
@@ -647,7 +646,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
                 << " m_fltFramePerS:" << m_objConfig.m_fltFramePerS
                 << " m_fltLineDurationUs:" << m_objConfig.m_fltLineDuration
                 << " m_fltRatioOfRowsToDisplay:" << m_objConfig.m_fltRatioOfRowsToDisplay
-                << " m_fltTopDurationUs:" << m_objConfig.m_fltTopDurationUs
+                << " m_fltTopDurationUs:" << m_objConfig.m_fltTopDuration
                 << " m_blnHSync:" << m_objConfig.m_blnHSync
                 << " m_blnVSync:" << m_objConfig.m_blnVSync;
 
@@ -730,7 +729,7 @@ void ATVDemod::applySettings()
     if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
        || (m_objConfig.m_fltLineDuration != m_objRunning.m_fltLineDuration)
        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
-       || (m_objConfig.m_fltTopDurationUs != m_objRunning.m_fltTopDurationUs)
+       || (m_objConfig.m_fltTopDuration != m_objRunning.m_fltTopDuration)
        || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay))
     {
         m_objSettingsMutex.lock();
@@ -746,7 +745,7 @@ void ATVDemod::applySettings()
                 << " m_intNumberSamplePerLine: " << m_intNumberSamplePerLine
                 << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay;
 
-        m_intNumberSamplePerTop = (int) ((m_objConfig.m_fltTopDurationUs * m_objConfig.m_intSampleRate) / m_fltSecondToUs);
+        m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
         m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
 
         m_intRowsLimit = m_intNumberOfLines-1;

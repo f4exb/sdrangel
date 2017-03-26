@@ -404,7 +404,7 @@ public:
     Real getMagSq() const { return m_movingAverage.average(); }
     void getCameraNumbers(std::vector<int>& numbers);
 
-    static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit);
+    static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit);
     static float getRFBandwidthDivisor(ATVModulation modulation);
 
 signals:

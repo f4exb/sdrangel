@@ -104,6 +104,7 @@ private:
     ScopeVisNG* m_objScopeVis;
 
     float m_fltLineTimeMultiplier;
+    float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
@@ -115,6 +116,7 @@ private:
     void setChannelMarkerBandwidth();
     void setRFFiltersSlidersRange(int sampleRate);
     void lineTimeUpdate();
+    void topTimeUpdate();
     static float getFps(int fpsIndex);
     static float getNominalLineTime(int nbLinesIndex, int fpsIndex);
 

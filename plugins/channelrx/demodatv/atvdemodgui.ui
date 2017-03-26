@@ -737,25 +737,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="lineTimeText">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Effective line length value</string>
-        </property>
-        <property name="text">
-         <string>us</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="4">
        <widget class="QLabel" name="topTimeLabel">
         <property name="text">
@@ -769,7 +750,7 @@
          <string>Horizontal top length adjustment</string>
         </property>
         <property name="minimum">
-         <number>1</number>
+         <number>-30</number>
         </property>
         <property name="maximum">
          <number>30</number>
@@ -781,7 +762,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -792,7 +773,7 @@
        <widget class="QLabel" name="topTimeText">
         <property name="minimumSize">
          <size>
-          <width>55</width>
+          <width>62</width>
           <height>0</height>
          </size>
         </property>
@@ -819,6 +800,25 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lineTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>62</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Effective line length value</string>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&amp;mu;S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
