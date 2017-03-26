@@ -84,12 +84,10 @@ ATVMod::ATVMod() :
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
-    applyStandard();
-
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;
 
-    apply(true);
+    apply(true); // does applyStandard() too;
 
     m_movingAverage.resize(16, 0);
 }
@@ -691,9 +689,18 @@ void ATVMod::apply(bool force)
         || (m_config.m_atvModulation != m_running.m_atvModulation) || force)
     {
         int rateUnits, nbPointsPerRateUnit;
-        getBaseValues(m_config.m_nbLines * m_config.m_fps, rateUnits, nbPointsPerRateUnit);
+        getBaseValues(m_config.m_outputSampleRate, m_config.m_nbLines * m_config.m_fps, rateUnits, nbPointsPerRateUnit);
         m_tvSampleRate = (m_config.m_outputSampleRate / rateUnits) * rateUnits; // make sure working sample rate is a multiple of rate units
         m_pointsPerLine = (m_tvSampleRate / rateUnits) * nbPointsPerRateUnit;
+
+//        qDebug() << "ATVMod::apply: "
+//                << " m_nbLines: " << m_config.m_nbLines
+//                << " m_fps: " << m_config.m_fps
+//                << " rateUnits: " << rateUnits
+//                << " nbPointsPerRateUnit: " << nbPointsPerRateUnit
+//                << " m_outputSampleRate: " << m_config.m_outputSampleRate
+//                << " m_tvSampleRate: " << m_tvSampleRate
+//                << " m_pointsPerTU: " << m_pointsPerTU;
 
         m_settingsMutex.lock();
 
@@ -715,7 +722,7 @@ void ATVMod::apply(bool force)
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        applyStandard(); // set all timings
+        applyStandard(rateUnits, nbPointsPerRateUnit); // set all timings
         m_settingsMutex.unlock();
 
         MsgReportEffectiveSampleRate *report;
@@ -767,17 +774,18 @@ void ATVMod::apply(bool force)
     m_running.m_forceDecimator = m_config.m_forceDecimator;
 }
 
-void ATVMod::getBaseValues(int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)
+void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, int& nbPointsPerRateUnit)
 {
-    int i = 0;
+    int maxPoints = outputSampleRate / linesPerSecond;
+    int i = maxPoints;
 
-    for (; i < 100; i++)
+    for (; i > 0; i--)
     {
-        if (((100+i) * linesPerSecond) % 1000 == 0)
+        if ((i * linesPerSecond) % 1000 == 0)
             break;
     }
 
-    nbPointsPerRateUnit = (i == 100) ? 100 : 100+i;
+    nbPointsPerRateUnit = i;
     sampleRateUnits = nbPointsPerRateUnit * linesPerSecond;
 }
 
@@ -798,10 +806,8 @@ float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
     }
 }
 
-void ATVMod::applyStandard()
+void ATVMod::applyStandard(int rateUnits, int nbPointsPerRateUnit)
 {
-    int rateUnits, nbPointsPerRateUnit;
-    getBaseValues(m_config.m_nbLines * m_config.m_fps, rateUnits, nbPointsPerRateUnit);
     m_pointsPerTU = m_tvSampleRate / rateUnits; // TV sample rate is already set at a multiple of rate units
 
     m_pointsPerSync    = (uint32_t) roundf(4.7f * m_pointsPerTU); // normal sync pulse (4.7 us / rateUnits)
@@ -818,6 +824,14 @@ void ATVMod::applyStandard()
     m_nbLines          = m_config.m_nbLines;
     m_nbLines2         = (m_nbLines / 2) + 1;
     m_fps              = m_config.m_fps * 1.0f;
+
+//    qDebug() << "ATVMod::applyStandard: "
+//            << " m_nbLines: " << m_config.m_nbLines
+//            << " m_fps: " << m_config.m_fps
+//            << " rateUnits: " << rateUnits
+//            << " nbPointsPerRateUnit: " << nbPointsPerRateUnit
+//            << " m_tvSampleRate: " << m_tvSampleRate
+//            << " m_pointsPerTU: " << m_pointsPerTU;
 
     switch(m_config.m_atvStd)
     {
