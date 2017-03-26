@@ -699,7 +699,7 @@ private:
     void modulateSample();
     Complex& modulateSSB(Real& sample);
     Complex& modulateVestigialSSB(Real& sample);
-    void applyStandard(int rateUnits, int nbPointsPerRateUnit);
+    void applyStandard();
     void openImage(const QString& fileName);
     void openVideo(const QString& fileName);
     void resizeImage();

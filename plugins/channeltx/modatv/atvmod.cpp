@@ -719,7 +719,7 @@ void ATVMod::apply(bool force)
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        applyStandard(m_tvSampleRate, m_pointsPerLine); // set all timings
+        applyStandard(); // set all timings
         m_settingsMutex.unlock();
 
         MsgReportEffectiveSampleRate *report;
@@ -803,7 +803,7 @@ float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
     }
 }
 
-void ATVMod::applyStandard(int rateUnits, int nbPointsPerRateUnit)
+void ATVMod::applyStandard()
 {
     m_pointsPerSync  = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
     m_pointsPerBP    = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
