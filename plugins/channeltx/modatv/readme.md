@@ -24,24 +24,24 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 The left button can be used to force the rational decimator even when the source and channel samople rates agree. This allows to use the FIR filter of the decimator in any case.
 
-The middle figure is the sample rate in kS/s used in the channel which may differ of the source plugin output sample rate if the rational decimator is engaged. This sample rate is calculated as the multiple of a base rate the closest lower to the source plugin output sample rate.
+The middle figure is the sample rate in kS/s used in the channel which may differ of the source plugin output sample rate if the rational decimator is engaged. This sample rate is calculated as the closest 1 kS/s multiple to the source sample rate to fit an integer number of line points. The number of line points is the full line including synchronization. This number is the sample rate divided by the line frequency. The line frequency is calculated as the nominal number of lines multiplied by the FPS.  
 
-The right figure is the corresponding number of points and therefore also samples per full line including line synchronization pattern. 
-
-The base sample rate is calculated based on the line frquency as the closest multiple of 1 kHz that represents an integer number of points per line greater or equal to 100.
+The right figure is the corresponding number of points and therefore also samples per full line including line synchronization. 
 
 Let's take an example with a 405 lines and 25 FPS video signal and a 2400 kS/s source output sample rate: 
 
   - the line frequency is 405 &#215; 25 = 10125 Hz
-  - 100 points require a sample rate of at least 100 &#215; 10125 = 1012500 S/s to fit one point per sample. This is not a multiple of 1 kS/s so we look for the next number of points that will yield a multiple of 1 kS/s
-  - 104 points yield a sample rate of 104 &#215; 10125 = 1053000 S/s which is a multiple of 1 kS/s and is the closest to 1012500 S/s. So we take 1053 kS/s as the base rate
-  - the channel sample rate at the output of the rational decimator will be 1053 &#215; 2 = 2106 kS/s and will fit 104 &#215; 2 = 208 points per line which produces a fairly good image
+  - 2400 kS/s fit 237.037037037 points per line and therefore is not an integer number
+  - closest sample rate to fit an integer number of points is 232 &#215; 10125 = 2349 kS/s
+  - therefore decimated sample rate is 2349 kS/s and the number of points per line is 232
   
 The example taken in the screenshot is from a 405 lines &#215; 20 FPS video signal:
 
+  - source sample rate is 1625 kS/s
   - line frequency is 8100 Hz
-  - 100 points fit exactly into a 810 kS/s sample rate
-  - the nearest sample rate to 2400 kS/s is 1620 kS/s for 200 points per line 
+  - 200 points fit in 8100 &#215; 200 = 1620 kS/s
+  - 201 points fit in 8100 &#215; 201 = 1628.1 kS/s
+  - therefore the closest sample rate is 1620 kS/s for 200 points per line 
 
 <h2>4: Channel power</h2>
 
@@ -184,10 +184,18 @@ Use this combo to select the camera source when more than one is available. the 
 
 This is the device number used by OpenCV which on Linux systems correspond to the /dev/video device number. i.e. "#0" for /dev/video0.
 
-<h2>16. Camera FPS</h2>
+<h2>16. Camera image size</h2>
+
+This is the width x height camera iamge size in pixels
+
+<h2>17. System camera FPS</h2>
 
 This is the camera FPS. On Windows there is no dynamic FPS check and a fixed 5 FPS is set for each camera. On Linux 90% of the calculated FPS is divided by the number of scanned cameras to give the final FPS. This is an attempt to avoid congestion when multiple cameras are available however this was only tested with two cameras.
 
-<h2>17. Camera image size</h2>
+<h2>18. Manual camera FPS toggle</h2>
 
-This is the width x height camera iamge size in pixels
+Use this button to switch between system camera FPS (off) and manual camera FPS (on)
+
+<h2>19. Manual camera FPS adjust</h2>
+
+Use this dial button to adjust camera FPS manually between 2 and 30 FPS in 0.1 FPS steps. The manual FPS value appears on the right of the button.
