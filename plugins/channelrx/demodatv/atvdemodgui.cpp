@@ -509,12 +509,14 @@ void ATVDemodGUI::on_blackLevel_valueChanged(int value)
 
 void ATVDemodGUI::on_lineTime_valueChanged(int value)
 {
+	ui->lineTime->setToolTip(QString("Line length adjustment (%1)").arg(value));
     lineTimeUpdate();
     applySettings();
 }
 
 void ATVDemodGUI::on_topTime_valueChanged(int value)
 {
+	ui->topTime->setToolTip(QString("Horizontal sync pulse length adjustment (%1)").arg(value));
     topTimeUpdate();
     applySettings();
 }
