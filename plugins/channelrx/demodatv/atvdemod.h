@@ -45,6 +45,13 @@ class ATVDemod : public BasebandSampleSink
 
 public:
 
+    enum ATVStd
+    {
+        ATVStdPAL625,
+        ATVStdPAL525,
+        ATVStd405
+    };
+
 	enum ATVModulation {
 	    ATV_FM1,  //!< Classical frequency modulation with discriminator #1
 	    ATV_FM2,  //!< Classical frequency modulation with discriminator #2
@@ -57,6 +64,7 @@ public:
 	struct ATVConfig
 	{
 	    int m_intSampleRate;
+	    ATVStd m_enmATVStandard;
 	    float m_fltLineDuration;
 	    float m_fltTopDuration;
 	    float m_fltFramePerS;
@@ -70,6 +78,7 @@ public:
 
 	    ATVConfig() :
 	        m_intSampleRate(0),
+	        m_enmATVStandard(ATVStdPAL625),
 	        m_fltLineDuration(0.0f),
 	        m_fltTopDuration(0.0f),
 	        m_fltFramePerS(0.0f),
@@ -139,6 +148,7 @@ public:
             float fltLineDurationUs,
             float fltTopDurationUs,
             float fltFramePerS,
+            ATVStd enmATVStandard,
             float fltRatioOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
@@ -186,6 +196,7 @@ private:
                     float fltLineDurationUs,
                     float fltTopDurationUs,
                     float fltFramePerS,
+                    ATVStd enmATVStandard,
                     float fltRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
@@ -198,6 +209,7 @@ private:
                         fltLineDurationUs,
                         fltTopDurationUs,
                         fltFramePerS,
+                        enmATVStandard,
                         fltRatioOfRowsToDisplay,
                         fltVoltLevelSynchroTop,
                         fltVoltLevelSynchroBlack,
@@ -214,6 +226,7 @@ private:
                     float fltLineDurationUs,
                     float fltTopDurationUs,
                     float fltFramePerS,
+                    ATVStd enmATVStandard,
                     float flatRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
@@ -226,6 +239,7 @@ private:
                 m_objMsgConfig.m_fltVoltLevelSynchroBlack = fltVoltLevelSynchroBlack;
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_fltFramePerS = fltFramePerS;
+                m_objMsgConfig.m_enmATVStandard = enmATVStandard;
                 m_objMsgConfig.m_fltLineDuration = fltLineDurationUs;
                 m_objMsgConfig.m_fltTopDuration = fltTopDurationUs;
                 m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
@@ -295,6 +309,9 @@ private:
     int m_intNumberSamplePerTop;
     int m_intNumberOfLines;
     int m_intNumberOfRowsToDisplay;
+    int m_intNumberOfSyncLines;
+    int m_intNumberOfBlackLines;
+    int m_intNumberSamplePerEndOfLine;
 
     //*************** PROCESSING  ***************
 
@@ -358,6 +375,7 @@ private:
     QMutex m_objSettingsMutex;
 
     void applySettings();
+    void applyStandard();
     void demod(Complex& c);
     static float getRFBandwidthDivisor(ATVModulation modulation);
 };

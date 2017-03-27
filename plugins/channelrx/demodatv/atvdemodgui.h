@@ -75,6 +75,7 @@ private slots:
     void on_modulation_currentIndexChanged(int index);
     void on_nbLines_currentIndexChanged(int index);
     void on_fps_currentIndexChanged(int index);
+    void on_standard_currentIndexChanged(int index);
     void on_reset_clicked(bool checked);
     void on_rfBW_valueChanged(int value);
     void on_rfOppBW_valueChanged(int value);

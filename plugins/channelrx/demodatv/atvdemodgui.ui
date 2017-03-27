@@ -546,6 +546,28 @@
        </widget>
       </item>
       <item>
+       <widget class="QComboBox" name="standard">
+        <property name="toolTip">
+         <string>TV standard scheme</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>PAL625L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PAL525L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>405L</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="hSync">
         <property name="toolTip">
          <string>Toggle horizontal synchronization</string>

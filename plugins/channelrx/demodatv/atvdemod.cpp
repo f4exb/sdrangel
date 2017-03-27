@@ -77,6 +77,8 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     memset((void*)m_fltBufferQ,0,6*sizeof(float));
 
     m_objPhaseDiscri.setFMScaling(1.0f);
+
+    applyStandard();
 }
 
 ATVDemod::~ATVDemod()
@@ -93,6 +95,7 @@ void ATVDemod::configure(
         float fltLineDurationUs,
         float fltTopDurationUs,
         float fltFramePerS,
+        ATVStd enmATVStandard,
         float fltRatioOfRowsToDisplay,
         float fltVoltLevelSynchroTop,
         float fltVoltLevelSynchroBlack,
@@ -105,6 +108,7 @@ void ATVDemod::configure(
             fltLineDurationUs,
             fltTopDurationUs,
             fltFramePerS,
+            enmATVStandard,
             fltRatioOfRowsToDisplay,
             fltVoltLevelSynchroTop,
             fltVoltLevelSynchroBlack,
@@ -442,7 +446,7 @@ void ATVDemod::demod(Complex& c)
 
     if (blnComputeImage)
     {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex,intVal, intVal, intVal);
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSamplePerTop, intVal, intVal, intVal);
     }
 
     m_intColIndex++;
@@ -508,7 +512,7 @@ void ATVDemod::demod(Complex& c)
 
                 if(blnComputeImage)
                 {
-                    m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                    m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
                 }
             }
         }
@@ -532,7 +536,7 @@ void ATVDemod::demod(Complex& c)
 
             if(m_intRowIndex<m_intNumberOfLines)
             {
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
             }
 
             m_blnLineSynchronized=false;
@@ -561,7 +565,7 @@ void ATVDemod::demod(Complex& c)
 
         if(blnComputeImage)
         {
-            m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
         }
 
         //Rendering when odd image processed
@@ -730,7 +734,8 @@ void ATVDemod::applySettings()
        || (m_objConfig.m_fltLineDuration != m_objRunning.m_fltLineDuration)
        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
        || (m_objConfig.m_fltTopDuration != m_objRunning.m_fltTopDuration)
-       || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay))
+       || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay)
+       || (m_objConfig.m_enmATVStandard != m_objRunning.m_enmATVStandard))
     {
         m_objSettingsMutex.lock();
 
@@ -738,15 +743,21 @@ void ATVDemod::applySettings()
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
 
+        m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
+
+        applyStandard();
+
+        m_objRegisteredATVScreen->resizeATVScreen(
+                m_intNumberSamplePerLine - (m_intNumberSamplePerTop+m_intNumberSamplePerEndOfLine),
+                m_intNumberOfLines - m_intNumberOfBlackLines);
+
         qDebug() << "ATVDemod::applySettings:"
                 << " m_fltLineDuration: " << m_objConfig.m_fltLineDuration
                 << " m_fltFramePerS: " << m_objConfig.m_fltFramePerS
                 << " m_intNumberOfLines: " << m_intNumberOfLines
                 << " m_intNumberSamplePerLine: " << m_intNumberSamplePerLine
-                << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay;
-
-        m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
-        m_objRegisteredATVScreen->resizeATVScreen(m_intNumberSamplePerLine, m_intNumberOfLines);
+                << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay
+                << " m_intNumberOfBlackLines: " << m_intNumberOfBlackLines;
 
         m_intRowsLimit = m_intNumberOfLines-1;
         m_intImageIndex = 0;
@@ -801,6 +812,31 @@ void ATVDemod::applySettings()
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
     m_objRunningPrivate = m_objConfigPrivate;
+}
+
+void ATVDemod::applyStandard()
+{
+    switch(m_objConfig.m_enmATVStandard)
+    {
+    case ATVStd405: // Follows loosely the 405 lines standard
+        // what is left in a 64 us line for the image
+        m_intNumberOfSyncLines  = 24; // (15+7)*2 - 20
+        m_intNumberOfBlackLines = 28; // above + 4
+        break;
+    case ATVStdPAL525: // Follows PAL-M standard
+        // what is left in a 64/1.008 us line for the image
+        m_intNumberOfSyncLines  = 40; // (15+15)*2 - 20
+        m_intNumberOfBlackLines = 44; // above + 4
+        break;
+    case ATVStdPAL625: // Follows PAL-B/G/H standard
+    default:
+        // what is left in a 64 us line for the image
+        m_intNumberOfSyncLines  = 44; // (15+17)*2 - 20
+        m_intNumberOfBlackLines = 48; // above + 4
+    }
+
+    // for now all standards apply this
+    m_intNumberSamplePerEndOfLine = (int) ((7.3f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
 }
 
 int ATVDemod::getSampleRate()
