@@ -40,7 +40,6 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_intRowIndex(0),
     m_intSynchroPoints(0),
     m_blnSynchroDetected(false),
-    m_blnLineSynchronized(false),
     m_blnVerticalSynchroDetected(false),
     m_intRowsLimit(0),
     m_blnImageDetecting(false),
@@ -529,7 +528,6 @@ void ATVDemod::demod(Complex& c)
         m_intColIndex=0;
         m_blnImageDetecting=true;
         m_blnSynchroDetected=false;
-        m_blnLineSynchronized=false;
         m_fltAmpLineAverage=0.0f;
 
         //New line + Interleaving

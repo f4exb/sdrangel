@@ -350,7 +350,6 @@ private:
     int m_intSynchroPoints;
 
     bool m_blnSynchroDetected;
-    bool m_blnLineSynchronized;
     bool m_blnImageDetecting;
     bool m_blnVerticalSynchroDetected;
 
