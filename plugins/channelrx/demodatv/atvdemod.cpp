@@ -526,31 +526,20 @@ void ATVDemod::demod(Complex& c)
     if((m_intColIndex>=m_intNumberSamplePerLine)
        || (m_blnSynchroDetected==true))
     {
-        m_blnSynchroDetected=false;
-        m_blnImageDetecting=true;
-
         m_intColIndex=0;
-
-        if((m_blnSynchroDetected==false) || (m_blnLineSynchronized==true))
-        {
-            //New line + Interleaving
-            m_intRowIndex ++;
-            m_intRowIndex ++;
-
-            if(m_intRowIndex<m_intNumberOfLines)
-            {
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-            }
-
-            m_blnLineSynchronized=false;
-        }
-        else
-        {
-            m_blnLineSynchronized=m_blnSynchroDetected;
-        }
-
+        m_blnImageDetecting=true;
+        m_blnSynchroDetected=false;
+        m_blnLineSynchronized=false;
         m_fltAmpLineAverage=0.0f;
 
+        //New line + Interleaving
+        m_intRowIndex ++;
+        m_intRowIndex ++;
+
+        if(m_intRowIndex<m_intNumberOfLines)
+        {
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+        }
     }
 
     //////////////////////
