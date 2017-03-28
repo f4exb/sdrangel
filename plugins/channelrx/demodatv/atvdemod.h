@@ -297,6 +297,36 @@ private:
             }
     };
 
+    /**
+     * Exponential average using integers and alpha as the inverse of a power of two
+     */
+    class AvgExpInt
+    {
+    public:
+        AvgExpInt(int log2Alpha) : m_log2Alpha(log2Alpha), m_m1(0), m_start(true) {}
+        void reset() { m_start = true; }
+
+        int run(int m0)
+        {
+            if (m_start)
+            {
+                m_m1 = m0;
+                m_start = false;
+                return m0;
+            }
+            else
+            {
+                m_m1 = m0 + m_m1 - (m_m1>>m_log2Alpha);
+                return m_m1>>m_log2Alpha;
+            }
+        }
+
+    private:
+        int m_log2Alpha;
+        int m_m1;
+        bool m_start;
+    };
+
     //*************** SCOPE  ***************
 
     BasebandSampleSink* m_objScopeSink;

@@ -446,7 +446,7 @@ void ATVDemod::demod(Complex& c)
 
     if (blnComputeImage)
     {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSamplePerTop, intVal, intVal, intVal);
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSamplePerTop, intVal, intVal, intVal); // TODO: the subtraction should be made with back porch number of samples
     }
 
     m_intColIndex++;
@@ -454,6 +454,7 @@ void ATVDemod::demod(Complex& c)
     //////////////////////
 
     m_blnSynchroDetected=false;
+
     if((m_objRunning.m_blnHSync) && (m_intRowIndex>1))
     {
         //********** Line Synchro  0-0-0 -> 0.3-0.3 0.3 **********
@@ -518,6 +519,8 @@ void ATVDemod::demod(Complex& c)
         }
     }
 
+    // TODO: stabilize horizontal sync by (exponential) averaging the column index at sync detection.
+    //       Then on the next block trigger on this column index average.
 
     //Horizontal Synchro
     if((m_intColIndex>=m_intNumberSamplePerLine)
