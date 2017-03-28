@@ -2,9 +2,11 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white levels (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM. A plugin supporting audio can be used in the same passband to demodulate an audio carrier but not a subcarrier which excludes FM.
+This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same passband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
 
-The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin. It expects an integer number of MS/s and standard image quality requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. Anything below should be considered experimental quality.
+An optional rational downsampler with lowpass filtering can be used to set the channel sample rate to the 0.5 MS/s multiple which is the closest to the source sample rate. When the downsampler is not engaged the source feeds the channel directly and thus the source sample rate is used. A standard image quality for PAL standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. 
+
+Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Acceptable images (shown in the screenshots here) can be obtained in FM with just 1.3 MHz bandwidth.
 
 <h2>Interface</h2>
 
@@ -14,7 +16,7 @@ The interface is divided into three collapsable sections:
 
   - A: the RF settings
   - B: the video settings
-  - C: the video monitor and scope
+  - C: the video monitor and scope in a tabbed panel arrangement
 
 Each part is detailed next
 
@@ -36,9 +38,9 @@ Use this toggle button to enable or disable the rational downsampler.
 
 Without downsampling the sample rate given by the source plugin is directly applied to the channel.
 
-When the downsampler is engaged the channel sample rate is the closest multiple of 0.5 MS/s below the source sample rate. e.g for a source sample rate of 3.2 MS/s this will be 3 MS/s. If a non null sample rate cannot be obtained the decimator is disabled and the source sample rate is used instead. 
+When the downsampler is engaged the channel sample rate is the closest multiple of 0.5 MS/s below the source sample rate. e.g for a source sample rate of 1.6 MS/s this will be 1.5 MS/s. If a non null sample rate cannot be obtained the decimator is disabled and the source sample rate is used instead. 
 
-When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13). This works also when the decimation ratio is 1.0 e.g source sample rate is 3 MS/s.
+When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13). This works also when the decimation ratio is 1.0 e.g source sample rate is an exact multiple of 0.5 MS/s.
 
 <h3>4: Channel sample rate</h3>
 
@@ -46,17 +48,19 @@ This is the channel sample rate in kS/s possibly downsampled from source when ra
 
 <h3>5: Number of points (or samples) per line</h3>
 
-This is the number of points or samples per complete line including sync and black porchs.
+This is the number of points or samples per complete line including sync and padding. This is derived from the sample rate and line frequency as the ratio of the two. For example with a 625 lines &#215; 25 FPS signal the line frequency is 15625 Hz. If the channel sample rate is 1500 kS/s this yields 1500000/15625 = 96 points. If the ratio is not an integer then the integer part is taken.
+
+Picture definition depends largely on this number and the larger the better but it is useless to have a much greater number than the number of points per line used in transmission.
 
 <h3>6: BFO PLL lock indicator</h3>
 
-Warning: this is experimental.
+&#9888; this is experimental.
 
 When single sideband demodulation is selected (USB, LSB) the BFO is phased locked to the carrier. This indicator turns green if the PLL is locked.
 
 <h3>7: BFO frequency adjustment</h3>
 
-Warning: this is experimental.
+&#9888; this is experimental.
 
 This allows adjstment of BFO frequency in 10 Hz steps from -5 to +5 kHz. You will have to look for the right value to lock to the carrier. See (6) for the lock indicator.
 
@@ -70,20 +74,20 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
 
   - FM1: this is Frequency Modulation with approximative demodulation algorithm not using atan2
   - FM2: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
-  - FM3: this is Frequency Modulation with atan2 approximation
+  - FM3: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
   - AM: this is Amplitude Modulation
-  - USB: USB demodulation synchronous to the carrier
-  - LSB: USB demodulation synchronous to the carrier
+  - USB: &#9888; USB demodulation synchronous to the carrier
+  - LSB: &#9888; LSB demodulation synchronous to the carrier
   
-For FM choose the algorithm that best suits your conditions.
+For FM choose the algorithm that best suits your conditions. &#9888; only FM3 is accurate with regard to FM deviation (see 10).
 
-USB and LSB modes are experimental and do not show good results for present standards sample rates.
+&#9888; USB and LSB modes are experimental and do not show good results for present standards sample rates.
 
-<h3>10: FM excursion adjustment</h3>
+<h3>10: FM deviation adjustment</h3>
 
-Using this button you can adjust the nominal FM excursion as a percentage of the channel bandwidth that is displayed on the right of the button. When a signal with this excursion is received the demodulated signal is in the range -0.5/+0.5 which is shifted to a 0/1 range video signal.
+Using this button you can adjust the nominal FM deviation as a percentage of the channel bandwidth that is displayed on the right of the button. When a signal with this deviation is received the demodulated signal is in the range -0.5/+0.5 which is shifted to a 0/1 range video signal.
 
-Note that the value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.   
+&#9888; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.   
 
 <h3>11: FFT asymmetrical filter toggle</h3>
 
@@ -93,15 +97,15 @@ Use this button to enable/disable the FFT asymmetrical filter.
 
 For all modulations except LSB this is the lower side band.
 
-This slider lets you adjust the opposite band cutoff frequency of the FFT asymmetrical filter. The value in MHz appears on the left of the slider.
+This slider lets you adjust the opposite band cutoff frequency of the FFT asymmetrical filter. The value in kHz appears on the left of the slider.
 
 <h3>13: FFT asymmetrical filter in band cutoff frequency</h3>
 
 For all modulations except LSB this is the upper side band.
 
-This slider lets you adjust the in band cutoff frequency of the FFT asymmetrical filter. The value in MHz appears on the left of the slider.
+This slider lets you adjust the in band cutoff frequency of the FFT asymmetrical filter. The value in kHz appears on the left of the slider.
 
-If the rational downsampler is engaged (3) and the FFT filter is not engaged (11) this slider controls the downsampler cutoff frequency.
+If the rational downsampler is engaged (3) this slider also controls the downsampler cutoff frequency.
 
 <h2>B: Video settings</h2>
 
@@ -119,11 +123,13 @@ This combo lets you chose between a 30, 25, 20 and 16 FPS. This is the resulting
 
 <h3>3: Synchronization standard</h3>
 
-This combo lets you set the standard type relating essentially to frame synchronization. Choice is between:
+This combo lets you set the standard type relating essentially to frame synchronization and blank (black) lines. Choice is between:
 
   - PAL625L: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
   - PAL525L: the only difference with PAL625L is the number of black lines which is down to 15
-  - 405L: this is not the British standard. It just follows the same sheme as the two above but with only 7 black lines per half frame
+  - 405L: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
+
+When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
 
 <h3>4: Horizontal sync</h3>
 
@@ -154,8 +160,8 @@ Use this push button to reset values to a standard setting:
   - Interlacing
   - 100 mV sync level
   - 310 mV black level
-  - 64 microsecond line length
-  - 4.7 microsecond sync pulse length
+  - 64 microsecond line length (middle)
+  - 4.7 microsecond sync pulse length (middle)
   
 <h3>9: Synchronization level</h3>
 
@@ -167,11 +173,15 @@ Use this slider to adjust the black level of the video signal on a 0 to 1V scale
 
 <h3>11: Line length</h3>
 
-This is the line length in time units. The value in microseconds appears on the right of the slider. Nominal value: 64 microseconds.
+This is the line length in time units. The value appears on the right of the slider. Nominal value depends on the nominal line frequency. For example with 405 lines and 20 FPS. The line frequency is 405 &#215; 20 = 8100 Hz thus the nominal line time is the inverse of this value that is &#8776;123.45 &mu;s 
 
-<h3>12: Horizontl synchronization pulse length</h3>
+The slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. For example at 1500 kS/s sample rate this will be the inverse of this value that is &#8776;666.67 ns. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
 
-This is the length in time units of a synchronization top. The value in microseconds appears on the right of the slider. Nominal value 3 microseconds.
+<h3>12: Horizontal synchronization pulse length</h3>
+
+This is the length in time units of a horizontal or line synchronization pulse. The value appears on the right of the slider. Nominal value depends on the nominal line length as described above. The nominal pulse length is derived from the 4.7 &mu;s pulse of a 625 lines standard system with a 64 &mu;s line length. For example with a 405 lines &#215; 20 FPS transmission that has a line length of &#8776;123.45 &mu;s this is (4.7 / 64) &#215; 123.45 &#8776; 9.07 &mu;s. In practice you will adjust it to a slightly smaller value to be able to synchronize.
+
+Similarly to the line length slider the slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
 
 <h2>C: Image</h2>
 
@@ -181,7 +191,7 @@ Select monitor with the monitor tab on the left side.
 
 ![ATV Demodulator plugin GUI Video monitor](../../../doc/img/ATVDemod_pluginC_monitor.png)
 
-This is where the TV image appears. Yes on the screenshot this is the famous [Lenna](https://en.wikipedia.org/wiki/Lenna). The original image is 512 &#215; 512 pixels so it has been cropped to fit the 4:3 format. The screen geometry ratio is fixed to 4:3 format.
+This is where the TV image appears. Yes on the screenshot this is the famous [Lenna](https://en.wikipedia.org/wiki/Lenna). The original image is 512 &#215; 512 pixels so it has been cropped to fit the 4:3 format. The screen geometry ratio is fixed to 4:3 format. You will have to choose the standard (B.3) matching the transmission to ensure that the transmitted image fits perfectly. 
 
 <h3>Scope</h3>
 
@@ -189,6 +199,6 @@ Select scope with the scope tab on the left side.
 
 ![ATV Demodulator plugin GUI Video scope](../../../doc/img/ATVDemod_pluginC_scope.png)
 
-This is a scope widget fed with the video signal. Controls of the scope are the same as with the ChannelAnalyzerNG plugin. Please refer to the [readme](https://github.com/f4exb/sdrangel/tree/master/plugins/channelrx/chanalyzerng) of this plugin for more details.
+This is a scope widget fed with the video signal. Controls of the scope are the same as with the ChannelAnalyzerNG plugin. Please refer to the [source folder](https://github.com/f4exb/sdrangel/tree/master/plugins/channelrx/chanalyzerng) of this plugin for more details.
 
-Note that the video signal is a real signal so the imaginary part is always null. In fact only the "Real" mode for the trace and trigger is interesting.
+Note that the video signal is a real signal so the imaginary part is always null. Therefore only the "Real" mode for both the trace and the trigger is interesting.
