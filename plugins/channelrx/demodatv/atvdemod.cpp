@@ -457,16 +457,16 @@ void ATVDemod::demod(Complex& c)
     if (m_intColIndex >= intSynchroTimeSamples)
     {
         //Floor Detection 0
-        if (fltVal <= m_objRunning.m_fltVoltLevelSynchroTop)
+        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
         {
             m_intSynchroPoints++;
         }
-        else
+        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
         {
             m_intSynchroPoints = 0;
         }
 
-        if (m_intSynchroPoints >= m_intNumberSamplePerTop)
+        if (m_intSynchroPoints > m_intNumberSamplePerTop)
         {
             m_blnSynchroDetected = true;
             m_intSynchroPoints = 0;
