@@ -42,7 +42,6 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_blnSynchroDetected(false),
     m_blnVerticalSynchroDetected(false),
     m_intRowsLimit(0),
-    m_blnImageDetecting(false),
     m_fltEffMin(2000000000.0f),
     m_fltEffMax(-2000000000.0f),
     m_fltAmpMin(-2000000000.0f),
@@ -56,7 +55,8 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_interpolatorDistance(1.0f),
     m_DSBFilter(0),
     m_DSBFilterBuffer(0),
-    m_DSBFilterBufferIndex(0)
+    m_DSBFilterBufferIndex(0),
+    m_objAvgColIndex(2)
 {
     setObjectName("ATVDemod");
 
@@ -445,7 +445,7 @@ void ATVDemod::demod(Complex& c)
 
     if (blnComputeImage)
     {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSamplePerTop, intVal, intVal, intVal); // TODO: the subtraction should be made with back porch number of samples
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal); // TODO: the subtraction should be made with back porch number of samples
     }
 
     m_intColIndex++;
@@ -454,46 +454,22 @@ void ATVDemod::demod(Complex& c)
 
     m_blnSynchroDetected=false;
 
-    if((m_objRunning.m_blnHSync) && (m_intRowIndex>1))
+    if (m_intColIndex >= intSynchroTimeSamples)
     {
-        //********** Line Synchro  0-0-0 -> 0.3-0.3 0.3 **********
-        if(m_blnImageDetecting==false)
+        //Floor Detection 0
+        if (fltVal <= m_objRunning.m_fltVoltLevelSynchroTop)
         {
-            //Floor Detection 0
-            if (fltVal <= m_objRunning.m_fltVoltLevelSynchroTop)
-            {
-                m_intSynchroPoints ++;
-            }
-            else
-            {
-                m_intSynchroPoints=0;
-            }
-
-            if(m_intSynchroPoints>=m_intNumberSamplePerTop)
-            {
-                m_blnSynchroDetected=true;
-                m_blnImageDetecting=true;
-                m_intSynchroPoints=0;
-            }
+            m_intSynchroPoints++;
         }
         else
         {
-            //Image detection Sub Black 0.3
-            if (fltVal >= m_objRunning.m_fltVoltLevelSynchroBlack)
-            {
-                m_intSynchroPoints ++;
-            }
-            else
-            {
-                m_intSynchroPoints=0;
-            }
+            m_intSynchroPoints = 0;
+        }
 
-            if(m_intSynchroPoints>=m_intNumberSamplePerTop)
-            {
-                m_blnSynchroDetected=false;
-                m_blnImageDetecting=false;
-                m_intSynchroPoints=0;
-            }
+        if (m_intSynchroPoints >= m_intNumberSamplePerTop)
+        {
+            m_blnSynchroDetected = true;
+            m_intSynchroPoints = 0;
         }
     }
 
@@ -502,7 +478,7 @@ void ATVDemod::demod(Complex& c)
     // Vertical Synchro : 3/4 a line necessary
     if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
     {
-       if(m_intColIndex>=intSynchroTimeSamples)
+       if(m_intColIndex >= intSynchroTimeSamples)
        {
             if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
             {
@@ -518,16 +494,24 @@ void ATVDemod::demod(Complex& c)
         }
     }
 
-    // TODO: stabilize horizontal sync by (exponential) averaging the column index at sync detection.
-    //       Then on the next block trigger on this column index average.
-
     //Horizontal Synchro
-    if((m_intColIndex>=m_intNumberSamplePerLine)
-       || (m_blnSynchroDetected==true))
+    if ((m_blnSynchroDetected)
+       || (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop)
+       || (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)))
     {
-        m_intColIndex=0;
-        m_blnImageDetecting=true;
-        m_blnSynchroDetected=false;
+        if (m_blnSynchroDetected
+        && (m_intRowIndex > m_intNumberOfSyncLines)
+        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+        {
+            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+            m_intColIndex = m_intColIndex - m_intAvgColIndex;
+        }
+        else
+        {
+            m_intColIndex = 0;
+        }
+
         m_fltAmpLineAverage=0.0f;
 
         //New line + Interleaving
@@ -738,7 +722,7 @@ void ATVDemod::applySettings()
         applyStandard();
 
         m_objRegisteredATVScreen->resizeATVScreen(
-                m_intNumberSamplePerLine - (m_intNumberSamplePerTop+m_intNumberSamplePerEndOfLine),
+                m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                 m_intNumberOfLines - m_intNumberOfBlackLines);
 
         qDebug() << "ATVDemod::applySettings:"
@@ -826,7 +810,8 @@ void ATVDemod::applyStandard()
     }
 
     // for now all standards apply this
-    m_intNumberSamplePerEndOfLine = (int) ((7.3f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
+    m_intNumberSamplePerLineSignals = (int) ((12.0f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);  // 12.0 = 7.3 + 4.7
+    m_intNumberSaplesPerHSync = (int) ((9.4f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);      // 9.4 = 4.7 + 4.7
 }
 
 int ATVDemod::getSampleRate()
