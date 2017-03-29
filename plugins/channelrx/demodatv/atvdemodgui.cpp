@@ -121,6 +121,7 @@ QByteArray ATVDemodGUI::serialize() const
     s.writeBool(15, ui->invertVideo->isChecked());
     s.writeS32(16, ui->nbLines->currentIndex());
     s.writeS32(17, ui->fmDeviation->value());
+    s.writeS32(18, ui->standard->currentIndex());
 
     return s.final();
 }
@@ -184,6 +185,8 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->nbLines->setCurrentIndex(tmp);
         d.readS32(17, &tmp, 100);
         ui->fmDeviation->setValue(tmp);
+        d.readS32(18, &tmp, 0);
+        ui->standard->setCurrentIndex(tmp);
 
         blockApplySettings(false);
         m_objChannelMarker.blockSignals(false);
