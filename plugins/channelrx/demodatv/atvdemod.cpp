@@ -436,7 +436,7 @@ void ATVDemod::demod(Complex& c)
 
     //********** Filling pixels **********
 
-    bool blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f);
+    bool blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f); // TODO: review this
 
     if (!blnComputeImage)
     {
@@ -445,33 +445,48 @@ void ATVDemod::demod(Complex& c)
 
     if (blnComputeImage)
     {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal); // TODO: the subtraction should be made with back porch number of samples
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
     }
 
     m_intColIndex++;
 
     //////////////////////
 
-    m_blnSynchroDetected=false;
+//    m_blnSynchroDetected=false;
+//
+//    if (m_intColIndex >= intSynchroTimeSamples)
+//    {
+//        //Floor Detection 0
+//        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
+//        {
+//            m_intSynchroPoints++;
+//        }
+//        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+//        {
+//            m_intSynchroPoints = 0;
+//        }
+//
+//        if (m_intSynchroPoints > m_intNumberSamplePerTop)
+//        {
+//            m_blnSynchroDetected = true;
+//            m_intSynchroPoints = 0;
+//        }
+//    }
 
-    if (m_intColIndex >= intSynchroTimeSamples)
+    // Horizontal Synchro detection
+
+    // Floor Detection 0
+    if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
     {
-        //Floor Detection 0
-        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
-        {
-            m_intSynchroPoints++;
-        }
-        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
-        {
-            m_intSynchroPoints = 0;
-        }
-
-        if (m_intSynchroPoints > m_intNumberSamplePerTop)
-        {
-            m_blnSynchroDetected = true;
-            m_intSynchroPoints = 0;
-        }
+        m_intSynchroPoints++;
     }
+    // Black detection 0.3
+    else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+    {
+        m_intSynchroPoints = 0;
+    }
+
+    m_blnSynchroDetected = (m_intSynchroPoints == m_intNumberSamplePerTop);
 
     //********** Rendering if necessary **********
 
@@ -494,24 +509,32 @@ void ATVDemod::demod(Complex& c)
         }
     }
 
-    //Horizontal Synchro
-    if ((m_blnSynchroDetected)
-       || (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop)
-       || (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)))
-    {
-        if (m_blnSynchroDetected
-        && (m_intRowIndex > m_intNumberOfSyncLines)
-        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
-        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
-        {
-            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
-            m_intColIndex = m_intColIndex - m_intAvgColIndex;
-        }
-        else
-        {
-            m_intColIndex = 0;
-        }
+    //Horizontal Synchro processing
 
+    bool blnNewLine = false;
+
+    if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+    else if (m_blnSynchroDetected // Valid H sync detected
+    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
+    && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+    && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+    {
+        m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+        m_intColIndex = m_intColIndex - m_intAvgColIndex;
+        blnNewLine = true;
+    }
+    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+
+    if (blnNewLine)
+    {
         m_fltAmpLineAverage=0.0f;
 
         //New line + Interleaving
@@ -523,6 +546,36 @@ void ATVDemod::demod(Complex& c)
             m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
         }
     }
+
+//    //Horizontal Synchro
+//    if ((m_blnSynchroDetected)
+//       || (m_intColIndex >= m_intNumberSamplePerLine + 2)
+//       || (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)))
+//    {
+//        if (m_blnSynchroDetected
+//        && (m_intRowIndex > m_intNumberOfSyncLines)
+//        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+//        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+//        {
+//            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+//            m_intColIndex = m_intColIndex - m_intAvgColIndex;
+//        }
+//        else
+//        {
+//            m_intColIndex = 0;
+//        }
+//
+//        m_fltAmpLineAverage=0.0f;
+//
+//        //New line + Interleaving
+//        m_intRowIndex ++;
+//        m_intRowIndex ++;
+//
+//        if(m_intRowIndex<m_intNumberOfLines)
+//        {
+//            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+//        }
+//    }
 
     //////////////////////
 
