@@ -42,7 +42,6 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_intSynchroPoints(0),
     m_blnSynchroDetected(false),
     m_blnVerticalSynchroDetected(false),
-    m_intRowsLimit(0),
     m_fltEffMin(2000000000.0f),
     m_fltEffMax(-2000000000.0f),
     m_fltAmpMin(-2000000000.0f),
@@ -719,7 +718,6 @@ void ATVDemod::applySettings()
                 << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay
                 << " m_intNumberOfBlackLines: " << m_intNumberOfBlackLines;
 
-        m_intRowsLimit = m_intNumberOfLines-1;
         m_intImageIndex = 0;
         m_intColIndex=0;
         m_intRowIndex=0;

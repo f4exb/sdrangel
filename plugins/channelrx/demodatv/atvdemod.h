@@ -347,7 +347,6 @@ private:
     //*************** PROCESSING  ***************
 
     int m_intImageIndex;
-    int m_intRowsLimit;
     int m_intSynchroPoints;
 
     bool m_blnSynchroDetected;
