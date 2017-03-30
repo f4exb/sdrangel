@@ -450,7 +450,6 @@ void ATVDemod::demod(Complex& c)
         blnNewLine = true;
     }
     else if (m_blnSynchroDetected // Valid H sync detected
-    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
     && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
     && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
     {
@@ -469,10 +468,9 @@ void ATVDemod::demod(Complex& c)
         m_fltAmpLineAverage=0.0f;
 
         //New line + Interleaving
-        m_intRowIndex ++;
-        m_intRowIndex ++;
+        m_intRowIndex += 2;
 
-        if(m_intRowIndex<m_intNumberOfLines)
+        if (m_intRowIndex < m_intNumberOfLines)
         {
             m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
         }
@@ -480,92 +478,98 @@ void ATVDemod::demod(Complex& c)
         m_intLineIndex++;
     }
 
-    //********** Filling pixels **********
+    // Filling pixels
 
     m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
-
     m_intColIndex++;
 
-    //********** Rendering if necessary **********
+    // Vertical sync and image rendering
 
-    // End of frame processing
-
-    if (m_intRowIndex >= m_intRowsLimit)
+    if (m_objRunning.m_blnVSync) // VSync activated
     {
-        m_blnVerticalSynchroDetected=false;
-
-        m_fltAmpLineAverage=0.0f;
-
-        //Interleave Odd/Even images
-        m_intRowIndex=m_intImageIndex%2;
-
-        //Rendering when odd image processed
-        if(m_intImageIndex%2==1)
+        if (m_intColIndex >= intSynchroTimeSamples)
         {
-            //interleave
-//            m_objRegisteredATVScreen->renderImage(0);
-
-//            if (m_objRFRunning.m_enmModulation == ATV_AM)
-//            {
-//                m_fltAmpMin=m_fltEffMin;
-//                m_fltAmpMax=m_fltEffMax;
-//                m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
-//
-//                if(m_fltAmpDelta<=0.0)
-//                {
-//                    m_fltAmpDelta=1.0f;
-//                }
-//
-//                //Reset extrema
-//                m_fltEffMin=2000000.0f;
-//                m_fltEffMax=-2000000.0f;
-//            }
-
-            m_intRowsLimit = m_intNumberOfLines - 1; // odd image
-        }
-        else
-        {
-            m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // even image
-        }
-
-        //qDebug("1: %d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
-        m_intImageIndex ++;
-    }
-
-    // Vertical Synchro : 3/4 a line necessary
-    if (!m_blnVerticalSynchroDetected
-      && m_objRunning.m_blnVSync
-      && (m_intColIndex >= intSynchroTimeSamples)
-      && (m_fltAmpLineAverage<=fltSynchroTrameLevel))
-    {
-        m_blnVerticalSynchroDetected = true;
-
-    //                qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex, m_intNumberOfLines);
-
-        if (m_intLineIndex % 2 == 0) // even => odd image
-        {
-            m_objRegisteredATVScreen->renderImage(0);
-
-            if (m_objRFRunning.m_enmModulation == ATV_AM)
+            if (m_fltAmpLineAverage <= fltSynchroTrameLevel)
             {
-                m_fltAmpMin=m_fltEffMin;
-                m_fltAmpMax=m_fltEffMax;
-                m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
+                m_fltAmpLineAverage = 0.0f;
 
-                if(m_fltAmpDelta<=0.0)
+                if (!m_blnVerticalSynchroDetected) // not yet
                 {
-                    m_fltAmpDelta=1.0f;
-                }
+                    m_blnVerticalSynchroDetected = true; // prevent repetition
 
-                //Reset extrema
-                m_fltEffMin=2000000.0f;
-                m_fltEffMax=-2000000.0f;
+                    if (m_intLineIndex % 2 == 0) // even => odd image
+                    {
+                        m_objRegisteredATVScreen->renderImage(0);
+
+                        if (m_objRFRunning.m_enmModulation == ATV_AM)
+                        {
+                            m_fltAmpMin = m_fltEffMin;
+                            m_fltAmpMax = m_fltEffMax;
+                            m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                            if(m_fltAmpDelta<=0.0)
+                            {
+                                m_fltAmpDelta=1.0f;
+                            }
+
+                            //Reset extrema
+                            m_fltEffMin = 2000000.0f;
+                            m_fltEffMax = -2000000.0f;
+                        }
+
+                        m_intRowIndex = 1;
+                    }
+                    else
+                    {
+                        m_intRowIndex = 0;
+                    }
+
+                    m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                    m_intLineIndex = 0;
+                    m_intImageIndex++;
+                }
+            }
+            else
+            {
+                m_blnVerticalSynchroDetected = false; // reset
             }
         }
+    }
+    else // no VSync => arbitrary
+    {
+        if (m_intLineIndex >= m_intNumberOfLines/2)
+        {
+            if (m_intImageIndex % 2 == 1) // odd image
+            {
+                m_objRegisteredATVScreen->renderImage(0);
 
-        m_intRowIndex=m_intImageIndex%2;
-        m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-        m_intLineIndex = 0;
+                if (m_objRFRunning.m_enmModulation == ATV_AM)
+                {
+                    m_fltAmpMin = m_fltEffMin;
+                    m_fltAmpMax = m_fltEffMax;
+                    m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                    if(m_fltAmpDelta<=0.0)
+                    {
+                        m_fltAmpDelta=1.0f;
+                    }
+
+                    //Reset extrema
+                    m_fltEffMin = 2000000.0f;
+                    m_fltEffMax = -2000000.0f;
+                }
+
+                m_intRowIndex = 1;
+            }
+            else
+            {
+                m_intRowIndex = 0;
+            }
+
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+            m_intLineIndex = 0;
+            m_intImageIndex++;
+        }
     }
 }
 
