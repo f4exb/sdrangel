@@ -38,6 +38,7 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_intImageIndex(0),
     m_intColIndex(0),
     m_intRowIndex(0),
+    m_intLineIndex(0),
     m_intSynchroPoints(0),
     m_blnSynchroDetected(false),
     m_blnVerticalSynchroDetected(false),
@@ -476,52 +477,13 @@ void ATVDemod::demod(Complex& c)
         }
     }
 
-    //Horizontal Synchro processing
-
-    bool blnNewLine = false;
-
-    if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
-    {
-        m_intColIndex = 0;
-        blnNewLine = true;
-    }
-    else if (m_blnSynchroDetected // Valid H sync detected
-    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
-    && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
-    && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
-    {
-        m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
-        m_intColIndex = m_intColIndex - m_intAvgColIndex;
-        blnNewLine = true;
-    }
-    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
-    {
-        m_intColIndex = 0;
-        blnNewLine = true;
-    }
-
-    if (blnNewLine)
-    {
-        m_fltAmpLineAverage=0.0f;
-
-        //New line + Interleaving
-        m_intRowIndex ++;
-        m_intRowIndex ++;
-
-        if(m_intRowIndex<m_intNumberOfLines)
-        {
-            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-        }
-    }
-
-    //////////////////////
+    // End of frame processing
 
     if(m_intRowIndex>=m_intRowsLimit)
     {
+        m_blnVerticalSynchroDetected=false;
 
-         m_blnVerticalSynchroDetected=false;
-
-         m_fltAmpLineAverage=0.0f;
+        m_fltAmpLineAverage=0.0f;
 
         //Interleave Odd/Even images
         m_intRowIndex=m_intImageIndex%2;
@@ -564,7 +526,49 @@ void ATVDemod::demod(Complex& c)
             m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // even image
         }
 
+        //qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
+        m_intLineIndex = 0;
         m_intImageIndex ++;
+    }
+
+    //Horizontal Synchro processing
+
+    bool blnNewLine = false;
+
+    if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+    else if (m_blnSynchroDetected // Valid H sync detected
+    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
+    && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+    && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+    {
+        m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+        m_intColIndex = m_intColIndex - m_intAvgColIndex;
+        blnNewLine = true;
+    }
+    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+
+    if (blnNewLine)
+    {
+        m_fltAmpLineAverage=0.0f;
+
+        //New line + Interleaving
+        m_intRowIndex ++;
+        m_intRowIndex ++;
+
+        if(m_intRowIndex<m_intNumberOfLines)
+        {
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+        }
+
+        m_intLineIndex++;
     }
 }
 

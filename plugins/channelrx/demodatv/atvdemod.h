@@ -367,6 +367,7 @@ private:
 
     int m_intColIndex;
     int m_intRowIndex;
+    int m_intLineIndex;
 
     AvgExpInt m_objAvgColIndex;
     int m_intAvgColIndex;
