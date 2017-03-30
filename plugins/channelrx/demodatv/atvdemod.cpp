@@ -165,18 +165,6 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
     //********** Accessing ATV Screen context **********
 
-    if(m_intImageIndex==0)
-    {
-        if(m_intNumberOfLines%2==1)
-        {
-            m_intRowsLimit = m_intNumberOfLines;
-        }
-        else
-        {
-            m_intRowsLimit = m_intNumberOfLines-2;
-        }
-    }
-
 #ifdef EXTENDED_DIRECT_SAMPLE
 
     qint16 * ptrBuffer;
@@ -452,27 +440,6 @@ void ATVDemod::demod(Complex& c)
 
     //////////////////////
 
-//    m_blnSynchroDetected=false;
-//
-//    if (m_intColIndex >= intSynchroTimeSamples)
-//    {
-//        //Floor Detection 0
-//        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
-//        {
-//            m_intSynchroPoints++;
-//        }
-//        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
-//        {
-//            m_intSynchroPoints = 0;
-//        }
-//
-//        if (m_intSynchroPoints > m_intNumberSamplePerTop)
-//        {
-//            m_blnSynchroDetected = true;
-//            m_intSynchroPoints = 0;
-//        }
-//    }
-
     // Horizontal Synchro detection
 
     // Floor Detection 0
@@ -547,36 +514,6 @@ void ATVDemod::demod(Complex& c)
         }
     }
 
-//    //Horizontal Synchro
-//    if ((m_blnSynchroDetected)
-//       || (m_intColIndex >= m_intNumberSamplePerLine + 2)
-//       || (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)))
-//    {
-//        if (m_blnSynchroDetected
-//        && (m_intRowIndex > m_intNumberOfSyncLines)
-//        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
-//        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
-//        {
-//            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
-//            m_intColIndex = m_intColIndex - m_intAvgColIndex;
-//        }
-//        else
-//        {
-//            m_intColIndex = 0;
-//        }
-//
-//        m_fltAmpLineAverage=0.0f;
-//
-//        //New line + Interleaving
-//        m_intRowIndex ++;
-//        m_intRowIndex ++;
-//
-//        if(m_intRowIndex<m_intNumberOfLines)
-//        {
-//            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-//        }
-//    }
-
     //////////////////////
 
     if(m_intRowIndex>=m_intRowsLimit)
@@ -604,8 +541,6 @@ void ATVDemod::demod(Complex& c)
                 m_objRegisteredATVScreen->renderImage(NULL);
             }
 
-            m_intRowsLimit = m_intNumberOfLines-1;
-
             if (m_objRFRunning.m_enmModulation == ATV_AM)
             {
                 m_fltAmpMin=m_fltEffMin;
@@ -621,17 +556,12 @@ void ATVDemod::demod(Complex& c)
                 m_fltEffMin=2000000.0f;
                 m_fltEffMax=-2000000.0f;
             }
+
+            m_intRowsLimit = m_intNumberOfLines - 1; // odd image
         }
         else
         {
-            if(m_intNumberOfLines%2==1)
-            {
-                m_intRowsLimit = m_intNumberOfLines;
-            }
-            else
-            {
-                m_intRowsLimit = m_intNumberOfLines-2;
-            }
+            m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // even image
         }
 
         m_intImageIndex ++;
@@ -769,8 +699,8 @@ void ATVDemod::applySettings()
         m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
-
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
+        m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // start with even image
 
         applyStandard();
 
