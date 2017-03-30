@@ -442,6 +442,60 @@ void ATVDemod::demod(Complex& c)
 
     m_blnSynchroDetected = (m_intSynchroPoints == m_intNumberSamplePerTop);
 
+    //Horizontal Synchro processing
+
+    bool blnNewLine = false;
+
+    if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+    else if (m_blnSynchroDetected // Valid H sync detected
+    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
+    && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+    && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+    {
+        m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+        m_intColIndex = m_intColIndex - m_intAvgColIndex;
+        blnNewLine = true;
+    }
+    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
+    {
+        m_intColIndex = 0;
+        blnNewLine = true;
+    }
+
+    if (blnNewLine)
+    {
+        m_fltAmpLineAverage=0.0f;
+
+        //New line + Interleaving
+        m_intRowIndex ++;
+        m_intRowIndex ++;
+
+        if(m_intRowIndex<m_intNumberOfLines)
+        {
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+        }
+
+        m_intLineIndex++;
+    }
+
+    //********** Filling pixels **********
+
+    if (!blnComputeImage)
+    {
+        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
+    }
+
+    if (blnComputeImage)
+    {
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+    }
+
+    m_intColIndex++;
+
     //********** Rendering if necessary **********
 
     // Vertical Synchro : 3/4 a line necessary
@@ -513,59 +567,6 @@ void ATVDemod::demod(Complex& c)
         m_intImageIndex ++;
     }
 
-    //Horizontal Synchro processing
-
-    bool blnNewLine = false;
-
-    if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
-    {
-        m_intColIndex = 0;
-        blnNewLine = true;
-    }
-    else if (m_blnSynchroDetected // Valid H sync detected
-    //&& (m_intRowIndex > m_intNumberOfSyncLines) // FIXME: remove ?
-    && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
-    && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
-    {
-        m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
-        m_intColIndex = m_intColIndex - m_intAvgColIndex;
-        blnNewLine = true;
-    }
-    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
-    {
-        m_intColIndex = 0;
-        blnNewLine = true;
-    }
-
-    if (blnNewLine)
-    {
-        m_fltAmpLineAverage=0.0f;
-
-        //New line + Interleaving
-        m_intRowIndex ++;
-        m_intRowIndex ++;
-
-        if(m_intRowIndex<m_intNumberOfLines)
-        {
-            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-        }
-
-        m_intLineIndex++;
-    }
-
-    //********** Filling pixels **********
-
-    if (!blnComputeImage)
-    {
-        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
-    }
-
-    if (blnComputeImage)
-    {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
-    }
-
-    m_intColIndex++;
 }
 
 void ATVDemod::start()
