@@ -680,11 +680,9 @@ void ATVDemod::applySettings()
 
         applyStandard();
 
-        //m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
-        m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // start with even image
 
         m_objRegisteredATVScreen->resizeATVScreen(
                 m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
@@ -702,7 +700,6 @@ void ATVDemod::applySettings()
         m_intImageIndex = 0;
         m_intColIndex=0;
         m_intRowIndex=0;
-        m_intRowsLimit=0;
 
         m_objSettingsMutex.unlock();
 
