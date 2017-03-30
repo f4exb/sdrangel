@@ -64,7 +64,6 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_intNumberSamplePerLine=0;
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
-    m_intNumberOfRowsToDisplay=0;
 
     m_objMagSqAverage.resize(32, 1.0);
 
@@ -703,7 +702,6 @@ void ATVDemod::applySettings()
         applyStandard();
 
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
-        m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
 
         m_objRegisteredATVScreen->resizeATVScreen(
@@ -715,7 +713,6 @@ void ATVDemod::applySettings()
                 << " m_fltFramePerS: " << m_objConfig.m_fltFramePerS
                 << " m_intNumberOfLines: " << m_intNumberOfLines
                 << " m_intNumberSamplePerLine: " << m_intNumberSamplePerLine
-                << " m_intNumberOfRowsToDisplay: " << m_intNumberOfRowsToDisplay
                 << " m_intNumberOfBlackLines: " << m_intNumberOfBlackLines;
 
         m_intImageIndex = 0;

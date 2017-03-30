@@ -338,7 +338,6 @@ private:
     int m_intNumberSamplePerLine;
     int m_intNumberSamplePerTop;
     int m_intNumberOfLines;
-    int m_intNumberOfRowsToDisplay;
     int m_intNumberOfSyncLines;          //!< this is the number of non displayable lines at the start of a frame. First displayable row comes next.
     int m_intNumberOfBlackLines;         //!< this is the total number of lines not part of the image and is used for vertical screen size
     int m_intNumberSamplePerLineSignals; //!< number of samples in the non image part of the line (signals)
