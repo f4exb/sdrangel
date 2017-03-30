@@ -423,21 +423,7 @@ void ATVDemod::demod(Complex& c)
         intVal=255;
     }
 
-    //********** Filling pixels **********
-
     bool blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f); // TODO: review this
-
-    if (!blnComputeImage)
-    {
-        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
-    }
-
-    if (blnComputeImage)
-    {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
-    }
-
-    m_intColIndex++;
 
     //////////////////////
 
@@ -465,14 +451,17 @@ void ATVDemod::demod(Complex& c)
        {
             if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
             {
-                m_blnVerticalSynchroDetected=true;
+                m_blnVerticalSynchroDetected = true;
 
+                //qDebug("0: %d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
                 m_intRowIndex=m_intImageIndex%2;
 
                 if(blnComputeImage)
                 {
                     m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
                 }
+
+                m_intLineIndex = 0;
             }
         }
     }
@@ -520,8 +509,7 @@ void ATVDemod::demod(Complex& c)
             m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // even image
         }
 
-        //qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
-        m_intLineIndex = 0;
+        //qDebug("1: %d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
         m_intImageIndex ++;
     }
 
@@ -564,6 +552,20 @@ void ATVDemod::demod(Complex& c)
 
         m_intLineIndex++;
     }
+
+    //********** Filling pixels **********
+
+    if (!blnComputeImage)
+    {
+        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
+    }
+
+    if (blnComputeImage)
+    {
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+    }
+
+    m_intColIndex++;
 }
 
 void ATVDemod::start()
