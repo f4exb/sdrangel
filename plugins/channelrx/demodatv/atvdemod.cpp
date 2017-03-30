@@ -488,23 +488,6 @@ void ATVDemod::demod(Complex& c)
 
     //********** Rendering if necessary **********
 
-    // Vertical Synchro : 3/4 a line necessary
-    if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
-    {
-       if(m_intColIndex >= intSynchroTimeSamples)
-       {
-            if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
-            {
-                m_blnVerticalSynchroDetected = true;
-
-                //qDebug("0: %d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
-                m_intRowIndex=m_intImageIndex%2;
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-                m_intLineIndex = 0;
-            }
-        }
-    }
-
     // End of frame processing
 
     if(m_intRowIndex>=m_intRowsLimit)
@@ -549,6 +532,22 @@ void ATVDemod::demod(Complex& c)
         m_intImageIndex ++;
     }
 
+    // Vertical Synchro : 3/4 a line necessary
+    if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
+    {
+       if(m_intColIndex >= intSynchroTimeSamples)
+       {
+            if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
+            {
+                m_blnVerticalSynchroDetected = true;
+
+                qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
+                m_intRowIndex=m_intImageIndex%2;
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                m_intLineIndex = 0;
+            }
+        }
+    }
 }
 
 void ATVDemod::start()
