@@ -678,13 +678,13 @@ void ATVDemod::applySettings()
     {
         m_objSettingsMutex.lock();
 
-        m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
+        applyStandard();
+
+        //m_intNumberOfLines = (int) (1.0f / (m_objConfig.m_fltLineDuration * m_objConfig.m_fltFramePerS));
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberOfRowsToDisplay = (int) (m_objConfig.m_fltRatioOfRowsToDisplay * m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
         m_intRowsLimit = m_intNumberOfLines % 2 == 1 ? m_intNumberOfLines : m_intNumberOfLines-2; // start with even image
-
-        applyStandard();
 
         m_objRegisteredATVScreen->resizeATVScreen(
                 m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
@@ -758,17 +758,20 @@ void ATVDemod::applyStandard()
     switch(m_objConfig.m_enmATVStandard)
     {
     case ATVStd405: // Follows loosely the 405 lines standard
+        m_intNumberOfLines      = 405;
         // what is left in a 64 us line for the image
         m_intNumberOfSyncLines  = 24; // (15+7)*2 - 20
         m_intNumberOfBlackLines = 28; // above + 4
         break;
     case ATVStdPAL525: // Follows PAL-M standard
+        m_intNumberOfLines      = 525;
         // what is left in a 64/1.008 us line for the image
         m_intNumberOfSyncLines  = 40; // (15+15)*2 - 20
         m_intNumberOfBlackLines = 44; // above + 4
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
+        m_intNumberOfLines      = 625;
         // what is left in a 64 us line for the image
         m_intNumberOfSyncLines  = 44; // (15+17)*2 - 20
         m_intNumberOfBlackLines = 48; // above + 4
