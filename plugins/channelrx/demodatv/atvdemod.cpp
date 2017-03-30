@@ -487,12 +487,6 @@ void ATVDemod::demod(Complex& c)
 
         //Interleave Odd/Even images
         m_intRowIndex=m_intImageIndex%2;
-        m_intColIndex=0;
-
-        if(blnComputeImage)
-        {
-            m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-        }
 
         //Rendering when odd image processed
         if(m_intImageIndex%2==1)
