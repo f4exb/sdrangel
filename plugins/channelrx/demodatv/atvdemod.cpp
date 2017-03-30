@@ -423,8 +423,6 @@ void ATVDemod::demod(Complex& c)
         intVal=255;
     }
 
-    bool blnComputeImage = (m_objRunning.m_fltRatioOfRowsToDisplay != 0.5f); // TODO: review this
-
     //////////////////////
 
     // Horizontal Synchro detection
@@ -484,15 +482,7 @@ void ATVDemod::demod(Complex& c)
 
     //********** Filling pixels **********
 
-    if (!blnComputeImage)
-    {
-        blnComputeImage = ((m_intImageIndex/2) % 2 == 0);
-    }
-
-    if (blnComputeImage)
-    {
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
-    }
+    m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
 
     m_intColIndex++;
 
@@ -509,12 +499,7 @@ void ATVDemod::demod(Complex& c)
 
                 //qDebug("0: %d: %d: %d", m_intLineIndex, m_intImageIndex%2, m_intNumberOfLines);
                 m_intRowIndex=m_intImageIndex%2;
-
-                if(blnComputeImage)
-                {
-                    m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-                }
-
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
                 m_intLineIndex = 0;
             }
         }
@@ -535,10 +520,7 @@ void ATVDemod::demod(Complex& c)
         if(m_intImageIndex%2==1)
         {
             //interleave
-            if(blnComputeImage)
-            {
-                m_objRegisteredATVScreen->renderImage(NULL);
-            }
+            m_objRegisteredATVScreen->renderImage(0);
 
             if (m_objRFRunning.m_enmModulation == ATV_AM)
             {
