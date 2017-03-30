@@ -533,42 +533,39 @@ void ATVDemod::demod(Complex& c)
     }
 
     // Vertical Synchro : 3/4 a line necessary
-    if(!m_blnVerticalSynchroDetected && m_objRunning.m_blnVSync)
+    if (!m_blnVerticalSynchroDetected
+      && m_objRunning.m_blnVSync
+      && (m_intColIndex >= intSynchroTimeSamples)
+      && (m_fltAmpLineAverage<=fltSynchroTrameLevel))
     {
-       if(m_intColIndex >= intSynchroTimeSamples)
-       {
-            if(m_fltAmpLineAverage<=fltSynchroTrameLevel) //(m_fltLevelSynchroBlack*(float)(m_intColIndex-((m_intNumberSamplePerLine*12)/64)))) //75
+        m_blnVerticalSynchroDetected = true;
+
+    //                qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex, m_intNumberOfLines);
+
+        if (m_intLineIndex % 2 == 0) // even => odd image
+        {
+            m_objRegisteredATVScreen->renderImage(0);
+
+            if (m_objRFRunning.m_enmModulation == ATV_AM)
             {
-                m_blnVerticalSynchroDetected = true;
+                m_fltAmpMin=m_fltEffMin;
+                m_fltAmpMax=m_fltEffMax;
+                m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
 
-//                qDebug("%d: %d: %d", m_intLineIndex, m_intImageIndex, m_intNumberOfLines);
-
-                if (m_intLineIndex % 2 == 0) // even => odd image
+                if(m_fltAmpDelta<=0.0)
                 {
-                    m_objRegisteredATVScreen->renderImage(0);
-
-                    if (m_objRFRunning.m_enmModulation == ATV_AM)
-                    {
-                        m_fltAmpMin=m_fltEffMin;
-                        m_fltAmpMax=m_fltEffMax;
-                        m_fltAmpDelta=m_fltEffMax-m_fltEffMin;
-
-                        if(m_fltAmpDelta<=0.0)
-                        {
-                            m_fltAmpDelta=1.0f;
-                        }
-
-                        //Reset extrema
-                        m_fltEffMin=2000000.0f;
-                        m_fltEffMax=-2000000.0f;
-                    }
+                    m_fltAmpDelta=1.0f;
                 }
 
-                m_intRowIndex=m_intImageIndex%2;
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
-                m_intLineIndex = 0;
+                //Reset extrema
+                m_fltEffMin=2000000.0f;
+                m_fltEffMax=-2000000.0f;
             }
         }
+
+        m_intRowIndex=m_intImageIndex%2;
+        m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+        m_intLineIndex = 0;
     }
 }
 
