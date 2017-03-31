@@ -314,8 +314,10 @@ See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sd
 
 <h2>To Do</h2>
 
-  - Tx support for devices like Blade-RF or Hack-RF and simple file output (started)
-  - Tx channels to feed Tx devices (started)
+Since version 3.3.2 the "todos" are in the form of tickets opened in the Issues section with the label "feature". When a specific release is targeted it will appear as a milestone. Thus anyone can open a "feature" issue to request a new feature.
+
+Other ideas:
+
   - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection. Introduce the notion of ports of the same physical device.
   - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
   - 32 bit samples for the Channel Analyzer

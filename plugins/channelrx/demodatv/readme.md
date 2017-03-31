@@ -123,7 +123,7 @@ This combo lets you chose between a 30, 25, 20 and 16 FPS. This is the resulting
 
 <h3>3: Synchronization standard</h3>
 
-This combo lets you set the standard type relating essentially to frame synchronization and blank (black) lines. Choice is between:
+This combo lets you set the TV standard type. This sets the number of lines per complete image, frame synchronization parameters and number of blank (black) lines. Choice is between:
 
   - PAL625L: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
   - PAL525L: the only difference with PAL625L is the number of black lines which is down to 15
