@@ -287,11 +287,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qCritical("HackRFInput::applySettings: could not set sample rate TO %d kS/s: %s", m_settings.m_devSampleRate, hackrf_error_name(rc));
+				qCritical("HackRFInput::applySettings: could not set sample rate TO %llu S/s: %s", m_settings.m_devSampleRate, hackrf_error_name(rc));
 			}
 			else
 			{
-				qDebug("HackRFInput::applySettings: sample rate set to %d kS/s", m_settings.m_devSampleRate);
+				qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", m_settings.m_devSampleRate);
 				m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 			}
 		}
@@ -469,8 +469,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
     qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device center freq: " << deviceCenterFrequency << " Hz"
-            << " device sample rate: " << m_settings.m_devSampleRate << "Hz"
-            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "Hz";
+            << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
+            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s";
 
 	return true;
 }

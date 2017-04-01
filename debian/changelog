@@ -1,3 +1,9 @@
+sdrangel (3.3.3-1) unstable; urgency=medium
+
+  * HackRF, BladeRF, RTLSDR plugins: continuous sample rate setting
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 16 Apr 2017 23:14:18 +0100
+
 sdrangel (3.3.2-1) unstable; urgency=medium
 
   * ATV plugins: added 405 lines, 20 and 16 FPS  modes

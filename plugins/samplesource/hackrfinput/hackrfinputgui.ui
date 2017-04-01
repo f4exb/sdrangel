@@ -2,24 +2,16 @@
 <ui version="4.0">
  <class>HackRFInputGui</class>
  <widget class="QWidget" name="HackRFInputGui">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>260</width>
-    <height>210</height>
-   </rect>
-  </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>260</width>
-    <height>210</height>
+    <width>310</width>
+    <height>300</height>
    </size>
   </property>
   <property name="font">
@@ -49,6 +41,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
@@ -118,16 +113,10 @@
      </item>
      <item>
       <widget class="ValueDial" name="centerFrequency" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="minimumSize">
         <size>
          <width>32</width>
-         <height>16</height>
+         <height>50</height>
         </size>
        </property>
        <property name="font">
@@ -171,6 +160,12 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_LOppm">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>
@@ -214,6 +209,12 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_corr">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <item row="0" column="1">
       <widget class="ButtonSwitch" name="dcOffset">
        <property name="toolTip">
@@ -290,11 +291,8 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_samplerate">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
+    <layout class="QHBoxLayout" name="sampleRateLayout">
+     <item>
       <widget class="QLabel" name="sampleRateLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -302,40 +300,52 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>16</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Rate</string>
+        <string>SR</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="sampleRate">
-       <property name="maximumSize">
+     <item>
+      <widget class="ValueDial" name="sampleRate" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
         <size>
-         <width>70</width>
-         <height>16777215</height>
+         <width>32</width>
+         <height>16</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>12</pointsize>
+        </font>
        </property>
        <property name="toolTip">
         <string>Device sample rate</string>
        </property>
+       <zorder>sampleRateLabel</zorder>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="bbFiltLabel">
+     <item>
+      <widget class="QLabel" name="rateUnits">
        <property name="text">
-        <string>BBF</string>
+        <string>S/s</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <widget class="QComboBox" name="bbFilter">
-       <property name="toolTip">
-        <string>RF bandpas filter</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <spacer name="horizontalSpacer">
+     <item>
+      <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -347,10 +357,17 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="sampleRateUnits">
+     <item>
+      <widget class="QLabel" name="bbFiltLabel">
        <property name="text">
-        <string>kS/s</string>
+        <string>BBF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="bbFilter">
+       <property name="toolTip">
+        <string>RF bandpas filter</string>
        </property>
       </widget>
      </item>
@@ -358,6 +375,12 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>
@@ -478,6 +501,12 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_lna">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>
@@ -539,6 +568,9 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_vga" columnstretch="0,0,0">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>
@@ -592,7 +624,7 @@
    <item>
     <layout class="QHBoxLayout" name="padLayout">
      <item>
-      <spacer name="verticaPadlSpacer">
+      <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
