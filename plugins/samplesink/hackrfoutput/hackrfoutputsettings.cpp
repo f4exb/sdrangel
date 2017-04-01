@@ -29,12 +29,12 @@ void HackRFOutputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000 * 1000;
 	m_LOppmTenths = 0;
-	m_devSampleRate = 2400000;
 	m_biasT = false;
 	m_log2Interp = 0;
 	m_lnaExt = false;
 	m_vgaGain = 22;
 	m_bandwidth = 1750000;
+	m_devSampleRate = 2400000;
 }
 
 QByteArray HackRFOutputSettings::serialize() const
@@ -42,12 +42,12 @@ QByteArray HackRFOutputSettings::serialize() const
 	SimpleSerializer s(1);
 
 	s.writeS32(1, m_LOppmTenths);
-	s.writeU32(2, m_devSampleRate);
 	s.writeBool(3, m_biasT);
 	s.writeU32(4, m_log2Interp);
 	s.writeBool(5, m_lnaExt);
 	s.writeU32(6, m_vgaGain);
 	s.writeU32(7, m_bandwidth);
+	s.writeU64(8, m_devSampleRate);
 
 	return s.final();
 }
@@ -67,12 +67,12 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 		int intval;
 
 		d.readS32(1, &m_LOppmTenths, 0);
-		d.readU32(2, &m_devSampleRate, 2400000);
 		d.readBool(3, &m_biasT, false);
 		d.readU32(4, &m_log2Interp, 0);
 		d.readBool(5, &m_lnaExt, false);
 		d.readU32(6, &m_vgaGain, 30);
 		d.readU32(7, &m_bandwidth, 1750000);
+		d.readU64(8, &m_devSampleRate, 2400000);
 
 		return true;
 	}

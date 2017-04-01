@@ -269,13 +269,13 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qCritical("HackRFOutput::applySettings: could not set sample rate to %d S/s: %s",
+				qCritical("HackRFOutput::applySettings: could not set sample rate to %llu S/s: %s",
 				        settings.m_devSampleRate,
 				        hackrf_error_name(rc));
 			}
 			else
 			{
-				qDebug("HackRFOutput::applySettings: sample rate set to %d S/s",
+				qDebug("HackRFOutput::applySettings: sample rate set to %llu S/s",
 				        settings.m_devSampleRate);
 				m_hackRFThread->setSamplerate(settings.m_devSampleRate);
 			}

@@ -29,7 +29,6 @@ void HackRFInputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000 * 1000;
 	m_LOppmTenths = 0;
-	m_devOldSampleRate = 2400000;
 	m_biasT = false;
 	m_log2Decim = 0;
 	m_fcPos = FC_POS_CENTER;
@@ -39,6 +38,7 @@ void HackRFInputSettings::resetToDefaults()
 	m_vgaGain = 16;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+	m_devSampleRate = 2400000;
 }
 
 QByteArray HackRFInputSettings::serialize() const
@@ -46,7 +46,6 @@ QByteArray HackRFInputSettings::serialize() const
 	SimpleSerializer s(1);
 
 	s.writeS32(1, m_LOppmTenths);
-	s.writeU32(2, m_devOldSampleRate);
 	s.writeBool(3, m_biasT);
 	s.writeU32(4, m_log2Decim);
 	s.writeS32(5, m_fcPos);
@@ -76,7 +75,6 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
 		int intval;
 
 		d.readS32(1, &m_LOppmTenths, 0);
-		d.readU32(2, &m_devOldSampleRate, 2400000);
 		d.readBool(3, &m_biasT, false);
 		d.readU32(4, &m_log2Decim, 0);
 		d.readS32(5, &intval, 0);

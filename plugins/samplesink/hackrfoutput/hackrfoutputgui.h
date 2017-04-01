@@ -70,7 +70,6 @@ private:
 	int m_lastEngineState;
 
 	void displaySettings();
-	void displaySampleRates();
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();
@@ -78,8 +77,8 @@ private:
 private slots:
     void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
+	void on_sampleRate_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);
-	void on_sampleRate_currentIndexChanged(int index);
 	void on_biasT_stateChanged(int state);
 	void on_interp_currentIndexChanged(int index);
 	void on_lnaExt_stateChanged(int state);

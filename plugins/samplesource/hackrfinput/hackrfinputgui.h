@@ -78,11 +78,10 @@ private:
 private slots:
     void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
-	void on_newSampleRate_changed(quint64 value);
+	void on_sampleRate_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	void on_sampleRate_currentIndexChanged(int index);
 	void on_biasT_stateChanged(int state);
 	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);

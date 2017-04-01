@@ -247,13 +247,6 @@ void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 	sendSettings();
 }
 
-void HackRFInputGui::on_sampleRate_currentIndexChanged(int index)
-{
-//    int newrate = HackRFSampleRates::getRate(index);
-//    m_settings.m_devOldSampleRate = newrate;
-//	sendSettings();
-}
-
 void HackRFInputGui::on_bbFilter_currentIndexChanged(int index)
 {
     int newBandwidth = HackRFBandwidths::getBandwidth(index);
@@ -279,7 +272,7 @@ void HackRFInputGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void HackRFInputGui::on_newSampleRate_changed(quint64 value)
+void HackRFInputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
     sendSettings();

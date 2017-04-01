@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
-    <height>210</height>
+    <width>320</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>260</width>
-    <height>210</height>
+    <width>320</width>
+    <height>300</height>
    </size>
   </property>
   <property name="font">
@@ -49,6 +49,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
@@ -163,6 +166,12 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_LOppm">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>
@@ -205,22 +214,21 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_freq">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QGridLayout" name="gridLayout_corr">
-     <item row="0" column="0">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_interp">
        <property name="text">
         <string>Int</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="1" column="3">
       <widget class="QCheckBox" name="biasT">
        <property name="toolTip">
         <string>Activate antenna bias tee</string>
@@ -233,7 +241,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="1" column="4">
       <widget class="QCheckBox" name="lnaExt">
        <property name="toolTip">
         <string>Extra LNA +14dB</string>
@@ -246,7 +254,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="1" column="2">
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -259,7 +267,7 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="1">
+     <item row="1" column="1">
       <widget class="QComboBox" name="interp">
        <property name="maximumSize">
         <size>
@@ -308,11 +316,27 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_samplerate">
-     <property name="spacing">
-      <number>3</number>
+    <widget class="Line" name="line_freq">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <item row="0" column="0">
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="leftMargin">
+      <number>6</number>
+     </property>
+     <property name="topMargin">
+      <number>6</number>
+     </property>
+     <property name="rightMargin">
+      <number>6</number>
+     </property>
+     <property name="bottomMargin">
+      <number>6</number>
+     </property>
+     <item>
       <widget class="QLabel" name="sampleRateLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -321,39 +345,41 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Rate</string>
+        <string>SR</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="sampleRate">
-       <property name="maximumSize">
+     <item>
+      <widget class="ValueDial" name="sampleRate" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
         <size>
-         <width>70</width>
-         <height>16777215</height>
+         <width>32</width>
+         <height>16</height>
         </size>
        </property>
-       <property name="toolTip">
-        <string>Device sample rate</string>
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>12</pointsize>
+        </font>
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="bbFiltLabel">
+     <item>
+      <widget class="QLabel" name="sampleRateUnits_2">
        <property name="text">
-        <string>BBF</string>
+        <string>S/s</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <widget class="QComboBox" name="bbFilter">
-       <property name="toolTip">
-        <string>RF bandpas filter</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <spacer name="horizontalSpacer">
+     <item>
+      <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -365,10 +391,17 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="sampleRateUnits">
+     <item>
+      <widget class="QLabel" name="bbFiltLabel">
        <property name="text">
-        <string>kS/s</string>
+        <string>BBF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="bbFilter">
+       <property name="toolTip">
+        <string>RF bandpas filter</string>
        </property>
       </widget>
      </item>
@@ -383,6 +416,9 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_txvga" columnstretch="0,0,0">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
      <property name="spacing">
       <number>3</number>
      </property>

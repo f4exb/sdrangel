@@ -42,6 +42,9 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setValueRange(8, 2400000U, 20000000U);
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -50,7 +53,6 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 	m_deviceSampleSink = new HackRFOutput(m_deviceAPI);
 
-	displaySampleRates();
 	displayBandwidths();
 
 	m_deviceAPI->setSink(m_deviceSampleSink);
@@ -156,7 +158,7 @@ void HackRFOutputGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateText->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'f', 0)));
 }
 
 void HackRFOutputGui::displaySettings()
@@ -166,10 +168,9 @@ void HackRFOutputGui::displaySettings()
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
-    unsigned int sampleRateIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate);
-    ui->sampleRate->setCurrentIndex(sampleRateIndex);
-
 	ui->biasT->setChecked(m_settings.m_biasT);
+
+	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
 	ui->interp->setCurrentIndex(m_settings.m_log2Interp);
 
@@ -179,29 +180,6 @@ void HackRFOutputGui::displaySettings()
 
     unsigned int bandwidthIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->setCurrentIndex(bandwidthIndex);
-}
-
-void HackRFOutputGui::displaySampleRates()
-{
-	int savedIndex = HackRFSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->sampleRate->blockSignals(true);
-	ui->sampleRate->clear();
-
-	for (int i = 0; i < HackRFSampleRates::m_nb_rates; i++)
-	{
-		ui->sampleRate->addItem(QString("%1").arg(QString::number(HackRFSampleRates::m_rates[i] / 1000.0f, 'f', 0)));
-	}
-
-	ui->sampleRate->blockSignals(false);
-
-	if (savedIndex < HackRFSampleRates::m_nb_rates)
-	{
-		ui->sampleRate->setCurrentIndex(savedIndex);
-	}
-	else
-	{
-		ui->sampleRate->setCurrentIndex((int) HackRFSampleRates::m_nb_rates-1);
-	}
 }
 
 void HackRFOutputGui::displayBandwidths()
@@ -239,17 +217,16 @@ void HackRFOutputGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
+void HackRFOutputGui::on_sampleRate_changed(quint64 value)
+{
+    m_settings.m_devSampleRate = value;
+    sendSettings();
+}
+
 void HackRFOutputGui::on_LOppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-	sendSettings();
-}
-
-void HackRFOutputGui::on_sampleRate_currentIndexChanged(int index)
-{
-    int newrate = HackRFSampleRates::getRate(index);
-    m_settings.m_devSampleRate = newrate;
 	sendSettings();
 }
 
