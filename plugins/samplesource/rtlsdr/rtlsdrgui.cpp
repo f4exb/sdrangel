@@ -40,12 +40,8 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
 
-	ui->sampleRate->clear();
-
-	for (int i = 0; i < RTLSDRSampleRates::getNbRates(); i++)
-	{
-		ui->sampleRate->addItem(QString::number(RTLSDRSampleRates::getRate(i)/1000));
-	}
+    ui->newSampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->newSampleRate->setValueRange(7, 950000U, 2400000U);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -202,8 +198,6 @@ void RTLSDRGui::displaySettings()
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
-	unsigned int sampleRateIndex = RTLSDRSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->sampleRate->setCurrentIndex(sampleRateIndex);
 	ui->ppm->setValue(m_settings.m_loPpmCorrection);
 	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
@@ -305,10 +299,6 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 
 void RTLSDRGui::on_sampleRate_currentIndexChanged(int index)
 {
-	int newrate = RTLSDRSampleRates::getRate(index);
-	m_settings.m_devSampleRate = newrate;
-
-	sendSettings();
 }
 
 void RTLSDRGui::on_startStop_toggled(bool checked)
@@ -402,48 +392,21 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
-const unsigned int RTLSDRSampleRates::m_nb_rates = 13;
-const unsigned int RTLSDRSampleRates::m_rates[] = {
-        250000,
-        256000,
-       1000000,
-       1024000,
-       1152000,
-       1200000,
-       1536000,
-       1600000,
-       2000000,
-       2048000,
-       2166667, // for GSM
-       2304000,
-       2400000};
-
-unsigned int RTLSDRSampleRates::getRate(unsigned int rate_index)
+void RTLSDRGui::on_newSampleRate_changed(quint64 value)
 {
-	if (rate_index < m_nb_rates)
-	{
-		return m_rates[rate_index];
-	}
-	else
-	{
-		return m_rates[0];
-	}
+    m_settings.m_devSampleRate = value;
+    sendSettings();
 }
 
-unsigned int RTLSDRSampleRates::getRateIndex(unsigned int rate)
+void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 {
-	for (unsigned int i=0; i < m_nb_rates; i++)
-	{
-		if (rate == m_rates[i])
-		{
-			return i;
-		}
-	}
+    if (checked) {
+        ui->newSampleRate->setValueRange(7, 230000U, 300000U);
+    } else {
+        ui->newSampleRate->setValueRange(7, 950000U, 2400000U);
+    }
 
-	return 0;
-}
-
-unsigned int RTLSDRSampleRates::getNbRates()
-{
-	return RTLSDRSampleRates::m_nb_rates;
+    m_settings.m_devSampleRate = ui->newSampleRate->getValueNew();
+    qDebug("RTLSDRGui::on_lowSampleRate_toggled: %d S/s", m_settings.m_devSampleRate);
+    sendSettings();
 }

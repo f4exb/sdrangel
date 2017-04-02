@@ -17,14 +17,6 @@
 #ifndef DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 #define DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 
-class HackRFSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static const unsigned int m_nb_rates;
-    static const unsigned int m_rates[];
-};
-
 class HackRFBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);

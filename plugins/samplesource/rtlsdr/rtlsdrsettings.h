@@ -25,6 +25,7 @@ struct RTLSDRSettings {
 	} fcPos_t;
 
 	int m_devSampleRate;
+	bool m_lowSampleRate;
 	quint64 m_centerFrequency;
 	qint32 m_gain;
 	qint32 m_loPpmCorrection;

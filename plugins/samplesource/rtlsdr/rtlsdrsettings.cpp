@@ -26,6 +26,7 @@ RTLSDRSettings::RTLSDRSettings()
 void RTLSDRSettings::resetToDefaults()
 {
 	m_devSampleRate = 1024*1000;
+	m_lowSampleRate = false;
 	m_centerFrequency = 435000*1000;
 	m_gain = 0;
 	m_loPpmCorrection = 0;
@@ -39,13 +40,14 @@ QByteArray RTLSDRSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
-	s.writeS32(1, m_devSampleRate);
 	s.writeS32(2, m_gain);
 	s.writeS32(3, m_loPpmCorrection);
 	s.writeU32(4, m_log2Decim);
 	s.writeBool(5, m_dcBlock);
 	s.writeBool(6, m_iqImbalance);
 	s.writeS32(7, (int) m_fcPos);
+    s.writeS32(8, m_devSampleRate);
+    s.writeBool(9, m_lowSampleRate);
 
 	return s.final();
 }
@@ -64,7 +66,6 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
 	{
 		int intval;
 
-		d.readS32(1, &m_devSampleRate, 0);
 		d.readS32(2, &m_gain, 0);
 		d.readS32(3, &m_loPpmCorrection, 0);
 		d.readU32(4, &m_log2Decim, 4);
@@ -72,6 +73,8 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
 		d.readBool(6, &m_iqImbalance, false);
 		d.readS32(7, &intval, 0);
 		m_fcPos = (fcPos_t) intval;
+        d.readS32(8, &m_devSampleRate, 1024*1000);
+        d.readBool(9, &m_lowSampleRate, false);
 
 		return true;
 	}

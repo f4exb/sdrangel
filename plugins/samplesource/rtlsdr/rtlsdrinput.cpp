@@ -329,8 +329,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
             {
                 qDebug() << "RTLSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
                         << " device center freq: " << deviceCenterFrequency << " Hz"
-                        << " device sample rate: " << devSampleRate << "Hz"
-                        << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
+                        << " device sample rate: " << devSampleRate << "S/s"
+                        << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "S/s"
                         << " img: " << f_img << "Hz";
             }
         }
