@@ -42,11 +42,8 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
-	ui->samplerate->clear();
-	for (int i = 0; i < BladerfSampleRates::getNbRates(); i++)
-	{
-		ui->samplerate->addItem(QString::number(BladerfSampleRates::getRate(i)/1000));
-	}
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setValueRange(8, BLADERF_SAMPLERATE_MIN, BLADERF_SAMPLERATE_REC_MAX);
 
 	ui->bandwidth->clear();
 	for (int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
@@ -169,15 +166,13 @@ void BladerfOutputGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateLabel->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateLabel->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
 }
 
 void BladerfOutputGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-
-	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->samplerate->setCurrentIndex(sampleRateIndex);
+	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
 	unsigned int bandwidthIndex = BladerfBandwidths::getBandwidthIndex(m_settings.m_bandwidth);
 	ui->bandwidth->setCurrentIndex(bandwidthIndex);
@@ -205,11 +200,10 @@ void BladerfOutputGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_samplerate_currentIndexChanged(int index)
+void BladerfOutputGui::on_sampleRate_changed(quint64 value)
 {
-	int newrate = BladerfSampleRates::getRate(index);
-	m_settings.m_devSampleRate = newrate;
-	sendSettings();
+    m_settings.m_devSampleRate = value;
+    sendSettings();
 }
 
 void BladerfOutputGui::on_bandwidth_currentIndexChanged(int index)

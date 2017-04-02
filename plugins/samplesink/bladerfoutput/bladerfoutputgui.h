@@ -69,7 +69,7 @@ private:
 private slots:
     void handleDSPMessages();
 	void on_centerFrequency_changed(quint64 value);
-	void on_samplerate_currentIndexChanged(int index);
+    void on_sampleRate_changed(quint64 value);
 	void on_bandwidth_currentIndexChanged(int index);
 	void on_interp_currentIndexChanged(int index);
 	void on_vga1_valueChanged(int value);

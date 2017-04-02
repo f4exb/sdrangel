@@ -461,8 +461,8 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 	}
 
 	qDebug() << "BladerfOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-			<< " device sample rate: " << m_settings.m_devSampleRate << "Hz"
-			<< " baseband sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp) << "Hz"
+			<< " device sample rate: " << m_settings.m_devSampleRate << "S/s"
+			<< " baseband sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp) << "S/s"
 			<< " BW: " << m_settings.m_bandwidth << "Hz";
 
 	return true;
