@@ -94,6 +94,7 @@ void ATVDemod::configure(
         float fltTopDurationUs,
         float fltFramePerS,
         ATVStd enmATVStandard,
+        int intNumberOfLines,
         float fltRatioOfRowsToDisplay,
         float fltVoltLevelSynchroTop,
         float fltVoltLevelSynchroBlack,
@@ -107,6 +108,7 @@ void ATVDemod::configure(
             fltTopDurationUs,
             fltFramePerS,
             enmATVStandard,
+            intNumberOfLines,
             fltRatioOfRowsToDisplay,
             fltVoltLevelSynchroTop,
             fltVoltLevelSynchroBlack,
@@ -695,9 +697,12 @@ void ATVDemod::applySettings()
        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
        || (m_objConfig.m_fltTopDuration != m_objRunning.m_fltTopDuration)
        || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay)
-       || (m_objConfig.m_enmATVStandard != m_objRunning.m_enmATVStandard))
+       || (m_objConfig.m_enmATVStandard != m_objRunning.m_enmATVStandard)
+       || (m_objConfig.m_intNumberOfLines != m_objRunning.m_intNumberOfLines))
     {
         m_objSettingsMutex.lock();
+
+        m_intNumberOfLines = m_objConfig.m_intNumberOfLines;
 
         applyStandard();
 
@@ -772,21 +777,23 @@ void ATVDemod::applyStandard()
 {
     switch(m_objConfig.m_enmATVStandard)
     {
+    case ATVStdShortInterleaved: // Follows loosely the 405 lines standard
+        // what is left in a line for the image
+        m_intNumberOfSyncLines  = 4;
+        m_intNumberOfBlackLines = 4;
+        break;
     case ATVStd405: // Follows loosely the 405 lines standard
-        m_intNumberOfLines      = 405;
-        // what is left in a 64 us line for the image
+        // what is left in a ine for the image
         m_intNumberOfSyncLines  = 24; // (15+7)*2 - 20
         m_intNumberOfBlackLines = 28; // above + 4
         break;
     case ATVStdPAL525: // Follows PAL-M standard
-        m_intNumberOfLines      = 525;
         // what is left in a 64/1.008 us line for the image
         m_intNumberOfSyncLines  = 40; // (15+15)*2 - 20
         m_intNumberOfBlackLines = 44; // above + 4
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
-        m_intNumberOfLines      = 625;
         // what is left in a 64 us line for the image
         m_intNumberOfSyncLines  = 44; // (15+17)*2 - 20
         m_intNumberOfBlackLines = 48; // above + 4

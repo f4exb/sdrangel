@@ -372,6 +372,7 @@ void ATVDemodGUI::applySettings()
                 getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) * (4.7f / 64.0f) + ui->topTime->value() * m_fltTopTimeMultiplier,
                 getFps(ui->fps->currentIndex()),
                 (ATVDemod::ATVStd) ui->standard->currentIndex(),
+                getNumberOfLines(ui->nbLines->currentIndex()),
                 (ui->halfImage->checkState() == Qt::Checked) ? 0.5f : 1.0f,
                 ui->synchLevel->value() / 1000.0f,
                 ui->blackLevel->value() / 1000.0f,
@@ -720,6 +721,23 @@ float ATVDemodGUI::getNominalLineTime(int nbLinesIndex, int fpsIndex)
     case 0:
     default:
         return 1.0f / (625 * fps);
+        break;
+    }
+}
+
+int ATVDemodGUI::getNumberOfLines(int nbLinesIndex)
+{
+    switch(nbLinesIndex)
+    {
+    case 1:
+        return 525;
+        break;
+    case 2:
+        return 405;
+        break;
+    case 0:
+    default:
+        return 625;
         break;
     }
 }

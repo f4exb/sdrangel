@@ -120,6 +120,7 @@ private:
     void topTimeUpdate();
     static float getFps(int fpsIndex);
     static float getNominalLineTime(int nbLinesIndex, int fpsIndex);
+    static int getNumberOfLines(int nbLinesIndex);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

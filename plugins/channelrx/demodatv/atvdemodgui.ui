@@ -498,22 +498,28 @@
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
        <widget class="QComboBox" name="nbLines">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Nominal number of lines per frame</string>
         </property>
         <item>
          <property name="text">
-          <string>625 L</string>
+          <string>625</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>525 L</string>
+          <string>525</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>405 L</string>
+          <string>405</string>
          </property>
         </item>
        </widget>
@@ -563,6 +569,11 @@
         <item>
          <property name="text">
           <string>405L</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SHi</string>
          </property>
         </item>
        </widget>

@@ -49,7 +49,8 @@ public:
     {
         ATVStdPAL625,
         ATVStdPAL525,
-        ATVStd405
+        ATVStd405,
+        ATVStdShortInterleaved
     };
 
 	enum ATVModulation {
@@ -65,6 +66,7 @@ public:
 	{
 	    int m_intSampleRate;
 	    ATVStd m_enmATVStandard;
+	    int m_intNumberOfLines;
 	    float m_fltLineDuration;
 	    float m_fltTopDuration;
 	    float m_fltFramePerS;
@@ -79,6 +81,7 @@ public:
 	    ATVConfig() :
 	        m_intSampleRate(0),
 	        m_enmATVStandard(ATVStdPAL625),
+	        m_intNumberOfLines(625),
 	        m_fltLineDuration(0.0f),
 	        m_fltTopDuration(0.0f),
 	        m_fltFramePerS(0.0f),
@@ -149,6 +152,7 @@ public:
             float fltTopDurationUs,
             float fltFramePerS,
             ATVStd enmATVStandard,
+            int intNumberOfLines,
             float fltRatioOfRowsToDisplay,
             float fltVoltLevelSynchroTop,
             float fltVoltLevelSynchroBlack,
@@ -197,6 +201,7 @@ private:
                     float fltTopDurationUs,
                     float fltFramePerS,
                     ATVStd enmATVStandard,
+                    int intNumberOfLines,
                     float fltRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
@@ -210,6 +215,7 @@ private:
                         fltTopDurationUs,
                         fltFramePerS,
                         enmATVStandard,
+                        intNumberOfLines,
                         fltRatioOfRowsToDisplay,
                         fltVoltLevelSynchroTop,
                         fltVoltLevelSynchroBlack,
@@ -227,6 +233,7 @@ private:
                     float fltTopDurationUs,
                     float fltFramePerS,
                     ATVStd enmATVStandard,
+                    int intNumberOfLines,
                     float flatRatioOfRowsToDisplay,
                     float fltVoltLevelSynchroTop,
                     float fltVoltLevelSynchroBlack,
@@ -240,6 +247,7 @@ private:
                 m_objMsgConfig.m_fltVoltLevelSynchroTop = fltVoltLevelSynchroTop;
                 m_objMsgConfig.m_fltFramePerS = fltFramePerS;
                 m_objMsgConfig.m_enmATVStandard = enmATVStandard;
+                m_objMsgConfig.m_intNumberOfLines = intNumberOfLines;
                 m_objMsgConfig.m_fltLineDuration = fltLineDurationUs;
                 m_objMsgConfig.m_fltTopDuration = fltTopDurationUs;
                 m_objMsgConfig.m_fltRatioOfRowsToDisplay = flatRatioOfRowsToDisplay;
