@@ -339,7 +339,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ValueDial" name="newSampleRate" native="true">
+      <widget class="ValueDial" name="sampleRate" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>

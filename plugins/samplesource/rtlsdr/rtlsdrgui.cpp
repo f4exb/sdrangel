@@ -40,8 +40,8 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
 
-    ui->newSampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
-    ui->newSampleRate->setValueRange(7, 950000U, 2400000U);
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setValueRange(7, 950000U, 2400000U);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -190,12 +190,13 @@ void RTLSDRGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 	ui->ppm->setValue(m_settings.m_loPpmCorrection);
@@ -392,7 +393,7 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
-void RTLSDRGui::on_newSampleRate_changed(quint64 value)
+void RTLSDRGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
     sendSettings();
@@ -401,12 +402,12 @@ void RTLSDRGui::on_newSampleRate_changed(quint64 value)
 void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 {
     if (checked) {
-        ui->newSampleRate->setValueRange(7, 230000U, 300000U);
+        ui->sampleRate->setValueRange(7, 230000U, 300000U);
     } else {
-        ui->newSampleRate->setValueRange(7, 950000U, 2400000U);
+        ui->sampleRate->setValueRange(7, 950000U, 2400000U);
     }
 
-    m_settings.m_devSampleRate = ui->newSampleRate->getValueNew();
+    m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
     qDebug("RTLSDRGui::on_lowSampleRate_toggled: %d S/s", m_settings.m_devSampleRate);
     sendSettings();
 }
