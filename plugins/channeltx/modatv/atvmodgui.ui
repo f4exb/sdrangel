@@ -629,6 +629,11 @@
           <string>405L</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>SHi</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

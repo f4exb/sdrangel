@@ -826,6 +826,21 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
+    case ATVStdShortInterleaved: // Follows loosely the 405 lines standard
+        // what is left in a 64 us line for the image
+        m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
+        m_nbImageLines2    = m_nbImageLines / 2;
+        m_interleaved       = true;
+        m_nbSyncLinesHeadE = 1; // number of sync lines on the top of a frame even
+        m_nbSyncLinesHeadO = 1; // number of sync lines on the top of a frame odd
+        m_nbSyncLinesBottom = 0;
+        m_nbLongSyncLines  = 1;
+        m_nbHalfLongSync   = 0;
+        m_nbWholeEqLines   = 0;
+        m_singleLongSync   = true;
+        m_nbBlankLines     = 1;
+        m_blankLineLvel    = 0.7f;
+        break;
     case ATVStd405: // Follows loosely the 405 lines standard
         // what is left in a 64 us line for the image
         m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
