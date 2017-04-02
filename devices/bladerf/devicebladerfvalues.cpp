@@ -17,64 +17,6 @@
 #include "devicebladerfvalues.h"
 
 
-unsigned int DeviceBladeRFSampleRates::m_nb_rates = 23;
-unsigned int DeviceBladeRFSampleRates::m_rates[] = {
-        1536,
-        1600,
-        2000,
-        2304,
-        2400,
-        3000,
-        3024,
-        3072,
-        3200,
-        4608,
-        4800,
-        6000,
-        6048,
-        6144,
-        7680,
-        9216,
-        9600,
-       10752,
-       12288,
-       18432,
-       19200,
-       24576,
-       30720,
-       36864,
-       39936};
-
-unsigned int DeviceBladeRFSampleRates::getRate(unsigned int rate_index)
-{
-    if (rate_index < m_nb_rates)
-    {
-        return m_rates[rate_index];
-    }
-    else
-    {
-        return m_rates[0];
-    }
-}
-
-unsigned int DeviceBladeRFSampleRates::getRateIndex(unsigned int rate)
-{
-    for (unsigned int i=0; i < m_nb_rates; i++)
-    {
-        if (rate/1000 == m_rates[i])
-        {
-            return i;
-        }
-    }
-
-    return 0;
-}
-
-unsigned int DeviceBladeRFSampleRates::getNbRates()
-{
-    return DeviceBladeRFSampleRates::m_nb_rates;
-}
-
 unsigned int DeviceBladeRFBandwidths::m_nb_halfbw = 16;
 unsigned int DeviceBladeRFBandwidths::m_halfbw[] = {
         750,

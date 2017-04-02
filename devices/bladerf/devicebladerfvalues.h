@@ -18,16 +18,6 @@
 #define DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
 
 
-class DeviceBladeRFSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_rates[];
-    static unsigned int m_nb_rates;
-};
-
 class DeviceBladeRFBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
