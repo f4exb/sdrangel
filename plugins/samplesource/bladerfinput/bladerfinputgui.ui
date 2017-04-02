@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>259</width>
-    <height>210</height>
+    <width>310</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>210</height>
+    <width>310</width>
+    <height>250</height>
    </size>
   </property>
   <property name="font">
@@ -35,7 +35,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -222,7 +231,7 @@
        <property name="toolTip">
         <string>XB200 board mode</string>
        </property>
-       <property name="currentText" stdset="0">
+       <property name="currentText">
         <string>None</string>
        </property>
        <property name="currentIndex">
@@ -283,11 +292,14 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_samplerate">
-     <property name="spacing">
-      <number>3</number>
+    <layout class="QHBoxLayout" name="sampleRateLayout">
+     <property name="topMargin">
+      <number>2</number>
      </property>
-     <item row="0" column="0">
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
       <widget class="QLabel" name="samplerateLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -300,74 +312,37 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="samplerate">
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Sample rate in kS/s</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="samplerateUnit">
-       <property name="text">
-        <string>kS/s</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QComboBox" name="bandwidth">
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>IF bandwidth in kHz</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="bandwidthLabel">
+     <item>
+      <widget class="ValueDial" name="sampleRate" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="text">
-        <string>BW  </string>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>12</pointsize>
+        </font>
        </property>
       </widget>
      </item>
-     <item row="0" column="6">
-      <widget class="QLabel" name="bandwidthUnit">
+     <item>
+      <widget class="QLabel" name="samplerateUnit">
        <property name="text">
-        <string>kHz</string>
+        <string>S/s</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="7">
-      <spacer name="horizontalSpacer_3">
+     <item>
+      <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -379,21 +354,14 @@
        </property>
       </spacer>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0,0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
+     <item>
       <widget class="QLabel" name="label_decim">
        <property name="text">
         <string>Dec</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item>
       <widget class="QComboBox" name="decim">
        <property name="maximumSize">
         <size>
@@ -439,14 +407,47 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="3">
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="4">
+      <spacer name="fcPosRightSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="5">
+      <widget class="QLabel" name="bandwidthLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>BW  </string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
       <widget class="QLabel" name="label_fcPos">
        <property name="text">
         <string>Fp</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="0" column="3">
       <widget class="QComboBox" name="fcPos">
        <property name="toolTip">
         <string>Relative position of device center frequency</string>
@@ -468,7 +469,7 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="6">
+     <item row="0" column="9">
       <widget class="QLabel" name="lnaGainLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -479,22 +480,12 @@
        <property name="text">
         <string>LNA </string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <spacer name="fcPosRightSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="7">
+     <item row="0" column="10">
       <widget class="QComboBox" name="lna">
        <property name="maximumSize">
         <size>
@@ -519,15 +510,35 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="8">
+     <item row="0" column="11">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>dB</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <spacer name="horizontalSpacer_4">
+     <item row="0" column="7">
+      <widget class="QLabel" name="bandwidthUnit">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QComboBox" name="bandwidth">
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>IF bandwidth in kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
+      <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

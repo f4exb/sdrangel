@@ -42,11 +42,9 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
-	ui->samplerate->clear();
-	for (int i = 0; i < BladerfSampleRates::getNbRates(); i++)
-	{
-		ui->samplerate->addItem(QString::number(BladerfSampleRates::getRate(i)/1000));
-	}
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    // BladeRF can go as low as 80 kS/s but because of buffering in practice experience is not good below 330 kS/s
+    ui->sampleRate->setValueRange(8, 330000U, BLADERF_SAMPLERATE_REC_MAX);
 
 	ui->bandwidth->clear();
 	for (int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
@@ -169,18 +167,16 @@ void BladerfInputGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateLabel->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+    ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
 void BladerfInputGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
-
-	unsigned int sampleRateIndex = BladerfSampleRates::getRateIndex(m_settings.m_devSampleRate);
-	ui->samplerate->setCurrentIndex(sampleRateIndex);
 
 	unsigned int bandwidthIndex = BladerfBandwidths::getBandwidthIndex(m_settings.m_bandwidth);
 	ui->bandwidth->setCurrentIndex(bandwidthIndex);
@@ -212,6 +208,12 @@ void BladerfInputGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
+void BladerfInputGui::on_sampleRate_changed(quint64 value)
+{
+    m_settings.m_devSampleRate = value;
+    sendSettings();
+}
+
 void BladerfInputGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
@@ -221,13 +223,6 @@ void BladerfInputGui::on_dcOffset_toggled(bool checked)
 void BladerfInputGui::on_iqImbalance_toggled(bool checked)
 {
 	m_settings.m_iqCorrection = checked;
-	sendSettings();
-}
-
-void BladerfInputGui::on_samplerate_currentIndexChanged(int index)
-{
-	int newrate = BladerfSampleRates::getRate(index);
-	m_settings.m_devSampleRate = newrate;
 	sendSettings();
 }
 

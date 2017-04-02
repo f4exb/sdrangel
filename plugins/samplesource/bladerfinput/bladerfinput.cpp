@@ -531,8 +531,8 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
 			<< " device center freq: " << deviceCenterFrequency << " Hz"
-			<< " device sample rate: " << m_settings.m_devSampleRate << "Hz"
-			<< " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
+			<< " device sample rate: " << m_settings.m_devSampleRate << "S/s"
+			<< " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s"
 			<< " BW: " << m_settings.m_bandwidth << "Hz"
 			<< " img: " << f_img << "Hz"
 			<< " cut: " << f_cut << "Hz"

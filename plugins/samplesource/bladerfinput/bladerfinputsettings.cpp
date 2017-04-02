@@ -28,7 +28,7 @@ BladeRFInputSettings::BladeRFInputSettings()
 void BladeRFInputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
-	m_devSampleRate = 3072000;
+    m_devSampleRate = 3072000;
 	m_lnaGain = 0;
 	m_vga1 = 20;
 	m_vga2 = 9;
@@ -46,7 +46,7 @@ QByteArray BladeRFInputSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
-	s.writeS32(1, m_devSampleRate);
+    s.writeS32(1, m_devSampleRate);
 	s.writeS32(2, m_lnaGain);
 	s.writeS32(3, m_vga1);
 	s.writeS32(4, m_vga2);
@@ -76,7 +76,7 @@ bool BladeRFInputSettings::deserialize(const QByteArray& data)
 	{
 		int intval;
 
-		d.readS32(1, &m_devSampleRate);
+        d.readS32(1, &m_devSampleRate, 3072000);
 		d.readS32(2, &m_lnaGain);
 		d.readS32(3, &m_vga1);
 		d.readS32(4, &m_vga2);

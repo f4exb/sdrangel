@@ -28,7 +28,7 @@ struct BladeRFInputSettings {
 	} fcPos_t;
 
 	quint64 m_centerFrequency;
-	qint32 m_devSampleRate;
+    qint32 m_devSampleRate;
 	qint32 m_lnaGain;
 	qint32 m_vga1;
 	qint32 m_vga2;

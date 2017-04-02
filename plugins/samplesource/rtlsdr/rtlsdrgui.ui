@@ -306,17 +306,11 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="sampleRateLayout">
-     <property name="leftMargin">
-      <number>6</number>
-     </property>
      <property name="topMargin">
-      <number>6</number>
-     </property>
-     <property name="rightMargin">
-      <number>6</number>
+      <number>2</number>
      </property>
      <property name="bottomMargin">
-      <number>6</number>
+      <number>2</number>
      </property>
      <item>
       <widget class="ButtonSwitch" name="lowSampleRate">
