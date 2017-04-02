@@ -635,7 +635,7 @@ private:
     uint32_t m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
-    bool     m_interlaced;       //!< true if image is interlaced (2 half frames per frame)
+    bool     m_interleaved;      //!< true if image is interlaced (2 half frames per frame)
     bool     m_evenImage;        //!< in interlaced mode true if this is an even image
     QMutex   m_settingsMutex;
     int      m_horizontalCount;  //!< current point index on line
@@ -755,7 +755,7 @@ private:
                 {
                 	unsigned char pixv;
 
-                	if (m_interlaced) {
+                	if (m_interleaved) {
                         pixv = m_image.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                 	} else {
                         pixv = m_image.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
@@ -773,7 +773,7 @@ private:
                 {
                 	unsigned char pixv;
 
-                	if (m_interlaced) {
+                	if (m_interleaved) {
                         pixv = m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                 	} else {
                         pixv = m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
@@ -799,7 +799,7 @@ private:
                     {
                         unsigned char pixv;
 
-                        if (m_interlaced) {
+                        if (m_interleaved) {
                             pixv = camera.m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                         } else {
                             pixv = camera.m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
