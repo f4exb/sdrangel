@@ -167,7 +167,7 @@ void HackRFInputGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'f', 0)));
+    ui->deviceRateText->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
 }
 
 void HackRFInputGui::displaySettings()
