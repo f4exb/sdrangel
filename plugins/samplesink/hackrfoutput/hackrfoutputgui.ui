@@ -221,13 +221,6 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_interp">
-       <property name="text">
-        <string>Int</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="3">
       <widget class="QCheckBox" name="biasT">
        <property name="toolTip">
@@ -267,50 +260,18 @@
        </property>
       </spacer>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="bbFiltLabel">
+       <property name="text">
+        <string>BBF</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="interp">
-       <property name="maximumSize">
-        <size>
-         <width>55</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="QComboBox" name="bbFilter">
        <property name="toolTip">
-        <string>Decimation factor</string>
+        <string>RF bandpas filter</string>
        </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>32</string>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>
@@ -392,17 +353,56 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="bbFiltLabel">
+      <widget class="QLabel" name="label_interp">
        <property name="text">
-        <string>BBF</string>
+        <string>Int</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="bbFilter">
-       <property name="toolTip">
-        <string>RF bandpas filter</string>
+      <widget class="QComboBox" name="interp">
+       <property name="maximumSize">
+        <size>
+         <width>55</width>
+         <height>16777215</height>
+        </size>
        </property>
+       <property name="toolTip">
+        <string>Decimation factor</string>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
