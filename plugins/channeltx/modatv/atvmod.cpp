@@ -271,44 +271,38 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
 
 void ATVMod::pullVideo(Real& sample)
 {
-    int iLine = m_lineCount % m_nbLines2;
-
-    if (m_lineCount < m_nbLines2) // even image or non interlaced
+    if (m_lineCount < m_nbLines2 + 1) // even image or non interlaced
     {
-        if (iLine < m_nbSyncLinesHead)
+        int iLine = m_lineCount;
+
+        if (iLine < m_nbSyncLinesHeadE + m_nbBlankLines)
         {
             pullVSyncLine(sample);
         }
-        else if (iLine < m_nbSyncLinesHead + m_nbBlankLines)
+        else if (iLine > m_nbLines2 - m_nbSyncLinesBottom)
         {
-            pullVSyncLine(sample); // pull black line
-        }
-        else if (iLine < m_nbLines2 - 3)
-        {
-            pullImageLine(sample);
+            pullVSyncLine(sample);
         }
         else
         {
-            pullVSyncLine(sample);
+            pullImageLine(sample);
         }
     }
     else // odd image
     {
-        if (iLine < m_nbSyncLinesHead - 1)
+        int iLine = m_lineCount - m_nbLines2 - 1;
+
+        if (iLine < m_nbSyncLinesHeadO + m_nbBlankLines)
         {
             pullVSyncLine(sample);
         }
-        else if (iLine < m_nbSyncLinesHead + m_nbBlankLines - 1)
+        else if (iLine > m_nbLines2 - 1 - m_nbSyncLinesBottom)
         {
-            pullVSyncLine(sample); // pull black line
-        }
-        else if (iLine < m_nbLines2 - 4)
-        {
-            pullImageLine(sample);
+            pullVSyncLine(sample);
         }
         else
         {
-            pullVSyncLine(sample);
+            pullImageLine(sample);
         }
     }
 
@@ -819,7 +813,7 @@ void ATVMod::applyStandard()
     m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
 
     m_nbLines          = m_config.m_nbLines;
-    m_nbLines2         = (m_nbLines / 2) + 1;
+    m_nbLines2         = m_nbLines / 2;
     m_fps              = m_config.m_fps * 1.0f;
 
 //    qDebug() << "ATVMod::applyStandard: "
@@ -837,16 +831,30 @@ void ATVMod::applyStandard()
         m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
-        m_nbSyncLinesHead  = 5; // number of sync lines on the top of a frame
+        m_nbSyncLinesHeadE = 5; // number of sync lines on the top of a frame even
+        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
+        m_nbSyncLinesBottom = 3;
+        m_nbLongSyncLines  = 2;
+        m_nbHalfLongSync   = 1;
+        m_nbWholeEqLines   = 2;
+        m_singleLongSync   = false;
         m_nbBlankLines     = 7; // yields 376 lines (195 - 7) * 2
+        m_blankLineLvel    = m_blackLevel;
         break;
     case ATVStdPAL525: // Follows PAL-M standard
         // what is left in a 64/1.008 us line for the image
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
-        m_nbSyncLinesHead  = 5;
+        m_nbSyncLinesHeadE = 5;
+        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
+        m_nbSyncLinesBottom = 3;
+        m_nbLongSyncLines  = 2;
+        m_nbHalfLongSync   = 1;
+        m_nbWholeEqLines   = 2;
+        m_singleLongSync   = false;
         m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
+        m_blankLineLvel    = m_blackLevel;
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
@@ -854,8 +862,15 @@ void ATVMod::applyStandard()
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
-        m_nbSyncLinesHead  = 5;
+        m_nbSyncLinesHeadE = 5;
+        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
+        m_nbSyncLinesBottom = 3;
+        m_nbLongSyncLines  = 2;
+        m_nbHalfLongSync   = 1;
+        m_nbWholeEqLines   = 2;
+        m_singleLongSync   = false;
         m_nbBlankLines     = 17; // yields 576 lines (305 - 17) * 2
+        m_blankLineLvel    = m_blackLevel;
     }
 
     if (m_imageOK)

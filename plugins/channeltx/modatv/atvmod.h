@@ -631,8 +631,15 @@ private:
     uint32_t m_nbImageLines;     //!< number of image lines excluding synchronization lines
     uint32_t m_nbImageLines2;    //!< same number as above (non interlaced) or half the number above (interlaced)
     uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
-    uint32_t m_nbSyncLinesHead;  //!< number of header sync lines
+    uint32_t m_nbSyncLinesHeadE; //!< number of header sync lines on even frame
+    uint32_t m_nbSyncLinesHeadO; //!< number of header sync lines on odd frame
+    uint32_t m_nbSyncLinesBottom;//!< number of sync lines at bottom
+    uint32_t m_nbLongSyncLines;  //!< number of whole long sync lines for vertical synchronization
+    uint32_t m_nbHalfLongSync;   //!< number of half long sync / equalization lines
+    uint32_t m_nbWholeEqLines;   //!< number of whole equalizing lines
+    bool     m_singleLongSync;   //!< single or double long sync per long sync line
     uint32_t m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
+    float    m_blankLineLvel;    //!< video level of blank lines
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
     bool     m_interleaved;      //!< true if image is interlaced (2 half frames per frame)
@@ -725,9 +732,9 @@ private:
         else if (m_horizontalCount < m_pointsPerSync + m_pointsPerBP + m_pointsPerImgLine)
         {
             int pointIndex = m_horizontalCount - (m_pointsPerSync + m_pointsPerBP);
-            int iLine = m_lineCount % m_nbLines2;
-            int oddity = m_lineCount < m_nbLines2 ? 0 : 1;
-            int iLineImage = iLine - m_nbSyncLinesHead - m_nbBlankLines;
+            int oddity = m_lineCount < m_nbLines2 + 1 ? 0 : 1;
+            int iLine = oddity == 0 ? m_lineCount :  m_lineCount - m_nbLines2 - 1;
+            int iLineImage = iLine - m_nbBlankLines - (oddity == 0 ? m_nbSyncLinesHeadE : m_nbSyncLinesHeadO);
 
             switch(m_running.m_atvModInput)
             {
@@ -822,11 +829,11 @@ private:
 
     inline void pullVSyncLine(Real& sample)
     {
-        int fieldLine = m_lineCount % m_nbLines2;
-
-        if (m_lineCount < m_nbLines2) // even
+        if (m_lineCount < m_nbLines2 + 1) // even
         {
-            if (fieldLine < 2) // 0,1: Whole line "long" pulses
+            int fieldLine = m_lineCount;
+
+            if (fieldLine < m_nbLongSyncLines) // 0,1: Whole line "long" pulses
             {
                 int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
 
@@ -839,7 +846,7 @@ private:
                     sample = m_blackLevel;
                 }
             }
-            else if (fieldLine == 2) // long pulse then equalizing pulse
+            else if (fieldLine < m_nbLongSyncLines + m_nbHalfLongSync) // long pulse then equalizing pulse
             {
                 if (m_horizontalCount < (m_nbHorizPoints/2) - m_pointsPerSync)
                 {
@@ -858,7 +865,7 @@ private:
                     sample = m_blackLevel; // black
                 }
             }
-            else if ((fieldLine < 5) || (fieldLine > m_nbLines2 - 3)) // Whole line equalizing pulses
+            else if (fieldLine < m_nbLongSyncLines + m_nbHalfLongSync + m_nbWholeEqLines) // Whole line equalizing pulses
             {
                 int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
 
@@ -871,21 +878,7 @@ private:
                     sample = m_blackLevel;
                 }
             }
-            else // black images
-            {
-                if (m_horizontalCount < m_pointsPerSync)
-                {
-                    sample = 0.0f;
-                }
-                else
-                {
-                    sample = m_blackLevel;
-                }
-            }
-        }
-        else // odd
-        {
-            if (fieldLine < 1) // equalizing pulse then long pulse
+            else if (fieldLine > m_nbLines2 - m_nbHalfLongSync) // equalizing pulse then long pulse
             {
                 if (m_horizontalCount < m_pointsPerFSync)
                 {
@@ -904,20 +897,7 @@ private:
                     sample = m_blackLevel; // black
                 }
             }
-            else if (fieldLine < 3) // Whole line "long" pulses
-            {
-                int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
-
-                if (halfIndex < (m_nbHorizPoints/2) - m_pointsPerSync) // ultra-black
-                {
-                    sample = 0.0f;
-                }
-                else // black
-                {
-                    sample = m_blackLevel;
-                }
-            }
-            else if ((fieldLine < 5) || (fieldLine > m_nbLines2 - 5)) // Whole line equalizing pulses
+            else if (fieldLine > m_nbLines2 - m_nbHalfLongSync - m_nbWholeEqLines) // Whole line equalizing pulses
             {
                 int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
 
@@ -938,7 +918,62 @@ private:
                 }
                 else
                 {
+                    sample = m_blankLineLvel;
+                }
+            }
+        }
+        else // odd
+        {
+            int fieldLine = m_lineCount - m_nbLines2 - 1;
+
+            if (fieldLine < m_nbLongSyncLines) // 0,1: Whole line "long" pulses
+            {
+                int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
+
+                if (halfIndex < (m_nbHorizPoints/2) - m_pointsPerSync) // ultra-black
+                {
+                    sample = 0.0f;
+                }
+                else // black
+                {
                     sample = m_blackLevel;
+                }
+            }
+            else if (fieldLine < m_nbLongSyncLines + m_nbWholeEqLines) // Whole line equalizing pulses
+            {
+                int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
+
+                if (halfIndex < m_pointsPerFSync) // ultra-black
+                {
+                    sample = 0.0f;
+                }
+                else // black
+                {
+                    sample = m_blackLevel;
+                }
+            }
+            else if (fieldLine > m_nbLines2 - 1 - m_nbWholeEqLines - m_nbHalfLongSync) // Whole line equalizing pulses
+            {
+                int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
+
+                if (halfIndex < m_pointsPerFSync) // ultra-black
+                {
+                    sample = 0.0f;
+                }
+                else // black
+                {
+                    sample = m_blackLevel;
+                }
+            }
+            else // black images
+            {
+                if (m_horizontalCount < m_pointsPerSync)
+                {
+                    sample = 0.0f;
+                }
+                else
+                {
+                    sample = m_blankLineLvel;
                 }
             }
         }
