@@ -288,6 +288,12 @@ int ATVModGUI::getNbLines()
     case 6:
         return 90;
         break;
+    case 7:
+        return 60;
+        break;
+    case 8:
+        return 32;
+        break;
     case 0:
     default:
         return 625;

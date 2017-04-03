@@ -45,6 +45,7 @@ public:
 		ATVStd405,
 		ATVStdShortInterleaved,
 		ATVStdShort,
+		ATVStdHLeap,
     } ATVStd;
 
     typedef enum
@@ -721,11 +722,11 @@ private:
     void resizeCamera();
     void mixImageAndText(cv::Mat& image);
 
-    inline void pullImageLine(Real& sample)
+    inline void pullImageLine(Real& sample, bool noHSync = false)
     {
         if (m_horizontalCount < m_pointsPerSync) // sync pulse
         {
-            sample = 0.0f; // ultra-black
+            sample = noHSync ? m_blackLevel : 0.0f; // ultra-black
         }
         else if (m_horizontalCount < m_pointsPerSync + m_pointsPerBP) // back porch
         {

@@ -288,6 +288,10 @@ void ATVMod::pullVideo(Real& sample)
             pullImageLine(sample);
         }
     }
+    else if (m_running.m_atvStd == ATVStdHLeap) // HLeap special
+    {
+        pullImageLine(sample, true); // pull image line without sync
+    }
     else // odd image
     {
         int iLine = m_lineCount - m_nbLines2 - 1;
@@ -825,8 +829,22 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
-    case ATVStdShort: // Follows loosely the 405 lines standard
-        // what is left in a 64 us line for the image
+    case ATVStdHLeap:
+        m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
+        m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
+        m_interleaved       = false;
+        m_nbSyncLinesHeadE = 0; // number of sync lines on the top of a frame even
+        m_nbSyncLinesHeadO = 0; // number of sync lines on the top of a frame odd
+        m_nbSyncLinesBottom = -1; // force no vsync in even block
+        m_nbLongSyncLines  = 0;
+        m_nbHalfLongSync   = 0;
+        m_nbWholeEqLines   = 0;
+        m_singleLongSync   = true;
+        m_nbBlankLines     = 0;
+        m_blankLineLvel    = 0.7f;
+        m_nbLines2         = m_nbLines - 2; // force last line to slip from the even block
+        break;
+    case ATVStdShort:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
         m_interleaved       = false;
@@ -841,8 +859,7 @@ void ATVMod::applyStandard()
         m_blankLineLvel    = 0.7f;
         m_nbLines2         = m_nbLines; // force non interleaved => treated as even for all lines
         break;
-    case ATVStdShortInterleaved: // Follows loosely the 405 lines standard
-        // what is left in a 64 us line for the image
+    case ATVStdShortInterleaved:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -857,7 +874,6 @@ void ATVMod::applyStandard()
         m_blankLineLvel    = 0.7f;
         break;
     case ATVStd405: // Follows loosely the 405 lines standard
-        // what is left in a 64 us line for the image
         m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -872,7 +888,6 @@ void ATVMod::applyStandard()
         m_blankLineLvel    = m_blackLevel;
         break;
     case ATVStdPAL525: // Follows PAL-M standard
-        // what is left in a 64/1.008 us line for the image
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -888,7 +903,6 @@ void ATVMod::applyStandard()
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
-        // what is left in a 64 us line for the image
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;

@@ -574,6 +574,16 @@
           <string>90</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>60</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -656,7 +666,7 @@
         </item>
         <item>
          <property name="text">
-          <string>405L</string>
+          <string>PAL405</string>
          </property>
         </item>
         <item>
@@ -667,6 +677,11 @@
         <item>
          <property name="text">
           <string>SHni</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>HLeap</string>
          </property>
         </item>
        </widget>
