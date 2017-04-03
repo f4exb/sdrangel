@@ -462,9 +462,39 @@ void ATVDemod::demod(Complex& c)
     }
     else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
     {
-        //qDebug("HLine: %d", m_intColIndex);
-        m_intColIndex = 0;
-        blnNewLine = true;
+        if (m_objRunning.m_enmATVStandard == ATVStdHLeap) // new image in hSync leap mode
+        {
+            m_objRegisteredATVScreen->renderImage(0);
+
+            if (m_objRFRunning.m_enmModulation == ATV_AM)
+            {
+                m_fltAmpMin = m_fltEffMin;
+                m_fltAmpMax = m_fltEffMax;
+                m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                if(m_fltAmpDelta<=0.0)
+                {
+                    m_fltAmpDelta=1.0f;
+                }
+
+                //Reset extrema
+                m_fltEffMin = 2000000.0f;
+                m_fltEffMax = -2000000.0f;
+            }
+
+            m_intColIndex = m_intNumberSamplePerTop; // catch up with passed samples from the line length point
+            m_intRowIndex = 0;
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+            m_intLineIndex = 0;
+            m_intImageIndex++;
+            blnNewLine = false; // done already
+        }
+        else
+        {
+            //qDebug("HLine: %d", m_intColIndex);
+            m_intColIndex = 0;
+            blnNewLine = true;
+        }
     }
 
     if (blnNewLine)
@@ -489,7 +519,7 @@ void ATVDemod::demod(Complex& c)
 
     // Vertical sync and image rendering
 
-    if (m_objRunning.m_blnVSync) // VSync activated
+    if ((m_objRunning.m_blnVSync) && (m_objRunning.m_enmATVStandard != ATVStdHLeap)) // VSync activated
     {
         if (m_intColIndex >= intSynchroTimeSamples)
         {
@@ -781,6 +811,12 @@ void ATVDemod::applyStandard()
 {
     switch(m_objConfig.m_enmATVStandard)
     {
+    case ATVStdHLeap:
+        // what is left in a line for the image
+        m_intNumberOfSyncLines  = 0;
+        m_intNumberOfBlackLines = 0;
+        m_interleaved = false;
+        break;
     case ATVStdShort:
         // what is left in a line for the image
         m_intNumberOfSyncLines  = 4;

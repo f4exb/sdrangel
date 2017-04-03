@@ -51,7 +51,8 @@ public:
         ATVStdPAL525,
         ATVStd405,
         ATVStdShortInterleaved,
-        ATVStdShort
+        ATVStdShort,
+        ATVStdHLeap
     };
 
 	enum ATVModulation {
