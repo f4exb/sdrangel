@@ -276,6 +276,18 @@ int ATVModGUI::getNbLines()
     case 2:
         return 405;
         break;
+    case 3:
+        return 343;
+        break;
+    case 4:
+        return 240;
+        break;
+    case 5:
+        return 180;
+        break;
+    case 6:
+        return 90;
+        break;
     case 0:
     default:
         return 625;
@@ -295,6 +307,12 @@ int ATVModGUI::getFPS()
         break;
     case 3:
         return 16;
+        break;
+    case 4:
+        return 12;
+        break;
+    case 5:
+        return 10;
         break;
     case 1:
     default:
