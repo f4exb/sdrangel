@@ -576,6 +576,11 @@
           <string>SHi</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>SHni</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

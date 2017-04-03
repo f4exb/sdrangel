@@ -50,7 +50,8 @@ public:
         ATVStdPAL625,
         ATVStdPAL525,
         ATVStd405,
-        ATVStdShortInterleaved
+        ATVStdShortInterleaved,
+        ATVStdShort
     };
 
 	enum ATVModulation {
@@ -350,6 +351,7 @@ private:
     int m_intNumberOfBlackLines;         //!< this is the total number of lines not part of the image and is used for vertical screen size
     int m_intNumberSamplePerLineSignals; //!< number of samples in the non image part of the line (signals)
     int m_intNumberSaplesPerHSync;       //!< number of samples per horizontal synchronization pattern (pulse + back porch)
+    bool m_interleaved;                  //!< interleaved image
 
     //*************** PROCESSING  ***************
 

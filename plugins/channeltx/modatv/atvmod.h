@@ -43,7 +43,8 @@ public:
         ATVStdPAL625,
 		ATVStdPAL525,
 		ATVStd405,
-		ATVStdShortInterleaved
+		ATVStdShortInterleaved,
+		ATVStdShort,
     } ATVStd;
 
     typedef enum
