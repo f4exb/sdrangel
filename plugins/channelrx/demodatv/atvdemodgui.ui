@@ -522,6 +522,26 @@
           <string>405</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>343</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>240</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>180</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>90</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -547,6 +567,16 @@
         <item>
          <property name="text">
           <string>16 Fps</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>12 Fps</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10 Fps</string>
          </property>
         </item>
        </widget>

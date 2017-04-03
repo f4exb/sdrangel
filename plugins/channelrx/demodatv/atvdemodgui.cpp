@@ -699,6 +699,12 @@ float ATVDemodGUI::getFps(int fpsIndex)
     case 3:
         return 16.0f;
         break;
+    case 4:
+        return 12.0f;
+        break;
+    case 5:
+        return 10.0f;
+        break;
     case 0:
     default:
         return 25.0f;
@@ -718,6 +724,18 @@ float ATVDemodGUI::getNominalLineTime(int nbLinesIndex, int fpsIndex)
     case 2:
         return 1.0f / (405 * fps);
         break;
+    case 3:
+        return 1.0f / (343 * fps);
+        break;
+    case 4:
+        return 1.0f / (240 * fps);
+        break;
+    case 5:
+        return 1.0f / (180 * fps);
+        break;
+    case 6:
+        return 1.0f / (90 * fps);
+        break;
     case 0:
     default:
         return 1.0f / (625 * fps);
@@ -734,6 +752,18 @@ int ATVDemodGUI::getNumberOfLines(int nbLinesIndex)
         break;
     case 2:
         return 405;
+        break;
+    case 3:
+        return 343;
+        break;
+    case 4:
+        return 240;
+        break;
+    case 5:
+        return 180;
+        break;
+    case 6:
+        return 90;
         break;
     case 0:
     default:
