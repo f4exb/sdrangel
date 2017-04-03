@@ -56,7 +56,7 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_DSBFilter(0),
     m_DSBFilterBuffer(0),
     m_DSBFilterBufferIndex(0),
-    m_objAvgColIndex(2)
+    m_objAvgColIndex(3)
 {
     setObjectName("ATVDemod");
 
@@ -449,16 +449,19 @@ void ATVDemod::demod(Complex& c)
         m_intColIndex = 0;
         blnNewLine = true;
     }
-    else if (m_blnSynchroDetected // Valid H sync detected
+    else if (m_objRunning.m_blnHSync && m_blnSynchroDetected // Valid H sync detected
     && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
     && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
     {
+//        qDebug("HSync: %d", m_intColIndex);
+//        m_intColIndex = 0;
         m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
         m_intColIndex = m_intColIndex - m_intAvgColIndex;
         blnNewLine = true;
     }
-    else if (m_intColIndex >= m_intNumberSamplePerLine + 2) // No valid H sync
+    else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
     {
+        //qDebug("HLine: %d", m_intColIndex);
         m_intColIndex = 0;
         blnNewLine = true;
     }
