@@ -375,6 +375,7 @@ private:
     float m_fltBufferQ[6];
 
     int m_intColIndex;
+    int m_intSampleIndex;
     int m_intRowIndex;
     int m_intLineIndex;
 
@@ -420,6 +421,273 @@ private:
     void applyStandard();
     void demod(Complex& c);
     static float getRFBandwidthDivisor(ATVModulation modulation);
+
+    inline void processHLeap(float& fltVal, int& intVal)
+    {
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+
+        // Horizontal Synchro detection
+
+        // Floor Detection 0
+        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
+        {
+            m_intSynchroPoints++;
+        }
+        // Black detection 0.3
+        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+        {
+            m_intSynchroPoints = 0;
+        }
+
+        // sync pulse
+
+        m_blnSynchroDetected = (m_intSynchroPoints == m_intNumberSamplePerTop);
+
+        if (m_blnSynchroDetected)
+        {
+            if (m_intSampleIndex >= (3*m_intNumberSamplePerLine)/2) // first after leap
+            {
+                //qDebug("VSync: %d %d %d", m_intColIndex, m_intSampleIndex, m_intLineIndex);
+                m_intAvgColIndex = m_intColIndex;
+                m_objRegisteredATVScreen->renderImage(0);
+
+                if ((m_objRFRunning.m_enmModulation == ATV_AM)
+                    || (m_objRFRunning.m_enmModulation == ATV_LSB)
+                    || (m_objRFRunning.m_enmModulation == ATV_USB))
+                {
+                    m_fltAmpMin = m_fltEffMin;
+                    m_fltAmpMax = m_fltEffMax;
+                    m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                    if(m_fltAmpDelta<=0.0)
+                    {
+                        m_fltAmpDelta=1.0f;
+                    }
+
+                    //Reset extrema
+                    m_fltEffMin = 2000000.0f;
+                    m_fltEffMax = -2000000.0f;
+                }
+
+                m_intImageIndex++;
+                m_intLineIndex = 0;
+                m_intRowIndex = 0;
+            }
+
+            m_intSampleIndex = 0;
+        }
+        else
+        {
+            m_intSampleIndex++;
+        }
+
+        if (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop - 1)
+        {
+            m_intColIndex++;
+        }
+        else
+        {
+            if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
+            {
+                //qDebug("HCorr: %d", m_intAvgColIndex);
+                m_intColIndex = m_intNumberSamplePerTop + m_intNumberSamplePerLine - m_intAvgColIndex;
+            }
+            else
+            {
+                m_intColIndex = m_intNumberSamplePerTop;
+            }
+
+            m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+            m_intLineIndex++;
+            m_intRowIndex++;
+        }
+    }
+
+    inline void processClassic(float& fltVal, int& intVal)
+    {
+        int intSynchroTimeSamples= (3*m_intNumberSamplePerLine)/4;
+        float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
+
+        // Horizontal Synchro detection
+
+        // Floor Detection 0
+        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
+        {
+            m_intSynchroPoints++;
+        }
+        // Black detection 0.3
+        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+        {
+            m_intSynchroPoints = 0;
+        }
+
+        m_blnSynchroDetected = (m_intSynchroPoints == m_intNumberSamplePerTop);
+
+        //Horizontal Synchro processing
+
+        bool blnNewLine = false;
+
+        if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
+        {
+            m_intColIndex = 0;
+            blnNewLine = true;
+        }
+        else if (m_objRunning.m_blnHSync && m_blnSynchroDetected // Valid H sync detected
+        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
+        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
+        {
+    //        qDebug("HSync: %d", m_intColIndex);
+    //        m_intColIndex = 0;
+            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
+            m_intColIndex = m_intColIndex - m_intAvgColIndex;
+            blnNewLine = true;
+        }
+        else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
+        {
+            if (m_objRunning.m_enmATVStandard == ATVStdHLeap) // new image in hSync leap mode
+            {
+                m_objRegisteredATVScreen->renderImage(0);
+
+                if (m_objRFRunning.m_enmModulation == ATV_AM)
+                {
+                    m_fltAmpMin = m_fltEffMin;
+                    m_fltAmpMax = m_fltEffMax;
+                    m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                    if(m_fltAmpDelta<=0.0)
+                    {
+                        m_fltAmpDelta=1.0f;
+                    }
+
+                    //Reset extrema
+                    m_fltEffMin = 2000000.0f;
+                    m_fltEffMax = -2000000.0f;
+                }
+
+                m_intColIndex = m_intNumberSamplePerTop; // catch up with passed samples from the line length point
+                m_intRowIndex = 0;
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
+                m_intLineIndex = 0;
+                m_intImageIndex++;
+                blnNewLine = false; // done already
+            }
+            else
+            {
+                //qDebug("HLine: %d", m_intColIndex);
+                m_intColIndex = 0;
+                blnNewLine = true;
+            }
+        }
+
+        if (blnNewLine)
+        {
+            m_fltAmpLineAverage=0.0f;
+
+            //New line + Interleaving
+            m_intRowIndex += m_interleaved ? 2 : 1;
+
+            if (m_intRowIndex < m_intNumberOfLines)
+            {
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+            }
+
+            m_intLineIndex++;
+        }
+
+        // Filling pixels
+
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+        m_intColIndex++;
+
+        // Vertical sync and image rendering
+
+        if ((m_objRunning.m_blnVSync) && (m_objRunning.m_enmATVStandard != ATVStdHLeap)) // VSync activated
+        {
+            if (m_intColIndex >= intSynchroTimeSamples)
+            {
+                if (m_fltAmpLineAverage <= fltSynchroTrameLevel)
+                {
+                    m_fltAmpLineAverage = 0.0f;
+
+                    if (!m_blnVerticalSynchroDetected) // not yet
+                    {
+                        m_blnVerticalSynchroDetected = true; // prevent repetition
+
+                        if ((m_intLineIndex % 2 == 0) || !m_interleaved) // even => odd image
+                        {
+                            m_objRegisteredATVScreen->renderImage(0);
+
+                            if (m_objRFRunning.m_enmModulation == ATV_AM)
+                            {
+                                m_fltAmpMin = m_fltEffMin;
+                                m_fltAmpMax = m_fltEffMax;
+                                m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                                if(m_fltAmpDelta<=0.0)
+                                {
+                                    m_fltAmpDelta=1.0f;
+                                }
+
+                                //Reset extrema
+                                m_fltEffMin = 2000000.0f;
+                                m_fltEffMax = -2000000.0f;
+                            }
+
+                            m_intRowIndex = 1;
+                        }
+                        else
+                        {
+                            m_intRowIndex = 0;
+                        }
+
+                        m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                        m_intLineIndex = 0;
+                        m_intImageIndex++;
+                    }
+                }
+                else
+                {
+                    m_blnVerticalSynchroDetected = false; // reset
+                }
+            }
+        }
+        else // no VSync => arbitrary
+        {
+            if (m_intLineIndex >= m_intNumberOfLines/2)
+            {
+                if (m_intImageIndex % 2 == 1) // odd image
+                {
+                    m_objRegisteredATVScreen->renderImage(0);
+
+                    if (m_objRFRunning.m_enmModulation == ATV_AM)
+                    {
+                        m_fltAmpMin = m_fltEffMin;
+                        m_fltAmpMax = m_fltEffMax;
+                        m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                        if(m_fltAmpDelta<=0.0)
+                        {
+                            m_fltAmpDelta=1.0f;
+                        }
+
+                        //Reset extrema
+                        m_fltEffMin = 2000000.0f;
+                        m_fltEffMax = -2000000.0f;
+                    }
+
+                    m_intRowIndex = 1;
+                }
+                else
+                {
+                    m_intRowIndex = 0;
+                }
+
+                m_objRegisteredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                m_intLineIndex = 0;
+                m_intImageIndex++;
+            }
+        }
+    }
 };
 
 #endif // INCLUDE_ATVDEMOD_H
