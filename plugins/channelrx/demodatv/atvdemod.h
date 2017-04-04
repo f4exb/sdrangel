@@ -490,7 +490,7 @@ private:
             if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
             {
                 //qDebug("HCorr: %d", m_intAvgColIndex);
-                m_intColIndex = m_intNumberSamplePerTop + m_intNumberSamplePerLine - m_intAvgColIndex;
+                m_intColIndex = m_intNumberSamplePerTop + (m_intNumberSamplePerLine - m_intAvgColIndex)/2; // amortizing factor 1/2
             }
             else
             {
