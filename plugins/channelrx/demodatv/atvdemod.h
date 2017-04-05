@@ -544,23 +544,9 @@ private:
         }
         else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
         {
-            if (m_objRunning.m_enmATVStandard == ATVStdHLeap) // new image in hSync leap mode
-            {
-                m_objRegisteredATVScreen->renderImage(0);
-
-                m_intColIndex = m_intNumberSamplePerTop; // catch up with passed samples from the line length point
-                m_intRowIndex = 0;
-                m_objRegisteredATVScreen->selectRow(m_intRowIndex);
-                m_intLineIndex = 0;
-                m_intImageIndex++;
-                blnNewLine = false; // done already
-            }
-            else
-            {
-                //qDebug("HLine: %d", m_intColIndex);
-                m_intColIndex = 0;
-                blnNewLine = true;
-            }
+            //qDebug("HLine: %d", m_intColIndex);
+            m_intColIndex = 0;
+            blnNewLine = true;
         }
 
         if (blnNewLine)
@@ -603,7 +589,7 @@ private:
 
         // Vertical sync and image rendering
 
-        if ((m_objRunning.m_blnVSync) && (m_objRunning.m_enmATVStandard != ATVStdHLeap)) // VSync activated
+        if (m_objRunning.m_blnVSync) // VSync activated
         {
             if (m_intColIndex >= intSynchroTimeSamples)
             {
