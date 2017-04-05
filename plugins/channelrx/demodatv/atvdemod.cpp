@@ -332,7 +332,8 @@ void ATVDemod::demod(Complex& c)
         magSq = fltI*fltI + fltQ*fltQ;
         m_objMagSqAverage.feed(magSq);
         fltNorm = sqrt(magSq);
-        fltVal = fltNorm;
+        fltVal = fltNorm / (1<<15);
+        //fltVal = magSq / (1<<30);
 
         //********** Mini and Maxi Amplitude tracking **********
 
@@ -403,6 +404,7 @@ void ATVDemod::demod(Complex& c)
         fltVal = 0.0f;
     }
 
+    fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
     m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
 
     fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;

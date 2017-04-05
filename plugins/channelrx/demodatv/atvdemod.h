@@ -451,24 +451,6 @@ private:
                 m_intAvgColIndex = m_intColIndex;
                 m_objRegisteredATVScreen->renderImage(0);
 
-                if ((m_objRFRunning.m_enmModulation == ATV_AM)
-                    || (m_objRFRunning.m_enmModulation == ATV_LSB)
-                    || (m_objRFRunning.m_enmModulation == ATV_USB))
-                {
-                    m_fltAmpMin = m_fltEffMin;
-                    m_fltAmpMax = m_fltEffMax;
-                    m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
-
-                    if(m_fltAmpDelta<=0.0)
-                    {
-                        m_fltAmpDelta=1.0f;
-                    }
-
-                    //Reset extrema
-                    m_fltEffMin = 2000000.0f;
-                    m_fltEffMax = -2000000.0f;
-                }
-
                 m_intImageIndex++;
                 m_intLineIndex = 0;
                 m_intRowIndex = 0;
@@ -495,6 +477,24 @@ private:
             else
             {
                 m_intColIndex = m_intNumberSamplePerTop;
+            }
+
+            if ((m_objRFRunning.m_enmModulation == ATV_AM)
+                || (m_objRFRunning.m_enmModulation == ATV_USB)
+                || (m_objRFRunning.m_enmModulation == ATV_LSB))
+            {
+                m_fltAmpMin = m_fltEffMin;
+                m_fltAmpMax = m_fltEffMax;
+                m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                if(m_fltAmpDelta<=0.0)
+                {
+                    m_fltAmpDelta=1.0f;
+                }
+
+                //Reset extrema
+                m_fltEffMin = 2000000.0f;
+                m_fltEffMax = -2000000.0f;
             }
 
             m_objRegisteredATVScreen->selectRow(m_intRowIndex);
@@ -548,22 +548,6 @@ private:
             {
                 m_objRegisteredATVScreen->renderImage(0);
 
-                if (m_objRFRunning.m_enmModulation == ATV_AM)
-                {
-                    m_fltAmpMin = m_fltEffMin;
-                    m_fltAmpMax = m_fltEffMax;
-                    m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
-
-                    if(m_fltAmpDelta<=0.0)
-                    {
-                        m_fltAmpDelta=1.0f;
-                    }
-
-                    //Reset extrema
-                    m_fltEffMin = 2000000.0f;
-                    m_fltEffMax = -2000000.0f;
-                }
-
                 m_intColIndex = m_intNumberSamplePerTop; // catch up with passed samples from the line length point
                 m_intRowIndex = 0;
                 m_objRegisteredATVScreen->selectRow(m_intRowIndex);
@@ -581,6 +565,24 @@ private:
 
         if (blnNewLine)
         {
+            if ((m_objRFRunning.m_enmModulation == ATV_AM)
+                || (m_objRFRunning.m_enmModulation == ATV_USB)
+                || (m_objRFRunning.m_enmModulation == ATV_LSB))
+            {
+                m_fltAmpMin = m_fltEffMin;
+                m_fltAmpMax = m_fltEffMax;
+                m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
+
+                if(m_fltAmpDelta<=0.0)
+                {
+                    m_fltAmpDelta=1.0f;
+                }
+
+                //Reset extrema
+                m_fltEffMin = 2000000.0f;
+                m_fltEffMax = -2000000.0f;
+            }
+
             m_fltAmpLineAverage=0.0f;
 
             //New line + Interleaving
@@ -616,23 +618,6 @@ private:
                         if ((m_intLineIndex % 2 == 0) || !m_interleaved) // even => odd image
                         {
                             m_objRegisteredATVScreen->renderImage(0);
-
-                            if (m_objRFRunning.m_enmModulation == ATV_AM)
-                            {
-                                m_fltAmpMin = m_fltEffMin;
-                                m_fltAmpMax = m_fltEffMax;
-                                m_fltAmpDelta = m_fltEffMax-m_fltEffMin;
-
-                                if(m_fltAmpDelta<=0.0)
-                                {
-                                    m_fltAmpDelta=1.0f;
-                                }
-
-                                //Reset extrema
-                                m_fltEffMin = 2000000.0f;
-                                m_fltEffMax = -2000000.0f;
-                            }
-
                             m_intRowIndex = 1;
                         }
                         else
