@@ -645,30 +645,35 @@ void ATVDemod::applyStandard()
         // what is left in a line for the image
         m_intNumberOfSyncLines  = 0;
         m_intNumberOfBlackLines = 0;
+        m_intNumberOfEqLines    = 0; // not applicable
         m_interleaved = false;
         break;
     case ATVStdShort:
         // what is left in a line for the image
         m_intNumberOfSyncLines  = 4;
         m_intNumberOfBlackLines = 4;
+        m_intNumberOfEqLines    = 0;
         m_interleaved = false;
         break;
     case ATVStdShortInterleaved:
         // what is left in a line for the image
         m_intNumberOfSyncLines  = 4;
         m_intNumberOfBlackLines = 4;
+        m_intNumberOfEqLines    = 0;
         m_interleaved = true;
         break;
     case ATVStd405: // Follows loosely the 405 lines standard
         // what is left in a ine for the image
         m_intNumberOfSyncLines  = 24; // (15+7)*2 - 20
         m_intNumberOfBlackLines = 28; // above + 4
+        m_intNumberOfEqLines    = 3;
         m_interleaved = true;
         break;
     case ATVStdPAL525: // Follows PAL-M standard
         // what is left in a 64/1.008 us line for the image
         m_intNumberOfSyncLines  = 40; // (15+15)*2 - 20
         m_intNumberOfBlackLines = 44; // above + 4
+        m_intNumberOfEqLines    = 3;
         m_interleaved = true;
         break;
     case ATVStdPAL625: // Follows PAL-B/G/H standard
@@ -676,6 +681,7 @@ void ATVDemod::applyStandard()
         // what is left in a 64 us line for the image
         m_intNumberOfSyncLines  = 44; // (15+17)*2 - 20
         m_intNumberOfBlackLines = 48; // above + 4
+        m_intNumberOfEqLines    = 3;
         m_interleaved = true;
     }
 
