@@ -497,6 +497,13 @@
     <item>
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
+       <widget class="QLabel" name="mbLinesLabel">
+        <property name="text">
+         <string>L:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="nbLines">
         <property name="maximumSize">
          <size>
@@ -555,55 +562,86 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="fpsLabel">
+        <property name="text">
+         <string>F:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="fps">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Frames per second</string>
         </property>
         <item>
          <property name="text">
-          <string comment="25">25 Fps</string>
+          <string comment="25">30</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string comment="30">30 Fps</string>
+          <string comment="30">25</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>20 Fps</string>
+          <string>20</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>16 Fps</string>
+          <string>16</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>12 Fps</string>
+          <string>12</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>10 Fps</string>
+          <string>10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8</string>
          </property>
         </item>
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="standardLabel">
+        <property name="text">
+         <string>S:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="standard">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>TV standard scheme</string>
         </property>
         <item>
          <property name="text">
-          <string>PAL625L</string>
+          <string>PAL625</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>PAL525L</string>
+          <string>PAL525</string>
          </property>
         </item>
         <item>
@@ -613,12 +651,12 @@
         </item>
         <item>
          <property name="text">
-          <string>SHi</string>
+          <string>ShI</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>SHni</string>
+          <string>ShNI</string>
          </property>
         </item>
         <item>

@@ -634,6 +634,11 @@
           <string>10</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -671,12 +676,12 @@
         </item>
         <item>
          <property name="text">
-          <string>SHi</string>
+          <string>ShI</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>SHni</string>
+          <string>ShNI</string>
          </property>
         </item>
         <item>

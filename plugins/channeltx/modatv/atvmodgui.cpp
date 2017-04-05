@@ -320,6 +320,9 @@ int ATVModGUI::getFPS()
     case 5:
         return 10;
         break;
+    case 6:
+        return 8;
+        break;
     case 1:
     default:
         return 25;

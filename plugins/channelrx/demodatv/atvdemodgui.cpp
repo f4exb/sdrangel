@@ -690,7 +690,7 @@ float ATVDemodGUI::getFps(int fpsIndex)
 {
     switch(fpsIndex)
     {
-    case 1:
+    case 0:
         return 30.0f;
         break;
     case 2:
@@ -705,7 +705,10 @@ float ATVDemodGUI::getFps(int fpsIndex)
     case 5:
         return 10.0f;
         break;
-    case 0:
+    case 6:
+        return 8.0f;
+        break;
+    case 1:
     default:
         return 25.0f;
         break;
