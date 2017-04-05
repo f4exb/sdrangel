@@ -271,7 +271,11 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if (m_lineCount < m_nbLines2 + 1) // even image or non interlaced
+    if ((m_running.m_atvStd == ATVStdHLeap) && (m_lineCount == m_nbLines2 - 1)) // 1 line before the last in leap mode
+    {
+        pullImageLine(sample, true); // pull image line without sync
+    }
+    else if (m_lineCount < m_nbLines2 + 1) // even image or non interlaced
     {
         int iLine = m_lineCount;
 
@@ -287,10 +291,6 @@ void ATVMod::pullVideo(Real& sample)
         {
             pullImageLine(sample);
         }
-    }
-    else if (m_running.m_atvStd == ATVStdHLeap) // HLeap special
-    {
-        pullImageLine(sample, true); // pull image line without sync
     }
     else // odd image
     {
@@ -842,7 +842,7 @@ void ATVMod::applyStandard()
         m_singleLongSync   = true;
         m_nbBlankLines     = 0;
         m_blankLineLvel    = 0.7f;
-        m_nbLines2         = m_nbLines - 2; // force last line to slip from the even block
+        m_nbLines2         = m_nbLines - 1;
         break;
     case ATVStdShort:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
