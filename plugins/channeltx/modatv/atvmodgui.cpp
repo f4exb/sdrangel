@@ -286,12 +286,15 @@ int ATVModGUI::getNbLines()
         return 180;
         break;
     case 6:
-        return 90;
+        return 120;
         break;
     case 7:
-        return 60;
+        return 90;
         break;
     case 8:
+        return 60;
+        break;
+    case 9:
         return 32;
         break;
     case 0:
