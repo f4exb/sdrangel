@@ -54,6 +54,7 @@ public:
 
     bool selectRow(int intLine);
     bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
+    void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
 
     void connectTimer(const QTimer& timer);
 
@@ -75,6 +76,7 @@ private:
     QTimer m_objTimer;
     QMutex m_objMutex;
     bool m_blnDataChanged;
+    bool m_blnRenderImmediate;
     bool m_blnConfigChanged;
 
     GLShaderArray m_objGLShaderArray;

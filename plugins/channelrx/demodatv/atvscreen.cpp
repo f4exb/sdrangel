@@ -37,6 +37,7 @@ ATVScreen::ATVScreen(QWidget* parent) :
     m_chrLastData = NULL;
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
+    m_blnRenderImmediate = false;
     m_blnGLContextInitialized = false;
 
     //Par défaut
@@ -63,7 +64,7 @@ void ATVScreen::renderImage(unsigned char * objData)
 {
     m_chrLastData = objData;
     m_blnDataChanged = true;
-    //update();
+    if (m_blnRenderImmediate) update();
 }
 
 void ATVScreen::resetImage()
