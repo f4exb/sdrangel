@@ -234,7 +234,7 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 
     if (forwardChange)
     {
-        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %d m_log2Interp: %d",
+        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d",
                 m_settings.m_centerFrequency,
                 m_settings.m_sampleRate,
                 m_settings.m_log2Interp);
