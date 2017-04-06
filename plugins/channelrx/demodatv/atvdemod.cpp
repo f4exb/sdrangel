@@ -573,7 +573,7 @@ void ATVDemod::applySettings()
         m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
 
-        m_objRegisteredATVScreen->setRenderImmediate((m_objConfig.m_fltFramePerS < 25.0f));
+        m_objRegisteredATVScreen->setRenderImmediate(!(m_objConfig.m_fltFramePerS > 25.0f));
         m_objRegisteredATVScreen->resizeATVScreen(
                 m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                 m_intNumberOfLines - m_intNumberOfBlackLines);
