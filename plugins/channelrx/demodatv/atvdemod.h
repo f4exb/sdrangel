@@ -528,25 +528,34 @@ private:
 
         bool blnNewLine = false;
 
+        if (m_blnSynchroDetected)
+        {
+            m_intAvgColIndex = m_intSampleIndex - m_intColIndex - (m_intColIndex < m_intNumberSamplePerLine/2 ? 150 : 0);
+            //qDebug("HSync: %d %d %d", m_intSampleIndex, m_intColIndex, m_intAvgColIndex);
+            m_intSampleIndex = 0;
+        }
+        else
+        {
+            m_intSampleIndex++;
+        }
+
         if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
         {
             m_intColIndex = 0;
             blnNewLine = true;
         }
-        else if (m_objRunning.m_blnHSync && m_blnSynchroDetected // Valid H sync detected
-        && (m_intColIndex > m_intNumberSamplePerLine - m_intNumberSamplePerTop)
-        && (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop))
-        {
-    //        qDebug("HSync: %d", m_intColIndex);
-    //        m_intColIndex = 0;
-            m_intAvgColIndex = m_objAvgColIndex.run(m_intColIndex);
-            m_intColIndex = m_intColIndex - m_intAvgColIndex;
-            blnNewLine = true;
-        }
         else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
         {
-            //qDebug("HLine: %d", m_intColIndex);
-            m_intColIndex = m_intNumberSamplePerTop;
+            if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
+            {
+                //qDebug("HSync: %d %d", m_intColIndex, m_intAvgColIndex);
+                m_intColIndex = m_intNumberSamplePerTop + m_intAvgColIndex/4; // amortizing 1/4
+            }
+            else
+            {
+                m_intColIndex = m_intNumberSamplePerTop;
+            }
+
             blnNewLine = true;
         }
 
@@ -585,7 +594,8 @@ private:
 
         // Filling pixels
 
-        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+        // +4 is to compensate shift due to hsync amortizing factor of 1/4
+        m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop + 4, intVal, intVal, intVal);
         m_intColIndex++;
 
         // Vertical sync and image rendering
