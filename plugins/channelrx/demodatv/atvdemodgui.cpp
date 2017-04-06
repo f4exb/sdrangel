@@ -654,7 +654,9 @@ void ATVDemodGUI::lineTimeUpdate()
 
     float lineTime = nominalLineTime + m_fltLineTimeMultiplier * ui->lineTime->value();
 
-    if(lineTime < 0.000001)
+    if (lineTime < 0.0)
+        ui->lineTimeText->setText("invalid");
+    else if(lineTime < 0.000001)
         ui->lineTimeText->setText(tr("%1 ns").arg(lineTime * 1000000000.0, 0, 'f', 2));
     else if(lineTime < 0.001)
         ui->lineTimeText->setText(tr("%1 µs").arg(lineTime * 1000000.0, 0, 'f', 2));
@@ -677,7 +679,9 @@ void ATVDemodGUI::topTimeUpdate()
 
     float topTime = nominalTopTime + m_fltTopTimeMultiplier * ui->topTime->value();
 
-    if(topTime < 0.000001)
+    if (topTime < 0.0)
+        ui->topTimeText->setText("invalid");
+    else if (topTime < 0.000001)
         ui->topTimeText->setText(tr("%1 ns").arg(topTime * 1000000000.0, 0, 'f', 2));
     else if(topTime < 0.001)
         ui->topTimeText->setText(tr("%1 µs").arg(topTime * 1000000.0, 0, 'f', 2));
