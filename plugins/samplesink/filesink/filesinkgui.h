@@ -78,22 +78,13 @@ private slots:
     void handleDSPMessages();
     void handleSinkMessages();
     void on_centerFrequency_changed(quint64 value);
+    void on_sampleRate_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
 	void on_interp_currentIndexChanged(int index);
-    void on_sampleRate_currentIndexChanged(int index);
     void updateHardware();
     void updateStatus();
 	void tick();
-};
-
-class FileSinkSampleRates {
-public:
-	static unsigned int getRate(unsigned int rate_index);
-	static unsigned int getRateIndex(unsigned int rate);
-	static unsigned int getNbRates();
-	static const unsigned int m_nb_rates;
-	static const unsigned int m_rates[];
 };
 
 #endif // INCLUDE_FILESINKGUI_H

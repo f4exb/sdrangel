@@ -49,15 +49,14 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
 	ui->setupUi(this);
+
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
-	ui->fileNameText->setText(m_fileName);
 
-	ui->sampleRate->clear();
-	for (int i = 0; i < FileSinkSampleRates::getNbRates(); i++)
-	{
-		ui->sampleRate->addItem(QString::number(FileSinkSampleRates::getRate(i)));
-	}
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setValueRange(7, 32000U, 9000000U);
+
+	ui->fileNameText->setText(m_fileName);
 
 	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -195,8 +194,7 @@ void FileSinkGui::updateSampleRateAndFrequency()
 void FileSinkGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-    unsigned int sampleRateIndex = FileSinkSampleRates::getRateIndex(m_settings.m_sampleRate);
-    ui->sampleRate->setCurrentIndex(sampleRateIndex);
+    ui->sampleRate->setValue(m_settings.m_sampleRate);
 }
 
 void FileSinkGui::sendSettings()
@@ -249,10 +247,9 @@ void FileSinkGui::on_centerFrequency_changed(quint64 value)
     sendSettings();
 }
 
-void FileSinkGui::on_sampleRate_currentIndexChanged(int index)
+void FileSinkGui::on_sampleRate_changed(quint64 value)
 {
-	int newrate = FileSinkSampleRates::getRate(index);
-    m_settings.m_sampleRate = newrate * 1000;
+    m_settings.m_sampleRate = value;
     sendSettings();
 }
 
@@ -338,38 +335,3 @@ void FileSinkGui::tick()
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}
 }
-
-const unsigned int FileSinkSampleRates::m_nb_rates = 17;
-const unsigned int FileSinkSampleRates::m_rates[FileSinkSampleRates::m_nb_rates] = {
-		32, 48, 64, 72, 128, 192, 256, 288, 300, 384, 512, 1000, 2000, 3000, 4000, 5000, 6000};
-
-unsigned int FileSinkSampleRates::getRate(unsigned int rate_index)
-{
-	if (rate_index < m_nb_rates)
-	{
-		return m_rates[rate_index];
-	}
-	else
-	{
-		return m_rates[0];
-	}
-}
-
-unsigned int FileSinkSampleRates::getRateIndex(unsigned int rate)
-{
-	for (unsigned int i=0; i < m_nb_rates; i++)
-	{
-		if (rate/1000 == m_rates[i])
-		{
-			return i;
-		}
-	}
-
-	return 0;
-}
-
-unsigned int FileSinkSampleRates::getNbRates()
-{
-	return FileSinkSampleRates::m_nb_rates;
-}
-

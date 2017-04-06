@@ -33,7 +33,7 @@ QByteArray FileSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(1, m_sampleRate);
+    s.writeU64(1, m_sampleRate);
     s.writeU32(2, m_log2Interp);
 
     return s.final();
@@ -52,7 +52,7 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
-        d.readS32(1, &m_sampleRate, 48000);
+        d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
         return true;
     }
