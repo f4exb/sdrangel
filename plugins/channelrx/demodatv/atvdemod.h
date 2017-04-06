@@ -590,7 +590,7 @@ private:
 
         // Vertical sync and image rendering
 
-        if (m_objRunning.m_blnVSync) // VSync activated
+        if ((m_objRunning.m_blnVSync) && (m_intLineIndex < m_intNumberOfLines)) // VSync activated and lines in range
         {
             if (m_intColIndex >= intSynchroTimeSamples)
             {
@@ -623,7 +623,7 @@ private:
                 }
             }
         }
-        else // no VSync => arbitrary
+        else // no VSync or lines out of range => arbitrary
         {
             if (m_intLineIndex >= m_intNumberOfLines/2)
             {
