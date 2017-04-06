@@ -1133,6 +1133,7 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     int thickness = image.cols / 160;
     int baseline=0;
 
+    fontScale < 8.0f ? 8.0f : fontScale; // minimum size
     cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 
