@@ -546,7 +546,7 @@ private:
         else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
         {
             //qDebug("HLine: %d", m_intColIndex);
-            m_intColIndex = 0;
+            m_intColIndex = m_intNumberSamplePerTop;
             blnNewLine = true;
         }
 
