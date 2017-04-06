@@ -271,7 +271,7 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if ((m_running.m_atvStd == ATVStdHLeap) && (m_lineCount == m_nbLines2 - 1)) // 1 line before the last in leap mode
+    if ((m_running.m_atvStd == ATVStdHLeap) && (m_lineCount == m_nbLines2)) // last line in leap mode
     {
         pullImageLine(sample, true); // pull image line without sync
     }
