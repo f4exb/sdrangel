@@ -538,7 +538,7 @@ void ATVDemod::applySettings()
     {
         m_objSettingsMutex.lock();
 
-        m_objConfigPrivate.m_intTVSampleRate = (m_objConfig.m_intSampleRate / 500000) * 500000; // make sure working sample rate is a multiple of rate units
+        m_objConfigPrivate.m_intTVSampleRate = m_objConfig.m_intSampleRate;
 
         if (m_objConfigPrivate.m_intTVSampleRate > 0)
         {
