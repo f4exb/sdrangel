@@ -187,9 +187,11 @@ private:
     struct ATVConfigPrivate
     {
         int m_intTVSampleRate;
+        int m_intNumberSamplePerLine;
 
         ATVConfigPrivate() :
-            m_intTVSampleRate(0)
+            m_intTVSampleRate(0),
+            m_intNumberSamplePerLine(0)
         {}
     };
 
@@ -345,7 +347,7 @@ private:
     //*************** ATV PARAMETERS  ***************
     ATVScreen * m_objRegisteredATVScreen;
 
-    int m_intNumberSamplePerLine;
+    //int m_intNumberSamplePerLine;
     int m_intNumberSamplePerTop;
     int m_intNumberOfLines;
     int m_intNumberOfSyncLines;          //!< this is the number of non displayable lines at the start of a frame. First displayable row comes next.
@@ -446,7 +448,7 @@ private:
 
         if (m_blnSynchroDetected)
         {
-            if (m_intSampleIndex >= (3*m_intNumberSamplePerLine)/2) // first after leap
+            if (m_intSampleIndex >= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/2) // first after leap
             {
                 //qDebug("VSync: %d %d %d", m_intColIndex, m_intSampleIndex, m_intLineIndex);
                 m_intAvgColIndex = m_intColIndex;
@@ -464,7 +466,7 @@ private:
             m_intSampleIndex++;
         }
 
-        if (m_intColIndex < m_intNumberSamplePerLine + m_intNumberSamplePerTop - 1)
+        if (m_intColIndex < m_objRunningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop - 1)
         {
             m_intColIndex++;
         }
@@ -473,7 +475,7 @@ private:
             if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
             {
                 //qDebug("HCorr: %d", m_intAvgColIndex);
-                m_intColIndex = m_intNumberSamplePerTop + (m_intNumberSamplePerLine - m_intAvgColIndex)/2; // amortizing factor 1/2
+                m_intColIndex = m_intNumberSamplePerTop + (m_objRunningPrivate.m_intNumberSamplePerLine - m_intAvgColIndex)/2; // amortizing factor 1/2
             }
             else
             {
@@ -506,7 +508,7 @@ private:
 
     inline void processClassic(float& fltVal, int& intVal)
     {
-        int intSynchroTimeSamples= (3*m_intNumberSamplePerLine)/4;
+        int intSynchroTimeSamples= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/4;
         float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
 
         // Horizontal Synchro detection
@@ -530,7 +532,7 @@ private:
 
         if (m_blnSynchroDetected)
         {
-            m_intAvgColIndex = m_intSampleIndex - m_intColIndex - (m_intColIndex < m_intNumberSamplePerLine/2 ? 150 : 0);
+            m_intAvgColIndex = m_intSampleIndex - m_intColIndex - (m_intColIndex < m_objRunningPrivate.m_intNumberSamplePerLine/2 ? 150 : 0);
             //qDebug("HSync: %d %d %d", m_intSampleIndex, m_intColIndex, m_intAvgColIndex);
             m_intSampleIndex = 0;
         }
@@ -539,12 +541,12 @@ private:
             m_intSampleIndex++;
         }
 
-        if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_intNumberSamplePerLine)) // H Sync not active
+        if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_objRunningPrivate.m_intNumberSamplePerLine)) // H Sync not active
         {
             m_intColIndex = 0;
             blnNewLine = true;
         }
-        else if (m_intColIndex >= m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
+        else if (m_intColIndex >= m_objRunningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
         {
             if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
             {

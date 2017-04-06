@@ -211,6 +211,7 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
         int nbPointsPerLine =  ((ATVDemod::MsgReportEffectiveSampleRate&)objMessage).getNbPointsPerLine();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 0));
         ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
+        m_objScopeVis->setSampleRate(sampleRate);
         setRFFiltersSlidersRange(sampleRate);
         lineTimeUpdate();
         topTimeUpdate();

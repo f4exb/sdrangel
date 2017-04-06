@@ -62,7 +62,7 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     setObjectName("ATVDemod");
 
     //*************** ATV PARAMETERS  ***************
-    m_intNumberSamplePerLine=0;
+    //m_intNumberSamplePerLine=0;
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
     m_interleaved = true;
@@ -159,7 +159,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
     bool blnComputeImage=false;
 
-    int intSynchroTimeSamples= (3*m_intNumberSamplePerLine)/4;
+    int intSynchroTimeSamples= (3 * m_objRunningPrivate.m_intNumberSamplePerLine) / 4;
     float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
 
     //********** Let's rock and roll buddy ! **********
@@ -524,6 +524,8 @@ void ATVDemod::applySettings()
         return;
     }
 
+    bool forwardSampleRateChange = false;
+
     if((m_objRFConfig.m_intFrequencyOffset != m_objRFRunning.m_intFrequencyOffset)
        || (m_objRFConfig.m_enmModulation != m_objRFRunning.m_enmModulation)
        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
@@ -570,19 +572,19 @@ void ATVDemod::applySettings()
 
         applyStandard();
 
-        m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
+        m_objConfigPrivate.m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
 
         m_objRegisteredATVScreen->setRenderImmediate(!(m_objConfig.m_fltFramePerS > 25.0f));
         m_objRegisteredATVScreen->resizeATVScreen(
-                m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
+                m_objConfigPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                 m_intNumberOfLines - m_intNumberOfBlackLines);
 
         qDebug() << "ATVDemod::applySettings:"
                 << " m_fltLineDuration: " << m_objConfig.m_fltLineDuration
                 << " m_fltFramePerS: " << m_objConfig.m_fltFramePerS
                 << " m_intNumberOfLines: " << m_intNumberOfLines
-                << " m_intNumberSamplePerLine: " << m_intNumberSamplePerLine
+                << " m_intNumberSamplePerLine: " << m_objConfigPrivate.m_intNumberSamplePerLine
                 << " m_intNumberOfBlackLines: " << m_intNumberOfBlackLines;
 
         m_intImageIndex = 0;
@@ -590,21 +592,14 @@ void ATVDemod::applySettings()
         m_intRowIndex=0;
 
         m_objSettingsMutex.unlock();
-
-        int sampleRate = m_objRFConfig.m_blndecimatorEnable ? m_objConfigPrivate.m_intTVSampleRate : m_objConfig.m_intSampleRate;
-        MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(sampleRate, m_intNumberSamplePerLine);
-        getOutputMessageQueue()->push(report);
     }
 
     if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
+        || (m_objConfigPrivate.m_intNumberSamplePerLine != m_objRunningPrivate.m_intNumberSamplePerLine)
         || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
         || (m_objRFConfig.m_blndecimatorEnable != m_objRFRunning.m_blndecimatorEnable))
     {
-        int sampleRate = m_objRFConfig.m_blndecimatorEnable ? m_objConfigPrivate.m_intTVSampleRate : m_objConfig.m_intSampleRate;
-        MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(sampleRate, m_intNumberSamplePerLine);
-        getOutputMessageQueue()->push(report);
+        forwardSampleRateChange = true;
     }
 
     if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
@@ -636,6 +631,14 @@ void ATVDemod::applySettings()
     m_objRunning = m_objConfig;
     m_objRFRunning = m_objRFConfig;
     m_objRunningPrivate = m_objConfigPrivate;
+
+    if (forwardSampleRateChange)
+    {
+        int sampleRate = m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
+        MsgReportEffectiveSampleRate *report;
+        report = MsgReportEffectiveSampleRate::create(sampleRate, m_objRunningPrivate.m_intNumberSamplePerLine);
+        getOutputMessageQueue()->push(report);
+    }
 }
 
 void ATVDemod::applyStandard()
