@@ -398,7 +398,7 @@ void ATVDemodGUI::applyRFSettings()
                 ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
                 ui->rfFiltering->isChecked(),
                 ui->decimatorEnable->isChecked(),
-                ui->bfo->value() * 10.0f,
+                ui->bfo->value(),
                 ui->fmDeviation->value() / 100.0f);
     }
 }
@@ -626,7 +626,7 @@ void ATVDemodGUI::on_deltaFrequencyMinus_toggled(bool minus)
 
 void ATVDemodGUI::on_bfo_valueChanged(int value)
 {
-    ui->bfoText->setText(QString("%1").arg(value * 10.0, 0, 'f', 0));
+    ui->bfoText->setText(QString("%1").arg(value * 1.0, 0, 'f', 0));
     applyRFSettings();
 }
 
