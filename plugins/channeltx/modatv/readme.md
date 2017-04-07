@@ -6,7 +6,7 @@ This plugin can be used to generate an analog TV signal mostly used in amateur r
 
 There is no sound either. You coud imagine using any of the plugins supporting audio to create a mixed signal. This is not working well however for various reasons. It is better to use two physical transmitters and two physical receivers.
 
-In practice 4 MS/s with about 300 points per line is the lowest sample rate that produces a standard image quality. Lower sample rates and line definition produce low quality images that may still be acceptable for experiments.
+In practice 4 MS/s with about 300 points per line is the lowest sample rate that produces a standard image quality. Lower sample rates and line definition produce low quality images that may still be acceptable for experiments. The plugin offers to go as low as 32 lines and 8 FPS for NBTV experiments. NBTV stands for Narrow Band TeleVision see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
 <h1>Interface</h1>
 
@@ -110,9 +110,12 @@ This controls the number of full frames per second. Choice is between 30, 25, 20
 
 This controls the frame synchronization schem and number of black lines:
 
-  - PAL625L: this is the PAL 625 lines standard with 25 FPS. Since only black and white (luminance) is supported this corresponds to any of the B,G,I or L PAL standards
-  - PAL525L: this is the PAL 525 lines standard with 30 FPS. This corresponds to the PAL M standard.
-  - 405L: this loosely corresponds to the British 405 lines system and is similar to PAL for synchronization. This mode has only 7 black lines.
+  - PAL625: this is the PAL 625 lines standard with 25 FPS. Since only black and white (luminance) is supported this corresponds to any of the B,G,I or L PAL standards
+  - PAL525: this is the PAL 525 lines standard with 30 FPS. This corresponds to the PAL M standard.
+  - PAL405: this loosely corresponds to the British 405 lines system and is similar to PAL for synchronization. This mode has only 7 black lines.
+  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
+  - ShNI: this is the same as above but with non interleaved frames.
+  - HLeap: this is the horizontal sync leap technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
   
 <h2>A.10: Input source</h2>
 

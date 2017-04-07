@@ -4,9 +4,9 @@
 
 This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same passband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
 
-An optional rational downsampler with lowpass filtering can be used to set the channel sample rate to the 0.5 MS/s multiple which is the closest to the source sample rate. When the downsampler is not engaged the source feeds the channel directly and thus the source sample rate is used. A standard image quality for PAL standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. 
+An optional rational downsampler with lowpass filtering can be used but its ratio is always 1.0 so in fact only the filter functionality is retained. This is a provision for future developments. When this downsampler is not engaged (button A.3) the source feeds the channel directly. A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. 
 
-Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Acceptable images (shown in the screenshots here) can be obtained in FM with just 1.3 MHz bandwidth.
+Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Very low line frequencies and thus small bandwidths are reachable with degraded image quality. This is known as NBTV see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
 <h2>Interface</h2>
 
@@ -34,17 +34,17 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 <h3>3: Rational downsampler toggle</h3>
 
-Use this toggle button to enable or disable the rational downsampler. 
+Use this toggle button to enable or disable the rational downsampler and its FIR filter. Without downsampling the source plugin feeds the channel directly. 
 
-Without downsampling the sample rate given by the source plugin is directly applied to the channel.
-
-When the downsampler is engaged the channel sample rate is the closest multiple of 0.5 MS/s below the source sample rate. e.g for a source sample rate of 1.6 MS/s this will be 1.5 MS/s. If a non null sample rate cannot be obtained the decimator is disabled and the source sample rate is used instead. 
-
-When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13). This works also when the decimation ratio is 1.0 e.g source sample rate is an exact multiple of 0.5 MS/s.
+Use it when you want to filter the signal into a narrower bandwidth than the channel bandwidth in AM and FM modes. When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
 
 <h3>4: Channel sample rate</h3>
 
-This is the channel sample rate in kS/s possibly downsampled from source when rational downsampler is engaged (3).
+This is the channel sample rate in kS/s. For good horizontal synchronization you should aim at a sample rate (given by the source) that yields an integer number of points per line. Sample rate (S), number of lines (l) and frames per second (F) should yield an integer number of points (N) using this formula:
+
+N = S / (l &#215; F)
+
+The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
 
 <h3>5: Number of points (or samples) per line</h3>
 
@@ -62,7 +62,7 @@ When single sideband demodulation is selected (USB, LSB) the BFO is phased locke
 
 &#9888; this is experimental.
 
-This allows adjstment of BFO frequency in 10 Hz steps from -5 to +5 kHz. You will have to look for the right value to lock to the carrier. See (6) for the lock indicator.
+This allows adjstment of BFO frequency in 1 Hz steps from -2 to +2 kHz. You will have to look for the right value to lock to the carrier. See (6) for the lock indicator. This will work only at relatively low sample rates say below 1 MS/s.
 
 The BFO base frequency in Hz appears on the right. Actual frequency may change acoording to PLL locking to the carrier.
 
@@ -76,12 +76,12 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
   - FM2: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
   - FM3: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
   - AM: this is Amplitude Modulation
-  - USB: &#9888; USB demodulation synchronous to the carrier
-  - LSB: &#9888; LSB demodulation synchronous to the carrier
+  - USB: &#9888; USB demodulation synchronous to the carrier (experimental)
+  - LSB: &#9888; LSB demodulation synchronous to the carrier (experimental)
   
 For FM choose the algorithm that best suits your conditions. &#9888; only FM3 is accurate with regard to FM deviation (see 10).
 
-&#9888; USB and LSB modes are experimental and do not show good results for present standards sample rates.
+&#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
 
 <h3>10: FM deviation adjustment</h3>
 
@@ -91,7 +91,7 @@ Using this button you can adjust the nominal FM deviation as a percentage of the
 
 <h3>11: FFT asymmetrical filter toggle</h3>
 
-Use this button to enable/disable the FFT asymmetrical filter.
+Use this button to enable/disable the FFT asymmetrical filter. Use this filter when you want to optimize the reception of vestigial sideband AM signals. 
 
 <h3>12: FFT asymmetrical filter opposite band cutoff frequency</h3>
 
@@ -115,21 +115,73 @@ If the rational downsampler is engaged (3) this slider also controls the downsam
 
 This is the total number of lines including all possible synchronization signals.
 
-Choice is between 625, 525 and 405 lines. The number of image lines depends on the synchronization scheme.
+Choice is between 625, 525, 405, 343, 240, 180, 120, 90, 60 and 32 lines. The actual number of image lines depends on the synchronization scheme.
 
 <h3>2: Frames Per Second</h3>
 
-This combo lets you chose between a 30, 25, 20 and 16 FPS. This is the resulting FPS. In interleaved modes the half frame rate is doubled.
+This combo lets you chose between a 30, 25, 20, 16, 12, 10 and 8 FPS. This is the resulting FPS. In interleaved modes the half frame rate is doubled.
 
 <h3>3: Synchronization standard</h3>
 
 This combo lets you set the TV standard type. This sets the number of lines per complete image, frame synchronization parameters and number of blank (black) lines. Choice is between:
 
-  - PAL625L: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
-  - PAL525L: the only difference with PAL625L is the number of black lines which is down to 15
-  - 405L: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
+  - PAL625: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
+  - PAL525: the only difference with PAL625 is the number of black lines which is down to 15
+  - PAL405: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
+  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
+  - ShNI: this is the same as above but with non interleaved frames.
+  - HLeap: this is the horizontal sync leap technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
 When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
+
+All standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+
+<table>
+    <tr>
+        <th>#lines</th>
+        <th>standard</th>
+    </tr>
+    <tr>
+        <td>625</td>
+        <td>PAL625, PAL525, PAL405</td>
+    </tr>
+    <tr>
+        <td>525</td>
+        <td>PAL525, PAL405</td>
+    </tr>
+    <tr>
+        <td>405</td>
+        <td>PAL405, ShI, ShNI</td>
+    </tr>
+    <tr>
+        <td>343</td>
+        <td>ShI, ShNI</td>
+    </tr>
+    <tr>
+        <td>240</td>
+        <td>ShNI</td>
+    </tr>
+    <tr>
+        <td>180</td>
+        <td>ShNI</td>
+    </tr>
+    <tr>
+        <td>120</td>
+        <td>ShNI, HLeap</td>
+    </tr>
+    <tr>
+        <td>90</td>
+        <td>ShNI, HLeap</td>
+    </tr>
+    <tr>
+        <td>60</td>
+        <td>HLeap</td>
+    </tr>
+    <tr>
+        <td>32</td>
+        <td>HLeap</td>
+    </tr>
+</table>
 
 <h3>4: Horizontal sync</h3>
 
@@ -154,10 +206,10 @@ Use this push button to reset values to a standard setting:
   - FM1 modulation
   - 625 lines
   - 25 FPS
-  - PAL 625L standard
+  - PAL625 standard
   - Horizontal and vertical syncs active
   - No video inversion
-  - Interlacing
+  - Interleaving
   - 100 mV sync level
   - 310 mV black level
   - 64 microsecond line length (middle)
