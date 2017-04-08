@@ -44,13 +44,11 @@ This is the channel sample rate in kS/s. For good horizontal synchronization you
 
 N = S / (l &#215; F)
 
-The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
+&#9758; The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
 
 <h3>5: Number of points (or samples) per line</h3>
 
 This is the number of points or samples per complete line including sync and padding. This is derived from the sample rate and line frequency as the ratio of the two. For example with a 625 lines &#215; 25 FPS signal the line frequency is 15625 Hz. If the channel sample rate is 1500 kS/s this yields 1500000/15625 = 96 points. If the ratio is not an integer then the integer part is taken.
-
-Picture definition depends largely on this number and the larger the better but it is useless to have a much greater number than the number of points per line used in transmission.
 
 <h3>6: BFO PLL lock indicator</h3>
 
@@ -79,7 +77,9 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
   - USB: &#9888; USB demodulation synchronous to the carrier (experimental)
   - LSB: &#9888; LSB demodulation synchronous to the carrier (experimental)
   
-For FM choose the algorithm that best suits your conditions. &#9888; only FM3 is accurate with regard to FM deviation (see 10).
+For FM choose the algorithm that best suits your conditions. 
+
+&#9758; only FM3 is accurate with regard to FM deviation (see 10).
 
 &#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
 
@@ -87,7 +87,7 @@ For FM choose the algorithm that best suits your conditions. &#9888; only FM3 is
 
 Using this button you can adjust the nominal FM deviation as a percentage of the channel bandwidth that is displayed on the right of the button. When a signal with this deviation is received the demodulated signal is in the range -0.5/+0.5 which is shifted to a 0/1 range video signal.
 
-&#9888; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.   
+&#9758; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.   
 
 <h3>11: FFT asymmetrical filter toggle</h3>
 
@@ -130,11 +130,11 @@ This combo lets you set the TV standard type. This sets the number of lines per 
   - PAL405: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
   - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
   - ShNI: this is the same as above but with non interleaved frames.
-  - HLeap: this is the horizontal sync leap technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
+  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
 When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
 
-All standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; All standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
 
 <table>
     <tr>
@@ -167,19 +167,19 @@ All standards are supposed to work for any number of lines. You may experiment w
     </tr>
     <tr>
         <td>120</td>
-        <td>ShNI, HLeap</td>
+        <td>ShNI, HSkip</td>
     </tr>
     <tr>
         <td>90</td>
-        <td>ShNI, HLeap</td>
+        <td>ShNI, HSkip</td>
     </tr>
     <tr>
         <td>60</td>
-        <td>HLeap</td>
+        <td>HSkip</td>
     </tr>
     <tr>
         <td>32</td>
-        <td>HLeap</td>
+        <td>HSkip</td>
     </tr>
 </table>
 
@@ -235,6 +235,8 @@ This is the length in time units of a horizontal or line synchronization pulse. 
 
 Similarly to the line length slider the slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
 
+&#9758; You can move this control back and forth in case you have synchronizing issues as it can help the synchronization system to get back into pace.
+
 <h2>C: Image</h2>
 
 <h3>Monitor</h3>
@@ -251,6 +253,6 @@ Select scope with the scope tab on the left side.
 
 ![ATV Demodulator plugin GUI Video scope](../../../doc/img/ATVDemod_pluginC_scope.png)
 
-This is a scope widget fed with the video signal. Controls of the scope are the same as with the ChannelAnalyzerNG plugin. Please refer to the [source folder](https://github.com/f4exb/sdrangel/tree/master/plugins/channelrx/chanalyzerng) of this plugin for more details.
+This is a scope widget fed with the video signal. Controls of the scope are the same as with the ChannelAnalyzerNG plugin. Please refer to [this plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channelrx/chanalyzerng) for more details.
 
 Note that the video signal is a real signal so the imaginary part is always null. Therefore only the "Real" mode for both the trace and the trigger is interesting.

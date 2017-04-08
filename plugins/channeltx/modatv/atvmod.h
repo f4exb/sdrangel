@@ -45,7 +45,7 @@ public:
 		ATVStd405,
 		ATVStdShortInterleaved,
 		ATVStdShort,
-		ATVStdHLeap,
+		ATVStdHSkip,
     } ATVStd;
 
     typedef enum

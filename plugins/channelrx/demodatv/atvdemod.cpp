@@ -427,9 +427,9 @@ void ATVDemod::demod(Complex& c)
 
     //********** process video sample **********
 
-    if (m_objRunning.m_enmATVStandard == ATVStdHLeap)
+    if (m_objRunning.m_enmATVStandard == ATVStdHSkip)
     {
-        processHLeap(fltVal, intVal);
+        processHSkip(fltVal, intVal);
     }
     else
     {
@@ -645,7 +645,7 @@ void ATVDemod::applyStandard()
 {
     switch(m_objConfig.m_enmATVStandard)
     {
-    case ATVStdHLeap:
+    case ATVStdHSkip:
         // what is left in a line for the image
         m_intNumberOfSyncLines  = 0;
         m_intNumberOfBlackLines = 0;

@@ -666,7 +666,7 @@
         </item>
         <item>
          <property name="text">
-          <string>HLeap</string>
+          <string>HSkip</string>
          </property>
         </item>
        </widget>

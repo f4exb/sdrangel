@@ -271,7 +271,7 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if ((m_running.m_atvStd == ATVStdHLeap) && (m_lineCount == m_nbLines2)) // last line in leap mode
+    if ((m_running.m_atvStd == ATVStdHSkip) && (m_lineCount == m_nbLines2)) // last line in skip mode
     {
         pullImageLine(sample, true); // pull image line without sync
     }
@@ -829,7 +829,7 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
-    case ATVStdHLeap:
+    case ATVStdHSkip:
         m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
         m_interleaved       = false;

@@ -52,7 +52,7 @@ public:
         ATVStd405,
         ATVStdShortInterleaved,
         ATVStdShort,
-        ATVStdHLeap
+        ATVStdHSkip
     };
 
 	enum ATVModulation {
@@ -425,7 +425,7 @@ private:
     void demod(Complex& c);
     static float getRFBandwidthDivisor(ATVModulation modulation);
 
-    inline void processHLeap(float& fltVal, int& intVal)
+    inline void processHSkip(float& fltVal, int& intVal)
     {
         m_objRegisteredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
 
@@ -448,7 +448,7 @@ private:
 
         if (m_blnSynchroDetected)
         {
-            if (m_intSampleIndex >= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/2) // first after leap
+            if (m_intSampleIndex >= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/2) // first after skip
             {
                 //qDebug("VSync: %d %d %d", m_intColIndex, m_intSampleIndex, m_intLineIndex);
                 m_intAvgColIndex = m_intColIndex;
