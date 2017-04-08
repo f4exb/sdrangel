@@ -541,6 +541,11 @@
         </property>
         <item>
          <property name="text">
+          <string>640</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>625</string>
          </property>
         </item>
@@ -551,7 +556,17 @@
         </item>
         <item>
          <property name="text">
+          <string>480</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>405</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>360</string>
          </property>
         </item>
         <item>
@@ -642,6 +657,21 @@
         <item>
          <property name="text">
           <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1</string>
          </property>
         </item>
        </widget>

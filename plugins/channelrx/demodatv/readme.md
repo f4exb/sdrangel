@@ -115,11 +115,13 @@ If the rational downsampler is engaged (3) this slider also controls the downsam
 
 This is the total number of lines including all possible synchronization signals.
 
-Choice is between 625, 525, 405, 343, 240, 180, 120, 90, 60 and 32 lines. The actual number of image lines depends on the synchronization scheme.
+Choice is between 640, 625, 525, 480, 405, 360, 343, 240, 180, 120, 90, 60 and 32 lines. The actual number of image lines depends on the synchronization scheme.
 
 <h3>2: Frames Per Second</h3>
 
-This combo lets you chose between a 30, 25, 20, 16, 12, 10 and 8 FPS. This is the resulting FPS. In interleaved modes the half frame rate is doubled.
+This combo lets you chose between a 30, 25, 20, 16, 12, 10, 8, 5, 2 and 1 FPS. This is the resulting FPS. In interleaved modes the half frame rate is doubled.
+
+&#9758; Perception of continuous motion is said to be acceptable down to 16 FPS. Down to 8 FPS fluidity is still acceptable. The 5 to 1 FPS modes can be used for transmission of images with only few movements or where motion is not important such as fixed webcams. Low FPS will allow for more lines and therefore definition in the same bandwidth.
 
 <h3>3: Synchronization standard</h3>
 

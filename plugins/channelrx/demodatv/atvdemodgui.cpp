@@ -85,6 +85,7 @@ void ATVDemodGUI::resetToDefaults()
     ui->vSync->setChecked(true);
     ui->halfImage->setChecked(false);
     ui->invertVideo->setChecked(false);
+    ui->standard->setCurrentIndex(1);
 
     //********** RF Default values **********
     ui->decimatorEnable->setChecked(false);
@@ -185,7 +186,7 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->nbLines->setCurrentIndex(tmp);
         d.readS32(17, &tmp, 100);
         ui->fmDeviation->setValue(tmp);
-        d.readS32(18, &tmp, 0);
+        d.readS32(18, &tmp, 1);
         ui->standard->setCurrentIndex(tmp);
 
         blockApplySettings(false);
@@ -713,6 +714,15 @@ float ATVDemodGUI::getFps(int fpsIndex)
     case 6:
         return 8.0f;
         break;
+    case 7:
+        return 5.0f;
+        break;
+    case 8:
+        return 2.0f;
+        break;
+    case 9:
+        return 1.0f;
+        break;
     case 1:
     default:
         return 25.0f;
@@ -732,34 +742,43 @@ int ATVDemodGUI::getNumberOfLines(int nbLinesIndex)
 {
     switch(nbLinesIndex)
     {
-    case 1:
-        return 525;
+    case 0:
+        return 640;
         break;
     case 2:
-        return 405;
+        return 525;
         break;
     case 3:
-        return 343;
+        return 480;
         break;
     case 4:
-        return 240;
+        return 405;
         break;
     case 5:
-        return 180;
+        return 360;
         break;
     case 6:
-        return 120;
+        return 343;
         break;
     case 7:
-        return 90;
+        return 240;
         break;
     case 8:
-        return 60;
+        return 180;
         break;
     case 9:
+        return 120;
+        break;
+    case 10:
+        return 90;
+        break;
+    case 11:
+        return 60;
+        break;
+    case 12:
         return 32;
         break;
-    case 0:
+    case 1:
     default:
         return 625;
         break;

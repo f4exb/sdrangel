@@ -780,7 +780,7 @@ void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sample
             break;
     }
 
-    nbPointsPerRateUnit = i;
+    nbPointsPerRateUnit = i == 0 ? maxPoints : i;
     sampleRateUnits = nbPointsPerRateUnit * linesPerSecond;
 }
 

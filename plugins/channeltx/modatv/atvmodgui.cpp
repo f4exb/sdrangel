@@ -270,34 +270,43 @@ int ATVModGUI::getNbLines()
 {
     switch(ui->nbLines->currentIndex())
     {
-    case 1:
-        return 525;
+    case 0:
+        return 640;
         break;
     case 2:
-        return 405;
+        return 525;
         break;
     case 3:
-        return 343;
+        return 480;
         break;
     case 4:
-        return 240;
+        return 405;
         break;
     case 5:
-        return 180;
+        return 360;
         break;
     case 6:
-        return 120;
+        return 343;
         break;
     case 7:
-        return 90;
+        return 240;
         break;
     case 8:
-        return 60;
+        return 180;
         break;
     case 9:
+        return 120;
+        break;
+    case 10:
+        return 90;
+        break;
+    case 11:
+        return 60;
+        break;
+    case 12:
         return 32;
         break;
-    case 0:
+    case 1:
     default:
         return 625;
         break;
@@ -325,6 +334,15 @@ int ATVModGUI::getFPS()
         break;
     case 6:
         return 8;
+        break;
+    case 7:
+        return 5;
+        break;
+    case 8:
+        return 2;
+        break;
+    case 9:
+        return 1;
         break;
     case 1:
     default:

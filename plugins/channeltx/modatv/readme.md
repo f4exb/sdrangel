@@ -100,11 +100,13 @@ This is the level meter fed with the video signal. Units are the percentage of t
 
 <h3>A.7: Nuber of lines</h3>
 
-This controls the number of lines per full frame. Choice is between 625, 525 or 405 lines.
+This controls the number of lines per full frame. Choice is between 640, 625, 525, 480, 405, 360, 343, 240, 180, 120, 90, 60 and 32 lines.
 
 <h3>A.8: Number of frames per second</h3>
 
-This controls the number of full frames per second. Choice is between 30, 25, 20 or 16 frames per second.
+This controls the number of full frames per second. Choice is between 30, 25, 20, 16, 12, 10, 8, 5, 2 and 1 frames per second.
+
+&#9758; Perception of continuous motion is said to be acceptable down to 16 FPS. Down to 8 FPS fluidity is still acceptable. The 5 to 1 FPS modes can be used when you want to transmit images with only few movements or where motion is not important such as fixed webcams. Low FPS will allow for more lines and therefore definition in the same bandwidth.
 
 <h3>A.9: TV Standard</h2>
 
