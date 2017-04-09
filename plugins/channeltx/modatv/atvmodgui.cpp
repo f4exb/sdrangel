@@ -102,6 +102,7 @@ QByteArray ATVModGUI::serialize() const
     s.writeS32(11, ui->fps->currentIndex());
     s.writeS32(12, ui->rfScaling->value());
     s.writeS32(13, ui->fmExcursion->value());
+    s.writeString(14, ui->overlayText->text());
 
 	return s.final();
 }
@@ -122,6 +123,7 @@ bool ATVModGUI::deserialize(const QByteArray& data)
 		quint32 u32tmp;
 		qint32 tmp;
 		bool booltmp;
+		QString tmpString;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -156,9 +158,14 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->rfScaling->setValue(tmp);
         d.readS32(13, &tmp, 250);
         ui->fmExcursion->setValue(tmp);
+        d.readString(14, &tmpString, "");
+        ui->overlayText->setText(tmpString);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
+
+	    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
+	    m_atvMod->getInputMessageQueue()->push(message);
 
 		applySettings();
 		return true;
