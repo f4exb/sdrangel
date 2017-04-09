@@ -534,11 +534,25 @@ void ATVDemod::applySettings()
     }
 
     if ((m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
-        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth))
+        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth)
+        || (m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
+        || (m_objConfig.m_intNumberOfLines != m_objRunning.m_intNumberOfLines))
     {
         m_objSettingsMutex.lock();
 
-        m_objConfigPrivate.m_intTVSampleRate = m_objConfig.m_intSampleRate;
+        int linesPerSecond = m_objConfig.m_intNumberOfLines * m_objConfig.m_fltFramePerS;
+
+        int maxPoints = m_objConfig.m_intSampleRate / linesPerSecond;
+        int i = maxPoints;
+
+        for (; i > 0; i--)
+        {
+            if ((i * linesPerSecond) % 10 == 0)
+                break;
+        }
+
+        int nbPointsPerRateUnit = i == 0 ? maxPoints : i;
+        m_objConfigPrivate.m_intTVSampleRate = nbPointsPerRateUnit * linesPerSecond;
 
         if (m_objConfigPrivate.m_intTVSampleRate > 0)
         {

@@ -776,7 +776,7 @@ void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sample
 
     for (; i > 0; i--)
     {
-        if ((i * linesPerSecond) % 1000 == 0)
+        if ((i * linesPerSecond) % 10 == 0)
             break;
     }
 
