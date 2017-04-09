@@ -50,7 +50,9 @@ The baseband stream is interpolated by this value before being written to file. 
 
 <h3>7: Baseband sample rate</h3>
 
-This is the baseband sample rate before interpolation in kS/s. Possible values are: 32, 48, 64, 72, 128, 192, 256, 288, 300, 384, 512, 1000 kS/s. 
+This is the baseband sample rate before interpolation in S/s.
+
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
 
 <h3>8: Time counter</h3>
 

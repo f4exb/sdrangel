@@ -63,7 +63,9 @@ Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an a
 
 <h3>6: Device sample rate</h3>
 
-This is the HackRF device ADC sample rate in kS/s. Possible values are: 2400, 3200, 4800, 5600, 6400, 8000, 9600, 12800, 19200 kS/s. 
+This is the HackRF device ADC sample rate in S/s.
+
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
 
 <h3>7: Rx filter bandwidth</h3>
 

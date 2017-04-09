@@ -60,17 +60,15 @@ This controls the optional XB-200 add-on when it is fitted to the BladeRF main b
 
 <h3>4: Device sample rate</h3>
 
-This is the BladeRF device ADC sample rate in kS/s. Possible values are: 1536, 1600, 2000, 2304, 2400, 3072, 3200, 4608, 4800, 6144, 7680, 9216, 9600, 10752, 12288, 18432, 19200, 24576, 30720, 36864, 39936 kS/s. 
+This is the BladeRF device ADC sample rate in S/s.
 
-<h3>5: Rx filter bandwidth</h3>
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
 
-This is the Rx filter bandwidth in kHz in the LMS6002D device. Possible values are: 1500, 1750, 2500, 2750, 3000, 3840, 5000, 5500, 6000, 7000, 8750, 10000, 12000, 14000, 20000, 28000 kHz.
-
-<h3>6: Decimation factor</h3>
+<h3>5: Decimation factor</h3>
 
 The I/Q stream from the BladeRF ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
-<h3>7: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
+<h3>6: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
 
 Possible values are:
 
@@ -78,11 +76,15 @@ Possible values are:
   - **Inf**: the decimation operation takes place around the center of the lower half of the BladeRF Rx passband. 
   - **Sup**: the decimation operation takes place around the center of the upper half of the BladeRF Rx passband. 
 
+<h3>7: Rx filter bandwidth</h3>
+
+This is the Rx filter bandwidth in kHz in the LMS6002D device. Possible values are: 1500, 1750, 2500, 2750, 3000, 3840, 5000, 5500, 6000, 7000, 8750, 10000, 12000, 14000, 20000, 28000 kHz.
+
 <h3>8: LNA gain</h2>
 
 This is the LNA gain in dB. LNA is inside the LMS6002D chip and is placed before the RF mixer. Possible values are:
 
-  - **0 dB**: no gain
+  - **0dB**: no gain
   - **3dB**
   - **6dB**
   

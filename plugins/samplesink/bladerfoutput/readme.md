@@ -60,7 +60,9 @@ This controls the optional XB-200 add-on when it is fitted to the BladeRF main b
 
 <h3>6: Device sample rate</h3>
 
-This is the BladeRF device DAC sample rate in kS/s. Possible values are: 1536, 1600, 2000, 2304, 2400, 3072, 3200, 4608, 4800, 6144, 7680, 9216, 9600, 10752, 12288, 18432, 19200, 24576, 30720, 36864, 39936 kS/s. 
+This is the BladeRF device DAC sample rate in S/s.
+
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.    
 
 <h3>7: Tx filter bandwidth</h3>
 
