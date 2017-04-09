@@ -154,7 +154,7 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         ui->fps->setCurrentIndex(tmp);
         d.readS32(12, &tmp, 80);
         ui->rfScaling->setValue(tmp);
-        d.readS32(13, &tmp, 50);
+        d.readS32(13, &tmp, 250);
         ui->fmExcursion->setValue(tmp);
 
         blockApplySettings(false);
@@ -400,7 +400,7 @@ void ATVModGUI::on_rfScaling_valueChanged(int value)
 
 void ATVModGUI::on_fmExcursion_valueChanged(int value)
 {
-    ui->fmExcursionText->setText(tr("%1").arg(value));
+    ui->fmExcursionText->setText(tr("%1").arg(value / 10.0, 0, 'f', 1));
     applySettings();
 }
 
@@ -713,7 +713,7 @@ void ATVModGUI::applySettings()
 			ui->channelMute->isChecked(),
 			ui->invertVideo->isChecked(),
 			ui->rfScaling->value() * 327.68f,
-			ui->fmExcursion->value() / 100.0f,
+			ui->fmExcursion->value() / 1000.0f, // percentage of full bandwidth. Value in pro milli
 			ui->forceDecimator->isChecked());
 	}
 }

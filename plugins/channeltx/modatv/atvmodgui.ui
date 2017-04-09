@@ -299,16 +299,16 @@
          <string>FM excursion in % of total bandwidth</string>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>500</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>50</number>
+         <number>250</number>
         </property>
        </widget>
       </item>
@@ -316,15 +316,15 @@
        <widget class="QLabel" name="fmExcursionText">
         <property name="minimumSize">
          <size>
-          <width>20</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>FM deviation percentage of total bandwidth</string>
+         <string>FM excursion in % of total bandwidth</string>
         </property>
         <property name="text">
-         <string>50</string>
+         <string>25.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

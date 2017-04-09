@@ -331,17 +331,20 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>FM deviation as % of full bandwidth</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>125</number>
+         <number>500</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>100</number>
+         <number>250</number>
         </property>
        </widget>
       </item>
@@ -349,12 +352,15 @@
        <widget class="QLabel" name="fmDeviationText">
         <property name="minimumSize">
          <size>
-          <width>20</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>FM deviation as % of full bandwidth</string>
+        </property>
         <property name="text">
-         <string>100</string>
+         <string>25.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

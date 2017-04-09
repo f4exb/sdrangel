@@ -93,7 +93,7 @@ void ATVDemodGUI::resetToDefaults()
     ui->rfBW->setValue(10);
     ui->rfOppBW->setValue(10);
     ui->bfo->setValue(0);
-    ui->fmDeviation->setValue(100);
+    ui->fmDeviation->setValue(250);
 
     blockApplySettings(false);
     lineTimeUpdate();
@@ -184,7 +184,7 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->invertVideo->setChecked(booltmp);
         d.readS32(16, &tmp, 0);
         ui->nbLines->setCurrentIndex(tmp);
-        d.readS32(17, &tmp, 100);
+        d.readS32(17, &tmp, 250);
         ui->fmDeviation->setValue(tmp);
         d.readS32(18, &tmp, 1);
         ui->standard->setCurrentIndex(tmp);
@@ -400,7 +400,7 @@ void ATVDemodGUI::applyRFSettings()
                 ui->rfFiltering->isChecked(),
                 ui->decimatorEnable->isChecked(),
                 ui->bfo->value(),
-                ui->fmDeviation->value() / 100.0f);
+                ui->fmDeviation->value() / 500.0f);
     }
 }
 
@@ -633,7 +633,7 @@ void ATVDemodGUI::on_bfo_valueChanged(int value)
 
 void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
 {
-    ui->fmDeviationText->setText(QString("%1").arg(value));
+    ui->fmDeviationText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     applyRFSettings();
 }
 
