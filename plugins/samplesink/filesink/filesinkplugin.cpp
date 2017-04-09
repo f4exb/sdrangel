@@ -25,7 +25,7 @@
 
 const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
 	QString("File sink output"),
-	QString("3.0.0"),
+	QString("3.3.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
