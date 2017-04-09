@@ -22,26 +22,26 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 <h2>3: Sample rate data</h2>
 
-The left button can be used to force the rational decimator even when the source and channel samople rates agree. This allows to use the FIR filter of the decimator in any case.
+The left button can be used to force the rational decimator even when the source and channel sample rates agree. This allows to use the FIR filter of the decimator in any case.
 
-The middle figure is the sample rate in kS/s used in the channel which may differ of the source plugin output sample rate if the rational decimator is engaged. This sample rate is calculated as the closest 1 kS/s multiple to the source sample rate to fit an integer number of line points. The number of line points is the full line including synchronization. This number is the sample rate divided by the line frequency. The line frequency is calculated as the nominal number of lines multiplied by the FPS.  
+The middle figure is the sample rate in kS/s used in the channel which may differ of the source plugin output sample rate if the rational decimator is engaged. This sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points. The number of line points is the full line including synchronization. This number is the sample rate divided by the line frequency. The line frequency is calculated as the nominal number of lines multiplied by the FPS.  
 
 The right figure is the corresponding number of points and therefore also samples per full line including line synchronization. 
 
-Let's take an example with a 405 lines and 25 FPS video signal and a 2400 kS/s source output sample rate: 
+Let's take an example with a 405 lines and 20 FPS video signal and a 3000 kS/s sink input sample rate: 
 
   - the line frequency is 405 &#215; 25 = 10125 Hz
   - 2400 kS/s fit 237.037037037 points per line and therefore is not an integer number
-  - closest sample rate to fit an integer number of points is 232 &#215; 10125 = 2349 kS/s
-  - therefore decimated sample rate is 2349 kS/s and the number of points per line is 232
+  - closest 10 S/s multiple sample rate to fit an integer number of points is 236 &#215; 10125 = 2389.5 kS/s
+  - therefore decimated sample rate is 2389.5 kS/s and the number of points per line is 236
   
 The example taken in the screenshot is from a 405 lines &#215; 20 FPS video signal:
 
-  - source sample rate is 1625 kS/s
+  - source sample rate is 3000 kS/s
   - line frequency is 8100 Hz
-  - 200 points fit in 8100 &#215; 200 = 1620 kS/s
-  - 201 points fit in 8100 &#215; 201 = 1628.1 kS/s
-  - therefore the closest sample rate is 1620 kS/s for 200 points per line 
+  - 371 points fit in 8100 &#215; 371 = 3005.1 kS/s
+  - 370 points fit in 8100 &#215; 370 = 2997 kS/s
+  - therefore the closest sample rate is 2997 kS/s for 370 points per line 
 
 <h2>4: Channel power</h2>
 
@@ -60,7 +60,7 @@ Use this button to toggle mute for this channel. The radio waves on the icon are
 The video signal can modulate the carrier in the following modes:
 
   - AM: Amplitude modulation. Modulation index is 90%.
-  - FM: Frequency modulation. Excursion is a percentage of the bandwidth available given the channel sample rate. This percentage is controlled by button (2). e.g. at 50% for 4 MS/s sample rate this is &#177;1 MHz (2 MHz total) 
+  - FM: Frequency modulation. Excursion is a percentage of the bandwidth available given the channel sample rate. This percentage is controlled by button (2). e.g. at 25% for 4 MS/s sample rate this is 1 MHz (&#177;0.5 MHz) 
   - USB: SSB upper side band: video signal is transposed only in positive frequencies including DC component
   - LSB: SSB lower side band: video signal is transposed only in megative frequencies excluding DC component
   - VUSB: SSB upper sideband with vestigial lower sideband. The cutoff frequency of the lower sideband is controlled by slider (3)
@@ -68,7 +68,9 @@ The video signal can modulate the carrier in the following modes:
   
 <h3>A.2: FM deviation percentage of total bandwidth</h3>
 
-Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g for the sample rate of 1620 kS/s of the screenshot and a percentage of 40% this yields a full deviation of 1620 &#215; 0.4 = 648 kHz that is &#177;324 kHz
+Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g for the sample rate of 2997 kS/s of the screenshot and a percentage of 19% this yields a full deviation of 2997 &#215; 0.19 = 569.43 kHz that is &#177;284.715 kHz
+
+&#9758; You can adjust this value and see the result for yourseelf. A good starting point is half of the signal bandwidth.
   
 <h3>A.3: Opposite sideband FFT filter cutoff</h3>
 
@@ -119,12 +121,18 @@ This controls the frame synchronization schem and number of black lines:
   - ShNI: this is the same as above but with non interleaved frames.
   - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
-&#9758; All standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; Interleaved mode requires an odd number of lines because the system recognizes the even and odd frames depending on a odd or even number of lines respectively for the half images
+
+&#9758; For non interlaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
 
 <table>
     <tr>
         <th>#lines</th>
         <th>standard</th>
+    </tr>
+    <tr>
+        <td>640</td>
+        <td>ShNI</td>
     </tr>
     <tr>
         <td>625</td>
@@ -135,8 +143,16 @@ This controls the frame synchronization schem and number of black lines:
         <td>PAL525, PAL405</td>
     </tr>
     <tr>
+        <td>480</td>
+        <td>ShNI</td>
+    </tr>
+    <tr>
         <td>405</td>
         <td>PAL405, ShI, ShNI</td>
+    </tr>
+    <tr>
+        <td>360</td>
+        <td>ShNI</td>
     </tr>
     <tr>
         <td>343</td>

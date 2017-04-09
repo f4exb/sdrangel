@@ -36,7 +36,7 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 Use this toggle button to enable or disable the rational downsampler and its FIR filter. Without downsampling the source plugin feeds the channel directly. 
 
-Use it when you want to filter the signal into a narrower bandwidth than the channel bandwidth in AM and FM modes. When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
+When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
 
 <h3>4: Channel sample rate</h3>
 
@@ -45,6 +45,16 @@ This is the channel sample rate in kS/s. For good horizontal synchronization you
 N = S / (l &#215; F)
 
 &#9758; The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
+
+When the rational dowsampler is engaged (3) the resulting sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points.
+
+The example taken in the screenshot is from a 405 lines × 20 FPS video signal:
+
+  - source sample rate is 1500 kS/s
+  - line frequency is 8100 Hz
+  - 186 points fit in 8100 × 186 = 1506.6 kS/s
+  - 185 points fit in 8100 × 185 = 1498.5 kS/s
+  - therefore the closest sample rate is 1498.5 kS/s for 185 points per line 
 
 <h3>5: Number of points (or samples) per line</h3>
 
@@ -136,12 +146,18 @@ This combo lets you set the TV standard type. This sets the number of lines per 
 
 When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
 
-&#9758; All standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; Interleaved mode requires an odd number of lines because the system recognizes the even and odd frames depending on a odd or even number of lines respectively for the half images
+
+&#9758; For non interlaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
 
 <table>
     <tr>
         <th>#lines</th>
         <th>standard</th>
+    </tr>
+    <tr>
+        <td>640</td>
+        <td>ShNI</td>
     </tr>
     <tr>
         <td>625</td>
@@ -152,8 +168,16 @@ When the standard chosen matches the standard of transmission the image should a
         <td>PAL525, PAL405</td>
     </tr>
     <tr>
+        <td>480</td>
+        <td>ShNI</td>
+    </tr>
+    <tr>
         <td>405</td>
         <td>PAL405, ShI, ShNI</td>
+    </tr>
+    <tr>
+        <td>360</td>
+        <td>ShNI</td>
     </tr>
     <tr>
         <td>343</td>
