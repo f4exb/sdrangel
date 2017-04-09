@@ -221,9 +221,8 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
     if ((m_objRunning.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) // do only if scope tab is selected and scope is available
     {
         m_objScopeSink->feed(m_objScopeSampleBuffer.begin(), m_objScopeSampleBuffer.end(), false); // m_ssb = positive only
+        m_objScopeSampleBuffer.clear();
     }
-
-    m_objScopeSampleBuffer.clear();
 
     if (ptrBufferToRelease != 0)
     {
@@ -404,10 +403,12 @@ void ATVDemod::demod(Complex& c)
         fltVal = 0.0f;
     }
 
-    fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
-    m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
-
     fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
+    fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
+
+    if ((m_objRunning.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) { // feed scope buffer only if scope is present and visible
+        m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
+    }
 
     m_fltAmpLineAverage += fltVal;
 

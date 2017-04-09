@@ -385,6 +385,8 @@ private:
     AvgExpInt m_objAvgColIndex;
     int m_intAvgColIndex;
 
+    SampleVector m_sampleBuffer;
+
     //*************** RF  ***************
 
     MovingAverage<double> m_objMagSqAverage;
