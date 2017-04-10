@@ -76,6 +76,21 @@ If you use your own location for libhackrf install directory you need to specify
 
 HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.2 MS/s rates are considered experimental and are way out of specs of the ADC. You may or may not achieve acceptable results depending on the unit. A too low sampling rate will typically create ghost signals (images) and/or raise the noise floor.
 
+<h2>LimeSDR</h2>
+
+&#9888; This is a wotk in progress
+
+You will need a minimal installation of LimeSuite:
+
+  - `sudo apt-get install libsqlite3-dev`
+  - `git clone https://github.com/myriadrf/LimeSuite.git`
+  - `cd LimeSuite`
+  - `mkdir builddir`
+  - `cd builddir`
+  - `cmake -DCMAKE_INSTALL_PREFIX=/opt/install/LimeSuite`
+  - `make -j8`
+  - `make install`
+
 <h2>RTL-SDR</h2>
 
 RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
