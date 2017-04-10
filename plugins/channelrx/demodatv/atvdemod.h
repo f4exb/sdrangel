@@ -86,7 +86,7 @@ public:
 	        m_intNumberOfLines(625),
 	        m_fltLineDuration(0.0f),
 	        m_fltTopDuration(0.0f),
-	        m_fltFramePerS(0.0f),
+	        m_fltFramePerS(25.0f),
 	        m_fltRatioOfRowsToDisplay(0.0f),
 	        m_fltVoltLevelSynchroTop(0.0f),
 	        m_fltVoltLevelSynchroBlack(1.0f),
