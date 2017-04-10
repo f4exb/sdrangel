@@ -1,8 +1,16 @@
+sdrangel (3.3.4-1) unstable; urgency=medium
+
+  * ATV Demod: fixed issue #22. Segfault when starting the plugin while the
+  * source is running
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 10 Apr 2017 21:14:18 +0100
+
 sdrangel (3.3.3-1) unstable; urgency=medium
 
   * HackRF, BladeRF, RTLSDR plugins: continuous sample rate setting
+  * ATV: implemented narrow band modes
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 16 Apr 2017 23:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 9 Apr 2017 23:14:18 +0100
 
 sdrangel (3.3.2-1) unstable; urgency=medium
 
