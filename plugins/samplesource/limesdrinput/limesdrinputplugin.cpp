@@ -1,0 +1,96 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include "limesdrinputplugin.h"
+
+#include <QtPlugin>
+#include <QAction>
+
+#include "lime/LimeSuite.h"
+#include "plugin/pluginapi.h"
+#include "util/simpleserializer.h"
+#include "device/devicesourceapi.h"
+
+#include "limesdrinputgui.h"
+
+const PluginDescriptor LimeSDRInputPlugin::m_pluginDescriptor = {
+    QString("LimeSDR Input"),
+    QString("3.4.0"),
+    QString("(c) Edouard Griffiths, F4EXB"),
+    QString("https://github.com/f4exb/sdrangel"),
+    true,
+    QString("https://github.com/f4exb/sdrangel")
+};
+
+const QString LimeSDRInputPlugin::m_hardwareID = "LimeSDR";
+const QString LimeSDRInputPlugin::m_deviceTypeID = LIMESDR_DEVICE_TYPE_ID;
+
+LimeSDRInputPlugin::LimeSDRInputPlugin(QObject* parent) :
+    QObject(parent)
+{
+}
+
+const PluginDescriptor& LimeSDRInputPlugin::getPluginDescriptor() const
+{
+    return m_pluginDescriptor;
+}
+
+void LimeSDRInputPlugin::initPlugin(PluginAPI* pluginAPI)
+{
+    pluginAPI->registerSampleSource(m_deviceTypeID, this);
+}
+
+PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
+{
+    SamplingDevices result;
+    struct bladerf_devinfo *devinfo = 0;
+
+    int count = bladerf_get_device_list(&devinfo);
+
+    for(int i = 0; i < count; i++)
+    {
+        QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+
+        result.append(SamplingDevice(displayedName,
+                m_hardwareID,
+                m_deviceTypeID,
+                QString(devinfo[i].serial),
+                i));
+    }
+
+    if (devinfo)
+    {
+        bladerf_free_device_list(devinfo); // Valgrind memcheck
+    }
+
+    return result;
+}
+
+PluginGUI* LimeSDRInputPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+{
+    if(sourceId == m_deviceTypeID)
+    {
+        LimeSDRInputGui* gui = new LimeSDRInputGui(deviceAPI);
+        *widget = gui;
+        return gui;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+

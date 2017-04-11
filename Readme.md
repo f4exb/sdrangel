@@ -97,6 +97,12 @@ Then add the following defines on `cmake` command line:
 
 `-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
 
+For binary installation you will need to install the following packages as a prerequisite:
+
+  - `liblimesuite17.02-1_17.02.1-1_amd64.deb`
+  - `liblimesuite-dev_17.02.1-1_amd64.deb`
+  - `limesuite-udev_17.02.1-1_amd64.deb` (if you want the udev rules)
+
 <h2>RTL-SDR</h2>
 
 RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
@@ -198,15 +204,17 @@ This is the archive of the complete binary distribution that expands to the `sdr
 
 <h2>Debian distributions</h2>
 
-It is provided in the form of a .deb package for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). 
+It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). 
 
-Install it as usual for a .deb package:
+Install it as usual for .deb packages:
 
   - Make sure the `universe` repository is in your `/etc/apt/sources.list`
 
 Then in a terminal do:
 
   - `sudo apt-get update`
+  - `sudo dpkg -i liblimesuite17.02-1_17.02.1-1_amd64.deb`
+  - `sudo dpkg -i liblimesuite-dev_17.02.1-1_amd64.deb`  
   - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
   - `sudo apt-get -f install` this will install missing dependencies
     
