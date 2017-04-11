@@ -78,6 +78,8 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
+Linux only.
+
 &#9888; This is a wotk in progress
 
 You will need a minimal installation of LimeSuite:
@@ -90,6 +92,10 @@ You will need a minimal installation of LimeSuite:
   - `cmake -DCMAKE_INSTALL_PREFIX=/opt/install/LimeSuite`
   - `make -j8`
   - `make install`
+
+Then add the following defines on `cmake` command line:
+
+`-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
 
 <h2>RTL-SDR</h2>
 

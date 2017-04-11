@@ -23,6 +23,9 @@ include_directories(
 )
 endif (BUILD_DEBIAN)
 
+add_definitions(${QT_DEFINITIONS})
+add_definitions(-DQT_SHARED)
+
 add_library(limesdrdevice SHARED
     ${limesdrdevice_SOURCES}
 )

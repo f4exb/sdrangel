@@ -21,13 +21,13 @@ bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
 {
     if (LMS_Open(&m_dev, deviceStr, 0))
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot open device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot open device " << deviceStr;
         return false;
     }
 
     if (LMS_Init(m_dev) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot init device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot init device " << deviceStr;
         return false;
     }
 
@@ -35,59 +35,59 @@ bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
 
     if ((n = LMS_GetNumChannels(m_dev, LMS_CH_RX)) < 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the number of Rx channels for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the number of Rx channels for device " << deviceStr;
         return false;
     }
     else
     {
         m_nbRxChannels = n;
-        QDebug() << "DeviceLimeSDRParams::open: " << n << " Rx channels for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: " << n << " Rx channels for device " << deviceStr;
     }
 
     if ((n = LMS_GetNumChannels(m_dev, LMS_CH_TX)) < 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the number of Tx channels for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the number of Tx channels for device " << deviceStr;
         return false;
     }
     else
     {
         m_nbTxChannels = n;
-        QDebug() << "DeviceLimeSDRParams::open: " << n << " Tx channels for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: " << n << " Tx channels for device " << deviceStr;
     }
 
     if (LMS_GetLPFBWRange(m_dev, LMS_CH_RX, &m_lpfRangeRx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Rx LPF range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Rx LPF range for device " << deviceStr;
         return false;
     }
 
     if (LMS_GetLPFBWRange(m_dev, LMS_CH_TX, &m_lpfRangeTx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Tx LPF range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Tx LPF range for device " << deviceStr;
         return false;
     }
 
     if (LMS_GetLOFrequencyRange(m_dev, LMS_CH_RX, &m_lpfRangeRx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Rx LO range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Rx LO range for device " << deviceStr;
         return false;
     }
 
     if (LMS_GetLOFrequencyRange(m_dev, LMS_CH_TX, &m_lpfRangeTx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Tx LO range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Tx LO range for device " << deviceStr;
         return false;
     }
 
     if (LMS_GetSampleRateRange(m_dev, LMS_CH_RX, &m_srRangeRx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Rx sample rate range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Rx sample rate range for device " << deviceStr;
         return false;
     }
 
     if (LMS_GetSampleRateRange(m_dev, LMS_CH_TX, &m_srRangeTx) != 0)
     {
-        QDebug() << "DeviceLimeSDRParams::open: cannot get the Tx sample rate range for device " << deviceStr;
+        qDebug() << "DeviceLimeSDRParams::open: cannot get the Tx sample rate range for device " << deviceStr;
         return false;
     }
 
