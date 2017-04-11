@@ -1,6 +1,7 @@
 project(limesdrdevice)
 
 set(limesdrdevice_SOURCES
+    devicelimesdrparam.cpp
 )
 
 set(limesdrdevice_HEADERS

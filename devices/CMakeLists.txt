@@ -12,8 +12,12 @@ if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
     add_subdirectory(hackrf)
 endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
+find_package(LimeSuite)
+if(LIMESUITE_FOUND AND LIBHACKRF_FOUND)
+    add_subdirectory(limesdr)
+endif(LIMESUITE_FOUND AND LIBHACKRF_FOUND)
+
 if (BUILD_DEBIAN)
     add_subdirectory(bladerf)
     add_subdirectory(hackrf)
 endif (BUILD_DEBIAN)
-
