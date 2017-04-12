@@ -697,16 +697,19 @@ void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI 
             << " ser: " << sampleSourceDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSourceDevice->m_deviceSequence;
 
-    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
-
-    QWidget *gui;
-    PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceAPI);
+    deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists // TODO: move out
 
     //  m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(sampleSourceDevice->m_deviceSequence);
     deviceAPI->setHardwareId(sampleSourceDevice->m_hadrwareId);
     deviceAPI->setSampleSourceId(sampleSourceDevice->m_deviceId);
     deviceAPI->setSampleSourceSerial(sampleSourceDevice->m_deviceSerial);
+
+    // TOOD: move out the rest
+
+    QWidget *gui;
+    PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceAPI);
+
     deviceAPI->setSampleSourcePluginGUI(pluginGUI);
     deviceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
 }
@@ -723,14 +726,15 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
 
     deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
 
-    QWidget *gui;
-    PluginGUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceAPI);
-
     //  m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(sampleSinkDevice->m_deviceSequence);
     deviceAPI->setHardwareId(sampleSinkDevice->m_hadrwareId);
     deviceAPI->setSampleSinkId(sampleSinkDevice->m_deviceId);
     deviceAPI->setSampleSinkSerial(sampleSinkDevice->m_deviceSerial);
+
+    QWidget *gui;
+    PluginGUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceAPI);
+
     deviceAPI->setSampleSinkPluginGUI(pluginGUI);
     deviceAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);
 }
