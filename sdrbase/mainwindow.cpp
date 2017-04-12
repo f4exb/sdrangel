@@ -858,9 +858,11 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked)
         int selectedComboIndex = deviceUI->m_samplingDeviceControl->getDeviceSelector()->currentIndex();
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSinkAPI->stopGeneration();
+
+        deviceUI->m_deviceSinkAPI->setSampleSinkPluginGUI(0); // deletes old GUI and input object
         deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
+
         m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
-        deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
 
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
@@ -887,6 +889,16 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked)
                 }
             }
         }
+
+        // constructs new GUI and output object
+        QWidget *gui;
+        PluginManager::SamplingDevice *sampleSinkDevice = (PluginManager::SamplingDevice *) devicePtr;
+        PluginGUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
+
+        deviceUI->m_deviceSinkAPI->setSampleSinkPluginGUI(pluginGUI);
+        deviceUI->m_deviceSinkAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);
+
+        deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
     }
 }
 

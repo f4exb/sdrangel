@@ -714,19 +714,11 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
             << " ser: " << sampleSinkDevice->m_deviceSerial.toStdString().c_str()
             << " seq: " << sampleSinkDevice->m_deviceSequence;
 
-    deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
-
     //  m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(sampleSinkDevice->m_deviceSequence);
     deviceAPI->setHardwareId(sampleSinkDevice->m_hadrwareId);
     deviceAPI->setSampleSinkId(sampleSinkDevice->m_deviceId);
     deviceAPI->setSampleSinkSerial(sampleSinkDevice->m_deviceSerial);
-
-    QWidget *gui;
-    PluginGUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceAPI);
-
-    deviceAPI->setSampleSinkPluginGUI(pluginGUI);
-    deviceAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);
 }
 
 void PluginManager::loadPlugins(const QDir& dir)
