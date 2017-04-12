@@ -107,6 +107,7 @@ SDRdaemonFECGui::~SDRdaemonFECGui()
 {
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
+    delete m_sampleSource;
 	delete ui;
 }
 
