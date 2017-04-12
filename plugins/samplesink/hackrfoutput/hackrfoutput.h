@@ -71,7 +71,6 @@ public:
 	HackRFOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~HackRFOutput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

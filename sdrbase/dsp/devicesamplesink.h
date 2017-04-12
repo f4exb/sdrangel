@@ -31,7 +31,6 @@ public:
 	DeviceSampleSink();
 	virtual ~DeviceSampleSink();
 
-	virtual bool init(const Message& cmd) = 0;
 	virtual bool start(int device) = 0;
 	virtual void stop() = 0;
 

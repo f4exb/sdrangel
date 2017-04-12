@@ -71,7 +71,6 @@ public:
 	BladerfOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~BladerfOutput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

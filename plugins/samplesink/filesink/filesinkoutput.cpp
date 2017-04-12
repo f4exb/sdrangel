@@ -70,11 +70,6 @@ void FileSinkOutput::openFileStream()
 	qDebug() << "FileSinkOutput::openFileStream: " << m_fileName.toStdString().c_str();
 }
 
-bool FileSinkOutput::init(const Message& message)
-{
-	return false;
-}
-
 bool FileSinkOutput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);

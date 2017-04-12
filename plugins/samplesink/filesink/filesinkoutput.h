@@ -151,7 +151,6 @@ public:
 	FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer);
 	virtual ~FileSinkOutput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

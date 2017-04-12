@@ -53,11 +53,6 @@ HackRFOutput::~HackRFOutput()
 	m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool HackRFOutput::init(const Message& cmd)
-{
-	return false;
-}
-
 bool HackRFOutput::start(int device)
 {
 //	QMutexLocker mutexLocker(&m_mutex);
