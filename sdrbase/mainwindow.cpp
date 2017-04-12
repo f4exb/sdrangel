@@ -797,23 +797,10 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSourceAPI->stopAcquisition();
 
-        // TODO: deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(0); // deletes old GUI and input object
+        deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(0); // deletes old GUI and input object
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
 
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
-
-        // TODO: move up add to buddies list
-
-        // TODO:
-//        // constructs new GUI and input object
-//        QWidget *gui;
-//        PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
-//        PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
-//
-//        deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(pluginGUI);
-//        deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
-
-        deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
@@ -840,6 +827,16 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
                 }
             }
         }
+
+        // constructs new GUI and input object
+        QWidget *gui;
+        PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
+        PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
+
+        deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(pluginGUI);
+        deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
+
+        deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
         if (currentSourceTabIndex == 0)
         {
