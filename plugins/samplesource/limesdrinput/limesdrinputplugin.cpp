@@ -55,27 +55,39 @@ void LimeSDRInputPlugin::initPlugin(PluginAPI* pluginAPI)
 
 PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
 {
+    lms_info_str_t* deviceList;
+    int nbDevices;
     SamplingDevices result;
-    struct bladerf_devinfo *devinfo = 0;
 
-    int count = bladerf_get_device_list(&devinfo);
-
-    for(int i = 0; i < count; i++)
+    if ((nbDevices = LMS_GetDeviceList(0)) <= 0)
     {
-        QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
-
-        result.append(SamplingDevice(displayedName,
-                m_hardwareID,
-                m_deviceTypeID,
-                QString(devinfo[i].serial),
-                i));
+        qDebug("LimeSDRInputPlugin::enumSampleSources: Could not find any LimeSDR device");
+        return result; // empty result
     }
 
-    if (devinfo)
+    deviceList = new lms_info_str_t[nbDevices];
+
+    if (LMS_GetDeviceList(deviceList) < 0)
     {
-        bladerf_free_device_list(devinfo); // Valgrind memcheck
+        qDebug("LimeSDRInputPlugin::enumSampleSources: Could not obtain LimeSDR devices information");
+        delete[] deviceList;
+        return result; // empty result
+    }
+    else
+    {
+        for (int i = 0; i < nbDevices; i++)
+        {
+            qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
+            QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(deviceList[i]));
+            result.append(SamplingDevice(displayedName,
+                    m_hardwareID,
+                    m_deviceTypeID,
+                    QString(deviceList[i]),
+                    i));
+        }
     }
 
+    delete[] deviceList;
     return result;
 }
 
