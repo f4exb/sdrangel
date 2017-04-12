@@ -47,11 +47,6 @@ FCDProPlusInput::~FCDProPlusInput()
 	stop();
 }
 
-bool FCDProPlusInput::init(const Message& cmd)
-{
-	return false;
-}
-
 bool FCDProPlusInput::start(int device)
 {
 	qDebug() << "FCDProPlusInput::start with device #" << device;

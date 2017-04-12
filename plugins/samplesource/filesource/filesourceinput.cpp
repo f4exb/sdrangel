@@ -140,11 +140,6 @@ void FileSourceInput::seekFileStream(int seekPercentage)
 	}
 }
 
-bool FileSourceInput::init(const Message& message)
-{
-	return false;
-}
-
 bool FileSourceInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);

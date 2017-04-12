@@ -31,7 +31,6 @@ public:
 	DeviceSampleSource();
 	virtual ~DeviceSampleSource();
 
-	virtual bool init(const Message& cmd) = 0;
 	virtual bool start(int device) = 0;
 	virtual void stop() = 0;
 
@@ -40,7 +39,7 @@ public:
 	virtual quint64 getCenterFrequency() const = 0; //!< Center frequency exposed by the source
 
 	virtual bool handleMessage(const Message& message) = 0;
-	
+
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; }
     SampleSinkFifo* getSampleFifo() { return &m_sampleFifo; }

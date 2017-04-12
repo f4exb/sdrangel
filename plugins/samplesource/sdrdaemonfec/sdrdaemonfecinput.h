@@ -261,7 +261,6 @@ public:
 	SDRdaemonFECInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonFECInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

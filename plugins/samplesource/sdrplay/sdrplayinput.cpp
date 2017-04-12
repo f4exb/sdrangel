@@ -46,11 +46,6 @@ SDRPlayInput::~SDRPlayInput()
     stop();
 }
 
-bool SDRPlayInput::init(const Message& cmd)
-{
-    return false;
-}
-
 bool SDRPlayInput::start(int device)
 {
     QMutexLocker mutexLocker(&m_mutex);

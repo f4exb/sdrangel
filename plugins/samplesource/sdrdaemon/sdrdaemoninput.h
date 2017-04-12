@@ -277,7 +277,6 @@ public:
 	SDRdaemonInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

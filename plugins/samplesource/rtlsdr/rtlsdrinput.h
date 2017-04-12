@@ -72,7 +72,6 @@ public:
 	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

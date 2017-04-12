@@ -1,3 +1,9 @@
+sdrangel (3.4.0-1) unstable; urgency=medium
+
+  * LimeSDR support with redesign of source and sink management
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 17 Apr 2017 23:14:18 +0100
+
 sdrangel (3.3.4-1) unstable; urgency=medium
 
   * ATV Demod: fixed issue #22. Segfault when starting the plugin while the

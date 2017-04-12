@@ -61,12 +61,6 @@ SDRdaemonFECInput::~SDRdaemonFECInput()
 	delete m_SDRdaemonUDPHandler;
 }
 
-bool SDRdaemonFECInput::init(const Message& message)
-{
-	qDebug() << "SDRdaemonInput::init";
-	return false;
-}
-
 bool SDRdaemonFECInput::start(int device)
 {
 	qDebug() << "SDRdaemonInput::start";

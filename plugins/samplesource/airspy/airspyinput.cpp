@@ -46,11 +46,6 @@ AirspyInput::~AirspyInput()
 	stop();
 }
 
-bool AirspyInput::init(const Message& cmd)
-{
-	return false;
-}
-
 bool AirspyInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);

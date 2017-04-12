@@ -52,11 +52,6 @@ BladerfInput::~BladerfInput()
     m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool BladerfInput::init(const Message& cmd)
-{
-	return false;
-}
-
 bool BladerfInput::start(int device)
 {
 //	QMutexLocker mutexLocker(&m_mutex);

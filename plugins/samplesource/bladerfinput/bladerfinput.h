@@ -71,7 +71,6 @@ public:
 	BladerfInput(DeviceSourceAPI *deviceAPI);
 	virtual ~BladerfInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

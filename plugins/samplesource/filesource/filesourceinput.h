@@ -212,7 +212,6 @@ public:
 	FileSourceInput(const QTimer& masterTimer);
 	virtual ~FileSourceInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 

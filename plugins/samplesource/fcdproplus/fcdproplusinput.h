@@ -57,7 +57,6 @@ public:
 	FCDProPlusInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FCDProPlusInput();
 
-	virtual bool init(const Message& cmd);
 	virtual bool start(int device);
 	virtual void stop();
 

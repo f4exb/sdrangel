@@ -44,11 +44,6 @@ RTLSDRInput::~RTLSDRInput()
 	stop();
 }
 
-bool RTLSDRInput::init(const Message& message)
-{
-	return false;
-}
-
 bool RTLSDRInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);

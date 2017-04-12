@@ -81,7 +81,6 @@ public:
     SDRPlayInput(DeviceSourceAPI *deviceAPI);
     virtual ~SDRPlayInput();
 
-    virtual bool init(const Message& message);
     virtual bool start(int device);
     virtual void stop();
 

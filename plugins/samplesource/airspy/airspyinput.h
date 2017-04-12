@@ -71,7 +71,6 @@ public:
 	AirspyInput(DeviceSourceAPI *deviceAPI);
 	virtual ~AirspyInput();
 
-	virtual bool init(const Message& message);
 	virtual bool start(int device);
 	virtual void stop();
 
