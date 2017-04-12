@@ -49,25 +49,40 @@ public:
 		{ }
 	};
 
-	class MsgReportRTLSDR : public Message {
+	class MsgQueryRTLSDR : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const std::vector<int>& getGains() const { return m_gains; }
-
-		static MsgReportRTLSDR* create(const std::vector<int>& gains)
+		static MsgQueryRTLSDR* create()
 		{
-			return new MsgReportRTLSDR(gains);
+			return new MsgQueryRTLSDR();
 		}
 
 	protected:
-		std::vector<int> m_gains;
-
-		MsgReportRTLSDR(const std::vector<int>& gains) :
-			Message(),
-			m_gains(gains)
+		MsgQueryRTLSDR() :
+			Message()
 		{ }
 	};
+
+    class MsgReportRTLSDR : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const std::vector<int>& getGains() const { return m_gains; }
+
+        static MsgReportRTLSDR* create(const std::vector<int>& gains)
+        {
+            return new MsgReportRTLSDR(gains);
+        }
+
+    protected:
+        std::vector<int> m_gains;
+
+        MsgReportRTLSDR(const std::vector<int>& gains) :
+            Message(),
+            m_gains(gains)
+        { }
+    };
 
 	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
@@ -81,6 +96,7 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+	const std::vector<int>& getGains() const { return m_gains; }
 	void set_ds_mode(int on);
 
 private:
@@ -91,7 +107,10 @@ private:
 	RTLSDRThread* m_rtlSDRThread;
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
+	bool m_running;
 
+	bool openDevice();
+	void closeDevice();
 	bool applySettings(const RTLSDRSettings& settings, bool force);
 };
 

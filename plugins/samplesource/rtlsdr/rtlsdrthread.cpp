@@ -19,7 +19,7 @@
 #include <errno.h>
 #include "rtlsdrthread.h"
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 
 #define FCD_BLOCKSIZE 16384
 
@@ -30,7 +30,8 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObjec
 	m_convertBuffer(FCD_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(288000),
-	m_log2Decim(4)
+	m_log2Decim(4),
+	m_fcPos(0)
 {
 }
 

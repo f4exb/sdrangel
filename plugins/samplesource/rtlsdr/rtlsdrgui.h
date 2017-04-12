@@ -61,6 +61,8 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 
+	void queryDeviceReport();
+	void displayGains();
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();

@@ -60,6 +60,8 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_deviceAPI->addSink(m_fileSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+
+    queryDeviceReport(); // will reply with MsgReportRTLSDR to report gain list
 }
 
 RTLSDRGui::~RTLSDRGui()
@@ -67,6 +69,7 @@ RTLSDRGui::~RTLSDRGui()
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
 	delete ui;
+	delete m_sampleSource;
 }
 
 void RTLSDRGui::destroy()
@@ -124,6 +127,7 @@ bool RTLSDRGui::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
+        displayGains();
         displaySettings();
         sendSettings();
         return true;
@@ -141,7 +145,7 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	{
 		qDebug() << "RTLSDRGui::handleMessage: MsgReportRTLSDR";
 		m_gains = ((RTLSDRInput::MsgReportRTLSDR&) message).getGains();
-		displaySettings();
+		displayGains();
 		return true;
 	}
 	else
@@ -194,6 +198,35 @@ void RTLSDRGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
+void RTLSDRGui::displayGains()
+{
+    if (m_gains.size() > 0)
+    {
+        int dist = abs(m_settings.m_gain - m_gains[0]);
+        int pos = 0;
+
+        for (uint i = 1; i < m_gains.size(); i++)
+        {
+            if (abs(m_settings.m_gain - m_gains[i]) < dist)
+            {
+                dist = abs(m_settings.m_gain - m_gains[i]);
+                pos = i;
+            }
+        }
+
+        ui->gainText->setText(tr("%1.%2").arg(m_gains[pos] / 10).arg(abs(m_gains[pos] % 10)));
+        ui->gain->setMaximum(m_gains.size() - 1);
+        ui->gain->setEnabled(true);
+        ui->gain->setValue(pos);
+    }
+    else
+    {
+        ui->gain->setMaximum(0);
+        ui->gain->setEnabled(false);
+        ui->gain->setValue(0);
+    }
+}
+
 void RTLSDRGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
@@ -204,32 +237,6 @@ void RTLSDRGui::displaySettings()
 	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
-
-	if (m_gains.size() > 0)
-	{
-		int dist = abs(m_settings.m_gain - m_gains[0]);
-		int pos = 0;
-
-		for (uint i = 1; i < m_gains.size(); i++)
-		{
-			if (abs(m_settings.m_gain - m_gains[i]) < dist)
-			{
-				dist = abs(m_settings.m_gain - m_gains[i]);
-				pos = i;
-			}
-		}
-
-		ui->gainText->setText(tr("%1.%2").arg(m_gains[pos] / 10).arg(abs(m_gains[pos] % 10)));
-		ui->gain->setMaximum(m_gains.size() - 1);
-		ui->gain->setEnabled(true);
-		ui->gain->setValue(pos);
-	}
-	else
-	{
-		ui->gain->setMaximum(0);
-		ui->gain->setEnabled(false);
-		ui->gain->setValue(0);
-	}
 }
 
 void RTLSDRGui::sendSettings()
@@ -332,6 +339,12 @@ void RTLSDRGui::on_record_toggled(bool checked)
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         m_fileSink->stopRecording();
     }
+}
+
+void RTLSDRGui::queryDeviceReport()
+{
+    RTLSDRInput::MsgQueryRTLSDR* message = RTLSDRInput::MsgQueryRTLSDR::create();
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void RTLSDRGui::updateHardware()
