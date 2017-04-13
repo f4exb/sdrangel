@@ -88,9 +88,9 @@ bool BladerfInput::openDevice()
     }
     else
     {
-        if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
+        if (!DeviceBladeRF::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSourceSerial())))
         {
-            qCritical("BladerfInput::start: could not open BladeRF");
+            qCritical("BladerfInput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
             return false;
         }
 
