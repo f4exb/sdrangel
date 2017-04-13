@@ -44,7 +44,6 @@ RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
 
 RTLSDRInput::~RTLSDRInput()
 {
-	//stop();
     if (m_running) stop();
     closeDevice();
 }

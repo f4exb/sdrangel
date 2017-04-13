@@ -28,99 +28,114 @@
 #include "airspythread.h"
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
-MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
+//MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
 AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
 	m_airspyThread(0),
-	m_deviceDescription("Airspy")
+	m_deviceDescription("Airspy"),
+	m_running(false)
 {
-	m_sampleRates.push_back(10000000);
-	m_sampleRates.push_back(2500000);
+    openDevice();
 }
 
 AirspyInput::~AirspyInput()
 {
-	stop();
+    if (m_running) stop();
+    closeDevice();
+}
+
+bool AirspyInput::openDevice()
+{
+    if (m_dev != 0)
+    {
+        closeDevice();
+    }
+
+    airspy_error rc;
+
+    rc = (airspy_error) airspy_init();
+
+    if (rc != AIRSPY_SUCCESS)
+    {
+        qCritical("AirspyInput::start: failed to initiate Airspy library %s", airspy_error_name(rc));
+    }
+
+    if (!m_sampleFifo.setSize(1<<19))
+    {
+        qCritical("AirspyInput::start: could not allocate SampleFifo");
+        return false;
+    }
+
+    int device = m_deviceAPI->getSampleSourceSequence();
+
+    if ((m_dev = open_airspy_from_sequence(device)) == 0)
+    {
+        qCritical("AirspyInput::start: could not open Airspy #%d", device);
+        return false;
+    }
+
+#ifdef LIBAIRSPY_DYN_RATES
+    uint32_t nbSampleRates;
+    uint32_t *sampleRates;
+
+    airspy_get_samplerates(m_dev, &nbSampleRates, 0);
+
+    sampleRates = new uint32_t[nbSampleRates];
+
+    airspy_get_samplerates(m_dev, sampleRates, nbSampleRates);
+
+    if (nbSampleRates == 0)
+    {
+        qCritical("AirspyInput::start: could not obtain Airspy sample rates");
+        return false;
+    }
+    else
+    {
+        qDebug("AirspyInput::start: %d sample rates", nbSampleRates);
+    }
+
+    m_sampleRates.clear();
+
+    for (int i=0; i<nbSampleRates; i++)
+    {
+        m_sampleRates.push_back(sampleRates[i]);
+        qDebug("AirspyInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
+    }
+
+    delete[] sampleRates;
+#else
+    qDebug("AirspyInput::start: detault rates");
+    m_sampleRates.clear();
+    m_sampleRates.push_back(10000000);
+    m_sampleRates.push_back(2500000);
+#endif
+
+//    MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
+//    getOutputMessageQueueToGUI()->push(message);
+
+    rc = (airspy_error) airspy_set_sample_type(m_dev, AIRSPY_SAMPLE_INT16_IQ);
+
+    if (rc != AIRSPY_SUCCESS)
+    {
+        qCritical("AirspyInput::start: could not set sample type to INT16_IQ");
+        return false;
+    }
+
+    return true;
 }
 
 bool AirspyInput::start(int device)
 {
 	QMutexLocker mutexLocker(&m_mutex);
-	airspy_error rc;
 
-	rc = (airspy_error) airspy_init();
+    if (!m_dev) {
+        return false;
+    }
 
-	if (rc != AIRSPY_SUCCESS)
-	{
-		qCritical("AirspyInput::start: failed to initiate Airspy library %s", airspy_error_name(rc));
-	}
-
-	if (m_dev != 0)
-	{
-		stop();
-	}
-
-	if (!m_sampleFifo.setSize(1<<19))
-	{
-		qCritical("AirspyInput::start: could not allocate SampleFifo");
-		return false;
-	}
-
-	if ((m_dev = open_airspy_from_sequence(device)) == 0)
-	{
-		qCritical("AirspyInput::start: could not open Airspy #%d", device);
-		return false;
-	}
-
-#ifdef LIBAIRSPY_DYN_RATES
-	uint32_t nbSampleRates;
-	uint32_t *sampleRates;
-
-	airspy_get_samplerates(m_dev, &nbSampleRates, 0);
-
-	sampleRates = new uint32_t[nbSampleRates];
-
-	airspy_get_samplerates(m_dev, sampleRates, nbSampleRates);
-
-	if (nbSampleRates == 0)
-	{
-		qCritical("AirspyInput::start: could not obtain Airspy sample rates");
-		return false;
-	}
-	else
-	{
-	    qDebug("AirspyInput::start: %d sample rates", nbSampleRates);
-	}
-
-	m_sampleRates.clear();
-
-	for (int i=0; i<nbSampleRates; i++)
-	{
-		m_sampleRates.push_back(sampleRates[i]);
-		qDebug("AirspyInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
-	}
-
-	delete[] sampleRates;
-#else
-	qDebug("AirspyInput::start: detault rates");
-	m_sampleRates.clear();
-	m_sampleRates.push_back(10000000);
-	m_sampleRates.push_back(2500000);
-#endif
-
-	MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
-	getOutputMessageQueueToGUI()->push(message);
-
-	rc = (airspy_error) airspy_set_sample_type(m_dev, AIRSPY_SAMPLE_INT16_IQ);
-
-	if (rc != AIRSPY_SUCCESS)
-	{
-		qCritical("AirspyInput::start: could not set sample type to INT16_IQ");
-		return false;
-	}
+    if (m_running) stop();
 
 	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == 0)
 	{
@@ -136,8 +151,22 @@ bool AirspyInput::start(int device)
 	applySettings(m_settings, true);
 
 	qDebug("AirspyInput::startInput: started");
+	m_running = true;
 
 	return true;
+}
+
+void AirspyInput::closeDevice()
+{
+    if (m_dev != 0)
+    {
+        airspy_stop_rx(m_dev);
+        airspy_close(m_dev);
+        m_dev = 0;
+    }
+
+    m_deviceDescription.clear();
+    airspy_exit();
 }
 
 void AirspyInput::stop()
@@ -145,21 +174,14 @@ void AirspyInput::stop()
 	qDebug("AirspyInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_airspyThread != 0)
+	if (m_airspyThread != 0)
 	{
 		m_airspyThread->stopWork();
 		delete m_airspyThread;
 		m_airspyThread = 0;
 	}
 
-	if(m_dev != 0)
-	{
-		airspy_stop_rx(m_dev);
-		airspy_close(m_dev);
-		m_dev = 0;
-	}
-
-	airspy_exit();
+	m_running = false;
 }
 
 const QString& AirspyInput::getDeviceDescription() const
