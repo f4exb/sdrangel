@@ -104,6 +104,8 @@ void LimeSDRInput::closeDevice()
     {
         m_deviceParams.close();
     }
+
+    m_deviceParams.m_dev = 0;
 }
 
 bool LimeSDRInput::start(int device)

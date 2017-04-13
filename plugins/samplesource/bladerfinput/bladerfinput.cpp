@@ -62,41 +62,31 @@ bool BladerfInput::openDevice()
 
     if (!m_sampleFifo.setSize(96000 * 4))
     {
-        qCritical("BladerfInput::start: could not allocate SampleFifo");
+        qCritical("BladerfInput::openDevice: could not allocate SampleFifo");
         return false;
     }
 
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) sinkBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
         {
-            qCritical("BladerfInput::start: could not get shared parameters from buddy");
+            qCritical("BladerfInput::openDevice: could not get shared parameters from buddy");
             return false;
         }
 
-        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
+        if (buddySharedParams->m_dev == 0) // device is not opened by buddy
         {
-            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
-            {
-                qCritical("BladerfInput::start: could not get BladeRF handle from buddy");
-                return false;
-            }
+            qCritical("BladerfInput::openDevice: could not get BladeRF handle from buddy");
+            return false;
         }
-        else // Tx is not running so Rx opens device and takes ownership
-        {
-            if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
-            {
-                qCritical("BladerfInput::start: could not open BladeRF");
-                return false;
-            }
 
-            m_sharedParams.m_dev = m_dev;
-        }
+        m_sharedParams = *(buddySharedParams); // copy parameters from buddy
+        m_dev = m_sharedParams.m_dev;          // get BladeRF handle
     }
-    else // No Tx part open so Rx opens device and takes ownership
+    else
     {
         if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
         {
@@ -162,28 +152,10 @@ void BladerfInput::closeDevice()
         qCritical("BladerfInput::stop: bladerf_enable_module with return code %d", res);
     }
 
-    if (m_deviceAPI->getSinkBuddies().size() > 0)
+    if (m_deviceAPI->getSinkBuddies().size() == 0)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+        qDebug("BladerfInput::closeDevice: closing device since Tx side is not open");
 
-        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
-        {
-            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Rx has the ownership but not the Tx
-            {
-                buddySharedParams->m_dev = m_dev; // transfer ownership
-            }
-        }
-        else // Tx is not running so Rx must have the ownership
-        {
-            if(m_dev != 0) // close BladeRF
-            {
-                bladerf_close(m_dev);
-            }
-        }
-    }
-    else // No Tx part open
-    {
         if(m_dev != 0) // close BladeRF
         {
             bladerf_close(m_dev);

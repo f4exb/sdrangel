@@ -63,8 +63,8 @@ bool BladerfOutput::openDevice()
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) sourceBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
         {
@@ -72,33 +72,17 @@ bool BladerfOutput::openDevice()
             return false;
         }
 
-        if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side is running so it must have device ownership
+        if (buddySharedParams->m_dev == 0) // device is not opened by buddy
         {
-            qDebug("BladerfOutput::start: Rx side is running");
-
-            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Rx but do not take ownership
-            {
-                qCritical("BladerfOutput::start: could not get BladeRF handle from buddy");
-                return false;
-            }
+            qCritical("BladerfOutput::start: could not get BladeRF handle from buddy");
+            return false;
         }
-        else // Rx is not running so Tx opens device and takes ownership
-        {
-            qDebug("BladerfOutput::start: Rx side is not running");
 
-            if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
-            {
-                qCritical("BladerfOutput::start: could not open BladeRF");
-                return false;
-            }
-
-            m_sharedParams.m_dev = m_dev;
-        }
+        m_sharedParams = *(buddySharedParams); // copy parameters from buddy
+        m_dev = m_sharedParams.m_dev;          // get BladeRF handle
     }
-    else // No Rx part open so Tx opens device and takes ownership
+    else
     {
-        qDebug("BladerfOutput::start: Rx side is not open");
-
         if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
         {
             qCritical("BladerfOutput::start: could not open BladeRF");
@@ -160,38 +144,14 @@ void BladerfOutput::closeDevice()
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_TX, false)) < 0)
     {
-        qCritical("BladerfOutput::stop: bladerf_enable_module with return code %d", res);
+        qCritical("BladerfOutput::closeDevice: bladerf_enable_module with return code %d", res);
     }
 
-    if (m_deviceAPI->getSourceBuddies().size() > 0)
+    if (m_deviceAPI->getSourceBuddies().size() == 0)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
+        qDebug("BladerfOutput::closeDevice: closing device since Rx side is not open");
 
-        if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side running
-        {
-            qDebug("BladerfOutput::stop: Rx side is running");
-
-            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Tx has the ownership but not the Rx
-            {
-                buddySharedParams->m_dev = m_dev; // transfer ownership
-            }
-        }
-        else // Rx is not running so Tx must have the ownership
-        {
-            qDebug("BladerfOutput::stop: Rx side is not running");
-
-            if(m_dev != 0) // close BladeRF
-            {
-                bladerf_close(m_dev);
-            }
-        }
-    }
-    else // No Rx part open
-    {
-        qDebug("BladerfOutput::stop: Rx side is not open");
-
-        if(m_dev != 0) // close BladeRF
+        if (m_dev != 0) // close BladeRF
         {
             bladerf_close(m_dev);
         }
