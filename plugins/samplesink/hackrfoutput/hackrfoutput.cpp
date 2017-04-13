@@ -38,39 +38,29 @@ HackRFOutput::HackRFOutput(DeviceSinkAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_hackRFThread(0),
-	m_deviceDescription("HackRFOutput")
+	m_deviceDescription("HackRFOutput"),
+	m_running(false)
 {
+    openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 HackRFOutput::~HackRFOutput()
 {
-    if (m_dev != 0)
-    {
-        stop();
-    }
-
+    if (m_running) stop();
+    closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool HackRFOutput::start(int device)
+bool HackRFOutput::openDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
     if (m_dev != 0)
     {
-        stop();
+        closeDevice();
     }
 
-//    hackrf_error rc;
-//
-//	rc = (hackrf_error) hackrf_init();
-//
-//	if (rc != HACKRF_SUCCESS)
-//	{
-//		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
-//	}
-
     m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    int device = m_deviceAPI->getSampleSinkSequence();
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -79,39 +69,46 @@ bool HackRFOutput::start(int device)
 
         if (buddySharedParams == 0)
         {
-            qCritical("HackRFOutput::start: could not get shared parameters from buddy");
+            qCritical("HackRFOutput::openDevice: could not get shared parameters from buddy");
             return false;
         }
 
-        if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side is running so it must have device ownership
+        if ((m_dev = buddySharedParams->m_dev) == 0) // device is not opened by buddy
         {
-            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Rx but do not take ownership
-            {
-                qCritical("HackRFOutput::start: could not get HackRF handle from buddy");
-                return false;
-            }
+            qCritical("HackRFOutput::openDevice: could not get HackRF handle from buddy");
+            return false;
         }
-        else // Rx is not running so Tx opens device and takes ownership
-        {
-            if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
-            {
-                qCritical("HackRFOutput::start: could not open HackRF #%d", device);
-                return false;
-            }
 
-            m_sharedParams.m_dev = m_dev;
-        }
+        m_sharedParams = *(buddySharedParams); // copy parameters from buddy
+        m_sharedParams.m_dev = m_dev;
     }
-    else // No Rx part open so Tx opens device and takes ownership
+    else
     {
+        if (hackrf_init() != HACKRF_SUCCESS) // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+        {
+            qCritical("HackRFInput::openDevice: could not init HackRF");
+            return false;
+        }
+
         if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
         {
-            qCritical("HackRFOutput::start: could not open HackRF #%d", device);
+            qCritical("HackRFOutput::openDevice: could not open HackRF #%d", device);
             return false;
         }
 
         m_sharedParams.m_dev = m_dev;
     }
+
+    return true;
+}
+
+bool HackRFOutput::start(int device)
+{
+    if (!m_dev) {
+        return false;
+    }
+
+    if (m_running) stop();
 
 	if((m_hackRFThread = new HackRFOutputThread(m_dev, &m_sampleSourceFifo)) == 0)
 	{
@@ -123,12 +120,32 @@ bool HackRFOutput::start(int device)
 //	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
+	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+	m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
 
 	m_hackRFThread->startWork();
 
 	qDebug("HackRFOutput::start: started");
+    m_running = true;
 
 	return true;
+}
+
+void HackRFOutput::closeDevice()
+{
+    if (m_deviceAPI->getSourceBuddies().size() == 0)
+    {
+        qDebug("HackRFOutput::closeDevice: closing device since Rx side is not open");
+
+        if(m_dev != 0) // close HackRF
+        {
+            hackrf_close(m_dev);
+            hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+        }
+    }
+
+    m_sharedParams.m_dev = 0;
+    m_dev = 0;
 }
 
 void HackRFOutput::stop()
@@ -143,43 +160,7 @@ void HackRFOutput::stop()
 		m_hackRFThread = 0;
 	}
 
-    if (m_dev != 0)
-    {
-        hackrf_stop_tx(m_dev);
-    }
-
-    if (m_deviceAPI->getSourceBuddies().size() > 0)
-    {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
-
-        if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Rx side running
-        {
-            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Tx has the ownership but not the Rx
-            {
-                buddySharedParams->m_dev = m_dev; // transfer ownership
-            }
-        }
-        else // Rx is not running so Tx must have the ownership
-        {
-            if(m_dev != 0) // close HackRF
-            {
-                hackrf_close(m_dev);
-                hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-            }
-        }
-    }
-    else // No Rx part open
-    {
-        if(m_dev != 0) // close HackRF
-        {
-            hackrf_close(m_dev);
-            hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-        }
-    }
-
-    m_sharedParams.m_dev = 0;
-    m_dev = 0;
+	m_running = false;
 }
 
 const QString& HackRFOutput::getDeviceDescription() const
@@ -270,16 +251,19 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-				qDebug("HackRFOutput::applySettings: sample rate set to %llu S/s",
-				        settings.m_devSampleRate);
-				m_hackRFThread->setSamplerate(settings.m_devSampleRate);
+			    if (m_hackRFThread != 0)
+			    {
+	                qDebug("HackRFOutput::applySettings: sample rate set to %llu S/s",
+	                        settings.m_devSampleRate);
+	                m_hackRFThread->setSamplerate(settings.m_devSampleRate);
+			    }
 			}
 		}
 	}
 
 	if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
-		if(m_hackRFThread != 0)
+		if (m_hackRFThread != 0)
 		{
 			m_hackRFThread->setLog2Interpolation(settings.m_log2Interp);
 			qDebug() << "HackRFOutput: set interpolation to " << (1<<settings.m_log2Interp);

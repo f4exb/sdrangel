@@ -78,27 +78,23 @@ bool HackRFInput::openDevice()
             return false;
         }
 
-        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
+        if (buddySharedParams->m_dev == 0) // device is not opened by buddy
         {
-            if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
-            {
-                qCritical("HackRFInput::openDevice: could not get HackRF handle from buddy");
-                return false;
-            }
+            qCritical("HackRFInput::openDevice: could not get HackRF handle from buddy");
+            return false;
         }
-        else // Tx is not running so Rx opens device and takes ownership
-        {
-            if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
-            {
-                qCritical("HackRFInput::openDevice: could not open HackRF #%d", device);
-                return false;
-            }
 
-            m_sharedParams.m_dev = m_dev;
-        }
+        m_sharedParams = *(buddySharedParams); // copy parameters from buddy
+        m_dev = m_sharedParams.m_dev;          // get HackRF handle
     }
-    else // No Tx part open so Rx opens device and takes ownership
+    else
     {
+        if (hackrf_init() != HACKRF_SUCCESS) // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+        {
+            qCritical("HackRFInput::openDevice: could not init HackRF");
+            return false;
+        }
+
         if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
         {
             qCritical("HackRFInput::openDevice: could not open HackRF #%d", device);
@@ -114,9 +110,8 @@ bool HackRFInput::openDevice()
 bool HackRFInput::start(int device)
 {
 //	QMutexLocker mutexLocker(&m_mutex);
-    if (m_dev != 0)
-    {
-        stop();
+    if (!m_dev) {
+        return false;
     }
 
     if (m_running) stop();
@@ -146,34 +141,10 @@ bool HackRFInput::start(int device)
 
 void HackRFInput::closeDevice()
 {
-    if(m_dev != 0)
+    if (m_deviceAPI->getSinkBuddies().size() == 0)
     {
-        hackrf_stop_rx(m_dev);
-    }
+        qDebug("HackRFInput::closeDevice: closing device since Tx side is not open");
 
-    if (m_deviceAPI->getSinkBuddies().size() > 0)
-    {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-        DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
-
-        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
-        {
-            if ((m_sharedParams.m_dev != 0) && (buddySharedParams->m_dev == 0)) // Rx has the ownership but not the Tx
-            {
-                buddySharedParams->m_dev = m_dev; // transfer ownership
-            }
-        }
-        else // Tx is not running so Rx must have the ownership
-        {
-            if(m_dev != 0) // close BladeRF
-            {
-                hackrf_close(m_dev);
-                hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-            }
-        }
-    }
-    else // No Tx part open
-    {
         if(m_dev != 0) // close BladeRF
         {
             hackrf_close(m_dev);

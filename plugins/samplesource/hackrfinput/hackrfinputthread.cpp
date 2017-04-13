@@ -76,15 +76,26 @@ void HackRFInputThread::run()
 
 	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
 
+    if (rc == HACKRF_SUCCESS)
+    {
+        qDebug("HackRFThread::run: started HackRF Rx");
+    }
+    else
+    {
+        qDebug("HackRFThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
+    }
+
     m_running = true;
     m_startWaiter.wakeAll();
 
-	if (rc != HACKRF_SUCCESS)
+	if (rc == HACKRF_SUCCESS)
 	{
-		qCritical("HackRFThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
-	}
-	else
-	{
+	    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE) {
+	        qDebug("HackRFThread::run: HackRF is streaming");
+	    } else {
+            qDebug("HackRFThread::run: HackRF is not streaming");
+	    }
+
 		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
 		{
 			usleep(200000);
