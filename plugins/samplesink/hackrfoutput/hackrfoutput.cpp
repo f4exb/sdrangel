@@ -84,12 +84,6 @@ bool HackRFOutput::openDevice()
     }
     else
     {
-        if (hackrf_init() != HACKRF_SUCCESS) // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-        {
-            qCritical("HackRFInput::openDevice: could not init HackRF");
-            return false;
-        }
-
         if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
         {
             qCritical("HackRFOutput::openDevice: could not open HackRF #%d", device);
@@ -140,7 +134,7 @@ void HackRFOutput::closeDevice()
         if(m_dev != 0) // close HackRF
         {
             hackrf_close(m_dev);
-            hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
+            //hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
         }
     }
 
