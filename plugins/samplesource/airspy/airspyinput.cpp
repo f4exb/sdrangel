@@ -144,6 +144,10 @@ bool AirspyInput::start(int device)
 		return false;
 	}
 
+	m_airspyThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
+	m_airspyThread->setLog2Decimation(m_settings.m_log2Decim);
+	m_airspyThread->setFcPos((int) m_settings.m_fcPos);
+
 	m_airspyThread->startWork();
 
 	mutexLocker.unlock();
@@ -281,7 +285,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 			{
 				qCritical("AirspyInput::applySettings: could not set sample rate index %u (%d S/s): %s", m_settings.m_devSampleRateIndex, m_sampleRates[m_settings.m_devSampleRateIndex], airspy_error_name(rc));
 			}
-			else
+			else if (m_airspyThread != 0)
 			{
 				qDebug("AirspyInput::applySettings: sample rate set to index: %u (%d S/s)", m_settings.m_devSampleRateIndex, m_sampleRates[m_settings.m_devSampleRateIndex]);
 				m_airspyThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
@@ -294,7 +298,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		m_settings.m_log2Decim = settings.m_log2Decim;
 		forwardChange = true;
 
-		if(m_dev != 0)
+		if (m_airspyThread != 0)
 		{
 			m_airspyThread->setLog2Decimation(m_settings.m_log2Decim);
 			qDebug() << "AirspyInput: set decimation to " << (1<<m_settings.m_log2Decim);
@@ -349,7 +353,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 	{
 		m_settings.m_fcPos = settings.m_fcPos;
 
-		if(m_dev != 0)
+		if (m_airspyThread != 0)
 		{
 			m_airspyThread->setFcPos((int) m_settings.m_fcPos);
 			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
