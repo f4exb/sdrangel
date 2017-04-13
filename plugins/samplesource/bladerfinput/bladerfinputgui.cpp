@@ -38,6 +38,9 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
+    m_sampleSource = new BladerfInput(m_deviceAPI);
+    m_deviceAPI->setSource(m_sampleSource);
+
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
@@ -57,9 +60,6 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
-
-	m_sampleSource = new BladerfInput(m_deviceAPI);
-	m_deviceAPI->setSource(m_sampleSource);
 
 	char recFileNameCStr[30];
 	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
