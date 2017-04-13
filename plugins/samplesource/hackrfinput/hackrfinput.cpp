@@ -38,44 +38,34 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_hackRFThread(0),
-	m_deviceDescription("HackRF")
+	m_deviceDescription("HackRF"),
+	m_running(false)
 {
+    openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 HackRFInput::~HackRFInput()
 {
-    if (m_dev != 0)
-    {
-        stop();
-    }
-
+    if (m_running) stop();
+    closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool HackRFInput::start(int device)
+bool HackRFInput::openDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
     if (m_dev != 0)
     {
-        stop();
+        closeDevice();
     }
 
-//    hackrf_error rc;
-//
-//	rc = (hackrf_error) hackrf_init();
-//
-//	if (rc != HACKRF_SUCCESS)
-//	{
-//		qCritical("HackRFInput::start: failed to initiate HackRF library %s", hackrf_error_name(rc));
-//	}
+    if (!m_sampleFifo.setSize(1<<19))
+    {
+        qCritical("HackRFInput::start: could not allocate SampleFifo");
+        return false;
+    }
 
-	if (!m_sampleFifo.setSize(1<<19))
-	{
-		qCritical("HackRFInput::start: could not allocate SampleFifo");
-		return false;
-	}
-
+    int device = m_deviceAPI->getSampleSourceSequence();
 
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
@@ -84,7 +74,7 @@ bool HackRFInput::start(int device)
 
         if (buddySharedParams == 0)
         {
-            qCritical("HackRFInput::start: could not get shared parameters from buddy");
+            qCritical("HackRFInput::openDevice: could not get shared parameters from buddy");
             return false;
         }
 
@@ -92,7 +82,7 @@ bool HackRFInput::start(int device)
         {
             if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
             {
-                qCritical("HackRFInput::start: could not get HackRF handle from buddy");
+                qCritical("HackRFInput::openDevice: could not get HackRF handle from buddy");
                 return false;
             }
         }
@@ -100,7 +90,7 @@ bool HackRFInput::start(int device)
         {
             if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
             {
-                qCritical("HackRFInput::start: could not open HackRF #%d", device);
+                qCritical("HackRFInput::openDevice: could not open HackRF #%d", device);
                 return false;
             }
 
@@ -111,14 +101,27 @@ bool HackRFInput::start(int device)
     {
         if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
         {
-            qCritical("HackRFInput::start: could not open HackRF #%d", device);
+            qCritical("HackRFInput::openDevice: could not open HackRF #%d", device);
             return false;
         }
 
         m_sharedParams.m_dev = m_dev;
     }
 
-	if((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
+    return true;
+}
+
+bool HackRFInput::start(int device)
+{
+//	QMutexLocker mutexLocker(&m_mutex);
+    if (m_dev != 0)
+    {
+        stop();
+    }
+
+    if (m_running) stop();
+
+	if ((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
 	{
 		qFatal("HackRFInput::start: out of memory");
 		stop();
@@ -129,25 +132,20 @@ bool HackRFInput::start(int device)
 
 	applySettings(m_settings, true);
 
+	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+	m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
+	m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
+
 	m_hackRFThread->startWork();
 
 	qDebug("HackRFInput::startInput: started");
+	m_running = true;
 
 	return true;
 }
 
-void HackRFInput::stop()
+void HackRFInput::closeDevice()
 {
-	qDebug("HackRFInput::stop");
-//	QMutexLocker mutexLocker(&m_mutex);
-
-	if(m_hackRFThread != 0)
-	{
-		m_hackRFThread->stopWork();
-		delete m_hackRFThread;
-		m_hackRFThread = 0;
-	}
-
     if(m_dev != 0)
     {
         hackrf_stop_rx(m_dev);
@@ -185,15 +183,21 @@ void HackRFInput::stop()
 
     m_sharedParams.m_dev = 0;
     m_dev = 0;
+}
 
-//	if(m_dev != 0)
-//	{
-//		hackrf_stop_rx(m_dev);
-//		hackrf_close(m_dev);
-//		m_dev = 0;
-//	}
-//
-//	hackrf_exit();
+void HackRFInput::stop()
+{
+	qDebug("HackRFInput::stop");
+//	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_hackRFThread != 0)
+	{
+		m_hackRFThread->stopWork();
+		delete m_hackRFThread;
+		m_hackRFThread = 0;
+	}
+
+	m_running = false;
 }
 
 const QString& HackRFInput::getDeviceDescription() const
@@ -286,8 +290,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", m_settings.m_devSampleRate);
-				m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+			    if (m_hackRFThread != 0)
+			    {
+	                qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", m_settings.m_devSampleRate);
+	                m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+			    }
 			}
 		}
 	}
@@ -297,7 +304,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		m_settings.m_log2Decim = settings.m_log2Decim;
 		forwardChange = true;
 
-		if(m_dev != 0)
+		if (m_hackRFThread != 0)
 		{
 			m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
 			qDebug() << "HackRFInput: set decimation to " << (1<<m_settings.m_log2Decim);
@@ -352,7 +359,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	{
 		m_settings.m_fcPos = settings.m_fcPos;
 
-		if(m_dev != 0)
+		if (m_hackRFThread != 0)
 		{
 			m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
 			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;

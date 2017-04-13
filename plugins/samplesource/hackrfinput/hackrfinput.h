@@ -81,6 +81,8 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
+    bool openDevice();
+    void closeDevice();
 	bool applySettings(const HackRFInputSettings& settings, bool force);
 //	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setCenterFrequency(quint64 freq);
@@ -92,6 +94,7 @@ private:
 	HackRFInputThread* m_hackRFThread;
 	QString m_deviceDescription;
 	DeviceHackRFParams m_sharedParams;
+	bool m_running;
 };
 
 #endif // INCLUDE_HACKRFINPUT_H
