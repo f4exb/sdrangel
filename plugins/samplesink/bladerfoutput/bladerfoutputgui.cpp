@@ -38,6 +38,9 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
+    m_deviceSampleSink = new BladerfOutput(m_deviceAPI);
+    m_deviceAPI->setSink(m_deviceSampleSink);
+
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
@@ -56,9 +59,6 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
-
-	m_deviceSampleSink = new BladerfOutput(m_deviceAPI);
-	m_deviceAPI->setSink(m_deviceSampleSink);
 
 	char recFileNameCStr[30];
 	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
