@@ -81,6 +81,8 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
+    bool openDevice();
+    void closeDevice();
 	bool applySettings(const BladeRFOutputSettings& settings, bool force);
 
 	DeviceSinkAPI *m_deviceAPI;
@@ -90,6 +92,7 @@ private:
 	BladerfOutputThread* m_bladerfThread;
 	QString m_deviceDescription;
     DeviceBladeRFParams m_sharedParams;
+    bool m_running;
 };
 
 #endif // INCLUDE_BLADERFOUTPUT_H

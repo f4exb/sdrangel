@@ -36,31 +36,28 @@ BladerfOutput::BladerfOutput(DeviceSinkAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_bladerfThread(0),
-	m_deviceDescription("BladeRFOutput")
+	m_deviceDescription("BladeRFOutput"),
+	m_running(false)
 {
+    openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 BladerfOutput::~BladerfOutput()
 {
-    if (m_dev != 0)
-    {
-        stop();
-    }
-
+    if (m_running) stop();
+    closeDevice();
     m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool BladerfOutput::start(int device)
+bool BladerfOutput::openDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+    if (m_dev != 0)
+    {
+        closeDevice();
+    }
 
-	if (m_dev != 0)
-	{
-		stop();
-	}
-
-	int res;
+    int res;
 
     m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
 
@@ -114,47 +111,52 @@ bool BladerfOutput::start(int device)
     // TODO: adjust USB transfer data according to sample rate
     if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_TX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
-    	qCritical("BladerfOutput::start: bladerf_sync_config with return code %d", res);
-    	goto failed;
+        qCritical("BladerfOutput::start: bladerf_sync_config with return code %d", res);
+        return false;
     }
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_TX, true)) < 0)
     {
-    	qCritical("BladerfOutput::start: bladerf_enable_module with return code %d", res);
-    	goto failed;
+        qCritical("BladerfOutput::start: bladerf_enable_module with return code %d", res);
+        return false;
     }
+
+    return true;
+}
+
+bool BladerfOutput::start(int device)
+{
+//	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_dev) {
+        return false;
+    }
+
+    if (m_running) stop();
 
 	if((m_bladerfThread = new BladerfOutputThread(m_dev, &m_sampleSourceFifo)) == 0)
 	{
 		qFatal("BladerfOutput::start: out of memory");
-		goto failed;
+        stop();
+        return false;
 	}
 
 //	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
+	m_bladerfThread->setLog2Interpolation(m_settings.m_log2Interp);
+
     m_bladerfThread->startWork();
 
 	qDebug("BladerfOutput::start: started");
+    m_running = true;
 
-	return true;
-
-failed:
-	stop();
-	return false;
+    return true;
 }
 
-void BladerfOutput::stop()
+void BladerfOutput::closeDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
     int res;
-
-    if(m_bladerfThread != 0)
-	{
-		m_bladerfThread->stopWork();
-		delete m_bladerfThread;
-		m_bladerfThread = 0;
-	}
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_TX, false)) < 0)
     {
@@ -197,6 +199,19 @@ void BladerfOutput::stop()
 
     m_sharedParams.m_dev = 0;
     m_dev = 0;
+}
+
+void BladerfOutput::stop()
+{
+//	QMutexLocker mutexLocker(&m_mutex);
+    if (m_bladerfThread != 0)
+	{
+		m_bladerfThread->stopWork();
+		delete m_bladerfThread;
+		m_bladerfThread = 0;
+	}
+
+    m_running = false;
 }
 
 const QString& BladerfOutput::getDeviceDescription() const
