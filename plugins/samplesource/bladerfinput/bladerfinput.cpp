@@ -37,59 +37,56 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_bladerfThread(0),
-	m_deviceDescription("BladeRFInput")
+	m_deviceDescription("BladeRFInput"),
+	m_running(false)
 {
+    openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 BladerfInput::~BladerfInput()
 {
-    if (m_dev != 0)
-    {
-        stop();
-    }
-
+    if (m_running) stop();
+    closeDevice();
     m_deviceAPI->setBuddySharedPtr(0);
 }
 
-bool BladerfInput::start(int device)
+bool BladerfInput::openDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+    if (m_dev != 0)
+    {
+        closeDevice();
+    }
 
-	if (m_dev != 0)
-	{
-		stop();
-	}
+    int res;
 
-	int res;
+    if (!m_sampleFifo.setSize(96000 * 4))
+    {
+        qCritical("BladerfInput::start: could not allocate SampleFifo");
+        return false;
+    }
 
-	if (!m_sampleFifo.setSize(96000 * 4))
-	{
-		qCritical("BladerfInput::start: could not allocate SampleFifo");
-		return false;
-	}
+    if (m_deviceAPI->getSinkBuddies().size() > 0)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
 
-	if (m_deviceAPI->getSinkBuddies().size() > 0)
-	{
-	    DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-	    DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
-
-	    if (buddySharedParams == 0)
-	    {
+        if (buddySharedParams == 0)
+        {
             qCritical("BladerfInput::start: could not get shared parameters from buddy");
             return false;
-	    }
+        }
 
-	    if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
-	    {
+        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side is running so it must have device ownership
+        {
             if ((m_dev = buddySharedParams->m_dev) == 0) // get device handle from Tx but do not take ownership
             {
                 qCritical("BladerfInput::start: could not get BladeRF handle from buddy");
                 return false;
             }
-	    }
-	    else // Tx is not running so Rx opens device and takes ownership
-	    {
+        }
+        else // Tx is not running so Rx opens device and takes ownership
+        {
             if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
             {
                 qCritical("BladerfInput::start: could not open BladeRF");
@@ -97,10 +94,10 @@ bool BladerfInput::start(int device)
             }
 
             m_sharedParams.m_dev = m_dev;
-	    }
-	}
-	else // No Tx part open so Rx opens device and takes ownership
-	{
+        }
+    }
+    else // No Tx part open so Rx opens device and takes ownership
+    {
         if (!DeviceBladeRF::open_bladerf(&m_dev, 0)) // TODO: fix; Open first available device as there is no proper handling for multiple devices
         {
             qCritical("BladerfInput::start: could not open BladeRF");
@@ -108,45 +105,42 @@ bool BladerfInput::start(int device)
         }
 
         m_sharedParams.m_dev = m_dev;
-	}
-
-//	if ((m_dev = open_bladerf_from_serial(0)) == 0) // TODO: fix; Open first available device as there is no proper handling for multiple devices
-//	{
-//		qCritical("could not open BladeRF");
-//		return false;
-//	}
-//
-//    fpga_loaded = bladerf_is_fpga_configured(m_dev);
-//
-//    if (fpga_loaded < 0)
-//    {
-//    	qCritical("Failed to check FPGA state: %s",
-//                  bladerf_strerror(fpga_loaded));
-//    	return false;
-//    }
-//    else if (fpga_loaded == 0)
-//    {
-//    	qCritical("The device's FPGA is not loaded.");
-//    	return false;
-//    }
+    }
 
     // TODO: adjust USB transfer data according to sample rate
     if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
-    	qCritical("BladerfInput::start: bladerf_sync_config with return code %d", res);
-    	goto failed;
+        qCritical("BladerfInput::start: bladerf_sync_config with return code %d", res);
+        return false;
     }
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_RX, true)) < 0)
     {
-    	qCritical("BladerfInput::start: bladerf_enable_module with return code %d", res);
-    	goto failed;
+        qCritical("BladerfInput::start: bladerf_enable_module with return code %d", res);
+        return false;
     }
 
-	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == NULL) {
+    return true;
+}
+
+bool BladerfInput::start(int device)
+{
+//	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_dev) {
+        return false;
+    }
+
+    if (m_running) stop();
+
+	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == 0) {
 		qFatal("BladerfInput::start: out of memory");
-		goto failed;
+		stop();
+		return false;
 	}
+
+	m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
+	m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
 
 	m_bladerfThread->startWork();
 
@@ -154,25 +148,14 @@ bool BladerfInput::start(int device)
 	applySettings(m_settings, true);
 
 	qDebug("BladerfInput::startInput: started");
+	m_running = true;
 
 	return true;
-
-failed:
-	stop();
-	return false;
 }
 
-void BladerfInput::stop()
+void BladerfInput::closeDevice()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
     int res;
-
-	if(m_bladerfThread != 0)
-	{
-		m_bladerfThread->stopWork();
-		delete m_bladerfThread;
-		m_bladerfThread = 0;
-	}
 
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_RX, false)) < 0)
     {
@@ -209,12 +192,20 @@ void BladerfInput::stop()
 
     m_sharedParams.m_dev = 0;
     m_dev = 0;
+}
 
-//	if(m_dev != 0)
-//	{
-//		bladerf_close(m_dev);
-//		m_dev = 0;
-//	}
+void BladerfInput::stop()
+{
+//	QMutexLocker mutexLocker(&m_mutex);
+
+	if(m_bladerfThread != 0)
+	{
+		m_bladerfThread->stopWork();
+		delete m_bladerfThread;
+		m_bladerfThread = 0;
+	}
+
+	m_running = false;
 }
 
 const QString& BladerfInput::getDeviceDescription() const
@@ -458,7 +449,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		m_settings.m_log2Decim = settings.m_log2Decim;
 		forwardChange = true;
 
-		if(m_dev != 0)
+		if (m_bladerfThread != 0)
 		{
 			m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 			qDebug() << "BladerfInput::applySettings: set decimation to " << (1<<m_settings.m_log2Decim);
@@ -469,7 +460,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	{
 		m_settings.m_fcPos = settings.m_fcPos;
 
-		if(m_dev != 0)
+		if (m_bladerfThread != 0)
 		{
 			m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
 			qDebug() << "BladerfInput::applySettings: set fc pos (enum) to " << (int) m_settings.m_fcPos;

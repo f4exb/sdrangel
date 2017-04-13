@@ -81,6 +81,8 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
+    bool openDevice();
+    void closeDevice();
 	bool applySettings(const BladeRFInputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
 //	struct bladerf *open_bladerf_from_serial(const char *serial);
@@ -92,6 +94,7 @@ private:
 	BladerfInputThread* m_bladerfThread;
 	QString m_deviceDescription;
 	DeviceBladeRFParams m_sharedParams;
+	bool m_running;
 };
 
 #endif // INCLUDE_BLADERFINPUT_H
