@@ -94,5 +94,12 @@ bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
     return true;
 }
 
-
+void DeviceLimeSDRParams::close()
+{
+    if (m_dev)
+    {
+        LMS_Close(m_dev);
+        m_dev = 0;
+    }
+}
 
