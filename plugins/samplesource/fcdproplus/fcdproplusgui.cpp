@@ -36,6 +36,9 @@ FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
+    m_sampleSource = new FCDProPlusInput(m_deviceAPI);
+    m_deviceAPI->setSource(m_sampleSource);
+
 	ui->setupUi(this);
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
@@ -58,9 +61,6 @@ FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
-
-	m_sampleSource = new FCDProPlusInput(m_deviceAPI);
-	m_deviceAPI->setSource(m_sampleSource);
 
 	char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());

@@ -38,33 +38,46 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
-	m_deviceDescription(fcd_traits<ProPlus>::displayedName)
+	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
+	m_running(false)
 {
+    openDevice();
 }
 
 FCDProPlusInput::~FCDProPlusInput()
 {
-	stop();
+    if (m_running) stop();
+    closeDevice();
+}
+
+bool FCDProPlusInput::openDevice()
+{
+    int device = m_deviceAPI->getSampleSourceSequence();
+    qDebug() << "FCDProPlusInput::openDevice with device #" << device;
+
+    m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
+
+    if (m_dev == 0)
+    {
+        qCritical("FCDProPlusInput::start: could not open FCD");
+        return false;
+    }
+
+    return true;
 }
 
 bool FCDProPlusInput::start(int device)
 {
-	qDebug() << "FCDProPlusInput::start with device #" << device;
 
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_FCDThread)
-	{
-		return false;
-	}
+    if (!m_dev) {
+        return false;
+    }
 
-	m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
+    if (m_running) stop();
 
-	if (m_dev == 0)
-	{
-		qCritical("FCDProPlusInput::start: could not open FCD");
-		return false;
-	}
+    qDebug() << "FCDProPlusInput::start";
 
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
@@ -87,11 +100,19 @@ bool FCDProPlusInput::start(int device)
 
 	m_FCDThread->startWork();
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
 	qDebug("FCDProPlusInput::started");
+	m_running = true;
+
 	return true;
+}
+
+void FCDProPlusInput::closeDevice()
+{
+    fcdClose(m_dev);
+    m_dev = 0;
 }
 
 void FCDProPlusInput::stop()
@@ -106,8 +127,7 @@ void FCDProPlusInput::stop()
 		m_FCDThread = 0;
 	}
 
-	fcdClose(m_dev);
-	m_dev = 0;
+	m_running = false;
 }
 
 const QString& FCDProPlusInput::getDeviceDescription() const

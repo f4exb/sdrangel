@@ -76,6 +76,8 @@ public:
 	void set_lo_ppm();
 
 private:
+    bool openDevice();
+    void closeDevice();
 	void applySettings(const FCDProPlusSettings& settings, bool force);
 
 	DeviceSourceAPI *m_deviceAPI;
@@ -84,6 +86,7 @@ private:
 	FCDProPlusSettings m_settings;
 	FCDProPlusThread* m_FCDThread;
 	QString m_deviceDescription;
+	bool m_running;
 };
 
 #endif // INCLUDE_FCD_H
