@@ -40,39 +40,26 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_devNumber(0),
     m_running(false)
 {
+    openDevice();
 }
 
 SDRPlayInput::~SDRPlayInput()
 {
-    stop();
+    if (m_running) stop();
+    closeDevice();
 }
 
-bool openDevice()
+bool SDRPlayInput::openDevice()
 {
-
-}
-
-void closeDevice()
-{
-
-}
-
-bool SDRPlayInput::start(int device)
-{
-    QMutexLocker mutexLocker(&m_mutex);
-
     m_devNumber = m_deviceAPI->getSampleSourceSequence();
 
-	if (m_dev != 0)
-	{
-		stop();
-	}
+    if (m_dev != 0)
+    {
+        closeDevice();
+    }
 
-	char vendor[256];
-	char product[256];
-	char serial[256];
-	int res;
-	int numberOfGains;
+    int res;
+    //int numberOfGains;
 
     if (!m_sampleFifo.setSize(96000 * 4))
     {
@@ -80,25 +67,43 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
-	if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, m_devNumber)) < 0)
-	{
-		qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
-		return false;
-	}
+    if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, m_devNumber)) < 0)
+    {
+        qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
+        return false;
+    }
 
-	vendor[0] = '\0';
-	product[0] = '\0';
-	serial[0] = '\0';
+    char vendor[256];
+    char product[256];
+    char serial[256];
 
-	if ((res = mirisdr_get_device_usb_strings(m_devNumber, vendor, product, serial)) < 0)
-	{
-		qCritical("SDRPlayInput::start: error accessing USB device");
-		stop();
-		return false;
-	}
+    vendor[0] = '\0';
+    product[0] = '\0';
+    serial[0] = '\0';
 
-	qWarning("SDRPlayInput::start: open: %s %s, SN: %s", vendor, product, serial);
-	m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
+    if ((res = mirisdr_get_device_usb_strings(m_devNumber, vendor, product, serial)) < 0)
+    {
+        qCritical("SDRPlayInput::start: error accessing USB device");
+        stop();
+        return false;
+    }
+
+    qWarning("SDRPlayInput::start: open: %s %s, SN: %s", vendor, product, serial);
+    m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
+
+    return true;
+}
+
+bool SDRPlayInput::start(int device)
+{
+//    QMutexLocker mutexLocker(&m_mutex);
+    int res;
+
+    if (!m_dev) {
+        return false;
+    }
+
+    if (m_running) stop();
 
 	char s12FormatString[] = "336_S16";
 
@@ -145,16 +150,28 @@ bool SDRPlayInput::start(int device)
 
     m_sdrPlayThread->startWork();
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 
 	applySettings(m_settings, true, true);
+	m_running = true;
 
 	return true;
 }
 
+void SDRPlayInput::closeDevice()
+{
+    if (m_dev != 0)
+    {
+        mirisdr_close(m_dev);
+        m_dev = 0;
+    }
+
+    m_deviceDescription.clear();
+}
+
 void SDRPlayInput::stop()
 {
-    QMutexLocker mutexLocker(&m_mutex);
+//    QMutexLocker mutexLocker(&m_mutex);
 
     if(m_sdrPlayThread != 0)
     {
@@ -163,13 +180,7 @@ void SDRPlayInput::stop()
         m_sdrPlayThread = 0;
     }
 
-    if (m_dev != 0)
-    {
-        mirisdr_close(m_dev);
-        m_dev = 0;
-    }
-
-    m_deviceDescription.clear();
+    m_running = false;
 }
 
 const QString& SDRPlayInput::getDeviceDescription() const

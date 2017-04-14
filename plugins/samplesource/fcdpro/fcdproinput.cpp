@@ -39,7 +39,8 @@ FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
 	m_dev(0),
 	m_settings(),
 	m_FCDThread(0),
-	m_deviceDescription(fcd_traits<Pro>::displayedName)
+	m_deviceDescription(fcd_traits<Pro>::displayedName),
+	m_running(false)
 {
 }
 

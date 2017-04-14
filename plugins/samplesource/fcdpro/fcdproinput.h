@@ -96,6 +96,7 @@ private:
 	FCDProSettings m_settings;
 	FCDProThread* m_FCDThread;
 	QString m_deviceDescription;
+	bool m_running;
 };
 
 #endif // INCLUDE_FCDPROINPUT_H
