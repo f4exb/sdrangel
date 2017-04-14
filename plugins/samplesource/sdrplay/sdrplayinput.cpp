@@ -129,6 +129,9 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
+    m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
+
     m_sdrPlayThread->startWork();
 
 	mutexLocker.unlock();
