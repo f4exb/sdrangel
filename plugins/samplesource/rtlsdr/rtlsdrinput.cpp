@@ -148,7 +148,7 @@ bool RTLSDRInput::openDevice()
     return true;
 }
 
-bool RTLSDRInput::start(int device) // TODO: remove device parameter
+bool RTLSDRInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 

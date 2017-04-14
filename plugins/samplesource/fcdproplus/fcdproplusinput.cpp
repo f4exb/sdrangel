@@ -66,7 +66,7 @@ bool FCDProPlusInput::openDevice()
     return true;
 }
 
-bool FCDProPlusInput::start(int device)
+bool FCDProPlusInput::start()
 {
 
 //	QMutexLocker mutexLocker(&m_mutex);

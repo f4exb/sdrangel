@@ -73,7 +73,7 @@ bool FCDProInput::openDevice()
     return true;
 }
 
-bool FCDProInput::start(int device)
+bool FCDProInput::start()
 {
 	qDebug() << "FCDProInput::start";
 
@@ -84,19 +84,6 @@ bool FCDProInput::start(int device)
     }
 
     if (m_running) stop();
-
-//	if (m_FCDThread)
-//	{
-//		return false;
-//	}
-
-//	m_dev = fcdOpen(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId, device);
-//
-//	if (m_dev == 0)
-//	{
-//		qCritical("FCDProInput::start: could not open FCD");
-//		return false;
-//	}
 
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
@@ -147,8 +134,6 @@ void FCDProInput::stop()
 	}
 
 	m_running = false;
-//	fcdClose(m_dev);
-//	m_dev = 0;
 }
 
 const QString& FCDProInput::getDeviceDescription() const

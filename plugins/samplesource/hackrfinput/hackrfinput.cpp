@@ -99,7 +99,7 @@ bool HackRFInput::openDevice()
     return true;
 }
 
-bool HackRFInput::start(int device)
+bool HackRFInput::start()
 {
 //	QMutexLocker mutexLocker(&m_mutex);
     if (!m_dev) {

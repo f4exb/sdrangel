@@ -63,7 +63,7 @@ SDRdaemonInput::~SDRdaemonInput()
 	delete m_SDRdaemonUDPHandler;
 }
 
-bool SDRdaemonInput::start(int device)
+bool SDRdaemonInput::start()
 {
 	qDebug() << "SDRdaemonInput::start";
 	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(true);

@@ -87,7 +87,7 @@ public:
 	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
 
-	virtual bool start(int device);
+	virtual bool start();
 	virtual void stop();
 
 	virtual const QString& getDeviceDescription() const;

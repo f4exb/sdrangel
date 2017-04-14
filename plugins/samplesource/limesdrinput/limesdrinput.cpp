@@ -108,7 +108,7 @@ void LimeSDRInput::closeDevice()
     m_deviceParams.m_dev = 0;
 }
 
-bool LimeSDRInput::start(int device)
+bool LimeSDRInput::start()
 {
     QMutexLocker mutexLocker(&m_mutex);
 

@@ -449,7 +449,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 	// Start everything
 
-	if(!m_deviceSampleSource->start(m_sampleSourceSequence))
+	if(!m_deviceSampleSource->start())
 	{
 		return gotoError("Could not start sample source");
 	}

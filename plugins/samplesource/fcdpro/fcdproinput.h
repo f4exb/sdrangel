@@ -58,7 +58,7 @@ public:
 	FCDProInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FCDProInput();
 
-	virtual bool start(int device);
+	virtual bool start();
 	virtual void stop();
 
 	virtual const QString& getDeviceDescription() const;

@@ -94,7 +94,7 @@ bool SDRPlayInput::openDevice()
     return true;
 }
 
-bool SDRPlayInput::start(int device)
+bool SDRPlayInput::start()
 {
 //    QMutexLocker mutexLocker(&m_mutex);
     int res;
@@ -213,7 +213,7 @@ bool SDRPlayInput::handleMessage(const Message& message)
         {
             m_settings = settings;
             stop();
-            start(m_devNumber);
+            start();
         }
         // standard changes
         else

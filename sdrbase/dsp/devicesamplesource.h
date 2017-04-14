@@ -31,7 +31,7 @@ public:
 	DeviceSampleSource();
 	virtual ~DeviceSampleSource();
 
-	virtual bool start(int device) = 0;
+	virtual bool start() = 0;
 	virtual void stop() = 0;
 
 	virtual const QString& getDeviceDescription() const = 0;
