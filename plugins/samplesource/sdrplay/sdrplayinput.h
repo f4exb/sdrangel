@@ -91,6 +91,8 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    bool openDevice();
+    void closeDevice();
     bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
     bool setCenterFrequency(quint64 freq);
 
@@ -101,6 +103,7 @@ private:
     SDRPlayThread* m_sdrPlayThread;
     QString m_deviceDescription;
     int m_devNumber;
+    bool m_running;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

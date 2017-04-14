@@ -37,7 +37,8 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
 	m_dev(0),
     m_sdrPlayThread(0),
     m_deviceDescription("SDRPlay"),
-    m_devNumber(0)
+    m_devNumber(0),
+    m_running(false)
 {
 }
 
@@ -46,11 +47,21 @@ SDRPlayInput::~SDRPlayInput()
     stop();
 }
 
+bool openDevice()
+{
+
+}
+
+void closeDevice()
+{
+
+}
+
 bool SDRPlayInput::start(int device)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    m_devNumber = device;
+    m_devNumber = m_deviceAPI->getSampleSourceSequence();
 
 	if (m_dev != 0)
 	{
@@ -69,9 +80,9 @@ bool SDRPlayInput::start(int device)
         return false;
     }
 
-	if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, device)) < 0)
+	if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, m_devNumber)) < 0)
 	{
-		qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", device, strerror(errno));
+		qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
 		return false;
 	}
 
@@ -79,7 +90,7 @@ bool SDRPlayInput::start(int device)
 	product[0] = '\0';
 	serial[0] = '\0';
 
-	if ((res = mirisdr_get_device_usb_strings(device, vendor, product, serial)) < 0)
+	if ((res = mirisdr_get_device_usb_strings(m_devNumber, vendor, product, serial)) < 0)
 	{
 		qCritical("SDRPlayInput::start: error accessing USB device");
 		stop();
