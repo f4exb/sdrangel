@@ -144,9 +144,9 @@ Since version 3.4.0 the opening and closing of the physical device has been spli
 
 The device interface is itself created in the constructor of the GUI and is deleted at the destruction of the GUI.
 
-//TODO: add screenshot here
+![Sampling Devices Control](./doc/img/SamplingDevicesControl.png)
 
-The lifecycle of the GUI is controlled from the device selector in the main window using the plugin manager. When there is a change in the hardware device selection (you can also re-cycle the same device this way) validated by the confirmation button (check sign icon). the following steps are executed in sequence:
+The lifecycle of the GUI is controlled from the "Sampling Device Control" device selector in the main window using the plugin manager. When there is a change in the hardware device selection (you can also re-cycle the same device by clicking again on this button) validated by the confirmation button (check sign icon). the following steps are executed in sequence:
 
   - Stop streaming
   - Delete the current GUI this will in turn delete the device interface and always close the physical device unless the physical device has a SISO or MIMO architecture (more on that later)
