@@ -28,8 +28,7 @@
  */
 struct DeviceLimeSDRParams
 {
-    lms_device_t *m_dev;         //!< device handle if the party has ownership else 0
-    int          m_channel;      //!< logical device channel number (-1 if none)
+    lms_device_t *m_dev;         //!< device handle
     int          m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)
     int          m_nbTxChannels; //!< number of Tx channels (normally 2, we'll see if we really use it...)
     lms_range_t  m_lpfRangeRx;   //!< Low pass filter range information (Rx side)
@@ -46,7 +45,6 @@ struct DeviceLimeSDRParams
 
     DeviceLimeSDRParams() :
         m_dev(0),
-        m_channel(-1),
         m_nbRxChannels(0),
         m_nbTxChannels(0),
         m_sampleRate(1e6),
@@ -62,6 +60,7 @@ struct DeviceLimeSDRParams
      */
     bool open(lms_info_str_t deviceStr);
     void close();
+    lms_device_t *getDevice() { return m_dev; }
 
     ~DeviceLimeSDRParams()
     {

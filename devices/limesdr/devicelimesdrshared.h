@@ -14,47 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
-#define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
+#ifndef DEVICES_LIMESDR_DEVICELIMESDRSHARED_H_
+#define DEVICES_LIMESDR_DEVICELIMESDRSHARED_H_
 
-#include <QString>
-#include "dsp/devicesamplesource.h"
-#include "limesdr/devicelimesdrshared.h"
-#include "limesdrinputsettings.h"
+#include <cstddef>
+#include "devicelimesdrparam.h"
 
-class DeviceSourceAPI;
-class LimeSDRInputThread;
-struct DeviceLimeSDRParams;
-
-class LimeSDRInput : public DeviceSampleSource
+/**
+ * Structure shared by a buddy with other buddies
+ */
+struct DeviceLimeSDRShared
 {
-public:
-    LimeSDRInput(DeviceSourceAPI *deviceAPI);
-    virtual ~LimeSDRInput();
+    DeviceLimeSDRParams *m_deviceParams; //!< unique hardware device parameters
+    std::size_t         m_channel;       //!< logical device channel number (-1 if none)
 
-    virtual bool start();
-    virtual void stop();
+    DeviceLimeSDRShared() :
+        m_deviceParams(0),
+        m_channel(-1)
+    {}
 
-    virtual const QString& getDeviceDescription() const;
-    virtual int getSampleRate() const;
-    virtual quint64 getCenterFrequency() const;
-
-    virtual bool handleMessage(const Message& message);
-
-private:
-    DeviceSourceAPI *m_deviceAPI;
-    QMutex m_mutex;
-    LimeSDRInputSettings m_settings;
-    LimeSDRInputThread* m_limeSDRInputThread;
-    QString m_deviceDescription;
-    bool m_running;
-    DeviceLimeSDRShared m_deviceShared;
-
-    lms_stream_t m_streamId;
-
-    bool openDevice();
-    void closeDevice();
-    bool applySettings(const LimeSDRInputSettings& settings, bool force);
+    ~DeviceLimeSDRShared()
+    {}
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_ */
+#endif /* DEVICES_LIMESDR_DEVICELIMESDRSHARED_H_ */
