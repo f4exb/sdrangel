@@ -34,6 +34,9 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui(new Ui::SDRPlayGui),
     m_deviceAPI(deviceAPI)
 {
+    m_sampleSource = new SDRPlayInput(m_deviceAPI);
+    m_deviceAPI->setSource(m_sampleSource);
+
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->centerFrequency->setValueRange(7, 10U, 12000U);
@@ -68,11 +71,7 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     displaySettings();
 
-    m_sampleSource = new SDRPlayInput(m_deviceAPI);
-    m_deviceAPI->setSource(m_sampleSource);
-
     connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    m_deviceAPI->setSource(m_sampleSource);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
