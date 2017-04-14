@@ -87,6 +87,8 @@ public:
 	void set_gain6(int index);
 
 private:
+    bool openDevice();
+    void closeDevice();
 	void applySettings(const FCDProSettings& settings, bool force);
 	void set_lo_ppm();
 

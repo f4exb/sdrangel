@@ -42,31 +42,61 @@ FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(fcd_traits<Pro>::displayedName),
 	m_running(false)
 {
+    openDevice();
 }
 
 FCDProInput::~FCDProInput()
 {
-	stop();
+    if (m_running) stop();
+    closeDevice();
+}
+
+bool FCDProInput::openDevice()
+{
+    int device = m_deviceAPI->getSampleSourceSequence();
+
+    if (m_dev != 0)
+    {
+        closeDevice();
+    }
+
+    qDebug() << "FCDProInput::openDevice with device #" << device;
+
+    m_dev = fcdOpen(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId, device);
+
+    if (m_dev == 0)
+    {
+        qCritical("FCDProInput::start: could not open FCD");
+        return false;
+    }
+
+    return true;
 }
 
 bool FCDProInput::start(int device)
 {
-	qDebug() << "FCDProInput::start with device #" << device;
+	qDebug() << "FCDProInput::start";
 
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_FCDThread)
-	{
-		return false;
-	}
+    if (!m_dev) {
+        return false;
+    }
 
-	m_dev = fcdOpen(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId, device);
+    if (m_running) stop();
 
-	if (m_dev == 0)
-	{
-		qCritical("FCDProInput::start: could not open FCD");
-		return false;
-	}
+//	if (m_FCDThread)
+//	{
+//		return false;
+//	}
+
+//	m_dev = fcdOpen(fcd_traits<Pro>::vendorId, fcd_traits<Pro>::productId, device);
+//
+//	if (m_dev == 0)
+//	{
+//		qCritical("FCDProInput::start: could not open FCD");
+//		return false;
+//	}
 
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
@@ -89,16 +119,24 @@ bool FCDProInput::start(int device)
 
 	m_FCDThread->startWork();
 
-	mutexLocker.unlock();
+//	mutexLocker.unlock();
 	applySettings(m_settings, true);
 
 	qDebug("FCDProInput::started");
+	m_running = true;
+
 	return true;
+}
+
+void FCDProInput::closeDevice()
+{
+    fcdClose(m_dev);
+    m_dev = 0;
 }
 
 void FCDProInput::stop()
 {
-	QMutexLocker mutexLocker(&m_mutex);
+//	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_FCDThread)
 	{
@@ -108,8 +146,9 @@ void FCDProInput::stop()
 		m_FCDThread = 0;
 	}
 
-	fcdClose(m_dev);
-	m_dev = 0;
+	m_running = false;
+//	fcdClose(m_dev);
+//	m_dev = 0;
 }
 
 const QString& FCDProInput::getDeviceDescription() const
