@@ -39,7 +39,10 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
-	ui->setupUi(this);
+    m_sampleSource = new HackRFInput(m_deviceAPI);
+    m_deviceAPI->setSource(m_sampleSource);
+
+    ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
@@ -52,11 +55,9 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_sampleSource = new HackRFInput(m_deviceAPI);
 
 	displayBandwidths();
 
-	m_deviceAPI->setSource(m_sampleSource);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());

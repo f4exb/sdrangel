@@ -38,7 +38,10 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_deviceSampleSink(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
-	ui->setupUi(this);
+    m_deviceSampleSink = new HackRFOutput(m_deviceAPI);
+    m_deviceAPI->setSink(m_deviceSampleSink);
+
+    ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
@@ -50,12 +53,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
-
-	m_deviceSampleSink = new HackRFOutput(m_deviceAPI);
-
 	displayBandwidths();
-
-	m_deviceAPI->setSink(m_deviceSampleSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
