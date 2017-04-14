@@ -71,7 +71,7 @@ public:
 	BladerfOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~BladerfOutput();
 
-	virtual bool start(int device);
+	virtual bool start();
 	virtual void stop();
 
 	virtual const QString& getDeviceDescription() const;

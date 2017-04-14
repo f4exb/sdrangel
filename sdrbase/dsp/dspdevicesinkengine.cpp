@@ -449,7 +449,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	// Start everything
 
-	if(!m_deviceSampleSink->start(m_sampleSinkSequence))
+	if(!m_deviceSampleSink->start())
 	{
 		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample source");
 	}

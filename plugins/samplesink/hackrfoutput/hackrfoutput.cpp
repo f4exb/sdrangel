@@ -95,7 +95,7 @@ bool HackRFOutput::openDevice()
     return true;
 }
 
-bool HackRFOutput::start(int device)
+bool HackRFOutput::start()
 {
     if (!m_dev) {
         return false;
