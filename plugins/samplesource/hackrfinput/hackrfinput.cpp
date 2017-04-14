@@ -65,8 +65,6 @@ bool HackRFInput::openDevice()
         return false;
     }
 
-    int device = m_deviceAPI->getSampleSourceSequence();
-
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
         DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
@@ -89,9 +87,9 @@ bool HackRFInput::openDevice()
     }
     else
     {
-        if ((m_dev = DeviceHackRF::open_hackrf(device)) == 0)
+        if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSampleSourceSerial()))) == 0)
         {
-            qCritical("HackRFInput::openDevice: could not open HackRF #%d", device);
+            qCritical("HackRFInput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
             return false;
         }
 

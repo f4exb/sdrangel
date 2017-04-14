@@ -23,6 +23,7 @@ class DeviceHackRF
 {
 public:
     static hackrf_device *open_hackrf(int sequence);
+    static hackrf_device *open_hackrf(const char * const serial);
 private:
     static hackrf_device *open_hackrf_from_sequence(int sequence);
 };
