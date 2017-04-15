@@ -180,13 +180,13 @@ Some SDR hardware have Rx/Tx capabilities in a SISO or MIMO configuration. That 
   
 Note that the following would also work for multiple sample channels Rx or Tx only devices but none exists or is supported at this moment.
   
-In SDRangel there is a complete receiver or transmitter per I/Q sample flow. These transmitters and receivers are visually represented by the Rn and Tn tabs in the main window. They are created and disposed in the way explained in the previous paragraph using the source or sink selection confirmation button. In fact it acts as if each receiver or transmitter was controlled independently. In single input or single output (none at the moment) devices this is a true independence but with SISO or MIMO devices this cannot be the case and although each receiver or transmitter looks like it was handled independently there are things in common that have to be taken into account. For example it all cases the device handle should be unique and opening and closing the device has to be done only once per physical device usage cycle.
+In SDRangel there is a complete receiver or transmitter per I/Q sample flow. These transmitters and receivers are visually represented by the Rn and Tn tabs in the main window. They are created and disposed in the way explained in the previous paragraph using the source or sink selection confirmation button. In fact it acts as if each receiver or transmitter was controlled independently. In single input or single output (none at the moment) devices this is a true independence but with SISO or MIMO devices this cannot be the case and although each receiver or transmitter looks like it was handled independently there are things in common that have to be taken into account. For example in all cases the device handle should be unique and opening and closing the device has to be done only once per physical device usage cycle.
 
 This is where the "buddies list" come into play. Receivers exhibit a generic interface in the form of the DeviceSourceAPI class and transmitter have the DeviceSinkAPI with the same role. Through these APIs some information and control can flow between receivers and trasmitters. The point is that all receivers and/or transmitters pertaining to the same physical device must "know" each other in order to be able to exchange information or control each other. For this purpose the DeviceSourceAPI or DeviceSinkAPI maintain a list of DeviceSourceAPI siblings and a list of DeviceSinkAPI siblings called "buddies". Thus any multi flow Rx/Tx configuration can be handled.
 
 The exact behaviour of these coupled receivers and/or transmitters is dependent on the hardware therefore a generic pointer attached to the API can be used to convey any kind of class or structure taylored for the exact hardware use case. Through this structure the state of the receiver or transmitter can be exposed therefore there is one structure per receiver and transmitter in the device interface. This structure may contain pointers to common areas (dynamically allocated) related to the physical device. One such "area" is the device handle which is present in all cases.
 
-Normally the first buddy would create the common areas (through new) and the last would delete them (through delete) and the superstructure would be on the stack of each buddy. Thus through the superstructure copy a buddy would gain access to common areas from another (already present) buddy along with static information from the other buddy. Exchange of dynamic information between buddies is done using message passing.
+Normally the first buddy would create the common areas (through new) and the last would delete them (through delete) and the indovidual structure (superstructure) would be on the stack of each buddy. Thus by copying this superstructure a buddy would gain access to common areas from another (already present) buddy along with static information from the other buddy (such as which hadrware Rx or Tx channel it uses in a MIMO architecture). Exchange of dynamic information between buddies is done using message passing.
 
 The degree of entanglement between the different coupled flows in a single hardware can be very different:
 
@@ -202,6 +202,7 @@ The degree of entanglement between the different coupled flows in a single hardw
     - Rx share the same sample rate, hardware decimation factor and center frequency
     - Tx share the same sample rate, hardware interpolation factor and center frequency
     - Rx and Tx share the same base sample rate (decimation/interpolation apart)
+    - Independent Rx and Tx center frequencies
     - Independent gains, bandwidths, etc... per Rx or Tx channel
      
 The openDevice and closeDevice methods of the device interface are designed specifically for each physical device type in order to manage the common resources appropriately at receiver or transmitter construction and destruction. For example opening and closing the device and the related device handle is always done this way:
@@ -213,3 +214,5 @@ The openDevice and closeDevice methods of the device interface are designed spec
    
   - closeDevice:
     - if there are no buddies then effectively close the device else just zero out the own copy of the device handle
+    
+Exchange of dynamic information when necessary such as sample rate or center frequency is done by message passing between buddies.
