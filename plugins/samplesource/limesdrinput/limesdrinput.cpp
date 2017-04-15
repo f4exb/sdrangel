@@ -198,3 +198,28 @@ void LimeSDRInput::stop()
     m_running = false;
 }
 
+void LimeSDRInput::getLORange(float& minF, float& maxF, float& stepF) const
+{
+    lms_range_t range = m_deviceShared.m_deviceParams->m_loRangeRx;
+    minF = range.min;
+    maxF = range.max;
+    stepF = range.step;
+}
+
+void LimeSDRInput::getSRRange(float& minF, float& maxF, float& stepF) const
+{
+    lms_range_t range = m_deviceShared.m_deviceParams->m_srRangeRx;
+    minF = range.min;
+    maxF = range.max;
+    stepF = range.step;
+}
+
+void LimeSDRInput::getLPRange(float& minF, float& maxF, float& stepF) const
+{
+    lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
+    minF = range.min;
+    maxF = range.max;
+    stepF = range.step;
+}
+
+

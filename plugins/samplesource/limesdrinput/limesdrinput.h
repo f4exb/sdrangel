@@ -41,6 +41,10 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    void getLORange(float& minF, float& maxF, float& stepF) const;
+    void getSRRange(float& minF, float& maxF, float& stepF) const;
+    void getLPRange(float& minF, float& maxF, float& stepF) const;
+
 private:
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;
