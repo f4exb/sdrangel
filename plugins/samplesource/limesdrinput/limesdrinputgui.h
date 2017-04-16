@@ -18,15 +18,15 @@
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTGUI_H_
 
 #include <QTimer>
-#include "plugin/plugingui.h"
 
+#include "plugin/plugingui.h"
 #include "limesdrinput.h"
 
 class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
-    class LimeSDRInputGui;
+    class LimeSDRInputGUI;
 }
 
 class LimeSDRInputGUI : public QWidget, public PluginGUI {
@@ -48,7 +48,7 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
-    Ui::LimeSDRInputGui* ui;
+    Ui::LimeSDRInputGUI* ui;
 
     DeviceSourceAPI* m_deviceAPI;
     LimeSDRInput* m_limeSDRInput; //!< Same object as above but gives easy access to LimeSDRInput methods and attributes that are used intensively
@@ -66,7 +66,7 @@ private:
     void updateSampleRateAndFrequency();
 
 private slots:
-    void handleDSPMessages();
+    void handleMessagesToUI();
 
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);

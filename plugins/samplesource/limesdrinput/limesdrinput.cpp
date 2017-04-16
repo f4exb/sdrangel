@@ -19,7 +19,10 @@
 #include <string.h>
 #include "lime/LimeSuite.h"
 
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
 #include "limesdrinput.h"
+#include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
 
 
@@ -45,8 +48,8 @@ bool LimeSDRInput::openDevice()
     // if there is a channel left take the first available
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
     {
-        DeviceSinkAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        m_deviceShared = *(sourceBuddy->getBuddySharedPtr());              // copy shared data
+        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        m_deviceShared = *((DeviceLimeSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
         DeviceLimeSDRParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
 
         if (deviceParams == 0)
@@ -65,8 +68,8 @@ bool LimeSDRInput::openDevice()
 
         for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
         {
-            DeviceSinkAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
-            DeviceLimeSDRShared *buddyShared = buddy->getBuddySharedPtr();
+            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+            DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
             busyChannels[buddyShared->m_channel] = 1;
         }
 
@@ -87,7 +90,7 @@ bool LimeSDRInput::openDevice()
     else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
     {
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        m_deviceShared = *(sinkBuddy->getBuddySharedPtr()); // copy parameters
+        m_deviceShared = *((DeviceLimeSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
 
         if (m_deviceShared.m_deviceParams == 0)
         {
@@ -103,7 +106,9 @@ bool LimeSDRInput::openDevice()
     else
     {
         m_deviceShared.m_deviceParams = new DeviceLimeSDRParams();
-        m_deviceShared.m_deviceParams->open((lms_info_str_t) qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        char serial[256];
+        strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        m_deviceShared.m_deviceParams->open(serial);
         m_deviceShared.m_channel = 0; // take first channel
     }
 
@@ -113,7 +118,7 @@ bool LimeSDRInput::openDevice()
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
     {
-        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %u", m_deviceShared.m_channel);
+        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %lu", m_deviceShared.m_channel);
         return false;
     }
 
@@ -126,7 +131,7 @@ void LimeSDRInput::closeDevice()
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
     {
-        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %u", m_deviceShared.m_channel);
+        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %lu", m_deviceShared.m_channel);
     }
 
     m_deviceShared.m_channel = -1;
@@ -159,7 +164,7 @@ bool LimeSDRInput::start()
 
     if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
     {
-        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %u", m_deviceShared.m_channel);
+        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %lu", m_deviceShared.m_channel);
         return false;
     }
 
@@ -198,6 +203,11 @@ void LimeSDRInput::stop()
     m_running = false;
 }
 
+std::size_t LimeSDRInput::getChannelIndex()
+{
+    return m_deviceShared.m_channel;
+}
+
 void LimeSDRInput::getLORange(float& minF, float& maxF, float& stepF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_loRangeRx;
@@ -222,4 +232,14 @@ void LimeSDRInput::getLPRange(float& minF, float& maxF, float& stepF) const
     stepF = range.step;
 }
 
+int LimeSDRInput::getLPIndex(float lpfBW) const
+{
+    lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
+    return (int) ((lpfBW - range.min) / range.step);
+}
+
+uint32_t LimeSDRInput::getHWLog2Decim() const
+{
+    return m_deviceShared.m_deviceParams->m_log2OvSRRx;
+}
 

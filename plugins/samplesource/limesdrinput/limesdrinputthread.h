@@ -21,6 +21,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include "lime/LimeSuite.h"
+
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 

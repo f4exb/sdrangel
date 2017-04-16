@@ -95,7 +95,7 @@ PluginGUI* LimeSDRInputPlugin::createSampleSourcePluginGUI(const QString& source
 {
     if(sourceId == m_deviceTypeID)
     {
-        LimeSDRInputGui* gui = new LimeSDRInputGui(deviceAPI);
+        LimeSDRInputGUI* gui = new LimeSDRInputGUI(deviceAPI);
         *widget = gui;
         return gui;
     }

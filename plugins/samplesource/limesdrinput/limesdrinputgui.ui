@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LimeSDRInputGui</class>
- <widget class="QWidget" name="LimeSDRInputGui">
+ <class>LimeSDRInputGUI</class>
+ <widget class="QWidget" name="LimeSDRInputGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -167,6 +167,25 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="channelNumberText">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Channel number</string>
+       </property>
+       <property name="text">
+        <string>#0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

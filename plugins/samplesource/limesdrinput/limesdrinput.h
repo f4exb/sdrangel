@@ -18,6 +18,8 @@
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
 
 #include <QString>
+#include <stdint.h>
+
 #include "dsp/devicesamplesource.h"
 #include "limesdr/devicelimesdrshared.h"
 #include "limesdrinputsettings.h"
@@ -29,6 +31,26 @@ struct DeviceLimeSDRParams;
 class LimeSDRInput : public DeviceSampleSource
 {
 public:
+    class MsgConfigureLimeSDR : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const LimeSDRInputSettings& getSettings() const { return m_settings; }
+
+        static MsgConfigureLimeSDR* create(const LimeSDRInputSettings& settings)
+        {
+            return new MsgConfigureLimeSDR(settings);
+        }
+
+    private:
+        LimeSDRInputSettings m_settings;
+
+        MsgConfigureLimeSDR(const LimeSDRInputSettings& settings) :
+            Message(),
+            m_settings(settings)
+        { }
+    };
+
     LimeSDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~LimeSDRInput();
 
@@ -41,9 +63,12 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    std::size_t getChannelIndex();
     void getLORange(float& minF, float& maxF, float& stepF) const;
     void getSRRange(float& minF, float& maxF, float& stepF) const;
     void getLPRange(float& minF, float& maxF, float& stepF) const;
+    int getLPIndex(float lpfBW) const;
+    uint32_t getHWLog2Decim() const;
 
 private:
     DeviceSourceAPI *m_deviceAPI;

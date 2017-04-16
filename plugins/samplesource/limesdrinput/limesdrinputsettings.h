@@ -17,6 +17,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTSETTINGS_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTSETTINGS_H_
 
+#include <QByteArray>
 #include <stdint.h>
 
 /**
@@ -32,8 +33,8 @@ struct LimeSDRInputSettings
     } fcPos_t;
 
     // global settings to be saved
-    quint64  m_centerFrequency;
-    qint32   m_devSampleRate;
+    uint64_t m_centerFrequency;
+    int      m_devSampleRate;
     uint32_t m_log2HardDecim;
     // channel settings
     bool     m_dcBlock;
