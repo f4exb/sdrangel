@@ -15,12 +15,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMutexLocker>
+#include <QDebug>
 #include <cstddef>
 #include <string.h>
 #include "lime/LimeSuite.h"
 
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
+#include "dsp/dspcommands.h"
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
@@ -241,5 +243,167 @@ int LimeSDRInput::getLPIndex(float lpfBW) const
 uint32_t LimeSDRInput::getHWLog2Decim() const
 {
     return m_deviceShared.m_deviceParams->m_log2OvSRRx;
+}
+
+bool LimeSDRInput::handleMessage(const Message& message)
+{
+    if (MsgConfigureLimeSDR::match(message))
+    {
+        MsgConfigureLimeSDR& conf = (MsgConfigureLimeSDR&) message;
+        qDebug() << "LimeSDRInput::handleMessage: MsgConfigureLimeSDR";
+
+        if (!applySettings(conf.getSettings(), false))
+        {
+            qDebug("LimeSDRInput::handleMessage config error");
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool force)
+{
+    bool forwardChangeOwnDSP = false;
+    bool forwardChangeRxDSP  = false;
+    bool forwardChangeAllDSP = false;
+//  QMutexLocker mutexLocker(&m_mutex);
+
+    qDebug() << "LimeSDRInput::applySettings";
+
+    if (m_settings.m_dcBlock != settings.m_dcBlock)
+    {
+        m_settings.m_dcBlock = settings.m_dcBlock;
+        m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+    }
+
+    if (m_settings.m_iqCorrection != settings.m_iqCorrection)
+    {
+        m_settings.m_iqCorrection = settings.m_iqCorrection;
+        m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+    }
+
+    if ((m_settings.m_gain != settings.m_gain) || force)
+    {
+        m_settings.m_gain = settings.m_gain;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_gain) < 0)
+            {
+                qDebug("LimeSDRInput::applySettings: LMS_SetGaindB() failed");
+            }
+            else
+            {
+                qDebug() << "LimeSDRInput::applySettings: Gain set to " << m_settings.m_gain;
+            }
+        }
+    }
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+    {
+        forwardChangeRxDSP  = m_settings.m_log2HardDecim != settings.m_log2HardDecim;
+        forwardChangeAllDSP = m_settings.m_devSampleRate != settings.m_devSampleRate;
+
+        m_settings.m_devSampleRate = settings.m_devSampleRate;
+        m_settings.m_log2HardDecim = settings.m_log2HardDecim;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_settings.m_devSampleRate,
+                    1<<m_settings.m_log2HardDecim) < 0)
+            {
+                qCritical("LimeSDRInput::applySettings: could not set sample rate to %d with oversampling of %d",
+                        m_settings.m_devSampleRate,
+                        1<<m_settings.m_log2HardDecim);
+            }
+            else
+            {
+                m_deviceShared.m_deviceParams->m_log2OvSRRx = m_settings.m_log2HardDecim;
+                m_deviceShared.m_deviceParams->m_sampleRate = m_settings.m_devSampleRate;
+                qDebug("LimeSDRInput::applySettings: set sample rate set to %d with oversampling of %d",
+                        m_settings.m_devSampleRate,
+                        1<<m_settings.m_log2HardDecim);
+            }
+        }
+    }
+
+    if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
+    {
+        m_settings.m_lpfBW = settings.m_lpfBW;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (LMS_SetLPF(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_lpfBW))
+            {
+                qCritical("LimeSDRInput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
+            }
+        }
+    }
+
+    if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+    {
+        m_settings.m_log2SoftDecim = settings.m_log2SoftDecim;
+        forwardChangeOwnDSP = true;
+
+        if (m_limeSDRInputThread != 0)
+        {
+            m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
+            qDebug() << "LimeSDRInput::applySettings: set soft decimation to " << (1<<m_settings.m_log2SoftDecim);
+        }
+    }
+
+    if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+    {
+        forwardChangeRxDSP = true;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != NULL)
+        {
+            if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
+                    m_settings.m_centerFrequency ) != 0)
+            {
+                qDebug("LimeSDRInput::applySettings: LMS_SetLOFrequency(%lu) failed", m_settings.m_centerFrequency);
+            }
+        }
+    }
+
+    if (forwardChangeAllDSP)
+    {
+
+    }
+    else if (forwardChangeRxDSP)
+    {
+
+    }
+    else if (forwardChangeOwnDSP)
+    {
+        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+    }
+
+    qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
+            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s";
+
+    return true;
 }
 

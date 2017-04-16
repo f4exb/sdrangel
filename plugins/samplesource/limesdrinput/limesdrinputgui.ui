@@ -402,35 +402,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_fcPos">
-       <property name="text">
-        <string>Fp</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="fcPos">
-       <property name="toolTip">
-        <string>Relative position of device center frequency</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Inf</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sup</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Cen</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

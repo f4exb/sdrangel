@@ -72,7 +72,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToUI()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToGUI()), Qt::QueuedConnection);
 }
 
 LimeSDRInputGUI::~LimeSDRInputGUI()
@@ -134,13 +134,13 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
     }
 }
 
-void LimeSDRInputGUI::handleMessagesToUI()
+void LimeSDRInputGUI::handleMessagesToGUI()
 {
     Message* message;
 
     while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
     {
-        qDebug("LimeSDRInputGUI::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
@@ -173,7 +173,6 @@ void LimeSDRInputGUI::displaySettings()
 
     ui->hwDecim->setCurrentIndex(m_settings.m_log2HardDecim);
     ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
-    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
     ui->lpf->setValue(m_limeSDRInput->getLPIndex(m_settings.m_lpfFIRBW));
     ui->lpfText->setText(tr("%1k").arg(QString::number(m_settings.m_lpfFIRBW / 1000.0f, 'f', 0)));
@@ -194,7 +193,7 @@ void LimeSDRInputGUI::sendSettings()
 void LimeSDRInputGUI::updateHardware()
 {
     qDebug() << "BladerfGui::updateHardware";
-    LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create( m_settings);
+    LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
     m_sampleSource->getInputMessageQueue()->push(message);
     m_updateTimer.stop();
 }

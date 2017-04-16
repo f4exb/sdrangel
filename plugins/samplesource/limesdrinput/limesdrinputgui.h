@@ -66,7 +66,7 @@ private:
     void updateSampleRateAndFrequency();
 
 private slots:
-    void handleMessagesToUI();
+    void handleMessagesToGUI();
 
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
@@ -76,7 +76,6 @@ private slots:
     void on_sampleRate_changed(quint64 value);
     void on_hwDecim_currentIndexChanged(int index);
     void on_swDecim_currentIndexChanged(int index);
-    void on_fcPos_currentIndexChanged(int index);
     void on_lpf_valueChanged(int value);
     void on_lpFIREnable_toggled(bool checked);
     void on_lpFIR_changed(quint64 value);
