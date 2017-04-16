@@ -130,15 +130,7 @@ bool BladerfInputGui::deserialize(const QByteArray& data)
 
 bool BladerfInputGui::handleMessage(const Message& message)
 {
-	if (BladerfInput::MsgReportBladerf::match(message))
-	{
-		displaySettings();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    return false;
 }
 
 void BladerfInputGui::handleDSPMessages()

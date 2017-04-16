@@ -51,23 +51,6 @@ public:
 		{ }
 	};
 
-	class MsgReportBladerf : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-
-		static MsgReportBladerf* create()
-		{
-			return new MsgReportBladerf();
-		}
-
-	protected:
-
-		MsgReportBladerf() :
-			Message()
-		{ }
-	};
-
 	BladerfInput(DeviceSourceAPI *deviceAPI);
 	virtual ~BladerfInput();
 
