@@ -60,10 +60,12 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
+    bool m_doApplySettings;
 
     void displaySettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
+    void blockApplySettings(bool block);
 
 private slots:
     void handleMessagesToGUI();

@@ -51,6 +51,52 @@ public:
         { }
     };
 
+    class MsgSetReferenceLimeSDR : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const LimeSDRInputSettings& getSettings() const { return m_settings; }
+
+        static MsgSetReferenceLimeSDR* create(const LimeSDRInputSettings& settings)
+        {
+            return new MsgSetReferenceLimeSDR(settings);
+        }
+
+    private:
+        LimeSDRInputSettings m_settings;
+
+        MsgSetReferenceLimeSDR(const LimeSDRInputSettings& settings) :
+            Message(),
+            m_settings(settings)
+        { }
+    };
+
+    class MsgReportLimeSDRToGUI : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float    getCenterFrequency() const { return m_centerFrequency; }
+        int      getSampleRate() const { return m_sampleRate; }
+        uint32_t getLog2HardDecim() const { return m_log2HardDecim; }
+
+        static MsgReportLimeSDRToGUI* create(float centerFrequency, int sampleRate, uint32_t log2HardDecim)
+        {
+            return new MsgReportLimeSDRToGUI(centerFrequency, sampleRate, log2HardDecim);
+        }
+
+    private:
+        float    m_centerFrequency;
+        int      m_sampleRate;
+        uint32_t m_log2HardDecim;
+
+        MsgReportLimeSDRToGUI(float centerFrequency, int sampleRate, uint32_t log2HardDecim) :
+            Message(),
+            m_centerFrequency(centerFrequency),
+            m_sampleRate(sampleRate),
+            m_log2HardDecim(log2HardDecim)
+        { }
+    };
+
     LimeSDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~LimeSDRInput();
 

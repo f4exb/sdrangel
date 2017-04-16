@@ -34,7 +34,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_settings(),
     m_sampleSource(0),
     m_sampleRate(0),
-    m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+    m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+    m_doApplySettings(true)
 {
     m_limeSDRInput = new LimeSDRInput(m_deviceAPI);
     m_sampleSource = (DeviceSampleSource *) m_limeSDRInput;
@@ -124,14 +125,22 @@ QByteArray LimeSDRInputGUI::serialize() const
 
 bool LimeSDRInputGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
+}
+
+bool LimeSDRInputGUI::handleMessage(const Message& message) // TODO: does not seem to be really useful in any of the source (+sink?) plugins
+{
+    return false;
 }
 
 void LimeSDRInputGUI::handleMessagesToGUI()
@@ -150,6 +159,23 @@ void LimeSDRInputGUI::handleMessagesToGUI()
             qDebug("BladerfGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
             m_fileSink->handleMessage(*notif); // forward to file sink
+
+            delete message;
+        }
+        else if (LimeSDRInput::MsgReportLimeSDRToGUI::match(*message))
+        {
+            LimeSDRInput::MsgReportLimeSDRToGUI *report = (LimeSDRInput::MsgReportLimeSDRToGUI *) message;
+
+            m_settings.m_centerFrequency = report->getCenterFrequency() / 1000;
+            m_settings.m_devSampleRate = report->getSampleRate();
+            m_settings.m_log2HardDecim = report->getLog2HardDecim();
+
+            blockApplySettings(true);
+            displaySettings();
+            blockApplySettings(false);
+
+            LimeSDRInput::MsgSetReferenceLimeSDR* message = LimeSDRInput::MsgSetReferenceLimeSDR::create(m_settings);
+            m_sampleSource->getInputMessageQueue()->push(message);
 
             delete message;
         }
@@ -192,10 +218,13 @@ void LimeSDRInputGUI::sendSettings()
 
 void LimeSDRInputGUI::updateHardware()
 {
-    qDebug() << "BladerfGui::updateHardware";
-    LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
-    m_sampleSource->getInputMessageQueue()->push(message);
-    m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "BladerfGui::updateHardware";
+        LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_updateTimer.stop();
+    }
 }
 
 void LimeSDRInputGUI::updateStatus()
@@ -227,3 +256,67 @@ void LimeSDRInputGUI::updateStatus()
     }
 }
 
+void LimeSDRInputGUI::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
+}
+
+void LimeSDRInputGUI::on_startStop_toggled(bool checked)
+{
+
+}
+
+void LimeSDRInputGUI::on_record_toggled(bool checked)
+{
+
+}
+
+void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
+{
+
+}
+
+void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
+{
+
+}
+
+void LimeSDRInputGUI::on_iqImbalance_toggled(bool checked)
+{
+
+}
+
+void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
+{
+
+}
+
+void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
+{
+
+}
+
+void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
+{
+
+}
+
+void LimeSDRInputGUI::on_lpf_valueChanged(int value)
+{
+
+}
+
+void LimeSDRInputGUI::on_lpFIREnable_toggled(bool checked)
+{
+
+}
+
+void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
+{
+
+}
+
+void LimeSDRInputGUI::on_gain_valueChanged(int value)
+{
+
+}

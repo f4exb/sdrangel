@@ -27,6 +27,9 @@
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
 
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
+
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -259,6 +262,13 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgSetReferenceLimeSDR::match(message))
+    {
+        MsgSetReferenceLimeSDR& conf = (MsgSetReferenceLimeSDR&) message;
+        qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceLimeSDR";
+        m_settings = conf.getSettings();
+        return true;
+    }
     else
     {
         return false;
@@ -274,13 +284,13 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     qDebug() << "LimeSDRInput::applySettings";
 
-    if (m_settings.m_dcBlock != settings.m_dcBlock)
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
         m_settings.m_dcBlock = settings.m_dcBlock;
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
-    if (m_settings.m_iqCorrection != settings.m_iqCorrection)
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
     {
         m_settings.m_iqCorrection = settings.m_iqCorrection;
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
@@ -357,6 +367,33 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
+    if ((m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
+        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
+    {
+        m_settings.m_lpfFIRBW = settings.m_lpfFIRBW;
+        m_settings.m_lpfFIREnable = settings.m_lpfFIREnable;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_lpfFIREnable,
+                    m_settings.m_lpfFIRBW))
+            {
+                qCritical("LimeSDRInput::applySettings: could %s and set LPF FIR to %f Hz",
+                        m_settings.m_lpfFIREnable ? "enable" : "disable",
+                        m_settings.m_lpfFIRBW);
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: %sd and set LPF FIR to %f Hz",
+                        m_settings.m_lpfFIREnable ? "enable" : "disable",
+                        m_settings.m_lpfFIRBW);
+            }
+        }
+    }
+
     if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
     {
         m_settings.m_log2SoftDecim = settings.m_log2SoftDecim;
@@ -369,7 +406,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-    if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         forwardChangeRxDSP = true;
 
@@ -387,11 +424,51 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     if (forwardChangeAllDSP)
     {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
 
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+            (*itSource)->getDeviceInputMessageQueue()->push(notif);
+            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                    m_settings.m_centerFrequency,
+                    m_settings.m_devSampleRate,
+                    m_settings.m_log2HardDecim);
+            (*itSource)->getDeviceInputMessageQueue()->push(report);
+        }
+
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+            (*itSink)->getDeviceInputMessageQueue()->push(notif);
+            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                    m_settings.m_centerFrequency,
+                    m_settings.m_devSampleRate,
+                    m_settings.m_log2HardDecim);
+            (*itSink)->getDeviceInputMessageQueue()->push(report);
+        }
     }
     else if (forwardChangeRxDSP)
     {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
 
+        for (; it != sourceBuddies.end(); ++it)
+        {
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+            (*it)->getDeviceInputMessageQueue()->push(notif);
+            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                    m_settings.m_centerFrequency,
+                    m_settings.m_devSampleRate,
+                    m_settings.m_log2HardDecim);
+            (*it)->getDeviceInputMessageQueue()->push(report);
+        }
     }
     else if (forwardChangeOwnDSP)
     {
