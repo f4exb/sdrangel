@@ -261,13 +261,8 @@ void ATVDemod::demod(Complex& c)
 
     //********** demodulation **********
 
-#if defined(_WINDOWS_)
-    float fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
-    float fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
-#else
     const float& fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
     const float& fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
-#endif
     double magSq;
 
     if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
