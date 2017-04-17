@@ -174,7 +174,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
             displaySettings();
             blockApplySettings(false);
 
-            LimeSDRInput::MsgSetReferenceLimeSDR* message = LimeSDRInput::MsgSetReferenceLimeSDR::create(m_settings);
+            LimeSDRInput::MsgSetReferenceConfig* message = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
             m_sampleSource->getInputMessageQueue()->push(message);
 
             delete message;
@@ -263,60 +263,94 @@ void LimeSDRInputGUI::blockApplySettings(bool block)
 
 void LimeSDRInputGUI::on_startStop_toggled(bool checked)
 {
-
+    if (checked)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudioOutput();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+        DSPEngine::instance()->stopAudioOutput();
+    }
 }
 
 void LimeSDRInputGUI::on_record_toggled(bool checked)
 {
-
+    if (checked)
+    {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        m_fileSink->startRecording();
+    }
+    else
+    {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        m_fileSink->stopRecording();
+    }
 }
 
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 {
-
+    m_settings.m_centerFrequency = value * 1000;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
 {
-
+    m_settings.m_dcBlock = checked;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_iqImbalance_toggled(bool checked)
 {
-
+    m_settings.m_iqCorrection = checked;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
 {
-
-}
+    m_settings.m_devSampleRate = value;
+    sendSettings();}
 
 void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
 {
-
+    if ((index <0) || (index > 5))
+        return;
+    m_settings.m_log2HardDecim = index;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
 {
-
+    if ((index <0) || (index > 5))
+        return;
+    m_settings.m_log2SoftDecim = index;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_lpf_valueChanged(int value)
 {
-
+    m_settings.m_lpfBW = m_limeSDRInput->getLPValue(value);
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_lpFIREnable_toggled(bool checked)
 {
-
+    m_settings.m_lpfFIREnable = checked;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
 {
-
+    m_settings.m_lpfFIRBW = value;
+    sendSettings();
 }
 
 void LimeSDRInputGUI::on_gain_valueChanged(int value)
 {
-
+    m_settings.m_gain = value;
+    sendSettings();
 }

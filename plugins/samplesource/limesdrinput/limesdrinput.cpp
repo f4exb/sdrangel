@@ -243,6 +243,12 @@ int LimeSDRInput::getLPIndex(float lpfBW) const
     return (int) ((lpfBW - range.min) / range.step);
 }
 
+float LimeSDRInput::getLPValue(int index) const
+{
+    lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
+    return range.min + index * range.step;
+}
+
 uint32_t LimeSDRInput::getHWLog2Decim() const
 {
     return m_deviceShared.m_deviceParams->m_log2OvSRRx;
@@ -262,9 +268,9 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgSetReferenceLimeSDR::match(message))
+    else if (MsgSetReferenceConfig::match(message))
     {
-        MsgSetReferenceLimeSDR& conf = (MsgSetReferenceLimeSDR&) message;
+        MsgSetReferenceConfig& conf = (MsgSetReferenceConfig&) message;
         qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceLimeSDR";
         m_settings = conf.getSettings();
         return true;

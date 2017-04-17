@@ -51,21 +51,21 @@ public:
         { }
     };
 
-    class MsgSetReferenceLimeSDR : public Message {
+    class MsgSetReferenceConfig : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         const LimeSDRInputSettings& getSettings() const { return m_settings; }
 
-        static MsgSetReferenceLimeSDR* create(const LimeSDRInputSettings& settings)
+        static MsgSetReferenceConfig* create(const LimeSDRInputSettings& settings)
         {
-            return new MsgSetReferenceLimeSDR(settings);
+            return new MsgSetReferenceConfig(settings);
         }
 
     private:
         LimeSDRInputSettings m_settings;
 
-        MsgSetReferenceLimeSDR(const LimeSDRInputSettings& settings) :
+        MsgSetReferenceConfig(const LimeSDRInputSettings& settings) :
             Message(),
             m_settings(settings)
         { }
@@ -114,6 +114,7 @@ public:
     void getSRRange(float& minF, float& maxF, float& stepF) const;
     void getLPRange(float& minF, float& maxF, float& stepF) const;
     int getLPIndex(float lpfBW) const;
+    float getLPValue(int index) const;
     uint32_t getHWLog2Decim() const;
 
 private:
