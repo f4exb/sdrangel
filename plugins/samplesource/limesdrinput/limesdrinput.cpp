@@ -28,6 +28,7 @@
 #include "limesdr/devicelimesdrparam.h"
 
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
 
 
@@ -206,6 +207,22 @@ void LimeSDRInput::stop()
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
 
     m_running = false;
+}
+
+const QString& LimeSDRInput::getDeviceDescription() const
+{
+    return m_deviceDescription;
+}
+
+int LimeSDRInput::getSampleRate() const
+{
+    int rate = m_settings.m_devSampleRate;
+    return (rate / (1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim)));
+}
+
+quint64 LimeSDRInput::getCenterFrequency() const
+{
+    return m_settings.m_centerFrequency;
 }
 
 std::size_t LimeSDRInput::getChannelIndex()
