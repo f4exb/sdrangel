@@ -120,7 +120,8 @@ void ValueDial::setValue(quint64 value)
 void ValueDial::setValueRange(uint numDigits, quint64 min, quint64 max)
 {
 	m_numDigits = numDigits;
-	m_numDecimalPoints = m_numDigits / 3;
+	//m_numDecimalPoints = m_numDigits / 3;
+	m_numDecimalPoints = m_numDigits < 3 ? 0 : (m_numDigits%3) == 0 ? (m_numDigits/3)-1 : m_numDigits/3;
 
 	m_valueMin = min;
 	m_valueMax = max;
@@ -158,8 +159,16 @@ QChar ValueDial::digitNeigh(QChar c, bool dir)
 QString ValueDial::formatText(quint64 value)
 {
 	QString str = QString("%1").arg(value, m_numDigits, 10, QChar('0'));
+
 	for(int i = 0; i < m_numDecimalPoints; i++)
-		str.insert(m_numDigits - 3 - 3 * i, ".");
+	{
+	    int ipoint = m_numDigits - 3 - 3 * i;
+
+	    if (ipoint != 0) { // do not insert leading point
+	        str.insert(ipoint, ".");
+	    }
+	}
+
 	return str;
 }
 
