@@ -111,6 +111,10 @@ bool FCDProPlusInput::start()
 
 void FCDProPlusInput::closeDevice()
 {
+    if (m_dev == 0) { // was never open
+        return;
+    }
+
     fcdClose(m_dev);
     m_dev = 0;
 }

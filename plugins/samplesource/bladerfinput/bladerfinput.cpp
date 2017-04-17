@@ -146,6 +146,10 @@ void BladerfInput::closeDevice()
 {
     int res;
 
+    if (m_dev == 0) { // was never open
+        return;
+    }
+
     if ((res = bladerf_enable_module(m_dev, BLADERF_MODULE_RX, false)) < 0)
     {
         qCritical("BladerfInput::stop: bladerf_enable_module with return code %d", res);

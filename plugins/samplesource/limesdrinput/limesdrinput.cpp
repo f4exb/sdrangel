@@ -133,6 +133,10 @@ bool LimeSDRInput::openDevice()
 
 void LimeSDRInput::closeDevice()
 {
+    if (m_deviceShared.m_deviceParams->getDevice() == 0) { // was never open
+        return;
+    }
+
     // release the channel
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
