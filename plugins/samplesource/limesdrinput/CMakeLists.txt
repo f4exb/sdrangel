@@ -1,5 +1,7 @@
 project(limesdrinput)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(limesdrinput_SOURCES
 	limesdrinputgui.cpp
 	limesdrinput.cpp

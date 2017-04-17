@@ -43,6 +43,7 @@ public:
 
 private:
     static const PluginDescriptor m_pluginDescriptor;
+    static bool findSerial(const char *lmsInfoStr, std::string& serial);
 };
 
 

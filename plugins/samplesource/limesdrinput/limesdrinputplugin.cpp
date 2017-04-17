@@ -19,6 +19,9 @@
 #include <QtPlugin>
 #include <QAction>
 
+#include <regex>
+#include <string>
+
 #include "lime/LimeSuite.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -77,13 +80,22 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
     {
         for (int i = 0; i < nbDevices; i++)
         {
-            qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
-            QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(deviceList[i]));
-            result.append(SamplingDevice(displayedName,
-                    m_hardwareID,
-                    m_deviceTypeID,
-                    QString(deviceList[i]),
-                    i));
+            std::string serial;
+
+            if (findSerial((const char *) deviceList[i], serial))
+            {
+                qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
+                QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(serial.c_str()));
+                result.append(SamplingDevice(displayedName,
+                        m_hardwareID,
+                        m_deviceTypeID,
+                        QString(serial.c_str()),
+                        i));
+            }
+            else
+            {
+                qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: cannot find serial in %s", i, (char *) deviceList[i]);
+            }
         }
     }
 
@@ -105,4 +117,21 @@ PluginGUI* LimeSDRInputPlugin::createSampleSourcePluginGUI(const QString& source
     }
 }
 
+bool LimeSDRInputPlugin::findSerial(const char *lmsInfoStr, std::string& serial)
+{
+    std::regex serial_reg("serial=([0-9,A-F]+)");
+    std::string input(lmsInfoStr);
+    std::smatch result;
+    std::regex_search(input, result, serial_reg);
+
+    if (result[1].str().length()>0)
+    {
+        serial = result[1].str();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
