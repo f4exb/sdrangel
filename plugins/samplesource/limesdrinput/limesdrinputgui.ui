@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>340</width>
     <height>265</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>310</width>
+    <width>340</width>
     <height>250</height>
    </size>
   </property>
@@ -455,6 +455,9 @@
       <widget class="QSlider" name="lpf">
        <property name="toolTip">
         <string>Analog lowpass filter bandwidth (kHz)</string>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

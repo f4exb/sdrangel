@@ -240,6 +240,7 @@ void LimeSDRInput::getLORange(float& minF, float& maxF, float& stepF) const
     minF = range.min;
     maxF = range.max;
     stepF = range.step;
+    qDebug("LimeSDRInput::getLORange: min: %f max: %f step: %f", range.min, range.max, range.step);
 }
 
 void LimeSDRInput::getSRRange(float& minF, float& maxF, float& stepF) const
@@ -248,26 +249,31 @@ void LimeSDRInput::getSRRange(float& minF, float& maxF, float& stepF) const
     minF = range.min;
     maxF = range.max;
     stepF = range.step;
+    qDebug("LimeSDRInput::getSRRange: min: %f max: %f step: %f", range.min, range.max, range.step);
 }
 
 void LimeSDRInput::getLPRange(float& minF, float& maxF, float& stepF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
+    float step = range.step < 1000.0f ? 1000.0 : range.step;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
+    stepF = step;
+    qDebug("LimeSDRInput::getLPRange: min: %f max: %f step: %f", range.min, range.max, range.step);
 }
 
 int LimeSDRInput::getLPIndex(float lpfBW) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
-    return (int) ((lpfBW - range.min) / range.step);
+    float step = range.step < 1000.0f ? 1000.0 : range.step;
+    return (int) ((lpfBW - range.min) / step);
 }
 
 float LimeSDRInput::getLPValue(int index) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
-    return range.min + index * range.step;
+    float step = range.step < 1000.0f ? 1000.0 : range.step;
+    return index * step;
 }
 
 uint32_t LimeSDRInput::getHWLog2Decim() const
@@ -308,8 +314,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
 //  QMutexLocker mutexLocker(&m_mutex);
-
-    qDebug() << "LimeSDRInput::applySettings";
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
@@ -380,10 +384,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (LMS_SetLPF(m_deviceShared.m_deviceParams->getDevice(),
+            if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
-                    m_settings.m_lpfBW))
+                    m_settings.m_lpfBW) < 0)
             {
                 qCritical("LimeSDRInput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
             }
@@ -406,7 +410,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
                     m_settings.m_lpfFIREnable,
-                    m_settings.m_lpfFIRBW))
+                    m_settings.m_lpfFIRBW) < 0)
             {
                 qCritical("LimeSDRInput::applySettings: could %s and set LPF FIR to %f Hz",
                         m_settings.m_lpfFIREnable ? "enable" : "disable",
@@ -435,16 +439,21 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
+        m_settings.m_centerFrequency = settings.m_centerFrequency;
         forwardChangeRxDSP = true;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != NULL)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
-                    m_settings.m_centerFrequency ) != 0)
+                    m_settings.m_centerFrequency ) < 0)
             {
-                qDebug("LimeSDRInput::applySettings: LMS_SetLOFrequency(%lu) failed", m_settings.m_centerFrequency);
+                qCritical("LimeSDRInput::applySettings: could not set frequency to %lu", m_settings.m_centerFrequency);
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: frequency set to %lu", m_settings.m_centerFrequency);
             }
         }
     }
@@ -506,7 +515,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
-            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s";
+            << " sample rate after soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s";
 
     return true;
 }

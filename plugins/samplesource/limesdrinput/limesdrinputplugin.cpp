@@ -80,22 +80,16 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
     {
         for (int i = 0; i < nbDevices; i++)
         {
-            std::string serial;
+            std::string serial("N/D");
+            findSerial((const char *) deviceList[i], serial);
 
-            if (findSerial((const char *) deviceList[i], serial))
-            {
-                qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
-                QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(serial.c_str()));
-                result.append(SamplingDevice(displayedName,
-                        m_hardwareID,
-                        m_deviceTypeID,
-                        QString(serial.c_str()),
-                        i));
-            }
-            else
-            {
-                qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: cannot find serial in %s", i, (char *) deviceList[i]);
-            }
+            qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
+            QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(serial.c_str()));
+            result.append(SamplingDevice(displayedName,
+                    m_hardwareID,
+                    m_deviceTypeID,
+                    QString(deviceList[i]),
+                    i));
         }
     }
 
