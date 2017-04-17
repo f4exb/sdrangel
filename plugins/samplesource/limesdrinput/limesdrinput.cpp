@@ -37,7 +37,8 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
     m_limeSDRInputThread(0),
     m_deviceDescription(),
-    m_running(false)
+    m_running(false),
+    m_firstConfig(true)
 {
     openDevice();
 }
@@ -255,25 +256,10 @@ void LimeSDRInput::getSRRange(float& minF, float& maxF, float& stepF) const
 void LimeSDRInput::getLPRange(float& minF, float& maxF, float& stepF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
-    float step = range.step < 1000.0f ? 1000.0 : range.step;
     minF = range.min;
     maxF = range.max;
-    stepF = step;
+    stepF = range.step;
     qDebug("LimeSDRInput::getLPRange: min: %f max: %f step: %f", range.min, range.max, range.step);
-}
-
-int LimeSDRInput::getLPIndex(float lpfBW) const
-{
-    lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
-    float step = range.step < 1000.0f ? 1000.0 : range.step;
-    return (int) ((lpfBW - range.min) / step);
-}
-
-float LimeSDRInput::getLPValue(int index) const
-{
-    lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeRx;
-    float step = range.step < 1000.0f ? 1000.0 : range.step;
-    return index * step;
 }
 
 uint32_t LimeSDRInput::getHWLog2Decim() const
@@ -288,9 +274,13 @@ bool LimeSDRInput::handleMessage(const Message& message)
         MsgConfigureLimeSDR& conf = (MsgConfigureLimeSDR&) message;
         qDebug() << "LimeSDRInput::handleMessage: MsgConfigureLimeSDR";
 
-        if (!applySettings(conf.getSettings(), false))
+        if (!applySettings(conf.getSettings(), m_firstConfig))
         {
             qDebug("LimeSDRInput::handleMessage config error");
+        }
+        else
+        {
+            m_firstConfig = false;
         }
 
         return true;

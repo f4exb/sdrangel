@@ -54,11 +54,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
     m_limeSDRInput->getLPRange(minF, maxF, stepF);
-    int minLP = (int) (minF / stepF);
-    int maxLP = (int) (maxF / stepF);
-    int nbSteps = (int) ((maxF - minF) / stepF);
-    ui->lpf->setMinimum(minLP);
-    ui->lpf->setMaximum(maxLP);
+    ui->lpf->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 
     ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->lpFIR->setValueRange(5, 1U, 56000U);
@@ -203,8 +200,7 @@ void LimeSDRInputGUI::displaySettings()
     ui->hwDecim->setCurrentIndex(m_settings.m_log2HardDecim);
     ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
 
-    ui->lpf->setValue(m_limeSDRInput->getLPIndex(m_settings.m_lpfBW));
-    ui->lpfText->setText(tr("%1k").arg(QString::number(m_settings.m_lpfBW / 1000.0f, 'f', 0)));
+    ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 
     ui->lpFIREnable->setChecked(m_settings.m_lpfFIREnable);
     ui->lpFIR->setValue(m_settings.m_lpfFIRBW / 1000);
@@ -223,7 +219,7 @@ void LimeSDRInputGUI::updateHardware()
 {
     if (m_doApplySettings)
     {
-        qDebug() << "BladerfGui::updateHardware";
+        qDebug() << "LimeSDRInputGUI::updateHardware";
         LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_updateTimer.stop();
@@ -334,10 +330,9 @@ void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
     sendSettings();
 }
 
-void LimeSDRInputGUI::on_lpf_valueChanged(int value)
+void LimeSDRInputGUI::on_lpf_changed(int value)
 {
-    m_settings.m_lpfBW = m_limeSDRInput->getLPValue(value);
-    ui->lpfText->setText(tr("%1k").arg(QString::number(m_settings.m_lpfBW / 1000.0f, 'f', 0)));
+    m_settings.m_lpfBW = value * 1000;
     sendSettings();
 }
 

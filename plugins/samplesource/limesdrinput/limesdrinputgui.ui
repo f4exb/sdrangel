@@ -265,7 +265,6 @@
          <pointsize>12</pointsize>
         </font>
        </property>
-       <zorder>samplerateUnit</zorder>
       </widget>
      </item>
      <item row="0" column="4">
@@ -452,22 +451,34 @@
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="lpf">
+      <widget class="ValueDial" name="lpf" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="toolTip">
-        <string>Analog lowpass filter bandwidth (kHz)</string>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <string>Analog lowpass filers bandwidth (kHz)</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lpfText">
+      <widget class="QLabel" name="lpfUnits">
        <property name="text">
-        <string>00000k</string>
+        <string>k</string>
        </property>
       </widget>
      </item>
@@ -490,7 +501,7 @@
         <string>Enable or disable the digital FIR lowpass filters</string>
        </property>
        <property name="text">
-        <string>LPFIR</string>
+        <string>FIR</string>
        </property>
       </widget>
      </item>
@@ -515,14 +526,14 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Digital FIR lowpass filers bandwidth (Hz)</string>
+        <string>Digital FIR lowpass filers bandwidth (kHz)</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="lpFIRUnits">
        <property name="text">
-        <string>Hz</string>
+        <string>k</string>
        </property>
       </widget>
      </item>

@@ -113,8 +113,6 @@ public:
     void getLORange(float& minF, float& maxF, float& stepF) const;
     void getSRRange(float& minF, float& maxF, float& stepF) const;
     void getLPRange(float& minF, float& maxF, float& stepF) const;
-    int getLPIndex(float lpfBW) const;
-    float getLPValue(int index) const;
     uint32_t getHWLog2Decim() const;
 
 private:
@@ -125,6 +123,7 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
+    bool m_firstConfig;
 
     lms_stream_t m_streamId;
 
