@@ -454,6 +454,11 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
 
+        // send to self first
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+
+        // send to source buddies
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
@@ -465,6 +470,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             (*itSource)->getDeviceInputMessageQueue()->push(report);
         }
 
+        // send to sink buddies
         const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
         std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
 
@@ -485,6 +491,11 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
 
+        // send to self first
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+
+        // send to source buddies
         for (; it != sourceBuddies.end(); ++it)
         {
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
@@ -505,7 +516,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
-            << " sample rate after soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s";
+            << " sample rate after decimation: " << m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim)) << "S/s";
 
     return true;
 }

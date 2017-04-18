@@ -25,7 +25,7 @@ LimeSDRInputSettings::LimeSDRInputSettings()
 void LimeSDRInputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
-    m_devSampleRate = 3072000;
+    m_devSampleRate = 6000000;
     m_log2HardDecim = 2;
     m_dcBlock = false;
     m_iqCorrection = false;
