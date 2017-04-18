@@ -460,7 +460,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
 
         // send to self first
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
@@ -497,7 +497,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
-        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
 
         // send to self first
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
@@ -517,14 +517,14 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     }
     else if (forwardChangeOwnDSP)
     {
-        int sampleRate = m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim));
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-            << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
-            << " sample rate after decimation: " << m_settings.m_devSampleRate/(1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim)) << "S/s";
+            << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
+            << " sample rate with soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s";
 
     return true;
 }
