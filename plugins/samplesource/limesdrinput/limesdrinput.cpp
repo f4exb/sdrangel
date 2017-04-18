@@ -342,7 +342,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (m_limeSDRInputThread && !threadStopped)
+            if (m_limeSDRInputThread && m_running && !threadStopped)
             {
                 m_limeSDRInputThread->stopWork();
                 threadStopped = true;
@@ -374,7 +374,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (m_limeSDRInputThread && !threadStopped)
+            if (m_limeSDRInputThread && m_running && !threadStopped)
             {
                 m_limeSDRInputThread->stopWork();
                 threadStopped = true;
@@ -407,7 +407,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (m_limeSDRInputThread && !threadStopped)
+            if (m_limeSDRInputThread && m_running && !threadStopped)
             {
                 m_limeSDRInputThread->stopWork();
                 threadStopped = true;
@@ -436,7 +436,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (m_limeSDRInputThread && !threadStopped)
+            if (m_limeSDRInputThread && m_running && !threadStopped)
             {
                 m_limeSDRInputThread->stopWork();
                 threadStopped = true;
@@ -481,7 +481,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (m_limeSDRInputThread && !threadStopped)
+            if (m_limeSDRInputThread && m_running && !threadStopped)
             {
                 m_limeSDRInputThread->stopWork();
                 threadStopped = true;
