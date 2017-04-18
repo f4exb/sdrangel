@@ -156,7 +156,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("BladerfGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("LimeSDRInputGUI::handleMessagesToGUI: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
             m_fileSink->handleMessage(*notif); // forward to file sink
 

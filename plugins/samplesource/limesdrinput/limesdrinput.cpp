@@ -51,6 +51,16 @@ LimeSDRInput::~LimeSDRInput()
 
 bool LimeSDRInput::openDevice()
 {
+    if (!m_sampleFifo.setSize(96000 * 4))
+    {
+        qCritical("LimeSDRInput::openDevice: could not allocate SampleFifo");
+        return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::openDevice: allocated SampleFifo");
+    }
+
     // look for Rx buddies and get reference to common parameters
     // if there is a channel left take the first available
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
