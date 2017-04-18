@@ -478,7 +478,7 @@
      <item>
       <widget class="QLabel" name="lpfUnits">
        <property name="text">
-        <string>k</string>
+        <string>kHz</string>
        </property>
       </widget>
      </item>
@@ -533,7 +533,7 @@
      <item>
       <widget class="QLabel" name="lpFIRUnits">
        <property name="text">
-        <string>k</string>
+        <string>kHz</string>
        </property>
       </widget>
      </item>

@@ -330,7 +330,7 @@ void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
     sendSettings();
 }
 
-void LimeSDRInputGUI::on_lpf_changed(int value)
+void LimeSDRInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
     sendSettings();
@@ -351,5 +351,6 @@ void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
 void LimeSDRInputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
+    ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
     sendSettings();
 }
