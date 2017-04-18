@@ -239,7 +239,7 @@ const QString& LimeSDRInput::getDeviceDescription() const
 int LimeSDRInput::getSampleRate() const
 {
     int rate = m_settings.m_devSampleRate;
-    return (rate / (1<<(m_settings.m_log2HardDecim + m_settings.m_log2SoftDecim)));
+    return (rate / (1<<m_settings.m_log2SoftDecim));
 }
 
 quint64 LimeSDRInput::getCenterFrequency() const

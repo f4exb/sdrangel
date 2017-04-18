@@ -34,7 +34,7 @@ void LimeSDRInputSettings::resetToDefaults()
     m_lpfBW = 4.5e6f;
     m_lpfFIREnable = false;
     m_lpfFIRBW = 2.5e6f;
-    m_gain = 0;
+    m_gain = 30;
 }
 
 QByteArray LimeSDRInputSettings::serialize() const
