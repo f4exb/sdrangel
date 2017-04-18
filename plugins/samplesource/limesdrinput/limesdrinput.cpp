@@ -178,14 +178,22 @@ bool LimeSDRInput::start()
         qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %lu", m_deviceShared.m_channel);
         return false;
     }
+    else
+    {
+        qDebug("LimeSDRInput::start: stream set up on Rx channel %lu", m_deviceShared.m_channel);
+    }
 
     // start / stop streaming is done in the thread.
 
     if ((m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo)) == 0)
     {
-        qFatal("LimeSDRInput::start: out of memory");
+        qFatal("LimeSDRInput::start: cannot create thread");
         stop();
         return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::start: thread created");
     }
 
     m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
