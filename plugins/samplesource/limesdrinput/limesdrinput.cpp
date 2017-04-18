@@ -311,6 +311,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
+    bool doCalibration = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -340,6 +341,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
+                doCalibration = true;
                 qDebug() << "LimeSDRInput::applySettings: Gain set to " << m_settings.m_gain;
             }
         }
@@ -369,6 +371,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             {
                 m_deviceShared.m_deviceParams->m_log2OvSRRx = m_settings.m_log2HardDecim;
                 m_deviceShared.m_deviceParams->m_sampleRate = m_settings.m_devSampleRate;
+                doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: set sample rate set to %d with oversampling of %d",
                         m_settings.m_devSampleRate,
                         1<<m_settings.m_log2HardDecim);
@@ -391,6 +394,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
+                doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
             }
         }
@@ -416,6 +420,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
+                doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: %sd and set LPF FIR to %f Hz",
                         m_settings.m_lpfFIREnable ? "enable" : "disable",
                         m_settings.m_lpfFIRBW);
@@ -451,8 +456,25 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
+                doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: frequency set to %lu", m_settings.m_centerFrequency);
             }
+        }
+    }
+
+    if (doCalibration)
+    {
+        if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
+                LMS_CH_RX,
+                m_deviceShared.m_channel,
+                m_settings.m_lpfBW,
+                0) < 0)
+        {
+            qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %lu", m_deviceShared.m_channel);
+        }
+        else
+        {
+            qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %lu", m_deviceShared.m_channel);
         }
     }
 
