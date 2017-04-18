@@ -211,7 +211,6 @@ bool LimeSDRInput::start()
 
     m_limeSDRInputThread->startWork();
 
-    applySettings(m_settings, true);
     m_running = true;
 
     return true;
@@ -322,6 +321,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool doCalibration = false;
+    bool threadStopped = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -342,6 +342,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
+            if (m_limeSDRInputThread && !threadStopped)
+            {
+                m_limeSDRInputThread->stopWork();
+                threadStopped = true;
+            }
+
             if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
@@ -368,6 +374,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
+            if (m_limeSDRInputThread && !threadStopped)
+            {
+                m_limeSDRInputThread->stopWork();
+                threadStopped = true;
+            }
+
             if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_settings.m_devSampleRate,
@@ -395,6 +407,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
+            if (m_limeSDRInputThread && !threadStopped)
+            {
+                m_limeSDRInputThread->stopWork();
+                threadStopped = true;
+            }
+
             if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
@@ -418,6 +436,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
+            if (m_limeSDRInputThread && !threadStopped)
+            {
+                m_limeSDRInputThread->stopWork();
+                threadStopped = true;
+            }
+
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
@@ -457,6 +481,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
+            if (m_limeSDRInputThread && !threadStopped)
+            {
+                m_limeSDRInputThread->stopWork();
+                threadStopped = true;
+            }
+
             if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
@@ -486,6 +516,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %lu", m_deviceShared.m_channel);
         }
+    }
+
+    if (threadStopped)
+    {
+        m_limeSDRInputThread->startWork();
+        threadStopped = false;
     }
 
     if (forwardChangeAllDSP)

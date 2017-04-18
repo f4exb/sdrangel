@@ -25,15 +25,15 @@ LimeSDRInputSettings::LimeSDRInputSettings()
 void LimeSDRInputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
-    m_devSampleRate = 6000000;
-    m_log2HardDecim = 2;
+    m_devSampleRate = 5000000;
+    m_log2HardDecim = 3;
     m_dcBlock = false;
     m_iqCorrection = false;
     m_log2SoftDecim = 0;
     m_fcPos = FC_POS_CENTER;
-    m_lpfBW = 1.5e6f;
+    m_lpfBW = 4.5e6f;
     m_lpfFIREnable = false;
-    m_lpfFIRBW = 1.5e6f;
+    m_lpfFIRBW = 2.5e6f;
     m_gain = 0;
 }
 
