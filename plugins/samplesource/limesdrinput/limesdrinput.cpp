@@ -65,6 +65,8 @@ bool LimeSDRInput::openDevice()
     // if there is a channel left take the first available
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
     {
+        qDebug("LimeSDRInput::openDevice: look in Rx buddies");
+
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         m_deviceShared = *((DeviceLimeSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
         DeviceLimeSDRParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
@@ -74,11 +76,21 @@ bool LimeSDRInput::openDevice()
             qCritical("LimeSDRInput::openDevice: cannot get device parameters from Rx buddy");
             return false; // the device params should have been created by the buddy
         }
+        else
+        {
+            qDebug("LimeSDRInput::openDevice: getting device parameters from Rx buddy");
+        }
 
         if (m_deviceAPI->getSourceBuddies().size() == deviceParams->m_nbRxChannels)
         {
+            qCritical("LimeSDRInput::openDevice: no more Rx channels available in device");
             return false; // no more Rx channels available in device
         }
+        else
+        {
+            qDebug("LimeSDRInput::openDevice: at least one more Rx channel is available in device");
+        }
+
         // look for unused channel number
         char *busyChannels = new char[deviceParams->m_nbRxChannels];
         memset(busyChannels, 0, deviceParams->m_nbRxChannels);
@@ -106,6 +118,8 @@ bool LimeSDRInput::openDevice()
     // take the first Rx channel
     else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
     {
+        qDebug("LimeSDRInput::openDevice: look in Tx buddies");
+
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         m_deviceShared = *((DeviceLimeSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
 
@@ -113,6 +127,10 @@ bool LimeSDRInput::openDevice()
         {
             qCritical("LimeSDRInput::openDevice: cannot get device parameters from Tx buddy");
             return false; // the device params should have been created by the buddy
+        }
+        else
+        {
+            qDebug("LimeSDRInput::openDevice: getting device parameters from Tx buddy");
         }
 
         m_deviceShared.m_channel = 0; // take first channel
@@ -122,6 +140,8 @@ bool LimeSDRInput::openDevice()
     // take the first Rx channel
     else
     {
+        qDebug("LimeSDRInput::openDevice: open device here");
+
         m_deviceShared.m_deviceParams = new DeviceLimeSDRParams();
         char serial[256];
         strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
@@ -137,6 +157,10 @@ bool LimeSDRInput::openDevice()
     {
         qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %lu", m_deviceShared.m_channel);
         return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::openDevice: Rx channel %lu enabled", m_deviceShared.m_channel);
     }
 
     return true;
@@ -305,7 +329,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
     else if (MsgSetReferenceConfig::match(message))
     {
         MsgSetReferenceConfig& conf = (MsgSetReferenceConfig&) message;
-        qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceLimeSDR";
+        qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceConfig";
         m_settings = conf.getSettings();
         return true;
     }
@@ -526,6 +550,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     if (forwardChangeAllDSP)
     {
+        qDebug("LimeSDRInput::applySettings: forward change to all buddies");
+
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
@@ -543,7 +569,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*itSource)->getDeviceInputMessageQueue()->push(report);
+            (*itSource)->getDeviceOutputMessageQueue()->push(report);
         }
 
         // send to sink buddies
@@ -558,11 +584,13 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*itSink)->getDeviceInputMessageQueue()->push(report);
+            (*itSink)->getDeviceOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeRxDSP)
     {
+        qDebug("LimeSDRInput::applySettings: forward change to Rx buddies");
+
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
@@ -580,11 +608,13 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*it)->getDeviceInputMessageQueue()->push(report);
+            (*it)->getDeviceOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeOwnDSP)
     {
+        qDebug("LimeSDRInput::applySettings: forward change to self only");
+
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);

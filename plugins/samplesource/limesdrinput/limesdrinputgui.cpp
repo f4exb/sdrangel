@@ -166,7 +166,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
         {
             LimeSDRInput::MsgReportLimeSDRToGUI *report = (LimeSDRInput::MsgReportLimeSDRToGUI *) message;
 
-            m_settings.m_centerFrequency = report->getCenterFrequency() / 1000;
+            m_settings.m_centerFrequency = report->getCenterFrequency();
             m_settings.m_devSampleRate = report->getSampleRate();
             m_settings.m_log2HardDecim = report->getLog2HardDecim();
 
@@ -174,8 +174,8 @@ void LimeSDRInputGUI::handleMessagesToGUI()
             displaySettings();
             blockApplySettings(false);
 
-            LimeSDRInput::MsgSetReferenceConfig* message = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
-            m_sampleSource->getInputMessageQueue()->push(message);
+            LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
+            m_sampleSource->getInputMessageQueue()->push(conf);
 
             delete message;
         }
