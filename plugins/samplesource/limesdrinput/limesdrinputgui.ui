@@ -725,9 +725,12 @@
          <pointsize>8</pointsize>
         </font>
        </property>
+       <property name="toolTip">
+        <string>FIFO status</string>
+       </property>
        <property name="styleSheet">
-        <string notr="true">border: 2px solid rgb(79, 79, 79);
-text-align: center;</string>
+        <string notr="true">QProgressBar{border: 2px solid rgb(79, 79, 79); text-align: center;}
+QToolTip{background-color: white; color: black;}</string>
        </property>
        <property name="value">
         <number>0</number>
