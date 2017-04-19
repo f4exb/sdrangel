@@ -76,5 +76,6 @@
         <file>picture.png</file>
         <file>camera.png</file>
         <file>filter_bandpass.png</file>
+        <file>stream.png</file>
     </qresource>
 </RCC>

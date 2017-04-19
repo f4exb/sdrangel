@@ -28,8 +28,10 @@
 #include "limesdr/devicelimesdrparam.h"
 
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
 
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
@@ -331,6 +333,53 @@ bool LimeSDRInput::handleMessage(const Message& message)
         MsgSetReferenceConfig& conf = (MsgSetReferenceConfig&) message;
         qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceConfig";
         m_settings = conf.getSettings();
+        return true;
+    }
+    else if (MsgGetStreamInfo::match(message))
+    {
+        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
+        lms_stream_status_t status;
+
+        if (LMS_GetStreamStatus(&m_streamId, &status) < 0)
+        {
+            qDebug("LimeSDRInput::handleMessage: canot get stream status");
+            MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                    false, // Success
+                    status.active,
+                    status.fifoFilledCount,
+                    status.fifoSize,
+                    status.underrun,
+                    status.overrun,
+                    status.droppedPackets,
+                    status.sampleRate,
+                    status.linkRate,
+                    status.timestamp);
+            m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+        }
+        else
+        {
+            qDebug() << "LimeSDRInput::handleMessage: got stream status at %llu" << status.timestamp
+                    << " fifoFilledCount: " << status.fifoFilledCount
+                    << " fifoSize: " << status.fifoSize
+                    << " underrun: " << status.underrun
+                    << " overrun: " << status.overrun
+                    << " droppedPackets: " << status.droppedPackets
+                    << " sampleRate: " << status.sampleRate
+                    << " linkRate: " << status.linkRate;
+            MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                    true, // Success
+                    status.active,
+                    status.fifoFilledCount,
+                    status.fifoSize,
+                    status.underrun,
+                    status.overrun,
+                    status.droppedPackets,
+                    status.sampleRate,
+                    status.linkRate,
+                    status.timestamp);
+            m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+        }
+
         return true;
     }
     else

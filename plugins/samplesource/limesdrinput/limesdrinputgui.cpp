@@ -35,7 +35,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_sampleSource(0),
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
-    m_doApplySettings(true)
+    m_doApplySettings(true),
+    m_statusCounter(0)
 {
     m_limeSDRInput = new LimeSDRInput(m_deviceAPI);
     m_sampleSource = (DeviceSampleSource *) m_limeSDRInput;
@@ -179,6 +180,29 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 
             delete message;
         }
+        else if (LimeSDRInput::MsgReportStreamInfo::match(*message))
+        {
+            LimeSDRInput::MsgReportStreamInfo *report = (LimeSDRInput::MsgReportStreamInfo *) message;
+
+            if (report->getSuccess())
+            {
+                if (report->getActive())
+                {
+                    ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+                }
+                else
+                {
+                    ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+                }
+
+                ui->streamSampleRateText->setText(tr("%1kS").arg(QString::number(report->getSampleRate() / 1000.0f, 'f', 0)));
+                ui->streamLinkRateText->setText(tr("%1kB").arg(QString::number(report->getLinkRate() / 1000.0f, 'f', 0)));
+            }
+            else
+            {
+                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : red; }");
+            }
+        }
     }
 }
 
@@ -252,6 +276,17 @@ void LimeSDRInputGUI::updateStatus()
         }
 
         m_lastEngineState = state;
+    }
+
+    if (m_statusCounter < 1)
+    {
+        m_statusCounter++;
+    }
+    else
+    {
+        LimeSDRInput::MsgGetStreamInfo* message = LimeSDRInput::MsgGetStreamInfo::create();
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_statusCounter = 0;
     }
 }
 

@@ -71,6 +71,21 @@ public:
         { }
     };
 
+    class MsgGetStreamInfo : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgGetStreamInfo* create()
+        {
+            return new MsgGetStreamInfo();
+        }
+
+    private:
+        MsgGetStreamInfo() :
+            Message()
+        { }
+    };
+
     class MsgReportLimeSDRToGUI : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -94,6 +109,85 @@ public:
             m_centerFrequency(centerFrequency),
             m_sampleRate(sampleRate),
             m_log2HardDecim(log2HardDecim)
+        { }
+    };
+
+    class MsgReportStreamInfo : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool     getSuccess() const { return m_success; }
+        bool     getActive() const { return m_active; }
+        uint32_t getFifoFilledCount() const { return m_fifoFilledCount; }
+        uint32_t getFifoSize() const { return m_fifoSize; }
+        uint32_t getUnderrun() const { return m_underrun; }
+        uint32_t getOverrun() const { return m_overrun; }
+        uint32_t getDroppedPackets() const { return m_droppedPackets; }
+        float    getSampleRate() const { return m_sampleRate; }
+        float    getLinkRate() const { return m_linkRate; }
+        uint64_t getTimestamp() const { return m_timestamp; }
+
+        static MsgReportStreamInfo* create(
+                bool     active,
+                uint32_t fifoFilledCount,
+                uint32_t fifoSize,
+                uint32_t underrun,
+                uint32_t overrun,
+                uint32_t droppedPackets,
+                float    sampleRate,
+                float    linkRate,
+                uint64_t timestamp
+                )
+        {
+            return new MsgReportStreamInfo(
+                    active,
+                    fifoFilledCount,
+                    fifoSize,
+                    underrun,
+                    overrun,
+                    droppedPackets,
+                    sampleRate,
+                    linkRate,
+                    timestamp
+                    );
+        }
+
+    private:
+        bool     m_success;
+        // everything from lms_stream_status_t
+        bool     m_active; //!< Indicates whether the stream is currently active
+        uint32_t m_fifoFilledCount; //!< Number of samples in FIFO buffer
+        uint32_t m_fifoSize; //!< Size of FIFO buffer
+        uint32_t m_underrun; //!< FIFO underrun count
+        uint32_t m_overrun; //!< FIFO overrun count
+        uint32_t m_droppedPackets; //!< Number of dropped packets by HW
+        float    m_sampleRate; //!< Sampling rate of the stream
+        float    m_linkRate; //!< Combined data rate of all stream of the same direction (TX or RX)
+        uint64_t m_timestamp; //!< Current HW timestamp
+
+        MsgReportStreamInfo(
+                bool     success,
+                bool     active,
+                uint32_t fifoFilledCount,
+                uint32_t fifoSize,
+                uint32_t underrun,
+                uint32_t overrun,
+                uint32_t droppedPackets,
+                float    sampleRate,
+                float    linkRate,
+                uint64_t timestamp
+                ) :
+            Message(),
+            m_success(success),
+            m_active(active),
+            m_fifoFilledCount(fifoFilledCount),
+            m_fifoSize(fifoSize),
+            m_underrun(underrun),
+            m_overrun(overrun),
+            m_droppedPackets(droppedPackets),
+            m_sampleRate(sampleRate),
+            m_linkRate(linkRate),
+            m_timestamp(timestamp)
         { }
     };
 
