@@ -397,7 +397,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool threadStopped = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
-    if ((m_deviceShared.m_deviceParams->getDevice() != 0) && m_limeSDRInputThread && m_running &&
+    if ((m_deviceShared.m_deviceParams->getDevice() != 0) && m_limeSDRInputThread &&
         ((m_settings.m_gain != settings.m_gain) ||
         (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_log2HardDecim != settings.m_log2HardDecim) ||

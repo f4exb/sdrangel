@@ -36,6 +36,8 @@ LimeSDRInputThread::~LimeSDRInputThread()
 
 void LimeSDRInputThread::startWork()
 {
+    if (m_running) return; // return if running already
+
     m_startWaitMutex.lock();
     start();
     while(!m_running)
@@ -45,6 +47,8 @@ void LimeSDRInputThread::startWork()
 
 void LimeSDRInputThread::stopWork()
 {
+    if (!m_running) return; // return if not running
+
     m_running = false;
     wait();
 }
