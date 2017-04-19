@@ -128,6 +128,7 @@ public:
         uint64_t getTimestamp() const { return m_timestamp; }
 
         static MsgReportStreamInfo* create(
+                bool     success,
                 bool     active,
                 uint32_t fifoFilledCount,
                 uint32_t fifoSize,
@@ -140,6 +141,7 @@ public:
                 )
         {
             return new MsgReportStreamInfo(
+                    success,
                     active,
                     fifoFilledCount,
                     fifoSize,

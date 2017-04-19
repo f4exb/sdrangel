@@ -186,21 +186,34 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 
             if (report->getSuccess())
             {
-                if (report->getActive())
-                {
-                    ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
-                }
-                else
-                {
-                    ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+                ui->streamLinkRateText->setText(tr("%1 MB/s").arg(QString::number(report->getLinkRate() / 1000000.0f, 'f', 3)));
+
+                if (report->getUnderrun() > 0) {
+                    ui->underrunLabel->setStyleSheet("QLabel { background-color : red; }");
+                } else {
+                    ui->underrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
                 }
 
-                ui->streamSampleRateText->setText(tr("%1kS").arg(QString::number(report->getSampleRate() / 1000.0f, 'f', 0)));
-                ui->streamLinkRateText->setText(tr("%1kB").arg(QString::number(report->getLinkRate() / 1000.0f, 'f', 0)));
+                if (report->getOverrun() > 0) {
+                    ui->overrunLabel->setStyleSheet("QLabel { background-color : red; }");
+                } else {
+                    ui->overrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+                }
+
+                if (report->getDroppedPackets() > 0) {
+                    ui->droppedLabel->setStyleSheet("QLabel { background-color : red; }");
+                } else {
+                    ui->droppedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+                }
+
+                ui->fifoBar->setMaximum(report->getFifoSize());
+                ui->fifoBar->setValue(report->getFifoFilledCount());
+                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 bytes").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
             }
             else
             {
-                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : red; }");
+                ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
         }
     }

@@ -628,18 +628,68 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="streamSampleRateText">
+      <widget class="QLabel" name="underrunLabel">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>12</width>
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Red if underruns</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
        <property name="text">
-        <string>00000kS</string>
+        <string>U</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="overrunLabel">
+       <property name="minimumSize">
+        <size>
+         <width>12</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Red if overruns</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
+       <property name="text">
+        <string>O</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="droppedLabel">
+       <property name="minimumSize">
+        <size>
+         <width>12</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Red if dropped packets</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
+       <property name="text">
+        <string>D</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -647,15 +697,40 @@
       <widget class="QLabel" name="streamLinkRateText">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Stream link rate (MB/s)</string>
+       </property>
        <property name="text">
-        <string>00000kB</string>
+        <string>000.000 MB/s</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="fifoBar">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 2px solid rgb(79, 79, 79);
+text-align: center;</string>
+       </property>
+       <property name="value">
+        <number>0</number>
        </property>
       </widget>
      </item>

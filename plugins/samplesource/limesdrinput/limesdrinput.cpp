@@ -358,7 +358,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
         }
         else
         {
-            qDebug() << "LimeSDRInput::handleMessage: got stream status at %llu" << status.timestamp
+            qDebug() << "LimeSDRInput::handleMessage: got stream status at: " << status.timestamp
                     << " fifoFilledCount: " << status.fifoFilledCount
                     << " fifoSize: " << status.fifoSize
                     << " underrun: " << status.underrun
