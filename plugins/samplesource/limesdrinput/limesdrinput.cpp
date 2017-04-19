@@ -163,6 +163,24 @@ bool LimeSDRInput::openDevice()
         qDebug("LimeSDRInput::openDevice: Rx channel %lu enabled", m_deviceShared.m_channel);
     }
 
+    // set up the stream
+
+    m_streamId.channel =  m_deviceShared.m_channel; //channel number
+    m_streamId.fifoSize = 1024 * 128;               //fifo size in samples
+    m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
+    m_streamId.isTx = false;                        //RX channel
+    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
+
+    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
+    {
+        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %lu", m_deviceShared.m_channel);
+        return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::start: stream set up on Rx channel %lu", m_deviceShared.m_channel);
+    }
+
     return true;
 }
 
@@ -171,6 +189,9 @@ void LimeSDRInput::closeDevice()
     if (m_deviceShared.m_deviceParams->getDevice() == 0) { // was never open
         return;
     }
+
+    // destroy the stream
+    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
 
     // release the channel
 
@@ -198,24 +219,6 @@ bool LimeSDRInput::start()
     }
 
     if (m_running) stop();
-
-    // set up the stream
-
-    m_streamId.channel =  m_deviceShared.m_channel; //channel number
-    m_streamId.fifoSize = 1024 * 128;               //fifo size in samples
-    m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
-    m_streamId.isTx = false;                        //RX channel
-    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
-
-    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
-    {
-        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %lu", m_deviceShared.m_channel);
-        return false;
-    }
-    else
-    {
-        qDebug("LimeSDRInput::start: stream set up on Rx channel %lu", m_deviceShared.m_channel);
-    }
 
     // start / stop streaming is done in the thread.
 
@@ -248,9 +251,6 @@ void LimeSDRInput::stop()
         delete m_limeSDRInputThread;
         m_limeSDRInputThread = 0;
     }
-
-    // destroy the stream
-    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
 
     m_running = false;
 }
