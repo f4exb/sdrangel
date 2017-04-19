@@ -27,10 +27,12 @@ struct DeviceLimeSDRShared
 {
     DeviceLimeSDRParams *m_deviceParams; //!< unique hardware device parameters
     std::size_t         m_channel;       //!< logical device channel number (-1 if none)
+    void                *m_thread;       //!< anonymous pointer that will hold the thread address if started else 0
 
     DeviceLimeSDRShared() :
         m_deviceParams(0),
-        m_channel(-1)
+        m_channel(-1),
+        m_thread(0)
     {}
 
     ~DeviceLimeSDRShared()

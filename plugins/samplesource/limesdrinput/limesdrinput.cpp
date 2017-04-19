@@ -240,6 +240,7 @@ bool LimeSDRInput::start()
 
     m_limeSDRInputThread->startWork();
 
+    m_deviceShared.m_thread = (void *) m_limeSDRInputThread;
     m_running = true;
 
     return true;
@@ -254,6 +255,7 @@ void LimeSDRInput::stop()
         m_limeSDRInputThread = 0;
     }
 
+    m_deviceShared.m_thread = 0;
     m_running = false;
 }
 
@@ -393,22 +395,104 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
+    bool suspendOwnThread    = false;
+    bool suspendRxThread     = false;
+    bool suspendAllThread    = false;
     bool doCalibration = false;
-    bool threadStopped = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
-    if ((m_deviceShared.m_deviceParams->getDevice() != 0) && m_limeSDRInputThread &&
-        ((m_settings.m_gain != settings.m_gain) ||
-        (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2HardDecim != settings.m_log2HardDecim) ||
+    // determine if buddies threads or own thread need to be suspended
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    {
+        suspendAllThread = true;
+    }
+
+    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) ||
+        (m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
+        suspendRxThread = true;
+    }
+
+    if ((m_settings.m_gain != settings.m_gain) ||
         (m_settings.m_lpfBW != settings.m_lpfBW) ||
         (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
-        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-        (m_settings.m_centerFrequency != settings.m_centerFrequency) || force))
+        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
-        m_limeSDRInputThread->stopWork();
-        threadStopped = true;
+        suspendOwnThread = true;
     }
+
+    // suspend buddies threads or own thread
+
+    if (suspendAllThread)
+    {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->stopWork();
+            }
+        }
+
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->stopWork();
+            }
+        }
+
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->stopWork();
+        }
+    }
+    else if (suspendRxThread)
+    {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->stopWork();
+            }
+        }
+
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->stopWork();
+        }
+    }
+    else if (suspendOwnThread)
+    {
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->stopWork();
+        }
+    }
+
+//    if ((m_deviceShared.m_deviceParams->getDevice() != 0) && m_limeSDRInputThread &&
+//        ((m_settings.m_gain != settings.m_gain) ||
+//        (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+//        (m_settings.m_log2HardDecim != settings.m_log2HardDecim) ||
+//        (m_settings.m_lpfBW != settings.m_lpfBW) ||
+//        (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
+//        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
+//        (m_settings.m_centerFrequency != settings.m_centerFrequency) || force))
+//    {
+//        m_limeSDRInputThread->stopWork();
+//        threadStopped = true;
+//    }
+
+    // apply settings
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
@@ -574,11 +658,70 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-    if (threadStopped)
+//    if (threadStopped)
+//    {
+//        m_limeSDRInputThread->startWork();
+//        threadStopped = false;
+//    }
+
+    // resume buddies threads or own thread
+
+    if (suspendAllThread)
     {
-        m_limeSDRInputThread->startWork();
-        threadStopped = false;
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->startWork();
+            }
+        }
+
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->startWork();
+            }
+        }
+
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->startWork();
+        }
     }
+    else if (suspendRxThread)
+    {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            if (buddySharedPtr->m_thread)
+            {
+                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->startWork();
+            }
+        }
+
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->startWork();
+        }
+    }
+    else if (suspendOwnThread)
+    {
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->startWork();
+        }
+    }
+
+    // forward changes to buddies or oneself
 
     if (forwardChangeAllDSP)
     {
