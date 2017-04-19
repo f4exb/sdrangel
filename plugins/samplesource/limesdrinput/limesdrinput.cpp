@@ -339,12 +339,12 @@ bool LimeSDRInput::handleMessage(const Message& message)
     }
     else if (MsgGetStreamInfo::match(message))
     {
-        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
+//        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
         lms_stream_status_t status;
 
         if (LMS_GetStreamStatus(&m_streamId, &status) < 0)
         {
-            qDebug("LimeSDRInput::handleMessage: canot get stream status");
+//            qDebug("LimeSDRInput::handleMessage: canot get stream status");
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
                     false, // Success
                     status.active,
@@ -360,14 +360,14 @@ bool LimeSDRInput::handleMessage(const Message& message)
         }
         else
         {
-            qDebug() << "LimeSDRInput::handleMessage: got stream status at: " << status.timestamp
-                    << " fifoFilledCount: " << status.fifoFilledCount
-                    << " fifoSize: " << status.fifoSize
-                    << " underrun: " << status.underrun
-                    << " overrun: " << status.overrun
-                    << " droppedPackets: " << status.droppedPackets
-                    << " sampleRate: " << status.sampleRate
-                    << " linkRate: " << status.linkRate;
+//            qDebug() << "LimeSDRInput::handleMessage: got stream status at: " << status.timestamp
+//                    << " fifoFilledCount: " << status.fifoFilledCount
+//                    << " fifoSize: " << status.fifoSize
+//                    << " underrun: " << status.underrun
+//                    << " overrun: " << status.overrun
+//                    << " droppedPackets: " << status.droppedPackets
+//                    << " sampleRate: " << status.sampleRate
+//                    << " linkRate: " << status.linkRate;
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
                     true, // Success
                     status.active,

@@ -150,10 +150,9 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 
     while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
     {
-        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
+            qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
@@ -165,6 +164,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
         }
         else if (LimeSDRInput::MsgReportLimeSDRToGUI::match(*message))
         {
+            qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
             LimeSDRInput::MsgReportLimeSDRToGUI *report = (LimeSDRInput::MsgReportLimeSDRToGUI *) message;
 
             m_settings.m_centerFrequency = report->getCenterFrequency();
