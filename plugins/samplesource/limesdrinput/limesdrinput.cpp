@@ -669,6 +669,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             {
                 doCalibration = true;
                 forwardChangeOwnDSP = true;
+                m_deviceShared.m_ncoFrequency = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0; // for buddies
                 qDebug("LimeSDRInput::applySettings: %sd and set NCO to %d Hz",
                         m_settings.m_ncoEnable ? "enable" : "disable",
                         m_settings.m_ncoFrequency);
@@ -814,7 +815,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         // send to source buddies
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + buddyNCOFreq);
             (*itSource)->getDeviceInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
@@ -843,7 +846,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         qDebug("LimeSDRInput::applySettings: forward change to Rx buddies");
 
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
@@ -852,15 +855,17 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
-        for (; it != sourceBuddies.end(); ++it)
+        for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-            (*it)->getDeviceInputMessageQueue()->push(notif);
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
+            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + buddyNCOFreq);
+            (*itSource)->getDeviceInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*it)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeOwnDSP)
