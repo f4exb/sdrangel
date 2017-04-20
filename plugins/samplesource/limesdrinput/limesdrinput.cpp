@@ -43,6 +43,7 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_running(false),
     m_firstConfig(true)
 {
+    m_streamId.handle = 0;
     openDevice();
 }
 
@@ -223,6 +224,7 @@ void LimeSDRInput::closeDevice()
 
     // destroy the stream
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
+    m_streamId.handle = 0;
 
     // release the channel
 
@@ -383,7 +385,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
 //        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
         lms_stream_status_t status;
 
-        if (LMS_GetStreamStatus(&m_streamId, &status) < 0)
+        if (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) < 0))
         {
 //            qDebug("LimeSDRInput::handleMessage: canot get stream status");
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
