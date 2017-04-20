@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>BladeRF</string>
+   <string>LimeSDR Input</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -190,43 +190,79 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <layout class="QHBoxLayout" name="ncoSampleRateLayout">
+     <property name="leftMargin">
+      <number>6</number>
      </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_corr">
-     <item row="0" column="7">
-      <widget class="QLabel" name="samplerateUnit">
-       <property name="text">
-        <string>S/s</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="ButtonSwitch" name="iqImbalance">
+     <property name="topMargin">
+      <number>6</number>
+     </property>
+     <property name="rightMargin">
+      <number>6</number>
+     </property>
+     <property name="bottomMargin">
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="ButtonSwitch" name="ncoEnable">
        <property name="toolTip">
-        <string>Automatic IQ imbalance correction</string>
+        <string>Enable the TSP NCO</string>
        </property>
        <property name="text">
-        <string>IQ</string>
+        <string>NCO</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="ButtonSwitch" name="dcOffset">
+     <item>
+      <widget class="QPushButton" name="ncoReset">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Automatic DC offset removal</string>
+        <string>Reset the NCO to zero frequency</string>
        </property>
        <property name="text">
-        <string>DC</string>
+        <string>R</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <spacer name="horizontalSpacer_2">
+     <item>
+      <widget class="QWidget" name="ncoFrequency" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Center frequency with NCO engaged (kHz)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ncoUnits">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -238,14 +274,20 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="corrLabel">
+     <item>
+      <widget class="QLabel" name="samplerateLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Auto</string>
+        <string>SR</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
+     <item>
       <widget class="ValueDial" name="sampleRate" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -267,16 +309,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="samplerateLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+     <item>
+      <widget class="QLabel" name="samplerateUnit">
        <property name="text">
-        <string>SR</string>
+        <string>S/s</string>
        </property>
       </widget>
      </item>
@@ -290,13 +326,47 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="sampleRateLayout">
+    <layout class="QHBoxLayout" name="corrDecimLayout">
      <property name="topMargin">
       <number>2</number>
      </property>
      <property name="bottomMargin">
       <number>2</number>
      </property>
+     <item>
+      <widget class="QLabel" name="corrLabel">
+       <property name="text">
+        <string>Auto</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>Automatic DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>Automatic IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="hwDecimLabel">
        <property name="text">
@@ -423,13 +493,6 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line_vga1">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="lpfLayout">
      <property name="leftMargin">
       <number>6</number>
@@ -540,6 +603,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_vga1">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="gainLayout">
      <item>
       <widget class="QLabel" name="gainLabel">
@@ -590,6 +660,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="statusLayout">

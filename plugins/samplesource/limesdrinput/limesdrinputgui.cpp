@@ -61,6 +61,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
     ui->lpFIR->setValueRange(5, 1U, 56000U);
 
+    ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDRInput->getChannelIndex()));
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -244,6 +246,12 @@ void LimeSDRInputGUI::displaySettings()
 
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+
+    int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
+    ui->ncoFrequency->setValueRange(7,
+            (m_settings.m_centerFrequency - ncoHalfRange)/1000,
+            (m_settings.m_centerFrequency + ncoHalfRange)/1000); // frequency dial is in kHz
+    ui->ncoFrequency->setValue(m_settings.m_centerFrequency + m_settings.m_ncoFrequency);
 }
 
 void LimeSDRInputGUI::sendSettings()
@@ -345,6 +353,25 @@ void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
     sendSettings();
 }
 
+void LimeSDRInputGUI::on_ncoFrequency_changed(quint64 value)
+{
+    m_settings.m_ncoFrequency = (int64_t) value - (int64_t) m_settings.m_centerFrequency;
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
+{
+    m_settings.m_ncoEnable = checked;
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_ncoReset_clicked(bool checked)
+{
+    m_settings.m_ncoFrequency = 0;
+    ui->ncoFrequency->setValue(m_settings.m_centerFrequency);
+    sendSettings();
+}
+
 void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
@@ -393,7 +420,10 @@ void LimeSDRInputGUI::on_lpFIREnable_toggled(bool checked)
 void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
-    sendSettings();
+
+    if (m_settings.m_lpfFIREnable) { // do not send the update if the FIR is disabled
+        sendSettings();
+    }
 }
 
 void LimeSDRInputGUI::on_gain_valueChanged(int value)

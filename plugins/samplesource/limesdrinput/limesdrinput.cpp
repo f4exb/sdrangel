@@ -26,6 +26,7 @@
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
+#include "limesdr/devicelimesdr.h"
 
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
@@ -457,7 +458,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     if ((m_settings.m_gain != settings.m_gain) ||
         (m_settings.m_lpfBW != settings.m_lpfBW) ||
         (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
-        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
+        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
+        (m_settings.m_ncoEnable != settings.m_ncoEnable) ||
+        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) || force)
     {
         suspendOwnThread = true;
     }
@@ -648,6 +651,34 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
+    if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
+        (m_settings.m_ncoEnable != settings.m_ncoEnable) || force)
+    {
+        m_settings.m_ncoFrequency = settings.m_ncoFrequency;
+        m_settings.m_ncoEnable = settings.m_ncoEnable;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_ncoEnable,
+                    m_settings.m_ncoFrequency))
+            {
+                doCalibration = true;
+                qDebug("LimeSDRInput::applySettings: %sd and set NCO to %f Hz",
+                        m_settings.m_ncoEnable ? "enable" : "disable",
+                        m_settings.m_ncoFrequency);
+            }
+            else
+            {
+                qCritical("LimeSDRInput::applySettings: could %s and set LPF FIR to %f Hz",
+                        m_settings.m_ncoEnable ? "enable" : "disable",
+                        m_settings.m_ncoFrequency);
+            }
+        }
+    }
+
     if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
     {
         m_settings.m_log2SoftDecim = settings.m_log2SoftDecim;
@@ -681,6 +712,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
         }
     }
+
 
     if (doCalibration)
     {

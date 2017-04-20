@@ -45,6 +45,8 @@ struct LimeSDRInputSettings
     bool     m_lpfFIREnable; //!< Enable LMS digital lowpass FIR filters
     float    m_lpfFIRBW;     //!< LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t m_gain;         //!< Optimally distributed gain (dB)
+    bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
+    int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
 
     LimeSDRInputSettings();
     void resetToDefaults();

@@ -74,6 +74,9 @@ private slots:
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
+    void on_ncoFrequency_changed(quint64 value);
+    void on_ncoEnable_toggled(bool checked);
+    void on_ncoReset_clicked(bool checked);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
     void on_sampleRate_changed(quint64 value);
