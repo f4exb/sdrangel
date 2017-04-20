@@ -250,6 +250,11 @@ void LimeSDRInputGUI::displaySettings()
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
 
+    setNCODisplay();
+}
+
+void LimeSDRInputGUI::setNCODisplay()
+{
     int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
     ui->ncoFrequency->setValueRange(7,
             (m_settings.m_centerFrequency - ncoHalfRange)/1000,
@@ -353,6 +358,7 @@ void LimeSDRInputGUI::on_record_toggled(bool checked)
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    setNCODisplay();
     sendSettings();
 }
 
@@ -391,6 +397,7 @@ void LimeSDRInputGUI::on_iqImbalance_toggled(bool checked)
 void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    setNCODisplay();
     sendSettings();}
 
 void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
@@ -398,6 +405,7 @@ void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
     if ((index <0) || (index > 5))
         return;
     m_settings.m_log2HardDecim = index;
+    setNCODisplay();
     sendSettings();
 }
 

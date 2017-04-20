@@ -64,6 +64,7 @@ private:
     int m_statusCounter;
 
     void displaySettings();
+    void setNCODisplay();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void blockApplySettings(bool block);

@@ -147,7 +147,7 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="toolTip">
-        <string>Tuner center frequency in kHz</string>
+        <string>Main center frequency in kHz</string>
        </property>
       </widget>
      </item>
@@ -326,6 +326,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>TSP hardware decimation factor</string>
+       </property>
        <property name="currentIndex">
         <number>2</number>
        </property>
@@ -380,7 +383,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Decimation factor</string>
+        <string>Software decimation factor</string>
        </property>
        <property name="currentIndex">
         <number>0</number>
@@ -463,6 +466,9 @@
          <pointsize>12</pointsize>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Device to host sample rate</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -517,7 +523,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Analog lowpass filers bandwidth (kHz)</string>
+        <string>Analog lowpass filer bandwidth (kHz)</string>
        </property>
       </widget>
      </item>
@@ -544,7 +550,7 @@
      <item>
       <widget class="ButtonSwitch" name="lpFIREnable">
        <property name="toolTip">
-        <string>Enable or disable the digital FIR lowpass filters</string>
+        <string>Enable or disable TSP digital FIR lowpass filters</string>
        </property>
        <property name="text">
         <string>FIR</string>
@@ -672,6 +678,9 @@
          <height>24</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Green when stream is reporting data</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -779,7 +788,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>FIFO status</string>
+        <string>FIFO fill status</string>
        </property>
        <property name="styleSheet">
         <string notr="true">QProgressBar{border: 2px solid rgb(79, 79, 79); text-align: center;}

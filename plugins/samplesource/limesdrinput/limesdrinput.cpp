@@ -666,6 +666,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_ncoFrequency))
             {
                 doCalibration = true;
+                forwardChangeOwnDSP = true;
                 qDebug("LimeSDRInput::applySettings: %sd and set NCO to %d Hz",
                         m_settings.m_ncoEnable ? "enable" : "disable",
                         m_settings.m_ncoFrequency);
@@ -802,9 +803,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
+        int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
@@ -841,9 +843,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
+        int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
@@ -863,7 +866,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         qDebug("LimeSDRInput::applySettings: forward change to self only");
 
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
