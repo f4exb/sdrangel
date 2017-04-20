@@ -666,13 +666,13 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_ncoFrequency))
             {
                 doCalibration = true;
-                qDebug("LimeSDRInput::applySettings: %sd and set NCO to %f Hz",
+                qDebug("LimeSDRInput::applySettings: %sd and set NCO to %d Hz",
                         m_settings.m_ncoEnable ? "enable" : "disable",
                         m_settings.m_ncoFrequency);
             }
             else
             {
-                qCritical("LimeSDRInput::applySettings: could %s and set LPF FIR to %f Hz",
+                qCritical("LimeSDRInput::applySettings: could not %s and set NCO to %d Hz",
                         m_settings.m_ncoEnable ? "enable" : "disable",
                         m_settings.m_ncoFrequency);
             }

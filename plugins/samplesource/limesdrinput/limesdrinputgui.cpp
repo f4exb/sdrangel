@@ -65,6 +65,9 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDRInput->getChannelIndex()));
 
+    ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
+    ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
+
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
@@ -251,7 +254,7 @@ void LimeSDRInputGUI::displaySettings()
     ui->ncoFrequency->setValueRange(7,
             (m_settings.m_centerFrequency - ncoHalfRange)/1000,
             (m_settings.m_centerFrequency + ncoHalfRange)/1000); // frequency dial is in kHz
-    ui->ncoFrequency->setValue(m_settings.m_centerFrequency + m_settings.m_ncoFrequency);
+    ui->ncoFrequency->setValue((m_settings.m_centerFrequency + m_settings.m_ncoFrequency)/1000);
 }
 
 void LimeSDRInputGUI::sendSettings()
@@ -355,7 +358,8 @@ void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 
 void LimeSDRInputGUI::on_ncoFrequency_changed(quint64 value)
 {
-    m_settings.m_ncoFrequency = (int64_t) value - (int64_t) m_settings.m_centerFrequency;
+    m_settings.m_ncoFrequency = (int64_t) value - (int64_t) m_settings.m_centerFrequency/1000;
+    m_settings.m_ncoFrequency *= 1000;
     sendSettings();
 }
 
@@ -368,7 +372,7 @@ void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
 void LimeSDRInputGUI::on_ncoReset_clicked(bool checked)
 {
     m_settings.m_ncoFrequency = 0;
-    ui->ncoFrequency->setValue(m_settings.m_centerFrequency);
+    ui->ncoFrequency->setValue(m_settings.m_centerFrequency/1000);
     sendSettings();
 }
 

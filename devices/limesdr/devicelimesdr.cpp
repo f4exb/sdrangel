@@ -18,7 +18,7 @@
 #include <cstring>
 #include "devicelimesdr.h"
 
-bool DeviceLimeSDR::enableNCO(lms_device_t *device, bool dir_tx, std::size_t chan, float frequency, bool enable)
+bool DeviceLimeSDR::enableNCO(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable)
 {
     if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
     {
@@ -55,8 +55,8 @@ bool DeviceLimeSDR::enableNCO(lms_device_t *device, bool dir_tx, std::size_t cha
 bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, float frequency)
 {
     bool positive;
-    float freqs[LMS_NCO_VAL_COUNT];
-    float phos[LMS_NCO_VAL_COUNT];
+    float_type freqs[LMS_NCO_VAL_COUNT];
+    float_type phos[LMS_NCO_VAL_COUNT];
 
     if (LMS_GetNCOFrequency(device, dir_tx, chan, freqs, phos) < 0)
     {
@@ -75,7 +75,7 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
 
     freqs[0] = frequency;
 
-    if (LMS_SetNCOFrequency(device, dir_tx, chan, freqs, phos) < 0)
+    if (LMS_SetNCOFrequency(device, dir_tx, chan, freqs, 0.0f) < 0)
     {
         fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set frequency to %f\n", frequency);
         return false;
@@ -95,8 +95,8 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
     if (enable)
     {
         bool positive;
-        float freqs[LMS_NCO_VAL_COUNT];
-        float phos[LMS_NCO_VAL_COUNT];
+        float_type freqs[LMS_NCO_VAL_COUNT];
+        float_type phos[LMS_NCO_VAL_COUNT];
 
         if (LMS_GetNCOFrequency(device, dir_tx, chan, freqs, phos) < 0)
         {
@@ -115,7 +115,7 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
 
         freqs[0] = frequency;
 
-        if (LMS_SetNCOFrequency(device, dir_tx, chan, freqs, phos) < 0)
+        if (LMS_SetNCOFrequency(device, dir_tx, chan, freqs, 0.0f) < 0)
         {
             fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set frequency to %f\n", frequency);
             return false;
