@@ -378,6 +378,8 @@ bool LimeSDRInput::handleMessage(const Message& message)
         MsgSetReferenceConfig& conf = (MsgSetReferenceConfig&) message;
         qDebug() << "LimeSDRInput::handleMessage: MsgSetReferenceConfig";
         m_settings = conf.getSettings();
+        m_deviceShared.m_ncoFrequency = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0; // for buddies
+        m_deviceShared.m_centerFrequency = m_settings.m_centerFrequency; // for buddies
         return true;
     }
     else if (MsgGetStreamInfo::match(message))
@@ -385,11 +387,10 @@ bool LimeSDRInput::handleMessage(const Message& message)
 //        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
         lms_stream_status_t status;
 
-        if (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) < 0))
+        if (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) == 0))
         {
-//            qDebug("LimeSDRInput::handleMessage: canot get stream status");
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
-                    false, // Success
+                    true, // Success
                     status.active,
                     status.fifoFilledCount,
                     status.fifoSize,
@@ -403,25 +404,17 @@ bool LimeSDRInput::handleMessage(const Message& message)
         }
         else
         {
-//            qDebug() << "LimeSDRInput::handleMessage: got stream status at: " << status.timestamp
-//                    << " fifoFilledCount: " << status.fifoFilledCount
-//                    << " fifoSize: " << status.fifoSize
-//                    << " underrun: " << status.underrun
-//                    << " overrun: " << status.overrun
-//                    << " droppedPackets: " << status.droppedPackets
-//                    << " sampleRate: " << status.sampleRate
-//                    << " linkRate: " << status.linkRate;
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
-                    true, // Success
-                    status.active,
-                    status.fifoFilledCount,
-                    status.fifoSize,
-                    status.underrun,
-                    status.overrun,
-                    status.droppedPackets,
-                    status.sampleRate,
-                    status.linkRate,
-                    status.timestamp);
+                    false, // Success
+                    false, // status.active,
+                    0,     // status.fifoFilledCount,
+                    16384, // status.fifoSize,
+                    0,     // status.underrun,
+                    0,     // status.overrun,
+                    0,     // status.droppedPackets,
+                    0,     // status.sampleRate,
+                    0,     // status.linkRate,
+                    0);    // status.timestamp);
             m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
         }
 
@@ -705,13 +698,14 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
-                    m_settings.m_centerFrequency ) < 0)
+                    m_settings.m_centerFrequency) < 0)
             {
                 qCritical("LimeSDRInput::applySettings: could not set frequency to %lu", m_settings.m_centerFrequency);
             }
             else
             {
                 doCalibration = true;
+                m_deviceShared.m_centerFrequency = m_settings.m_centerFrequency; // for buddies
                 qDebug("LimeSDRInput::applySettings: frequency set to %lu", m_settings.m_centerFrequency);
             }
         }
@@ -832,7 +826,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
+            uint64_t buddyCenterFreq = buddySharedPtr->m_centerFrequency;
+            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
+            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, buddyCenterFreq + buddyNCOFreq); // do not change center frequency
             (*itSink)->getDeviceInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
