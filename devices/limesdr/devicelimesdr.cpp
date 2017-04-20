@@ -18,78 +18,6 @@
 #include <cstring>
 #include "devicelimesdr.h"
 
-bool DeviceLimeSDR::enableNCO(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable)
-{
-    if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
-    {
-        fprintf(stderr, "DeviceLimeSDR::enableNCO: cannot address channel #%lu\n", chan);
-        return false;
-    }
-
-    if (dir_tx)
-    {
-        if (LMS_WriteParam(device, LMS7param(CMIX_BYP_RXTSP), enable ? 0 : 1) < 0)
-        {
-            fprintf(stderr, "DeviceLimeSDR::enableNCO: cannot %s Rx NCO\n", enable ? "enable" : "disable");
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else
-    {
-        if (LMS_WriteParam(device, LMS7param(CMIX_BYP_TXTSP), enable ? 0 : 1) < 0)
-        {
-            fprintf(stderr, "DeviceLimeSDR::enableNCO: cannot %s Tx NCO\n", enable ? "enable" : "disable");
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-}
-
-bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, float frequency)
-{
-    bool positive;
-    float_type freqs[LMS_NCO_VAL_COUNT];
-    float_type phos[LMS_NCO_VAL_COUNT];
-
-    if (LMS_GetNCOFrequency(device, dir_tx, chan, freqs, phos) < 0)
-    {
-        fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot get NCO frequencies and phases\n");
-    }
-
-    if (frequency < 0)
-    {
-        positive = false;
-        frequency = -frequency;
-    }
-    else
-    {
-        positive = true;
-    }
-
-    freqs[0] = frequency;
-
-    if (LMS_SetNCOFrequency(device, dir_tx, chan, freqs, 0.0f) < 0)
-    {
-        fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set frequency to %f\n", frequency);
-        return false;
-    }
-
-    if (LMS_SetNCOIndex(device, dir_tx, chan, 0, positive) < 0) // TODO: verify positive = downconvert ?
-    {
-        fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set conversion direction %s\n", positive ? "down" : "up");
-        return false;
-    }
-
-    return true;
-}
-
 bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable, float frequency)
 {
     if (enable)
@@ -121,9 +49,9 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
             return false;
         }
 
-        if (LMS_SetNCOIndex(device, dir_tx, chan, 0, positive) < 0) // TODO: verify positive = downconvert ?
+        if (LMS_SetNCOIndex(device, dir_tx, chan, 0, !positive) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set conversion direction %s\n", positive ? "down" : "up");
+            fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set conversion direction %sfreq\n", positive ? "+" : "-");
             return false;
         }
 
@@ -131,35 +59,10 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
     }
     else
     {
-        if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
+        if (LMS_SetNCOIndex(device, dir_tx, chan, LMS_NCO_VAL_COUNT, true) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot address channel #%lu\n", chan);
+            fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot disable NCO\n");
             return false;
-        }
-
-        if (dir_tx)
-        {
-            if (LMS_WriteParam(device, LMS7param(CMIX_BYP_RXTSP), 1) < 0)
-            {
-                fprintf(stderr, "DeviceLimeSDR::enableNCO: cannot disable Rx NCO on channel %lu\n", chan);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (LMS_WriteParam(device, LMS7param(CMIX_BYP_TXTSP), 1) < 0)
-            {
-                fprintf(stderr, "DeviceLimeSDR::enableNCO: cannot disable Tx NCO on channel %lu\n", chan);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
         }
     }
 }

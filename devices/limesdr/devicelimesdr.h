@@ -22,11 +22,7 @@
 class DeviceLimeSDR
 {
 public:
-    /** enable or disable NCO. If re-enabled frequency should have been set once */
-    static bool enableNCO(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable);
-    /** set NCO frequency with positive or negative frequency (deals with up/down convert). Enables NCO */
-    static bool setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, float frequency);
-    /** combination of the two like LMS_SetGFIRLPF */
+    /** set NCO frequency with positive or negative frequency (deals with up/down convert). Enables or disables NCO */
     static bool setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable, float frequency);
 };
 
