@@ -40,7 +40,6 @@ struct LimeSDRInputSettings
     bool     m_dcBlock;
     bool     m_iqCorrection;
     uint32_t m_log2SoftDecim;
-    fcPos_t  m_fcPos;
     float    m_lpfBW;        //!< LMS amalog lowpass filter bandwidth (Hz)
     bool     m_lpfFIREnable; //!< Enable LMS digital lowpass FIR filters
     float    m_lpfFIRBW;     //!< LMS digital lowpass FIR filters bandwidth (Hz)

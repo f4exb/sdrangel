@@ -30,7 +30,6 @@ void LimeSDRInputSettings::resetToDefaults()
     m_dcBlock = false;
     m_iqCorrection = false;
     m_log2SoftDecim = 0;
-    m_fcPos = FC_POS_CENTER;
     m_lpfBW = 4.5e6f;
     m_lpfFIREnable = false;
     m_lpfFIRBW = 2.5e6f;
@@ -48,11 +47,12 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeBool(3, m_dcBlock);
     s.writeBool(4, m_iqCorrection);
     s.writeU32(5, m_log2SoftDecim);
-    s.writeS32(6, (int) m_fcPos);
     s.writeFloat(7, m_lpfBW);
     s.writeBool(8, m_lpfFIREnable);
     s.writeFloat(9, m_lpfFIRBW);
     s.writeU32(10, m_gain);
+    s.writeBool(11, m_ncoEnable);
+    s.writeS32(12, m_ncoFrequency);
 
     return s.final();
 }
@@ -71,17 +71,17 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
     {
         int intval;
 
-        d.readS32(1, &m_devSampleRate, 3072000);
+        d.readS32(1, &m_devSampleRate, 5000000);
         d.readU32(2, &m_log2HardDecim, 2);
         d.readBool(3, &m_dcBlock, false);
         d.readBool(4, &m_iqCorrection, false);
         d.readU32(5, &m_log2SoftDecim, 0);
-        d.readS32(6, &intval, 0);
-        m_fcPos = (fcPos_t) intval;
         d.readFloat(7, &m_lpfBW, 1.5e6);
         d.readBool(8, &m_lpfFIREnable, false);
         d.readFloat(9, &m_lpfFIRBW, 1.5e6);
         d.readU32(10, &m_gain, 0);
+        d.readBool(11, &m_ncoEnable, false);
+        d.readS32(12, &m_ncoFrequency, 0);
 
         return true;
     }
