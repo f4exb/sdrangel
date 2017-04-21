@@ -24,6 +24,12 @@ class DeviceLimeSDR
 public:
     /** set NCO frequency with positive or negative frequency (deals with up/down convert). Enables or disables NCO */
     static bool setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable, float frequency);
+    /** set LNA gain Range: [1-30] (dB) **/
+    static bool SetRFELNA_dB(lms_device_t *device, std::size_t chan, int value);
+    /** set TIA gain Range: [1-3] **/
+    static bool SetRFETIA_dB(lms_device_t *device, std::size_t chan, int value);
+    /** set PGA gain Range: [0-32] (dB) **/
+    static bool SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float value);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDR_H_ */
