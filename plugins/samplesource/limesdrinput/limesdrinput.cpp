@@ -279,7 +279,6 @@ bool LimeSDRInput::start()
     }
 
     m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
-    m_limeSDRInputThread->setFcPos((int) m_settings.m_fcPos);
 
     m_limeSDRInputThread->startWork();
 

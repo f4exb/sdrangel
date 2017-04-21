@@ -16,6 +16,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cmath>
 #include "devicelimesdr.h"
 
 bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable, float frequency)
