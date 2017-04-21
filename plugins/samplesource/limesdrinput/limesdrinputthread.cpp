@@ -16,6 +16,7 @@
 
 #include <errno.h>
 
+#include "limesdrinputsettings.h"
 #include "limesdrinputthread.h"
 
 LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo, QObject* parent) :
@@ -25,7 +26,7 @@ LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sam
     m_convertBuffer(LIMESDR_BLOCKSIZE),
     m_sampleFifo(sampleFifo),
     m_log2Decim(0),
-    m_fcPos(0)
+    m_fcPos(LimeSDRInputSettings::FC_POS_CENTER)
 {
 }
 
