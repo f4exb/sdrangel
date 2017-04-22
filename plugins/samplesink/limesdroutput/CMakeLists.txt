@@ -50,6 +50,6 @@ target_link_libraries(outputlimesdr
 	limesdrdevice
 )
 
-qt5_use_modules(inputlimesdr Core Widgets)
+qt5_use_modules(outputlimesdr Core Widgets)
 
-install(TARGETS inputlimesdr DESTINATION lib/plugins/samplesource)
+install(TARGETS outputlimesdr DESTINATION lib/plugins/samplesink)

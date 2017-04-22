@@ -85,7 +85,7 @@ void LimeSDROutputThread::run()
     {
         callback(m_buf, 2 * res);
 
-        if ((res = LMS_SendStream(m_stream, (void *) m_buf, LIMESDR_BLOCKSIZE, &metadata, 1000)) < 0)
+        if ((res = LMS_SendStream(m_stream, (void *) m_buf, LIMESDROUTPUT_BLOCKSIZE, &metadata, 1000)) < 0)
         {
             qCritical("LimeSDROutputThread::run write error: %s", strerror(errno));
             break;
@@ -102,7 +102,7 @@ void LimeSDROutputThread::run()
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => decim=16)
-void LimeSDROutputThread::callback(const qint16* buf, qint32 len)
+void LimeSDROutputThread::callback(qint16* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
     m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));

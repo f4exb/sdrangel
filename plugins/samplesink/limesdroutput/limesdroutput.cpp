@@ -23,7 +23,7 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/dspcommands.h"
-#include "limesdrinputthread.h"
+#include "limesdroutputthread.h"
 #include "limesdr/devicelimesdrparam.h"
 #include "limesdr/devicelimesdr.h"
 #include "limesdroutput.h"
@@ -229,7 +229,7 @@ void LimeSDROutput::closeDevice()
 
     for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        const DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -702,9 +702,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->startWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->startWork();
             }
         }
 

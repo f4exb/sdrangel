@@ -57,7 +57,7 @@ private:
     Interpolators<qint16, SDR_SAMP_SZ, 12> m_interpolators;
 
     void run();
-    void callback(const qint16* buf, qint32 len);
+    void callback(qint16* buf, qint32 len);
 };
 
 
