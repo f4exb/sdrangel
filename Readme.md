@@ -32,6 +32,7 @@ From version 3 transmission or signal generation is supported for BladeRF and Ha
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
 
 <h1>Supported hardware</h1>
@@ -97,11 +98,13 @@ Then add the following defines on `cmake` command line:
 
 `-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
 
-For binary installation you will need to install the following packages as a prerequisite:
+For binary installation you need at least a mimimal install of LimeSuite as a prerequisite. The following packages are provided with SDRangel binary distribution:
 
   - `liblimesuite17.02-1_17.02.1-1_amd64.deb`
   - `liblimesuite-dev_17.02.1-1_amd64.deb`
   - `limesuite-udev_17.02.1-1_amd64.deb` (if you want the udev rules)
+
+Alternatively you can install a full LimeSuite from PPA following [these instructions](http://wiki.myriadrf.org/Lime_Suite).
 
 <h2>RTL-SDR</h2>
 
