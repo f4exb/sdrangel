@@ -25,10 +25,11 @@
 
 #include "dsp/samplesourcefifo.h"
 #include "dsp/interpolators.h"
+#include "limesdr/devicelimesdrshared.h"
 
 #define LIMESDROUTPUT_BLOCKSIZE (1<<14) //complex samples per buffer ~10k (16k)
 
-class LimeSDROutputThread : public QThread
+class LimeSDROutputThread : public QThread, public DeviceLimeSDRShared::ThreadInterface
 {
     Q_OBJECT
 
@@ -36,8 +37,8 @@ public:
     LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
     ~LimeSDROutputThread();
 
-    void startWork();
-    void stopWork();
+    virtual void startWork();
+    virtual void stopWork();
     void setLog2Interpolation(unsigned int log2_ioterp);
     void setFcPos(int fcPos);
 

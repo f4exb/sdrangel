@@ -96,7 +96,7 @@ bool LimeSDROutput::openDevice()
             busyChannels[buddyShared->m_channel] = 1;
 
             if (buddyShared->m_thread) { // suspend Tx buddy's thread for proper stream allocation later
-                ((LimeSDROutputThread *) buddyShared->m_thread)->stopWork();
+                buddyShared->m_thread->stopWork();
             }
         }
 
@@ -187,7 +187,7 @@ bool LimeSDROutput::openDevice()
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
-            ((LimeSDROutputThread *) buddyShared->m_thread)->startWork();
+            buddyShared->m_thread->startWork();
         }
     }
 
@@ -208,7 +208,7 @@ void LimeSDROutput::closeDevice()
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
-            ((LimeSDROutputThread *) buddyShared->m_thread)->stopWork();
+            buddyShared->m_thread->stopWork();
         }
     }
 
@@ -233,7 +233,7 @@ void LimeSDROutput::closeDevice()
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
-            ((LimeSDROutputThread *) buddyShared->m_thread)->startWork();
+            buddyShared->m_thread->startWork();
         }
     }
 
@@ -272,7 +272,7 @@ bool LimeSDROutput::start()
 
     m_limeSDROutputThread->startWork();
 
-    m_deviceShared.m_thread = (void *) m_limeSDROutputThread;
+    m_deviceShared.m_thread = m_limeSDROutputThread;
     m_running = true;
 
     return true;
@@ -459,9 +459,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDRInputThread *) buddySharedPtr->m_thread)->stopWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->stopWork();
             }
         }
 
@@ -471,9 +471,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDROutputThread *) buddySharedPtr->m_thread)->stopWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->stopWork();
             }
         }
 
@@ -489,9 +489,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDROutputThread *) buddySharedPtr->m_thread)->stopWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->stopWork();
             }
         }
 
@@ -714,9 +714,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDROutputThread *) buddySharedPtr->m_thread)->startWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->startWork();
             }
         }
 
@@ -732,9 +732,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-            if (buddySharedPtr->m_thread)
-            {
-                ((LimeSDROutputThread *) buddySharedPtr->m_thread)->startWork();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->startWork();
             }
         }
 
