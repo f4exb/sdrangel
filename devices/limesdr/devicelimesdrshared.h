@@ -25,9 +25,16 @@
  */
 struct DeviceLimeSDRShared
 {
+    class ThreadInterface
+    {
+    public:
+        virtual void startWork() = 0;
+        virtual void stopWork() = 0;
+    };
+
     DeviceLimeSDRParams *m_deviceParams; //!< unique hardware device parameters
     std::size_t         m_channel;       //!< logical device channel number (-1 if none)
-    void                *m_thread;       //!< anonymous pointer that will hold the thread address if started else 0
+    ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
     int                 m_ncoFrequency;
     uint64_t            m_centerFrequency;
 

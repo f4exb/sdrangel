@@ -25,10 +25,11 @@
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
+#include "limesdr/devicelimesdrshared.h"
 
 #define LIMESDR_BLOCKSIZE (1<<14) //complex samples per buffer ~10k (16k)
 
-class LimeSDRInputThread : public QThread
+class LimeSDRInputThread : public QThread, public DeviceLimeSDRShared::ThreadInterface
 {
     Q_OBJECT
 
@@ -36,8 +37,8 @@ public:
     LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo, QObject* parent = 0);
     ~LimeSDRInputThread();
 
-    void startWork();
-    void stopWork();
+    virtual void startWork();
+    virtual void stopWork();
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
 
