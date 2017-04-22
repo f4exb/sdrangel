@@ -65,6 +65,11 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
             fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot disable NCO\n");
             return false;
         }
+        else
+        {
+            fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: NCO disabled\n");
+            return true;
+        }
     }
 }
 
