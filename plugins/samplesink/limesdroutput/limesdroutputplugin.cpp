@@ -52,7 +52,7 @@ const PluginDescriptor& LimeSDROutputPlugin::getPluginDescriptor() const
 
 void LimeSDROutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-    pluginAPI->registerSampleSource(m_deviceTypeID, this);
+    pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
 PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
