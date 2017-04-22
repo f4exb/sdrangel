@@ -516,19 +516,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-//    if ((m_deviceShared.m_deviceParams->getDevice() != 0) && m_limeSDRInputThread &&
-//        ((m_settings.m_gain != settings.m_gain) ||
-//        (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-//        (m_settings.m_log2HardDecim != settings.m_log2HardDecim) ||
-//        (m_settings.m_lpfBW != settings.m_lpfBW) ||
-//        (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
-//        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-//        (m_settings.m_centerFrequency != settings.m_centerFrequency) || force))
-//    {
-//        m_limeSDRInputThread->stopWork();
-//        threadStopped = true;
-//    }
-
     // apply settings
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -727,12 +714,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-//    if (threadStopped)
-//    {
-//        m_limeSDRInputThread->startWork();
-//        threadStopped = false;
-//    }
-
     // resume buddies threads or own thread
 
     if (suspendAllThread)
@@ -796,8 +777,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         qDebug("LimeSDRInput::applySettings: forward change to all buddies");
 
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
@@ -806,6 +785,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
@@ -841,8 +823,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         qDebug("LimeSDRInput::applySettings: forward change to Rx buddies");
 
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
@@ -851,6 +831,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
