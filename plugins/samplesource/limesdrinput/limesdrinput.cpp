@@ -26,6 +26,7 @@
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
+#include "limesdr/devicelimesdrshared.h"
 #include "limesdr/devicelimesdr.h"
 
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
@@ -666,6 +667,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_log2SoftDecim = settings.m_log2SoftDecim;
         forwardChangeOwnDSP = true;
+        m_deviceShared.m_log2Soft = m_settings.m_log2SoftDecim; // for buddies
 
         if (m_limeSDRInputThread != 0)
         {
@@ -777,11 +779,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         qDebug("LimeSDRInput::applySettings: forward change to all buddies");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
+        DSPSignalNotification *notif = new DSPSignalNotification(
+                m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim),
+                m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 
         // send to source buddies
@@ -792,7 +795,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
             int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + buddyNCOFreq);
+            uint32_t buddyLog2Decim = buddySharedPtr->m_log2Soft;
+            DSPSignalNotification *notif = new DSPSignalNotification(
+                    m_settings.m_devSampleRate/(1<<buddyLog2Decim),
+                    m_settings.m_centerFrequency + buddyNCOFreq);
             (*itSource)->getDeviceInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
@@ -810,12 +816,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
             uint64_t buddyCenterFreq = buddySharedPtr->m_centerFrequency;
             int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, buddyCenterFreq + buddyNCOFreq); // do not change center frequency
+            uint32_t buddyLog2Interp = buddySharedPtr->m_log2Soft;
+            DSPSignalNotification *notif = new DSPSignalNotification(
+                    m_settings.m_devSampleRate/(1<<buddyLog2Interp),
+                    buddyCenterFreq + buddyNCOFreq); // do not change center frequency
             (*itSink)->getDeviceInputMessageQueue()->push(notif);
-            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
-                    buddyCenterFreq,
-                    m_settings.m_devSampleRate,
-                    m_settings.m_log2HardDecim);
+            DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
             (*itSink)->getDeviceOutputMessageQueue()->push(report);
         }
     }

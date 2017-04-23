@@ -19,12 +19,34 @@
 
 #include <cstddef>
 #include "devicelimesdrparam.h"
+#include "util/message.h"
 
 /**
  * Structure shared by a buddy with other buddies
  */
-struct DeviceLimeSDRShared
+class DeviceLimeSDRShared
 {
+public:
+    class MsgCrossReportToGUI : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgCrossReportToGUI* create(int sampleRate)
+        {
+            return new MsgCrossReportToGUI(sampleRate);
+        }
+
+    private:
+        int m_sampleRate;
+
+        MsgCrossReportToGUI(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     class ThreadInterface
     {
     public:
@@ -37,13 +59,15 @@ struct DeviceLimeSDRShared
     ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
     int                 m_ncoFrequency;
     uint64_t            m_centerFrequency;
+    uint32_t            m_log2Soft;
 
     DeviceLimeSDRShared() :
         m_deviceParams(0),
         m_channel(-1),
         m_thread(0),
         m_ncoFrequency(0),
-        m_centerFrequency(0)
+        m_centerFrequency(0),
+        m_log2Soft(0)
     {}
 
     ~DeviceLimeSDRShared()

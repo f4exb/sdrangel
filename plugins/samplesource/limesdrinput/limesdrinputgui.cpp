@@ -185,6 +185,20 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 
             delete message;
         }
+        else if (DeviceLimeSDRShared::MsgCrossReportToGUI::match(*message))
+        {
+            DeviceLimeSDRShared::MsgCrossReportToGUI *report = (DeviceLimeSDRShared::MsgCrossReportToGUI *) message;
+            m_settings.m_devSampleRate = report->getSampleRate();
+
+            blockApplySettings(true);
+            displaySettings();
+            blockApplySettings(false);
+
+            LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
+            m_sampleSource->getInputMessageQueue()->push(conf);
+
+            delete message;
+        }
         else if (LimeSDRInput::MsgReportStreamInfo::match(*message))
         {
             LimeSDRInput::MsgReportStreamInfo *report = (LimeSDRInput::MsgReportStreamInfo *) message;
