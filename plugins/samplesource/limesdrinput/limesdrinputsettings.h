@@ -32,6 +32,16 @@ struct LimeSDRInputSettings
         FC_POS_CENTER
     } fcPos_t;
 
+    enum PathRFE
+    {
+        PATH_RFE_NONE = 0,
+        PATH_RFE_LNAH,
+        PATH_RFE_LNAL,
+        PATH_RFE_LNAW,
+        PATH_RFE_LB1,
+        PATH_RFE_LB2
+    };
+
     // global settings to be saved
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
@@ -46,6 +56,7 @@ struct LimeSDRInputSettings
     uint32_t m_gain;         //!< Optimally distributed gain (dB)
     bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
     int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
+    PathRFE  m_antennaPath;
 
     LimeSDRInputSettings();
     void resetToDefaults();

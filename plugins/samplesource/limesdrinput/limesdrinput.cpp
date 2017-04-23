@@ -453,6 +453,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool suspendRxThread     = false;
     bool suspendAllThread    = false;
     bool doCalibration = false;
+    bool setAntennaAuto = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
     // determine if buddies threads or own thread need to be suspended
@@ -468,12 +469,19 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         suspendRxThread = true;
     }
 
+    if ((m_settings.m_antennaPath != settings.m_antennaPath) &&
+        (m_settings.m_antennaPath == 0))
+    {
+        suspendRxThread = true;
+    }
+
     if ((m_settings.m_gain != settings.m_gain) ||
         (m_settings.m_lpfBW != settings.m_lpfBW) ||
         (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
         (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
         (m_settings.m_ncoEnable != settings.m_ncoEnable) ||
-        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) || force)
+        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
+        (m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
         suspendOwnThread = true;
     }
@@ -694,7 +702,30 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+    {
+        m_settings.m_antennaPath = settings.m_antennaPath;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::setAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
+                    m_deviceShared.m_channel,
+                    m_settings.m_antennaPath))
+            {
+                doCalibration = true;
+                setAntennaAuto = (m_settings.m_antennaPath == 0);
+                qDebug("LimeSDRInput::applySettings: set antenna path to %d",
+                        (int) m_settings.m_antennaPath);
+            }
+            else
+            {
+                qCritical("LimeSDRInput::applySettings: could not set antenna path to %d",
+                        (int) m_settings.m_antennaPath);
+            }
+        }
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || setAntennaAuto || force)
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         forwardChangeRxDSP = true;

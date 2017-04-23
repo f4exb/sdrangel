@@ -36,6 +36,7 @@ void LimeSDRInputSettings::resetToDefaults()
     m_gain = 30;
     m_ncoEnable = false;
     m_ncoFrequency = 0;
+    m_antennaPath = PATH_RFE_NONE;
 }
 
 QByteArray LimeSDRInputSettings::serialize() const

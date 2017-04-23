@@ -458,3 +458,9 @@ void LimeSDRInputGUI::on_gain_valueChanged(int value)
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
     sendSettings();
 }
+
+void LimeSDRInputGUI::on_antenna_currentIndexChanged(int index)
+{
+    m_settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) index;
+    sendSettings();
+}

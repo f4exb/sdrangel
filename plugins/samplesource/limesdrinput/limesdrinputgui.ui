@@ -647,6 +647,59 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="antennaLabel">
+       <property name="pixmap">
+        <pixmap resource="../../../sdrbase/resources/res.qrc">:/antenna.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="antenna">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Au</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Hi</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lo</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Wi</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>T1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>T2</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
