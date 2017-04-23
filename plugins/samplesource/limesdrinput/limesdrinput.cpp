@@ -813,7 +813,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, buddyCenterFreq + buddyNCOFreq); // do not change center frequency
             (*itSink)->getDeviceInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
-                    m_settings.m_centerFrequency,
+                    buddyCenterFreq,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
             (*itSink)->getDeviceOutputMessageQueue()->push(report);
