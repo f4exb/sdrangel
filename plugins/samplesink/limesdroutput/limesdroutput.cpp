@@ -44,13 +44,17 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_firstConfig(true)
 {
     m_streamId.handle = 0;
+    suspendBuddies();
     openDevice();
+    resumeBuddies();
 }
 
 LimeSDROutput::~LimeSDROutput()
 {
     if (m_running) stop();
+    suspendBuddies();
     closeDevice();
+    resumeBuddies();
 }
 
 bool LimeSDROutput::openDevice()
@@ -94,10 +98,6 @@ bool LimeSDROutput::openDevice()
             DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
             DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
             busyChannels[buddyShared->m_channel] = 1;
-
-            if (buddyShared->m_thread) { // suspend Tx buddy's thread for proper stream allocation later
-                buddyShared->m_thread->stopWork();
-            }
         }
 
         std::size_t ch = 0;
@@ -129,16 +129,6 @@ bool LimeSDROutput::openDevice()
         else
         {
             qDebug("LimeSDROutput::openDevice: getting device parameters from Rx buddy");
-        }
-
-        for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
-        {
-            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
-            DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
-
-            if (buddyShared->m_thread) { // suspend Rx buddy's thread for proper stream allocation later
-                buddyShared->m_thread->stopWork();
-            }
         }
 
         m_deviceShared.m_channel = 0; // take first channel
@@ -189,6 +179,38 @@ bool LimeSDROutput::openDevice()
         qDebug("LimeSDROutput::start: stream set up on Tx channel %lu", m_deviceShared.m_channel);
     }
 
+    return true;
+}
+
+void LimeSDROutput::suspendBuddies()
+{
+    // suspend Tx buddy's threads
+
+    for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared->m_thread) {
+            buddyShared->m_thread->stopWork();
+        }
+    }
+
+    // suspend Rx buddy's threads
+
+    for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+    {
+        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared->m_thread) {
+            buddyShared->m_thread->stopWork();
+        }
+    }
+}
+
+void LimeSDROutput::resumeBuddies()
+{
     // resume Tx buddy's threads
 
     for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
@@ -208,30 +230,16 @@ bool LimeSDROutput::openDevice()
         DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
-        if (buddyShared->m_thread) { // suspend Rx buddy's thread for proper stream allocation later
+        if (buddyShared->m_thread) {
             buddyShared->m_thread->startWork();
         }
     }
-
-    return true;
 }
 
 void LimeSDROutput::closeDevice()
 {
     if (m_deviceShared.m_deviceParams->getDevice() == 0) { // was never open
         return;
-    }
-
-    // suspend Tx buddy's threads
-
-    for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
-    {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
-
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->stopWork();
-        }
     }
 
     // destroy the stream
@@ -246,18 +254,6 @@ void LimeSDROutput::closeDevice()
     }
 
     m_deviceShared.m_channel = -1;
-
-    // resume Tx buddy's threads
-
-    for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
-    {
-        const DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
-
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->startWork();
-        }
-    }
 
     // No buddies so effectively close the device
 
