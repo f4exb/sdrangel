@@ -29,7 +29,7 @@ void LimeSDROutputSettings::resetToDefaults()
     m_devSampleRate = 5000000;
     m_log2HardInterp = 3;
     m_log2SoftInterp = 0;
-    m_lpfBW = 4.5e6f;
+    m_lpfBW = 5.5e6f;
     m_lpfFIREnable = false;
     m_lpfFIRBW = 2.5e6f;
     m_gain = 30;
