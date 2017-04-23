@@ -131,6 +131,16 @@ bool LimeSDROutput::openDevice()
             qDebug("LimeSDROutput::openDevice: getting device parameters from Rx buddy");
         }
 
+        for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+        {
+            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+            DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+
+            if (buddyShared->m_thread) { // suspend Rx buddy's thread for proper stream allocation later
+                buddyShared->m_thread->stopWork();
+            }
+        }
+
         m_deviceShared.m_channel = 0; // take first channel
     }
     // There are no buddies then create the first LimeSDR common parameters
@@ -187,6 +197,18 @@ bool LimeSDROutput::openDevice()
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
+            buddyShared->m_thread->startWork();
+        }
+    }
+
+    // resume Rx buddy's threads
+
+    for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+    {
+        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared->m_thread) { // suspend Rx buddy's thread for proper stream allocation later
             buddyShared->m_thread->startWork();
         }
     }
