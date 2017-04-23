@@ -375,14 +375,15 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
     deviceAPI->stopAcquisition();
     deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
 
+    deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
+    deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
+    deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
+    deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
+
 	QWidget *gui;
 	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
-	deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
-	deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
-	deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
-	deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
 	deviceAPI->setSampleSourcePluginGUI(pluginGUI);
 	deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
