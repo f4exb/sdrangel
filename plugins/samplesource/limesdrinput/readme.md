@@ -88,17 +88,19 @@ These buttons control the local DSP auto correction options:
   - **DC**: (6) auto remove DC component
   - **IQ**: (7) auto make I/Q balance
   
-<h3>8: LMS7002M hardware decimation</h3>
+<h3>8: LMS7002M hardware decimation factor</h3>
 
 The TSP block in the LMS7002M hardware has a decimation chain that acts on both Rx channels. It is composed of 5 halfband decimation stages and therefore can achieve decimation between 1 (no decimation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32.
+
+Thus the actual sample rate of the ADC is the stream sample rate (10) multiplied by this factor. 
 
 <h3>9: Software decimation factor</h3>
 
 The I/Q stream from the LimeSDR is doensampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
-<h3>10: Device sample rate</h3>
+<h3>10: Device stream sample rate</h3>
 
-This is the LMS7002M device ADC and DAC sample rate in S/s.
+This is the LMS7002M device to/from host stream sample rate in S/s.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
 
