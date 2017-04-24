@@ -94,7 +94,7 @@ private:
     CWKeyIambicState m_keyIambicState;
     CWTextState m_textState;
 
-    static const char m_asciiToMorse[128][7];
+    static const signed char m_asciiToMorse[128][7];
 
     void nextStateIambic();
     void nextStateText();

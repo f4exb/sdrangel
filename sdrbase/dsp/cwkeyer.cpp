@@ -24,7 +24,7 @@
  * 1:  dash
  * -1: end of sequence
  */
-const char CWKeyer::m_asciiToMorse[128][7] = {
+const signed char CWKeyer::m_asciiToMorse[128][7] = {
         {-1,0,0,0,0,0,0}, // 0
         {-1,0,0,0,0,0,0}, // 1
         {-1,0,0,0,0,0,0}, // 2
