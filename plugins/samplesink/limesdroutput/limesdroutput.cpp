@@ -164,8 +164,8 @@ bool LimeSDROutput::openDevice()
     // set up the stream
 
     m_streamId.channel =  m_deviceShared.m_channel; // channel number
-    m_streamId.fifoSize = 1024 * 128;               // fifo size in samples
-    m_streamId.throughputVsLatency = 1.0;           // optimize for max throughput
+    m_streamId.fifoSize = 5000000;                  // fifo size in samples
+    m_streamId.throughputVsLatency = 0.0;           // optimize for max throughput
     m_streamId.isTx = true;                         // TX channel
     m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
 
@@ -576,6 +576,23 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                         m_settings.m_devSampleRate,
                         1<<m_settings.m_log2HardInterp);
             }
+
+            if (m_limeSDROutputThread != 0)
+            {
+                m_limeSDROutputThread->setDeviceSampleRate(m_settings.m_devSampleRate);
+            }
+
+            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+            std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+            for (; itSink != sinkBuddies.end(); ++itSink)
+            {
+                DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
+
+                if (buddySharedPtr->m_thread) {
+                    buddySharedPtr->m_thread->setDeviceSampleRate(m_settings.m_devSampleRate);
+                }
+            }
         }
     }
 
@@ -703,11 +720,11 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                 m_settings.m_lpfBW,
                 0) < 0)
         {
-            qCritical("LimeSDROutput::applySettings: calibration failed on Rx channel %lu", m_deviceShared.m_channel);
+            qCritical("LimeSDROutput::applySettings: calibration failed on Tx channel %lu", m_deviceShared.m_channel);
         }
         else
         {
-            qDebug("LimeSDROutput::applySettings: calibration successful on Rx channel %lu", m_deviceShared.m_channel);
+            qDebug("LimeSDROutput::applySettings: calibration successful on Tx channel %lu", m_deviceShared.m_channel);
         }
     }
 

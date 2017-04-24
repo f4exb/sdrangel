@@ -79,8 +79,8 @@ private slots:
     void on_ncoEnable_toggled(bool checked);
     void on_ncoReset_clicked(bool checked);
     void on_sampleRate_changed(quint64 value);
-    void on_hwDecim_currentIndexChanged(int index);
-    void on_swDecim_currentIndexChanged(int index);
+    void on_hwInterp_currentIndexChanged(int index);
+    void on_swInterp_currentIndexChanged(int index);
     void on_lpf_changed(quint64 value);
     void on_lpFIREnable_toggled(bool checked);
     void on_lpFIR_changed(quint64 value);

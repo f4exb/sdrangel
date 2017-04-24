@@ -52,6 +52,7 @@ public:
     public:
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
+        virtual void setDeviceSampleRate(int sampleRate) = 0;
     };
 
     DeviceLimeSDRParams *m_deviceParams; //!< unique hardware device parameters

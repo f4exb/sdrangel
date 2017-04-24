@@ -39,6 +39,7 @@ public:
 
     virtual void startWork();
     virtual void stopWork();
+    virtual void setDeviceSampleRate(int sampleRate) {}
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
 

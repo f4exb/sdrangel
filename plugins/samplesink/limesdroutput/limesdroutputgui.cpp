@@ -225,7 +225,7 @@ void LimeSDROutputGUI::handleMessagesToGUI()
 
                 ui->fifoBar->setMaximum(report->getFifoSize());
                 ui->fifoBar->setValue(report->getFifoFilledCount());
-                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 bytes").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
+                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 samples").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
             }
             else
             {
@@ -382,7 +382,7 @@ void LimeSDROutputGUI::on_sampleRate_changed(quint64 value)
     setNCODisplay();
     sendSettings();}
 
-void LimeSDROutputGUI::on_hwDecim_currentIndexChanged(int index)
+void LimeSDROutputGUI::on_hwInterp_currentIndexChanged(int index)
 {
     if ((index <0) || (index > 5))
         return;
@@ -391,7 +391,7 @@ void LimeSDROutputGUI::on_hwDecim_currentIndexChanged(int index)
     sendSettings();
 }
 
-void LimeSDROutputGUI::on_swDecim_currentIndexChanged(int index)
+void LimeSDROutputGUI::on_swInterp_currentIndexChanged(int index)
 {
     if ((index <0) || (index > 5))
         return;

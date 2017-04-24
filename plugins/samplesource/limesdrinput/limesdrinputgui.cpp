@@ -228,7 +228,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 
                 ui->fifoBar->setMaximum(report->getFifoSize());
                 ui->fifoBar->setValue(report->getFifoFilledCount());
-                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 bytes").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
+                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 samples").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
             }
             else
             {

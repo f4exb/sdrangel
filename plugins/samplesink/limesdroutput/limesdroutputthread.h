@@ -27,7 +27,7 @@
 #include "dsp/interpolators.h"
 #include "limesdr/devicelimesdrshared.h"
 
-#define LIMESDROUTPUT_BLOCKSIZE (1<<14) //complex samples per buffer ~10k (16k)
+#define LIMESDROUTPUT_BLOCKSIZE (1<<15) //complex samples per buffer ~10k (16k)
 
 class LimeSDROutputThread : public QThread, public DeviceLimeSDRShared::ThreadInterface
 {
@@ -39,6 +39,7 @@ public:
 
     virtual void startWork();
     virtual void stopWork();
+    virtual void setDeviceSampleRate(int sampleRate) { m_sampleRate = sampleRate; }
     void setLog2Interpolation(unsigned int log2_ioterp);
     void setFcPos(int fcPos);
 
@@ -51,6 +52,7 @@ private:
     qint16 m_buf[2*LIMESDROUTPUT_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
     SampleSourceFifo* m_sampleFifo;
 
+    int m_sampleRate;
     unsigned int m_log2Interp; // soft decimation
     int m_fcPos;
 
