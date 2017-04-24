@@ -81,8 +81,6 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 Linux only.
 
-&#9888; This is a wotk in progress
-
 You will need a minimal installation of LimeSuite:
 
   - `sudo apt-get install libsqlite3-dev`
@@ -216,8 +214,9 @@ Install it as usual for .deb packages:
 Then in a terminal do:
 
   - `sudo apt-get update`
-  - `sudo dpkg -i liblimesuite17.02-1_17.02.1-1_amd64.deb`
-  - `sudo dpkg -i liblimesuite-dev_17.02.1-1_amd64.deb`  
+  - For LimeSDR support:
+    - `sudo dpkg -i liblimesuite17.02-1_17.02.1-1_amd64.deb`
+    - `sudo dpkg -i liblimesuite-dev_17.02.1-1_amd64.deb`  
   - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
   - `sudo apt-get -f install` this will install missing dependencies
     
@@ -251,7 +250,7 @@ Install cmake version 3:
 
 <h3>With newer versions just do:</h3>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio liblz4-dev libnanomsg-dev libopencv-dev`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio liblz4-dev libnanomsg-dev libopencv-dev libsqlite3-dev`
   - `mkdir build && cd build && cmake ../ && make`
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
@@ -268,7 +267,7 @@ Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, b
 
 For Debian Jessie or Stretch:
 
-`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev`
+`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev`
 
 `mkdir build && cd build && cmake ../ && make`
 
