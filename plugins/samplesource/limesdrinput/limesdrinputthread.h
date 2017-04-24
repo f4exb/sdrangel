@@ -27,7 +27,7 @@
 #include "dsp/decimators.h"
 #include "limesdr/devicelimesdrshared.h"
 
-#define LIMESDR_BLOCKSIZE (1<<14) //complex samples per buffer ~10k (16k)
+#define LIMESDR_BLOCKSIZE (1<<15) //complex samples per buffer
 
 class LimeSDRInputThread : public QThread, public DeviceLimeSDRShared::ThreadInterface
 {

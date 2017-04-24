@@ -175,7 +175,7 @@ bool LimeSDRInput::openDevice()
     // set up the stream
 
     m_streamId.channel =  m_deviceShared.m_channel; //channel number
-    m_streamId.fifoSize = 1024 * 128;               //fifo size in samples
+    m_streamId.fifoSize = 1024 * 1024;              //fifo size in samples
     m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
     m_streamId.isTx = false;                        //RX channel
     m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
