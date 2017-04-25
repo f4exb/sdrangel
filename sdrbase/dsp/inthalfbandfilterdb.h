@@ -61,7 +61,7 @@ public:
 	}
 
     // upsample by 2, return center part of original spectrum - double buffer variant
-    bool workInterpolateCenter(Sample* sampleIn, Sample *SampleOut)
+    bool workInterpolateCenterZeroStuffing(Sample* sampleIn, Sample *SampleOut)
     {
         switch(m_state)
         {
@@ -92,7 +92,7 @@ public:
     }
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    bool workInterpolateCenterOptimized(Sample* sampleIn, Sample *SampleOut)
+    bool workInterpolateCenter(Sample* sampleIn, Sample *SampleOut)
     {
         switch(m_state)
         {
