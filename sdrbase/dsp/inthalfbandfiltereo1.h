@@ -439,7 +439,8 @@ public:
         advancePointer();
     }
 
-    void myInterpolate(Sample* sample1, Sample* sample2)
+    /** Simple zero stuffing and filter */
+    void myInterpolateZeroStuffing(Sample* sample1, Sample* sample2)
     {
         storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
         doFIR(sample1);
@@ -450,7 +451,8 @@ public:
         advancePointer();
     }
 
-    void myInterpolate(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
+    /** Simple zero stuffing and filter */
+    void myInterpolateZeroStuffing(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
     {
         storeSample(*x1, *y1);
         doFIR(x1, y1);
@@ -462,7 +464,7 @@ public:
     }
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    void myInterpolateOptimized(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
     {
         // insert sample into ring double buffer
         m_samples[m_ptr][0] = *x1;

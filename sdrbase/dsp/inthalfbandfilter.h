@@ -553,7 +553,8 @@ public:
         m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
     }
 
-    void myInterpolate(Sample* sample1, Sample* sample2)
+    /** Simple zero stuffing and filter */
+    void myInterpolateZeroStuffing(Sample* sample1, Sample* sample2)
     {
         m_samples[m_ptr][0] = sample1->real();
         m_samples[m_ptr][1] = sample1->imag();
@@ -570,7 +571,8 @@ public:
         m_ptr = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 1];
     }
 
-    void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    /** Simple zero stuffing and filter */
+    void myInterpolateZeroStuffing(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
     {
         m_samples[m_ptr][0] = *x1;
         m_samples[m_ptr][1] = *y1;
@@ -588,7 +590,7 @@ public:
     }
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    void myInterpolateOptimized(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
     {
         // insert sample into ring double buffer
         m_samples[m_ptr][0] = *x1;
