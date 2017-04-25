@@ -125,7 +125,6 @@ public:
         }
     }
 
-
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
@@ -459,6 +458,7 @@ public:
         advancePointer();
     }
 
+    /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
     void myInterpolateOptimized(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
     {
         // insert sample into ring double buffer
