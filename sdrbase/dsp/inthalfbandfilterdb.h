@@ -91,6 +91,41 @@ public:
         }
     }
 
+    /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
+    bool workInterpolateCenterOptimized(Sample* sampleIn, Sample *SampleOut)
+    {
+        switch(m_state)
+        {
+        case 0:
+            // return the middle peak
+            SampleOut->setReal(m_samplesDB[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0]);
+            SampleOut->setImag(m_samplesDB[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1]);
+            m_state = 1;  // next state
+            return false; // tell caller we didn't consume the sample
+
+        default:
+            // calculate with non null samples
+            doInterpolateFIR(SampleOut);
+
+            // insert sample into ring double buffer
+            m_samplesDB[m_ptr][0] = sampleIn->real();
+            m_samplesDB[m_ptr][1] = sampleIn->imag();
+            m_samplesDB[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = sampleIn->real();
+            m_samplesDB[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = sampleIn->imag();
+
+            // advance pointer
+            if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+                m_ptr++;
+            } else {
+                m_ptr = 0;
+            }
+
+            m_state = 0; // next state
+            return true; // tell caller we consumed the sample
+        }
+    }
+
+
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
@@ -424,6 +459,29 @@ public:
         advancePointer();
     }
 
+    void myInterpolateOptimized(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+    {
+        // insert sample into ring double buffer
+        m_samplesDB[m_ptr][0] = *x1;
+        m_samplesDB[m_ptr][1] = *y1;
+        m_samplesDB[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = *x1;
+        m_samplesDB[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = *y1;
+
+        // advance pointer
+        if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+            m_ptr++;
+        } else {
+            m_ptr = 0;
+        }
+
+        // first output sample calculated with the middle peak
+        *x1 = m_samplesDB[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0];
+        *y1 = m_samplesDB[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1];
+
+        // second sample calculated with the filter
+        doInterpolateFIR(x2, y2);
+    }
+
 protected:
 	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
 	int m_ptr;
@@ -492,6 +550,48 @@ protected:
         qAcc += ((qint32)m_samplesDB[b-1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
         *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit
+        *y = qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+    }
+
+    void doInterpolateFIR(Sample* sample)
+    {
+        qint16 a = m_ptr;
+        qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
+
+        // go through samples in buffer
+        qint32 iAcc = 0;
+        qint32 qAcc = 0;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
+        {
+            iAcc += (m_samplesDB[a][0] + m_samplesDB[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += (m_samplesDB[a][1] + m_samplesDB[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            a++;
+            b--;
+        }
+
+        sample->setReal(iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
+        sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
+    }
+
+    void doInterpolateFIR(qint32 *x, qint32 *y)
+    {
+        qint16 a = m_ptr;
+        qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
+
+        // go through samples in buffer
+        qint32 iAcc = 0;
+        qint32 qAcc = 0;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
+        {
+            iAcc += (m_samplesDB[a][0] + m_samplesDB[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += (m_samplesDB[a][1] + m_samplesDB[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            a++;
+            b--;
+        }
+
+        *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
         *y = qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
     }
 };
