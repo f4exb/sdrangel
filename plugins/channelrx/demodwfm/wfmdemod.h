@@ -37,7 +37,13 @@ public:
 	WFMDemod(BasebandSampleSink* sampleSink);
 	virtual ~WFMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
+	void configure(
+	        MessageQueue* messageQueue,
+	        Real rfBandwidth,
+	        Real afBandwidth,
+	        Real volume,
+	        Real squelch,
+	        bool auduiMute);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -45,6 +51,7 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
 	Real getMagSq() const { return m_movingAverage.average(); }
+    bool getSquelchOpen() const { return m_squelchOpen; }
 
 private:
 	class MsgConfigureWFMDemod : public Message {
@@ -55,10 +62,11 @@ private:
 		Real getAFBandwidth() const { return m_afBandwidth; }
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
+        bool getAudioMute() const { return m_audioMute; }
 
-		static MsgConfigureWFMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+		static MsgConfigureWFMDemod* create(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute)
 		{
-			return new MsgConfigureWFMDemod(rfBandwidth, afBandwidth, volume, squelch);
+			return new MsgConfigureWFMDemod(rfBandwidth, afBandwidth, volume, squelch, audioMute);
 		}
 
 	private:
@@ -66,13 +74,15 @@ private:
 		Real m_afBandwidth;
 		Real m_volume;
 		Real m_squelch;
+		bool m_audioMute;
 
-		MsgConfigureWFMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch) :
+		MsgConfigureWFMDemod(Real rfBandwidth, Real afBandwidth, Real volume, Real squelch, bool audioMute) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
 			m_volume(volume),
-			m_squelch(squelch)
+			m_squelch(squelch),
+			m_audioMute(audioMute)
 		{ }
 	};
 
@@ -95,6 +105,7 @@ private:
 		Real m_squelch;
 		Real m_volume;
 		quint32 m_audioSampleRate;
+		bool m_audioMute;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -103,7 +114,8 @@ private:
 			m_afBandwidth(-1),
 			m_squelch(0),
 			m_volume(0),
-			m_audioSampleRate(0)
+			m_audioSampleRate(0),
+			m_audioMute(false)
 		{ }
 	};
 
@@ -118,6 +130,7 @@ private:
 
 	Real m_squelchLevel;
 	int m_squelchState;
+    bool m_squelchOpen;
 
 	Real m_lastArgument;
 	MovingAverage<double> m_movingAverage;

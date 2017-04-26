@@ -45,6 +45,7 @@ private slots:
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+    void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
 	void tick();
@@ -56,6 +57,8 @@ private:
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
+    bool m_audioMute;
+    bool m_squelchOpen;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;

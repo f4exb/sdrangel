@@ -192,6 +192,11 @@ void WFMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void WFMDemodGUI::on_audioMute_toggled(bool checked)
+{
+    m_audioMute = checked;
+    applySettings();
+}
 
 void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
@@ -288,7 +293,8 @@ void WFMDemodGUI::applySettings()
 		    m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
-			ui->squelch->value());
+			ui->squelch->value(),
+			ui->audioMute->isChecked());
 	}
 }
 
@@ -311,4 +317,17 @@ void WFMDemodGUI::tick()
 	Real powDb = CalcDb::dbPower(m_wfmDemod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+
+    bool squelchOpen = m_wfmDemod->getSquelchOpen();
+
+    if (squelchOpen != m_squelchOpen)
+    {
+        if (squelchOpen) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        m_squelchOpen = squelchOpen;
+    }
 }

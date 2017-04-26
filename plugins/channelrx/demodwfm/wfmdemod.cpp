@@ -65,9 +65,15 @@ WFMDemod::~WFMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void WFMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch)
+void WFMDemod::configure(
+        MessageQueue* messageQueue,
+        Real rfBandwidth,
+        Real afBandwidth,
+        Real volume,
+        Real squelch,
+        bool audioMute)
 {
-	Message* cmd = MsgConfigureWFMDemod::create(rfBandwidth, afBandwidth, volume, squelch);
+	Message* cmd = MsgConfigureWFMDemod::create(rfBandwidth, afBandwidth, volume, squelch, audioMute);
 	messageQueue->push(cmd);
 }
 
@@ -98,16 +104,23 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			if(m_movingAverage.average() >= m_squelchLevel)
 				m_squelchState = m_running.m_rfBandwidth / 20; // decay rate
 
-			if(m_squelchState > 0)
+			if (m_squelchState > 0)
 			{
 				m_squelchState--;
+				m_squelchOpen = true;
 			}
 			else
 			{
 				demod = 0;
+                m_squelchOpen = false;
 			}
 
-			Complex e(demod, 0);
+            if (m_running.m_audioMute)
+            {
+                demod = 0;
+            }
+
+            Complex e(demod, 0);
 
 			if(m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
@@ -191,11 +204,13 @@ bool WFMDemod::handleMessage(const Message& cmd)
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
+		m_config.m_audioMute = cfg.getAudioMute();
 
         qDebug() << "WFMDemod::handleMessage: MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
                 << " m_afBandwidth: " << m_config.m_afBandwidth
                 << " m_volume: " << m_config.m_volume
-                << " m_squelch: " << m_config.m_squelch;
+                << " m_squelch: " << m_config.m_squelch
+                << " m_audioMute: " << m_config.m_audioMute;
 
 		apply();
 
@@ -258,5 +273,5 @@ void WFMDemod::apply()
 	m_running.m_squelch = m_config.m_squelch;
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-
+	m_running.m_audioMute = m_config.m_audioMute;
 }
