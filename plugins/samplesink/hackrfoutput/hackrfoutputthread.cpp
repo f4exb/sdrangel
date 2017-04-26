@@ -67,44 +67,48 @@ void HackRFOutputThread::run()
 {
 	hackrf_error rc;
 
-	rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, this);
-
-    if (rc == HACKRF_SUCCESS)
-    {
-        qDebug("HackRFOutputThread::run: started HackRF Tx");
-    }
-    else
-    {
-        qDebug("HackRFOutputThread::run: failed to start HackRF Tx: %s", hackrf_error_name(rc));
-    }
-
     m_running = true;
     m_startWaiter.wakeAll();
 
-	if (rc == HACKRF_SUCCESS)
-	{
-        if (hackrf_is_streaming(m_dev) == HACKRF_TRUE) {
-            qDebug("HackRFThread::run: HackRF is streaming");
-        } else {
-            qDebug("HackRFThread::run: HackRF is not streaming");
+
+    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE)
+    {
+        qDebug("HackRFInputThread::run: HackRF is streaming already");
+    }
+    else
+    {
+        qDebug("HackRFInputThread::run: HackRF is not streaming");
+
+        rc = (hackrf_error) hackrf_start_tx(m_dev, tx_callback, this);
+
+        if (rc == HACKRF_SUCCESS)
+        {
+            qDebug("HackRFOutputThread::run: started HackRF Tx");
         }
+        else
+        {
+            qDebug("HackRFOutputThread::run: failed to start HackRF Tx: %s", hackrf_error_name(rc));
+        }
+    }
 
-	    while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
-		{
-			usleep(200000);
-		}
-	}
+    while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
+    {
+        usleep(200000);
+    }
 
-	rc = (hackrf_error) hackrf_stop_tx(m_dev);
+    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE)
+    {
+        rc = (hackrf_error) hackrf_stop_tx(m_dev);
 
-	if (rc == HACKRF_SUCCESS)
-	{
-		qDebug("HackRFOutputThread::run: stopped HackRF Tx");
-	}
-	else
-	{
-		qDebug("HackRFOutputThread::run: failed to stop HackRF Tx: %s", hackrf_error_name(rc));
-	}
+        if (rc == HACKRF_SUCCESS)
+        {
+            qDebug("HackRFOutputThread::run: stopped HackRF Tx");
+        }
+        else
+        {
+            qDebug("HackRFOutputThread::run: failed to stop HackRF Tx: %s", hackrf_error_name(rc));
+        }
+    }
 
 	m_running = false;
 }

@@ -74,44 +74,47 @@ void HackRFInputThread::run()
 {
 	hackrf_error rc;
 
-	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
-
-    if (rc == HACKRF_SUCCESS)
-    {
-        qDebug("HackRFThread::run: started HackRF Rx");
-    }
-    else
-    {
-        qDebug("HackRFThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
-    }
-
     m_running = true;
     m_startWaiter.wakeAll();
 
-	if (rc == HACKRF_SUCCESS)
-	{
-	    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE) {
-	        qDebug("HackRFThread::run: HackRF is streaming");
-	    } else {
-            qDebug("HackRFThread::run: HackRF is not streaming");
-	    }
+    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE)
+    {
+        qDebug("HackRFInputThread::run: HackRF is streaming already");
+    }
+    else
+    {
+        qDebug("HackRFInputThread::run: HackRF is not streaming");
 
-		while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
-		{
-			usleep(200000);
-		}
-	}
+        rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
 
-	rc = (hackrf_error) hackrf_stop_rx(m_dev);
+        if (rc == HACKRF_SUCCESS)
+        {
+            qDebug("HackRFInputThread::run: started HackRF Rx");
+        }
+        else
+        {
+            qDebug("HackRFInputThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
+        }
+    }
 
-	if (rc == HACKRF_SUCCESS)
-	{
-		qDebug("HackRFThread::run: stopped HackRF Rx");
-	}
-	else
-	{
-		qDebug("HackRFThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
-	}
+    while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
+    {
+        usleep(200000);
+    }
+
+    if (hackrf_is_streaming(m_dev) == HACKRF_TRUE)
+    {
+        rc = (hackrf_error) hackrf_stop_rx(m_dev);
+
+        if (rc == HACKRF_SUCCESS)
+        {
+            qDebug("HackRFInputThread::run: stopped HackRF Rx");
+        }
+        else
+        {
+            qDebug("HackRFInputThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
+        }
+    }
 
 	m_running = false;
 }
