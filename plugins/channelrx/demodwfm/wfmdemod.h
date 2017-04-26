@@ -120,7 +120,7 @@ private:
 	int m_squelchState;
 
 	Real m_lastArgument;
-	MovingAverage<Real> m_movingAverage;
+	MovingAverage<double> m_movingAverage;
 	Real m_fmExcursion;
 
 	AudioVector m_audioBuffer;

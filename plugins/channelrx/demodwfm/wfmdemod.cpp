@@ -76,7 +76,9 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	Complex ci;
 	fftfilt::cmplx *rf;
 	int rf_out;
-	Real msq, demod;
+	Real demod;
+	double msq;
+	float fmDev;
 
 	m_settingsMutex.lock();
 
@@ -89,7 +91,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		for (int i =0 ; i  <rf_out; i++)
 		{
-			msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
+		    demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
 
 			m_movingAverage.feed(msq);
 
@@ -99,17 +101,6 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			if(m_squelchState > 0)
 			{
 				m_squelchState--;
-
-				// Alternative without atan
-				// http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
-				// in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
-				/*
-				Real ip = rf[i].real() - m_m2Sample.real();
-				Real qp = rf[i].imag() - m_m2Sample.imag();
-				Real h1 = m_m1Sample.real() * qp;
-				Real h2 = m_m1Sample.imag() * ip;
-				demod = (h1 - h2) / (msq * 10.0);*/
-				demod = m_phaseDiscri.phaseDiscriminator2(rf[i]);
 			}
 			else
 			{
@@ -120,7 +111,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if(m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
-				quint16 sample = (qint16)(ci.real() * 3000 * m_running.m_volume);
+				quint16 sample = (qint16)(ci.real() * 3276.8f * m_running.m_volume);
 				m_sampleBuffer.push_back(Sample(sample, sample));
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
@@ -178,8 +169,6 @@ void WFMDemod::stop()
 
 bool WFMDemod::handleMessage(const Message& cmd)
 {
-	qDebug() << "WFMDemod::handleMessage";
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -187,10 +176,10 @@ bool WFMDemod::handleMessage(const Message& cmd)
 		m_config.m_inputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		apply();
+        qDebug() << "WFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+                << " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
-		qDebug() << "WFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+		apply();
 
 		return true;
 	}
@@ -203,12 +192,12 @@ bool WFMDemod::handleMessage(const Message& cmd)
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 
-		apply();
+        qDebug() << "WFMDemod::handleMessage: MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_afBandwidth: " << m_config.m_afBandwidth
+                << " m_volume: " << m_config.m_volume
+                << " m_squelch: " << m_config.m_squelch;
 
-		qDebug() << "WFMDemod::handleMessage: MsgConfigureWFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_afBandwidth: " << m_config.m_afBandwidth
-				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch;
+		apply();
 
 		return true;
 	}
@@ -231,38 +220,33 @@ void WFMDemod::apply()
 	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
 		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))
 	{
-		qDebug() << "WFMDemod::handleMessage: m_nco.setFreq";
+		qDebug() << "WFMDemod::apply: m_nco.setFreq";
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
 	}
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 	    (m_config.m_audioSampleRate != m_running.m_audioSampleRate) ||
-		(m_config.m_afBandwidth != m_running.m_afBandwidth))
-	{
-		m_settingsMutex.lock();
-		qDebug() << "WFMDemod::handleMessage: m_interpolator.create";
-		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
-		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_settingsMutex.unlock();
-	}
-
-	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
+		(m_config.m_afBandwidth != m_running.m_afBandwidth) ||
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
 	{
 		m_settingsMutex.lock();
-		qDebug() << "WFMDemod::handleMessage: m_rfFilter->create_filter";
-		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
-		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
-		m_rfFilter->create_filter(lowCut, hiCut);
-		m_fmExcursion = m_config.m_rfBandwidth / 2.0;
-		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
+		qDebug() << "WFMDemod::apply: m_interpolator.create";
+		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
+		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+        qDebug() << "WFMDemod::apply: m_rfFilter->create_filter";
+        Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
+        Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
+        m_rfFilter->create_filter(lowCut, hiCut);
+        m_fmExcursion = m_config.m_rfBandwidth / (Real) m_config.m_inputSampleRate;
+        m_phaseDiscri.setFMScaling(1.0f/m_fmExcursion);
+        qDebug("WFMDemod::apply: m_fmExcursion: %f", m_fmExcursion);
 		m_settingsMutex.unlock();
 	}
 
 	if(m_config.m_squelch != m_running.m_squelch)
 	{
-		qDebug() << "WFMDemod::handleMessage: set m_squelchLevel";
+		qDebug() << "WFMDemod::apply: set m_squelchLevel";
 		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
 		m_squelchLevel *= m_squelchLevel;
 	}
