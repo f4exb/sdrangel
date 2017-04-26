@@ -31,7 +31,13 @@ MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
 	m_audioFifo(4, 250000),
-	m_settingsMutex(QMutex::Recursive)
+	m_settingsMutex(QMutex::Recursive),
+    m_squelchOpen(false),
+    m_magsq(0.0f),
+    m_magsqSum(0.0f),
+    m_magsqPeak(0.0f),
+    m_magsqCount(0)
+
 {
 	setObjectName("WFMDemod");
 
@@ -90,16 +96,26 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
-		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
 		rf_out = m_rfFilter->runFilt(c, &rf); // filter RF before demod
 
-		for (int i =0 ; i  <rf_out; i++)
+		for (int i = 0 ; i < rf_out; i++)
 		{
 		    demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
+		    Real magsq = msq / (1<<30);
 
-			m_movingAverage.feed(msq);
+			m_movingAverage.feed(magsq);
+            m_magsqSum += magsq;
+
+            if (magsq > m_magsqPeak)
+            {
+                m_magsqPeak = magsq;
+            }
+
+            m_magsqCount++;
 
 			if(m_movingAverage.average() >= m_squelchLevel)
 				m_squelchState = m_running.m_rfBandwidth / 20; // decay rate
