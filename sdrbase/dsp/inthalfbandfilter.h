@@ -287,7 +287,7 @@ public:
 	}
 
     // upsample by 2, from lower half of original spectrum
-    bool workInterpolateLowerHalf(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateLowerHalfZeroStuffing(Sample* sampleIn, Sample *sampleOut)
     {
         Sample s;
 
@@ -371,6 +371,73 @@ public:
         }
     }
 
+    /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
+    bool workInterpolateLowerHalf(Sample* sampleIn, Sample *sampleOut)
+    {
+        Sample s;
+
+        switch(m_state)
+        {
+        case 0:
+            // return the middle peak
+            sampleOut->setReal(m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1]);  // imag
+            sampleOut->setImag(-m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0]); // - real
+            m_state = 1;  // next state
+            return false; // tell caller we didn't consume the sample
+
+        case 1:
+            // calculate with non null samples
+            doInterpolateFIR(&s);
+            sampleOut->setReal(-s.real());
+            sampleOut->setImag(-s.imag());
+
+            // insert sample into ring double buffer
+            m_samples[m_ptr][0] = sampleIn->real();
+            m_samples[m_ptr][1] = sampleIn->imag();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = sampleIn->real();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = sampleIn->imag();
+
+            // advance pointer
+            if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+                m_ptr++;
+            } else {
+                m_ptr = 0;
+            }
+
+            m_state = 2; // next state
+            return true; // tell caller we consumed the sample
+
+        case 2:
+            // return the middle peak
+            sampleOut->setReal(-m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1]);  // - imag
+            sampleOut->setImag(m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0]); // real
+            m_state = 3;  // next state
+            return false; // tell caller we didn't consume the sample
+
+        default:
+            // calculate with non null samples
+            doInterpolateFIR(&s);
+            sampleOut->setReal(s.real());
+            sampleOut->setImag(s.imag());
+
+            // insert sample into ring double buffer
+            m_samples[m_ptr][0] = sampleIn->real();
+            m_samples[m_ptr][1] = sampleIn->imag();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = sampleIn->real();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = sampleIn->imag();
+
+            // advance pointer
+            if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+                m_ptr++;
+            } else {
+                m_ptr = 0;
+            }
+
+            m_state = 0; // next state
+            return true; // tell caller we consumed the sample
+        }
+    }
+
 	// downsample by 2, return upper half of original spectrum
 	bool workDecimateUpperHalf(Sample* sample)
 	{
@@ -441,7 +508,7 @@ public:
 	}
 
     // upsample by 2, move original spectrum to upper half
-    bool workInterpolateUpperHalf(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateUpperHalfZeroStuffing(Sample* sampleIn, Sample *sampleOut)
     {
         Sample s;
 
@@ -522,6 +589,73 @@ public:
 
             // tell caller we consumed the sample
             return true;
+        }
+    }
+
+    /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
+    bool workInterpolateUpperHalf(Sample* sampleIn, Sample *sampleOut)
+    {
+        Sample s;
+
+        switch(m_state)
+        {
+        case 0:
+            // return the middle peak
+            sampleOut->setReal(-m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1]); // - imag
+            sampleOut->setImag(m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0]); // + real
+            m_state = 1;  // next state
+            return false; // tell caller we didn't consume the sample
+
+        case 1:
+            // calculate with non null samples
+            doInterpolateFIR(&s);
+            sampleOut->setReal(-s.real());
+            sampleOut->setImag(-s.imag());
+
+            // insert sample into ring double buffer
+            m_samples[m_ptr][0] = sampleIn->real();
+            m_samples[m_ptr][1] = sampleIn->imag();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = sampleIn->real();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = sampleIn->imag();
+
+            // advance pointer
+            if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+                m_ptr++;
+            } else {
+                m_ptr = 0;
+            }
+
+            m_state = 2; // next state
+            return true; // tell caller we consumed the sample
+
+        case 2:
+            // return the middle peak
+            sampleOut->setReal(m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][1]);  // + imag
+            sampleOut->setImag(-m_samples[m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder/4) - 1][0]);   // - real
+            m_state = 3;  // next state
+            return false; // tell caller we didn't consume the sample
+
+        default:
+            // calculate with non null samples
+            doInterpolateFIR(&s);
+            sampleOut->setReal(s.real());
+            sampleOut->setImag(s.imag());
+
+            // insert sample into ring double buffer
+            m_samples[m_ptr][0] = sampleIn->real();
+            m_samples[m_ptr][1] = sampleIn->imag();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][0] = sampleIn->real();
+            m_samples[m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder/2][1] = sampleIn->imag();
+
+            // advance pointer
+            if (m_ptr < (HBFIRFilterTraits<HBFilterOrder>::hbOrder/2) - 1) {
+                m_ptr++;
+            } else {
+                m_ptr = 0;
+            }
+
+            m_state = 0; // next state
+            return true; // tell caller we consumed the sample
         }
     }
 
