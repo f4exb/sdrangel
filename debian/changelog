@@ -1,3 +1,12 @@
+sdrangel (3.4.1-1) unstable; urgency=medium
+
+  * Optimization of halfband interpolation FIR fitler processing
+  * HackRF support: fixed start/stop sequence
+  * WFM Demod enhancement
+  * CW Keyer: specifiy char signedness to fix error with some compilers
+  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Apr 2017 23:14:18 +0100
+
 sdrangel (3.4.0-1) unstable; urgency=medium
 
   * LimeSDR support with redesign of source and sink management
