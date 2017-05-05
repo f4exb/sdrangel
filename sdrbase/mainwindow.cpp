@@ -388,7 +388,7 @@ void MainWindow::loadSettings()
 
     for(int i = 0; i < m_settings.getPresetCount(); ++i)
     {
-    	addPresetToTree(m_settings.getPreset(i));
+        ui->presetTree->setCurrentItem(addPresetToTree(m_settings.getPreset(i)));
     }
 }
 

@@ -113,7 +113,9 @@ void FileSourceThread::setBuffer(std::size_t chunksize)
         else
         {
             qDebug() << "FileSourceThread::setBuffer: Re-allocate buffer";
+            quint8 *buf = m_buf;
             m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
+            if (!m_buf) free(buf);
         }
 
         qDebug() << "FileSourceThread::setBuffer: size: " << m_bufsize
