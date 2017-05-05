@@ -21,32 +21,32 @@
 #include <stdint.h>
 
 template <unsigned int size>
-struct BitfieldIndex 
+struct BitfieldIndex
 {
     uint32_t v : size;
-    
-    BitfieldIndex() {}
+
+    BitfieldIndex() : v(0) {}
     BitfieldIndex(int i) { v = i; }
-    
+
     BitfieldIndex& operator=(const BitfieldIndex& rhs) { v = rhs.v; return *this; }
     BitfieldIndex& operator=(const int& rhi) { v = rhi; return *this; }
     BitfieldIndex& operator++() { v++; return *this; }
     BitfieldIndex operator++(int) { BitfieldIndex x(*this); ++(*this); return x; }
-    BitfieldIndex& operator+=(const BitfieldIndex& b) { v += b.v; return *this; }     
+    BitfieldIndex& operator+=(const BitfieldIndex& b) { v += b.v; return *this; }
     BitfieldIndex& operator-=(const BitfieldIndex& b) { v -= b.v; return *this; }
-    BitfieldIndex& operator+=(int i) { v += i; return *this; }     
+    BitfieldIndex& operator+=(int i) { v += i; return *this; }
     BitfieldIndex& operator-=(int i) { v -= i; return *this; }
-    BitfieldIndex operator+(const BitfieldIndex& b) const { BitfieldIndex x(*this); x.v += b.v; return x; }  
-    BitfieldIndex operator-(const BitfieldIndex& b) const { BitfieldIndex x(*this); x.v -= b.v; return x; }  
-    BitfieldIndex operator+(int i) const { BitfieldIndex x(*this); x.v += i; return x; }  
-    BitfieldIndex operator-(int i) const { BitfieldIndex x(*this); x.v -= i; return x; }  
+    BitfieldIndex operator+(const BitfieldIndex& b) const { BitfieldIndex x(*this); x.v += b.v; return x; }
+    BitfieldIndex operator-(const BitfieldIndex& b) const { BitfieldIndex x(*this); x.v -= b.v; return x; }
+    BitfieldIndex operator+(int i) const { BitfieldIndex x(*this); x.v += i; return x; }
+    BitfieldIndex operator-(int i) const { BitfieldIndex x(*this); x.v -= i; return x; }
 
     operator int() const { return v; }
 };
 
 template <unsigned int size>
 BitfieldIndex<size> operator+(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b) { BitfieldIndex<size> x; x.v = x.a + x.b; return x; }
-    
+
 template <unsigned int size>
 BitfieldIndex<size> operator-(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b) { BitfieldIndex<size> x; x.v = x.a - x.b; return x; }
 

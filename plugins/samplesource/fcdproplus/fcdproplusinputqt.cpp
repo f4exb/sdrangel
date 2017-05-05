@@ -33,7 +33,10 @@ MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
 FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
 	m_settings(),
-	m_deviceDescription(fcd_traits<ProPlus>::displayedName)
+	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
+	m_FCDThread(0),
+	m_running(false),
+	m_deviceAPI(0)
 {
 	m_FCDReader = new FCDProPlusReader(&m_sampleFifo);
 }
@@ -161,7 +164,7 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 			set_bias_t(settings.m_biasT);
 		}
 	}
-    
+
 	if ((m_settings.m_mixGain != settings.m_mixGain) || force)
 	{
 		m_settings.m_mixGain = settings.m_mixGain;

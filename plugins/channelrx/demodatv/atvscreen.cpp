@@ -194,6 +194,8 @@ bool ATVScreen::selectRow(int intLine)
     {
         return m_objGLShaderArray.SelectRow(intLine);
     }
+
+    return false;
 }
 
 bool ATVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
@@ -203,4 +205,6 @@ bool ATVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
         return m_objGLShaderArray.SetDataColor(intCol,
                 qRgb(intRed, intGreen, intBlue));
     }
+
+    return false;
 }

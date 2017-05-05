@@ -84,6 +84,10 @@ bool CWKeyerGUI::deserialize(const QByteArray& data)
         applySettings();
         return true;
     }
+    else
+    {
+        return false;
+    }
 }
 
 // === SLOTS ==================================================================

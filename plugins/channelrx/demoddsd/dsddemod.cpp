@@ -27,8 +27,6 @@
 #include "dsp/dspengine.h"
 #include "../../channelrx/demoddsd/dsddemodgui.h"
 
-static const Real afSqTones[2] = {1200.0, 6400.0}; // {1200.0, 8000.0};
-
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 

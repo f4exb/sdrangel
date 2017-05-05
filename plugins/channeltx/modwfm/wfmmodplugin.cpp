@@ -31,7 +31,8 @@ const PluginDescriptor WFMModPlugin::m_pluginDescriptor = {
 };
 
 WFMModPlugin::WFMModPlugin(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    m_pluginAPI(0)
 {
 }
 

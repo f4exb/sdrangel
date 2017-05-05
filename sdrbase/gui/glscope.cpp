@@ -65,7 +65,10 @@ GLScope::GLScope(QWidget* parent) :
 	m_prevArg(0),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
-	m_powerOverlayFont(font())
+	m_powerOverlayFont(font()),
+	m_maxPow(0.0f),
+	m_sumPow(0.0f),
+	m_nbPow(1)
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));

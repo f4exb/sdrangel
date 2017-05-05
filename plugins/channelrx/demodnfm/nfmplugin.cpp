@@ -15,7 +15,8 @@ const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
 };
 
 NFMPlugin::NFMPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

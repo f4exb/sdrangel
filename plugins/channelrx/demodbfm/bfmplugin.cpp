@@ -32,7 +32,8 @@ const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
 };
 
 BFMPlugin::BFMPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

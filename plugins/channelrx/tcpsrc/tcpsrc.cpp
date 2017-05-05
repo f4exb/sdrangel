@@ -35,6 +35,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampl
 	m_sampleFormat = FormatSSB;
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
+	m_tcpServer = 0;
 	m_tcpPort = 9999;
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
@@ -145,7 +146,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					  - m_last.imag() * (m_this.real() - sideband[i+1].real());
 					m_this = sideband[i+1];
 					m_sampleBufferSSB.push_back(Sample(l * m_scale, r * m_scale));
-					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag(); 
+					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag();
 				}
 				// TODO: correct levels
 				m_scale = 24000 * tcpFftLen / sum;

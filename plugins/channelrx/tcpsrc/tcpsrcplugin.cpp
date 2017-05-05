@@ -15,7 +15,8 @@ const PluginDescriptor TCPSrcPlugin::m_pluginDescriptor = {
 };
 
 TCPSrcPlugin::TCPSrcPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

@@ -15,7 +15,8 @@ const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 };
 
 WFMPlugin::WFMPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

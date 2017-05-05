@@ -35,7 +35,8 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* s
     m_log2Interpolation(0),
     m_throttlems(FILESINK_THROTTLE_MS),
     m_throttleToggle(false),
-    m_buf(0)
+    m_buf(0),
+    m_maxThrottlems(50)
 {
     assert(m_ofstream != 0);
 }

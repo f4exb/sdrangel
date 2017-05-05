@@ -45,7 +45,8 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
 		m_nbReads(0),
 		m_nbWrites(0),
 		m_balCorrection(0),
-	    m_balCorrLimit(0)
+	    m_balCorrLimit(0),
+	    m_curOriginalBlocks(0)
 {
 	m_currentMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);

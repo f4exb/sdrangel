@@ -40,6 +40,7 @@ RDSDecoder::RDSDecoder()
 	m_groupGoodBlocksCounter = 0;
 	m_wrongBlocksCounter   = 0;
 	m_goodBlock            = false;
+	m_qua                  = 0.0f;
 }
 
 RDSDecoder::~RDSDecoder()

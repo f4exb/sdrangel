@@ -45,6 +45,7 @@ RDSDemod::RDSDemod()
 	m_parms.counter = 0;
 	m_parms.reading_frame = 0;
 	m_parms.dbit = 0;
+	m_prev = 0.0f;
 }
 
 RDSDemod::~RDSDemod()

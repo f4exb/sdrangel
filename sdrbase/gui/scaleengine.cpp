@@ -269,7 +269,7 @@ double ScaleEngine::calcMajorTickUnits(double distance, int* retDecimalPlaces)
 		}/*
 	}*/
 
-	if(retDecimalPlaces != NULL) {
+	if(retDecimalPlaces != 0) {
 		if(decimalPlaces < 0)
 			decimalPlaces = 0;
 		*retDecimalPlaces = decimalPlaces;
@@ -489,7 +489,14 @@ ScaleEngine::ScaleEngine() :
 	m_physicalUnit(Unit::None),
 	m_rangeMin(-1.0),
 	m_rangeMax(1.0),
-	m_recalc(true)
+	m_recalc(true),
+	m_charSize(8),
+	m_numMinorTicks(1),
+	m_decimalPlaces(1),
+	m_size(1.0f),
+	m_firstMajorTickValue(1.0),
+	m_majorTickValueDistance(1.0),
+	m_scale(1.0f)
 {
 }
 

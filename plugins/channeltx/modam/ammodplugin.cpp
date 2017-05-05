@@ -31,7 +31,8 @@ const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
 };
 
 AMModPlugin::AMModPlugin(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    m_pluginAPI(0)
 {
 }
 

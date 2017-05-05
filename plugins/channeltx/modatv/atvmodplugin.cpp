@@ -31,7 +31,8 @@ const PluginDescriptor ATVModPlugin::m_pluginDescriptor = {
 };
 
 ATVModPlugin::ATVModPlugin(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    m_pluginAPI(0)
 {
 }
 

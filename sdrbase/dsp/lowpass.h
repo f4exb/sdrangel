@@ -7,7 +7,7 @@
 
 template <class Type> class Lowpass {
 public:
-	Lowpass() { }
+	Lowpass() : m_ptr(0) { }
 
 	void create(int nTaps, double sampleRate, double cutoff)
 	{

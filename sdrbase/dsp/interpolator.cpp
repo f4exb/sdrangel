@@ -56,8 +56,13 @@ void Interpolator::createPolyphaseLowPass(
 }
 
 Interpolator::Interpolator() :
-	m_taps(NULL),
-	m_alignedTaps(NULL)
+	m_taps(0),
+	m_alignedTaps(0),
+	m_nTaps(1),
+	m_ptr(0),
+	m_taps2(0),
+	m_alignedTaps2(0),
+	m_phaseSteps(1)
 {
 }
 

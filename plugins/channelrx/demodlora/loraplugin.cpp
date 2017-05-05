@@ -15,7 +15,8 @@ const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
 };
 
 LoRaPlugin::LoRaPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

@@ -27,7 +27,9 @@
 
 GLShaderTextured::GLShaderTextured() :
 	m_program(0),
-	m_texture(0)
+	m_texture(0),
+	m_matrixLoc(0),
+	m_textureLoc(0)
 { }
 
 GLShaderTextured::~GLShaderTextured()

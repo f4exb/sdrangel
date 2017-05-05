@@ -32,7 +32,8 @@ const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 };
 
 DSDDemodPlugin::DSDDemodPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

@@ -32,7 +32,8 @@ const PluginDescriptor UDPSrcPlugin::m_pluginDescriptor = {
 };
 
 UDPSrcPlugin::UDPSrcPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

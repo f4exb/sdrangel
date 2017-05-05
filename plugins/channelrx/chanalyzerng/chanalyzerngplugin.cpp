@@ -30,7 +30,8 @@ const PluginDescriptor ChannelAnalyzerNGPlugin::m_pluginDescriptor = {
 };
 
 ChannelAnalyzerNGPlugin::ChannelAnalyzerNGPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

@@ -53,7 +53,12 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_histogram(NULL),
 	m_histogramHoldoff(NULL),
 	m_displayHistogram(true),
-	m_displayChanged(false)
+	m_displayChanged(false),
+	m_colorLoc(0),
+	m_waterfallBufferPos(0),
+	m_cursorChannel(0),
+	m_waterfallTexturePos(0),
+	m_matrixLoc(0)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);

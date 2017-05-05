@@ -32,7 +32,7 @@ typedef qint16 FixReal;
 #pragma pack(push, 1)
 struct Sample
 {
-	Sample() {}
+	Sample() : m_real(0), m_imag(0) {}
 	Sample(FixReal real) : m_real(real), m_imag(0) {}
 	Sample(FixReal real, FixReal imag) : m_real(real), m_imag(imag) {}
 	Sample(const Sample& other) : m_real(other.m_real), m_imag(other.m_imag) {}

@@ -15,7 +15,8 @@ const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 };
 
 SSBPlugin::SSBPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

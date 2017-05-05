@@ -1,9 +1,9 @@
-#include "../../channelrx/chanalyzer/chanalyzerplugin.h"
+#include "chanalyzerplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/chanalyzer/chanalyzergui.h"
+#include "chanalyzergui.h"
 
 const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
 	QString("Channel Analyzer"),
@@ -15,7 +15,8 @@ const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
 };
 
 ChannelAnalyzerPlugin::ChannelAnalyzerPlugin(QObject* parent) :
-	QObject(parent)
+	QObject(parent),
+	m_pluginAPI(0)
 {
 }
 

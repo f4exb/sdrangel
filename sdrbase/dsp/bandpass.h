@@ -7,7 +7,7 @@
 
 template <class Type> class Bandpass {
 public:
-	Bandpass() { }
+	Bandpass() : m_ptr(0) { }
 
 	void create(int nTaps, double sampleRate, double lowCutoff, double highCutoff)
 	{

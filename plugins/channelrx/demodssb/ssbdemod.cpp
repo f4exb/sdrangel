@@ -32,7 +32,9 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_audioFifo(4, 24000),
 	m_settingsMutex(QMutex::Recursive),
 	m_audioBinaual(false),
-	m_audioFlipChannels(false)
+	m_audioFlipChannels(false),
+	m_audioMute(false),
+	m_dsb(false)
 {
 	setObjectName("SSBDemod");
 
