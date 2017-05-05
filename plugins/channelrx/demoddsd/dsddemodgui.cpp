@@ -663,7 +663,13 @@ void DSDDemodGUI::tick()
             ui->formatStatusText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background
 	    }
 
-	    m_tickCount = 0;
+        if (m_squelchOpen && m_dsdDemod->getDecoder().getSymbolPLLLocked()) {
+            ui->symbolPLLLock->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(53,53,53); }");
+        }
+
+        m_tickCount = 0;
 	}
 }
 

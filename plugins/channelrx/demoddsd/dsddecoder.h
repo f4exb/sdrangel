@@ -48,6 +48,7 @@ public:
     bool getVoice1On() const { return m_decoder.getVoice1On(); }
     bool getVoice2On() const { return m_decoder.getVoice2On(); }
     void setTDMAStereo(bool tdmaStereo) { m_decoder.setTDMAStereo(tdmaStereo); }
+    bool getSymbolPLLLocked() const { return m_decoder.getSymbolPLLLocked(); }
 
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 

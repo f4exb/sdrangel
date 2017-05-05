@@ -1,3 +1,11 @@
+sdrangel (3.4.2-1) unstable; urgency=medium
+
+  * DSD demod: use version 1.7.0 of dsdcc with PLL for symbol synchronization
+  * DSD demod: kernel >= 4.4.52 workaround for SerialDV
+  * Code cleanup: cppchack and Eclipse warnings
+  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Apr 2017 23:14:18 +0100
+
 sdrangel (3.4.1-1) unstable; urgency=medium
 
   * Optimization of halfband interpolation FIR fitler processing
