@@ -179,7 +179,7 @@ bool DeviceLimeSDR::SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float v
     return true;
 }
 
-bool DeviceLimeSDR::setAntennaPath(lms_device_t *device, std::size_t chan, int path)
+bool DeviceLimeSDR::setRxAntennaPath(lms_device_t *device, std::size_t chan, int path)
 {
 //    if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
 //    {
@@ -245,7 +245,7 @@ bool DeviceLimeSDR::setAntennaPath(lms_device_t *device, std::size_t chan, int p
 //
 //    return true;
 
-    switch ((PathRFE) path)
+    switch ((PathRxRFE) path)
     {
     case PATH_RFE_LNAH:
         if (LMS_SetAntenna(device, LMS_CH_RX, chan, 1) < 0)
@@ -262,7 +262,7 @@ bool DeviceLimeSDR::setAntennaPath(lms_device_t *device, std::size_t chan, int p
         }
         break;
     case PATH_RFE_LNAW:
-        if (LMS_SetAntenna(device, LMS_CH_RX, chan, 2) < 0)
+        if (LMS_SetAntenna(device, LMS_CH_RX, chan, 3) < 0)
         {
             fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to LNAW\n");
             return false;

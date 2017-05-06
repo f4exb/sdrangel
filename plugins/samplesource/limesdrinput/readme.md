@@ -126,9 +126,9 @@ Use this slider to adjust the global gain of the LNA, TIA and PGA. LimeSuite sof
 
 Use this combo box to select the antenna input:
 
-  - **Au**: Auto: automatically selects optimal input depending on LO center frequency
-  - **Lo**: Selects the low frequency input
-  - **Hi**: Selects the high frequncy input
+  - **No**: None
+  - **Lo**: Selects the low frequency input (700 to 900 MHz nominally)
+  - **Hi**: Selects the high frequncy input (2 to 2.6 GHz)
   - **Wo**: Selects the wideband input
   - **T1**: Selects loopback from TX #1 (experimental)
   - **T1**: Selects loopback from TX #2 (experimental)

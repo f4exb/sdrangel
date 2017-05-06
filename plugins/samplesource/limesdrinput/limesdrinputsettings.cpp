@@ -54,6 +54,7 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeU32(10, m_gain);
     s.writeBool(11, m_ncoEnable);
     s.writeS32(12, m_ncoFrequency);
+    s.writeS32(13, (int) m_antennaPath);
 
     return s.final();
 }
@@ -83,6 +84,8 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readU32(10, &m_gain, 0);
         d.readBool(11, &m_ncoEnable, false);
         d.readS32(12, &m_ncoFrequency, 0);
+        d.readS32(13, &intval, 0);
+        m_antennaPath = (PathRFE) intval;
 
         return true;
     }

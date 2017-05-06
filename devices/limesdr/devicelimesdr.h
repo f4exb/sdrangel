@@ -22,7 +22,7 @@
 class DeviceLimeSDR
 {
 public:
-    enum PathRFE
+    enum PathRxRFE
     {
         PATH_RFE_NONE = 0,
         PATH_RFE_LNAH,
@@ -41,7 +41,7 @@ public:
     /** set PGA gain Range: [0-32] (dB) **/
     static bool SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float value);
     /** Set antenna path **/
-    static bool setAntennaPath(lms_device_t *device, std::size_t chan, int path);
+    static bool setRxAntennaPath(lms_device_t *device, std::size_t chan, int path);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDR_H_ */

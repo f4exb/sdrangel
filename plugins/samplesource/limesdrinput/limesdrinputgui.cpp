@@ -264,6 +264,8 @@ void LimeSDRInputGUI::displaySettings()
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
 
+    ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
+
     setNCODisplay();
 }
 

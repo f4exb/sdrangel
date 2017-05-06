@@ -708,7 +708,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
-            if (DeviceLimeSDR::setAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
+            if (DeviceLimeSDR::setRxAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
                     m_settings.m_antennaPath))
             {
