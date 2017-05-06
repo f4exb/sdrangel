@@ -30,6 +30,13 @@ Note also that this is not supported in Windows because of trouble with COM port
 
 Altermatively you can use software decoding with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
+---
+&#9888; Since kernel 4.4.52 the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
+
+`echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer` or `sudo setserial /dev/ttyUSB0 low_latency`
+
+---
+
 <h2>Mbelib support</h2>
 
 DSDcc itself can use [mbelib](https://github.com/szechyjs/mbelib) to decode AMBE frames. While DSDcc is intended to be patent-free, `mbelib` that it uses describes functions that may be covered by one or more U.S. patents owned by DVSI Inc. The source code itself should not be infringing as it merely describes possible methods of implementation. Compiling or using `mbelib` may infringe on patents rights in your jurisdiction and/or require licensing. It is unknown if DVSI will sell licenses for software that uses `mbelib`.
@@ -70,9 +77,17 @@ This can be one of the following:
   - `+NXDN`: non-inverted NXDN frame (detection only)
   - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
 
+<h3>3a: Symbol PLL lock indicator</h3>
+
+Since dsdcc version 1.7.0 the synbol synchronization is done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. This works significantly better than with the ringing filter alone used in previous versions.
+
+This indicator lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
+
 <h3>4: Symbol synchronization zero crossing hits in %</h3>
 
-This is the percentage per symbols for which a valid zero crossing has been detected. This can display 101% because somtimes there are two crossings per symbol period at the start of a sequence. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
+This is the percentage per symbols for which a valid zero crossing has been detected. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
+
+Since dsdcc version 1.7.0 and its PLL the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
 
 <h3>5: Zero crossing shift</h3>
  
