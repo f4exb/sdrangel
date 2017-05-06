@@ -44,6 +44,7 @@ $$LIBDSDCCSRC/viterbi3.cpp\
 $$LIBDSDCCSRC/viterbi5.cpp\
 $$LIBDSDCCSRC/pn.cpp\
 $$LIBDSDCCSRC/mbefec.cpp\
+$$LIBDSDCCSRC/phaselock.cpp\
 $$LIBDSDCCSRC/locator.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
@@ -70,6 +71,7 @@ $$LIBDSDCCSRC/viterbi3.h\
 $$LIBDSDCCSRC/viterbi5.h\
 $$LIBDSDCCSRC/pn.h\
 $$LIBDSDCCSRC/mbefec.h\
+$$LIBDSDCCSRC/phaselock.h\
 $$LIBDSDCCSRC/locator.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
