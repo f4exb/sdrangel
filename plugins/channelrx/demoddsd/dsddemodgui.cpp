@@ -510,7 +510,7 @@ void DSDDemodGUI::formatStatusText()
             }
             memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
             memcpy(&m_formatStatusText[62], m_dsdDemod->getDecoder().getDStarDecoder().getLocator(), 6);
-            sprintf(&m_formatStatusText[69], "%03d/%07.1f",
+            snprintf(&m_formatStatusText[69], 82-69, "%03d/%07.1f",
                     m_dsdDemod->getDecoder().getDStarDecoder().getBearing(),
                     m_dsdDemod->getDecoder().getDStarDecoder().getDistance());
         }
@@ -519,7 +519,7 @@ void DSDDemodGUI::formatStatusText()
         m_signalFormat = signalFormatDStar;
         break;
     case DSDcc::DSDDecoder::DSDSyncDPMR:
-        sprintf(m_formatStatusText, "%s CC: %04d OI: %08d CI: %08d",
+        snprintf(m_formatStatusText, 82, "%s CC: %04d OI: %08d CI: %08d",
                 DSDcc::DSDdPMR::dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
                 m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode(),
                 m_dsdDemod->getDecoder().getDPMRDecoder().getOwnId(),
