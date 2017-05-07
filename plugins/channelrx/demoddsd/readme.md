@@ -79,15 +79,22 @@ This can be one of the following:
 
 <h3>3a: Symbol PLL lock indicator</h3>
 
-Since dsdcc version 1.7.0 the synbol synchronization is done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. This works significantly better than with the ringing filter alone used in previous versions.
+Since dsdcc version 1.7.1 the synbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
 
-This indicator lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
+However with marginal signals the ringing filter alone and a few heuristics work better. This is why since DSDcc version 1.7.1 the PLL became optional.
+
+You can use this button to toggle between the two options:
+
+  - with the locker icon in locked position: PLL is engaged
+  - with the locker icon in unlocked position: PLL is bypassed
+
+When in lock position the button lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
 
 <h3>4: Symbol synchronization zero crossing hits in %</h3>
 
 This is the percentage per symbols for which a valid zero crossing has been detected. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
 
-Since dsdcc version 1.7.0 and its PLL the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
+With the PLL engaged the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
 
 <h3>5: Zero crossing shift</h3>
  
