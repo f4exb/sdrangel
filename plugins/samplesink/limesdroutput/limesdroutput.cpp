@@ -688,6 +688,28 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         }
     }
 
+    if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+    {
+        m_settings.m_antennaPath = settings.m_antennaPath;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::setTxAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
+                    m_deviceShared.m_channel,
+                    m_settings.m_antennaPath))
+            {
+                doCalibration = true;
+                qDebug("LimeSDRInput::applySettings: set antenna path to %d",
+                        (int) m_settings.m_antennaPath);
+            }
+            else
+            {
+                qCritical("LimeSDRInput::applySettings: could not set antenna path to %d",
+                        (int) m_settings.m_antennaPath);
+            }
+        }
+    }
+
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;

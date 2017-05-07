@@ -85,6 +85,7 @@ private slots:
     void on_lpFIREnable_toggled(bool checked);
     void on_lpFIR_changed(quint64 value);
     void on_gain_valueChanged(int value);
+    void on_antenna_currentIndexChanged(int index);
 
     void updateHardware();
     void updateStatus();

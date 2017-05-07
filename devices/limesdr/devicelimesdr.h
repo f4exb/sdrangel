@@ -24,12 +24,19 @@ class DeviceLimeSDR
 public:
     enum PathRxRFE
     {
-        PATH_RFE_NONE = 0,
+        PATH_RFE_RX_NONE = 0,
         PATH_RFE_LNAH,
         PATH_RFE_LNAL,
         PATH_RFE_LNAW,
         PATH_RFE_LB1,
         PATH_RFE_LB2
+    };
+
+    enum PathTxRFE
+    {
+        PATH_RFE_TX_NONE = 0,
+        PATH_RFE_TXRF1,
+        PATH_RFE_TXRF2,
     };
 
     /** set NCO frequency with positive or negative frequency (deals with up/down convert). Enables or disables NCO */
@@ -40,8 +47,10 @@ public:
     static bool SetRFETIA_dB(lms_device_t *device, std::size_t chan, int value);
     /** set PGA gain Range: [0-32] (dB) **/
     static bool SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float value);
-    /** Set antenna path **/
+    /** Set Rx antenna path **/
     static bool setRxAntennaPath(lms_device_t *device, std::size_t chan, int path);
+    /** Set Tx antenna path **/
+    static bool setTxAntennaPath(lms_device_t *device, std::size_t chan, int path);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDR_H_ */

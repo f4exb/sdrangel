@@ -258,6 +258,8 @@ void LimeSDROutputGUI::displaySettings()
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
 
+    ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
+
     setNCODisplay();
 }
 
@@ -424,5 +426,11 @@ void LimeSDROutputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+    sendSettings();
+}
+
+void LimeSDROutputGUI::on_antenna_currentIndexChanged(int index)
+{
+    m_settings.m_antennaPath = (LimeSDROutputSettings::PathRFE) index;
     sendSettings();
 }

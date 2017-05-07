@@ -250,43 +250,73 @@ bool DeviceLimeSDR::setRxAntennaPath(lms_device_t *device, std::size_t chan, int
     case PATH_RFE_LNAH:
         if (LMS_SetAntenna(device, LMS_CH_RX, chan, 1) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to LNAH\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to LNAH\n");
             return false;
         }
         break;
     case PATH_RFE_LNAL:
         if (LMS_SetAntenna(device, LMS_CH_RX, chan, 2) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to LNAL\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to LNAL\n");
             return false;
         }
         break;
     case PATH_RFE_LNAW:
         if (LMS_SetAntenna(device, LMS_CH_RX, chan, 3) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to LNAW\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to LNAW\n");
             return false;
         }
         break;
     case PATH_RFE_LB1:
         if (LMS_SetAntenna(device, LMS_CH_TX, chan, 1) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to Loopback TX1\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to Loopback TX1\n");
             return false;
         }
         break;
     case PATH_RFE_LB2:
         if (LMS_SetAntenna(device, LMS_CH_TX, chan, 2) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to Loopback TX2\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to Loopback TX2\n");
             return false;
         }
         break;
-    case PATH_RFE_NONE:
+    case PATH_RFE_RX_NONE:
     default:
         if (LMS_SetAntenna(device, LMS_CH_RX, chan, 0) < 0)
         {
-            fprintf(stderr, "DeviceLimeSDR::setAntennaPath: cannot set to none\n");
+            fprintf(stderr, "DeviceLimeSDR::setRxAntennaPath: cannot set to none\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool DeviceLimeSDR::setTxAntennaPath(lms_device_t *device, std::size_t chan, int path)
+{
+    switch ((PathTxRFE) path)
+    {
+    case PATH_RFE_TXRF1:
+        if (LMS_SetAntenna(device, LMS_CH_TX, chan, 1) < 0)
+        {
+            fprintf(stderr, "DeviceLimeSDR::setTxAntennaPath: cannot set to TXRF1\n");
+            return false;
+        }
+        break;
+    case PATH_RFE_TXRF2:
+        if (LMS_SetAntenna(device, LMS_CH_TX, chan, 2) < 0)
+        {
+            fprintf(stderr, "DeviceLimeSDR::setTxAntennaPath: cannot set to TXRF2\n");
+            return false;
+        }
+        break;
+    case PATH_RFE_TX_NONE:
+    default:
+        if (LMS_SetAntenna(device, LMS_CH_TX, chan, 0) < 0)
+        {
+            fprintf(stderr, "DeviceLimeSDR::setTxAntennaPath: cannot set to none\n");
             return false;
         }
     }
