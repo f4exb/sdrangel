@@ -69,6 +69,7 @@ public:
     void setMyPoint(float lat, float lon) { m_decoder.setMyPoint(lat, lon); }
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
     void setBaudRate(int baudRate);
+    void setSymbolPLLLock(bool pllLock) { m_decoder.setSymbolPLLLock(pllLock); }
 
 private:
     DSDcc::DSDDecoder m_decoder;

@@ -95,7 +95,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 		bool syncOrConstellation,
 		bool slot1On,
 		bool slot2On,
-		bool tdmaStereo)
+		bool tdmaStereo,
+		bool pllLock)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
 			demodGain,
@@ -109,7 +110,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
 			syncOrConstellation,
 			slot1On,
 			slot2On,
-			tdmaStereo);
+			tdmaStereo,
+			pllLock);
 	messageQueue->push(cmd);
 }
 
@@ -363,6 +365,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_config.m_slot1On = cfg.getSlot1On();
 		m_config.m_slot2On = cfg.getSlot2On();
 		m_config.m_tdmaStereo = cfg.getTDMAStereo();
+		m_config.m_pllLock = cfg.getPLLLock();
 
 		apply();
 
@@ -378,7 +381,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
 				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation
 				<< " m_slot1On: " << m_config.m_slot1On
 				<< " m_slot2On: " << m_config.m_slot2On
-				<< " m_tdmaStereo: " << m_config.m_tdmaStereo;
+				<< " m_tdmaStereo: " << m_config.m_tdmaStereo
+				<< " m_pllLock: " << m_config.m_pllLock;
 
 		return true;
 	}
@@ -451,6 +455,11 @@ void DSDDemod::apply()
         m_dsdDecoder.setTDMAStereo(m_config.m_tdmaStereo);
     }
 
+    if (m_config.m_pllLock != m_running.m_pllLock)
+    {
+        m_dsdDecoder.setSymbolPLLLock(m_config.m_pllLock);
+    }
+
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
@@ -467,4 +476,5 @@ void DSDDemod::apply()
 	m_running.m_slot1On = m_config.m_slot1On;
 	m_running.m_slot2On = m_config.m_slot2On;
 	m_running.m_tdmaStereo = m_config.m_tdmaStereo;
+	m_running.m_pllLock = m_config.m_pllLock;
 }

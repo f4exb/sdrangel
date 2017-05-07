@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demoddsd/dsddemodgui.h"
+#include "dsddemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
@@ -23,7 +23,7 @@
 #include <QMainWindow>
 #include <QDebug>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"
 #include "dsp/scopevis.h"
 #include "gui/glscope.h"
@@ -34,7 +34,7 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-#include "../../channelrx/demoddsd/dsddemod.h"
+#include "dsddemod.h"
 
 const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
 
@@ -86,6 +86,7 @@ void DSDDemodGUI::resetToDefaults()
 	ui->squelchGate->setValue(5);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+	ui->symbolPLLLock->setChecked(true);
 
 	blockApplySettings(false);
 	applySettings();
@@ -283,6 +284,16 @@ void DSDDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
+{
+    if (checked) {
+        ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    } else {
+        ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(53,53,53); }");
+    }
+    applySettings();
+}
+
 void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
 	/*
@@ -425,7 +436,8 @@ void DSDDemodGUI::applySettings()
 			m_syncOrConstellation,
 			m_slot1On,
 			m_slot2On,
-			m_tdmaStereo);
+			m_tdmaStereo,
+			ui->symbolPLLLock->isChecked());
 	}
 }
 
@@ -663,10 +675,10 @@ void DSDDemodGUI::tick()
             ui->formatStatusText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background
 	    }
 
-        if (m_squelchOpen && m_dsdDemod->getDecoder().getSymbolPLLLocked()) {
+        if (m_squelchOpen && ui->symbolPLLLock->isChecked() && m_dsdDemod->getDecoder().getSymbolPLLLocked()) {
             ui->symbolPLLLock->setStyleSheet("QToolButton { background-color : green; }");
         } else {
-            ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(53,53,53); }");
+            ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         }
 
         m_tickCount = 0;

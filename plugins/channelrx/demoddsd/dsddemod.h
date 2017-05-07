@@ -54,7 +54,8 @@ public:
 			bool syncOrConstellation,
 			bool slot1On,
 			bool slot2On,
-			bool tdmaStereo);
+			bool tdmaStereo,
+			bool pllLock);
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
 
@@ -123,6 +124,7 @@ private:
 		bool getSlot1On() const { return m_slot1On; }
 		bool getSlot2On() const { return m_slot2On; }
 		bool getTDMAStereo() const { return m_tdmaStereo; }
+		bool getPLLLock() const { return m_pllLock; }
 
 		static MsgConfigureDSDDemod* create(int rfBandwidth,
 				int  demodGain,
@@ -136,7 +138,8 @@ private:
 				bool syncOrConstellation,
 				bool slot1On,
 				bool slot2On,
-				bool tdmaStereo)
+				bool tdmaStereo,
+				bool pllLock)
 		{
 			return new MsgConfigureDSDDemod(rfBandwidth,
 			        demodGain,
@@ -150,7 +153,8 @@ private:
 			        syncOrConstellation,
 			        slot1On,
 			        slot2On,
-			        tdmaStereo);
+			        tdmaStereo,
+			        pllLock);
 		}
 
 	private:
@@ -167,6 +171,7 @@ private:
         bool m_slot1On;
         bool m_slot2On;
         bool m_tdmaStereo;
+        bool m_pllLock;
 
 		MsgConfigureDSDDemod(int rfBandwidth,
 				int  demodGain,
@@ -180,7 +185,8 @@ private:
 				bool syncOrConstellation,
 				bool slot1On,
 				bool slot2On,
-				bool tdmaStereo) :
+				bool tdmaStereo,
+				bool pllLock) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_demodGain(demodGain),
@@ -194,7 +200,8 @@ private:
 			m_syncOrConstellation(syncOrConstellation),
 			m_slot1On(slot1On),
 			m_slot2On(slot2On),
-			m_tdmaStereo(tdmaStereo)
+			m_tdmaStereo(tdmaStereo),
+			m_pllLock(pllLock)
 		{ }
 	};
 
@@ -226,6 +233,7 @@ private:
 		bool m_slot1On;
 		bool m_slot2On;
 		bool m_tdmaStereo;
+		bool m_pllLock;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -243,7 +251,8 @@ private:
 			m_syncOrConstellation(false),
 			m_slot1On(false),
 			m_slot2On(false),
-			m_tdmaStereo(false)
+			m_tdmaStereo(false),
+			m_pllLock(true)
 		{ }
 	};
 
