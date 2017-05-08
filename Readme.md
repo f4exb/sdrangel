@@ -100,14 +100,6 @@ Then add the following defines on `cmake` command line:
 
 `-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
 
-For binary installation you need at least a mimimal install of LimeSuite as a prerequisite. The following packages are provided with SDRangel binary distribution:
-
-  - `liblimesuite17.02-1_17.02.1-1_amd64.deb`
-  - `liblimesuite-dev_17.02.1-1_amd64.deb`
-  - `limesuite-udev_17.02.1-1_amd64.deb` (if you want the udev rules)
-
-Alternatively you can install a full LimeSuite from PPA following [these instructions](http://wiki.myriadrf.org/Lime_Suite).
-
 <h2>RTL-SDR</h2>
 
 RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
