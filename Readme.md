@@ -32,7 +32,7 @@ From version 3 transmission or signal generation is supported for BladeRF and Ha
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
-  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only and experimental
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
 
 <h1>Supported hardware</h1>
@@ -79,7 +79,9 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-Linux only.
+Linux only and experimental.
+
+&#9888; LimeSuite library itself is unstable or made unstable in the source and sink plugins due to lack of documentation. These plugins are provided as a minimal support and further development is suspended until proper support for LimeSDR is available.
 
 You will need a minimal installation of LimeSuite:
 
