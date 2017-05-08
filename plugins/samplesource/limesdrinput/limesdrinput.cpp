@@ -572,7 +572,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
-                doCalibration = true;
+                //doCalibration = true;
                 qDebug() << "LimeSDRInput::applySettings: Gain set to " << m_settings.m_gain;
             }
         }
@@ -673,7 +673,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_ncoEnable,
                     m_settings.m_ncoFrequency))
             {
-                doCalibration = true;
+                //doCalibration = true;
                 forwardChangeOwnDSP = true;
                 m_deviceShared.m_ncoFrequency = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0; // for buddies
                 qDebug("LimeSDRInput::applySettings: %sd and set NCO to %d Hz",
