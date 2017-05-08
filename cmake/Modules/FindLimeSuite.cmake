@@ -1,21 +1,25 @@
 # Find Lime Suite
 
-FIND_PATH (LIMESUITE_INCLUDE_DIR
-    NAMES lime/LimeSuite.h
-    PATHS
-    /usr/include
-    /usr/local/include
-)
+if (!LIMESUITE_INCLUDE_DIR)
+    FIND_PATH (LIMESUITE_INCLUDE_DIR
+        NAMES lime/LimeSuite.h
+        PATHS
+        /usr/include
+        /usr/local/include
+    )
+endif()
 
-FIND_LIBRARY (LIMESUITE_LIBRARY
-    NAMES LimeSuite
-    HINTS ${CMAKE_INSTALL_PREFIX}/lib
-          ${CMAKE_INSTALL_PREFIX}/lib64
-    PATHS /usr/local/lib
-          /usr/local/lib64
-          /usr/lib
-          /usr/lib64
-)
+if (!LIMESUITE_LIBRARY)
+    FIND_LIBRARY (LIMESUITE_LIBRARY
+        NAMES LimeSuite
+        HINTS ${CMAKE_INSTALL_PREFIX}/lib
+              ${CMAKE_INSTALL_PREFIX}/lib64
+        PATHS /usr/local/lib
+              /usr/local/lib64
+              /usr/lib
+              /usr/lib64
+    )
+endif()
 
 IF (LIMESUITE_INCLUDE_DIR AND LIMESUITE_LIBRARY)
     SET(LIMESUITE_FOUND TRUE)
