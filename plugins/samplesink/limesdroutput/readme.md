@@ -27,15 +27,7 @@ Then add the following defines on `cmake` command line:
 
 <h2>Installation from binary packages</h2>
 
-Packages are provided in the releases section for AMD64 architecture only in the form of .deb files. Support for LimeSDR has to be installed as a prerequisite to installing SDRangel from the .deb package.
-
-The following packages are provided with SDRangel binary distribution:
-
-  - `liblimesuite17.02-1_17.02.1-1_amd64.deb`
-  - `liblimesuite-dev_17.02.1-1_amd64.deb`
-  - `limesuite-udev_17.02.1-1_amd64.deb` (if you want the udev rules)
-
-Alternatively you can install a full LimeSuite from PPA following [these instructions](http://wiki.myriadrf.org/Lime_Suite).
+&#9888; The LimeSDR plugins are not deployed in the binary packages because it does not build with Debian
 
 <h2>Interface</h2>
 
