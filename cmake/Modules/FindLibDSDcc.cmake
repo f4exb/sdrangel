@@ -14,7 +14,9 @@ if(NOT LIBDSDCC_FOUND)
     PATHS
     ${LIBDSDCC_PKG_LIBRARY_DIRS}
     /usr/lib
+    /usr/lib64
     /usr/local/lib
+    /usr/local/lib64
   )
 
   if(LIBDSDCC_INCLUDE_DIR AND LIBDSDCC_LIBRARIES)

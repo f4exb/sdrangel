@@ -19,7 +19,9 @@ FIND_LIBRARY(CM256CC_LIBRARIES
     PATHS
     ${CM256CC_INCLUDE_DIR}/../lib
     /usr/local/lib
+    /usr/local/lib64
     /usr/lib
+    /usr/lib64
 )
 
 if(CM256CC_INCLUDE_DIR AND CM256CC_LIBRARIES)
