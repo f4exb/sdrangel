@@ -84,9 +84,9 @@ void LimeSDROutputThread::run()
     }
 
     count = 0;
-    msleep = LIMESDROUTPUT_BLOCKSIZE/(m_sampleRate/1e6f);
-    mdelta = msleep/100;
-    msleep = (3*msleep)/4; // to start faster
+//    msleep = LIMESDROUTPUT_BLOCKSIZE/(m_sampleRate/1e6f);
+//    mdelta = msleep/100;
+//    msleep = (3*msleep)/4; // to start faster
 
     while (m_running)
     {
@@ -104,25 +104,25 @@ void LimeSDROutputThread::run()
             qDebug("LimeSDROutputThread::run written %d/%d samples", res, LIMESDROUTPUT_BLOCKSIZE);
         }
 
-        usleep(msleep);
-
-        if (count < 10)
-        {
-            count++;
-        }
-        else
-        {
-            if (LMS_GetStreamStatus(m_stream, &streamStatus) == 0)
-            {
-                if (streamStatus.fifoFilledCount < (4*streamStatus.fifoSize)/5) { // FIFO at 80%
-                    msleep -= mdelta;
-                } else {
-                    msleep += mdelta;
-                }
-            }
-
-            count = 0;
-        }
+//        usleep(msleep);
+//
+//        if (count < 10)
+//        {
+//            count++;
+//        }
+//        else
+//        {
+//            if (LMS_GetStreamStatus(m_stream, &streamStatus) == 0)
+//            {
+//                if (streamStatus.fifoFilledCount < (4*streamStatus.fifoSize)/5) { // FIFO at 80%
+//                    msleep -= mdelta;
+//                } else {
+//                    msleep += mdelta;
+//                }
+//            }
+//
+//            count = 0;
+//        }
     }
 
     if (LMS_StopStream(m_stream) < 0) {

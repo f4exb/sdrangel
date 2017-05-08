@@ -427,7 +427,7 @@ void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
 
 void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5))
+    if ((index <0) || (index > 6))
         return;
     m_settings.m_log2SoftDecim = index;
     sendSettings();

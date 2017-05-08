@@ -395,7 +395,7 @@ void LimeSDROutputGUI::on_hwInterp_currentIndexChanged(int index)
 
 void LimeSDROutputGUI::on_swInterp_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5))
+    if ((index <0) || (index > 6))
         return;
     m_settings.m_log2SoftInterp = index;
     sendSettings();
