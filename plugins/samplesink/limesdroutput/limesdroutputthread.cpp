@@ -92,7 +92,7 @@ void LimeSDROutputThread::run()
     {
         callback(m_buf, LIMESDROUTPUT_BLOCKSIZE);
 
-        res = LMS_SendStream(m_stream, (void *) m_buf, LIMESDROUTPUT_BLOCKSIZE, &metadata, 1000);
+        res = LMS_SendStream(m_stream, (void *) m_buf, LIMESDROUTPUT_BLOCKSIZE, &metadata, 1000000);
 
         if (res < 0)
         {
