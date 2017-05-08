@@ -32,7 +32,7 @@ void LimeSDROutputSettings::resetToDefaults()
     m_lpfBW = 5.5e6f;
     m_lpfFIREnable = false;
     m_lpfFIRBW = 2.5e6f;
-    m_gain = 30;
+    m_gain = 4;
     m_ncoEnable = false;
     m_ncoFrequency = 0;
     m_antennaPath = PATH_RFE_NONE;
@@ -76,7 +76,7 @@ bool LimeSDROutputSettings::deserialize(const QByteArray& data)
         d.readFloat(7, &m_lpfBW, 1.5e6);
         d.readBool(8, &m_lpfFIREnable, false);
         d.readFloat(9, &m_lpfFIRBW, 1.5e6);
-        d.readU32(10, &m_gain, 0);
+        d.readU32(10, &m_gain, 4);
         d.readBool(11, &m_ncoEnable, false);
         d.readS32(12, &m_ncoFrequency, 0);
         d.readS32(13, &intval, 0);
