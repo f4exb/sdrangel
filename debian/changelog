@@ -1,3 +1,11 @@
+sdrangel (3.4.4-1) unstable; urgency=medium
+
+  * LimeSDR output: fixed timeout value on LMS_SendStream
+  * LimeSDR: various fixes to make it run smoothly
+  * cmake modules: search lib64 libraries
+  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 08 May 2017 21:14:18 +0100
+
 sdrangel (3.4.3-1) unstable; urgency=medium
 
   * DSD demod: use version 1.7.1 of dsdcc with PLL for symbol synchronization as an option
