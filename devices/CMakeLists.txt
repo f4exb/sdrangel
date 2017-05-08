@@ -1,11 +1,14 @@
 project(devices)
 
 find_package(LibUSB)
+find_package(LimeSuite)
 
 if (BUILD_DEBIAN)
     add_subdirectory(bladerf)
     add_subdirectory(hackrf)
-    add_subdirectory(limesdr)
+    if(LIMESUITE_FOUND)
+        add_subdirectory(limesdr)
+    endif(LIMESUITE_FOUND)
 else(BUILD_DEBIAN)
     find_package(LibBLADERF)
     if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
@@ -17,7 +20,6 @@ else(BUILD_DEBIAN)
         add_subdirectory(hackrf)
     endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
 
-    find_package(LimeSuite)
     if(LIBUSB_FOUND AND LIMESUITE_FOUND)
         add_subdirectory(limesdr)
     endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
