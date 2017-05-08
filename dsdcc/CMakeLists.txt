@@ -23,6 +23,7 @@ set(dsdcc_SOURCES
     ${LIBDSDCCSRC}/pn.cpp
     ${LIBDSDCCSRC}/mbefec.cpp
     ${LIBDSDCCSRC}/locator.cpp
+    ${LIBDSDCCSRC}/phaselock.cpp
 )
 
 set(dsdcc_HEADERS
@@ -50,7 +51,8 @@ set(dsdcc_HEADERS
     ${LIBDSDCCSRC}/viterbi5.h
     ${LIBDSDCCSRC}/pn.h
     ${LIBDSDCCSRC}/mbefec.h
-    ${LIBDSDCCSRC}/locator.h    
+    ${LIBDSDCCSRC}/locator.h
+    ${LIBDSDCCSRC}/phaselock.h
 )
 
 add_definitions(-DDSD_USE_MBELIB)
