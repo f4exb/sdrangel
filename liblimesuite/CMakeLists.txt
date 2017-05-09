@@ -26,6 +26,7 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_common.cpp
     ${LIBLIMESUITESRC}/src/GFIR/corrections.c
     ${LIBLIMESUITESRC}/src/GFIR/gfir_lms.c
+    ${LIBLIMESUITESRC}/src/GFIR/lms.c
     ${LIBLIMESUITESRC}/src/GFIR/recipes.c
     ${LIBLIMESUITESRC}/src/GFIR/rounding.c
     ${LIBLIMESUITESRC}/src/kissFFT/kiss_fft.c
@@ -63,6 +64,7 @@ set(limesuite_HEADERS
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_common.h
     ${LIBLIMESUITESRC}/src/GFIR/dfilter.h
     ${LIBLIMESUITESRC}/src/GFIR/lms_gfir.h
+    ${LIBLIMESUITESRC}/src/GFIR/lms.h
     ${LIBLIMESUITESRC}/src/kissFFT/_kiss_fft_guts.h
     ${LIBLIMESUITESRC}/src/kissFFT/kiss_fft.h
     ${LIBLIMESUITESRC}/src/lms7002m/CalibrationCache.h
