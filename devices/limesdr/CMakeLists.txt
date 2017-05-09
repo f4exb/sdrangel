@@ -17,6 +17,14 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBLIMESUITESRC}/src
+    ${LIBLIMESUITESRC}/src/ADF4002
+    ${LIBLIMESUITESRC}/src/ConnectionRegistry
+    ${LIBLIMESUITESRC}/src/FPGA_common
+    ${LIBLIMESUITESRC}/src/GFIR
+    ${LIBLIMESUITESRC}/src/lms7002m
+    ${LIBLIMESUITESRC}/src/lms7002m_mcu
+    ${LIBLIMESUITESRC}/src/Si5351C
+    ${LIBLIMESUITESRC}/src/protocols    
 )
 else (BUILD_DEBIAN)
 include_directories(
