@@ -16,7 +16,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIMESUITESRC}/src
+    ${LIBLIMESUITESRC}/src
 )
 else (BUILD_DEBIAN)
 include_directories(
