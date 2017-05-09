@@ -81,8 +81,6 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 Linux only and experimental.
 
-&#9888; The LimeSDR plugins are not deployed in the binary packages because it does not build with Debian
-
 &#9888; LimeSuite library itself is unstable or made unstable in the source and sink plugins due to lack of documentation. These plugins are provided as a minimal support and further development is suspended until proper support for LimeSDR is available.
 
 You will need a minimal installation of LimeSuite:

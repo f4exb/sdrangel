@@ -27,7 +27,7 @@ Then add the following defines on `cmake` command line:
 
 <h2>Installation from binary packages</h2>
 
-&#9888; The LimeSDR plugins are not deployed in the binary packages because it does not build with Debian
+&#9758; LimeSuite is built in the binary packages so there is no external dependency
 
 <h2>Interface</h2>
 
