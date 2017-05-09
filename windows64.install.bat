@@ -25,6 +25,7 @@ copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
+copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 copy %opencvdir%\opencv_ffmpeg2413_64.dll %2

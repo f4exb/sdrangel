@@ -44,7 +44,7 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMImages.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMing.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDR.cpp\
-    $$LIBLIMESUITESRC/src/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
+    srcmw/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDRing.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybus.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybusEntry.cpp\
