@@ -6,7 +6,7 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/ADF4002/ADF4002.cpp 
     ${LIBLIMESUITESRC}/src/API/lms7_api.cpp
     ${LIBLIMESUITESRC}/src/API/lms7_device.cpp
-    ${LIBLIMESUITESRC}/src/ConnectionRegistry/BuiltinConnections.in.cpp
+    src/BuiltinConnections.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionHandle.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionRegistry.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionRegistry.cpp
@@ -18,7 +18,7 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/Connection_uLimeSDR.cpp
     ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp
     ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/Connection_uLimeSDRing.cpp
-    ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/DRV_DriverInterface.cpp
+#    ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/DRV_DriverInterface.cpp
     ${LIBLIMESUITESRC}/src/ConnectionXillybus/ConnectionXillybus.cpp
     ${LIBLIMESUITESRC}/src/ConnectionXillybus/ConnectionXillybusEntry.cpp
     ${LIBLIMESUITESRC}/src/ConnectionXillybus/ConnectionXillybusing.cpp
@@ -44,8 +44,8 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/Si5351C/Si5351C.cpp
     ${LIBLIMESUITESRC}/src/ErrorReporting.cpp
     ${LIBLIMESUITESRC}/src/Logger.cpp
-    ${LIBLIMESUITESRC}/src/SystemResources.in.cpp
-    ${LIBLIMESUITESRC}/src/VersionInfo.in.cpp
+    src/SystemResources.cpp
+    src/VersionInfo.cpp
 )
 
 set(limesuite_HEADERS
@@ -94,14 +94,17 @@ include_directories(
     ${LIBLIMESUITESRC}/src
     ${LIBLIMESUITESRC}/src/ADF4002
     ${LIBLIMESUITESRC}/src/ConnectionRegistry
+    ${LIBLIMESUITESRC}/src/FPGA_common
     ${LIBLIMESUITESRC}/src/GFIR
     ${LIBLIMESUITESRC}/src/lms7002m
     ${LIBLIMESUITESRC}/src/lms7002m_mcu
     ${LIBLIMESUITESRC}/src/Si5351C
     ${LIBLIMESUITESRC}/src/protocols
+    ${LIBLIMESUITESRC}/external/cpp-feather-ini-parser
     ./include
 )
 
+set (CMAKE_CXX_STANDARD 11)
 add_definitions(-DQT_SHARED)
 
 add_library(limesuite SHARED

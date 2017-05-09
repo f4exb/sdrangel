@@ -561,6 +561,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(librtlsdr)
     add_subdirectory(libbladerf)
     add_subdirectory(libmirisdr)
+    add_subdirectory(liblimesuite)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(devices)
