@@ -22,12 +22,21 @@ set(limesdrinput_FORMS
 	limesdrinputgui.ui
 )
 
+if (BUILD_DEBIAN)
+include_directories(
+        .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/devices    
+    ${LIBLIMESUITESRC}/src
+)
+else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/devices
 	${LIMESUITE_INCLUDE_DIR}
 )
+endif (BUILD_DEBIAN)
 
 #include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
@@ -43,12 +52,21 @@ add_library(inputlimesdr SHARED
 	${limesdrinput_FORMS_HEADERS}
 )
 
+if (BUILD_DEBIAN)
+target_link_libraries(inputlimesdr
+    ${QT_LIBRARIES}
+    limesuite
+    sdrbase
+    limesdrdevice
+)
+else (BUILD_DEBIAN)
 target_link_libraries(inputlimesdr
 	${QT_LIBRARIES}
 	${LIMESUITE_LIBRARY}
 	sdrbase
 	limesdrdevice
 )
+endif (BUILD_DEBIAN)
 
 qt5_use_modules(inputlimesdr Core Widgets)
 
