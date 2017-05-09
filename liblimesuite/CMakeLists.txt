@@ -10,7 +10,6 @@ set(limesuite_SOURCES
     src/BuiltinConnections.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionHandle.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionRegistry.cpp
-    ${LIBLIMESUITESRC}/src/ConnectionRegistry/ConnectionRegistry.cpp
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/IConnection.cpp
     ${LIBLIMESUITESRC}/src/ConnectionSTREAM/ConnectionSTREAM.cpp
     ${LIBLIMESUITESRC}/src/ConnectionSTREAM/ConnectionSTREAMEntry.cpp
