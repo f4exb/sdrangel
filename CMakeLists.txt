@@ -131,6 +131,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/spectrumscopengcombovis.cpp
     sdrbase/dsp/scopevis.cpp
     sdrbase/dsp/scopevisng.cpp
+    sdrbase/dsp/scopevismulti.cpp
     sdrbase/dsp/spectrumvis.cpp
     sdrbase/dsp/threadedbasebandsamplesink.cpp
     sdrbase/dsp/threadedbasebandsamplesource.cpp
@@ -146,7 +147,9 @@ set(sdrbase_SOURCES
     sdrbase/gui/glscope.cpp
     sdrbase/gui/glscopegui.cpp
     sdrbase/gui/glscopeng.cpp
+    sdrbase/gui/glscopemulti.cpp
     sdrbase/gui/glscopenggui.cpp
+    sdrbase/gui/glscopemultigui.cpp
     sdrbase/gui/glshadersimple.cpp
     sdrbase/gui/glshadertextured.cpp
     sdrbase/gui/glspectrum.cpp
@@ -248,6 +251,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/spectrumscopengcombovis.h
     sdrbase/dsp/scopevis.h
     sdrbase/dsp/scopevisng.h
+    sdrbase/dsp/scopevismulti.h
     sdrbase/dsp/spectrumvis.h
     sdrbase/dsp/threadedbasebandsamplesink.h
     sdrbase/dsp/threadedbasebandsamplesource.h
@@ -262,7 +266,9 @@ set(sdrbase_HEADERS
     sdrbase/gui/glscope.h
     sdrbase/gui/glscopegui.h
     sdrbase/gui/glscopeng.h
+    sdrbase/gui/glscopemulti.h
     sdrbase/gui/glscopenggui.h
+    sdrbase/gui/glscopemultigui.h
     sdrbase/gui/glshadersimple.h
     sdrbase/gui/glshadertextured.h
     sdrbase/gui/glspectrum.h
@@ -323,6 +329,7 @@ set(sdrbase_FORMS
     sdrbase/gui/cwkeyergui.ui
     sdrbase/gui/glscopegui.ui
     sdrbase/gui/glscopenggui.ui
+    sdrbase/gui/glscopemultigui.ui
     sdrbase/gui/glspectrumgui.ui
     sdrbase/gui/pluginsdialog.ui
     sdrbase/gui/audiodialog.ui
