@@ -130,7 +130,7 @@ private:
 	Real m_magsqPeak;
 	int  m_magsqCount;
 
-	MovingAverage<Real> m_movingAverage;
+	MovingAverage<double> m_movingAverage;
 	SimpleAGC m_volumeAGC;
 
 	AudioVector m_audioBuffer;
