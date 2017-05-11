@@ -57,7 +57,8 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_DSBFilter(0),
     m_DSBFilterBuffer(0),
     m_DSBFilterBufferIndex(0),
-    m_objAvgColIndex(3)
+    m_objAvgColIndex(3),
+    m_objMagSqAverage(40, 0)
 {
     setObjectName("ATVDemod");
 

@@ -40,7 +40,8 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	m_settingsMutex(QMutex::Recursive),
     m_scope(sampleSink),
 	m_scopeEnabled(true),
-	m_dsdDecoder()
+	m_dsdDecoder(),
+	m_movingAverage(40, 0)
 {
 	setObjectName("DSDDemod");
 

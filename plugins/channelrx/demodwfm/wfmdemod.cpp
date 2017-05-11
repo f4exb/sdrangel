@@ -36,7 +36,8 @@ WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
     m_magsq(0.0f),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
-    m_magsqCount(0)
+    m_magsqCount(0),
+    m_movingAverage(40, 0)
 
 {
 	setObjectName("WFMDemod");

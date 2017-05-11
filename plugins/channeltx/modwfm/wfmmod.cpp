@@ -46,7 +46,9 @@ WFMMod::WFMMod() :
 	m_afInput(WFMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+	m_movingAverage(40, 0),
+	m_volumeAGC(40, 0)
 {
 	setObjectName("WFMod");
 

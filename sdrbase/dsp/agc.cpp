@@ -8,14 +8,6 @@
 #include "dsp/agc.h"
 
 
-AGC::AGC() :
-	m_u0(1.0),
-	m_R(1.0),
-	m_moving_average(),
-	m_historySize(0),
-	m_count(0)
-{}
-
 AGC::AGC(int historySize, Real R) :
 	m_u0(1.0),
 	m_R(R),
@@ -45,10 +37,10 @@ Real AGC::getAverage()
 	return m_moving_average.average();
 }
 
-MagSquaredAGC::MagSquaredAGC() :
-	AGC(),
-	m_magsq(0.0)
-{}
+//MagSquaredAGC::MagSquaredAGC() :
+//	AGC(),
+//	m_magsq(0.0)
+//{}
 
 MagSquaredAGC::MagSquaredAGC(int historySize, Real R) :
 	AGC(historySize, R),
@@ -67,10 +59,10 @@ void MagSquaredAGC::feed(Complex& ci)
 }
 
 
-MagAGC::MagAGC() :
-	AGC(),
-	m_magsq(0.0)
-{}
+//MagAGC::MagAGC() :
+//	AGC(),
+//	m_magsq(0.0)
+//{}
 
 MagAGC::MagAGC(int historySize, Real R) :
 	AGC(historySize, R),
@@ -89,12 +81,12 @@ void MagAGC::feed(Complex& ci)
 }
 
 
-AlphaAGC::AlphaAGC() :
-	AGC(),
-	m_alpha(0.5),
-	m_magsq(0.0),
-	m_squelchOpen(true)
-{}
+//AlphaAGC::AlphaAGC() :
+//	AGC(),
+//	m_alpha(0.5),
+//	m_magsq(0.0),
+//	m_squelchOpen(true)
+//{}
 
 AlphaAGC::AlphaAGC(int historySize, Real R) :
 	AGC(historySize, R),

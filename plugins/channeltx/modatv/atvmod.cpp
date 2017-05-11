@@ -63,7 +63,8 @@ ATVMod::ATVMod() :
     m_SSBFilterBuffer(0),
     m_DSBFilterBuffer(0),
     m_SSBFilterBufferIndex(0),
-    m_DSBFilterBufferIndex(0)
+    m_DSBFilterBufferIndex(0),
+    m_movingAverage(40, 0)
 {
     setObjectName("ATVMod");
     scanCameras();

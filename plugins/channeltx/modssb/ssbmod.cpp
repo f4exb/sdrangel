@@ -52,7 +52,9 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+	m_movingAverage(40, 0),
+	m_volumeAGC(40, 0)
 {
 	setObjectName("SSBMod");
 

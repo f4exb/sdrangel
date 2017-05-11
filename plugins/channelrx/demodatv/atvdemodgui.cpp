@@ -276,7 +276,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
         m_objChannelMarker(this),
         m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true),
-        m_intTickCount(0)
+        m_intTickCount(0),
+        m_objMagSqAverage(40, 0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);

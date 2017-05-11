@@ -33,7 +33,9 @@ AMDemod::AMDemod() :
 	m_settingsMutex(QMutex::Recursive),
 	m_magsqSum(0.0f),
 	m_magsqPeak(0.0f),
-	m_magsqCount(0)
+	m_magsqCount(0),
+	m_movingAverage(40, 0),
+	m_volumeAGC(40, 0)
 {
 	setObjectName("AMDemod");
 

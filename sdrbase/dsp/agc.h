@@ -13,8 +13,6 @@
 class AGC
 {
 public:
-
-	AGC();
 	AGC(int historySize, Real R);
 	virtual ~AGC();
 
@@ -34,7 +32,6 @@ protected:
 class MagSquaredAGC : public AGC
 {
 public:
-	MagSquaredAGC();
 	MagSquaredAGC(int historySize, Real R);
 	virtual ~MagSquaredAGC();
 	virtual void feed(Complex& ci);
@@ -46,7 +43,6 @@ private:
 class MagAGC : public AGC
 {
 public:
-	MagAGC();
 	MagAGC(int historySize, Real R);
 	virtual ~MagAGC();
 	virtual void feed(Complex& ci);
@@ -58,7 +54,6 @@ private:
 class AlphaAGC : public AGC
 {
 public:
-	AlphaAGC();
 	AlphaAGC(int historySize, Real R);
 	AlphaAGC(int historySize, Real R, Real alpha);
 	virtual ~AlphaAGC();
@@ -74,14 +69,6 @@ private:
 class SimpleAGC
 {
 public:
-	SimpleAGC() :
-			m_squelchOpen(false),
-			m_fill(0),
-			m_cutoff(0),
-			m_clip(0),
-			m_moving_average()
-	{}
-
 	SimpleAGC(int historySize, Real initial, Real cutoff=0, Real clip=0) :
 			m_squelchOpen(false),
 			m_fill(initial),
