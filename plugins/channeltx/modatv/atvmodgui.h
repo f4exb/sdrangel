@@ -108,7 +108,7 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
     ATVMod* m_atvMod;
-    MovingAverage<Real> m_channelPowerDbAvg;
+    MovingAverage<double> m_channelPowerDbAvg;
 
     QString m_imageFileName;
     QString m_videoFileName;

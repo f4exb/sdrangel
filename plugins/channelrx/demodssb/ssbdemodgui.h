@@ -68,7 +68,7 @@ private:
 	bool m_audioFlipChannels;
 	bool m_dsb;
 	bool m_audioMute;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;

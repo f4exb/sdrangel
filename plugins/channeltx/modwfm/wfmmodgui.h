@@ -93,7 +93,7 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
     WFMMod* m_wfmMod;
-    MovingAverage<Real> m_channelPowerDbAvg;
+    MovingAverage<double> m_channelPowerDbAvg;
 
     QString m_fileName;
     quint32 m_recordLength;

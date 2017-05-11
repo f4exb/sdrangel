@@ -340,7 +340,7 @@ private:
     Bandpass<Real> m_bandpass;
 
     Real m_magsq;
-    MovingAverage<Real> m_movingAverage;
+    MovingAverage<double> m_movingAverage;
     SimpleAGC m_volumeAGC;
 
     AudioVector m_audioBuffer;

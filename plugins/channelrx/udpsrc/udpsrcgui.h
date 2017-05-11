@@ -83,7 +83,7 @@ private:
 	DeviceSourceAPI* m_deviceAPI;
 	UDPSrc* m_udpSrc;
 	ChannelMarker m_channelMarker;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 
 	// settings
 	UDPSrc::SampleFormat m_sampleFormat;

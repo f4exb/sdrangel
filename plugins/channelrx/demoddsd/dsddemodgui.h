@@ -110,7 +110,7 @@ private:
     bool m_tdmaStereo;
     bool m_audioMute;
 	bool m_squelchOpen;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 	int m_tickCount;
 
 	float m_myLatitude;

@@ -60,7 +60,7 @@ private:
 	DeviceSourceAPI* m_deviceAPI;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 
 	// settings
 	TCPSrc::SampleFormat m_sampleFormat;

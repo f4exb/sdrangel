@@ -63,7 +63,7 @@ private:
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 
 	static const int m_rfBW[];
     static const int m_nbRfBW;

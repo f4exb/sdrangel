@@ -99,7 +99,7 @@ private:
     UpChannelizer* m_channelizer;
     SpectrumVis* m_spectrumVis;
     SSBMod* m_ssbMod;
-    MovingAverage<Real> m_channelPowerDbAvg;
+    MovingAverage<double> m_channelPowerDbAvg;
 
     QString m_fileName;
     quint32 m_recordLength;

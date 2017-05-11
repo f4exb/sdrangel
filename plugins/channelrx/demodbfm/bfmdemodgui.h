@@ -94,7 +94,7 @@ private:
 	RDSParser m_rdsParser;
 
 	BFMDemod* m_bfmDemod;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerDbAvg;
 	int m_rate;
 	std::vector<unsigned int> m_g14ComboIndex;
 

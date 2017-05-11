@@ -652,7 +652,7 @@ private:
     int      m_lineCount;        //!< current line index in frame
     float    m_fps;              //!< resulting frames per second
 
-    MovingAverage<Real> m_movingAverage;
+    MovingAverage<double> m_movingAverage;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
