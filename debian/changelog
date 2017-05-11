@@ -1,7 +1,15 @@
+sdrangel (3.4.5-1) unstable; urgency=medium
+
+  * Removed default constuctors in Moving average and AGC classes 
+  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 11 May 2017 21:14:18 +0100
+
 sdrangel (3.4.4-1) unstable; urgency=medium
 
   * LimeSDR output: fixed timeout value on LMS_SendStream
   * LimeSDR: various fixes to make it run smoothly
+  * LimeSDR: Windows 64 build
+  * LimeSDR: integrated Debian build
   * cmake modules: search lib64 libraries
   
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 08 May 2017 21:14:18 +0100
