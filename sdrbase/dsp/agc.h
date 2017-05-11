@@ -24,7 +24,7 @@ public:
 protected:
 	Real m_u0;
 	Real m_R;       // objective mag
-	MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+	MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
 	int m_historySize;
 	int m_count;
 };
@@ -109,7 +109,7 @@ private:
     Real m_fill;    // refill average at this level
     Real m_cutoff;  // consider samples only above this level
     Real m_clip;    // never go below this level
-    MovingAverage<Real> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+    MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
 };
 
 #endif /* INCLUDE_GPL_DSP_AGC_H_ */
