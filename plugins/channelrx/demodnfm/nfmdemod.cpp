@@ -406,13 +406,13 @@ void NFMDemod::apply()
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_phaseDiscri.setFMScaling((2.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation);
+		m_phaseDiscri.setFMScaling((8.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation); // integrate 4x factor
 		m_settingsMutex.unlock();
 	}
 
 	if (m_config.m_fmDeviation != m_running.m_fmDeviation)
 	{
-		m_phaseDiscri.setFMScaling((2.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation);
+		m_phaseDiscri.setFMScaling((8.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation); // integrate 4x factor
 	}
 
 	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
