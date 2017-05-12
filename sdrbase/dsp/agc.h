@@ -85,6 +85,11 @@ public:
 			m_moving_average.resize(historySize, initial);
 	}
 
+	void fill(double value)
+	{
+	    m_moving_average.fill(value);
+	}
+
 	Real getValue()
 	{
 			if (m_moving_average.average() > m_clip)

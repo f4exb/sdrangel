@@ -160,6 +160,10 @@ private:
         {
             if (m_squelchCount <= m_running.m_audioSampleRate / 10)
             {
+                if (m_squelchCount == m_running.m_audioSampleRate / 20) {
+                    m_volumeAGC.fill(1.0);
+                }
+
                 m_squelchCount++;
             }
         }
