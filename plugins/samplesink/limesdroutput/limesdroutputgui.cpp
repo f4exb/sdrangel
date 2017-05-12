@@ -261,6 +261,8 @@ void LimeSDROutputGUI::displaySettings()
     ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
 
     setNCODisplay();
+
+    ui->ncoEnable->setChecked(m_settings.m_ncoEnable);
 }
 
 void LimeSDROutputGUI::setNCODisplay()
