@@ -184,8 +184,8 @@ private:
 
             m_volumeAGC.feed(demod);
             demod /= m_volumeAGC.getValue();
-            sample = (0.5 - demod) * 2048 * m_running.m_volume;
-//            Real attack = (m_squelchCount - (m_running.m_audioSampleRate / 20)) / (Real) (m_running.m_audioSampleRate / 20);
+            Real attack = m_squelchCount / (0.1f * m_running.m_audioSampleRate);
+            sample = (0.5 - demod) * attack * 2048 * m_running.m_volume;
 //            demod *= ((0.003 * attack) / m_volumeAGC.getValue());
 //            sample = demod * 32700 * 16;
             m_squelchOpen = true;
