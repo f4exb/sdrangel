@@ -37,7 +37,7 @@ AFSquelch::AFSquelch() :
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
-	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 0.0));
+	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 1.0f));
 
 	m_toneSet[0]  = 2000.0;
 	m_toneSet[1]  = 10000.0;
@@ -45,7 +45,7 @@ AFSquelch::AFSquelch() :
 
 AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
 			m_N(0),
-            m_nbAvg(0),
+            m_nbAvg(128),
 			m_sampleRate(0),
 			m_samplesProcessed(0),
 			m_maxPowerIndex(0),
@@ -63,6 +63,7 @@ AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
+    m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 1.0f));
 
 	for (int j = 0; j < m_nTones; ++j)
 	{
