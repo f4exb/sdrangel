@@ -35,7 +35,7 @@ AMDemod::AMDemod() :
 	m_magsqPeak(0.0f),
 	m_magsqCount(0),
 	m_movingAverage(40, 0),
-	m_volumeAGC(40, 0)
+	m_volumeAGC(4800, 1.0)
 {
 	setObjectName("AMDemod");
 

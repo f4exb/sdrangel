@@ -177,21 +177,17 @@ private:
         {
             Real demod = sqrt(magsq);
 
-            if (demod < -1)
-            {
-                demod = -1;
-            }
-            else if (demod > 1)
+            if (demod > 1)
             {
                 demod = 1;
             }
 
             m_volumeAGC.feed(demod);
-
-            Real attack = (m_squelchCount - (m_running.m_audioSampleRate / 20)) / (Real) (m_running.m_audioSampleRate / 20);
-            demod *= ((0.003 * attack) / m_volumeAGC.getValue());
-            demod *= m_running.m_volume;
-            sample = demod * 32700 * 16;
+            demod /= m_volumeAGC.getValue();
+            sample = (0.5 - demod) * 2048 * m_running.m_volume;
+//            Real attack = (m_squelchCount - (m_running.m_audioSampleRate / 20)) / (Real) (m_running.m_audioSampleRate / 20);
+//            demod *= ((0.003 * attack) / m_volumeAGC.getValue());
+//            sample = demod * 32700 * 16;
             m_squelchOpen = true;
         }
         else
