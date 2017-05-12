@@ -7,7 +7,7 @@
 
 const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
 	QString("AM Demodulator"),
-	QString("2.4.0"),
+	QString("3.4.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
