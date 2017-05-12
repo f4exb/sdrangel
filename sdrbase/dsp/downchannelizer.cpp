@@ -77,6 +77,8 @@ void DownChannelizer::feed(const SampleVector::const_iterator& begin, const Samp
 
 			if(stage == m_filterStages.end())
 			{
+			    s.m_real /= (1<<(m_filterStages.size()));
+			    s.m_imag /= (1<<(m_filterStages.size()));
 				m_sampleBuffer.push_back(s);
 			}
 		}
@@ -172,6 +174,8 @@ void DownChannelizer::applyConfiguration()
 
 	m_mutex.unlock();
 
+	//debugFilterChain();
+
 	m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
 
 	qDebug() << "DownChannelizer::applyConfiguration in=" << m_inputSampleRate
@@ -189,7 +193,9 @@ void DownChannelizer::applyConfiguration()
 #ifdef USE_SSE4_1
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>),
-	m_workFunction(0)
+	m_workFunction(0),
+	m_mode(mode),
+	m_sse(true)
 {
 	switch(mode) {
 		case ModeCenter:
@@ -208,7 +214,9 @@ DownChannelizer::FilterStage::FilterStage(Mode mode) :
 #else
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>),
-	m_workFunction(0)
+	m_workFunction(0),
+	m_mode(mode),
+	m_sse(false)
 {
 	switch(mode) {
 		case ModeCenter:
@@ -285,4 +293,28 @@ void DownChannelizer::freeFilterChain()
 	for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
 		delete *it;
 	m_filterStages.clear();
+}
+
+void DownChannelizer::debugFilterChain()
+{
+    qDebug("DownChannelizer::debugFilterChain: %lu stages", m_filterStages.size());
+
+    for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
+    {
+        switch ((*it)->m_mode)
+        {
+        case FilterStage::ModeCenter:
+            qDebug("DownChannelizer::debugFilterChain: center %s", (*it)->m_sse ? "sse" : "no_sse");
+            break;
+        case FilterStage::ModeLowerHalf:
+            qDebug("DownChannelizer::debugFilterChain: lower %s", (*it)->m_sse ? "sse" : "no_sse");
+            break;
+        case FilterStage::ModeUpperHalf:
+            qDebug("DownChannelizer::debugFilterChain: upper %s", (*it)->m_sse ? "sse" : "no_sse");
+            break;
+        default:
+            qDebug("DownChannelizer::debugFilterChain: none %s", (*it)->m_sse ? "sse" : "no_sse");
+            break;
+        }
+    }
 }

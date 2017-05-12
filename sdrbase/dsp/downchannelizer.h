@@ -81,6 +81,8 @@ protected:
 		IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #endif
 		WorkFunction m_workFunction;
+		Mode m_mode;
+		bool m_sse;
 
 		FilterStage(Mode mode);
 		~FilterStage();
@@ -105,6 +107,7 @@ protected:
 	bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
 	Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
 	void freeFilterChain();
+	void debugFilterChain();
 
 signals:
 	void inputSampleRateChanged();
