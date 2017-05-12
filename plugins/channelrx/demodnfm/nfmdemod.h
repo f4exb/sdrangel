@@ -215,6 +215,7 @@ private:
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;
+	bool m_afSquelchOpen;
 	Real m_magsq; //!< displayed averaged value
     Real m_magsqSum;
     Real m_magsqPeak;

@@ -216,7 +216,7 @@ void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
     if (ui->deltaSquelch->isChecked())
     {
         ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 10.0, 0, 'f', 1));
-        ui->squelchText->setToolTip(tr("Squelch deviation threshold (%)"));
+        ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     else
     {

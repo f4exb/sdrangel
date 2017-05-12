@@ -83,7 +83,7 @@ private:
     double *m_u0;
     double *m_u1;
     double *m_power;
-    std::vector<MovingAverage<Real> > m_movingAverages;
+    std::vector<MovingAverage<double> > m_movingAverages;
 };
 
 

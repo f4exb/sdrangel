@@ -37,7 +37,7 @@ AFSquelch::AFSquelch() :
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
-	m_movingAverages.resize(m_nTones, MovingAverage<Real>(m_nbAvg, 0.0));
+	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 0.0));
 
 	m_toneSet[0]  = 2000.0;
 	m_toneSet[1]  = 10000.0;
@@ -89,7 +89,7 @@ void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int 
 	m_sampleRate = _samplerate;
 	m_samplesAttack = _samplesAttack;
 	m_samplesDecay = _samplesDecay;
-	m_movingAverages.resize(m_nTones, MovingAverage<Real>(m_nbAvg, 0.0));
+	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 1.0));
 
 	// for each of the frequencies (tones) of interest calculate
 	// k and the associated filter coefficient as per the Goertzel
@@ -169,7 +169,7 @@ void AFSquelch::reset()
 
 bool AFSquelch::evaluate()
 {
-	double maxPower = 0.0;
+	double maxPower = 1.0;
 	double minPower;
 	int minIndex = 0, maxIndex = 0;
 
@@ -194,6 +194,7 @@ bool AFSquelch::evaluate()
 
 	// principle is to open if power is uneven because noise gives even power
 	bool open = (minPower/maxPower < m_threshold) && (minIndex > maxIndex);
+	//qDebug("AFSquelch::evaluate: %g : %g", minPower/maxPower, m_threshold);
 
 	if (open)
 	{

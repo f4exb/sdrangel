@@ -38,6 +38,7 @@ NFMDemod::NFMDemod() :
 	m_squelchGate(2400),
 	m_audioMute(false),
 	m_squelchOpen(false),
+	m_afSquelchOpen(false),
 	m_magsq(0.0f),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
@@ -180,21 +181,45 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				// AF processing
 
-				if ( (m_running.m_deltaSquelch && ((deviation > m_squelchLevel) || (deviation < -m_squelchLevel))) ||
-				     (!m_running.m_deltaSquelch && (m_movingAverage.average() < m_squelchLevel)) )
+				if (m_running.m_deltaSquelch)
 				{
-                    if (m_squelchCount > 0)
-                    {
-                        m_squelchCount--;
-                    }
+	                if (m_afSquelch.analyze(demod)) {
+	                    m_squelchCount = m_afSquelch.evaluate() ? m_squelchGate + 480 : 0;
+	                }
 				}
 				else
 				{
-                    if (m_squelchCount < m_squelchGate + 480)
-                    {
-                        m_squelchCount++;
-                    }
+				    if (m_movingAverage.average() < m_squelchLevel)
+				    {
+                        if (m_squelchCount > 0)
+                        {
+                            m_squelchCount--;
+                        }
+				    }
+				    else
+				    {
+                        if (m_squelchCount < m_squelchGate + 480)
+                        {
+                            m_squelchCount++;
+                        }
+				    }
 				}
+
+//				if ( (m_running.m_deltaSquelch && ((deviation > m_squelchLevel) || (deviation < -m_squelchLevel))) ||
+//				     (!m_running.m_deltaSquelch && (m_movingAverage.average() < m_squelchLevel)) )
+//				{
+//                    if (m_squelchCount > 0)
+//                    {
+//                        m_squelchCount--;
+//                    }
+//				}
+//				else
+//				{
+//                    if (m_squelchCount < m_squelchGate + 480)
+//                    {
+//                        m_squelchCount++;
+//                    }
+//				}
 
 				//squelchOpen = (getMag() > m_squelchLevel);
 				m_squelchOpen = (m_squelchCount > m_squelchGate);
@@ -244,9 +269,17 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					}
 					else
 					{
-	                    Real squelchFactor = (Real) (m_squelchCount - m_squelchGate) / 480.0f;
-						demod = m_bandpass.filter(demod);
-						sample = demod * m_running.m_volume * squelchFactor * squelchFactor;
+                        demod = m_bandpass.filter(demod);
+
+                        if (m_running.m_deltaSquelch)
+                        {
+                            sample = demod * m_running.m_volume;
+                        }
+                        else
+                        {
+                            Real squelchFactor = (Real) (m_squelchCount - m_squelchGate) / 480.0f;
+                            sample = demod * m_running.m_volume * squelchFactor * squelchFactor;
+                        }
 					}
 				}
 				else
@@ -400,13 +433,17 @@ void NFMDemod::apply()
 	if ((m_config.m_squelch != m_running.m_squelch) ||
 	    (m_config.m_deltaSquelch != m_running.m_deltaSquelch))
 	{
-	    if (m_config.m_deltaSquelch) { // input is a value in negative millis
-	        m_squelchLevel = - m_config.m_squelch / 1000.0;
-	    } else { // input is a value in centi-Bels
+	    if (m_config.m_deltaSquelch)
+	    { // input is a value in negative millis
+	        m_squelchLevel = (- m_config.m_squelch) / 1000.0;
+	        m_afSquelch.setThreshold(m_squelchLevel);
+	    }
+	    else
+	    { // input is a value in centi-Bels
 	        m_squelchLevel = std::pow(10.0, m_config.m_squelch / 100.0);
 	    }
 		//m_squelchLevel *= m_squelchLevel;
-		//m_afSquelch.setThreshold(m_squelchLevel);
+        //m_afSquelch.setThreshold(m_squelchLevel);
 	}
 
 	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
