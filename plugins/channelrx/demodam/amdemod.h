@@ -24,6 +24,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -33,7 +34,7 @@ public:
 	AMDemod();
 	~AMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute);
+	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -62,10 +63,11 @@ private:
 		Real getVolume() const { return m_volume; }
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
+		bool getBandpassEnable() const { return m_bandpassEnable; }
 
-		static MsgConfigureAMDemod* create(Real rfBandwidth, Real volume, Real squelch, bool audioMute)
+		static MsgConfigureAMDemod* create(Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable)
 		{
-			return new MsgConfigureAMDemod(rfBandwidth, volume, squelch, audioMute);
+			return new MsgConfigureAMDemod(rfBandwidth, volume, squelch, audioMute, bandpassEnable);
 		}
 
 	private:
@@ -73,13 +75,15 @@ private:
 		Real m_volume;
 		Real m_squelch;
 		bool m_audioMute;
+		bool m_bandpassEnable;
 
-		MsgConfigureAMDemod(Real rfBandwidth, Real volume, Real squelch, bool audioMute) :
+		MsgConfigureAMDemod(Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
-			m_audioMute(audioMute)
+			m_audioMute(audioMute),
+			m_bandpassEnable(bandpassEnable)
 		{ }
 	};
 
@@ -102,6 +106,7 @@ private:
 		Real m_volume;
 		quint32 m_audioSampleRate;
 		bool m_audioMute;
+		bool m_bandpassEnable;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -110,7 +115,8 @@ private:
 			m_squelch(0),
 			m_volume(0),
 			m_audioSampleRate(0),
-			m_audioMute(false)
+			m_audioMute(false),
+			m_bandpassEnable(false)
 		{ }
 	};
 
@@ -132,6 +138,7 @@ private:
 
 	MovingAverage<double> m_movingAverage;
 	SimpleAGC m_volumeAGC;
+    Bandpass<Real> m_bandpass;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -180,18 +187,18 @@ private:
         if ((m_squelchCount >= m_running.m_audioSampleRate / 20) && !m_running.m_audioMute)
         {
             Real demod = sqrt(magsq);
-
-            if (demod > 1)
-            {
-                demod = 1;
-            }
-
             m_volumeAGC.feed(demod);
             demod /= m_volumeAGC.getValue();
+
+            if (m_running.m_bandpassEnable)
+            {
+                demod = m_bandpass.filter(demod);
+                demod /= 301.0f;
+            }
+
             Real attack = m_squelchCount / (0.1f * m_running.m_audioSampleRate);
             sample = (0.5 - demod) * attack * 2048 * m_running.m_volume;
-//            demod *= ((0.003 * attack) / m_volumeAGC.getValue());
-//            sample = demod * 32700 * 16;
+
             m_squelchOpen = true;
         }
         else

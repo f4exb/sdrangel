@@ -63,9 +63,9 @@ AMDemod::~AMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 }
 
-void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute)
+void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable)
 {
-	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, volume, squelch, audioMute);
+	Message* cmd = MsgConfigureAMDemod::create(rfBandwidth, volume, squelch, audioMute, bandpassEnable);
 	messageQueue->push(cmd);
 }
 
@@ -157,6 +157,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 		m_config.m_volume = cfg.getVolume();
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_bandpassEnable = cfg.getBandpassEnable();
 
 		apply();
 
@@ -164,7 +165,8 @@ bool AMDemod::handleMessage(const Message& cmd)
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_volume: " << m_config.m_volume
 				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioMute: " << m_config.m_audioMute;
+				<< " m_audioMute: " << m_config.m_audioMute
+				<< " m_bandpassEnable: " << m_config.m_bandpassEnable;
 
 		return true;
 	}
@@ -185,12 +187,14 @@ void AMDemod::apply()
 
 	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+		(m_config.m_audioSampleRate != m_running.m_audioSampleRate) ||
+		(m_config.m_bandpassEnable != m_running.m_bandpassEnable))
 	{
 		m_settingsMutex.lock();
-		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
+		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2f);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
 		m_settingsMutex.unlock();
 	}
 
@@ -207,4 +211,5 @@ void AMDemod::apply()
 	m_running.m_volume = m_config.m_volume;
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_audioMute = m_config.m_audioMute;
+	m_running.m_bandpassEnable = m_config.m_bandpassEnable;
 }

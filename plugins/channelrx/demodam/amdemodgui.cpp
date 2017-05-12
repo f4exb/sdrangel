@@ -88,6 +88,7 @@ QByteArray AMDemodGUI::serialize() const
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
+	s.writeBool(8, ui->bandpassEnable->isChecked());
 	return s.final();
 }
 
@@ -106,6 +107,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool boolTmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -125,6 +127,9 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         {
 			m_channelMarker.setColor(u32tmp);
         }
+
+        d.readBool(8, &boolTmp, false);
+        ui->bandpassEnable->setChecked(boolTmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -167,6 +172,11 @@ void AMDemodGUI::on_deltaFrequency_changed(quint64 value)
 	} else {
 		m_channelMarker.setCenterFrequency(value);
 	}
+}
+
+void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
+{
+    applySettings();
 }
 
 void AMDemodGUI::on_rfBW_valueChanged(int value)
@@ -284,7 +294,8 @@ void AMDemodGUI::applySettings()
 			ui->rfBW->value() * 100.0,
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
-			ui->audioMute->isChecked());
+			ui->audioMute->isChecked(),
+			ui->bandpassEnable->isChecked());
 	}
 }
 
