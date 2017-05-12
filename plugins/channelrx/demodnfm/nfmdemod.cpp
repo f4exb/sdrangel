@@ -183,25 +183,21 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				if ( (m_running.m_deltaSquelch && ((deviation > m_squelchLevel) || (deviation < -m_squelchLevel))) ||
 				     (!m_running.m_deltaSquelch && (m_movingAverage.average() < m_squelchLevel)) )
 				{
-                    if (m_squelchCount < m_squelchGate)
+                    if (m_squelchCount > 0)
                     {
-                        m_squelchCount = 0;  // return to 0
-                    }
-                    else
-                    {
-                        m_squelchCount--;    // grace period
+                        m_squelchCount--;
                     }
 				}
 				else
 				{
-                    if (m_squelchCount < m_squelchGate + 2)
+                    if (m_squelchCount < m_squelchGate + 480)
                     {
                         m_squelchCount++;
                     }
 				}
 
 				//squelchOpen = (getMag() > m_squelchLevel);
-				m_squelchOpen = m_squelchCount >= m_squelchGate; // wait for AGC to stabilize
+				m_squelchOpen = (m_squelchCount > m_squelchGate);
 
 				/*
 				if (m_afSquelch.analyze(demod))
@@ -248,8 +244,9 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					}
 					else
 					{
+	                    Real squelchFactor = (Real) (m_squelchCount - m_squelchGate) / 480.0f;
 						demod = m_bandpass.filter(demod);
-						sample = demod * m_running.m_volume;
+						sample = demod * m_running.m_volume * squelchFactor * squelchFactor;
 					}
 				}
 				else
