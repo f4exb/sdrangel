@@ -340,6 +340,7 @@ void NFMDemod::start()
 {
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
+	apply(true);
 }
 
 void NFMDemod::stop()
@@ -398,16 +399,16 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void NFMDemod::apply()
+void NFMDemod::apply(bool force)
 {
 	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_inputSampleRate != m_running.m_inputSampleRate))
+		(m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
 	{
 		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
 	}
 
 	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
+		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
 	{
 		m_settingsMutex.lock();
 		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2);
@@ -417,13 +418,13 @@ void NFMDemod::apply()
 		m_settingsMutex.unlock();
 	}
 
-	if (m_config.m_fmDeviation != m_running.m_fmDeviation)
+	if ((m_config.m_fmDeviation != m_running.m_fmDeviation) || force)
 	{
 		m_phaseDiscri.setFMScaling((8.0f*m_config.m_rfBandwidth) / (float) m_config.m_fmDeviation); // integrate 4x factor
 	}
 
 	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
+		(m_config.m_audioSampleRate != m_running.m_audioSampleRate) || force)
 	{
 		m_settingsMutex.lock();
 		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
@@ -431,14 +432,14 @@ void NFMDemod::apply()
 		m_settingsMutex.unlock();
 	}
 
-	if (m_config.m_squelchGate != m_running.m_squelchGate)
+	if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
 	{
 		m_squelchGate = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
 		m_squelchCount = 0; // reset squelch open counter
 	}
 
 	if ((m_config.m_squelch != m_running.m_squelch) ||
-	    (m_config.m_deltaSquelch != m_running.m_deltaSquelch))
+	    (m_config.m_deltaSquelch != m_running.m_deltaSquelch) || force)
 	{
 	    if (m_config.m_deltaSquelch)
 	    { // input is a value in negative millis

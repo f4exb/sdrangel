@@ -243,7 +243,7 @@ private:
 
     PhaseDiscriminators m_phaseDiscri;
 
-	void apply();
+	void apply(bool force = false);
 
     float smootherstep(float x)
     {
