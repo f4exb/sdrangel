@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples from a [LimeSDR device](https://myriadrf.org/projects/limesdr/). LimeSDR support in SDRangel is for Linux only and experimental.
+This input sample source plugin gets its samples from a [LimeSDR device](https://myriadrf.org/projects/limesdr/). LimeSDR plugins are not included in the Win32 binary distribution.
 
-&#9888; LimeSuite library itself is unstable or made unstable in this plugin due to lack of documentation. This plugin is provided as a minimal support and further development is suspended until proper support for LimeSDR is available.
+&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
 
 LimeSDR is a 2x2 MIMO device so it has two receiving channels that can run concurrently. To activate the second channel when the first is already active just open a new source tab in the main window (Devices -> Add source device) and select the same LimeSDR device.
 

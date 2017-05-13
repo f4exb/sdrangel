@@ -28,11 +28,11 @@ From version 2 SDRangel can integrate more than one hardware device running conc
 
 <h2>Transmission support</h2>
 
-From version 3 transmission or signal generation is supported for BladeRF and HackRF (since version 3.1) using a sample sink plugin. These plugins are:
+From version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1) and LimeSDR (since version 3.4) using a sample sink plugin. These plugins are:
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
-  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only and experimental
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) not for Win32
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
 
 <h1>Supported hardware</h1>
@@ -79,9 +79,9 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-Linux only and experimental.
+LimeSDR plugins are not included in Win32 binary distribution.
 
-&#9888; LimeSuite library itself is unstable or made unstable in the source and sink plugins due to lack of documentation. These plugins are provided as a minimal support and further development is suspended until proper support for LimeSDR is available.
+&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
 
 You will need a minimal installation of LimeSuite:
 
