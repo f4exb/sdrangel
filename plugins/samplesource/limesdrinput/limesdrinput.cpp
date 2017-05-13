@@ -284,6 +284,8 @@ bool LimeSDRInput::start()
 
     if (m_running) stop();
 
+    applySettings(m_settings, true);
+
     // start / stop streaming is done in the thread.
 
     if ((m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo)) == 0)

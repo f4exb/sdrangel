@@ -227,7 +227,7 @@ private:
     void closeDevice();
     void suspendBuddies();
     void resumeBuddies();
-    bool applySettings(const LimeSDRInputSettings& settings, bool force);
+    bool applySettings(const LimeSDRInputSettings& settings, bool force = false);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_ */
