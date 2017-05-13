@@ -277,8 +277,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                         }
                         else
                         {
-                            Real squelchFactor = (Real) (m_squelchCount - m_squelchGate) / 480.0f;
-                            sample = demod * m_running.m_volume * squelchFactor * squelchFactor;
+                            Real squelchFactor = smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
+                            sample = demod * m_running.m_volume * squelchFactor;
                         }
 					}
 				}
