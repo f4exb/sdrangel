@@ -29,7 +29,7 @@ public:
 	AFSquelch();
     // allows user defined tone pair
 	AFSquelch(unsigned int nbTones,
-			const Real *tones);
+			const double *tones);
     virtual ~AFSquelch();
 
     // setup the basic parameters and coefficients
@@ -45,11 +45,11 @@ public:
 
     // analyze a sample set and optionally filter
     // the tone frequencies.
-    bool analyze(Real sample); // input signal sample
+    bool analyze(double sample); // input signal sample
     bool evaluate(); // evaluate result
 
     // get the tone set
-    const Real *getToneSet() const
+    const double *getToneSet() const
     {
     	return m_toneSet;
     }
@@ -61,7 +61,7 @@ public:
     void reset();                       // reset the analysis algorithm
 
 protected:
-    void feedback(Real sample);
+    void feedback(double sample);
     void feedForward();
 
 private:
@@ -80,7 +80,7 @@ private:
     double m_threshold;
     double *m_k;
     double *m_coef;
-    Real *m_toneSet;
+    double *m_toneSet;
     double *m_u0;
     double *m_u1;
     double *m_power;

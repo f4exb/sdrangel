@@ -34,7 +34,7 @@ AFSquelch::AFSquelch() :
 {
 	m_k = new double[m_nTones];
 	m_coef = new double[m_nTones];
-	m_toneSet = new Real[m_nTones];
+	m_toneSet = new double[m_nTones];
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
@@ -53,7 +53,7 @@ AFSquelch::AFSquelch() :
     }
 }
 
-AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
+AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
 			m_N(0),
             m_nbAvg(128),
 			m_sampleRate(0),
@@ -70,7 +70,7 @@ AFSquelch::AFSquelch(unsigned int nbTones, const Real *tones) :
 {
 	m_k = new double[m_nTones];
 	m_coef = new double[m_nTones];
-	m_toneSet = new Real[m_nTones];
+	m_toneSet = new double[m_nTones];
 	m_u0 = new double[m_nTones];
 	m_u1 = new double[m_nTones];
 	m_power = new double[m_nTones];
@@ -134,7 +134,7 @@ void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int 
 
 
 // Analyze an input signal
-bool AFSquelch::analyze(Real sample)
+bool AFSquelch::analyze(double sample)
 {
 
 	feedback(sample); // Goertzel feedback
@@ -162,7 +162,7 @@ bool AFSquelch::analyze(Real sample)
 }
 
 
-void AFSquelch::feedback(Real in)
+void AFSquelch::feedback(double in)
 {
 	double t;
 

@@ -27,7 +27,7 @@
 #include "dsp/dspengine.h"
 #include "nfmdemodgui.h"
 
-static const Real afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
+static const double afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
