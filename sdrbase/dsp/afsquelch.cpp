@@ -117,7 +117,7 @@ void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int 
 
 	// for each of the frequencies (tones) of interest calculate
 	// k and the associated filter coefficient as per the Goertzel
-	// algorithm. Note: we are using a real value (as apposed to
+	// algorithm. Note: we are using a real value (as opposed to
 	// an integer as described in some references. k is retained
 	// for later display. The tone set is specified in the
 	// constructor. Notice that the resulting coefficients are
@@ -182,7 +182,8 @@ void AFSquelch::feedForward()
 	{
 		m_power[j] = (m_u0[j] * m_u0[j]) + (m_u1[j] * m_u1[j]) - (m_coef[j] * m_u0[j] * m_u1[j]);
 		m_movingAverages[j].feed(m_power[j]);
-		m_u0[j] = m_u1[j] = 0.0; // reset for next block.
+		m_u0[j] = 0.0;
+		m_u1[j] = 0.0; // reset for next block.
 	}
 
 	evaluate();
@@ -229,7 +230,7 @@ bool AFSquelch::evaluate()
 	}
 
 	// principle is to open if power is uneven because noise gives even power
-	bool open = maxPower == 0.0 ? true : (minPower/maxPower < m_threshold) && (minIndex > maxIndex);
+	bool open = maxPower > 0.0 ? (minPower/maxPower < m_threshold) && (minIndex > maxIndex) : true;
 	//qDebug("AFSquelch::evaluate: %g : %g", minPower/maxPower, m_threshold);
 
 	if (open)
