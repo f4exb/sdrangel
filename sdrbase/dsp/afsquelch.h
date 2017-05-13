@@ -69,6 +69,7 @@ private:
     int m_N;
     int m_sampleRate;
     int m_samplesProcessed;
+    int m_samplesAvgProcessed;
     int m_maxPowerIndex;
     int m_nTones;
     int m_samplesAttack;
