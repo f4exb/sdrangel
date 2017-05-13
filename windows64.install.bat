@@ -61,8 +61,8 @@ copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
-REM copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
+copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
-REM copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
+copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
