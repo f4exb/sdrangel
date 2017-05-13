@@ -247,6 +247,12 @@ private:
 
     float smootherstep(float x)
     {
+        if (x == 1.0f) {
+            return 1.0f;
+        } else if (x == 0.0f) {
+            return 0.0f;
+        }
+
         double x3 = x * x * x;
         double x4 = x * x3;
         double x5 = x * x4;
