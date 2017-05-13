@@ -208,6 +208,7 @@ void NFMDemodGUI::on_volume_valueChanged(int value)
 
 void NFMDemodGUI::on_squelchGate_valueChanged(int value)
 {
+    ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0f, 0, 'f', 0));
 	applySettings();
 }
 
@@ -369,14 +370,13 @@ void NFMDemodGUI::applySettings()
 
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
-		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0f, 0, 'f', 0));
 
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
 			ui->afBW->value() * 1000.0f,
 			m_fmDev[ui->rfBW->currentIndex()],
 			ui->volume->value() / 10.0f,
-			ui->squelchGate->value(), // in 10ths of ms
+			ui->squelchGate->value(), // in 10ths of ms 1 -> 50
 			ui->deltaSquelch->isChecked(),
 			ui->squelch->value(), // -1000 -> 0
 			ui->ctcssOn->isChecked(),

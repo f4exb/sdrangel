@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodnfm/nfmdemod.h"
+#include "nfmdemod.h"
 
 #include <QTime>
 #include <QDebug>
@@ -25,9 +25,9 @@
 #include "audio/audiooutput.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
-#include "../../channelrx/demodnfm/nfmdemodgui.h"
+#include "nfmdemodgui.h"
 
-static const Real afSqTones[2] = {1200.0, 6400.0}; // {1200.0, 8000.0};
+static const Real afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
@@ -75,7 +75,7 @@ NFMDemod::NFMDemod() :
 	m_movingAverage.resize(32, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 4000 Hz span, 250us, 100ms attack
+	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -184,8 +184,23 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				if (m_running.m_deltaSquelch)
 				{
 	                if (m_afSquelch.analyze(demod)) {
-	                    m_squelchCount = m_afSquelch.evaluate() ? m_squelchGate + 480 : 0;
+	                    m_afSquelchOpen = m_afSquelch.evaluate() ? m_squelchGate + 480 : 0;
 	                }
+
+                    if (m_afSquelchOpen)
+                    {
+                        if (m_squelchCount < m_squelchGate + 480)
+                        {
+                            m_squelchCount++;
+                        }
+                    }
+                    else
+                    {
+                        if (m_squelchCount > 0)
+                        {
+                            m_squelchCount--;
+                        }
+                    }
 				}
 				else
 				{
@@ -270,16 +285,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					else
 					{
                         demod = m_bandpass.filter(demod);
-
-                        if (m_running.m_deltaSquelch)
-                        {
-                            sample = demod * m_running.m_volume;
-                        }
-                        else
-                        {
-                            Real squelchFactor = smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
-                            sample = demod * m_running.m_volume * squelchFactor;
-                        }
+                        Real squelchFactor = smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
+                        sample = demod * m_running.m_volume * squelchFactor;
 					}
 				}
 				else

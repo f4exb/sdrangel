@@ -91,6 +91,12 @@ void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int 
 	m_samplesAttack = _samplesAttack;
 	m_samplesDecay = _samplesDecay;
 	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 1.0));
+	m_samplesProcessed = 0;
+	m_maxPowerIndex = 0;
+	m_attackCount = 0;
+	m_decayCount = 0;
+	m_isOpen = false;
+	m_threshold = 0.0;
 
 	// for each of the frequencies (tones) of interest calculate
 	// k and the associated filter coefficient as per the Goertzel
