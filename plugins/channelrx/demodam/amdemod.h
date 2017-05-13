@@ -196,7 +196,7 @@ private:
                 demod /= 301.0f;
             }
 
-            Real attack = m_squelchCount / (0.1f * m_running.m_audioSampleRate);
+            Real attack = (m_squelchCount - 0.05f * m_running.m_audioSampleRate) / (0.05f * m_running.m_audioSampleRate);
             sample = (0.5 - demod) * attack * 2048 * m_running.m_volume;
 
             m_squelchOpen = true;
