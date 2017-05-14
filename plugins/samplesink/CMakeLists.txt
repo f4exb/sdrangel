@@ -17,10 +17,18 @@ if(LIBUSB_FOUND AND LIMESUITE_FOUND)
     add_subdirectory(limesdroutput)
 endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
 
+find_package(CM256cc)
+if(CM256CC_FOUND AND LIBNANOMSG_FOUND)
+    add_subdirectory(sdrdaemonsink)
+endif(CM256CC_FOUND AND LIBNANOMSG_FOUND)
+
 if (BUILD_DEBIAN)
     add_subdirectory(bladerfoutput)
     add_subdirectory(hackrfoutput)
     add_subdirectory(limesdroutput)
+    if (LIBNANOMSG_FOUND)
+        add_subdirectory(sdrdaemonsink)
+    endif (LIBNANOMSG_FOUND)    
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesink)
