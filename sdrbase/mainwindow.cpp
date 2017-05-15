@@ -138,7 +138,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	if (sampleSourceIndex < 0)
 	{
 	    qCritical("MainWindow::MainWindow: no sample source. Exit");
-	    exit(0);
+        exit(0);
 	}
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);

@@ -40,6 +40,4 @@ int pthread_barrier_wait(pthread_barrier_t *barrier);
 #  define CLOCK_MONOTONIC 0
 #endif
 
-int clock_gettime(int clk_id, struct timespec *t);
-
 #endif // APPLE Compatibility

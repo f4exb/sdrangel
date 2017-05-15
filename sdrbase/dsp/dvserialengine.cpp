@@ -28,7 +28,9 @@
 #ifndef __WINDOWS__
 #include <termios.h>
 #include <sys/ioctl.h>
+#ifndef __APPLE__
 #include <linux/serial.h>
+#endif
 #endif
 
 #include <QDebug>

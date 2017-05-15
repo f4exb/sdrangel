@@ -22,7 +22,8 @@ CONFIG(MINGW64):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../lz4
-INCLUDEPATH += $$LIBNANOMSGSRC/src
+!macx:INCLUDEPATH += $$LIBNANOMSGSRC/src
+macx:INCLUDEPATH += /opt/local/include
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -43,7 +44,8 @@ FORMS += sdrdaemongui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../lz4/$${build_subdir} -llz4
-LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
+!macx:LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
+macx:LIBS += -L/opt/local/lib -lnanomsg
 
 RESOURCES = ../../../sdrbase/resources/res.qrc
 
