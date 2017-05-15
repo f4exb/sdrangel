@@ -38,12 +38,12 @@ Then add the following defines on `cmake` command line:
 Device start / stop button. 
 
   - Blue triangle icon: device is ready and can be started
-  - Red square icon: device is running and can be stopped
+  - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
   
 <h3>2: Baseband sample rate</h3>
 
-This is the baseband sample rate in kS/s before interpolation (4) to produce the final stream that is sent to the LimeSDR device. Thus this is the device sample rate (6) divided by the interpolation factor (4).
+This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the device sample rate (10) divided by the interpolation factor (9).
   
 <h3>3: Frequency</h3>
 
@@ -61,7 +61,7 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 <h3>6: Zero (reset) NCO frequency</h3>
 
-USe this push button to reset the NCO frequency to 0 and thus center on the main passband of the DAC.
+Use this push button to reset the NCO frequency to 0 and thus center on the main passband of the DAC.
 
 <h3>7: Center frequency with NCO engaged</h3>
 
@@ -71,11 +71,11 @@ This is the center frequency of the mix of LO and NCO combined and is the sink p
 
 The TSP block in the LMS7002M hardware has an interpolation chain that acts on both Tx channels. It is composed of 5 halfband interpolation stages and therefore can achieve interpolation between 1 (no interpolation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32.
 
-Thus the actual sample rate of the DAC is the stream sample rate (10) multiplied by this factor. 
+Thus the actual sample rate of the DAC is the stream sample rate (10) multiplied by this factor. In the screenshot example this yields a 40 MS/s rate at the DAC.
 
 <h3>9: Software interpolation factor</h3>
 
-The I/Q stream from the LimeSDR is upsampled by a power of two by software inside the plugin before being sent to the device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
+The I/Q stream from the baseband is upsampled by a power of two by software inside the plugin before being sent to the LimeSDR device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
 
 <h3>10: Device stream sample rate</h3>
 
@@ -95,11 +95,11 @@ The TSP in the LMS7002M chip has a FIR filter chain per channel. Use this button
 
 <h3>13: TSP FIR filter bandwidth</h3>
 
-USe the wheels to adjust the bandwidth of the hardware TSP FIR filter.
+Use the wheels to adjust the bandwidth of the hardware TSP FIR filter.
 
 <h3>14: Gain</h2>
 
-Use this slider to adjust the global gain of the Tx chain. LimeSuite software automatically set optimals values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the slider. 
+Use this slider to adjust the global gain of the Tx chain. LimeSuite software automatically set optimal values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the slider.
 
 <h3>15: Stream status indicator</h3>
 
@@ -115,6 +115,8 @@ This label turns green when status can be obtained from the current stream. Usua
 
 This is the stream throughput in MB/s and is usually about 3 times the sample rate for a single stream and 6 times for a dual Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bita travel on the USB link.
 
+&#9888; it has been found that in practice to get a clean output the gain should not exceed ~4dB with standard levels in the channel plugins.
+
 <h3>18: FIFO status</h3>
 
-This is the fill percentage of the Tx FIFO in the LimeSuite interface. There is no flow regulation provided by the LimeSuite interface so an automatic adjustment is done within the plugin. In practice the value will oscillate between 50 and 100% centered around 80%.
+This is the fill percentage of the Tx FIFO in the LimeSuite interface. In normal conditions this should be ~100%.
