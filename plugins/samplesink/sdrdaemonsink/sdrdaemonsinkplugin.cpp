@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,41 +24,41 @@
 #include "sdrdaemonsinkgui.h"
 #include "sdrdaemonsinkplugin.h"
 
-const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
-	QString("File sink output"),
-	QString("3.4.0"),
+const PluginDescriptor SDRdaemonSinkPlugin::m_pluginDescriptor = {
+	QString("SDRdaemon sink output"),
+	QString("3.5.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString FileSinkPlugin::m_hardwareID = "FileSink";
-const QString FileSinkPlugin::m_deviceTypeID = FILESINK_DEVICE_TYPE_ID;
+const QString SDRdaemonSinkPlugin::m_hardwareID = "SDRdaemonSink";
+const QString SDRdaemonSinkPlugin::m_deviceTypeID = SDRDAEMONSINK_DEVICE_TYPE_ID;
 
-FileSinkPlugin::FileSinkPlugin(QObject* parent) :
+SDRdaemonSinkPlugin::SDRdaemonSinkPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& FileSinkPlugin::getPluginDescriptor() const
+const PluginDescriptor& SDRdaemonSinkPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
+void SDRdaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
+PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
 	int count = 1;
 
 	for(int i = 0; i < count; i++)
 	{
-		QString displayedName(QString("FileSink[%1]").arg(i));
+		QString displayedName(QString("SDRdaemonSink[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
 		        m_hardwareID,
@@ -70,11 +70,11 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginGUI* FileSinkPlugin::createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginGUI* SDRdaemonSinkPlugin::createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		FileSinkGui* gui = new FileSinkGui(deviceAPI);
+		SDRDaemonSinkGui* gui = new SDRDaemonSinkGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

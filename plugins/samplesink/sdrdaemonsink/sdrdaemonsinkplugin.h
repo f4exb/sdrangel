@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,24 +14,24 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKPLUGIN_H
-#define INCLUDE_FILESINKPLUGIN_H
+#ifndef INCLUDE_SDRDAEMONSINKPLUGIN_H
+#define INCLUDE_SDRDAEMONSINKPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-#define FILESINK_DEVICE_TYPE_ID "sdrangel.samplesink.filesink"
+#define SDRDAEMONSINK_DEVICE_TYPE_ID "sdrangel.samplesink.sdrdaemonsink"
 
 class PluginAPI;
 class DeviceSinkAPI;
 
-class FileSinkPlugin : public QObject, public PluginInterface {
+class SDRdaemonSinkPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID FILESINK_DEVICE_TYPE_ID)
+	Q_PLUGIN_METADATA(IID SDRDAEMONSINK_DEVICE_TYPE_ID)
 
 public:
-	explicit FileSinkPlugin(QObject* parent = NULL);
+	explicit SDRdaemonSinkPlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
@@ -46,4 +46,4 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif // INCLUDE_FILESOURCEPLUGIN_H
+#endif // INCLUDE_SDRDAEMONSINKPLUGIN_H
