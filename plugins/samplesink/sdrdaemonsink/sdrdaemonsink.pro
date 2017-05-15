@@ -47,7 +47,7 @@ HEADERS += sdrdaemonsinksettings.h
 #	sdrdaemonsinksettings.h\
 #	sdrdaemonsinkthread.h
 
-#FORMS += sdrdaemonsinkgui.ui
+FORMS += sdrdaemonsinkgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../devices/$${build_subdir} -ldevices

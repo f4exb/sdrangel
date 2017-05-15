@@ -16,9 +16,9 @@ set(sdrdaemonsink_HEADERS
 #	sdrdaemonsinkthread.h
 )
 
-#set(sdrdaemonsink_FORMS
-#	sdrdaemonsinkgui.ui
-#)
+set(sdrdaemonsink_FORMS
+	sdrdaemonsinkgui.ui
+)
 
 include_directories(
 	.
@@ -29,7 +29,7 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt5_wrap_ui(sdrdaemonsink_FORMS_HEADERS ${sdrdaemonsink_FORMS})
+qt5_wrap_ui(sdrdaemonsink_FORMS_HEADERS ${sdrdaemonsink_FORMS})
 
 add_library(outputsdrdaemonsink SHARED
 	${sdrdaemonsink_SOURCES}
