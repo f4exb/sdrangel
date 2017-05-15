@@ -18,7 +18,6 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
-#include <lz4.h>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
