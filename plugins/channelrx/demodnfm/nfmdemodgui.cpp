@@ -218,11 +218,13 @@ void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
     {
         ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 10.0, 0, 'f', 1));
         ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
+        ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     else
     {
         ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 10.0, 0, 'f', 1));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
+        ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     applySettings();
 }
