@@ -129,6 +129,12 @@ protected:
 
     virtual void render(QPainter *painter) = 0;
     virtual void resized() = 0;
+
+    /** Shift the x coordinate so it does not fall right on 0 or width-1 */
+    int shiftx(int val, int width)
+    {
+        return val == 0 ? 1 : val == width-1 ? width-2 : val;
+    }
 };
 
 class LevelMeterVU : public LevelMeter

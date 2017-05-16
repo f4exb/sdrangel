@@ -203,7 +203,7 @@ void LevelMeterVU::resized()
                 painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2), tick.text);
             }
 
-            painter.drawLine(tick.pos, 0, scaleTickList[i].pos, bar.height());
+            painter.drawLine(shiftx(tick.pos, bar.width()), 0, shiftx(scaleTickList[i].pos, bar.width()), bar.height());
         }
         else
         {
@@ -239,6 +239,13 @@ void LevelMeterVU::render(QPainter *painter)
     bar.setRight(rect().right() - (1.0 - 0.75*m_decayedPeakLevel) * rect().width());
     painter->fillRect(bar, m_decayedPeakColor);
 
+    // borders
+    painter->setPen(QColor(0,0,0));
+    painter->drawLine(0, 0, rect().width() - 2, 0);
+    painter->drawLine(0, rect().height() - 1, 0, 0);
+    painter->setPen(QColor(80,80,80));
+    painter->drawLine(1, rect().height() - 1, rect().width() - 1, rect().height() - 1);
+    painter->drawLine(rect().width() - 1, rect().height() - 1, rect().width() - 1, 0);
 }
 
 // ====================================================================
@@ -314,7 +321,7 @@ void LevelMeterSignalDB::resized()
                 painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2 - 1), tick.text);
             }
 
-            painter.drawLine(tick.pos, 0, scaleTickList[i].pos, bar.height());
+            painter.drawLine(shiftx(tick.pos, bar.width()), 0, shiftx(scaleTickList[i].pos,bar.width()), bar.height());
         }
         else
         {
@@ -350,5 +357,13 @@ void LevelMeterSignalDB::render(QPainter *painter)
     bar.setRight(rect().right() - (1.0 - m_peakHoldLevel) * rect().width());
     bar.setLeft(bar.right() - 2);
     painter->fillRect(bar, m_peakColor[m_colorTheme]);
+
+    // borders
+    painter->setPen(QColor(0,0,0));
+    painter->drawLine(0, 0, rect().width() - 2, 0);
+    painter->drawLine(0, rect().height() - 1, 0, 0);
+    painter->setPen(QColor(80,80,80));
+    painter->drawLine(1, rect().height() - 1, rect().width() - 1, rect().height() - 1);
+    painter->drawLine(rect().width() - 1, rect().height() - 1, rect().width() - 1, 0);
 }
 
