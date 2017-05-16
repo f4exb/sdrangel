@@ -487,7 +487,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::green);

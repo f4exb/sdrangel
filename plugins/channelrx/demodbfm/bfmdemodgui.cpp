@@ -372,7 +372,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_rate(625000)
 {
 	ui->setupUi(this);
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 

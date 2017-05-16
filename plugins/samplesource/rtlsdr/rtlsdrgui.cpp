@@ -40,10 +40,10 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_deviceAPI->setSource(m_sampleSource);
 
     ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
 
-    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 950000U, 2400000U);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));

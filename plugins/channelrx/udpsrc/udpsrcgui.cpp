@@ -246,7 +246,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 	ui->fmDeviation->setEnabled(false);
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
 	ui->glSpectrum->setCenterFrequency(0);

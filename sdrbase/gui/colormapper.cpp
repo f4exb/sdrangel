@@ -131,7 +131,7 @@ ColorMapper::ColorMapper(Theme theme) :
         m_secondaryForegroundColor = QColor(255, 197, 128);     // 50% saturation - front face color
         m_highlightColor = QColor(255, 169, 64, 128);           // 75% saturation - digit highlight overlay
         m_boundaryColor = QColor(32, 32, 32);                   // background 60% darkness - inter wheel gap
-        m_boundaryAlphaColor = QColor(255, 39, 0, 32);          // Base with alpha - wheel edges
+        m_boundaryAlphaColor = QColor(255, 139, 0, 32);         // Base with alpha - wheel edges
         break;
 	case Normal:
 	default:

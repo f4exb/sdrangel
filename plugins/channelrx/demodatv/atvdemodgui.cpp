@@ -295,7 +295,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     ui->glScope->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
     connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
-    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
     connect(m_objChannelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
