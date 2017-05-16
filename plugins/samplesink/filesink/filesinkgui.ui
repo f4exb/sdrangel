@@ -127,7 +127,7 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
@@ -302,6 +302,9 @@
          <pointsize>12</pointsize>
         </font>
        </property>
+       <property name="cursor">
+        <cursorShape>SizeVerCursor</cursorShape>
+       </property>
       </widget>
      </item>
      <item>
@@ -388,6 +391,9 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
