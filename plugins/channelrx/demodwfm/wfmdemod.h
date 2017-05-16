@@ -50,10 +50,10 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-	Real getMagSq() const { return m_movingAverage.average(); }
+	double getMagSq() const { return m_movingAverage.average(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
-    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
         avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
         m_magsq = avg;
@@ -142,9 +142,9 @@ private:
 	Real m_squelchLevel;
 	int m_squelchState;
     bool m_squelchOpen;
-    Real m_magsq; //!< displayed averaged value
-    Real m_magsqSum;
-    Real m_magsqPeak;
+    double m_magsq; //!< displayed averaged value
+    double m_magsqSum;
+    double m_magsqPeak;
     int  m_magsqCount;
 
 	Real m_lastArgument;

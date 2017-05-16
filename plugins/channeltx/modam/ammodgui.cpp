@@ -444,7 +444,7 @@ void AMModGUI::enterEvent(QEvent*)
 
 void AMModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_amMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_amMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 

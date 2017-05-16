@@ -43,7 +43,7 @@ public:
 
 	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
     int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
-	Real getMagSq() const { return m_magsq == 0 ? 1e-10 : m_magsq; }
+	double getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -120,7 +120,7 @@ private:
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
 	bool m_usb;
-	Real m_magsq;
+	double m_magsq;
 	bool m_useInterpolator;
 
 	NCOF m_nco;

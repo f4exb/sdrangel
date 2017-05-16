@@ -17,7 +17,7 @@
 #include "util/db.h"
 #include <cmath>
 
-Real CalcDb::dbPower(Real magsq, Real floordB)
+double CalcDb::dbPower(double magsq, double floordB)
 {
 	if (magsq > 0)
 	{

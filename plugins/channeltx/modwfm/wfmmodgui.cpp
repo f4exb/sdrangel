@@ -463,7 +463,7 @@ void WFMModGUI::enterEvent(QEvent*)
 
 void WFMModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_wfmMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_wfmMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 

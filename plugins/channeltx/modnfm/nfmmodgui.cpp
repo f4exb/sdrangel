@@ -500,7 +500,7 @@ void NFMModGUI::enterEvent(QEvent*)
 
 void NFMModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_nfmMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_nfmMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 

@@ -108,7 +108,8 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	Complex ci, cs, cr;
 	fftfilt::cmplx *rf;
 	int rf_out;
-	Real msq, demod;
+	double msq;
+	Real demod;
 
 	m_sampleBuffer.clear();
 

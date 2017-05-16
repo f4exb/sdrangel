@@ -638,7 +638,7 @@ void SSBModGUI::enterEvent(QEvent*)
 
 void SSBModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_ssbMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_ssbMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 

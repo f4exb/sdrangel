@@ -476,7 +476,7 @@ void BFMDemodGUI::enterEvent(QEvent*)
 
 void BFMDemodGUI::tick()
 {
-    Real magsqAvg, magsqPeak;
+    double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     m_bfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
     Real powDbAvg = CalcDb::dbPower(magsqAvg);

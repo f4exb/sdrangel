@@ -192,7 +192,7 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
-    Real getMagSq() const { return m_magsq == 0 ? 1e-10 : m_magsq; }
+    double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 
@@ -323,7 +323,7 @@ private:
     fftfilt::cmplx *m_rfFilterBuffer;
     int m_rfFilterBufferIndex;
 
-    Real m_magsq;
+    double m_magsq;
     MovingAverage<double> m_movingAverage;
     SimpleAGC m_volumeAGC;
 

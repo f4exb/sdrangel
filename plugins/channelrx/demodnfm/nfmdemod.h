@@ -72,7 +72,7 @@ public:
 	Real getMag() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
-    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
         avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
         m_magsq = avg;
@@ -216,9 +216,9 @@ private:
 	Real m_squelchLevel;
 	bool m_squelchOpen;
 	bool m_afSquelchOpen;
-	Real m_magsq; //!< displayed averaged value
-    Real m_magsqSum;
-    Real m_magsqPeak;
+	double m_magsq; //!< displayed averaged value
+	double m_magsqSum;
+	double m_magsqPeak;
     int  m_magsqCount;
 
 	Real m_lastArgument;

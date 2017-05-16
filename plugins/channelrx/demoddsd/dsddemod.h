@@ -73,7 +73,7 @@ public:
 
 	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }
 
-    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
         avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
         m_magsq = avg;
@@ -273,9 +273,9 @@ private:
 
 	Real m_lastArgument;
     MovingAverage<double> m_movingAverage;
-    Real m_magsq;
-    Real m_magsqSum;
-    Real m_magsqPeak;
+    double m_magsq;
+    double m_magsqSum;
+    double m_magsqPeak;
     int  m_magsqCount;
 
 	Real m_fmExcursion;

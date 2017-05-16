@@ -178,7 +178,7 @@ void TCPSrcGUI::channelMarkerChanged()
 
 void TCPSrcGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_tcpSrc->getMagSq());
+    double powDb = CalcDb::dbPower(m_tcpSrc->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }

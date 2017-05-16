@@ -49,9 +49,9 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-	Real getMagSq() const { return m_magsq; }
+	double getMagSq() const { return m_magsq; }
 
-    void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
         avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
         m_magsq = avg;
@@ -138,9 +138,9 @@ private:
 	bool m_usb;
 	bool m_dsb;
 	bool m_audioMute;
-    Real m_magsq;
-    Real m_magsqSum;
-    Real m_magsqPeak;
+	double m_magsq;
+	double m_magsqSum;
+	double m_magsqPeak;
     int  m_magsqCount;
 
 	NCOF m_nco;

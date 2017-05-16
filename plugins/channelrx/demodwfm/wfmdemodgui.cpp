@@ -319,11 +319,11 @@ void WFMDemodGUI::tick()
 //	m_channelPowerDbAvg.feed(powDb);
 //	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 
-    Real magsqAvg, magsqPeak;
+    double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     m_wfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-    Real powDbAvg = CalcDb::dbPower(magsqAvg);
-    Real powDbPeak = CalcDb::dbPower(magsqPeak);
+    double powDbAvg = CalcDb::dbPower(magsqAvg);
+    double powDbPeak = CalcDb::dbPower(magsqPeak);
 
     ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
     ui->channelPowerMeter->levelChanged(

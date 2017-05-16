@@ -419,11 +419,11 @@ void NFMDemodGUI::blockApplySettings(bool block)
 
 void NFMDemodGUI::tick()
 {
-    Real magsqAvg, magsqPeak;
+    double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     m_nfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-    Real powDbAvg = CalcDb::dbPower(magsqAvg);
-    Real powDbPeak = CalcDb::dbPower(magsqPeak);
+    double powDbAvg = CalcDb::dbPower(magsqAvg);
+    double powDbPeak = CalcDb::dbPower(magsqPeak);
 
     ui->channelPowerMeter->levelChanged(
             (100.0f + powDbAvg) / 100.0f,

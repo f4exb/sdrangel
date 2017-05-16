@@ -215,7 +215,7 @@ void UDPSrcGUI::channelMarkerChanged()
 
 void UDPSrcGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_udpSrc->getMagSq());
+    double powDb = CalcDb::dbPower(m_udpSrc->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }

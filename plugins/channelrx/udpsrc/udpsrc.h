@@ -73,7 +73,7 @@ public:
 			int boost,
 			int volume);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
-	Real getMagSq() const { return m_magsq; }
+	double getMagSq() const { return m_magsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -221,7 +221,7 @@ protected:
 	bool m_audioStereo;
 	int m_volume;
 	int m_fmDeviation;
-	Real m_magsq;
+	double m_magsq;
 
 	Real m_scale;
 	Complex m_last, m_this;

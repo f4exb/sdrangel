@@ -741,7 +741,7 @@ void ATVModGUI::enterEvent(QEvent*)
 
 void ATVModGUI::tick()
 {
-	Real powDb = CalcDb::dbPower(m_atvMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_atvMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 
