@@ -52,7 +52,7 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
 
