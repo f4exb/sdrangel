@@ -11,9 +11,11 @@ TARGET = dsdcc
 
 CONFIG(MINGW32):LIBDSDCCSRC = "D:\softs\dsdcc"
 CONFIG(MINGW64):LIBDSDCCSRC = "D:\softs\dsdcc"
+CONFIG(macx):LIBDSDCCSRC = "../../deps/dsdcc"
 
 CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
 CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+CONFIG(macx):LIBMBELIBSRC = "../../deps/mbelib"
 
 INCLUDEPATH += $$LIBDSDCCSRC
 INCLUDEPATH += $$LIBMBELIBSRC

@@ -21,7 +21,8 @@ CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../devices
-INCLUDEPATH += $$LIBHACKRFSRC
+!macx:INCLUDEPATH += $$LIBHACKRFSRC
+macx:INCLUDEPATH += /opt/local/include
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -41,7 +42,8 @@ HEADERS += hackrfinputgui.h\
 FORMS += hackrfinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
-LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
+!macx:LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
+macx:LIBS += -L/opt/local/lib -lhackrf
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
 RESOURCES = ../../../sdrbase/resources/res.qrc

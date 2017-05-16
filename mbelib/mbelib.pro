@@ -11,6 +11,7 @@ TARGET = mbelib
 
 CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
 CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+CONFIG(macx):LIBMBELIBSRC = "../../deps/mbelib"
 
 INCLUDEPATH += $$LIBMBELIBSRC
 
