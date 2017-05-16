@@ -47,21 +47,21 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     float minF, maxF, stepF;
 
     m_limeSDRInput->getLORange(minF, maxF, stepF);
-    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
 
     m_limeSDRInput->getSRRange(minF, maxF, stepF);
-    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
     m_limeSDRInput->getLPRange(minF, maxF, stepF);
-    ui->lpf->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 
-    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->lpFIR->setValueRange(5, 1U, 56000U);
 
-    ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+    ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDRInput->getChannelIndex()));
 

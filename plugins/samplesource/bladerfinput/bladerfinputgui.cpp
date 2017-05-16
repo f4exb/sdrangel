@@ -42,10 +42,10 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_deviceAPI->setSource(m_sampleSource);
 
 	ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
-    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     // BladeRF can go as low as 80 kS/s but because of buffering in practice experience is not good below 330 kS/s
     ui->sampleRate->setValueRange(8, 330000U, BLADERF_SAMPLERATE_REC_MAX);
 

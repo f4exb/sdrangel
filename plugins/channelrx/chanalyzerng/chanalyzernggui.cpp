@@ -371,10 +371,10 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
 
-	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::ReverseGreenYellow));
+	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
 	ui->channelSampleRate->setValueRange(7, 2000U, 9999999U);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);

@@ -322,7 +322,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }"); // squelch closed
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
+	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
