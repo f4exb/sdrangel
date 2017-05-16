@@ -116,8 +116,8 @@ ColorMapper::ColorMapper(Theme theme) :
         m_foregroundColor = QColor(99, 128, 64);                // 50% saturation 50% brightbess - shadow face color
         m_secondaryForegroundColor = QColor(198, 255, 128);     // 50% saturation - front face color
         m_highlightColor = QColor(169, 255, 64, 128);           // 75% saturation - digit highlight overlay
-        m_boundaryColor = QColor(79, 115, 34);                  // 70% saturation 45% brightness - inter wheel boundary
-        m_boundaryAlphaColor = QColor(140, 255, 0, 32);         // Base with alpha
+        m_boundaryColor = QColor(32, 32, 32);                   // background 60% darkness - inter wheel gap
+        m_boundaryAlphaColor = QColor(140, 255, 0, 32);         // Base with alpha - wheel edges
         break;
     case GrayGold: // Base 33 degrees hue 255,139,0
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(33, 33, 33))); // 59% darkness
@@ -130,8 +130,8 @@ ColorMapper::ColorMapper(Theme theme) :
         m_foregroundColor = QColor(128, 98, 64);                // 50% saturation 50% brightbess - shadow face color
         m_secondaryForegroundColor = QColor(255, 197, 128);     // 50% saturation - front face color
         m_highlightColor = QColor(255, 169, 64, 128);           // 75% saturation - digit highlight overlay
-        m_boundaryColor = QColor(115, 79, 34);                  // 70% saturation 45% brightness - inter wheel boundary
-        m_boundaryAlphaColor = QColor(255, 39, 0, 32);          // Base with alpha
+        m_boundaryColor = QColor(32, 32, 32);                   // background 60% darkness - inter wheel gap
+        m_boundaryAlphaColor = QColor(255, 39, 0, 32);          // Base with alpha - wheel edges
         break;
 	case Normal:
 	default:
