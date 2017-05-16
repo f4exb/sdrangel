@@ -20,7 +20,8 @@ CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
-INCLUDEPATH += $$LIBRTLSDRSRC/include
+!macx:INCLUDEPATH += $$LIBRTLSDRSRC/include
+macx:INCLUDEPATH += /opt/local/include
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -40,6 +41,7 @@ HEADERS += rtlsdrgui.h\
 FORMS += rtlsdrgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
-LIBS += -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
+!macx:LIBS += -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
+macx:LIBS += -L/opt/local/lib -lrtlsdr
 
 RESOURCES = ../../../sdrbase/resources/res.qrc

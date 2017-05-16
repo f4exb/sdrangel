@@ -12,8 +12,10 @@ TARGET = sdrbase
 INCLUDEPATH += $$PWD
 
 DEFINES += USE_KISSFFT=1
-DEFINES += __WINDOWS__=1
-DEFINES += DSD_USE_SERIALDV=1
+win32 {
+    DEFINES += __WINDOWS__=1
+    DEFINES += DSD_USE_SERIALDV=1
+}
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
 DEFINES += USE_SSE4_1=1
@@ -29,6 +31,17 @@ CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\softs\serialDV"
 CONFIG(MINGW64):INCLUDEPATH += "D:\softs\serialDV"
+
+CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
+
+win32 {
+    HEADERS += \
+        dsp/dvserialengine.h \
+        dsp/dvserialworker.h
+    SOURCES += \
+        dsp/dvserialengine.cpp \
+        dsp/dvserialworker.cpp
+}
 
 SOURCES += mainwindow.cpp\
         audio/audiodeviceinfo.cpp\
@@ -48,8 +61,6 @@ SOURCES += mainwindow.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
         dsp/dspdevicesinkengine.cpp\
-        dsp/dvserialengine.cpp\
-        dsp/dvserialworker.cpp\
         dsp/fftengine.cpp\
         dsp/kissengine.cpp\
         dsp/fftfilt.cxx\
@@ -141,8 +152,6 @@ HEADERS  += mainwindow.h\
         dsp/dspengine.h\
         dsp/dspdevicesourceengine.h\
         dsp/dspdevicesinkengine.h\
-        dsp/dvserialengine.h\
-        dsp/dvserialworker.h\
         dsp/dsptypes.h\
         dsp/fftengine.h\
         dsp/fftfilt.h\
@@ -249,7 +258,7 @@ FORMS    += mainwindow.ui\
 
 RESOURCES = resources/res.qrc
 
-LIBS += -L../serialdv/$${build_subdir} -lserialdv
+!macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

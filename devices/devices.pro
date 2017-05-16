@@ -18,6 +18,7 @@ QMAKE_CXXFLAGS += -msse4.1
 
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
+CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
@@ -46,9 +47,10 @@ CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += bladerf/devicebladerf.cpp\
-        bladerf/devicebladerfvalues.cpp\
-        hackrf/devicehackrf.cpp\
+!macx:SOURCES += bladerf/devicebladerf.cpp\
+        bladerf/devicebladerfvalues.cpp
+
+SOURCES += hackrf/devicehackrf.cpp\
         hackrf/devicehackrfvalues.cpp
 
 CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
@@ -56,10 +58,11 @@ CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrshared.cpp\
         sdrdaemon/sdrdaemonfecbuffer.cpp
 
-HEADERS  += bladerf/devicebladerf.h\
+!macx:HEADERS -= bladerf/devicebladerf.h\
         bladerf/devicebladerfparam.h\
-        bladerf/devicebladerfvalues.h\
-        hackrf/devicehackrf.h\
+        bladerf/devicebladerfvalues.h
+
+HEADERS  += hackrf/devicehackrf.h\
         hackrf/devicehackrfparam.h\
         hackrf/devicehackrfvalues.h\
 
@@ -73,3 +76,9 @@ LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
 CONFIG(MINGW64)LIBS += -L../cm256cc/$${build_subdir} -lcm256cc
 CONFIG(MINGW64)LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
+
+macx {
+    LIBS -= -L../libbladerf/$${build_subdir} -llibbladerf
+    LIBS -= -L../libhackrf/$${build_subdir} -llibhackrf
+    LIBS += -L/opt/local/lib -lhackrf
+}

@@ -60,6 +60,7 @@ int pthread_barrier_wait(pthread_barrier_t *barrier)
 /**
  * Missing POSIX RealTime/Monotonic Clock
  */
+/*
 #include <mach/mach_time.h>
 
 int clock_gettime(int clk_id, struct timespec *t) {
@@ -73,5 +74,5 @@ int clock_gettime(int clk_id, struct timespec *t) {
     t->tv_nsec = nseconds;
     return 0;
 }
-
+*/
 #endif // APPLE Compatibility

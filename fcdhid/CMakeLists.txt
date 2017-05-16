@@ -1,13 +1,13 @@
 project(fcdhid)
 
 set(fcdhid_SOURCES
-    ../apple_compat.c
+    	../apple/apple_compat.c
 	hid-libusb.c
 	fcdhid.c
 )
 
 set(fcdhid_HEADERS
-    ../apple_compat.h
+    	../apple/apple_compat.h
 	fcdhid.h
 	hid-libusb.h
 	hidapi.h
