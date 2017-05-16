@@ -54,10 +54,10 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
     m_limeSDROutput->getLPRange(minF, maxF, stepF);
-    ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 
-    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpFIR->setValueRange(5, 1U, 56000U);
 
     ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
