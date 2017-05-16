@@ -38,6 +38,8 @@ public:
 	const QColor& getHighlightColor() const { return m_highlightColor; };
 	const QColor& getBoundaryColor() const { return m_boundaryColor; };
 	const QColor& getBoundaryAlphaColor() const { return m_boundaryAlphaColor; };
+    const QColor& getLightBorderColor() const { return m_lightBorderColor; };
+    const QColor& getDarkBorderColor() const { return m_darkBorderColor; };
 
 private:
 	Theme m_theme;
@@ -47,6 +49,8 @@ private:
 	QColor m_highlightColor;
 	QColor m_boundaryColor;
 	QColor m_boundaryAlphaColor;
+	QColor m_lightBorderColor;
+    QColor m_darkBorderColor;
 };
 
 #endif /* INCLUDE_GPL_GUI_COLORMAPPER_H_ */

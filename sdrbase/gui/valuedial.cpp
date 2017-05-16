@@ -194,6 +194,14 @@ void ValueDial::paintEvent(QPaintEvent*)
 	painter.drawLine(1, 1, 1, height() - 1);
 	painter.drawLine(width() - 2, 1, width() - 2, height() - 1);
 
+	// dial borders
+	painter.setPen(m_colorMapper.getLightBorderColor());
+    painter.drawLine(0, height() - 1, width() - 1, height() - 1);
+    painter.drawLine(width() - 1, height() - 1, width() - 1, 0);
+    painter.setPen(m_colorMapper.getDarkBorderColor());
+    painter.drawLine(0, 0, width() - 1, 0);
+    painter.drawLine(0, height() - 1, 0, 0);
+
 	if(m_hightlightedDigit >= 0) {
 		painter.setPen(Qt::NoPen);
 		painter.setBrush(m_colorMapper.getHighlightColor());
