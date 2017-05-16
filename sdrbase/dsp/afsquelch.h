@@ -34,11 +34,11 @@ public:
 
     // setup the basic parameters and coefficients
     void setCoefficients(
-    		int N,              //!< the algorithm "block"  size
-			unsigned int nbAvg, //!< averaging size
-			int SampleRate,     //!< input signal sample rate
-			int _samplesAttack, //!< number of results before squelch opens
-			int _samplesDecay); //!< number of results keeping squelch open
+            unsigned int N,              //!< the algorithm "block"  size
+			unsigned int nbAvg,          //!< averaging size
+			unsigned int SampleRate,     //!< input signal sample rate
+			unsigned int _samplesAttack, //!< number of results before squelch opens
+			unsigned int _samplesDecay); //!< number of results keeping squelch open
 
     // set the detection threshold
     void setThreshold(double _threshold);
@@ -66,16 +66,16 @@ protected:
 
 private:
     unsigned int m_nbAvg; //!< number of power samples taken for moving average
-    int m_N;
-    int m_sampleRate;
-    int m_samplesProcessed;
-    int m_samplesAvgProcessed;
-    int m_maxPowerIndex;
-    int m_nTones;
-    int m_samplesAttack;
-    int m_attackCount;
-    int m_samplesDecay;
-    int m_decayCount;
+    unsigned int m_N;
+    unsigned int m_sampleRate;
+    unsigned int m_samplesProcessed;
+    unsigned int m_samplesAvgProcessed;
+    unsigned int m_maxPowerIndex;
+    unsigned int m_nTones;
+    unsigned int m_samplesAttack;
+    unsigned int m_attackCount;
+    unsigned int m_samplesDecay;
+    unsigned int m_decayCount;
     bool m_isOpen;
     double m_threshold;
     double *m_k;

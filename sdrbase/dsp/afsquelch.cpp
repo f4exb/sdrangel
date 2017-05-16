@@ -43,7 +43,7 @@ AFSquelch::AFSquelch() :
 	m_toneSet[0]  = 2000.0;
 	m_toneSet[1]  = 10000.0;
 
-    for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
     {
         m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
         m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
@@ -76,7 +76,7 @@ AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
 	m_power = new double[m_nTones];
     m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 0.0f));
 
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		m_toneSet[j] = tones[j];
         m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
@@ -99,7 +99,12 @@ AFSquelch::~AFSquelch()
 }
 
 
-void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int _samplesAttack, int _samplesDecay )
+void AFSquelch::setCoefficients(
+        unsigned int N,
+        unsigned int nbAvg,
+        unsigned int _samplerate,
+        unsigned int _samplesAttack,
+        unsigned int _samplesDecay)
 {
 	m_N = N;                   // save the basic parameters for use during analysis
 	m_nbAvg = nbAvg;
@@ -122,7 +127,7 @@ void AFSquelch::setCoefficients(int N, unsigned int nbAvg, int _samplerate, int 
 	// for later display. The tone set is specified in the
 	// constructor. Notice that the resulting coefficients are
 	// independent of N.
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
 		m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
@@ -167,7 +172,7 @@ void AFSquelch::feedback(double in)
 	double t;
 
 	// feedback for each tone
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		t = m_u0[j];
 		m_u0[j] = in + (m_coef[j] * m_u0[j]) - m_u1[j];
@@ -178,7 +183,7 @@ void AFSquelch::feedback(double in)
 
 void AFSquelch::feedForward()
 {
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		m_power[j] = (m_u0[j] * m_u0[j]) + (m_u1[j] * m_u1[j]) - (m_coef[j] * m_u0[j] * m_u1[j]);
 		m_movingAverages[j].feed(m_power[j]);
@@ -192,7 +197,7 @@ void AFSquelch::feedForward()
 
 void AFSquelch::reset()
 {
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		m_power[j] = m_u0[j] = m_u1[j] = 0.0; // reset
 		m_movingAverages[j].fill(0.0);
@@ -210,7 +215,7 @@ bool AFSquelch::evaluate()
 	double minPower;
 	int minIndex = 0, maxIndex = 0;
 
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		if (m_movingAverages[j].sum() > maxPower)
 		{
@@ -221,7 +226,7 @@ bool AFSquelch::evaluate()
 
 	minPower = maxPower;
 
-	for (int j = 0; j < m_nTones; ++j)
+    for (unsigned int j = 0; j < m_nTones; ++j)
 	{
 		if (m_movingAverages[j].sum() < minPower) {
 			minPower = m_movingAverages[j].sum();
