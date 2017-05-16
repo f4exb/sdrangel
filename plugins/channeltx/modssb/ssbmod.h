@@ -195,7 +195,7 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
-    Real getMagSq() const { return m_magsq; }
+    Real getMagSq() const { return m_magsq == 0 ? 1e-10 : m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 

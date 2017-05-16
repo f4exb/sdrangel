@@ -46,9 +46,9 @@ public:
 
 	void getMagSqLevels(Real& avg, Real& peak, int& nbSamples)
 	{
-	    avg = m_magsqSum / m_magsqCount;
-	    peak = m_magsqPeak;
-	    nbSamples = m_magsqCount;
+	    avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
+	    peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+	    nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
 	    m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
