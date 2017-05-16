@@ -1,3 +1,10 @@
+sdrangel (3.5.0-1) unstable; urgency=medium
+
+  * SDRdaemonSink plugin connecting to a distant sdrdaemontx instance 
+  * Changed frequency thumbweels color scheme 
+  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 11 May 2017 21:14:18 +0100
+
 sdrangel (3.4.5-1) unstable; urgency=medium
 
   * Removed default constuctors in Moving average and AGC classes 
