@@ -105,7 +105,7 @@ ColorMapper::ColorMapper(Theme theme) :
         m_boundaryColor = QColor(0x46, 0x66, 0x20);             // 69% saturation 40% brightness
         m_boundaryAlphaColor = QColor(0x8c, 0xff, 0x00, 0x20);  // Base with alpha
         break;
-    case GrayGreenYellow:
+    case GrayGreenYellow: // Base 87 (=120-33) degrees hue 140,255,0
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(33, 33, 33))); // 59% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(50, 50, 50))); // 37% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(67, 67, 67))); // 18% darkness
@@ -113,13 +113,13 @@ ColorMapper::ColorMapper(Theme theme) :
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(60, 60, 60))); // 25% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(50, 50, 50))); // 37% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(33, 33, 33))); // 59% darkness
-        m_foregroundColor = QColor(0x8c, 0xff, 0x00);           // Base 87 (=120-33) degrees hue
-        m_secondaryForegroundColor = QColor(0xc6, 0xff, 0x80);  // 50% saturation
-        m_highlightColor = QColor(0xa9, 0xff, 0x40, 0x80);      // 75% saturation
-        m_boundaryColor = QColor(0x46, 0x66, 0x20);             // 69% saturation 40% brightness
-        m_boundaryAlphaColor = QColor(0x8c, 0xff, 0x00, 0x20);  // Base with alpha
+        m_foregroundColor = QColor(99, 128, 64);                // 50% saturation 50% brightbess - shadow face color
+        m_secondaryForegroundColor = QColor(198, 255, 128);     // 50% saturation - front face color
+        m_highlightColor = QColor(169, 255, 64, 128);           // 75% saturation - digit highlight overlay
+        m_boundaryColor = QColor(79, 115, 34);                  // 70% saturation 45% brightness - inter wheel boundary
+        m_boundaryAlphaColor = QColor(140, 255, 0, 32);         // Base with alpha
         break;
-    case GrayGold:
+    case GrayGold: // Base 33 degrees hue 255,139,0
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.0, QColor(33, 33, 33))); // 59% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.1, QColor(50, 50, 50))); // 37% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.2, QColor(67, 67, 67))); // 18% darkness
@@ -127,11 +127,11 @@ ColorMapper::ColorMapper(Theme theme) :
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.8, QColor(60, 60, 60))); // 25% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(0.9, QColor(50, 50, 50))); // 37% darkness
         m_dialBackgroundcolorMap.push_back(std::pair<float, QColor>(1.0, QColor(33, 33, 33))); // 59% darkness
-        m_foregroundColor = QColor(0xff, 0x8b, 0x00);           // Base 33 degrees hue
-        m_secondaryForegroundColor = QColor(0xff, 0xc5, 0x80);  // 50% saturation
-        m_highlightColor = QColor(0xbf, 0x69, 0x00, 0x80);      // 75% saturation
-        m_boundaryColor = QColor(0x66, 0x38, 0x20);             // 69% saturation 40% brightness
-        m_boundaryAlphaColor = QColor(0xff, 0x8b, 0x00, 0x20);  // Base with alpha
+        m_foregroundColor = QColor(128, 98, 64);                // 50% saturation 50% brightbess - shadow face color
+        m_secondaryForegroundColor = QColor(255, 197, 128);     // 50% saturation - front face color
+        m_highlightColor = QColor(255, 169, 64, 128);           // 75% saturation - digit highlight overlay
+        m_boundaryColor = QColor(115, 79, 34);                  // 70% saturation 45% brightness - inter wheel boundary
+        m_boundaryAlphaColor = QColor(255, 39, 0, 32);          // Base with alpha
         break;
 	case Normal:
 	default:
