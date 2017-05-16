@@ -49,6 +49,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
@@ -132,7 +135,7 @@
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>SizeVerCursor</cursorShape>
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
@@ -226,6 +229,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="rateControlLayout">
+     <property name="topMargin">
+      <number>4</number>
+     </property>
      <item>
       <widget class="QLabel" name="interpLabel">
        <property name="text">
@@ -303,7 +309,7 @@
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>SizeVerCursor</cursorShape>
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
       </widget>
      </item>

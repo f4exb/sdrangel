@@ -49,6 +49,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="topMargin">
+      <number>4</number>
+     </property>
      <property name="bottomMargin">
       <number>2</number>
      </property>
@@ -129,12 +132,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>SizeVerCursor</cursorShape>
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
@@ -300,6 +303,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="sampleRateLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
      <item>
       <widget class="QLabel" name="sampleRateLabel">
        <property name="sizePolicy">
@@ -335,9 +341,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Device sample rate</string>
@@ -425,7 +434,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0">
      <property name="topMargin">
       <number>2</number>
      </property>

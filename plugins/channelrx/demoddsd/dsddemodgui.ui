@@ -73,6 +73,9 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="deltaFreqPowerLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
         <item>
@@ -110,12 +113,12 @@
           </property>
           <property name="font">
            <font>
-            <family>Monospace</family>
+            <family>DejaVu Sans Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
           <property name="cursor">
-           <cursorShape>SizeVerCursor</cursorShape>
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="focusPolicy">
            <enum>Qt::StrongFocus</enum>

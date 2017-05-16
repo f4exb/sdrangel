@@ -49,6 +49,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
@@ -124,12 +127,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>SizeVerCursor</cursorShape>
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
@@ -291,7 +294,7 @@
    <item>
     <layout class="QHBoxLayout" name="sampleRateLayout">
      <property name="topMargin">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="bottomMargin">
       <number>2</number>
@@ -325,9 +328,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>Bitstream Vera Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Device sample rate (S/s)</string>

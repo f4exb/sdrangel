@@ -52,6 +52,9 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="rfSettings1Layout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
@@ -89,9 +92,12 @@
           </property>
           <property name="font">
            <font>
-            <family>Monospace</family>
+            <family>DejaVu Sans Mono</family>
             <pointsize>12</pointsize>
            </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="toolTip">
            <string>Channel center frequency shift</string>

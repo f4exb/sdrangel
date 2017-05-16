@@ -49,7 +49,7 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
-     <property name="bottomMargin">
+     <property name="topMargin">
       <number>2</number>
      </property>
      <item>
@@ -121,12 +121,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>SizeVerCursor</cursorShape>
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
@@ -182,9 +182,6 @@
      <property name="topMargin">
       <number>2</number>
      </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
      <item>
       <widget class="ButtonSwitch" name="ncoEnable">
        <property name="toolTip">
@@ -227,9 +224,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Center frequency with NCO engaged (kHz)</string>
@@ -268,9 +268,6 @@
    <item>
     <layout class="QHBoxLayout" name="ncoSampleRateLayout">
      <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
       <number>2</number>
      </property>
      <item>
@@ -432,9 +429,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Device to host sample rate</string>
@@ -488,9 +488,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Analog lowpass filer bandwidth (kHz)</string>
@@ -543,9 +546,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
         <string>Digital FIR lowpass filers bandwidth (kHz)</string>

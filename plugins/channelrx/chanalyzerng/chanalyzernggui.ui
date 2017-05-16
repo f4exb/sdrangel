@@ -55,6 +55,9 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="HeaderLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
         <item>
@@ -100,7 +103,7 @@
            </font>
           </property>
           <property name="cursor">
-           <cursorShape>SizeVerCursor</cursorShape>
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="focusPolicy">
            <enum>Qt::StrongFocus</enum>
@@ -220,7 +223,7 @@
            </font>
           </property>
           <property name="cursor">
-           <cursorShape>SizeVerCursor</cursorShape>
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="toolTip">
            <string>Rational downsampler output rate</string>

@@ -38,7 +38,16 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -168,6 +177,9 @@
     </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
        <widget class="QToolButton" name="deltaMinus">
         <property name="toolTip">
@@ -206,12 +218,12 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
           <pointsize>12</pointsize>
          </font>
         </property>
         <property name="cursor">
-         <cursorShape>SizeVerCursor</cursorShape>
+         <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="focusPolicy">
          <enum>Qt::StrongFocus</enum>
@@ -523,7 +535,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
