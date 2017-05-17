@@ -66,7 +66,9 @@ When button is off the sample rate can vary from 950 kS/s to 2400 kS/s
 
 This is the device sample rate in samples per second (S/s).
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
+Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
 
 <h3>7: Decimation factor</h3>
 

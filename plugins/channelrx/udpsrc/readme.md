@@ -17,7 +17,9 @@ The receiving application must make sure it acknowledges this block size. UDP ma
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Use the "+/-" button on the left side to toggle between positive and negative shift.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
 
 <h3>2: Channel power</h3>
 

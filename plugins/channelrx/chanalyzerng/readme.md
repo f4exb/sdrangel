@@ -33,13 +33,15 @@ Note: the spectrum view (Channel spectrum) is not presented here.
 
 ![Channel Analyzer NG plugin controls](../../../doc/img/ChAnalyzerNG_plugin_settings.png)
 
-<h3>1: Frequency shift from center frequency of reception direction</h3>
+<h3>1: <s>Frequency shift from center frequency of reception direction</s></h3>
 
 The "+/-" button on the left side of the dial toggles between positive and negative shift.
 
 <h3>2: Frequency shift from center frequency of reception value</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
 
 <h3>3: Toggle the rational downsampler</h3>
 
@@ -47,7 +49,9 @@ The input channel sample rate is given by the source device sample rate possibly
 
 <h3>4: Rational downsampler output rate</h3>
 
-Use the wheels to adjust the sample rate that will be used in the rest of the signal processing in the channel. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate.
+Use the wheels to adjust the sample rate that will be used in the rest of the signal processing in the channel. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate.
 
 <h3>5: Downsampler by a power of two</h3>
 

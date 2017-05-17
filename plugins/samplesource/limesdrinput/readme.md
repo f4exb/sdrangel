@@ -73,7 +73,7 @@ USe this push button to reset the NCO frequency to 0 and thus center on the main
 
 <h3>5: Center frequency with NCO engaged</h3>
 
-This is the center frequency of the mix of LO and NCO combined and is the source passband center frequency when the NCO is engaged. Use the thumbwheels to adjust frequency as done with the LO (1.1). The boundaries are dynamically calculated from the LO center frequency and sample rate.
+This is the center frequency of the mix of LO and NCO combined and is the source passband center frequency when the NCO is engaged. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency and sample rate.
 
 <h3>6-7: Auto correction options</h3>
 
@@ -96,13 +96,15 @@ The I/Q stream from the LimeSDR is doensampled by a power of two by software ins
 
 This is the LMS7002M device to/from host stream sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
+Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
 
 The LMS7002M uses the same clock for both the ADCs and DACs therefore this sample rate affects all of the 2x2 MIMO channels.
 
 <h3>11: Rx hardware filter bandwidth</h3>
 
-This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the given channel. Boundaries are updated automatically but generally are from 1.4 to 130 MHz in 1 kHz steps. Use the wheels to adjust the value.
+This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the given channel. Boundaries are updated automatically but generally are from 1.4 to 130 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
 <h3>12: TSP FIR filter toggle</h3>
 
@@ -110,7 +112,7 @@ The TSP in the LMS7002M chip has a FIR filter chain per channel. Use this button
 
 <h3>13: TSP FIR filter bandwidth</h3>
 
-USe the wheels to adjust the bandwidth of the hardware TSP FIR filter.
+USe the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
 <h3>14: Gain</h2>
 

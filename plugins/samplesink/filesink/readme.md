@@ -52,7 +52,9 @@ The baseband stream is interpolated by this value before being written to file. 
 
 This is the baseband sample rate before interpolation in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
+Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
 
 <h3>8: Time counter</h3>
 

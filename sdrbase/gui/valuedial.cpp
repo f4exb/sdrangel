@@ -328,14 +328,20 @@ void ValueDial::wheelEvent(QWheelEvent* event)
 
 	if(m_animationState == 0) {
 		if(event->delta() < 0) {
-			if(event->modifiers() & Qt::ShiftModifier)
-				e *= 5;
+            if (event->modifiers() & Qt::ShiftModifier) {
+                e *= 5;
+            } else if (event->modifiers() & Qt::ControlModifier) {
+                e *= 2;
+            }
 			if(m_value < e)
 				m_valueNew = m_valueMin;
 			else m_valueNew = m_value - e;
 		} else {
-			if(event->modifiers() & Qt::ShiftModifier)
-				e *= 5;
+            if (event->modifiers() & Qt::ShiftModifier) {
+                e *= 5;
+            } else if (event->modifiers() & Qt::ControlModifier) {
+                e *= 2;
+            }
 			if(m_valueMax - m_value < e)
 				m_valueNew = m_valueMax;
 			else m_valueNew = m_value + e;
@@ -403,8 +409,11 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 		}
 	} else if(value->key() == Qt::Key_Up) {
 		quint64 e = findExponent(m_cursor);
-		if(value->modifiers() & Qt::ShiftModifier)
-			e *= 5;
+        if (value->modifiers() & Qt::ShiftModifier) {
+            e *= 5;
+        } else if (value->modifiers() & Qt::ControlModifier) {
+            e *= 2;
+        }
 		if(m_animationState != 0)
 			m_value = m_valueNew;
 		if(m_valueMax - m_value < e)
@@ -414,8 +423,11 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 		emit changed(m_valueNew);
 	} else if(value->key() == Qt::Key_Down) {
 		quint64 e = findExponent(m_cursor);
-		if(value->modifiers() & Qt::ShiftModifier)
-			e *= 5;
+        if (value->modifiers() & Qt::ShiftModifier) {
+            e *= 5;
+        } else if (value->modifiers() & Qt::ControlModifier) {
+            e *= 2;
+        }
 		if(m_animationState != 0)
 			m_value = m_valueNew;
 		if(m_value < e)

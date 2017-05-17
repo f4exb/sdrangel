@@ -62,7 +62,9 @@ This controls the optional XB-200 add-on when it is fitted to the BladeRF main b
 
 This is the BladeRF device ADC sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
+Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. 
 
 <h3>5: Decimation factor</h3>
 

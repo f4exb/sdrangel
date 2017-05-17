@@ -400,16 +400,20 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
 
             if(event->delta() < 0)
             {
-                if(event->modifiers() & Qt::ShiftModifier) {
+                if (event->modifiers() & Qt::ShiftModifier) {
                     e *= 5;
+                } else if (event->modifiers() & Qt::ControlModifier) {
+                    e *= 2;
                 }
 
                 m_valueNew = (m_value - e < m_valueMin) ? m_valueMin : m_value - e;
             }
             else
             {
-                if(event->modifiers() & Qt::ShiftModifier) {
+                if (event->modifiers() & Qt::ShiftModifier) {
                     e *= 5;
+                } else if (event->modifiers() & Qt::ControlModifier) {
+                    e *= 2;
                 }
 
                 m_valueNew = (m_value + e > m_valueMax) ? m_valueMax : m_value + e;
@@ -516,8 +520,10 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         {
             qint64 e = findExponent(m_cursor);
 
-            if(value->modifiers() & Qt::ShiftModifier) {
+            if (value->modifiers() & Qt::ShiftModifier) {
                 e *= 5;
+            } else if (value->modifiers() & Qt::ControlModifier) {
+                e *= 2;
             }
 
             if(m_animationState != 0) {
@@ -544,8 +550,10 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         {
             qint64 e = findExponent(m_cursor);
 
-            if(value->modifiers() & Qt::ShiftModifier) {
+            if (value->modifiers() & Qt::ShiftModifier) {
                 e *= 5;
+            } else if (value->modifiers() & Qt::ControlModifier) {
+                e *= 2;
             }
 
             if(m_animationState != 0) {

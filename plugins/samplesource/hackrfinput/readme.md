@@ -65,7 +65,9 @@ Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an a
 
 This is the HackRF device ADC sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
+Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.   
 
 <h3>7: Rx filter bandwidth</h3>
 

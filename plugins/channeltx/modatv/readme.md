@@ -12,13 +12,15 @@ In practice 4 MS/s with about 300 points per line is the lowest sample rate that
 
 ![ATV Modulator plugin GUI](../../../doc/img/ATVMod_plugin.png)
 
-<h2>1: Frequency shift from center frequency of reception direction</h2>
+<h2>1: <s>Frequency shift from center frequency of reception direction</s></h2>
 
 The "+/-" button on the left side of the dial toggles between positive and negative shift.
 
 <h2>2: Frequency shift from center frequency of reception value</h2>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. 
+
+Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
 
 <h2>3: Sample rate data</h2>
 
