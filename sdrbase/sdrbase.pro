@@ -116,6 +116,7 @@ SOURCES += mainwindow.cpp\
         gui/scale.cpp\
         gui/scaleengine.cpp\
         gui/valuedial.cpp\
+        gui/valuedialz.cpp\
         dsp/devicesamplesource.cpp\
         dsp/devicesamplesink.cpp\
         plugin/pluginapi.cpp\
@@ -222,6 +223,7 @@ HEADERS  += mainwindow.h\
         gui/scale.h\
         gui/scaleengine.h\
         gui/valuedial.h\
+        gui/valuedialz.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/pluginapi.h\

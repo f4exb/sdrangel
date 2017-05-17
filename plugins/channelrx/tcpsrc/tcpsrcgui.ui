@@ -149,29 +149,7 @@
        <number>2</number>
       </property>
       <item>
-       <widget class="QToolButton" name="deltaMinus">
-        <property name="toolTip">
-         <string>Frequency shift direction</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <selectedoff>:/plus.png</selectedoff>
-          <selectedon>:/minus.png</selectedon>
-         </iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ValueDial" name="deltaFrequency" native="true">
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -458,12 +436,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -475,6 +447,12 @@
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>sampleFormat</tabstop>
@@ -484,8 +462,6 @@
   <tabstop>applyBtn</tabstop>
   <tabstop>connections</tabstop>
  </tabstops>
- <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

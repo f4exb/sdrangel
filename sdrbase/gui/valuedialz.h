@@ -1,6 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// Same as ValueDial but handles optionally positive and negative numbers with   //
+// sign display.                                                                 //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,22 +23,22 @@
 #include "gui/colormapper.h"
 #include "util/export.h"
 
-class SDRANGEL_API ValueDial : public QWidget {
+class SDRANGEL_API ValueDialZ : public QWidget {
 	Q_OBJECT
 
 public:
-	ValueDial(QWidget* parent = NULL, ColorMapper colorMapper = ColorMapper(ColorMapper::Normal));
+	ValueDialZ(bool positiveOnly = true, QWidget* parent = NULL, ColorMapper colorMapper = ColorMapper(ColorMapper::Normal));
 
-	void setValue(quint64 value);
-	void setValueRange(uint numDigits, quint64 min, quint64 max);
+	void setValue(qint64 value);
+	void setValueRange(bool positiveOnly, uint numDigits, qint64 min, qint64 max);
 	void setFont(const QFont& font);
 	void setBold(bool bold);
 	void setColorMapper(ColorMapper colorMapper);
-	quint64 getValue() const { return m_value; }
-	quint64 getValueNew() const { return m_valueNew; }
+	qint64 getValue() const { return m_value; }
+	qint64 getValueNew() const { return m_valueNew; }
 
 signals:
-	void changed(quint64 value);
+	void changed(qint64 value);
 
 private:
 	QLinearGradient m_background;
@@ -46,12 +49,13 @@ private:
 	int m_hightlightedDigit;
 	int m_cursor;
 	bool m_cursorState;
-	quint64 m_value;
-	quint64 m_valueMax;
-	quint64 m_valueMin;
+	qint64 m_value;
+	qint64 m_valueMax;
+	qint64 m_valueMin;
+	bool m_positiveOnly;
 	QString m_text;
 
-	quint64 m_valueNew;
+	qint64 m_valueNew;
 	QString m_textNew;
 	int m_animationState;
 	QTimer m_animationTimer;
@@ -59,9 +63,9 @@ private:
 
 	ColorMapper m_colorMapper;
 
-	quint64 findExponent(int digit);
+    quint64 findExponent(int digit);
 	QChar digitNeigh(QChar c, bool dir);
-	QString formatText(quint64 value);
+	QString formatText(qint64 value);
 
 	void paintEvent(QPaintEvent*);
 

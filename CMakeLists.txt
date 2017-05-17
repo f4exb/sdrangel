@@ -165,6 +165,7 @@ set(sdrbase_SOURCES
     sdrbase/gui/scale.cpp
     sdrbase/gui/scaleengine.cpp
     sdrbase/gui/valuedial.cpp
+    sdrbase/gui/valuedialz.cpp
 
     sdrbase/dsp/devicesamplesource.cpp
     sdrbase/dsp/devicesamplesink.cpp
@@ -285,6 +286,7 @@ set(sdrbase_HEADERS
     sdrbase/gui/scale.h
     sdrbase/gui/scaleengine.h
     sdrbase/gui/valuedial.h
+    sdrbase/gui/valuedialz.h
 
     sdrbase/dsp/devicesamplesource.h
     sdrbase/dsp/devicesamplesink.h

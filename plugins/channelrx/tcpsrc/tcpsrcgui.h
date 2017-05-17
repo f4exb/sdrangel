@@ -42,8 +42,7 @@ public:
 
 private slots:
 	void channelMarkerChanged();
-	void on_deltaFrequency_changed(quint64 value);
-	void on_deltaMinus_toggled(bool minus);
+	void on_deltaFrequency_changed(qint64 value);
 	void on_sampleFormat_currentIndexChanged(int index);
 	void on_sampleRate_textEdited(const QString& arg1);
 	void on_rfBandwidth_textEdited(const QString& arg1);

@@ -207,7 +207,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
@@ -282,8 +282,7 @@ void TCPSrcGUI::applySettings()
 		int boost = ui->boost->value();
 
 		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+        ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
 		ui->tcpPort->setText(QString("%1").arg(tcpPort));
@@ -332,24 +331,9 @@ void TCPSrcGUI::applySettings()
 	}
 }
 
-void TCPSrcGUI::on_deltaMinus_toggled(bool minus)
+void TCPSrcGUI::on_deltaFrequency_changed(qint64 value)
 {
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
-void TCPSrcGUI::on_deltaFrequency_changed(quint64 value)
-{
-	if (ui->deltaMinus->isChecked()) {
-		m_channelMarker.setCenterFrequency(-value);
-	} else {
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void TCPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
