@@ -58,8 +58,7 @@ private slots:
     void viewChanged();
     void handleSourceMessages();
 
-    void on_deltaFrequency_changed(quint64 value);
-    void on_deltaMinus_toggled(bool minus);
+    void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int value);
     void on_modPercent_valueChanged(int value);
     void on_volume_valueChanged(int value);

@@ -76,26 +76,20 @@
       <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
-         <widget class="QToolButton" name="deltaMinus">
-          <property name="toolTip">
-           <string>Frequency shift direction</string>
+         <widget class="QLabel" name="deltaFrequencyLabel">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>0</height>
+           </size>
           </property>
           <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <selectedoff>:/plus.png</selectedoff>
-            <selectedon>:/minus.png</selectedon>
-           </iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
+           <string>Df</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="ValueDial" name="deltaFrequency" native="true">
+         <widget class="ValueDialZ" name="deltaFrequency" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
             <horstretch>0</horstretch>
@@ -674,12 +668,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
@@ -694,6 +682,12 @@
    <class>CWKeyerGUI</class>
    <extends>QWidget</extends>
    <header>gui/cwkeyergui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
