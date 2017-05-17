@@ -189,7 +189,7 @@ void DSDDemodGUI::viewChanged()
 
 void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(-value);
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void DSDDemodGUI::on_rfBW_valueChanged(int value)

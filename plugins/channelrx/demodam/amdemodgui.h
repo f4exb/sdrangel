@@ -39,8 +39,7 @@ public:
 
 private slots:
 	void viewChanged();
-	void on_deltaFrequency_changed(quint64 value);
-	void on_deltaMinus_toggled(bool minus);
+	void on_deltaFrequency_changed(qint64 value);
 	void on_bandpassEnable_toggled(bool checked);
 	void on_rfBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);

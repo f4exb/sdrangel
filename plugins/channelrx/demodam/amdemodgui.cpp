@@ -154,24 +154,9 @@ void AMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void AMDemodGUI::on_deltaMinus_toggled(bool minus)
+void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
-void AMDemodGUI::on_deltaFrequency_changed(quint64 value)
-{
-	if (ui->deltaMinus->isChecked()) {
-		m_channelMarker.setCenterFrequency(-value);
-	} else {
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
@@ -243,7 +228,9 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	//m_channelMarker = new ChannelMarker(this);
@@ -287,8 +274,7 @@ void AMDemodGUI::applySettings()
 			48000,
 			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
 			ui->rfBW->value() * 100.0,
