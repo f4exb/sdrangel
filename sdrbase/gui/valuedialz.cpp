@@ -358,7 +358,7 @@ void ValueDialZ::mouseMoveEvent(QMouseEvent* event)
     {
         i = -1;
     }
-    else if ((m_text[i] == QChar('+')) || (m_text[i] != QChar('-')))
+    else if ((m_text[i] == QChar('+')) || (m_text[i] == QChar('-')))
     {
         i = -1;
     }
