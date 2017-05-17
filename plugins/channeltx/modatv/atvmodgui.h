@@ -60,8 +60,7 @@ private slots:
     void channelizerOutputSampleRateChanged();
     void handleSourceMessages();
 
-    void on_deltaFrequency_changed(quint64 value);
-    void on_deltaMinus_toggled(bool minus);
+    void on_deltaFrequency_changed(qint64 value);
     void on_channelMute_toggled(bool checked);
     void on_forceDecimator_toggled(bool checked);
     void on_modulation_currentIndexChanged(int index);
