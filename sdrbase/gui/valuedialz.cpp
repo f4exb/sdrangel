@@ -358,10 +358,6 @@ void ValueDialZ::mouseMoveEvent(QMouseEvent* event)
     {
         i = -1;
     }
-    else if ((m_text[i] == QChar('+')) || (m_text[i] == QChar('-')))
-    {
-        i = -1;
-    }
 
     if(i != m_hightlightedDigit)
     {
@@ -376,9 +372,7 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
 
     i = (event->x() - 1) / m_digitWidth;
 
-    if ((m_text[i] != QChar('.')) &&
-       (m_text[i] != QChar('+')) &&
-       (m_text[i] != QChar('-')))
+    if (m_text[i] != QChar('.'))
     {
         m_hightlightedDigit = i;
     }
@@ -394,25 +388,32 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
         update();
     }
 
-    qint64 e = findExponent(m_hightlightedDigit);
-
     if(m_animationState == 0)
     {
-        if(event->delta() < 0)
+        if (!m_positiveOnly && (m_hightlightedDigit == 0))
         {
-            if(event->modifiers() & Qt::ShiftModifier) {
-                e *= 5;
-            }
-
-            m_valueNew = (m_value - e < m_valueMin) ? m_valueMin : m_value - e;
+            m_valueNew = (-m_value < m_valueMin) ? m_valueMin : (-m_value > m_valueMax) ? m_valueMax : -m_value;
         }
         else
         {
-            if(event->modifiers() & Qt::ShiftModifier) {
-                e *= 5;
-            }
+            qint64 e = findExponent(m_hightlightedDigit);
 
-            m_valueNew = (m_value + e > m_valueMax) ? m_valueMax : m_value + e;
+            if(event->delta() < 0)
+            {
+                if(event->modifiers() & Qt::ShiftModifier) {
+                    e *= 5;
+                }
+
+                m_valueNew = (m_value - e < m_valueMin) ? m_valueMin : m_value - e;
+            }
+            else
+            {
+                if(event->modifiers() & Qt::ShiftModifier) {
+                    e *= 5;
+                }
+
+                m_valueNew = (m_value + e > m_valueMax) ? m_valueMax : m_value + e;
+            }
         }
 
         setValue(m_valueNew);
