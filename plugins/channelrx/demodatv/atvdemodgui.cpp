@@ -295,8 +295,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     ui->glScope->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
     connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
     connect(m_objChannelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
@@ -363,8 +364,7 @@ void ATVDemodGUI::applySettings()
 {
     if (m_blnDoApplySettings)
     {
-		ui->deltaFrequency->setValue(abs(m_objChannelMarker.getCenterFrequency()));
-        ui->deltaFrequencyMinus->setChecked(m_objChannelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
 
         m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
                 m_objChannelizer->getInputSampleRate(), // always use maximum available bandwidth
@@ -606,24 +606,9 @@ void ATVDemodGUI::on_decimatorEnable_toggled(bool checked)
     applyRFSettings();
 }
 
-void ATVDemodGUI::on_deltaFrequency_changed(quint64 value)
+void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    if (ui->deltaFrequencyMinus->isChecked()) {
-        m_objChannelMarker.setCenterFrequency(-value);
-    } else {
-        m_objChannelMarker.setCenterFrequency(value);
-    }
-}
-
-void ATVDemodGUI::on_deltaFrequencyMinus_toggled(bool minus)
-{
-    int deltaFrequency = m_objChannelMarker.getCenterFrequency();
-    bool minusDelta = (deltaFrequency < 0);
-
-    if (minus ^ minusDelta) // sign change
-    {
-        m_objChannelMarker.setCenterFrequency(-deltaFrequency);
-    }
+    m_objChannelMarker.setCenterFrequency(value);
 }
 
 void ATVDemodGUI::on_bfo_valueChanged(int value)

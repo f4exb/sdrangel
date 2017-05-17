@@ -81,8 +81,7 @@ private slots:
     void on_rfOppBW_valueChanged(int value);
     void on_rfFiltering_toggled(bool checked);
     void on_decimatorEnable_toggled(bool checked);
-    void on_deltaFrequency_changed(quint64 value);
-    void on_deltaFrequencyMinus_toggled(bool minus);
+    void on_deltaFrequency_changed(qint64 value);
     void on_bfo_valueChanged(int value);
     void on_fmDeviation_valueChanged(int value);
     void on_screenTabWidget_currentChanged(int index);

@@ -58,26 +58,20 @@
       <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
-         <widget class="QToolButton" name="deltaFrequencyMinus">
-          <property name="toolTip">
-           <string>Channel center frequency shift direction</string>
+         <widget class="QLabel" name="deltaFrequencyLabel">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>0</height>
+           </size>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset>
-            <selectedoff>:/plus.png</selectedoff>
-            <selectedon>:/minus.png</selectedon>
-           </iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
+           <string>Df</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="ValueDial" name="deltaFrequency" native="true">
+         <widget class="ValueDialZ" name="deltaFrequency" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
             <horstretch>0</horstretch>
@@ -1118,12 +1112,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
@@ -1144,6 +1132,12 @@
    <class>GLScopeNGGUI</class>
    <extends>QWidget</extends>
    <header>gui/glscopenggui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
