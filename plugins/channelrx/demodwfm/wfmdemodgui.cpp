@@ -145,27 +145,9 @@ void WFMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void WFMDemodGUI::on_deltaMinus_toggled(bool minus)
+void WFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
-void WFMDemodGUI::on_deltaFrequency_changed(quint64 value)
-{
-	if (ui->deltaMinus->isChecked())
-	{
-		m_channelMarker.setCenterFrequency(-value);
-	}
-	else
-	{
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void WFMDemodGUI::on_rfBW_currentIndexChanged(int index)
@@ -222,8 +204,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -287,8 +270,7 @@ void WFMDemodGUI::applySettings()
 			requiredBW(m_rfBW[ui->rfBW->currentIndex()]), // TODO: this is where requested sample rate is specified
 			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
 		    m_rfBW[ui->rfBW->currentIndex()],
