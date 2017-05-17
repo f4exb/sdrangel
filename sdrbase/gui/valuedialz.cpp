@@ -474,7 +474,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
                 m_cursor--;
             }
 
-            if (m_cursor < (m_positiveOnly ? 0 : 1)) {
+            if (m_cursor < 0) {
                 m_cursor++;
             }
 
@@ -504,34 +504,56 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
     }
     else if(value->key() == Qt::Key_Up)
     {
-        qint64 e = findExponent(m_cursor);
+        if (!m_positiveOnly && (m_cursor == 0))
+        {
+            if(m_animationState != 0) {
+                m_value = m_valueNew;
+            }
 
-        if(value->modifiers() & Qt::ShiftModifier) {
-            e *= 5;
+            m_valueNew = (-m_value < m_valueMin) ? m_valueMin : (-m_value > m_valueMax) ? m_valueMax : -m_value;
         }
+        else
+        {
+            qint64 e = findExponent(m_cursor);
 
-        if(m_animationState != 0) {
-            m_value = m_valueNew;
+            if(value->modifiers() & Qt::ShiftModifier) {
+                e *= 5;
+            }
+
+            if(m_animationState != 0) {
+                m_value = m_valueNew;
+            }
+
+            m_valueNew = m_value + e > m_valueMax ? m_valueMax : m_value + e;
         }
-
-        m_valueNew = m_value + e > m_valueMax ? m_valueMax : m_value + e;
 
         setValue(m_valueNew);
         emit changed(m_valueNew);
     }
     else if(value->key() == Qt::Key_Down)
     {
-        qint64 e = findExponent(m_cursor);
+        if (!m_positiveOnly && (m_cursor == 0))
+        {
+            if(m_animationState != 0) {
+                m_value = m_valueNew;
+            }
 
-        if(value->modifiers() & Qt::ShiftModifier) {
-            e *= 5;
+            m_valueNew = (-m_value < m_valueMin) ? m_valueMin : (-m_value > m_valueMax) ? m_valueMax : -m_value;
         }
+        else
+        {
+            qint64 e = findExponent(m_cursor);
 
-        if(m_animationState != 0) {
-            m_value = m_valueNew;
+            if(value->modifiers() & Qt::ShiftModifier) {
+                e *= 5;
+            }
+
+            if(m_animationState != 0) {
+                m_value = m_valueNew;
+            }
+
+            m_valueNew = m_value - e < m_valueMin ? m_valueMin : m_value - e;
         }
-
-        m_valueNew = m_value - e < m_valueMin ? m_valueMin : m_value - e;
 
         setValue(m_valueNew);
         emit changed(m_valueNew);
