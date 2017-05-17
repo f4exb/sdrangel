@@ -59,8 +59,7 @@ private slots:
     void viewChanged();
     void handleSourceMessages();
 
-    void on_deltaFrequency_changed(quint64 value);
-    void on_deltaMinus_toggled(bool minus);
+    void on_deltaFrequency_changed(qint64 value);
     void on_dsb_toggled(bool checked);
     void on_audioBinaural_toggled(bool checked);
     void on_audioFlipChannels_toggled(bool checked);
