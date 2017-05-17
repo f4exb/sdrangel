@@ -146,17 +146,6 @@ void SSBDemodGUI::viewChanged()
 	applySettings();
 }
 
-void SSBDemodGUI::on_deltaMinus_toggled(bool minus)
-{
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
@@ -200,16 +189,9 @@ void SSBDemodGUI::on_dsb_toggled(bool dsb)
 	setNewRate(m_spanLog2);
 }
 
-void SSBDemodGUI::on_deltaFrequency_changed(quint64 value)
+void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-	if (ui->deltaMinus->isChecked())
-	{
-		m_channelMarker.setCenterFrequency(-value);
-	}
-	else
-	{
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void SSBDemodGUI::on_BW_valueChanged(int value)
@@ -346,7 +328,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
@@ -465,8 +449,7 @@ void SSBDemodGUI::applySettings()
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			48000,
