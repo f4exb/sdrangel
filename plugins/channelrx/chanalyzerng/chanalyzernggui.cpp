@@ -182,17 +182,6 @@ void ChannelAnalyzerNGGUI::channelizerInputSampleRateChanged()
 	applySettings();
 }
 
-void ChannelAnalyzerNGGUI::on_deltaMinus_toggled(bool minus)
-{
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
 {
     ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
@@ -220,13 +209,9 @@ int ChannelAnalyzerNGGUI::getRequestedChannelSampleRate()
     }
 }
 
-void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(quint64 value)
+void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(qint64 value)
 {
-	if (ui->deltaMinus->isChecked()) {
-		m_channelMarker.setCenterFrequency(-value);
-	} else {
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void ChannelAnalyzerNGGUI::on_BW_valueChanged(int value)
@@ -371,8 +356,9 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
 	ui->channelSampleRate->setValueRange(7, 2000U, 9999999U);
@@ -513,8 +499,7 @@ void ChannelAnalyzerNGGUI::applySettings()
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			//m_channelizer->getInputSampleRate(),
