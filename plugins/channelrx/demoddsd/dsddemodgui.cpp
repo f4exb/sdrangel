@@ -187,27 +187,9 @@ void DSDDemodGUI::viewChanged()
 	applySettings();
 }
 
-void DSDDemodGUI::on_deltaMinus_toggled(bool minus)
+void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
-void DSDDemodGUI::on_deltaFrequency_changed(quint64 value)
-{
-	if (ui->deltaMinus->isChecked())
-	{
-		m_channelMarker.setCenterFrequency(-value);
-	}
-	else
-	{
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(-value);
 }
 
 void DSDDemodGUI::on_rfBW_valueChanged(int value)
@@ -349,7 +331,9 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
     ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	m_channelizer = new DownChannelizer(m_dsdDemod);
@@ -410,8 +394,7 @@ void DSDDemodGUI::applySettings()
 			48000,
 			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 	    ui->rfBWText->setText(QString("%1k").arg(ui->rfBW->value() / 10.0, 0, 'f', 1));
 	    ui->demodGainText->setText(QString("%1").arg(ui->demodGain->value() / 100.0, 0, 'f', 2));
 	    ui->fmDeviationText->setText(QString("%1k").arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
