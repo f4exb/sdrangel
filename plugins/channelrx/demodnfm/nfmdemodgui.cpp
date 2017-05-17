@@ -1,4 +1,4 @@
-#include "../../channelrx/demodnfm/nfmdemodgui.h"
+#include "nfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QDebug>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_nfmdemodgui.h"
 #include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
@@ -15,7 +15,7 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
-#include "../../channelrx/demodnfm/nfmdemod.h"
+#include "nfmdemod.h"
 
 const QString NFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.nfm";
 
@@ -163,27 +163,9 @@ void NFMDemodGUI::viewChanged()
 	applySettings();
 }
 
-void NFMDemodGUI::on_deltaMinus_toggled(bool minus)
+void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-	int deltaFrequency = m_channelMarker.getCenterFrequency();
-	bool minusDelta = (deltaFrequency < 0);
-
-	if (minus ^ minusDelta) // sign change
-	{
-		m_channelMarker.setCenterFrequency(-deltaFrequency);
-	}
-}
-
-void NFMDemodGUI::on_deltaFrequency_changed(quint64 value)
-{
-	if (ui->deltaMinus->isChecked())
-	{
-		m_channelMarker.setCenterFrequency(-value);
-	}
-	else
-	{
-		m_channelMarker.setCenterFrequency(value);
-	}
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void NFMDemodGUI::on_rfBW_currentIndexChanged(int index)
@@ -322,7 +304,9 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }"); // squelch closed
 
+	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+	ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
 	m_channelizer = new DownChannelizer(m_nfmDemod);
@@ -370,8 +354,7 @@ void NFMDemodGUI::applySettings()
 			48000,
 			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
-		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
+        ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
 			m_rfBW[ui->rfBW->currentIndex()],
