@@ -990,7 +990,9 @@ void MainWindow::on_action_reloadDevices_triggered()
         {
             QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
             bool sampleSourceSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
-            m_pluginManager->fillSampleSourceSelector(deviceSelectorComboBox, (*it)->m_deviceSourceEngine->getUID());
+            uint dspDeviceSourceEngineUID = (*it)->m_deviceSourceEngine->getUID();
+            m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceSourceEngineUID);
+            m_pluginManager->fillSampleSourceSelector(deviceSelectorComboBox, dspDeviceSourceEngineUID);
             int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
             deviceSelectorComboBox->setCurrentIndex(newIndex);
             deviceSelectorComboBox->blockSignals(sampleSourceSignalsBlocked);
@@ -1000,7 +1002,9 @@ void MainWindow::on_action_reloadDevices_triggered()
         {
             QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
             bool sampleSinkSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
-            m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, (*it)->m_deviceSinkEngine->getUID());
+            uint dspDeviceSinkEngineUID = (*it)->m_deviceSinkEngine->getUID();
+            m_pluginManager->duplicateLocalSampleSinkDevices(dspDeviceSinkEngineUID);
+            m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, dspDeviceSinkEngineUID);
             int newIndex = m_pluginManager->getSampleSinkSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSinkAPI);
             deviceSelectorComboBox->setCurrentIndex(newIndex);
             deviceSelectorComboBox->blockSignals(sampleSinkSignalsBlocked);

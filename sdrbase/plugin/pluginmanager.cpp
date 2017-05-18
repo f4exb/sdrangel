@@ -127,6 +127,12 @@ void PluginManager::updateSampleSourceDevices()
 					ssd[j].id,
 					ssd[j].serial,
 					ssd[j].sequence));
+            qDebug("PluginManager::updateSampleSourceDevices: %s %s %s %s %d",
+                    qPrintable(ssd[j].displayedName),
+                    qPrintable(ssd[j].hardwareId),
+                    qPrintable(ssd[j].id),
+                    qPrintable(ssd[j].serial),
+                    ssd[j].sequence);
 		}
 	}
 }
@@ -147,6 +153,12 @@ void PluginManager::updateSampleSinkDevices()
                     ssd[j].id,
 					ssd[j].serial,
 					ssd[j].sequence));
+            qDebug("PluginManager::updateSampleSinkDevices: %s %s %s %s %d",
+                    qPrintable(ssd[j].displayedName),
+                    qPrintable(ssd[j].hardwareId),
+                    qPrintable(ssd[j].id),
+                    qPrintable(ssd[j].serial),
+                    ssd[j].sequence);
 		}
 	}
 }
