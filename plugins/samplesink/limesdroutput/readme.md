@@ -103,22 +103,28 @@ Use the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing 
 
 Use this slider to adjust the global gain of the Tx chain. LimeSuite software automatically set optimal values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the slider.
 
-<h3>15: Stream status indicator</h3>
+<h3>15: Antenna selection</h3>
+
+  - ** No **: no output
+  - ** Lo **: Tx low range 30 MHz to 1.9 GHz
+  - ** Hi **: Tx high range: 2 GHz and above
+
+<h3>16: Stream status indicator</h3>
 
 This label turns green when status can be obtained from the current stream. Usually this means that the stream is up and running but not necessarily streaming data. The various status elements appear next on the same line (16, 17, 18)
 
-<h3>16: Stream warning indicators</h3>
+<h3>17: Stream warning indicators</h3>
 
   - **U**: turns red if stream experiences underruns
   - **O**: turns red if stream experiences overruns  
   - **P**: turns red if stream experiences packet drop outs
   
-<h3>17: Stream global (all Tx) throughput in MB/s</h3>
+<h3>18: Stream global (all Tx) throughput in MB/s</h3>
 
 This is the stream throughput in MB/s and is usually about 3 times the sample rate for a single stream and 6 times for a dual Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bita travel on the USB link.
 
 &#9888; it has been found that in practice to get a clean output the gain should not exceed ~4dB with standard levels in the channel plugins.
 
-<h3>18: FIFO status</h3>
+<h3>19: FIFO status</h3>
 
-This is the fill percentage of the Tx FIFO in the LimeSuite interface. In normal conditions this should be ~100%.
+This is the fill percentage of the Tx FIFO in the LimeSuite interface. In normal conditions this should be ~100%. On the picture the Tx is not started.
