@@ -277,7 +277,7 @@ void MainWindow::removeLastDevice()
 
 	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
-	    m_deviceWidgetTabs.removeLast();m_pluginManager->loadPlugins();
+	    m_deviceWidgetTabs.removeLast();
 	    ui->tabInputsView->clear();
 
 	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
