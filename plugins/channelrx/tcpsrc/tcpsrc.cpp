@@ -14,13 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/tcpsrc/tcpsrc.h"
+#include "tcpsrc.h"
 
 #include <dsp/downchannelizer.h>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QThread>
-#include "../../channelrx/tcpsrc/tcpsrcgui.h"
+#include "tcpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)

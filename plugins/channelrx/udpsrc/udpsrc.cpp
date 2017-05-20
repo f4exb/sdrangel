@@ -15,15 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/udpsrc/udpsrc.h"
+#include "udpsrc.h"
 
 #include <dsp/downchannelizer.h>
 #include <QUdpSocket>
-#include <QThread>
 #include <QHostAddress>
 #include "dsp/dspengine.h"
 
-#include "../../channelrx/udpsrc/udpsrcgui.h"
+#include "udpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
