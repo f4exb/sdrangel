@@ -89,26 +89,6 @@ public:
 		{ }
 	};
 
-	class MsgReportSDRdaemonSinkGeneration : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool getAcquisition() const { return m_acquisition; }
-
-		static MsgReportSDRdaemonSinkGeneration* create(bool acquisition)
-		{
-			return new MsgReportSDRdaemonSinkGeneration(acquisition);
-		}
-
-	protected:
-		bool m_acquisition;
-
-		MsgReportSDRdaemonSinkGeneration(bool acquisition) :
-			Message(),
-			m_acquisition(acquisition)
-		{ }
-	};
-
 	class MsgReportSDRdaemonSinkStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 

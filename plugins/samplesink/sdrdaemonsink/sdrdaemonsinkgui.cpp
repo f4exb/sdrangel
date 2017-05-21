@@ -22,7 +22,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "ui_filesinkgui.h"
+#include "ui_sdrdaemonsinkgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -34,16 +34,13 @@
 #include "device/devicesinkapi.h"
 #include "sdrdaemonsinkgui.h"
 
-FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::FileSinkGui),
+	ui(new Ui::SDRdaemonSinkGui),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_deviceSampleSink(0),
 	m_sampleRate(0),
-	m_generation(false),
-	m_fileName("./test.sdriq"),
-	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
@@ -55,8 +52,6 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
-
-	ui->fileNameText->setText(m_fileName);
 
 	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -72,51 +67,51 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
-FileSinkGui::~FileSinkGui()
+SDRdaemonSinkGui::~SDRdaemonSinkGui()
 {
 	delete ui;
 }
 
-void FileSinkGui::destroy()
+void SDRdaemonSinkGui::destroy()
 {
 	delete this;
 }
 
-void FileSinkGui::setName(const QString& name)
+void SDRdaemonSinkGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString FileSinkGui::getName() const
+QString SDRdaemonSinkGui::getName() const
 {
 	return objectName();
 }
 
-void FileSinkGui::resetToDefaults()
+void SDRdaemonSinkGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 FileSinkGui::getCenterFrequency() const
+qint64 SDRdaemonSinkGui::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void FileSinkGui::setCenterFrequency(qint64 centerFrequency)
+void SDRdaemonSinkGui::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray FileSinkGui::serialize() const
+QByteArray SDRdaemonSinkGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool FileSinkGui::deserialize(const QByteArray& data)
+bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
@@ -128,15 +123,9 @@ bool FileSinkGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FileSinkGui::handleMessage(const Message& message)
+bool SDRdaemonSinkGui::handleMessage(const Message& message)
 {
-	if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration::match(message))
-	{
-		m_generation = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration&)message).getAcquisition();
-		updateWithGeneration();
-		return true;
-	}
-	else if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
+	if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
 	{
 		m_samplesCount = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
@@ -148,7 +137,7 @@ bool FileSinkGui::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkGui::handleDSPMessages()
+void SDRdaemonSinkGui::handleDSPMessages()
 {
     Message* message;
 
@@ -169,7 +158,7 @@ void FileSinkGui::handleDSPMessages()
     }
 }
 
-void FileSinkGui::handleSinkMessages()
+void SDRdaemonSinkGui::handleSinkMessages()
 {
     Message* message;
 
@@ -184,27 +173,27 @@ void FileSinkGui::handleSinkMessages()
     }
 }
 
-void FileSinkGui::updateSampleRateAndFrequency()
+void SDRdaemonSinkGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
 }
 
-void FileSinkGui::displaySettings()
+void SDRdaemonSinkGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
 }
 
-void FileSinkGui::sendSettings()
+void SDRdaemonSinkGui::sendSettings()
 {
     if(!m_updateTimer.isActive())
         m_updateTimer.start(100);
 }
 
 
-void FileSinkGui::updateHardware()
+void SDRdaemonSinkGui::updateHardware()
 {
     qDebug() << "FileSinkGui::updateHardware";
     SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings);
@@ -212,7 +201,7 @@ void FileSinkGui::updateHardware()
     m_updateTimer.stop();
 }
 
-void FileSinkGui::updateStatus()
+void SDRdaemonSinkGui::updateStatus()
 {
     int state = m_deviceAPI->state();
 
@@ -241,19 +230,19 @@ void FileSinkGui::updateStatus()
     }
 }
 
-void FileSinkGui::on_centerFrequency_changed(quint64 value)
+void SDRdaemonSinkGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     sendSettings();
 }
 
-void FileSinkGui::on_sampleRate_changed(quint64 value)
+void SDRdaemonSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     sendSettings();
 }
 
-void FileSinkGui::on_interp_currentIndexChanged(int index)
+void SDRdaemonSinkGui::on_interp_currentIndexChanged(int index)
 {
     if (index < 0) {
         return;
@@ -264,7 +253,7 @@ void FileSinkGui::on_interp_currentIndexChanged(int index)
     sendSettings();
 }
 
-void FileSinkGui::on_startStop_toggled(bool checked)
+void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
@@ -285,32 +274,7 @@ void FileSinkGui::on_startStop_toggled(bool checked)
     }
 }
 
-void FileSinkGui::on_showFileDialog_clicked(bool checked)
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
-
-	if (fileName != "")
-	{
-		m_fileName = fileName;
-		ui->fileNameText->setText(m_fileName);
-		configureFileName();
-	}
-}
-
-void FileSinkGui::configureFileName()
-{
-	qDebug() << "FileSinkGui::configureFileName: " << m_fileName.toStdString().c_str();
-	SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkName* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkName::create(m_fileName);
-	m_deviceSampleSink->getInputMessageQueue()->push(message);
-}
-
-void FileSinkGui::updateWithGeneration()
-{
-	ui->showFileDialog->setEnabled(!m_generation);
-}
-
-void FileSinkGui::updateWithStreamTime()
+void SDRdaemonSinkGui::updateWithStreamTime()
 {
 	int t_sec = 0;
 	int t_msec = 0;
@@ -324,10 +288,10 @@ void FileSinkGui::updateWithStreamTime()
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
 	QString s_timems = t.toString("hh:mm:ss.zzz");
-	ui->relTimeText->setText(s_timems);
+	//ui->relTimeText->setText(s_timems); TODO with absolute time
 }
 
-void FileSinkGui::tick()
+void SDRdaemonSinkGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0)
 	{

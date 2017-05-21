@@ -1,8 +1,8 @@
 project(sdrdaemonsink)
 
 set(sdrdaemonsink_SOURCES
-#	sdrdaemonsinkgui.cpp
-#	sdrdaemonsinkoutput.cpp
+	sdrdaemonsinkgui.cpp
+	sdrdaemonsinkoutput.cpp
 #	sdrdaemonsinkplugin.cpp
 	sdrdaemonsinksettings.cpp
 	sdrdaemonsinkthread.cpp
@@ -10,8 +10,8 @@ set(sdrdaemonsink_SOURCES
 )
 
 set(sdrdaemonsink_HEADERS
-#	sdrdaemonsinkgui.h
-#	sdrdaemonsinkoutput.h
+	sdrdaemonsinkgui.h
+	sdrdaemonsinkoutput.h
 #	sdrdaemonsinkplugin.h
 	sdrdaemonsinksettings.h
 	sdrdaemonsinkthread.h

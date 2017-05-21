@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,13 +14,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKGUI_H
-#define INCLUDE_FILESINKGUI_H
+#ifndef INCLUDE_SDRDAEMONSINKGUI_H
+#define INCLUDE_SDRDAEMONSINKGUI_H
 
 #include <QTimer>
 
 #include "plugin/plugingui.h"
-#include "../sdrdaemonoutput/filesinksettings.h"
+#include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
 
 
@@ -28,15 +28,15 @@ class DeviceSinkAPI;
 class DeviceSampleSink;
 
 namespace Ui {
-	class FileSinkGui;
+	class SDRdaemonSinkGui;
 }
 
-class FileSinkGui : public QWidget, public PluginGUI {
+class SDRdaemonSinkGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
-	virtual ~FileSinkGui();
+	explicit SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	virtual ~SDRdaemonSinkGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -50,18 +50,15 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::FileSinkGui* ui;
+	Ui::SDRdaemonSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
-	FileSinkSettings m_settings;
-    QString m_fileName;
+	SDRdaemonSinkSettings m_settings;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	DeviceSampleSink* m_deviceSampleSink;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
-    bool m_generation;
-	std::time_t m_startingTimeStamp;
 	int m_samplesCount;
 	std::size_t m_tickCount;
 	int m_lastEngineState;
@@ -69,8 +66,6 @@ private:
 	void displaySettings();
 	void displayTime();
 	void sendSettings();
-	void configureFileName();
-	void updateWithGeneration();
 	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
 
@@ -80,8 +75,9 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_sampleRate_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
-	void on_showFileDialog_clicked(bool checked);
 	void on_interp_currentIndexChanged(int index);
+	void on_txDelay_valueChanged(int value);
+    void on_nbFECBlocks_valueChanged(int value);
     void updateHardware();
     void updateStatus();
 	void tick();

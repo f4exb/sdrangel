@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -32,7 +32,6 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming, Message)
 
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
@@ -70,9 +69,6 @@ bool SDRdaemonSinkOutput::start()
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("SDRdaemonSinkOutput::start: started");
 
-	MsgReportSDRdaemonSinkGeneration *report = MsgReportSDRdaemonSinkGeneration::create(true); // generation on
-	getOutputMessageQueueToGUI()->push(report);
-
 	return true;
 }
 
@@ -87,9 +83,6 @@ void SDRdaemonSinkOutput::stop()
 		delete m_sdrDaemonSinkThread;
 		m_sdrDaemonSinkThread = 0;
 	}
-
-    MsgReportSDRdaemonSinkGeneration *report = MsgReportSDRdaemonSinkGeneration::create(false); // generation off
-	getOutputMessageQueueToGUI()->push(report);
 }
 
 const QString& SDRdaemonSinkOutput::getDeviceDescription() const

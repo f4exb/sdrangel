@@ -23,7 +23,7 @@
 #include "dsp/samplesourcefifo.h"
 #include "sdrdaemonsinkthread.h"
 
-SDRdaemonSinkThread::SDRdaemonSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
+SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_samplesChunkSize(0),

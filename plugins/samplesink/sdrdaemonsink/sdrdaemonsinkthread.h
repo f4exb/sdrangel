@@ -40,7 +40,7 @@ class SDRdaemonSinkThread : public QThread {
 	Q_OBJECT
 
 public:
-	SDRdaemonSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
+	SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* parent = 0);
 	~SDRdaemonSinkThread();
 
 	void startWork();
