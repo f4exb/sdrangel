@@ -45,12 +45,15 @@ public:
 
 	void startWork();
 	void stopWork();
+
+    void setCenterFrequency(uint64_t centerFrequency) { m_udpSinkFEC.setCenterFrequency(centerFrequency); }
 	void setSamplerate(int samplerate);
-    void setBuffer(std::size_t chunksize);
     void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
     void setTxDelay(uint32_t txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
     void setRemoteAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
-	bool isRunning() const { return m_running; }
+
+    bool isRunning() const { return m_running; }
+
     std::size_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
 

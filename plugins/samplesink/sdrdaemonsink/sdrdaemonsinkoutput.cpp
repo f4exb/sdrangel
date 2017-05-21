@@ -156,9 +156,26 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
 
+    if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
+    {
+        m_settings.m_address = settings.m_address;
+        m_settings.m_dataPort = settings.m_dataPort;
+
+        if (m_sdrDaemonSinkThread != 0)
+        {
+            m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
+        }
+    }
+
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
+
+        if (m_sdrDaemonSinkThread != 0)
+        {
+            m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
+        }
+
         forwardChange = true;
     }
 
@@ -177,23 +194,41 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
-        }
-
         forwardChange = true;
     }
 
-    // TODO: manage sending to control port
+    if (force || (m_settings.m_txDelay != settings.m_txDelay))
+    {
+        m_settings.m_txDelay = settings.m_txDelay;
+
+        if (m_sdrDaemonSinkThread != 0)
+        {
+            m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
+        }
+    }
+
+    if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
+    {
+        m_settings.m_nbFECBlocks = settings.m_nbFECBlocks;
+
+        if (m_sdrDaemonSinkThread != 0)
+        {
+            m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
+        }
+    }
+
+    mutexLocker.unlock();
+
+    qDebug("FileSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %d m_nbFECBlocks: %d",
+            forwardChange ? "forward change" : "",
+            m_settings.m_centerFrequency,
+            m_settings.m_sampleRate,
+            m_settings.m_log2Interp,
+            m_settings.m_txDelay,
+            m_settings.m_nbFECBlocks);
 
     if (forwardChange)
     {
-        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d",
-                m_settings.m_centerFrequency,
-                m_settings.m_sampleRate,
-                m_settings.m_log2Interp);
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
