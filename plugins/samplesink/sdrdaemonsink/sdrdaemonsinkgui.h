@@ -53,7 +53,8 @@ private:
 	Ui::SDRdaemonSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
-	SDRdaemonSinkSettings m_settings;
+	SDRdaemonSinkSettings m_settings;        //!< current settings
+	SDRdaemonSinkSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	DeviceSampleSink* m_deviceSampleSink;
@@ -62,9 +63,14 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 	int m_lastEngineState;
+    bool m_doApplySettings;
 
+    int m_nnSender;
+
+    void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();
+    void sendControl(bool force = false);
 	void sendSettings();
 	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
@@ -74,10 +80,16 @@ private slots:
     void handleSinkMessages();
     void on_centerFrequency_changed(quint64 value);
     void on_sampleRate_changed(quint64 value);
-	void on_startStop_toggled(bool checked);
-	void on_interp_currentIndexChanged(int index);
-	void on_txDelay_valueChanged(int value);
+    void on_interp_currentIndexChanged(int index);
+    void on_txDelay_valueChanged(int value);
     void on_nbFECBlocks_valueChanged(int value);
+    void on_address_textEdited(const QString& arg1);
+    void on_dataPort_textEdited(const QString& arg1);
+    void on_controlPort_textEdited(const QString& arg1);
+    void on_specificParms_textEdited(const QString& arg1);
+    void on_applyButton_clicked(bool checked);
+    void on_sendButton_clicked(bool checked);
+	void on_startStop_toggled(bool checked);
     void updateHardware();
     void updateStatus();
 	void tick();

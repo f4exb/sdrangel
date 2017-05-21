@@ -27,8 +27,12 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
     m_log2Interp = 0;
+    m_txDelay = 300;
+    m_nbFECBlocks = 0;
     m_address = "127.0.0.1";
-    m_port = 9090;
+    m_dataPort = 9090;
+    m_controlPort = 9090;
+    m_specificParameters = "";
 }
 
 QByteArray SDRdaemonSinkSettings::serialize() const
@@ -37,8 +41,12 @@ QByteArray SDRdaemonSinkSettings::serialize() const
 
     s.writeU64(1, m_sampleRate);
     s.writeU32(2, m_log2Interp);
-    s.writeString(3, m_address);
-    s.writeU32(4, m_port);
+    s.writeU32(3, m_txDelay);
+    s.writeU32(4, m_nbFECBlocks);
+    s.writeString(5, m_address);
+    s.writeU32(6, m_dataPort);
+    s.writeU32(7, m_controlPort);
+    s.writeString(8, m_specificParameters);
 
     return s.final();
 }
@@ -59,9 +67,14 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
         quint32 uintval;
         d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
-        d.readString(3, &m_address, "");
-        d.readU32(4, &uintval, 9090);
-        m_port = uintval % (1<<16);
+        d.readU32(3, &m_txDelay, 300);
+        d.readU32(4, &m_nbFECBlocks, 0);
+        d.readString(5, &m_address, "127.0.0.1");
+        d.readU32(6, &uintval, 9090);
+        m_dataPort = uintval % (1<<16);
+        d.readU32(7, &uintval, 9090);
+        m_controlPort = uintval % (1<<16);
+        d.readString(5, &m_specificParameters, "");
         return true;
     }
     else
