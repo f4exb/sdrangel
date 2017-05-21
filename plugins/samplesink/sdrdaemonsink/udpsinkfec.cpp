@@ -186,6 +186,12 @@ UDPSinkFECWorker::UDPSinkFECWorker() : m_remotePort(9090)
 
 UDPSinkFECWorker::~UDPSinkFECWorker()
 {
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        delete message;
+    }
 }
 
 void UDPSinkFECWorker::pushTxFrame(const UDPSinkFEC::SuperBlock *txBlocks,

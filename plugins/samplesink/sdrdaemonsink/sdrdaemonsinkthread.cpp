@@ -26,19 +26,14 @@
 SDRdaemonSinkThread::SDRdaemonSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
-	m_ofstream(samplesStream),
-	m_bufsize(0),
 	m_samplesChunkSize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
     m_samplerate(0),
-    m_log2Interpolation(0),
     m_throttlems(SDRDAEMONSINK_THROTTLE_MS),
     m_throttleToggle(false),
-    m_buf(0),
     m_maxThrottlems(50)
 {
-    assert(m_ofstream != 0);
 }
 
 SDRdaemonSinkThread::~SDRdaemonSinkThread()
@@ -46,29 +41,18 @@ SDRdaemonSinkThread::~SDRdaemonSinkThread()
 	if (m_running) {
 		stopWork();
 	}
-
-    if (m_buf) delete[] m_buf;
 }
 
 void SDRdaemonSinkThread::startWork()
 {
 	qDebug() << "SDRdaemonSinkThread::startWork: ";
-
-    if (m_ofstream->is_open())
-    {
-        qDebug() << "SDRdaemonSinkThread::startWork: file stream open, starting...";
-        m_maxThrottlems = 0;
-        m_startWaitMutex.lock();
-        m_elapsedTimer.start();
-        start();
-        while(!m_running)
-            m_startWaiter.wait(&m_startWaitMutex, 100);
-        m_startWaitMutex.unlock();
-    }
-    else
-    {
-        qDebug() << "SDRdaemonSinkThread::startWork: file stream closed, not starting.";
-    }
+    m_maxThrottlems = 0;
+    m_startWaitMutex.lock();
+    m_elapsedTimer.start();
+    start();
+    while(!m_running)
+        m_startWaiter.wait(&m_startWaitMutex, 100);
+    m_startWaitMutex.unlock();
 }
 
 void SDRdaemonSinkThread::stopWork()
@@ -99,10 +83,6 @@ void SDRdaemonSinkThread::setSamplerate(int samplerate)
 		    m_sampleFifo->resize(samplerate); // 1s buffer
 		}
 
-        // resize output buffer
-        if (m_buf) delete[] m_buf;
-        m_buf = new int16_t[samplerate*(1<<m_log2Interpolation)*2];
-
         m_samplerate = samplerate;
         m_samplesChunkSize = (m_samplerate * m_throttlems) / 1000;
 
@@ -110,39 +90,6 @@ void SDRdaemonSinkThread::setSamplerate(int samplerate)
             startWork();
         }
 	}
-}
-
-void SDRdaemonSinkThread::setLog2Interpolation(int log2Interpolation)
-{
-    if ((log2Interpolation < 0) || (log2Interpolation > 6))
-    {
-        return;
-    }
-
-    if (log2Interpolation != m_log2Interpolation)
-    {
-        qDebug() << "SDRdaemonSinkThread::setLog2Interpolation:"
-                << " new:" << log2Interpolation
-                << " old:" << m_log2Interpolation;
-
-        bool wasRunning = false;
-
-        if (m_running)
-        {
-            stopWork();
-            wasRunning = true;
-        }
-
-        // resize output buffer
-        if (m_buf) delete[] m_buf;
-        m_buf = new int16_t[m_samplerate*(1<<log2Interpolation)*2];
-
-        m_log2Interpolation = log2Interpolation;
-
-        if (wasRunning) {
-            startWork();
-        }
-    }
 }
 
 void SDRdaemonSinkThread::run()
@@ -191,7 +138,8 @@ void SDRdaemonSinkThread::tick()
         SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
         m_samplesCount += m_samplesChunkSize;
 
-        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
+        m_udpSinkFEC.write(beginRead, m_samplesChunkSize);
+//        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
 
         // interpolation is done on the far side
 //        if (m_log2Interpolation == 0)

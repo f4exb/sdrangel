@@ -30,6 +30,8 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
 
+#include "udpsinkfec.h"
+
 #define SDRDAEMONSINK_THROTTLE_MS 50
 
 class SampleSourceFifo;
@@ -44,8 +46,10 @@ public:
 	void startWork();
 	void stopWork();
 	void setSamplerate(int samplerate);
-	void setLog2Interpolation(int log2Interpolation);
     void setBuffer(std::size_t chunksize);
+    void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
+    void setTxDelay(uint32_t txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
+    void setRemoteAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
 	bool isRunning() const { return m_running; }
     std::size_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
@@ -57,21 +61,17 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	std::ofstream* m_ofstream;
-	std::size_t m_bufsize;
 	unsigned int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;
     std::size_t m_samplesCount;
 
 	int m_samplerate;
-	int m_log2Interpolation;
     int m_throttlems;
     int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 
-    Interpolators<qint16, SDR_SAMP_SZ, 16> m_interpolators;
-    int16_t *m_buf;
+    UDPSinkFEC m_udpSinkFEC;
 
 	void run();
 

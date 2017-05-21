@@ -5,7 +5,7 @@ set(sdrdaemonsink_SOURCES
 #	sdrdaemonsinkoutput.cpp
 #	sdrdaemonsinkplugin.cpp
 	sdrdaemonsinksettings.cpp
-#	sdrdaemonsinkthread.cpp
+	sdrdaemonsinkthread.cpp
     udpsinkfec.cpp
 )
 
@@ -14,7 +14,7 @@ set(sdrdaemonsink_HEADERS
 #	sdrdaemonsinkoutput.h
 #	sdrdaemonsinkplugin.h
 	sdrdaemonsinksettings.h
-#	sdrdaemonsinkthread.h
+	sdrdaemonsinkthread.h
     udpsinkfec.h
 )
 
