@@ -52,26 +52,6 @@ public:
 		{ }
 	};
 
-	class MsgConfigureSDRdaemonSinkName : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const QString& getFileName() const { return m_fileName; }
-
-		static MsgConfigureSDRdaemonSinkName* create(const QString& fileName)
-		{
-			return new MsgConfigureSDRdaemonSinkName(fileName);
-		}
-
-	private:
-		QString m_fileName;
-
-		MsgConfigureSDRdaemonSinkName(const QString& fileName) :
-			Message(),
-			m_fileName(fileName)
-		{ }
-	};
-
 	class MsgConfigureSDRdaemonSinkWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -166,14 +146,11 @@ private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
 	SDRdaemonSinkSettings m_settings;
-	std::ofstream m_ofstream;
-	SDRdaemonSinkThread* m_fileSinkThread;
+	SDRdaemonSinkThread* m_sdrDaemonSinkThread;
 	QString m_deviceDescription;
-	QString m_fileName;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
-	void openFileStream();
 	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
 };
 
