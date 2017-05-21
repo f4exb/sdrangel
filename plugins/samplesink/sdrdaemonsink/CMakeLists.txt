@@ -6,6 +6,7 @@ set(sdrdaemonsink_SOURCES
 #	sdrdaemonsinkplugin.cpp
 	sdrdaemonsinksettings.cpp
 #	sdrdaemonsinkthread.cpp
+    udpsinkfec.cpp
 )
 
 set(sdrdaemonsink_HEADERS
@@ -14,6 +15,7 @@ set(sdrdaemonsink_HEADERS
 #	sdrdaemonsinkplugin.h
 	sdrdaemonsinksettings.h
 #	sdrdaemonsinkthread.h
+    udpsinkfec.h
 )
 
 set(sdrdaemonsink_FORMS
@@ -23,6 +25,8 @@ set(sdrdaemonsink_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/devices
+    ${CM256CC_INCLUDE_DIR}	
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -40,6 +44,7 @@ add_library(outputsdrdaemonsink SHARED
 target_link_libraries(outputsdrdaemonsink
 	${QT_LIBRARIES}
 	sdrbase
+    ${CM256CC_LIBRARIES}	
 )
 
 qt5_use_modules(outputsdrdaemonsink Core Widgets)

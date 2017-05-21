@@ -121,7 +121,7 @@ void SDRdaemonSinkThread::setLog2Interpolation(int log2Interpolation)
 
     if (log2Interpolation != m_log2Interpolation)
     {
-        qDebug() << "FileSinkThread::setLog2Interpolation:"
+        qDebug() << "SDRdaemonSinkThread::setLog2Interpolation:"
                 << " new:" << log2Interpolation
                 << " old:" << m_log2Interpolation;
 
@@ -187,44 +187,47 @@ void SDRdaemonSinkThread::tick()
 
         SampleVector::iterator readUntil;
 
-        m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize);
+        m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize); // pull samples
         SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
         m_samplesCount += m_samplesChunkSize;
 
-        if (m_log2Interpolation == 0)
-        {
-            m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
-        }
-        else
-        {
-            int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate);
+        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
 
-            switch (m_log2Interpolation)
-            {
-            case 1:
-                m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 2:
-                m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 3:
-                m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 4:
-                m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 5:
-                m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 6:
-                m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            default:
-                break;
-            }
-
-            m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
-        }
+        // interpolation is done on the far side
+//        if (m_log2Interpolation == 0)
+//        {
+//            m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
+//        }
+//        else
+//        {
+//            int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate);
+//
+//            switch (m_log2Interpolation)
+//            {
+//            case 1:
+//                m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            case 2:
+//                m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            case 3:
+//                m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            case 4:
+//                m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            case 5:
+//                m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            case 6:
+//                m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+//                break;
+//            default:
+//                break;
+//            }
+//
+//            m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t)); // send samples
+//        }
 
 	}
 }

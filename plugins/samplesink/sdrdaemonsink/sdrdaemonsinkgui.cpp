@@ -65,7 +65,7 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-	m_deviceSampleSink = new FileSinkOutput(m_deviceAPI, m_deviceAPI->getMainWindow()->getMasterTimer());
+	m_deviceSampleSink = new SDRdaemonSinkOutput(m_deviceAPI, m_deviceAPI->getMainWindow()->getMasterTimer());
     connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
 	m_deviceAPI->setSink(m_deviceSampleSink);
 
@@ -130,15 +130,15 @@ bool FileSinkGui::deserialize(const QByteArray& data)
 
 bool FileSinkGui::handleMessage(const Message& message)
 {
-	if (FileSinkOutput::MsgReportFileSinkGeneration::match(message))
+	if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration::match(message))
 	{
-		m_generation = ((FileSinkOutput::MsgReportFileSinkGeneration&)message).getAcquisition();
+		m_generation = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration&)message).getAcquisition();
 		updateWithGeneration();
 		return true;
 	}
-	else if (FileSinkOutput::MsgReportFileSinkStreamTiming::match(message))
+	else if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
 	{
-		m_samplesCount = ((FileSinkOutput::MsgReportFileSinkStreamTiming&)message).getSamplesCount();
+		m_samplesCount = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
 	}
@@ -207,7 +207,7 @@ void FileSinkGui::sendSettings()
 void FileSinkGui::updateHardware()
 {
     qDebug() << "FileSinkGui::updateHardware";
-    FileSinkOutput::MsgConfigureFileSink* message = FileSinkOutput::MsgConfigureFileSink::create(m_settings);
+    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
     m_updateTimer.stop();
 }
@@ -301,7 +301,7 @@ void FileSinkGui::on_showFileDialog_clicked(bool checked)
 void FileSinkGui::configureFileName()
 {
 	qDebug() << "FileSinkGui::configureFileName: " << m_fileName.toStdString().c_str();
-	FileSinkOutput::MsgConfigureFileSinkName* message = FileSinkOutput::MsgConfigureFileSinkName::create(m_fileName);
+	SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkName* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkName::create(m_fileName);
 	m_deviceSampleSink->getInputMessageQueue()->push(message);
 }
 
@@ -331,7 +331,7 @@ void FileSinkGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0)
 	{
-		FileSinkOutput::MsgConfigureFileSinkStreamTiming* message = FileSinkOutput::MsgConfigureFileSinkStreamTiming::create();
+		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}
 }

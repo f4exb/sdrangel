@@ -29,14 +29,14 @@
 #include "sdrdaemonsinkoutput.h"
 #include "sdrdaemonsinkthread.h"
 
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSink, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkName, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkWork, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkName, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkGeneration, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming, Message)
 
-FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
+SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSinkThread(0),
@@ -47,12 +47,12 @@ FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTim
 {
 }
 
-FileSinkOutput::~FileSinkOutput()
+SDRdaemonSinkOutput::~SDRdaemonSinkOutput()
 {
 	stop();
 }
 
-void FileSinkOutput::openFileStream()
+void SDRdaemonSinkOutput::openFileStream()
 {
 	if (m_ofstream.is_open()) {
 		m_ofstream.close();
@@ -70,7 +70,7 @@ void FileSinkOutput::openFileStream()
 	qDebug() << "FileSinkOutput::openFileStream: " << m_fileName.toStdString().c_str();
 }
 
-bool FileSinkOutput::start()
+bool SDRdaemonSinkOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSinkOutput::start";
@@ -93,13 +93,13 @@ bool FileSinkOutput::start()
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSinkOutput::start: started");
 
-	MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(true); // acquisition on
+	MsgReportSDRdaemonSinkGeneration *report = MsgReportSDRdaemonSinkGeneration::create(true); // acquisition on
 	getOutputMessageQueueToGUI()->push(report);
 
 	return true;
 }
 
-void FileSinkOutput::stop()
+void SDRdaemonSinkOutput::stop()
 {
 	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
@@ -115,49 +115,49 @@ void FileSinkOutput::stop()
         m_ofstream.close();
     }
 
-    MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
+    MsgReportSDRdaemonSinkGeneration *report = MsgReportSDRdaemonSinkGeneration::create(false); // acquisition off
 	getOutputMessageQueueToGUI()->push(report);
 }
 
-const QString& FileSinkOutput::getDeviceDescription() const
+const QString& SDRdaemonSinkOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int FileSinkOutput::getSampleRate() const
+int SDRdaemonSinkOutput::getSampleRate() const
 {
 	return m_settings.m_sampleRate;
 }
 
-quint64 FileSinkOutput::getCenterFrequency() const
+quint64 SDRdaemonSinkOutput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-std::time_t FileSinkOutput::getStartingTimeStamp() const
+std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-bool FileSinkOutput::handleMessage(const Message& message)
+bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 {
-	if (MsgConfigureFileSinkName::match(message))
+	if (MsgConfigureSDRdaemonSinkName::match(message))
 	{
-		MsgConfigureFileSinkName& conf = (MsgConfigureFileSinkName&) message;
+		MsgConfigureSDRdaemonSinkName& conf = (MsgConfigureSDRdaemonSinkName&) message;
 		m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
 	}
-	else if (MsgConfigureFileSink::match(message))
+	else if (MsgConfigureSDRdaemonSink::match(message))
     {
 	    qDebug() << "FileSinkOutput::handleMessage: MsgConfigureFileSink";
-	    MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
+	    MsgConfigureSDRdaemonSink& conf = (MsgConfigureSDRdaemonSink&) message;
         applySettings(conf.getSettings(), false);
         return true;
     }
-	else if (MsgConfigureFileSinkWork::match(message))
+	else if (MsgConfigureSDRdaemonSinkWork::match(message))
 	{
-		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) message;
+		MsgConfigureSDRdaemonSinkWork& conf = (MsgConfigureSDRdaemonSinkWork&) message;
 		bool working = conf.isWorking();
 
 		if (m_fileSinkThread != 0)
@@ -174,13 +174,13 @@ bool FileSinkOutput::handleMessage(const Message& message)
 
 		return true;
 	}
-	else if (MsgConfigureFileSinkStreamTiming::match(message))
+	else if (MsgConfigureSDRdaemonSinkStreamTiming::match(message))
 	{
-        MsgReportFileSinkStreamTiming *report;
+        MsgReportSDRdaemonSinkStreamTiming *report;
 
 		if (m_fileSinkThread != 0)
 		{
-			report = MsgReportFileSinkStreamTiming::create(m_fileSinkThread->getSamplesCount());
+			report = MsgReportSDRdaemonSinkStreamTiming::create(m_fileSinkThread->getSamplesCount());
 			getOutputMessageQueueToGUI()->push(report);
 		}
 
@@ -192,7 +192,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
+void SDRdaemonSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;

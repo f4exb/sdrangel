@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKOUTPUT_H
-#define INCLUDE_FILESINKOUTPUT_H
+#ifndef INCLUDE_SDRDAEMONSINKOUTPUT_H
+#define INCLUDE_SDRDAEMONSINKOUTPUT_H
 
 #include <QString>
 #include <QTimer>
@@ -27,130 +27,130 @@
 
 #include "sdrdaemonsinksettings.h"
 
-class FileSinkThread;
+class SDRdaemonSinkThread;
 class DeviceSinkAPI;
 
-class FileSinkOutput : public DeviceSampleSink {
+class SDRdaemonSinkOutput : public DeviceSampleSink {
 public:
-	class MsgConfigureFileSink : public Message {
+	class MsgConfigureSDRdaemonSink : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const FileSinkSettings& getSettings() const { return m_settings; }
+		const SDRdaemonSinkSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFileSink* create(const FileSinkSettings& settings)
+		static MsgConfigureSDRdaemonSink* create(const SDRdaemonSinkSettings& settings)
 		{
-			return new MsgConfigureFileSink(settings);
+			return new MsgConfigureSDRdaemonSink(settings);
 		}
 
 	private:
-		FileSinkSettings m_settings;
+		SDRdaemonSinkSettings m_settings;
 
-		MsgConfigureFileSink(const FileSinkSettings& settings) :
+		MsgConfigureSDRdaemonSink(const SDRdaemonSinkSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
 	};
 
-	class MsgConfigureFileSinkName : public Message {
+	class MsgConfigureSDRdaemonSinkName : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const QString& getFileName() const { return m_fileName; }
 
-		static MsgConfigureFileSinkName* create(const QString& fileName)
+		static MsgConfigureSDRdaemonSinkName* create(const QString& fileName)
 		{
-			return new MsgConfigureFileSinkName(fileName);
+			return new MsgConfigureSDRdaemonSinkName(fileName);
 		}
 
 	private:
 		QString m_fileName;
 
-		MsgConfigureFileSinkName(const QString& fileName) :
+		MsgConfigureSDRdaemonSinkName(const QString& fileName) :
 			Message(),
 			m_fileName(fileName)
 		{ }
 	};
 
-	class MsgConfigureFileSinkWork : public Message {
+	class MsgConfigureSDRdaemonSinkWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool isWorking() const { return m_working; }
 
-		static MsgConfigureFileSinkWork* create(bool working)
+		static MsgConfigureSDRdaemonSinkWork* create(bool working)
 		{
-			return new MsgConfigureFileSinkWork(working);
+			return new MsgConfigureSDRdaemonSinkWork(working);
 		}
 
 	private:
 		bool m_working;
 
-		MsgConfigureFileSinkWork(bool working) :
+		MsgConfigureSDRdaemonSinkWork(bool working) :
 			Message(),
 			m_working(working)
 		{ }
 	};
 
-	class MsgConfigureFileSinkStreamTiming : public Message {
+	class MsgConfigureSDRdaemonSinkStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 
-		static MsgConfigureFileSinkStreamTiming* create()
+		static MsgConfigureSDRdaemonSinkStreamTiming* create()
 		{
-			return new MsgConfigureFileSinkStreamTiming();
+			return new MsgConfigureSDRdaemonSinkStreamTiming();
 		}
 
 	private:
 
-		MsgConfigureFileSinkStreamTiming() :
+		MsgConfigureSDRdaemonSinkStreamTiming() :
 			Message()
 		{ }
 	};
 
-	class MsgReportFileSinkGeneration : public Message {
+	class MsgReportSDRdaemonSinkGeneration : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool getAcquisition() const { return m_acquisition; }
 
-		static MsgReportFileSinkGeneration* create(bool acquisition)
+		static MsgReportSDRdaemonSinkGeneration* create(bool acquisition)
 		{
-			return new MsgReportFileSinkGeneration(acquisition);
+			return new MsgReportSDRdaemonSinkGeneration(acquisition);
 		}
 
 	protected:
 		bool m_acquisition;
 
-		MsgReportFileSinkGeneration(bool acquisition) :
+		MsgReportSDRdaemonSinkGeneration(bool acquisition) :
 			Message(),
 			m_acquisition(acquisition)
 		{ }
 	};
 
-	class MsgReportFileSinkStreamTiming : public Message {
+	class MsgReportSDRdaemonSinkStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		std::size_t getSamplesCount() const { return m_samplesCount; }
 
-		static MsgReportFileSinkStreamTiming* create(std::size_t samplesCount)
+		static MsgReportSDRdaemonSinkStreamTiming* create(std::size_t samplesCount)
 		{
-			return new MsgReportFileSinkStreamTiming(samplesCount);
+			return new MsgReportSDRdaemonSinkStreamTiming(samplesCount);
 		}
 
 	protected:
 		std::size_t m_samplesCount;
 
-		MsgReportFileSinkStreamTiming(std::size_t samplesCount) :
+		MsgReportSDRdaemonSinkStreamTiming(std::size_t samplesCount) :
 			Message(),
 			m_samplesCount(samplesCount)
 		{ }
 	};
 
-	FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer);
-	virtual ~FileSinkOutput();
+	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer);
+	virtual ~SDRdaemonSinkOutput();
 
 	virtual bool start();
 	virtual void stop();
@@ -165,16 +165,16 @@ public:
 private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
-	FileSinkSettings m_settings;
+	SDRdaemonSinkSettings m_settings;
 	std::ofstream m_ofstream;
-	FileSinkThread* m_fileSinkThread;
+	SDRdaemonSinkThread* m_fileSinkThread;
 	QString m_deviceDescription;
 	QString m_fileName;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
 	void openFileStream();
-	void applySettings(const FileSinkSettings& settings, bool force = false);
+	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
 };
 
-#endif // INCLUDE_FILESINKOUTPUT_H
+#endif // INCLUDE_SDRDAEMONSINKOUTPUT_H
