@@ -109,7 +109,7 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 {
 	if (MsgConfigureSDRdaemonSink::match(message))
     {
-	    qDebug() << "FileSinkOutput::handleMessage: MsgConfigureFileSink";
+	    qDebug() << "SDRdaemonSinkOutput::handleMessage: MsgConfigureFileSink";
 	    MsgConfigureSDRdaemonSink& conf = (MsgConfigureSDRdaemonSink&) message;
         applySettings(conf.getSettings(), false);
         return true;
@@ -219,7 +219,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     mutexLocker.unlock();
 
-    qDebug("FileSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %d m_nbFECBlocks: %d",
+    qDebug("SDRdaemonSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %d m_nbFECBlocks: %d",
             forwardChange ? "forward change" : "",
             m_settings.m_centerFrequency,
             m_settings.m_sampleRate,

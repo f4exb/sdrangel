@@ -83,10 +83,10 @@ private slots:
     void on_interp_currentIndexChanged(int index);
     void on_txDelay_valueChanged(int value);
     void on_nbFECBlocks_valueChanged(int value);
-    void on_address_textEdited(const QString& arg1);
-    void on_dataPort_textEdited(const QString& arg1);
-    void on_controlPort_textEdited(const QString& arg1);
-    void on_specificParms_textEdited(const QString& arg1);
+    void on_address_returnPressed();
+    void on_dataPort_returnPressed();
+    void on_controlPort_returnPressed();
+    void on_specificParms_returnPressed();
     void on_applyButton_clicked(bool checked);
     void on_sendButton_clicked(bool checked);
 	void on_startStop_toggled(bool checked);

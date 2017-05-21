@@ -31,7 +31,7 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_nbFECBlocks = 0;
     m_address = "127.0.0.1";
     m_dataPort = 9090;
-    m_controlPort = 9090;
+    m_controlPort = 9091;
     m_specificParameters = "";
 }
 

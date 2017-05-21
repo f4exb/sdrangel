@@ -45,6 +45,7 @@ target_link_libraries(outputsdrdaemonsink
 	${QT_LIBRARIES}
 	sdrbase
     ${CM256CC_LIBRARIES}	
+    ${LIBNANOMSG_LIBRARIES}    
 )
 
 qt5_use_modules(outputsdrdaemonsink Core Widgets)

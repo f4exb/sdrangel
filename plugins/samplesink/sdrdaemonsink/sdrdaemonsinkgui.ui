@@ -435,8 +435,11 @@
        <property name="toolTip">
         <string>Remote data connection IP address</string>
        </property>
-       <property name="text">
+       <property name="inputMask">
         <string>000.000.000.000</string>
+       </property>
+       <property name="text">
+        <string>0...</string>
        </property>
       </widget>
      </item>
@@ -452,8 +455,11 @@
        <property name="toolTip">
         <string>Remote data connection port</string>
        </property>
+       <property name="inputMask">
+        <string>00000</string>
+       </property>
        <property name="text">
-        <string>0000</string>
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -472,8 +478,11 @@
        <property name="toolTip">
         <string>Remote control port</string>
        </property>
-       <property name="text">
+       <property name="inputMask">
         <string>00000</string>
+       </property>
+       <property name="text">
+        <string>0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

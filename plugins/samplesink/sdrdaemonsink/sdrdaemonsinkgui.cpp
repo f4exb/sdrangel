@@ -170,12 +170,12 @@ void SDRdaemonSinkGui::handleDSPMessages()
 
     while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
     {
-        qDebug("FileSinkGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("SDRdaemonSinkGui::handleDSPMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("FileSinkGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("SDRdaemonSinkGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             updateSampleRateAndFrequency();
@@ -296,13 +296,18 @@ void SDRdaemonSinkGui::sendControl(bool force)
 
         if (rc != config_size)
         {
-            QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
+            //QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
+            qDebug() << "SDRdaemonSinkGui::sendControl: Cannot send message to remote control port."
+                << " remoteAddress: " << m_settings.m_address
+                << " remotePort: " << m_settings.m_controlPort
+                << " message: " << os.str().c_str();
         }
         else
         {
             qDebug() << "SDRdaemonSinkGui::sendControl:"
-                << " remoteAddress: " << m_settings.m_address
-                << " message: " << os.str().c_str();
+                << "remoteAddress:" << m_settings.m_address
+                << "remotePort:" << m_settings.m_controlPort
+                << "message:" << os.str().c_str();
         }
     }
 
@@ -323,7 +328,7 @@ void SDRdaemonSinkGui::sendSettings()
 
 void SDRdaemonSinkGui::updateHardware()
 {
-    qDebug() << "FileSinkGui::updateHardware";
+    qDebug() << "SDRdaemonSinkGui::updateHardware";
     SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
     m_updateTimer.stop();
@@ -401,14 +406,14 @@ void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_address_textEdited(const QString& arg1)
+void SDRdaemonSinkGui::on_address_returnPressed()
 {
     m_settings.m_address = ui->address->text();
     sendControl();
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_dataPort_textEdited(const QString& arg1)
+void SDRdaemonSinkGui::on_dataPort_returnPressed()
 {
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
@@ -425,10 +430,10 @@ void SDRdaemonSinkGui::on_dataPort_textEdited(const QString& arg1)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_controlPort_textEdited(const QString& arg1)
+void SDRdaemonSinkGui::on_controlPort_returnPressed()
 {
     bool ctlOk;
-    int udpCtlPort = ui->dataPort->text().toInt(&ctlOk);
+    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
 
     if((!ctlOk) || (udpCtlPort < 1024) || (udpCtlPort > 65535))
     {
@@ -442,7 +447,7 @@ void SDRdaemonSinkGui::on_controlPort_textEdited(const QString& arg1)
     sendControl();
 }
 
-void SDRdaemonSinkGui::on_specificParms_textEdited(const QString& arg1)
+void SDRdaemonSinkGui::on_specificParms_returnPressed()
 {
     m_settings.m_specificParameters = ui->specificParms->text();
     sendControl();
@@ -464,7 +469,7 @@ void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
         {
             if (!m_deviceAPI->startGeneration())
             {
-                qDebug("FileSinkGui::on_startStop_toggled: device start failed");
+                qDebug("SDRdaemonSinkGui::on_startStop_toggled: device start failed");
             }
 
             DSPEngine::instance()->startAudioInput();
