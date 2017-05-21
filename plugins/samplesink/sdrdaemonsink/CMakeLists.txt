@@ -3,7 +3,7 @@ project(sdrdaemonsink)
 set(sdrdaemonsink_SOURCES
 	sdrdaemonsinkgui.cpp
 	sdrdaemonsinkoutput.cpp
-#	sdrdaemonsinkplugin.cpp
+	sdrdaemonsinkplugin.cpp
 	sdrdaemonsinksettings.cpp
 	sdrdaemonsinkthread.cpp
     udpsinkfec.cpp
@@ -12,7 +12,7 @@ set(sdrdaemonsink_SOURCES
 set(sdrdaemonsink_HEADERS
 	sdrdaemonsinkgui.h
 	sdrdaemonsinkoutput.h
-#	sdrdaemonsinkplugin.h
+	sdrdaemonsinkplugin.h
 	sdrdaemonsinksettings.h
 	sdrdaemonsinkthread.h
     udpsinkfec.h

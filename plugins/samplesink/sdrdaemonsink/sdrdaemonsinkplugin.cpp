@@ -74,7 +74,7 @@ PluginGUI* SDRdaemonSinkPlugin::createSampleSinkPluginGUI(const QString& sinkId,
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		SDRDaemonSinkGui* gui = new SDRDaemonSinkGui(deviceAPI);
+	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}
