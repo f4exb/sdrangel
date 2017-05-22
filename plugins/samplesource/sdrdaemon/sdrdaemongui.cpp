@@ -84,7 +84,7 @@ SDRdaemonGui::SDRdaemonGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 
-	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+	//connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware())); does not exist in this class
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 	connect(&(deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
