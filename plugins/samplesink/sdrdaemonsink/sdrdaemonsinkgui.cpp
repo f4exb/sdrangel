@@ -264,22 +264,21 @@ void SDRdaemonSinkGui::sendControl(bool force)
 
     if ((m_settings.m_centerFrequency != m_controlSettings.m_centerFrequency) || force)
     {
-        os << "freq=" << m_settings.m_centerFrequency*1000LL;
+        os << "freq=" << m_settings.m_centerFrequency;
         nbArgs++;
     }
 
-    if ((m_settings.m_sampleRate != m_controlSettings.m_sampleRate) || force)
+    if ((m_settings.m_sampleRate != m_controlSettings.m_sampleRate) || (m_settings.m_log2Interp != m_controlSettings.m_log2Interp) || force)
     {
         if (nbArgs > 0) os << ",";
-        os << "srate=" << m_settings.m_sampleRate;
+        os << "srate=" << m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
         nbArgs++;
-    }
 
-    if ((m_settings.m_log2Interp != m_controlSettings.m_log2Interp) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "interp=" << m_settings.m_log2Interp;
-        nbArgs++;
+        if ((m_settings.m_log2Interp != m_controlSettings.m_log2Interp) || force)
+        {
+            os << ",interp=" << m_settings.m_log2Interp;
+            nbArgs++;
+        }
     }
 
     if ((m_settings.m_specificParameters != m_controlSettings.m_specificParameters) || force)
@@ -313,7 +312,7 @@ void SDRdaemonSinkGui::sendControl(bool force)
 
     m_controlSettings.m_address = m_settings.m_address;
     m_controlSettings.m_controlPort = m_settings.m_controlPort;
-    m_controlSettings.m_centerFrequency = m_settings.m_controlPort;
+    m_controlSettings.m_centerFrequency = m_settings.m_centerFrequency;
     m_controlSettings.m_sampleRate = m_settings.m_sampleRate;
     m_controlSettings.m_log2Interp = m_settings.m_log2Interp;
     m_controlSettings.m_specificParameters = m_settings.m_specificParameters;
