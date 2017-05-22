@@ -64,6 +64,7 @@ private:
 	std::size_t m_tickCount;
 	int m_lastEngineState;
     bool m_doApplySettings;
+    bool m_forceSettings;
 
     int m_nnSender;
 

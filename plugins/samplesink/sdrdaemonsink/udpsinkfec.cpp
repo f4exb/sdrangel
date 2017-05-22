@@ -43,22 +43,26 @@ UDPSinkFEC::UDPSinkFEC() :
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];
+    m_udpThread = new QThread();
     m_udpWorker = new UDPSinkFECWorker();
 
-    m_udpWorker->moveToThread(&m_udpThread);
-    connect(&(m_udpWorker->m_inputMessageQueue), SIGNAL(messageEnqueued()), m_udpWorker, SLOT(handleInputMessages()));
-    m_udpThread.start();
+    m_udpWorker->moveToThread(m_udpThread);
+
+    connect(m_udpThread, SIGNAL(started()), m_udpWorker, SLOT(process()));
+    connect(m_udpWorker, SIGNAL(finished()), m_udpThread, SLOT(quit()));
+
+    m_udpThread->start();
 }
 
 UDPSinkFEC::~UDPSinkFEC()
 {
-    disconnect(&(m_udpWorker->m_inputMessageQueue), SIGNAL(messageEnqueued()), m_udpWorker, SLOT(handleInputMessages()));
-    m_udpThread.exit();
-    m_udpThread.wait();
+    m_udpWorker->stop();
+    m_udpThread->wait();
 
     delete[] m_buf;
     delete[] m_bufMeta;
     delete m_udpWorker;
+    delete m_udpThread;
 }
 
 void UDPSinkFEC::setTxDelay(uint32_t txDelay)
@@ -81,6 +85,7 @@ void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)
 
 void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunkSize)
 {
+    //qDebug("UDPSinkFEC::write(: %u samples", sampleChunkSize);
     const SampleVector::iterator end = begin + sampleChunkSize;
     SampleVector::iterator it = begin;
 
@@ -163,6 +168,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                 int txDelay = m_txDelay;
 
                 // TODO: send blocks
+                //qDebug("UDPSinkFEC::write: push frame to worker: %u", m_frameCount);
                 m_udpWorker->pushTxFrame(m_txBlocks[m_txBlocksIndex], nbBlocksFEC, txDelay, m_frameCount);
                 //m_txThread = new std::thread(transmitUDP, this, m_txBlocks[m_txBlocksIndex], m_frameCount, nbBlocksFEC, txDelay, m_cm256Valid);
                 //transmitUDP(this, m_txBlocks[m_txBlocksIndex], m_frameCount, m_nbBlocksFEC, m_txDelay, m_cm256Valid);
@@ -179,32 +185,52 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
     }
 }
 
-UDPSinkFECWorker::UDPSinkFECWorker() : m_remotePort(9090)
+UDPSinkFECWorker::UDPSinkFECWorker() :
+        m_running(false),
+        m_remotePort(9090)
 {
     m_cm256Valid = m_cm256.isInitialized();
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::DirectConnection);
 }
 
 UDPSinkFECWorker::~UDPSinkFECWorker()
 {
-    Message* message;
-
-    while ((message = m_inputMessageQueue.pop()) != 0)
-    {
-        delete message;
-    }
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_inputMessageQueue.clear();
 }
 
-void UDPSinkFECWorker::pushTxFrame(const UDPSinkFEC::SuperBlock *txBlocks,
+void UDPSinkFECWorker::pushTxFrame(UDPSinkFEC::SuperBlock *txBlocks,
     uint32_t nbBlocksFEC,
     uint32_t txDelay,
     uint16_t frameIndex)
 {
+    //qDebug("UDPSinkFECWorker::pushTxFrame. %d", m_inputMessageQueue.size());
     m_inputMessageQueue.push(MsgUDPFECEncodeAndSend::create(txBlocks, nbBlocksFEC, txDelay, frameIndex));
 }
 
 void UDPSinkFECWorker::setRemoteAddress(const QString& address, uint16_t port)
 {
     m_inputMessageQueue.push(MsgConfigureRemoteAddress::create(address, port));
+}
+
+void UDPSinkFECWorker::process()
+{
+    m_running  = true;
+
+    qDebug("UDPSinkFECWorker::process: started");
+
+    while (m_running)
+    {
+        usleep(250000);
+    }
+
+    qDebug("UDPSinkFECWorker::process: stopped");
+    emit finished();
+}
+
+void UDPSinkFECWorker::stop()
+{
+    m_running = false;
 }
 
 void UDPSinkFECWorker::handleInputMessages()
@@ -216,11 +242,13 @@ void UDPSinkFECWorker::handleInputMessages()
         if (MsgUDPFECEncodeAndSend::match(*message))
         {
             MsgUDPFECEncodeAndSend *sendMsg = (MsgUDPFECEncodeAndSend *) message;
+            encodeAndTransmit(sendMsg->getTxBlocks(), sendMsg->getFrameIndex(), sendMsg->getNbBlocsFEC(), sendMsg->getTxDelay());
         }
         else if (MsgConfigureRemoteAddress::match(*message))
         {
+            qDebug("UDPSinkFECWorker::handleInputMessages: %s", message->getIdentifier());
             MsgConfigureRemoteAddress *addressMsg = (MsgConfigureRemoteAddress *) message;
-            m_remoteAddress.setAddress(addressMsg->getAddress());
+            m_remoteAddress = addressMsg->getAddress();
             m_remotePort = addressMsg->getPort();
         }
 
@@ -228,7 +256,7 @@ void UDPSinkFECWorker::handleInputMessages()
     }
 }
 
-void UDPSinkFECWorker::transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t frameIndex, int nbBlocksFEC, int txDelay)
+void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay)
 {
     CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
     CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
@@ -236,9 +264,12 @@ void UDPSinkFECWorker::transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t fr
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
+        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame without FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
+
         for (int i = 0; i < UDPSinkFEC::m_nbOriginalBlocks; i++)
         {
-            m_udpSocket.writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
+            m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
+            //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
             usleep(txDelay);
         }
     }
@@ -265,7 +296,7 @@ void UDPSinkFECWorker::transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t fr
         // Encode FEC blocks
         if (m_cm256.cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
         {
-            qDebug() << "UDPSinkFECWorker::transmitUDP: CM256 encode failed. No transmission.";
+            qDebug("UDPSinkFECWorker::encodeAndTransmit: CM256 encode failed. No transmission.");
             return;
         }
 
@@ -276,6 +307,9 @@ void UDPSinkFECWorker::transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t fr
         }
 
         // Transmit all blocks
+
+        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame with FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
+
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
         {
 #ifdef SDRDAEMON_PUNCTURE
@@ -297,7 +331,8 @@ void UDPSinkFECWorker::transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t fr
 //
 //            std::cerr << std::endl;
 
-            m_udpSocket.writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
+            m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, "127.0.0.1", (uint32_t) m_remotePort);
+            //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
             usleep(txDelay);
         }
     }

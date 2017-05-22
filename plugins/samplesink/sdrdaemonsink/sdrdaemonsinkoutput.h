@@ -37,18 +37,21 @@ public:
 
 	public:
 		const SDRdaemonSinkSettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureSDRdaemonSink* create(const SDRdaemonSinkSettings& settings)
+		static MsgConfigureSDRdaemonSink* create(const SDRdaemonSinkSettings& settings, bool force = false)
 		{
-			return new MsgConfigureSDRdaemonSink(settings);
+			return new MsgConfigureSDRdaemonSink(settings, force);
 		}
 
 	private:
 		SDRdaemonSinkSettings m_settings;
+		bool m_force;
 
-		MsgConfigureSDRdaemonSink(const SDRdaemonSinkSettings& settings) :
+		MsgConfigureSDRdaemonSink(const SDRdaemonSinkSettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 

@@ -21,7 +21,6 @@
 #include <cstddef>
 
 #include <QObject>
-#include <QUdpSocket>
 #include <QHostAddress>
 #include <QString>
 #include <QThread>
@@ -32,6 +31,8 @@
 #include "util/CRC64.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
+
+#include "UDPSocket.h"
 
 class UDPSinkFECWorker;
 
@@ -152,7 +153,7 @@ private:
     uint16_t m_frameCount;               //!< transmission frame count
     int m_sampleIndex;                   //!< Current sample index in protected block data
 
-    QThread m_udpThread;
+    QThread *m_udpThread;
     UDPSinkFECWorker *m_udpWorker;
 };
 
@@ -165,13 +166,13 @@ public:
     {
         MESSAGE_CLASS_DECLARATION
     public:
-        const UDPSinkFEC::SuperBlock *getTxBlocks() const { return m_txBlockx; }
+        UDPSinkFEC::SuperBlock *getTxBlocks() const { return m_txBlockx; }
         uint32_t getNbBlocsFEC() const { return m_nbBlocksFEC; }
         uint32_t getTxDelay() const { return m_txDelay; }
         uint16_t getFrameIndex() const { return m_frameIndex; }
 
         static MsgUDPFECEncodeAndSend* create(
-                const UDPSinkFEC::SuperBlock *txBlocks,
+                UDPSinkFEC::SuperBlock *txBlocks,
                 uint32_t nbBlocksFEC,
                 uint32_t txDelay,
                 uint16_t frameIndex)
@@ -180,13 +181,13 @@ public:
         }
 
     private:
-        const UDPSinkFEC::SuperBlock *m_txBlockx;
+        UDPSinkFEC::SuperBlock *m_txBlockx;
         uint32_t m_nbBlocksFEC;
         uint32_t m_txDelay;
         uint16_t m_frameIndex;
 
         MsgUDPFECEncodeAndSend(
-                const UDPSinkFEC::SuperBlock *txBlocks,
+                UDPSinkFEC::SuperBlock *txBlocks,
                 uint32_t nbBlocksFEC,
                 uint32_t txDelay,
                 uint16_t frameIndex) :
@@ -222,24 +223,32 @@ public:
     UDPSinkFECWorker();
     ~UDPSinkFECWorker();
 
-    void pushTxFrame(const UDPSinkFEC::SuperBlock *txBlocks,
+    void pushTxFrame(UDPSinkFEC::SuperBlock *txBlocks,
         uint32_t nbBlocksFEC,
         uint32_t txDelay,
         uint16_t frameIndex);
     void setRemoteAddress(const QString& address, uint16_t port);
+    void stop();
 
     MessageQueue m_inputMessageQueue;    //!< Queue for asynchronous inbound communication
 
+signals:
+    void finished();
+
 public slots:
+    void process();
+
+private slots:
     void handleInputMessages();
 
 private:
-    void transmitUDP(UDPSinkFEC::SuperBlock *txBlockx, uint16_t frameIndex, int nbBlocksFEC, int txDelay);
+    void encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay);
 
-    QUdpSocket m_udpSocket;
+    bool m_running;
     CM256 m_cm256;                       //!< CM256 library object
     bool m_cm256Valid;                   //!< true if CM256 library is initialized correctly
-    QHostAddress m_remoteAddress;
+    UDPSocket    m_socket;
+    QString      m_remoteAddress;
     uint16_t     m_remotePort;
 };
 

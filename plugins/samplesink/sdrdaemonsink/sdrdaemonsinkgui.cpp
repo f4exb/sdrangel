@@ -47,7 +47,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
-	m_doApplySettings(true)
+	m_doApplySettings(true),
+	m_forceSettings(true)
 {
     m_nnSender = nn_socket(AF_SP, NN_PAIR);
     assert(m_nnSender != -1);
@@ -140,6 +141,7 @@ bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
 		displaySettings();
 	    blockApplySettings(false);
 		sendControl(true);
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	}
@@ -328,8 +330,9 @@ void SDRdaemonSinkGui::sendSettings()
 void SDRdaemonSinkGui::updateHardware()
 {
     qDebug() << "SDRdaemonSinkGui::updateHardware";
-    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings);
+    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings, m_forceSettings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
+    m_forceSettings = false;
     m_updateTimer.stop();
 }
 

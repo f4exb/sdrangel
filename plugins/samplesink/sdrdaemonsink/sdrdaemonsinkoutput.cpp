@@ -60,8 +60,11 @@ bool SDRdaemonSinkOutput::start()
 		stop();
 		return false;
 	}
-
+	m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
+	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
+	m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
+	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
 	m_sdrDaemonSinkThread->startWork();
 
@@ -107,11 +110,12 @@ std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const
 
 bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 {
-	if (MsgConfigureSDRdaemonSink::match(message))
+
+    if (MsgConfigureSDRdaemonSink::match(message))
     {
-	    qDebug() << "SDRdaemonSinkOutput::handleMessage: MsgConfigureFileSink";
+        qDebug() << "SDRdaemonSinkOutput::handleMessage:" << message.getIdentifier();
 	    MsgConfigureSDRdaemonSink& conf = (MsgConfigureSDRdaemonSink&) message;
-        applySettings(conf.getSettings(), false);
+        applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
 	else if (MsgConfigureSDRdaemonSinkWork::match(message))
