@@ -33,7 +33,6 @@ SUBDIRS += plugins/samplesink/filesink
 SUBDIRS += plugins/samplesink/bladerfoutput
 SUBDIRS += plugins/samplesink/hackrfoutput
 CONFIG(MINGW64)SUBDIRS += plugins/samplesink/limesdroutput
-CONFIG(MINGW64)SUBDIRS += plugins/samplesink/sdrdaemonsink
 SUBDIRS += plugins/channelrx/chanalyzer
 SUBDIRS += plugins/channelrx/chanalyzerng
 SUBDIRS += plugins/channelrx/demodam
