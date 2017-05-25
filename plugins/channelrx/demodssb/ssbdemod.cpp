@@ -28,13 +28,13 @@
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
 SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
-	m_audioFifo(4, 24000),
-	m_settingsMutex(QMutex::Recursive),
 	m_audioBinaual(false),
 	m_audioFlipChannels(false),
-	m_audioMute(false),
-	m_dsb(false)
+    m_dsb(false),
+    m_audioMute(false),
+    m_sampleSink(sampleSink),
+    m_audioFifo(4, 24000),
+    m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("SSBDemod");
 
@@ -89,11 +89,10 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
 	Complex ci;
 	fftfilt::cmplx *sideband;
-	Real avg;
 	int n_out;
 
 	m_settingsMutex.lock();

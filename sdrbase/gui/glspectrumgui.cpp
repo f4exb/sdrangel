@@ -293,7 +293,7 @@ void GLSpectrumGUI::on_traceIntensity_valueChanged(int index)
 		m_glSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
 }
 
-void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked)
+void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked __attribute__((unused)))
 {
 	if(m_glSpectrum != NULL)
 		m_glSpectrum->clearSpectrumHistogram();

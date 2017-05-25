@@ -249,7 +249,6 @@ void PhaseLock::process(const std::vector<Real>& samples_in, std::vector<Real>& 
 // Process samples. Multiple output
 void PhaseLock::process(const Real& sample_in, Real *samples_out)
 {
-    bool was_locked = (m_lock_cnt >= m_lock_delay);
     m_pps_events.clear();
 
 	// Generate locked pilot tone.

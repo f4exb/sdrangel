@@ -62,5 +62,5 @@ PluginGUI* NFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkA
 
 void NFMModPlugin::createInstanceModNFM(DeviceSinkAPI *deviceAPI)
 {
-    NFMModGUI* gui = NFMModGUI::create(m_pluginAPI, deviceAPI);
+    NFMModGUI::create(m_pluginAPI, deviceAPI);
 }

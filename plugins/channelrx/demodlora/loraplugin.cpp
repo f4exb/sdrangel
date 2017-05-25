@@ -46,5 +46,5 @@ PluginGUI* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceA
 
 void LoRaPlugin::createInstanceLoRa(DeviceSourceAPI *deviceAPI)
 {
-	LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
+	LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
 }

@@ -722,8 +722,8 @@ protected:
             qAcc += ((int32_t)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
-        sample->setReal(iAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
-        sample->setImag(qAcc >> HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+        sample->setReal(iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
+        sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
     }
 
     void doFIR(int32_t *x, int32_t *y)

@@ -45,12 +45,12 @@ ScopeVisMulti::ScopeVisMulti(GLScopeMulti* glScope) :
     m_focusedTraceIndex(0),
     m_traceSize(m_traceChunkSize),
     m_nbSamples(0),
+    m_timeBase(1),
+    m_timeOfsProMill(0),
     m_traceStart(true),
     m_postTrigBuffering(false),
     m_traceFill(0),
     m_zTraceIndex(-1),
-    m_timeBase(1),
-    m_timeOfsProMill(0),
     m_sampleRate(0),
     m_freeRun(true),
     m_maxTraceDelay(0),
@@ -296,7 +296,7 @@ void ScopeVisMulti::processSources()
 
     uint32_t nbSources = m_traceDiscreteMemory.getNbSources();
 
-    for (int is = 0; is < nbSources; is++)
+    for (unsigned int is = 0; is < nbSources; is++)
     {
         SampleVector::iterator begin = m_traceDiscreteMemory.getBeginIterator(is); // trigger position
         SampleVector::iterator end = begin + m_traceSize;
@@ -333,7 +333,7 @@ void ScopeVisMulti::processMemorySources()
     {
         uint32_t nbSources = m_traceDiscreteMemory.getNbSources();
 
-        for (int is = 0; is < nbSources; is++)
+        for (unsigned int is = 0; is < nbSources; is++)
         {
             SampleVector::const_iterator mend = m_traceDiscreteMemory.m_traceBackBuffers[is].at(m_currentTraceMemoryIndex).m_endPoint;
             SampleVector::const_iterator mbegin = mend - m_traceSize;
@@ -362,7 +362,12 @@ bool ScopeVisMulti::nextTrigger()
         }
     }
 
-    if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
+    if (m_triggerConditions.size() == 0)
+    {
+        m_currentTriggerIndex = 0;
+        return false; // final
+    }
+    else if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
     {
         m_currentTriggerIndex++;
         return true; // not final keep going
@@ -375,11 +380,11 @@ bool ScopeVisMulti::nextTrigger()
     }
 }
 
-void ScopeVisMulti::processTraces(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool traceBack, int sourceIndex)
+void ScopeVisMulti::processTraces(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool traceBack, uint32_t sourceIndex)
 {
     SampleVector::const_iterator begin(cbegin);
-    int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
-    int length = m_traceSize / m_timeBase;
+    uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
+    uint32_t length = m_traceSize / m_timeBase;
     int nbSamples = end - begin;
 
     while (begin < end)
@@ -402,7 +407,7 @@ void ScopeVisMulti::processTraces(const SampleVector::const_iterator& cbegin, co
 
             if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
-                int& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
+                uint32_t& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
 
                 if (projectionType == ProjectionMagLin)
@@ -569,7 +574,7 @@ bool ScopeVisMulti::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -589,7 +594,7 @@ bool ScopeVisMulti::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size()) {
             m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
@@ -622,7 +627,7 @@ bool ScopeVisMulti::handleMessage(const Message& message)
     else if (MsgScopeVisNGFocusOnTrigger::match(message))
     {
         MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -679,7 +684,7 @@ bool ScopeVisMulti::handleMessage(const Message& message)
     else if (MsgScopeVisNGFocusOnTrace::match(message))
     {
         MsgScopeVisNGFocusOnTrace& conf = (MsgScopeVisNGFocusOnTrace&) message;
-        int traceIndex = conf.getTraceIndex();
+        uint32_t traceIndex = conf.getTraceIndex();
 
         if (traceIndex < m_traces.m_tracesData.size())
         {
@@ -772,7 +777,7 @@ void ScopeVisMulti::initTraceBuffers()
 
     for (; it0 != m_traces.m_traces[0].end(); ++it0, ++it1)
     {
-        for (int i = 0; i < m_traceSize; i++)
+        for (unsigned int i = 0; i < m_traceSize; i++)
         {
             (*it0)[2*i] = (i - shift); // display x
             (*it0)[2*i + 1] = 0.0f;    // display y

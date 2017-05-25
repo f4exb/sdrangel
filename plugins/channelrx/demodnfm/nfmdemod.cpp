@@ -43,12 +43,12 @@ NFMDemod::NFMDemod() :
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
-	m_afSquelch(2, afSqTones),
-	m_audioFifo(4, 48000),
-	m_fmExcursion(2400),
-	m_settingsMutex(QMutex::Recursive),
 	m_AGC(40, 0),
-	m_movingAverage(40, 0)
+    m_movingAverage(40, 0),
+    m_afSquelch(2, afSqTones),
+    m_fmExcursion(2400),
+    m_audioFifo(4, 48000),
+    m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");
 
@@ -138,7 +138,7 @@ Real angleDist(Real a, Real b)
 	return dist;
 }
 
-void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
 

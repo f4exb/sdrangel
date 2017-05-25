@@ -66,8 +66,8 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_peakHoldLevel(0.0)
     ,   m_redrawTimer(new QTimer(this))
     ,   m_avgColor(0xff, 0x8b, 0x00, 128)          // color mapper foreground
-    ,   m_decayedPeakColor(0x97, 0x54, 0x00, 128)  // color mapper 59%
     ,   m_peakColor(Qt::red)                       // just red 100% opaque
+    ,   m_decayedPeakColor(0x97, 0x54, 0x00, 128)  // color mapper 59%
     ,   m_backgroundPixmap(0)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -269,8 +269,8 @@ const QColor LevelMeterSignalDB::m_peakColor[3] = {
 };
 
 LevelMeterSignalDB::LevelMeterSignalDB(QWidget *parent) :
-        m_colorTheme(ColorGold),
-        LevelMeter(parent)
+        LevelMeter(parent),
+        m_colorTheme(ColorGold)
 {
     m_scaleEngine.setFont(font());
     m_scaleEngine.setOrientation(Qt::Horizontal);

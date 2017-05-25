@@ -128,7 +128,6 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
-		bool boolTmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -177,7 +176,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool DSDDemodGUI::handleMessage(const Message& message)
+bool DSDDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -199,22 +198,22 @@ void DSDDemodGUI::on_rfBW_valueChanged(int value)
 	applySettings();
 }
 
-void DSDDemodGUI::on_demodGain_valueChanged(int value)
+void DSDDemodGUI::on_demodGain_valueChanged(int value __attribute__((unused)))
 {
 	applySettings();
 }
 
-void DSDDemodGUI::on_fmDeviation_valueChanged(int value)
+void DSDDemodGUI::on_fmDeviation_valueChanged(int value __attribute__((unused)))
 {
 	applySettings();
 }
 
-void DSDDemodGUI::on_volume_valueChanged(int value)
+void DSDDemodGUI::on_volume_valueChanged(int value __attribute__((unused)))
 {
     applySettings();
 }
 
-void DSDDemodGUI::on_baudRate_currentIndexChanged(int index)
+void DSDDemodGUI::on_baudRate_currentIndexChanged(int index __attribute__((unused)))
 {
     applySettings();
 }
@@ -249,7 +248,7 @@ void DSDDemodGUI::on_tdmaStereoSplit_toggled(bool checked)
     applySettings();
 }
 
-void DSDDemodGUI::on_squelchGate_valueChanged(int value)
+void DSDDemodGUI::on_squelchGate_valueChanged(int value __attribute__((unused)))
 {
 	applySettings();
 }
@@ -276,7 +275,7 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
-void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (DSDDemodGUI != NULL))

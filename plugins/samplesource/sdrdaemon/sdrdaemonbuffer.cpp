@@ -95,7 +95,7 @@ SDRdaemonBuffer::~SDRdaemonBuffer()
 
 void SDRdaemonBuffer::updateBufferSize(uint32_t sampleRate)
 {
-	uint32_t rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
+	int rawSize = sampleRate * m_iqSampleSize * m_rawBufferLengthSeconds; // store worth of this seconds of samples at this sample rate
 
 	if ((m_frameSize > 0) && (rawSize / m_frameSize < m_rawBufferMinNbFrames))
 	{
@@ -148,9 +148,8 @@ void SDRdaemonBuffer::updateReadBufferSize(uint32_t length)
 	m_readBuffer = new uint8_t[length];
 }
 
-bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
+bool SDRdaemonBuffer::readMeta(char *array)
 {
-	assert(length >= sizeof(MetaData) + 8);
 	MetaData *metaData = (MetaData *) array;
 
 	if (m_crc64.calculate_crc((uint8_t *) array, sizeof(MetaData) - 8) == metaData->m_crc)
@@ -183,7 +182,7 @@ bool SDRdaemonBuffer::readMeta(char *array, uint32_t length)
 		{
 			m_sampleBytes = metaData->m_sampleBytes & 0x0F;
 			uint32_t frameSize = m_iqSampleSize * metaData->m_nbSamples * metaData->m_nbBlocks;
-			int sampleRate = metaData->m_sampleRate;
+			uint32_t sampleRate = metaData->m_sampleRate;
 
             if (sampleRate != m_sampleRateStream) // change of nominal stream sample rate
 			{
@@ -337,7 +336,7 @@ uint8_t *SDRdaemonBuffer::readData(int32_t length)
 	}
 }
 
-void SDRdaemonBuffer::writeDataLZ4(const char *array, uint32_t length)
+void SDRdaemonBuffer::writeDataLZ4(const char *array, int length)
 {
     if (m_lz4InCount + length < m_lz4InSize)
     {
@@ -394,7 +393,7 @@ void SDRdaemonBuffer::writeToRawBufferLZ4()
 	}
 }
 
-void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, uint32_t length)
+void SDRdaemonBuffer::writeToRawBufferUncompressed(const char *array, int length)
 {
 	// TODO: handle the 1 byte per I or Q sample
 	if (m_writeIndex + length < m_rawSize)

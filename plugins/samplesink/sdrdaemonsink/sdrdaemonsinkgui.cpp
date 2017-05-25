@@ -53,7 +53,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_nnSender = nn_socket(AF_SP, NN_PAIR);
     assert(m_nnSender != -1);
     int millis = 500;
-    int rc = nn_setsockopt (m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    nn_setsockopt (m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
 	ui->setupUi(this);
@@ -262,7 +262,6 @@ void SDRdaemonSinkGui::sendControl(bool force)
 
     std::ostringstream os;
     int nbArgs = 0;
-    bool ok;
 
     if ((m_settings.m_centerFrequency != m_controlSettings.m_centerFrequency) || force)
     {
@@ -455,11 +454,11 @@ void SDRdaemonSinkGui::on_specificParms_returnPressed()
     sendControl();
 }
 
-void on_applyButton_clicked(bool checked)
+void on_applyButton_clicked(bool checked __attribute__((unused)))
 {
 }
 
-void on_sendButton_clicked(bool checked)
+void on_sendButton_clicked(bool checked __attribute__((unused)))
 {
 }
 

@@ -42,25 +42,25 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui->centerFrequency->setValueRange(7, 10U, 12000U);
 
     ui->fBand->clear();
-    for (int i = 0; i < SDRPlayBands::getNbBands(); i++)
+    for (unsigned int i = 0; i < SDRPlayBands::getNbBands(); i++)
     {
         ui->fBand->addItem(SDRPlayBands::getBandName(i));
     }
 
     ui->ifFrequency->clear();
-    for (int i = 0; i < SDRPlayIF::getNbIFs(); i++)
+    for (unsigned int i = 0; i < SDRPlayIF::getNbIFs(); i++)
     {
         ui->ifFrequency->addItem(QString::number(SDRPlayIF::getIF(i)/1000));
     }
 
     ui->samplerate->clear();
-    for (int i = 0; i < SDRPlaySampleRates::getNbRates(); i++)
+    for (unsigned int i = 0; i < SDRPlaySampleRates::getNbRates(); i++)
     {
         ui->samplerate->addItem(QString::number(SDRPlaySampleRates::getRate(i)/1000));
     }
 
     ui->bandwidth->clear();
-    for (int i = 0; i < SDRPlayBandwidths::getNbBandwidths(); i++)
+    for (unsigned int i = 0; i < SDRPlayBandwidths::getNbBandwidths(); i++)
     {
         ui->bandwidth->addItem(QString::number(SDRPlayBandwidths::getBandwidth(i)/1000));
     }

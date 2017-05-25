@@ -29,15 +29,15 @@
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 
 WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
-	m_audioFifo(4, 250000),
-	m_settingsMutex(QMutex::Recursive),
     m_squelchOpen(false),
     m_magsq(0.0f),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
-    m_movingAverage(40, 0)
+    m_movingAverage(40, 0),
+    m_sampleSink(sampleSink),
+    m_audioFifo(4, 250000),
+    m_settingsMutex(QMutex::Recursive)
 
 {
 	setObjectName("WFMDemod");
@@ -84,7 +84,7 @@ void WFMDemod::configure(
 	messageQueue->push(cmd);
 }
 
-void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
 	fftfilt::cmplx *rf;

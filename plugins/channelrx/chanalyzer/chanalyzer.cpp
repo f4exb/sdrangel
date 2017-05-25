@@ -60,7 +60,7 @@ void ChannelAnalyzer::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
 	fftfilt::cmplx *sideband;
 	int n_out;

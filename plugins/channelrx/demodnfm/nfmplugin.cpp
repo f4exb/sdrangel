@@ -45,5 +45,5 @@ PluginGUI* NFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAP
 
 void NFMPlugin::createInstanceNFM(DeviceSourceAPI *deviceAPI)
 {
-	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceAPI);
+	NFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

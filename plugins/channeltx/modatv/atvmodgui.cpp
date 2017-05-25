@@ -377,7 +377,7 @@ void ATVModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
 }
 
-void ATVModGUI::on_modulation_currentIndexChanged(int index)
+void ATVModGUI::on_modulation_currentIndexChanged(int index __attribute__((unused)))
 {
     setRFFiltersSlidersRange(m_atvMod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
@@ -441,18 +441,18 @@ void ATVModGUI::setChannelMarkerBandwidth()
     }
 }
 
-void ATVModGUI::on_nbLines_currentIndexChanged(int index)
+void ATVModGUI::on_nbLines_currentIndexChanged(int index __attribute__((unused)))
 {
     applySettings();
 }
 
-void ATVModGUI::on_fps_currentIndexChanged(int index)
+void ATVModGUI::on_fps_currentIndexChanged(int index __attribute__((unused)))
 {
     applySettings();
 }
 
 
-void ATVModGUI::on_standard_currentIndexChanged(int index)
+void ATVModGUI::on_standard_currentIndexChanged(int index __attribute__((unused)))
 {
     applySettings();
 }
@@ -468,22 +468,22 @@ void ATVModGUI::on_invertVideo_clicked()
     applySettings();
 }
 
-void ATVModGUI::on_inputSelect_currentIndexChanged(int index)
+void ATVModGUI::on_inputSelect_currentIndexChanged(int index __attribute__((unused)))
 {
     applySettings();
 }
 
-void ATVModGUI::on_channelMute_toggled(bool checked)
+void ATVModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
 
-void ATVModGUI::on_forceDecimator_toggled(bool checked)
+void ATVModGUI::on_forceDecimator_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }
 
-void ATVModGUI::on_imageFileDialog_clicked(bool checked)
+void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"));
@@ -496,7 +496,7 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked)
     }
 }
 
-void ATVModGUI::on_videoFileDialog_clicked(bool checked)
+void ATVModGUI::on_videoFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"));
@@ -509,7 +509,7 @@ void ATVModGUI::on_videoFileDialog_clicked(bool checked)
     }
 }
 
-void ATVModGUI::on_playLoop_toggled(bool checked)
+void ATVModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }
@@ -525,13 +525,12 @@ void ATVModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
     {
-        int seekFame = (m_videoLength * value) / 100;
         ATVMod::MsgConfigureVideoFileSourceSeek* message = ATVMod::MsgConfigureVideoFileSourceSeek::create(value);
         m_atvMod->getInputMessageQueue()->push(message);
     }
 }
 
-void ATVModGUI::on_playCamera_toggled(bool checked)
+void ATVModGUI::on_playCamera_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }
@@ -567,7 +566,7 @@ void ATVModGUI::on_overlayTextShow_toggled(bool checked)
     m_atvMod->getInputMessageQueue()->push(message);
 }
 
-void ATVModGUI::on_overlayText_textEdited(const QString& arg1)
+void ATVModGUI::on_overlayText_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
     m_atvMod->getInputMessageQueue()->push(message);
@@ -587,7 +586,7 @@ void ATVModGUI::configureVideoFileName()
     m_atvMod->getInputMessageQueue()->push(message);
 }
 
-void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void ATVModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

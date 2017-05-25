@@ -47,28 +47,28 @@ GLScope::GLScope(QWidget* parent) :
 	m_memTraceIndexMax(0),
 	m_memTraceRecall(false),
 	m_displayTrace(&m_rawTrace[0]),
-	m_oldTraceSize(-1),
-	m_sampleRate(0),
-	m_amp1(1.0),
-	m_amp2(1.0),
-	m_ofs1(0.0),
-	m_ofs2(0.0),
 	//m_amp(1.0),
 	//m_ofs(0.0),
-	m_timeBase(1),
-	m_timeOfsProMill(0),
-	m_triggerChannel(ScopeVis::TriggerFreeRun),
-	m_triggerLevel(0.0),
-	m_triggerPre(0.0),
-	m_triggerLevelDis1(0.0),
-	m_triggerLevelDis2(0.0),
-	m_prevArg(0),
-	m_displayGridIntensity(5),
-	m_displayTraceIntensity(50),
-	m_powerOverlayFont(font()),
 	m_maxPow(0.0f),
 	m_sumPow(0.0f),
-	m_nbPow(1)
+    m_oldTraceSize(-1),
+    m_sampleRate(0),
+    m_amp1(1.0),
+    m_amp2(1.0),
+    m_ofs1(0.0),
+    m_ofs2(0.0),
+    m_timeBase(1),
+    m_timeOfsProMill(0),
+    m_triggerChannel(ScopeVis::TriggerFreeRun),
+    m_triggerLevel(0.0),
+    m_triggerPre(0.0),
+    m_triggerLevelDis1(0.0),
+    m_triggerLevelDis2(0.0),
+    m_nbPow(1),
+    m_prevArg(0),
+    m_displayGridIntensity(5),
+    m_displayTraceIntensity(50),
+    m_powerOverlayFont(font())
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -839,7 +839,7 @@ void GLScope::paintGL()
 	m_mutex.unlock();
 }
 
-void GLScope::mousePressEvent(QMouseEvent* event)
+void GLScope::mousePressEvent(QMouseEvent* event __attribute__((unused)))
 {
 #if 0
 	int x = event->x() - 10;

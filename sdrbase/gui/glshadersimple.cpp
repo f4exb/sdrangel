@@ -26,8 +26,8 @@
 
 GLShaderSimple::GLShaderSimple() :
 	m_program(0),
-	m_colorLoc(0),
-	m_matrixLoc(0)
+    m_matrixLoc(0),
+	m_colorLoc(0)
 { }
 
 GLShaderSimple::~GLShaderSimple()

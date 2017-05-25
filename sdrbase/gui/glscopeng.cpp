@@ -34,15 +34,15 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     m_displayMode(DisplayX),
     m_dataChanged(false),
     m_configChanged(false),
-    m_displayGridIntensity(10),
-    m_displayTraceIntensity(50),
-    m_timeBase(1),
-    m_traceSize(0),
     m_sampleRate(0),
-    m_triggerPre(0),
     m_timeOfsProMill(0),
+    m_triggerPre(0),
+    m_traceSize(0),
+    m_timeBase(1),
+    m_timeOffset(0),
     m_focusedTraceIndex(0),
-    m_timeOffset(0)
+    m_displayGridIntensity(10),
+    m_displayTraceIntensity(50)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -479,7 +479,7 @@ void GLScopeNG::paintGL()
             if(end - start < 2)
                 start--;
 
-            for (int i = 1; i < m_traces->size(); i++)
+            for (unsigned int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
@@ -702,7 +702,7 @@ void GLScopeNG::paintGL()
             if(end - start < 2)
                 start--;
 
-            for (int i = 0; i < m_traces->size(); i++)
+            for (unsigned int i = 0; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
@@ -875,7 +875,7 @@ void GLScopeNG::paintGL()
             const float *trace0 = (*m_traces)[0];
             memcpy(q3, &(trace0[2*start+1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
 
-            for (int i = 1; i < m_traces->size(); i++)
+            for (unsigned int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVisNG::TraceData& traceData = (*m_tracesData)[i];
@@ -969,7 +969,6 @@ void GLScopeNG::applyConfig()
     m_configChanged = false;
 
     QFontMetrics fm(font());
-    int M = fm.width("-");
     //float t_start = ((m_timeOfsProMill / 1000.0) * ((float) m_traceSize / m_sampleRate)) - ((float) m_triggerPre / m_sampleRate);
     float t_start = (((m_timeOfsProMill / 1000.0f) * (float) m_traceSize) / m_sampleRate) - ((float) m_triggerPre / m_sampleRate);
     float t_len = ((float) m_traceSize / m_sampleRate) / (float) m_timeBase;

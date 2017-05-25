@@ -149,7 +149,7 @@ void SDRdaemonUDPHandler::processData()
 	{
 		m_sdrDaemonBuffer.updateBlockCounts(m_udpReadBytes);
 
-		if (m_sdrDaemonBuffer.readMeta(m_udpBuf, m_udpReadBytes))
+		if (m_sdrDaemonBuffer.readMeta(m_udpBuf))
 		{
 			const SDRdaemonBuffer::MetaData& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 			bool change = false;

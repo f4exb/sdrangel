@@ -28,24 +28,24 @@ const int SDRdaemonFECBuffer::m_sampleSize = 2;
 const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
 
 SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
-        m_frameHead(0),
         m_decoderIndexHead(nbDecoderSlots/2),
+        m_frameHead(0),
         m_curNbBlocks(0),
         m_minNbBlocks(256),
+        m_curOriginalBlocks(0),
         m_minOriginalBlocks(128),
         m_curNbRecovery(0),
         m_maxNbRecovery(0),
         m_framesDecoded(true),
-        m_throttlemsNominal(throttlems),
         m_readIndex(0),
+        m_throttlemsNominal(throttlems),
         m_readBuffer(0),
         m_readSize(0),
         m_bufferLenSec(0.0f),
-		m_nbReads(0),
-		m_nbWrites(0),
-		m_balCorrection(0),
-	    m_balCorrLimit(0),
-	    m_curOriginalBlocks(0)
+        m_nbReads(0),
+        m_nbWrites(0),
+        m_balCorrection(0),
+	    m_balCorrLimit(0)
 {
 	m_currentMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
@@ -135,7 +135,7 @@ void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
 	{
 		int targetPivotSlot = (slotIndex + (nbDecoderSlots/2))  % nbDecoderSlots; // slot at half buffer opposite of current write slot
 		int targetPivotIndex = targetPivotSlot * sizeof(BufferFrame);             // buffer index corresponding to start of above slot
-		int normalizedReadIndex = (m_readIndex < targetPivotIndex ? m_readIndex + nbDecoderSlots * sizeof(BufferFrame) :  m_readIndex)
+		uint32_t normalizedReadIndex = (m_readIndex < targetPivotIndex ? m_readIndex + nbDecoderSlots * sizeof(BufferFrame) :  m_readIndex)
 				- (targetPivotSlot * sizeof(BufferFrame)); // normalize read index so it is positive and zero at start of pivot slot
 		int dBytes;
         int rwDelta = (m_nbReads * m_readNbBytes) - (m_nbWrites * sizeof(BufferFrame));
@@ -156,8 +156,6 @@ void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
         } else if (m_balCorrection > m_balCorrLimit) {
             m_balCorrection = m_balCorrLimit;
         }
-
-        float rwRatio = (float) (m_nbWrites * sizeof(BufferFrame)) / (float)  (m_nbReads * m_readNbBytes);
 
 	    m_nbReads = 0;
 	    m_nbWrites = 0;
@@ -189,7 +187,7 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
     }
 }
 
-void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
+void SDRdaemonFECBuffer::writeData(char *array)
 {
     SuperBlock *superBlock = (SuperBlock *) array;
     int frameIndex = superBlock->header.frameIndex;
@@ -322,80 +320,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
     } // decode
 }
 
-void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
-{
-// Kept as comments for the out of sync blocks algorithms
-//    assert(length == m_udpPayloadSize);
-//
-//    bool dataAvailable = false;
-//    SuperBlock *superBlock = (SuperBlock *) array;
-//    int frameIndex = superBlock->header.frameIndex;
-//    int decoderIndex = frameIndex % nbDecoderSlots;
-//    int blockIndex = superBlock->header.blockIndex;
-//
-////    qDebug() << "SDRdaemonFECBuffer::writeData:"
-////            << " frameIndex: " << frameIndex
-////            << " decoderIndex: " << decoderIndex
-////            << " blockIndex: " << blockIndex;
-//
-//    if (m_frameHead == -1) // initial state
-//    {
-//        m_decoderIndexHead = decoderIndex; // new decoder slot head
-//        m_frameHead = frameIndex;
-//        initReadIndex(); // reset read index
-//        initDecodeAllSlots(); // initialize all slots
-//    }
-//    else
-//    {
-//        int frameDelta = m_frameHead - frameIndex;
-//
-//        if (frameDelta < 0)
-//        {
-//            if (-frameDelta < nbDecoderSlots) // new frame head not too new
-//            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (1): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-//                m_decoderIndexHead = decoderIndex; // new decoder slot head
-//                m_frameHead = frameIndex;
-//                checkSlotData(decoderIndex);
-//                dataAvailable = true;
-//                initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
-//            }
-//            else if (-frameDelta <= 65536 - nbDecoderSlots) // loss of sync start over
-//            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (1)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-//                m_decoderIndexHead = decoderIndex; // new decoder slot head
-//                m_frameHead = frameIndex;
-//                initReadIndex(); // reset read index
-//                initDecodeAllSlots(); // re-initialize all slots
-//            }
-//        }
-//        else
-//        {
-//            if (frameDelta > 65536 - nbDecoderSlots) // new frame head not too new
-//            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (2): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-//                m_decoderIndexHead = decoderIndex; // new decoder slot head
-//                m_frameHead = frameIndex;
-//                checkSlotData(decoderIndex);
-//                dataAvailable = true;
-//                initDecodeSlot(decoderIndex); // collect stats and re-initialize current slot
-//            }
-//            else if (frameDelta >= nbDecoderSlots) // loss of sync start over
-//            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (2)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
-//                m_decoderIndexHead = decoderIndex; // new decoder slot head
-//                m_frameHead = frameIndex;
-//                initReadIndex(); // reset read index
-//                initDecodeAllSlots(); // re-initialize all slots
-//            }
-//        }
-//    }
-//
-//    // decoderIndex should now be correctly set
-//
-}
-
-uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
+uint8_t *SDRdaemonFECBuffer::readData(uint32_t length)
 {
     uint8_t *buffer = (uint8_t *) m_frames;
     uint32_t readIndex = m_readIndex;

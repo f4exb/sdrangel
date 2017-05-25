@@ -249,12 +249,12 @@ void SSBModGUI::on_dsb_toggled(bool checked)
     setNewRate(m_spanLog2);
 }
 
-void SSBModGUI::on_audioBinaural_toggled(bool checked)
+void SSBModGUI::on_audioBinaural_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
 
-void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
+void SSBModGUI::on_audioFlipChannels_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
@@ -337,7 +337,7 @@ void SSBModGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
-void SSBModGUI::on_playLoop_toggled(bool checked)
+void SSBModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }
@@ -397,7 +397,7 @@ void SSBModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void SSBModGUI::on_showFileDialog_clicked(bool checked)
+void SSBModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
@@ -418,7 +418,7 @@ void SSBModGUI::configureFileName()
     m_ssbMod->getInputMessageQueue()->push(message);
 }
 
-void SSBModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void SSBModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

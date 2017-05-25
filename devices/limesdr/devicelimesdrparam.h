@@ -29,8 +29,8 @@
 struct DeviceLimeSDRParams
 {
     lms_device_t *m_dev;         //!< device handle
-    int          m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)
-    int          m_nbTxChannels; //!< number of Tx channels (normally 2, we'll see if we really use it...)
+    uint32_t     m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)
+    uint32_t     m_nbTxChannels; //!< number of Tx channels (normally 2, we'll see if we really use it...)
     lms_range_t  m_lpfRangeRx;   //!< Low pass filter range information (Rx side)
     lms_range_t  m_lpfRangeTx;   //!< Low pass filter range information (Tx side)
     lms_range_t  m_loRangeRx;    //!< LO range for Rx

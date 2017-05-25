@@ -29,13 +29,13 @@ MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
 AMDemod::AMDemod() :
     m_squelchOpen(false),
-	m_audioFifo(4, 48000),
-	m_settingsMutex(QMutex::Recursive),
 	m_magsqSum(0.0f),
 	m_magsqPeak(0.0f),
 	m_magsqCount(0),
 	m_movingAverage(40, 0),
-	m_volumeAGC(4800, 1.0)
+    m_volumeAGC(4800, 1.0),
+    m_audioFifo(4, 48000),
+    m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("AMDemod");
 
@@ -69,7 +69,7 @@ void AMDemod::configure(MessageQueue* messageQueue, Real rfBandwidth, Real volum
 	messageQueue->push(cmd);
 }
 
-void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
 

@@ -67,8 +67,9 @@ void LimeSDROutputThread::setFcPos(int fcPos)
 
 void LimeSDROutputThread::run()
 {
-    int res, count, msleep, mdelta;
-    lms_stream_status_t streamStatus;
+    //int count, msleep, mdelta;
+    int res;
+    //lms_stream_status_t streamStatus;
 
     lms_stream_meta_t metadata;          //Use metadata for additional control over sample receive function behaviour
     metadata.flushPartialPacket = false; //Do not discard data remainder when read size differs from packet size
@@ -83,7 +84,7 @@ void LimeSDROutputThread::run()
         qDebug("LimeSDROutputThread::run: stream started");
     }
 
-    count = 0;
+//    count = 0;
 //    msleep = LIMESDROUTPUT_BLOCKSIZE/(m_sampleRate/1e6f);
 //    mdelta = msleep/100;
 //    msleep = (3*msleep)/4; // to start faster

@@ -61,5 +61,5 @@ PluginGUI* ChannelAnalyzerNGPlugin::createRxChannel(const QString& channelName, 
 
 void ChannelAnalyzerNGPlugin::createInstanceChannelAnalyzer(DeviceSourceAPI *deviceAPI)
 {
-    ChannelAnalyzerNGGUI* gui = ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceAPI);
+    ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceAPI);
 }

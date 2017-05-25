@@ -25,8 +25,8 @@
 #include "gui/valuedialz.h"
 
 ValueDialZ::ValueDialZ(bool positiveOnly, QWidget* parent, ColorMapper colorMapper) :
+    QWidget(parent),
     m_positiveOnly(positiveOnly),
-	QWidget(parent),
 	m_animationState(0),
 	m_colorMapper(colorMapper)
 {

@@ -92,7 +92,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 				serial_lsb = read_partid_serialno.serial_no[3];
 
 				QString serial_str = QString::number(serial_msb, 16) + QString::number(serial_lsb, 16);
-				uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
+				//uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 				QString displayedName(QString("Airspy[%1] %2").arg(i).arg(serial_str));
 
 				result.append(SamplingDevice(displayedName,

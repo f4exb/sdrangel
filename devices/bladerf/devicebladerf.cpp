@@ -20,10 +20,9 @@
 
 bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
 {
-    int res;
     int fpga_loaded;
 
-    if ((*dev = open_bladerf_from_serial(0)) == 0)
+    if ((*dev = open_bladerf_from_serial(serial)) == 0)
     {
         fprintf(stderr, "DeviceBladeRF::open_bladerf: could not open BladeRF\n");
         return false;

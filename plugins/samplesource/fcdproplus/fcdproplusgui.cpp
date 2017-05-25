@@ -131,7 +131,7 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FCDProPlusGui::handleMessage(const Message& message)
+bool FCDProPlusGui::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }

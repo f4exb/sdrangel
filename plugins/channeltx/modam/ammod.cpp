@@ -36,6 +36,8 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod() :
+    m_movingAverage(40, 0),
+    m_volumeAGC(40, 0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -44,9 +46,7 @@ AMMod::AMMod() :
 	m_afInput(AMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-	m_movingAverage(40, 0),
-	m_volumeAGC(40, 0)
+	m_levelSum(0.0f)
 {
 	setObjectName("AMMod");
 
@@ -141,7 +141,7 @@ void AMMod::pull(Sample& sample)
 void AMMod::pullAudio(int nbSamples)
 {
 //    qDebug("AMMod::pullAudio: %d", nbSamples);
-    int nbAudioSamples = nbSamples * m_interpolatorDistance;
+    unsigned int nbAudioSamples = nbSamples * m_interpolatorDistance;
 
     if (nbAudioSamples > m_audioBuffer.size())
     {

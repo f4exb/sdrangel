@@ -114,8 +114,8 @@ public:
 
 private:
     QMutex m_mutex;
-    int m_fadeInCounter;
-    int m_fadeOutCounter;
+    unsigned int m_fadeInCounter;
+    unsigned int m_fadeOutCounter;
     unsigned int m_nbFadeSamples;
     float *m_fadeInSamples;
     float *m_fadeOutSamples;

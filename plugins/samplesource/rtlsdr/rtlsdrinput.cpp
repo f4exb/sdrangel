@@ -238,7 +238,7 @@ bool RTLSDRInput::handleMessage(const Message& message)
     }
     else if (MsgQueryRTLSDR::match(message))
     {
-        MsgQueryRTLSDR& conf = (MsgQueryRTLSDR&) message;
+        //MsgQueryRTLSDR& conf = (MsgQueryRTLSDR&) message;
         qDebug() << "RTLSDRInput::handleMessage: MsgQueryRTLSDR";
 
         MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);

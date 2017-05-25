@@ -529,6 +529,9 @@ endif()
 
 ##############################################################################
 
+# Compiler flags.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -fmax-errors=10 -std=c++11 -O2 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+
 set(sdrangel_SOURCES
     app/main.cpp
 )

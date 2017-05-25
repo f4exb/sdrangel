@@ -62,7 +62,7 @@ PluginGUI* ATVModPlugin::createTxChannel(const QString& channelName, DeviceSinkA
 
 void ATVModPlugin::createInstanceModATV(DeviceSinkAPI *deviceAPI)
 {
-    ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceAPI);
+    ATVModGUI::create(m_pluginAPI, deviceAPI);
 }
 
 

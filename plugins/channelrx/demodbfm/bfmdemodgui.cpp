@@ -131,7 +131,6 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		QByteArray bytetmp;
-		quint32 u32tmp;
 		qint32 tmp;
 		bool booltmp;
 
@@ -183,7 +182,7 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool BFMDemodGUI::handleMessage(const Message& message)
+bool BFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -233,7 +232,7 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 	applySettings();
 }
 
-void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
+void BFMDemodGUI::on_lsbStereo_toggled(bool lsb __attribute__((unused)))
 {
 	applySettings();
 }
@@ -248,7 +247,7 @@ void BFMDemodGUI::on_rds_clicked()
 	applySettings();
 }
 
-void BFMDemodGUI::on_clearData_clicked(bool checked)
+void BFMDemodGUI::on_clearData_clicked(bool checked __attribute__((unused)))
 {
 	if (ui->rds->isChecked())
 	{
@@ -266,8 +265,10 @@ void BFMDemodGUI::on_clearData_clicked(bool checked)
 	}
 }
 
-void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
+void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int _index)
 {
+    uint32_t index = _index & 0x7FFFFFF;
+
 	if (index < m_g14ComboIndex.size())
 	{
 		unsigned int piKey = m_g14ComboIndex[index];
@@ -309,26 +310,26 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int index)
 	}
 }
 
-void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index)
+void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index __attribute__((unused)))
 {
 	qint64 f = (qint64) ((ui->g00AltFrequenciesBox->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
-void BFMDemodGUI::on_g14MappedFrequencies_activated(int index)
+void BFMDemodGUI::on_g14MappedFrequencies_activated(int index __attribute__((unused)))
 {
 	qint64 f = (qint64) ((ui->g14MappedFrequencies->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
-void BFMDemodGUI::on_g14AltFrequencies_activated(int index)
+void BFMDemodGUI::on_g14AltFrequencies_activated(int index __attribute__((unused)))
 {
 	qint64 f = (qint64) ((ui->g14AltFrequencies->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
 
-void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void BFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

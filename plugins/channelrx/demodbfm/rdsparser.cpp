@@ -383,7 +383,6 @@ void RDSParser::parseGroup(unsigned int *group)
 	m_pi_program_type           = (group[1] >> 5) & 0x1f;  // "PTY"
 	m_pi_country_identification = (m_pi_program_identification >> 12) & 0xf;
 	m_pi_area_coverage_index = (m_pi_program_identification >> 8) & 0xf;
-	unsigned char pi_program_reference_number = m_pi_program_identification & 0xff;
 
 	/*
 	std::string pistring = str(boost::format("%04X") % m_pi_program_identification);
@@ -466,7 +465,6 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 	unsigned int  no_af    = 0;
 	double af_1            = 0;
 	double af_2            = 0;
-	char flagstring[8]     = "0000000";
 
 	m_g0_count++;
 	m_g0_updated = true;
@@ -587,7 +585,6 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 
 double RDSParser::decode_af(unsigned int af_code)
 {
-	static unsigned int number_of_freqs = 0;
 	static bool vhf_or_lfmf             = 0; // 0 = vhf, 1 = lf/mf
 	double alt_frequency                = 0; // in kHz
 
@@ -597,20 +594,17 @@ double RDSParser::decode_af(unsigned int af_code)
 		( af_code == 224) ||                      // No AF exists
 		( af_code >= 251))                        // not assigned
 	{
-		number_of_freqs = 0;
 		alt_frequency   = 0;
 	}
 
 	if ((af_code >= 225) && (af_code <= 249))      // VHF frequencies follow
 	{
-		number_of_freqs = af_code - 224;
 		alt_frequency   = 0;
 		vhf_or_lfmf     = 1;
 	}
 
 	if (af_code == 250)                            // an LF/MF frequency follows
 	{
-		number_of_freqs = 1;
 		alt_frequency   = 0;
 		vhf_or_lfmf     = 0;
 	}
@@ -755,13 +749,13 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 
 		if (variant_code == 0)
 		{
-			int ltn  = (message >> 6) & 0x3f; // location table number
-			bool afi = (message >> 5) & 0x1;  // alternative freq. indicator
-			bool M   = (message >> 4) & 0x1;  // mode of transmission
-			bool I   = (message >> 3) & 0x1;  // international
-			bool N   = (message >> 2) & 0x1;  // national
-			bool R   = (message >> 1) & 0x1;  // regional
-			bool U   =  message       & 0x1;  // urban
+//			int ltn  = (message >> 6) & 0x3f; // location table number
+//			bool afi = (message >> 5) & 0x1;  // alternative freq. indicator
+//			bool M   = (message >> 4) & 0x1;  // mode of transmission
+//			bool I   = (message >> 3) & 0x1;  // international
+//			bool N   = (message >> 2) & 0x1;  // national
+//			bool R   = (message >> 1) & 0x1;  // regional
+//			bool U   =  message       & 0x1;  // urban
 
 			/*
 			qDebug() << "RDSParser::decode_type3: location table: " << ltn << " - "
@@ -775,9 +769,9 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 		}
 		else if (variant_code==1)
 		{
-			int G   = (message >> 12) & 0x3;  // gap
-			int sid = (message >>  6) & 0x3f; // service identifier
-			int gap_no[4] = {3, 5, 8, 11};
+//			int G   = (message >> 12) & 0x3;  // gap
+//			int sid = (message >>  6) & 0x3f; // service identifier
+//			int gap_no[4] = {3, 5, 8, 11};
 			/*
 			qDebug() << "RDSParser::decode_type3: gap: " << gap_no[G] << " groups, SID: "
 				<< sid << " ";*/
@@ -829,19 +823,19 @@ void RDSParser::decode_type4(unsigned int *group, bool B)
 	//send_message(5,time);
 }
 
-void RDSParser::decode_type5(unsigned int *group, bool B) {
+void RDSParser::decode_type5(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
 	qDebug() << "RDSParser::decode_type5: type5 not implemented yet";
 	m_g5_updated = true;
 	m_g5_count++;
 }
 
-void RDSParser::decode_type6(unsigned int *group, bool B) {
+void RDSParser::decode_type6(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
 	qDebug() << "RDSParser::decode_type6: type 6 not implemented yet";
 	m_g6_updated = true;
 	m_g6_count++;
 }
 
-void RDSParser::decode_type7(unsigned int *group, bool B) {
+void RDSParser::decode_type7(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
 	qDebug() << "RDSParser::decode_type7: type 7 not implemented yet";
 	m_g7_updated = true;
 	m_g7_count++;
@@ -969,25 +963,29 @@ void RDSParser::decode_type9(unsigned int *group, bool B){
 	m_g9_count++;
 }
 
-void RDSParser::decode_type10(unsigned int *group, bool B){
+void RDSParser::decode_type10(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+{
 	qDebug() << "RDSParser::decode_type10: type 10 not implemented yet";
 	m_g10_updated = true;
 	m_g10_count++;
 }
 
-void RDSParser::decode_type11(unsigned int *group, bool B){
+void RDSParser::decode_type11(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+{
 	qDebug() << "RDSParser::decode_type11: type 11 not implemented yet";
 	m_g11_updated = true;
 	m_g11_count++;
 }
 
-void RDSParser::decode_type12(unsigned int *group, bool B){
+void RDSParser::decode_type12(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+{
 	qDebug() << "RDSParser::decode_type12: type 12 not implemented yet";
 	m_g12_updated = true;
 	m_g12_count++;
 }
 
-void RDSParser::decode_type13(unsigned int *group, bool B){
+void RDSParser::decode_type13(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+{
 	qDebug() << "RDSParser::decode_type13: type 13 not implemented yet";
 	m_g13_updated = true;
 	m_g13_count++;
@@ -995,14 +993,11 @@ void RDSParser::decode_type13(unsigned int *group, bool B){
 
 void RDSParser::decode_type14(unsigned int *group, bool B)
 {
-	bool tp_on               = (group[1] >> 4) & 0x01;
 	char variant_code        = group[1] & 0x0f;
 	unsigned int information = group[2];
 	unsigned int pi_on       = group[3];
 
-	char pty_on = 0;
 	bool ta_on = 0;
-	static char ps_on[8] = {' ',' ',' ',' ',' ',' ',' ',' '};
 	double af_1 = 0;
 	double af_2 = 0;
 
@@ -1144,7 +1139,6 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			case 13: // PTY(ON), TA(ON)
 			{
 				ta_on = information & 0x01;
-				pty_on = (information >> 11) & 0x1f;
 				//qDebug() << "RDSParser::decode_type14: PTY(ON):" << pty_table[int(pty_on)].c_str();
 				if(ta_on) {
 					qDebug() << "RDSParser::decode_type14:  - TA";
@@ -1178,7 +1172,8 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 	}*/
 }
 
-void RDSParser::decode_type15(unsigned int *group, bool B){
+void RDSParser::decode_type15(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+{
 	qDebug() << "RDSParser::decode_type5: type 15 not implemented yet";
 	m_g15_updated = true;
 	m_g15_count++;

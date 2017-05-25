@@ -42,7 +42,7 @@ void FileRecord::setFileName(const std::string& filename)
     }
 }
 
-void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
     // if no recording is active, send the samples to /dev/null
     if(!m_recordOn)

@@ -74,7 +74,7 @@ public:
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSinkId() const { return m_sampleSinkId; }
     const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
-    int getSampleSinkSequence() const { return m_sampleSinkSequence; }
+    uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
 
     void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
     void removeChannelInstance(PluginGUI* pluginGUI);
@@ -138,7 +138,7 @@ protected:
     QString m_hardwareId;
     QString m_sampleSinkId;
     QString m_sampleSinkSerial;
-    int m_sampleSinkSequence;
+    uint32_t m_sampleSinkSequence;
     PluginGUI* m_sampleSinkPluginGUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;

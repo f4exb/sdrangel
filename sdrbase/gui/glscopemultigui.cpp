@@ -28,12 +28,12 @@ GLScopeMultiGUI::GLScopeMultiGUI(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::GLScopeMultiGUI),
     m_messageQueue(0),
-    m_glScope(0),
     m_scopeVis(0),
+    m_glScope(0),
     m_sampleRate(0),
-    m_traceLenMult(1),
     m_timeBase(1),
-    m_timeOffset(0)
+    m_timeOffset(0),
+    m_traceLenMult(1)
 {
     qDebug("GLScopeMultiGUI::GLScopeMultiGUI");
     setEnabled(false);
@@ -181,7 +181,7 @@ QByteArray GLScopeMultiGUI::serialize() const
     s.writeU32(200, (uint32_t) m_scopeVis->getNbTriggers());
     s.writeS32(201, ui->trigPre->value());
 
-    for (int i = 0; i < m_scopeVis->getNbTriggers(); i++)
+    for (unsigned int i = 0; i < m_scopeVis->getNbTriggers(); i++)
     {
         const ScopeVisMulti::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
         s.writeS32(210 + 16*i, (int) triggerData.m_projectionType);
@@ -270,7 +270,7 @@ bool GLScopeMultiGUI::deserialize(const QByteArray& data)
         uint32_t nbTracesSaved;
         d.readU32(10, &nbTracesSaved, 1);
         const std::vector<ScopeVisMulti::TraceData>& tracesData = m_scopeVis->getTracesData();
-        int iTrace = tracesData.size();
+        uint32_t iTrace = tracesData.size();
 
         qDebug("GLScopeMultiGUI::deserialize: nbTracesSaved: %u tracesData.size(): %lu", nbTracesSaved, tracesData.size());
 
@@ -339,7 +339,7 @@ bool GLScopeMultiGUI::deserialize(const QByteArray& data)
         uint32_t nbTriggersSaved;
         d.readU32(200, &nbTriggersSaved, 1);
         uint32_t nbTriggers = m_scopeVis->getNbTriggers();
-        int iTrigger = nbTriggers;
+        uint32_t iTrigger = nbTriggers;
 
         d.readS32(201, &intValue, 0);
         ui->trigPre->setValue(intValue);
@@ -558,14 +558,14 @@ void GLScopeMultiGUI::on_trace_valueChanged(int value)
     m_scopeVis->focusOnTrace(value);
 }
 
-void GLScopeMultiGUI::on_traceAdd_clicked(bool checked)
+void GLScopeMultiGUI::on_traceAdd_clicked(bool checked __attribute__((unused)))
 {
     ScopeVisMulti::TraceData traceData;
     fillTraceData(traceData);
     addTrace(traceData);
 }
 
-void GLScopeMultiGUI::on_traceDel_clicked(bool checked)
+void GLScopeMultiGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->value() > 0) // not the X trace
     {
@@ -586,7 +586,7 @@ void GLScopeMultiGUI::on_traceDel_clicked(bool checked)
     }
 }
 
-void GLScopeMultiGUI::on_traceUp_clicked(bool checked)
+void GLScopeMultiGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->maximum() > 0) // more than one trace
     {
@@ -600,7 +600,7 @@ void GLScopeMultiGUI::on_traceUp_clicked(bool checked)
     }
 }
 
-void GLScopeMultiGUI::on_traceDown_clicked(bool checked)
+void GLScopeMultiGUI::on_traceDown_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->value() > 0) // not the X (lowest) trace
     {
@@ -633,14 +633,14 @@ void GLScopeMultiGUI::on_trig_valueChanged(int value)
     m_scopeVis->focusOnTrigger(value);
 }
 
-void GLScopeMultiGUI::on_trigAdd_clicked(bool checked)
+void GLScopeMultiGUI::on_trigAdd_clicked(bool checked __attribute__((unused)))
 {
     ScopeVisMulti::TriggerData triggerData;
     fillTriggerData(triggerData);
     addTrigger(triggerData);
 }
 
-void GLScopeMultiGUI::on_trigDel_clicked(bool checked)
+void GLScopeMultiGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->value() > 0)
     {
@@ -649,7 +649,7 @@ void GLScopeMultiGUI::on_trigDel_clicked(bool checked)
     }
 }
 
-void GLScopeMultiGUI::on_trigUp_clicked(bool checked)
+void GLScopeMultiGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->maximum() > 0) // more than one trigger
     {
@@ -663,7 +663,7 @@ void GLScopeMultiGUI::on_trigUp_clicked(bool checked)
     }
 }
 
-void GLScopeMultiGUI::on_trigDown_clicked(bool checked)
+void GLScopeMultiGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->value() > 0) // not the 0 (lowest) trigger
     {
@@ -677,44 +677,44 @@ void GLScopeMultiGUI::on_trigDown_clicked(bool checked)
     }
 }
 
-void GLScopeMultiGUI::on_traceMode_currentIndexChanged(int index)
+void GLScopeMultiGUI::on_traceMode_currentIndexChanged(int index __attribute__((unused)))
 {
     setAmpScaleDisplay();
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_amp_valueChanged(int value)
+void GLScopeMultiGUI::on_amp_valueChanged(int value __attribute__((unused)))
 {
     setAmpScaleDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_ofsCoarse_valueChanged(int value)
+void GLScopeMultiGUI::on_ofsCoarse_valueChanged(int value __attribute__((unused)))
 {
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_ofsFine_valueChanged(int value)
+void GLScopeMultiGUI::on_ofsFine_valueChanged(int value __attribute__((unused)))
 {
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_traceDelayCoarse_valueChanged(int value)
+void GLScopeMultiGUI::on_traceDelayCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_traceDelayFine_valueChanged(int value)
+void GLScopeMultiGUI::on_traceDelayFine_valueChanged(int value __attribute__((unused)))
 {
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeMultiGUI::on_traceView_toggled(bool checked)
+void GLScopeMultiGUI::on_traceView_toggled(bool checked __attribute__((unused)))
 {
     changeCurrentTrace();
 }
@@ -742,13 +742,13 @@ void GLScopeMultiGUI::on_mem_valueChanged(int value)
    	m_scopeVis->setMemoryIndex(value);
 }
 
-void GLScopeMultiGUI::on_trigMode_currentIndexChanged(int index)
+void GLScopeMultiGUI::on_trigMode_currentIndexChanged(int index __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigCount_valueChanged(int value)
+void GLScopeMultiGUI::on_trigCount_valueChanged(int value __attribute__((unused)))
 {
     setTrigCountDisplay();
     changeCurrentTrigger();
@@ -784,31 +784,31 @@ void GLScopeMultiGUI::on_trigBoth_toggled(bool checked)
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigLevelCoarse_valueChanged(int value)
+void GLScopeMultiGUI::on_trigLevelCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigLevelFine_valueChanged(int value)
+void GLScopeMultiGUI::on_trigLevelFine_valueChanged(int value __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigDelayCoarse_valueChanged(int value)
+void GLScopeMultiGUI::on_trigDelayCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigDelayFine_valueChanged(int value)
+void GLScopeMultiGUI::on_trigDelayFine_valueChanged(int value __attribute__((unused)))
 {
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeMultiGUI::on_trigPre_valueChanged(int value)
+void GLScopeMultiGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
 {
     setTrigPreDisplay();
     m_scopeVis->configure(
@@ -1307,7 +1307,7 @@ void GLScopeMultiGUI::applySettings()
 {
 }
 
-bool GLScopeMultiGUI::handleMessage(Message* message)
+bool GLScopeMultiGUI::handleMessage(Message* message __attribute__((unused)))
 {
     return false;
 }

@@ -63,5 +63,5 @@ PluginGUI* BFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAP
 
 void BFMPlugin::createInstanceBFM(DeviceSourceAPI *deviceAPI)
 {
-	BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceAPI);
+	BFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

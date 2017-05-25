@@ -29,8 +29,8 @@
 #include "threadedbasebandsamplesource.h"
 
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
-    m_uid(uid),
 	QThread(parent),
+    m_uid(uid),
 	m_state(StNotStarted),
 	m_deviceSampleSink(0),
 	m_sampleSinkSequence(0),

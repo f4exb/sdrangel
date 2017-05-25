@@ -382,7 +382,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
             }
             else
             {
-                mirisdr_get_lna_gain(m_dev);
+                lnaGain = mirisdr_get_lna_gain(m_dev);
             }
 
             MsgReportSDRPlayGains *message = MsgReportSDRPlayGains::create(

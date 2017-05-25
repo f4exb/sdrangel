@@ -39,7 +39,7 @@ void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPerc
 	msgQueue->push(cmd);
 }
 
-void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
 	/*

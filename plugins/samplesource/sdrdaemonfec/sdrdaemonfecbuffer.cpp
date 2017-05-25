@@ -29,24 +29,24 @@ const int SDRdaemonFECBuffer::m_sampleSize = 2;
 const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
 
 SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
-        m_frameHead(0),
         m_decoderIndexHead(nbDecoderSlots/2),
+        m_frameHead(0),
         m_curNbBlocks(0),
         m_minNbBlocks(256),
+        m_curOriginalBlocks(0),
         m_minOriginalBlocks(128),
         m_curNbRecovery(0),
         m_maxNbRecovery(0),
         m_framesDecoded(true),
-        m_throttlemsNominal(throttlems),
         m_readIndex(0),
+        m_throttlemsNominal(throttlems),
         m_readBuffer(0),
         m_readSize(0),
         m_bufferLenSec(0.0f),
-		m_nbReads(0),
-		m_nbWrites(0),
-		m_balCorrection(0),
-	    m_balCorrLimit(0),
-	    m_curOriginalBlocks(0)
+        m_nbReads(0),
+        m_nbWrites(0),
+        m_balCorrection(0),
+	    m_balCorrLimit(0)
 {
 	m_currentMeta.init();
 	m_framesNbBytes = nbDecoderSlots * sizeof(BufferFrame);
@@ -141,7 +141,7 @@ void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
 		int dBytes;
         int rwDelta = (m_nbReads * m_readNbBytes) - (m_nbWrites * sizeof(BufferFrame));
 
-		if (normalizedReadIndex < (nbDecoderSlots/ 2) * sizeof(BufferFrame)) // read leads
+		if (normalizedReadIndex < (nbDecoderSlots/ 2) * (int) sizeof(BufferFrame)) // read leads
 		{
 			dBytes = - normalizedReadIndex - rwDelta;
 		}
@@ -157,8 +157,6 @@ void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
         } else if (m_balCorrection > m_balCorrLimit) {
             m_balCorrection = m_balCorrLimit;
         }
-
-        float rwRatio = (float) (m_nbWrites * sizeof(BufferFrame)) / (float)  (m_nbReads * m_readNbBytes);
 
 	    m_nbReads = 0;
 	    m_nbWrites = 0;
@@ -190,7 +188,7 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
     }
 }
 
-void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
+void SDRdaemonFECBuffer::writeData(char *array)
 {
     SuperBlock *superBlock = (SuperBlock *) array;
     int frameIndex = superBlock->header.frameIndex;
@@ -323,7 +321,7 @@ void SDRdaemonFECBuffer::writeData(char *array, uint32_t length)
     } // decode
 }
 
-void SDRdaemonFECBuffer::writeData0(char *array, uint32_t length)
+void SDRdaemonFECBuffer::writeData0(char *array __attribute__((unused)), uint32_t length __attribute__((unused)))
 {
 // Kept as comments for the out of sync blocks algorithms
 //    assert(length == m_udpPayloadSize);

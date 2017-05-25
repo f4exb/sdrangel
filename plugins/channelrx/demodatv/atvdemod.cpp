@@ -33,32 +33,32 @@ const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
     m_objScopeSink(objScopeSink),
-    m_objSettingsMutex(QMutex::Recursive),
     m_objRegisteredATVScreen(NULL),
+    m_intNumberSamplePerTop(0),
     m_intImageIndex(0),
-    m_intColIndex(0),
-    m_intSampleIndex(0),
-    m_intRowIndex(0),
-    m_intLineIndex(0),
     m_intSynchroPoints(0),
     m_blnSynchroDetected(false),
     m_blnVerticalSynchroDetected(false),
+    m_fltAmpLineAverage(0.0f),
     m_fltEffMin(2000000000.0f),
     m_fltEffMax(-2000000000.0f),
     m_fltAmpMin(-2000000000.0f),
     m_fltAmpMax(2000000000.0f),
     m_fltAmpDelta(1.0),
-    m_fltAmpLineAverage(0.0f),
-    m_intNumberSamplePerTop(0),
+    m_intColIndex(0),
+    m_intSampleIndex(0),
+    m_intRowIndex(0),
+    m_intLineIndex(0),
+    m_objAvgColIndex(3),
+    m_objMagSqAverage(40, 0),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
-    m_interpolatorDistanceRemain(0.0f),
     m_interpolatorDistance(1.0f),
+    m_interpolatorDistanceRemain(0.0f),
     m_DSBFilter(0),
     m_DSBFilterBuffer(0),
     m_DSBFilterBufferIndex(0),
-    m_objAvgColIndex(3),
-    m_objMagSqAverage(40, 0)
+    m_objSettingsMutex(QMutex::Recursive)
 {
     setObjectName("ATVDemod");
 
@@ -143,25 +143,13 @@ void ATVDemod::configureRF(
     objMessageQueue->push(msgCmd);
 }
 
-void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
-    float fltDivSynchroBlack = 1.0f - m_objRunning.m_fltVoltLevelSynchroBlack;
     float fltI;
     float fltQ;
-    float fltNormI;
-    float fltNormQ;
     Complex ci;
 
-    float fltNorm=0.00f;
-    float fltVal;
-    int intVal;
-
     qint16 * ptrBufferToRelease = 0;
-
-    bool blnComputeImage=false;
-
-    int intSynchroTimeSamples= (3 * m_objRunningPrivate.m_intNumberSamplePerLine) / 4;
-    float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
 
     //********** Let's rock and roll buddy ! **********
 

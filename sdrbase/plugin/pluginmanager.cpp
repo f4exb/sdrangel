@@ -548,7 +548,7 @@ int PluginManager::selectFirstSampleSink(const QString& sinkId, DeviceSinkAPI *d
 	return index;
 }
 
-int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, int sourceSequence, DeviceSourceAPI *deviceAPI)
+int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, uint32_t sourceSequence, DeviceSourceAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSourceBySequence by sequence: id: %s ser: %s seq: %d", qPrintable(sourceId), qPrintable(sourceSerial), sourceSequence);
 
@@ -624,7 +624,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
 	return index;
 }
 
-int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, const QString& sinkSerial, int sinkSequence, DeviceSinkAPI *deviceAPI)
+int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, const QString& sinkSerial, uint32_t sinkSequence, DeviceSinkAPI *deviceAPI)
 {
 	qDebug("PluginManager::selectSampleSinkBySerialOrSequence by sequence: id: %s ser: %s seq: %d", qPrintable(sinkId), qPrintable(sinkSerial), sinkSequence);
 

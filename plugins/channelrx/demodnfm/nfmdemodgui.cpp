@@ -153,7 +153,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool NFMDemodGUI::handleMessage(const Message& message)
+bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -188,13 +188,13 @@ void NFMDemodGUI::on_volume_valueChanged(int value)
 	applySettings();
 }
 
-void NFMDemodGUI::on_squelchGate_valueChanged(int value)
+void NFMDemodGUI::on_squelchGate_valueChanged(int value __attribute__((unused)))
 {
     ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0f, 0, 'f', 0));
 	applySettings();
 }
 
-void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
+void NFMDemodGUI::on_deltaSquelch_toggled(bool checked __attribute__((unused)))
 {
     if (ui->deltaSquelch->isChecked())
     {
@@ -246,7 +246,7 @@ void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 	}
 }
 
-void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void NFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))

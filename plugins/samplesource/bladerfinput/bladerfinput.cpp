@@ -300,7 +300,6 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		    if (m_deviceAPI->getSinkBuddies().size() > 0)
 		    {
 		        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-		        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
 
 		        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) // Tx side running
 		        {

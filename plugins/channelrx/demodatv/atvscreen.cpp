@@ -161,7 +161,7 @@ void ATVScreen::paintGL()
     m_objMutex.unlock();
 }
 
-void ATVScreen::mousePressEvent(QMouseEvent* event)
+void ATVScreen::mousePressEvent(QMouseEvent* event __attribute__((unused)))
 {
 }
 

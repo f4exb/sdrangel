@@ -202,7 +202,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool UDPSrcGUI::handleMessage(const Message& message)
+bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	qDebug() << "UDPSrcGUI::handleMessage";
 	return false;
@@ -228,10 +228,10 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_udpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
-	m_basicSettingsShown(false),
-	m_doApplySettings(true),
 	m_boost(1),
-	m_volume(20)
+    m_volume(20),
+    m_basicSettingsShown(false),
+    m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -454,32 +454,32 @@ void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1)
+void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1)
+void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_fmDeviation_textEdited(const QString& arg1)
+void UDPSrcGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_udpAddress_textEdited(const QString& arg1)
+void UDPSrcGUI::on_udpAddress_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_udpPort_textEdited(const QString& arg1)
+void UDPSrcGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void UDPSrcGUI::on_audioPort_textEdited(const QString& arg1)
+void UDPSrcGUI::on_audioPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
@@ -489,12 +489,12 @@ void UDPSrcGUI::on_applyBtn_clicked()
 	applySettings();
 }
 
-void UDPSrcGUI::on_audioActive_toggled(bool active)
+void UDPSrcGUI::on_audioActive_toggled(bool active __attribute__((unused)))
 {
 	applySettingsImmediate();
 }
 
-void UDPSrcGUI::on_audioStereo_toggled(bool stereo)
+void UDPSrcGUI::on_audioStereo_toggled(bool stereo __attribute__((unused)))
 {
 	applySettingsImmediate();
 }

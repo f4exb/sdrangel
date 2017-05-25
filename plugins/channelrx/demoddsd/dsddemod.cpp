@@ -34,14 +34,14 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	m_sampleCount(0),
 	m_squelchCount(0),
 	m_squelchOpen(false),
+    m_movingAverage(40, 0),
+    m_fmExcursion(24),
 	m_audioFifo1(4, 48000),
     m_audioFifo2(4, 48000),
-	m_fmExcursion(24),
-	m_settingsMutex(QMutex::Recursive),
     m_scope(sampleSink),
-	m_scopeEnabled(true),
-	m_dsdDecoder(),
-	m_movingAverage(40, 0)
+    m_scopeEnabled(true),
+    m_dsdDecoder(),
+    m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("DSDDemod");
 
@@ -122,7 +122,7 @@ void DSDDemod::configureMyPosition(MessageQueue* messageQueue, float myLatitude,
 	messageQueue->push(cmd);
 }
 
-void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
 	int samplesPerSymbol = m_dsdDecoder.getSamplesPerSymbol();
@@ -276,7 +276,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	        if (nbAudioSamples > 0)
 	        {
 	            if (!m_running.m_audioMute) {
-	                uint res = m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+	                m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
 	            }
 
 	            m_dsdDecoder.resetAudio1();
@@ -291,7 +291,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             if (nbAudioSamples > 0)
             {
                 if (!m_running.m_audioMute) {
-                    uint res = m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+                    m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples, 10);
                 }
 
                 m_dsdDecoder.resetAudio2();

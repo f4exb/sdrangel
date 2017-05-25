@@ -63,5 +63,5 @@ PluginGUI* DSDDemodPlugin::createRxChannel(const QString& channelName, DeviceSou
 
 void DSDDemodPlugin::createInstanceDSDDemod(DeviceSourceAPI *deviceAPI)
 {
-    DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceAPI);
+    DSDDemodGUI::create(m_pluginAPI, deviceAPI);
 }

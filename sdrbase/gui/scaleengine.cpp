@@ -486,17 +486,17 @@ double ScaleEngine::minorTickValue(int tick)
 
 ScaleEngine::ScaleEngine() :
 	m_orientation(Qt::Horizontal),
-	m_physicalUnit(Unit::None),
-	m_rangeMin(-1.0),
-	m_rangeMax(1.0),
-	m_recalc(true),
 	m_charSize(8),
-	m_numMinorTicks(1),
-	m_decimalPlaces(1),
-	m_size(1.0f),
-	m_firstMajorTickValue(1.0),
+    m_size(1.0f),
+    m_physicalUnit(Unit::None),
+    m_rangeMin(-1.0),
+    m_rangeMax(1.0),
+    m_recalc(true),
+    m_scale(1.0f),
 	m_majorTickValueDistance(1.0),
-	m_scale(1.0f)
+    m_firstMajorTickValue(1.0),
+    m_numMinorTicks(1),
+    m_decimalPlaces(1)
 {
 }
 

@@ -99,7 +99,7 @@ bool AirspyInput::openDevice()
 
     m_sampleRates.clear();
 
-    for (int i=0; i<nbSampleRates; i++)
+    for (unsigned int i=0; i<nbSampleRates; i++)
     {
         m_sampleRates.push_back(sampleRates[i]);
         qDebug("AirspyInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
@@ -248,7 +248,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 	QMutexLocker mutexLocker(&m_mutex);
 
 	bool forwardChange = false;
-	airspy_error rc;
+	airspy_error rc = AIRSPY_ERROR_OTHER;
 
 	qDebug() << "AirspyInput::applySettings";
 
@@ -486,12 +486,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 {
-	airspy_read_partid_serialno_t read_partid_serialno;
-	struct airspy_device *devinfo, *retdev = 0;
-	uint32_t serial_msb = 0;
-	uint32_t serial_lsb = 0;
-	airspy_error rc;
-	int i;
+	struct airspy_device *devinfo;
+	airspy_error rc = AIRSPY_ERROR_OTHER;
 
 	for (int i = 0; i < AIRSPY_MAX_DEVICE; i++)
 	{

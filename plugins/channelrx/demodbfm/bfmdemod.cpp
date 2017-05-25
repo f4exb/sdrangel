@@ -36,10 +36,10 @@ const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 
 BFMDemod::BFMDemod(BasebandSampleSink* sampleSink, RDSParser *rdsParser) :
 	m_sampleSink(sampleSink),
-	m_rdsParser(rdsParser),
 	m_audioFifo(4, 250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
+    m_rdsParser(rdsParser),
 	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
 	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
 	m_fmExcursion(default_excursion)
@@ -103,7 +103,7 @@ void BFMDemod::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci, cs, cr;
 	fftfilt::cmplx *rf;
@@ -182,7 +182,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				}
 			}
 
-			Real sampleStereo;
+			Real sampleStereo = 0.0f;
 
 			// Process stereo if stereo mode is selected
 

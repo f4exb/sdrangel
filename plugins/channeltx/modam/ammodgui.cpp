@@ -218,12 +218,12 @@ void AMModGUI::on_toneFrequency_valueChanged(int value)
 }
 
 
-void AMModGUI::on_channelMute_toggled(bool checked)
+void AMModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
 
-void AMModGUI::on_playLoop_toggled(bool checked)
+void AMModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
@@ -283,7 +283,7 @@ void AMModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void AMModGUI::on_showFileDialog_clicked(bool checked)
+void AMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
@@ -304,7 +304,7 @@ void AMModGUI::configureFileName()
     m_amMod->getInputMessageQueue()->push(message);
 }
 
-void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void AMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

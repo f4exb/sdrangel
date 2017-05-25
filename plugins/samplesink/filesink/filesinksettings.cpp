@@ -51,7 +51,6 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        int intval;
         d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
         return true;

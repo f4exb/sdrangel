@@ -56,8 +56,8 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	m_masterTabIndex(0),
 	m_settings(),
+    m_masterTabIndex(0),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
 	m_inputGUI(0),
@@ -211,7 +211,7 @@ void MainWindow::addSourceDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
-    int sampleSourceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
+    m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
 }
 
 void MainWindow::addSinkDevice()
@@ -256,7 +256,7 @@ void MainWindow::addSinkDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
-    int sampleSinkIndex = m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
+    m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
 }
 
 void MainWindow::removeLastDevice()
@@ -719,12 +719,12 @@ void MainWindow::on_presetDelete_clicked()
 	}
 }
 
-void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current __attribute__((unused)), QTreeWidgetItem *previous __attribute__((unused)))
 {
 	updatePresetControls();
 }
 
-void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
+void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item __attribute__((unused)), int column __attribute__((unused)))
 {
 	on_presetLoad_clicked();
 }
@@ -783,7 +783,7 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
     }
 }
 
-void MainWindow::on_sampleSource_confirmClicked(bool checked)
+void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unused)))
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
@@ -845,7 +845,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked)
     }
 }
 
-void MainWindow::on_sampleSink_confirmClicked(bool checked)
+void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused)))
 {
     // Do it in the currently selected source tab
     int currentSinkTabIndex = ui->tabInputsSelect->currentIndex();
@@ -902,7 +902,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked)
     }
 }
 
-void MainWindow::on_channel_addClicked(bool checked)
+void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();

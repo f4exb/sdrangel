@@ -62,5 +62,5 @@ PluginGUI* WFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkA
 
 void WFMModPlugin::createInstanceModWFM(DeviceSinkAPI *deviceAPI)
 {
-    WFMModGUI* gui = WFMModGUI::create(m_pluginAPI, deviceAPI);
+    WFMModGUI::create(m_pluginAPI, deviceAPI);
 }

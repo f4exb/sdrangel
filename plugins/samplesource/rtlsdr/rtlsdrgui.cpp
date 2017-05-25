@@ -306,7 +306,7 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 	sendSettings();
 }
 
-void RTLSDRGui::on_sampleRate_currentIndexChanged(int index)
+void RTLSDRGui::on_sampleRate_currentIndexChanged(int index __attribute__((unused)))
 {
 }
 

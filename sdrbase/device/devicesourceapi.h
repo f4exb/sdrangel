@@ -74,7 +74,7 @@ public:
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
     const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
-    int getSampleSourceSequence() const { return m_sampleSourceSequence; }
+    uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
 
     void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
     void removeChannelInstance(PluginGUI* pluginGUI);
@@ -138,7 +138,7 @@ protected:
     QString m_hardwareId;
     QString m_sampleSourceId;
     QString m_sampleSourceSerial;
-    int m_sampleSourceSequence;
+    uint32_t m_sampleSourceSequence;
     PluginGUI* m_sampleSourcePluginGUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;

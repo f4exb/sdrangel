@@ -48,7 +48,7 @@ PluginGUI* TCPSrcPlugin::createRxChannel(const QString& channelName, DeviceSourc
 
 void TCPSrcPlugin::createInstanceTCPSrc(DeviceSourceAPI *deviceAPI)
 {
-	TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceAPI);
+	TCPSrcGUI::create(m_pluginAPI, deviceAPI);
 //	deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

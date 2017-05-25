@@ -37,10 +37,10 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
+    m_sdrDaemonSinkThread(0),
 	m_deviceDescription("SDRdaemonSink"),
-	m_startingTimeStamp(0),
-	m_masterTimer(masterTimer),
-	m_sdrDaemonSinkThread(0)
+    m_startingTimeStamp(0),
+	m_masterTimer(masterTimer)
 {
 }
 

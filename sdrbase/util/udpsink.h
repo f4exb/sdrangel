@@ -79,7 +79,7 @@ private:
 	unsigned int m_port;
 	QUdpSocket *m_socket;
 	T *m_sampleBuffer;;
-	int m_sampleBufferIndex;
+	uint32_t m_sampleBufferIndex;
 };
 
 

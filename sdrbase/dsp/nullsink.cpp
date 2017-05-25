@@ -11,12 +11,12 @@ NullSink::~NullSink()
 {
 }
 
-bool NullSink::init(const Message& message)
+bool NullSink::init(const Message& message __attribute__((unused)))
 {
 	return false;
 }
 
-void NullSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
+void NullSink::feed(SampleVector::const_iterator begin __attribute__((unused)), SampleVector::const_iterator end __attribute__((unused)), bool positiveOnly __attribute__((unused)))
 {
 }
 
@@ -28,7 +28,7 @@ void NullSink::stop()
 {
 }
 
-bool NullSink::handleMessage(const Message& message)
+bool NullSink::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }

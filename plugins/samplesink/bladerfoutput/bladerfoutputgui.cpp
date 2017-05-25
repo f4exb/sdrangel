@@ -49,7 +49,8 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     ui->sampleRate->setValueRange(8, BLADERF_SAMPLERATE_MIN, BLADERF_SAMPLERATE_REC_MAX);
 
 	ui->bandwidth->clear();
-	for (int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
+
+	for (unsigned int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
 	{
 		ui->bandwidth->addItem(QString::number(BladerfBandwidths::getBandwidth(i)));
 	}

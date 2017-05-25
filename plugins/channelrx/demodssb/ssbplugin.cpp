@@ -46,5 +46,5 @@ PluginGUI* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAP
 
 void SSBPlugin::createInstanceSSB(DeviceSourceAPI *deviceAPI)
 {
-	SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
+	SSBDemodGUI::create(m_pluginAPI, deviceAPI);
 }

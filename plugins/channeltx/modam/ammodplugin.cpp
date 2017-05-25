@@ -62,5 +62,5 @@ PluginGUI* AMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAP
 
 void AMModPlugin::createInstanceModAM(DeviceSinkAPI *deviceAPI)
 {
-	AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceAPI);
+	AMModGUI::create(m_pluginAPI, deviceAPI);
 }

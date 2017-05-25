@@ -177,10 +177,10 @@ protected:
 				int boost,
 				int volume) :
 			Message(),
+            m_boost(boost),
+            m_volume(volume),
 			m_audioActive(audioActive),
-			m_audioStereo(audioStereo),
-			m_boost(boost),
-			m_volume(volume)
+			m_audioStereo(audioStereo)
 		{ }
 	};
 

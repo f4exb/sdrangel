@@ -141,7 +141,7 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool LimeSDROutputGUI::handleMessage(const Message& message) // TODO: does not seem to be really useful in any of the source (+sink?) plugins
+bool LimeSDROutputGUI::handleMessage(const Message& message __attribute__((unused))) // TODO: does not seem to be really useful in any of the source (+sink?) plugins
 {
     return false;
 }
@@ -373,7 +373,7 @@ void LimeSDROutputGUI::on_ncoEnable_toggled(bool checked)
     sendSettings();
 }
 
-void LimeSDROutputGUI::on_ncoReset_clicked(bool checked)
+void LimeSDROutputGUI::on_ncoReset_clicked(bool checked __attribute__((unused)))
 {
     m_settings.m_ncoFrequency = 0;
     ui->ncoFrequency->setValue(m_settings.m_centerFrequency/1000);

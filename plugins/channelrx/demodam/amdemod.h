@@ -129,7 +129,7 @@ private:
 	Real m_interpolatorDistanceRemain;
 
 	Real m_squelchLevel;
-	int m_squelchCount;
+	uint32_t m_squelchCount;
 	bool m_squelchOpen;
 	double m_magsq;
 	double m_magsqSum;

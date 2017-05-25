@@ -45,11 +45,12 @@ const int ATVMod::m_ssbFftLen = 1024;
 
 ATVMod::ATVMod() :
 	m_modPhasor(0.0f),
-    m_evenImage(true),
     m_tvSampleRate(1000000),
+    m_evenImage(true),
     m_settingsMutex(QMutex::Recursive),
     m_horizontalCount(0),
     m_lineCount(0),
+    m_movingAverage(40, 0),
 	m_imageOK(false),
 	m_videoFPSq(1.0f),
     m_videoFPSCount(0.0f),
@@ -59,12 +60,11 @@ ATVMod::ATVMod() :
 	m_cameraIndex(-1),
 	m_showOverlayText(false),
     m_SSBFilter(0),
-    m_DSBFilter(0),
     m_SSBFilterBuffer(0),
-    m_DSBFilterBuffer(0),
     m_SSBFilterBufferIndex(0),
-    m_DSBFilterBufferIndex(0),
-    m_movingAverage(40, 0)
+    m_DSBFilter(0),
+    m_DSBFilterBuffer(0),
+    m_DSBFilterBufferIndex(0)
 {
     setObjectName("ATVMod");
     scanCameras();
@@ -137,7 +137,7 @@ void ATVMod::configure(MessageQueue* messageQueue,
     messageQueue->push(cmd);
 }
 
-void ATVMod::pullAudio(int nbSamples)
+void ATVMod::pullAudio(int nbSamples __attribute__((unused)))
 {
 }
 
@@ -329,7 +329,7 @@ void ATVMod::pullVideo(Real& sample)
 
             if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay) && !m_videoEOF)
             {
-            	int grabOK;
+            	int grabOK = 0;
             	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
 
             	// move a number of frames according to increment
@@ -610,7 +610,7 @@ bool ATVMod::handleMessage(const Message& cmd)
     else if (MsgConfigureCameraIndex::match(cmd))
     {
     	MsgConfigureCameraIndex& cfg = (MsgConfigureCameraIndex&) cmd;
-    	int index = cfg.getIndex();
+    	uint32_t index = cfg.getIndex() & 0x7FFFFFF;
 
     	if (index < m_cameras.size())
     	{
@@ -632,7 +632,7 @@ bool ATVMod::handleMessage(const Message& cmd)
     else if (MsgConfigureCameraData::match(cmd))
     {
     	MsgConfigureCameraData& cfg = (MsgConfigureCameraData&) cmd;
-    	int index = cfg.getIndex();
+    	uint32_t index = cfg.getIndex() & 0x7FFFFFF;
     	float mnaualFPS = cfg.getManualFPS();
     	bool manualFPSEnable = cfg.getManualFPSEnable();
 
@@ -1134,7 +1134,7 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     int thickness = image.cols / 160;
     int baseline=0;
 
-    fontScale < 8.0f ? 8.0f : fontScale; // minimum size
+    fontScale = fontScale < 8.0f ? 8.0f : fontScale; // minimum size
     cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 

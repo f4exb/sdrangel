@@ -182,11 +182,11 @@ void HackRFOutputGui::displaySettings()
 
 void HackRFOutputGui::displayBandwidths()
 {
-	int savedIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
+	unsigned int savedIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->blockSignals(true);
 	ui->bbFilter->clear();
 
-	for (int i = 0; i < HackRFBandwidths::m_nb_bw; i++)
+	for (unsigned int i = 0; i < HackRFBandwidths::m_nb_bw; i++)
 	{
 		ui->bbFilter->addItem(QString("%1M").arg(QString::number(HackRFBandwidths::m_bw_k[i]/1000.0, 'f', 2)));
 	}

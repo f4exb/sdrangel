@@ -58,9 +58,9 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
-	fftfilt::cmplx *sideband;
+	fftfilt::cmplx *sideband = 0;
 	Complex ci;
 
 	m_settingsMutex.lock();
@@ -104,8 +104,6 @@ void ChannelAnalyzerNG::stop()
 
 bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
-	float bandwidth, lowCutoff;
-
 	qDebug() << "ChannelAnalyzerNG::handleMessage: " << cmd.getIdentifier();
 
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))

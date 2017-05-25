@@ -29,13 +29,13 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum) :
-	m_settingsMutex(QMutex::Recursive),
 	m_udpPort(9999),
-	m_audioFifo(4, 24000),
 	m_audioActive(false),
 	m_audioStereo(false),
 	m_volume(20),
-	m_fmDeviation(2500)
+    m_fmDeviation(2500),
+    m_audioFifo(4, 24000),
+    m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("UDPSrc");
 

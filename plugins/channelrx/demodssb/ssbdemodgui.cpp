@@ -136,7 +136,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool SSBDemodGUI::handleMessage(const Message& message)
+bool SSBDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -283,7 +283,7 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 
 }
 
-void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void SSBDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_ssbDemod != NULL))
@@ -313,8 +313,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_spanLog2(3),
 	m_audioBinaural(false),
 	m_audioFlipChannels(false),
-	m_audioMute(false),
 	m_dsb(false),
+    m_audioMute(false),
 	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);

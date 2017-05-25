@@ -14,14 +14,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/chanalyzer/chanalyzergui.h"
+#include "chanalyzergui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_chanalyzergui.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
@@ -35,7 +35,7 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-#include "../../channelrx/chanalyzer/chanalyzer.h"
+#include "chanalyzer.h"
 
 const QString ChannelAnalyzerGUI::m_channelID = "org.f4exb.sdrangelove.channel.chanalyzer";
 
@@ -154,7 +154,7 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool ChannelAnalyzerGUI::handleMessage(const Message& message)
+bool ChannelAnalyzerGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -289,7 +289,7 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
 	}
 }
 
-void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_ssbDemod != NULL))

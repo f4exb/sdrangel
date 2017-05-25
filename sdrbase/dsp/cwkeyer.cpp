@@ -375,14 +375,14 @@ void CWKeyer::nextStateText()
 	case TextStartElement:
 		m_samplePointer = 0;
 //        qDebug() << "CWKeyer::nextStateText: TextStartElement: " << (int) m_asciiToMorse[m_asciiChar][m_elementPointer];
-		if (m_asciiToMorse[m_asciiChar][m_elementPointer] == -1) // end of morse character
+		if (m_asciiToMorse[(uint8_t)(m_asciiChar&0x7F)][m_elementPointer] == -1) // end of morse character
 		{
 		    m_elementPointer = 0;
 		    m_textState = TextCharSpace;
 		}
 		else
 		{
-            if (m_asciiToMorse[m_asciiChar][m_elementPointer] == 0) // dot
+            if (m_asciiToMorse[(uint8_t)(m_asciiChar&0x7F)][m_elementPointer] == 0) // dot
             {
                 m_dot = true;
                 m_dash = false;
@@ -482,7 +482,7 @@ void CWSmoother::setNbFadeSamples(unsigned int nbFadeSamples)
         m_fadeInSamples = new float[m_nbFadeSamples];
         m_fadeOutSamples = new float[m_nbFadeSamples];
 
-        for (int i = 0; i < m_nbFadeSamples; i++)
+        for (unsigned int i = 0; i < m_nbFadeSamples; i++)
         {
             float x = i/ (float) m_nbFadeSamples;
             float y = 1.0f -x;

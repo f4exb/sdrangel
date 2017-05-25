@@ -38,17 +38,17 @@ const int WFMMod::m_rfFilterFFTLength = 1024;
 
 WFMMod::WFMMod() :
 	m_modPhasor(0.0f),
+    m_movingAverage(40, 0),
+    m_volumeAGC(40, 0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
-	m_fileSize(0),
+    m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
 	m_afInput(WFMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-	m_movingAverage(40, 0),
-	m_volumeAGC(40, 0)
+	m_levelSum(0.0f)
 {
 	setObjectName("WFMod");
 
@@ -117,7 +117,6 @@ void WFMMod::pull(Sample& sample)
 	}
 
 	Complex ci, ri;
-	Real t;
     fftfilt::cmplx *rf;
     int rf_out;
 
@@ -169,7 +168,7 @@ void WFMMod::pull(Sample& sample)
 
 void WFMMod::pullAudio(int nbSamples)
 {
-    int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+    unsigned int nbSamplesAudio = nbSamples * m_interpolatorDistance;
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {

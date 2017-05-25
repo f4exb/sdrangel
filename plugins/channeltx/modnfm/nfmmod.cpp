@@ -37,6 +37,8 @@ const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
 NFMMod::NFMMod() :
 	m_modPhasor(0.0f),
+    m_movingAverage(40, 0),
+    m_volumeAGC(40, 0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -45,9 +47,7 @@ NFMMod::NFMMod() :
 	m_afInput(NFMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-	m_movingAverage(40, 0),
-	m_volumeAGC(40, 0)
+	m_levelSum(0.0f)
 {
 	setObjectName("NFMod");
 
@@ -117,7 +117,6 @@ void NFMMod::pull(Sample& sample)
 	}
 
 	Complex ci;
-	Real t;
 
 	m_settingsMutex.lock();
 
@@ -155,7 +154,7 @@ void NFMMod::pull(Sample& sample)
 
 void NFMMod::pullAudio(int nbSamples)
 {
-    int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+    unsigned int nbSamplesAudio = nbSamples * m_interpolatorDistance;
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {

@@ -227,12 +227,12 @@ void WFMModGUI::on_toneFrequency_valueChanged(int value)
     applySettings();
 }
 
-void WFMModGUI::on_channelMute_toggled(bool checked)
+void WFMModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
 
-void WFMModGUI::on_playLoop_toggled(bool checked)
+void WFMModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
@@ -292,7 +292,7 @@ void WFMModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void WFMModGUI::on_showFileDialog_clicked(bool checked)
+void WFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
@@ -313,7 +313,7 @@ void WFMModGUI::configureFileName()
     m_wfmMod->getInputMessageQueue()->push(message);
 }
 
-void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void WFMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

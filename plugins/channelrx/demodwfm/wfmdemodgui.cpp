@@ -135,7 +135,7 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool WFMDemodGUI::handleMessage(const Message& message)
+bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -180,7 +180,7 @@ void WFMDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
-void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 

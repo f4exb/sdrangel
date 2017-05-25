@@ -39,10 +39,10 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	ui(new Ui::FileSinkGui),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_deviceSampleSink(0),
-	m_sampleRate(0),
-	m_generation(false),
 	m_fileName("./test.sdriq"),
+    m_deviceSampleSink(0),
+    m_sampleRate(0),
+    m_generation(false),
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
@@ -285,7 +285,7 @@ void FileSinkGui::on_startStop_toggled(bool checked)
     }
 }
 
-void FileSinkGui::on_showFileDialog_clicked(bool checked)
+void FileSinkGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));

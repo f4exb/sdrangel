@@ -31,8 +31,8 @@ SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* 
 	m_samplesCount(0),
     m_samplerate(0),
     m_throttlems(SDRDAEMONSINK_THROTTLE_MS),
-    m_throttleToggle(false),
-    m_maxThrottlems(50)
+    m_maxThrottlems(50),
+    m_throttleToggle(false)
 {
 }
 
@@ -94,8 +94,6 @@ void SDRdaemonSinkThread::setSamplerate(int samplerate)
 
 void SDRdaemonSinkThread::run()
 {
-	int res;
-
 	m_running = true;
 	m_startWaiter.wakeAll();
 

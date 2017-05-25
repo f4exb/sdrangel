@@ -46,5 +46,5 @@ PluginGUI* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSour
 
 void AMDemodPlugin::createInstanceDemodAM(DeviceSourceAPI *deviceAPI)
 {
-	AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
+	AMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

@@ -111,7 +111,7 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool LoRaDemodGUI::handleMessage(const Message& message)
+bool LoRaDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -130,11 +130,11 @@ void LoRaDemodGUI::on_BW_valueChanged(int value)
 	applySettings();
 }
 
-void LoRaDemodGUI::on_Spread_valueChanged(int value)
+void LoRaDemodGUI::on_Spread_valueChanged(int value __attribute__((unused)))
 {
 }
 
-void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void LoRaDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_LoRaDemod != NULL))

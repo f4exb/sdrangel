@@ -62,5 +62,5 @@ PluginGUI* SSBModPlugin::createTxChannel(const QString& channelName, DeviceSinkA
 
 void SSBModPlugin::createInstanceModSSB(DeviceSinkAPI *deviceAPI)
 {
-    SSBModGUI* gui = SSBModGUI::create(m_pluginAPI, deviceAPI);
+    SSBModGUI::create(m_pluginAPI, deviceAPI);
 }

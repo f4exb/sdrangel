@@ -35,7 +35,7 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void pull(Sample& sample) = 0;
-	virtual void pullAudio(int nbSamples) {}
+	virtual void pullAudio(int nbSamples __attribute__((unused))) {}
 
     /** direct feeding of sample source FIFO */
 	void feed(SampleSourceFifo* sampleFifo, int nbSamples)

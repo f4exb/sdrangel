@@ -134,8 +134,6 @@ private:
 template<typename T, uint SdrBits, uint OutputBits>
 void Interpolators<T, SdrBits, OutputBits>::interpolate1(SampleVector::iterator* it, T* buf, qint32 len)
 {
-	qint32 xreal, yimag;
-
 	for (int pos = 0; pos < len - 1; pos += 2)
 	{
 	    buf[pos+0] = (**it).m_real >> interpolation_shifts<SdrBits, OutputBits>::post1;

@@ -337,22 +337,22 @@ void TCPSrcGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
 }
 
-void TCPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
+void TCPSrcGUI::on_sampleFormat_currentIndexChanged(int index __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void TCPSrcGUI::on_sampleRate_textEdited(const QString& arg1)
+void TCPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void TCPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1)
+void TCPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }
 
-void TCPSrcGUI::on_tcpPort_textEdited(const QString& arg1)
+void TCPSrcGUI::on_tcpPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyBtn->setEnabled(true);
 }

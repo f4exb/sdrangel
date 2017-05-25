@@ -144,7 +144,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool AMDemodGUI::handleMessage(const Message& message)
+bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -159,7 +159,7 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
 }
 
-void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
+void AMDemodGUI::on_bandpassEnable_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }
@@ -183,12 +183,12 @@ void AMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
-void AMDemodGUI::on_audioMute_toggled(bool checked)
+void AMDemodGUI::on_audioMute_toggled(bool checked __attribute__((unused)))
 {
 	applySettings();
 }
 
-void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))

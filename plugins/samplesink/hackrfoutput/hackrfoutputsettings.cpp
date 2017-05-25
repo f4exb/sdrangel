@@ -64,8 +64,6 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
-		int intval;
-
 		d.readS32(1, &m_LOppmTenths, 0);
 		d.readBool(3, &m_biasT, false);
 		d.readU32(4, &m_log2Interp, 0);

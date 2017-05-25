@@ -64,7 +64,6 @@ bool FileSourceInput::Settings::deserialize(const QByteArray& data)
 	}
 
 	if(d.getVersion() == 1) {
-		int intval;
 		d.readString(1, &m_fileName, "./test.sdriq");
 		return true;
 	} else {

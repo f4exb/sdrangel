@@ -148,7 +148,7 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 
 void SDRdaemonFECUDPHandler::processData()
 {
-    m_sdrDaemonBuffer.writeData(m_udpBuf, m_udpReadBytes);
+    m_sdrDaemonBuffer.writeData(m_udpBuf);
     const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 
     bool change = false;

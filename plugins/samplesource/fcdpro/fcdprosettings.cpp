@@ -86,8 +86,6 @@ bool FCDProSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
-		int intval;
-
 		d.readBool(1, &m_dcBlock, false);
 		d.readBool(2, &m_iqCorrection, false);
 		d.readS32(3, &m_LOppmTenths, 0);

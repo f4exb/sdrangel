@@ -75,7 +75,7 @@ SDRdaemonGui::SDRdaemonGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sender = nn_socket(AF_SP, NN_PAIR);
 	assert(m_sender != -1);
 	int millis = 500;
-    int rc = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
 	m_startingTimeStamp.tv_sec = 0;
@@ -189,7 +189,6 @@ bool SDRdaemonGui::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 	QString address;
-	uint32_t uintval;
 	quint16 dataPort;
 	bool dcBlock;
 	bool iqCorrection;
@@ -401,7 +400,7 @@ void SDRdaemonGui::displayConfigurationParameters(uint32_t freq,
 	ui->specificParms->setCursorPosition(0);
 }
 
-void SDRdaemonGui::on_applyButton_clicked(bool checked)
+void SDRdaemonGui::on_applyButton_clicked(bool checked __attribute__((unused)))
 {
 	bool dataOk, ctlOk;
 	QString udpAddress = ui->address->text();
@@ -432,7 +431,7 @@ void SDRdaemonGui::on_applyButton_clicked(bool checked)
 	ui->applyButton->setEnabled(false);
 }
 
-void SDRdaemonGui::on_sendButton_clicked(bool checked)
+void SDRdaemonGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
 	sendConfiguration();
 	ui->specificParms->setCursorPosition(0);
@@ -500,19 +499,19 @@ void SDRdaemonGui::sendConfiguration()
     }
 }
 
-void SDRdaemonGui::on_address_textEdited(const QString& arg1)
+void SDRdaemonGui::on_address_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 	m_addressEdited = true;
 }
 
-void SDRdaemonGui::on_dataPort_textEdited(const QString& arg1)
+void SDRdaemonGui::on_dataPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 	m_dataPortEdited = true;
 }
 
-void SDRdaemonGui::on_controlPort_textEdited(const QString& arg1)
+void SDRdaemonGui::on_controlPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 }
@@ -551,33 +550,33 @@ void SDRdaemonGui::on_autoCorrBuffer_toggled(bool checked)
     }
 }
 
-void SDRdaemonGui::on_resetIndexes_clicked(bool checked)
+void SDRdaemonGui::on_resetIndexes_clicked(bool checked __attribute__((unused)))
 {
     SDRdaemonInput::MsgConfigureSDRdaemonResetIndexes* message = SDRdaemonInput::MsgConfigureSDRdaemonResetIndexes::create();
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonGui::on_freq_textEdited(const QString& arg1)
+void SDRdaemonGui::on_freq_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonGui::on_sampleRate_textEdited(const QString& arg1)
+void SDRdaemonGui::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonGui::on_specificParms_textEdited(const QString& arg1)
+void SDRdaemonGui::on_specificParms_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonGui::on_decim_currentIndexChanged(int index)
+void SDRdaemonGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonGui::on_fcPos_currentIndexChanged(int index)
+void SDRdaemonGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }

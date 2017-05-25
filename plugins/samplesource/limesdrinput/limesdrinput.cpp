@@ -104,7 +104,7 @@ bool LimeSDRInput::openDevice()
         char *busyChannels = new char[deviceParams->m_nbRxChannels];
         memset(busyChannels, 0, deviceParams->m_nbRxChannels);
 
-        for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+        for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
         {
             DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
             DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
@@ -197,7 +197,7 @@ void LimeSDRInput::suspendBuddies()
 {
     // suspend Rx buddy's threads
 
-    for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
         DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
@@ -209,7 +209,7 @@ void LimeSDRInput::suspendBuddies()
 
     // suspend Tx buddy's threads
 
-    for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
     {
         DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
@@ -224,7 +224,7 @@ void LimeSDRInput::resumeBuddies()
 {
     // resume Rx buddy's threads
 
-    for (int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
         DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
@@ -236,7 +236,7 @@ void LimeSDRInput::resumeBuddies()
 
     // resume Tx buddy's threads
 
-    for (int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
     {
         DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
         DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();

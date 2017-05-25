@@ -87,9 +87,8 @@ public:
 	~SDRdaemonFECBuffer();
 
 	// R/W operations
-	void writeData(char *array, uint32_t length); //!< Write data into buffer.
-    void writeData0(char *array, uint32_t length); //!< Write data into buffer.
-	uint8_t *readData(int32_t length);            //!< Read data from buffer
+	void writeData(char *array);        //!< Write data into buffer.
+	uint8_t *readData(uint32_t length); //!< Read data from buffer
 
 	// meta data
 	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
@@ -148,7 +147,6 @@ public:
         {
             int32_t val = (m_wrDeltaEstimate * 100) / (int32_t) m_framesNbBytes;
             int32_t ret = val < 0 ? -val - 50 : 50 -val;
-            int32_t rp  = (m_readIndex * 100) / (int32_t) m_framesNbBytes;
             return ret;
         }
         else
@@ -189,7 +187,7 @@ private:
     CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
-    int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
+    uint32_t             m_framesNbBytes;                //!< Number of bytes in samples buffer
     int                  m_decoderIndexHead;     //!< index of the current head frame slot in decoding slots
     int                  m_frameHead;            //!< index of the current head frame sent
     int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received

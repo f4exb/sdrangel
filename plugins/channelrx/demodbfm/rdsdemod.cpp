@@ -53,7 +53,7 @@ RDSDemod::~RDSDemod()
 	//delete m_socket;
 }
 
-void RDSDemod::setSampleRate(int srate) /// FIXME: fix rate for now
+void RDSDemod::setSampleRate(int srate __attribute__((unused))) /// FIXME: fix rate for now
 {
 }
 

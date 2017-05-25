@@ -37,13 +37,15 @@ const int SSBMod::m_levelNbSamples = 480; // every 10ms
 const int SSBMod::m_ssbFftLen = 1024;
 
 SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
-    m_sampleSink(sampleSink),
     m_SSBFilter(0),
     m_DSBFilter(0),
 	m_SSBFilterBuffer(0),
 	m_DSBFilterBuffer(0),
 	m_SSBFilterBufferIndex(0),
 	m_DSBFilterBufferIndex(0),
+    m_sampleSink(sampleSink),
+    m_movingAverage(40, 0),
+    m_volumeAGC(40, 0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -52,9 +54,7 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-	m_movingAverage(40, 0),
-	m_volumeAGC(40, 0)
+	m_levelSum(0.0f)
 {
 	setObjectName("SSBMod");
 
@@ -186,7 +186,7 @@ void SSBMod::pull(Sample& sample)
 
 void SSBMod::pullAudio(int nbSamples)
 {
-    int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+    unsigned int nbSamplesAudio = nbSamples * m_interpolatorDistance;
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {

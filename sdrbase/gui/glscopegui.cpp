@@ -33,7 +33,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
     m_triggerPre(0),
 	m_traceLenMult(20)
 {
-	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	for (unsigned int i = 0; i < ScopeVis::m_nbTriggers; i++)
 	{
 		m_triggerChannel[i] = ScopeVis::TriggerFreeRun;
 		m_triggerLevelCoarse[i] = 0;
@@ -84,7 +84,7 @@ void GLScopeGUI::resetToDefaults()
     m_triggerPre = 0;
     m_traceLenMult = 20;
 
-	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	for (unsigned int i = 0; i < ScopeVis::m_nbTriggers; i++)
 	{
 		m_triggerChannel[i] = ScopeVis::TriggerFreeRun;
 		m_triggerLevelCoarse[i] = 0;
@@ -118,7 +118,7 @@ QByteArray GLScopeGUI::serialize() const
 	s.writeS32(20, m_amp2OffsetCoarse);
 	s.writeS32(21, m_amp2OffsetFine);
 
-	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	for (unsigned int i = 0; i < ScopeVis::m_nbTriggers; i++)
 	{
 		s.writeS32(50 + 10*i, m_triggerChannel[i]);
 		s.writeS32(51 + 10*i, m_triggerLevelCoarse[i]);
@@ -165,7 +165,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 		d.readS32(20, &m_amp2OffsetCoarse, 0);
 		d.readS32(21, &m_amp2OffsetFine, 0);
 
-		for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+		for (unsigned int i = 0; i < ScopeVis::m_nbTriggers; i++)
 		{
 			d.readS32(50 + 10*i, &m_triggerChannel[i], ScopeVis::TriggerFreeRun);
 			d.readS32(51 + 10*i, &m_triggerLevelCoarse[i], 0);
@@ -194,7 +194,7 @@ void GLScopeGUI::applyAllTriggerSettings()
 {
 	quint32 currentTriggerIndex = m_triggerIndex;
 
-	for (int i = 0; i < ScopeVis::m_nbTriggers; i++)
+	for (unsigned int i = 0; i < ScopeVis::m_nbTriggers; i++)
 	{
 		m_triggerIndex = i;
 		applyTriggerSettings();
@@ -899,7 +899,7 @@ void GLScopeGUI::on_oneShot_clicked()
 	m_scopeVis->setOneShot(ui->oneShot->isChecked());
 }
 
-bool GLScopeGUI::handleMessage(Message* cmd)
+bool GLScopeGUI::handleMessage(Message* cmd __attribute__((unused)))
 {
 	return false;
 	/*

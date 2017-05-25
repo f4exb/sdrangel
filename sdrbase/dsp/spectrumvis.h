@@ -41,7 +41,7 @@ public:
 	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);

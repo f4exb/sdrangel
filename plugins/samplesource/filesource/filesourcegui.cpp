@@ -209,7 +209,7 @@ void FileSourceGui::sendSettings()
 {
 }
 
-void FileSourceGui::on_playLoop_toggled(bool checked)
+void FileSourceGui::on_playLoop_toggled(bool checked __attribute__((unused)))
 {
 	// TODO: do something about it!
 }
@@ -281,7 +281,7 @@ void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 	}
 }
 
-void FileSourceGui::on_showFileDialog_clicked(bool checked)
+void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));

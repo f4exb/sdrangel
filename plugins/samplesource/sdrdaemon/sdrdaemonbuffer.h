@@ -63,7 +63,7 @@ public:
 	SDRdaemonBuffer(uint32_t throttlems);
 	~SDRdaemonBuffer();
 
-	bool readMeta(char *array, uint32_t length);  //!< Attempt to read meta. Returns true if meta block
+	bool readMeta(char *array);                   //!< Attempt to read meta. Returns true if meta block
 	void writeData(char *array, uint32_t length); //!< Write data into buffer.
 	uint8_t *readData(int32_t length);
 	void updateBlockCounts(uint32_t nbBytesReceived);
@@ -118,15 +118,15 @@ private:
 	void updateBufferSize(uint32_t sampleRate);
 	void updateLZ4Sizes(uint32_t frameSize);
 	void updateReadBufferSize(uint32_t length);
-	void writeDataLZ4(const char *array, uint32_t length);
+	void writeDataLZ4(const char *array, int length);
 	void writeToRawBufferLZ4();
-	void writeToRawBufferUncompressed(const char *array, uint32_t length);
+	void writeToRawBufferUncompressed(const char *array, int length);
     void resetIndexes();
 
     static void printMeta(const QString& header, MetaData *metaData);
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
-	uint32_t m_rawSize;            //!< Size of the raw samples buffer in bytes
+	int      m_rawSize;            //!< Size of the raw samples buffer in bytes
     uint8_t  *m_rawBuffer;         //!< Buffer for raw samples obtained from UDP (I/Q not in a formal I/Q structure)
     uint32_t m_sampleRateStream;   //!< Current sample rate from the stream meta data
     uint32_t m_sampleRate;         //!< Current actual sample rate in Hz
@@ -142,8 +142,8 @@ private:
     uint32_t m_bytesInBlock; //!< Number of bytes received in the current UDP block
     uint64_t m_dataCRC;      //!< CRC64 of the data block
 	uint32_t m_inCount;      //!< Current position of uncompressed input
-    uint32_t m_lz4InCount;   //!< Current position in LZ4 input buffer
-    uint32_t m_lz4InSize;    //!< Size in bytes of the LZ4 input data
+    int      m_lz4InCount;   //!< Current position in LZ4 input buffer
+    int      m_lz4InSize;    //!< Size in bytes of the LZ4 input data
     uint8_t *m_lz4InBuffer;  //!< Buffer for LZ4 compressed input
     uint8_t *m_lz4OutBuffer; //!< Buffer for LZ4 uncompressed output
     uint32_t m_frameSize;    //!< Size in bytes of one uncompressed frame
@@ -156,7 +156,7 @@ private:
 
 	int32_t  m_writeIndex;   //!< Current write position in the raw samples buffer
 	int32_t  m_readIndex;    //!< Current read position in the raw samples buffer
-	uint32_t m_readSize;     //!< Read buffer size
+	int      m_readSize;     //!< Read buffer size
 	uint8_t  *m_readBuffer;  //!< Read buffer to hold samples when looping back to beginning of raw buffer
 
     bool     m_autoFollowRate; //!< Auto follow stream sample rate else stick with meta data sample rate

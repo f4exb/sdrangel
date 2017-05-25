@@ -387,9 +387,9 @@ void FCDProInput::set_center_freq(double freq)
 
 }
 
-void FCDProInput::set_bias_t(bool on)
+void FCDProInput::set_bias_t(bool on __attribute__((unused)))
 {
-	quint8 cmd = on ? 1 : 0;
+	//quint8 cmd = on ? 1 : 0;
 
 	// TODO: use FCD Pro controls
 	//fcdAppSetParam(m_dev, FCD_CMD_APP_SET_BIAS_TEE, &cmd, 1);

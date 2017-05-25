@@ -48,11 +48,11 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_focusedTraceIndex(0),
     m_traceSize(m_traceChunkSize),
     m_nbSamples(0),
+    m_timeBase(1),
+    m_timeOfsProMill(0),
     m_traceStart(true),
     m_traceFill(0),
     m_zTraceIndex(-1),
-    m_timeBase(1),
-    m_timeOfsProMill(0),
     m_sampleRate(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
@@ -171,7 +171,7 @@ void ScopeVisNG::setMemoryIndex(uint32_t memoryIndex)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
+void ScopeVisNG::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
     if (m_freeRun) {
         m_triggerPoint = cbegin;
@@ -412,7 +412,12 @@ bool ScopeVisNG::nextTrigger()
         }
     }
 
-    if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
+    if (m_triggerConditions.size() == 0)
+    {
+        m_currentTriggerIndex = 0;
+        return false; // final
+    }
+    else if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
     {
         m_currentTriggerIndex++;
         return true; // not final keep going
@@ -428,8 +433,8 @@ bool ScopeVisNG::nextTrigger()
 int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool traceBack)
 {
     SampleVector::const_iterator begin(cbegin);
-    int shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
-    int length = m_traceSize / m_timeBase;
+    uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
+    uint32_t length = m_traceSize / m_timeBase;
 
     while ((begin < end) && (m_nbSamples > 0))
     {
@@ -447,7 +452,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 
             if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
-                int& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
+                uint32_t& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
 
                 if (projectionType == ProjectionMagLin)
@@ -622,7 +627,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -642,7 +647,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size()) {
             m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
@@ -675,7 +680,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgScopeVisNGFocusOnTrigger::match(message))
     {
         MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;
-        int triggerIndex = conf.getTriggerIndex();
+        uint32_t triggerIndex = conf.getTriggerIndex();
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -732,7 +737,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     else if (MsgScopeVisNGFocusOnTrace::match(message))
     {
         MsgScopeVisNGFocusOnTrace& conf = (MsgScopeVisNGFocusOnTrace&) message;
-        int traceIndex = conf.getTraceIndex();
+        uint32_t traceIndex = conf.getTraceIndex();
 
         if (traceIndex < m_traces.m_tracesData.size())
         {
@@ -825,7 +830,7 @@ void ScopeVisNG::initTraceBuffers()
 
     for (; it0 != m_traces.m_traces[0].end(); ++it0, ++it1)
     {
-        for (int i = 0; i < m_traceSize; i++)
+        for (unsigned int i = 0; i < m_traceSize; i++)
         {
             (*it0)[2*i] = (i - shift); // display x
             (*it0)[2*i + 1] = 0.0f;    // display y

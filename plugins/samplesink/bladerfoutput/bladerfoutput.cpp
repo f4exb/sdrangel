@@ -311,7 +311,6 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
             if (m_deviceAPI->getSourceBuddies().size() > 0)
             {
                 DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-                DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) buddy->getBuddySharedPtr();
 
                 if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) // Tx side running
                 {

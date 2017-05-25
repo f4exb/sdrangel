@@ -54,8 +54,8 @@ AFSquelch::AFSquelch() :
 }
 
 AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
-			m_N(0),
             m_nbAvg(128),
+			m_N(0),
 			m_sampleRate(0),
 			m_samplesProcessed(0),
             m_samplesAvgProcessed(0),

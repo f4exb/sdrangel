@@ -74,7 +74,7 @@ private:
     uint32_t m_readLengthSamples;
     uint32_t m_readLength;
     bool m_throttleToggle;
-    int m_rateDivider;
+    uint32_t m_rateDivider;
     bool m_autoCorrBuffer;
 
 	void setSamplerate(uint32_t samplerate);

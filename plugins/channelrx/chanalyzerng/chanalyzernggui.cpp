@@ -157,7 +157,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool ChannelAnalyzerNGGUI::handleMessage(const Message& message)
+bool ChannelAnalyzerNGGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
 }
@@ -194,7 +194,7 @@ void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
     }
 }
 
-void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked)
+void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked __attribute__((unused)))
 {
     setNewFinalRate(m_spanLog2);
     applySettings();
@@ -313,7 +313,7 @@ void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 	}
 }
 
-void ChannelAnalyzerNGGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void ChannelAnalyzerNGGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
 	if((widget == ui->spectrumContainer) && (m_ssbDemod != NULL))

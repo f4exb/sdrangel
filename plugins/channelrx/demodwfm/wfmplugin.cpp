@@ -46,5 +46,5 @@ PluginGUI* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAP
 
 void WFMPlugin::createInstanceWFM(DeviceSourceAPI *deviceAPI)
 {
-	WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
+	WFMDemodGUI::create(m_pluginAPI, deviceAPI);
 }

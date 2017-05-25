@@ -50,7 +50,7 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui->sampleRate->setValueRange(8, 330000U, BLADERF_SAMPLERATE_REC_MAX);
 
 	ui->bandwidth->clear();
-	for (int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
+	for (unsigned int i = 0; i < BladerfBandwidths::getNbBandwidths(); i++)
 	{
 		ui->bandwidth->addItem(QString::number(BladerfBandwidths::getBandwidth(i)));
 	}
@@ -128,7 +128,7 @@ bool BladerfInputGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool BladerfInputGui::handleMessage(const Message& message)
+bool BladerfInputGui::handleMessage(const Message& message __attribute__((unused)))
 {
     return false;
 }

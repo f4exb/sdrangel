@@ -54,23 +54,23 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_framesDecodingStatus(0),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
-	m_samplesCount(0),
-	m_tickCount(0),
-	m_address("127.0.0.1"),
-	m_dataPort(9090),
-	m_controlPort(9091),
-	m_addressEdited(false),
-	m_dataPortEdited(false),
-	m_initSendConfiguration(false),
-	m_dcBlock(false),
-	m_iqCorrection(false),
 	m_nbOriginalBlocks(128),
-	m_nbFECBlocks(0)
+    m_nbFECBlocks(0),
+    m_samplesCount(0),
+    m_tickCount(0),
+    m_address("127.0.0.1"),
+    m_dataPort(9090),
+    m_controlPort(9091),
+    m_addressEdited(false),
+    m_dataPortEdited(false),
+    m_initSendConfiguration(false),
+    m_dcBlock(false),
+    m_iqCorrection(false)
 {
 	m_sender = nn_socket(AF_SP, NN_PAIR);
 	assert(m_sender != -1);
 	int millis = 500;
-    int rc = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
@@ -185,7 +185,6 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 	QString address;
-	uint32_t uintval;
 	quint16 dataPort;
 	bool dcBlock;
 	bool iqCorrection;
@@ -381,7 +380,7 @@ void SDRdaemonFECGui::displayConfigurationParameters(uint32_t freq,
 	ui->specificParms->setCursorPosition(0);
 }
 
-void SDRdaemonFECGui::on_applyButton_clicked(bool checked)
+void SDRdaemonFECGui::on_applyButton_clicked(bool checked __attribute__((unused)))
 {
 	bool dataOk, ctlOk;
 	QString udpAddress = ui->address->text();
@@ -412,7 +411,7 @@ void SDRdaemonFECGui::on_applyButton_clicked(bool checked)
 	ui->applyButton->setEnabled(false);
 }
 
-void SDRdaemonFECGui::on_sendButton_clicked(bool checked)
+void SDRdaemonFECGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
 	sendConfiguration();
 	ui->specificParms->setCursorPosition(0);
@@ -481,19 +480,19 @@ void SDRdaemonFECGui::sendConfiguration()
     }
 }
 
-void SDRdaemonFECGui::on_address_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_address_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 	m_addressEdited = true;
 }
 
-void SDRdaemonFECGui::on_dataPort_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_dataPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 	m_dataPortEdited = true;
 }
 
-void SDRdaemonFECGui::on_controlPort_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_controlPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->applyButton->setEnabled(true);
 }
@@ -516,27 +515,27 @@ void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_freq_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_freq_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_sampleRate_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_specificParms_textEdited(const QString& arg1)
+void SDRdaemonFECGui::on_specificParms_textEdited(const QString& arg1 __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_decim_currentIndexChanged(int index)
+void SDRdaemonFECGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_fcPos_currentIndexChanged(int index)
+void SDRdaemonFECGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
 	ui->sendButton->setEnabled(true);
 }

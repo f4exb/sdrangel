@@ -23,9 +23,9 @@
 
 
 MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) :
-	m_mainSettings(mainSettings),
-	QDialog(parent),
-	ui(new Ui::MyPositionDialog)
+    QDialog(parent),
+    ui(new Ui::MyPositionDialog),
+	m_mainSettings(mainSettings)
 {
 	ui->setupUi(this);
     ui->latitudeSpinBox->setValue(m_mainSettings.getLatitude());

@@ -87,7 +87,7 @@ public:
 	~SDRdaemonFECBuffer();
 
 	// R/W operations
-	void writeData(char *array, uint32_t length); //!< Write data into buffer.
+	void writeData(char *array); //!< Write data into buffer.
     void writeData0(char *array, uint32_t length); //!< Write data into buffer.
 	uint8_t *readData(int32_t length);            //!< Read data from buffer
 
@@ -148,7 +148,6 @@ public:
         {
             int32_t val = (m_wrDeltaEstimate * 100) / (int32_t) m_framesNbBytes;
             int32_t ret = val < 0 ? -val - 50 : 50 -val;
-            int32_t rp  = (m_readIndex * 100) / (int32_t) m_framesNbBytes;
             return ret;
         }
         else
@@ -210,7 +209,7 @@ private:
 
 	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
     uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
-    uint32_t m_readSize;           //!< Read buffer size
+    int      m_readSize;           //!< Read buffer size
 
     float    m_bufferLenSec;
 

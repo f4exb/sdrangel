@@ -91,7 +91,6 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
     while (it != end)
     {
-        int inSamplesIndex = it - begin;
         int inRemainingSamples = end - it;
 
         if (m_txBlockIndex == 0) // Tx block index 0 is a block with only meta data
@@ -266,7 +265,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
     {
         qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame without FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
 
-        for (int i = 0; i < UDPSinkFEC::m_nbOriginalBlocks; i++)
+        for (unsigned int i = 0; i < UDPSinkFEC::m_nbOriginalBlocks; i++)
         {
             m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
             //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);

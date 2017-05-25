@@ -34,9 +34,9 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* s
     m_samplerate(0),
     m_log2Interpolation(0),
     m_throttlems(FILESINK_THROTTLE_MS),
+    m_maxThrottlems(50),
     m_throttleToggle(false),
-    m_buf(0),
-    m_maxThrottlems(50)
+    m_buf(0)
 {
     assert(m_ofstream != 0);
 }
@@ -147,8 +147,6 @@ void FileSinkThread::setLog2Interpolation(int log2Interpolation)
 
 void FileSinkThread::run()
 {
-	int res;
-
 	m_running = true;
 	m_startWaiter.wakeAll();
 

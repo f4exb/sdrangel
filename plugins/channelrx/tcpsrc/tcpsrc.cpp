@@ -391,7 +391,7 @@ void TCPSrc::processDeconnection()
 	}
 }
 
-void TCPSrc::onTcpServerError(QAbstractSocket::SocketError socketError)
+void TCPSrc::onTcpServerError(QAbstractSocket::SocketError socketError __attribute__((unused)))
 {
 	qDebug("TCPSrc::onTcpServerError: %s", qPrintable(m_tcpServer->errorString()));
 }

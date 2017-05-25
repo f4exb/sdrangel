@@ -50,18 +50,18 @@ public:
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
 	// channel Rx plugins
-	virtual PluginGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createRxChannel(const QString& channelName __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused)) ) { return 0; }
 
 	// channel Tx plugins
-	virtual PluginGUI* createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createTxChannel(const QString& channelName __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused)) ) { return 0; }
 
 	// device source plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
 
 	// device sink plugins only
 	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
-	virtual PluginGUI* createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI) { return 0; }
+	virtual PluginGUI* createSampleSinkPluginGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

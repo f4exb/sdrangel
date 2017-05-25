@@ -621,27 +621,27 @@ private:
     Real m_interpolatorDistanceRemain;
     int      m_tvSampleRate;     //!< sample rate for generating signal
     uint32_t m_pointsPerLine;    //!< Number of points per full line
-    uint32_t m_pointsPerSync;    //!< number of line points for the horizontal sync
-    uint32_t m_pointsPerBP;      //!< number of line points for the back porch
-    uint32_t m_pointsPerImgLine; //!< number of line points for the image line
+    int      m_pointsPerSync;    //!< number of line points for the horizontal sync
+    int      m_pointsPerBP;      //!< number of line points for the back porch
+    int      m_pointsPerImgLine; //!< number of line points for the image line
     uint32_t m_pointsPerFP;      //!< number of line points for the front porch
-    uint32_t m_pointsPerFSync;   //!< number of line points for the field first sync
+    int      m_pointsPerFSync;   //!< number of line points for the field first sync
     uint32_t m_pointsPerHBar;    //!< number of line points for a bar of the bar chart
     uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
     uint32_t m_pointsPerTU;      //!< number of line points per time unit
-    uint32_t m_nbLines;          //!< number of lines per complete frame
-    uint32_t m_nbLines2;         //!< same number as above (non interlaced) or half the number above (interlaced)
+    int      m_nbLines;          //!< number of lines per complete frame
+    int      m_nbLines2;         //!< same number as above (non interlaced) or half the number above (interlaced)
     uint32_t m_nbImageLines;     //!< number of image lines excluding synchronization lines
     uint32_t m_nbImageLines2;    //!< same number as above (non interlaced) or half the number above (interlaced)
-    uint32_t m_nbHorizPoints;    //!< number of line points per horizontal line
-    uint32_t m_nbSyncLinesHeadE; //!< number of header sync lines on even frame
-    uint32_t m_nbSyncLinesHeadO; //!< number of header sync lines on odd frame
-    uint32_t m_nbSyncLinesBottom;//!< number of sync lines at bottom
-    uint32_t m_nbLongSyncLines;  //!< number of whole long sync lines for vertical synchronization
-    uint32_t m_nbHalfLongSync;   //!< number of half long sync / equalization lines
-    uint32_t m_nbWholeEqLines;   //!< number of whole equalizing lines
+    int      m_nbHorizPoints;    //!< number of line points per horizontal line
+    int      m_nbSyncLinesHeadE; //!< number of header sync lines on even frame
+    int      m_nbSyncLinesHeadO; //!< number of header sync lines on odd frame
+    int      m_nbSyncLinesBottom;//!< number of sync lines at bottom
+    int      m_nbLongSyncLines;  //!< number of whole long sync lines for vertical synchronization
+    int      m_nbHalfLongSync;   //!< number of half long sync / equalization lines
+    int      m_nbWholeEqLines;   //!< number of whole equalizing lines
     bool     m_singleLongSync;   //!< single or double long sync per long sync line
-    uint32_t m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
+    int      m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
     float    m_blankLineLvel;    //!< video level of blank lines
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment

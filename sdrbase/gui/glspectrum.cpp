@@ -30,6 +30,7 @@
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
+    m_cursorChannel(0),
 	m_mouseInside(false),
 	m_changesPending(true),
 	m_centerFrequency(100000000),
@@ -46,19 +47,18 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_currentSpectrum(0),
 	m_displayCurrent(false),
 	m_waterfallBuffer(NULL),
-	m_waterfallTextureHeight(-1),
-	m_displayWaterfall(true),
-	m_ssbSpectrum(false),
-	m_histogramBuffer(NULL),
-	m_histogram(NULL),
-	m_histogramHoldoff(NULL),
-	m_displayHistogram(true),
-	m_displayChanged(false),
-	m_colorLoc(0),
 	m_waterfallBufferPos(0),
-	m_cursorChannel(0),
-	m_waterfallTexturePos(0),
-	m_matrixLoc(0)
+    m_waterfallTextureHeight(-1),
+    m_waterfallTexturePos(0),
+    m_displayWaterfall(true),
+    m_ssbSpectrum(false),
+    m_histogramBuffer(NULL),
+    m_histogram(NULL),
+    m_histogramHoldoff(NULL),
+    m_displayHistogram(true),
+    m_displayChanged(false),
+    m_matrixLoc(0),
+    m_colorLoc(0)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -995,7 +995,7 @@ void GLSpectrum::applyChanges()
 	int waterfallHeight = 0;
 	int waterfallTop = 0;
 	int frequencyScaleHeight = fm.height() * 3; // +1 line for marker frequency scale
-	int frequencyScaleTop;
+	int frequencyScaleTop = 0;
 	int histogramTop = 0;
 	int histogramHeight = 20;
 	int leftMargin;

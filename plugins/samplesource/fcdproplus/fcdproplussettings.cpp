@@ -66,8 +66,6 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
-		int intval;
-
 		d.readBool(1, &m_biasT, false);
 		d.readBool(2, &m_rangeLow, false);
 		d.readBool(3, &m_mixGain, true);

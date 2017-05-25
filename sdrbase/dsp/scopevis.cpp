@@ -25,9 +25,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_triggerIndex(0),
 	m_prevTrigger(false),
 	m_triggerPre(0),
-    m_triggerDelayCount(0),
 	m_triggerOneShot(false),
 	m_armed(false),
+    m_triggerDelayCount(0),
 	m_triggerCount(0),
 	m_sampleRate(0),
 	m_prevArg(0.0),
@@ -38,7 +38,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
 	m_trace.resize(20*m_traceChunkSize);
 	m_traceback.resize(20*m_traceChunkSize);
 
-	for (int i = 0; i < m_nbTriggers; i++)
+	for (unsigned int i = 0; i < m_nbTriggers; i++)
 	{
 		m_triggerChannel[i] = TriggerFreeRun;
 		m_triggerLevel[i] = 0.0;
@@ -55,9 +55,9 @@ ScopeVis::~ScopeVis()
 
 void ScopeVis::configure(MessageQueue* msgQueue,
 	uint triggerIndex,
-    TriggerChannel triggerChannel, 
-    Real triggerLevel, 
-    bool triggerPositiveEdge, 
+    TriggerChannel triggerChannel,
+    Real triggerLevel,
+    bool triggerPositiveEdge,
     bool triggerBothEdges,
     uint triggerPre,
     uint triggerDelay,
@@ -76,7 +76,7 @@ void ScopeVis::configure(MessageQueue* msgQueue,
 	msgQueue->push(cmd);
 }
 
-void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
+void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
 	SampleVector::const_iterator begin(cbegin);
 
@@ -144,7 +144,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
                 }
                 begin += count;
                 m_fill += count;
-				if(m_fill >= m_trace.size()) 
+				if(m_fill >= m_trace.size())
                 {
                     m_fill = 0;
                     m_triggerDelayCount--;
@@ -343,12 +343,12 @@ bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 {
 	Complex c(it->real()/32768.0f, it->imag()/32768.0f);
     m_traceback.push_back(c); // store into trace memory FIFO
-    
+
     if (m_tracebackCount < m_traceback.size())
     { // increment count up to trace memory size
         m_tracebackCount++;
     }
-    
+
 	if (m_triggerChannel[m_triggerIndex] == TriggerChannelI)
 	{
 		return c.real() > m_triggerLevel[m_triggerIndex];

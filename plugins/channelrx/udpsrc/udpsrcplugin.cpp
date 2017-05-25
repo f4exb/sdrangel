@@ -65,7 +65,7 @@ PluginGUI* UDPSrcPlugin::createRxChannel(const QString& channelName, DeviceSourc
 
 void UDPSrcPlugin::createInstanceUDPSrc(DeviceSourceAPI *deviceAPI)
 {
-	UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceAPI);
+	UDPSrcGUI::create(m_pluginAPI, deviceAPI);
 //	deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

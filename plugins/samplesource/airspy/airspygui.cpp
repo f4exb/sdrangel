@@ -122,7 +122,7 @@ bool AirspyGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool AirspyGui::handleMessage(const Message& message)
+bool AirspyGui::handleMessage(const Message& message __attribute__((unused)))
 {
     return false;
 //	if (AirspyInput::MsgReportAirspy::match(message))
@@ -214,14 +214,14 @@ void AirspyGui::displaySettings()
 
 void AirspyGui::displaySampleRates()
 {
-	int savedIndex = m_settings.m_devSampleRateIndex;
+	unsigned int savedIndex = m_settings.m_devSampleRateIndex;
 	ui->sampleRate->blockSignals(true);
 
 	if (m_rates.size() > 0)
 	{
 		ui->sampleRate->clear();
 
-		for (int i = 0; i < m_rates.size(); i++)
+		for (unsigned int i = 0; i < m_rates.size(); i++)
 		{
 			ui->sampleRate->addItem(QString("%1").arg(QString::number(m_rates[i]/1000000.0, 'f', 1)));
 		}

@@ -125,8 +125,6 @@ void FileSourceThread::setBuffer(std::size_t chunksize)
 
 void FileSourceThread::run()
 {
-	int res;
-
 	m_running = true;
 	m_startWaiter.wakeAll();
 

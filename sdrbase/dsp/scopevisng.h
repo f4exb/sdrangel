@@ -771,11 +771,11 @@ private:
      */
     struct TraceControl
     {
-        Projector m_projector;  //!< Projector transform from complex trace to real (displayable) trace
-        int m_traceCount[2];    //!< Count of samples processed (double buffered)
-        Real m_maxPow;          //!< Maximum power over the current trace for MagDB overlay display
-        Real m_sumPow;          //!< Cumulative power over the current trace for MagDB overlay display
-        int m_nbPow;            //!< Number of power samples over the current trace for MagDB overlay display
+        Projector m_projector;    //!< Projector transform from complex trace to real (displayable) trace
+        uint32_t m_traceCount[2]; //!< Count of samples processed (double buffered)
+        Real m_maxPow;            //!< Maximum power over the current trace for MagDB overlay display
+        Real m_sumPow;            //!< Cumulative power over the current trace for MagDB overlay display
+        int m_nbPow;              //!< Number of power samples over the current trace for MagDB overlay display
 
         TraceControl() : m_projector(ProjectionReal)
         {
@@ -814,7 +814,12 @@ private:
         int m_maxTraceSize;                           //!< Maximum Size of a trace in buffer
         bool evenOddIndex;                            //!< Even (true) or odd (false) index
 
-        Traces() : evenOddIndex(true), m_traceSize(0), m_maxTraceSize(0), m_x0(0), m_x1(0)
+        Traces() :
+            m_traceSize(0),
+            m_maxTraceSize(0),
+            evenOddIndex(true),
+            m_x0(0),
+            m_x1(0)
         {
         }
 
@@ -911,7 +916,7 @@ private:
             std::fill_n(m_x0, 2*m_traceSize*m_traces[0].size(), 0.0f);
             std::fill_n(m_x1, 2*m_traceSize*m_traces[0].size(), 0.0f);
 
-            for (int i = 0; i < m_traces[0].size(); i++)
+            for (unsigned int i = 0; i < m_traces[0].size(); i++)
             {
                 (m_traces[0])[i] = &m_x0[2*m_traceSize*i];
                 (m_traces[1])[i] = &m_x1[2*m_traceSize*i];
@@ -1010,15 +1015,15 @@ private:
     GLScopeNG* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
-    int m_currentTriggerIndex;                     //!< Index of current index in the chain
-    int m_focusedTriggerIndex;                     //!< Index of the trigger that has focus
+    uint32_t m_currentTriggerIndex;                //!< Index of current index in the chain
+    uint32_t m_focusedTriggerIndex;                //!< Index of the trigger that has focus
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
     int m_focusedTraceIndex;                       //!< Index of the trace that has focus
-    int m_traceSize;                               //!< Size of traces in number of samples
+    uint32_t m_traceSize;                          //!< Size of traces in number of samples
     int m_nbSamples;                               //!< Number of samples yet to process in one complex trace
-    int m_timeBase;                                //!< Trace display time divisor
-    int m_timeOfsProMill;                          //!< Start trace shift in 1/1000 trace size
+    uint32_t m_timeBase;                           //!< Trace display time divisor
+    uint32_t m_timeOfsProMill;                     //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
     int m_traceFill;                               //!< Count of samples accumulated into trace
     int m_zTraceIndex;                             //!< Index of the trace used for Z input (luminance or false colors)
