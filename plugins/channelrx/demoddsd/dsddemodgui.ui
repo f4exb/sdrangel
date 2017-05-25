@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>686</width>
     <height>841</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>680</width>
+    <width>686</width>
     <height>0</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>678</width>
+     <width>684</width>
      <height>172</height>
     </rect>
    </property>
@@ -48,7 +48,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>678</width>
+     <width>684</width>
      <height>0</height>
     </size>
    </property>
@@ -123,8 +123,6 @@
           <property name="toolTip">
            <string>Demod shift frequency from center in Hz</string>
           </property>
-          <zorder>deltaFrequencyLabel</zorder>
-          <zorder>deltaFrequencyLabel</zorder>
          </widget>
         </item>
         <item>
@@ -357,43 +355,32 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="channnelPowerLayout">
-        <item>
-         <widget class="QLabel" name="channelPower">
-          <property name="minimumSize">
-           <size>
-            <width>35</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Channel power (dB)</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
-          </property>
-          <property name="text">
-           <string>-00.0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="channelPowerUnits">
-          <property name="minimumSize">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string> dB</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="channelPower">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Channel power (dB)</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>-100.0 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

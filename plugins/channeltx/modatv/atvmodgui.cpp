@@ -728,7 +728,7 @@ void ATVModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_atvMod->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
 
     if (((++m_tickCount & 0xf) == 0) && (ui->inputSelect->currentIndex() == (int) ATVMod::ATVModInputVideo))
     {

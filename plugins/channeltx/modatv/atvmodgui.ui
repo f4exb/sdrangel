@@ -186,12 +186,14 @@
           </property>
          </spacer>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="channelPowerLayout">
         <item>
          <widget class="QLabel" name="channelPower">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Channel power</string>
           </property>
@@ -199,36 +201,32 @@
            <enum>Qt::RightToLeft</enum>
           </property>
           <property name="text">
-           <string>0.0</string>
+           <string>-100.0 dB</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="channelPowerUnits">
-          <property name="text">
-           <string> dB</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="channelMute">
-          <property name="toolTip">
-           <string>Mute/Unmute channel (not implemented)</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrbase/resources/res.qrc">
-            <normaloff>:/txon.png</normaloff>
-            <normalon>:/txoff.png</normalon>:/txon.png</iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QToolButton" name="channelMute">
+        <property name="toolTip">
+         <string>Mute/Unmute channel (not implemented)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/txon.png</normaloff>
+          <normalon>:/txoff.png</normalon>:/txon.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

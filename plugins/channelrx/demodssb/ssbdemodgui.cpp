@@ -494,5 +494,5 @@ void SSBDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
 }
