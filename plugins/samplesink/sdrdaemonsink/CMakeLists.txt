@@ -36,7 +36,7 @@ set(sdrdaemonsink_FORMS
 )
 
 if (BUILD_DEBIAN)
-target_include_directories(inputsdrdaemonfec PUBLIC
+include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBCM256CCSRC}
@@ -65,7 +65,7 @@ add_library(outputsdrdaemonsink SHARED
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(inputsdrdaemonfec
+target_link_libraries(outputsdrdaemonsink
     ${QT_LIBRARIES}
     sdrbase
     cm256cc
