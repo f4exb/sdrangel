@@ -1,6 +1,7 @@
 #ifndef INCLUDE_PLUGINMANAGER_H
 #define INCLUDE_PLUGINMANAGER_H
 
+#include <stdint.h>
 #include <QObject>
 #include <QDir>
 #include "plugin/plugininterface.h"

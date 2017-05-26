@@ -18,6 +18,7 @@
 #ifndef INCLUDE_UTIL_UDPSINK_H_
 #define INCLUDE_UTIL_UDPSINK_H_
 
+#include <stdint.h>
 #include <QObject>
 #include <QUdpSocket>
 #include <QHostAddress>

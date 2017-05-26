@@ -70,7 +70,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sender = nn_socket(AF_SP, NN_PAIR);
 	assert(m_sender != -1);
 	int millis = 500;
-    nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    int rc __attribute__((unused)) = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);

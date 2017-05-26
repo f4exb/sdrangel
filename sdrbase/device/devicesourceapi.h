@@ -17,6 +17,7 @@
 #ifndef SDRBASE_DEVICE_DEVICESOURCEAPI_H_
 #define SDRBASE_DEVICE_DEVICESOURCEAPI_H_
 
+#include <stdint.h>
 #include <QObject>
 #include <QString>
 

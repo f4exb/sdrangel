@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <stdint.h>
 #include <QChar>
 #include <QDebug>
 #include "cwkeyer.h"
