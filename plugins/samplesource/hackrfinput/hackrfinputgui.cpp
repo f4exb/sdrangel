@@ -36,6 +36,7 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui(new Ui::HackRFInputGui),
 	m_deviceAPI(deviceAPI),
 	m_settings(),
+	m_forceSettings(true),
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
@@ -54,10 +55,7 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
-
-
 	displayBandwidths();
-
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
@@ -65,6 +63,8 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_deviceAPI->addSink(m_fileSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+
+    sendSettings();
 }
 
 HackRFInputGui::~HackRFInputGui()
@@ -119,6 +119,7 @@ bool HackRFInputGui::deserialize(const QByteArray& data)
 	if(m_settings.deserialize(data))
 	{
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	}
@@ -355,8 +356,9 @@ void HackRFInputGui::on_record_toggled(bool checked)
 void HackRFInputGui::updateHardware()
 {
 	qDebug() << "HackRFGui::updateHardware";
-	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings);
+	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+    m_forceSettings = false;
 	m_updateTimer.stop();
 }
 

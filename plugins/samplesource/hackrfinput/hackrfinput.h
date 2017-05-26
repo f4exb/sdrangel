@@ -36,18 +36,21 @@ public:
 
 	public:
 		const HackRFInputSettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureHackRF* create(const HackRFInputSettings& settings)
+		static MsgConfigureHackRF* create(const HackRFInputSettings& settings, bool force = false)
 		{
-			return new MsgConfigureHackRF(settings);
+			return new MsgConfigureHackRF(settings, force);
 		}
 
 	private:
 		HackRFInputSettings m_settings;
+		bool m_force;
 
-		MsgConfigureHackRF(const HackRFInputSettings& settings) :
+		MsgConfigureHackRF(const HackRFInputSettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 

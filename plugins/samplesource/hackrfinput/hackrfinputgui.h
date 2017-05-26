@@ -62,6 +62,7 @@ private:
 
 	DeviceSourceAPI* m_deviceAPI;
 	HackRFInputSettings m_settings;
+	bool m_forceSettings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
