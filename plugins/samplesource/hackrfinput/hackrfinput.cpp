@@ -185,7 +185,7 @@ bool HackRFInput::handleMessage(const Message& message)
 		MsgConfigureHackRF& conf = (MsgConfigureHackRF&) message;
 		qDebug() << "HackRFInput::handleMessage: MsgConfigureHackRF";
 
-		bool success = applySettings(conf.getSettings(), false);
+		bool success = applySettings(conf.getSettings(), conf.getForce());
 
 		if (!success)
 		{
@@ -373,7 +373,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
         if (m_dev != 0)
 		{
-	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth);
+	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
