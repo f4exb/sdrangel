@@ -454,12 +454,30 @@ void SDRdaemonSinkGui::on_specificParms_returnPressed()
     sendControl();
 }
 
-void on_applyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused)))
 {
+    m_settings.m_address = ui->address->text();
+
+    bool ctlOk;
+    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
+
+    if((ctlOk) && (udpCtlPort >= 1024) && (udpCtlPort < 65535))
+    {
+        m_settings.m_controlPort = udpCtlPort;
+    }
+
+    bool dataOk;
+    int udpDataPort = ui->dataPort->text().toInt(&dataOk);
+
+    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
+    {
+        m_settings.m_dataPort = udpDataPort;
+    }
 }
 
-void on_sendButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
+    sendControl(true);
 }
 
 void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
