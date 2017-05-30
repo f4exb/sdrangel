@@ -76,6 +76,7 @@ private:
     unsigned int m_attackCount;
     unsigned int m_samplesDecay;
     unsigned int m_decayCount;
+    unsigned int m_squelchCount;
     bool m_isOpen;
     double m_threshold;
     double *m_k;

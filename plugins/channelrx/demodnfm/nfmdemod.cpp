@@ -27,7 +27,7 @@
 #include "dsp/dspengine.h"
 #include "nfmdemodgui.h"
 
-static const double afSqTones[2] = {1200.0, 8000.0}; // {1200.0, 8000.0};
+static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
@@ -75,7 +75,7 @@ NFMDemod::NFMDemod() :
 	m_movingAverage.resize(32, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
+	m_afSquelch.setCoefficients(24, 60, 48000.0, 20, 0); // 0.5ms test period, 30ms average span, 48kS/s SR, 10ms attack, no decay
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }

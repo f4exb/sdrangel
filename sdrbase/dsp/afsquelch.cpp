@@ -29,6 +29,7 @@ AFSquelch::AFSquelch() :
 			m_attackCount(0),
 			m_samplesDecay(0),
 			m_decayCount(0),
+			m_squelchCount(0),
 			m_isOpen(false),
 			m_threshold(0.0)
 {
@@ -65,6 +66,7 @@ AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
 			m_attackCount(0),
 			m_samplesDecay(0),
 			m_decayCount(0),
+			m_squelchCount(0),
 			m_isOpen(false),
 			m_threshold(0.0)
 {
@@ -117,6 +119,7 @@ void AFSquelch::setCoefficients(
 	m_maxPowerIndex = 0;
 	m_attackCount = 0;
 	m_decayCount = 0;
+	m_squelchCount = 0;
 	m_isOpen = false;
 	m_threshold = 0.0;
 
@@ -239,32 +242,55 @@ bool AFSquelch::evaluate()
 		}
 	}
 
-	if ((minPower/maxPower < m_threshold) && (minIndex > maxIndex)) // open condition
-	{
-		if ((m_samplesAttack > 0) && (m_attackCount < m_samplesAttack))
-		{
-			m_isOpen = false;
-			m_attackCount++;
-		}
-		else
-		{
-			m_isOpen = true;
-			m_decayCount = 0;
-		}
-	}
-	else
-	{
-		if ((m_samplesDecay > 0) && (m_decayCount < m_samplesDecay))
-		{
-			m_isOpen = true;
-			m_decayCount++;
-		}
-		else
-		{
-			m_isOpen = false;
-			m_attackCount = 0;
-		}
-	}
+//    m_isOpen = ((minPower/maxPower < m_threshold) && (minIndex > maxIndex));
+
+    if ((minPower/maxPower < m_threshold) && (minIndex > maxIndex)) // open condition
+    {
+        if (m_squelchCount < m_samplesAttack + m_samplesDecay)
+        {
+            m_squelchCount++;
+        }
+    }
+    else
+    {
+        if (m_squelchCount > m_samplesAttack)
+        {
+            m_squelchCount--;
+        }
+        else
+        {
+            m_squelchCount = 0;
+        }
+    }
+
+    m_isOpen = (m_squelchCount >= m_samplesAttack) ;
+
+//	if ((minPower/maxPower < m_threshold) && (minIndex > maxIndex)) // open condition
+//	{
+//		if ((m_samplesAttack > 0) && (m_attackCount < m_samplesAttack))
+//		{
+//			m_isOpen = false;
+//			m_attackCount++;
+//		}
+//		else
+//		{
+//			m_isOpen = true;
+//			m_decayCount = 0;
+//		}
+//	}
+//	else
+//	{
+//		if ((m_samplesDecay > 0) && (m_decayCount < m_samplesDecay))
+//		{
+//			m_isOpen = true;
+//			m_decayCount++;
+//		}
+//		else
+//		{
+//			m_isOpen = false;
+//			m_attackCount = 0;
+//		}
+//	}
 
 	return m_isOpen;
 }
