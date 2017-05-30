@@ -224,6 +224,11 @@ bool AFSquelch::evaluate()
 		}
 	}
 
+    if (maxPower == 0.0)
+    {
+        return m_isOpen;
+    }
+
 	minPower = maxPower;
 
     for (unsigned int j = 0; j < m_nTones; ++j)
@@ -234,11 +239,7 @@ bool AFSquelch::evaluate()
 		}
 	}
 
-	// principle is to open if power is uneven because noise gives even power
-	bool open = maxPower > 0.0 ? (minPower/maxPower < m_threshold) && (minIndex > maxIndex) : true;
-	//qDebug("AFSquelch::evaluate: %g : %g", minPower/maxPower, m_threshold);
-
-	if (open)
+	if ((minPower/maxPower < m_threshold) && (minIndex > maxIndex)) // open condition
 	{
 		if ((m_samplesAttack > 0) && (m_attackCount < m_samplesAttack))
 		{
