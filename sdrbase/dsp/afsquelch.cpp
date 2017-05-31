@@ -51,6 +51,7 @@ AFSquelch::AFSquelch() :
         m_u0[j] = 0.0;
         m_u1[j] = 0.0;
         m_power[j] = 0.0;
+        m_movingAverages[j].fill(0.0);
     }
 }
 
@@ -86,6 +87,7 @@ AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
         m_u0[j] = 0.0;
         m_u1[j] = 0.0;
         m_power[j] = 0.0;
+        m_movingAverages[j].fill(0.0);
 	}
 }
 
@@ -137,6 +139,7 @@ void AFSquelch::setCoefficients(
 		m_u0[j] = 0.0;
 		m_u1[j] = 0.0;
         m_power[j] = 0.0;
+        m_movingAverages[j].fill(0.0);
 	}
 }
 
