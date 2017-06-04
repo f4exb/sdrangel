@@ -522,7 +522,17 @@ void SDRdaemonSinkGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0)
 	{
+	    void *msgBuf = 0;
+
 		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
+
+		int len = nn_recv(m_nnSender, &msgBuf, NN_MSG, NN_DONTWAIT);
+
+        if ((len > 0) && msgBuf)
+        {
+            std::string msg((char *) msgBuf, len);
+            qDebug("SDRdaemonSinkGui::tick: received NN msg: %s", msg.c_str());
+        }
 	}
 }

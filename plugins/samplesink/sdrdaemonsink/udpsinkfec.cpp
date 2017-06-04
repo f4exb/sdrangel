@@ -263,7 +263,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
-        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame without FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
+//        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame without FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
 
         for (unsigned int i = 0; i < UDPSinkFEC::m_nbOriginalBlocks; i++)
         {
@@ -307,7 +307,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
 
         // Transmit all blocks
 
-        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame with FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
+//        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame with FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
 
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
         {
