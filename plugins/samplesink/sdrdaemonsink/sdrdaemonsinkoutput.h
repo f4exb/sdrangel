@@ -75,6 +75,26 @@ public:
 		{ }
 	};
 
+    class MsgConfigureSDRdaemonSinkChunkCorrection : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getChunkCorrection() const { return m_chunkCorrection; }
+
+        static MsgConfigureSDRdaemonSinkChunkCorrection* create(int chunkCorrection)
+        {
+            return new MsgConfigureSDRdaemonSinkChunkCorrection(chunkCorrection);
+        }
+
+    private:
+        int m_chunkCorrection;
+
+        MsgConfigureSDRdaemonSinkChunkCorrection(int chunkCorrection) :
+            Message(),
+            m_chunkCorrection(chunkCorrection)
+        { }
+    };
+
 	class MsgConfigureSDRdaemonSinkStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 

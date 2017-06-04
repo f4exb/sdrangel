@@ -62,6 +62,7 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_samplesCount;
 	std::size_t m_tickCount;
+	std::size_t m_nbSinceLastFlowCheck;
 	int m_lastEngineState;
     bool m_doApplySettings;
     bool m_forceSettings;

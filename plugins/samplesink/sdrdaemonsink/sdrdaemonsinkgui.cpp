@@ -23,6 +23,7 @@
 #include <QMessageBox>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <nanomsg/nn.h>
 #include <nanomsg/pair.h>
@@ -48,6 +49,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_samplesCount(0),
 	m_tickCount(0),
+	m_nbSinceLastFlowCheck(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
 	m_doApplySettings(true),
 	m_forceSettings(true)
@@ -522,7 +524,7 @@ void SDRdaemonSinkGui::updateWithStreamTime()
 
 void SDRdaemonSinkGui::tick()
 {
-	if ((++m_tickCount & 0xf) == 0)
+	if ((++m_tickCount & 0xf) == 0) // 16*50ms ~800ms
 	{
 	    void *msgBuf = 0;
 
@@ -540,7 +542,36 @@ void SDRdaemonSinkGui::tick()
 
             if (nbTokens > 0) // at least the queue length is given
             {
-                ui->queueLengthText->setText(QString::fromStdString(strs[0]));
+                try
+                {
+                    int queueLength = boost::lexical_cast<int>(strs[0]);
+                    ui->queueLengthText->setText(QString::fromStdString(strs[0]));
+                    m_nbSinceLastFlowCheck++;
+                    int samplesCorr = 0;
+
+                    if (queueLength < 10)
+                    {
+//                        samplesCorr = ((10 - queueLength)*m_nbSinceLastFlowCheck)/10;
+                        samplesCorr = ((10 - queueLength)*16)/m_nbSinceLastFlowCheck;
+                    }
+                    else if (queueLength > 10)
+                    {
+//                        samplesCorr = ((10 - queueLength)*m_nbSinceLastFlowCheck)/10;
+                        samplesCorr = ((10 - queueLength)*16)/m_nbSinceLastFlowCheck;
+                    }
+
+                    if (samplesCorr != 0)
+                    {
+                        samplesCorr = samplesCorr < -50 ? -50 : samplesCorr > 50 ? 50 : samplesCorr;
+                        SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(samplesCorr);
+                        m_deviceSampleSink->getInputMessageQueue()->push(message);
+                        m_nbSinceLastFlowCheck = 0;
+                    }
+                }
+                catch(const boost::bad_lexical_cast &)
+                {
+                    qDebug("SDRdaemonSinkGui::tick: queue length invalid: %s", strs[0].c_str());
+                }
             }
 
             if (nbTokens > 1) // the quality indicator is given also

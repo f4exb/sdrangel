@@ -29,6 +29,7 @@ SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* 
 	m_samplesChunkSize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
+	m_chunkCorrection(0),
     m_samplerate(0),
     m_throttlems(SDRDAEMONSINK_THROTTLE_MS),
     m_maxThrottlems(50),
@@ -121,6 +122,7 @@ void SDRdaemonSinkThread::tick()
         {
             m_throttlems = throttlems;
             m_samplesChunkSize = (m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+            m_samplesChunkSize = m_samplesChunkSize + m_chunkCorrection > 0 ? m_samplesChunkSize + m_chunkCorrection : m_samplesChunkSize;
             m_throttleToggle = !m_throttleToggle;
         }
 

@@ -434,7 +434,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Average number of blocks received / Average number of blocks used for recovery</string>
+        <string>Transmitter average number of blocks received / average number of blocks used for recovery</string>
        </property>
        <property name="text">
         <string>100.0/100.0</string>

@@ -32,6 +32,7 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming, Message)
 
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
@@ -148,6 +149,17 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 		}
 
 		return true;
+	}
+	else if (MsgConfigureSDRdaemonSinkChunkCorrection::match(message))
+	{
+	    MsgConfigureSDRdaemonSinkChunkCorrection& conf = (MsgConfigureSDRdaemonSinkChunkCorrection&) message;
+
+	    if (m_sdrDaemonSinkThread != 0)
+        {
+	        m_sdrDaemonSinkThread->setChunkCorrection(conf.getChunkCorrection());
+        }
+
+	    return true;
 	}
 	else
 	{

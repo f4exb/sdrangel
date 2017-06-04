@@ -56,6 +56,7 @@ public:
 
     std::size_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
+    void setChunkCorrection(int chunkCorrection) { m_chunkCorrection = chunkCorrection; }
 
 	void connectTimer(const QTimer& timer);
 
@@ -64,9 +65,10 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	unsigned int m_samplesChunkSize;
+	int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;
     std::size_t m_samplesCount;
+    int m_chunkCorrection;
 
 	int m_samplerate;
     int m_throttlems;
