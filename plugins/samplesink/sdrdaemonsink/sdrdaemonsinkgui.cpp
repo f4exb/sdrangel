@@ -22,6 +22,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <boost/algorithm/string.hpp>
+
 #include <nanomsg/nn.h>
 #include <nanomsg/pair.h>
 
@@ -532,7 +534,19 @@ void SDRdaemonSinkGui::tick()
         if ((len > 0) && msgBuf)
         {
             std::string msg((char *) msgBuf, len);
-            qDebug("SDRdaemonSinkGui::tick: received NN msg: %s", msg.c_str());
+            std::vector<std::string> strs;
+            boost::split(strs, msg, boost::is_any_of(":"));
+            unsigned int nbTokens = strs.size();
+
+            if (nbTokens > 0) // at least the queue length is given
+            {
+                ui->queueLengthText->setText(QString::fromStdString(strs[0]));
+            }
+
+            if (nbTokens > 1) // the quality indicator is given also
+            {
+                ui->qualityStatusText->setText(QString::fromStdString(strs[1]));
+            }
         }
 	}
 }
