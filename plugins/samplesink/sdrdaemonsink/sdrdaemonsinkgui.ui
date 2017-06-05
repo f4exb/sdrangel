@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
+    <width>411</width>
     <height>217</height>
    </rect>
   </property>
@@ -371,7 +371,7 @@
         </size>
        </property>
        <property name="text">
-        <string>000/000</string>
+        <string>000/00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -439,7 +439,7 @@
       <widget class="QLabel" name="qualityStatusText">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>52</width>
          <height>0</height>
         </size>
        </property>
@@ -471,7 +471,7 @@
       <widget class="QLabel" name="eventUnrecText">
        <property name="minimumSize">
         <size>
-         <width>18</width>
+         <width>25</width>
          <height>0</height>
         </size>
        </property>
@@ -479,7 +479,7 @@
         <string>Number of uncrecoverable errors since event counts reset</string>
        </property>
        <property name="text">
-        <string>00</string>
+        <string>000</string>
        </property>
       </widget>
      </item>
@@ -487,7 +487,7 @@
       <widget class="QLabel" name="eventRecText">
        <property name="minimumSize">
         <size>
-         <width>18</width>
+         <width>25</width>
          <height>0</height>
         </size>
        </property>
@@ -495,7 +495,7 @@
         <string>Number of correctable errors since event counts reset</string>
        </property>
        <property name="text">
-        <string>00</string>
+        <string>000</string>
        </property>
       </widget>
      </item>

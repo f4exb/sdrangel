@@ -18,6 +18,7 @@
 #define INCLUDE_SDRDAEMONSINKGUI_H
 
 #include <QTimer>
+#include <QTime>
 
 #include "plugin/plugingui.h"
 #include "sdrdaemonsinksettings.h"
@@ -69,6 +70,10 @@ private:
 
     int m_nnSender;
 
+    uint32_t m_countUnrecoverable;
+    uint32_t m_countRecovered;
+    QTime m_time;
+
     QPalette m_paletteGreenText;
     QPalette m_paletteRedText;
     QPalette m_paletteWhiteText;
@@ -80,6 +85,8 @@ private:
 	void sendSettings();
 	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
+	void displayEventCounts();
+    void displayEventTimer();
 
 private slots:
     void handleDSPMessages();
@@ -96,6 +103,7 @@ private slots:
     void on_applyButton_clicked(bool checked);
     void on_sendButton_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
+	void on_eventCountsReset_clicked(bool checked);
     void updateHardware();
     void updateStatus();
 	void tick();

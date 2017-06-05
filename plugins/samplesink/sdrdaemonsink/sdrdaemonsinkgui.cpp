@@ -60,6 +60,9 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     nn_setsockopt (m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
+    m_countUnrecoverable = 0;
+    m_countRecovered = 0;
+
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
@@ -82,6 +85,10 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_deviceAPI->setSink(m_deviceSampleSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+
+    m_time.start();
+    displayEventCounts();
+    displayEventTimer();
 
     displaySettings();
     sendControl(true);
@@ -509,6 +516,32 @@ void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
     }
 }
 
+void SDRdaemonSinkGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+{
+    m_countUnrecoverable = 0;
+    m_countRecovered = 0;
+    m_time.start();
+    displayEventCounts();
+    displayEventTimer();
+}
+
+void SDRdaemonSinkGui::displayEventCounts()
+{
+    QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
+    ui->eventUnrecText->setText(nstr);
+    nstr = QString("%1").arg(m_countRecovered, 3, 10, QChar('0'));
+    ui->eventRecText->setText(nstr);
+}
+
+void SDRdaemonSinkGui::displayEventTimer()
+{
+    int elapsedTimeMillis = m_time.elapsed();
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
+    QString s_time = recordLength.toString("hh:mm:ss");
+    ui->eventCountsTimeText->setText(s_time);
+}
+
 void SDRdaemonSinkGui::updateWithStreamTime()
 {
 	int t_sec = 0;
@@ -540,11 +573,11 @@ void SDRdaemonSinkGui::tick()
         if ((len > 0) && msgBuf)
         {
             std::string msg((char *) msgBuf, len);
-            //qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
             std::vector<std::string> strs;
             boost::split(strs, msg, boost::is_any_of(":"));
             unsigned int nbTokens = strs.size();
             unsigned int status = 0;
+            bool updateEventCounts = false;
 
             if (nbTokens > 0) // at least the queue length is given
             {
@@ -591,10 +624,22 @@ void SDRdaemonSinkGui::tick()
 
             if (nbTokens > 1) // the quality status is given also
             {
-                if (strs[1] == "2") {
+                if (strs[1] == "2")
+                {
                     status = 2;
-                } else if (strs[1] == "1") {
+                }
+                else if (strs[1] == "1")
+                {
                     status = 1;
+                    if (m_countUnrecoverable < 999) m_countUnrecoverable++;
+                    updateEventCounts = true;
+                    qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
+                }
+                else
+                {
+                    if (m_countRecovered < 999) m_countRecovered++;
+                    updateEventCounts = true;
+                    qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
                 }
             }
 
@@ -610,6 +655,13 @@ void SDRdaemonSinkGui::tick()
             } else { // recoverable errors or unknown status
                 ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(56,56,56); }");
             }
+
+            if (updateEventCounts)
+            {
+                displayEventCounts();
+            }
         }
+
+        displayEventTimer();
 	}
 }
