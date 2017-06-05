@@ -330,7 +330,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
 //
 //            std::cerr << std::endl;
 
-            m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, "127.0.0.1", (uint32_t) m_remotePort);
+            m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
             //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
             usleep(txDelay);
         }
