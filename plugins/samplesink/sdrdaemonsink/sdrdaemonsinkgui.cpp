@@ -548,21 +548,25 @@ void SDRdaemonSinkGui::tick()
                     ui->queueLengthText->setText(QString::fromStdString(strs[0]));
                     m_nbSinceLastFlowCheck++;
                     int samplesCorr = 0;
+                    bool quickStart = false;
 
-                    if (queueLength < 10)
+                    if (queueLength == 0)
                     {
-//                        samplesCorr = ((10 - queueLength)*m_nbSinceLastFlowCheck)/10;
-                        samplesCorr = ((10 - queueLength)*16)/m_nbSinceLastFlowCheck;
+                        samplesCorr = 127*8;
+                        quickStart = true;
                     }
-                    else if (queueLength > 10)
+                    else if (queueLength < 5)
                     {
-//                        samplesCorr = ((10 - queueLength)*m_nbSinceLastFlowCheck)/10;
-                        samplesCorr = ((10 - queueLength)*16)/m_nbSinceLastFlowCheck;
+                        samplesCorr = ((5 - queueLength)*16)/m_nbSinceLastFlowCheck;
+                    }
+                    else if (queueLength > 5)
+                    {
+                        samplesCorr = ((5 - queueLength)*16)/m_nbSinceLastFlowCheck;
                     }
 
                     if (samplesCorr != 0)
                     {
-                        samplesCorr = samplesCorr < -50 ? -50 : samplesCorr > 50 ? 50 : samplesCorr;
+                        samplesCorr = quickStart ? samplesCorr : samplesCorr <= -50 ? -50 : samplesCorr >= 50 ? 50 : samplesCorr;
                         SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(samplesCorr);
                         m_deviceSampleSink->getInputMessageQueue()->push(message);
                         m_nbSinceLastFlowCheck = 0;
