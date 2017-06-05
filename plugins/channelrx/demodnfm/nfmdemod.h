@@ -49,7 +49,8 @@ public:
             bool deltaSquelch,
 			Real squelch,
 			bool ctcssOn,
-			bool audioMute);
+			bool audioMute,
+			bool force);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -97,6 +98,7 @@ private:
 		Real getSquelch() const { return m_squelch; }
 		bool getCtcssOn() const { return m_ctcssOn; }
 		bool getAudioMute() const { return m_audioMute; }
+		bool getForce() const { return m_force; }
 
 		static MsgConfigureNFMDemod* create(Real rfBandwidth,
 				Real afBandwidth,
@@ -106,7 +108,8 @@ private:
 				bool deltaSquelch,
 				Real squelch,
 				bool ctcssOn,
-				bool audioMute)
+				bool audioMute,
+				bool force)
 		{
 			return new MsgConfigureNFMDemod(
 			        rfBandwidth,
@@ -117,7 +120,8 @@ private:
 			        deltaSquelch,
 			        squelch,
 			        ctcssOn,
-			        audioMute);
+			        audioMute,
+			        force);
 		}
 
 	private:
@@ -130,6 +134,7 @@ private:
 		Real m_squelch;
 		bool m_ctcssOn;
 		bool m_audioMute;
+		bool m_force;
 
 		MsgConfigureNFMDemod(Real rfBandwidth,
 				Real afBandwidth,
@@ -139,7 +144,8 @@ private:
 				bool deltaSquelch,
 				Real squelch,
 				bool ctcssOn,
-				bool audioMute) :
+				bool audioMute,
+				bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
@@ -149,7 +155,8 @@ private:
 			m_deltaSquelch(deltaSquelch),
 			m_squelch(squelch),
 			m_ctcssOn(ctcssOn),
-			m_audioMute(audioMute)
+			m_audioMute(audioMute),
+			m_force(force)
 		{ }
 	};
 

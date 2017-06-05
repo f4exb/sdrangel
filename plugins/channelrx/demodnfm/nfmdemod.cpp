@@ -94,7 +94,8 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		bool deltaSquelch,
 		Real squelch,
 		bool ctcssOn,
-		bool audioMute)
+		bool audioMute,
+		bool force)
 {
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
 			afBandwidth,
@@ -104,7 +105,8 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 			deltaSquelch,
 			squelch,
 			ctcssOn,
-			audioMute);
+			audioMute,
+			force);
 	messageQueue->push(cmd);
 }
 
@@ -338,6 +340,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void NFMDemod::start()
 {
+    qDebug() << "NFMDemod::start";
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
 	apply(true);
@@ -379,7 +382,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_ctcssOn = cfg.getCtcssOn();
 		m_config.m_audioMute = cfg.getAudioMute();
 
-		apply();
+		apply(cfg.getForce());
 
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
@@ -389,7 +392,8 @@ bool NFMDemod::handleMessage(const Message& cmd)
 				<< " m_deltaSquelch: " << m_config.m_deltaSquelch
 				<< " m_squelch: " << m_squelchLevel
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
-				<< " m_audioMute: " << m_config.m_audioMute;
+				<< " m_audioMute: " << m_config.m_audioMute
+				<< " force: " << cfg.getForce();
 
 		return true;
 	}

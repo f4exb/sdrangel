@@ -143,7 +143,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
-		applySettings();
+		applySettings(true);
 		return true;
 	}
 	else
@@ -272,7 +272,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false)
+	m_squelchOpen(false),
+	m_autoInitCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -328,7 +329,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	QChar delta = QChar(0x94, 0x03);
 	ui->deltaSquelch->setText(delta);
 
-	applySettings();
+	applySettings(true);
 }
 
 NFMDemodGUI::~NFMDemodGUI()
@@ -342,7 +343,7 @@ NFMDemodGUI::~NFMDemodGUI()
 	delete ui;
 }
 
-void NFMDemodGUI::applySettings()
+void NFMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -365,7 +366,8 @@ void NFMDemodGUI::applySettings()
 			ui->deltaSquelch->isChecked(),
 			ui->squelch->value(), // -1000 -> 0
 			ui->ctcssOn->isChecked(),
-			ui->audioMute->isChecked());
+			ui->audioMute->isChecked(),
+			force);
 	}
 }
 
@@ -426,5 +428,11 @@ void NFMDemodGUI::tick()
 		}
 
         m_squelchOpen = squelchOpen;
+	}
+
+	if (m_autoInitCount < 100) // ~5s
+	{
+	    if (m_autoInitCount == 99) applySettings(true);
+	    m_autoInitCount++;
 	}
 }

@@ -205,8 +205,10 @@ void AFSquelch::reset()
 {
     for (unsigned int j = 0; j < m_nTones; ++j)
 	{
-		m_power[j] = m_u0[j] = m_u1[j] = 0.0; // reset
-		m_movingAverages[j].fill(0.0);
+        m_u0[j] = 0.0;
+        m_u1[j] = 0.0;
+        m_power[j] = 0.0;
+        m_movingAverages[j].fill(0.0);
 	}
 
 	m_samplesProcessed = 0;

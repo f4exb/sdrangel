@@ -69,6 +69,7 @@ private:
 	bool m_ctcssOn;
 	bool m_audioMute;
 	bool m_squelchOpen;
+	uint32_t m_autoInitCount;
 
 	static const int m_rfBW[];
 	static const int m_fmDev[];
@@ -78,7 +79,7 @@ private:
 	virtual ~NFMDemodGUI();
 
 	void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
