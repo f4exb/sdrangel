@@ -227,10 +227,10 @@ void FileSinkGui::updateStatus()
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DSPDeviceSinkEngine::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DSPDeviceSinkEngine::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : magenta; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
             default:

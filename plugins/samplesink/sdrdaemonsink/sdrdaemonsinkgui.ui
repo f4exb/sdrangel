@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>372</width>
+    <width>380</width>
     <height>217</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>372</width>
+    <width>380</width>
     <height>190</height>
    </size>
   </property>
@@ -419,9 +419,19 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="qualityStatusLabel">
+      <widget class="QToolButton" name="allFramesDecoded">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost</string>
+       </property>
        <property name="text">
-        <string>Q:</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
        </property>
       </widget>
      </item>
@@ -429,15 +439,73 @@
       <widget class="QLabel" name="qualityStatusText">
        <property name="minimumSize">
         <size>
-         <width>80</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Transmitter average number of blocks received / average number of blocks used for recovery</string>
+        <string>Tx status since last poll: minimum of blocks received / maximum number of blocks used for recovery</string>
        </property>
        <property name="text">
-        <string>100.0/100.0</string>
+        <string>100/100</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="eventCountsReset">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Event counts reset</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventUnrecText">
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Number of uncrecoverable errors since event counts reset</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventRecText">
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Number of correctable errors since event counts reset</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventCountsTimeText">
+       <property name="toolTip">
+        <string>Time since last event counts reset</string>
+       </property>
+       <property name="text">
+        <string>00:00:00</string>
        </property>
       </widget>
      </item>

@@ -69,6 +69,10 @@ private:
 
     int m_nnSender;
 
+    QPalette m_paletteGreenText;
+    QPalette m_paletteRedText;
+    QPalette m_paletteWhiteText;
+
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();

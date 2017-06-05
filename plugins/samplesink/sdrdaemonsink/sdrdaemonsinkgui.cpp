@@ -60,7 +60,11 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     nn_setsockopt (m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
-	ui->setupUi(this);
+    m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
+    m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
+    m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
+
+    ui->setupUi(this);
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
@@ -354,10 +358,10 @@ void SDRdaemonSinkGui::updateStatus()
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DSPDeviceSinkEngine::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DSPDeviceSinkEngine::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : magenta; }");
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;
             default:
@@ -536,9 +540,11 @@ void SDRdaemonSinkGui::tick()
         if ((len > 0) && msgBuf)
         {
             std::string msg((char *) msgBuf, len);
+            //qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
             std::vector<std::string> strs;
             boost::split(strs, msg, boost::is_any_of(":"));
             unsigned int nbTokens = strs.size();
+            unsigned int status = 0;
 
             if (nbTokens > 0) // at least the queue length is given
             {
@@ -583,9 +589,26 @@ void SDRdaemonSinkGui::tick()
                 }
             }
 
-            if (nbTokens > 1) // the quality indicator is given also
+            if (nbTokens > 1) // the quality status is given also
             {
-                ui->qualityStatusText->setText(QString::fromStdString(strs[1]));
+                if (strs[1] == "2") {
+                    status = 2;
+                } else if (strs[1] == "1") {
+                    status = 1;
+                }
+            }
+
+            if (nbTokens > 2) // the quality indicator message is given also
+            {
+                ui->qualityStatusText->setText(QString::fromStdString(strs[2]));
+            }
+
+            if (status == 2) { // all OK
+                ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
+            } else if (status == 1) { // unrecoverable errors
+                ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
+            } else { // recoverable errors or unknown status
+                ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(56,56,56); }");
             }
         }
 	}
