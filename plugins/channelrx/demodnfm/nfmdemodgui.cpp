@@ -272,8 +272,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false),
-	m_autoInitCount(0)
+	m_squelchOpen(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -428,11 +427,5 @@ void NFMDemodGUI::tick()
 		}
 
         m_squelchOpen = squelchOpen;
-	}
-
-	if (m_autoInitCount < 100) // ~5s
-	{
-	    if (m_autoInitCount == 99) applySettings(true);
-	    m_autoInitCount++;
 	}
 }

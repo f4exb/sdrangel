@@ -304,4 +304,5 @@ void AFSquelch::setThreshold(double threshold)
 {
 	qDebug("AFSquelch::setThreshold: threshold: %f", threshold);
 	m_threshold = threshold;
+	reset();
 }
