@@ -7,8 +7,8 @@ FIND_PATH(CM256CC_INCLUDE_DIR
     ${CMAKE_INSTALL_PREFIX}/include
     ${LIBCM256CC_INSTALL_PREFIX}/include
     PATHS
-    /usr/local/include
-    /usr/include
+    /usr/local/include/cm256cc
+    /usr/include/cm256cc
 )
 
 FIND_LIBRARY(CM256CC_LIBRARIES
