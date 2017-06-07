@@ -27,7 +27,7 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_centerFrequency = 435000*1000;
     m_sampleRate = 192000;
     m_log2Interp = 4;
-    m_txDelay = 300;
+    m_txDelay = 0.5;
     m_nbFECBlocks = 0;
     m_address = "127.0.0.1";
     m_dataPort = 9092;
@@ -41,7 +41,7 @@ QByteArray SDRdaemonSinkSettings::serialize() const
 
     s.writeU64(1, m_sampleRate);
     s.writeU32(2, m_log2Interp);
-    s.writeU32(3, m_txDelay);
+    s.writeFloat(3, m_txDelay);
     s.writeU32(4, m_nbFECBlocks);
     s.writeString(5, m_address);
     s.writeU32(6, m_dataPort);
@@ -66,7 +66,7 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
         quint32 uintval;
         d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
-        d.readU32(3, &m_txDelay, 300);
+        d.readFloat(3, &m_txDelay, 0.5);
         d.readU32(4, &m_nbFECBlocks, 0);
         d.readString(5, &m_address, "127.0.0.1");
         d.readU32(6, &uintval, 9090);

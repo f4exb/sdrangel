@@ -293,16 +293,19 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Delay in microseconds between consecutive UDP packets</string>
+        <string>Delay between consecutive UDP packets in percentage of nominal UDP packet process time</string>
        </property>
        <property name="minimum">
-        <number>1</number>
+        <number>10</number>
        </property>
        <property name="maximum">
-        <number>200</number>
+        <number>90</number>
        </property>
        <property name="pageStep">
-        <number>1</number>
+        <number>0</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
       </widget>
      </item>
@@ -310,12 +313,18 @@
       <widget class="QLabel" name="txDelayText">
        <property name="minimumSize">
         <size>
-         <width>32</width>
+         <width>20</width>
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>20</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>0000</string>
+        <string>90</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

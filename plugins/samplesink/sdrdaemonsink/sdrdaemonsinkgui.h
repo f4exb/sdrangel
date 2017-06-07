@@ -85,6 +85,7 @@ private:
 	void sendSettings();
 	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
+	void updateTxDelayTooltip();
 	void displayEventCounts();
     void displayEventTimer();
 

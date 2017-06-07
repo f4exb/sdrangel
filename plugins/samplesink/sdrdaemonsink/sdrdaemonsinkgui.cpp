@@ -224,14 +224,20 @@ void SDRdaemonSinkGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
 }
 
+void SDRdaemonSinkGui::updateTxDelayTooltip()
+{
+    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
+}
+
 void SDRdaemonSinkGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
     ui->interp->setCurrentIndex(m_settings.m_log2Interp);
-    ui->txDelay->setValue(m_settings.m_txDelay/10);
-    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay));
+    ui->txDelay->setValue(m_settings.m_txDelay*100);
+    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
@@ -389,6 +395,7 @@ void SDRdaemonSinkGui::on_centerFrequency_changed(quint64 value)
 void SDRdaemonSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
+    updateTxDelayTooltip();
     sendControl();
     sendSettings();
 }
@@ -406,8 +413,9 @@ void SDRdaemonSinkGui::on_interp_currentIndexChanged(int index)
 
 void SDRdaemonSinkGui::on_txDelay_valueChanged(int value)
 {
-    m_settings.m_txDelay = value * 10;
-    ui->txDelayText->setText(tr("%1").arg(10*value));
+    m_settings.m_txDelay = value / 100.0;
+    ui->txDelayText->setText(tr("%1").arg(value));
+    updateTxDelayTooltip();
     sendSettings();
 }
 
@@ -419,6 +427,7 @@ void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+    updateTxDelayTooltip();
     sendSettings();
 }
 

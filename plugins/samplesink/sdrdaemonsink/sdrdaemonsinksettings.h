@@ -23,7 +23,7 @@ struct SDRdaemonSinkSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Interp;
-    quint32 m_txDelay;
+    float   m_txDelay;
     quint32 m_nbFECBlocks;
     QString m_address;
     quint16 m_dataPort;

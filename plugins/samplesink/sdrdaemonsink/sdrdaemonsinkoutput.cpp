@@ -64,10 +64,12 @@ bool SDRdaemonSinkOutput::start()
 	m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
 	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
-	m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
 	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
 	m_sdrDaemonSinkThread->startWork();
+
+    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -171,6 +173,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
+    bool changeTxDelay = false;
 
     if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
     {
@@ -205,22 +208,13 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
         }
 
         forwardChange = true;
+        changeTxDelay = true;
     }
 
     if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
         forwardChange = true;
-    }
-
-    if (force || (m_settings.m_txDelay != settings.m_txDelay))
-    {
-        m_settings.m_txDelay = settings.m_txDelay;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
-        }
     }
 
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
@@ -231,11 +225,34 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
         {
             m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
         }
+
+        changeTxDelay = true;
+    }
+
+    if (force || (m_settings.m_txDelay != settings.m_txDelay))
+    {
+        m_settings.m_txDelay = settings.m_txDelay;
+        changeTxDelay = true;
+    }
+
+    if (changeTxDelay)
+    {
+        double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+        qDebug("SDRdaemonSinkOutput::applySettings: Tx delay: %f us", delay*1e6);
+
+        if (m_sdrDaemonSinkThread != 0)
+        {
+            // delay is calculated as a fraction of the nominal UDP block process time
+            // frame size: 127 * 127 samples
+            // divided by sample rate gives the frame process time
+            // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
+            m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
+        }
     }
 
     mutexLocker.unlock();
 
-    qDebug("SDRdaemonSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %d m_nbFECBlocks: %d",
+    qDebug("SDRdaemonSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %f m_nbFECBlocks: %d",
             forwardChange ? "forward change" : "",
             m_settings.m_centerFrequency,
             m_settings.m_sampleRate,
