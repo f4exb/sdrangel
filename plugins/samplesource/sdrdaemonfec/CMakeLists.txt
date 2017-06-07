@@ -15,6 +15,7 @@ set(sdrdaemonfec_SOURCES
     sdrdaemonfecbuffer.cpp
     sdrdaemonfecgui.cpp
     sdrdaemonfecinput.cpp
+    sdrdaemonfecsettings.cpp
     sdrdaemonfecplugin.cpp
     sdrdaemonfecudphandler.cpp
 )
@@ -23,6 +24,7 @@ set(sdrdaemonfec_HEADERS
     sdrdaemonfecbuffer.h
     sdrdaemonfecgui.h
     sdrdaemonfecinput.h
+    sdrdaemonfecsettings.h
     sdrdaemonfecplugin.h
     sdrdaemonfecudphandler.h
 )
