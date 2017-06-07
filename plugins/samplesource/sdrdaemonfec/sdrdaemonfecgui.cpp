@@ -92,8 +92,6 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_deviceAPI->setSource(m_sampleSource);
 
 	displaySettings();
-	ui->applyButton->setEnabled(false);
-	ui->sendButton->setEnabled(false);
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
@@ -407,15 +405,12 @@ void SDRdaemonFECGui::on_applyButton_clicked(bool checked __attribute__((unused)
 		m_addressEdited = false;
 		m_dataPortEdited = false;
 	}
-
-	ui->applyButton->setEnabled(false);
 }
 
 void SDRdaemonFECGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
 	sendConfiguration();
 	ui->specificParms->setCursorPosition(0);
-	ui->sendButton->setEnabled(false);
 }
 
 void SDRdaemonFECGui::sendConfiguration()
@@ -480,21 +475,18 @@ void SDRdaemonFECGui::sendConfiguration()
     }
 }
 
-void SDRdaemonFECGui::on_address_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_address_returnPressed()
 {
-	ui->applyButton->setEnabled(true);
 	m_addressEdited = true;
 }
 
-void SDRdaemonFECGui::on_dataPort_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_dataPort_returnPressed()
 {
-	ui->applyButton->setEnabled(true);
 	m_dataPortEdited = true;
 }
 
-void SDRdaemonFECGui::on_controlPort_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_controlPort_returnPressed()
 {
-	ui->applyButton->setEnabled(true);
 }
 
 void SDRdaemonFECGui::on_dcOffset_toggled(bool checked)
@@ -515,29 +507,24 @@ void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_freq_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_freq_returnPressed()
 {
-	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_sampleRate_returnPressed()
 {
-	ui->sendButton->setEnabled(true);
 }
 
-void SDRdaemonFECGui::on_specificParms_textEdited(const QString& arg1 __attribute__((unused)))
+void SDRdaemonFECGui::on_specificParms_returnPressed()
 {
-	ui->sendButton->setEnabled(true);
 }
 
 void SDRdaemonFECGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
 {
-	ui->sendButton->setEnabled(true);
 }
 
 void SDRdaemonFECGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
-	ui->sendButton->setEnabled(true);
 }
 
 void SDRdaemonFECGui::on_startStop_toggled(bool checked)

@@ -73,7 +73,7 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
         m_dataPort = uintval % (1<<16);
         d.readU32(7, &uintval, 9090);
         m_controlPort = uintval % (1<<16);
-        d.readString(5, &m_specificParameters, "");
+        d.readString(8, &m_specificParameters, "");
         return true;
     }
     else
