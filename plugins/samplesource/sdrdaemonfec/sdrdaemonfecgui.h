@@ -101,13 +101,6 @@ private:
 
     void blockApplySettings(bool block);
 	void displaySettings();
-
-//	void displayConfigurationParameters(uint32_t freq,
-//			uint32_t log2Decim,
-//			uint32_t fcPos,
-//			uint32_t sampleRate,
-//			QString& specParms);
-
 	void displayTime();
     void sendControl(bool force = false);
     void sendSettings();
@@ -116,7 +109,6 @@ private:
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
-//	void sendConfiguration();
     void updateSampleRateAndFrequency();
 
 private slots:

@@ -107,7 +107,14 @@ void SDRdaemonFECInput::getRemoteAddress(QString &s)
 
 bool SDRdaemonFECInput::handleMessage(const Message& message)
 {
-	if (MsgConfigureSDRdaemonUDPLink::match(message))
+    if (MsgConfigureSDRdaemonFEC::match(message))
+    {
+        qDebug() << "SDRdaemonFECInput::handleMessage:" << message.getIdentifier();
+        //MsgConfigureSDRdaemonFEC& conf = (MsgConfigureSDRdaemonFEC&) message;
+        //applySettings(conf.getSettings(), conf.getForce());
+        return true;
+    }
+    else if (MsgConfigureSDRdaemonUDPLink::match(message))
 	{
 		MsgConfigureSDRdaemonUDPLink& conf = (MsgConfigureSDRdaemonUDPLink&) message;
 		m_SDRdaemonUDPHandler->configureUDPLink(conf.getAddress(), conf.getPort());

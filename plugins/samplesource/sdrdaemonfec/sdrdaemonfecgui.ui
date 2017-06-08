@@ -367,6 +367,42 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
+      <widget class="QLabel" name="nominalNbBlocksText">
+       <property name="minimumSize">
+        <size>
+         <width>52</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Nominal number of blocks per frame: Total/FEC</string>
+       </property>
+       <property name="text">
+        <string>000/000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="allFramesDecoded">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrbase/resources/res.qrc">
+         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="minNbBlocksText">
        <property name="minimumSize">
         <size>
@@ -382,68 +418,6 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="avgNbBlocksText">
-       <property name="minimumSize">
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Average number of blocks retrieved per frame</string>
-       </property>
-       <property name="text">
-        <string>000.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="allFramesDecoded">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Frames status: green = all original received, pink = some recovered by FEC, none = some lost</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
-         <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="minNbOriginalText">
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Minimum number of original blocks retrieved per frame</string>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream5">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -467,47 +441,67 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="avgNbRecoveryText">
-       <property name="minimumSize">
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Average number of recovery blocks used per frame</string>
-       </property>
-       <property name="text">
-        <string>000.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="lineStream6">
+      <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nominalNbBlocksText">
+      <widget class="QPushButton" name="eventCountsReset">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Event counts reset</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventUnrecText">
        <property name="minimumSize">
         <size>
-         <width>52</width>
+         <width>25</width>
          <height>0</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Nominal number of blocks per frame: Total/FEC</string>
+        <string>Number of uncrecoverable errors since event counts reset</string>
        </property>
        <property name="text">
-        <string>000/000</string>
+        <string>000</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventRecText">
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Number of correctable errors since event counts reset</string>
+       </property>
+       <property name="text">
+        <string>000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="eventCountsTimeText">
+       <property name="toolTip">
+        <string>Time since last event counts reset</string>
+       </property>
+       <property name="text">
+        <string>00:00:00</string>
        </property>
       </widget>
      </item>

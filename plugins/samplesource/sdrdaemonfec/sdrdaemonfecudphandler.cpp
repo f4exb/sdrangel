@@ -233,7 +233,8 @@ void SDRdaemonFECUDPHandler::tick()
 	    int nbFECblocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbFECBlocks;
 		m_tickCount = 0;
 
-		framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
+		//framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
+        framesDecodingStatus = (minNbBlocks == 128 + nbFECblocks ? 2 : (minNbBlocks < 128 ? 0 : 1));
 
 		SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::create(
 			m_tv_sec,
