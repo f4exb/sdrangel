@@ -314,10 +314,12 @@ void SDRdaemonFECGui::displaySettings()
     ui->specificParms->setText(m_settings.m_specificParameters);
     ui->specificParms->setCursorPosition(0);
     ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
+    ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
+    QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
+    ui->nbFECBlocksText->setText(nstr);
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
-    QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
-    ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s0).arg(s1));
+    ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s0).arg(nstr));
 
     ui->address->setText(m_settings.m_address);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
@@ -389,6 +391,13 @@ void SDRdaemonFECGui::sendControl(bool force)
         nbArgs++;
     }
 
+    if ((m_settings.m_nbFECBlocks != m_controlSettings.m_nbFECBlocks) || force)
+    {
+        if (nbArgs > 0) os << ",";
+        os << "fecblk=" << m_settings.m_nbFECBlocks;
+        nbArgs++;
+    }
+
     if (m_txDelay != 0.0)
     {
         if (nbArgs > 0) os << ",";
@@ -435,6 +444,7 @@ void SDRdaemonFECGui::sendControl(bool force)
     m_controlSettings.m_sampleRate = m_settings.m_sampleRate;
     m_controlSettings.m_log2Decim = m_settings.m_log2Decim;
     m_controlSettings.m_fcPos = m_settings.m_fcPos;
+    m_controlSettings.m_nbFECBlocks = m_settings.m_nbFECBlocks;
     m_controlSettings.m_specificParameters = m_settings.m_specificParameters;
 }
 
@@ -584,6 +594,14 @@ void SDRdaemonFECGui::on_txDelay_valueChanged(int value)
     sendControl();
 }
 
+void SDRdaemonFECGui::on_nbFECBlocks_valueChanged(int value)
+{
+    m_settings.m_nbFECBlocks = value;
+    QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
+    ui->nbFECBlocksText->setText(nstr);
+    sendControl();
+}
+
 void SDRdaemonFECGui::on_startStop_toggled(bool checked)
 {
     if (checked)
@@ -703,11 +721,11 @@ void SDRdaemonFECGui::updateWithStreamTime()
     s = QString::number(m_minNbBlocks, 'f', 0);
     ui->minNbBlocksText->setText(tr("%1").arg(s));
 
-    s = QString::number(m_maxNbRecovery, 'f', 0);
+    s = QString("%1").arg(m_maxNbRecovery, 2, 10, QChar('0'));
     ui->maxNbRecoveryText->setText(tr("%1").arg(s));
 
     s = QString::number(m_nbOriginalBlocks + m_nbFECBlocks, 'f', 0);
-    QString s1 = QString::number(m_nbFECBlocks, 'f', 0);
+    QString s1 = QString("%1").arg(m_nbFECBlocks, 2, 10, QChar('0'));
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
 
     if (updateEventCounts)

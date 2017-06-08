@@ -374,10 +374,42 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
+      <widget class="QDial" name="nbFECBlocks">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>64</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nbFECBlocksText">
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Given number of FEC blocks per frame</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="nominalNbBlocksText">
        <property name="minimumSize">
         <size>
-         <width>52</width>
+         <width>48</width>
          <height>0</height>
         </size>
        </property>
@@ -385,7 +417,7 @@
         <string>Nominal number of blocks per frame: Total/FEC</string>
        </property>
        <property name="text">
-        <string>000/000</string>
+        <string>000/00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

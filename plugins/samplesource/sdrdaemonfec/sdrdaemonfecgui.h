@@ -139,6 +139,7 @@ private slots:
     void on_record_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
     void on_txDelay_valueChanged(int value);
+    void on_nbFECBlocks_valueChanged(int value);
     void updateHardware();
 	void updateStatus();
 	void tick();
