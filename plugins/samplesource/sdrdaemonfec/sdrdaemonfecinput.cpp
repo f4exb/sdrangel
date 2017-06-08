@@ -29,6 +29,7 @@
 #include "sdrdaemonfecgui.h"
 #include "sdrdaemonfecudphandler.h"
 
+MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonFEC, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonWork, Message)

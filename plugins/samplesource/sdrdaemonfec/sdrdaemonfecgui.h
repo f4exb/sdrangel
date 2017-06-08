@@ -52,6 +52,8 @@ private:
 	Ui::SDRdaemonFECGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
+    SDRdaemonFECSettings m_settings;        //!< current settings
+    SDRdaemonFECSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
@@ -88,6 +90,8 @@ private:
 	bool m_dataPortEdited;
 	bool m_initSendConfiguration;
 	int m_sender;
+    bool m_doApplySettings;
+    bool m_forceSettings;
 
 	bool m_dcBlock;
 	bool m_iqCorrection;
@@ -95,21 +99,24 @@ private:
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
 
+    void blockApplySettings(bool block);
 	void displaySettings();
 
-	void displayConfigurationParameters(uint32_t freq,
-			uint32_t log2Decim,
-			uint32_t fcPos,
-			uint32_t sampleRate,
-			QString& specParms);
+//	void displayConfigurationParameters(uint32_t freq,
+//			uint32_t log2Decim,
+//			uint32_t fcPos,
+//			uint32_t sampleRate,
+//			QString& specParms);
 
 	void displayTime();
+    void sendControl(bool force = false);
+    void sendSettings();
 	void configureUDPLink();
 	void configureAutoCorrections();
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
-	void sendConfiguration();
+//	void sendConfiguration();
     void updateSampleRateAndFrequency();
 
 private slots:
@@ -129,6 +136,7 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void updateHardware();
 	void updateStatus();
 	void tick();
 };

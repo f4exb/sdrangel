@@ -24,11 +24,36 @@
 #include <iostream>
 #include <stdint.h>
 
+#include "sdrdaemonfecsettings.h"
+
 class DeviceSourceAPI;
 class SDRdaemonFECUDPHandler;
 
 class SDRdaemonFECInput : public DeviceSampleSource {
 public:
+    class MsgConfigureSDRdaemonFEC : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SDRdaemonFECSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSDRdaemonFEC* create(const SDRdaemonFECSettings& settings, bool force = false)
+        {
+            return new MsgConfigureSDRdaemonFEC(settings, force);
+        }
+
+    private:
+        SDRdaemonFECSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSDRdaemonFEC(const SDRdaemonFECSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
 	class MsgConfigureSDRdaemonUDPLink : public Message {
 		MESSAGE_CLASS_DECLARATION
 
