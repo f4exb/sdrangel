@@ -235,9 +235,9 @@ void SDRdaemonFECUDPHandler::tick()
 
 		//framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
 		if (minNbBlocks < nbOriginalBlocks) {
-			framesDecodingStatus = 1;
-		} else if (minNbBlocks < nbOriginalBlocks + nbFECblocks) {
 			framesDecodingStatus = 0;
+		} else if (minNbBlocks < nbOriginalBlocks + nbFECblocks) {
+			framesDecodingStatus = 1;
 		} else {
 			framesDecodingStatus = 2;
 		}
