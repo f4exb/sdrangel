@@ -737,27 +737,31 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="freq">
+      <widget class="ValueDial" name="freq" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>0</height>
+         <width>32</width>
+         <height>16</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Set center frequency (kHz)</string>
-       </property>
-       <property name="text">
-        <string>00000000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>Desired device center frequency</string>
        </property>
       </widget>
      </item>
@@ -791,7 +795,7 @@
      <item>
       <widget class="QLabel" name="txDelayLabel">
        <property name="text">
-        <string>Dt</string>
+        <string>UDly</string>
        </property>
       </widget>
      </item>
@@ -885,6 +889,19 @@
         <string>S/s</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="decimLabel">
@@ -987,19 +1004,6 @@
         </property>
        </item>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

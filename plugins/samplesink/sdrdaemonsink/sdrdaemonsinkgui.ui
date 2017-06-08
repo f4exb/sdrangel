@@ -280,7 +280,7 @@
      <item>
       <widget class="QLabel" name="txDelayLabel">
        <property name="text">
-        <string>Dt</string>
+        <string>UDly</string>
        </property>
       </widget>
      </item>

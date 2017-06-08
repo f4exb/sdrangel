@@ -86,10 +86,13 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->setupUi(this);
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
+	ui->centerFrequency->setValueRange(7, 0, 9999999U);
+
+    ui->freq->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->freq->setValueRange(7, 0, 9999999U);
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(7, 32000U, 9000000U);
+    ui->sampleRate->setValueRange(7, 32000U, 9999999U);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -311,7 +314,7 @@ void SDRdaemonFECGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->deviceRateText->setText(tr("%1k").arg(m_sampleRate / 1000.0));
 
-    ui->freq->setText(QString::number(m_settings.m_centerFrequency / 1000));
+    ui->freq->setValue(m_settings.m_centerFrequency / 1000);
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex(m_settings.m_fcPos);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
@@ -546,16 +549,10 @@ void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_freq_returnPressed()
+void SDRdaemonFECGui::on_freq_changed(quint64 value)
 {
-    bool ok;
-    uint64_t freq = ui->freq->text().toInt(&ok);
-
-    if (ok)
-    {
-        m_settings.m_centerFrequency = freq * 1000;
-        sendControl();
-    }
+    m_settings.m_centerFrequency = value * 1000;
+    sendControl();
 }
 
 void SDRdaemonFECGui::on_sampleRate_changed(quint64 value)
