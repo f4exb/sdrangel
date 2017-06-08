@@ -131,7 +131,7 @@ private slots:
 	void on_controlPort_returnPressed();
 	void on_sendButton_clicked(bool checked);
 	void on_freq_returnPressed();
-	void on_sampleRate_returnPressed();
+	void on_sampleRate_changed(quint64 value);
 	void on_specificParms_returnPressed();
 	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);

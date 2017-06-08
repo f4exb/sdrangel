@@ -381,6 +381,9 @@
          <height>24</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Desired number of FEC blocks per frame</string>
+       </property>
        <property name="maximum">
         <number>64</number>
        </property>
@@ -398,7 +401,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Given number of FEC blocks per frame</string>
+        <string>Desired number of FEC blocks per frame</string>
        </property>
        <property name="text">
         <string>00</string>
@@ -450,7 +453,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Minimum number of blocks retrieved per frame (green: all blocks received)</string>
+        <string>Minimum number of blocks retrieved per frame</string>
        </property>
        <property name="text">
         <string>000</string>
@@ -464,7 +467,7 @@
       <widget class="QLabel" name="maxNbRecoveryText">
        <property name="minimumSize">
         <size>
-         <width>24</width>
+         <width>22</width>
          <height>0</height>
         </size>
        </property>
@@ -472,7 +475,7 @@
         <string>Maximum number of recovery blocks used per frame</string>
        </property>
        <property name="text">
-        <string>000</string>
+        <string>00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -848,34 +851,38 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="sampleRate">
+      <widget class="ValueDial" name="sampleRate" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>0</height>
+         <width>32</width>
+         <height>16</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+         <italic>false</italic>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Sample rate (kS/s)</string>
-       </property>
-       <property name="text">
-        <string>00000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string>Desired remote device sample rate</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="sampleRateUnits">
        <property name="text">
-        <string>kS/s</string>
+        <string>S/s</string>
        </property>
       </widget>
      </item>
