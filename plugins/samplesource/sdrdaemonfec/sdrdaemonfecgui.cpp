@@ -64,6 +64,8 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_addressEdited(false),
     m_dataPortEdited(false),
     m_initSendConfiguration(false),
+	m_countUnrecoverable(0),
+	m_countRecovered(0),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_dcBlock(false),
@@ -101,6 +103,10 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_deviceAPI->addSink(m_fileSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+
+    m_eventsTime.start();
+    displayEventCounts();
+    displayEventTimer();
 
     displaySettings();
     sendControl(true);
@@ -567,6 +573,32 @@ void SDRdaemonFECGui::on_record_toggled(bool checked)
     }
 }
 
+void SDRdaemonFECGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+{
+    m_countUnrecoverable = 0;
+    m_countRecovered = 0;
+    m_eventsTime.start();
+    displayEventCounts();
+    displayEventTimer();
+}
+
+void SDRdaemonFECGui::displayEventCounts()
+{
+    QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
+    ui->eventUnrecText->setText(nstr);
+    nstr = QString("%1").arg(m_countRecovered, 3, 10, QChar('0'));
+    ui->eventRecText->setText(nstr);
+}
+
+void SDRdaemonFECGui::displayEventTimer()
+{
+    int elapsedTimeMillis = m_eventsTime.elapsed();
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
+    QString s_time = recordLength.toString("hh:mm:ss");
+    ui->eventCountsTimeText->setText(s_time);
+}
+
 void SDRdaemonFECGui::configureUDPLink()
 {
 	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_settings.m_address.toStdString().c_str()
@@ -594,16 +626,26 @@ void SDRdaemonFECGui::updateWithStreamData()
 
 void SDRdaemonFECGui::updateWithStreamTime()
 {
+	bool updateEventCounts = false;
     quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
-	if (m_framesDecodingStatus == 2) {
+	if (m_framesDecodingStatus == 2)
+	{
 		ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
-	} else if (m_framesDecodingStatus == 1) {
+	}
+	else if (m_framesDecodingStatus == 1)
+	{
+        if (m_countRecovered < 999) m_countRecovered++;
+        updateEventCounts = true;
         ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(56,56,56); }");
-	} else {
+	}
+	else
+	{
+        if (m_countUnrecoverable < 999) m_countUnrecoverable++;
+        updateEventCounts = true;
         ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
 	}
 
@@ -619,18 +661,19 @@ void SDRdaemonFECGui::updateWithStreamTime()
     s = QString::number(m_minNbBlocks, 'f', 0);
     ui->minNbBlocksText->setText(tr("%1").arg(s));
 
-    if (m_allBlocksReceived) {
-        ui->minNbBlocksText->setPalette(m_paletteGreenText);
-    } else {
-        ui->minNbBlocksText->setPalette(m_paletteWhiteText);
-    }
-
     s = QString::number(m_maxNbRecovery, 'f', 0);
     ui->maxNbRecoveryText->setText(tr("%1").arg(s));
 
     s = QString::number(m_nbOriginalBlocks + m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+
+    if (updateEventCounts)
+    {
+        displayEventCounts();
+    }
+
+    displayEventTimer();
 }
 
 void SDRdaemonFECGui::updateHardware()

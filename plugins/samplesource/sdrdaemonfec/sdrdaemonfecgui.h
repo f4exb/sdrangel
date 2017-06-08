@@ -90,7 +90,12 @@ private:
 	bool m_dataPortEdited;
 	bool m_initSendConfiguration;
 	int m_sender;
-    bool m_doApplySettings;
+
+    uint32_t m_countUnrecoverable;
+    uint32_t m_countRecovered;
+    QTime m_eventsTime;
+
+	bool m_doApplySettings;
     bool m_forceSettings;
 
 	bool m_dcBlock;
@@ -110,6 +115,8 @@ private:
 	void updateWithStreamData();
 	void updateWithStreamTime();
     void updateSampleRateAndFrequency();
+	void displayEventCounts();
+    void displayEventTimer();
 
 private slots:
     void handleDSPMessages();
@@ -128,6 +135,7 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_eventCountsReset_clicked(bool checked);
     void updateHardware();
 	void updateStatus();
 	void tick();
