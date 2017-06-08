@@ -68,6 +68,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_countRecovered(0),
     m_doApplySettings(true),
     m_forceSettings(true),
+    m_txDelay(0.0),
     m_dcBlock(false),
     m_iqCorrection(false)
 {
@@ -163,6 +164,8 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
     {
         displaySettings();
         configureUDPLink();
+        updateTxDelay();
+        sendControl();
         blockApplySettings(false);
         sendControl(true);
         m_forceSettings = true;
@@ -199,12 +202,21 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData::match(message))
 	{
-		m_sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getSampleRate();
-		m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getCenterFrequency();
-		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_sec();
-		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_usec();
-		updateWithStreamData();
-		return true;
+        int sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getSampleRate();
+
+        if (m_sampleRate != sampleRate)
+        {
+            m_sampleRate = sampleRate;
+            updateTxDelay();
+            sendControl();
+        }
+
+        m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getCenterFrequency();
+        m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_sec();
+        m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_usec();
+
+        updateWithStreamData();
+        return true;
 	}
 	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::match(message))
 	{
@@ -221,7 +233,15 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
         m_avgNbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbOriginalBlocks();
         m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
         m_nbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbOriginalBlocksPerFrame();
-        m_nbFECBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbFECBlocksPerFrame();
+
+        int nbFECBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbFECBlocksPerFrame();
+
+        if (m_nbFECBlocks != nbFECBlocks)
+        {
+            m_nbFECBlocks = nbFECBlocks;
+            updateTxDelay();
+            sendControl();
+        }
 
 		updateWithStreamTime();
 		return true;
@@ -276,6 +296,12 @@ void SDRdaemonFECGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
+void SDRdaemonFECGui::updateTxDelay()
+{
+    m_txDelay = ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_nbFECBlocks);
+    ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(m_txDelay*1e6, 'f', 0)));
+}
+
 void SDRdaemonFECGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
@@ -287,7 +313,7 @@ void SDRdaemonFECGui::displaySettings()
     ui->sampleRate->setText(QString::number(m_settings.m_sampleRate / 1000));
     ui->specificParms->setText(m_settings.m_specificParameters);
     ui->specificParms->setCursorPosition(0);
-
+    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
@@ -300,7 +326,6 @@ void SDRdaemonFECGui::displaySettings()
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
-
 }
 
 void SDRdaemonFECGui::sendControl(bool force)
@@ -362,6 +387,14 @@ void SDRdaemonFECGui::sendControl(bool force)
         if (nbArgs > 0) os << ",";
         os << "fcpos=" << m_settings.m_fcPos;
         nbArgs++;
+    }
+
+    if (m_txDelay != 0.0)
+    {
+        if (nbArgs > 0) os << ",";
+        os << "txdelay=" << (int) (m_txDelay*1e6);
+        nbArgs++;
+        m_txDelay = 0.0;
     }
 
     if ((m_settings.m_specificParameters != m_controlSettings.m_specificParameters) || force)
@@ -436,6 +469,7 @@ void SDRdaemonFECGui::on_applyButton_clicked(bool checked __attribute__((unused)
 
 void SDRdaemonFECGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
+    updateTxDelay();
     sendControl(true);
 	ui->specificParms->setCursorPosition(0);
 }
@@ -539,6 +573,14 @@ void SDRdaemonFECGui::on_decim_currentIndexChanged(int index __attribute__((unus
 void SDRdaemonFECGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
     m_settings.m_fcPos = ui->fcPos->currentIndex();
+    sendControl();
+}
+
+void SDRdaemonFECGui::on_txDelay_valueChanged(int value)
+{
+    m_settings.m_txDelay = value / 100.0;
+    ui->txDelayText->setText(tr("%1").arg(value));
+    updateTxDelay();
     sendControl();
 }
 

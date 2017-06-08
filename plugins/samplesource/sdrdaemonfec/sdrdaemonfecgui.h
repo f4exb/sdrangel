@@ -97,6 +97,7 @@ private:
 
 	bool m_doApplySettings;
     bool m_forceSettings;
+    double m_txDelay;
 
 	bool m_dcBlock;
 	bool m_iqCorrection;
@@ -115,6 +116,7 @@ private:
 	void updateWithStreamData();
 	void updateWithStreamTime();
     void updateSampleRateAndFrequency();
+    void updateTxDelay();
 	void displayEventCounts();
     void displayEventTimer();
 
@@ -136,6 +138,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
+    void on_txDelay_valueChanged(int value);
     void updateHardware();
 	void updateStatus();
 	void tick();

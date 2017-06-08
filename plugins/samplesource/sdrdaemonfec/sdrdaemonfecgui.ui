@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>372</width>
-    <height>292</height>
+    <height>261</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -557,7 +557,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>120</width>
+         <width>100</width>
          <height>0</height>
         </size>
        </property>
@@ -586,12 +586,6 @@
       <widget class="QLineEdit" name="dataPort">
        <property name="enabled">
         <bool>true</bool>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
        </property>
        <property name="toolTip">
         <string>Local data connection port</string>
@@ -629,6 +623,19 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="applyButton">
@@ -743,6 +750,21 @@
          <width>24</width>
          <height>24</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Delay between consecutive UDP packets in percentage of nominal UDP packet process time</string>
+       </property>
+       <property name="minimum">
+        <number>10</number>
+       </property>
+       <property name="maximum">
+        <number>90</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
       </widget>
      </item>
