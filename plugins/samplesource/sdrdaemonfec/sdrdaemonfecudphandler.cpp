@@ -234,7 +234,13 @@ void SDRdaemonFECUDPHandler::tick()
 		m_tickCount = 0;
 
 		//framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
-        framesDecodingStatus = (minNbBlocks == 128 + nbFECblocks ? 2 : (minNbBlocks < 128 ? 0 : 1));
+		if (minNbBlocks < nbOriginalBlocks) {
+			framesDecodingStatus = 1;
+		} else if (minNbBlocks < nbOriginalBlocks + nbFECblocks) {
+			framesDecodingStatus = 0;
+		} else {
+			framesDecodingStatus = 2;
+		}
 
 		SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::create(
 			m_tv_sec,
