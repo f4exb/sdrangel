@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SDRdaemonFECGui</class>
- <widget class="QWidget" name="SDRdaemonFECGui">
+ <class>SDRdaemonSourceGui</class>
+ <widget class="QWidget" name="SDRdaemonSourceGui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>SDRdaemon</string>
+   <string>SDRdaemon Source</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -1032,7 +1032,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Send commands to remote SDRdaemon instance</string>
+        <string>Send commands to remote SDRdaemonRx instance</string>
        </property>
        <property name="text">
         <string>Send</string>

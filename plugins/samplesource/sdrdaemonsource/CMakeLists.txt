@@ -29,8 +29,8 @@ set(sdrdaemonfec_HEADERS
     sdrdaemonfecudphandler.h
 )
 
-set(sdrdaemonfec_FORMS
-    sdrdaemonfecgui.ui
+set(sdrdaemonsource_FORMS
+    sdrdaemonsourcegui.ui
 )
 
 #include(${QT_USE_FILE})
@@ -39,12 +39,12 @@ add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
 #qt4_wrap_cpp(sdrdaemonfec_HEADERS_MOC ${sdrdaemonfec_HEADERS})
-qt5_wrap_ui(sdrdaemonfec_FORMS_HEADERS ${sdrdaemonfec_FORMS})
+qt5_wrap_ui(sdrdaemonsource_FORMS_HEADERS ${sdrdaemonsource_FORMS})
 
 add_library(inputsdrdaemonfec SHARED
     ${sdrdaemonfec_SOURCES}
     ${sdrdaemonfec_HEADERS_MOC}
-    ${sdrdaemonfec_FORMS_HEADERS}
+    ${sdrdaemonsource_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)

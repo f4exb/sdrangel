@@ -27,7 +27,7 @@ class DeviceSourceAPI;
 class FileRecord;
 
 namespace Ui {
-	class SDRdaemonFECGui;
+	class SDRdaemonSourceGui;
 }
 
 class SDRdaemonFECGui : public QWidget, public PluginGUI {
@@ -49,7 +49,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::SDRdaemonFECGui* ui;
+	Ui::SDRdaemonSourceGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
     SDRdaemonFECSettings m_settings;        //!< current settings
