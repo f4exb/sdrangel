@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdint.h>
 
-#include "sdrdaemonfecsettings.h"
+#include "sdrdaemonsourcesettings.h"
 
 class DeviceSourceAPI;
 class SDRdaemonFECUDPHandler;

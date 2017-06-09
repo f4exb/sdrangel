@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "sdrdaemonfecgui.h"
-
 #include <stdint.h>
 #include <sstream>
 #include <iostream>
@@ -41,6 +39,7 @@
 
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
+#include "sdrdaemonsourcegui.h"
 
 SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),

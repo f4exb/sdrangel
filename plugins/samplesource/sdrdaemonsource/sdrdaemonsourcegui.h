@@ -21,7 +21,7 @@
 #include <sys/time.h>
 #include "plugin/plugingui.h"
 
-#include "sdrdaemonfecinput.h"
+#include "sdrdaemonsourceinput.h"
 
 class DeviceSourceAPI;
 class FileRecord;

@@ -1,32 +1,32 @@
-project(sdrdaemonfec)
+project(sdrdaemonsource)
 
 find_package(LibNANOMSG)
 
 if (HAS_SSSE3)
-    message(STATUS "SDRdaemonFEC: use SSSE3 SIMD" )
+    message(STATUS "SDRdaemonSource: use SSSE3 SIMD" )
 elseif (HAS_NEON)
-    message(STATUS "SDRdaemonFEC: use Neon SIMD" )
+    message(STATUS "SDRdaemonSource: use Neon SIMD" )
 else()
-    message(STATUS "SDRdaemonFEC: Unsupported architecture")
+    message(STATUS "SDRdaemonSource: Unsupported architecture")
     return()
 endif()
 
-set(sdrdaemonfec_SOURCES
-    sdrdaemonfecbuffer.cpp
-    sdrdaemonfecgui.cpp
-    sdrdaemonfecinput.cpp
-    sdrdaemonfecsettings.cpp
-    sdrdaemonfecplugin.cpp
-    sdrdaemonfecudphandler.cpp
+set(sdrdaemonsource_SOURCES
+    sdrdaemonsourcebuffer.cpp
+    sdrdaemonsourcegui.cpp
+    sdrdaemonsourceinput.cpp
+    sdrdaemonsourcesettings.cpp
+    sdrdaemonsourceplugin.cpp
+    sdrdaemonsourceudphandler.cpp
 )
 
-set(sdrdaemonfec_HEADERS
-    sdrdaemonfecbuffer.h
-    sdrdaemonfecgui.h
-    sdrdaemonfecinput.h
-    sdrdaemonfecsettings.h
-    sdrdaemonfecplugin.h
-    sdrdaemonfecudphandler.h
+set(sdrdaemonsource_HEADERS
+    sdrdaemonsourcebuffer.h
+    sdrdaemonsourcegui.h
+    sdrdaemonsourceinput.h
+    sdrdaemonsourcesettings.h
+    sdrdaemonsourceplugin.h
+    sdrdaemonsourceudphandler.h
 )
 
 set(sdrdaemonsource_FORMS
@@ -38,24 +38,24 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt4_wrap_cpp(sdrdaemonfec_HEADERS_MOC ${sdrdaemonfec_HEADERS})
+#qt4_wrap_cpp(sdrdaemonsource_HEADERS_MOC ${sdrdaemonsource_HEADERS})
 qt5_wrap_ui(sdrdaemonsource_FORMS_HEADERS ${sdrdaemonsource_FORMS})
 
-add_library(inputsdrdaemonfec SHARED
-    ${sdrdaemonfec_SOURCES}
-    ${sdrdaemonfec_HEADERS_MOC}
+add_library(inputsdrdaemonsource SHARED
+    ${sdrdaemonsource_SOURCES}
+    ${sdrdaemonsource_HEADERS_MOC}
     ${sdrdaemonsource_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)
-target_include_directories(inputsdrdaemonfec PUBLIC
+target_include_directories(inputsdrdaemonsource PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBCM256CCSRC}
     ${LIBNANOMSG_INCLUDE_DIR}
 )
 else (BUILD_DEBIAN)
-target_include_directories(inputsdrdaemonfec PUBLIC
+target_include_directories(inputsdrdaemonsource PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CM256CC_INCLUDE_DIR}
@@ -64,14 +64,14 @@ target_include_directories(inputsdrdaemonfec PUBLIC
 endif (BUILD_DEBIAN)
 
 if (BUILD_DEBIAN)
-target_link_libraries(inputsdrdaemonfec
+target_link_libraries(inputsdrdaemonsource
     ${QT_LIBRARIES}
     cm256cc
     ${LIBNANOMSG_LIBRARIES}
     sdrbase
 )
 else (BUILD_DEBIAN)
-target_link_libraries(inputsdrdaemonfec
+target_link_libraries(inputsdrdaemonsource
     ${QT_LIBRARIES}
     ${CM256CC_LIBRARIES}
     ${LIBNANOMSG_LIBRARIES}
@@ -79,6 +79,6 @@ target_link_libraries(inputsdrdaemonfec
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputsdrdaemonfec Core Widgets)
+qt5_use_modules(inputsdrdaemonsource Core Widgets)
 
-install(TARGETS inputsdrdaemonfec DESTINATION lib/plugins/samplesource)
+install(TARGETS inputsdrdaemonsource DESTINATION lib/plugins/samplesource)

@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = inputsdrdaemonfec
+TARGET = inputsdrdaemonsource
 
 CONFIG(MINGW32):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
 CONFIG(MINGW64):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
@@ -36,21 +36,21 @@ CONFIG(Debug):build_subdir = debug
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
 
-SOURCES += sdrdaemonfecbuffer.cpp\
-sdrdaemonfecgui.cpp\
-sdrdaemonfecinput.cpp\
-sdrdaemonfecsettings.cpp\
-sdrdaemonfecplugin.cpp\
-sdrdaemonfecudphandler.cpp
+SOURCES += sdrdaemonsourcebuffer.cpp\
+sdrdaemonsourcegui.cpp\
+sdrdaemonsourceinput.cpp\
+sdrdaemonsourcesettings.cpp\
+sdrdaemonsourceplugin.cpp\
+sdrdaemonsourceudphandler.cpp
 
-HEADERS += sdrdaemonfecbuffer.h\
-sdrdaemonfecgui.h\
-sdrdaemonfecinput.h\
-sdrdaemonfecsettings.h\
-sdrdaemonfecplugin.h\
-sdrdaemonfecudphandler.h
+HEADERS += sdrdaemonsourcebuffer.h\
+sdrdaemonsourcegui.h\
+sdrdaemonsourceinput.h\
+sdrdaemonsourcesettings.h\
+sdrdaemonsourceplugin.h\
+sdrdaemonsourceudphandler.h
 
-FORMS += sdrdaemonfecgui.ui
+FORMS += sdrdaemonsourcegui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../lz4/$${build_subdir} -llz4

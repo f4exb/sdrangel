@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "sdrdaemonfecplugin.h"
-
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
@@ -23,7 +21,8 @@
 
 #include <device/devicesourceapi.h>
 
-#include "sdrdaemonfecgui.h"
+#include "sdrdaemonsourcegui.h"
+#include "sdrdaemonsourceplugin.h"
 
 const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon with FEC input"),

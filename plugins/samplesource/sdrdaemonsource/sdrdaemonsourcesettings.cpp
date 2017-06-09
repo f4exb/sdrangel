@@ -14,9 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "sdrdaemonfecsettings.h"
-
 #include "util/simpleserializer.h"
+#include "sdrdaemonsourcesettings.h"
 
 SDRdaemonFECSettings::SDRdaemonFECSettings()
 {

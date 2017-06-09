@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "sdrdaemonfecbuffer.h"
-
 #include <QDebug>
 #include <cassert>
 #include <cstring>
@@ -23,6 +21,7 @@
 #include <lz4.h>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
+#include "sdrdaemonsourcebuffer.h"
 
 
 

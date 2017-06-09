@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECUDPHANDLER_H_
-#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECUDPHANDLER_H_
+#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_
+#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_
 
 #include <QObject>
 #include <QUdpSocket>
@@ -23,7 +23,7 @@
 #include <QMutex>
 #include <QElapsedTimer>
 
-#include "sdrdaemonfecbuffer.h"
+#include "sdrdaemonsourcebuffer.h"
 
 #define SDRDAEMONFEC_THROTTLE_MS 50
 
@@ -83,4 +83,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECUDPHANDLER_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_ */
