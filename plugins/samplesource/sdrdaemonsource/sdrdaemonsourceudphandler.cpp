@@ -26,7 +26,7 @@
 #include "sdrdaemonsourceinput.h"
 #include "sdrdaemonsourceudphandler.h"
 
-SDRdaemonFECUDPHandler::SDRdaemonFECUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *devieAPI) :
+SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *devieAPI) :
     m_deviceAPI(devieAPI),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
@@ -45,17 +45,17 @@ SDRdaemonFECUDPHandler::SDRdaemonFECUDPHandler(SampleSinkFifo *sampleFifo, Messa
 	m_tickCount(0),
 	m_samplesCount(0),
 	m_timer(0),
-    m_throttlems(SDRDAEMONFEC_THROTTLE_MS),
+    m_throttlems(SDRDAEMONSOURCE_THROTTLE_MS),
     m_readLengthSamples(0),
     m_readLength(0),
     m_throttleToggle(false),
-    m_rateDivider(1000/SDRDAEMONFEC_THROTTLE_MS),
+    m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_autoCorrBuffer(true)
 {
-    m_udpBuf = new char[SDRdaemonFECBuffer::m_udpPayloadSize];
+    m_udpBuf = new char[SDRdaemonSourceBuffer::m_udpPayloadSize];
 }
 
-SDRdaemonFECUDPHandler::~SDRdaemonFECUDPHandler()
+SDRdaemonSourceUDPHandler::~SDRdaemonSourceUDPHandler()
 {
 	stop();
 	delete[] m_udpBuf;
@@ -66,7 +66,7 @@ SDRdaemonFECUDPHandler::~SDRdaemonFECUDPHandler()
 #endif
 }
 
-void SDRdaemonFECUDPHandler::start()
+void SDRdaemonSourceUDPHandler::start()
 {
 	qDebug("SDRdaemonFECUDPHandler::start");
 
@@ -98,7 +98,7 @@ void SDRdaemonFECUDPHandler::start()
     m_elapsedTimer.start();
 }
 
-void SDRdaemonFECUDPHandler::stop()
+void SDRdaemonSourceUDPHandler::stop()
 {
 	qDebug("SDRdaemonFECUDPHandler::stop");
 
@@ -115,7 +115,7 @@ void SDRdaemonFECUDPHandler::stop()
 	}
 }
 
-void SDRdaemonFECUDPHandler::configureUDPLink(const QString& address, quint16 port)
+void SDRdaemonSourceUDPHandler::configureUDPLink(const QString& address, quint16 port)
 {
 	qDebug("SDRdaemonFECUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
 	bool addressOK = m_dataAddress.setAddress(address);
@@ -131,7 +131,7 @@ void SDRdaemonFECUDPHandler::configureUDPLink(const QString& address, quint16 po
 	start();
 }
 
-void SDRdaemonFECUDPHandler::dataReadyRead()
+void SDRdaemonSourceUDPHandler::dataReadyRead()
 {
     m_udpReadBytes = 0;
 
@@ -140,17 +140,17 @@ void SDRdaemonFECUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes += m_dataSocket->readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
 
-		if (m_udpReadBytes == SDRdaemonFECBuffer::m_udpPayloadSize) {
+		if (m_udpReadBytes == SDRdaemonSourceBuffer::m_udpPayloadSize) {
 		    processData();
 		    m_udpReadBytes = 0;
 		}
 	}
 }
 
-void SDRdaemonFECUDPHandler::processData()
+void SDRdaemonSourceUDPHandler::processData()
 {
     m_sdrDaemonBuffer.writeData(m_udpBuf);
-    const SDRdaemonFECBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    const SDRdaemonSourceBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 
     bool change = false;
 //    m_tv_sec = metaData.m_tv_sec;
@@ -174,7 +174,7 @@ void SDRdaemonFECUDPHandler::processData()
     {
         DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
-        SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData::create(
+        SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::create(
             m_samplerate,
             m_centerFrequency * 1000, // Frequency in Hz for the GUI
             m_tv_sec,
@@ -183,7 +183,7 @@ void SDRdaemonFECUDPHandler::processData()
     }
 }
 
-void SDRdaemonFECUDPHandler::connectTimer(const QTimer* timer)
+void SDRdaemonSourceUDPHandler::connectTimer(const QTimer* timer)
 {
 	qDebug() << "SDRdaemonFECUDPHandler::connectTimer";
 #ifdef USE_INTERNAL_TIMER
@@ -199,7 +199,7 @@ void SDRdaemonFECUDPHandler::connectTimer(const QTimer* timer)
     m_rateDivider = 1000 / m_throttlems;
 }
 
-void SDRdaemonFECUDPHandler::tick()
+void SDRdaemonSourceUDPHandler::tick()
 {
     // auto throttling
     int throttlems = m_elapsedTimer.restart();
@@ -215,7 +215,7 @@ void SDRdaemonFECUDPHandler::tick()
         m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
-    m_readLength = m_readLengthSamples * SDRdaemonFECBuffer::m_iqSampleSize;
+    m_readLength = m_readLengthSamples * SDRdaemonSourceBuffer::m_iqSampleSize;
 
     // read samples directly feeding the SampleFifo (no callback)
     m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
@@ -243,7 +243,7 @@ void SDRdaemonFECUDPHandler::tick()
 			framesDecodingStatus = 2;
 		}
 
-		SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming *report = SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::create(
+		SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::create(
 			m_tv_sec,
 			m_tv_usec,
 			m_sdrDaemonBuffer.getBufferLengthInSecs(),

@@ -30,12 +30,12 @@ namespace Ui {
 	class SDRdaemonSourceGui;
 }
 
-class SDRdaemonFECGui : public QWidget, public PluginGUI {
+class SDRdaemonSourceGui : public QWidget, public PluginGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
-	virtual ~SDRdaemonFECGui();
+	explicit SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	virtual ~SDRdaemonSourceGui();
 	void destroy();
 
 	void setName(const QString& name);
@@ -52,8 +52,8 @@ private:
 	Ui::SDRdaemonSourceGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
-    SDRdaemonFECSettings m_settings;        //!< current settings
-    SDRdaemonFECSettings m_controlSettings; //!< settings last sent to device via control port
+    SDRdaemonSourceSettings m_settings;        //!< current settings
+    SDRdaemonSourceSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;

@@ -25,31 +25,31 @@
 
 #include "sdrdaemonsourcebuffer.h"
 
-#define SDRDAEMONFEC_THROTTLE_MS 50
+#define SDRDAEMONSOURCE_THROTTLE_MS 50
 
 class SampleSinkFifo;
 class MessageQueue;
 class QTimer;
 class DeviceSourceAPI;
 
-class SDRdaemonFECUDPHandler : public QObject
+class SDRdaemonSourceUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonFECUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *deviceAPI);
-	~SDRdaemonFECUDPHandler();
+	SDRdaemonSourceUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *deviceAPI);
+	~SDRdaemonSourceUDPHandler();
 	void connectTimer(const QTimer* timer);
 	void start();
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
-    int getNbOriginalBlocks() const { return SDRdaemonFECBuffer::m_nbOriginalBlocks; }
+    int getNbOriginalBlocks() const { return SDRdaemonSourceBuffer::m_nbOriginalBlocks; }
 public slots:
 	void dataReadyRead();
 
 private:
 	DeviceSourceAPI *m_deviceAPI;
-	SDRdaemonFECBuffer m_sdrDaemonBuffer;
+	SDRdaemonSourceBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
 	QHostAddress m_remoteAddress;

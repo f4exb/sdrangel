@@ -41,7 +41,7 @@
 #include <dsp/filerecord.h>
 #include "sdrdaemonsourcegui.h"
 
-SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonSourceGui),
 	m_deviceAPI(deviceAPI),
@@ -98,7 +98,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	connect(&(deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
-	m_sampleSource = new SDRdaemonFECInput(deviceAPI->getMainWindow()->getMasterTimer(), m_deviceAPI);
+	m_sampleSource = new SDRdaemonSourceInput(deviceAPI->getMainWindow()->getMasterTimer(), m_deviceAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	m_deviceAPI->setSource(m_sampleSource);
 
@@ -120,7 +120,7 @@ SDRdaemonFECGui::SDRdaemonFECGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     sendSettings();
 }
 
-SDRdaemonFECGui::~SDRdaemonFECGui()
+SDRdaemonSourceGui::~SDRdaemonSourceGui()
 {
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
@@ -128,27 +128,27 @@ SDRdaemonFECGui::~SDRdaemonFECGui()
 	delete ui;
 }
 
-void SDRdaemonFECGui::blockApplySettings(bool block)
+void SDRdaemonSourceGui::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void SDRdaemonFECGui::destroy()
+void SDRdaemonSourceGui::destroy()
 {
 	delete this;
 }
 
-void SDRdaemonFECGui::setName(const QString& name)
+void SDRdaemonSourceGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString SDRdaemonFECGui::getName() const
+QString SDRdaemonSourceGui::getName() const
 {
 	return objectName();
 }
 
-void SDRdaemonFECGui::resetToDefaults()
+void SDRdaemonSourceGui::resetToDefaults()
 {
     blockApplySettings(true);
     m_settings.resetToDefaults();
@@ -157,12 +157,12 @@ void SDRdaemonFECGui::resetToDefaults()
     sendSettings();
 }
 
-QByteArray SDRdaemonFECGui::serialize() const
+QByteArray SDRdaemonSourceGui::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool SDRdaemonFECGui::deserialize(const QByteArray& data)
+bool SDRdaemonSourceGui::deserialize(const QByteArray& data)
 {
     blockApplySettings(true);
 
@@ -185,12 +185,12 @@ bool SDRdaemonFECGui::deserialize(const QByteArray& data)
     }
 }
 
-qint64 SDRdaemonFECGui::getCenterFrequency() const
+qint64 SDRdaemonSourceGui::getCenterFrequency() const
 {
     return m_settings.m_centerFrequency;
 }
 
-void SDRdaemonFECGui::setCenterFrequency(qint64 centerFrequency)
+void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
@@ -198,17 +198,17 @@ void SDRdaemonFECGui::setCenterFrequency(qint64 centerFrequency)
     sendSettings();
 }
 
-bool SDRdaemonFECGui::handleMessage(const Message& message)
+bool SDRdaemonSourceGui::handleMessage(const Message& message)
 {
-	if (SDRdaemonFECInput::MsgReportSDRdaemonAcquisition::match(message))
+	if (SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition::match(message))
 	{
-		m_acquisition = ((SDRdaemonFECInput::MsgReportSDRdaemonAcquisition&)message).getAcquisition();
+		m_acquisition = ((SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition&)message).getAcquisition();
 		updateWithAcquisition();
 		return true;
 	}
-	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData::match(message))
+	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::match(message))
 	{
-        int sampleRate = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getSampleRate();
+        int sampleRate = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).getSampleRate();
 
         if (m_sampleRate != sampleRate)
         {
@@ -217,30 +217,30 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
             sendControl();
         }
 
-        m_centerFrequency = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).getCenterFrequency();
-        m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_sec();
-        m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData&)message).get_tv_usec();
+        m_centerFrequency = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).getCenterFrequency();
+        m_startingTimeStamp.tv_sec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_sec();
+        m_startingTimeStamp.tv_usec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_usec();
 
         updateWithStreamData();
         return true;
 	}
-	else if (SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming::match(message))
+	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::match(message))
 	{
-		m_startingTimeStamp.tv_sec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_sec();
-		m_startingTimeStamp.tv_usec = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).get_tv_usec();
-		m_framesDecodingStatus = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getFramesDecodingStatus();
-		m_allBlocksReceived = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).allBlocksReceived();
-		m_bufferLengthInSecs = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferLengthInSecs();
-        m_bufferGauge = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getBufferGauge();
-        m_minNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbBlocks();
-        m_minNbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMinNbOriginalBlocks();
-        m_maxNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getMaxNbRecovery();
-        m_avgNbBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbBlocks();
-        m_avgNbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbOriginalBlocks();
-        m_avgNbRecovery = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getAvgNbRecovery();
-        m_nbOriginalBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbOriginalBlocksPerFrame();
+		m_startingTimeStamp.tv_sec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).get_tv_sec();
+		m_startingTimeStamp.tv_usec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).get_tv_usec();
+		m_framesDecodingStatus = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getFramesDecodingStatus();
+		m_allBlocksReceived = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).allBlocksReceived();
+		m_bufferLengthInSecs = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getBufferLengthInSecs();
+        m_bufferGauge = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getBufferGauge();
+        m_minNbBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getMinNbBlocks();
+        m_minNbOriginalBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getMinNbOriginalBlocks();
+        m_maxNbRecovery = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getMaxNbRecovery();
+        m_avgNbBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getAvgNbBlocks();
+        m_avgNbOriginalBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getAvgNbOriginalBlocks();
+        m_avgNbRecovery = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getAvgNbRecovery();
+        m_nbOriginalBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getNbOriginalBlocksPerFrame();
 
-        int nbFECBlocks = ((SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming&)message).getNbFECBlocksPerFrame();
+        int nbFECBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getNbFECBlocksPerFrame();
 
         if (m_nbFECBlocks != nbFECBlocks)
         {
@@ -258,7 +258,7 @@ bool SDRdaemonFECGui::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonFECGui::handleDSPMessages()
+void SDRdaemonSourceGui::handleDSPMessages()
 {
     Message* message;
 
@@ -280,7 +280,7 @@ void SDRdaemonFECGui::handleDSPMessages()
     }
 }
 
-void SDRdaemonFECGui::handleSourceMessages()
+void SDRdaemonSourceGui::handleSourceMessages()
 {
 	Message* message;
 
@@ -295,20 +295,20 @@ void SDRdaemonFECGui::handleSourceMessages()
 	}
 }
 
-void SDRdaemonFECGui::updateSampleRateAndFrequency()
+void SDRdaemonSourceGui::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
-void SDRdaemonFECGui::updateTxDelay()
+void SDRdaemonSourceGui::updateTxDelay()
 {
     m_txDelay = ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_nbFECBlocks);
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(m_txDelay*1e6, 'f', 0)));
 }
 
-void SDRdaemonFECGui::displaySettings()
+void SDRdaemonSourceGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->deviceRateText->setText(tr("%1k").arg(m_sampleRate / 1000.0));
@@ -336,10 +336,10 @@ void SDRdaemonFECGui::displaySettings()
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 }
 
-void SDRdaemonFECGui::sendControl(bool force)
+void SDRdaemonSourceGui::sendControl(bool force)
 {
     QString remoteAddress;
-    ((SDRdaemonFECInput *) m_sampleSource)->getRemoteAddress(remoteAddress);
+    ((SDRdaemonSourceInput *) m_sampleSource)->getRemoteAddress(remoteAddress);
 
     if ((remoteAddress != m_remoteAddress) ||
         (m_settings.m_controlPort != m_controlSettings.m_controlPort) || force)
@@ -454,13 +454,13 @@ void SDRdaemonFECGui::sendControl(bool force)
     m_controlSettings.m_specificParameters = m_settings.m_specificParameters;
 }
 
-void SDRdaemonFECGui::sendSettings()
+void SDRdaemonSourceGui::sendSettings()
 {
     if(!m_updateTimer.isActive())
         m_updateTimer.start(100);
 }
 
-void SDRdaemonFECGui::on_applyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_applyButton_clicked(bool checked __attribute__((unused)))
 {
     m_settings.m_address = ui->address->text();
 
@@ -483,20 +483,20 @@ void SDRdaemonFECGui::on_applyButton_clicked(bool checked __attribute__((unused)
     configureUDPLink();
 }
 
-void SDRdaemonFECGui::on_sendButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
     updateTxDelay();
     sendControl(true);
 	ui->specificParms->setCursorPosition(0);
 }
 
-void SDRdaemonFECGui::on_address_returnPressed()
+void SDRdaemonSourceGui::on_address_returnPressed()
 {
     m_settings.m_address = ui->address->text();
     configureUDPLink();
 }
 
-void SDRdaemonFECGui::on_dataPort_returnPressed()
+void SDRdaemonSourceGui::on_dataPort_returnPressed()
 {
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
@@ -513,7 +513,7 @@ void SDRdaemonFECGui::on_dataPort_returnPressed()
     configureUDPLink();
 }
 
-void SDRdaemonFECGui::on_controlPort_returnPressed()
+void SDRdaemonSourceGui::on_controlPort_returnPressed()
 {
     bool ctlOk;
     int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
@@ -530,7 +530,7 @@ void SDRdaemonFECGui::on_controlPort_returnPressed()
     sendControl();
 }
 
-void SDRdaemonFECGui::on_dcOffset_toggled(bool checked)
+void SDRdaemonSourceGui::on_dcOffset_toggled(bool checked)
 {
 	if (m_dcBlock != checked)
 	{
@@ -539,7 +539,7 @@ void SDRdaemonFECGui::on_dcOffset_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
+void SDRdaemonSourceGui::on_iqImbalance_toggled(bool checked)
 {
 	if (m_iqCorrection != checked)
 	{
@@ -548,19 +548,19 @@ void SDRdaemonFECGui::on_iqImbalance_toggled(bool checked)
 	}
 }
 
-void SDRdaemonFECGui::on_freq_changed(quint64 value)
+void SDRdaemonSourceGui::on_freq_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     sendControl();
 }
 
-void SDRdaemonFECGui::on_sampleRate_changed(quint64 value)
+void SDRdaemonSourceGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     sendControl();
 }
 
-void SDRdaemonFECGui::on_specificParms_returnPressed()
+void SDRdaemonSourceGui::on_specificParms_returnPressed()
 {
     if ((ui->specificParms->text()).size() > 0) {
         m_settings.m_specificParameters = ui->specificParms->text();
@@ -568,19 +568,19 @@ void SDRdaemonFECGui::on_specificParms_returnPressed()
     }
 }
 
-void SDRdaemonFECGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
+void SDRdaemonSourceGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
 {
     m_settings.m_log2Decim = ui->decim->currentIndex();
     sendControl();
 }
 
-void SDRdaemonFECGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
+void SDRdaemonSourceGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
     m_settings.m_fcPos = ui->fcPos->currentIndex();
     sendControl();
 }
 
-void SDRdaemonFECGui::on_txDelay_valueChanged(int value)
+void SDRdaemonSourceGui::on_txDelay_valueChanged(int value)
 {
     m_settings.m_txDelay = value / 100.0;
     ui->txDelayText->setText(tr("%1").arg(value));
@@ -588,7 +588,7 @@ void SDRdaemonFECGui::on_txDelay_valueChanged(int value)
     sendControl();
 }
 
-void SDRdaemonFECGui::on_nbFECBlocks_valueChanged(int value)
+void SDRdaemonSourceGui::on_nbFECBlocks_valueChanged(int value)
 {
     m_settings.m_nbFECBlocks = value;
     QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
@@ -596,7 +596,7 @@ void SDRdaemonFECGui::on_nbFECBlocks_valueChanged(int value)
     sendControl();
 }
 
-void SDRdaemonFECGui::on_startStop_toggled(bool checked)
+void SDRdaemonSourceGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
@@ -613,7 +613,7 @@ void SDRdaemonFECGui::on_startStop_toggled(bool checked)
     }
 }
 
-void SDRdaemonFECGui::on_record_toggled(bool checked)
+void SDRdaemonSourceGui::on_record_toggled(bool checked)
 {
     if (checked)
     {
@@ -627,7 +627,7 @@ void SDRdaemonFECGui::on_record_toggled(bool checked)
     }
 }
 
-void SDRdaemonFECGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
 {
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
@@ -636,7 +636,7 @@ void SDRdaemonFECGui::on_eventCountsReset_clicked(bool checked __attribute__((un
     displayEventTimer();
 }
 
-void SDRdaemonFECGui::displayEventCounts()
+void SDRdaemonSourceGui::displayEventCounts()
 {
     QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
     ui->eventUnrecText->setText(nstr);
@@ -644,7 +644,7 @@ void SDRdaemonFECGui::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
-void SDRdaemonFECGui::displayEventTimer()
+void SDRdaemonSourceGui::displayEventTimer()
 {
     int elapsedTimeMillis = m_eventsTime.elapsed();
     QTime recordLength(0, 0, 0, 0);
@@ -653,32 +653,32 @@ void SDRdaemonFECGui::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void SDRdaemonFECGui::configureUDPLink()
+void SDRdaemonSourceGui::configureUDPLink()
 {
 	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_settings.m_address.toStdString().c_str()
 			<< " : " << m_settings.m_dataPort;
 
-	SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink::create(m_settings.m_address, m_settings.m_dataPort);
+	SDRdaemonSourceInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonUDPLink::create(m_settings.m_address, m_settings.m_dataPort);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonFECGui::configureAutoCorrections()
+void SDRdaemonSourceGui::configureAutoCorrections()
 {
-	SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
+	SDRdaemonSourceInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonFECGui::updateWithAcquisition()
+void SDRdaemonSourceGui::updateWithAcquisition()
 {
 }
 
-void SDRdaemonFECGui::updateWithStreamData()
+void SDRdaemonSourceGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency / 1000);
 	updateWithStreamTime();
 }
 
-void SDRdaemonFECGui::updateWithStreamTime()
+void SDRdaemonSourceGui::updateWithStreamTime()
 {
 	bool updateEventCounts = false;
     quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
@@ -730,16 +730,16 @@ void SDRdaemonFECGui::updateWithStreamTime()
     displayEventTimer();
 }
 
-void SDRdaemonFECGui::updateHardware()
+void SDRdaemonSourceGui::updateHardware()
 {
     qDebug() << "SDRdaemonSinkGui::updateHardware";
-    SDRdaemonFECInput::MsgConfigureSDRdaemonFEC* message = SDRdaemonFECInput::MsgConfigureSDRdaemonFEC::create(m_settings, m_forceSettings);
+    SDRdaemonSourceInput::MsgConfigureSDRdaemonSource* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonSource::create(m_settings, m_forceSettings);
     m_sampleSource->getInputMessageQueue()->push(message);
     m_forceSettings = false;
     m_updateTimer.stop();
 }
 
-void SDRdaemonFECGui::updateStatus()
+void SDRdaemonSourceGui::updateStatus()
 {
     int state = m_deviceAPI->state();
 
@@ -768,10 +768,10 @@ void SDRdaemonFECGui::updateStatus()
     }
 }
 
-void SDRdaemonFECGui::tick()
+void SDRdaemonSourceGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0) {
-		SDRdaemonFECInput::MsgConfigureSDRdaemonStreamTiming* message = SDRdaemonFECInput::MsgConfigureSDRdaemonStreamTiming::create();
+		SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming::create();
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }

@@ -20,7 +20,7 @@
 #include <QByteArray>
 #include <QString>
 
-struct SDRdaemonFECSettings {
+struct SDRdaemonSourceSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Decim;
@@ -34,7 +34,7 @@ struct SDRdaemonFECSettings {
     bool    m_iqCorrection;
     quint32 m_fcPos;
 
-    SDRdaemonFECSettings();
+    SDRdaemonSourceSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

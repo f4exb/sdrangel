@@ -25,10 +25,10 @@
 
 
 
-const int SDRdaemonFECBuffer::m_sampleSize = 2;
-const int SDRdaemonFECBuffer::m_iqSampleSize = 2 * m_sampleSize;
+const int SDRdaemonSourceBuffer::m_sampleSize = 2;
+const int SDRdaemonSourceBuffer::m_iqSampleSize = 2 * m_sampleSize;
 
-SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
+SDRdaemonSourceBuffer::SDRdaemonSourceBuffer(uint32_t throttlems) :
         m_decoderIndexHead(nbDecoderSlots/2),
         m_frameHead(0),
         m_curNbBlocks(0),
@@ -65,14 +65,14 @@ SDRdaemonFECBuffer::SDRdaemonFECBuffer(uint32_t throttlems) :
     }
 }
 
-SDRdaemonFECBuffer::~SDRdaemonFECBuffer()
+SDRdaemonSourceBuffer::~SDRdaemonSourceBuffer()
 {
 	if (m_readBuffer) {
 		delete[] m_readBuffer;
 	}
 }
 
-void SDRdaemonFECBuffer::initDecodeAllSlots()
+void SDRdaemonSourceBuffer::initDecodeAllSlots()
 {
     for (int i = 0; i < nbDecoderSlots; i++)
     {
@@ -86,7 +86,7 @@ void SDRdaemonFECBuffer::initDecodeAllSlots()
     }
 }
 
-void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
+void SDRdaemonSourceBuffer::initDecodeSlot(int slotIndex)
 {
     // collect stats before voiding the slot
 
@@ -122,7 +122,7 @@ void SDRdaemonFECBuffer::initDecodeSlot(int slotIndex)
     memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
 }
 
-void SDRdaemonFECBuffer::initReadIndex()
+void SDRdaemonSourceBuffer::initReadIndex()
 {
     m_readIndex = ((m_decoderIndexHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
     m_wrDeltaEstimate = m_framesNbBytes / 2;
@@ -130,7 +130,7 @@ void SDRdaemonFECBuffer::initReadIndex()
     m_nbWrites = 0;
 }
 
-void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
+void SDRdaemonSourceBuffer::rwCorrectionEstimate(int slotIndex)
 {
 	if (m_nbReads >= 40) // check every ~1s as tick is ~50ms
 	{
@@ -163,7 +163,7 @@ void SDRdaemonFECBuffer::rwCorrectionEstimate(int slotIndex)
 	}
 }
 
-void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
+void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
 {
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
@@ -188,7 +188,7 @@ void SDRdaemonFECBuffer::checkSlotData(int slotIndex)
     }
 }
 
-void SDRdaemonFECBuffer::writeData(char *array)
+void SDRdaemonSourceBuffer::writeData(char *array)
 {
     SuperBlock *superBlock = (SuperBlock *) array;
     int frameIndex = superBlock->header.frameIndex;
@@ -321,7 +321,7 @@ void SDRdaemonFECBuffer::writeData(char *array)
     } // decode
 }
 
-void SDRdaemonFECBuffer::writeData0(char *array __attribute__((unused)), uint32_t length __attribute__((unused)))
+void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint32_t length __attribute__((unused)))
 {
 // Kept as comments for the out of sync blocks algorithms
 //    assert(length == m_udpPayloadSize);
@@ -394,7 +394,7 @@ void SDRdaemonFECBuffer::writeData0(char *array __attribute__((unused)), uint32_
 //
 }
 
-uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
+uint8_t *SDRdaemonSourceBuffer::readData(int32_t length)
 {
     uint8_t *buffer = (uint8_t *) m_frames;
     uint32_t readIndex = m_readIndex;
@@ -436,7 +436,7 @@ uint8_t *SDRdaemonFECBuffer::readData(int32_t length)
     }
 }
 
-void SDRdaemonFECBuffer::printMeta(const QString& header, MetaDataFEC *metaData)
+void SDRdaemonSourceBuffer::printMeta(const QString& header, MetaDataFEC *metaData)
 {
 	qDebug() << header << ": "
             << "|" << metaData->m_centerFrequency

@@ -20,17 +20,17 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-#define SDRDAEMONFEC_DEVICE_TYPE_ID "sdrangel.samplesource.sdrdaemonfec"
+#define SDRDAEMONSOURCE_DEVICE_TYPE_ID "sdrangel.samplesource.sdrdaemonsource"
 
 class PluginAPI;
 
-class SDRdaemonFECPlugin : public QObject, public PluginInterface {
+class SDRdaemonSourcePlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID SDRDAEMONFEC_DEVICE_TYPE_ID)
+	Q_PLUGIN_METADATA(IID SDRDAEMONSOURCE_DEVICE_TYPE_ID)
 
 public:
-	explicit SDRdaemonFECPlugin(QObject* parent = NULL);
+	explicit SDRdaemonSourcePlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);

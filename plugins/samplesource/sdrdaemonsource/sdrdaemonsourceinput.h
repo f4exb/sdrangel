@@ -27,27 +27,27 @@
 #include "sdrdaemonsourcesettings.h"
 
 class DeviceSourceAPI;
-class SDRdaemonFECUDPHandler;
+class SDRdaemonSourceUDPHandler;
 
-class SDRdaemonFECInput : public DeviceSampleSource {
+class SDRdaemonSourceInput : public DeviceSampleSource {
 public:
-    class MsgConfigureSDRdaemonFEC : public Message {
+    class MsgConfigureSDRdaemonSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const SDRdaemonFECSettings& getSettings() const { return m_settings; }
+        const SDRdaemonSourceSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSDRdaemonFEC* create(const SDRdaemonFECSettings& settings, bool force = false)
+        static MsgConfigureSDRdaemonSource* create(const SDRdaemonSourceSettings& settings, bool force = false)
         {
-            return new MsgConfigureSDRdaemonFEC(settings, force);
+            return new MsgConfigureSDRdaemonSource(settings, force);
         }
 
     private:
-        SDRdaemonFECSettings m_settings;
+        SDRdaemonSourceSettings m_settings;
         bool m_force;
 
-        MsgConfigureSDRdaemonFEC(const SDRdaemonFECSettings& settings, bool force) :
+        MsgConfigureSDRdaemonSource(const SDRdaemonSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -156,7 +156,7 @@ public:
 		{ }
 	};
 
-	class MsgReportSDRdaemonFECStreamData : public Message {
+	class MsgReportSDRdaemonSourceStreamData : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -165,9 +165,9 @@ public:
 		uint32_t get_tv_sec() const { return m_tv_sec; }
 		uint32_t get_tv_usec() const { return m_tv_usec; }
 
-		static MsgReportSDRdaemonFECStreamData* create(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec)
+		static MsgReportSDRdaemonSourceStreamData* create(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec)
 		{
-			return new MsgReportSDRdaemonFECStreamData(sampleRate, centerFrequency, tv_sec, tv_usec);
+			return new MsgReportSDRdaemonSourceStreamData(sampleRate, centerFrequency, tv_sec, tv_usec);
 		}
 
 	protected:
@@ -176,7 +176,7 @@ public:
 		uint32_t m_tv_sec;
 		uint32_t m_tv_usec;
 
-		MsgReportSDRdaemonFECStreamData(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec) :
+		MsgReportSDRdaemonSourceStreamData(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
@@ -185,7 +185,7 @@ public:
 		{ }
 	};
 
-	class MsgReportSDRdaemonFECStreamTiming : public Message {
+	class MsgReportSDRdaemonSourceStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -204,7 +204,7 @@ public:
         int getNbOriginalBlocksPerFrame() const { return m_nbOriginalBlocksPerFrame; }
         int getNbFECBlocksPerFrame() const { return m_nbFECBlocksPerFrame; }
 
-		static MsgReportSDRdaemonFECStreamTiming* create(uint32_t tv_sec,
+		static MsgReportSDRdaemonSourceStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
@@ -219,7 +219,7 @@ public:
                 int nbOriginalBlocksPerFrame,
                 int nbFECBlocksPerFrame)
 		{
-			return new MsgReportSDRdaemonFECStreamTiming(tv_sec,
+			return new MsgReportSDRdaemonSourceStreamTiming(tv_sec,
 					tv_usec,
 					bufferLenSec,
                     bufferGauge,
@@ -251,7 +251,7 @@ public:
         int      m_nbOriginalBlocksPerFrame;
         int      m_nbFECBlocksPerFrame;
 
-		MsgReportSDRdaemonFECStreamTiming(uint32_t tv_sec,
+		MsgReportSDRdaemonSourceStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
 				float bufferLenSec,
                 int32_t bufferGauge,
@@ -283,8 +283,8 @@ public:
 		{ }
 	};
 
-	SDRdaemonFECInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
-	virtual ~SDRdaemonFECInput();
+	SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
+	virtual ~SDRdaemonSourceInput();
 
 	virtual bool start();
 	virtual void stop();
@@ -302,7 +302,7 @@ private:
 	QMutex m_mutex;
 	QString m_address;
 	quint16 m_port;
-	SDRdaemonFECUDPHandler* m_SDRdaemonUDPHandler;
+	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
 	QString m_deviceDescription;
 	int m_sampleRate;
 	quint64 m_centerFrequency;

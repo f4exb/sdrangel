@@ -24,11 +24,11 @@
 #include "util/movingaverage.h"
 
 
-#define SDRDAEMONFEC_UDPSIZE 512               // UDP payload size
-#define SDRDAEMONFEC_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
-#define SDRDAEMONFEC_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
+#define SDRDAEMONSOURCE_UDPSIZE 512               // UDP payload size
+#define SDRDAEMONSOURCE_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
+#define SDRDAEMONSOURCE_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
-class SDRdaemonFECBuffer
+class SDRdaemonSourceBuffer
 {
 public:
 #pragma pack(push, 1)
@@ -68,8 +68,8 @@ public:
         uint8_t  filler;
     };
 
-    static const int samplesPerBlock = (SDRDAEMONFEC_UDPSIZE - sizeof(Header)) / sizeof(Sample);
-    static const int framesSize = SDRDAEMONFEC_NBDECODERSLOTS * (SDRDAEMONFEC_NBORIGINALBLOCKS - 1) * (SDRDAEMONFEC_UDPSIZE - sizeof(Header));
+    static const int samplesPerBlock = (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header)) / sizeof(Sample);
+    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDAEMONSOURCE_NBORIGINALBLOCKS - 1) * (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header));
 
     struct ProtectedBlock
     {
@@ -83,8 +83,8 @@ public:
     };
 #pragma pack(pop)
 
-	SDRdaemonFECBuffer(uint32_t throttlems);
-	~SDRdaemonFECBuffer();
+	SDRdaemonSourceBuffer(uint32_t throttlems);
+	~SDRdaemonSourceBuffer();
 
 	// R/W operations
 	void writeData(char *array); //!< Write data into buffer.
@@ -156,13 +156,13 @@ public:
         }
     }
 
-    static const int m_udpPayloadSize = SDRDAEMONFEC_UDPSIZE;
-    static const int m_nbOriginalBlocks = SDRDAEMONFEC_NBORIGINALBLOCKS;
+    static const int m_udpPayloadSize = SDRDAEMONSOURCE_UDPSIZE;
+    static const int m_nbOriginalBlocks = SDRDAEMONSOURCE_NBORIGINALBLOCKS;
 	static const int m_sampleSize;
 	static const int m_iqSampleSize;
 
 private:
-    static const int nbDecoderSlots = SDRDAEMONFEC_NBDECODERSLOTS;
+    static const int nbDecoderSlots = SDRDAEMONSOURCE_NBDECODERSLOTS;
 
 #pragma pack(push, 1)
     struct BufferFrame

@@ -28,16 +28,16 @@
 #include "sdrdaemonsourceinput.h"
 #include "sdrdaemonsourceudphandler.h"
 
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonFEC, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonAutoCorr, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonWork, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonAcquisition, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamData, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgReportSDRdaemonFECStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonSource, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonUDPLink, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonAutoCorr, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonWork, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming, Message)
 
-SDRdaemonFECInput::SDRdaemonFECInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
+SDRdaemonSourceInput::SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),
@@ -51,17 +51,17 @@ SDRdaemonFECInput::SDRdaemonFECInput(const QTimer& masterTimer, DeviceSourceAPI 
     m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonFECUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_deviceAPI);
+	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_deviceAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 }
 
-SDRdaemonFECInput::~SDRdaemonFECInput()
+SDRdaemonSourceInput::~SDRdaemonSourceInput()
 {
 	stop();
 	delete m_SDRdaemonUDPHandler;
 }
 
-bool SDRdaemonFECInput::start()
+bool SDRdaemonSourceInput::start()
 {
 	qDebug() << "SDRdaemonInput::start";
 	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(true);
@@ -69,34 +69,34 @@ bool SDRdaemonFECInput::start()
 	return true;
 }
 
-void SDRdaemonFECInput::stop()
+void SDRdaemonSourceInput::stop()
 {
 	qDebug() << "SDRdaemonInput::stop";
 	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(false);
 	getInputMessageQueue()->push(command);
 }
 
-const QString& SDRdaemonFECInput::getDeviceDescription() const
+const QString& SDRdaemonSourceInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int SDRdaemonFECInput::getSampleRate() const
+int SDRdaemonSourceInput::getSampleRate() const
 {
 	return m_sampleRate;
 }
 
-quint64 SDRdaemonFECInput::getCenterFrequency() const
+quint64 SDRdaemonSourceInput::getCenterFrequency() const
 {
 	return m_centerFrequency;
 }
 
-std::time_t SDRdaemonFECInput::getStartingTimeStamp() const
+std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-void SDRdaemonFECInput::getRemoteAddress(QString &s)
+void SDRdaemonSourceInput::getRemoteAddress(QString &s)
 {
 	if (m_SDRdaemonUDPHandler) {
 		m_SDRdaemonUDPHandler->getRemoteAddress(s);
@@ -104,9 +104,9 @@ void SDRdaemonFECInput::getRemoteAddress(QString &s)
 }
 
 
-bool SDRdaemonFECInput::handleMessage(const Message& message)
+bool SDRdaemonSourceInput::handleMessage(const Message& message)
 {
-    if (MsgConfigureSDRdaemonFEC::match(message))
+    if (MsgConfigureSDRdaemonSource::match(message))
     {
         qDebug() << "SDRdaemonFECInput::handleMessage:" << message.getIdentifier();
         //MsgConfigureSDRdaemonFEC& conf = (MsgConfigureSDRdaemonFEC&) message;

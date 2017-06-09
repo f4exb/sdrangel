@@ -24,8 +24,8 @@
 #include "sdrdaemonsourcegui.h"
 #include "sdrdaemonsourceplugin.h"
 
-const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
-	QString("SDRdaemon with FEC input"),
+const PluginDescriptor SDRdaemonSourcePlugin::m_pluginDescriptor = {
+	QString("SDRdaemon source input"),
 	QString("3.5.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -33,32 +33,32 @@ const PluginDescriptor SDRdaemonFECPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString SDRdaemonFECPlugin::m_hardwareID = "SDRdaemonFEC";
-const QString SDRdaemonFECPlugin::m_deviceTypeID = SDRDAEMONFEC_DEVICE_TYPE_ID;
+const QString SDRdaemonSourcePlugin::m_hardwareID = "SDRdaemonSource";
+const QString SDRdaemonSourcePlugin::m_deviceTypeID = SDRDAEMONSOURCE_DEVICE_TYPE_ID;
 
-SDRdaemonFECPlugin::SDRdaemonFECPlugin(QObject* parent) :
+SDRdaemonSourcePlugin::SDRdaemonSourcePlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& SDRdaemonFECPlugin::getPluginDescriptor() const
+const PluginDescriptor& SDRdaemonSourcePlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void SDRdaemonFECPlugin::initPlugin(PluginAPI* pluginAPI)
+void SDRdaemonSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices SDRdaemonFECPlugin::enumSampleSources()
+PluginInterface::SamplingDevices SDRdaemonSourcePlugin::enumSampleSources()
 {
 	SamplingDevices result;
 	int count = 1;
 
 	for(int i = 0; i < count; i++)
 	{
-		QString displayedName(QString("SDRdaemonFEC[%1]").arg(i));
+		QString displayedName(QString("SDRdaemonSource[%1]").arg(i));
 
 		result.append(SamplingDevice(displayedName,
 		        m_hardwareID,
@@ -70,11 +70,11 @@ PluginInterface::SamplingDevices SDRdaemonFECPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* SDRdaemonFECPlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginGUI* SDRdaemonSourcePlugin::createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		SDRdaemonFECGui* gui = new SDRdaemonFECGui(deviceAPI);
+		SDRdaemonSourceGui* gui = new SDRdaemonSourceGui(deviceAPI);
 		*widget = gui;
 		return gui;
 	}

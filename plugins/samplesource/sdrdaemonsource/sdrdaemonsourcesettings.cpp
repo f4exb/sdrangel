@@ -17,12 +17,12 @@
 #include "util/simpleserializer.h"
 #include "sdrdaemonsourcesettings.h"
 
-SDRdaemonFECSettings::SDRdaemonFECSettings()
+SDRdaemonSourceSettings::SDRdaemonSourceSettings()
 {
     resetToDefaults();
 }
 
-void SDRdaemonFECSettings::resetToDefaults()
+void SDRdaemonSourceSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_sampleRate = 256000;
@@ -38,7 +38,7 @@ void SDRdaemonFECSettings::resetToDefaults()
     m_fcPos = 2; // center
 }
 
-QByteArray SDRdaemonFECSettings::serialize() const
+QByteArray SDRdaemonSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
 
@@ -57,7 +57,7 @@ QByteArray SDRdaemonFECSettings::serialize() const
     return s.final();
 }
 
-bool SDRdaemonFECSettings::deserialize(const QByteArray& data)
+bool SDRdaemonSourceSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
