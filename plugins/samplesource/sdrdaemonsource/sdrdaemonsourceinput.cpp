@@ -108,8 +108,8 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 {
     if (MsgConfigureSDRdaemonSource::match(message))
     {
-        qDebug() << "SDRdaemonFECInput::handleMessage:" << message.getIdentifier();
-        //MsgConfigureSDRdaemonFEC& conf = (MsgConfigureSDRdaemonFEC&) message;
+        qDebug() << "SDRdaemonSourceInput::handleMessage:" << message.getIdentifier();
+        //SDRdaemonSourceInput& conf = (MsgConfigureSDRdaemonFEC&) message;
         //applySettings(conf.getSettings(), conf.getForce());
         return true;
     }

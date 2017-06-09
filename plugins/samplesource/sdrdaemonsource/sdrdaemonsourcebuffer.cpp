@@ -59,7 +59,7 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer(uint32_t throttlems) :
 
     if (!m_cm256.isInitialized()) {
         m_cm256_OK = false;
-        qDebug() << "SDRdaemonFECBuffer::SDRdaemonFECBuffer: cannot initialize CM256 library";
+        qDebug() << "SDRdaemonSourceBuffer::SDRdaemonSourceBuffer: cannot initialize CM256 library";
     } else {
         m_cm256_OK = true;
     }
@@ -182,7 +182,7 @@ void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
 
     if (!m_decoderSlots[slotIndex].m_decoded)
     {
-        qDebug() << "SDRdaemonFECBuffer::checkSlotData: incomplete frame:"
+        qDebug() << "SDRdaemonSourceBuffer::checkSlotData: incomplete frame:"
                 << " m_blockCount: " << m_decoderSlots[slotIndex].m_blockCount
                 << " m_recoveryCount: " << m_decoderSlots[slotIndex].m_recoveryCount;
     }
@@ -258,13 +258,13 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
             if (m_cm256.cm256_decode(m_paramsCM256, m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qDebug() << "SDRdaemonFECBuffer::writeData: decode CM256 error:"
+                qDebug() << "SDRdaemonSourceBuffer::writeData: decode CM256 error:"
                         << " m_originalCount: " << m_decoderSlots[decoderIndex].m_originalCount
                         << " m_recoveryCount: " << m_decoderSlots[decoderIndex].m_recoveryCount;
             }
             else
             {
-                qDebug() << "SDRdaemonFECBuffer::writeData: decode CM256 success:"
+                qDebug() << "SDRdaemonSourceBuffer::writeData: decode CM256 success:"
                         << " m_originalCount: " << m_decoderSlots[decoderIndex].m_originalCount
                         << " m_recoveryCount: " << m_decoderSlots[decoderIndex].m_recoveryCount;
 
@@ -284,17 +284,17 @@ void SDRdaemonSourceBuffer::writeData(char *array)
                         if (crc32.checksum() == metaData->m_crc32)
                         {
                             m_decoderSlots[decoderIndex].m_metaRetrieved = true;
-                            printMeta("SDRdaemonFECBuffer::writeData: recovered meta", metaData);
+                            printMeta("SDRdaemonSourceBuffer::writeData: recovered meta", metaData);
                         }
                         else
                         {
-                            qDebug() << "SDRdaemonFECBuffer::writeData: recovered meta: invalid CRC32";
+                            qDebug() << "SDRdaemonSourceBuffer::writeData: recovered meta: invalid CRC32";
                         }
                     }
 
                     storeOriginalBlock(decoderIndex, blockIndex, *recoveredBlock);
 
-                    qDebug() << "SDRdaemonFECBuffer::writeData: recovered block #" << blockIndex;
+                    qDebug() << "SDRdaemonSourceBuffer::writeData: recovered block #" << blockIndex;
                 } // restore missing blocks
             } // CM256 decode
         } // revovery
@@ -313,7 +313,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
                     m_readNbBytes = (sampleRate * m_iqSampleSize) / 20;
                 }
 
-                printMeta("SDRdaemonFECBuffer::writeData: new meta", metaData); // print for change other than timestamp
+                printMeta("SDRdaemonSourceBuffer::writeData: new meta", metaData); // print for change other than timestamp
             }
 
             m_currentMeta = *metaData; // renew current meta
@@ -332,7 +332,7 @@ void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint
 //    int decoderIndex = frameIndex % nbDecoderSlots;
 //    int blockIndex = superBlock->header.blockIndex;
 //
-////    qDebug() << "SDRdaemonFECBuffer::writeData:"
+////    qDebug() << "SDRdaemonSourceBuffer::writeData:"
 ////            << " frameIndex: " << frameIndex
 ////            << " decoderIndex: " << decoderIndex
 ////            << " blockIndex: " << blockIndex;
@@ -352,7 +352,7 @@ void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint
 //        {
 //            if (-frameDelta < nbDecoderSlots) // new frame head not too new
 //            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (1): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
+//                //qDebug() << "SDRdaemonSourceBuffer::writeData: new frame head (1): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
 //                m_decoderIndexHead = decoderIndex; // new decoder slot head
 //                m_frameHead = frameIndex;
 //                checkSlotData(decoderIndex);
@@ -361,7 +361,7 @@ void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint
 //            }
 //            else if (-frameDelta <= 65536 - nbDecoderSlots) // loss of sync start over
 //            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (1)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
+//                //qDebug() << "SDRdaemonSourceBuffer::writeData: loss of sync start over (1)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
 //                m_decoderIndexHead = decoderIndex; // new decoder slot head
 //                m_frameHead = frameIndex;
 //                initReadIndex(); // reset read index
@@ -372,7 +372,7 @@ void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint
 //        {
 //            if (frameDelta > 65536 - nbDecoderSlots) // new frame head not too new
 //            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: new frame head (2): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
+//                //qDebug() << "SDRdaemonSourceBuffer::writeData: new frame head (2): " << frameIndex << ":" << frameDelta << ":" << decoderIndex;
 //                m_decoderIndexHead = decoderIndex; // new decoder slot head
 //                m_frameHead = frameIndex;
 //                checkSlotData(decoderIndex);
@@ -381,7 +381,7 @@ void SDRdaemonSourceBuffer::writeData0(char *array __attribute__((unused)), uint
 //            }
 //            else if (frameDelta >= nbDecoderSlots) // loss of sync start over
 //            {
-//                //qDebug() << "SDRdaemonFECBuffer::writeData: loss of sync start over (2)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
+//                //qDebug() << "SDRdaemonSourceBuffer::writeData: loss of sync start over (2)" << frameIndex << ":" << frameDelta << ":" << decoderIndex;
 //                m_decoderIndexHead = decoderIndex; // new decoder slot head
 //                m_frameHead = frameIndex;
 //                initReadIndex(); // reset read index

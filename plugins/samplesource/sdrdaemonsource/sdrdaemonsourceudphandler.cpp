@@ -68,7 +68,7 @@ SDRdaemonSourceUDPHandler::~SDRdaemonSourceUDPHandler()
 
 void SDRdaemonSourceUDPHandler::start()
 {
-	qDebug("SDRdaemonFECUDPHandler::start");
+	qDebug("SDRdaemonSourceUDPHandler::start");
 
 	if (!m_dataSocket)
 	{
@@ -81,12 +81,12 @@ void SDRdaemonSourceUDPHandler::start()
 
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
-			qDebug("SDRdaemonFECUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+			qDebug("SDRdaemonSourceUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
 			m_dataConnected = true;
 		}
 		else
 		{
-			qWarning("SDRdaemonFECUDPHandler::start: cannot bind data port %d", m_dataPort);
+			qWarning("SDRdaemonSourceUDPHandler::start: cannot bind data port %d", m_dataPort);
 	        disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
 			m_dataConnected = false;
 		}
@@ -100,7 +100,7 @@ void SDRdaemonSourceUDPHandler::start()
 
 void SDRdaemonSourceUDPHandler::stop()
 {
-	qDebug("SDRdaemonFECUDPHandler::stop");
+	qDebug("SDRdaemonSourceUDPHandler::stop");
 
     if (m_dataConnected)
     {
@@ -117,12 +117,12 @@ void SDRdaemonSourceUDPHandler::stop()
 
 void SDRdaemonSourceUDPHandler::configureUDPLink(const QString& address, quint16 port)
 {
-	qDebug("SDRdaemonFECUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
+	qDebug("SDRdaemonSourceUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
 	bool addressOK = m_dataAddress.setAddress(address);
 
 	if (!addressOK)
 	{
-		qWarning("SDRdaemonFECUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+		qWarning("SDRdaemonSourceUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
 		m_dataAddress = QHostAddress::LocalHost;
 	}
 
@@ -185,7 +185,7 @@ void SDRdaemonSourceUDPHandler::processData()
 
 void SDRdaemonSourceUDPHandler::connectTimer(const QTimer* timer)
 {
-	qDebug() << "SDRdaemonFECUDPHandler::connectTimer";
+	qDebug() << "SDRdaemonSourceUDPHandler::connectTimer";
 #ifdef USE_INTERNAL_TIMER
 #warning "Uses internal timer"
     m_timer = new QTimer();

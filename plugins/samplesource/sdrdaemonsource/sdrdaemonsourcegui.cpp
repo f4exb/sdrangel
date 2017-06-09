@@ -349,9 +349,9 @@ void SDRdaemonSourceGui::sendControl(bool force)
         int rc = nn_shutdown(m_sender, 0);
 
         if (rc < 0) {
-            qDebug() << "SDRdaemonFECGui::sendControl: disconnection failed";
+            qDebug() << "SDRdaemonSourceGui::sendControl: disconnection failed";
         } else {
-            qDebug() << "SDRdaemonFECGui::sendControl: disconnection successful";
+            qDebug() << "SDRdaemonSourceGui::sendControl: disconnection successful";
         }
 
         std::ostringstream os;
@@ -360,10 +360,10 @@ void SDRdaemonSourceGui::sendControl(bool force)
         rc = nn_connect(m_sender, addrstrng.c_str());
 
         if (rc < 0) {
-            qDebug() << "SDRdaemonFECGui::sendConfiguration: connexion to " << addrstrng.c_str() << " failed";
+            qDebug() << "SDRdaemonSourceGui::sendConfiguration: connexion to " << addrstrng.c_str() << " failed";
             QMessageBox::information(this, tr("Message"), tr("Cannot connect to remote control port"));
         } else {
-            qDebug() << "SDRdaemonFECGui::sendConfiguration: connexion to " << addrstrng.c_str() << " successful";
+            qDebug() << "SDRdaemonSourceGui::sendConfiguration: connexion to " << addrstrng.c_str() << " successful";
         }
     }
 
@@ -430,14 +430,14 @@ void SDRdaemonSourceGui::sendControl(bool force)
         if (rc != config_size)
         {
             //QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
-            qDebug() << "SDRdaemonFECGui::sendControl: Cannot send message to remote control port."
+            qDebug() << "SDRdaemonSourceGui::sendControl: Cannot send message to remote control port."
                 << " remoteAddress: " << m_remoteAddress
                 << " remotePort: " << m_settings.m_controlPort
                 << " message: " << os.str().c_str();
         }
         else
         {
-            qDebug() << "SDRdaemonFECGui::sendControl:"
+            qDebug() << "SDRdaemonSourceGui::sendControl:"
                 << "remoteAddress:" << m_remoteAddress
                 << "remotePort:" << m_settings.m_controlPort
                 << "message:" << os.str().c_str();

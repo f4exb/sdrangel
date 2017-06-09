@@ -1,4 +1,4 @@
-<h1>SDRdaemonFEC plugin</h1>
+<h1>SDRdaemon source plugin</h1>
 
 <h2>Introduction</h2>
 
