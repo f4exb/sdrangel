@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "sdrdaemonfecgui.h"
+
 #include <stdint.h>
 #include <sstream>
 #include <iostream>
@@ -36,8 +38,6 @@
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
 #include "util/simpleserializer.h"
-
-#include "sdrdaemonfecgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>

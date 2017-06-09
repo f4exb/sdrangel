@@ -14,12 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "sdrdaemonfecplugin.h"
+
 #include <QtPlugin>
 #include <QAction>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-
-#include "sdrdaemonfecplugin.h"
 
 #include <device/devicesourceapi.h>
 

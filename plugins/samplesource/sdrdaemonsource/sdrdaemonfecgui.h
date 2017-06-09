@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONFECGUI_H
-#define INCLUDE_SDRDAEMONFECGUI_H
+#ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
+#define INCLUDE_SDRDAEMONSOURCEGUI_H
 
 #include <QTimer>
 #include <sys/time.h>
@@ -145,4 +145,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_SDRDAEMONGUI_H
+#endif // INCLUDE_SDRDAEMONSOURCEGUI_H

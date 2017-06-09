@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONFECINPUT_H
-#define INCLUDE_SDRDAEMONFECINPUT_H
+#ifndef INCLUDE_SDRDAEMONSOURCEINPUT_H
+#define INCLUDE_SDRDAEMONSOURCEINPUT_H
 
 #include <dsp/devicesamplesource.h>
 #include <QString>
@@ -312,4 +312,4 @@ private:
     bool m_autoCorrBuffer;
 };
 
-#endif // INCLUDE_SDRDAEMONFECINPUT_H
+#endif // INCLUDE_SDRDAEMONSOURCEINPUT_H

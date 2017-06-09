@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "sdrdaemonfecudphandler.h"
+
 #include <QUdpSocket>
 #include <QDebug>
 #include <QTimer>
@@ -21,9 +23,8 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "sdrdaemonfecinput.h"
-#include "sdrdaemonfecudphandler.h"
 #include <device/devicesourceapi.h>
+#include "../sdrdaemonsource/sdrdaemonfecinput.h"
 
 SDRdaemonFECUDPHandler::SDRdaemonFECUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *devieAPI) :
     m_deviceAPI(devieAPI),

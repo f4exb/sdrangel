@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONFEC_SDRDAEMONFECBUFFER_H_
-#define PLUGINS_SAMPLESOURCE_SDRDAEMONFEC_SDRDAEMONFECBUFFER_H_
+#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECBUFFER_H_
+#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECBUFFER_H_
 
 #include <QString>
 #include <QDebug>
@@ -270,4 +270,4 @@ private:
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONFEC_SDRDAEMONFECBUFFER_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONFECBUFFER_H_ */

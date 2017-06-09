@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "sdrdaemonfecinput.h"
+
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
@@ -21,13 +23,11 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "sdrdaemonfecinput.h"
-
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
-#include "sdrdaemonfecgui.h"
-#include "sdrdaemonfecudphandler.h"
+#include "../sdrdaemonsource/sdrdaemonfecgui.h"
+#include "../sdrdaemonsource/sdrdaemonfecudphandler.h"
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonFEC, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonFECInput::MsgConfigureSDRdaemonUDPLink, Message)

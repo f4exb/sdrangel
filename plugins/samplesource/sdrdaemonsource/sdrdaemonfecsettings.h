@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,35 +14,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONFECPLUGIN_H
-#define INCLUDE_SDRDAEMONFECPLUGIN_H
+#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCESETTINGS_H_
+#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCESETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QByteArray>
+#include <QString>
 
-#define SDRDAEMONFEC_DEVICE_TYPE_ID "sdrangel.samplesource.sdrdaemonfec"
+struct SDRdaemonFECSettings {
+    quint64 m_centerFrequency;
+    quint64 m_sampleRate;
+    quint32 m_log2Decim;
+    float   m_txDelay;
+    quint32 m_nbFECBlocks;
+    QString m_address;
+    quint16 m_dataPort;
+    quint16 m_controlPort;
+    QString m_specificParameters;
+    bool    m_dcBlock;
+    bool    m_iqCorrection;
+    quint32 m_fcPos;
 
-class PluginAPI;
-
-class SDRdaemonFECPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID SDRDAEMONFEC_DEVICE_TYPE_ID)
-
-public:
-	explicit SDRdaemonFECPlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    SDRdaemonFECSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_SDRDAEMONFECPLUGIN_H
+#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCESETTINGS_H_ */
