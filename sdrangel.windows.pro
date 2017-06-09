@@ -22,7 +22,6 @@ SUBDIRS += dsdcc
 SUBDIRS += serialdv
 CONFIG(MINGW64)SUBDIRS += cm256cc
 SUBDIRS += plugins/samplesource/filesource
-CONFIG(MINGW64)SUBDIRS += plugins/samplesource/sdrdaemon
 CONFIG(MINGW64)SUBDIRS += plugins/samplesource/sdrdaemonsource
 SUBDIRS += plugins/samplesource/rtlsdr
 SUBDIRS += plugins/samplesource/hackrfinput

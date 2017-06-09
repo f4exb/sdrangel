@@ -55,12 +55,6 @@ if(LIBUSB_FOUND AND LIMESUITE_FOUND)
     add_subdirectory(limesdrinput)
 endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
 
-find_package(LZ4)
-find_package(LibNANOMSG)
-if(LIBNANOMSG_FOUND AND LIBLZ4_FOUND)
-    add_subdirectory(sdrdaemon)
-endif(LIBNANOMSG_FOUND AND LIBLZ4_FOUND)
-
 find_package(CM256cc)
 if(CM256CC_FOUND AND LIBNANOMSG_FOUND)
     add_subdirectory(sdrdaemonsource)
