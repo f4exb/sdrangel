@@ -1,6 +1,6 @@
 ![SDR Angel banner](doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5/OpenGL SDR and signal analyzer frontend to various hardware.
+**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
 
 <h1>Source code</h1>
 
@@ -20,6 +20,13 @@ channelrx:
   - demodlora
   - tcpsrc (although it has evolved please use the udpsrc plugin instead)
 
+<h2>Deprecated plugins</h2>
+
+These plugins are still present at least in the code but have been superceded:
+
+  - chanalyzer: the Channel Analyzer channel plugin is superceded by the "new generation" Channel Analyzer NG (chanalyzerng)
+  - sdrdaemon: the SDRdaemon input plugin is superceded by the SDRdaemon source input plugin (sdrdaemonsource). The plugin is not part of the build anymore.
+
 <h1>Specific features</h1>
 
 <h2>Multiple device support</h2>
@@ -34,6 +41,7 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) not for Win32
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
+  - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink)
 
 <h1>Supported hardware</h1>
 
@@ -118,9 +126,11 @@ If you use your own location for libmirisdr-4 install directory you need to spec
 
 <h1>Plugins for special devices</h1>
 
+These plugins do not use any hardware device connected to your system. They support "virtual" devices related to the file system or the network.
+
 <h2>File input</h2>
 
-The file source plugin allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Click on the record button on the left of the main frequency dial to toggle recording. The file has a fixed name `test_<n>.sdriq` created in the current directory where `<n>` is the device tab index.
+The [File source plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/filesource) allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Click on the record button on the left of the main frequency dial to toggle recording. The file has a fixed name `test_<n>.sdriq` created in the current directory where `<n>` is the device tab index.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
 
@@ -128,29 +138,33 @@ The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header contain
 
 <h2>File output</h2>
 
-The file sink plugin allows the recording of the I/Q baseband signal produced by a transmission chain to a file in the `.sdriq` format thus readable by the file source plugin described just above.
+The [File sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink) allows the recording of the I/Q baseband signal produced by a transmission chain to a file in the `.sdriq` format thus readable by the file source plugin described just above.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSink[0]` even if no physical device is connected.
 
-<h2>SDRdaemon input</h2>
+<h2>SDRdaemon receiver input</h2>
 
-This is the client side of the SDRdaemon server. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the address and UDP port to which the server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency.
+The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hadrware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
+
+The data blocks transmitted via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
 There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second.
 
-This plugin will be built only if the lz4 and libnanomsg libraries are installed in your system. These libraries are available as dev packages in most distributions.
+This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemon[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected.
 
-<h2>SDRdaemonFEC input</h2>
+<h2>SDRdaemon transmitter output</h2>
 
-This is a specialized client for the SDRdaemon server that matches the SDRdaemon with FEC option (`sdrdaemonfec` binary). The frame format is quite different from what it is without FEC and it also does not have the exact same functionnalities so a different plugin is more practiclal than trying to fit both versions in one plugin.
+The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of the SDRdaemon transmitter server `sdrdaemontx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9092`). It also opens a TCP link to another port to exchange service messages such as setting the center frequency or getting status information from the server (default port is `9093`). The `libnanomsg` library is used to support this messaging.
 
-Using this scheme the remote operation is more robust in case conditions are not optimal. While SDRdaemon without FEC will work fine on copper or fiber lines the FEC version is recommended for WiFi links where even in good conditions some UDP packets might get lost.
+The data blocks sent via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
+
+There is an automated skew rate compensation in place so that the generator throttling is adjusted to match the actual sample rate of the distant device. This is based on the number of buffer blocks sent back from the distant server using the TCP link. 
 
 This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonFEC[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSink[0]` even if no physical device is connected.
 
 <h1>Channel plugins with special conditions</h1>
 

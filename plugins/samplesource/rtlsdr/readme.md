@@ -16,7 +16,7 @@ If you want to benefit from the direct sampling you will have to compile and ins
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon FEC stream GUI](../../../doc/img/SDRdaemonFEC_plugin_01.png)
+![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
 
 <h4>1.1: Frequency</h4>
 
