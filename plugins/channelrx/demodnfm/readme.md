@@ -8,35 +8,35 @@ This plugin can be used to listen to a narrowband FM modulated signal. "Narrowba
 
 ![NFM Demodulator plugin GUI](../../../doc/img/NFMdemod_plugin.png)
 
-<h3>1: <s>Frequency shift from center frequency of reception direction</s></h3>
-
-The "+/-" button on the left side of the dial toggles between positive and negative shift.
-
-<h3>2: Frequency shift from center frequency of reception value</h3>
+<h3>1: Frequency shift from center frequency of reception value</h3>
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. 
 
-<h3>3: Channel power</h3>
+<h3>2: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>4: Level meter in dB</h3>
+<h3>3: Level meter in dB</h3>
 
   - top bar (green): average value
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>5: RF bandwidth</h3>
+<h3>4: RF bandwidth</h3>
 
 This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps as 5, 6.25, 8.33, 10, 12.5, 15, 20, 25 and 40 kHz.
 
-<h3>6: AF bandwidth</h3>
+<h3>5: AF bandwidth</h3>
 
 This is the bandwidth of the audio signal in kHz (i.e. after demodulation). It can be set in continuous kHz steps from 1 to 20 kHz.
 
-<h3>7: Volume</h3>
+<h3>6: Volume</h3>
 
 This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can be varied continuously in 0.1 steps using the dial button.
+
+<h3>7: Delta/Level squelch</h3>
+
+Use this button to toggle between AF (on) and RF power (off) based squelch.
 
 <h3>8: Squelch threshold</h3>
 
