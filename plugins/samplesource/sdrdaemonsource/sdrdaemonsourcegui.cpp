@@ -304,7 +304,12 @@ void SDRdaemonSourceGui::updateSampleRateAndFrequency()
 
 void SDRdaemonSourceGui::updateTxDelay()
 {
-    m_txDelay = ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_nbFECBlocks);
+    if (m_sampleRate == 0) {
+        m_txDelay = 0.0; // 0 value will not set the Tx delay
+    } else {
+        m_txDelay = ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_nbFECBlocks);
+    }
+
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(m_txDelay*1e6, 'f', 0)));
 }
 
