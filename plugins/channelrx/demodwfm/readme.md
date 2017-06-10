@@ -8,11 +8,7 @@ This plugin can be used to listen to a wideband or narrowband FM modulated signa
 
 ![WFM Demodulator plugin GUI](../../../doc/img/WFMDemod_plugin.png)
 
-<h3>1: <s>Frequency shift from center frequency of reception direction</s></h3>
-
-The "+/-" button on the left side of the dial toggles between positive and negative shift.
-
-<h3>2: Frequency shift from center frequency of reception value</h3>
+<h3>1: Frequency shift from center frequency of reception</h3>
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
