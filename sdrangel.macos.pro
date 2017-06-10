@@ -7,7 +7,6 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += devices
-SUBDIRS += lz4
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
 SUBDIRS += mbelib

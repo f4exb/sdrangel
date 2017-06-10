@@ -13,7 +13,6 @@ mkdir -p "${APP_PLUGINS}/samplesource"
 
 cp -v fcdhid/libfcdhid.dylib $APP_LIB
 cp -v fcdlib/libfcdlib.dylib $APP_LIB
-cp -v lz4/liblz4.dylib $APP_LIB
 cp -v mbelib/libmbelib.dylib $APP_LIB
 cp -v sdrbase/libsdrbase.dylib $APP_LIB
 cp -v devices/libdevices.dylib $APP_LIB
@@ -28,6 +27,5 @@ cd $APP_LIB
 cp /opt/local/lib/libnanomsg.5.0.0.dylib .
 ln -s libdsdcc.dylib libdsdcc.1.dylib
 ln -s libdevices.dylib libdevices.1.dylib
-ln -s liblz4.dylib liblz4.1.dylib
 ln -s libsdrbase.dylib libsdrbase.1.dylib
 ln -s libmbelib.dylib libmbelib.1.dylib

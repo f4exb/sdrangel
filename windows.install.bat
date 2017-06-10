@@ -4,7 +4,6 @@ SET opencvdir="D:\softs\opencv\build\mw32\install\x86\mingw\bin"
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy devices\%1\devices.dll %2
-copy lz4\%1\lz4.dll %2
 copy mbelib\%1\mbelib.dll %2
 copy dsdcc\%1\dsdcc.dll %2
 copy serialdv\%1\serialdv.dll %2

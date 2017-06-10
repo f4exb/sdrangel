@@ -7,7 +7,6 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 SUBDIRS += devices
-SUBDIRS += lz4
 CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib

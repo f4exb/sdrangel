@@ -19,7 +19,6 @@ CONFIG(MINGW64):LIBCM256CCSRC = "D:\softs\cm256cc"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
-INCLUDEPATH += ../../../lz4
 INCLUDEPATH += $$LIBNANOMSGSRC/src
 INCLUDEPATH += $$LIBCM256CCSRC
 
@@ -53,7 +52,6 @@ sdrdaemonsourceudphandler.h
 FORMS += sdrdaemonsourcegui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
-LIBS += -L../../../lz4/$${build_subdir} -llz4
 LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
 
