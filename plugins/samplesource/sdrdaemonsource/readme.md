@@ -112,15 +112,15 @@ Maximum number of FEC blocks used for original blocks recovery during the last p
 
 This push button can be used to reset the events counters (4.7 and 4.8) and reset the event counts timer (4.9)
 
-<h4>4.6: Unrecoverable error events counter</h4>
+<h4>4.7: Unrecoverable error events counter</h4>
 
 This counter counts the unrecoverable error conditions found (i.e. 4.4 lower than 128) since the last counters reset.
 
-<h4>4.6: Recoverable error events counter</h4>
+<h4>4.8: Recoverable error events counter</h4>
 
 This counter counts the unrecoverable error conditions found (i.e. 4.4 between 128 and 128 plus the number of FEC blocks) since the last counters reset.
 
-<h4>4.6: events counters timer</h4>
+<h4>4.9: events counters timer</h4>
 
 This hh:mm:ss time display shows the time since the reset evetnts counters button (4.6) was pushed.
 
@@ -161,7 +161,7 @@ The value is a percentage of the nominal time it takes to process a block of sam
   - Number of FEC blocks: _F_
   - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 4 bytes header (1 sample) thus there are 127 samples remaining effectively. This gives the constant 127*127 = 16219 samples per frame in the formula
   
-Formula: ((127 * 127) * _d_ / _SR_) / (128 + _F_)   
+Formula: ((127 &#x2715; 127 &#x2715; _d_) / _SR_) / (128 + _F_)   
 
 <h3>8: Desired distant device sample rate</h3>
 
