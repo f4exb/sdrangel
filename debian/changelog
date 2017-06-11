@@ -1,11 +1,13 @@
 sdrangel (3.5.0-1) unstable; urgency=medium
 
-  * SDRdaemonSink plugin connecting to a distant sdrdaemontx instance 
+  * SDRdaemonSink plugin connecting to a distant sdrdaemontx instance
+  * SDRdemonFEC plugin renamed to SDRdaemonSource
+  * SDRdaemon plugin deprecated and removed from the build and distributions
   * Changed frequency thumbweels color scheme
   * Activated compiler warnings and fixed warnings
   * Lots of little GUI fixes
   
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 29 May 2017 21:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 11 Jun 2017 19:14:18 +0200
 
 sdrangel (3.4.5-1) unstable; urgency=medium
 
