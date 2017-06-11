@@ -23,14 +23,11 @@ CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
-CONFIG(MINGW32):LIBCM256CCSRC = "D:\softs\cm256cc"
-CONFIG(MINGW64):LIBCM256CCSRC = "D:\softs\cm256cc"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += $$LIBBLADERFSRC
 INCLUDEPATH += $$LIBHACKRFSRC
-CONFIG(MINGW64)INCLUDEPATH += $$LIBCM256CCSRC
 CONFIG(MINGW64)INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(MINGW64)INCLUDEPATH += ../liblimesuite/srcmw
 CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src
@@ -55,8 +52,7 @@ SOURCES += hackrf/devicehackrf.cpp\
 
 CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
-        limesdr/devicelimesdrshared.cpp\
-        sdrdaemon/sdrdaemonfecbuffer.cpp
+        limesdr/devicelimesdrshared.cpp
 
 !macx:HEADERS -= bladerf/devicebladerf.h\
         bladerf/devicebladerfparam.h\
@@ -68,13 +64,11 @@ HEADERS  += hackrf/devicehackrf.h\
 
 CONFIG(MINGW64)HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
-        limesdr/devicelimesdrshared.h\
-        sdrdaemon/sdrdaemonfecbuffer.h
+        limesdr/devicelimesdrshared.h
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-CONFIG(MINGW64)LIBS += -L../cm256cc/$${build_subdir} -lcm256cc
 CONFIG(MINGW64)LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
 
 macx {
