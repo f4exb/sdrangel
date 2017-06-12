@@ -1,7 +1,5 @@
 project(sdrdaemonsource)
 
-find_package(LibNANOMSG)
-
 if (HAS_SSSE3)
     message(STATUS "SDRdaemonSource: use SSSE3 SIMD" )
 elseif (HAS_NEON)
