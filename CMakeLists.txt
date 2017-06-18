@@ -525,6 +525,12 @@ elseif (${ARCHITECTURE} MATCHES "armv7l")
     else()
         set(HAS_NEON OFF CACHE BOOL "Architecture does not have NEON SIMD enabled")
     endif()
+elseif (${ARCHITECTURE} MATCHES "aarch64")
+    set(HAS_NEON ON CACHE BOOL FORCE "Architecture has NEON SIMD enabled")
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        message(STATUS "Aarch64 always has NEON SIMD instructions")
+        add_definitions(-DUSE_NEON)
+    endif()
 endif()
 
 ##############################################################################
