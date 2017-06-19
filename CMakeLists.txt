@@ -23,6 +23,7 @@ option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
 option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
 option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
 option(DEBUG_OUTPUT "Print debug messages" OFF)
+option(HOST_RPI3 "Compiling on RPi3" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -444,6 +445,10 @@ include_directories(
 )
 
 ##############################################################################
+
+if (HOST_RPI3)
+    message( STATUS "Compiling on RPi3" )
+endif()
 
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 message( STATUS "Architecture: ${ARCHITECTURE}" )
