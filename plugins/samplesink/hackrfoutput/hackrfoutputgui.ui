@@ -194,10 +194,10 @@
         <string>Local Oscullator ppm correction</string>
        </property>
        <property name="minimum">
-        <number>-200</number>
+        <number>-300</number>
        </property>
        <property name="maximum">
-        <number>200</number>
+        <number>300</number>
        </property>
        <property name="pageStep">
         <number>1</number>
