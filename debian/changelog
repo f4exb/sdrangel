@@ -1,3 +1,9 @@
+sdrangel (3.5.1-1) unstable; urgency=medium
+
+  * Added pulseaudio and libqt5multimedia5-plugins in the Debian dependencies
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jul 2017 19:14:18 +0200
+
 sdrangel (3.5.0-1) unstable; urgency=medium
 
   * SDRdaemonSink plugin connecting to a distant sdrdaemontx instance
