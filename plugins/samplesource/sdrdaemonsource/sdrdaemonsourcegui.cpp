@@ -187,7 +187,7 @@ bool SDRdaemonSourceGui::deserialize(const QByteArray& data)
 
 qint64 SDRdaemonSourceGui::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_centerFrequency;
 }
 
 void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
