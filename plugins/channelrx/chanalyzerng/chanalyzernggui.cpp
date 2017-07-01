@@ -215,8 +215,6 @@ void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(qint64 value)
 
 void ChannelAnalyzerNGGUI::on_BW_valueChanged(int value)
 {
-	QString s = QString::number(value/10.0, 'f', 1);
-	ui->BWText->setText(tr("%1k").arg(s));
 	m_channelMarker.setBandwidth(value * 100 * 2);
 
 	if (ui->ssb->isChecked())
@@ -226,10 +224,15 @@ void ChannelAnalyzerNGGUI::on_BW_valueChanged(int value)
 		} else {
 			m_channelMarker.setSidebands(ChannelMarker::usb);
 		}
+
+		QString s = QString::number(value/10.0, 'f', 1);
+	    ui->BWText->setText(tr("%1k").arg(s));
 	}
 	else
 	{
 		m_channelMarker.setSidebands(ChannelMarker::dsb);
+	    QString s = QString::number(value/5.0, 'f', 1); // BW = value * 2
+	    ui->BWText->setText(tr("%1k").arg(s));
 	}
 
 	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
@@ -282,8 +285,13 @@ void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 {
     setFiltersUIBoundaries();
 
+    int bw = m_channelMarker.getBandwidth();
+
 	if (checked)
 	{
+        QString s = QString::number(bw/2000.0, 'f', 1); // bw/2
+        ui->BWText->setText(tr("%1k").arg(s));
+
 		if (ui->BW->value() < 0) {
 			m_channelMarker.setSidebands(ChannelMarker::lsb);
 		} else {
@@ -300,6 +308,9 @@ void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 	}
 	else
 	{
+        QString s = QString::number(bw/1000.0, 'f', 1); // bw
+        ui->BWText->setText(tr("%1k").arg(s));
+
         ui->lowCut->setEnabled(false);
 
         m_channelMarker.setSidebands(ChannelMarker::dsb);
