@@ -211,7 +211,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
     painter.setPen(m_colorMapper.getBoundaryColor());
     painter.setBrush(Qt::NoBrush);
 
-    for (int i = 1; i < m_numDigits + m_numDecimalPoints; i++)
+    for (int i = 1; i < 1 + m_numDigits + m_numDecimalPoints; i++)
     {
         painter.setPen(m_colorMapper.getBoundaryColor());
         painter.drawLine(1 + i * m_digitWidth, 1, 1 + i * m_digitWidth, height() - 1);
