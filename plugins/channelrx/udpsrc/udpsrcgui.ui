@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
+    <width>316</width>
     <height>355</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>316</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -22,15 +34,15 @@
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>5</y>
-     <width>270</width>
+     <x>2</x>
+     <y>2</y>
+     <width>312</width>
      <height>142</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>270</width>
+     <width>312</width>
      <height>0</height>
     </size>
    </property>
@@ -316,6 +328,9 @@
         <property name="toolTip">
          <string>Remote data port</string>
         </property>
+        <property name="inputMask">
+         <string>00000</string>
+        </property>
         <property name="text">
          <string>9999</string>
         </property>
@@ -332,6 +347,9 @@
        <widget class="QLineEdit" name="audioPort">
         <property name="toolTip">
          <string>Local audio input port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000</string>
         </property>
         <property name="text">
          <string>9998</string>
@@ -500,6 +518,9 @@
        <widget class="QLineEdit" name="udpAddress">
         <property name="toolTip">
          <string>Remote address</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000</string>
         </property>
         <property name="text">
          <string>127.0.0.1</string>
