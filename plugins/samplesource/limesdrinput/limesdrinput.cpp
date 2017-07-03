@@ -31,9 +31,11 @@
 
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportDeviceInfo, Message)
 
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
@@ -439,6 +441,46 @@ bool LimeSDRInput::handleMessage(const Message& message)
         }
 
         return true;
+    }
+    else if (MsgGetDeviceInfo::match(message))
+    {
+        if (m_deviceAPI->isBuddyLeader())
+        {
+            double temp = 0.0;
+
+            if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) == 0))
+            {
+                qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
+            }
+            else
+            {
+                qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
+            }
+
+            // send to oneself
+            MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+            m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+
+            // send to source buddies
+            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+            std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+            for (; itSource != sourceBuddies.end(); ++itSource)
+            {
+                MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+                (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            }
+
+            // send to sink buddies
+            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+            std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+            for (; itSink != sinkBuddies.end(); ++itSink)
+            {
+                MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+                (*itSink)->getDeviceOutputMessageQueue()->push(report);
+            }
+        }
     }
     else
     {

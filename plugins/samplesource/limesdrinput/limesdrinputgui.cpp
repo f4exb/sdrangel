@@ -36,7 +36,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
     m_doApplySettings(true),
-    m_statusCounter(0)
+    m_statusCounter(0),
+    m_deviceStatusCounter(0)
 {
     m_limeSDRInput = new LimeSDRInput(m_deviceAPI);
     m_sampleSource = (DeviceSampleSource *) m_limeSDRInput;
@@ -235,6 +236,11 @@ void LimeSDRInputGUI::handleMessagesToGUI()
                 ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
         }
+        else if (LimeSDRInput::MsgReportDeviceInfo::match(*message))
+        {
+            LimeSDRInput::MsgReportDeviceInfo *report = (LimeSDRInput::MsgReportDeviceInfo *) message;
+            ui->temperatureText->setText(tr("%1C").arg(QString::number(report->getTemperature(), 'f', 0)));
+        }
     }
 }
 
@@ -334,6 +340,17 @@ void LimeSDRInputGUI::updateStatus()
         LimeSDRInput::MsgGetStreamInfo* message = LimeSDRInput::MsgGetStreamInfo::create();
         m_sampleSource->getInputMessageQueue()->push(message);
         m_statusCounter = 0;
+    }
+
+    if (m_deviceStatusCounter < 10)
+    {
+        m_deviceStatusCounter++;
+    }
+    else
+    {
+        LimeSDRInput::MsgGetDeviceInfo* message = LimeSDRInput::MsgGetDeviceInfo::create();
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_deviceStatusCounter = 0;
     }
 }
 
