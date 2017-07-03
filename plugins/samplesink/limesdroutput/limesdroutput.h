@@ -86,6 +86,21 @@ public:
         { }
     };
 
+    class MsgGetDeviceInfo : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgGetDeviceInfo* create()
+        {
+            return new MsgGetDeviceInfo();
+        }
+
+    private:
+        MsgGetDeviceInfo() :
+            Message()
+        { }
+    };
+
     class MsgReportLimeSDRToGUI : public Message {
         MESSAGE_CLASS_DECLARATION
 

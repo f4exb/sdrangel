@@ -63,6 +63,7 @@ private:
     int m_lastEngineState;
     bool m_doApplySettings;
     int m_statusCounter;
+    int m_deviceStatusCounter;
 
     void displaySettings();
     void setNCODisplay();
