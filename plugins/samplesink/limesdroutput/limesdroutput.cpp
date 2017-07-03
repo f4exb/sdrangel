@@ -469,6 +469,8 @@ bool LimeSDROutput::handleMessage(const Message& message)
                 (*itSink)->getDeviceOutputMessageQueue()->push(report);
             }
         }
+
+        return true;
     }
     else
     {
