@@ -449,7 +449,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
             if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) == 0))
             {
-                qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
+                //qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
             }
             else
             {

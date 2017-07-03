@@ -141,6 +141,8 @@ MainWindow::MainWindow(QWidget* parent) :
         exit(0);
 	}
 
+	m_deviceUIs.back()->m_deviceSourceAPI->setBuddyLeader(true); // the first device is always the leader
+
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->setCurrentIndex(sampleSourceIndex);
     m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(sampleSourceSignalsBlocked);
