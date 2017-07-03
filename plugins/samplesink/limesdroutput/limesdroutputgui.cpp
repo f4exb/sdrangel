@@ -342,8 +342,12 @@ void LimeSDROutputGUI::updateStatus()
     }
     else
     {
-        LimeSDROutput::MsgGetDeviceInfo* message = LimeSDROutput::MsgGetDeviceInfo::create();
-        m_sampleSink->getInputMessageQueue()->push(message);
+        if (m_deviceAPI->isBuddyLeader())
+        {
+            LimeSDROutput::MsgGetDeviceInfo* message = LimeSDROutput::MsgGetDeviceInfo::create();
+            m_sampleSink->getInputMessageQueue()->push(message);
+        }
+
         m_deviceStatusCounter = 0;
     }
 }
