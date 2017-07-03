@@ -36,7 +36,8 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_channelWindow(channelWindow),
     m_sampleSinkSequence(0),
     m_sampleSinkPluginGUI(0),
-    m_buddySharedPtr(0)
+    m_buddySharedPtr(0),
+    m_isBuddyLeader(false)
 {
 }
 
@@ -464,9 +465,16 @@ void DeviceSinkAPI::clearBuddiesLists()
 {
     std::vector<DeviceSourceAPI*>::iterator itSource = m_sourceBuddies.begin();
     std::vector<DeviceSinkAPI*>::iterator itSink = m_sinkBuddies.begin();
+    bool leaderElected = false;
 
     for (;itSource != m_sourceBuddies.end(); ++itSource)
     {
+        if (isBuddyLeader() && !leaderElected)
+        {
+            (*itSource)->setBuddyLeader(true);
+            leaderElected = true;
+        }
+
         (*itSource)->removeSinkBuddy(this);
     }
 
@@ -474,6 +482,12 @@ void DeviceSinkAPI::clearBuddiesLists()
 
     for (;itSink != m_sinkBuddies.end(); ++itSink)
     {
+        if (isBuddyLeader() && !leaderElected)
+        {
+            (*itSink)->setBuddyLeader(true);
+            leaderElected = true;
+        }
+
         (*itSink)->removeSinkBuddy(this);
     }
 

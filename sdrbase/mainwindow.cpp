@@ -804,6 +804,8 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
 
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+        int nbOfBuddies = 0;
+
         for (; it != m_deviceUIs.end(); ++it)
         {
             if (*it != deviceUI) // do not add to itself
@@ -814,6 +816,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
                         (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
                     {
                         (*it)->m_deviceSourceAPI->addSourceBuddy(deviceUI->m_deviceSourceAPI);
+                        nbOfBuddies++;
                     }
                 }
 
@@ -823,9 +826,14 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
                         (deviceUI->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
                     {
                         (*it)->m_deviceSinkAPI->addSourceBuddy(deviceUI->m_deviceSourceAPI);
+                        nbOfBuddies++;
                     }
                 }
             }
+        }
+
+        if (nbOfBuddies == 0) {
+            deviceUI->m_deviceSourceAPI->setBuddyLeader(true);
         }
 
         // constructs new GUI and input object
@@ -866,6 +874,8 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
 
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+        int nbOfBuddies = 0;
+
         for (; it != m_deviceUIs.end(); ++it)
         {
             if (*it != deviceUI) // do not add to itself
@@ -876,6 +886,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
                         (deviceUI->m_deviceSinkAPI->getSampleSinkSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
                     {
                         (*it)->m_deviceSourceAPI->addSinkBuddy(deviceUI->m_deviceSinkAPI);
+                        nbOfBuddies++;
                     }
                 }
 
@@ -885,9 +896,14 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
                         (deviceUI->m_deviceSinkAPI->getSampleSinkSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
                     {
                         (*it)->m_deviceSinkAPI->addSinkBuddy(deviceUI->m_deviceSinkAPI);
+                        nbOfBuddies++;
                     }
                 }
             }
+        }
+
+        if (nbOfBuddies == 0) {
+            deviceUI->m_deviceSinkAPI->setBuddyLeader(true);
         }
 
         // constructs new GUI and output object

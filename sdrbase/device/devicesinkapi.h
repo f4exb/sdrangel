@@ -98,6 +98,8 @@ public:
     void clearBuddiesLists();
     void *getBuddySharedPtr() const { return m_buddySharedPtr; }
     void setBuddySharedPtr(void *ptr) { m_buddySharedPtr = ptr; }
+    bool isBuddyLeader() const { return m_isBuddyLeader; }
+    void setBuddyLeader(bool isBuddyLeader) { m_isBuddyLeader = isBuddyLeader; }
 
 protected:
     struct ChannelInstanceRegistration
@@ -146,6 +148,7 @@ protected:
     std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
     void *m_buddySharedPtr;
+    bool m_isBuddyLeader;
 
     friend class MainWindow;
     friend class DeviceSourceAPI;
