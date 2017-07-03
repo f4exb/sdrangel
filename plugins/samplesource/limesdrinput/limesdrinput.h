@@ -208,26 +208,6 @@ public:
         { }
     };
 
-    class MsgReportDeviceInfo : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        float getTemperature() const { return m_temperature; }
-
-        static MsgReportDeviceInfo* create(float temperature)
-        {
-            return new MsgReportDeviceInfo(temperature);
-        }
-
-    private:
-        float    m_temperature;
-
-        MsgReportDeviceInfo(float temperature) :
-            Message(),
-            m_temperature(temperature)
-        { }
-    };
-
     LimeSDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~LimeSDRInput();
 

@@ -17,3 +17,4 @@
 #include "devicelimesdrshared.h"
 
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgCrossReportToGUI, Message)
+MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportDeviceInfo, Message)

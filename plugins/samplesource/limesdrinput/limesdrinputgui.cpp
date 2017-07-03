@@ -236,9 +236,9 @@ void LimeSDRInputGUI::handleMessagesToGUI()
                 ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
         }
-        else if (LimeSDRInput::MsgReportDeviceInfo::match(*message))
+        else if (DeviceLimeSDRShared::MsgReportDeviceInfo::match(*message))
         {
-            LimeSDRInput::MsgReportDeviceInfo *report = (LimeSDRInput::MsgReportDeviceInfo *) message;
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = (DeviceLimeSDRShared::MsgReportDeviceInfo *) message;
             ui->temperatureText->setText(tr("%1C").arg(QString::number(report->getTemperature(), 'f', 0)));
         }
     }

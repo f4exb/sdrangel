@@ -35,7 +35,6 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportDeviceInfo, Message)
 
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
@@ -458,7 +457,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
             }
 
             // send to oneself
-            MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
             m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
 
             // send to source buddies
@@ -467,7 +466,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
             for (; itSource != sourceBuddies.end(); ++itSource)
             {
-                MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
                 (*itSource)->getDeviceOutputMessageQueue()->push(report);
             }
 
@@ -477,7 +476,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
             for (; itSink != sinkBuddies.end(); ++itSink)
             {
-                MsgReportDeviceInfo *report = MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
                 (*itSink)->getDeviceOutputMessageQueue()->push(report);
             }
         }
