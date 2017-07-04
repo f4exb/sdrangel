@@ -42,6 +42,11 @@ struct LimeSDRInputSettings
         PATH_RFE_LB2
     };
 
+    typedef enum {
+        GAIN_AUTO,
+        GAIN_MANUAL
+    } GainMode;
+
     // global settings to be saved
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
@@ -57,6 +62,10 @@ struct LimeSDRInputSettings
     bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
     int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathRFE  m_antennaPath;
+    GainMode m_gainMode;     //!< Gain mode: auto or manual
+    uint32_t m_lnaGain;      //!< Manual LAN gain
+    uint32_t m_tiaGain;      //!< Manual TIA gain
+    uint32_t m_pgaGain;      //!< Manual PGA gain
 
     LimeSDRInputSettings();
     void resetToDefaults();

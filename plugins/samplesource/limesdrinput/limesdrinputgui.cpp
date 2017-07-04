@@ -268,9 +268,29 @@ void LimeSDRInputGUI::displaySettings()
     ui->lpFIR->setValue(m_settings.m_lpfFIRBW / 1000);
 
     ui->gain->setValue(m_settings.m_gain);
-    ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+    ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
 
     ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
+
+    ui->gainMode->setCurrentIndex((int) m_settings.m_gainMode);
+    ui->lnaGain->setValue(m_settings.m_lnaGain);
+    ui->tiaGain->setCurrentIndex(m_settings.m_tiaGain - 1);
+    ui->pgaGain->setValue(m_settings.m_pgaGain);
+
+    if (m_settings.m_gainMode == LimeSDRInputSettings::GAIN_AUTO)
+    {
+        ui->gain->setEnabled(true);
+        ui->lnaGain->setEnabled(false);
+        ui->tiaGain->setEnabled(false);
+        ui->pgaGain->setEnabled(false);
+    }
+    else
+    {
+        ui->gain->setEnabled(false);
+        ui->lnaGain->setEnabled(true);
+        ui->tiaGain->setEnabled(true);
+        ui->pgaGain->setEnabled(true);
+    }
 
     setNCODisplay();
 
@@ -477,10 +497,52 @@ void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
     }
 }
 
+void LimeSDRInputGUI::on_gainMode_currentIndexChanged(int index)
+{
+    m_settings.m_gainMode = (LimeSDRInputSettings::GainMode) index;
+
+    if (index == 0)
+    {
+        ui->gain->setEnabled(true);
+        ui->lnaGain->setEnabled(false);
+        ui->tiaGain->setEnabled(false);
+        ui->pgaGain->setEnabled(false);
+    }
+    else
+    {
+        ui->gain->setEnabled(false);
+        ui->lnaGain->setEnabled(true);
+        ui->tiaGain->setEnabled(true);
+        ui->pgaGain->setEnabled(true);
+    }
+
+    sendSettings();
+}
+
 void LimeSDRInputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
-    ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+    ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_lnaGain_valueChanged(int value)
+{
+    m_settings.m_lnaGain = value;
+    ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGain));
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_tiaGain_currentIndexChanged(int index)
+{
+    m_settings.m_tiaGain = index + 1;
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_pgaGain_valueChanged(int value)
+{
+    m_settings.m_pgaGain = value;
+    ui->pgaGainText->setText(tr("%1").arg(m_settings.m_pgaGain));
     sendSettings();
 }
 

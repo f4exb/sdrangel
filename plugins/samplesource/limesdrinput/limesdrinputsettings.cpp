@@ -37,6 +37,10 @@ void LimeSDRInputSettings::resetToDefaults()
     m_ncoEnable = false;
     m_ncoFrequency = 0;
     m_antennaPath = PATH_RFE_NONE;
+    m_gainMode = GAIN_AUTO;
+    m_lnaGain = 15;
+    m_tiaGain = 2;
+    m_pgaGain = 16;
 }
 
 QByteArray LimeSDRInputSettings::serialize() const
@@ -55,6 +59,10 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeBool(11, m_ncoEnable);
     s.writeS32(12, m_ncoFrequency);
     s.writeS32(13, (int) m_antennaPath);
+    s.writeS32(14, (int) m_gainMode);
+    s.writeU32(15, m_lnaGain);
+    s.writeU32(16, m_tiaGain);
+    s.writeU32(17, m_pgaGain);
 
     return s.final();
 }
@@ -86,6 +94,11 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_ncoFrequency, 0);
         d.readS32(13, &intval, 0);
         m_antennaPath = (PathRFE) intval;
+        d.readS32(14, &intval, 0);
+        m_gainMode = (GainMode) intval;
+        d.readU32(15, &m_lnaGain, 15);
+        d.readU32(16, &m_tiaGain, 2);
+        d.readU32(17, &m_pgaGain, 16);
 
         return true;
     }
