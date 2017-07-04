@@ -599,7 +599,75 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_gain != settings.m_gain) || force)
+    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+    {
+        m_settings.m_gainMode = settings.m_gainMode;
+
+        if (m_settings.m_gainMode == LimeSDRInputSettings::GAIN_AUTO)
+        {
+            m_settings.m_gain = settings.m_gain;
+
+            if (m_deviceShared.m_deviceParams->getDevice() != 0)
+            {
+                if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
+                        LMS_CH_RX,
+                        m_deviceShared.m_channel,
+                        m_settings.m_gain) < 0)
+                {
+                    qDebug("LimeSDRInput::applySettings: LMS_SetGaindB() failed");
+                }
+                else
+                {
+                    //doCalibration = true;
+                    qDebug() << "LimeSDRInput::applySettings: Gain set to " << m_settings.m_gain;
+                }
+            }
+        }
+        else
+        {
+            m_settings.m_lnaGain = settings.m_lnaGain;
+            m_settings.m_tiaGain = settings.m_tiaGain;
+            m_settings.m_pgaGain = settings.m_pgaGain;
+
+            if (m_deviceShared.m_deviceParams->getDevice() != 0)
+            {
+                if (DeviceLimeSDR::SetRFELNA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                        m_deviceShared.m_channel,
+                        m_settings.m_lnaGain))
+                {
+                    qDebug() << "LimeSDRInput::applySettings: LNA gain set to " << m_settings.m_lnaGain;
+                }
+                else
+                {
+                    qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRFELNA_dB() failed");
+                }
+
+                if (DeviceLimeSDR::SetRFETIA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                        m_deviceShared.m_channel,
+                        m_settings.m_tiaGain))
+                {
+                    qDebug() << "LimeSDRInput::applySettings: TIA gain set to " << m_settings.m_tiaGain;
+                }
+                else
+                {
+                    qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRFETIA_dB() failed");
+                }
+
+                if (DeviceLimeSDR::SetRBBPGA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                        m_deviceShared.m_channel,
+                        m_settings.m_pgaGain))
+                {
+                    qDebug() << "LimeSDRInput::applySettings: PGA gain set to " << m_settings.m_pgaGain;
+                }
+                else
+                {
+                    qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRBBPGA_dB() failed");
+                }
+            }
+        }
+    }
+
+    if ((m_settings.m_gainMode == LimeSDRInputSettings::GAIN_AUTO) && (m_settings.m_gain != settings.m_gain))
     {
         m_settings.m_gain = settings.m_gain;
 
@@ -616,6 +684,63 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             {
                 //doCalibration = true;
                 qDebug() << "LimeSDRInput::applySettings: Gain set to " << m_settings.m_gain;
+            }
+        }
+    }
+
+    if ((m_settings.m_gainMode == LimeSDRInputSettings::GAIN_MANUAL) && (m_settings.m_lnaGain != settings.m_lnaGain))
+    {
+        m_settings.m_lnaGain = settings.m_lnaGain;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::SetRFELNA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                    m_deviceShared.m_channel,
+                    m_settings.m_lnaGain))
+            {
+                qDebug() << "LimeSDRInput::applySettings: LNA gain set to " << m_settings.m_lnaGain;
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRFELNA_dB() failed");
+            }
+        }
+    }
+
+    if ((m_settings.m_gainMode == LimeSDRInputSettings::GAIN_MANUAL) && (m_settings.m_tiaGain != settings.m_tiaGain))
+    {
+        m_settings.m_tiaGain = settings.m_tiaGain;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::SetRFETIA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                    m_deviceShared.m_channel,
+                    m_settings.m_tiaGain))
+            {
+                qDebug() << "LimeSDRInput::applySettings: TIA gain set to " << m_settings.m_tiaGain;
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRFETIA_dB() failed");
+            }
+        }
+    }
+
+    if ((m_settings.m_gainMode == LimeSDRInputSettings::GAIN_MANUAL) && (m_settings.m_pgaGain != settings.m_pgaGain))
+    {
+        m_settings.m_pgaGain = settings.m_pgaGain;
+
+        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        {
+            if (DeviceLimeSDR::SetRBBPGA_dB(m_deviceShared.m_deviceParams->getDevice(),
+                    m_deviceShared.m_channel,
+                    m_settings.m_pgaGain))
+            {
+                qDebug() << "LimeSDRInput::applySettings: PGA gain set to " << m_settings.m_pgaGain;
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: DeviceLimeSDR::SetRBBPGA_dB() failed");
             }
         }
     }
