@@ -146,3 +146,7 @@ This is the stream throughput in MB/s and is usually about 3 times the sample ra
 <h3>19: FIFO status</h3>
 
 This is the fill percentage of the Rx FIFO in the LimeSuite interface. It should be zero most of the time.
+
+<h3>20: Board temperature</h3>
+
+This is the board temperature in degrees Celsius updated every ~5s. Before the first probe the display marks "00C" this is normal.
