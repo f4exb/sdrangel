@@ -114,9 +114,31 @@ The TSP in the LMS7002M chip has a FIR filter chain per channel. Use this button
 
 USe the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-<h3>14: Gain</h2>
+<h3>14: Gain settings</h2>
 
-Use this slider to adjust the global gain of the LNA, TIA and PGA. LimeSuite software automatically set optimals values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the slider. 
+![LimeSDR input plugin gain GUI](../../../doc/img/LimeSDRInput_plugin_14.png)
+
+<h4>14.1: Gain mode</h2>
+
+Use this combo to select either the automatic gain (Aut) or the manual (Man) gain setting. Autonatic gain sets the global gain using a predefined table for LNA, TIA and PGA gain blocks. This global gain is set with button 14.2. When manual gain is engaged the LNA, TIA and PGA gains can be set independently with the 14.3, 14.4 and 14.5 buttons respectively.
+
+Please refer to [LMS7002M documentation](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) for a precise description of LNA, TIA and PGA and their location in the Rx chain. To summarize these blocks are placed in this order from antenna to ADC.
+
+<h4>14.2: Global automatic gain</h4>
+
+Use this button to adjust the global gain of the LNA, TIA and PGA. LimeSuite software automatically set optimal values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the button.
+
+<h4>14.3: LNA manual gain</h4>
+
+Use this button to adjust the gain of tha LNA when manual gain mode is set (14.1). Gain can be set between 1 and 30 dB in 1 dB steps. However the hardware has 3 dB steps for the lower gain values so increasing or decerasing by one step does not always produce a change. The value in dB appears at the right of the button.
+
+<h4>14.4: TIA manual gain</h4>
+
+Use this combo to select the TIA gain in dB when manual gain mode is set (14.1). Possible values are 1,2 and 3 dB.
+
+<h4>14.5: PGA manual gain</h4>
+
+Use this button to adjust the gain of tha PGA when manual gain mode is set (14.1). Gain can be set between 0 and 32 dB in 1 dB steps. The value in dB appears at the right of the button.
 
 <h3>15: Antenna select</h3>
 
