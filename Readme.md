@@ -43,6 +43,21 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink)
 
+<h1>Notes on pulseaudio setup</h1>
+
+The audio devices with Qt are supported through pulseaudio and unless you are using a single sound chip (or card) with a single output port or you are an expert with pulseaudio config files you may get into trouble when trying to route the audio to a different output port. These notes are a follow-up of issue #31 with my own experiments with HDMI audio output on the Udoo x86 board. So using this example of HDMI output you can do the following:
+
+  - Install pavucontrol. It is included in most distributions for example:
+    - Ubuntu/Debian: `sudo apt-get install pavucontrol`
+    - openSUSE: `sudo zypper in pavucontrol`
+  - Check the audio config with alsamixer. On the Udoo x86 the HDMI output depends on the S/PDIF control and it occasionally gets muted when the HDMI monitor is turned off or goes to sleep. So in any case make sure nothing is muted there.
+  - Open pavucontrol and open the last tab (rightmost) called 'Configuration'
+  - Select HDMI from the profiles list in the 'Configuration' tab
+  - Then in the 'Output devices' tab the HDMI / display port is selected as it is normally the only one. Just double check this
+  - In SDRangel's Preferences/Audio menu make sure something like `alsa_output.pci-0000_00_1b.0.hdmi-stereo` is selected. The default might also work after the pulseaudio configuration you just made.
+  
+In case you cannot see anything related to HDMI or your desired audio device in pavucontrol just restart pulseaudio with `pulseaudio -k` (`-k` kills the previous instance before restarting) and do the above steps again.
+
 <h1>Supported hardware</h1>
 
 <h2>Airspy</h2>
