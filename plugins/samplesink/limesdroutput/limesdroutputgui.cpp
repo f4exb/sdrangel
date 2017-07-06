@@ -248,6 +248,17 @@ void LimeSDROutputGUI::updateSampleRateAndFrequency()
     ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
+void LimeSDROutputGUI::updateDACRate()
+{
+    uint32_t dacRate = m_settings.m_devSampleRate * (1<<m_settings.m_log2HardInterp);
+
+    if (dacRate < 100000000) {
+        ui->dacRateLabel->setText(tr("%1k").arg(QString::number(dacRate / 1000.0f, 'g', 5)));
+    } else {
+        ui->dacRateLabel->setText(tr("%1M").arg(QString::number(dacRate / 1000000.0f, 'g', 5)));
+    }
+}
+
 void LimeSDROutputGUI::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
@@ -255,6 +266,8 @@ void LimeSDROutputGUI::displaySettings()
 
     ui->hwInterp->setCurrentIndex(m_settings.m_log2HardInterp);
     ui->swInterp->setCurrentIndex(m_settings.m_log2SoftInterp);
+
+    updateDACRate();
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 
@@ -404,6 +417,7 @@ void LimeSDROutputGUI::on_ncoReset_clicked(bool checked __attribute__((unused)))
 void LimeSDROutputGUI::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    updateDACRate();
     setNCODisplay();
     sendSettings();}
 
@@ -412,6 +426,7 @@ void LimeSDROutputGUI::on_hwInterp_currentIndexChanged(int index)
     if ((index <0) || (index > 5))
         return;
     m_settings.m_log2HardInterp = index;
+    updateDACRate();
     setNCODisplay();
     sendSettings();
 }

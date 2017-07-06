@@ -69,6 +69,7 @@ private:
     void setNCODisplay();
     void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateDACRate();
     void blockApplySettings(bool block);
 
 private slots:

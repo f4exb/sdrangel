@@ -41,13 +41,21 @@ Device start / stop button.
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
   
-<h3>2: Baseband sample rate</h3>
+<h3>2A: DAC sample rate</h3>
 
-This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the device sample rate (10) divided by the interpolation factor (9).
+This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (8). Thus this is the host to device sample rate (10) multiplied by the hardware interpolation factor (8).
+
+<h3>2B: Baseband sample rate</h3>
+
+This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the host to device sample rate (10) divided by the software interpolation factor (9).
   
-<h3>3: Frequency</h3>
+<h3>3: Center frequency</h3>
 
 This is the center frequency of transmission in kHz.
+
+<h3>3A: Center frequency units</h3>
+
+This is the center frequency units thus kHz (fixed)
 
 <h3>4: Channel number</h3>
 
