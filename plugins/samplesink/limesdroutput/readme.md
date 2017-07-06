@@ -87,9 +87,9 @@ Thus the actual sample rate of the DAC is the stream sample rate (10) multiplied
 
 The I/Q stream from the baseband is upsampled by a power of two by software inside the plugin before being sent to the LimeSDR device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
 
-<h3>10: Device stream sample rate</h3>
+<h3>10: Host to device stream sample rate</h3>
 
-This is the LMS7002M device to/from host stream sample rate in S/s.
+This is the LMS7002M device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
 
 Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.
 

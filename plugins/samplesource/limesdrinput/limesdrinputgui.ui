@@ -53,9 +53,9 @@
       <number>4</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="deviceUILayout">
+      <layout class="QVBoxLayout" name="freqLeftLayout">
        <item>
-        <layout class="QHBoxLayout" name="deviceButtonsLayout">
+        <layout class="QHBoxLayout" name="freqLeftTopLayout">
          <item>
           <widget class="ButtonSwitch" name="startStop">
            <property name="toolTip">
@@ -89,11 +89,17 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="deviceRateLayout">
+        <layout class="QHBoxLayout" name="freqLeftBotLayout">
          <item>
-          <widget class="QLabel" name="deviceRateLabel">
+          <widget class="QLabel" name="adcRateLabel">
+           <property name="minimumSize">
+            <size>
+             <width>54</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="toolTip">
-            <string>I/Q sample rate kS/s</string>
+            <string>ADC rate before hardware downsampling (k or MS/s)</string>
            </property>
            <property name="text">
             <string>00000k</string>
@@ -154,43 +160,67 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="freqUnits">
-       <property name="text">
-        <string> kHz</string>
+      <layout class="QVBoxLayout" name="freqRightLayout">
+       <property name="leftMargin">
+        <number>6</number>
        </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="freqRightlSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+       <property name="rightMargin">
+        <number>6</number>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="channelNumberText">
-       <property name="minimumSize">
-        <size>
-         <width>20</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Channel number</string>
-       </property>
-       <property name="text">
-        <string>#0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
+       <item>
+        <layout class="QHBoxLayout" name="freqRightTopLayout">
+         <item>
+          <widget class="QLabel" name="freqUnits">
+           <property name="text">
+            <string> kHz</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channelNumberText">
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Channel number</string>
+           </property>
+           <property name="text">
+            <string>#0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="freqRightBotLayout">
+         <item>
+          <widget class="QLabel" name="deviceRateLabel">
+           <property name="minimumSize">
+            <size>
+             <width>54</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Baseband I/Q sample rate kS/s</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

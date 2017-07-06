@@ -244,6 +244,17 @@ void LimeSDRInputGUI::handleMessagesToGUI()
     }
 }
 
+void LimeSDRInputGUI::updateADCRate()
+{
+    uint32_t adcRate = m_settings.m_devSampleRate * (1<<m_settings.m_log2HardDecim);
+
+    if (adcRate < 100000000) {
+        ui->adcRateLabel->setText(tr("%1k").arg(QString::number(adcRate / 1000.0f, 'g', 5)));
+    } else {
+        ui->adcRateLabel->setText(tr("%1M").arg(QString::number(adcRate / 1000000.0f, 'g', 5)));
+    }
+}
+
 void LimeSDRInputGUI::updateSampleRateAndFrequency()
 {
     m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
@@ -261,6 +272,8 @@ void LimeSDRInputGUI::displaySettings()
 
     ui->hwDecim->setCurrentIndex(m_settings.m_log2HardDecim);
     ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
+
+    updateADCRate();
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 
@@ -456,6 +469,7 @@ void LimeSDRInputGUI::on_iqImbalance_toggled(bool checked)
 void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    updateADCRate();
     setNCODisplay();
     sendSettings();}
 
@@ -464,6 +478,7 @@ void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
     if ((index <0) || (index > 5))
         return;
     m_settings.m_log2HardDecim = index;
+    updateADCRate();
     setNCODisplay();
     sendSettings();
 }

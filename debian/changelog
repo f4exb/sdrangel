@@ -1,6 +1,10 @@
 sdrangel (3.5.1-1) unstable; urgency=medium
 
+  * LimeSDR input: added individual gains control and ADC rate display
+  * LimeSDR output: added DAC rate display
+  * LimeSDR all: added board temperature display
   * Added pulseaudio and libqt5multimedia5-plugins in the Debian dependencies
+  * Updates to build on aarch64 in openSUSE
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jul 2017 19:14:18 +0200
 

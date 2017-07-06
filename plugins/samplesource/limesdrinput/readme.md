@@ -35,7 +35,7 @@ Then add the following defines on `cmake` command line:
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
+![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_1.png)
 
 <h4>1.1: Frequency</h4>
 
@@ -53,11 +53,15 @@ Device start / stop button.
 
 Record baseband I/Q stream toggle button
 
-<h4>1.4: Stream sample rate</h4>
+<h4>1.4: ADC sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6). 
+This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before hardware decimation (8). Thus this is the device to host sample rate (10) multiplied by the hardware decimation factor (8).
 
-<h3>2: Channel number</h3>
+<h4>1.5: Stream sample rate</h4>
+
+Baseband I/Q sample rate in kS/s. This is the device to host sample rate (10) divided by the software decimation factor (9). 
+
+<h4>1.6: Channel number</h4>
 
 LimeSDR is a 2x2 MIMO device so it has two receiving channels. This shows the corresponding Rx channel index (0 or 1).
 
@@ -94,9 +98,9 @@ Thus the actual sample rate of the ADC is the stream sample rate (10) multiplied
 
 The I/Q stream from the LimeSDR is doensampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
-<h3>10: Device stream sample rate</h3>
+<h3>10: Device to host stream sample rate</h3>
 
-This is the LMS7002M device to/from host stream sample rate in S/s.
+This is the LMS7002M device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
 
 Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.
 
