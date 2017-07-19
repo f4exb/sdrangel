@@ -26,6 +26,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "device/devicesourceapi.h"
 #include "hackrf/devicehackrfvalues.h"
 
 #include "ui_hackrfoutputgui.h"
@@ -269,6 +270,13 @@ void HackRFOutputGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
+        // forcibly stop the Rx if present before starting
+        if (m_deviceAPI->getSourceBuddies().size() > 0)
+        {
+            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+            buddy->stopAcquisition();
+        }
+
         if (m_deviceAPI->initGeneration())
         {
             m_deviceAPI->startGeneration();
@@ -303,6 +311,7 @@ void HackRFOutputGui::updateStatus()
                 break;
             case DSPDeviceSinkEngine::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                ui->startStop->setChecked(false);
                 break;
             case DSPDeviceSinkEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");

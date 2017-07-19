@@ -25,8 +25,9 @@
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
+#include "dsp/filerecord.h"
 #include "hackrf/devicehackrfvalues.h"
 
 #include "ui_hackrfinputgui.h"
@@ -326,6 +327,13 @@ void HackRFInputGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
+        // forcibly stop the Tx if present before starting
+        if (m_deviceAPI->getSinkBuddies().size() > 0)
+        {
+            DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+            buddy->stopGeneration();
+        }
+
         if (m_deviceAPI->initAcquisition())
         {
             m_deviceAPI->startAcquisition();
@@ -375,6 +383,7 @@ void HackRFInputGui::updateStatus()
                 break;
             case DSPDeviceSourceEngine::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                ui->startStop->setChecked(false);
                 break;
             case DSPDeviceSourceEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
