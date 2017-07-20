@@ -432,6 +432,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 	}
 
+	m_settings.m_linkTxFrequency = settings.m_linkTxFrequency;
+
     qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device center freq: " << deviceCenterFrequency << " Hz"
             << " device sample rate: " << m_settings.m_devSampleRate << "S/s"

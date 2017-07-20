@@ -39,6 +39,7 @@ void HackRFInputSettings::resetToDefaults()
 	m_dcBlock = false;
 	m_iqCorrection = false;
 	m_devSampleRate = 2400000;
+	m_linkTxFrequency = false;
 }
 
 QByteArray HackRFInputSettings::serialize() const
@@ -56,6 +57,7 @@ QByteArray HackRFInputSettings::serialize() const
 	s.writeBool(10, m_dcBlock);
 	s.writeBool(11, m_iqCorrection);
 	s.writeU64(12, m_devSampleRate);
+    s.writeBool(13, m_linkTxFrequency);
 
 	return s.final();
 }
@@ -86,6 +88,7 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
 		d.readBool(10, &m_dcBlock, false);
 		d.readBool(11, &m_iqCorrection, false);
 		d.readU64(12, &m_devSampleRate, 2400000U);
+        d.readBool(11, &m_linkTxFrequency, false);
 
 		return true;
 	}

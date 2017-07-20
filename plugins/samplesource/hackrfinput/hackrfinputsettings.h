@@ -38,6 +38,7 @@ struct HackRFInputSettings {
 	bool m_lnaExt;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	bool m_linkTxFrequency;
 
 	HackRFInputSettings();
 	void resetToDefaults();
