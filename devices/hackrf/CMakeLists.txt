@@ -3,12 +3,14 @@ project(hackrfdevice)
 set(hackrfdevice_SOURCES
     devicehackrf.cpp
     devicehackrfvalues.cpp
+    devicehackrfshared.cpp
 )
 
 set(hackrfdevice_HEADERS
     devicehackrf.h
     devicehackrfparam.h
     devicehackrfvalues.h
+    devicehackrfshared.h
 )
 
 if (BUILD_DEBIAN)
