@@ -28,6 +28,7 @@
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
 #include "hackrf/devicehackrfvalues.h"
+#include "hackrf/devicehackrfshared.h"
 
 #include "ui_hackrfoutputgui.h"
 
@@ -147,6 +148,13 @@ void HackRFOutputGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("HackRFOutputGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
+
+            delete message;
+        }
+        else if (DeviceHackRFShared::MsgConfigureFrequencyDelta::match(*message))
+        {
+            DeviceHackRFShared::MsgConfigureFrequencyDelta* deltaMsg = (DeviceHackRFShared::MsgConfigureFrequencyDelta *) message;
+            ui->centerFrequency->setValue(ui->centerFrequency->getValue() + (deltaMsg->getFrequencyDelta()/1000));
 
             delete message;
         }

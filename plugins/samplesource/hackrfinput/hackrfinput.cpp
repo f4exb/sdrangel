@@ -26,6 +26,7 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "hackrf/devicehackrfvalues.h"
+#include "hackrf/devicehackrfshared.h"
 
 #include "hackrfinputgui.h"
 #include "hackrfinputthread.h"
@@ -277,6 +278,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
 	qint64 f_img = deviceCenterFrequency;
 	quint32 devSampleRate =m_settings.m_devSampleRate;
+
+	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
+	{
+	    if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
+	    {
+	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+	        DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(settings.m_centerFrequency - m_settings.m_centerFrequency);
+	        buddy->getDeviceOutputMessageQueue()->push(deltaMsg);
+	    }
+	}
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||

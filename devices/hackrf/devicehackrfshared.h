@@ -21,6 +21,7 @@
 
 class DeviceHackRFShared
 {
+public:
     class MsgConfigureFrequencyDelta : public Message
     {
         MESSAGE_CLASS_DECLARATION
