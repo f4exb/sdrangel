@@ -30,9 +30,9 @@ Device start / stop button.
   - Green square icon: device is running and can be stopped
   - Red square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
-Please note that HackRF is a half duplex device so if you have the Tx open in another tab you have to stop it first before starting the Rx for it to work properly. In a similar manner you should stop the Rx before resuming the Tx.
+If you have the Tx open in another tab and it is running then it will be stopped automatically before the Rx starts. In a similar manner the Rx will be stopped before the Tx is started from the Tx tab.
 
-The settings on Tx or Rx tab are reapplied on start so provided the half duplex is handled correctly as stated above these settings can be considered independent.
+The settings on Rx or Tx tab are reapplied on start so these settings can be considered independent.
 
 <h4>1.3: Record</h4>
 
@@ -52,6 +52,14 @@ These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance
+
+<h3>3A: Link Tx frequency</h3>
+
+Use this button to toggle the device Tx frequency link.
+
+When active (button lit) and a tab is opened for the Tx part of the same device this option will activate the link of the Tx frequency to the Rx frequency. Thus when changing the Rx frequency the Tx frequency will vary by the same amount. This facilitates the split operation or repeater operation. You can also set the Tx frequency so that it follows exactly the Rx frequency (simplex).
+
+The amount of shift is simply set by changing the frequency in the Tx tab.
   
 <h3>4: Bias tee</h3>
 

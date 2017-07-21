@@ -22,9 +22,9 @@ Device start / stop button.
   - Red square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
 
-Please note that HackRF is a half duplex device so if you have the Rx open in another tab you have to stop it first before starting the Tx for it to work properly. In a similar manner you should stop the Tx before resuming the Rx.
+If you have the Rx open in another tab and it is running then it will be stopped automatically before the Tx starts. In a similar manner the Tx will be stopped before the Rx is started from the Rx tab.
 
-The settings on Tx or Rx tab are reapplied on start so provided the half duplex is handled correctly as stated above these settings can be considered independent.
+The settings on Tx or Rx tab are reapplied on start so these settings can be considered independent.
   
 <h3>2: Baseband sample rate</h3>
 
