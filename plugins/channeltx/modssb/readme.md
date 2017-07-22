@@ -8,6 +8,10 @@ This plugin can be used to generate a single sideband or double sidebands modula
 
 ![SSB Modulator plugin GUI](../../../doc/img/SSBModulator_plugin.png)
 
+&#9758; In order to toggle USB or LSB mode in SSB mode you have to set the "BW" in channel filter cutoff control (8) to a positive (USB) or negative (LSB) value. The above screenshot shows a USB setup. See the (7) to (9) paragraphs below for details.
+
+&#9758; The channel marker in the main spectrum display shows the actual band received taking in channel filtering into account.
+
 <h3>1: Frequency shift from center frequency of transmission</h3>
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
@@ -32,17 +36,46 @@ Selects between SSB and DSB operation. When in SSB mode the icon shows a single 
 
 <h3>7: Spectrum display frequency span</h3>
 
-The transmitted signal in the sideband (SSB) or sidebands (DSB) is further decimated by a power of two before being applied to the channel spectrum display. Thus the frequency span of the spectrum display is the audio sample rate (48 kHz) divided by the decimation factor.
+The transmitted signal in the sideband (SSB) or sidebands (DSB) sample rate of 48 kHz is further decimated by a power of two before being applied to the channel spectrum display and used to set the in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
 
-<h3>8: Signal bandwidth</h3>
+  - 1 (no decimation): 24 kHz (SSB) or 48 kHz (DSB)
+  - 2: 12 kHz (SSB) or 24 kHz (DSB)
+  - 4: 6 kHz (SSB) or 12 kHz (DSB)
+  - 8: 3 kHz (SSB) or 6 kHz (DSB)
+  - 16: 1.5 kHz (SSB) or 3 kHz (DSB)
 
-The modulating signal is bandpass filtered (SSB) or lowpass filtered (DSB) before being multiplied by the local oscillator NCO. This is the upper limit of the filter in absolute value.
+The span value display is set as follows depending on the SSB or DSB mode:
 
-When this limit is positive the signal is transmitted in the upper sideband (USB). When this limit is negative the signal is transmitted in the lower sideband (LSB).
+  - In SSB mode: the span goes from zero to the upper (USB: positive frequencies) or lower (LSB: negative frequencies) limit and the absolute value of the limit is displayed.
+  - In DSB mode: the span goes from the lower to the upper limit of same absolute value and &#177; the absolute value of the limit is displayed.
 
-<h3>9: Filter low frequency cutoff</h3>
+This is how the Span (7) and bandpass (8, 9) fitler controls look like in the 3 possible modes:
 
-In SSB mode this is the lower limit in absolute value of the modulating signal bandpass filter
+**DSB**:
+
+![SSB Demodulator band controls DSB](../../../doc/img/SSBDemod_plugin_dsb.png)
+
+**USB**:
+
+![SSB Demodulator band controls USB](../../../doc/img/SSBDemod_plugin_usb.png)
+
+**LSB**:
+
+![SSB Demodulator band controls LSB](../../../doc/img/SSBDemod_plugin_lsb.png)
+
+<h3>8: "BW": In channel bandpass filter cutoff frequency farthest from zero</h3>
+
+Values are expressed in kHz and step is 100 Hz.
+
+  - In SSB mode this is the upper (USB: positive frequencies) or lower (LSB: negative frequencies) cutoff of the in channel single side band bandpass filter. The value triggers LSB mode when negative and USB when positive
+  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign. 
+
+<h3>9: "Low cut": In channel bandpass filter cutoff frequency closest to zero</h3>
+
+Values are expressed in kHz and step is 100 Hz.
+
+  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel signe side band bandpass filter.
+  - In DSB mode it is inactive and set to zero (double side band filter).
 
 <h3>10: Volume</h3>
 
