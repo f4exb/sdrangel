@@ -55,13 +55,27 @@ This is how the Span (7) and bandpass (8, 9) fitler controls look like in the 3 
 
 ![SSB Demodulator band controls DSB](../../../doc/img/SSBDemod_plugin_dsb.png)
 
+  - Decimation factor is 4 hence span is 6 kHz from -3 to +3 kHz and &#177;3.0k is displayed
+  - In channel filter bandwidth is 4.8 kHz from -2.4 to +2.4 kHz and &#177;2.4k is displayed
+  - In channel filter "low cut" is disabled and set to 0
+
 **USB**:
 
 ![SSB Demodulator band controls USB](../../../doc/img/SSBDemod_plugin_usb.png)
 
+  - Decimation factor is 4 hence span is 3 kHz from 0 to 3 kHz and 3.0k is displayed
+  - In channel filter upper cutoff is 2.4 kHz and 2.4k is displayed
+  - In channel filter lower cutoff is 0.3 kHz and 0.3k is displayed
+  - Hence in channel filter bandwidth is 2.1 kHz
+
 **LSB**:
 
 ![SSB Demodulator band controls LSB](../../../doc/img/SSBDemod_plugin_lsb.png)
+
+  - Decimation factor is 4 hence span is 3 kHz from 0 to -3 kHz and -3.0k is displayed
+  - In channel filter lower cutoff is -2.4 kHz and -2.4k is displayed
+  - In channel filter upper cutoff is -0.3 kHz and -0.3k is displayed
+  - Hence in channel filter bandwidth is 2.1 kHz
 
 <h3>8: "BW": In channel bandpass filter cutoff frequency farthest from zero</h3>
 
