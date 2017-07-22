@@ -29,9 +29,12 @@ static double trunc(double d)
 
 QString ScaleEngine::formatTick(double value, int decimalPlaces, bool fancyTime)
 {
-	if((m_physicalUnit != Unit::Time) || (!fancyTime) || 1) {
-		return QString("%1").arg(value, 0, 'f', decimalPlaces);
-	} else {
+	if((m_physicalUnit != Unit::Time) || (!fancyTime) || 1)
+	{
+		return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	}
+	else
+	{
 		QString str;
 		double orig = fabs(value);
 		double tmp;
@@ -60,7 +63,7 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces, bool fancyTime)
 				value *= -1.0;
 		}
 
-		tmp = value;
+		tmp = m_makeOpposite ? -value : value;
 		str += QString("%1").arg(tmp, 2, 'f', decimalPlaces, QChar('0'));
 
 		return str;
@@ -496,7 +499,8 @@ ScaleEngine::ScaleEngine() :
 	m_majorTickValueDistance(1.0),
     m_firstMajorTickValue(1.0),
     m_numMinorTicks(1),
-    m_decimalPlaces(1)
+    m_decimalPlaces(1),
+    m_makeOpposite(false)
 {
 }
 

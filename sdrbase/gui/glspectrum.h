@@ -43,7 +43,7 @@ public:
 	GLSpectrum(QWidget* parent = NULL);
 	~GLSpectrum();
 
-	void setCenterFrequency(quint64 frequency);
+	void setCenterFrequency(qint64 frequency);
 	void setSampleRate(qint32 sampleRate);
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
@@ -52,6 +52,7 @@ public:
 	void setHistoStroke(int stroke);
 	void setDisplayWaterfall(bool display);
 	void setSsbSpectrum(bool ssbSpectrum);
+	void setLsbDisplay(bool lsbDisplay);
 	void setInvertedWaterfall(bool inv);
 	void setDisplayMaxHold(bool display);
 	void setDisplayCurrent(bool display);
@@ -140,6 +141,7 @@ private:
 	QMatrix4x4 m_glWaterfallBoxMatrix;
 	bool m_displayWaterfall;
 	bool m_ssbSpectrum;
+	bool m_lsbDisplay;
 
 	QRgb m_histogramPalette[240];
 	QImage* m_histogramBuffer;

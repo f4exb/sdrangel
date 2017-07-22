@@ -52,6 +52,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_waterfallTexturePos(0),
     m_displayWaterfall(true),
     m_ssbSpectrum(false),
+    m_lsbDisplay(false),
     m_histogramBuffer(NULL),
     m_histogram(NULL),
     m_histogramHoldoff(NULL),
@@ -140,7 +141,7 @@ GLSpectrum::~GLSpectrum()
 	}
 }
 
-void GLSpectrum::setCenterFrequency(quint64 frequency)
+void GLSpectrum::setCenterFrequency(qint64 frequency)
 {
 	m_centerFrequency = frequency;
 	m_changesPending = true;
@@ -207,6 +208,12 @@ void GLSpectrum::setSsbSpectrum(bool ssbSpectrum)
 {
 	m_ssbSpectrum = ssbSpectrum;
 	update();
+}
+
+void GLSpectrum::setLsbDisplay(bool lsbDisplay)
+{
+    m_lsbDisplay = lsbDisplay;
+    update();
 }
 
 void GLSpectrum::setInvertedWaterfall(bool inv)
@@ -1059,6 +1066,7 @@ void GLSpectrum::applyChanges()
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
+		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
@@ -1155,6 +1163,7 @@ void GLSpectrum::applyChanges()
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2.0, m_centerFrequency + m_sampleRate / 2.0);
+		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
@@ -1206,6 +1215,7 @@ void GLSpectrum::applyChanges()
 
 		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
+		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glHistogramSpectrumMatrix.setToIdentity();
 		m_glHistogramSpectrumMatrix.translate(

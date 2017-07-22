@@ -56,6 +56,7 @@ private:
 	double m_firstMajorTickValue;
 	int m_numMinorTicks;
 	int m_decimalPlaces;
+	bool m_makeOpposite; // will show -value instead of value
 
 	QString formatTick(double value, int decimalPlaces, bool fancyTime = true);
 	void calcCharSize();
@@ -76,6 +77,7 @@ public:
 	void setSize(float size);
 	float getSize() { return m_size; }
 	void setRange(Unit::Physical physicalUnit, float rangeMin, float rangeMax);
+	void setMakeOpposite(bool makeOpposite) { m_makeOpposite = makeOpposite; }
 
 	float getPosFromValue(double value);
 	float getValueFromPos(double pos);
