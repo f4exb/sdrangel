@@ -221,7 +221,22 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
 
 void SSBModGUI::on_dsb_toggled(bool checked)
 {
-    if (!checked)
+    if (checked)
+    {
+        if (ui->BW->value() < 0) {
+            ui->BW->setValue(-ui->BW->value());
+        }
+
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+        QString bwStr = QString::number(ui->BW->value()/10.0, 'f', 1);
+        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
+        ui->lowCut->setValue(0);
+        ui->lowCut->setEnabled(false);
+
+        applySettings();
+    }
+    else
     {
         if (ui->BW->value() < 0) {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
@@ -229,21 +244,11 @@ void SSBModGUI::on_dsb_toggled(bool checked)
             m_channelMarker.setSidebands(ChannelMarker::usb);
         }
 
-        ui->glSpectrum->setCenterFrequency(m_rate/4);
-        ui->glSpectrum->setSampleRate(m_rate/2);
-        ui->glSpectrum->setSsbSpectrum(true);
+        QString bwStr = QString::number(ui->BW->value()/10.0, 'f', 1);
+        ui->BWText->setText(tr("%1k").arg(bwStr));
+        ui->lowCut->setEnabled(true);
 
         on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-    }
-    else
-    {
-        m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-        ui->glSpectrum->setCenterFrequency(0);
-        ui->glSpectrum->setSampleRate(m_rate);
-        ui->glSpectrum->setSsbSpectrum(false);
-
-        applySettings();
     }
 
     setNewRate(m_spanLog2);
@@ -270,11 +275,21 @@ void SSBModGUI::on_spanLog2_valueChanged(int value)
 
 void SSBModGUI::on_BW_valueChanged(int value)
 {
-	ui->BWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
-	m_channelMarker.setBandwidth(value * 200);
-    int lowCutoff = getEffectiveLowCutoff(ui->lowCut->value() * 100);
-    m_channelMarker.setLowCutoff(lowCutoff);
+    QString s = QString::number(value/10.0, 'f', 1);
+    m_channelMarker.setBandwidth(value * 200);
+
+    if (ui->dsb->isChecked())
+    {
+        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
+    }
+    else
+    {
+        ui->BWText->setText(tr("%1k").arg(s));
+    }
+
+    on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 	applySettings();
+	setNewRate(m_spanLog2);
 }
 
 void SSBModGUI::on_lowCut_valueChanged(int value)
@@ -543,35 +558,45 @@ bool SSBModGUI::setNewRate(int spanLog2)
 		m_channelMarker.setLowCutoff(m_rate);
 	}
 
-	ui->BW->setMinimum(-m_rate/100);
-	ui->lowCut->setMinimum(-m_rate/100);
-	ui->BW->setMaximum(m_rate/100);
-	ui->lowCut->setMaximum(m_rate/100);
-
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
-	ui->spanText->setText(tr("%1k").arg(s));
 
-	//ui->glSpectrum->setCenterFrequency(m_rate/2);
-	//ui->glSpectrum->setSampleRate(m_rate);
-	if (!ui->dsb->isChecked())
+	if (ui->dsb->isChecked())
 	{
-		if (ui->BW->value() < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
+        ui->BW->setMinimum(0);
+        ui->BW->setMaximum(m_rate/100);
+        ui->lowCut->setMinimum(0);
+        ui->lowCut->setMaximum(m_rate/100);
 
-		ui->glSpectrum->setCenterFrequency(m_rate/2);
-		ui->glSpectrum->setSampleRate(m_rate);
-		ui->glSpectrum->setSsbSpectrum(true);
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+        ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(2*m_rate);
+        ui->glSpectrum->setSsbSpectrum(false);
+        ui->glSpectrum->setLsbDisplay(false);
 	}
 	else
 	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
+        ui->BW->setMinimum(-m_rate/100);
+        ui->BW->setMaximum(m_rate/100);
+        ui->lowCut->setMinimum(-m_rate/100);
+        ui->lowCut->setMaximum(m_rate/100);
 
-		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(2*m_rate);
-		ui->glSpectrum->setSsbSpectrum(false);
+        if (ui->BW->value() < 0)
+        {
+            m_channelMarker.setSidebands(ChannelMarker::lsb);
+            ui->glSpectrum->setLsbDisplay(true);
+        }
+        else
+        {
+            m_channelMarker.setSidebands(ChannelMarker::usb);
+            ui->glSpectrum->setLsbDisplay(false);
+        }
+
+        ui->spanText->setText(tr("%1k").arg(s));
+        ui->glSpectrum->setCenterFrequency(m_rate/2);
+        ui->glSpectrum->setSampleRate(m_rate);
+        ui->glSpectrum->setSsbSpectrum(true);
 	}
 
 	return true;
