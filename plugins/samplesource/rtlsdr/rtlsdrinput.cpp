@@ -256,6 +256,18 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 {
     bool forwardChange = false;
 
+    if ((m_settings.m_agc != settings.m_agc) || force)
+    {
+        if (rtlsdr_set_agc_mode(m_dev, settings.m_agc ? 1 : 0) < 0)
+        {
+            qCritical("could not set AGC mode %s", settings.m_agc ? "on" : "off");
+        }
+        else
+        {
+            m_settings.m_agc = settings.m_agc;
+        }
+    }
+
     if ((m_settings.m_gain != settings.m_gain) || force)
     {
         m_settings.m_gain = settings.m_gain;

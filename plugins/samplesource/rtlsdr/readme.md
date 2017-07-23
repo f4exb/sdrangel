@@ -76,6 +76,8 @@ The I/Q stream from the RTLSDR ADC is doensampled by a power of two before being
 
 Use this checkbox to activate the special RTLSDR direct sampling. This can be used to tune to HF frequencies.
 
-<h3>9: RF gain</h2>
+<h3>9: RF gain and AGC</h2>
 
-This is the RF gain setting in dB. The values are defined in the RTLSDR device and generally are: 0.0, 0.9, 1.4, 2.7, 3.7, 7.7, 8.7, 12.5, 14.4, 15.7, 16.6, 19.7, 20.7, 22.9, 25.4, 28.0, 29.7, 32.8, 33.8, 36.4, 37.2, 38.6, 40.2, 42.1, 43.4, 43.9, 44.5, 48.0, 49.6
+The slider sets RF gain in dB. The values are defined in the RTLSDR device and generally are: 0.0, 0.9, 1.4, 2.7, 3.7, 7.7, 8.7, 12.5, 14.4, 15.7, 16.6, 19.7, 20.7, 22.9, 25.4, 28.0, 29.7, 32.8, 33.8, 36.4, 37.2, 38.6, 40.2, 42.1, 43.4, 43.9, 44.5, 48.0, 49.6
+
+The AGC checkbox can be used to switch on or off the RTL2838 AGC. This is independent of the gain setting as this AGC acts after the gain block. 

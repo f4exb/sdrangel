@@ -407,6 +407,12 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	sendSettings();
 }
 
+void RTLSDRGui::on_agc_stateChanged(int state)
+{
+    m_settings.m_agc = (state == Qt::Checked);
+    sendSettings();
+}
+
 void RTLSDRGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;

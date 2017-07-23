@@ -33,6 +33,7 @@ struct RTLSDRSettings {
 	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqImbalance;
+	bool m_agc;
 
 	RTLSDRSettings();
 	void resetToDefaults();
