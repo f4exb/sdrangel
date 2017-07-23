@@ -48,7 +48,8 @@ CONFIG(Debug):build_subdir = debug
         bladerf/devicebladerfvalues.cpp
 
 SOURCES += hackrf/devicehackrf.cpp\
-        hackrf/devicehackrfvalues.cpp
+        hackrf/devicehackrfvalues.cpp\
+        hackrf/devicehackrfshared.cpp
 
 CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
@@ -61,6 +62,7 @@ CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
 HEADERS  += hackrf/devicehackrf.h\
         hackrf/devicehackrfparam.h\
         hackrf/devicehackrfvalues.h\
+        hackrf/devicehackrfshared.h
 
 CONFIG(MINGW64)HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
