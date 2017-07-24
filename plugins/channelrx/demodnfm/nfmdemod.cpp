@@ -43,7 +43,6 @@ NFMDemod::NFMDemod() :
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
-	m_AGC(40, 0),
     m_movingAverage(40, 0),
     m_afSquelch(2, afSqTones),
     m_fmExcursion(2400),
@@ -71,7 +70,6 @@ NFMDemod::NFMDemod() :
 	m_audioBufferFill = 0;
 
 	m_agcLevel = 1.0;
-	m_AGC.resize(m_squelchGate, m_agcLevel);
 	m_movingAverage.resize(32, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution

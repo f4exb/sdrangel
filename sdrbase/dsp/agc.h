@@ -22,8 +22,8 @@ public:
 	virtual void feed(Complex& ci) = 0;
 
 protected:
-	Real m_u0;
-	Real m_R;       // objective mag
+	double m_u0;
+	double m_R;       // objective mag
 	MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
 	int m_historySize;
 	int m_count;
@@ -32,23 +32,27 @@ protected:
 class MagSquaredAGC : public AGC
 {
 public:
-	MagSquaredAGC(int historySize, Real R);
+	MagSquaredAGC(int historySize, double R, double threshold);
 	virtual ~MagSquaredAGC();
 	virtual void feed(Complex& ci);
-	Real getMagSq() const { return m_magsq; }
+	double feedAndGetValue(const Complex& ci);
+	double getMagSq() const { return m_magsq; }
 private:
-	Real m_magsq;
+	double m_magsq;
+	double m_threshold;
 };
 
 class MagAGC : public AGC
 {
 public:
-	MagAGC(int historySize, Real R);
+	MagAGC(int historySize, double R, double threshold);
 	virtual ~MagAGC();
 	virtual void feed(Complex& ci);
+    double feedAndGetValue(const Complex& ci);
 	Real getMagSq() const { return m_magsq; }
 private:
-	Real m_magsq;
+	double m_magsq;
+    double m_threshold;
 };
 
 class AlphaAGC : public AGC

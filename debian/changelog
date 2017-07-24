@@ -1,3 +1,9 @@
+sdrangel (3.5.3-1) unstable; urgency=medium
+
+  * SSB demod: anded optional AGC
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 28 Jul 2017 09:14:18 +0200
+
 sdrangel (3.5.2-1) unstable; urgency=medium
 
   * HackRF: stop Rx before start Tx automatically and vice versa

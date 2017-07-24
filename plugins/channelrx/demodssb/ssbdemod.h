@@ -24,6 +24,7 @@
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
+#include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -142,6 +143,7 @@ private:
 	double m_magsqSum;
 	double m_magsqPeak;
     int  m_magsqCount;
+    MagAGC m_agc;
 
 	NCOF m_nco;
 	Interpolator m_interpolator;
