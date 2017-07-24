@@ -32,7 +32,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_audioFlipChannels(false),
     m_dsb(false),
     m_audioMute(false),
-    m_agc(12000, 4.0, 1e-2),
+    m_agc(12000, 40.0, 1e-2),
     m_sampleSink(sampleSink),
     m_audioFifo(4, 24000),
     m_settingsMutex(QMutex::Recursive)
@@ -173,19 +173,19 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				{
 					if (m_audioFlipChannels)
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * agcVal * 100);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * agcVal * 100);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * agcVal * 10);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * agcVal * 10);
 					}
 					else
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal * 100);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal * 100);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal * 10);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal * 10);
 					}
 				}
 				else
 				{
 					Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-					qint16 sample = (qint16)(demod * m_volume * agcVal * 100);
+					qint16 sample = (qint16)(demod * m_volume * agcVal * 10);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}
