@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>435</width>
+    <width>370</width>
     <height>160</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>421</width>
+     <width>360</width>
      <height>151</height>
     </rect>
    </property>
@@ -568,13 +568,13 @@
          <string>Set threshiold gate (ms)</string>
         </property>
         <property name="maximum">
-         <number>50</number>
+         <number>20</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>5</number>
+         <number>4</number>
         </property>
        </widget>
       </item>
@@ -582,7 +582,7 @@
        <widget class="QLabel" name="agcThresholdGateText">
         <property name="minimumSize">
          <size>
-          <width>24</width>
+          <width>16</width>
           <height>0</height>
          </size>
         </property>
@@ -590,7 +590,7 @@
          <string>Threshiold gate (ms)</string>
         </property>
         <property name="text">
-         <string>000</string>
+         <string>00</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

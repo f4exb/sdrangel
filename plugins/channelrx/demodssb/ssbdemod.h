@@ -47,7 +47,8 @@ public:
 			bool audioMute,
 			bool agc,
 			int agcTimeLog2,
-			int agcPowerThreshold);
+			int agcPowerThreshold,
+			int agcThresholdGate);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -81,8 +82,9 @@ private:
 		bool getDSB() const { return m_dsb; }
 		bool getAudioMute() const { return m_audioMute; }
 		bool getAGC() const { return m_agc; }
-		int  getAGCTimeLog2() { return m_agcTimeLog2; }
-		int  getAGCPowerThershold() { return m_agcPowerThreshold; }
+		int  getAGCTimeLog2() const { return m_agcTimeLog2; }
+		int  getAGCPowerThershold() const { return m_agcPowerThreshold; }
+        int  getAGCThersholdGate() const { return m_agcThresholdGate; }
 
 		static MsgConfigureSSBDemod* create(Real Bandwidth,
 				Real LowCutoff,
@@ -94,7 +96,8 @@ private:
 				bool audioMute,
                 bool agc,
                 int  agcTimeLog2,
-                int  agcPowerThreshold)
+                int  agcPowerThreshold,
+                int  agcThresholdGate)
 		{
 			return new MsgConfigureSSBDemod(
 			        Bandwidth,
@@ -107,7 +110,8 @@ private:
 			        audioMute,
 			        agc,
 			        agcTimeLog2,
-			        agcPowerThreshold);
+			        agcPowerThreshold,
+			        agcThresholdGate);
 		}
 
 	private:
@@ -122,6 +126,7 @@ private:
 		bool m_agc;
 		int  m_agcTimeLog2;
 		int  m_agcPowerThreshold;
+		int  m_agcThresholdGate;
 
 		MsgConfigureSSBDemod(Real Bandwidth,
 				Real LowCutoff,
@@ -133,7 +138,8 @@ private:
 				bool audioMute,
 				bool agc,
 				int  agcTimeLog2,
-				int  agcPowerThreshold) :
+				int  agcPowerThreshold,
+				int  agcThresholdGate) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
@@ -145,7 +151,8 @@ private:
 			m_audioMute(audioMute),
 			m_agc(agc),
 			m_agcTimeLog2(agcTimeLog2),
-			m_agcPowerThreshold(agcPowerThreshold)
+			m_agcPowerThreshold(agcPowerThreshold),
+			m_agcThresholdGate(agcThresholdGate)
 		{ }
 	};
 
@@ -177,6 +184,7 @@ private:
     bool m_agcActive;
     int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
     double m_agcPowerThreshold; //!< AGC power threshold (linear)
+    int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
 
 	NCOF m_nco;
 	Interpolator m_interpolator;

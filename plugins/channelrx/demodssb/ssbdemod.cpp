@@ -37,6 +37,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
     m_agcActive(false),
     m_agcNbSamples(12000),
     m_agcPowerThreshold(1e-2),
+    m_agcThresholdGate(0),
     m_sampleSink(sampleSink),
     m_audioFifo(4, 24000),
     m_settingsMutex(QMutex::Recursive)
@@ -91,7 +92,8 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		bool audioMute,
 		bool agc,
         int agcTimeLog2,
-        int agcPowerThreshold)
+        int agcPowerThreshold,
+        int agcThresholdGate)
 {
 	Message* cmd = MsgConfigureSSBDemod::create(
 	        Bandwidth,
@@ -104,7 +106,8 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 	        audioMute,
 	        agc,
 	        agcTimeLog2,
-	        agcPowerThreshold);
+	        agcPowerThreshold,
+	        agcThresholdGate);
 	messageQueue->push(cmd);
 }
 
@@ -313,6 +316,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 		int agcNbSamples = 48 * (1<<cfg.getAGCTimeLog2());
 		double agcPowerThreshold = CalcDb::powerFromdB(cfg.getAGCPowerThershold()) * (1<<30);
+		int agcThresholdGate = 48 * cfg.getAGCThersholdGate(); // ms
 
 		if (m_agcNbSamples != agcNbSamples)
 		{
@@ -324,6 +328,12 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		{
 		    m_agc.setThreshold(agcPowerThreshold);
 		    m_agcPowerThreshold = agcPowerThreshold;
+		}
+
+		if (m_agcThresholdGate != agcThresholdGate)
+		{
+		    m_agc.setGate(agcThresholdGate);
+		    m_agcThresholdGate = agcThresholdGate;
 		}
 
 		m_settingsMutex.unlock();
@@ -338,7 +348,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_audioMute: " << m_audioMute
 				<< " m_agcActive: " << m_agcActive
 				<< " agcNbSamples: " << agcNbSamples
-				<< " agcPowerThreshold: " << agcPowerThreshold;
+				<< " agcPowerThreshold: " << agcPowerThreshold
+				<< " agcThresholdGate: " << agcThresholdGate;
 
 		return true;
 	}

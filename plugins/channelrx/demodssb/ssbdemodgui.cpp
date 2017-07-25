@@ -82,6 +82,7 @@ QByteArray SSBDemodGUI::serialize() const
 	s.writeBool(11, ui->agc->isChecked());
 	s.writeS32(12, ui->agcTimeLog2->value());
 	s.writeS32(13, ui->agcPowerThreshold->value());
+    s.writeS32(14, ui->agcThresholdGate->value());
 	return s.final();
 }
 
@@ -138,7 +139,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
         ui->agcPowerThresholdText->setText(s);
         d.readS32(14, &tmp, 5);
         ui->agcThresholdGate->setValue(tmp);
-        s = QString::number(tmp*10, 'f', 0);
+        s = QString::number(tmp, 'f', 0);
         ui->agcThresholdGateText->setText(s);
 
 		blockApplySettings(false);
@@ -304,7 +305,7 @@ void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 
 void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
 {
-    QString s = QString::number(value * 10, 'f', 0);
+    QString s = QString::number(value, 'f', 0);
     ui->agcThresholdGateText->setText(s);
     applySettings();
 }
@@ -515,7 +516,8 @@ void SSBDemodGUI::applySettings()
 			ui->audioMute->isChecked(),
 			ui->agc->isChecked(),
 			ui->agcTimeLog2->value(),
-			ui->agcPowerThreshold->value());
+			ui->agcPowerThreshold->value(),
+			ui->agcThresholdGate->value());
 	}
 }
 
