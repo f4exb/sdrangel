@@ -84,9 +84,23 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		bool audioBinaural,
 		bool audioFlipChannel,
 		bool dsb,
-		bool audioMute)
+		bool audioMute,
+		bool agc,
+        int agcTimeLog2,
+        int agcPowerThreshold)
 {
-	Message* cmd = MsgConfigureSSBDemod::create(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannel, dsb, audioMute);
+	Message* cmd = MsgConfigureSSBDemod::create(
+	        Bandwidth,
+	        LowCutoff,
+	        volume,
+	        spanLog2,
+	        audioBinaural,
+	        audioFlipChannel,
+	        dsb,
+	        audioMute,
+	        agc,
+	        agcTimeLog2,
+	        agcPowerThreshold);
 	messageQueue->push(cmd);
 }
 

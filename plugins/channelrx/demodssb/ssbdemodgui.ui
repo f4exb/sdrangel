@@ -459,7 +459,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="agc">
         <property name="text">
          <string>AGC</string>
         </property>
@@ -510,6 +510,18 @@
         </property>
         <property name="toolTip">
          <string>AGC power threshold (dB)</string>
+        </property>
+        <property name="minimum">
+         <number>-99</number>
+        </property>
+        <property name="maximum">
+         <number>0</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>-40</number>
         </property>
        </widget>
       </item>

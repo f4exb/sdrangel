@@ -43,7 +43,10 @@ public:
 			bool audioBinaural,
 			bool audioFlipChannels,
 			bool dsb,
-			bool audioMute);
+			bool audioMute,
+			bool agc,
+			int agcTimeLog2,
+			int agcPowerThreshold);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -76,6 +79,9 @@ private:
 		bool getAudioFlipChannels() const { return m_audioFlipChannels; }
 		bool getDSB() const { return m_dsb; }
 		bool getAudioMute() const { return m_audioMute; }
+		bool getAGC() const { return m_agc; }
+		int  getAGCTimeLog2() { return m_agcTimeLog2; }
+		int  getAGCPowerThershold() { return m_agcPowerThreshold; }
 
 		static MsgConfigureSSBDemod* create(Real Bandwidth,
 				Real LowCutoff,
@@ -84,9 +90,23 @@ private:
 				bool audioBinaural,
 				bool audioFlipChannels,
 				bool dsb,
-				bool audioMute)
+				bool audioMute,
+                bool agc,
+                int  agcTimeLog2,
+                int  agcPowerThreshold)
 		{
-			return new MsgConfigureSSBDemod(Bandwidth, LowCutoff, volume, spanLog2, audioBinaural, audioFlipChannels, dsb, audioMute);
+			return new MsgConfigureSSBDemod(
+			        Bandwidth,
+			        LowCutoff,
+			        volume,
+			        spanLog2,
+			        audioBinaural,
+			        audioFlipChannels,
+			        dsb,
+			        audioMute,
+			        agc,
+			        agcTimeLog2,
+			        agcPowerThreshold);
 		}
 
 	private:
@@ -98,6 +118,9 @@ private:
 		bool m_audioFlipChannels;
 		bool m_dsb;
 		bool m_audioMute;
+		bool m_agc;
+		int  m_agcTimeLog2;
+		int  m_agcPowerThreshold;
 
 		MsgConfigureSSBDemod(Real Bandwidth,
 				Real LowCutoff,
@@ -106,7 +129,10 @@ private:
 				bool audioBinaural,
 				bool audioFlipChannels,
 				bool dsb,
-				bool audioMute) :
+				bool audioMute,
+				bool agc,
+				int  agcTimeLog2,
+				int  agcPowerThreshold) :
 			Message(),
 			m_Bandwidth(Bandwidth),
 			m_LowCutoff(LowCutoff),
@@ -115,7 +141,10 @@ private:
 			m_audioBinaural(audioBinaural),
 			m_audioFlipChannels(audioFlipChannels),
 			m_dsb(dsb),
-			m_audioMute(audioMute)
+			m_audioMute(audioMute),
+			m_agc(agc),
+			m_agcTimeLog2(agcTimeLog2),
+			m_agcPowerThreshold(agcPowerThreshold)
 		{ }
 	};
 

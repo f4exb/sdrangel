@@ -468,7 +468,10 @@ void SSBDemodGUI::applySettings()
 			m_audioBinaural,
 			m_audioFlipChannels,
 			m_dsb,
-			ui->audioMute->isChecked());
+			ui->audioMute->isChecked(),
+			ui->agc->isChecked(),
+			ui->agcTimeLog2->value(),
+			ui->agcPowerThreshold->value());
 	}
 }
 
