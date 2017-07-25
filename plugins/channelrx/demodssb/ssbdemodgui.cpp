@@ -357,7 +357,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_audioFlipChannels(false),
 	m_dsb(false),
     m_audioMute(false),
-	m_channelPowerDbAvg(20,0)
+	m_channelPowerDbAvg(20,0),
+	m_squelchOpen(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -549,4 +550,17 @@ void SSBDemodGUI::tick()
             nbMagsqSamples);
 
     ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+
+    bool squelchOpen = m_ssbDemod->getAudioActive();
+
+    if (squelchOpen != m_squelchOpen)
+    {
+        if (squelchOpen) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        m_squelchOpen = squelchOpen;
+    }
 }

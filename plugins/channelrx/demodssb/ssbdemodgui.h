@@ -72,6 +72,7 @@ private:
 	bool m_dsb;
 	bool m_audioMute;
 	MovingAverage<double> m_channelPowerDbAvg;
+	bool m_squelchOpen;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;

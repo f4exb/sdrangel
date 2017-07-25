@@ -56,6 +56,7 @@ public:
 	virtual bool handleMessage(const Message& cmd);
 
 	double getMagSq() const { return m_magsq; }
+	bool getAudioActive() const { return m_audioActive; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -185,6 +186,7 @@ private:
     int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
     double m_agcPowerThreshold; //!< AGC power threshold (linear)
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
+    bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
 	NCOF m_nco;
 	Interpolator m_interpolator;

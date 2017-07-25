@@ -38,6 +38,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
     m_agcNbSamples(12000),
     m_agcPowerThreshold(1e-2),
     m_agcThresholdGate(0),
+    m_audioActive(false),
     m_sampleSink(sampleSink),
     m_audioFifo(4, 24000),
     m_settingsMutex(QMutex::Recursive)
@@ -181,6 +182,9 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_sum.imag(0.0);
 			}
 
+            double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
+            m_audioActive = agcVal != 0.0;
+
 			if (m_audioMute)
 			{
 				m_audioBuffer[m_audioBufferFill].r = 0;
@@ -188,8 +192,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			}
 			else
 			{
-			    double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
-
 				if (m_audioBinaual)
 				{
 					if (m_audioFlipChannels)
