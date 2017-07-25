@@ -302,7 +302,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
 
 		m_volume = cfg.getVolume();
-		m_volume *= m_volume * 0.1;
+		m_volume *= 2.0;
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_audioBinaual = cfg.getAudioBinaural();

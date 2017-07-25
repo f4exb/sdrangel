@@ -129,9 +129,17 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		d.readBool(11, &booltmp, false);
 		ui->agc->setChecked(booltmp);
 		d.readS32(12, &tmp, 7);
-		ui->agcTimeText->setText(QString("%1").arg((1<<tmp), 0, 'f', 0));
+		ui->agcTimeLog2->setValue(tmp);
+	    QString s = QString::number((1<<tmp), 'f', 0);
+	    ui->agcTimeText->setText(s);
         d.readS32(13, &tmp, -20);
-        ui->agcPowerThresholdText->setText(QString("%1").arg(tmp, 0, 'f', 0));
+        ui->agcPowerThreshold->setValue(tmp);
+        s = QString::number(tmp, 'f', 0);
+        ui->agcPowerThresholdText->setText(s);
+        d.readS32(14, &tmp, 5);
+        ui->agcThresholdGate->setValue(tmp);
+        s = QString::number(tmp*10, 'f', 0);
+        ui->agcThresholdGateText->setText(s);
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -275,20 +283,29 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 	applySettings();
 }
 
-void SSBDemodGUI::on_agc_stateChanged(int state)
+void SSBDemodGUI::on_agc_stateChanged(int state __attribute((__unused__)))
 {
     applySettings();
 }
 
 void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
 {
-    ui->agcTimeText->setText(QString("%1").arg((1<<value), 0, 'f', 0));
+    QString s = QString::number((1<<value), 'f', 0);
+    ui->agcTimeText->setText(s);
     applySettings();
 }
 
 void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 {
-    ui->agcPowerThresholdText->setText(QString("%1").arg(value, 0, 'f', 0));
+    QString s = QString::number(value, 'f', 0);
+    ui->agcPowerThresholdText->setText(s);
+    applySettings();
+}
+
+void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
+{
+    QString s = QString::number(value * 10, 'f', 0);
+    ui->agcThresholdGateText->setText(s);
     applySettings();
 }
 

@@ -6,6 +6,7 @@
  */
 
 #include "dsp/agc.h"
+#include "util/smootherstep.h"
 
 
 AGC::AGC(int historySize, Real R) :
@@ -46,7 +47,9 @@ MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
 	m_magsq(0.0),
 	m_threshold(threshold),
-	m_thresholdCount(0)
+	m_gate(0),
+	m_stepCounter(0),
+	m_gateCounter(0)
 {}
 
 MagSquaredAGC::~MagSquaredAGC()
@@ -68,16 +71,39 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
 
     if (m_magsq > m_threshold)
     {
-        m_thresholdCount = 0;
+        if (m_gateCounter < m_gate)
+        {
+            m_gateCounter++;
+        }
+        else
+        {
+            m_count = 0;
+        }
     }
     else
     {
-        if (m_thresholdCount < m_moving_average.historySize()) {
-            m_thresholdCount++;
+        if (m_count < m_moving_average.historySize()) {
+            m_count++;
         }
+
+        m_gateCounter = 0;
     }
 
-    return (m_thresholdCount <  m_moving_average.historySize()) ? m_u0 : 0.0;
+    if (m_count <  m_moving_average.historySize())
+    {
+        if (m_stepCounter < 2400) {
+            m_stepCounter++;
+        }
+
+        return m_u0 * StepFunctions::smootherstep(m_stepCounter/2400.0);
+    }
+    else
+    {
+        m_stepCounter = 0;
+        return 0.0;
+    }
+
+    //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //MagAGC::MagAGC() :
@@ -89,7 +115,9 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
 	m_magsq(0.0),
 	m_threshold(threshold),
-	m_thresholdCount(0)
+	m_gate(0),
+	m_stepCounter(0),
+	m_gateCounter(0)
 {}
 
 MagAGC::~MagAGC()
@@ -111,16 +139,39 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 
     if (m_magsq > m_threshold)
     {
-        m_thresholdCount = 0;
+        if (m_gateCounter < m_gate)
+        {
+            m_gateCounter++;
+        }
+        else
+        {
+            m_count = 0;
+        }
     }
     else
     {
-        if (m_thresholdCount < m_moving_average.historySize()) {
-            m_thresholdCount++;
+        if (m_count < m_moving_average.historySize()) {
+            m_count++;
         }
+
+        m_gateCounter = 0;
     }
 
-    return (m_thresholdCount <  m_moving_average.historySize()) ? m_u0 : 0.0;
+    if (m_count <  m_moving_average.historySize())
+    {
+        if (m_stepCounter < 480) {
+            m_stepCounter++;
+        }
+
+        return m_u0 * StepFunctions::smootherstep(m_stepCounter/480.0);
+    }
+    else
+    {
+        m_stepCounter = 0;
+        return 0.0;
+    }
+
+    //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //AlphaAGC::AlphaAGC() :

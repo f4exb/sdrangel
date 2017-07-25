@@ -38,10 +38,13 @@ public:
 	double feedAndGetValue(const Complex& ci);
 	double getMagSq() const { return m_magsq; }
 	void setThreshold(double threshold) { m_threshold = threshold; }
+	void setGate(int gate) { m_gate = gate; }
 private:
 	double m_magsq;
 	double m_threshold; //!< squelch on magsq average with transition from +3dB
-    int m_thresholdCount;
+    int m_gate;
+    int m_stepCounter;
+    int m_gateCounter;
 };
 
 class MagAGC : public AGC
@@ -53,10 +56,13 @@ public:
     double feedAndGetValue(const Complex& ci);
 	Real getMagSq() const { return m_magsq; }
     void setThreshold(double threshold) { m_threshold = threshold; }
+    void setGate(int gate) { m_gate = gate; }
 private:
 	double m_magsq;
     double m_threshold; //!< squelch on magsq average
-    int m_thresholdCount;
+    int m_gate;
+    int m_stepCounter;
+    int m_gateCounter;
 };
 
 class AlphaAGC : public AGC
