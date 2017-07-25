@@ -45,7 +45,8 @@ Real AGC::getAverage()
 MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
 	m_magsq(0.0),
-	m_threshold(threshold)
+	m_threshold(threshold),
+	m_thresholdCount(0)
 {}
 
 MagSquaredAGC::~MagSquaredAGC()
@@ -64,7 +65,19 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
     m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
     m_moving_average.feed(m_magsq);
     m_u0 = m_R / m_moving_average.average();
-    return m_magsq > m_threshold ? m_u0 : 1.0;
+
+    if (m_magsq > m_threshold)
+    {
+        m_thresholdCount = 0;
+    }
+    else
+    {
+        if (m_thresholdCount < m_moving_average.historySize()) {
+            m_thresholdCount++;
+        }
+    }
+
+    return (m_thresholdCount <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //MagAGC::MagAGC() :
@@ -75,7 +88,8 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
 MagAGC::MagAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
 	m_magsq(0.0),
-	m_threshold(threshold)
+	m_threshold(threshold),
+	m_thresholdCount(0)
 {}
 
 MagAGC::~MagAGC()
@@ -94,7 +108,19 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
     m_moving_average.feed(m_magsq);
     m_u0 = m_R / sqrt(m_moving_average.average());
-    return m_magsq > m_threshold ? m_u0 : 1.0;
+
+    if (m_magsq > m_threshold)
+    {
+        m_thresholdCount = 0;
+    }
+    else
+    {
+        if (m_thresholdCount < m_moving_average.historySize()) {
+            m_thresholdCount++;
+        }
+    }
+
+    return (m_thresholdCount <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //AlphaAGC::AlphaAGC() :

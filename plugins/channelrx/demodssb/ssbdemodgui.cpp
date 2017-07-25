@@ -79,6 +79,9 @@ QByteArray SSBDemodGUI::serialize() const
 	s.writeBool(8, m_audioBinaural);
 	s.writeBool(9, m_audioFlipChannels);
 	s.writeBool(10, m_dsb);
+	s.writeBool(11, ui->agc->isChecked());
+	s.writeS32(12, ui->agcTimeLog2->value());
+	s.writeS32(13, ui->agcPowerThreshold->value());
 	return s.final();
 }
 
@@ -97,6 +100,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		QByteArray bytetmp;
 		quint32 u32tmp;
 		qint32 tmp;
+		bool booltmp;
 
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
@@ -122,6 +126,12 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		ui->audioFlipChannels->setChecked(m_audioFlipChannels);
 		d.readBool(10, &m_dsb);
 		ui->dsb->setChecked(m_dsb);
+		d.readBool(11, &booltmp, false);
+		ui->agc->setChecked(booltmp);
+		d.readS32(12, &tmp, 7);
+		ui->agcTimeText->setText(QString("%1").arg((1<<tmp), 0, 'f', 0));
+        d.readS32(13, &tmp, -20);
+        ui->agcPowerThresholdText->setText(QString("%1").arg(tmp, 0, 'f', 0));
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -263,6 +273,23 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	applySettings();
+}
+
+void SSBDemodGUI::on_agc_stateChanged(int state)
+{
+    applySettings();
+}
+
+void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
+{
+    ui->agcTimeText->setText(QString("%1").arg((1<<value), 0, 'f', 0));
+    applySettings();
+}
+
+void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
+{
+    ui->agcPowerThresholdText->setText(QString("%1").arg(value, 0, 'f', 0));
+    applySettings();
 }
 
 void SSBDemodGUI::on_audioMute_toggled(bool checked)

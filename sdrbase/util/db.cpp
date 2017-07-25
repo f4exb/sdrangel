@@ -28,3 +28,8 @@ double CalcDb::dbPower(double magsq, double floordB)
 		return floordB;
 	}
 }
+
+double CalcDb::powerFromdB(double powerdB)
+{
+    return pow(10.0, powerdB / 10.0);
+}

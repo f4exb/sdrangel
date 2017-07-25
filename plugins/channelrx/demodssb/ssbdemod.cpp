@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
@@ -32,7 +33,10 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_audioFlipChannels(false),
     m_dsb(false),
     m_audioMute(false),
-    m_agc(12000, 40.0, 1e-2),
+    m_agc(12000, agcTarget, 1e-2),
+    m_agcActive(false),
+    m_agcNbSamples(12000),
+    m_agcPowerThreshold(1e-2),
     m_sampleSink(sampleSink),
     m_audioFifo(4, 24000),
     m_settingsMutex(QMutex::Recursive)
@@ -181,25 +185,25 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			}
 			else
 			{
-			    double agcVal = m_agc.feedAndGetValue(sideband[i]);
+			    double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
 
 				if (m_audioBinaual)
 				{
 					if (m_audioFlipChannels)
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * agcVal * 10);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * agcVal * 10);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * agcVal);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * agcVal);
 					}
 					else
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal * 10);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal * 10);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal);
 					}
 				}
 				else
 				{
 					Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-					qint16 sample = (qint16)(demod * m_volume * agcVal * 10);
+					qint16 sample = (qint16)(demod * m_volume * agcVal);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}
@@ -305,6 +309,22 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_audioFlipChannels = cfg.getAudioFlipChannels();
 		m_dsb = cfg.getDSB();
 		m_audioMute = cfg.getAudioMute();
+		m_agcActive = cfg.getAGC();
+
+		int agcNbSamples = 48 * (1<<cfg.getAGCTimeLog2());
+		double agcPowerThreshold = CalcDb::powerFromdB(cfg.getAGCPowerThershold()) * (1<<30);
+
+		if (m_agcNbSamples != agcNbSamples)
+		{
+		    m_agc.resize(agcNbSamples, agcTarget);
+		    m_agcNbSamples = agcNbSamples;
+		}
+
+		if (m_agcPowerThreshold != agcPowerThreshold)
+		{
+		    m_agc.setThreshold(agcPowerThreshold);
+		    m_agcPowerThreshold = agcPowerThreshold;
+		}
 
 		m_settingsMutex.unlock();
 
@@ -315,7 +335,10 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_audioBinaual: " << m_audioBinaual
 				<< " m_audioFlipChannels: " << m_audioFlipChannels
 				<< " m_dsb: " << m_dsb
-				<< "m_audioMute: " << m_audioMute;
+				<< " m_audioMute: " << m_audioMute
+				<< " m_agcActive: " << m_agcActive
+				<< " agcNbSamples: " << agcNbSamples
+				<< " agcPowerThreshold: " << agcPowerThreshold;
 
 		return true;
 	}

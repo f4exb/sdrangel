@@ -23,6 +23,7 @@ class CalcDb
 {
 public:
 	static double dbPower(double magsq, double floordB = -100.0);
+	static double powerFromdB(double powerdB);
 };
 
 #endif /* INCLUDE_UTIL_DB_H_ */

@@ -50,6 +50,11 @@ public:
 		return m_sum;
 	}
 
+	int historySize() const
+	{
+	    return m_history.size();
+	}
+
 protected:
 	std::vector<Type> m_history;
 	Type m_sum;

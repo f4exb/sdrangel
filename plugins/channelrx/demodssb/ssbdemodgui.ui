@@ -433,6 +433,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
        </widget>
       </item>
       <item>
@@ -489,6 +492,12 @@
       </item>
       <item>
        <widget class="QLabel" name="agcTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>AGC time constant (ms)</string>
         </property>
@@ -521,12 +530,18 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>-40</number>
+         <number>-50</number>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="agcPowerThersholdText">
+       <widget class="QLabel" name="agcPowerThresholdText">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>AGC power threshold (dB)</string>
         </property>
@@ -656,6 +671,14 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>

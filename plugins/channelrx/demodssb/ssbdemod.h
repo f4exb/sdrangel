@@ -29,6 +29,7 @@
 #include "util/message.h"
 
 #define ssbFftLen 1024
+#define agcTarget 327.68 // -20 dB amplitude => -40 dB power: center of normal signal
 
 class SSBDemod : public BasebandSampleSink {
 public:
@@ -173,6 +174,9 @@ private:
 	double m_magsqPeak;
     int  m_magsqCount;
     MagAGC m_agc;
+    bool m_agcActive;
+    int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
+    double m_agcPowerThreshold; //!< AGC power threshold (linear)
 
 	NCOF m_nco;
 	Interpolator m_interpolator;
