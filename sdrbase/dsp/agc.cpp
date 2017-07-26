@@ -9,6 +9,7 @@
 #include "dsp/agc.h"
 #include "util/smootherstep.h"
 
+#define StepLengthMax 4800 // 100ms
 
 AGC::AGC(int historySize, Real R) :
 	m_u0(1.0),
@@ -49,9 +50,9 @@ MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	m_magsq(0.0),
 	m_threshold(threshold),
 	m_gate(0),
-	m_stepLength(std::min(2400, historySize/2)),
+	m_stepLength(std::min(StepLengthMax, historySize/2)),
 	m_stepUpCounter(0),
-    m_stepDownCounter(0),
+    m_stepDownCounter(m_stepLength),
 	m_gateCounter(0)
 {}
 
@@ -60,7 +61,7 @@ MagSquaredAGC::~MagSquaredAGC()
 
 void MagSquaredAGC::resize(int historySize, Real R)
 {
-    m_stepLength = std::min(2400, historySize/2);
+    m_stepLength = std::min(StepLengthMax, historySize/2);
     AGC::resize(historySize, R);
 }
 
@@ -132,9 +133,9 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	m_magsq(0.0),
 	m_threshold(threshold),
 	m_gate(0),
-	m_stepLength(std::min(2400, historySize/2)),
+	m_stepLength(std::min(StepLengthMax, historySize/2)),
 	m_stepUpCounter(0),
-    m_stepDownCounter(0),
+    m_stepDownCounter(m_stepLength),
 	m_gateCounter(0)
 {}
 
@@ -143,7 +144,7 @@ MagAGC::~MagAGC()
 
 void MagAGC::resize(int historySize, Real R)
 {
-    m_stepLength = std::min(2400, historySize/2);
+    m_stepLength = std::min(StepLengthMax, historySize/2);
     AGC::resize(historySize, R);
 }
 
