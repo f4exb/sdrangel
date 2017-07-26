@@ -182,7 +182,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_sum.imag(0.0);
 			}
 
-            double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
+            double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
             m_audioActive = agcVal != 0.0;
 
 			if (m_audioMute)
@@ -307,7 +307,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
 
 		m_volume = cfg.getVolume();
-		m_volume *= 2.0;
+		//m_volume *= 2.0; // for 327.68
+		m_volume /= 4.0; // for 3276.8
 
 		m_spanLog2 = cfg.getSpanLog2();
 		m_audioBinaual = cfg.getAudioBinaural();

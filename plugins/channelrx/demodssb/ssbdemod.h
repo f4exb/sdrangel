@@ -29,7 +29,7 @@
 #include "util/message.h"
 
 #define ssbFftLen 1024
-#define agcTarget 327.68 // -20 dB amplitude => -40 dB power: center of normal signal
+#define agcTarget 3276.8 // -10 dB amplitude => -20 dB power: center of normal signal
 
 class SSBDemod : public BasebandSampleSink {
 public:
