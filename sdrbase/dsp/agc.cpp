@@ -5,6 +5,7 @@
  *      Author: f4exb
  */
 
+#include <algorithm>
 #include "dsp/agc.h"
 #include "util/smootherstep.h"
 
@@ -48,12 +49,20 @@ MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	m_magsq(0.0),
 	m_threshold(threshold),
 	m_gate(0),
-	m_stepCounter(0),
+	m_stepLength(std::min(2400, historySize/2)),
+	m_stepUpCounter(0),
+    m_stepDownCounter(0),
 	m_gateCounter(0)
 {}
 
 MagSquaredAGC::~MagSquaredAGC()
 {}
+
+void MagSquaredAGC::resize(int historySize, Real R)
+{
+    m_stepLength = std::min(2400, historySize/2);
+    AGC::resize(historySize, R);
+}
 
 void MagSquaredAGC::feed(Complex& ci)
 {
@@ -91,16 +100,23 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
 
     if (m_count <  m_moving_average.historySize())
     {
-        if (m_stepCounter < 2400) {
-            m_stepCounter++;
+        m_stepDownCounter = m_stepLength;
+
+        if (m_stepUpCounter < m_stepLength) {
+            m_stepUpCounter++;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepCounter/2400.0);
+        return m_u0 * StepFunctions::smootherstep(m_stepUpCounter/m_stepLength);
     }
     else
     {
-        m_stepCounter = 0;
-        return 0.0;
+        m_stepUpCounter = 0;
+
+        if (m_stepDownCounter > 0) {
+            m_stepDownCounter--;
+        }
+
+        return m_u0 * StepFunctions::smootherstep(m_stepDownCounter/m_stepLength);
     }
 
     //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
@@ -116,12 +132,20 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	m_magsq(0.0),
 	m_threshold(threshold),
 	m_gate(0),
-	m_stepCounter(0),
+	m_stepLength(std::min(2400, historySize/2)),
+	m_stepUpCounter(0),
+    m_stepDownCounter(0),
 	m_gateCounter(0)
 {}
 
 MagAGC::~MagAGC()
 {}
+
+void MagAGC::resize(int historySize, Real R)
+{
+    m_stepLength = std::min(2400, historySize/2);
+    AGC::resize(historySize, R);
+}
 
 void MagAGC::feed(Complex& ci)
 {
@@ -159,16 +183,23 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 
     if (m_count <  m_moving_average.historySize())
     {
-        if (m_stepCounter < 480) {
-            m_stepCounter++;
+        m_stepDownCounter = m_stepLength;
+
+        if (m_stepUpCounter < m_stepLength) {
+            m_stepUpCounter++;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepCounter/480.0);
+        return m_u0 * StepFunctions::smootherstep(m_stepUpCounter/m_stepLength);
     }
     else
     {
-        m_stepCounter = 0;
-        return 0.0;
+        m_stepUpCounter = 0;
+
+        if (m_stepDownCounter > 0) {
+            m_stepDownCounter--;
+        }
+
+        return m_u0 * StepFunctions::smootherstep(m_stepDownCounter/m_stepLength);
     }
 
     //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;

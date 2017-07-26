@@ -34,6 +34,7 @@ class MagSquaredAGC : public AGC
 public:
 	MagSquaredAGC(int historySize, double R, double threshold);
 	virtual ~MagSquaredAGC();
+	void resize(int historySize, Real R);
 	virtual void feed(Complex& ci);
 	double feedAndGetValue(const Complex& ci);
 	double getMagSq() const { return m_magsq; }
@@ -41,10 +42,12 @@ public:
 	void setGate(int gate) { m_gate = gate; }
 private:
 	double m_magsq;
-	double m_threshold; //!< squelch on magsq average with transition from +3dB
-    int m_gate;
-    int m_stepCounter;
-    int m_gateCounter;
+	double m_threshold;    //!< squelch on magsq average
+    int m_gate;            //!< power threshold gate in number of samples
+    int m_stepLength;      //!< transition step length in number of samples
+    int m_stepUpCounter;   //!< step up transition samples counter
+    int m_stepDownCounter; //!< step down transition samples counter
+    int m_gateCounter;     //!< threshold gate samples counter
 };
 
 class MagAGC : public AGC
@@ -52,6 +55,7 @@ class MagAGC : public AGC
 public:
 	MagAGC(int historySize, double R, double threshold);
 	virtual ~MagAGC();
+	void resize(int historySize, Real R);
 	virtual void feed(Complex& ci);
     double feedAndGetValue(const Complex& ci);
 	Real getMagSq() const { return m_magsq; }
@@ -59,10 +63,12 @@ public:
     void setGate(int gate) { m_gate = gate; }
 private:
 	double m_magsq;
-    double m_threshold; //!< squelch on magsq average
-    int m_gate;
-    int m_stepCounter;
-    int m_gateCounter;
+    double m_threshold;    //!< squelch on magsq average
+    int m_gate;            //!< power threshold gate in number of samples
+    int m_stepLength;      //!< transition step length in number of samples
+    int m_stepUpCounter;   //!< step up transition samples counter
+    int m_stepDownCounter; //!< step down transition samples counter
+    int m_gateCounter;     //!< threshold gate samples counter
 };
 
 class AlphaAGC : public AGC
