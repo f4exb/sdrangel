@@ -9,7 +9,7 @@
 #include "dsp/agc.h"
 #include "util/smootherstep.h"
 
-#define StepLengthMax 4800 // 100ms
+#define StepLengthMax 2400 // 50ms
 
 AGC::AGC(int historySize, Real R) :
 	m_u0(1.0),
@@ -51,6 +51,7 @@ MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	m_threshold(threshold),
 	m_gate(0),
 	m_stepLength(std::min(StepLengthMax, historySize/2)),
+	m_stepDelta(1.0/m_stepLength),
 	m_stepUpCounter(0),
     m_stepDownCounter(m_stepLength),
 	m_gateCounter(0)
@@ -62,15 +63,15 @@ MagSquaredAGC::~MagSquaredAGC()
 void MagSquaredAGC::resize(int historySize, Real R)
 {
     m_stepLength = std::min(StepLengthMax, historySize/2);
+    m_stepDelta = 1.0 / m_stepLength;
+    m_stepUpCounter = 0;
+    m_stepDownCounter = m_stepLength;
     AGC::resize(historySize, R);
 }
 
 void MagSquaredAGC::feed(Complex& ci)
 {
-	m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
-	m_moving_average.feed(m_magsq);
-	m_u0 = m_R / m_moving_average.average();
-	ci *= m_u0;
+	ci *= feedAndGetValue(ci);
 }
 
 double MagSquaredAGC::feedAndGetValue(const Complex& ci)
@@ -103,24 +104,30 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
     {
         m_stepDownCounter = m_stepLength;
 
-        if (m_stepUpCounter < m_stepLength) {
+        if (m_stepUpCounter < m_stepLength)
+        {
             m_stepUpCounter++;
+            return m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta);
         }
-
-        return m_u0 * StepFunctions::smootherstep( ((float) m_stepUpCounter) / ((float) m_stepLength) );
+        else
+        {
+            return m_u0;
+        }
     }
     else
     {
         m_stepUpCounter = 0;
 
-        if (m_stepDownCounter > 0) {
+        if (m_stepDownCounter > 0)
+        {
             m_stepDownCounter--;
+            return m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
         }
-
-        return m_u0 * StepFunctions::smootherstep( ((float) m_stepDownCounter) / ((float) m_stepLength) );
+        else
+        {
+            return 0.0;
+        }
     }
-
-    //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //MagAGC::MagAGC() :
@@ -134,6 +141,7 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	m_threshold(threshold),
 	m_gate(0),
 	m_stepLength(std::min(StepLengthMax, historySize/2)),
+    m_stepDelta(1.0/m_stepLength),
 	m_stepUpCounter(0),
     m_stepDownCounter(m_stepLength),
 	m_gateCounter(0)
@@ -145,15 +153,15 @@ MagAGC::~MagAGC()
 void MagAGC::resize(int historySize, Real R)
 {
     m_stepLength = std::min(StepLengthMax, historySize/2);
+    m_stepDelta = 1.0 / m_stepLength;
+    m_stepUpCounter = 0;
+    m_stepDownCounter = m_stepLength;
     AGC::resize(historySize, R);
 }
 
 void MagAGC::feed(Complex& ci)
 {
-	m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
-	m_moving_average.feed(m_magsq);
-	m_u0 = m_R / sqrt(m_moving_average.average());
-	ci *= m_u0;
+	ci *= feedAndGetValue(ci);
 }
 
 double MagAGC::feedAndGetValue(const Complex& ci)
@@ -186,24 +194,30 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     {
         m_stepDownCounter = m_stepLength;
 
-        if (m_stepUpCounter < m_stepLength) {
+        if (m_stepUpCounter < m_stepLength)
+        {
             m_stepUpCounter++;
+            return m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta);
         }
-
-        return m_u0 * StepFunctions::smootherstep( ((float) m_stepUpCounter) / ((float) m_stepLength) );
+        else
+        {
+            return m_u0;
+        }
     }
     else
     {
         m_stepUpCounter = 0;
 
-        if (m_stepDownCounter > 0) {
+        if (m_stepDownCounter > 0)
+        {
             m_stepDownCounter--;
+            return m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
         }
-
-        return m_u0 * StepFunctions::smootherstep( ((float) m_stepDownCounter) / ((float) m_stepLength) );
+        else
+        {
+            return 0.0;
+        }
     }
-
-    //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
 }
 
 //AlphaAGC::AlphaAGC() :

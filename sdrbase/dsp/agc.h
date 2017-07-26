@@ -45,6 +45,7 @@ private:
 	double m_threshold;    //!< squelch on magsq average
     int m_gate;            //!< power threshold gate in number of samples
     int m_stepLength;      //!< transition step length in number of samples
+    double m_stepDelta;    //!< transition step unit by sample
     int m_stepUpCounter;   //!< step up transition samples counter
     int m_stepDownCounter; //!< step down transition samples counter
     int m_gateCounter;     //!< threshold gate samples counter
@@ -66,6 +67,7 @@ private:
     double m_threshold;    //!< squelch on magsq average
     int m_gate;            //!< power threshold gate in number of samples
     int m_stepLength;      //!< transition step length in number of samples
+    double m_stepDelta;    //!< transition step unit by sample
     int m_stepUpCounter;   //!< step up transition samples counter
     int m_stepDownCounter; //!< step down transition samples counter
     int m_gateCounter;     //!< threshold gate samples counter
