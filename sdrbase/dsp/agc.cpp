@@ -107,7 +107,7 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
             m_stepUpCounter++;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepUpCounter/m_stepLength);
+        return m_u0 * StepFunctions::smootherstep( ((float) m_stepUpCounter) / ((float) m_stepLength) );
     }
     else
     {
@@ -117,7 +117,7 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
             m_stepDownCounter--;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepDownCounter/m_stepLength);
+        return m_u0 * StepFunctions::smootherstep( ((float) m_stepDownCounter) / ((float) m_stepLength) );
     }
 
     //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
@@ -190,7 +190,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
             m_stepUpCounter++;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepUpCounter/m_stepLength);
+        return m_u0 * StepFunctions::smootherstep( ((float) m_stepUpCounter) / ((float) m_stepLength) );
     }
     else
     {
@@ -200,7 +200,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
             m_stepDownCounter--;
         }
 
-        return m_u0 * StepFunctions::smootherstep(m_stepDownCounter/m_stepLength);
+        return m_u0 * StepFunctions::smootherstep( ((float) m_stepDownCounter) / ((float) m_stepLength) );
     }
 
     //return (m_count <  m_moving_average.historySize()) ? m_u0 : 0.0;
