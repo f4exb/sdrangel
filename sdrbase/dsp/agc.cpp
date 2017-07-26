@@ -102,7 +102,7 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
 
     if (m_count <  m_moving_average.historySize())
     {
-        m_stepDownCounter = m_stepLength;
+        m_stepDownCounter = m_stepUpCounter;
 
         if (m_stepUpCounter < m_stepLength)
         {
@@ -116,7 +116,7 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
     }
     else
     {
-        m_stepUpCounter = 0;
+        m_stepUpCounter = m_stepDownCounter;
 
         if (m_stepDownCounter > 0)
         {
@@ -192,7 +192,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 
     if (m_count <  m_moving_average.historySize())
     {
-        m_stepDownCounter = m_stepLength;
+        m_stepDownCounter = m_stepUpCounter;
 
         if (m_stepUpCounter < m_stepLength)
         {
@@ -206,7 +206,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     }
     else
     {
-        m_stepUpCounter = 0;
+        m_stepUpCounter = m_stepDownCounter;
 
         if (m_stepDownCounter > 0)
         {
