@@ -87,6 +87,7 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
+	void displaySettings();
 
 	void displayAGCPowerThreshold(int value);
 

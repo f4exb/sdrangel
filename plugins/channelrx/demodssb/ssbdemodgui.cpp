@@ -58,7 +58,7 @@ void SSBDemodGUI::resetToDefaults()
 	blockApplySettings(true);
 
 	ui->BW->setValue(30);
-	ui->volume->setValue(40);
+	ui->volume->setValue(30);
 	ui->deltaFrequency->setValue(0);
 	ui->spanLog2->setValue(3);
 	ui->agc->setChecked(false);
@@ -67,7 +67,6 @@ void SSBDemodGUI::resetToDefaults()
 	ui->agcThresholdGate->setValue(4);
 
 	blockApplySettings(false);
-	applySettings();
 }
 
 QByteArray SSBDemodGUI::serialize() const
@@ -97,6 +96,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 	if (!d.isValid())
 	{
 		resetToDefaults();
+	    applySettings();
 		return false;
 	}
 
@@ -114,7 +114,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 30);
 		ui->BW->setValue(tmp);
-		d.readS32(3, &tmp, 20);
+		d.readS32(3, &tmp, 30);
 		ui->volume->setValue(tmp);
 		d.readBlob(4, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
@@ -135,15 +135,12 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 		ui->agc->setChecked(booltmp);
 		d.readS32(12, &tmp, 7);
 		ui->agcTimeLog2->setValue(tmp);
-	    QString s = QString::number((1<<tmp), 'f', 0);
-	    ui->agcTimeText->setText(s);
         d.readS32(13, &tmp, -40);
         ui->agcPowerThreshold->setValue(tmp);
-        displayAGCPowerThreshold(tmp);
         d.readS32(14, &tmp, 4);
         ui->agcThresholdGate->setValue(tmp);
-        s = QString::number(tmp, 'f', 0);
-        ui->agcThresholdGateText->setText(s);
+
+        displaySettings();
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
@@ -154,6 +151,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 	else
 	{
 		resetToDefaults();
+	    applySettings();
 		return false;
 	}
 }
@@ -399,6 +397,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
+	resetToDefaults();
+	displaySettings();
 	applySettings();
 	setNewRate(m_spanLog2);
 }
@@ -522,6 +522,15 @@ void SSBDemodGUI::applySettings()
 			ui->agcPowerThreshold->value(),
 			ui->agcThresholdGate->value());
 	}
+}
+
+void SSBDemodGUI::displaySettings()
+{
+    QString s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
+    ui->agcTimeText->setText(s);
+    displayAGCPowerThreshold(ui->agcPowerThreshold->value());
+    s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
+    ui->agcThresholdGateText->setText(s);
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)
