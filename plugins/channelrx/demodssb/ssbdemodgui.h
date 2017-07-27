@@ -88,6 +88,8 @@ private:
     void blockApplySettings(bool block);
 	void applySettings();
 
+	void displayAGCPowerThreshold(int value);
+
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 };

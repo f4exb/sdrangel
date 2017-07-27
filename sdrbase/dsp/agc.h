@@ -39,16 +39,18 @@ public:
 	double feedAndGetValue(const Complex& ci);
 	double getMagSq() const { return m_magsq; }
 	void setThreshold(double threshold) { m_threshold = threshold; }
+	void setThresholdEnable(bool enable) { m_thresholdEnable = enable; }
 	void setGate(int gate) { m_gate = gate; }
 private:
 	double m_magsq;
-	double m_threshold;    //!< squelch on magsq average
-    int m_gate;            //!< power threshold gate in number of samples
-    int m_stepLength;      //!< transition step length in number of samples
-    double m_stepDelta;    //!< transition step unit by sample
-    int m_stepUpCounter;   //!< step up transition samples counter
-    int m_stepDownCounter; //!< step down transition samples counter
-    int m_gateCounter;     //!< threshold gate samples counter
+	double m_threshold;     //!< squelch on magsq average
+	bool m_thresholdEnable; //!< enable squelch on power threshold
+    int m_gate;             //!< power threshold gate in number of samples
+    int m_stepLength;       //!< transition step length in number of samples
+    double m_stepDelta;     //!< transition step unit by sample
+    int m_stepUpCounter;    //!< step up transition samples counter
+    int m_stepDownCounter;  //!< step down transition samples counter
+    int m_gateCounter;      //!< threshold gate samples counter
 };
 
 class MagAGC : public AGC
@@ -56,15 +58,19 @@ class MagAGC : public AGC
 public:
 	MagAGC(int historySize, double R, double threshold);
 	virtual ~MagAGC();
+	void setSquared(bool squared) { m_squared = squared; }
 	void resize(int historySize, Real R);
 	virtual void feed(Complex& ci);
     double feedAndGetValue(const Complex& ci);
 	Real getMagSq() const { return m_magsq; }
     void setThreshold(double threshold) { m_threshold = threshold; }
+    void setThresholdEnable(bool enable);
     void setGate(int gate) { m_gate = gate; }
 private:
-	double m_magsq;
+    bool m_squared;        //!< use squared magnitude (power) to compute AGC value
+	double m_magsq;        //!< current squared magnitude (power)
     double m_threshold;    //!< squelch on magsq average
+    bool m_thresholdEnable; //!< enable squelch on power threshold
     int m_gate;            //!< power threshold gate in number of samples
     int m_stepLength;      //!< transition step length in number of samples
     double m_stepDelta;    //!< transition step unit by sample

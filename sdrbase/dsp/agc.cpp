@@ -49,6 +49,7 @@ MagSquaredAGC::MagSquaredAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
 	m_magsq(0.0),
 	m_threshold(threshold),
+    m_thresholdEnable(true),
 	m_gate(0),
 	m_stepLength(std::min(StepLengthMax, historySize/2)),
 	m_stepDelta(1.0/m_stepLength),
@@ -137,8 +138,10 @@ double MagSquaredAGC::feedAndGetValue(const Complex& ci)
 
 MagAGC::MagAGC(int historySize, double R, double threshold) :
 	AGC(historySize, R),
+	m_squared(false),
 	m_magsq(0.0),
 	m_threshold(threshold),
+	m_thresholdEnable(true),
 	m_gate(0),
 	m_stepLength(std::min(StepLengthMax, historySize/2)),
     m_stepDelta(1.0/m_stepLength),
@@ -159,6 +162,17 @@ void MagAGC::resize(int historySize, Real R)
     AGC::resize(historySize, R);
 }
 
+void MagAGC::setThresholdEnable(bool enable)
+{
+    if (m_thresholdEnable != enable)
+    {
+        m_stepUpCounter = 0;
+        m_stepDownCounter = m_stepLength;
+    }
+
+    m_thresholdEnable = enable;
+}
+
 void MagAGC::feed(Complex& ci)
 {
 	ci *= feedAndGetValue(ci);
@@ -168,55 +182,62 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 {
     m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
     m_moving_average.feed(m_magsq);
-    m_u0 = m_R / sqrt(m_moving_average.average());
+    m_u0 = m_R / (m_squared ? m_moving_average.average() : sqrt(m_moving_average.average()));
 
-    if (m_magsq > m_threshold)
+    if (m_thresholdEnable)
     {
-        if (m_gateCounter < m_gate)
+        if (m_magsq > m_threshold)
         {
-            m_gateCounter++;
+            if (m_gateCounter < m_gate)
+            {
+                m_gateCounter++;
+            }
+            else
+            {
+                m_count = 0;
+            }
         }
         else
         {
-            m_count = 0;
+            if (m_count < m_moving_average.historySize()) {
+                m_count++;
+            }
+
+            m_gateCounter = 0;
+        }
+
+        if (m_count <  m_moving_average.historySize())
+        {
+            m_stepDownCounter = m_stepUpCounter;
+
+            if (m_stepUpCounter < m_stepLength)
+            {
+                m_stepUpCounter++;
+                return m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta);
+            }
+            else
+            {
+                return m_u0;
+            }
+        }
+        else
+        {
+            m_stepUpCounter = m_stepDownCounter;
+
+            if (m_stepDownCounter > 0)
+            {
+                m_stepDownCounter--;
+                return m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
+            }
+            else
+            {
+                return 0.0;
+            }
         }
     }
     else
     {
-        if (m_count < m_moving_average.historySize()) {
-            m_count++;
-        }
-
-        m_gateCounter = 0;
-    }
-
-    if (m_count <  m_moving_average.historySize())
-    {
-        m_stepDownCounter = m_stepUpCounter;
-
-        if (m_stepUpCounter < m_stepLength)
-        {
-            m_stepUpCounter++;
-            return m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta);
-        }
-        else
-        {
-            return m_u0;
-        }
-    }
-    else
-    {
-        m_stepUpCounter = m_stepDownCounter;
-
-        if (m_stepDownCounter > 0)
-        {
-            m_stepDownCounter--;
-            return m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
-        }
-        else
-        {
-            return 0.0;
-        }
+        return m_u0;
     }
 }
 

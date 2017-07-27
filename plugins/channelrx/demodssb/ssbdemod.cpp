@@ -318,6 +318,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		m_agcActive = cfg.getAGC();
 
 		int agcNbSamples = 48 * (1<<cfg.getAGCTimeLog2());
+        m_agc.setThresholdEnable(cfg.getAGCPowerThershold() != -99);
 		double agcPowerThreshold = CalcDb::powerFromdB(cfg.getAGCPowerThershold()) * (1<<30);
 		int agcThresholdGate = 48 * cfg.getAGCThersholdGate(); // ms
 
