@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <complex.h>
 #include <dsp/downchannelizer.h>
+#include "util/stepfunctions.h"
 #include "audio/audiooutput.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
@@ -285,7 +286,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					else
 					{
                         demod = m_bandpass.filter(demod);
-                        Real squelchFactor = smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
+                        Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
                         sample = demod * m_running.m_volume * squelchFactor;
 					}
 				}

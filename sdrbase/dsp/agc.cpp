@@ -7,7 +7,8 @@
 
 #include <algorithm>
 #include "dsp/agc.h"
-#include "util/smootherstep.h"
+
+#include "util/stepfunctions.h"
 
 #define StepLengthMax 2400 // 50ms
 

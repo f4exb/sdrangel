@@ -119,8 +119,6 @@ private:
     unsigned int m_nbFadeSamples;
     float *m_fadeInSamples;
     float *m_fadeOutSamples;
-
-    float smootherstep(float x);
 };
 
 #endif /* SDRBASE_DSP_CWKEYER_H_ */

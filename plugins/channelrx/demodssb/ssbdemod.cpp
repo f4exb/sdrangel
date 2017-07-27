@@ -16,7 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodssb/ssbdemod.h"
+#include "ssbdemod.h"
 
 #include <dsp/downchannelizer.h>
 #include <QTime>
