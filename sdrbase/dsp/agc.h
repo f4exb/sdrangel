@@ -29,29 +29,6 @@ protected:
 	int m_count;
 };
 
-class MagSquaredAGC : public AGC
-{
-public:
-	MagSquaredAGC(int historySize, double R, double threshold);
-	virtual ~MagSquaredAGC();
-	void resize(int historySize, Real R);
-	virtual void feed(Complex& ci);
-	double feedAndGetValue(const Complex& ci);
-	double getMagSq() const { return m_magsq; }
-	void setThreshold(double threshold) { m_threshold = threshold; }
-	void setThresholdEnable(bool enable) { m_thresholdEnable = enable; }
-	void setGate(int gate) { m_gate = gate; }
-private:
-	double m_magsq;
-	double m_threshold;     //!< squelch on magsq average
-	bool m_thresholdEnable; //!< enable squelch on power threshold
-    int m_gate;             //!< power threshold gate in number of samples
-    int m_stepLength;       //!< transition step length in number of samples
-    double m_stepDelta;     //!< transition step unit by sample
-    int m_stepUpCounter;    //!< step up transition samples counter
-    int m_stepDownCounter;  //!< step down transition samples counter
-    int m_gateCounter;      //!< threshold gate samples counter
-};
 
 class MagAGC : public AGC
 {
@@ -79,6 +56,7 @@ private:
     int m_gateCounter;     //!< threshold gate samples counter
 };
 
+
 class AlphaAGC : public AGC
 {
 public:
@@ -93,6 +71,7 @@ private:
 	Real m_magsq;
 	bool m_squelchOpen;
 };
+
 
 class SimpleAGC
 {
