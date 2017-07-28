@@ -98,6 +98,7 @@ private:
 
 	void blockApplySettings(bool block);
 	void applySettings();
+	void displayBandwidth();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

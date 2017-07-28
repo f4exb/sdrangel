@@ -332,8 +332,14 @@
      <layout class="QHBoxLayout" name="BWLayout">
       <item>
        <widget class="QLabel" name="BWLabel">
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
-         <string>LP</string>
+         <string>BP</string>
         </property>
        </widget>
       </item>
@@ -394,6 +400,12 @@
       </item>
       <item>
        <widget class="QLabel" name="lowCutLabel">
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>HP</string>
         </property>
@@ -554,17 +566,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
@@ -583,6 +584,23 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>GLScopeNG</class>
    <extends>QWidget</extends>
    <header>gui/glscopeng.h</header>
@@ -594,16 +612,8 @@
    <header>gui/glscopenggui.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>
   <include location="../../../sdrbase/resources/res.qrc"/>

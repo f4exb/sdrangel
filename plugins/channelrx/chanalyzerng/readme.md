@@ -57,27 +57,33 @@ This is the resulting sample rate that will be used by the spectrum and scope vi
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>8. Select bandpass filter cut-off frequency</h3>
+<h3>8. Select lowpass filter cut-off frequency</h3>
 
-This slider controls the cut-off frequency of the bandpass filter (or lowpass filter in SSB mode - see next) applied before the signal is sent to the spectrum and scope
+In SSB mode this filter is a complex filter that can lowpass on either side of the center frequency. It is therefore labeled as "LP". For negative frequencies (LSB) the cut-off frequency is therefore negative. In fact setting a negative frequency in SSB mode automatically turns on the LSB mode processing and the spectrum is reversed.
 
-<h3>9. Bandpass filter cut-off frequency</h3>
+In normal (DSB) mode this filter is a real filter that lowpass on both sides of the zero (center) frequency symmetrically. Therefore it acts as a badpass filter centered on the zero frequency and therefore it is labeled as "BP". The value displayed in (9) is the full bandwidth of the filter.
 
-This is the cut-off frequency of the bandpass filter in kHz
+<h3>9. Lowpass filter cut-off frequency</h3>
+
+In SSB mode this is the complex cut-off frequency and is negative for LSB.
+
+In normal (DSB) mode this is the full bandwidth of the real lowpass filter centered around zero frequency.
 
 <h3>10. SSB filtering</h3>
 
-When this toggle is engaged the signal is filtered either above (USB) or below (LSB) the channel center frequency. The bandpass filter now acts as a lowpass filter and the highpass filter gets active. The sideband is selected upon the sign of the bandpass filter: if positive the USB is selected else the LSB. 
+When this toggle is engaged the signal is filtered either above (USB) or below (LSB) the channel center frequency. The sideband is selected according to the sign of the lowpass filter cut-off frequency (8): if positive the USB is selected else the LSB. In LSB mode the spectrum is reversed.
 
-When SSB is off the lowpass filter is not active and the lowpass filter is actually a bandpass filter around the channel center frequency. 
+When SSB is off the lowpass filter is actually a bandpass filter around the channel center frequency. 
 
 <h3>11. Select highpass filter cut-off frequency</h3>
 
-When the SSB feature is engaged this controls the cut-off frequency of the highpass filter
+In SSB mode this controls the cut-off frequency of the complex highpass filter which is the filter closest to the zero frequency. This cut-off frquency is always at least 0.1 kHz in absolute value below the lowpass filter cut-off frequency (8).
+
+In normal (DSB) mode this filter is not active.
 
 <h3>12. Hghpass filter cut-off frequency</h3>
 
-This is the cut-off frequency of the highpass filter in kHz
+This is the cut-off frequency of the highpass filter in kHz. It is zero or negative in LSB mode.
 
 <h2>D. Scope global controls line</h2>
 

@@ -219,22 +219,16 @@ void ChannelAnalyzerNGGUI::on_BW_valueChanged(int value)
 
 	if (ui->ssb->isChecked())
 	{
-		if (value < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
-
 		QString s = QString::number(value/10.0, 'f', 1);
 	    ui->BWText->setText(tr("%1k").arg(s));
 	}
 	else
 	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
 	    QString s = QString::number(value/5.0, 'f', 1); // BW = value * 2
 	    ui->BWText->setText(tr("%1k").arg(s));
 	}
 
+	displayBandwidth();
 	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 }
 
@@ -283,44 +277,38 @@ void ChannelAnalyzerNGGUI::on_spanLog2_currentIndexChanged(int index)
 
 void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 {
-    setFiltersUIBoundaries();
-
-    int bw = m_channelMarker.getBandwidth();
+    //int bw = m_channelMarker.getBandwidth();
 
 	if (checked)
 	{
-        QString s = QString::number(bw/2000.0, 'f', 1); // bw/2
+	    setFiltersUIBoundaries();
+
+	    ui->BWLabel->setText("LP");
+        QString s = QString::number(ui->BW->value()/10.0, 'f', 1); // bw/2
         ui->BWText->setText(tr("%1k").arg(s));
 
-		if (ui->BW->value() < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
-
-		ui->glSpectrum->setCenterFrequency(m_rate/4);
-		ui->glSpectrum->setSampleRate(m_rate/2);
-		ui->glSpectrum->setSsbSpectrum(true);
-
 		on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-
-        ui->lowCut->setEnabled(true);
 	}
 	else
 	{
-        QString s = QString::number(bw/1000.0, 'f', 1); // bw
+        if (ui->BW->value() < 0) {
+            ui->BW->setValue(-ui->BW->value());
+        }
+
+        setFiltersUIBoundaries();
+        //m_channelMarker.setBandwidth(ui->BW->value() * 200.0);
+
+        ui->BWLabel->setText("BP");
+        QString s = QString::number(ui->BW->value()/5.0, 'f', 1); // bw
         ui->BWText->setText(tr("%1k").arg(s));
 
         ui->lowCut->setEnabled(false);
-
-        m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(m_rate);
-		ui->glSpectrum->setSsbSpectrum(false);
-
-		applySettings();
+        ui->lowCut->setValue(0);
+        ui->lowCutText->setText("0.0k");
 	}
+
+    applySettings();
+    displayBandwidth();
 }
 
 void ChannelAnalyzerNGGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
@@ -377,7 +365,9 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	ui->glSpectrum->setSampleRate(m_rate);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
-	ui->glSpectrum->setSsbSpectrum(true);
+	ui->glSpectrum->setSsbSpectrum(false);
+    ui->glSpectrum->setLsbDisplay(false);
+	ui->BWLabel->setText("BP");
 
 	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
@@ -439,31 +429,44 @@ bool ChannelAnalyzerNGGUI::setNewFinalRate(int spanLog2)
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1 kS/s").arg(s));
 
-	if (ui->ssb->isChecked())
-	{
-		if (ui->BW->value() < 0) {
-			m_channelMarker.setSidebands(ChannelMarker::lsb);
-		} else {
-			m_channelMarker.setSidebands(ChannelMarker::usb);
-		}
-
-		ui->glSpectrum->setCenterFrequency(m_rate/4);
-		ui->glSpectrum->setSampleRate(m_rate/2);
-		ui->glSpectrum->setSsbSpectrum(true);
-	}
-	else
-	{
-		m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-		ui->glSpectrum->setCenterFrequency(0);
-		ui->glSpectrum->setSampleRate(m_rate);
-		ui->glSpectrum->setSsbSpectrum(false);
-	}
+	displayBandwidth();
 
 	ui->glScope->setSampleRate(m_rate);
 	m_scopeVis->setSampleRate(m_rate);
 
 	return true;
+}
+
+void ChannelAnalyzerNGGUI::displayBandwidth()
+{
+    if (ui->ssb->isChecked())
+    {
+        if (ui->BW->value() < 0)
+        {
+            m_channelMarker.setSidebands(ChannelMarker::lsb);
+            ui->glSpectrum->setLsbDisplay(true);
+        }
+        else
+        {
+            m_channelMarker.setSidebands(ChannelMarker::usb);
+            ui->glSpectrum->setLsbDisplay(false);
+        }
+
+        ui->glSpectrum->setCenterFrequency(m_rate/4);
+        ui->glSpectrum->setSampleRate(m_rate/2);
+        ui->glSpectrum->setSsbSpectrum(true);
+    }
+    else
+    {
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(m_rate);
+        ui->glSpectrum->setLsbDisplay(false);
+        ui->glSpectrum->setSsbSpectrum(false);
+    }
+
+
 }
 
 void ChannelAnalyzerNGGUI::setFiltersUIBoundaries()
