@@ -334,7 +334,7 @@
        <widget class="QLabel" name="BWLabel">
         <property name="minimumSize">
          <size>
-          <width>10</width>
+          <width>15</width>
           <height>0</height>
          </size>
         </property>
@@ -402,7 +402,7 @@
        <widget class="QLabel" name="lowCutLabel">
         <property name="minimumSize">
          <size>
-          <width>10</width>
+          <width>15</width>
           <height>0</height>
          </size>
         </property>
