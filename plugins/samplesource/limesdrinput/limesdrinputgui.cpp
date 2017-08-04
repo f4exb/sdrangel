@@ -19,6 +19,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#include <algorithm>
+
 #include "ui_limesdrinputgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -313,8 +315,9 @@ void LimeSDRInputGUI::displaySettings()
 void LimeSDRInputGUI::setNCODisplay()
 {
     int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
+    int lowBoundary = std::max(0, (int) m_settings.m_centerFrequency - ncoHalfRange);
     ui->ncoFrequency->setValueRange(7,
-            (m_settings.m_centerFrequency - ncoHalfRange)/1000,
+            lowBoundary/1000,
             (m_settings.m_centerFrequency + ncoHalfRange)/1000); // frequency dial is in kHz
     ui->ncoFrequency->setValue((m_settings.m_centerFrequency + m_settings.m_ncoFrequency)/1000);
 }
