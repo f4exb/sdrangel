@@ -23,7 +23,7 @@
 
 const PluginDescriptor SSBModPlugin::m_pluginDescriptor = {
     QString("SSB Modulator"),
-    QString("3.5.2"),
+    QString("3.5.4"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
