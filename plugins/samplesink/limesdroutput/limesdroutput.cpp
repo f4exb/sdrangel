@@ -483,7 +483,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool suspendOwnThread    = false;
     bool suspendTxThread     = false;
     bool suspendAllThread    = false;
-    bool doCalibration = false;
+    bool doCalibration       = false;
+    bool forceNCOFrequency   = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
     // determine if buddies threads or own thread need to be suspended
@@ -614,6 +615,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                 m_deviceShared.m_deviceParams->m_log2OvSRTx = m_settings.m_log2HardInterp;
                 m_deviceShared.m_deviceParams->m_sampleRate = m_settings.m_devSampleRate;
                 doCalibration = true;
+                forceNCOFrequency = true;
                 qDebug("LimeSDROutput::applySettings: set sample rate set to %d with oversampling of %d",
                         m_settings.m_devSampleRate,
                         1<<m_settings.m_log2HardInterp);
@@ -688,7 +690,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     }
 
     if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
-        (m_settings.m_ncoEnable != settings.m_ncoEnable) || force)
+        (m_settings.m_ncoEnable != settings.m_ncoEnable) || force || forceNCOFrequency)
     {
         m_settings.m_ncoFrequency = settings.m_ncoFrequency;
         m_settings.m_ncoEnable = settings.m_ncoEnable;
