@@ -68,6 +68,9 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_magsqPeak = 0.0f;
 	m_magsqCount = 0;
 
+	m_agc.setClampMax(32768.0*32768.0);
+	m_agc.setClamping(true);
+
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 

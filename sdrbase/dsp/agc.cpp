@@ -71,12 +71,14 @@ void MagAGC::resize(int historySize, Real R)
     m_stepUpCounter = 0;
     m_stepDownCounter = m_stepLength;
     AGC::resize(historySize, R);
+    m_moving_average.fill(0);
 }
 
 void MagAGC::setOrder(double R)
 {
     m_R2 = R*R;
     AGC::setOrder(R);
+    m_moving_average.fill(0);
 }
 
 void MagAGC::setThresholdEnable(bool enable)
@@ -110,7 +112,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
         else
         {
             double u02 = m_R2 / m_moving_average.average();
-            m_u0 = (u02 * m_magsq > m_clampMax) ? m_clampMax / sqrt(m_magsq) : sqrt(u02);
+            m_u0 = (u02 * m_magsq > m_clampMax) ? sqrt(m_clampMax / m_magsq) : sqrt(u02);
         }
     }
     else

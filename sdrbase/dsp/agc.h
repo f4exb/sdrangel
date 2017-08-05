@@ -24,7 +24,7 @@ public:
 
 protected:
 	double m_u0;                            //!< AGC factor
-	double m_R;                             //!< objective mag
+	double m_R;                             //!< ordered magnitude
 	MovingAverage<double> m_moving_average; //!< Averaging engine. The stack length conditions the smoothness of AGC.
 	int m_historySize;                      //!< Averaging length (attack)
 	int m_count;                            //!< Samples counter
@@ -61,8 +61,8 @@ private:
     int m_gateCounter;     //!< threshold gate samples counter
     int m_stepDownDelay;   //!< delay in samples before cutoff (release)
     bool m_clamping;       //!< clamping active
-    double m_R2;           //!< square of objective magnitude
-    double m_clampMax;     //!< maximum to clamp to
+    double m_R2;           //!< square of ordered magnitude
+    double m_clampMax;     //!< maximum to clamp to as power value
 };
 
 
