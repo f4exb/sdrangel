@@ -72,6 +72,7 @@ private slots:
     void on_toneFrequency_valueChanged(int value);
     void on_mic_toggled(bool checked);
     void on_agc_stateChanged(int state);
+    void on_agcOrder_valueChanged(int value);
     void on_agcTime_valueChanged(int value);
     void on_agcThreshold_valueChanged(int value);
     void on_agcThresholdGate_valueChanged(int value);

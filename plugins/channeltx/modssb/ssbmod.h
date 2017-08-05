@@ -189,6 +189,7 @@ public:
 			bool audioMute,
             bool playLoop,
             bool agc,
+            float agcOrder,
             int agcTime,
             int agcThreshold,
             int agcThresholdGate,
@@ -231,6 +232,7 @@ private:
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
         bool getAGC() const { return m_agc; }
+        float getAGCOrder() const { return m_agcOrder; }
         int getAGCTime() const { return m_agcTime; }
         int getAGCThreshold() const { return m_agcThreshold; }
         int getAGCThresholdGate() const { return m_agcThresholdGate; }
@@ -247,6 +249,7 @@ private:
 				bool audioMute,
 				bool playLoop,
 				bool agc,
+				float agcOrder,
 				int agcTime,
                 int agcThreshold,
                 int agcThresholdGate,
@@ -263,6 +266,7 @@ private:
 					audioMute,
 					playLoop,
 					agc,
+					agcOrder,
 					agcTime,
 					agcThreshold,
 					agcThresholdGate,
@@ -281,6 +285,7 @@ private:
         bool m_audioMute;
         bool m_playLoop;
         bool m_agc;
+        float m_agcOrder;
         int m_agcTime;
         int m_agcThreshold;
         int m_agcThresholdGate;
@@ -297,6 +302,7 @@ private:
 				bool audioMute,
 				bool playLoop,
 				bool agc,
+				float agcOrder,
 				int agcTime,
 				int agcThreshold,
 				int agcThresholdGate,
@@ -313,6 +319,7 @@ private:
             m_audioMute(audioMute),
 			m_playLoop(playLoop),
 			m_agc(agc),
+			m_agcOrder(agcOrder),
 			m_agcTime(agcTime),
 			m_agcThreshold(agcThreshold),
 			m_agcThresholdGate(agcThresholdGate),
@@ -349,6 +356,7 @@ private:
 		bool m_audioMute;
         bool m_playLoop;
         bool m_agc;
+        float m_agcOrder;
         int m_agcTime;
         bool m_agcThresholdEnable;
         double m_agcThreshold;
@@ -371,6 +379,7 @@ private:
             m_audioMute(false),
 			m_playLoop(false),
 			m_agc(false),
+			m_agcOrder(0.2),
 			m_agcTime(9600),
 			m_agcThresholdEnable(true),
 			m_agcThreshold(1e-4),

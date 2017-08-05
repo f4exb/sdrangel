@@ -476,6 +476,38 @@
        </widget>
       </item>
       <item>
+       <widget class="QDial" name="agcOrder">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>AGC volume order in faraction of maximum amplitude</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="agcOrderText">
+        <property name="toolTip">
+         <string>AGC volume order in faraction of maximum amplitude</string>
+        </property>
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="agcTime">
         <property name="maximumSize">
          <size>
@@ -484,7 +516,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Compressor time constant (attack)</string>
+         <string>Compressor time constant (attack) in ms</string>
         </property>
         <property name="minimum">
          <number>0</number>
@@ -528,7 +560,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio squelch threshold</string>
+         <string>Audio squelch threshold (db power)</string>
         </property>
         <property name="minimum">
          <number>-99</number>
@@ -572,7 +604,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio squelch gate</string>
+         <string>Audio squelch gate in ms</string>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -610,7 +642,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Audio squelch delay (release)</string>
+         <string>Audio squelch delay (release) in ms</string>
         </property>
         <property name="pageStep">
          <number>1</number>

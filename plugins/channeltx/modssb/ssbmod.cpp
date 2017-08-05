@@ -135,6 +135,7 @@ void SSBMod::configure(MessageQueue* messageQueue,
 		bool audioMute,
 		bool playLoop,
 		bool agc,
+		float agcOrder,
 		int agcTime,
 		int agcThreshold,
 		int agcThresholdGate,
@@ -151,6 +152,7 @@ void SSBMod::configure(MessageQueue* messageQueue,
 			audioMute,
 			playLoop,
 			agc,
+			agcOrder,
 			agcTime,
 			agcThreshold,
 			agcThresholdGate,
@@ -617,6 +619,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 		m_config.m_agc = cfg.getAGC();
 
 		m_config.m_agcTime = 48 * cfg.getAGCTime(); // ms
+		m_config.m_agcOrder = cfg.getAGCOrder();
 		m_config.m_agcThresholdEnable = cfg.getAGCThreshold() != -99;
 		m_config.m_agcThreshold = CalcDb::powerFromdB(cfg.getAGCThreshold()); // power dB
 		m_config.m_agcThresholdGate = 48 * cfg.getAGCThresholdGate(); // ms
@@ -752,9 +755,9 @@ void SSBMod::apply()
 		}
 	}
 
-    if (m_config.m_agcTime != m_running.m_agcTime)
+    if ((m_config.m_agcTime != m_running.m_agcTime) || (m_config.m_agcOrder != m_running.m_agcOrder))
     {
-        m_inAGC.resize(m_config.m_agcTime, 0.2);
+        m_inAGC.resize(m_config.m_agcTime, m_config.m_agcOrder);
     }
 
     if (m_config.m_agcThresholdEnable != m_running.m_agcThresholdEnable)
@@ -792,6 +795,7 @@ void SSBMod::apply()
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_playLoop = m_config.m_playLoop;
 	m_running.m_agc = m_config.m_agc;
+    m_running.m_agcOrder = m_config.m_agcOrder;
     m_running.m_agcTime = m_config.m_agcTime;
     m_running.m_agcThresholdEnable = m_config.m_agcThresholdEnable;
     m_running.m_agcThreshold = m_config.m_agcThreshold;

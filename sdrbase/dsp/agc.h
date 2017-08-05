@@ -13,10 +13,11 @@
 class AGC
 {
 public:
-	AGC(int historySize, Real R);
+	AGC(int historySize, double R);
 	virtual ~AGC();
 
-	void resize(int historySize, Real R);
+	void resize(int historySize, double R);
+	void setOrder(double R) { m_R = R; }
 	Real getValue();
 	Real getAverage();
 	virtual void feed(Complex& ci) = 0;
@@ -37,9 +38,10 @@ public:
 	virtual ~MagAGC();
 	void setSquared(bool squared) { m_squared = squared; }
 	void resize(int historySize, Real R);
+	void setOrder(double R);
 	virtual void feed(Complex& ci);
     double feedAndGetValue(const Complex& ci);
-	Real getMagSq() const { return m_magsq; }
+    double getMagSq() const { return m_magsq; }
     void setThreshold(double threshold) { m_threshold = threshold; }
     void setThresholdEnable(bool enable);
     void setGate(int gate) { m_gate = gate; }

@@ -122,6 +122,7 @@ QByteArray SSBModGUI::serialize() const
     s.writeS32(14, ui->agcThreshold->value());
     s.writeS32(15, ui->agcThresholdGate->value());
     s.writeS32(16, ui->agcThresholdDelay->value());
+    s.writeS32(17, ui->agcOrder->value());
 
 	return s.final();
 }
@@ -185,6 +186,8 @@ bool SSBModGUI::deserialize(const QByteArray& data)
         ui->agcThresholdGate->setValue(tmp);
         d.readS32(16, &tmp, 5);
         ui->agcThresholdDelay->setValue(tmp);
+        d.readS32(17, &tmp, 20);
+        ui->agcOrder->setValue(tmp);
 
         displaySettings();
 
@@ -430,6 +433,12 @@ void SSBModGUI::on_mic_toggled(bool checked)
 
 void SSBModGUI::on_agc_stateChanged(int state __attribute((__unused__)))
 {
+    applySettings();
+}
+
+void SSBModGUI::on_agcOrder_valueChanged(int value){
+    QString s = QString::number(value / 100.0, 'f', 2);
+    ui->agcOrderText->setText(s);
     applySettings();
 }
 
@@ -692,6 +701,7 @@ void SSBModGUI::applySettings()
 			ui->audioMute->isChecked(),
 			ui->playLoop->isChecked(),
 			ui->agc->isChecked(),
+			ui->agcOrder->value() / 100.0,
 			m_agcTimeConstant[ui->agcTime->value()],
             ui->agcThreshold->value(),
             ui->agcThresholdGate->value(),
@@ -708,6 +718,8 @@ void SSBModGUI::displaySettings()
     ui->agcThresholdGateText->setText(s);
     s = QString::number(ui->agcThresholdDelay->value() * 10, 'f', 0);
     ui->agcThresholdDelayText->setText(s);
+    s = QString::number(ui->agcOrder->value() / 100.0, 'f', 2);
+    ui->agcOrderText->setText(s);
 }
 
 void SSBModGUI::displayAGCPowerThreshold(int value)

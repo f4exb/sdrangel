@@ -12,7 +12,7 @@
 
 #define StepLengthMax 2400 // 50ms
 
-AGC::AGC(int historySize, Real R) :
+AGC::AGC(int historySize, double R) :
 	m_u0(1.0),
 	m_R(R),
 	m_moving_average(historySize, m_R),
@@ -23,7 +23,7 @@ AGC::AGC(int historySize, Real R) :
 AGC::~AGC()
 {}
 
-void AGC::resize(int historySize, Real R)
+void AGC::resize(int historySize, double R)
 {
 	m_R = R;
 	m_moving_average.resize(historySize, R);
@@ -71,6 +71,12 @@ void MagAGC::resize(int historySize, Real R)
     m_stepUpCounter = 0;
     m_stepDownCounter = m_stepLength;
     AGC::resize(historySize, R);
+}
+
+void MagAGC::setOrder(double R)
+{
+    m_R2 = R*R;
+    AGC::setOrder(R);
 }
 
 void MagAGC::setThresholdEnable(bool enable)
