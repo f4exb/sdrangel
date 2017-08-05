@@ -285,7 +285,7 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 	applySettings();
 }
 
-void SSBDemodGUI::on_agc_stateChanged(int state __attribute((__unused__)))
+void SSBDemodGUI::on_agc_toggled(bool checked __attribute((__unused__)))
 {
     applySettings();
 }

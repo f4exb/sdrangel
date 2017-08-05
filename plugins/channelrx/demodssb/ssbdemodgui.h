@@ -48,7 +48,7 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
-	void on_agc_stateChanged(int state);
+	void on_agc_toggled(bool checked);
 	void on_agcTimeLog2_valueChanged(int value);
     void on_agcPowerThreshold_valueChanged(int value);
     void on_agcThresholdGate_valueChanged(int value);

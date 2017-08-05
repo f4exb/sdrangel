@@ -466,12 +466,15 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_agc">
       <item>
-       <widget class="QCheckBox" name="agc">
+       <widget class="ButtonSwitch" name="agc">
         <property name="toolTip">
          <string>Toggle audio compressor</string>
         </property>
         <property name="text">
-         <string>Cmp</string>
+         <string>CMP</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

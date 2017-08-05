@@ -431,7 +431,7 @@ void SSBModGUI::on_mic_toggled(bool checked)
     m_ssbMod->getInputMessageQueue()->push(message);
 }
 
-void SSBModGUI::on_agc_stateChanged(int state __attribute((__unused__)))
+void SSBModGUI::on_agc_toggled(bool checked __attribute((__unused__)))
 {
     applySettings();
 }
