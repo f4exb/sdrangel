@@ -35,6 +35,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
     m_audioMute(false),
     m_agc(12000, agcTarget, 1e-2),
     m_agcActive(false),
+    m_agcClamping(false),
     m_agcNbSamples(12000),
     m_agcPowerThreshold(1e-2),
     m_agcThresholdGate(0),
@@ -69,7 +70,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	m_magsqCount = 0;
 
 	m_agc.setClampMax(32768.0*32768.0);
-	m_agc.setClamping(true);
+	m_agc.setClamping(m_agcClamping);
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
@@ -95,6 +96,7 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 		bool dsb,
 		bool audioMute,
 		bool agc,
+		bool agcClamping,
         int agcTimeLog2,
         int agcPowerThreshold,
         int agcThresholdGate)
@@ -109,6 +111,7 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 	        dsb,
 	        audioMute,
 	        agc,
+	        agcClamping,
 	        agcTimeLog2,
 	        agcPowerThreshold,
 	        agcThresholdGate);
@@ -324,6 +327,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
         m_agc.setThresholdEnable(cfg.getAGCPowerThershold() != -99);
 		double agcPowerThreshold = CalcDb::powerFromdB(cfg.getAGCPowerThershold()) * (1<<30);
 		int agcThresholdGate = 48 * cfg.getAGCThersholdGate(); // ms
+		bool agcClamping = cfg.getAGCClamping();
 
 		if (m_agcNbSamples != agcNbSamples)
 		{
@@ -344,6 +348,12 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		    m_agcThresholdGate = agcThresholdGate;
 		}
 
+		if (m_agcClamping != agcClamping)
+		{
+		    m_agc.setClamping(agcClamping);
+		    m_agcClamping = agcClamping;
+		}
+
 		m_settingsMutex.unlock();
 
 		qDebug() << "SBDemod::handleMessage: MsgConfigureSSBDemod: m_Bandwidth: " << m_Bandwidth
@@ -355,6 +365,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 				<< " m_dsb: " << m_dsb
 				<< " m_audioMute: " << m_audioMute
 				<< " m_agcActive: " << m_agcActive
+				<< " m_agcClamping: " << m_agcClamping
 				<< " agcNbSamples: " << agcNbSamples
 				<< " agcPowerThreshold: " << agcPowerThreshold
 				<< " agcThresholdGate: " << agcThresholdGate;

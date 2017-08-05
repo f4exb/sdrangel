@@ -46,6 +46,7 @@ public:
 			bool dsb,
 			bool audioMute,
 			bool agc,
+			bool agcClamping,
 			int agcTimeLog2,
 			int agcPowerThreshold,
 			int agcThresholdGate);
@@ -83,6 +84,7 @@ private:
 		bool getDSB() const { return m_dsb; }
 		bool getAudioMute() const { return m_audioMute; }
 		bool getAGC() const { return m_agc; }
+		bool getAGCClamping() const { return m_agcClamping; }
 		int  getAGCTimeLog2() const { return m_agcTimeLog2; }
 		int  getAGCPowerThershold() const { return m_agcPowerThreshold; }
         int  getAGCThersholdGate() const { return m_agcThresholdGate; }
@@ -96,6 +98,7 @@ private:
 				bool dsb,
 				bool audioMute,
                 bool agc,
+                bool agcClamping,
                 int  agcTimeLog2,
                 int  agcPowerThreshold,
                 int  agcThresholdGate)
@@ -110,6 +113,7 @@ private:
 			        dsb,
 			        audioMute,
 			        agc,
+			        agcClamping,
 			        agcTimeLog2,
 			        agcPowerThreshold,
 			        agcThresholdGate);
@@ -125,6 +129,7 @@ private:
 		bool m_dsb;
 		bool m_audioMute;
 		bool m_agc;
+		bool m_agcClamping;
 		int  m_agcTimeLog2;
 		int  m_agcPowerThreshold;
 		int  m_agcThresholdGate;
@@ -138,6 +143,7 @@ private:
 				bool dsb,
 				bool audioMute,
 				bool agc,
+				bool agcClamping,
 				int  agcTimeLog2,
 				int  agcPowerThreshold,
 				int  agcThresholdGate) :
@@ -151,6 +157,7 @@ private:
 			m_dsb(dsb),
 			m_audioMute(audioMute),
 			m_agc(agc),
+			m_agcClamping(agcClamping),
 			m_agcTimeLog2(agcTimeLog2),
 			m_agcPowerThreshold(agcPowerThreshold),
 			m_agcThresholdGate(agcThresholdGate)
@@ -183,6 +190,7 @@ private:
     int  m_magsqCount;
     MagAGC m_agc;
     bool m_agcActive;
+    bool m_agcClamping;
     int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
     double m_agcPowerThreshold; //!< AGC power threshold (linear)
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
