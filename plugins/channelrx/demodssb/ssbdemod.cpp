@@ -325,6 +325,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
 		if (m_agcNbSamples != agcNbSamples)
 		{
 		    m_agc.resize(agcNbSamples, agcTarget);
+		    m_agc.setStepDownDelay(agcNbSamples);
 		    m_agcNbSamples = agcNbSamples;
 		}
 

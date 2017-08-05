@@ -187,7 +187,12 @@ public:
 			bool audioFlipChannels,
 			bool dsb,
 			bool audioMute,
-            bool playLoop);
+            bool playLoop,
+            bool agc,
+            int agcTime,
+            int agcThreshold,
+            int agcThresholdGate,
+            int agcThresholdDelay);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples);
@@ -225,6 +230,11 @@ private:
         bool getDSB() const { return m_dsb; }
         bool getAudioMute() const { return m_audioMute; }
         bool getPlayLoop() const { return m_playLoop; }
+        bool getAGC() const { return m_agc; }
+        int getAGCTime() const { return m_agcTime; }
+        int getAGCThreshold() const { return m_agcThreshold; }
+        int getAGCThresholdGate() const { return m_agcThresholdGate; }
+        int getAGCThresholdDelay() const { return m_agcThresholdDelay; }
 
         static MsgConfigureSSBMod* create(Real bandwidth,
         		Real lowCutoff,
@@ -235,7 +245,12 @@ private:
 				bool audioFlipChannels,
 				bool dsb,
 				bool audioMute,
-				bool playLoop)
+				bool playLoop,
+				bool agc,
+				int agcTime,
+                int agcThreshold,
+                int agcThresholdGate,
+                int agcThresholdDelay)
         {
             return new MsgConfigureSSBMod(bandwidth,
             		lowCutoff,
@@ -246,7 +261,12 @@ private:
 					audioFlipChannels,
 					dsb,
 					audioMute,
-					playLoop);
+					playLoop,
+					agc,
+					agcTime,
+					agcThreshold,
+					agcThresholdGate,
+					agcThresholdDelay);
         }
 
     private:
@@ -260,6 +280,11 @@ private:
 		bool m_dsb;
         bool m_audioMute;
         bool m_playLoop;
+        bool m_agc;
+        int m_agcTime;
+        int m_agcThreshold;
+        int m_agcThresholdGate;
+        int m_agcThresholdDelay;
 
         MsgConfigureSSBMod(Real bandwidth,
         		Real lowCutoff,
@@ -270,7 +295,12 @@ private:
 				bool audioFlipChannels,
 				bool dsb,
 				bool audioMute,
-				bool playLoop) :
+				bool playLoop,
+				bool agc,
+				int agcTime,
+				int agcThreshold,
+				int agcThresholdGate,
+				int agcThresholdDelay) :
             Message(),
             m_bandwidth(bandwidth),
 			m_lowCutoff(lowCutoff),
@@ -281,7 +311,12 @@ private:
 			m_audioFlipChannels(audioFlipChannels),
 			m_dsb(dsb),
             m_audioMute(audioMute),
-			m_playLoop(playLoop)
+			m_playLoop(playLoop),
+			m_agc(agc),
+			m_agcTime(agcTime),
+			m_agcThreshold(agcThreshold),
+			m_agcThresholdGate(agcThresholdGate),
+			m_agcThresholdDelay(agcThresholdDelay)
         { }
     };
 
@@ -313,6 +348,12 @@ private:
 		bool m_dsb;
 		bool m_audioMute;
         bool m_playLoop;
+        bool m_agc;
+        int m_agcTime;
+        bool m_agcThresholdEnable;
+        double m_agcThreshold;
+        int m_agcThresholdGate;
+        int m_agcThresholdDelay;
 
         Config() :
             m_outputSampleRate(0),
@@ -328,7 +369,13 @@ private:
 			m_audioFlipChannels(false),
 			m_dsb(false),
             m_audioMute(false),
-			m_playLoop(false)
+			m_playLoop(false),
+			m_agc(false),
+			m_agcTime(9600),
+			m_agcThresholdEnable(true),
+			m_agcThreshold(1e-4),
+			m_agcThresholdGate(192),
+			m_agcThresholdDelay(2400)
         { }
     };
 
@@ -365,7 +412,6 @@ private:
 
     double m_magsq;
     MovingAverage<double> m_movingAverage;
-    SimpleAGC m_volumeAGC;
 
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
@@ -385,6 +431,8 @@ private:
     Real m_levelSum;
     CWKeyer m_cwKeyer;
     CWSmoother m_cwSmoother;
+
+    MagAGC m_inAGC;
 
     static const int m_levelNbSamples;
 

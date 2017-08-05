@@ -24,6 +24,7 @@
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceName, Message)
@@ -45,7 +46,6 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_DSBFilterBufferIndex(0),
     m_sampleSink(sampleSink),
     m_movingAverage(40, 0),
-    m_volumeAGC(40, 0),
     m_audioFifo(4, 48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -54,7 +54,8 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+	m_inAGC(9600, 0.2, 1e-4)
 {
 	setObjectName("SSBMod");
 
@@ -84,7 +85,6 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
     m_sumCount = 0;
 
 	m_movingAverage.resize(16, 0);
-	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
@@ -96,6 +96,9 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 
 	m_cwSmoother.setNbFadeSamples(192); // 4 ms at 48 kHz
+	m_inAGC.setGate(m_config.m_agcThresholdGate);
+	m_inAGC.setStepDownDelay(m_config.m_agcThresholdDelay);
+	m_inAGC.setClamping(true);
     apply();
 }
 
@@ -130,7 +133,12 @@ void SSBMod::configure(MessageQueue* messageQueue,
 		bool audioFlipChannels,
 		bool dsb,
 		bool audioMute,
-		bool playLoop)
+		bool playLoop,
+		bool agc,
+		int agcTime,
+		int agcThreshold,
+		int agcThresholdGate,
+		int agcThresholdDelay)
 {
 	Message* cmd = MsgConfigureSSBMod::create(bandwidth,
 			lowCutoff,
@@ -141,7 +149,12 @@ void SSBMod::configure(MessageQueue* messageQueue,
 			audioFlipChannels,
 			dsb,
 			audioMute,
-			playLoop);
+			playLoop,
+			agc,
+			agcTime,
+			agcThreshold,
+			agcThresholdGate,
+			agcThresholdDelay);
 	messageQueue->push(cmd);
 }
 
@@ -282,8 +295,19 @@ void SSBMod::pullAF(Complex& sample)
             	{
                     Real real;
                 	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-                    ci.real(real * m_running.m_volumeFactor);
-                    ci.imag(0.0f);
+
+                	if (m_running.m_agc)
+                	{
+                        ci.real(real);
+                        ci.imag(0.0f);
+                        m_inAGC.feed(ci);
+                        ci *= m_running.m_volumeFactor;
+                	}
+                	else
+                	{
+                        ci.real(real * m_running.m_volumeFactor);
+                        ci.imag(0.0f);
+                	}
             	}
             }
         }
@@ -309,8 +333,18 @@ void SSBMod::pullAF(Complex& sample)
     	}
         else
         {
-            ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_running.m_volumeFactor);
-            ci.imag(0.0f);
+            if (m_running.m_agc)
+            {
+                ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f));
+                ci.imag(0.0f);
+                m_inAGC.feed(ci);
+                ci *= m_running.m_volumeFactor;
+            }
+            else
+            {
+                ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_running.m_volumeFactor);
+                ci.imag(0.0f);
+            }
         }
 
         break;
@@ -580,6 +614,13 @@ bool SSBMod::handleMessage(const Message& cmd)
 		m_config.m_dsb = cfg.getDSB();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
+		m_config.m_agc = cfg.getAGC();
+
+		m_config.m_agcTime = 48 * cfg.getAGCTime(); // ms
+		m_config.m_agcThresholdEnable = cfg.getAGCThreshold() != -99;
+		m_config.m_agcThreshold = CalcDb::powerFromdB(cfg.getAGCThreshold()); // power dB
+		m_config.m_agcThresholdGate = 48 * cfg.getAGCThresholdGate(); // ms
+		m_config.m_agcThresholdDelay = 48 * cfg.getAGCThresholdDelay(); // ms
 
 		apply();
 
@@ -595,7 +636,13 @@ bool SSBMod::handleMessage(const Message& cmd)
 				<< " m_audioFlipChannels: " << m_config.m_audioFlipChannels
 				<< " m_dsb: " << m_config.m_dsb
 				<< " m_audioMute: " << m_config.m_audioMute
-				<< " m_playLoop: " << m_config.m_playLoop;
+				<< " m_playLoop: " << m_config.m_playLoop
+				<< " m_agc: " << m_config.m_agc
+				<< " m_agcTime: " << m_config.m_agcTime
+                << " m_agcThresholdEnable: " << m_config.m_agcThresholdEnable
+                << " m_agcThreshold: " << m_config.m_agcThreshold
+                << " m_agcThresholdGate: " << m_config.m_agcThresholdGate
+                << " m_agcThresholdDelay: " << m_config.m_agcThresholdDelay;
 
 		return true;
 	}
@@ -705,6 +752,31 @@ void SSBMod::apply()
 		}
 	}
 
+    if (m_config.m_agcTime != m_running.m_agcTime)
+    {
+        m_inAGC.resize(m_config.m_agcTime, 0.2);
+    }
+
+    if (m_config.m_agcThresholdEnable != m_running.m_agcThresholdEnable)
+    {
+        m_inAGC.setThresholdEnable(m_config.m_agcThresholdEnable);
+    }
+
+    if (m_config.m_agcThreshold != m_running.m_agcThreshold)
+    {
+        m_inAGC.setThreshold(m_config.m_agcThreshold);
+    }
+
+    if (m_config.m_agcThresholdGate != m_running.m_agcThresholdGate)
+    {
+        m_inAGC.setGate(m_config.m_agcThresholdGate);
+    }
+
+    if (m_config.m_agcThresholdDelay != m_running.m_agcThresholdDelay)
+    {
+        m_inAGC.setStepDownDelay(m_config.m_agcThresholdDelay);
+    }
+
 	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
 	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
 	m_running.m_bandwidth = m_config.m_bandwidth;
@@ -719,6 +791,12 @@ void SSBMod::apply()
 	m_running.m_dsb = m_config.m_dsb;
 	m_running.m_audioMute = m_config.m_audioMute;
 	m_running.m_playLoop = m_config.m_playLoop;
+	m_running.m_agc = m_config.m_agc;
+    m_running.m_agcTime = m_config.m_agcTime;
+    m_running.m_agcThresholdEnable = m_config.m_agcThresholdEnable;
+    m_running.m_agcThreshold = m_config.m_agcThreshold;
+    m_running.m_agcThresholdGate = m_config.m_agcThresholdGate;
+    m_running.m_agcThresholdDelay = m_config.m_agcThresholdDelay;
 }
 
 void SSBMod::openFileStream()

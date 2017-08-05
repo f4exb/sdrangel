@@ -71,6 +71,11 @@ private slots:
     void on_tone_toggled(bool checked);
     void on_toneFrequency_valueChanged(int value);
     void on_mic_toggled(bool checked);
+    void on_agc_stateChanged(int state);
+    void on_agcTime_valueChanged(int value);
+    void on_agcThreshold_valueChanged(int value);
+    void on_agcThresholdGate_valueChanged(int value);
+    void on_agcThresholdDelay_valueChanged(int value);
     void on_play_toggled(bool checked);
     void on_playLoop_toggled(bool checked);
     void on_morseKeyer_toggled(bool checked);
@@ -107,6 +112,7 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     SSBMod::SSBModInputAF m_modAFInput;
+    static const int m_agcTimeConstant[]; //!< time constant index to value in ms
 
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SSBModGUI();
@@ -116,6 +122,8 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+    void displaySettings();
+    void displayAGCPowerThreshold(int value);
     void updateWithStreamData();
     void updateWithStreamTime();
 

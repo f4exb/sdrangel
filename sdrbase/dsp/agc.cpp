@@ -53,7 +53,11 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
     m_stepDelta(1.0/m_stepLength),
 	m_stepUpCounter(0),
     m_stepDownCounter(m_stepLength),
-	m_gateCounter(0)
+	m_gateCounter(0),
+	m_stepDownDelay(historySize),
+	m_clamping(false),
+	m_R2(R*R),
+	m_clampMax(1.0)
 {}
 
 MagAGC::~MagAGC()
@@ -61,6 +65,7 @@ MagAGC::~MagAGC()
 
 void MagAGC::resize(int historySize, Real R)
 {
+    m_R2 = R*R;
     m_stepLength = std::min(StepLengthMax, historySize/2);
     m_stepDelta = 1.0 / m_stepLength;
     m_stepUpCounter = 0;
@@ -88,7 +93,24 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 {
     m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
     m_moving_average.feed(m_magsq);
-    m_u0 = m_R / (m_squared ? m_moving_average.average() : sqrt(m_moving_average.average()));
+
+    if (m_clamping)
+    {
+        if (m_squared)
+        {
+            double u0 = m_R / m_moving_average.average();
+            m_u0 = (u0 * m_magsq > m_clampMax) ? m_clampMax / m_magsq : u0;
+        }
+        else
+        {
+            double u02 = m_R2 / m_moving_average.average();
+            m_u0 = (u02 * m_magsq > m_clampMax) ? m_clampMax / sqrt(m_magsq) : sqrt(u02);
+        }
+    }
+    else
+    {
+        m_u0 = m_R / (m_squared ? m_moving_average.average() : sqrt(m_moving_average.average()));
+    }
 
     if (m_thresholdEnable)
     {
@@ -105,14 +127,14 @@ double MagAGC::feedAndGetValue(const Complex& ci)
         }
         else
         {
-            if (m_count < m_moving_average.historySize()) {
+            if (m_count < m_stepDownDelay) {
                 m_count++;
             }
 
             m_gateCounter = 0;
         }
 
-        if (m_count <  m_moving_average.historySize())
+        if (m_count <  m_stepDownDelay)
         {
             m_stepDownCounter = m_stepUpCounter;
 

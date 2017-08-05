@@ -36,6 +36,18 @@
 
 const QString SSBModGUI::m_channelID = "sdrangel.channeltx.modssb";
 
+const int SSBModGUI::m_agcTimeConstant[] = {
+        1,
+        2,
+        5,
+       10,
+       20,
+       50,
+      100,
+      200,
+      500,
+      990};
+
 SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
     SSBModGUI* gui = new SSBModGUI(pluginAPI, deviceAPI);
@@ -105,6 +117,11 @@ QByteArray SSBModGUI::serialize() const
     s.writeBool(9, ui->audioBinaural->isChecked());
     s.writeBool(10, ui->audioFlipChannels->isChecked());
     s.writeBool(11, ui->dsb->isChecked());
+    s.writeBool(12, ui->agc->isChecked());
+    s.writeS32(13, ui->agcTime->value());
+    s.writeS32(14, ui->agcThreshold->value());
+    s.writeS32(15, ui->agcThresholdGate->value());
+    s.writeS32(16, ui->agcThresholdDelay->value());
 
 	return s.final();
 }
@@ -158,6 +175,18 @@ bool SSBModGUI::deserialize(const QByteArray& data)
         ui->audioFlipChannels->setChecked(booltmp);
         d.readBool(11, &booltmp);
         ui->dsb->setChecked(booltmp);
+        d.readBool(12, &booltmp, false);
+        ui->agc->setChecked(booltmp);
+        d.readS32(13, &tmp, 7);
+        ui->agcTime->setValue(tmp > 9 ? 9 : tmp);
+        d.readS32(14, &tmp, -40);
+        ui->agcThreshold->setValue(tmp);
+        d.readS32(15, &tmp, 4);
+        ui->agcThresholdGate->setValue(tmp);
+        d.readS32(16, &tmp, 5);
+        ui->agcThresholdDelay->setValue(tmp);
+
+        displaySettings();
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -399,6 +428,37 @@ void SSBModGUI::on_mic_toggled(bool checked)
     m_ssbMod->getInputMessageQueue()->push(message);
 }
 
+void SSBModGUI::on_agc_stateChanged(int state __attribute((__unused__)))
+{
+    applySettings();
+}
+
+void SSBModGUI::on_agcTime_valueChanged(int value){
+    QString s = QString::number(m_agcTimeConstant[value], 'f', 0);
+    ui->agcTimeText->setText(s);
+    applySettings();
+}
+
+void SSBModGUI::on_agcThreshold_valueChanged(int value)
+{
+    displayAGCPowerThreshold(value);
+    applySettings();
+}
+
+void SSBModGUI::on_agcThresholdGate_valueChanged(int value)
+{
+    QString s = QString::number(value, 'f', 0);
+    ui->agcThresholdGateText->setText(s);
+    applySettings();
+}
+
+void SSBModGUI::on_agcThresholdDelay_valueChanged(int value)
+{
+    QString s = QString::number(value * 10, 'f', 0);
+    ui->agcThresholdDelayText->setText(s);
+    applySettings();
+}
+
 void SSBModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
@@ -507,6 +567,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
+    displaySettings();
 	applySettings();
 	setNewRate(m_spanLog2);
 
@@ -629,8 +690,37 @@ void SSBModGUI::applySettings()
 			ui->audioFlipChannels->isChecked(),
 			ui->dsb->isChecked(),
 			ui->audioMute->isChecked(),
-			ui->playLoop->isChecked());
+			ui->playLoop->isChecked(),
+			ui->agc->isChecked(),
+			m_agcTimeConstant[ui->agcTime->value()],
+            ui->agcThreshold->value(),
+            ui->agcThresholdGate->value(),
+            ui->agcThresholdDelay->value() * 10);
 	}
+}
+
+void SSBModGUI::displaySettings()
+{
+    QString s = QString::number(m_agcTimeConstant[ui->agcTime->value()], 'f', 0);
+    ui->agcTimeText->setText(s);
+    displayAGCPowerThreshold(ui->agcThreshold->value());
+    s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
+    ui->agcThresholdGateText->setText(s);
+    s = QString::number(ui->agcThresholdDelay->value() * 10, 'f', 0);
+    ui->agcThresholdDelayText->setText(s);
+}
+
+void SSBModGUI::displayAGCPowerThreshold(int value)
+{
+    if (value == -99)
+    {
+        ui->agcThresholdText->setText("---");
+    }
+    else
+    {
+        QString s = QString::number(value, 'f', 0);
+        ui->agcThresholdText->setText(s);
+    }
 }
 
 void SSBModGUI::leaveEvent(QEvent*)

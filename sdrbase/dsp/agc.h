@@ -22,11 +22,11 @@ public:
 	virtual void feed(Complex& ci) = 0;
 
 protected:
-	double m_u0;
-	double m_R;       // objective mag
-	MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
-	int m_historySize;
-	int m_count;
+	double m_u0;                            //!< AGC factor
+	double m_R;                             //!< objective mag
+	MovingAverage<double> m_moving_average; //!< Averaging engine. The stack length conditions the smoothness of AGC.
+	int m_historySize;                      //!< Averaging length (attack)
+	int m_count;                            //!< Samples counter
 };
 
 
@@ -43,6 +43,9 @@ public:
     void setThreshold(double threshold) { m_threshold = threshold; }
     void setThresholdEnable(bool enable);
     void setGate(int gate) { m_gate = gate; }
+    void setStepDownDelay(int stepDownDelay) { m_stepDownDelay = stepDownDelay; }
+    void setClamping(bool clamping) { m_clamping = clamping; }
+    void setClampMax(double clampMax) { m_clampMax = clampMax; }
 private:
     bool m_squared;        //!< use squared magnitude (power) to compute AGC value
 	double m_magsq;        //!< current squared magnitude (power)
@@ -54,6 +57,10 @@ private:
     int m_stepUpCounter;   //!< step up transition samples counter
     int m_stepDownCounter; //!< step down transition samples counter
     int m_gateCounter;     //!< threshold gate samples counter
+    int m_stepDownDelay;   //!< delay in samples before cutoff (release)
+    bool m_clamping;       //!< clamping active
+    double m_R2;           //!< square of objective magnitude
+    double m_clampMax;     //!< maximum to clamp to
 };
 
 
