@@ -154,7 +154,7 @@ void NFMMod::pull(Sample& sample)
 
 void NFMMod::pullAudio(int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+    unsigned int nbSamplesAudio = nbSamples * ((Real) m_config.m_audioSampleRate / (Real) m_config.m_basebandSampleRate);
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {
@@ -291,13 +291,15 @@ bool NFMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_outputSampleRate = notif.getSampleRate();
+		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
+        m_config.m_outputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		apply();
 
 		qDebug() << "NFMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
+				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
+                << " m_outputSampleRate: " << m_config.m_outputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;
