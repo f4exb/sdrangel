@@ -168,7 +168,7 @@ void WFMMod::pull(Sample& sample)
 
 void WFMMod::pullAudio(int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * m_interpolatorDistance;
+    unsigned int nbSamplesAudio = nbSamples * ((Real) m_config.m_audioSampleRate / (Real) m_config.m_basebandSampleRate);
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {
@@ -295,13 +295,15 @@ bool WFMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_outputSampleRate = notif.getSampleRate();
+		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
+        m_config.m_outputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		apply();
 
 		qDebug() << "WFMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
+				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
+                << " m_outputSampleRate: " << m_config.m_outputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;

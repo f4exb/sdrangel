@@ -278,6 +278,7 @@ private:
     };
 
     struct Config {
+        int m_basebandSampleRate;
         int m_outputSampleRate;
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
@@ -290,6 +291,7 @@ private:
         bool m_playLoop;
 
         Config() :
+            m_basebandSampleRate(0),
             m_outputSampleRate(-1),
             m_inputFrequencyOffset(0),
             m_rfBandwidth(-1),
