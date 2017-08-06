@@ -341,6 +341,7 @@ private:
     };
 
     struct Config {
+        int m_basebandSampleRate;
         int m_outputSampleRate;
         qint64 m_inputFrequencyOffset;
         Real m_bandwidth;
@@ -364,6 +365,7 @@ private:
         int m_agcThresholdDelay;
 
         Config() :
+            m_basebandSampleRate(0),
             m_outputSampleRate(0),
             m_inputFrequencyOffset(0),
             m_bandwidth(3000.0f),

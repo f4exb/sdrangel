@@ -40,16 +40,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        MsgChannelizerNotification(int samplerate, qint64 frequencyOffset) :
+        MsgChannelizerNotification(int basebandSampleRate, int samplerate, qint64 frequencyOffset) :
             Message(),
+            m_basebandSampleRate(basebandSampleRate),
             m_sampleRate(samplerate),
             m_frequencyOffset(frequencyOffset)
         { }
 
+        int getBasebandSampleRate() const { return m_basebandSampleRate; }
         int getSampleRate() const { return m_sampleRate; }
         qint64 getFrequencyOffset() const { return m_frequencyOffset; }
 
     private:
+        int m_basebandSampleRate;
         int m_sampleRate;
         qint64 m_frequencyOffset;
     };

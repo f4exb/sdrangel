@@ -196,7 +196,7 @@ void UpChannelizer::applyConfiguration()
 
     if (m_sampleSource != 0)
     {
-        MsgChannelizerNotification notif(m_currentInputSampleRate, m_currentCenterFrequency);
+        MsgChannelizerNotification notif(m_outputSampleRate, m_currentInputSampleRate, m_currentCenterFrequency);
         m_sampleSource->handleMessage(notif);
     }
 }
