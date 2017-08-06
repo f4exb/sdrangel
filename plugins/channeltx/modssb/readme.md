@@ -26,6 +26,8 @@ The audio compressor uses the same AGC as on the receive side (SSB demodulator) 
   - The amplitude (magnitude) order control is tunable (2.2)
   - The squelch delay after return below threshold is tunable (2.6) 
 
+The audio compressor works only in monaural mode controlled by (4)
+
 <h4>2.1: Audio compressor toggle</h4>
 
 Use this button to toggle audio compressor on and off. In "on" mode the button is lit as on the picture.
