@@ -16,6 +16,44 @@ This plugin can be used to generate a single sideband or double sidebands modula
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
+<h3>2: Audio compression</h3>
+
+![SSB Modulator plugin compressor GUI](../../../doc/img/SSBModulator_plugin_cmp.png)
+
+The audio compressor uses the same AGC as on the receive side (SSB demodulator) with the following changes:
+
+  - The clamping is always active to prevent modulation overload
+  - The amplitude (magnitude) order control is tunable (2.2)
+  - The squelch delay after return below threshold is tunable (2.6) 
+
+<h4>2.1: Audio compressor toggle</h4>
+
+Use this button to toggle audio compressor on and off. In "on" mode the button is lit as on the picture.
+
+<h4>2.2: AGC magnitude order</h4>
+
+This is the ratio to maximum signal magnitude aimed by the AGC. The higher the stronger is the compression but the signal will have more chances to get clamped and therefore will get more severly distorted.
+
+The default value is 0.2 which is rather mild. For normal voice you should not exceed 0.4 however the criteria is rather subjective. It is flexible enough to be tuned between 0 and 1 in 0.01 increments.
+
+<h4>2.3: AGC time constant</h4>
+
+Audio power is averaged during this period in ms. The lower the closer the compression reacts to audio signal variations and the "harder" it feels. This period can be set among these values: 1, 2, 5, 10, 20, 50, 100, 200, 500, 990 ms
+
+The default value is 200 ms which is relatively "soft". Most practically useful values are between 20 and 500 ms.
+
+<h4>2.4: Power threshold</h4>
+
+in order to avoid small signals due to background noise or power wiggle to enter the system and raise to normal voice level a power based squelch is in place. This control allows to select a threshold in dB above which a signal will open the squalch if it lasts longer than the squelch gate (2.5). Default is -40 dB.
+
+<h4>2.5: Squelch gate</h4>
+
+This prevents short bursts to open the squelch. This is the time in ms after a signal with a power constantly above the threshold will effectively open the squelch. Default is 4 ms.
+
+<h4>2.6: Squelch cut-off delay</h4>
+
+This controls the delay in ms after which a signal drop below threshold will close the squelch. Default value is 50 ms.
+
 <h3>3: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal generated in the pass band.
