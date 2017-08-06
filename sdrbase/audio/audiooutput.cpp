@@ -88,6 +88,10 @@ bool AudioOutput::start(int device, int rate)
             m_audioFormat = devInfo.nearestFormat(m_audioFormat);
             qWarning("AudioOutput::start: %d Hz S16_LE audio format not supported. New rate: %d", rate, m_audioFormat.sampleRate());
         }
+        else
+        {
+            qInfo("AudioOutput::start: audio format OK");
+        }
 
         if (m_audioFormat.sampleSize() != 16)
         {
