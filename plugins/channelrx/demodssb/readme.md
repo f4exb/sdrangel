@@ -112,6 +112,10 @@ If you are into digging weak signals out of the noise you probably will not turn
 
 This AGC is based on the calculated magnitude (square root of power of the filtered signal as I² + Q²) and will try to adjust audio volume as if a -20dB power signal was received.
 
+<h4>11.2A: AGC clamping</h4>
+
+When on this clamps signal at the maximum amplitude. Normally this is not needed for most signals as the AGC amplitude order is quite conservative at 10% of the maximum. You may switch it on if you notice a loud click when a transmission starts.
+
 <h4>11.3: AGC time constant</h4>
 
 This is the time window in milliseconds of the moving average used to calculate the signal power average. It can be varied in powers of two from 16 to 2048 ms that is: 16, 32, 64, 128, 256, 512, 1024 and 2048 ms. The most practical values are between 128 and 512 ms.
