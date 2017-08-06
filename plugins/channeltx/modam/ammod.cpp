@@ -141,7 +141,7 @@ void AMMod::pull(Sample& sample)
 void AMMod::pullAudio(int nbSamples)
 {
 //    qDebug("AMMod::pullAudio: %d", nbSamples);
-    unsigned int nbAudioSamples = nbSamples * m_interpolatorDistance;
+    unsigned int nbAudioSamples = nbSamples * ((Real) m_config.m_audioSampleRate / (Real) m_config.m_basebandSampleRate);
 
     if (nbAudioSamples > m_audioBuffer.size())
     {
@@ -268,13 +268,15 @@ bool AMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
+		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
 		m_config.m_outputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		apply();
 
 		qDebug() << "AMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
+				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
+                << " m_outputSampleRate: " << m_config.m_outputSampleRate
 				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
 
 		return true;
