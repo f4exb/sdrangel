@@ -620,23 +620,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                         m_settings.m_devSampleRate,
                         1<<m_settings.m_log2HardInterp);
             }
-
-            if (m_limeSDROutputThread != 0)
-            {
-                m_limeSDROutputThread->setDeviceSampleRate(m_settings.m_devSampleRate);
-            }
-
-            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-            for (; itSink != sinkBuddies.end(); ++itSink)
-            {
-                DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-
-                if (buddySharedPtr->m_thread) {
-                    buddySharedPtr->m_thread->setDeviceSampleRate(m_settings.m_devSampleRate);
-                }
-            }
         }
     }
 

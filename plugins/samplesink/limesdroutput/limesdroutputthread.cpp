@@ -24,7 +24,6 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_running(false),
     m_stream(stream),
     m_sampleFifo(sampleFifo),
-    m_sampleRate(5000000),
     m_log2Interp(0),
     m_fcPos(LimeSDROutputSettings::FC_POS_CENTER)
 {
@@ -83,11 +82,6 @@ void LimeSDROutputThread::run()
     } else {
         qDebug("LimeSDROutputThread::run: stream started");
     }
-
-//    count = 0;
-//    msleep = LIMESDROUTPUT_BLOCKSIZE/(m_sampleRate/1e6f);
-//    mdelta = msleep/100;
-//    msleep = (3*msleep)/4; // to start faster
 
     while (m_running)
     {

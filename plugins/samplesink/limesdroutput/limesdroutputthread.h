@@ -39,7 +39,7 @@ public:
 
     virtual void startWork();
     virtual void stopWork();
-    virtual void setDeviceSampleRate(int sampleRate) { m_sampleRate = sampleRate; }
+    virtual void setDeviceSampleRate(int __attribute__((unused)) sampleRate) {}
     void setLog2Interpolation(unsigned int log2_ioterp);
     void setFcPos(int fcPos);
 
@@ -52,7 +52,6 @@ private:
     qint16 m_buf[2*LIMESDROUTPUT_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
     SampleSourceFifo* m_sampleFifo;
 
-    int m_sampleRate;
     unsigned int m_log2Interp; // soft decimation
     int m_fcPos;
 
