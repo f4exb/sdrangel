@@ -505,7 +505,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
         (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
         (m_settings.m_ncoEnable != settings.m_ncoEnable) ||
-        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) || force)
+        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
+        (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
         suspendOwnThread = true;
     }
@@ -616,6 +617,15 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                         1<<settings.m_log2HardInterp);
             }
         }
+    }
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+       || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    {
+        int fifoSize = std::max(
+                (int) ((settings.m_devSampleRate/(1<<settings.m_log2SoftInterp)) * DeviceLimeSDRShared::m_sampleFifoLengthInSeconds),
+                DeviceLimeSDRShared::m_sampleFifoMinSize);
+        m_sampleSourceFifo.resize(fifoSize);
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)

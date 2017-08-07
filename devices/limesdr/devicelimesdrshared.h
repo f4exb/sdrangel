@@ -82,6 +82,9 @@ public:
     uint64_t            m_centerFrequency;
     uint32_t            m_log2Soft;
 
+    static const float  m_sampleFifoLengthInSeconds;
+    static const int    m_sampleFifoMinSize;
+
     DeviceLimeSDRShared() :
         m_deviceParams(0),
         m_channel(-1),
