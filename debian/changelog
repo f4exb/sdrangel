@@ -1,3 +1,10 @@
+sdrangel (3.5.5-1) unstable; urgency=medium
+
+  * Output plugins: use fixed time length for sample FIFO
+  * Audio modulators: reduce audio input file buffer to 0.25s
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Aug 2017 23:14:18 +0200
+
 sdrangel (3.5.4-1) unstable; urgency=medium
 
   * LimeSDR: fixed NCO lower boundary calculation by flooring to zero
