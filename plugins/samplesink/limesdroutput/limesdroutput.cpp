@@ -571,21 +571,19 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
     if ((m_settings.m_gain != settings.m_gain) || force)
     {
-        m_settings.m_gain = settings.m_gain;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel,
-                    m_settings.m_gain) < 0)
+                    settings.m_gain) < 0)
             {
                 qDebug("LimeSDROutput::applySettings: LMS_SetGaindB() failed");
             }
             else
             {
                 //doCalibration = true;
-                qDebug() << "LimeSDROutput::applySettings: Gain set to " << m_settings.m_gain;
+                qDebug() << "LimeSDROutput::applySettings: Gain set to " << settings.m_gain;
             }
         }
     }
@@ -596,50 +594,45 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         forwardChangeTxDSP  = m_settings.m_log2HardInterp != settings.m_log2HardInterp;
         forwardChangeAllDSP = m_settings.m_devSampleRate != settings.m_devSampleRate;
 
-        m_settings.m_devSampleRate = settings.m_devSampleRate;
-        m_settings.m_log2HardInterp = settings.m_log2HardInterp;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
-                    m_settings.m_devSampleRate,
-                    1<<m_settings.m_log2HardInterp) < 0)
+                    settings.m_devSampleRate,
+                    1<<settings.m_log2HardInterp) < 0)
             {
                 qCritical("LimeSDROutput::applySettings: could not set sample rate to %d with oversampling of %d",
-                        m_settings.m_devSampleRate,
-                        1<<m_settings.m_log2HardInterp);
+                        settings.m_devSampleRate,
+                        1<<settings.m_log2HardInterp);
             }
             else
             {
-                m_deviceShared.m_deviceParams->m_log2OvSRTx = m_settings.m_log2HardInterp;
-                m_deviceShared.m_deviceParams->m_sampleRate = m_settings.m_devSampleRate;
+                m_deviceShared.m_deviceParams->m_log2OvSRTx = settings.m_log2HardInterp;
+                m_deviceShared.m_deviceParams->m_sampleRate = settings.m_devSampleRate;
                 doCalibration = true;
                 forceNCOFrequency = true;
                 qDebug("LimeSDROutput::applySettings: set sample rate set to %d with oversampling of %d",
-                        m_settings.m_devSampleRate,
-                        1<<m_settings.m_log2HardInterp);
+                        settings.m_devSampleRate,
+                        1<<settings.m_log2HardInterp);
             }
         }
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
     {
-        m_settings.m_lpfBW = settings.m_lpfBW;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel,
-                    m_settings.m_lpfBW) < 0)
+                    settings.m_lpfBW) < 0)
             {
-                qCritical("LimeSDROutput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
+                qCritical("LimeSDROutput::applySettings: could not set LPF to %f Hz", settings.m_lpfBW);
             }
             else
             {
                 doCalibration = true;
-                qDebug("LimeSDROutput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
+                qDebug("LimeSDROutput::applySettings: LPF set to %f Hz", settings.m_lpfBW);
             }
         }
     }
@@ -647,27 +640,24 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
         (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
-        m_settings.m_lpfFIRBW = settings.m_lpfFIRBW;
-        m_settings.m_lpfFIREnable = settings.m_lpfFIREnable;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel,
-                    m_settings.m_lpfFIREnable,
-                    m_settings.m_lpfFIRBW) < 0)
+                    settings.m_lpfFIREnable,
+                    settings.m_lpfFIRBW) < 0)
             {
                 qCritical("LimeSDROutput::applySettings: could %s and set LPF FIR to %f Hz",
-                        m_settings.m_lpfFIREnable ? "enable" : "disable",
-                        m_settings.m_lpfFIRBW);
+                        settings.m_lpfFIREnable ? "enable" : "disable",
+                        settings.m_lpfFIRBW);
             }
             else
             {
                 doCalibration = true;
                 qDebug("LimeSDROutput::applySettings: %sd and set LPF FIR to %f Hz",
-                        m_settings.m_lpfFIREnable ? "enable" : "disable",
-                        m_settings.m_lpfFIRBW);
+                        settings.m_lpfFIREnable ? "enable" : "disable",
+                        settings.m_lpfFIRBW);
             }
         }
     }
@@ -675,71 +665,64 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
         (m_settings.m_ncoEnable != settings.m_ncoEnable) || force || forceNCOFrequency)
     {
-        m_settings.m_ncoFrequency = settings.m_ncoFrequency;
-        m_settings.m_ncoEnable = settings.m_ncoEnable;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel,
-                    m_settings.m_ncoEnable,
-                    m_settings.m_ncoFrequency))
+                    settings.m_ncoEnable,
+                    settings.m_ncoFrequency))
             {
                 //doCalibration = true;
                 forwardChangeOwnDSP = true;
-                m_deviceShared.m_ncoFrequency = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0; // for buddies
+                m_deviceShared.m_ncoFrequency = settings.m_ncoEnable ? settings.m_ncoFrequency : 0; // for buddies
                 qDebug("LimeSDROutput::applySettings: %sd and set NCO to %d Hz",
-                        m_settings.m_ncoEnable ? "enable" : "disable",
-                        m_settings.m_ncoFrequency);
+                        settings.m_ncoEnable ? "enable" : "disable",
+                        settings.m_ncoFrequency);
             }
             else
             {
                 qCritical("LimeSDROutput::applySettings: could not %s and set NCO to %d Hz",
-                        m_settings.m_ncoEnable ? "enable" : "disable",
-                        m_settings.m_ncoFrequency);
+                        settings.m_ncoEnable ? "enable" : "disable",
+                        settings.m_ncoFrequency);
             }
         }
     }
 
     if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
-        m_settings.m_log2SoftInterp = settings.m_log2SoftInterp;
         forwardChangeOwnDSP = true;
-        m_deviceShared.m_log2Soft = m_settings.m_log2SoftInterp; // for buddies
+        m_deviceShared.m_log2Soft = settings.m_log2SoftInterp; // for buddies
 
         if (m_limeSDROutputThread != 0)
         {
-            m_limeSDROutputThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
-            qDebug() << "LimeSDROutput::applySettings: set soft decimation to " << (1<<m_settings.m_log2SoftInterp);
+            m_limeSDROutputThread->setLog2Interpolation(settings.m_log2SoftInterp);
+            qDebug() << "LimeSDROutput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftInterp);
         }
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
-        m_settings.m_antennaPath = settings.m_antennaPath;
-
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
         {
             if (DeviceLimeSDR::setTxAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
-                    m_settings.m_antennaPath))
+                    settings.m_antennaPath))
             {
                 doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: set antenna path to %d",
-                        (int) m_settings.m_antennaPath);
+                        (int) settings.m_antennaPath);
             }
             else
             {
                 qCritical("LimeSDRInput::applySettings: could not set antenna path to %d",
-                        (int) m_settings.m_antennaPath);
+                        (int) settings.m_antennaPath);
             }
         }
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
-        m_settings.m_centerFrequency = settings.m_centerFrequency;
         forwardChangeTxDSP = true;
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
@@ -747,19 +730,20 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
-                    m_settings.m_centerFrequency) < 0)
+                    settings.m_centerFrequency) < 0)
             {
-                qCritical("LimeSDROutput::applySettings: could not set frequency to %lu", m_settings.m_centerFrequency);
+                qCritical("LimeSDROutput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
             }
             else
             {
                 doCalibration = true;
-                m_deviceShared.m_centerFrequency = m_settings.m_centerFrequency; // for buddies
-                qDebug("LimeSDROutput::applySettings: frequency set to %lu", m_settings.m_centerFrequency);
+                m_deviceShared.m_centerFrequency = settings.m_centerFrequency; // for buddies
+                qDebug("LimeSDROutput::applySettings: frequency set to %lu", settings.m_centerFrequency);
             }
         }
     }
 
+    m_settings = settings;
 
     if (doCalibration)
     {
