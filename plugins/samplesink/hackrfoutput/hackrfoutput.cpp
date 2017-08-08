@@ -113,7 +113,6 @@ bool HackRFOutput::start()
 //	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
-	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 	m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
 
 	m_hackRFThread->startWork();
@@ -244,12 +243,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 			}
 			else
 			{
-			    if (m_hackRFThread != 0)
-			    {
-	                qDebug("HackRFOutput::applySettings: sample rate set to %llu S/s",
-	                        settings.m_devSampleRate);
-	                m_hackRFThread->setSamplerate(settings.m_devSampleRate);
-			    }
+			    qDebug("HackRFOutput::applySettings: sample rate set to %llu S/s",
+			                                settings.m_devSampleRate);
 			}
 		}
 	}

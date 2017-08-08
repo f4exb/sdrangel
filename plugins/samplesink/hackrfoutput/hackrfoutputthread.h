@@ -36,7 +36,6 @@ public:
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(uint32_t samplerate);
 	void setLog2Interpolation(unsigned int log2_interp);
 
 private:
@@ -48,7 +47,6 @@ private:
 	qint8 m_buf[2*HACKRF_BLOCKSIZE];
 	SampleSourceFifo* m_sampleFifo;
 
-	int m_samplerate;
 	unsigned int m_log2Interp;
 
     Interpolators<qint8, SDR_SAMP_SZ, 8> m_interpolators;

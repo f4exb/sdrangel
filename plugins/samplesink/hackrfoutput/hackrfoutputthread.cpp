@@ -27,7 +27,6 @@ HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sam
 	m_running(false),
 	m_dev(dev),
 	m_sampleFifo(sampleFifo),
-	m_samplerate(10),
 	m_log2Interp(0)
 {
 }
@@ -51,11 +50,6 @@ void HackRFOutputThread::stopWork()
 	qDebug("HackRFOutputThread::stopWork");
 	m_running = false;
 	wait();
-}
-
-void HackRFOutputThread::setSamplerate(uint32_t samplerate)
-{
-	m_samplerate = samplerate;
 }
 
 void HackRFOutputThread::setLog2Interpolation(unsigned int log2Interp)
