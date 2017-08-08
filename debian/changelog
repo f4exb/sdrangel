@@ -1,6 +1,7 @@
 sdrangel (3.5.5-1) unstable; urgency=medium
 
-  * Output plugins: use fixed time length for sample FIFO
+  * Output plugins: use fixed time length for sample FIFO of ~0.25s
+  * Audio modulators: reduce audio input file buffer to 0.1s
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Aug 2017 23:14:18 +0200
 
