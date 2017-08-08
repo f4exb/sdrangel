@@ -18,4 +18,5 @@
 
 MESSAGE_CLASS_DEFINITION(DeviceHackRFShared::MsgConfigureFrequencyDelta, Message)
 
-
+const float  DeviceHackRFShared::m_sampleFifoLengthInSeconds = 0.25;
+const int    DeviceHackRFShared::m_sampleFifoMinSize = 150000; // 600kS/s knee

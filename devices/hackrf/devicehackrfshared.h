@@ -42,6 +42,9 @@ public:
             m_frequencyDelta(frequencyDelta)
         { }
     };
+
+    static const float  m_sampleFifoLengthInSeconds;
+    static const int    m_sampleFifoMinSize;
 };
 
 

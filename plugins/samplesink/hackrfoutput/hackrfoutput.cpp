@@ -25,7 +25,7 @@
 #include "dsp/dspengine.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
-
+#include "hackrf/devicehackrfshared.h"
 
 #include "hackrfoutputgui.h"
 #include "hackrfoutputthread.h"
@@ -242,11 +242,10 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
         forwardChange = true;
-
-        // FIFO size:
-        // 1 s length up to interpolation by 16
-        // 2 s for interpolation by 32
-        m_sampleSourceFifo.resize(settings.m_devSampleRate/(1<<(settings.m_log2Interp <= 4 ? settings.m_log2Interp : 4)));
+        int fifoSize = std::max(
+                (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceHackRFShared::m_sampleFifoLengthInSeconds),
+                DeviceHackRFShared::m_sampleFifoMinSize);
+        m_sampleSourceFifo.resize(fifoSize);
     }
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
