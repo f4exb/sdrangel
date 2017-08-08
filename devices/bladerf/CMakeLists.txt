@@ -3,12 +3,14 @@ project(bladerfdevice)
 set(bladerfdevice_SOURCES
     devicebladerf.cpp
     devicebladerfvalues.cpp
+    devicebladerfshared.cpp
 )
 
 set(bladerfdevice_HEADERS
     devicebladerf.h
     devicebladerfvalues.h
     devicebladerfparam.h
+    devicebladerfshared.h
 )
 
 if (BUILD_DEBIAN)

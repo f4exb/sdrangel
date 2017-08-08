@@ -45,7 +45,8 @@ CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 !macx:SOURCES += bladerf/devicebladerf.cpp\
-        bladerf/devicebladerfvalues.cpp
+        bladerf/devicebladerfvalues.cpp\
+        bladerf/devicebladerfshared.cpp
 
 SOURCES += hackrf/devicehackrf.cpp\
         hackrf/devicehackrfvalues.cpp\
@@ -57,7 +58,8 @@ CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
 
 !macx:HEADERS -= bladerf/devicebladerf.h\
         bladerf/devicebladerfparam.h\
-        bladerf/devicebladerfvalues.h
+        bladerf/devicebladerfvalues.h\
+        bladerf/devicebladerfshared.h
 
 HEADERS  += hackrf/devicehackrf.h\
         hackrf/devicehackrfparam.h\

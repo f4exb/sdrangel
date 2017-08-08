@@ -23,6 +23,7 @@
 #include "dsp/dspengine.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
+#include "bladerf/devicebladerfshared.h"
 
 #include "bladerfoutput.h"
 #include "bladerfoutputgui.h"
@@ -243,10 +244,20 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
-	    // FIFO size:
-	    // 1 s length up to interpolation by 16
-	    // 2 s for interpolation by 32
-	    m_sampleSourceFifo.resize(settings.m_devSampleRate/(1<<(settings.m_log2Interp <= 4 ? settings.m_log2Interp : 4)));
+	    int fifoSize;
+
+	    if (settings.m_log2Interp == 5)
+	    {
+	        fifoSize = DeviceBladeRFShared::m_sampleFifoMinSize32;
+	    }
+	    else
+	    {
+	        fifoSize = std::max(
+	            (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRFShared::m_sampleFifoLengthInSeconds),
+	            DeviceBladeRFShared::m_sampleFifoMinSize);
+	    }
+
+        m_sampleSourceFifo.resize(fifoSize);
 	}
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
