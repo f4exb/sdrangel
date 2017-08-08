@@ -214,10 +214,30 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 {
 //	QMutexLocker mutexLocker(&m_mutex);
 
-	bool forwardChange = false;
+	bool forwardChange    = false;
+	bool suspendThread    = false;
+	bool threadWasRunning = false;
 	hackrf_error rc;
 
 	qDebug() << "HackRFOutput::applySettings";
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+            (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        suspendThread = true;
+    }
+
+    if (suspendThread)
+    {
+        if (m_hackRFThread)
+        {
+            if (m_hackRFThread->isRunning())
+            {
+                m_hackRFThread->stopWork();
+                threadWasRunning = true;
+            }
+        }
+    }
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
@@ -337,6 +357,11 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 				qDebug() << "HackRFInput:applySettings: extra LNA set to " << settings.m_lnaExt;
 			}
 		}
+	}
+
+	if (threadWasRunning)
+	{
+	    m_hackRFThread->startWork();
 	}
 
     m_settings.m_devSampleRate = settings.m_devSampleRate;

@@ -47,6 +47,7 @@ void HackRFOutputThread::startWork()
 
 void HackRFOutputThread::stopWork()
 {
+    if (!m_running) return;
 	qDebug("HackRFOutputThread::stopWork");
 	m_running = false;
 	wait();
