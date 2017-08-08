@@ -216,30 +216,37 @@ bool BladerfOutput::handleMessage(const Message& message)
 
 bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool force)
 {
-	bool forwardChange = false;
+	bool forwardChange    = false;
+    bool suspendOwnThread = false;
+    bool threadWasRunning = false;
 //	QMutexLocker mutexLocker(&m_mutex);
 
 	qDebug() << "BladerfOutput::applySettings: m_dev: " << m_dev;
 
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+        (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        suspendOwnThread = true;
+    }
+
+    if (suspendOwnThread)
+    {
+        if (m_bladerfThread)
+        {
+            if (m_bladerfThread->isRunning())
+            {
+                m_bladerfThread->stopWork();
+                threadWasRunning = true;
+            }
+        }
+    }
+
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
-	    bool wasRunning = false;
-
-	    if ((m_bladerfThread != 0) && (m_bladerfThread->isRunning()))
-	    {
-	        m_bladerfThread->stopWork();
-	        wasRunning = true;
-	    }
-
 	    // FIFO size:
 	    // 1 s length up to interpolation by 16
 	    // 2 s for interpolation by 32
 	    m_sampleSourceFifo.resize(settings.m_devSampleRate/(1<<(settings.m_log2Interp <= 4 ? settings.m_log2Interp : 4)));
-
-	    if (wasRunning)
-	    {
-	        m_bladerfThread->startWork();
-	    }
 	}
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
@@ -415,6 +422,11 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 			qDebug("BladerfOutput::applySettings: bladerf_set_frequency(%lld) failed", settings.m_centerFrequency);
 		}
 	}
+
+    if (threadWasRunning)
+    {
+        m_bladerfThread->startWork();
+    }
 
     m_settings.m_centerFrequency = settings.m_centerFrequency;
     m_settings.m_bandwidth = settings.m_bandwidth;

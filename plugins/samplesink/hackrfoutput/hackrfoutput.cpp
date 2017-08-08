@@ -222,7 +222,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 	qDebug() << "HackRFOutput::applySettings";
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-            (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+        (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
         suspendThread = true;
     }
