@@ -10,7 +10,7 @@ LimeSDR is a 2x2 MIMO device so it has two transmitting channels that can run co
 
 <h2>Build</h2>
 
-The plugin will be built only if LimeSuite is installed in your system. To build and install LimeSuite from source do:
+The plugin will be built only if LimeSuite is installed in your system. Please use version tagged v17.06.0 or maybe later. To build and install LimeSuite from source do:
 
   - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`
@@ -130,8 +130,6 @@ This label turns green when status can be obtained from the current stream. Usua
 <h3>18: Stream global (all Tx) throughput in MB/s</h3>
 
 This is the stream throughput in MB/s and is usually about 3 times the sample rate for a single stream and 6 times for a dual Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bita travel on the USB link.
-
-&#9888; it has been found that in practice to get a clean output the gain should not exceed ~4dB with standard levels in the channel plugins.
 
 <h3>19: FIFO status</h3>
 
