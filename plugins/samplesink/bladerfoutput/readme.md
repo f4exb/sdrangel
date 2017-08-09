@@ -27,6 +27,16 @@ Device start / stop button.
 <h3>2: Baseband sample rate</h3>
 
 This is the baseband sample rate in kS/s before interpolation (4) to produce the final stream that is sent to the BladeRF device. Thus this is the device sample rate (6) divided by the interpolation factor (4).
+
+Transmission latency depends essentially in the delay in the sample FIFO. The FIFO size is calculated as follows:
+
+For interpolation by 32 the size is fixed at 150000 samples, Delay is 150000 / B where B is the baseband sample rate. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 500 kS/s:
+
+![BladeRF output plugin FIFO delay 32](../../../doc/img/BladeRFOutput_plugin_fifodly_32.png)
+
+For lower interpolation rates the size is calculated to give a fixed delay of 250 ms or 75000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 400 kS/s. The 250 ms delay is reached at 300 kS/s:
+
+![BladeRF output plugin FIFO delay other](../../../doc/img/BladeRFOutput_plugin_fifodly_other.png) 
   
 <h3>3: Frequency</h3>
 

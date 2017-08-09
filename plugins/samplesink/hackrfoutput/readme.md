@@ -29,6 +29,10 @@ The settings on Tx or Rx tab are reapplied on start so these settings can be con
 <h3>2: Baseband sample rate</h3>
 
 This is the baseband sample rate in kS/s before interpolation (5) to produce the final stream that is sent to the HackRF device. Thus this is the device sample rate (8) divided by the interpolation factor (5).
+
+Transmission latency depends essentially in the delay in the sample FIFO. The size of sample FIFO is calculated to give a fixed delay of 250 ms or 150000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 800 kS/s. The 250 ms delay is reached at 600 kS/s:
+
+![BladeRF output plugin FIFO delay other](../../../doc/img/HackRFOutput_plugin_fifodly.png) 
   
 <h3>3: Frequency</h3>
 

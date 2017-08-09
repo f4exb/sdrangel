@@ -48,7 +48,11 @@ This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hard
 <h3>2B: Baseband sample rate</h3>
 
 This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the host to device sample rate (10) divided by the software interpolation factor (9).
-  
+
+Transmission latency depends essentially in the delay in the sample FIFO. The size of sample FIFO is calculated to give a fixed delay of 250 ms or 48000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 250 kS/s. The 250 ms delay is reached at 192 kS/s:
+
+![BladeRF output plugin FIFO delay other](../../../doc/img/LimeSDROutput_plugin_fifodly.png) 
+
 <h3>3: Center frequency</h3>
 
 This is the center frequency of transmission in kHz.
