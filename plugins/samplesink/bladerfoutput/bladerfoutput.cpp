@@ -246,7 +246,7 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 	{
 	    int fifoSize;
 
-	    if (settings.m_log2Interp == 5)
+	    if (settings.m_log2Interp >= 5)
 	    {
 	        fifoSize = DeviceBladeRFShared::m_sampleFifoMinSize32;
 	    }
