@@ -35,6 +35,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
 SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/API/lms7_api.cpp\
     $$LIBLIMESUITESRC/src/API/lms7_device.cpp\
+    $$LIBLIMESUITESRC/src/API/qLimeSDR.cpp\
     src/BuiltinConnections.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.cpp\
@@ -44,8 +45,8 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMing.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMEntry.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDR.cpp\
-    srcmw/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDRing.cpp\
+    srcmw/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybus.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybusEntry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybusing.cpp\
@@ -77,6 +78,7 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     
 HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
     $$LIBLIMESUITESRC/src/API/lms7_device.h\
+    $$LIBLIMESUITESRC/src/API/qLimeSDR.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/IConnection.h\

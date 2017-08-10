@@ -33,7 +33,7 @@ static const char *errToStr(const int errnum)
     strerror_r(errnum, buff, sizeof(buff));
     #else
     //this version may decide to use its own internal string
-    //return strerror_r(errnum, buff, sizeof(buff)); MinGW
+    //return strerror_r(errnum, buff, sizeof(buff));
     return buff;
     #endif
     return buff;

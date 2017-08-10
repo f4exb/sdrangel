@@ -101,7 +101,6 @@ int Connection_uLimeSDR::UpdateExternalDataRate(const size_t channel, const doub
         for (int i = 0; i < bakRegCnt; ++i)
             dataWr[i] = (spiAddr[i] << 16);
         TransactSPI(addrLMS7002M, dataWr.data(), dataRd.data(), bakRegCnt);
-        //UpdateThreads(true);
     }
 
     if ((txInterfaceClk >= 5e6) && (rxInterfaceClk >= 5e6))
@@ -186,29 +185,28 @@ int Connection_uLimeSDR::UpdateExternalDataRate(const size_t channel, const doub
         dataWr[0] = (1 << 31) | (uint32_t(0x0020) << 16) | reg20; //msbit 1=SPI write
         TransactSPI(addrLMS7002M, dataWr.data(), nullptr, 1);
         WriteRegister(0x000A, 0);
-        UpdateThreads();
     }
     return status;
 }
 
 
-int Connection_uLimeSDR::ReadRawStreamData(char* buffer, unsigned length, int timeout_ms)
+int Connection_uLimeSDR::ReadRawStreamData(char* buffer, unsigned length, int epIndex, int timeout_ms)
 {
     int totalBytesReceived = 0;
-    fpga::StopStreaming(this);
+    fpga::StopStreaming(this, epIndex);
 
     //ResetStreamBuffers();
     WriteRegister(0x0008, 0x0100 | 0x2);
     WriteRegister(0x0007, 1);
 
-    fpga::StartStreaming(this);
+    fpga::StartStreaming(this, epIndex);
 
     int handle = BeginDataReading(buffer, length);
     if (WaitForReading(handle, timeout_ms))
         totalBytesReceived = FinishDataReading(buffer, length, handle);
 
     AbortReading();
-    fpga::StopStreaming(this);
+    fpga::StopStreaming(this, epIndex);
 
     return totalBytesReceived;
 }
@@ -235,23 +233,18 @@ int Connection_uLimeSDR::ResetStreamBuffers()
     @param terminate periodically pooled flag to terminate thread
     @param dataRate_Bps (optional) if not NULL periodically returns data rate in bytes per second
 */
-void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadData args)
+void Connection_uLimeSDR::ReceivePacketsLoop(Connection_uLimeSDR::Streamer* stream)
 {
-    //auto dataPort = args.dataPort;
-    auto terminate = args.terminate;
-    auto dataRate_Bps = args.dataRate_Bps;
-    auto generateData = args.generateData;
-    auto safeToConfigInterface = args.safeToConfigInterface;
-
     //at this point FPGA has to be already configured to output samples
-    const uint8_t chCount = args.channels.size();
-    const auto link = args.channels[0]->config.linkFormat;
+    const uint8_t chCount = stream->mRxStreams.size();
+    const auto link =stream->mRxStreams[0]->config.linkFormat;
     const uint32_t samplesInPacket = (link == StreamConfig::STREAM_12_BIT_COMPRESSED ? 1360 : 1020)/chCount;
+    const int chipID = stream->mChipID;
 
     double latency=0;
     for (int i = 0; i < chCount; i++)
     {
-        latency += args.channels[i]->config.performanceLatency/chCount;
+        latency += stream->mRxStreams[i]->config.performanceLatency/chCount;
     }
     const unsigned tmp_cnt = (latency * 4)+0.5;
 
@@ -308,17 +301,17 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
             doWork->wait(lck);
             port->WriteRegisters(addr, data, 2);
         }
-    }, this, terminate, &txFlagsLock, &resetTxFlags);
+    }, this, &stream->terminateRx, &txFlagsLock, &resetTxFlags);
 
     int resetFlagsDelay = 128;
     uint64_t prevTs = 0;
-    while (terminate->load() == false)
+    while (stream->terminateRx.load() == false)
     {
-        if(generateData->load())
+        if(stream->generateData.load())
         {
             if(activeTransfers == 0) //stop FPGA when last transfer completes
-                fpga::StopStreaming(this);
-            safeToConfigInterface->notify_all(); //notify that it's safe to change chip config
+                fpga::StopStreaming(this, chipID);
+            stream->safeToConfigInterface.notify_all(); //notify that it's safe to change chip config
             const int batchSize = (this->mExpectedSampleRate/chFrames[0].samplesCount)/10;
             IStreamChannel::Metadata meta;
             for(int i=0; i<batchSize; ++i)
@@ -331,7 +324,7 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
                         chFrames[ch].samples[j].i = 0;
                         chFrames[ch].samples[j].q = 0;
                     }
-                    uint32_t samplesPushed = args.channels[ch]->Write((const void*)chFrames[ch].samples, chFrames[ch].samplesCount, &meta);
+                    uint32_t samplesPushed = stream->mRxStreams[ch]->Write((const void*)chFrames[ch].samples, chFrames[ch].samplesCount, &meta);
                     samplesReceived[ch] += chFrames[ch].samplesCount;
                     if(samplesPushed != chFrames[ch].samplesCount)
                         printf("Rx samples pushed %i/%i\n", samplesPushed, chFrames[ch].samplesCount);
@@ -365,7 +358,7 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
                     printf("L");
                     resetTxFlags.notify_one();
                     resetFlagsDelay = packetsToBatch*buffersCount;
-                    if (args.reportLateTx) args.reportLateTx(pkt[pktIndex].counter);
+                    stream->txLastLateTime.store(pkt[pktIndex].counter);
                 }
             }
             uint8_t* pktStart = (uint8_t*)pkt[pktIndex].data;
@@ -377,8 +370,7 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
                 packetLoss += (pkt[pktIndex].counter - prevTs)/samplesInPacket;
             }
             prevTs = pkt[pktIndex].counter;
-            if(args.lastTimestamp)
-                args.lastTimestamp->store(pkt[pktIndex].counter);
+            stream->rxLastTimestamp.store(pkt[pktIndex].counter);
             //parse samples
             vector<complex16_t*> dest(chCount);
             for(uint8_t c=0; c<chCount; ++c)
@@ -391,16 +383,16 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
                 IStreamChannel::Metadata meta;
                 meta.timestamp = pkt[pktIndex].counter;
                 meta.flags = RingFIFO::OVERWRITE_OLD;
-                uint32_t samplesPushed = args.channels[ch]->Write((const void*)chFrames[ch].samples, samplesCount, &meta, 100);
+                uint32_t samplesPushed = stream->mRxStreams[ch]->Write((const void*)chFrames[ch].samples, samplesCount, &meta, 100);
                 if(samplesPushed != samplesCount)
                     droppedSamples += samplesCount-samplesPushed;
             }
         }
         // Re-submit this request to keep the queue full
-        if(not generateData->load())
+        if(not stream->generateData.load())
         {
             if(activeTransfers == 0) //reactivate FPGA and USB transfers
-                fpga::StartStreaming(this);
+                fpga::StartStreaming(this, chipID);
             for(int i=0; i<buffersCount-activeTransfers; ++i)
             {
                 handles[bi] = this->BeginDataReading(&buffers[bi*bufferSize], bufferSize);
@@ -430,9 +422,7 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
             m_bufferFailures = 0;
             droppedSamples = 0;
             packetLoss = 0;
-
-            if (dataRate_Bps)
-                dataRate_Bps->store((uint32_t)dataRate);
+            stream->rxDataRate_Bps.store((uint32_t)dataRate);
         }
     }
     this->AbortReading();
@@ -447,8 +437,7 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
     }
     resetTxFlags.notify_one();
     txReset.join();
-    if (dataRate_Bps)
-        dataRate_Bps->store(0);
+    stream->rxDataRate_Bps.store(0);
 }
 
 /** @brief Functions dedicated for transmitting packets to board
@@ -456,21 +445,17 @@ void Connection_uLimeSDR::ReceivePacketsLoop(const Connection_uLimeSDR::ThreadDa
     @param terminate periodically pooled flag to terminate thread
     @param dataRate_Bps (optional) if not NULL periodically returns data rate in bytes per second
 */
-void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadData args)
+void Connection_uLimeSDR::TransmitPacketsLoop(Streamer* stream)
 {
-    //auto dataPort = args.dataPort;
-    auto terminate = args.terminate;
-    auto dataRate_Bps = args.dataRate_Bps;
-
     //at this point FPGA has to be already configured to output samples
     const uint8_t maxChannelCount = 2;
-    const uint8_t chCount = args.channels.size();
-    const auto link = args.channels[0]->config.linkFormat;
+    const uint8_t chCount = stream->mTxStreams.size();
+    const auto link = stream->mTxStreams[0]->config.linkFormat;
 
     double latency=0;
     for (int i = 0; i < chCount; i++)
     {
-        latency += args.channels[i]->config.performanceLatency/chCount;
+        latency += stream->mTxStreams[i]->config.performanceLatency/chCount;
     }
     const unsigned tmp_cnt = (latency * 4)+0.5;
 
@@ -507,7 +492,7 @@ void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadD
     auto t2 = chrono::high_resolution_clock::now();
 
     uint8_t bi = 0; //buffer index
-    while (terminate->load() != true)
+    while (stream->terminateTx.load() != true)
     {
         if (bufferUsed[bi])
         {
@@ -521,13 +506,13 @@ void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadD
         }
         int i=0;
 
-        while(i<packetsToBatch && terminate->load() != true)
+        while(i<packetsToBatch && stream->terminateTx.load() != true)
         {
             IStreamChannel::Metadata meta;
             FPGA_DataPacket* pkt = reinterpret_cast<FPGA_DataPacket*>(&buffers[bi*bufferSize]);
             for(int ch=0; ch<chCount; ++ch)
             {
-                int samplesPopped = args.channels[ch]->Read(samples[ch].data(), maxSamplesBatch, &meta, popTimeout_ms);
+                int samplesPopped = stream->mTxStreams[ch]->Read(samples[ch].data(), maxSamplesBatch, &meta, popTimeout_ms);
                 if (samplesPopped != maxSamplesBatch)
                 {
                 #ifndef NDEBUG
@@ -536,7 +521,7 @@ void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadD
                 }
 
             }
-            if(terminate->load() == true) //early termination
+            if(stream->terminateTx.load() == true) //early termination
                 break;
             pkt[i].counter = meta.timestamp;
             pkt[i].reserved[0] = 0;
@@ -563,8 +548,7 @@ void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadD
         {
             //total number of bytes sent per second
             float dataRate = 1000.0*totalBytesSent / timePeriod;
-            if(dataRate_Bps)
-                dataRate_Bps->store(dataRate);
+            stream->txDataRate_Bps.store(dataRate);
             m_bufferFailures = 0;
             samplesSent = 0;
             totalBytesSent = 0;
@@ -589,6 +573,5 @@ void Connection_uLimeSDR::TransmitPacketsLoop(const Connection_uLimeSDR::ThreadD
         }
         bi = (bi + 1) & (buffersCount-1);
     }
-    if (dataRate_Bps)
-        dataRate_Bps->store(0);
+    stream->txDataRate_Bps.store(0);
 }

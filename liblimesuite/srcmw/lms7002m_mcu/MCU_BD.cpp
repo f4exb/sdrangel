@@ -28,6 +28,7 @@ MCU_BD::MCU_BD()
     stepsDone = 0;
     aborted = false;
     callback = nullptr;
+    mChipID =0;
     //ctor
     int i=0;
     m_serPort=NULL;
@@ -50,9 +51,10 @@ MCU_BD::~MCU_BD()
     //dtor
 }
 
-void MCU_BD::Initialize(IConnection* pSerPort, unsigned size)
+void MCU_BD::Initialize(IConnection* pSerPort, unsigned chipID, unsigned size)
 {
     m_serPort = pSerPort;
+    mChipID = chipID;
     if (size > 0)
         byte_array_size = size;
 }
@@ -119,7 +121,7 @@ void MCU_BD:: mSPI_write(
     if(m_serPort == nullptr)
         return;
     uint32_t wrdata = addr_reg << 16 | data_reg;
-    m_serPort->TransactSPI(0x10, &wrdata, nullptr, 1);
+    m_serPort->WriteLMS7002MSPI(&wrdata, 1, mChipID);
 }
 
 
@@ -130,8 +132,9 @@ unsigned short MCU_BD:: mSPI_read(
         return 0;
     uint32_t wrdata = addr_reg << 16;
     uint32_t rddata = 0;
-    if(m_serPort->TransactSPI(0x10, &wrdata, &rddata, 1) != 0)
+    if(m_serPort->ReadLMS7002MSPI(&wrdata, &rddata, 1, mChipID)!=0)
         return 0;
+   
     return rddata & 0xFFFF;
 }
 
@@ -572,18 +575,90 @@ int MCU_BD::Program_MCU(int m_iMode1, int m_iMode0)
     case 3: mode = IConnection::MCU_PROG_MODE::BOOT_SRAM_FROM_EEPROM; break;
     default: mode = IConnection::MCU_PROG_MODE::RESET; break;
     }
-    if(m_serPort)
-        return m_serPort->ProgramMCU(byte_array, byte_array_size, mode, callback);
-    else
-        return ReportError(ENOLINK, "Device not connected");
+    return Program_MCU(byte_array,mode);
 }
 
-int MCU_BD::Program_MCU(const uint8_t* binArray, const IConnection::MCU_PROG_MODE mode)
+int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE mode)
 {
-    if(m_serPort)
-        return m_serPort->ProgramMCU(binArray, byte_array_size, mode, callback);
-    else
+    if(!m_serPort)
         return ReportError(ENOLINK, "Device not connected");
+
+    if (byte_array_size <= 8192)
+        return m_serPort->ProgramMCU(buffer, byte_array_size, mode, callback);
+#ifndef NDEBUG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+    const auto timeout = std::chrono::milliseconds(100);
+    const uint32_t controlAddr = 0x0002 << 16;
+    const uint32_t statusReg = 0x0003 << 16;
+    const uint32_t addrDTM = 0x0004 << 16; //data to MCU
+    const uint16_t EMTPY_WRITE_BUFF = 1 << 0;
+    const uint16_t PROGRAMMED = 1 << 6;
+    const uint8_t fifoLen = 64;
+    uint32_t wrdata[fifoLen];
+    uint32_t rddata = 0;
+    int status;
+    bool abort = false;
+        //reset MCU, set mode
+    wrdata[0] = controlAddr | 0;
+    wrdata[1] = controlAddr | (mode & 0x3);
+    if((status = m_serPort->WriteLMS7002MSPI(wrdata, 2, mChipID))!=0)
+        return status;
+
+    if(callback)
+        abort = callback(0, byte_array_size, "");
+
+    for(uint16_t i=0; i<byte_array_size && !abort; i+=fifoLen)
+    {
+        //wait till EMPTY_WRITE_BUFF = 1
+        bool fifoEmpty = false;
+        wrdata[0] = statusReg;
+        auto t1 = std::chrono::high_resolution_clock::now();
+        auto t2 = t1;
+        do{
+            if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0)
+                return status;
+            fifoEmpty = rddata & EMTPY_WRITE_BUFF;
+            t2 = std::chrono::high_resolution_clock::now();
+        }while( (!fifoEmpty) && (t2-t1)<timeout);
+
+        if(!fifoEmpty)
+            return ReportError(ETIMEDOUT, "MCU FIFO full");
+
+        //write 32 bytes into FIFO
+        for(uint8_t j=0; j<fifoLen; ++j)
+            wrdata[j] = addrDTM | buffer[i+j];
+        if((status = m_serPort->WriteLMS7002MSPI(wrdata,fifoLen, mChipID))!=0)
+            return status;
+        if(callback)
+            abort = callback(i+fifoLen, byte_array_size, "");
+#ifndef NDEBUG
+        printf("MCU programming : %4i/%4li\r", i+fifoLen, long(byte_array_size));
+#endif
+    };
+    if(abort)
+        return ReportError(-1, "operation aborted by user");
+
+    //wait until programmed flag
+    wrdata[0] = statusReg;
+    bool programmed = false;
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto t2 = t1;
+    do{
+        if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0)
+            return status;
+        programmed = rddata & PROGRAMMED;
+        t2 = std::chrono::high_resolution_clock::now();
+    }while( (!programmed) && (t2-t1)<timeout);
+#ifndef NDEBUG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    printf("\nMCU Programming finished, %li ms\n",
+            std::chrono::duration_cast<std::chrono::milliseconds>
+            (timeEnd-timeStart).count());
+#endif
+    if(!programmed)
+        return ReportError(ETIMEDOUT, "MCU not programmed");
+    return 0;
 }
 
 void MCU_BD::Reset_MCU()

@@ -103,7 +103,7 @@ void LMS7002M::Log(LogType type, const char *format, va_list argList)
 
 /** @brief Sets connection which is used for data communication with chip
 */
-void LMS7002M::SetConnection(IConnection* port, const size_t devIndex, IConnection* samplesPort)
+void LMS7002M::SetConnection(IConnection* port, const size_t devIndex)
 {
     controlPort = port;
     mdevIndex = devIndex;
@@ -111,7 +111,6 @@ void LMS7002M::SetConnection(IConnection* port, const size_t devIndex, IConnecti
     if (controlPort != nullptr)
     {
         unsigned byte_array_size = 0;
-        addrLMS7002M = controlPort->GetDeviceInfo().addrsLMS7002M.at(devIndex);
         if (controlPort->IsOpen())
         {
             unsigned chipRev = this->Get_SPI_Reg_bits(LMS7_MASK, true);
@@ -120,12 +119,8 @@ void LMS7002M::SetConnection(IConnection* port, const size_t devIndex, IConnecti
             else
                 byte_array_size = 1024 * 8;
         }
-        mcuControl->Initialize(port, byte_array_size);
+        mcuControl->Initialize(port, mdevIndex, byte_array_size);
     }
-    if(samplesPort == nullptr)
-        dataPort = controlPort;
-    else
-        dataPort = samplesPort;
 }
 
 /** @brief Creates LMS7002M main control object.
@@ -136,8 +131,6 @@ LMS7002M::LMS7002M() :
     mValueCache(new CalibrationCache()),
     mRegistersMap(new LMS7002M_RegistersMap()),
     controlPort(nullptr),
-    dataPort(nullptr),
-    addrLMS7002M(-1),
     mdevIndex(0),
     mSelfCalDepth(0)
 {
@@ -205,7 +198,7 @@ LMS7002M::LMS7002M() :
 
     mRegistersMap->InitializeDefaultValues(LMS7parameterList);
     mcuControl = new MCU_BD();
-    mcuControl->Initialize(controlPort);
+    mcuControl->Initialize(nullptr);
 }
 
 LMS7002M::~LMS7002M()
@@ -253,8 +246,6 @@ int LMS7002M::EnableChannel(const bool isTx, const bool enable)
 
     //--- ADC/DAC ---
     this->Modify_SPI_Reg_bits(LMS7param(EN_DIR_AFE), 1);
-    this->Modify_SPI_Reg_bits(LMS7param(EN_G_AFE), enable?1:0);
-    this->Modify_SPI_Reg_bits(LMS7param(PD_AFE), enable?0:1);
     if (ch == ChA)
     {
         if (isTx) this->Modify_SPI_Reg_bits(LMS7param(PD_TX_AFE1), enable?0:1);
@@ -266,26 +257,43 @@ int LMS7002M::EnableChannel(const bool isTx, const bool enable)
         else      this->Modify_SPI_Reg_bits(LMS7param(PD_RX_AFE2), enable?0:1);
     }
 
+    int disabledChannels = (Get_SPI_Reg_bits(LMS7_PD_AFE.address,4,1)&0xF);//check if all channels are disabled
+    Modify_SPI_Reg_bits(LMS7param(EN_G_AFE),disabledChannels==0xF ? 0 : 1);
+    Modify_SPI_Reg_bits(LMS7param(PD_AFE), disabledChannels==0xF ? 1 : 0);
+
     //--- digital ---
     if (isTx)
     {
         this->Modify_SPI_Reg_bits(LMS7param(EN_TXTSP), enable?1:0);
+        this->Modify_SPI_Reg_bits(LMS7param(ISINC_BYP_TXTSP), enable?0:1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR3_BYP_TXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR2_BYP_TXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR1_BYP_TXTSP), 1);
+
+        if (!enable)
+        {
+            this->Modify_SPI_Reg_bits(LMS7param(CMIX_BYP_TXTSP), 1);
+            this->Modify_SPI_Reg_bits(LMS7param(DC_BYP_TXTSP), 1);
+            this->Modify_SPI_Reg_bits(LMS7param(GC_BYP_TXTSP), 1);
+            this->Modify_SPI_Reg_bits(LMS7param(PH_BYP_TXTSP), 1);
+        }
     }
     else
     {
         this->Modify_SPI_Reg_bits(LMS7param(EN_RXTSP), enable?1:0);
+        this->Modify_SPI_Reg_bits(LMS7param(DC_BYP_RXTSP), enable?0:1);
+        this->Modify_SPI_Reg_bits(LMS7param(DCLOOP_STOP), enable?0:1);
         this->Modify_SPI_Reg_bits(LMS7param(AGC_MODE_RXTSP), 2); //bypass
-        this->Modify_SPI_Reg_bits(LMS7param(CMIX_BYP_RXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(AGC_BYP_RXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR3_BYP_RXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR2_BYP_RXTSP), 1);
         this->Modify_SPI_Reg_bits(LMS7param(GFIR1_BYP_RXTSP), 1);
-        this->Modify_SPI_Reg_bits(LMS7param(DC_BYP_RXTSP), 1);
-        this->Modify_SPI_Reg_bits(LMS7param(GC_BYP_RXTSP), 1);
-        this->Modify_SPI_Reg_bits(LMS7param(PH_BYP_RXTSP), 1);
+        if (!enable)
+        {
+            this->Modify_SPI_Reg_bits(LMS7param(CMIX_BYP_RXTSP), 1);
+            this->Modify_SPI_Reg_bits(LMS7param(GC_BYP_RXTSP), 1);
+            this->Modify_SPI_Reg_bits(LMS7param(PH_BYP_RXTSP), 1);
+        }
     }
 
     //--- baseband ---
@@ -324,7 +332,7 @@ int LMS7002M::EnableChannel(const bool isTx, const bool enable)
     {
         this->SetActiveChannel(ChSXT);
         this->Modify_SPI_Reg_bits(LMS7param(EN_DIR_SXRSXT), 1);
-        this->Modify_SPI_Reg_bits(LMS7param(EN_G), enable?1:0);
+        this->Modify_SPI_Reg_bits(LMS7param(EN_G), (disabledChannels&3) == 3?0:1);
         if (ch == ChB) //enable LO to channel B
         {
             this->SetActiveChannel(ChA);
@@ -335,7 +343,7 @@ int LMS7002M::EnableChannel(const bool isTx, const bool enable)
     {
         this->SetActiveChannel(ChSXR);
         this->Modify_SPI_Reg_bits(LMS7param(EN_DIR_SXRSXT), 1);
-        this->Modify_SPI_Reg_bits(LMS7param(EN_G), enable?1:0);
+        this->Modify_SPI_Reg_bits(LMS7param(EN_G), (disabledChannels&0xC)==0xC?0:1);
         if (ch == ChB) //enable LO to channel B
         {
             this->SetActiveChannel(ChA);
@@ -695,9 +703,10 @@ int LMS7002M::SaveConfig(const char* filename)
     fout << "[lms7002_registers_b]" << endl;
     addrToRead.clear(); //add only B channel addresses
     for (uint8_t i = 0; i < MEMORY_SECTIONS_COUNT; ++i)
-        for (uint16_t addr = MemorySectionAddresses[i][0]; addr <= MemorySectionAddresses[i][1]; ++addr)
-            if (addr >= 0x0100)
-                addrToRead.push_back(addr);
+        if (i != RSSI_DC_CALIBRATION)
+            for (uint16_t addr = MemorySectionAddresses[i][0]; addr <= MemorySectionAddresses[i][1]; ++addr)
+                if (addr >= 0x0100)
+                    addrToRead.push_back(addr);
 
     this->SetActiveChannel(ChB);
     for (uint16_t i = 0; i < addrToRead.size(); ++i)
@@ -1876,8 +1885,7 @@ int LMS7002M::SPI_write_batch(const uint16_t* spiAddr, const uint16_t* spiData, 
     }
 
     checkConnection();
-
-    return controlPort->TransactSPI(addrLMS7002M, data.data(), nullptr, cnt);
+    return controlPort->WriteLMS7002MSPI(data.data(), cnt,mdevIndex);
 }
 
 /** @brief Batches multiple register reads into least amount of transactions
@@ -1897,7 +1905,8 @@ int LMS7002M::SPI_read_batch(const uint16_t* spiAddr, uint16_t* spiData, uint16_
         dataWr[i] = (uint32_t(spiAddr[i]) << 16);
     }
 
-    int status = controlPort->TransactSPI(addrLMS7002M, dataWr.data(), dataRd.data(), cnt);
+
+    int status = controlPort->ReadLMS7002MSPI(dataWr.data(), dataRd.data(), cnt,mdevIndex);
     if (status != 0) return status;
 
     int mac = mRegistersMap->GetValue(0, LMS7param(MAC).address) & 0x0003;
@@ -1990,9 +1999,10 @@ int LMS7002M::RegistersTest(const char* fileName)
             ss << moduleNames[i] << "  [" << chex << ":";
             sprintf(chex, "0x%04X", endAddr);
             ss << chex << "]";
-            if (startAddr >= 0x0100)
+            if (startAddr >= 0x0100) {
                 ss << " Ch." << (cc == 1 ? "A" : "B");
-                ss << endl;
+	    }
+            ss << endl;
             for (uint8_t p = 0; p < patternsCount; ++p)
                 moduleTestsSuccess &= RegistersTestInterval(startAddr, endAddr, patterns[p], ss) == 0;
         }
@@ -2140,7 +2150,8 @@ bool LMS7002M::IsSynced()
     std::vector<uint32_t> dataRd(addrToRead.size());
     for(size_t i = 0; i < addrToRead.size(); ++i)
         dataWr[i] = (uint32_t(addrToRead[i]) << 16);
-    status = controlPort->TransactSPI(addrLMS7002M, dataWr.data(), dataRd.data(), dataWr.size());
+    status = controlPort->ReadLMS7002MSPI(dataWr.data(),  dataRd.data(), dataWr.size(),mdevIndex);
+
     for(size_t i=0; i<addrToRead.size(); ++i)
         dataReceived[i] = dataRd[i] & 0xFFFF;
     if (status != 0)
@@ -2178,7 +2189,7 @@ bool LMS7002M::IsSynced()
     dataRd.resize(addrToRead.size());
     for(size_t i = 0; i < addrToRead.size(); ++i)
         dataWr[i] = (uint32_t(addrToRead[i]) << 16);
-    status = controlPort->TransactSPI(addrLMS7002M, dataWr.data(), dataRd.data(), dataWr.size());
+    status = controlPort->ReadLMS7002MSPI(dataWr.data(),  dataRd.data(), dataWr.size(),mdevIndex);
     for(size_t i=0; i<addrToRead.size(); ++i)
         dataReceived[i] = dataRd[i] & 0xFFFF;
     if (status != 0)
@@ -2461,7 +2472,7 @@ bool LMS7002M::GetRxDCRemoval(void)
 int LMS7002M::SetTxDCOffset(const float_type I, const float_type Q)
 {
     const bool bypass = I == 0.0 and Q == 0.0;
-    this->Modify_SPI_Reg_bits(LMS7param(DC_BYP_RXTSP), bypass?1:0);
+    this->Modify_SPI_Reg_bits(LMS7param(DC_BYP_TXTSP), bypass?1:0);
     this->Modify_SPI_Reg_bits(LMS7param(DCCORRI_TXTSP), std::lrint(I*128));
     this->Modify_SPI_Reg_bits(LMS7param(DCCORRQ_TXTSP), std::lrint(Q*128));
 	return 0;

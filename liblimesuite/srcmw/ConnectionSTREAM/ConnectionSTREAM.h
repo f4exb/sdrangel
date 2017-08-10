@@ -48,6 +48,7 @@ public:
         memset(inOvLap, 0, sizeof(OVERLAPPED));
         inOvLap->hEvent = CreateEvent(NULL, false, false, NULL);
         context = NULL;
+        EndPt = nullptr;
 #else
         transfer = libusb_alloc_transfer(0);
         bytesXfered = 0;
@@ -80,6 +81,7 @@ public:
     static int idCounter;
 #ifndef __unix__
     PUCHAR context;
+    CCyUSBEndPoint* EndPt;
     OVERLAPPED* inOvLap;
 #else
     libusb_transfer* transfer;
@@ -106,27 +108,27 @@ public:
     virtual int Write(const unsigned char* buffer, int length, int timeout_ms = 100) override;
     virtual int Read(unsigned char* buffer, int length, int timeout_ms = 100) override;
 
-    virtual int UploadWFM(const void* const* samples, uint8_t chCount, size_t sample_count, StreamConfig::StreamDataFormat format) override;
-
     //hooks to update FPGA plls when baseband interface data rate is changed
     virtual int UpdateExternalDataRate(const size_t channel, const double txRate, const double rxRate) override;
     virtual int UpdateExternalDataRate(const size_t channel, const double txRate, const double rxRate, const double txPhase, const double rxPhase) override;
     virtual int ProgramWrite(const char *buffer, const size_t length, const int programmingMode, const int device, ProgrammingCallback callback) override;
     int ProgramUpdate(const bool download, ProgrammingCallback callback);
-    int ReadRawStreamData(char* buffer, unsigned length, int timeout_ms = 100)override;
+    int ReadRawStreamData(char* buffer, unsigned length, int epIndex, int timeout_ms = 100)override;
 protected:
-    virtual void ReceivePacketsLoop(const ThreadData args) override;
-    virtual void TransmitPacketsLoop(const ThreadData args) override;
+    virtual void ReceivePacketsLoop(Streamer* args) override;
+    virtual void TransmitPacketsLoop(Streamer* args) override;
+    int SendData(const char* buffer, int length, int epIndex = 0, int timeout = 100)override;
+    int ReceiveData(char* buffer, int length, int epIndex = 0, int timeout = 100)override;
 
-    virtual int BeginDataReading(char* buffer, uint32_t length);
+    virtual int BeginDataReading(char* buffer, uint32_t length, const uint8_t streamBulkInAddr = 0x81);
     virtual int WaitForReading(int contextHandle, unsigned int timeout_ms);
     virtual int FinishDataReading(char* buffer, uint32_t length, int contextHandle);
-    virtual void AbortReading();
+    virtual void AbortReading(int ep);
 
-    virtual int BeginDataSending(const char* buffer, uint32_t length);
+    virtual int BeginDataSending(const char* buffer, uint32_t length, const uint8_t streamBulkOutAddr = 0x01);
     virtual int WaitForSending(int contextHandle, uint32_t timeout_ms);
     virtual int FinishDataSending(const char* buffer, uint32_t length, int contextHandle);
-    virtual void AbortSending();
+    virtual void AbortSending(int ep);
 
     int ResetStreamBuffers() override;
     eConnectionType GetType(void) {return USB_PORT;}
@@ -139,14 +141,15 @@ protected:
     bool isConnected;
 
 #ifndef __unix__
+    static const int MAX_EP_CNT = 16;
     CCyFX3Device* USBDevicePrimary;
     //control endpoints
     CCyControlEndPoint* InCtrlEndPt3;
     CCyControlEndPoint* OutCtrlEndPt3;
 
     //end points for samples reading and writing
-    CCyUSBEndPoint* InEndPt;
-    CCyUSBEndPoint* OutEndPt;
+    CCyUSBEndPoint* InEndPt[MAX_EP_CNT];
+    CCyUSBEndPoint* OutEndPt[MAX_EP_CNT];
 
     CCyUSBEndPoint* InCtrlBulkEndPt;
     CCyUSBEndPoint* OutCtrlBulkEndPt;
@@ -157,8 +160,6 @@ protected:
     int fx3_usbboot_download(unsigned char *buf, int len);
     int ram_write(unsigned char *buf, unsigned int ramAddress, int len);
 #endif
-    static const uint8_t streamBulkOutAddr;
-    static const uint8_t streamBulkInAddr;
     static const uint8_t ctrlBulkOutAddr;
     static const uint8_t ctrlBulkInAddr;
     static const std::set<uint8_t> commandsToBulkCtrlHw1;

@@ -452,7 +452,7 @@ public:
 		m_top = 0;
 		for (vi = m_chunks.begin(); vi < m_chunks.end(); vi++)
 		{
-            //m_top = m_top > vi->m_startAddress + vi->m_bytes.size() - 1 ? m_top : vi->m_startAddress + vi->m_bytes.size() - 1;
+            //m_top = max(m_top, vi->m_startAddress + vi->m_bytes.size() - 1);
             m_top = MYMAX(m_top, vi->m_startAddress + vi->m_bytes.size() - 1);
 		}
 	}

@@ -96,10 +96,10 @@ public:
     //hooks to update FPGA plls when baseband interface data rate is changed
     virtual int UpdateExternalDataRate(const size_t channel, const double txRate, const double rxRate, const double txPhase, const double rxPhase)override;
     virtual int UpdateExternalDataRate(const size_t channel, const double txRate, const double rxRate) override;
-    int ReadRawStreamData(char* buffer, unsigned length, int timeout_ms = 100)override;
+    int ReadRawStreamData(char* buffer, unsigned length, int epIndex, int timeout_ms = 100)override;
 protected:
-    virtual void ReceivePacketsLoop(const ThreadData args) override;
-    virtual void TransmitPacketsLoop(const ThreadData args) override;
+    virtual void ReceivePacketsLoop(Streamer* args) override;
+    virtual void TransmitPacketsLoop(Streamer* args) override;
 
     virtual int BeginDataReading(char* buffer, uint32_t length);
     virtual int WaitForReading(int contextHandle, unsigned int timeout_ms);

@@ -48,17 +48,8 @@ Connection_uLimeSDR::Connection_uLimeSDR(void *arg, const unsigned index, const 
 {
     RxLoopFunction = bind(&Connection_uLimeSDR::ReceivePacketsLoop, this, std::placeholders::_1);
     TxLoopFunction = bind(&Connection_uLimeSDR::TransmitPacketsLoop, this, std::placeholders::_1);
-    mTimestampOffset = 0;
-    rxLastTimestamp.store(0);
     mExpectedSampleRate = 0;
-    generateData.store(false);
-    rxRunning.store(false);
-    txRunning.store(false);
     isConnected = false;
-    terminateRx.store(false);
-    terminateTx.store(false);
-    rxDataRate_Bps.store(0);
-    txDataRate_Bps.store(0);
 
     mStreamWrEndPtAddr = 0x03;
     mStreamRdEndPtAddr = 0x83;
@@ -83,15 +74,6 @@ Connection_uLimeSDR::Connection_uLimeSDR(void *arg, const unsigned index, const 
 */
 Connection_uLimeSDR::~Connection_uLimeSDR()
 {
-    for(auto i : mTxStreams)
-        ControlStream((size_t)i, false);
-    for(auto i : mRxStreams)
-        ControlStream((size_t)i, false);
-    for(auto i : mTxStreams)
-        CloseStream((size_t)i);
-    for(auto i : mRxStreams)
-        CloseStream((size_t)i);
-    UpdateThreads();
     Close();
 }
 #ifdef __unix__

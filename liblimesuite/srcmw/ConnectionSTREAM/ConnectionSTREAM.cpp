@@ -28,8 +28,6 @@ using namespace std;
 
 using namespace lime;
 
-const uint8_t ConnectionSTREAM::streamBulkOutAddr = 0x01;
-const uint8_t ConnectionSTREAM::streamBulkInAddr = 0x81;
 const uint8_t ConnectionSTREAM::ctrlBulkOutAddr = 0x0F;
 const uint8_t ConnectionSTREAM::ctrlBulkInAddr = 0x8F;
 
@@ -70,6 +68,9 @@ ConnectionSTREAM::ConnectionSTREAM(void *arg, const std::string &vidpid, const s
 	OutCtrlEndPt3 = nullptr;
 	InCtrlBulkEndPt = nullptr;
 	OutCtrlBulkEndPt = nullptr;
+    for (int i = 0; i < MAX_EP_CNT; i++)
+        InEndPt[i] = OutEndPt[i] = nullptr;
+
 #else
     dev_handle = nullptr;
     ctx = (libusb_context *)arg;
@@ -178,15 +179,6 @@ double ConnectionSTREAM::DetectRefClk(void)
 */
 ConnectionSTREAM::~ConnectionSTREAM()
 {
-    for(auto i : mTxStreams)
-        ControlStream((size_t)i, false);
-    for(auto i : mRxStreams)
-        ControlStream((size_t)i, false);
-    for(auto i : mTxStreams)
-        CloseStream((size_t)i);
-    for(auto i : mRxStreams)
-        CloseStream((size_t)i);
-    UpdateThreads();
     Close();
 #ifndef __unix__
     delete USBDevicePrimary;
@@ -230,22 +222,23 @@ int ConnectionSTREAM::Open(const std::string &vidpid, const std::string &serial,
     OutCtrlEndPt3->Index = CTR_W_INDEX;
     OutCtrlEndPt3->TimeOut = 3000;
 
-    for (int i=0; i<USBDevicePrimary->EndPointCount(); i++)
-        if(USBDevicePrimary->EndPoints[i]->Address == streamBulkOutAddr)
+    for (int i = 0; i < USBDevicePrimary->EndPointCount(); i++)
+    {
+        auto adr = USBDevicePrimary->EndPoints[i]->Address;
+        if (adr < ctrlBulkOutAddr)
         {
-            OutEndPt = USBDevicePrimary->EndPoints[i];
-            long len = OutEndPt->MaxPktSize * 64;
-            OutEndPt->SetXferSize(len);
-            break;
+            OutEndPt[adr] = USBDevicePrimary->EndPoints[i];
+            long len = OutEndPt[adr]->MaxPktSize * 64;
+            OutEndPt[adr]->SetXferSize(len);
         }
-    for (int i=0; i<USBDevicePrimary->EndPointCount(); i++)
-        if(USBDevicePrimary->EndPoints[i]->Address == streamBulkInAddr)
+        else if (adr < ctrlBulkInAddr)
         {
-            InEndPt = USBDevicePrimary->EndPoints[i];
-            long len = InEndPt->MaxPktSize * 64;
-            InEndPt->SetXferSize(len);
-            break;
+            adr &= 0xF;
+            InEndPt[adr] = USBDevicePrimary->EndPoints[i];
+            long len = InEndPt[adr]->MaxPktSize * 64;
+            InEndPt[adr]->SetXferSize(len);
         }
+    }
 
     InCtrlBulkEndPt = nullptr;
     for (int i=0; i<USBDevicePrimary->EndPointCount(); i++)
@@ -356,21 +349,21 @@ int ConnectionSTREAM::Open(const std::string &vidpid, const std::string &serial,
 void ConnectionSTREAM::Close()
 {
     #ifndef __unix__
-	USBDevicePrimary->Close();
-	InEndPt = nullptr;
-	OutEndPt = nullptr;
-	InCtrlBulkEndPt = nullptr;
-	OutCtrlBulkEndPt = nullptr;
-	if (InCtrlEndPt3)
-	{
-		delete InCtrlEndPt3;
-		InCtrlEndPt3 = nullptr;
-	}
-	if (OutCtrlEndPt3)
-	{
-		delete OutCtrlEndPt3;
-		OutCtrlEndPt3 = nullptr;
-	}
+    USBDevicePrimary->Close();
+    for (int i = 0; i < MAX_EP_CNT; i++)
+        InEndPt[i] = OutEndPt[i] = nullptr;
+    InCtrlBulkEndPt = nullptr;
+    OutCtrlBulkEndPt = nullptr;
+    if (InCtrlEndPt3)
+    {
+        delete InCtrlEndPt3;
+        InCtrlEndPt3 = nullptr;
+    }
+    if (OutCtrlEndPt3)
+    {
+        delete OutCtrlEndPt3;
+        OutCtrlEndPt3 = nullptr;
+    }
     #else
     if(dev_handle != 0)
     {
@@ -532,9 +525,10 @@ void callback_libusbtransfer(libusb_transfer *trans)
 	@brief Starts asynchronous data reading from board
 	@param *buffer buffer where to store received data
 	@param length number of bytes to read
+	@param streamBulkInAddr endpoint index?
 	@return handle of transfer context
 */
-int ConnectionSTREAM::BeginDataReading(char *buffer, uint32_t length)
+int ConnectionSTREAM::BeginDataReading(char *buffer, uint32_t length, const uint8_t streamBulkInAddr)
 {
     int i = 0;
 	bool contextFound = false;
@@ -554,8 +548,11 @@ int ConnectionSTREAM::BeginDataReading(char *buffer, uint32_t length)
     }
     contexts[i].used = true;
     #ifndef __unix__
-    if(InEndPt)
-        contexts[i].context = InEndPt->BeginDataXfer((unsigned char*)buffer, length, contexts[i].inOvLap);
+    if (InEndPt[streamBulkInAddr & 0xF])
+    {
+        contexts[i].EndPt = InEndPt[streamBulkInAddr & 0xF];
+        contexts[i].context = contexts[i].EndPt->BeginDataXfer((unsigned char*)buffer, length, contexts[i].inOvLap);
+    }
 	return i;
     #else
     unsigned int Timeout = 500;
@@ -587,8 +584,7 @@ int ConnectionSTREAM::WaitForReading(int contextHandle, unsigned int timeout_ms)
     {
     #ifndef __unix__
     int status = 0;
-	if(InEndPt)
-        status = InEndPt->WaitForXfer(contexts[contextHandle].inOvLap, timeout_ms);
+    status = contexts[contextHandle].EndPt->WaitForXfer(contexts[contextHandle].inOvLap, timeout_ms);
 	return status;
     #else
     auto t1 = chrono::high_resolution_clock::now();
@@ -622,8 +618,7 @@ int ConnectionSTREAM::FinishDataReading(char *buffer, uint32_t length, int conte
     #ifndef __unix__
     int status = 0;
     long len = length;
-    if(InEndPt)
-        status = InEndPt->FinishDataXfer((unsigned char*)buffer, len, contexts[contextHandle].inOvLap, contexts[contextHandle].context);
+    status = contexts[contextHandle].EndPt->FinishDataXfer((unsigned char*)buffer, len, contexts[contextHandle].inOvLap, contexts[contextHandle].context);
     contexts[contextHandle].used = false;
     contexts[contextHandle].reset();
     return len;
@@ -641,14 +636,16 @@ int ConnectionSTREAM::FinishDataReading(char *buffer, uint32_t length, int conte
 /**
 	@brief Aborts reading operations
 */
-void ConnectionSTREAM::AbortReading()
+void ConnectionSTREAM::AbortReading(int ep)
 {
 #ifndef __unix__
-	InEndPt->Abort();
+    for (int i = 0; i < MAX_EP_CNT; i++)
+        if (InEndPt[i] && InEndPt[i]->Address == ep)
+	        InEndPt[i]->Abort();
 #else
     for(int i=0; i<USB_MAX_CONTEXTS; ++i)
     {
-        if(contexts[i].used)
+        if(contexts[i].used && contexts[i].transfer->endpoint == ep)
             libusb_cancel_transfer( contexts[i].transfer );
     }
 #endif
@@ -658,9 +655,10 @@ void ConnectionSTREAM::AbortReading()
 	@brief Starts asynchronous data Sending to board
 	@param *buffer buffer to send
 	@param length number of bytes to send
+	@param streamBulkOutAddr endpoint index?
 	@return handle of transfer context
 */
-int ConnectionSTREAM::BeginDataSending(const char *buffer, uint32_t length)
+int ConnectionSTREAM::BeginDataSending(const char *buffer, uint32_t length, const uint8_t streamBulkOutAddr)
 {
     int i = 0;
 	//find not used context
@@ -677,8 +675,11 @@ int ConnectionSTREAM::BeginDataSending(const char *buffer, uint32_t length)
         return -1;
     contextsToSend[i].used = true;
     #ifndef __unix__
-    if(OutEndPt)
-        contextsToSend[i].context = OutEndPt->BeginDataXfer((unsigned char*)buffer, length, contextsToSend[i].inOvLap);
+    if (OutEndPt[streamBulkOutAddr])
+    {
+        contextsToSend[i].EndPt = OutEndPt[streamBulkOutAddr];
+        contextsToSend[i].context = contextsToSend[i].EndPt->BeginDataXfer((unsigned char*)buffer, length, contextsToSend[i].inOvLap);
+    }
 	return i;
     #else
     unsigned int Timeout = 500;
@@ -708,12 +709,11 @@ int ConnectionSTREAM::WaitForSending(int contextHandle, unsigned int timeout_ms)
 {
     if( contextsToSend[contextHandle].used == true )
     {
-    #ifndef __unix__
+#   ifndef __unix__
 	int status = 0;
-	if(OutEndPt)
-        status = OutEndPt->WaitForXfer(contextsToSend[contextHandle].inOvLap, timeout_ms);
+	status = contextsToSend[contextHandle].EndPt->WaitForXfer(contextsToSend[contextHandle].inOvLap, timeout_ms);
 	return status;
-    #else
+#   else
     auto t1 = chrono::high_resolution_clock::now();
     auto t2 = chrono::high_resolution_clock::now();
 
@@ -725,7 +725,7 @@ int ConnectionSTREAM::WaitForSending(int contextHandle, unsigned int timeout_ms)
         t2 = chrono::high_resolution_clock::now();
     }
 	return contextsToSend[contextHandle].done == true;
-    #endif
+#   endif
     }
     else
         return 0;
@@ -744,8 +744,7 @@ int ConnectionSTREAM::FinishDataSending(const char *buffer, uint32_t length, int
     {
 #ifndef __unix__
     long len = length;
-	if(OutEndPt)
-        OutEndPt->FinishDataXfer((unsigned char*)buffer, len, contextsToSend[contextHandle].inOvLap, contextsToSend[contextHandle].context);
+    contextsToSend[contextHandle].EndPt->FinishDataXfer((unsigned char*)buffer, len, contextsToSend[contextHandle].inOvLap, contextsToSend[contextHandle].context);
     contextsToSend[contextHandle].used = false;
     contextsToSend[contextHandle].reset();
     return len;
@@ -763,17 +762,37 @@ int ConnectionSTREAM::FinishDataSending(const char *buffer, uint32_t length, int
 /**
 	@brief Aborts sending operations
 */
-void ConnectionSTREAM::AbortSending()
+void ConnectionSTREAM::AbortSending(int ep)
 {
 #ifndef __unix__
-	OutEndPt->Abort();
+    for (int i = 0; i < MAX_EP_CNT; i++)
+        if (OutEndPt[i] && OutEndPt[i]->Address == ep)
+            OutEndPt[i]->Abort();
 #else
     for (int i = 0; i<USB_MAX_CONTEXTS; ++i)
     {
-        if(contextsToSend[i].used)
+        if(contextsToSend[i].used && contextsToSend[i].transfer->endpoint == ep)
             libusb_cancel_transfer(contextsToSend[i].transfer);
     }
 #endif
+}
+
+int ConnectionSTREAM::SendData(const char* buffer, int length, int epIndex, int timeout)
+{
+    const unsigned char ep = 0x01;
+    int context = BeginDataSending((char*)buffer, length, ep);
+    if (WaitForSending(context, timeout)==false)
+        AbortSending(ep);
+    return FinishDataSending((char*)buffer, length , context);
+}
+
+int ConnectionSTREAM::ReceiveData(char* buffer, int length, int epIndex, int timeout)
+{
+    const unsigned char ep = 0x81;
+    int context = BeginDataReading(buffer, length, ep);
+    if (WaitForReading(context, timeout) == false)
+        AbortReading(ep);
+    return FinishDataReading(buffer, length, context);
 }
 
 int ConnectionSTREAM::ProgramWrite(const char *buffer, const size_t length, const int programmingMode, const int device, ProgrammingCallback callback)
