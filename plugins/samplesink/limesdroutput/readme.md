@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a [LimeSDR device](https://myriadrf.org/projects/limesdr/). LimeSDR plugins are not included in the Win32 binary distribution. 
+This output sample sink plugin sends its samples to a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
 &#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
 

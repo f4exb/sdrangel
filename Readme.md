@@ -39,7 +39,7 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
-  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) not for Win32
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink)
 
@@ -102,7 +102,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-LimeSDR plugins are not included in Win32 binary distribution.
+Linux only.
 
 &#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
 
@@ -170,6 +170,8 @@ This plugin will be built only if the libnanomsg and the [CM256cc library](https
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected.
 
 <h2>SDRdaemon transmitter output</h2>
+
+Linux only.
 
 The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of the SDRdaemon transmitter server `sdrdaemontx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9092`). It also opens a TCP link to another port to exchange service messages such as setting the center frequency or getting status information from the server (default port is `9093`). The `libnanomsg` library is used to support this messaging.
 
