@@ -40,9 +40,9 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/IConnection.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAM.cpp\
-    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAMEntry.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMImages.cpp\
     srcmw/ConnectionSTREAM/ConnectionSTREAMing.cpp\
+    srcmw/ConnectionSTREAM/ConnectionSTREAMEntry.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDR.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
     srcmw/Connection_uLimeSDR/Connection_uLimeSDRing.cpp\
