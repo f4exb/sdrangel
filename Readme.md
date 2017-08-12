@@ -235,22 +235,31 @@ In the [releases](https://github.com/f4exb/sdrangel/releases) section one can fi
 
 This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
+The latest stable version is v3.5.3 then v3.5.4 should still work on Windows 7
+
+**From release v3.5.5 there are no more Windows distributions**
+
 <h2>Debian distributions</h2>
 
-It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). 
+It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. 
+
+Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). From release v3.5.1 there is no more ARMv7 distributions.
 
 Install it as usual for .deb packages:
 
   - Make sure the `universe` repository is in your `/etc/apt/sources.list`
 
-Then in a terminal do:
+Prior to apt-get v 1.1 (before Ubuntu 16.04) in a terminal do:
 
   - `sudo apt-get update`
-  - For LimeSDR support:
-    - `sudo dpkg -i liblimesuite17.02-1_17.02.1-1_amd64.deb`
-    - `sudo dpkg -i liblimesuite-dev_17.02.1-1_amd64.deb`  
+  - `sudo apt-get upgrade`
   - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
   - `sudo apt-get -f install` this will install missing dependencies
+    
+Since apt-get v 1.1 installation is possible from a local file:
+
+  - cd to where the archive has been downloaded
+  - `sudo apt-get install ./sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number 
     
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
