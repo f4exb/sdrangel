@@ -53,7 +53,7 @@ find_package(Qt5Multimedia 5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig)
 
-find_package(Boost)
+find_package(Boost REQUIRED)
 find_package(FFTW3F)
 
 if (NOT BUILD_DEBIAN)
