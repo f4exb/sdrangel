@@ -11,6 +11,8 @@ TARGET = liblimesuite
 
 DEFINES += ENOLINK=21
 
+CONFIG(MINGW32):QMAKE_CXXFLAGS += -fpermissive
+
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 
@@ -118,8 +120,8 @@ HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
 CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
 
-CONFIG(MINGW32):LIBS += -L../../../libsqlite3/$${build_subdir} -llibsqlite3
-CONFIG(MINGW64):LIBS += -L../../../libsqlite3/$${build_subdir} -llibsqlite3
+CONFIG(MINGW32):LIBS += -L../libsqlite3/release -llibsqlite3
+CONFIG(MINGW64):LIBS += -L../libsqlite3/release -llibsqlite3
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

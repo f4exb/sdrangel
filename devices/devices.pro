@@ -28,18 +28,18 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += $$LIBBLADERFSRC
 INCLUDEPATH += $$LIBHACKRFSRC
-CONFIG(MINGW64)INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64)INCLUDEPATH += ../liblimesuite/srcmw
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/ConnectionRegistry
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/FPGA_common
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/GFIR
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
-CONFIG(MINGW64)INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
+INCLUDEPATH += "D:\boost_1_58_0"
+INCLUDEPATH += ../liblimesuite/srcmw
+INCLUDEPATH += $$LIBLIMESUITESRC/src
+INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
+INCLUDEPATH += $$LIBLIMESUITESRC/src/ConnectionRegistry
+INCLUDEPATH += $$LIBLIMESUITESRC/src/FPGA_common
+INCLUDEPATH += $$LIBLIMESUITESRC/src/GFIR
+INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m
+INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
+INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
+INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
+INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -52,7 +52,7 @@ SOURCES += hackrf/devicehackrf.cpp\
         hackrf/devicehackrfvalues.cpp\
         hackrf/devicehackrfshared.cpp
 
-CONFIG(MINGW64)SOURCES += limesdr/devicelimesdr.cpp\
+SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
         limesdr/devicelimesdrshared.cpp
 
@@ -66,14 +66,14 @@ HEADERS  += hackrf/devicehackrf.h\
         hackrf/devicehackrfvalues.h\
         hackrf/devicehackrfshared.h
 
-CONFIG(MINGW64)HEADERS += limesdr/devicelimesdr.h\
+HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
         limesdr/devicelimesdrshared.h
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-CONFIG(MINGW64)LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
+LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
 
 macx {
     LIBS -= -L../libbladerf/$${build_subdir} -llibbladerf
