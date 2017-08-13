@@ -15,11 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/udpsrc/udpsrcgui.h"
+#include "udpsrcgui.h"
 
-#include <device/devicesourceapi.h>
-#include <dsp/downchannelizer.h>
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
+#include "dsp/downchannelizer.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"

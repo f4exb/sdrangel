@@ -24,7 +24,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
-#include "../../channelrx/udpsrc/udpsrc.h"
+#include "udpsrc.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
