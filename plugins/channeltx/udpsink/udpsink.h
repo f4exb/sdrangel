@@ -22,6 +22,7 @@
 #include "dsp/basebandsamplesource.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/interpolator.h"
+#include "dsp/movingaverage.h"
 #include "dsp/nco.h"
 #include "util/message.h"
 
@@ -50,6 +51,8 @@ public:
     virtual void stop();
     virtual void pull(Sample& sample);
     virtual bool handleMessage(const Message& cmd);
+
+    double getMagSq() const { return m_magsq; }
 
     void configure(MessageQueue* messageQueue,
             SampleFormat sampleFormat,
@@ -180,6 +183,9 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
+
+    double m_magsq;
+    MovingAverage<double> m_movingAverage;
 
     QMutex m_settingsMutex;
 

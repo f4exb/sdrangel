@@ -69,6 +69,7 @@ private slots:
     void onMenuDoubleClicked();
     void on_volume_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
+    void tick();
 
 private:
     Ui::UDPSinkGUI* ui;
@@ -78,6 +79,7 @@ private:
     UpChannelizer* m_channelizer;
     SpectrumVis* m_spectrumVis;
     UDPSink* m_udpSink;
+    MovingAverage<double> m_channelPowerDbAvg;
     ChannelMarker m_channelMarker;
 
     // settings

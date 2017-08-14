@@ -26,6 +26,8 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_uiMessageQueue(uiMessageQueue),
     m_udpSinkGUI(udpSinkGUI),
     m_spectrum(spectrum),
+    m_magsq(1e-10),
+    m_movingAverage(16, 0),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
@@ -80,6 +82,11 @@ void UDPSink::pull(Sample& sample)
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
 
     m_settingsMutex.unlock();
+
+    Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+    magsq /= (1<<30);
+    m_movingAverage.feed(magsq);
+    m_magsq = m_movingAverage.average();
 
     sample.m_real = (FixReal) ci.real();
     sample.m_imag = (FixReal) ci.imag();

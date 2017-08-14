@@ -20,6 +20,7 @@
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "plugin/pluginapi.h"
 #include "mainwindow.h"
@@ -201,6 +202,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceAPI(deviceAPI),
+        m_channelPowerDbAvg(20,0),
         m_channelMarker(this),
         m_basicSettingsShown(false),
         m_doApplySettings(true)
@@ -470,5 +472,12 @@ void UDPSinkGUI::enterEvent(QEvent*)
     blockApplySettings(true);
     m_channelMarker.setHighlighted(true);
     blockApplySettings(false);
+}
+
+void UDPSinkGUI::tick()
+{
+    double powDb = CalcDb::dbPower(m_udpSink->getMagSq());
+    m_channelPowerDbAvg.feed(powDb);
+    ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
 }
 
