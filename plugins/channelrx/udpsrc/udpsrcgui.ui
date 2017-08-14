@@ -150,43 +150,6 @@
       </item>
      </layout>
     </item>
-    <item row="7" column="1">
-     <layout class="QHBoxLayout" name="VolumeLayout">
-      <item>
-       <widget class="QLabel" name="volumeLabel">
-        <property name="text">
-         <string>Vol</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="volume">
-        <property name="toolTip">
-         <string>Audio volume</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>20</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="volumeText">
-        <property name="text">
-         <string>20</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
       <property name="topMargin">
@@ -358,6 +321,23 @@
       </item>
      </layout>
     </item>
+    <item row="3" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>RF BW (Hz)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="rfBandwidth">
+      <property name="toolTip">
+       <string>Signal bandwidth</string>
+      </property>
+      <property name="text">
+       <string>32000</string>
+      </property>
+     </widget>
+    </item>
     <item row="6" column="0">
      <layout class="QHBoxLayout" name="AudioPortLayout">
       <item>
@@ -414,36 +394,6 @@
        </widget>
       </item>
      </layout>
-    </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="rfBandwidth">
-      <property name="toolTip">
-       <string>Signal bandwidth</string>
-      </property>
-      <property name="text">
-       <string>32000</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
-     <widget class="QPushButton" name="applyBtn">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="toolTip">
-       <string>Apply text input and/or samples format</string>
-      </property>
-      <property name="text">
-       <string>Apply</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>RF BW (Hz)</string>
-      </property>
-     </widget>
     </item>
     <item row="2" column="1">
      <widget class="QLineEdit" name="sampleRate">
@@ -529,6 +479,56 @@
       </item>
      </layout>
     </item>
+    <item row="7" column="0">
+     <layout class="QHBoxLayout" name="VolumeLayout">
+      <item>
+       <widget class="QLabel" name="volumeLabel">
+        <property name="text">
+         <string>Vol</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="volume">
+        <property name="toolTip">
+         <string>Audio volume</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>20</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="volumeText">
+        <property name="text">
+         <string>20</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="7" column="1">
+     <widget class="QPushButton" name="applyBtn">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string>Apply text input and/or samples format</string>
+      </property>
+      <property name="text">
+       <string>Apply</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="spectrumBox" native="true">
@@ -605,7 +605,6 @@
   <tabstop>sampleFormat</tabstop>
   <tabstop>sampleRate</tabstop>
   <tabstop>rfBandwidth</tabstop>
-  <tabstop>applyBtn</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrbase/resources/res.qrc"/>
