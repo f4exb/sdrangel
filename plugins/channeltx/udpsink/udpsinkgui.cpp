@@ -18,9 +18,10 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/spectrumvis.h"
-#include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
+#include "util/simpleserializer.h"
+#include "gui/basicchannelsettingswidget.h"
+#include "plugin/pluginapi.h"
 #include "mainwindow.h"
 
 #include "udpsinkgui.h"
@@ -201,6 +202,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         m_pluginAPI(pluginAPI),
         m_deviceAPI(deviceAPI),
         m_channelMarker(this),
+        m_basicSettingsShown(false),
         m_doApplySettings(true)
 {
     ui->setupUi(this);
@@ -372,5 +374,95 @@ void UDPSinkGUI::applySettings()
 
         ui->applyBtn->setEnabled(false);
     }
+}
+
+void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
+{
+    m_channelMarker.setCenterFrequency(value);
+}
+
+void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
+{
+    if ((index == 1) || (index == 2)) {
+        ui->fmDeviation->setEnabled(true);
+    } else {
+        ui->fmDeviation->setEnabled(false);
+    }
+
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_udpAddress_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_volume_valueChanged(int value)
+{
+    ui->volume->setValue(value);
+    ui->volumeText->setText(QString("%1").arg(value));
+    applySettings();
+}
+
+void UDPSinkGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
+}
+
+void UDPSinkGUI::on_applyBtn_clicked()
+{
+    applySettings();
+}
+
+void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+{
+    if ((widget == ui->spectrumBox) && (m_udpSink != 0))
+    {
+        m_udpSink->setSpectrum(m_udpSink->getInputMessageQueue(), rollDown);
+    }
+}
+
+void UDPSinkGUI::onMenuDoubleClicked()
+{
+    if (!m_basicSettingsShown)
+    {
+        m_basicSettingsShown = true;
+        BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
+        bcsw->show();
+    }
+}
+
+void UDPSinkGUI::leaveEvent(QEvent*)
+{
+    blockApplySettings(true);
+    m_channelMarker.setHighlighted(false);
+    blockApplySettings(false);
+}
+
+void UDPSinkGUI::enterEvent(QEvent*)
+{
+    blockApplySettings(true);
+    m_channelMarker.setHighlighted(true);
+    blockApplySettings(false);
 }
 

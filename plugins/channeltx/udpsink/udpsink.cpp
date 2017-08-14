@@ -20,6 +20,7 @@
 #include "udpsink.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 
 UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum) :
     m_uiMessageQueue(uiMessageQueue),
@@ -164,6 +165,13 @@ void UDPSink::configure(MessageQueue* messageQueue,
             channelMute);
     messageQueue->push(cmd);
 }
+
+void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
+{
+    Message* cmd = MsgUDPSinkSpectrum::create(enabled);
+    messageQueue->push(cmd);
+}
+
 
 void UDPSink::apply(bool force)
 {

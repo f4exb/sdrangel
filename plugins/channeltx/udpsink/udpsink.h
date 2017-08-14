@@ -59,6 +59,7 @@ public:
             QString& udpAddress,
             int udpPort,
             bool channelMute);
+    void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
 private:
     class MsgUDPSinkConfigure : public Message {
@@ -115,6 +116,26 @@ private:
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
             m_channelMute(channelMute)
+        { }
+    };
+
+    class MsgUDPSinkSpectrum : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getEnabled() const { return m_enabled; }
+
+        static MsgUDPSinkSpectrum* create(bool enabled)
+        {
+            return new MsgUDPSinkSpectrum(enabled);
+        }
+
+    private:
+        bool m_enabled;
+
+        MsgUDPSinkSpectrum(bool enabled) :
+            Message(),
+            m_enabled(enabled)
         { }
     };
 

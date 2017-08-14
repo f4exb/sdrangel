@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>316</width>
+    <width>340</width>
     <height>355</height>
    </rect>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>312</width>
+     <width>330</width>
      <height>142</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>312</width>
+     <width>330</width>
      <height>0</height>
     </size>
    </property>
@@ -342,6 +342,9 @@
         <property name="toolTip">
          <string>FM deviation in Hz (for S16LE NFM format)</string>
         </property>
+        <property name="inputMask">
+         <string>00000</string>
+        </property>
         <property name="text">
          <string>2500</string>
         </property>
@@ -360,6 +363,9 @@
      <widget class="QLineEdit" name="rfBandwidth">
       <property name="toolTip">
        <string>Signal bandwidth</string>
+      </property>
+      <property name="inputMask">
+       <string>0009999</string>
       </property>
       <property name="text">
        <string>32000</string>
@@ -407,6 +413,9 @@
      <widget class="QLineEdit" name="sampleRate">
       <property name="toolTip">
        <string>Samples rate</string>
+      </property>
+      <property name="inputMask">
+       <string>0009999</string>
       </property>
       <property name="text">
        <string>48000</string>

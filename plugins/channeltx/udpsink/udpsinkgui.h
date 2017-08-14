@@ -56,6 +56,19 @@ public:
 
 private slots:
     void handleSourceMessages();
+    void channelMarkerChanged();
+    void on_deltaFrequency_changed(qint64 value);
+    void on_sampleFormat_currentIndexChanged(int index);
+    void on_sampleRate_textEdited(const QString& arg1);
+    void on_rfBandwidth_textEdited(const QString& arg1);
+    void on_udpAddress_textEdited(const QString& arg1);
+    void on_udpPort_textEdited(const QString& arg1);
+    void on_fmDeviation_textEdited(const QString& arg1);
+    void on_applyBtn_clicked();
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDoubleClicked();
+    void on_volume_valueChanged(int value);
+    void on_channelMute_toggled(bool checked);
 
 private:
     Ui::UDPSinkGUI* ui;
@@ -75,6 +88,7 @@ private:
     int m_volume;
     QString m_udpAddress;
     int m_udpPort;
+    bool m_basicSettingsShown;
     bool m_doApplySettings;
 
     explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
@@ -82,6 +96,9 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+
+    void leaveEvent(QEvent*);
+    void enterEvent(QEvent*);
 };
 
 #endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_ */
