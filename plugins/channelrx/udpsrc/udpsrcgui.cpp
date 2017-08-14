@@ -29,7 +29,7 @@
 #include "ui_udpsrcgui.h"
 #include "mainwindow.h"
 
-#include "../../channelrx/udpsrc/udpsrc.h"
+#include "udpsrc.h"
 
 const QString UDPSrcGUI::m_channelID = "sdrangel.channel.udpsrc";
 

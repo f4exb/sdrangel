@@ -91,6 +91,8 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeString(9, m_udpAddress);
     s.writeS32(10, (qint32)m_volume);
     s.writeS32(11, m_fmDeviation);
+    s.writeU32(12, m_channelMarker.getColor().rgb());
+    s.writeString(13, m_channelMarker.getTitle());
     return s.final();
 }
 
@@ -109,6 +111,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         QString strtmp;
         qint32 s32tmp;
+        quint32 u32tmp;
         Real realtmp;
 
         blockApplySettings(true);
@@ -118,6 +121,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         restoreState(bytetmp);
         d.readS32(2, &s32tmp, 0);
         m_channelMarker.setCenterFrequency(s32tmp);
+
         d.readS32(3, &s32tmp, UDPSink::FormatS16LE);
         switch(s32tmp) {
             case UDPSink::FormatS16LE:
@@ -164,6 +168,12 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->volume->setValue(s32tmp);
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
+
+        d.readU32(12, &u32tmp, Qt::green);
+        m_channelMarker.setColor(u32tmp);
+        d.readString(13, &strtmp, "UDP Sample Sink");
+        m_channelMarker.setTitle(strtmp);
+        this->setWindowTitle(m_channelMarker.getTitle());
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
@@ -236,6 +246,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     m_channelMarker.setBandwidth(16000);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setColor(Qt::green);
+    m_channelMarker.setTitle("UDP Sample Sink");
     m_channelMarker.setVisible(true);
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -243,6 +254,8 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
+
+    ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
     applySettings();
 
