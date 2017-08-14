@@ -40,6 +40,7 @@ public:
     virtual void startWork();
     virtual void stopWork();
     virtual void setDeviceSampleRate(int sampleRate __attribute__((unused))) {}
+    virtual bool isRunning() { return m_running; }
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
 

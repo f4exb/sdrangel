@@ -109,7 +109,10 @@ bool LimeSDRInput::openDevice()
         {
             DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
             DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
-            busyChannels[buddyShared->m_channel] = 1;
+
+            if (buddyShared->m_channel >= 0) {
+                busyChannels[buddyShared->m_channel] = 1;
+            }
         }
 
         std::size_t ch = 0;
@@ -165,12 +168,12 @@ bool LimeSDRInput::openDevice()
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
     {
-        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %lu", m_deviceShared.m_channel);
+        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %d", m_deviceShared.m_channel);
         return false;
     }
     else
     {
-        qDebug("LimeSDRInput::openDevice: Rx channel %lu enabled", m_deviceShared.m_channel);
+        qDebug("LimeSDRInput::openDevice: Rx channel %d enabled", m_deviceShared.m_channel);
     }
 
     // set up the stream
@@ -183,12 +186,12 @@ bool LimeSDRInput::openDevice()
 
     if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
     {
-        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %lu", m_deviceShared.m_channel);
+        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
         return false;
     }
     else
     {
-        qDebug("LimeSDRInput::start: stream set up on Rx channel %lu", m_deviceShared.m_channel);
+        qDebug("LimeSDRInput::start: stream set up on Rx channel %d", m_deviceShared.m_channel);
     }
 
     return true;
@@ -262,7 +265,7 @@ void LimeSDRInput::closeDevice()
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
     {
-        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %lu", m_deviceShared.m_channel);
+        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %d", m_deviceShared.m_channel);
     }
 
     m_deviceShared.m_channel = -1;
@@ -492,6 +495,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool suspendOwnThread    = false;
+    bool ownThreadWasRunning = false;
     bool suspendRxThread     = false;
     bool suspendAllThread    = false;
     bool doCalibration = false;
@@ -540,8 +544,14 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
 
-            if (buddySharedPtr->m_thread) {
+            if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
+            {
                 buddySharedPtr->m_thread->stopWork();
+                buddySharedPtr->m_threadWasRunning = true;
+            }
+            else
+            {
+                buddySharedPtr->m_threadWasRunning = false;
             }
         }
 
@@ -554,11 +564,18 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
             if (buddySharedPtr->m_thread) {
                 buddySharedPtr->m_thread->stopWork();
+                buddySharedPtr->m_threadWasRunning = true;
+            }
+            else
+            {
+                buddySharedPtr->m_threadWasRunning = false;
             }
         }
 
-        if (m_limeSDRInputThread) {
+        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
+        {
             m_limeSDRInputThread->stopWork();
+            ownThreadWasRunning = true;
         }
     }
     else if (suspendRxThread)
@@ -575,14 +592,18 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
         }
 
-        if (m_limeSDRInputThread) {
+        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
+        {
             m_limeSDRInputThread->stopWork();
+            ownThreadWasRunning = true;
         }
     }
     else if (suspendOwnThread)
     {
-        if (m_limeSDRInputThread) {
+        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
+        {
             m_limeSDRInputThread->stopWork();
+            ownThreadWasRunning = true;
         }
     }
 
@@ -926,11 +947,11 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                 m_settings.m_lpfBW,
                 0) < 0)
         {
-            qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %lu", m_deviceShared.m_channel);
+            qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %d", m_deviceShared.m_channel);
         }
         else
         {
-            qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %lu", m_deviceShared.m_channel);
+            qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %d", m_deviceShared.m_channel);
         }
     }
 
@@ -945,7 +966,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
 
-            if (buddySharedPtr->m_thread) {
+            if (buddySharedPtr->m_threadWasRunning) {
                 buddySharedPtr->m_thread->startWork();
             }
         }
@@ -957,12 +978,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
 
-            if (buddySharedPtr->m_thread) {
+            if (buddySharedPtr->m_threadWasRunning) {
                 buddySharedPtr->m_thread->startWork();
             }
         }
 
-        if (m_limeSDRInputThread) {
+        if (ownThreadWasRunning) {
             m_limeSDRInputThread->startWork();
         }
     }
@@ -975,18 +996,18 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
 
-            if (buddySharedPtr->m_thread) {
+            if (buddySharedPtr->m_threadWasRunning) {
                 buddySharedPtr->m_thread->startWork();
             }
         }
 
-        if (m_limeSDRInputThread) {
+        if (ownThreadWasRunning) {
             m_limeSDRInputThread->startWork();
         }
     }
     else if (suspendOwnThread)
     {
-        if (m_limeSDRInputThread) {
+        if (ownThreadWasRunning) {
             m_limeSDRInputThread->startWork();
         }
     }

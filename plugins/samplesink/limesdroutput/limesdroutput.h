@@ -235,11 +235,14 @@ private:
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
     bool m_firstConfig;
+    bool m_channelAcquired;
 
     lms_stream_t m_streamId;
 
     bool openDevice();
     void closeDevice();
+    bool acquireChannel();
+    void releaseChannel();
     void suspendBuddies();
     void resumeBuddies();
     bool applySettings(const LimeSDROutputSettings& settings, bool force = false);

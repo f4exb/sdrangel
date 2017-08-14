@@ -73,14 +73,16 @@ public:
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
         virtual void setDeviceSampleRate(int sampleRate) = 0;
+        virtual bool isRunning() = 0;
     };
 
     DeviceLimeSDRParams *m_deviceParams; //!< unique hardware device parameters
-    std::size_t         m_channel;       //!< logical device channel number (-1 if none)
+    int                 m_channel;       //!< logical device channel number (-1 if none)
     ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
     int                 m_ncoFrequency;
     uint64_t            m_centerFrequency;
     uint32_t            m_log2Soft;
+    bool                m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
 
     static const float  m_sampleFifoLengthInSeconds;
     static const int    m_sampleFifoMinSize;
@@ -91,7 +93,8 @@ public:
         m_thread(0),
         m_ncoFrequency(0),
         m_centerFrequency(0),
-        m_log2Soft(0)
+        m_log2Soft(0),
+        m_threadWasRunning(false)
     {}
 
     ~DeviceLimeSDRShared()
