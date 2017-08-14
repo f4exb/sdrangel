@@ -39,9 +39,9 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
-  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) Linux only
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
-  - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink)
+  - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
 
 <h1>Notes on pulseaudio setup</h1>
 
@@ -102,8 +102,6 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-Linux only.
-
 &#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
 
 You will need a minimal installation of LimeSuite:
@@ -158,6 +156,8 @@ The [File sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/sample
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSink[0]` even if no physical device is connected.
 
 <h2>SDRdaemon receiver input</h2>
+
+Linux only.
 
 The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hadrware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
 
@@ -226,18 +226,16 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
 
-  - Windows 64 bit
-  - Windows 32 bit
-  - Debian x86_64 (Ubuntu 16.04)
-  - Debian armv7l (Debian Jessie)
+  - Windows 32 bit (runs in 64 bit Windows) 
+  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.04, Debian Stretch)
+  - Windows 64 bit until v3.5.4
+  - Debian armv7l (Debian Jessie) until v3.5.0
   
 <h2>Windows distributions</h2>
 
 This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
-The latest stable version is v3.5.3 then v3.5.4 should still work on Windows 7
-
-**From release v3.5.5 there are no more Windows distributions**
+Starting at release v3.5.5 there are no more Windows64 distributions
 
 <h2>Debian distributions</h2>
 

@@ -1,3 +1,10 @@
+sdrangel (3.6.0-1) unstable; urgency=medium
+
+  * UDPSink Tx plugin: new
+  * LimeSDR output: fixed Tx not stopping on stop (issue #50)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 17 Aug 2017 23:14:18 +0200
+
 sdrangel (3.5.5-1) unstable; urgency=medium
 
   * Output plugins: use fixed time length for sample FIFO of ~0.25s
