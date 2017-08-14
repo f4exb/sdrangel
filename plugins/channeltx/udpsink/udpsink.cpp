@@ -27,6 +27,9 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_spectrum(spectrum),
     m_settingsMutex(QMutex::Recursive)
 {
+    setObjectName("UDPSink");
+
+    apply(true);
 }
 
 UDPSink::~UDPSink()
@@ -43,8 +46,48 @@ void UDPSink::stop()
 
 void UDPSink::pull(Sample& sample)
 {
-    sample.m_real = 0.0f;
-    sample.m_imag = 0.0f;
+    if (m_running.m_channelMute)
+    {
+        sample.m_real = 0.0f;
+        sample.m_imag = 0.0f;
+        return;
+    }
+
+    Complex ci;
+
+    m_settingsMutex.lock();
+
+    if (m_interpolatorDistance > 1.0f) // decimate
+    {
+        modulateSample();
+
+        while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+        {
+            modulateSample();
+        }
+    }
+    else
+    {
+        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
+        {
+            modulateSample();
+        }
+    }
+
+    m_interpolatorDistanceRemain += m_interpolatorDistance;
+
+    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
+
+    m_settingsMutex.unlock();
+
+    sample.m_real = (FixReal) ci.real();
+    sample.m_imag = (FixReal) ci.imag();
+}
+
+void UDPSink::modulateSample()
+{
+    m_modSample.real(0.0f); // TODO
+    m_modSample.imag(0.0f);
 }
 
 bool UDPSink::handleMessage(const Message& cmd)
@@ -82,8 +125,18 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_fmDeviation = cfg.getFMDeviation();
         m_config.m_udpAddressStr = cfg.getUDPAddress();
         m_config.m_udpPort = cfg.getUDPPort();
+        m_config.m_channelMute = cfg.getChannelMute();
 
         m_settingsMutex.unlock();
+
+        qDebug() << "UDPSink::handleMessage: MsgUDPSinkConfigure:"
+                << " m_sampleFormat: " << m_config.m_sampleFormat
+                << " m_inputSampleRate: " << m_config.m_inputSampleRate
+                << " m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_fmDeviation: " << m_config.m_fmDeviation
+                << " m_udpAddressStr: " << m_config.m_udpAddressStr
+                << " m_udpPort: " << m_config.m_udpPort
+                << " m_channelMute: " << m_config.m_channelMute;
 
         return true;
     }
@@ -99,14 +152,40 @@ void UDPSink::configure(MessageQueue* messageQueue,
         Real rfBandwidth,
         int fmDeviation,
         QString& udpAddress,
-        int udpPort)
+        int udpPort,
+        bool channelMute)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
             outputSampleRate,
             rfBandwidth,
             fmDeviation,
             udpAddress,
-            udpPort);
+            udpPort,
+            channelMute);
     messageQueue->push(cmd);
 }
 
+void UDPSink::apply(bool force)
+{
+    if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
+        (m_config.m_outputSampleRate != m_running.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
+       (m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+       (m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_outputSampleRate;
+        m_interpolator.create(48, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+        m_settingsMutex.unlock();
+    }
+
+    m_running = m_config;
+}

@@ -21,6 +21,8 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/interpolator.h"
+#include "dsp/nco.h"
 #include "util/message.h"
 
 class UDPSinkGUI;
@@ -55,7 +57,8 @@ public:
             Real rfBandwidth,
             int fmDeviation,
             QString& udpAddress,
-            int udpPort);
+            int udpPort,
+            bool channelMute);
 
 private:
     class MsgUDPSinkConfigure : public Message {
@@ -68,6 +71,7 @@ private:
         int getFMDeviation() const { return m_fmDeviation; }
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
+        bool getChannelMute() const { return m_channelMute; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
                 sampleFormat,
@@ -75,14 +79,16 @@ private:
                 Real rfBandwidth,
                 int fmDeviation,
                 QString& udpAddress,
-                int udpPort)
+                int udpPort,
+                bool channelMute)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
                     inputSampleRate,
                     rfBandwidth,
                     fmDeviation,
                     udpAddress,
-                    udpPort);
+                    udpPort,
+                    channelMute);
         }
 
     private:
@@ -92,20 +98,23 @@ private:
         int m_fmDeviation;
         QString m_udpAddress;
         int m_udpPort;
+        bool m_channelMute;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
                 Real inputSampleRate,
                 Real rfBandwidth,
                 int fmDeviation,
                 QString& udpAddress,
-                int udpPort) :
+                int udpPort,
+                bool channelMute) :
             Message(),
             m_sampleFormat(sampleFormat),
             m_inputSampleRate(inputSampleRate),
             m_rfBandwidth(rfBandwidth),
             m_fmDeviation(fmDeviation),
             m_udpAddress(udpAddress),
-            m_udpPort(udpPort)
+            m_udpPort(udpPort),
+            m_channelMute(channelMute)
         { }
     };
 
@@ -117,18 +126,20 @@ private:
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
         int m_fmDeviation;
+        bool m_channelMute;
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
 
         Config() :
-            m_basebandSampleRate(0),
-            m_outputSampleRate(0),
+            m_basebandSampleRate(48000),
+            m_outputSampleRate(48000),
             m_sampleFormat(0),
-            m_inputSampleRate(0),
+            m_inputSampleRate(48000),
             m_inputFrequencyOffset(0),
-            m_rfBandwidth(0),
-            m_fmDeviation(0),
+            m_rfBandwidth(12500),
+            m_fmDeviation(1.0),
+            m_channelMute(false),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}
@@ -137,11 +148,22 @@ private:
     Config m_config;
     Config m_running;
 
+    NCO m_carrierNco;
+    Complex m_modSample;
+
     MessageQueue* m_uiMessageQueue;
     UDPSinkGUI* m_udpSinkGUI;
     BasebandSampleSink* m_spectrum;
 
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+    bool m_interpolatorConsumed;
+
     QMutex m_settingsMutex;
+
+    void apply(bool force);
+    void modulateSample();
 };
 
 

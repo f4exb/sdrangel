@@ -367,7 +367,8 @@ void UDPSinkGUI::applySettings()
             rfBandwidth,
             fmDeviation,
             m_udpAddress,
-            udpPort);
+            udpPort,
+            ui->channelMute->isChecked());
 
         ui->applyBtn->setEnabled(false);
     }
