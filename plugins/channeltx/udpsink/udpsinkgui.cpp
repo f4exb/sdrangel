@@ -376,6 +376,12 @@ void UDPSinkGUI::applySettings()
     }
 }
 
+void UDPSinkGUI::channelMarkerChanged()
+{
+    this->setWindowTitle(m_channelMarker.getTitle());
+    applySettings();
+}
+
 void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
