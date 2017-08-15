@@ -41,10 +41,12 @@ UDPSink::~UDPSink()
 
 void UDPSink::start()
 {
+    m_udpHandler.start();
 }
 
 void UDPSink::stop()
 {
+    m_udpHandler.stop();
 }
 
 void UDPSink::pull(Sample& sample)
@@ -94,8 +96,20 @@ void UDPSink::pull(Sample& sample)
 
 void UDPSink::modulateSample()
 {
-    m_modSample.real(0.0f); // TODO
-    m_modSample.imag(0.0f);
+    //Real t;
+    Sample s;
+
+    if (m_running.m_sampleFormat == FormatS16LE)
+    {
+        m_udpHandler.readSample(s);
+        m_modSample.real(s.m_real);
+        m_modSample.imag(s.m_imag);
+    }
+    else
+    {
+        m_modSample.real(0.0f);
+        m_modSample.imag(0.0f);
+    }
 }
 
 bool UDPSink::handleMessage(const Message& cmd)
@@ -134,6 +148,8 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_udpAddressStr = cfg.getUDPAddress();
         m_config.m_udpPort = cfg.getUDPPort();
         m_config.m_channelMute = cfg.getChannelMute();
+
+        apply(false);
 
         m_settingsMutex.unlock();
 
@@ -200,6 +216,19 @@ void UDPSink::apply(bool force)
         m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_outputSampleRate;
         m_interpolator.create(48, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
         m_settingsMutex.unlock();
+    }
+
+    if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) ||
+        (m_config.m_udpPort != m_running.m_udpPort) || force)
+    {
+        m_udpHandler.configureUDPLink(m_config.m_udpAddressStr, m_config.m_udpPort);
+    }
+
+    if ((m_config.m_channelMute != m_running.m_channelMute) || force)
+    {
+        if (!m_config.m_channelMute) {
+            m_udpHandler.resetReadIndex();
+        }
     }
 
     m_running = m_config;

@@ -26,6 +26,8 @@
 #include "dsp/nco.h"
 #include "util/message.h"
 
+#include "udpsinkudphandler.h"
+
 class UDPSinkGUI;
 
 class UDPSink : public BasebandSampleSource {
@@ -186,6 +188,8 @@ private:
 
     double m_magsq;
     MovingAverage<double> m_movingAverage;
+
+    UDPSinkUDPHandler m_udpHandler;
 
     QMutex m_settingsMutex;
 
