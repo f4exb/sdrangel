@@ -4,12 +4,9 @@
 
 By "source" one should undetstand a source of samples for the outside of SDRangel application. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
 
-The UDP block size or UDP payload size is fixed to 512 samples. The size in bytes depends on the format:
+The UDP block size or UDP payload size is fixed at 512 bytes.
 
-  - S16LE types not labeled as "mono": each sample is a complex sample of two 16 bit signed integers therefore the block size is 2048 bytes
-  - S16LE types labeled as "mono": each sample is a real sample of a single 16 bit signed integer therefore the block size is 1024 bytes
-
-The receiving application must make sure it acknowledges this block size. UDP may fragment the block but there will be a point when the last UDP block will fill up a complete block of this amount of bytes. In particular in GNUradio the UDP source block must be configured with a 2048 or 1024 bytes payload size depending on the format.
+The receiving application must make sure it acknowledges this block size. UDP may fragment the block but there will be a point when the last UDP block will fill up a complete block of this amount of bytes. In particular in GNUradio the UDP source block must be configured with a 512 bytes payload size.
 
 <h2>Interface</h2>
 
