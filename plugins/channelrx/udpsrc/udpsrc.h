@@ -80,7 +80,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-	static const int udpBLockSampleSize = 512; // UDP block size in number of samples
+	static const int udpBlockSize = 512; // UDP block size in number of bytes
 
 public slots:
     void audioReadyRead();

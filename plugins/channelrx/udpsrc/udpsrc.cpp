@@ -39,8 +39,8 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 {
 	setObjectName("UDPSrc");
 
-	m_udpBuffer = new UDPSink<Sample>(this, udpBLockSampleSize, m_udpPort);
-	m_udpBufferMono = new UDPSink<FixReal>(this, udpBLockSampleSize, m_udpPort);
+	m_udpBuffer = new UDPSink<Sample>(this, udpBlockSize, m_udpPort);
+	m_udpBufferMono = new UDPSink<FixReal>(this, udpBlockSize, m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 	m_udpAudioBuf = new char[m_udpAudioPayloadSize];
 
@@ -67,7 +67,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_scale = 0;
 	m_boost = 0;
 	m_magsq = 0;
-	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBLockSampleSize);
+	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBlockSize);
 
 	m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
 
