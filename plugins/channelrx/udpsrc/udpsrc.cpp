@@ -67,7 +67,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_scale = 0;
 	m_boost = 0;
 	m_magsq = 0;
-	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBLockSampleSize * sizeof(Sample));
+	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBLockSampleSize);
 
 	m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
 

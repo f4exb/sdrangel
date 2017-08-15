@@ -31,22 +31,25 @@ class UDPSink
 public:
 	UDPSink(QObject *parent, unsigned int udpSize, unsigned int port) :
 		m_udpSize(udpSize),
+		m_udpSamples(udpSize/sizeof(T)),
 		m_address(QHostAddress::LocalHost),
 		m_port(port),
 		m_sampleBufferIndex(0)
 	{
-		m_sampleBuffer = new T[m_udpSize];
+        assert(m_udpSamples > 0);
+		m_sampleBuffer = new T[m_udpSamples];
 		m_socket = new QUdpSocket(parent);
 	}
 
 	UDPSink (QObject *parent, unsigned int udpSize, QHostAddress& address, unsigned int port) :
 		m_udpSize(udpSize),
+        m_udpSamples(udpSize/sizeof(T)),
 		m_address(address),
 		m_port(port),
 		m_sampleBufferIndex(0)
 	{
-		assert(m_udpSize > 2);
-		m_sampleBuffer = new T[m_udpSize];
+		assert(m_udpSamples > 0);
+		m_sampleBuffer = new T[m_udpSamples];
 		m_socket = new QUdpSocket(parent);
 	}
 
@@ -61,14 +64,14 @@ public:
 
 	void write(T sample)
 	{
-		if (m_sampleBufferIndex < m_udpSize)
+		if (m_sampleBufferIndex < m_udpSamples)
 		{
 			m_sampleBuffer[m_sampleBufferIndex] = sample;
 			m_sampleBufferIndex++;
 		}
 		else
 		{
-			m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) (m_udpSize * sizeof(T)), m_address, m_port);
+			m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) m_udpSize, m_address, m_port);
 			m_sampleBuffer[0] = sample;
 			m_sampleBufferIndex = 1;
 		}
@@ -76,6 +79,7 @@ public:
 
 private:
 	unsigned int m_udpSize;
+    unsigned int m_udpSamples;
 	QHostAddress m_address;
 	unsigned int m_port;
 	QUdpSocket *m_socket;
