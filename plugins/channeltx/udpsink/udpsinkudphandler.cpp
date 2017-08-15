@@ -129,6 +129,7 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
         if (m_readFrameIndex < m_nbUDPFrames - 1) {
             m_readFrameIndex++;
         } else {
+            qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d", m_writeIndex);
             m_readFrameIndex = 0;
         }
     }
