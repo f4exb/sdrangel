@@ -87,7 +87,6 @@ private:
     Real m_inputSampleRate;
     Real m_rfBandwidth;
     int m_fmDeviation;
-    int m_volume;
     QString m_udpAddress;
     int m_udpPort;
     bool m_basicSettingsShown;

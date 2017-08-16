@@ -65,6 +65,7 @@ public:
             QString& udpAddress,
             int udpPort,
             bool channelMute,
+            Real volume,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
@@ -89,6 +90,7 @@ private:
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
+        Real getVolume() const { return m_volume; }
         bool getForce() const { return m_force; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
@@ -99,6 +101,7 @@ private:
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
+                Real volume,
                 bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
@@ -108,6 +111,7 @@ private:
                     udpAddress,
                     udpPort,
                     channelMute,
+                    volume,
                     force);
         }
 
@@ -119,6 +123,7 @@ private:
         QString m_udpAddress;
         int m_udpPort;
         bool m_channelMute;
+        Real m_volume;
         bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
@@ -128,6 +133,7 @@ private:
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
+                Real volume,
                 bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
@@ -137,6 +143,7 @@ private:
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
             m_channelMute(channelMute),
+            m_volume(volume),
             m_force(force)
         { }
     };
@@ -170,6 +177,7 @@ private:
         Real m_rfBandwidth;
         int m_fmDeviation;
         bool m_channelMute;
+        Real m_volume;
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
@@ -183,6 +191,7 @@ private:
             m_rfBandwidth(12500),
             m_fmDeviation(1.0),
             m_channelMute(false),
+            m_volume(1.0),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}

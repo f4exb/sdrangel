@@ -71,7 +71,7 @@ void UDPSinkGUI::resetToDefaults()
     ui->udpAddress->setText("127.0.0.1");
     ui->udpPort->setText("9999");
     ui->spectrumGUI->resetToDefaults();
-    ui->volume->setValue(20);
+    ui->volume->setValue(10);
 
     blockApplySettings(false);
     applySettings();
@@ -89,7 +89,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(8, m_channelMarker.getCenterFrequency());
     s.writeString(9, m_udpAddress);
-    s.writeS32(10, (qint32)m_volume);
+    s.writeS32(10, ui->volume->value());
     s.writeS32(11, m_fmDeviation);
     s.writeU32(12, m_channelMarker.getColor().rgb());
     s.writeString(13, m_channelMarker.getTitle());
@@ -164,7 +164,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.setCenterFrequency(s32tmp);
         d.readString(9, &strtmp, "127.0.0.1");
         ui->udpAddress->setText(strtmp);
-        d.readS32(10, &s32tmp, 20);
+        d.readS32(10, &s32tmp, 10);
         ui->volume->setValue(s32tmp);
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
@@ -387,6 +387,7 @@ void UDPSinkGUI::applySettings(bool force)
             m_udpAddress,
             udpPort,
             ui->channelMute->isChecked(),
+            ui->volume->value() / 10.0f,
             force);
 
         ui->applyBtn->setEnabled(false);
@@ -442,8 +443,7 @@ void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused
 
 void UDPSinkGUI::on_volume_valueChanged(int value)
 {
-    ui->volume->setValue(value);
-    ui->volumeText->setText(QString("%1").arg(value));
+    ui->volumeText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
     applySettings();
 }
 

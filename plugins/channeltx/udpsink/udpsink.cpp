@@ -112,8 +112,8 @@ void UDPSink::modulateSample()
     if (m_running.m_sampleFormat == FormatS16LE)
     {
         m_udpHandler.readSample(s);
-        m_modSample.real(s.m_real);
-        m_modSample.imag(s.m_imag);
+        m_modSample.real(s.m_real * m_running.m_volume);
+        m_modSample.imag(s.m_imag * m_running.m_volume);
         calculateLevel(m_modSample);
     }
     else
@@ -208,6 +208,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_udpAddressStr = cfg.getUDPAddress();
         m_config.m_udpPort = cfg.getUDPPort();
         m_config.m_channelMute = cfg.getChannelMute();
+        m_config.m_volume = cfg.getVolume();
 
         apply(cfg.getForce());
 
@@ -218,7 +219,8 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_fmDeviation: " << m_config.m_fmDeviation
                 << " m_udpAddressStr: " << m_config.m_udpAddressStr
                 << " m_udpPort: " << m_config.m_udpPort
-                << " m_channelMute: " << m_config.m_channelMute;
+                << " m_channelMute: " << m_config.m_channelMute
+                << " m_volume: " << m_config.m_volume;
 
         return true;
     }
@@ -303,6 +305,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         QString& udpAddress,
         int udpPort,
         bool channelMute,
+        Real volume,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
@@ -312,6 +315,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             udpAddress,
             udpPort,
             channelMute,
+            volume,
             force);
     messageQueue->push(cmd);
 }
