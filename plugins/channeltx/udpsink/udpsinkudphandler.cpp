@@ -150,7 +150,7 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
                 float dd = d - m_d; // derivative
                 float c = (d / 15.0) + (dd / 20.0); // damping and scaling
                 c = c < -0.05 ? -0.05 : c > 0.05 ? 0.05 : c; // limit
-                UDPSinkMessages::MsgSampleRateCorrection *msg = UDPSinkMessages::MsgSampleRateCorrection::create(c);
+                UDPSinkMessages::MsgSampleRateCorrection *msg = UDPSinkMessages::MsgSampleRateCorrection::create(c, d);
 
                 if (m_feedbackMessageQueue) {
                     m_feedbackMessageQueue->push(msg);

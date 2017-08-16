@@ -30,18 +30,21 @@ public:
 
     public:
         float getCorrectionFactor() const { return m_correctionFactor; }
+        float getRawDeltaRatio() const { return m_rawDeltaRatio; }
 
-        static MsgSampleRateCorrection* create(float correctionFactor)
+        static MsgSampleRateCorrection* create(float correctionFactor, float rawDeltaRatio)
         {
-            return new MsgSampleRateCorrection(correctionFactor);
+            return new MsgSampleRateCorrection(correctionFactor, rawDeltaRatio);
         }
 
     private:
         float m_correctionFactor;
+        float m_rawDeltaRatio;
 
-        MsgSampleRateCorrection(float correctionFactor) :
+        MsgSampleRateCorrection(float correctionFactor, float rawDeltaRatio) :
             Message(),
-            m_correctionFactor(correctionFactor)
+            m_correctionFactor(correctionFactor),
+            m_rawDeltaRatio(rawDeltaRatio)
         { }
     };
 };

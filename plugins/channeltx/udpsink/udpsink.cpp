@@ -29,6 +29,8 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_spectrum(spectrum),
     m_magsq(1e-10),
     m_movingAverage(16, 0),
+    m_sampleRateSum(0),
+    m_sampleRateAvgCounter(0),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
@@ -167,7 +169,38 @@ bool UDPSink::handleMessage(const Message& cmd)
     {
         UDPSinkMessages::MsgSampleRateCorrection& cfg = (UDPSinkMessages::MsgSampleRateCorrection&) cmd;
         m_actualInputSampleRate += cfg.getCorrectionFactor() * m_actualInputSampleRate;
-        qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f", cfg.getCorrectionFactor(), m_actualInputSampleRate);
+
+        if ((cfg.getRawDeltaRatio() > -0.05) || (cfg.getRawDeltaRatio() < 0.05))
+        {
+            if (m_sampleRateAvgCounter < m_sampleRateAverageItems)
+            {
+                m_sampleRateSum += m_actualInputSampleRate;
+                m_sampleRateAvgCounter++;
+            }
+        }
+        else
+        {
+            m_sampleRateSum = 0.0;
+            m_sampleRateAvgCounter = 0;
+        }
+
+        if (m_sampleRateAvgCounter == m_sampleRateAverageItems)
+        {
+            float avgRate = m_sampleRateSum / m_sampleRateAverageItems;
+            qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f: avg rate: %f",
+                    cfg.getCorrectionFactor(),
+                    m_actualInputSampleRate,
+                    avgRate);
+            m_actualInputSampleRate = avgRate;
+            m_sampleRateSum = 0.0;
+            m_sampleRateAvgCounter = 0;
+        }
+        else
+        {
+            qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f",
+                    cfg.getCorrectionFactor(),
+                    m_actualInputSampleRate);
+        }
 
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
@@ -233,6 +266,8 @@ void UDPSink::apply(bool force)
         m_interpolator.create(48, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
         m_actualInputSampleRate = m_config.m_inputSampleRate;
         m_udpHandler.resetReadIndex();
+        m_sampleRateSum = 0.0;
+        m_sampleRateAvgCounter = 0;
         m_settingsMutex.unlock();
     }
 

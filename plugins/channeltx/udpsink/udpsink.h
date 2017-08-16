@@ -199,8 +199,12 @@ private:
 
     UDPSinkUDPHandler m_udpHandler;
     Real m_actualInputSampleRate; //!< sample rate with UDP buffer skew compensation
+    double m_sampleRateSum;
+    int m_sampleRateAvgCounter;
 
     QMutex m_settingsMutex;
+
+    static const int m_sampleRateAverageItems = 17;
 
     void apply(bool force);
     void modulateSample();
