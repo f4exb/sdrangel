@@ -356,6 +356,7 @@ void UDPSink::apply(bool force)
         m_levelCalcCount = 0;
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
+        m_udpHandler.resizeBuffer(m_config.m_inputSampleRate);
         m_settingsMutex.unlock();
     }
 
