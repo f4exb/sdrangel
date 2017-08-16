@@ -39,8 +39,18 @@ public:
     void readSample(Real &t);
     void readSample(Sample &s);
 
+    /** Get buffer gauge value in % of buffer size ([-50:50])
+     *  [-50:0] : write leads or read lags
+     *  [0:50]  : read leads or write lags
+     */
+    inline int32_t getBufferGauge() const
+    {
+        int32_t val = m_rwDelta - (m_nbUDPFrames/2);
+        return (100*val) / m_nbUDPFrames;
+    }
+
     static const int m_udpBlockSize = 512; // UDP block size in number of bytes
-    static const int m_nbUDPFrames = 32;   // number of frames of block size in the UDP buffer
+    static const int m_nbUDPFrames = 128;  // number of frames of block size in the UDP buffer
 
 public slots:
     void dataReadyRead();
@@ -60,6 +70,7 @@ private:
     int m_writeIndex;
     int m_readFrameIndex;
     int m_readIndex;
+    int m_rwDelta;
 };
 
 

@@ -492,5 +492,12 @@ void UDPSinkGUI::tick()
     double powDb = CalcDb::dbPower(m_udpSink->getMagSq());
     m_channelPowerDbAvg.feed(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
+
+    int32_t bufferGauge = m_udpSink->getBufferGauge();
+    ui->bufferGaugeNegative->setValue((bufferGauge < 0 ? -bufferGauge : 0));
+    ui->bufferGaugePositive->setValue((bufferGauge < 0 ? 0 : bufferGauge));
+    QString s = QString::number(bufferGauge, 'f', 0);
+    ui->bufferRWBalanceText->setText(tr("%1").arg(s));
+
 }
 

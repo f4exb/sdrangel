@@ -55,6 +55,7 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     double getMagSq() const { return m_magsq; }
+    int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
 
     void configure(MessageQueue* messageQueue,
             SampleFormat sampleFormat,
