@@ -97,7 +97,7 @@ private:
     virtual ~UDPSinkGUI();
 
     void blockApplySettings(bool block);
-    void applySettings();
+    void applySettings(bool force = false);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

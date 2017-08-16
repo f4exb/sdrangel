@@ -178,7 +178,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
 
-        applySettings();
+        applySettings(true);
         return true;
     }
     else
@@ -257,7 +257,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
-    applySettings();
+    applySettings(true);
 
     connect(m_udpSink->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 }
@@ -278,7 +278,7 @@ void UDPSinkGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void UDPSinkGUI::applySettings()
+void UDPSinkGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
@@ -385,7 +385,8 @@ void UDPSinkGUI::applySettings()
             fmDeviation,
             m_udpAddress,
             udpPort,
-            ui->channelMute->isChecked());
+            ui->channelMute->isChecked(),
+            force);
 
         ui->applyBtn->setEnabled(false);
     }

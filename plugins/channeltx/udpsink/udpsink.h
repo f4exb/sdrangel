@@ -64,7 +64,8 @@ public:
             int fmDeviation,
             QString& udpAddress,
             int udpPort,
-            bool channelMute);
+            bool channelMute,
+            bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
 private:
@@ -79,6 +80,7 @@ private:
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
+        bool getForce() const { return m_force; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
                 sampleFormat,
@@ -87,7 +89,8 @@ private:
                 int fmDeviation,
                 QString& udpAddress,
                 int udpPort,
-                bool channelMute)
+                bool channelMute,
+                bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
                     inputSampleRate,
@@ -95,7 +98,8 @@ private:
                     fmDeviation,
                     udpAddress,
                     udpPort,
-                    channelMute);
+                    channelMute,
+                    force);
         }
 
     private:
@@ -106,6 +110,7 @@ private:
         QString m_udpAddress;
         int m_udpPort;
         bool m_channelMute;
+        bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
                 Real inputSampleRate,
@@ -113,7 +118,8 @@ private:
                 int fmDeviation,
                 QString& udpAddress,
                 int udpPort,
-                bool channelMute) :
+                bool channelMute,
+                bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
             m_inputSampleRate(inputSampleRate),
@@ -121,7 +127,8 @@ private:
             m_fmDeviation(fmDeviation),
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
-            m_channelMute(channelMute)
+            m_channelMute(channelMute),
+            m_force(force)
         { }
     };
 

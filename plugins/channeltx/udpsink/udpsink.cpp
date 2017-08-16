@@ -150,7 +150,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_udpPort = cfg.getUDPPort();
         m_config.m_channelMute = cfg.getChannelMute();
 
-        apply(false);
+        apply(cfg.getForce());
 
         m_settingsMutex.unlock();
 
@@ -183,7 +183,8 @@ void UDPSink::configure(MessageQueue* messageQueue,
         int fmDeviation,
         QString& udpAddress,
         int udpPort,
-        bool channelMute)
+        bool channelMute,
+        bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
             outputSampleRate,
@@ -191,7 +192,8 @@ void UDPSink::configure(MessageQueue* messageQueue,
             fmDeviation,
             udpAddress,
             udpPort,
-            channelMute);
+            channelMute,
+            force);
     messageQueue->push(cmd);
 }
 
