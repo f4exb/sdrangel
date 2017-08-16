@@ -5,6 +5,7 @@ set(udpsink_SOURCES
 	udpsinkgui.cpp
 	udpsinkplugin.cpp
 	udpsinkudphandler.cpp
+	udpsinkmsg.cpp
 )
 
 set(udpsink_HEADERS
@@ -12,6 +13,7 @@ set(udpsink_HEADERS
 	udpsinkgui.h
 	udpsinkplugin.h
 	udpsinkudphandler.h
+	udpsinkmsg.h
 )
 
 set(udpsink_FORMS

@@ -17,6 +17,7 @@
 #include <QDebug>
 
 #include "dsp/upchannelizer.h"
+#include "udpsinkmsg.h"
 #include "udpsink.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
@@ -31,7 +32,7 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
-
+    m_udpHandler.setFeedbackMessageQueue(&m_inputMessageQueue);
     apply(true);
 }
 
@@ -162,6 +163,11 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_udpPort: " << m_config.m_udpPort
                 << " m_channelMute: " << m_config.m_channelMute;
 
+        return true;
+    }
+    else if (UDPSinkMessages::MsgSampleRateCorrection::match(cmd))
+    {
+        // TODO
         return true;
     }
     else

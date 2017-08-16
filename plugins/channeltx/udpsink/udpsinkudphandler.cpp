@@ -28,7 +28,8 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_writeIndex(0),
     m_readFrameIndex(m_nbUDPFrames/2),
     m_readIndex(0),
-    m_rwDelta(m_nbUDPFrames/2)
+    m_rwDelta(m_nbUDPFrames/2),
+    m_feedbackMessageQueue(0)
 {
 }
 

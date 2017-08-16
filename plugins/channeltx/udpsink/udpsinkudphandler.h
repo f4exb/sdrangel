@@ -24,6 +24,8 @@
 
 #include "dsp/dsptypes.h"
 
+class MessageQueue;
+
 class UDPSinkUDPHandler : public QObject
 {
     Q_OBJECT
@@ -38,6 +40,8 @@ public:
 
     void readSample(Real &t);
     void readSample(Sample &s);
+
+    void setFeedbackMessageQueue(MessageQueue *messageQueue) { m_feedbackMessageQueue = messageQueue; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
      *  [-50:0] : write leads or read lags
@@ -71,6 +75,7 @@ private:
     int m_readFrameIndex;
     int m_readIndex;
     int m_rwDelta;
+    MessageQueue *m_feedbackMessageQueue;
 };
 
 
