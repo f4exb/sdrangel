@@ -28,12 +28,16 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_udpSinkGUI(udpSinkGUI),
     m_spectrum(spectrum),
     m_spectrumEnabled(false),
-    m_spectrumChunkSize(2400),
+    m_spectrumChunkSize(2160),
     m_spectrumChunkCounter(0),
     m_magsq(1e-10),
     m_movingAverage(16, 0),
     m_sampleRateSum(0),
     m_sampleRateAvgCounter(0),
+    m_levelCalcCount(0),
+    m_peakLevel(0.0f),
+    m_levelSum(0.0f),
+    m_levelNbSamples(480),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
@@ -110,11 +114,13 @@ void UDPSink::modulateSample()
         m_udpHandler.readSample(s);
         m_modSample.real(s.m_real);
         m_modSample.imag(s.m_imag);
+        calculateLevel(m_modSample);
     }
     else
     {
         m_modSample.real(0.0f);
         m_modSample.imag(0.0f);
+        calculateLevel(1e-10);
     }
 
     if (m_spectrum && m_spectrumEnabled && (m_spectrumChunkCounter < m_spectrumChunkSize - 1))
@@ -130,6 +136,45 @@ void UDPSink::modulateSample()
         m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
         m_sampleBuffer.clear();
         m_spectrumChunkCounter = 0;
+    }
+}
+
+void UDPSink::calculateLevel(Real sample)
+{
+    if (m_levelCalcCount < m_levelNbSamples)
+    {
+        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
+        m_levelSum += sample * sample;
+        m_levelCalcCount++;
+    }
+    else
+    {
+        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
+        emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_levelCalcCount = 0;
+    }
+}
+
+void UDPSink::calculateLevel(Complex sample)
+{
+    Real t = std::abs(sample);
+
+    if (m_levelCalcCount < m_levelNbSamples)
+    {
+        m_peakLevel = std::max(std::fabs(m_peakLevel), t);
+        m_levelSum += (t * t);
+        m_levelCalcCount++;
+    }
+    else
+    {
+        qreal rmsLevel = sqrt((m_levelSum/(1<<30)) / m_levelNbSamples);
+        emit levelChanged(rmsLevel, m_peakLevel / 32768.0, m_levelNbSamples);
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_levelCalcCount = 0;
     }
 }
 
@@ -303,6 +348,10 @@ void UDPSink::apply(bool force)
         m_sampleRateAvgCounter = 0;
         m_spectrumChunkSize = m_config.m_inputSampleRate * 0.05; // 50 ms chunk
         m_spectrumChunkCounter = 0;
+        m_levelNbSamples = m_config.m_inputSampleRate * 0.01; // every 10 ms
+        m_levelCalcCount = 0;
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
         m_settingsMutex.unlock();
     }
 

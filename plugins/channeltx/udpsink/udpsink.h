@@ -68,6 +68,15 @@ public:
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
+signals:
+    /**
+     * Level changed
+     * \param rmsLevel RMS level in range 0.0 - 1.0
+     * \param peakLevel Peak level in range 0.0 - 1.0
+     * \param numSamples Number of audio samples analyzed
+     */
+    void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
 private:
     class MsgUDPSinkConfigure : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -206,12 +215,19 @@ private:
     double m_sampleRateSum;
     int m_sampleRateAvgCounter;
 
+    int m_levelCalcCount;
+    Real m_peakLevel;
+    double m_levelSum;
+    int m_levelNbSamples;
+
     QMutex m_settingsMutex;
 
     static const int m_sampleRateAverageItems = 17;
 
     void apply(bool force);
     void modulateSample();
+    void calculateLevel(Real sample);
+    void calculateLevel(Complex sample);
 };
 
 
