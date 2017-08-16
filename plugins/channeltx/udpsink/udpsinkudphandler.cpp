@@ -16,7 +16,9 @@
 
 #include <QDebug>
 
+#include "udpsinkmsg.h"
 #include "udpsinkudphandler.h"
+#include "util/messagequeue.h"
 
 UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_dataSocket(0),
@@ -29,6 +31,7 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_readFrameIndex(m_nbUDPFrames/2),
     m_readIndex(0),
     m_rwDelta(m_nbUDPFrames/2),
+    m_d(0),
     m_feedbackMessageQueue(0)
 {
 }
@@ -136,8 +139,26 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
         {
             m_rwDelta = m_writeIndex; // raw R/W delta estimate
             float d = (m_rwDelta - (m_nbUDPFrames/2))/(float) m_nbUDPFrames;
-            qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
-            m_readFrameIndex = 0;
+            //qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
+
+            if ((d < -0.45) || (d > 0.45))
+            {
+                resetReadIndex();
+            }
+            else
+            {
+                float dd = d - m_d; // derivative
+                float c = (d + dd) / 10.0; // (d / 10.0) + (dd / 10.0); // damping and scaling
+                c = c < -0.05 ? -0.05 : c > 0.05 ? 0.05 : c; // limit
+                UDPSinkMessages::MsgSampleRateCorrection *msg = UDPSinkMessages::MsgSampleRateCorrection::create(c);
+
+                if (m_feedbackMessageQueue) {
+                    m_feedbackMessageQueue->push(msg);
+                }
+
+                m_readFrameIndex = 0;
+                m_d = d;
+            }
         }
     }
 }
@@ -164,4 +185,5 @@ void UDPSinkUDPHandler::resetReadIndex()
     m_readFrameIndex = (m_writeIndex + (m_nbUDPFrames/2)) % m_nbUDPFrames;
     m_rwDelta = m_nbUDPFrames/2;
     m_readIndex = 0;
+    m_d = 0.0f;
 }

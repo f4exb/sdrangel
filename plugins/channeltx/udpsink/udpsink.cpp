@@ -115,8 +115,6 @@ void UDPSink::modulateSample()
 
 bool UDPSink::handleMessage(const Message& cmd)
 {
-    qDebug() << "UDPSink::handleMessage";
-
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
@@ -167,7 +165,17 @@ bool UDPSink::handleMessage(const Message& cmd)
     }
     else if (UDPSinkMessages::MsgSampleRateCorrection::match(cmd))
     {
-        // TODO
+        UDPSinkMessages::MsgSampleRateCorrection& cfg = (UDPSinkMessages::MsgSampleRateCorrection&) cmd;
+        m_actualInputSampleRate += cfg.getCorrectionFactor() * m_actualInputSampleRate;
+        qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f", cfg.getCorrectionFactor(), m_actualInputSampleRate);
+
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_config.m_outputSampleRate;
+        //m_interpolator.create(48, m_actualInputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
+        m_settingsMutex.unlock();
+
         return true;
     }
     else
@@ -223,6 +231,8 @@ void UDPSink::apply(bool force)
         m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_outputSampleRate;
         m_interpolator.create(48, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+        m_actualInputSampleRate = m_config.m_inputSampleRate;
+        m_udpHandler.resetReadIndex();
         m_settingsMutex.unlock();
     }
 

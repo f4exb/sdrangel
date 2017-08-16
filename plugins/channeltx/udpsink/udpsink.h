@@ -198,6 +198,7 @@ private:
     MovingAverage<double> m_movingAverage;
 
     UDPSinkUDPHandler m_udpHandler;
+    Real m_actualInputSampleRate; //!< sample rate with UDP buffer skew compensation
 
     QMutex m_settingsMutex;
 

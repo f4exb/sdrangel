@@ -54,7 +54,7 @@ public:
     }
 
     static const int m_udpBlockSize = 512; // UDP block size in number of bytes
-    static const int m_nbUDPFrames = 128;  // number of frames of block size in the UDP buffer
+    static const int m_nbUDPFrames = 256;  // number of frames of block size in the UDP buffer
 
 public slots:
     void dataReadyRead();
@@ -75,6 +75,7 @@ private:
     int m_readFrameIndex;
     int m_readIndex;
     int m_rwDelta;
+    float m_d;
     MessageQueue *m_feedbackMessageQueue;
 };
 
