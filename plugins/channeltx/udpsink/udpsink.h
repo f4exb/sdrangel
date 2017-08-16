@@ -188,6 +188,10 @@ private:
     MessageQueue* m_uiMessageQueue;
     UDPSinkGUI* m_udpSinkGUI;
     BasebandSampleSink* m_spectrum;
+    bool m_spectrumEnabled;
+    SampleVector m_sampleBuffer;
+    int m_spectrumChunkSize;
+    int m_spectrumChunkCounter;
 
     Interpolator m_interpolator;
     Real m_interpolatorDistance;

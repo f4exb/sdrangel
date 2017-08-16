@@ -27,6 +27,9 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_uiMessageQueue(uiMessageQueue),
     m_udpSinkGUI(udpSinkGUI),
     m_spectrum(spectrum),
+    m_spectrumEnabled(false),
+    m_spectrumChunkSize(2400),
+    m_spectrumChunkCounter(0),
     m_magsq(1e-10),
     m_movingAverage(16, 0),
     m_sampleRateSum(0),
@@ -113,6 +116,21 @@ void UDPSink::modulateSample()
         m_modSample.real(0.0f);
         m_modSample.imag(0.0f);
     }
+
+    if (m_spectrum && m_spectrumEnabled && (m_spectrumChunkCounter < m_spectrumChunkSize - 1))
+    {
+        Sample s;
+        s.m_real = (FixReal) m_modSample.real();
+        s.m_imag = (FixReal) m_modSample.imag();
+        m_sampleBuffer.push_back(s);
+        m_spectrumChunkCounter++;
+    }
+    else
+    {
+        m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+        m_sampleBuffer.clear();
+        m_spectrumChunkCounter = 0;
+    }
 }
 
 bool UDPSink::handleMessage(const Message& cmd)
@@ -121,13 +139,11 @@ bool UDPSink::handleMessage(const Message& cmd)
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-        m_settingsMutex.lock();
-
         m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
         m_config.m_outputSampleRate = notif.getSampleRate();
         m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-        m_settingsMutex.unlock();
+        apply(false);
 
         qDebug() << "UDPSink::handleMessage: MsgChannelizerNotification:"
                 << " m_basebandSampleRate: " << m_config.m_basebandSampleRate
@@ -140,8 +156,6 @@ bool UDPSink::handleMessage(const Message& cmd)
     {
         MsgUDPSinkConfigure& cfg = (MsgUDPSinkConfigure&) cmd;
 
-        m_settingsMutex.lock();
-
         m_config.m_sampleFormat = cfg.getSampleFormat();
         m_config.m_inputSampleRate = cfg.getInputSampleRate();
         m_config.m_rfBandwidth = cfg.getRFBandwidth();
@@ -151,8 +165,6 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_channelMute = cfg.getChannelMute();
 
         apply(cfg.getForce());
-
-        m_settingsMutex.unlock();
 
         qDebug() << "UDPSink::handleMessage: MsgUDPSinkConfigure:"
                 << " m_sampleFormat: " << m_config.m_sampleFormat
@@ -168,52 +180,73 @@ bool UDPSink::handleMessage(const Message& cmd)
     else if (UDPSinkMessages::MsgSampleRateCorrection::match(cmd))
     {
         UDPSinkMessages::MsgSampleRateCorrection& cfg = (UDPSinkMessages::MsgSampleRateCorrection&) cmd;
-        m_actualInputSampleRate += cfg.getCorrectionFactor() * m_actualInputSampleRate;
+        Real newSampleRate = m_actualInputSampleRate + cfg.getCorrectionFactor() * m_actualInputSampleRate;
 
-        if ((cfg.getRawDeltaRatio() > -0.05) || (cfg.getRawDeltaRatio() < 0.05))
+        // exclude values too way out nominal sample rate (20%)
+        if ((newSampleRate < m_running.m_inputSampleRate * 1.2) && (newSampleRate >  m_running.m_inputSampleRate * 0.8))
         {
-            if (m_sampleRateAvgCounter < m_sampleRateAverageItems)
+            m_actualInputSampleRate = newSampleRate;
+
+            if ((cfg.getRawDeltaRatio() > -0.05) || (cfg.getRawDeltaRatio() < 0.05))
             {
-                m_sampleRateSum += m_actualInputSampleRate;
-                m_sampleRateAvgCounter++;
+                if (m_sampleRateAvgCounter < m_sampleRateAverageItems)
+                {
+                    m_sampleRateSum += m_actualInputSampleRate;
+                    m_sampleRateAvgCounter++;
+                }
             }
-        }
-        else
-        {
-            m_sampleRateSum = 0.0;
-            m_sampleRateAvgCounter = 0;
+            else
+            {
+                m_sampleRateSum = 0.0;
+                m_sampleRateAvgCounter = 0;
+            }
+
+            if (m_sampleRateAvgCounter == m_sampleRateAverageItems)
+            {
+                float avgRate = m_sampleRateSum / m_sampleRateAverageItems;
+                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f: avg rate: %.0f",
+                        cfg.getCorrectionFactor(),
+                        m_actualInputSampleRate,
+                        avgRate);
+                m_actualInputSampleRate = avgRate;
+                m_sampleRateSum = 0.0;
+                m_sampleRateAvgCounter = 0;
+            }
+            else
+            {
+                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f",
+                        cfg.getCorrectionFactor(),
+                        m_actualInputSampleRate);
+            }
+
+            m_settingsMutex.lock();
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorConsumed = false;
+            m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_config.m_outputSampleRate;
+            //m_interpolator.create(48, m_actualInputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
+            m_settingsMutex.unlock();
         }
 
-        if (m_sampleRateAvgCounter == m_sampleRateAverageItems)
-        {
-            float avgRate = m_sampleRateSum / m_sampleRateAverageItems;
-            qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f: avg rate: %f",
-                    cfg.getCorrectionFactor(),
-                    m_actualInputSampleRate,
-                    avgRate);
-            m_actualInputSampleRate = avgRate;
-            m_sampleRateSum = 0.0;
-            m_sampleRateAvgCounter = 0;
-        }
-        else
-        {
-            qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %f new rate: %f",
-                    cfg.getCorrectionFactor(),
-                    m_actualInputSampleRate);
-        }
-
-        m_settingsMutex.lock();
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_config.m_outputSampleRate;
-        //m_interpolator.create(48, m_actualInputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
-        m_settingsMutex.unlock();
+        return true;
+    }
+    else if (MsgUDPSinkSpectrum::match(cmd))
+    {
+        MsgUDPSinkSpectrum& spc = (MsgUDPSinkSpectrum&) cmd;
+        m_spectrumEnabled = spc.getEnabled();
+        qDebug() << "UDPSink::handleMessage: MsgUDPSinkSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
         return true;
     }
     else
     {
-        return false;
+        if(m_spectrum != 0)
+        {
+           return m_spectrum->handleMessage(cmd);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -268,13 +301,17 @@ void UDPSink::apply(bool force)
         m_udpHandler.resetReadIndex();
         m_sampleRateSum = 0.0;
         m_sampleRateAvgCounter = 0;
+        m_spectrumChunkSize = m_config.m_inputSampleRate * 0.05; // 50 ms chunk
+        m_spectrumChunkCounter = 0;
         m_settingsMutex.unlock();
     }
 
     if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) ||
         (m_config.m_udpPort != m_running.m_udpPort) || force)
     {
+        m_settingsMutex.lock();
         m_udpHandler.configureUDPLink(m_config.m_udpAddressStr, m_config.m_udpPort);
+        m_settingsMutex.unlock();
     }
 
     if ((m_config.m_channelMute != m_running.m_channelMute) || force)
