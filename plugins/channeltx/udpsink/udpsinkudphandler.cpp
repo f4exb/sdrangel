@@ -27,6 +27,8 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_dataPort(9999),
     m_dataConnected(false),
     m_udpReadBytes(0),
+    m_nbUDPFrames(m_minNbUDPFrames),
+    m_nbAllocatedUDPFrames(m_minNbUDPFrames),
     m_writeIndex(0),
     m_readFrameIndex(m_minNbUDPFrames/2),
     m_readIndex(0),
@@ -34,10 +36,12 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_d(0),
     m_feedbackMessageQueue(0)
 {
+    m_udpBuf = new udpBlk_t[m_minNbUDPFrames];
 }
 
 UDPSinkUDPHandler::~UDPSinkUDPHandler()
 {
+    delete[] m_udpBuf;
 }
 
 void UDPSinkUDPHandler::start()
@@ -102,7 +106,7 @@ void UDPSinkUDPHandler::moveData()
 {
     memcpy(m_udpBuf[m_writeIndex], m_udpTmpBuf, m_udpBlockSize);
 
-    if (m_writeIndex < m_minNbUDPFrames - 1) {
+    if (m_writeIndex < m_nbUDPFrames - 1) {
         m_writeIndex++;
     } else {
         m_writeIndex = 0;
@@ -131,14 +135,14 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
     {
         m_readIndex = 0;
 
-        if (m_readFrameIndex < m_minNbUDPFrames - 1)
+        if (m_readFrameIndex < m_nbUDPFrames - 1)
         {
             m_readFrameIndex++;
         }
         else
         {
             m_rwDelta = m_writeIndex; // raw R/W delta estimate
-            float d = (m_rwDelta - (m_minNbUDPFrames/2))/(float) m_minNbUDPFrames;
+            float d = (m_rwDelta - (m_nbUDPFrames/2))/(float) m_nbUDPFrames;
             //qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
 
             if ((d < -0.45) || (d > 0.45))
@@ -182,8 +186,26 @@ void UDPSinkUDPHandler::configureUDPLink(const QString& address, quint16 port)
 
 void UDPSinkUDPHandler::resetReadIndex()
 {
-    m_readFrameIndex = (m_writeIndex + (m_minNbUDPFrames/2)) % m_minNbUDPFrames;
-    m_rwDelta = m_minNbUDPFrames/2;
+    m_readFrameIndex = (m_writeIndex + (m_nbUDPFrames/2)) % m_nbUDPFrames;
+    m_rwDelta = m_nbUDPFrames/2;
     m_readIndex = 0;
     m_d = 0.0f;
+}
+
+void UDPSinkUDPHandler::resizeBuffer(float sampleRate)
+{
+    int halfNbFrames = std::max((sampleRate / 375.0), (m_minNbUDPFrames / 2.0));
+    qDebug("UDPSinkUDPHandler::resizeBuffer: nb_frames: %d", 2*halfNbFrames);
+
+    if (2*halfNbFrames > m_nbAllocatedUDPFrames)
+    {
+        delete[] m_udpBuf;
+        m_udpBuf = new udpBlk_t[2*halfNbFrames];
+        m_nbAllocatedUDPFrames = 2*halfNbFrames;
+    }
+
+    m_nbUDPFrames = 2*halfNbFrames;
+    m_writeIndex = 0;
+
+    resetReadIndex();
 }

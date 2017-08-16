@@ -259,12 +259,12 @@ bool UDPSink::handleMessage(const Message& cmd)
                 m_sampleRateSum = 0.0;
                 m_sampleRateAvgCounter = 0;
             }
-            else
-            {
-                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f",
-                        cfg.getCorrectionFactor(),
-                        m_actualInputSampleRate);
-            }
+//            else
+//            {
+//                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f",
+//                        cfg.getCorrectionFactor(),
+//                        m_actualInputSampleRate);
+//            }
 
             m_settingsMutex.lock();
             m_interpolatorDistanceRemain = 0;

@@ -37,6 +37,7 @@ public:
     void stop();
     void configureUDPLink(const QString& address, quint16 port);
     void resetReadIndex();
+    void resizeBuffer(float sampleRate);
 
     void readSample(Real &t);
     void readSample(Sample &s);
@@ -49,8 +50,8 @@ public:
      */
     inline int32_t getBufferGauge() const
     {
-        int32_t val = m_rwDelta - (m_minNbUDPFrames/2);
-        return (100*val) / m_minNbUDPFrames;
+        int32_t val = m_rwDelta - (m_nbUDPFrames/2);
+        return (100*val) / m_nbUDPFrames;
     }
 
     static const int m_udpBlockSize = 512; // UDP block size in number of bytes
@@ -72,7 +73,9 @@ private:
     bool m_dataConnected;
     udpBlk_t m_udpTmpBuf;
     qint64 m_udpReadBytes;
-    udpBlk_t m_udpBuf[m_minNbUDPFrames];
+    udpBlk_t *m_udpBuf;
+    int m_nbUDPFrames;
+    int m_nbAllocatedUDPFrames;
     int m_writeIndex;
     int m_readFrameIndex;
     int m_readIndex;
