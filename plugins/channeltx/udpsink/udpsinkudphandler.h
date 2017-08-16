@@ -49,17 +49,19 @@ public:
      */
     inline int32_t getBufferGauge() const
     {
-        int32_t val = m_rwDelta - (m_nbUDPFrames/2);
-        return (100*val) / m_nbUDPFrames;
+        int32_t val = m_rwDelta - (m_minNbUDPFrames/2);
+        return (100*val) / m_minNbUDPFrames;
     }
 
     static const int m_udpBlockSize = 512; // UDP block size in number of bytes
-    static const int m_nbUDPFrames = 256;  // number of frames of block size in the UDP buffer
+    static const int m_minNbUDPFrames = 256;  // number of frames of block size in the UDP buffer
 
 public slots:
     void dataReadyRead();
 
 private:
+    typedef char (udpBlk_t)[m_udpBlockSize];
+
     void moveData();
     void advanceReadPointer(int nbBytes);
 
@@ -68,9 +70,9 @@ private:
     QHostAddress m_remoteAddress;
     quint16 m_dataPort;
     bool m_dataConnected;
-    char m_udpTmpBuf[m_udpBlockSize];
+    udpBlk_t m_udpTmpBuf;
     qint64 m_udpReadBytes;
-    char m_udpBuf[m_nbUDPFrames][m_udpBlockSize];
+    udpBlk_t m_udpBuf[m_minNbUDPFrames];
     int m_writeIndex;
     int m_readFrameIndex;
     int m_readIndex;

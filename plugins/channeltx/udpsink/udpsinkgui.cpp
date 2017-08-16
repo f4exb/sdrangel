@@ -166,6 +166,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->udpAddress->setText(strtmp);
         d.readS32(10, &s32tmp, 10);
         ui->volume->setValue(s32tmp);
+        ui->volumeText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
 
