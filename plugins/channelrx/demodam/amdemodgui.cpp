@@ -213,7 +213,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false)
+	m_squelchOpen(false),
+	m_tickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -312,7 +313,9 @@ void AMDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    }
 
 	bool squelchOpen = m_amDemod->getSquelchOpen();
 
@@ -326,5 +329,7 @@ void AMDemodGUI::tick()
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
 	}
+
+	m_tickCount++;
 }
 
