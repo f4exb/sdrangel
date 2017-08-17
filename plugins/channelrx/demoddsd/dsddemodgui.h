@@ -109,8 +109,7 @@ private:
     bool m_tdmaStereo;
     bool m_audioMute;
 	bool m_squelchOpen;
-	MovingAverage<double> m_channelPowerDbAvg;
-	int m_tickCount;
+	uint32_t m_tickCount;
 
 	float m_myLatitude;
 	float m_myLongitude;

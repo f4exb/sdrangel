@@ -308,7 +308,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_slot2On(false),
 	m_tdmaStereo(false),
 	m_squelchOpen(false),
-	m_channelPowerDbAvg(20,0),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -594,11 +593,9 @@ void DSDDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
-
-//	Real powDb = CalcDb::dbPower(m_dsdDemod->getMagSq());
-//    m_channelPowerDbAvg.feed(powDb);
-//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+    }
 
 	bool squelchOpen = m_dsdDemod->getSquelchOpen();
 
@@ -615,11 +612,7 @@ void DSDDemodGUI::tick()
 
 	// "slow" updates
 
-	if (m_tickCount < 10)
-	{
-	    m_tickCount++;
-	}
-	else
+	if (m_tickCount % 10 == 0)
 	{
 	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
         ui->inCarrierPosText->setText(QString::number(m_dsdDemod->getDecoder().getCarrierPos()));
@@ -662,9 +655,9 @@ void DSDDemodGUI::tick()
         } else {
             ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         }
-
-        m_tickCount = 0;
 	}
+
+	m_tickCount++;
 }
 
 unsigned int DSDDemodBaudRates::getRate(unsigned int rate_index)
