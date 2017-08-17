@@ -16,17 +16,19 @@
 
 #include "util/db.h"
 #include <cmath>
+#include <cassert>
 
-double CalcDb::dbPower(double magsq, double floordB)
+double CalcDb::dbPower(double magsq, double floor)
 {
-	if (magsq > 0)
+    assert(floor > 0.0);
+
+	if (magsq > floor)
 	{
-	    double val = 10.0 * log10(magsq);
-		return val > floordB ? val : floordB;
+	    return 10.0 * log10(magsq);
 	}
 	else
 	{
-		return floordB;
+		return 10.0 * log10(floor);
 	}
 }
 
