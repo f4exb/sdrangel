@@ -69,6 +69,7 @@ public:
             bool channelMute,
             Real gain,
             Real squelchDB,
+            bool squelchEnabled,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
@@ -95,6 +96,7 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         Real getGain() const { return m_gain; }
         Real getSquelchDB() const { return m_squelchDB; }
+        bool getSquelchEnabled() const { return m_squelchEnabled; }
         bool getForce() const { return m_force; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
@@ -107,6 +109,7 @@ private:
                 bool channelMute,
                 Real gain,
                 Real squelchDB,
+                bool squelchEnabled,
                 bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
@@ -118,6 +121,7 @@ private:
                     channelMute,
                     gain,
                     squelchDB,
+                    squelchEnabled,
                     force);
         }
 
@@ -131,6 +135,7 @@ private:
         bool m_channelMute;
         Real m_gain;
         Real m_squelchDB;
+        bool m_squelchEnabled;
         bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
@@ -142,6 +147,7 @@ private:
                 bool channelMute,
                 Real gain,
                 Real squelchDB,
+                bool squelchEnabled,
                 bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
@@ -153,6 +159,7 @@ private:
             m_channelMute(channelMute),
             m_gain(gain),
             m_squelchDB(squelchDB),
+            m_squelchEnabled(squelchEnabled),
             m_force(force)
         { }
     };
@@ -188,6 +195,7 @@ private:
         bool m_channelMute;
         Real m_gain;
         Real m_squelch; //!< squared magnitude
+        bool m_squelchEnabled;
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
@@ -203,6 +211,7 @@ private:
             m_channelMute(false),
             m_gain(1.0),
             m_squelch(-50.0),
+            m_squelchEnabled(true),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}
@@ -258,7 +267,7 @@ private:
 
     inline void calculateSquelch(double value)
     {
-        if (value > m_running.m_squelch)
+        if ((!m_running.m_squelchEnabled) || (value > m_running.m_squelch))
         {
             if (m_squelchOpenCount < m_squelchThreshold) {
                 m_squelchOpenCount++;

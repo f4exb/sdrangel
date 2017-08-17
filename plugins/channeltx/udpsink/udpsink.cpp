@@ -232,6 +232,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_channelMute = cfg.getChannelMute();
         m_config.m_gain = cfg.getGain();
         m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
+        m_config.m_squelchEnabled = cfg.getSquelchEnabled();
 
         apply(cfg.getForce());
 
@@ -245,7 +246,8 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_channelMute: " << m_config.m_channelMute
                 << " m_gain: " << m_config.m_gain
                 << " squelchDB: " << cfg.getSquelchDB()
-                << " m_squelch: " << m_config.m_squelch;
+                << " m_squelch: " << m_config.m_squelch
+                << " m_squelchEnabled: " << m_config.m_squelchEnabled;
 
         return true;
     }
@@ -332,6 +334,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         bool channelMute,
         Real gain,
         Real squelchDB,
+        bool squelchEnabled,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
@@ -343,6 +346,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             channelMute,
             gain,
             squelchDB,
+            squelchEnabled,
             force);
     messageQueue->push(cmd);
 }

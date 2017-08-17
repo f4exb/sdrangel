@@ -177,7 +177,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.setTitle(strtmp);
         this->setWindowTitle(m_channelMarker.getTitle());
 
-        d.readS32(14, &s32tmp, 10);
+        d.readS32(14, &s32tmp, -60);
         ui->squelch->setValue(s32tmp);
         ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
 
@@ -398,6 +398,7 @@ void UDPSinkGUI::applySettings(bool force)
             ui->channelMute->isChecked(),
             ui->gain->value() / 10.0f,
             ui->squelch->value() * 1.0f,
+            ui->squelch->value() != -100,
             force);
 
         ui->applyBtn->setEnabled(false);
@@ -465,7 +466,15 @@ void UDPSinkGUI::on_gain_valueChanged(int value)
 
 void UDPSinkGUI::on_squelch_valueChanged(int value)
 {
-    ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
+    if (value == -100) // means disabled
+    {
+        ui->squelchText->setText("---");
+    }
+    else
+    {
+        ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
+    }
+
     applySettings();
 }
 

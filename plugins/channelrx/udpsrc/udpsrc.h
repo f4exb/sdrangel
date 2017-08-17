@@ -25,6 +25,7 @@
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
 #include "dsp/phasediscri.h"
+#include "dsp/movingaverage.h"
 #include "util/udpsink.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
@@ -71,9 +72,12 @@ public:
 			bool audioActive,
 			bool audioStereo,
 			Real gain,
-			int volume);
+			int volume,
+			Real squelchDB,
+			bool squelchEnabled);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
+	double getInMagSq() const { return m_inMagsq; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -151,36 +155,48 @@ protected:
 		int getVolume() const { return m_volume; }
 		bool getAudioActive() const { return m_audioActive; }
 		bool getAudioStereo() const { return m_audioStereo; }
+		Real getSquelchDB() const { return m_squelchDB; }
+		bool getSquelchEnabled() const { return m_squelchEnabled; }
 
 		static MsgUDPSrcConfigureImmediate* create(
 				bool audioActive,
 				bool audioStereo,
 				int boost,
-				int volume)
+				int volume,
+				Real squelchDB,
+				bool squelchEnabled)
 		{
 			return new MsgUDPSrcConfigureImmediate(
 					audioActive,
 					audioStereo,
 					boost,
-					volume);
+					volume,
+					squelchDB,
+					squelchEnabled);
 		}
 
 	private:
 		Real m_gain;
-		int m_volume;
+		int  m_volume;
 		bool m_audioActive;
 		bool m_audioStereo;
+		Real m_squelchDB;
+		bool m_squelchEnabled;
 
 		MsgUDPSrcConfigureImmediate(
 				bool audioActive,
 				bool audioStereo,
 				Real gain,
-				int volume) :
+				int volume,
+                Real squelchDB,
+                bool squelchEnabled) :
 			Message(),
 			m_gain(gain),
             m_volume(volume),
 			m_audioActive(audioActive),
-			m_audioStereo(audioStereo)
+			m_audioStereo(audioStereo),
+			m_squelchDB(squelchDB),
+			m_squelchEnabled(squelchEnabled)
 		{ }
 	};
 
@@ -222,6 +238,9 @@ protected:
 	int m_volume;
 	int m_fmDeviation;
 	double m_magsq;
+    double m_inMagsq;
+    MovingAverage<double> m_outMovingAverage;
+    MovingAverage<double> m_inMovingAverage;
 
 	Real m_scale;
 	Complex m_last, m_this;

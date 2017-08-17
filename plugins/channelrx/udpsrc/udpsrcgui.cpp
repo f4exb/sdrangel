@@ -105,6 +105,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(13, m_audioPort);
 	s.writeBool(14, m_audioStereo);
 	s.writeS32(15, m_fmDeviation);
+	s.writeS32(16, ui->squelch->value());
 	return s.final();
 }
 
@@ -189,6 +190,9 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->audioStereo->setChecked(booltmp);
 		d.readS32(15, &s32tmp, 2500);
 		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
+        d.readS32(16, &s32tmp, -60);
+        ui->squelch->setValue(s32tmp);
+        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -222,6 +226,9 @@ void UDPSrcGUI::tick()
         m_channelPowerAvg.feed(m_udpSrc->getMagSq());
         double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
         ui->channelPower->setText(QString::number(powDb, 'f', 1));
+        m_inPowerAvg.feed(m_udpSrc->getInMagSq());
+        double inPowDb = CalcDb::dbPower(m_inPowerAvg.average());
+        ui->inputPower->setText(QString::number(inPowDb, 'f', 1));
     }
 
 	m_tickCount++;
@@ -235,6 +242,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_udpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerAvg(4, 1e-10),
+    m_inPowerAvg(4, 1e-10),
 	m_tickCount(0),
 	m_gain(1.0),
     m_volume(20),
@@ -307,6 +315,7 @@ void UDPSrcGUI::displaySettings()
 {
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
+    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
 }
 
 void UDPSrcGUI::applySettingsImmediate()
@@ -322,7 +331,9 @@ void UDPSrcGUI::applySettingsImmediate()
 			m_audioActive,
 		    m_audioStereo,
 		    m_gain,
-			m_volume);
+			m_volume,
+			ui->squelch->value() * 1.0f,
+			ui->squelch->value() != -100);
 	}
 }
 
@@ -518,9 +529,22 @@ void UDPSrcGUI::on_gain_valueChanged(int value)
 
 void UDPSrcGUI::on_volume_valueChanged(int value)
 {
-	ui->volume->setValue(value);
 	ui->volumeText->setText(QString("%1").arg(value));
 	applySettingsImmediate();
+}
+
+void UDPSrcGUI::on_squelch_valueChanged(int value)
+{
+    if (value == -100) // means disabled
+    {
+        ui->squelchText->setText("---");
+    }
+    else
+    {
+        ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
+    }
+
+    applySettingsImmediate();
 }
 
 void UDPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)

@@ -35,6 +35,8 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_audioStereo(false),
 	m_volume(20),
     m_fmDeviation(2500),
+    m_outMovingAverage(480, 1e-10),
+    m_inMovingAverage(480, 1e-10),
     m_audioFifo(4, 24000),
     m_settingsMutex(QMutex::Recursive)
 {
@@ -67,6 +69,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_this = 0;
 	m_scale = 0;
 	m_magsq = 0;
+	m_inMagsq = 0;
 	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBlockSize);
 
 	m_phaseDiscri.setFMScaling((float) m_outputSampleRate / (2.0f * m_fmDeviation));
@@ -117,13 +120,17 @@ void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 		bool audioActive,
 		bool audioStereo,
 		Real boost,
-		int volume)
+		int  volume,
+		Real squelchDB,
+		bool squelchEnabled)
 {
 	Message* cmd = MsgUDPSrcConfigureImmediate::create(
 			audioActive,
 			audioStereo,
 			boost,
-			volume);
+			volume,
+			squelchDB,
+			squelchEnabled);
 	messageQueue->push(cmd);
 }
 
@@ -149,7 +156,13 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*m_gain*m_gain) / (1<<30);
+		    double inMagSq = ci.real()*ci.real() + ci.imag()*ci.imag();
+			//m_magsq = (inMagSq*m_gain*m_gain) / (1<<30);
+			m_outMovingAverage.feed((inMagSq*m_gain*m_gain) / (1<<30));
+		    m_inMovingAverage.feed(inMagSq / (1<<30));
+		    m_magsq = m_outMovingAverage.average();
+		    m_inMagsq = m_inMovingAverage.average();
+
 			Sample s(ci.real() * m_gain, ci.imag() * m_gain);
 			m_sampleBuffer.push_back(s);
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
@@ -220,7 +233,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_sampleFormat == FormatAMMono)
 			{
-				FixReal demod = (FixReal) (32768.0f * sqrt(m_magsq));
+				FixReal demod = (FixReal) (32768.0f * sqrt(inMagSq) * m_gain);
 				m_udpBufferMono->write(demod);
 			}
 			else // Raw I/Q samples
@@ -370,6 +383,9 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 		UDPFilter->create_filter(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate);
+
+        m_inMovingAverage.resize(m_inputSampleRate * 0.01, 1e-10);   // 10 ms
+        m_outMovingAverage.resize(m_outputSampleRate * 0.01, 1e-10); // 10 ms
 
 		m_settingsMutex.unlock();
 

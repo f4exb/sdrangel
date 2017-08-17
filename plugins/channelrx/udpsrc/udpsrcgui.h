@@ -74,6 +74,7 @@ private slots:
 	void onMenuDoubleClicked();
 	void on_gain_valueChanged(int value);
 	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
 	void tick();
 
 private:
@@ -83,6 +84,7 @@ private:
 	UDPSrc* m_udpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<double> m_channelPowerAvg;
+    MovingAverage<double> m_inPowerAvg;
 	uint32_t m_tickCount;
 
 	// settings
