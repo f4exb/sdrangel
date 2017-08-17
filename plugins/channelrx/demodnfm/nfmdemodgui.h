@@ -69,6 +69,7 @@ private:
 	bool m_ctcssOn;
 	bool m_audioMute;
 	bool m_squelchOpen;
+	uint32_t m_tickCount;
 
 	static const int m_rfBW[];
 	static const int m_fmDev[];

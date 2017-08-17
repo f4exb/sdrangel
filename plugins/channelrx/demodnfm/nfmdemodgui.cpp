@@ -272,7 +272,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_squelchOpen(false)
+	m_squelchOpen(false),
+	m_tickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -414,7 +415,9 @@ void NFMDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+    }
 
     bool squelchOpen = m_nfmDemod->getSquelchOpen();
 
@@ -428,4 +431,6 @@ void NFMDemodGUI::tick()
 
         m_squelchOpen = squelchOpen;
 	}
+
+	m_tickCount++;
 }
