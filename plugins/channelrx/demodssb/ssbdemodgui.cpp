@@ -1,12 +1,12 @@
-#include "../../channelrx/demodssb/ssbdemodgui.h"
-#include "../../channelrx/demodssb/ssbdemodgui.h"
+#include "ssbdemodgui.h"
+#include "ssbdemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
+#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_ssbdemodgui.h"
 #include "ui_ssbdemodgui.h"
 #include "dsp/spectrumvis.h"
@@ -17,7 +17,7 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
-#include "../../channelrx/demodssb/ssbdemod.h"
+#include "ssbdemod.h"
 
 const QString SSBDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.ssb";
 
@@ -365,7 +365,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_audioFlipChannels(false),
 	m_dsb(false),
     m_audioMute(false),
-	m_channelPowerDbAvg(20,0),
 	m_squelchOpen(false)
 {
 	ui->setupUi(this);
@@ -582,7 +581,9 @@ void SSBDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+    }
 
     bool squelchOpen = m_ssbDemod->getAudioActive();
 
@@ -596,4 +597,6 @@ void SSBDemodGUI::tick()
 
         m_squelchOpen = squelchOpen;
     }
+
+    m_tickCount++;
 }

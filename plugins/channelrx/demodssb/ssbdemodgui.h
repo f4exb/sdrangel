@@ -72,8 +72,8 @@ private:
 	bool m_audioFlipChannels;
 	bool m_dsb;
 	bool m_audioMute;
-	MovingAverage<double> m_channelPowerDbAvg;
 	bool m_squelchOpen;
+	uint32_t m_tickCount;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
