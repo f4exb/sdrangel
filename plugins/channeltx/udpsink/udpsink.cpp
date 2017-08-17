@@ -17,6 +17,7 @@
 #include <QDebug>
 
 #include "dsp/upchannelizer.h"
+#include "util/db.h"
 #include "udpsinkmsg.h"
 #include "udpsink.h"
 
@@ -31,13 +32,18 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_spectrumChunkSize(2160),
     m_spectrumChunkCounter(0),
     m_magsq(1e-10),
-    m_movingAverage(16, 0),
+    m_movingAverage(16, 1e-10),
+    m_inMovingAverage(480, 1e-10),
     m_sampleRateSum(0),
     m_sampleRateAvgCounter(0),
     m_levelCalcCount(0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
     m_levelNbSamples(480),
+    m_squelchOpen(false),
+    m_squelchOpenCount(0),
+    m_squelchCloseCount(0),
+    m_squelchThreshold(4800),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
@@ -65,6 +71,7 @@ void UDPSink::pull(Sample& sample)
     {
         sample.m_real = 0.0f;
         sample.m_imag = 0.0f;
+        initSquelch(false);
         return;
     }
 
@@ -95,7 +102,7 @@ void UDPSink::pull(Sample& sample)
 
     m_settingsMutex.unlock();
 
-    Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+    double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
     magsq /= (1<<30);
     m_movingAverage.feed(magsq);
     m_magsq = m_movingAverage.average();
@@ -112,15 +119,30 @@ void UDPSink::modulateSample()
     if (m_running.m_sampleFormat == FormatS16LE)
     {
         m_udpHandler.readSample(s);
-        m_modSample.real(s.m_real * m_running.m_volume);
-        m_modSample.imag(s.m_imag * m_running.m_volume);
-        calculateLevel(m_modSample);
+
+        uint64_t magsq = s.m_real * s.m_real + s.m_imag * s.m_imag;
+        m_inMovingAverage.feed(magsq/1073741824.0);
+        m_inMagsq = m_inMovingAverage.average();
+
+        calculateSquelch(m_inMagsq);
+
+        if (m_squelchOpen)
+        {
+            m_modSample.real(s.m_real * m_running.m_volume);
+            m_modSample.imag(s.m_imag * m_running.m_volume);
+            calculateLevel(m_modSample);
+        }
+        else
+        {
+            m_modSample.real(0.0f);
+            m_modSample.imag(0.0f);
+        }
     }
     else
     {
         m_modSample.real(0.0f);
         m_modSample.imag(0.0f);
-        calculateLevel(1e-10);
+        initSquelch(false);
     }
 
     if (m_spectrum && m_spectrumEnabled && (m_spectrumChunkCounter < m_spectrumChunkSize - 1))
@@ -149,7 +171,7 @@ void UDPSink::calculateLevel(Real sample)
     }
     else
     {
-        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        qreal rmsLevel = m_levelSum > 0.0 ? sqrt(m_levelSum / m_levelNbSamples) : 0.0;
         //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
         emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
         m_peakLevel = 0.0f;
@@ -170,7 +192,7 @@ void UDPSink::calculateLevel(Complex sample)
     }
     else
     {
-        qreal rmsLevel = sqrt((m_levelSum/(1<<30)) / m_levelNbSamples);
+        qreal rmsLevel = m_levelSum > 0.0 ? sqrt((m_levelSum/(1<<30)) / m_levelNbSamples) : 0.0;
         emit levelChanged(rmsLevel, m_peakLevel / 32768.0, m_levelNbSamples);
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
@@ -209,6 +231,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_udpPort = cfg.getUDPPort();
         m_config.m_channelMute = cfg.getChannelMute();
         m_config.m_volume = cfg.getVolume();
+        m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
 
         apply(cfg.getForce());
 
@@ -220,7 +243,9 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_udpAddressStr: " << m_config.m_udpAddressStr
                 << " m_udpPort: " << m_config.m_udpPort
                 << " m_channelMute: " << m_config.m_channelMute
-                << " m_volume: " << m_config.m_volume;
+                << " m_volume: " << m_config.m_volume
+                << " squelchDB: " << cfg.getSquelchDB()
+                << " m_squelch: " << m_config.m_squelch;
 
         return true;
     }
@@ -306,6 +331,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         int udpPort,
         bool channelMute,
         Real volume,
+        Real squelchDB,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
@@ -316,6 +342,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             udpPort,
             channelMute,
             volume,
+            squelchDB,
             force);
     messageQueue->push(cmd);
 }
@@ -357,6 +384,8 @@ void UDPSink::apply(bool force)
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
         m_udpHandler.resizeBuffer(m_config.m_inputSampleRate);
+        m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10); // 10 ms
+        m_squelchThreshold = m_config.m_inputSampleRate * 0.1; // 100 ms
         m_settingsMutex.unlock();
     }
 

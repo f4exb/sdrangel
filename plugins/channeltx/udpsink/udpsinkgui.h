@@ -68,6 +68,7 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
     void on_volume_valueChanged(int value);
+    void on_squelch_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
     void tick();
 
@@ -79,7 +80,9 @@ private:
     UpChannelizer* m_channelizer;
     SpectrumVis* m_spectrumVis;
     UDPSink* m_udpSink;
-    MovingAverage<double> m_channelPowerDbAvg;
+    MovingAverage<double> m_channelPowerAvg;
+    MovingAverage<double> m_inPowerAvg;
+    int m_powDisplayCount;
     ChannelMarker m_channelMarker;
 
     // settings
@@ -97,6 +100,7 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
+    void displaySettings();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

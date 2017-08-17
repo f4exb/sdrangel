@@ -93,6 +93,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeS32(11, m_fmDeviation);
     s.writeU32(12, m_channelMarker.getColor().rgb());
     s.writeString(13, m_channelMarker.getTitle());
+    s.writeS32(14, ui->squelch->value());
     return s.final();
 }
 
@@ -176,6 +177,10 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.setTitle(strtmp);
         this->setWindowTitle(m_channelMarker.getTitle());
 
+        d.readS32(14, &s32tmp, 10);
+        ui->squelch->setValue(s32tmp);
+        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
+
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
 
@@ -213,7 +218,9 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceAPI(deviceAPI),
-        m_channelPowerDbAvg(20,0),
+        m_channelPowerAvg(20, 1e-10),
+        m_inPowerAvg(50, 1e-10),
+        m_powDisplayCount(0),
         m_channelMarker(this),
         m_basicSettingsShown(false),
         m_doApplySettings(true)
@@ -389,10 +396,17 @@ void UDPSinkGUI::applySettings(bool force)
             udpPort,
             ui->channelMute->isChecked(),
             ui->volume->value() / 10.0f,
+            ui->squelch->value() * 1.0f,
             force);
 
         ui->applyBtn->setEnabled(false);
     }
+}
+
+void UDPSinkGUI::displaySettings()
+{
+    ui->volumeText->setText(tr("%1").arg(ui->volume->value()/10.0, 0, 'f', 1));
+    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
 }
 
 void UDPSinkGUI::channelMarkerChanged()
@@ -448,6 +462,12 @@ void UDPSinkGUI::on_volume_valueChanged(int value)
     applySettings();
 }
 
+void UDPSinkGUI::on_squelch_valueChanged(int value)
+{
+    ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
+    applySettings();
+}
+
 void UDPSinkGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
@@ -492,9 +512,22 @@ void UDPSinkGUI::enterEvent(QEvent*)
 
 void UDPSinkGUI::tick()
 {
-    double powDb = CalcDb::dbPower(m_udpSink->getMagSq());
-    m_channelPowerDbAvg.feed(powDb);
-    ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
+    m_channelPowerAvg.feed(m_udpSink->getMagSq());
+    m_inPowerAvg.feed(m_udpSink->getInMagSq());
+
+    if (m_powDisplayCount < 3)
+    {
+        m_powDisplayCount++;
+    }
+    else
+    {
+        double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
+        ui->channelPower->setText(tr("%1 dB").arg(powDb, 0, 'f', 1));
+        double inPowDb = CalcDb::dbPower(m_inPowerAvg.average());
+        ui->inputPower->setText(tr("%1").arg(inPowDb, 0, 'f', 1));
+
+        m_powDisplayCount = 0;
+    }
 
     int32_t bufferGauge = m_udpSink->getBufferGauge();
     ui->bufferGaugeNegative->setValue((bufferGauge < 0 ? -bufferGauge : 0));
@@ -502,5 +535,10 @@ void UDPSinkGUI::tick()
     QString s = QString::number(bufferGauge, 'f', 0);
     ui->bufferRWBalanceText->setText(tr("%1").arg(s));
 
+    if (m_udpSink->getSquelchOpen()) {
+        ui->channelMute->setStyleSheet("QToolButton { background-color : green; }");
+    } else {
+        ui->channelMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
 }
 

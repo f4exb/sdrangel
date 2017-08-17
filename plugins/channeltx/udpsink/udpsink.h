@@ -55,7 +55,9 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     double getMagSq() const { return m_magsq; }
+    double getInMagSq() const { return m_inMagsq; }
     int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
+    bool getSquelchOpen() const { return m_squelchOpen; }
 
     void configure(MessageQueue* messageQueue,
             SampleFormat sampleFormat,
@@ -66,6 +68,7 @@ public:
             int udpPort,
             bool channelMute,
             Real volume,
+            Real squelchDB,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
 
@@ -91,6 +94,7 @@ private:
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
         Real getVolume() const { return m_volume; }
+        Real getSquelchDB() const { return m_squelchDB; }
         bool getForce() const { return m_force; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
@@ -102,6 +106,7 @@ private:
                 int udpPort,
                 bool channelMute,
                 Real volume,
+                Real squelchDB,
                 bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
@@ -112,6 +117,7 @@ private:
                     udpPort,
                     channelMute,
                     volume,
+                    squelchDB,
                     force);
         }
 
@@ -124,6 +130,7 @@ private:
         int m_udpPort;
         bool m_channelMute;
         Real m_volume;
+        Real m_squelchDB;
         bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
@@ -134,6 +141,7 @@ private:
                 int udpPort,
                 bool channelMute,
                 Real volume,
+                Real squelchDB,
                 bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
@@ -144,6 +152,7 @@ private:
             m_udpPort(udpPort),
             m_channelMute(channelMute),
             m_volume(volume),
+            m_squelchDB(squelchDB),
             m_force(force)
         { }
     };
@@ -178,6 +187,7 @@ private:
         int m_fmDeviation;
         bool m_channelMute;
         Real m_volume;
+        Real m_squelch; //!< squared magnitude
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
@@ -192,6 +202,7 @@ private:
             m_fmDeviation(1.0),
             m_channelMute(false),
             m_volume(1.0),
+            m_squelch(-50.0),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}
@@ -217,7 +228,9 @@ private:
     bool m_interpolatorConsumed;
 
     double m_magsq;
+    double m_inMagsq;
     MovingAverage<double> m_movingAverage;
+    MovingAverage<double> m_inMovingAverage;
 
     UDPSinkUDPHandler m_udpHandler;
     Real m_actualInputSampleRate; //!< sample rate with UDP buffer skew compensation
@@ -229,6 +242,11 @@ private:
     double m_levelSum;
     int m_levelNbSamples;
 
+    bool m_squelchOpen;
+    int  m_squelchOpenCount;
+    int  m_squelchCloseCount;
+    int m_squelchThreshold;
+
     QMutex m_settingsMutex;
 
     static const int m_sampleRateAverageItems = 17;
@@ -237,6 +255,44 @@ private:
     void modulateSample();
     void calculateLevel(Real sample);
     void calculateLevel(Complex sample);
+
+    inline void calculateSquelch(double value)
+    {
+        if (value > m_running.m_squelch)
+        {
+            if (m_squelchOpenCount < m_squelchThreshold) {
+                m_squelchOpenCount++;
+            } else {
+                m_squelchCloseCount = m_squelchThreshold;
+                m_squelchOpen = true;
+            }
+        }
+        else
+        {
+            if (m_squelchCloseCount > 0) {
+                m_squelchCloseCount--;
+            } else {
+                m_squelchOpenCount = 0;
+                m_squelchOpen = false;
+            }
+        }
+    }
+
+    inline void initSquelch(bool open)
+    {
+        if (open)
+        {
+            m_squelchOpen = true;
+            m_squelchOpenCount = m_squelchThreshold;
+            m_squelchCloseCount = m_squelchThreshold;
+        }
+        else
+        {
+            m_squelchOpen = false;
+            m_squelchOpenCount = 0;
+            m_squelchCloseCount = 0;
+        }
+    }
 };
 
 
