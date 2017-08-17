@@ -15,16 +15,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/udpsrc/udpsrcplugin.h"
+#include "udpsrcplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/udpsrc/udpsrcgui.h"
+#include "udpsrcgui.h"
 
 const PluginDescriptor UDPSrcPlugin::m_pluginDescriptor = {
 	QString("UDP Channel Source"),
-	QString("3.5.0"),
+	QString("3.6.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -21,7 +21,8 @@ double CalcDb::dbPower(double magsq, double floordB)
 {
 	if (magsq > 0)
 	{
-		return 10.0 * log10(magsq);
+	    double val = 10.0 * log10(magsq);
+		return val > floordB ? val : floordB;
 	}
 	else
 	{

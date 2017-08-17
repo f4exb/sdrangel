@@ -457,7 +457,7 @@ void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused
     ui->applyBtn->setEnabled(true);
 }
 
-void UDPSinkGUI::on_volume_valueChanged(int value)
+void UDPSinkGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
     applySettings();

@@ -76,7 +76,7 @@
       <item>
        <widget class="LevelMeterVU" name="volumeMeter" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -644,6 +644,12 @@
      <layout class="QHBoxLayout" name="GainLayout">
       <item>
        <widget class="QLabel" name="gainLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
         <property name="text">
          <string>Gain</string>
         </property>
