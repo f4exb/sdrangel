@@ -15,14 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "udpsrc.h"
-
-#include <dsp/downchannelizer.h>
 #include <QUdpSocket>
 #include <QHostAddress>
+
+#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
+#include "util/db.h"
 
 #include "udpsrcgui.h"
+#include "udpsrc.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
@@ -38,6 +39,12 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
     m_audioFifo(4, 24000),
+    m_squelch(1e-6),
+    m_squelchEnabled(true),
+    m_squelchOpen(false),
+    m_squelchOpenCount(0),
+    m_squelchCloseCount(0),
+    m_squelchThreshold(4800),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("UDPSrc");
@@ -144,7 +151,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 {
 	Complex ci;
 	fftfilt::cmplx* sideband;
-	Real l, r;
+	double l, r;
 
 	m_sampleBuffer.clear();
 	m_settingsMutex.lock();
@@ -157,17 +164,18 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
 		    double inMagSq = ci.real()*ci.real() + ci.imag()*ci.imag();
-			//m_magsq = (inMagSq*m_gain*m_gain) / (1<<30);
-			m_outMovingAverage.feed((inMagSq*m_gain*m_gain) / (1<<30));
+
 		    m_inMovingAverage.feed(inMagSq / (1<<30));
-		    m_magsq = m_outMovingAverage.average();
 		    m_inMagsq = m_inMovingAverage.average();
 
-			Sample s(ci.real() * m_gain, ci.imag() * m_gain);
-			m_sampleBuffer.push_back(s);
+			Sample ss(ci.real(), ci.imag());
+			m_sampleBuffer.push_back(ss);
+
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 
-			if (m_sampleFormat == FormatLSB)
+			calculateSquelch(m_inMagsq);
+
+			if (m_sampleFormat == FormatLSB) // binaural LSB
 			{
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
 
@@ -175,13 +183,14 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = sideband[i].real();
-						r = sideband[i].imag();
-						m_udpBuffer->write(Sample(l, r));
+						l = m_squelchOpen ? sideband[i].real() * m_gain : 0;
+						r = m_squelchOpen ? sideband[i].imag() * m_gain : 0;
+					    m_udpBuffer->write(Sample(l, r));
+					    m_outMovingAverage.feed((l*l + r*r) / (1<<30));
 					}
 				}
 			}
-			if (m_sampleFormat == FormatUSB)
+			if (m_sampleFormat == FormatUSB) // binaural USB
 			{
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
 
@@ -189,23 +198,26 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = sideband[i].real();
-						r = sideband[i].imag();
+						l = m_squelchOpen ? sideband[i].real() * m_gain : 0;
+						r = m_squelchOpen ? sideband[i].imag() * m_gain : 0;
 						m_udpBuffer->write(Sample(l, r));
+						m_outMovingAverage.feed((l*l + r*r) / (1<<30));
 					}
 				}
 			}
 			else if (m_sampleFormat == FormatNFM)
 			{
-				Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci);
+				double demod = m_squelchOpen ? 32768.0 * m_phaseDiscri.phaseDiscriminator(ci) * m_gain : 0;
 				m_udpBuffer->write(Sample(demod, demod));
+				m_outMovingAverage.feed((demod * demod) / (1<<30));
 			}
 			else if (m_sampleFormat == FormatNFMMono)
 			{
-				FixReal demod = (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci));
+				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_gain) : 0;
 				m_udpBufferMono->write(demod);
+				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
-			else if (m_sampleFormat == FormatLSBMono)
+			else if (m_sampleFormat == FormatLSBMono) // Monaural LSB
 			{
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
 
@@ -213,12 +225,13 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_gain : 0;
 						m_udpBufferMono->write(l);
+						m_outMovingAverage.feed((l * l) / (1<<30));
 					}
 				}
 			}
-			else if (m_sampleFormat == FormatUSBMono)
+			else if (m_sampleFormat == FormatUSBMono) // Monaural USB
 			{
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
 
@@ -226,20 +239,35 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = (sideband[i].real() + sideband[i].imag()) * 0.7;
+						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_gain : 0;
 						m_udpBufferMono->write(l);
+						m_outMovingAverage.feed((l * l) / (1<<30));
 					}
 				}
 			}
 			else if (m_sampleFormat == FormatAMMono)
 			{
-				FixReal demod = (FixReal) (32768.0f * sqrt(inMagSq) * m_gain);
+				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * sqrt(inMagSq) * m_gain) : 0;
 				m_udpBufferMono->write(demod);
+				m_outMovingAverage.feed((demod * demod) / (1<<30));
 			}
 			else // Raw I/Q samples
 			{
-				m_udpBuffer->write(s);
+			    if (m_squelchOpen)
+			    {
+	                Sample s(ci.real() * m_gain, ci.imag() * m_gain);
+	                m_udpBuffer->write(s);
+	                m_outMovingAverage.feed((inMagSq*m_gain*m_gain) / (1<<30));
+			    }
+			    else
+			    {
+	                Sample s(0, 0);
+	                m_udpBuffer->write(s);
+	                m_outMovingAverage.feed(0);
+			    }
 			}
+
+            m_magsq = m_outMovingAverage.average();
 		}
 	}
 
@@ -320,13 +348,18 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			m_volume = cfg.getVolume();
 		}
 
+		m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
+		m_squelchEnabled = cfg.getSquelchEnabled();
+
 		m_settingsMutex.unlock();
 
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
 				<< " m_audioActive: " << m_audioActive
 				<< " m_audioStereo: " << m_audioStereo
 				<< " m_gain: " << m_gain
-				<< " m_volume: " << m_volume;
+				<< " m_squelchEnabled: " << m_squelchEnabled
+                << " m_squelch: " << m_squelch
+                << " getSquelchDB: " << cfg.getSquelchDB();
 
 		return true;
 
@@ -384,8 +417,9 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 		UDPFilter->create_filter(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate);
 
-        m_inMovingAverage.resize(m_inputSampleRate * 0.01, 1e-10);   // 10 ms
+        m_inMovingAverage.resize(m_outputSampleRate * 0.01, 1e-10);   // 10 ms
         m_outMovingAverage.resize(m_outputSampleRate * 0.01, 1e-10); // 10 ms
+        m_squelchThreshold = m_outputSampleRate * 0.05; // 50 ms
 
 		m_settingsMutex.unlock();
 

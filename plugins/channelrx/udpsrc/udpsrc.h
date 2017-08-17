@@ -78,6 +78,7 @@ public:
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
 	double getInMagSq() const { return m_inMagsq; }
+	bool getSquelchOpen() const { return m_squelchOpen; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -161,7 +162,7 @@ protected:
 		static MsgUDPSrcConfigureImmediate* create(
 				bool audioActive,
 				bool audioStereo,
-				int boost,
+				int gain,
 				int volume,
 				Real squelchDB,
 				bool squelchEnabled)
@@ -169,7 +170,7 @@ protected:
 			return new MsgUDPSrcConfigureImmediate(
 					audioActive,
 					audioStereo,
-					boost,
+					gain,
 					volume,
 					squelchDB,
 					squelchEnabled);
@@ -269,7 +270,53 @@ protected:
 
     PhaseDiscriminators m_phaseDiscri;
 
+    Real m_squelch; //!< squared magnitude
+    bool m_squelchEnabled;
+    bool m_squelchOpen;
+    int  m_squelchOpenCount;
+    int  m_squelchCloseCount;
+    int m_squelchThreshold;
+
 	QMutex m_settingsMutex;
+
+    inline void calculateSquelch(double value)
+    {
+        if ((!m_squelchEnabled) || (value > m_squelch))
+        {
+            if (m_squelchOpenCount < m_squelchThreshold) {
+                m_squelchOpenCount++;
+            } else {
+                m_squelchCloseCount = m_squelchThreshold;
+                m_squelchOpen = true;
+            }
+        }
+        else
+        {
+            if (m_squelchCloseCount > 0) {
+                m_squelchCloseCount--;
+            } else {
+                m_squelchOpenCount = 0;
+                m_squelchOpen = false;
+            }
+        }
+    }
+
+    inline void initSquelch(bool open)
+    {
+        if (open)
+        {
+            m_squelchOpen = true;
+            m_squelchOpenCount = m_squelchThreshold;
+            m_squelchCloseCount = m_squelchThreshold;
+        }
+        else
+        {
+            m_squelchOpen = false;
+            m_squelchOpenCount = 0;
+            m_squelchCloseCount = 0;
+        }
+    }
+
 };
 
 #endif // INCLUDE_UDPSRC_H

@@ -172,7 +172,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->udpPort->setText(QString("%1").arg(s32tmp));
 		d.readBlob(7, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
-        d.readS32(16, &s32tmp, 10);
+        d.readS32(8, &s32tmp, 10);
         ui->gain->setValue(s32tmp);
         ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
 		d.readS32(9, &s32tmp, 0);
@@ -231,6 +231,12 @@ void UDPSrcGUI::tick()
         ui->inputPower->setText(QString::number(inPowDb, 'f', 1));
     }
 
+    if (m_udpSrc->getSquelchOpen()) {
+        ui->squelchLabel->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->squelchLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    }
+
 	m_tickCount++;
 }
 
@@ -265,6 +271,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+    ui->squelchLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
