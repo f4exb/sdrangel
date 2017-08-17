@@ -81,6 +81,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Amplitude meter in % of maximum</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -167,7 +170,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Input power (dB)</string>
+         <string>Input power (dB) to which squelch applies</string>
         </property>
         <property name="text">
          <string>-100.0</string>
@@ -191,7 +194,7 @@
       <item>
        <widget class="QLineEdit" name="udpAddress">
         <property name="toolTip">
-         <string>Remote address</string>
+         <string>Address of listening interface (local)</string>
         </property>
         <property name="inputMask">
          <string>000.000.000.000</string>
@@ -211,7 +214,7 @@
       <item>
        <widget class="QLineEdit" name="udpPort">
         <property name="toolTip">
-         <string>Remote data port</string>
+         <string>Listening data port</string>
         </property>
         <property name="inputMask">
          <string>00000</string>
@@ -234,7 +237,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Channel power</string>
+         <string>Channel output power</string>
         </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
@@ -263,7 +266,7 @@
       <item>
        <widget class="QToolButton" name="channelMute">
         <property name="toolTip">
-         <string>Mute/Unmute channel</string>
+         <string>Mute/Unmute channel (green when on air)</string>
         </property>
         <property name="text">
          <string/>
@@ -325,7 +328,7 @@
          <enum>Qt::StrongFocus</enum>
         </property>
         <property name="toolTip">
-         <string>Demod shift frequency from center in Hz</string>
+         <string>Modulator shift frequency from center in Hz</string>
         </property>
        </widget>
       </item>
@@ -480,19 +483,19 @@
        <widget class="QLabel" name="sampleRateLabel">
         <property name="minimumSize">
          <size>
-          <width>21</width>
+          <width>36</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>SR</string>
+         <string>SRin</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="sampleRate">
         <property name="toolTip">
-         <string>Samples rate</string>
+         <string>Input sample rate (S/s)</string>
         </property>
         <property name="inputMask">
          <string>0009999</string>
@@ -510,19 +513,19 @@
        <widget class="QLabel" name="label_3">
         <property name="minimumSize">
          <size>
-          <width>21</width>
+          <width>36</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>BW</string>
+         <string>RFBW</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="rfBandwidth">
         <property name="toolTip">
-         <string>Signal bandwidth</string>
+         <string>Signal bandwidth (Hz)</string>
         </property>
         <property name="inputMask">
          <string>0009999</string>
@@ -642,7 +645,7 @@
       <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
-         <string>Vol</string>
+         <string>Gain</string>
         </property>
        </widget>
       </item>
@@ -653,6 +656,9 @@
           <width>22</width>
           <height>22</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Linear gain</string>
         </property>
         <property name="maximum">
          <number>100</number>
@@ -672,6 +678,9 @@
           <width>32</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Linear gain value</string>
         </property>
         <property name="text">
          <string>10.0</string>
