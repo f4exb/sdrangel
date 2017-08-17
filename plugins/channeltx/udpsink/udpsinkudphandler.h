@@ -39,7 +39,7 @@ public:
     void resetReadIndex();
     void resizeBuffer(float sampleRate);
 
-    void readSample(Real &t);
+    void readSample(FixReal &t);
     void readSample(Sample &s);
 
     void setFeedbackMessageQueue(MessageQueue *messageQueue) { m_feedbackMessageQueue = messageQueue; }

@@ -113,10 +113,10 @@ void UDPSinkUDPHandler::moveData()
     }
 }
 
-void UDPSinkUDPHandler::readSample(Real &t)
+void UDPSinkUDPHandler::readSample(FixReal &t)
 {
-    memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(Real));
-    advanceReadPointer((int) sizeof(Real));
+    memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(FixReal));
+    advanceReadPointer((int) sizeof(FixReal));
 }
 
 void UDPSinkUDPHandler::readSample(Sample &s)
