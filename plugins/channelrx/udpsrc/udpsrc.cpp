@@ -30,6 +30,7 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum) :
 	m_udpPort(9999),
+	m_gain(1.0),
 	m_audioActive(false),
 	m_audioStereo(false),
 	m_volume(20),
@@ -65,7 +66,6 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_last = 0;
 	m_this = 0;
 	m_scale = 0;
-	m_boost = 0;
 	m_magsq = 0;
 	UDPFilter = new fftfilt(0.0, (m_rfBandwidth / 2.0) / m_outputSampleRate, udpBlockSize);
 
@@ -116,7 +116,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 		bool audioActive,
 		bool audioStereo,
-		int boost,
+		Real boost,
 		int volume)
 {
 	Message* cmd = MsgUDPSrcConfigureImmediate::create(
@@ -141,7 +141,6 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 	m_sampleBuffer.clear();
 	m_settingsMutex.lock();
-	int rescale = (1 << m_boost);
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
@@ -150,8 +149,8 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (1<<30);
-			Sample s(ci.real() * rescale, ci.imag() * rescale);
+			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*m_gain*m_gain) / (1<<30);
+			Sample s(ci.real() * m_gain, ci.imag() * m_gain);
 			m_sampleBuffer.push_back(s);
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 
@@ -298,9 +297,9 @@ bool UDPSrc::handleMessage(const Message& cmd)
 			m_audioStereo = cfg.getAudioStereo();
 		}
 
-		if (cfg.getBoost() != m_boost)
+		if (cfg.getGain() != m_gain)
 		{
-			m_boost = cfg.getBoost();
+		    m_gain = cfg.getGain();
 		}
 
 		if (cfg.getVolume() != m_volume)
@@ -313,7 +312,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
 				<< " m_audioActive: " << m_audioActive
 				<< " m_audioStereo: " << m_audioStereo
-				<< " m_boost: " << m_boost
+				<< " m_gain: " << m_gain
 				<< " m_volume: " << m_volume;
 
 		return true;
@@ -377,7 +376,6 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure: m_sampleFormat: " << m_sampleFormat
 				<< " m_outputSampleRate: " << m_outputSampleRate
 				<< " m_rfBandwidth: " << m_rfBandwidth
-				<< " m_boost: " << m_boost
 				<< " m_udpAddressStr: " << m_udpAddressStr
 				<< " m_udpPort: " << m_udpPort
 				<< " m_audioPort: " << m_audioPort;

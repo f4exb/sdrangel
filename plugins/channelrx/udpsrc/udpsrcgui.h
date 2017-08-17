@@ -72,7 +72,7 @@ private slots:
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
-	void on_boost_valueChanged(int value);
+	void on_gain_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void tick();
 
@@ -82,14 +82,15 @@ private:
 	DeviceSourceAPI* m_deviceAPI;
 	UDPSrc* m_udpSrc;
 	ChannelMarker m_channelMarker;
-	MovingAverage<double> m_channelPowerDbAvg;
+	MovingAverage<double> m_channelPowerAvg;
+	uint32_t m_tickCount;
 
 	// settings
 	UDPSrc::SampleFormat m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_fmDeviation;
-	int m_boost;
+	Real m_gain;
 	bool m_audioActive;
 	bool m_audioStereo;
 	int m_volume;
@@ -110,6 +111,7 @@ private:
     void blockApplySettings(bool block);
 	void applySettings();
 	void applySettingsImmediate();
+	void displaySettings();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

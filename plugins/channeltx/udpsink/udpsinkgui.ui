@@ -641,25 +641,16 @@
      </layout>
     </item>
     <item row="8" column="2">
-     <layout class="QHBoxLayout" name="VolumeLayout">
+     <layout class="QHBoxLayout" name="GainLayout">
       <item>
-       <widget class="QLabel" name="volumeLabel">
+       <widget class="QLabel" name="gainLabel">
         <property name="text">
          <string>Gain</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="volume">
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Linear gain</string>
-        </property>
+       <widget class="QSlider" name="gain">
         <property name="maximum">
          <number>100</number>
         </property>
@@ -669,10 +660,13 @@
         <property name="value">
          <number>10</number>
         </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="volumeText">
+       <widget class="QLabel" name="gainText">
         <property name="minimumSize">
          <size>
           <width>32</width>
@@ -689,19 +683,6 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>

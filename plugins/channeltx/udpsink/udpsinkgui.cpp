@@ -71,7 +71,7 @@ void UDPSinkGUI::resetToDefaults()
     ui->udpAddress->setText("127.0.0.1");
     ui->udpPort->setText("9999");
     ui->spectrumGUI->resetToDefaults();
-    ui->volume->setValue(10);
+    ui->gain->setValue(10);
 
     blockApplySettings(false);
     applySettings();
@@ -89,7 +89,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(8, m_channelMarker.getCenterFrequency());
     s.writeString(9, m_udpAddress);
-    s.writeS32(10, ui->volume->value());
+    s.writeS32(10, ui->gain->value());
     s.writeS32(11, m_fmDeviation);
     s.writeU32(12, m_channelMarker.getColor().rgb());
     s.writeString(13, m_channelMarker.getTitle());
@@ -166,8 +166,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readString(9, &strtmp, "127.0.0.1");
         ui->udpAddress->setText(strtmp);
         d.readS32(10, &s32tmp, 10);
-        ui->volume->setValue(s32tmp);
-        ui->volumeText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
+        ui->gain->setValue(s32tmp);
+        ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
 
@@ -218,9 +218,9 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceAPI(deviceAPI),
-        m_channelPowerAvg(20, 1e-10),
-        m_inPowerAvg(50, 1e-10),
-        m_powDisplayCount(0),
+        m_channelPowerAvg(4, 1e-10),
+        m_inPowerAvg(4, 1e-10),
+        m_tickCount(0),
         m_channelMarker(this),
         m_basicSettingsShown(false),
         m_doApplySettings(true)
@@ -265,6 +265,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
+    displaySettings();
     applySettings(true);
 
     connect(m_udpSink->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -395,7 +396,7 @@ void UDPSinkGUI::applySettings(bool force)
             m_udpAddress,
             udpPort,
             ui->channelMute->isChecked(),
-            ui->volume->value() / 10.0f,
+            ui->gain->value() / 10.0f,
             ui->squelch->value() * 1.0f,
             force);
 
@@ -405,7 +406,7 @@ void UDPSinkGUI::applySettings(bool force)
 
 void UDPSinkGUI::displaySettings()
 {
-    ui->volumeText->setText(tr("%1").arg(ui->volume->value()/10.0, 0, 'f', 1));
+    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
 }
 
@@ -458,7 +459,7 @@ void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused
 
 void UDPSinkGUI::on_volume_valueChanged(int value)
 {
-    ui->volumeText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
+    ui->gainText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
     applySettings();
 }
 
@@ -515,18 +516,12 @@ void UDPSinkGUI::tick()
     m_channelPowerAvg.feed(m_udpSink->getMagSq());
     m_inPowerAvg.feed(m_udpSink->getInMagSq());
 
-    if (m_powDisplayCount < 3)
-    {
-        m_powDisplayCount++;
-    }
-    else
+    if (m_tickCount % 4 == 0)
     {
         double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
         ui->channelPower->setText(tr("%1 dB").arg(powDb, 0, 'f', 1));
         double inPowDb = CalcDb::dbPower(m_inPowerAvg.average());
         ui->inputPower->setText(tr("%1").arg(inPowDb, 0, 'f', 1));
-
-        m_powDisplayCount = 0;
     }
 
     int32_t bufferGauge = m_udpSink->getBufferGauge();
@@ -540,5 +535,7 @@ void UDPSinkGUI::tick()
     } else {
         ui->channelMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
+
+    m_tickCount++;
 }
 

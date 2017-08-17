@@ -70,7 +70,7 @@ public:
 	void configureImmediate(MessageQueue* messageQueue,
 			bool audioActive,
 			bool audioStereo,
-			int boost,
+			Real gain,
 			int volume);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
@@ -147,7 +147,7 @@ protected:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		int getBoost() const { return m_boost; }
+		Real getGain() const { return m_gain; }
 		int getVolume() const { return m_volume; }
 		bool getAudioActive() const { return m_audioActive; }
 		bool getAudioStereo() const { return m_audioStereo; }
@@ -166,7 +166,7 @@ protected:
 		}
 
 	private:
-		int m_boost;
+		Real m_gain;
 		int m_volume;
 		bool m_audioActive;
 		bool m_audioStereo;
@@ -174,10 +174,10 @@ protected:
 		MsgUDPSrcConfigureImmediate(
 				bool audioActive,
 				bool audioStereo,
-				int boost,
+				Real gain,
 				int volume) :
 			Message(),
-            m_boost(boost),
+			m_gain(gain),
             m_volume(volume),
 			m_audioActive(audioActive),
 			m_audioStereo(audioStereo)
@@ -216,7 +216,7 @@ protected:
 	QString m_udpAddressStr;
 	quint16 m_udpPort;
 	quint16 m_audioPort;
-	int m_boost;
+	Real m_gain;
 	bool m_audioActive;
 	bool m_audioStereo;
 	int m_volume;

@@ -128,8 +128,8 @@ void UDPSink::modulateSample()
 
         if (m_squelchOpen)
         {
-            m_modSample.real(s.m_real * m_running.m_volume);
-            m_modSample.imag(s.m_imag * m_running.m_volume);
+            m_modSample.real(s.m_real * m_running.m_gain);
+            m_modSample.imag(s.m_imag * m_running.m_gain);
             calculateLevel(m_modSample);
         }
         else
@@ -230,7 +230,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_udpAddressStr = cfg.getUDPAddress();
         m_config.m_udpPort = cfg.getUDPPort();
         m_config.m_channelMute = cfg.getChannelMute();
-        m_config.m_volume = cfg.getVolume();
+        m_config.m_gain = cfg.getGain();
         m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
 
         apply(cfg.getForce());
@@ -243,7 +243,7 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_udpAddressStr: " << m_config.m_udpAddressStr
                 << " m_udpPort: " << m_config.m_udpPort
                 << " m_channelMute: " << m_config.m_channelMute
-                << " m_volume: " << m_config.m_volume
+                << " m_gain: " << m_config.m_gain
                 << " squelchDB: " << cfg.getSquelchDB()
                 << " m_squelch: " << m_config.m_squelch;
 
@@ -330,7 +330,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         QString& udpAddress,
         int udpPort,
         bool channelMute,
-        Real volume,
+        Real gain,
         Real squelchDB,
         bool force)
 {
@@ -341,7 +341,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             udpAddress,
             udpPort,
             channelMute,
-            volume,
+            gain,
             squelchDB,
             force);
     messageQueue->push(cmd);

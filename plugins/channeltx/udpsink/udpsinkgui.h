@@ -82,7 +82,7 @@ private:
     UDPSink* m_udpSink;
     MovingAverage<double> m_channelPowerAvg;
     MovingAverage<double> m_inPowerAvg;
-    int m_powDisplayCount;
+    uint32_t m_tickCount;
     ChannelMarker m_channelMarker;
 
     // settings

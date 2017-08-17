@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>316</width>
+    <width>351</width>
     <height>355</height>
    </rect>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>312</width>
+     <width>340</width>
      <height>142</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>312</width>
+     <width>340</width>
      <height>0</height>
     </size>
    </property>
@@ -65,13 +65,6 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Format</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="1">
      <layout class="QHBoxLayout" name="ChannelPowerLayout">
       <item>
@@ -89,14 +82,23 @@
       </item>
       <item>
        <widget class="QLabel" name="channelPower">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>Channel power</string>
+         <string>Channel output power (dB)</string>
         </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>0.0</string>
+         <string>-100.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -104,47 +106,6 @@
        <widget class="QLabel" name="channelPowerUnits">
         <property name="text">
          <string> dB</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Rate (Hz)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="1">
-     <layout class="QHBoxLayout" name="BoostLayout">
-      <item>
-       <widget class="QLabel" name="boostLabel">
-        <property name="text">
-         <string>Boost</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="boost">
-        <property name="toolTip">
-         <string>Signal boost factor</string>
-        </property>
-        <property name="maximum">
-         <number>3</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="boostText">
-        <property name="text">
-         <string>0</string>
         </property>
        </widget>
       </item>
@@ -277,7 +238,7 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="0">
+    <item row="6" column="0">
      <layout class="QHBoxLayout" name="PortLayout">
       <item>
        <widget class="QLabel" name="udpPortlabel">
@@ -321,29 +282,12 @@
       </item>
      </layout>
     </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>RF BW (Hz)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="rfBandwidth">
-      <property name="toolTip">
-       <string>Signal bandwidth</string>
-      </property>
-      <property name="text">
-       <string>32000</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
+    <item row="7" column="0">
      <layout class="QHBoxLayout" name="AudioPortLayout">
       <item>
        <widget class="QLabel" name="fmDevLabel">
         <property name="text">
-         <string>FMd (Hz)</string>
+         <string>FMd</string>
         </property>
        </widget>
       </item>
@@ -395,67 +339,7 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="sampleRate">
-      <property name="toolTip">
-       <string>Samples rate</string>
-      </property>
-      <property name="text">
-       <string>48000</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QComboBox" name="sampleFormat">
-      <property name="toolTip">
-       <string>Samples format</string>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>S16LE I/Q</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE NFM</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE NFM Mono</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE LSB</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE USB</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE LSB Mono</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE USB Mono</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>S16LE AM Mono</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <layout class="QHBoxLayout" name="AddressLayout">
       <item>
        <widget class="QLabel" name="Addresslabel">
@@ -479,7 +363,7 @@
       </item>
      </layout>
     </item>
-    <item row="7" column="0">
+    <item row="8" column="0">
      <layout class="QHBoxLayout" name="VolumeLayout">
       <item>
        <widget class="QLabel" name="volumeLabel">
@@ -509,8 +393,175 @@
       </item>
       <item>
        <widget class="QLabel" name="volumeText">
+        <property name="minimumSize">
+         <size>
+          <width>18</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>20</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="FormatLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Fmt</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sampleFormat">
+        <property name="toolTip">
+         <string>Samples format</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>S16LE I/Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE NFM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE NFM Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE LSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE USB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE LSB Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE USB Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE AM Mono</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QHBoxLayout" name="SampleRateLayout">
+      <item>
+       <widget class="QLabel" name="sampleRateLabel">
+        <property name="text">
+         <string>SRout</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sampleRate">
+        <property name="toolTip">
+         <string>Output sample rate (S/s)</string>
+        </property>
+        <property name="text">
+         <string>48000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="1">
+     <layout class="QHBoxLayout" name="RFBandwidthLayout">
+      <item>
+       <widget class="QLabel" name="rfBandwidthLabel">
+        <property name="text">
+         <string>RFBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="rfBandwidth">
+        <property name="toolTip">
+         <string>Signal bandwidth (Hz)</string>
+        </property>
+        <property name="text">
+         <string>32000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="6" column="1">
+     <layout class="QHBoxLayout" name="GainLayout">
+      <item>
+       <widget class="QLabel" name="gainLabel">
+        <property name="text">
+         <string>Gain</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="gain">
+        <property name="toolTip">
+         <string>Output linear gain</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainText">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Output linear gain</string>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -601,11 +652,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>sampleFormat</tabstop>
-  <tabstop>sampleRate</tabstop>
-  <tabstop>rfBandwidth</tabstop>
- </tabstops>
  <resources>
   <include location="../../../sdrbase/resources/res.qrc"/>
  </resources>

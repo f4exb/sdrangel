@@ -67,7 +67,7 @@ public:
             QString& udpAddress,
             int udpPort,
             bool channelMute,
-            Real volume,
+            Real gain,
             Real squelchDB,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -93,7 +93,7 @@ private:
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
-        Real getVolume() const { return m_volume; }
+        Real getGain() const { return m_gain; }
         Real getSquelchDB() const { return m_squelchDB; }
         bool getForce() const { return m_force; }
 
@@ -105,7 +105,7 @@ private:
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
-                Real volume,
+                Real gain,
                 Real squelchDB,
                 bool force)
         {
@@ -116,7 +116,7 @@ private:
                     udpAddress,
                     udpPort,
                     channelMute,
-                    volume,
+                    gain,
                     squelchDB,
                     force);
         }
@@ -129,7 +129,7 @@ private:
         QString m_udpAddress;
         int m_udpPort;
         bool m_channelMute;
-        Real m_volume;
+        Real m_gain;
         Real m_squelchDB;
         bool m_force;
 
@@ -140,7 +140,7 @@ private:
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
-                Real volume,
+                Real gain,
                 Real squelchDB,
                 bool force) :
             Message(),
@@ -151,7 +151,7 @@ private:
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
             m_channelMute(channelMute),
-            m_volume(volume),
+            m_gain(gain),
             m_squelchDB(squelchDB),
             m_force(force)
         { }
@@ -186,7 +186,7 @@ private:
         Real m_rfBandwidth;
         int m_fmDeviation;
         bool m_channelMute;
-        Real m_volume;
+        Real m_gain;
         Real m_squelch; //!< squared magnitude
 
         QString m_udpAddressStr;
@@ -201,7 +201,7 @@ private:
             m_rfBandwidth(12500),
             m_fmDeviation(1.0),
             m_channelMute(false),
-            m_volume(1.0),
+            m_gain(1.0),
             m_squelch(-50.0),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
