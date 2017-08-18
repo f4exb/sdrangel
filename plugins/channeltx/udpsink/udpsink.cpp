@@ -161,9 +161,30 @@ void UDPSink::modulateSample()
 
         if (m_squelchOpen)
         {
-            m_modPhasor += (m_running.m_fmDeviation / m_running.m_inputSampleRate) * (t / 32768.0) * M_PI * 2.0f;
+            m_modPhasor += (m_running.m_fmDeviation / m_running.m_inputSampleRate) * (t / 32768.0f) * M_PI * 2.0f;
             m_modSample.real(cos(m_modPhasor) * 10362.2f * m_running.m_gain);
             m_modSample.imag(sin(m_modPhasor) * 10362.2f * m_running.m_gain);
+            calculateLevel(m_modSample);
+        }
+        else
+        {
+            m_modSample.real(0.0f);
+            m_modSample.imag(0.0f);
+        }
+    }
+    else if (m_running.m_sampleFormat == FormatAMMono)
+    {
+        FixReal t;
+        m_udpHandler.readSample(t);
+        m_inMovingAverage.feed((t*t)/1073741824.0);
+        m_inMagsq = m_inMovingAverage.average();
+
+        calculateSquelch(m_inMagsq);
+
+        if (m_squelchOpen)
+        {
+            m_modSample.real(((t / 32768.0f)*m_running.m_amModFactor*m_running.m_gain + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+            m_modSample.imag(0.0f);
             calculateLevel(m_modSample);
         }
         else
@@ -375,6 +396,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         Real outputSampleRate,
         Real rfBandwidth,
         int fmDeviation,
+        Real amModFactor,
         QString& udpAddress,
         int udpPort,
         bool channelMute,
@@ -388,6 +410,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             outputSampleRate,
             rfBandwidth,
             fmDeviation,
+            amModFactor,
             udpAddress,
             udpPort,
             channelMute,

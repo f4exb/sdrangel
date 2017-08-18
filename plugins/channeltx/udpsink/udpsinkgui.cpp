@@ -328,6 +328,13 @@ void UDPSinkGUI::applySettings(bool force)
             fmDeviation = 2500;
         }
 
+        int amModPercent = ui->amModPercent->text().toInt(&ok);
+
+        if ((!ok) || (amModPercent < 1) || (amModPercent > 100))
+        {
+            amModPercent = 95;
+        }
+
         setTitleColor(m_channelMarker.getColor());
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
         ui->sampleRate->setText(QString("%1").arg(inputSampleRate, 0));
@@ -335,6 +342,7 @@ void UDPSinkGUI::applySettings(bool force)
         //ui->udpAddress->setText(m_udpAddress);
         ui->udpPort->setText(QString("%1").arg(udpPort));
         ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
+        ui->amModPercent->setText(QString("%1").arg(amModPercent));
         m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
         m_channelMarker.setBandwidth((int)rfBandwidth);
         connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -397,6 +405,7 @@ void UDPSinkGUI::applySettings(bool force)
             inputSampleRate,
             rfBandwidth,
             fmDeviation,
+            amModPercent / 100.0f,
             m_udpAddress,
             udpPort,
             ui->channelMute->isChecked(),
@@ -430,10 +439,16 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
 {
-    if ((index == 1) || (index == 2)) {
+    if ((index == (int) UDPSink::FormatNFM) || (index == (int) UDPSink::FormatNFMMono)) {
         ui->fmDeviation->setEnabled(true);
     } else {
         ui->fmDeviation->setEnabled(false);
+    }
+
+    if (index == (int) UDPSink::FormatAMMono) {
+        ui->amModPercent->setEnabled(true);
+    } else {
+        ui->amModPercent->setEnabled(false);
     }
 
     ui->applyBtn->setEnabled(true);
@@ -450,6 +465,11 @@ void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((un
 }
 
 void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
+{
+    ui->applyBtn->setEnabled(true);
+}
+
+void UDPSinkGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
 }

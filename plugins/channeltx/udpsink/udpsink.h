@@ -64,6 +64,7 @@ public:
             Real inputSampleRate,
             Real rfBandwidth,
             int fmDeviation,
+            Real amModFactor,
             QString& udpAddress,
             int udpPort,
             bool channelMute,
@@ -93,6 +94,7 @@ private:
         Real getInputSampleRate() const { return m_inputSampleRate; }
         Real getRFBandwidth() const { return m_rfBandwidth; }
         int getFMDeviation() const { return m_fmDeviation; }
+        Real getAMModFactor() const { return m_amModFactor; }
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
@@ -107,6 +109,7 @@ private:
                 Real inputSampleRate,
                 Real rfBandwidth,
                 int fmDeviation,
+                Real amModFactor,
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
@@ -120,6 +123,7 @@ private:
                     inputSampleRate,
                     rfBandwidth,
                     fmDeviation,
+                    amModFactor,
                     udpAddress,
                     udpPort,
                     channelMute,
@@ -135,6 +139,7 @@ private:
         Real m_inputSampleRate;
         Real m_rfBandwidth;
         int m_fmDeviation;
+        Real m_amModFactor;
         QString m_udpAddress;
         int m_udpPort;
         bool m_channelMute;
@@ -148,6 +153,7 @@ private:
                 Real inputSampleRate,
                 Real rfBandwidth,
                 int fmDeviation,
+                Real amModFactor,
                 QString& udpAddress,
                 int udpPort,
                 bool channelMute,
@@ -161,6 +167,7 @@ private:
             m_inputSampleRate(inputSampleRate),
             m_rfBandwidth(rfBandwidth),
             m_fmDeviation(fmDeviation),
+            m_amModFactor(amModFactor),
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
             m_channelMute(channelMute),
@@ -217,6 +224,7 @@ private:
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
         int m_fmDeviation;
+        Real m_amModFactor;
         bool m_channelMute;
         Real m_gain;
         Real m_squelch; //!< squared magnitude
@@ -234,6 +242,7 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(12500),
             m_fmDeviation(1.0),
+            m_amModFactor(0.95),
             m_channelMute(false),
             m_gain(1.0),
             m_squelch(-50.0),
