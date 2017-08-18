@@ -44,6 +44,7 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
     m_squelchThreshold(4800),
+    m_modPhasor(0.0f),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
@@ -113,11 +114,10 @@ void UDPSink::pull(Sample& sample)
 
 void UDPSink::modulateSample()
 {
-    //Real t;
-    Sample s;
-
-    if (m_running.m_sampleFormat == FormatS16LE)
+    if (m_running.m_sampleFormat == FormatS16LE) // Linear I/Q transponding
     {
+        Sample s;
+
         m_udpHandler.readSample(s);
 
         uint64_t magsq = s.m_real * s.m_real + s.m_imag * s.m_imag;
@@ -131,6 +131,38 @@ void UDPSink::modulateSample()
             m_modSample.real(s.m_real * m_running.m_gain);
             m_modSample.imag(s.m_imag * m_running.m_gain);
             calculateLevel(m_modSample);
+        }
+        else
+        {
+            m_modSample.real(0.0f);
+            m_modSample.imag(0.0f);
+        }
+    }
+    else if ((m_running.m_sampleFormat == FormatNFMMono) || (m_running.m_sampleFormat == FormatNFM))
+    {
+        FixReal t;
+        Sample s;
+
+        if (m_running.m_sampleFormat == FormatNFMMono)
+        {
+            m_udpHandler.readSample(t);
+        }
+        else
+        {
+            m_udpHandler.readSample(s);
+            t = s.m_real;
+        }
+
+        m_inMovingAverage.feed((t*t)/1073741824.0);
+        m_inMagsq = m_inMovingAverage.average();
+
+        calculateSquelch(m_inMagsq);
+
+        if (m_squelchOpen)
+        {
+            m_modPhasor += (m_running.m_fmDeviation / m_running.m_inputSampleRate) * (t / 32768.0) * M_PI * 2.0f;
+            m_modSample.real(cos(m_modPhasor) * 10362.2f * m_running.m_gain);
+            m_modSample.imag(sin(m_modPhasor) * 10362.2f * m_running.m_gain);
         }
         else
         {

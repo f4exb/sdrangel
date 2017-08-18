@@ -256,6 +256,8 @@ private:
     int  m_squelchCloseCount;
     int m_squelchThreshold;
 
+    float m_modPhasor; //!< Phasor for FM modulation
+
     QMutex m_settingsMutex;
 
     static const int m_sampleRateAverageItems = 17;
