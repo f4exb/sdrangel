@@ -197,8 +197,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
-		applySettingsImmediate();
-		applySettings();
+		applySettingsImmediate(true);
+		applySettings(true);
 		return true;
 	}
 	else
@@ -297,8 +297,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	displaySettings();
-	applySettingsImmediate();
-	applySettings();
+	applySettingsImmediate(true);
+	applySettings(true);
 }
 
 UDPSrcGUI::~UDPSrcGUI()
@@ -323,9 +323,10 @@ void UDPSrcGUI::displaySettings()
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
+    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
 }
 
-void UDPSrcGUI::applySettingsImmediate()
+void UDPSrcGUI::applySettingsImmediate(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -340,12 +341,14 @@ void UDPSrcGUI::applySettingsImmediate()
 		    m_gain,
 			m_volume,
 			ui->squelch->value() * 1.0f,
-			ui->squelch->value() != -100);
+			ui->squelchGate->value() * 0.01f,
+			ui->squelch->value() != -100,
+			force);
 	}
 }
 
 
-void UDPSrcGUI::applySettings()
+void UDPSrcGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -461,7 +464,8 @@ void UDPSrcGUI::applySettings()
 			fmDeviation,
 			m_udpAddress,
 			udpPort,
-			audioPort);
+			audioPort,
+			force);
 
 		ui->applyBtn->setEnabled(false);
 	}
@@ -551,6 +555,12 @@ void UDPSrcGUI::on_squelch_valueChanged(int value)
         ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
     }
 
+    applySettingsImmediate();
+}
+
+void UDPSrcGUI::on_squelchGate_valueChanged(int value)
+{
+    ui->squelchGateText->setText(tr("%1").arg(value*10.0, 0, 'f', 0));
     applySettingsImmediate();
 }
 

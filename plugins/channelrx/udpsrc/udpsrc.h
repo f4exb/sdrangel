@@ -67,14 +67,17 @@ public:
 			int fmDeviation,
 			QString& udpAddress,
 			int udpPort,
-			int audioPort);
+			int audioPort,
+			bool force);
 	void configureImmediate(MessageQueue* messageQueue,
 			bool audioActive,
 			bool audioStereo,
 			Real gain,
 			int volume,
 			Real squelchDB,
-			bool squelchEnabled);
+			Real squelchGate,
+			bool squelchEnabled,
+			bool force);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
 	double getInMagSq() const { return m_inMagsq; }
@@ -102,6 +105,7 @@ protected:
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		int getUDPPort() const { return m_udpPort; }
 		int getAudioPort() const { return m_audioPort; }
+		bool getForce() const { return m_force; }
 
 		static MsgUDPSrcConfigure* create(SampleFormat
 				sampleFormat,
@@ -110,7 +114,8 @@ protected:
 				int fmDeviation,
 				QString& udpAddress,
 				int udpPort,
-				int audioPort)
+				int audioPort,
+				bool force)
 		{
 			return new MsgUDPSrcConfigure(sampleFormat,
 					sampleRate,
@@ -118,7 +123,8 @@ protected:
 					fmDeviation,
 					udpAddress,
 					udpPort,
-					audioPort);
+					audioPort,
+					force);
 		}
 
 	private:
@@ -129,6 +135,7 @@ protected:
 		QString m_udpAddress;
 		int m_udpPort;
 		int m_audioPort;
+		bool m_force;
 
 		MsgUDPSrcConfigure(SampleFormat sampleFormat,
 				Real outputSampleRate,
@@ -136,7 +143,8 @@ protected:
 				int fmDeviation,
 				QString& udpAddress,
 				int udpPort,
-				int audioPort) :
+				int audioPort,
+				bool force) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
@@ -144,7 +152,8 @@ protected:
 			m_fmDeviation(fmDeviation),
 			m_udpAddress(udpAddress),
 			m_udpPort(udpPort),
-			m_audioPort(audioPort)
+			m_audioPort(audioPort),
+			m_force(force)
 		{ }
 	};
 
@@ -157,7 +166,9 @@ protected:
 		bool getAudioActive() const { return m_audioActive; }
 		bool getAudioStereo() const { return m_audioStereo; }
 		Real getSquelchDB() const { return m_squelchDB; }
+		Real getSquelchGate() const { return m_squelchGate; }
 		bool getSquelchEnabled() const { return m_squelchEnabled; }
+		bool getForce() const { return m_force; }
 
 		static MsgUDPSrcConfigureImmediate* create(
 				bool audioActive,
@@ -165,7 +176,9 @@ protected:
 				int gain,
 				int volume,
 				Real squelchDB,
-				bool squelchEnabled)
+				Real squelchGate,
+				bool squelchEnabled,
+				bool force)
 		{
 			return new MsgUDPSrcConfigureImmediate(
 					audioActive,
@@ -173,7 +186,9 @@ protected:
 					gain,
 					volume,
 					squelchDB,
-					squelchEnabled);
+					squelchGate,
+					squelchEnabled,
+					force);
 		}
 
 	private:
@@ -182,7 +197,9 @@ protected:
 		bool m_audioActive;
 		bool m_audioStereo;
 		Real m_squelchDB;
+        Real m_squelchGate; // seconds
 		bool m_squelchEnabled;
+		bool m_force;
 
 		MsgUDPSrcConfigureImmediate(
 				bool audioActive,
@@ -190,14 +207,18 @@ protected:
 				Real gain,
 				int volume,
                 Real squelchDB,
-                bool squelchEnabled) :
+                Real squelchGate,
+                bool squelchEnabled,
+                bool force) :
 			Message(),
 			m_gain(gain),
             m_volume(volume),
 			m_audioActive(audioActive),
 			m_audioStereo(audioStereo),
 			m_squelchDB(squelchDB),
-			m_squelchEnabled(squelchEnabled)
+            m_squelchGate(squelchGate),
+			m_squelchEnabled(squelchEnabled),
+			m_force(force)
 		{ }
 	};
 
@@ -221,23 +242,54 @@ protected:
 		{ }
 	};
 
+    struct Config {
+        Real m_outputSampleRate;
+        SampleFormat m_sampleFormat;
+        Real m_inputSampleRate;
+        qint64 m_inputFrequencyOffset;
+        Real m_rfBandwidth;
+        int m_fmDeviation;
+        bool m_channelMute;
+        Real m_gain;
+        Real m_squelch; //!< squared magnitude
+        Real m_squelchGate; //!< seconds
+        bool m_squelchEnabled;
+        bool m_audioActive;
+        bool m_audioStereo;
+        int m_volume;
+
+        QString m_udpAddressStr;
+        quint16 m_udpPort;
+        quint16 m_audioPort;
+
+        Config() :
+            m_outputSampleRate(48000),
+            m_sampleFormat(FormatS16LE),
+            m_inputSampleRate(48000),
+            m_inputFrequencyOffset(0),
+            m_rfBandwidth(12500),
+            m_fmDeviation(2500),
+            m_channelMute(false),
+            m_gain(1.0),
+            m_squelch(1e-6),
+            m_squelchGate(0.0),
+            m_squelchEnabled(true),
+            m_audioActive(false),
+            m_audioStereo(false),
+            m_volume(20),
+            m_udpAddressStr("127.0.0.1"),
+            m_udpPort(9999),
+            m_audioPort(9998)
+        {}
+    };
+
+    Config m_config;
+    Config m_running;
+
 	MessageQueue* m_uiMessageQueue;
 	UDPSrcGUI* m_udpSrcGUI;
 	QUdpSocket *m_audioSocket;
 
-	int m_inputSampleRate;
-
-	int m_sampleFormat;
-	Real m_outputSampleRate;
-	Real m_rfBandwidth;
-	QString m_udpAddressStr;
-	quint16 m_udpPort;
-	quint16 m_audioPort;
-	Real m_gain;
-	bool m_audioActive;
-	bool m_audioStereo;
-	int m_volume;
-	int m_fmDeviation;
 	double m_magsq;
     double m_inMagsq;
     MovingAverage<double> m_outMovingAverage;
@@ -270,33 +322,53 @@ protected:
 
     PhaseDiscriminators m_phaseDiscri;
 
-    Real m_squelch; //!< squared magnitude
-    bool m_squelchEnabled;
     bool m_squelchOpen;
     int  m_squelchOpenCount;
     int  m_squelchCloseCount;
-    int m_squelchThreshold;
+    int m_squelchThreshold; //!< number of samples computed from given gate
 
 	QMutex m_settingsMutex;
 
+	void apply(bool force);
+
     inline void calculateSquelch(double value)
     {
-        if ((!m_squelchEnabled) || (value > m_squelch))
+        if ((!m_running.m_squelchEnabled) || (value > m_running.m_squelch))
         {
-            if (m_squelchOpenCount < m_squelchThreshold) {
-                m_squelchOpenCount++;
-            } else {
-                m_squelchCloseCount = m_squelchThreshold;
+            if (m_squelchThreshold == 0)
+            {
                 m_squelchOpen = true;
+            }
+            else
+            {
+                if (m_squelchOpenCount < m_squelchThreshold)
+                {
+                    m_squelchOpenCount++;
+                }
+                else
+                {
+                    m_squelchCloseCount = m_squelchThreshold;
+                    m_squelchOpen = true;
+                }
             }
         }
         else
         {
-            if (m_squelchCloseCount > 0) {
-                m_squelchCloseCount--;
-            } else {
-                m_squelchOpenCount = 0;
+            if (m_squelchThreshold == 0)
+            {
                 m_squelchOpen = false;
+            }
+            else
+            {
+                if (m_squelchCloseCount > 0)
+                {
+                    m_squelchCloseCount--;
+                }
+                else
+                {
+                    m_squelchOpenCount = 0;
+                    m_squelchOpen = false;
+                }
             }
         }
     }

@@ -75,6 +75,7 @@ private slots:
 	void on_gain_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+	void on_squelchGate_valueChanged(int value);
 	void tick();
 
 private:
@@ -111,8 +112,8 @@ private:
 	virtual ~UDPSrcGUI();
 
     void blockApplySettings(bool block);
-	void applySettings();
-	void applySettingsImmediate();
+	void applySettings(bool force = false);
+	void applySettingsImmediate(bool force = false);
 	void displaySettings();
 
 	void leaveEvent(QEvent*);
