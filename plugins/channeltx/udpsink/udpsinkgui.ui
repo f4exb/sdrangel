@@ -639,6 +639,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Reset UDP buffer index</string>
+        </property>
         <property name="text">
          <string>R</string>
         </property>

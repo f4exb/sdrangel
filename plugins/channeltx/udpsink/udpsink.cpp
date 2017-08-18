@@ -164,6 +164,7 @@ void UDPSink::modulateSample()
             m_modPhasor += (m_running.m_fmDeviation / m_running.m_inputSampleRate) * (t / 32768.0) * M_PI * 2.0f;
             m_modSample.real(cos(m_modPhasor) * 10362.2f * m_running.m_gain);
             m_modSample.imag(sin(m_modPhasor) * 10362.2f * m_running.m_gain);
+            calculateLevel(m_modSample);
         }
         else
         {
