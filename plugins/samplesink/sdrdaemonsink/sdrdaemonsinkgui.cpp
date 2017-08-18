@@ -58,7 +58,10 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     assert(m_nnSender != -1);
     int millis = 500;
     int rc = nn_setsockopt(m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
-    assert (rc == 0);
+
+    if (rc != 0) {
+        qCritical("SDRdaemonSinkGui::SDRdaemonSinkGui: nn_setsockopt failed with rc %d", rc);
+    }
 
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
