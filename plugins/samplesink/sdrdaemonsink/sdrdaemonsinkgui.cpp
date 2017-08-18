@@ -57,7 +57,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_nnSender = nn_socket(AF_SP, NN_PAIR);
     assert(m_nnSender != -1);
     int millis = 500;
-    nn_setsockopt (m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
+    int rc = nn_setsockopt(m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
     assert (rc == 0);
 
     m_countUnrecoverable = 0;
