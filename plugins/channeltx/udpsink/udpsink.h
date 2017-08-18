@@ -69,6 +69,7 @@ public:
             bool channelMute,
             Real gain,
             Real squelchDB,
+            Real squelchGate,
             bool squelchEnabled,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -97,6 +98,7 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         Real getGain() const { return m_gain; }
         Real getSquelchDB() const { return m_squelchDB; }
+        Real getSquelchGate() const { return m_squelchGate; }
         bool getSquelchEnabled() const { return m_squelchEnabled; }
         bool getForce() const { return m_force; }
 
@@ -110,6 +112,7 @@ private:
                 bool channelMute,
                 Real gain,
                 Real squelchDB,
+                Real squelchGate,
                 bool squelchEnabled,
                 bool force)
         {
@@ -122,6 +125,7 @@ private:
                     channelMute,
                     gain,
                     squelchDB,
+                    squelchGate,
                     squelchEnabled,
                     force);
         }
@@ -136,6 +140,7 @@ private:
         bool m_channelMute;
         Real m_gain;
         Real m_squelchDB;
+        Real m_squelchGate;
         bool m_squelchEnabled;
         bool m_force;
 
@@ -148,6 +153,7 @@ private:
                 bool channelMute,
                 Real gain,
                 Real squelchDB,
+                Real squelchGate,
                 bool squelchEnabled,
                 bool force) :
             Message(),
@@ -160,6 +166,7 @@ private:
             m_channelMute(channelMute),
             m_gain(gain),
             m_squelchDB(squelchDB),
+            m_squelchGate(squelchGate),
             m_squelchEnabled(squelchEnabled),
             m_force(force)
         { }
@@ -213,6 +220,7 @@ private:
         bool m_channelMute;
         Real m_gain;
         Real m_squelch; //!< squared magnitude
+        Real m_squelchGate; //!< seconds
         bool m_squelchEnabled;
 
         QString m_udpAddressStr;
@@ -229,6 +237,7 @@ private:
             m_channelMute(false),
             m_gain(1.0),
             m_squelch(-50.0),
+            m_squelchGate(0.05),
             m_squelchEnabled(true),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
@@ -289,20 +298,40 @@ private:
     {
         if ((!m_running.m_squelchEnabled) || (value > m_running.m_squelch))
         {
-            if (m_squelchOpenCount < m_squelchThreshold) {
-                m_squelchOpenCount++;
-            } else {
-                m_squelchCloseCount = m_squelchThreshold;
+            if (m_squelchThreshold == 0)
+            {
                 m_squelchOpen = true;
+            }
+            else
+            {
+                if (m_squelchOpenCount < m_squelchThreshold)
+                {
+                    m_squelchOpenCount++;
+                }
+                else
+                {
+                    m_squelchCloseCount = m_squelchThreshold;
+                    m_squelchOpen = true;
+                }
             }
         }
         else
         {
-            if (m_squelchCloseCount > 0) {
-                m_squelchCloseCount--;
-            } else {
-                m_squelchOpenCount = 0;
+            if (m_squelchThreshold == 0)
+            {
                 m_squelchOpen = false;
+            }
+            else
+            {
+                if (m_squelchCloseCount > 0)
+                {
+                    m_squelchCloseCount--;
+                }
+                else
+                {
+                    m_squelchOpenCount = 0;
+                    m_squelchOpen = false;
+                }
             }
         }
     }

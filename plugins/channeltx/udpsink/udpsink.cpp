@@ -266,6 +266,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_channelMute = cfg.getChannelMute();
         m_config.m_gain = cfg.getGain();
         m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
+        m_config.m_squelchGate = cfg.getSquelchGate();
         m_config.m_squelchEnabled = cfg.getSquelchEnabled();
 
         apply(cfg.getForce());
@@ -280,6 +281,7 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_channelMute: " << m_config.m_channelMute
                 << " m_gain: " << m_config.m_gain
                 << " squelchDB: " << cfg.getSquelchDB()
+                << " m_squelchGate: " << m_config.m_squelchGate
                 << " m_squelch: " << m_config.m_squelch
                 << " m_squelchEnabled: " << m_config.m_squelchEnabled;
 
@@ -378,6 +380,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         bool channelMute,
         Real gain,
         Real squelchDB,
+        Real squelchGate,
         bool squelchEnabled,
         bool force)
 {
@@ -390,6 +393,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             channelMute,
             gain,
             squelchDB,
+            squelchGate,
             squelchEnabled,
             force);
     messageQueue->push(cmd);
@@ -439,8 +443,15 @@ void UDPSink::apply(bool force)
         m_levelSum = 0.0f;
         m_udpHandler.resizeBuffer(m_config.m_inputSampleRate);
         m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10); // 10 ms
-        m_squelchThreshold = m_config.m_inputSampleRate * 0.1; // 100 ms
+        m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        initSquelch(m_squelchOpen);
         m_settingsMutex.unlock();
+    }
+
+    if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
+    {
+        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        initSquelch(m_squelchOpen);
     }
 
     if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) ||

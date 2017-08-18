@@ -94,6 +94,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeU32(12, m_channelMarker.getColor().rgb());
     s.writeString(13, m_channelMarker.getTitle());
     s.writeS32(14, ui->squelch->value());
+    s.writeS32(15, ui->squelchGate->value());
     return s.final();
 }
 
@@ -180,6 +181,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readS32(14, &s32tmp, -60);
         ui->squelch->setValue(s32tmp);
         ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
+        d.readS32(15, &s32tmp, 5);
+        ui->squelchGate->setValue(s32tmp);
+        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
@@ -398,6 +402,7 @@ void UDPSinkGUI::applySettings(bool force)
             ui->channelMute->isChecked(),
             ui->gain->value() / 10.0f,
             ui->squelch->value() * 1.0f,
+            ui->squelchGate->value() * 0.01f,
             ui->squelch->value() != -100,
             force);
 
@@ -409,6 +414,7 @@ void UDPSinkGUI::displaySettings()
 {
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
+    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
 }
 
 void UDPSinkGUI::channelMarkerChanged()
@@ -475,6 +481,12 @@ void UDPSinkGUI::on_squelch_valueChanged(int value)
         ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
     }
 
+    applySettings();
+}
+
+void UDPSinkGUI::on_squelchGate_valueChanged(int value)
+{
+    ui->squelchGateText->setText(tr("%1").arg(value*10.0, 0, 'f', 0));
     applySettings();
 }
 

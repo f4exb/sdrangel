@@ -411,6 +411,7 @@ void UDPSrc::apply(bool force)
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
         m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        initSquelch(m_squelchOpen);
     }
 
     if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) || force)

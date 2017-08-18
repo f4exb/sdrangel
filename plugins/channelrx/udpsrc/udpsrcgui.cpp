@@ -106,6 +106,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeBool(14, m_audioStereo);
 	s.writeS32(15, m_fmDeviation);
 	s.writeS32(16, ui->squelch->value());
+	s.writeS32(17, ui->squelchGate->value());
 	return s.final();
 }
 
@@ -193,8 +194,11 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         d.readS32(16, &s32tmp, -60);
         ui->squelch->setValue(s32tmp);
         ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
+        d.readS32(17, &s32tmp, 5);
+        ui->squelchGate->setValue(s32tmp);
+        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
 
-		blockApplySettings(false);
+        blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
 		applySettingsImmediate(true);
