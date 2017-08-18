@@ -247,7 +247,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_sampleFormat == FormatAMMono)
 			{
-				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * sqrt(inMagSq) * m_gain) : 0;
+				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * m_gain) : 0;
 				m_udpBufferMono->write(demod);
 				m_outMovingAverage.feed((demod * demod) / (1<<30));
 			}
