@@ -63,17 +63,18 @@ public slots:
 private:
     typedef char (udpBlk_t)[m_udpBlockSize];
 
-    void moveData();
+    void moveData(char *blk);
     void advanceReadPointer(int nbBytes);
 
     QUdpSocket *m_dataSocket;
     QHostAddress m_dataAddress;
     QHostAddress m_remoteAddress;
     quint16 m_dataPort;
+    quint16 m_remotePort;
     bool m_dataConnected;
-    udpBlk_t m_udpTmpBuf;
-    qint64 m_udpReadBytes;
     udpBlk_t *m_udpBuf;
+    char m_udpDump[m_udpBlockSize + 8192]; // UDP block size + largest possible block
+    int m_udpDumpIndex;
     int m_nbUDPFrames;
     int m_nbAllocatedUDPFrames;
     int m_writeIndex;

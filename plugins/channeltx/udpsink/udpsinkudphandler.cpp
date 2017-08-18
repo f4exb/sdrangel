@@ -25,8 +25,9 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_dataAddress(QHostAddress::LocalHost),
     m_remoteAddress(QHostAddress::LocalHost),
     m_dataPort(9999),
+    m_remotePort(0),
     m_dataConnected(false),
-    m_udpReadBytes(0),
+    m_udpDumpIndex(0),
     m_nbUDPFrames(m_minNbUDPFrames),
     m_nbAllocatedUDPFrames(m_minNbUDPFrames),
     m_writeIndex(0),
@@ -93,18 +94,37 @@ void UDPSinkUDPHandler::dataReadyRead()
     while (m_dataSocket->hasPendingDatagrams() && m_dataConnected)
     {
         qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
-        m_udpReadBytes += m_dataSocket->readDatagram(&m_udpTmpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
+        qint64 bytesRead = m_dataSocket->readDatagram(&m_udpDump[m_udpDumpIndex], pendingDataSize, &m_remoteAddress, &m_remotePort);
 
-        if (m_udpReadBytes == m_udpBlockSize) {
-            moveData();
-            m_udpReadBytes = 0;
+        if (bytesRead < 0)
+        {
+            qWarning("UDPSinkUDPHandler::dataReadyRead: UDP read error");
+        }
+        else
+        {
+            int udpDumpSize = m_udpDumpIndex + bytesRead;
+            int udpDumpPtr = 0;
+
+            while (udpDumpSize >= m_udpBlockSize)
+            {
+                moveData(&m_udpDump[udpDumpPtr]);
+                udpDumpPtr += m_udpBlockSize;
+                udpDumpSize -= m_udpBlockSize;
+            }
+
+            if (udpDumpSize > 0)
+            {
+                memcpy(m_udpDump, &m_udpDump[udpDumpPtr], udpDumpSize);
+            }
+
+            m_udpDumpIndex = udpDumpSize;
         }
     }
 }
 
-void UDPSinkUDPHandler::moveData()
+void UDPSinkUDPHandler::moveData(char *blk)
 {
-    memcpy(m_udpBuf[m_writeIndex], m_udpTmpBuf, m_udpBlockSize);
+    memcpy(m_udpBuf[m_writeIndex], blk, m_udpBlockSize);
 
     if (m_writeIndex < m_nbUDPFrames - 1) {
         m_writeIndex++;
