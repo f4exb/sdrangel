@@ -70,6 +70,7 @@ private slots:
     void on_gain_valueChanged(int value);
     void on_squelch_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
+    void on_resetUDPReadIndex_clicked();
     void tick();
 
 private:

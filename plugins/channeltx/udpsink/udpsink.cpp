@@ -23,6 +23,7 @@
 
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
 UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum) :
     m_uiMessageQueue(uiMessageQueue),
@@ -343,6 +344,16 @@ bool UDPSink::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgResetReadIndex::match(cmd))
+    {
+        m_settingsMutex.lock();
+        m_udpHandler.resetReadIndex();
+        m_settingsMutex.unlock();
+
+        qDebug() << "UDPSink::handleMessage: MsgResetReadIndex";
+
+        return true;
+    }
     else
     {
         if(m_spectrum != 0)
@@ -386,6 +397,12 @@ void UDPSink::configure(MessageQueue* messageQueue,
 void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
     Message* cmd = MsgUDPSinkSpectrum::create(enabled);
+    messageQueue->push(cmd);
+}
+
+void UDPSink::resetReadIndex(MessageQueue* messageQueue)
+{
+    Message* cmd = MsgResetReadIndex::create();
     messageQueue->push(cmd);
 }
 

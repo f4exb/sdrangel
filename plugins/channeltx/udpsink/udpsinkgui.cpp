@@ -488,6 +488,11 @@ void UDPSinkGUI::on_applyBtn_clicked()
     applySettings();
 }
 
+void UDPSinkGUI::on_resetUDPReadIndex_clicked()
+{
+    m_udpSink->resetReadIndex(m_udpSink->getInputMessageQueue());
+}
+
 void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     if ((widget == ui->spectrumBox) && (m_udpSink != 0))

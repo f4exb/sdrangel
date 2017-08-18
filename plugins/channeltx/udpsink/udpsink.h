@@ -72,6 +72,7 @@ public:
             bool squelchEnabled,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
+    void resetReadIndex(MessageQueue* messageQueue);
 
 signals:
     /**
@@ -181,6 +182,23 @@ private:
         MsgUDPSinkSpectrum(bool enabled) :
             Message(),
             m_enabled(enabled)
+        { }
+    };
+
+    class MsgResetReadIndex : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgResetReadIndex* create()
+        {
+            return new MsgResetReadIndex();
+        }
+
+    private:
+
+        MsgResetReadIndex() :
+            Message()
         { }
     };
 
