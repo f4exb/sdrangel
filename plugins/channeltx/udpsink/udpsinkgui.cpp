@@ -416,6 +416,7 @@ void UDPSinkGUI::applySettings(bool force)
             force);
 
         ui->applyBtn->setEnabled(false);
+        ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
     }
 }
 
@@ -452,36 +453,43 @@ void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
     }
 
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_udpAddress_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused)))
 {
     ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_gain_valueChanged(int value)

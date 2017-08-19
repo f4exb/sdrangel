@@ -24,6 +24,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/nco.h"
+#include "dsp/fftfilt.h"
 #include "util/message.h"
 
 #include "udpsinkudphandler.h"
@@ -223,6 +224,7 @@ private:
         Real m_inputSampleRate;
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
+        Real m_lowCutoff;
         int m_fmDeviation;
         Real m_amModFactor;
         bool m_channelMute;
@@ -241,6 +243,7 @@ private:
             m_inputSampleRate(48000),
             m_inputFrequencyOffset(0),
             m_rfBandwidth(12500),
+            m_lowCutoff(300),
             m_fmDeviation(1.0),
             m_amModFactor(0.95),
             m_channelMute(false),
@@ -292,11 +295,15 @@ private:
     int  m_squelchCloseCount;
     int m_squelchThreshold;
 
-    float m_modPhasor; //!< Phasor for FM modulation
+    float m_modPhasor;    //!< Phasor for FM modulation
+    fftfilt* m_SSBFilter; //!< Complex filter for SSB modulation
+    Complex* m_SSBFilterBuffer;
+    int m_SSBFilterBufferIndex;
 
     QMutex m_settingsMutex;
 
     static const int m_sampleRateAverageItems = 17;
+    static const int m_ssbFftLen = 1024;
 
     void apply(bool force);
     void modulateSample();

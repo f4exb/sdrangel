@@ -46,15 +46,20 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
     m_squelchCloseCount(0),
     m_squelchThreshold(4800),
     m_modPhasor(0.0f),
+    m_SSBFilterBufferIndex(0),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
     m_udpHandler.setFeedbackMessageQueue(&m_inputMessageQueue);
+    m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_inputSampleRate, m_config.m_rfBandwidth / m_config.m_inputSampleRate, m_ssbFftLen);
+    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     apply(true);
 }
 
 UDPSink::~UDPSink()
 {
+    delete[] m_SSBFilterBuffer;
+    delete m_SSBFilter;
 }
 
 void UDPSink::start()
@@ -185,6 +190,45 @@ void UDPSink::modulateSample()
         {
             m_modSample.real(((t / 32768.0f)*m_running.m_amModFactor*m_running.m_gain + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
+            calculateLevel(m_modSample);
+        }
+        else
+        {
+            m_modSample.real(0.0f);
+            m_modSample.imag(0.0f);
+        }
+    }
+    else if ((m_running.m_sampleFormat == FormatLSBMono) || (m_running.m_sampleFormat == FormatUSBMono))
+    {
+        FixReal t;
+        Complex c, ci;
+        fftfilt::cmplx *filtered;
+        int n_out = 0;
+
+        m_udpHandler.readSample(t);
+        m_inMovingAverage.feed((t*t)/1073741824.0);
+        m_inMagsq = m_inMovingAverage.average();
+
+        calculateSquelch(m_inMagsq);
+
+        if (m_squelchOpen)
+        {
+            ci.real((t / 32768.0f) * m_running.m_gain);
+            ci.imag(0.0f);
+
+            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_running.m_sampleFormat == FormatUSBMono));
+
+            if (n_out > 0)
+            {
+                memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+                m_SSBFilterBufferIndex = 0;
+            }
+
+            c = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
+            m_modSample.real(m_SSBFilterBuffer[m_SSBFilterBufferIndex].real() * 32768.0f);
+            m_modSample.imag(m_SSBFilterBuffer[m_SSBFilterBufferIndex].imag() * 32768.0f);
+            m_SSBFilterBufferIndex++;
+
             calculateLevel(m_modSample);
         }
         else
@@ -468,6 +512,7 @@ void UDPSink::apply(bool force)
         m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10); // 10 ms
         m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
+        m_SSBFilter->create_filter(m_config.m_lowCutoff / m_config.m_inputSampleRate, m_config.m_rfBandwidth / m_config.m_inputSampleRate);
         m_settingsMutex.unlock();
     }
 
