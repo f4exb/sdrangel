@@ -237,6 +237,47 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
+    else if ((m_running.m_sampleFormat == FormatLSB) || (m_running.m_sampleFormat == FormatUSB))
+    {
+        Sample s;
+        Complex c, ci;
+        fftfilt::cmplx *filtered;
+        int n_out = 0;
+
+        m_udpHandler.readSample(s);
+
+        uint64_t magsq = s.m_real * s.m_real + s.m_imag * s.m_imag;
+        m_inMovingAverage.feed(magsq/1073741824.0);
+        m_inMagsq = m_inMovingAverage.average();
+
+        calculateSquelch(m_inMagsq);
+
+        if (m_squelchOpen)
+        {
+            ci.real((s.m_real / 32768.0f) * m_running.m_gain);
+            ci.imag((s.m_imag / 32768.0f) * m_running.m_gain);
+
+            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_running.m_sampleFormat == FormatUSB));
+
+            if (n_out > 0)
+            {
+                memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+                m_SSBFilterBufferIndex = 0;
+            }
+
+            c = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
+            m_modSample.real(m_SSBFilterBuffer[m_SSBFilterBufferIndex].real() * 32768.0f);
+            m_modSample.imag(m_SSBFilterBuffer[m_SSBFilterBufferIndex].imag() * 32768.0f);
+            m_SSBFilterBufferIndex++;
+
+            calculateLevel(m_modSample);
+        }
+        else
+        {
+            m_modSample.real(0.0f);
+            m_modSample.imag(0.0f);
+        }
+    }
     else
     {
         m_modSample.real(0.0f);
