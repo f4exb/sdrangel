@@ -32,13 +32,13 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum) :
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
-    m_amMovingAverage(480, 1e-10),
+    m_amMovingAverage(1200, 1e-10),
     m_audioFifo(4, 24000),
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
     m_squelchThreshold(4800),
-    m_agc(12000, m_agcTarget, 1e-6),
+    m_agc(9600, m_agcTarget, 1e-6),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("UDPSrc");
@@ -431,16 +431,16 @@ void UDPSrc::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
 
-        int gateNbSamples = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        int gateNbSamples = m_config.m_inputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate);
         int agcTimeNbSamples = m_config.m_inputSampleRate * 0.2; // Fixed 200 ms
-        m_squelchThreshold = gateNbSamples;
+        m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
         m_agc.resize(agcTimeNbSamples, m_agcTarget);
         m_agc.setStepDownDelay(gateNbSamples);
         m_agc.setGate(gateNbSamples);
 
         m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10);   // 10 ms
-        m_amMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10);   // 10 ms
+        m_amMovingAverage.resize(m_config.m_inputSampleRate * 0.25, 1e-10);   // 25 ms
         m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
@@ -459,8 +459,8 @@ void UDPSrc::apply(bool force)
 
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
-        int gateNbSamples = m_config.m_inputSampleRate * m_config.m_squelchGate;
-        m_squelchThreshold = gateNbSamples;
+        int gateNbSamples = m_config.m_inputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate);
+        m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
         m_agc.setStepDownDelay(gateNbSamples); // same delay for up and down
         m_agc.setGate(gateNbSamples);
