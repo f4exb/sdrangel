@@ -347,6 +347,7 @@ void UDPSrcGUI::applySettingsImmediate(bool force)
 			ui->squelch->value() * 1.0f,
 			ui->squelchGate->value() * 0.01f,
 			ui->squelch->value() != -100,
+			ui->agc->isChecked(),
 			force);
 	}
 }
@@ -448,6 +449,10 @@ void UDPSrcGUI::applySettings(bool force)
 				sampleFormat = UDPSrc::FormatAMMono;
 				ui->fmDeviation->setEnabled(false);
 				break;
+            case 8:
+                sampleFormat = UDPSrc::FormatAMNoDCMono;
+                ui->fmDeviation->setEnabled(false);
+                break;
 			default:
 				sampleFormat = UDPSrc::FormatS16LE;
 				ui->fmDeviation->setEnabled(false);
@@ -542,6 +547,11 @@ void UDPSrcGUI::on_audioActive_toggled(bool active __attribute__((unused)))
 void UDPSrcGUI::on_audioStereo_toggled(bool stereo __attribute__((unused)))
 {
 	applySettingsImmediate();
+}
+
+void UDPSrcGUI::on_agc_toggled(bool agc __attribute__((unused)))
+{
+    applySettingsImmediate();
 }
 
 void UDPSrcGUI::on_gain_valueChanged(int value)

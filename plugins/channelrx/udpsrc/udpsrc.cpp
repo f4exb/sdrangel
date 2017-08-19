@@ -32,11 +32,13 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum) :
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
+    m_amMovingAverage(480, 1e-10),
     m_audioFifo(4, 24000),
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
     m_squelchThreshold(4800),
+    m_agc(12000, m_agcTarget, 1e-6),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("UDPSrc");
@@ -77,6 +79,9 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	{
 		qWarning("UDPSrc::UDPSrc: cannot bind audio port");
 	}
+
+    m_agc.setClampMax(32768.0*32768.0);
+    m_agc.setClamping(true);
 
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
@@ -122,6 +127,7 @@ void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 		Real squelchDB,
 		Real squelchGate,
 		bool squelchEnabled,
+		bool agc,
 		bool force)
 {
 	Message* cmd = MsgUDPSrcConfigureImmediate::create(
@@ -132,6 +138,7 @@ void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 			squelchDB,
 			squelchGate,
 			squelchEnabled,
+			agc,
 			force);
 	messageQueue->push(cmd);
 }
@@ -158,7 +165,21 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-		    double inMagSq = ci.real()*ci.real() + ci.imag()*ci.imag();
+		    double inMagSq;
+		    double agcFactor = 1.0;
+
+            if ((m_running.m_agc) &&
+                (m_running.m_sampleFormat != FormatNFM) &&
+                (m_running.m_sampleFormat != FormatNFMMono) &&
+                (m_running.m_sampleFormat != FormatS16LE))
+            {
+                agcFactor = m_agc.feedAndGetValue(ci);
+                inMagSq = m_agc.getMagSq();
+            }
+            else
+            {
+                inMagSq = ci.real()*ci.real() + ci.imag()*ci.imag();
+            }
 
 		    m_inMovingAverage.feed(inMagSq / (1<<30));
 		    m_inMagsq = m_inMovingAverage.average();
@@ -172,6 +193,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 			if (m_running.m_sampleFormat == FormatLSB) // binaural LSB
 			{
+			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
 
 				if (n_out)
@@ -187,6 +209,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			if (m_running.m_sampleFormat == FormatUSB) // binaural USB
 			{
+			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
 
 				if (n_out)
@@ -214,6 +237,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_running.m_sampleFormat == FormatLSBMono) // Monaural LSB
 			{
+			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
 
 				if (n_out)
@@ -228,6 +252,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_running.m_sampleFormat == FormatUSBMono) // Monaural USB
 			{
+			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
 
 				if (n_out)
@@ -242,10 +267,26 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
 			else if (m_running.m_sampleFormat == FormatAMMono)
 			{
-				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * m_running.m_gain) : 0;
+				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * agcFactor * m_running.m_gain) : 0;
 				m_udpBufferMono->write(demod);
-				m_outMovingAverage.feed((demod * demod) / (1<<30));
+				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
+            else if (m_running.m_sampleFormat == FormatAMNoDCMono)
+            {
+                m_amMovingAverage.feed(inMagSq);
+
+                if (m_squelchOpen)
+                {
+                    FixReal demod = (FixReal) ((sqrt(inMagSq) - sqrt(m_amMovingAverage.average())) * agcFactor * m_running.m_gain);
+                    m_udpBufferMono->write(demod);
+                    m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+                }
+                else
+                {
+                    m_udpBufferMono->write(0);
+                    m_outMovingAverage.feed(0);
+                }
+            }
 			else // Raw I/Q samples
 			{
 			    if (m_squelchOpen)
@@ -314,6 +355,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 		m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
 		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_squelchEnabled = cfg.getSquelchEnabled();
+		m_config.m_agc = cfg.getAGC();
 
 		apply(cfg.getForce());
 
@@ -324,7 +366,8 @@ bool UDPSrc::handleMessage(const Message& cmd)
 				<< " m_squelchEnabled: " << m_config.m_squelchEnabled
                 << " m_squelch: " << m_config.m_squelch
                 << " getSquelchDB: " << cfg.getSquelchDB()
-                << " m_squelchGate" << m_config.m_squelchGate;
+                << " m_squelchGate" << m_config.m_squelchGate
+                << " m_agc" << m_config.m_agc;
 
 		return true;
 
@@ -388,10 +431,16 @@ void UDPSrc::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
 
-        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        int gateNbSamples = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        int agcTimeNbSamples = m_config.m_inputSampleRate * 0.2; // Fixed 200 ms
+        m_squelchThreshold = gateNbSamples;
         initSquelch(m_squelchOpen);
+        m_agc.resize(agcTimeNbSamples, m_agcTarget);
+        m_agc.setStepDownDelay(gateNbSamples);
+        m_agc.setGate(gateNbSamples);
 
-        m_inMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
+        m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10);   // 10 ms
+        m_amMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10);   // 10 ms
         m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
@@ -410,8 +459,16 @@ void UDPSrc::apply(bool force)
 
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
-        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        int gateNbSamples = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        m_squelchThreshold = gateNbSamples;
         initSquelch(m_squelchOpen);
+        m_agc.setStepDownDelay(gateNbSamples); // same delay for up and down
+        m_agc.setGate(gateNbSamples);
+    }
+
+    if ((m_config.m_squelch != m_running.m_squelch) || force)
+    {
+        m_agc.setThreshold(m_config.m_squelch * (1<<30));
     }
 
     if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) || force)

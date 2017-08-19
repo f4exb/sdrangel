@@ -26,6 +26,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/phasediscri.h"
 #include "dsp/movingaverage.h"
+#include "dsp/agc.h"
 #include "util/udpsink.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
@@ -47,6 +48,7 @@ public:
 		FormatLSBMono,
 		FormatUSBMono,
 		FormatAMMono,
+		FormatAMNoDCMono,
 		FormatNone
 	};
 
@@ -77,6 +79,7 @@ public:
 			Real squelchDB,
 			Real squelchGate,
 			bool squelchEnabled,
+			bool agc,
 			bool force);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
@@ -168,6 +171,7 @@ protected:
 		Real getSquelchDB() const { return m_squelchDB; }
 		Real getSquelchGate() const { return m_squelchGate; }
 		bool getSquelchEnabled() const { return m_squelchEnabled; }
+		bool getAGC() const { return m_agc; }
 		bool getForce() const { return m_force; }
 
 		static MsgUDPSrcConfigureImmediate* create(
@@ -178,6 +182,7 @@ protected:
 				Real squelchDB,
 				Real squelchGate,
 				bool squelchEnabled,
+				bool agc,
 				bool force)
 		{
 			return new MsgUDPSrcConfigureImmediate(
@@ -188,6 +193,7 @@ protected:
 					squelchDB,
 					squelchGate,
 					squelchEnabled,
+					agc,
 					force);
 		}
 
@@ -199,6 +205,7 @@ protected:
 		Real m_squelchDB;
         Real m_squelchGate; // seconds
 		bool m_squelchEnabled;
+		bool m_agc;
 		bool m_force;
 
 		MsgUDPSrcConfigureImmediate(
@@ -209,6 +216,7 @@ protected:
                 Real squelchDB,
                 Real squelchGate,
                 bool squelchEnabled,
+                bool agc,
                 bool force) :
 			Message(),
 			m_gain(gain),
@@ -218,6 +226,7 @@ protected:
 			m_squelchDB(squelchDB),
             m_squelchGate(squelchGate),
 			m_squelchEnabled(squelchEnabled),
+			m_agc(agc),
 			m_force(force)
 		{ }
 	};
@@ -254,6 +263,7 @@ protected:
         Real m_squelch; //!< squared magnitude
         Real m_squelchGate; //!< seconds
         bool m_squelchEnabled;
+        bool m_agc;
         bool m_audioActive;
         bool m_audioStereo;
         int m_volume;
@@ -274,6 +284,7 @@ protected:
             m_squelch(1e-6),
             m_squelchGate(0.0),
             m_squelchEnabled(true),
+            m_agc(false),
             m_audioActive(false),
             m_audioStereo(false),
             m_volume(20),
@@ -294,6 +305,7 @@ protected:
     double m_inMagsq;
     MovingAverage<double> m_outMovingAverage;
     MovingAverage<double> m_inMovingAverage;
+    MovingAverage<double> m_amMovingAverage;
 
 	Real m_scale;
 	Complex m_last, m_this;
@@ -319,6 +331,7 @@ protected:
 
 	char *m_udpAudioBuf;
 	static const int m_udpAudioPayloadSize = 8192; //!< UDP audio samples buffer. No UDP block on Earth is larger than this
+	static const Real m_agcTarget = 16384.0f;
 
     PhaseDiscriminators m_phaseDiscri;
 
@@ -326,6 +339,8 @@ protected:
     int  m_squelchOpenCount;
     int  m_squelchCloseCount;
     int m_squelchThreshold; //!< number of samples computed from given gate
+
+    MagAGC m_agc;
 
 	QMutex m_settingsMutex;
 

@@ -76,6 +76,7 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_squelchGate_valueChanged(int value);
+	void on_agc_toggled(bool agc);
 	void tick();
 
 private:

@@ -334,6 +334,19 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="agc">
+        <property name="toolTip">
+         <string>Toggle AGC (only for AM and SSB)</string>
+        </property>
+        <property name="text">
+         <string>AGC</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="audioActive">
         <property name="toolTip">
          <string>Toggle audio input</string>
@@ -502,6 +515,11 @@
         <item>
          <property name="text">
           <string>S16LE AM Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE AM !DC Mono</string>
          </property>
         </item>
        </widget>
@@ -781,6 +799,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>
