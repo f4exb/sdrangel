@@ -33,7 +33,7 @@ AMDemod::AMDemod() :
 	m_magsqPeak(0.0f),
 	m_magsqCount(0),
 	m_movingAverage(40, 0),
-    m_volumeAGC(4800, 1.0),
+    m_volumeAGC(2400, 1.0),
     m_audioFifo(4, 48000),
     m_settingsMutex(QMutex::Recursive)
 {

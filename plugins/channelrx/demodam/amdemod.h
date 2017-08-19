@@ -188,7 +188,7 @@ private:
         {
             Real demod = sqrt(magsq);
             m_volumeAGC.feed(demod);
-            demod /= m_volumeAGC.getValue();
+            demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
 
             if (m_running.m_bandpassEnable)
             {
