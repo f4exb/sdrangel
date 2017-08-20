@@ -438,7 +438,7 @@ void UDPSrc::apply(bool force)
         m_agc.setGate(m_config.m_outputSampleRate * 0.02);
 
         m_inMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
-        m_amMovingAverage.resize(m_config.m_outputSampleRate * 0.25, 1e-10);  // 25 ms
+        m_amMovingAverage.resize(m_config.m_outputSampleRate * 0.005, 1e-10); //  5 ms
         m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
