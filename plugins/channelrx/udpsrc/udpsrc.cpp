@@ -287,6 +287,23 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     m_outMovingAverage.feed(0);
                 }
             }
+            else if (m_running.m_sampleFormat == FormatAMBPFMono)
+            {
+                if (m_squelchOpen)
+                {
+                    double demodf = sqrt(inMagSq);
+                    demodf = m_bandpass.filter(demodf);
+                    demodf /= 301.0;
+                    FixReal demod = (FixReal) (demodf * agcFactor * m_running.m_gain);
+                    m_udpBufferMono->write(demod);
+                    m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+                }
+                else
+                {
+                    m_udpBufferMono->write(0);
+                    m_outMovingAverage.feed(0);
+                }
+            }
 			else // Raw I/Q samples
 			{
 			    if (m_squelchOpen)
@@ -436,6 +453,8 @@ void UDPSrc::apply(bool force)
         m_agc.resize(m_config.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
         m_agc.setStepDownDelay( m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate));
         m_agc.setGate(m_config.m_outputSampleRate * 0.02);
+
+        m_bandpass.create(301, m_config.m_outputSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
 
         m_inMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
         m_amMovingAverage.resize(m_config.m_outputSampleRate * 0.005, 1e-10); //  5 ms

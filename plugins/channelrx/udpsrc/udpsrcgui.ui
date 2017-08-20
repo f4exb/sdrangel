@@ -522,6 +522,11 @@
           <string>S16LE AM !DC Mono</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>S16LE AM BPF Mono</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

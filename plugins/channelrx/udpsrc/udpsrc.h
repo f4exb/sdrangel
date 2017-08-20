@@ -27,6 +27,7 @@
 #include "dsp/phasediscri.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/bandpass.h"
 #include "util/udpsink.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
@@ -49,6 +50,7 @@ public:
 		FormatUSBMono,
 		FormatAMMono,
 		FormatAMNoDCMono,
+		FormatAMBPFMono,
 		FormatNone
 	};
 
@@ -341,6 +343,7 @@ protected:
     int m_squelchThreshold; //!< number of samples computed from given gate
 
     MagAGC m_agc;
+    Bandpass<double> m_bandpass;
 
 	QMutex m_settingsMutex;
 

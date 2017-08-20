@@ -454,6 +454,10 @@ void UDPSrcGUI::applySettings(bool force)
                 sampleFormat = UDPSrc::FormatAMNoDCMono;
                 ui->fmDeviation->setEnabled(false);
                 break;
+            case 9:
+                sampleFormat = UDPSrc::FormatAMBPFMono;
+                ui->fmDeviation->setEnabled(false);
+                break;
 			default:
 				sampleFormat = UDPSrc::FormatS16LE;
 				ui->fmDeviation->setEnabled(false);
