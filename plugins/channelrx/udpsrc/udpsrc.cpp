@@ -273,11 +273,11 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			}
             else if (m_running.m_sampleFormat == FormatAMNoDCMono)
             {
-                m_amMovingAverage.feed(inMagSq);
-
                 if (m_squelchOpen)
                 {
-                    FixReal demod = (FixReal) ((sqrt(inMagSq) - sqrt(m_amMovingAverage.average())) * agcFactor * m_running.m_gain);
+                    double demodf = sqrt(inMagSq);
+                    m_amMovingAverage.feed(demodf);
+                    FixReal demod = (FixReal) ((demodf - m_amMovingAverage.average()) * agcFactor * m_running.m_gain);
                     m_udpBufferMono->write(demod);
                     m_outMovingAverage.feed((demod * demod) / 1073741824.0);
                 }
