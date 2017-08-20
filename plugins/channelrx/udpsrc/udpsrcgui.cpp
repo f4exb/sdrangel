@@ -227,8 +227,9 @@ void UDPSrcGUI::tick()
 {
     if (m_tickCount % 4 == 0)
     {
-        m_channelPowerAvg.feed(m_udpSrc->getMagSq());
-        double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
+//        m_channelPowerAvg.feed(m_udpSrc->getMagSq());
+//        double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
+        double powDb = CalcDb::dbPower(m_udpSrc->getMagSq());
         ui->channelPower->setText(QString::number(powDb, 'f', 1));
         m_inPowerAvg.feed(m_udpSrc->getInMagSq());
         double inPowDb = CalcDb::dbPower(m_inPowerAvg.average());

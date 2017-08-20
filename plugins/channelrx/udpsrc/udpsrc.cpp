@@ -431,16 +431,14 @@ void UDPSrc::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
 
-        int gateNbSamples = m_config.m_inputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate);
-        int agcTimeNbSamples = m_config.m_inputSampleRate * 0.2; // Fixed 200 ms
-        m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
-        m_agc.resize(agcTimeNbSamples, m_agcTarget);
-        m_agc.setStepDownDelay(gateNbSamples);
-        m_agc.setGate(gateNbSamples);
+        m_agc.resize(m_config.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
+        m_agc.setStepDownDelay( m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate));
+        m_agc.setGate(m_config.m_outputSampleRate * 0.02);
 
-        m_inMovingAverage.resize(m_config.m_inputSampleRate * 0.01, 1e-10);   // 10 ms
-        m_amMovingAverage.resize(m_config.m_inputSampleRate * 0.25, 1e-10);   // 25 ms
+        m_inMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
+        m_amMovingAverage.resize(m_config.m_outputSampleRate * 0.25, 1e-10);  // 25 ms
         m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
@@ -459,16 +457,15 @@ void UDPSrc::apply(bool force)
 
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
-        int gateNbSamples = m_config.m_inputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate);
-        m_squelchThreshold = m_config.m_inputSampleRate * m_config.m_squelchGate;
+        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
-        m_agc.setStepDownDelay(gateNbSamples); // same delay for up and down
-        m_agc.setGate(gateNbSamples);
+        m_agc.setStepDownDelay(m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate)); // same delay for up and down
+        m_agc.setGate(m_config.m_outputSampleRate * 0.02);
     }
 
     if ((m_config.m_squelch != m_running.m_squelch) || force)
     {
-        m_agc.setThreshold(m_config.m_squelch * (1<<30));
+        m_agc.setThreshold(m_config.m_squelch*(1<<23));
     }
 
     if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) || force)
