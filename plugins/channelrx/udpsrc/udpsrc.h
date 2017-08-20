@@ -340,7 +340,8 @@ protected:
     bool m_squelchOpen;
     int  m_squelchOpenCount;
     int  m_squelchCloseCount;
-    int m_squelchThreshold; //!< number of samples computed from given gate
+    int  m_squelchGate; //!< number of samples computed from given gate
+    int  m_squelchRelease;
 
     MagAGC m_agc;
     Bandpass<double> m_bandpass;
@@ -353,26 +354,26 @@ protected:
     {
         if ((!m_running.m_squelchEnabled) || (value > m_running.m_squelch))
         {
-            if (m_squelchThreshold == 0)
+            if (m_squelchGate == 0)
             {
                 m_squelchOpen = true;
             }
             else
             {
-                if (m_squelchOpenCount < m_squelchThreshold)
+                if (m_squelchOpenCount < m_squelchGate)
                 {
                     m_squelchOpenCount++;
                 }
                 else
                 {
-                    m_squelchCloseCount = m_squelchThreshold;
+                    m_squelchCloseCount = m_squelchRelease;
                     m_squelchOpen = true;
                 }
             }
         }
         else
         {
-            if (m_squelchThreshold == 0)
+            if (m_squelchGate == 0)
             {
                 m_squelchOpen = false;
             }
@@ -396,8 +397,8 @@ protected:
         if (open)
         {
             m_squelchOpen = true;
-            m_squelchOpenCount = m_squelchThreshold;
-            m_squelchCloseCount = m_squelchThreshold;
+            m_squelchOpenCount = m_squelchGate;
+            m_squelchCloseCount = m_squelchRelease;
         }
         else
         {

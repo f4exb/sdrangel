@@ -641,7 +641,7 @@
          <string>Squelch gate (ms)</string>
         </property>
         <property name="maximum">
-         <number>50</number>
+         <number>90</number>
         </property>
         <property name="pageStep">
          <number>1</number>

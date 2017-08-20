@@ -37,7 +37,8 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
-    m_squelchThreshold(4800),
+    m_squelchGate(4800),
+    m_squelchRelease(4800),
     m_agc(9600, m_agcTarget, 1e-6),
     m_settingsMutex(QMutex::Recursive)
 {
@@ -448,11 +449,23 @@ void UDPSrc::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
 
-        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        if ((m_config.m_sampleFormat == FormatLSB) ||
+            (m_config.m_sampleFormat == FormatLSBMono) ||
+            (m_config.m_sampleFormat == FormatUSB) ||
+            (m_config.m_sampleFormat == FormatUSBMono))
+        {
+            m_squelchGate = m_config.m_outputSampleRate * 0.05;
+        }
+        else
+        {
+            m_squelchGate = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        }
+
+        m_squelchRelease = m_config.m_outputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
         m_agc.resize(m_config.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
         m_agc.setStepDownDelay( m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate));
-        m_agc.setGate(m_config.m_outputSampleRate * 0.02);
+        m_agc.setGate(m_config.m_outputSampleRate * 0.05);
 
         m_bandpass.create(301, m_config.m_outputSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
 
@@ -476,10 +489,21 @@ void UDPSrc::apply(bool force)
 
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
-        m_squelchThreshold = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        if ((m_config.m_sampleFormat == FormatLSB) ||
+            (m_config.m_sampleFormat == FormatLSBMono) ||
+            (m_config.m_sampleFormat == FormatUSB) ||
+            (m_config.m_sampleFormat == FormatUSBMono))
+        {
+            m_squelchGate = m_config.m_outputSampleRate * 0.05;
+        }
+        else
+        {
+            m_squelchGate = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        }
+
+        m_squelchRelease = m_config.m_outputSampleRate * m_config.m_squelchGate;
         initSquelch(m_squelchOpen);
         m_agc.setStepDownDelay(m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate)); // same delay for up and down
-        m_agc.setGate(m_config.m_outputSampleRate * 0.02);
     }
 
     if ((m_config.m_squelch != m_running.m_squelch) || force)
