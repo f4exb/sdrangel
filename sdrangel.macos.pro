@@ -34,6 +34,7 @@ SUBDIRS += plugins/channeltx/modatv
 SUBDIRS += plugins/channeltx/modnfm
 SUBDIRS += plugins/channeltx/modssb
 SUBDIRS += plugins/channeltx/modwfm
+SUBDIRS += plugins/channeltx/udpsink
 
 # Main app must be last
 CONFIG += ordered
