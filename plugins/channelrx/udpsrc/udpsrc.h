@@ -333,7 +333,7 @@ protected:
 
 	char *m_udpAudioBuf;
 	static const int m_udpAudioPayloadSize = 8192; //!< UDP audio samples buffer. No UDP block on Earth is larger than this
-	static const Real m_agcTarget = 16384.0f;
+    static const Real m_agcTarget;
 
     PhaseDiscriminators m_phaseDiscri;
 

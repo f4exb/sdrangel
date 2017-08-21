@@ -25,6 +25,8 @@
 #include "udpsrcgui.h"
 #include "udpsrc.h"
 
+const Real UDPSrc::m_agcTarget = 16384.0f;
+
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
