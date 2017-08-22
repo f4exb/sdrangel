@@ -81,6 +81,7 @@ void UDPSrcGUI::resetToDefaults()
 	ui->volume->setValue(20);
 	ui->audioActive->setChecked(false);
 	ui->audioStereo->setChecked(false);
+    ui->agc->setChecked(false);
 
 	blockApplySettings(false);
 	applySettingsImmediate();
@@ -107,6 +108,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(15, m_fmDeviation);
 	s.writeS32(16, ui->squelch->value());
 	s.writeS32(17, ui->squelchGate->value());
+    s.writeBool(18, ui->agc->isChecked());
 	return s.final();
 }
 
@@ -161,6 +163,12 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 			case UDPSrc::FormatAMMono:
 				ui->sampleFormat->setCurrentIndex(7);
 				break;
+            case UDPSrc::FormatAMNoDCMono:
+                ui->sampleFormat->setCurrentIndex(8);
+                break;
+            case UDPSrc::FormatAMBPFMono:
+                ui->sampleFormat->setCurrentIndex(9);
+                break;
 			default:
 				ui->sampleFormat->setCurrentIndex(0);
 				break;
@@ -197,6 +205,8 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         d.readS32(17, &s32tmp, 5);
         ui->squelchGate->setValue(s32tmp);
         ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
+        d.readBool(18, &booltmp, false);
+        ui->agc->setChecked(booltmp);
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
