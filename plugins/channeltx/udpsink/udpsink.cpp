@@ -156,7 +156,7 @@ void UDPSink::modulateSample()
         else
         {
             m_udpHandler.readSample(s);
-            t = s.m_real;
+            t = (s.m_real + s.m_imag) / 2;
         }
 
         m_inMovingAverage.feed((t*t)/1073741824.0);

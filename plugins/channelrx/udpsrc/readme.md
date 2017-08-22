@@ -99,9 +99,7 @@ This toggles between mono or stereo audio feedback
 
 <h3>13: Gain</h3>
 
-This gain is applied to the samples just before they are sent via UDP.  
-
-Amplifies the input passband signal before processing. The level of amplification is the log2 of the amplification factor applied therefore it varies from 0 dB (0) to +30 dB (3) in 10 dB steps.
+This gain is applied to the samples just before they are sent via UDP. The gain value appears at the right of the slider.
 
 <h3>14: Audio volume</h3>
 
