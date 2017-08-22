@@ -83,8 +83,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
 	removeDockWidget(ui->channelDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->inputSelectDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
+	addDockWidget(Qt::LeftDockWidgetArea, ui->inputSelectDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
