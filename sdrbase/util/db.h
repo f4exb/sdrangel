@@ -22,7 +22,7 @@
 class CalcDb
 {
 public:
-	static double dbPower(double magsq, double floor = 1e-10);
+	static double dbPower(double magsq, double floor = 1e-12);
 	static double powerFromdB(double powerdB);
 };
 
