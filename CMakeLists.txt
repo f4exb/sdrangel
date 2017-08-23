@@ -587,6 +587,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(liblimesuite)
 endif (BUILD_DEBIAN)
 
+add_subdirectory(httpserver)
 add_subdirectory(devices)
 add_subdirectory(plugins)
 
