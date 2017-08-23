@@ -50,6 +50,13 @@ public:
 	void setMovable(bool movable) { m_movable = movable; }
 	bool getMovable() const { return m_movable; }
 
+	void setUDPAddress(const QString& udpAddress);
+	const QString& getUDPAddress() const { return m_udpAddress; }
+
+	void setUDPPort(quint16 port);
+	quint16 getUDPPort() const { return m_udpPort; }
+
+
 protected:
 	static QRgb m_colorTable[];
 	static int m_nextColor;
@@ -64,6 +71,8 @@ protected:
 	bool m_highlighted;
 	QColor m_color;
 	bool m_movable;
+	QString m_udpAddress;
+	quint16 m_udpPort;
 
 signals:
 	void changed();

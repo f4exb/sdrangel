@@ -11,10 +11,9 @@ BasicChannelSettingsWidget::BasicChannelSettingsWidget(ChannelMarker* marker, QW
 {
 	ui->setupUi(this);
 	ui->title->setText(m_channelMarker->getTitle());
+	ui->address->setText(m_channelMarker->getUDPAddress());
+	ui->port->setText(QString("%1").arg(m_channelMarker->getUDPPort()));
 	paintColor();
-	ui->red->setValue(m_channelMarker->getColor().red());
-	ui->green->setValue(m_channelMarker->getColor().green());
-	ui->blue->setValue(m_channelMarker->getColor().blue());
 }
 
 BasicChannelSettingsWidget::~BasicChannelSettingsWidget()
@@ -34,10 +33,25 @@ void BasicChannelSettingsWidget::on_colorBtn_clicked()
 	if(c.isValid()) {
 		m_channelMarker->setColor(c);
 		paintColor();
-		ui->red->setValue(m_channelMarker->getColor().red());
-		ui->green->setValue(m_channelMarker->getColor().green());
-		ui->blue->setValue(m_channelMarker->getColor().blue());
 	}
+}
+
+void BasicChannelSettingsWidget::on_address_textEdited(const QString& arg1)
+{
+    m_channelMarker->setUDPAddress(arg1);
+}
+
+void BasicChannelSettingsWidget::on_port_textEdited(const QString& arg1)
+{
+    bool ok;
+    int udpPort = arg1.toInt(&ok);
+
+    if((!ok) || (udpPort < 1024) || (udpPort > 65535))
+    {
+        udpPort = 9999;
+    }
+
+    m_channelMarker->setUDPPort(udpPort);
 }
 
 void BasicChannelSettingsWidget::paintColor()
@@ -46,32 +60,20 @@ void BasicChannelSettingsWidget::paintColor()
 	QPixmap pm(24, 24);
 	pm.fill(c);
 	ui->colorBtn->setIcon(pm);
-	ui->color->setText(tr("#%1%2%3")
+	ui->colorText->setText(tr("#%1%2%3")
 		.arg(c.red(), 2, 16, QChar('0'))
 		.arg(c.green(), 2, 16, QChar('0'))
 		.arg(c.blue(), 2, 16, QChar('0')));
 }
 
-void BasicChannelSettingsWidget::on_red_valueChanged(int value)
+void BasicChannelSettingsWidget::setUDPDialogVisible(bool visible)
 {
-	QColor c(m_channelMarker->getColor());
-	c.setRed(value);
-	m_channelMarker->setColor(c);
-	paintColor();
-}
-
-void BasicChannelSettingsWidget::on_green_valueChanged(int value)
-{
-	QColor c(m_channelMarker->getColor());
-	c.setGreen(value);
-	m_channelMarker->setColor(c);
-	paintColor();
-}
-
-void BasicChannelSettingsWidget::on_blue_valueChanged(int value)
-{
-	QColor c(m_channelMarker->getColor());
-	c.setBlue(value);
-	m_channelMarker->setColor(c);
-	paintColor();
+    if (visible)
+    {
+        ui->udpWidget->show();
+    }
+    else
+    {
+        ui->udpWidget->hide();
+    }
 }

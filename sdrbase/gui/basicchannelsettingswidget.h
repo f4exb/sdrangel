@@ -16,13 +16,13 @@ class SDRANGEL_API BasicChannelSettingsWidget : public QWidget {
 public:
 	explicit BasicChannelSettingsWidget(ChannelMarker* marker, QWidget* parent = NULL);
 	~BasicChannelSettingsWidget();
+	void setUDPDialogVisible(bool visible);
 
 private slots:
 	void on_title_textChanged(const QString& text);
 	void on_colorBtn_clicked();
-	void on_red_valueChanged(int value);
-	void on_green_valueChanged(int value);
-	void on_blue_valueChanged(int value);
+	void on_address_textEdited(const QString& arg1);
+	void on_port_textEdited(const QString& arg1);
 
 private:
 	Ui::BasicChannelSettingsWidget* ui;
