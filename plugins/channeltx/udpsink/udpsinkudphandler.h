@@ -23,8 +23,8 @@
 #include <QMutex>
 
 #include "dsp/dsptypes.h"
-
-class MessageQueue;
+#include "util/message.h"
+#include "util/messagequeue.h"
 
 class UDPSinkUDPHandler : public QObject
 {
@@ -61,10 +61,35 @@ public slots:
     void dataReadyRead();
 
 private:
+    class MsgUDPAddressAndPort : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getAddress() const { return m_address; }
+        quint16 getPort() const { return m_port; }
+
+        static MsgUDPAddressAndPort* create(QString address, quint16 port)
+        {
+            return new MsgUDPAddressAndPort(address, port);
+        }
+
+    private:
+        QString m_address;
+        quint16 m_port;
+
+        MsgUDPAddressAndPort(QString address, quint16 port) :
+            Message(),
+            m_address(address),
+            m_port(port)
+        { }
+    };
+
     typedef char (udpBlk_t)[m_udpBlockSize];
 
     void moveData(char *blk);
     void advanceReadPointer(int nbBytes);
+    void applyUDPLink(const QString& address, quint16 port);
+    bool handleMessage(const Message& message);
 
     QUdpSocket *m_dataSocket;
     QHostAddress m_dataAddress;
@@ -83,6 +108,10 @@ private:
     int m_rwDelta;
     float m_d;
     MessageQueue *m_feedbackMessageQueue;
+    MessageQueue m_inputMessageQueue;
+
+private slots:
+    void handleMessages();
 };
 
 

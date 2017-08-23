@@ -18,7 +18,8 @@
 
 #include "udpsinkmsg.h"
 #include "udpsinkudphandler.h"
-#include "util/messagequeue.h"
+
+MESSAGE_CLASS_DEFINITION(UDPSinkUDPHandler::MsgUDPAddressAndPort, Message)
 
 UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_dataSocket(0),
@@ -38,6 +39,7 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_feedbackMessageQueue(0)
 {
     m_udpBuf = new udpBlk_t[m_minNbUDPFrames];
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()));
 }
 
 UDPSinkUDPHandler::~UDPSinkUDPHandler()
@@ -56,17 +58,16 @@ void UDPSinkUDPHandler::start()
 
     if (!m_dataConnected)
     {
-        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
 
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
         {
             qDebug("UDPSinkUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+            connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
             m_dataConnected = true;
         }
         else
         {
-            qWarning("UDPSinkUDPHandler::start: cannot bind data port %d", m_dataPort);
-            disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+            qWarning("UDPSinkUDPHandler::start: cannot bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
             m_dataConnected = false;
         }
     }
@@ -189,6 +190,12 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
 
 void UDPSinkUDPHandler::configureUDPLink(const QString& address, quint16 port)
 {
+    Message* msg = MsgUDPAddressAndPort::create(address, port);
+    m_inputMessageQueue.push(msg);
+}
+
+void UDPSinkUDPHandler::applyUDPLink(const QString& address, quint16 port)
+{
     qDebug("UDPSinkUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
     bool addressOK = m_dataAddress.setAddress(address);
 
@@ -229,3 +236,33 @@ void UDPSinkUDPHandler::resizeBuffer(float sampleRate)
 
     resetReadIndex();
 }
+
+void UDPSinkUDPHandler::handleMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
+}
+
+bool UDPSinkUDPHandler::handleMessage(const Message& cmd)
+{
+    if (UDPSinkUDPHandler::MsgUDPAddressAndPort::match(cmd))
+    {
+        UDPSinkUDPHandler::MsgUDPAddressAndPort& notif = (UDPSinkUDPHandler::MsgUDPAddressAndPort&) cmd;
+        applyUDPLink(notif.getAddress(), notif.getPort());
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+
