@@ -18,6 +18,8 @@
 #ifndef INCLUDE_DSDDEMODGUI_H
 #define INCLUDE_DSDDEMODGUI_H
 
+#include <QMenu>
+
 #include "gui/rollupwidget.h"
 #include "plugin/plugingui.h"
 #include "dsp/dsptypes.h"
@@ -26,6 +28,7 @@
 
 class PluginAPI;
 class DeviceSourceAPI;
+class BasicChannelSettingsWidget;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -57,8 +60,8 @@ public:
 	static const QString m_channelID;
 
 private slots:
-	void viewChanged();
 	void formatStatusText();
+	void channelMarkerChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int index);
 	void on_demodGain_valueChanged(int value);
@@ -114,6 +117,7 @@ private:
 	float m_myLatitude;
 	float m_myLongitude;
 
+	BasicChannelSettingsWidget *m_bcsw;
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();

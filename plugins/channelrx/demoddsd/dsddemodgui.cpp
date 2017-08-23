@@ -110,6 +110,9 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeBool(14, m_slot1On);
     s.writeBool(15, m_slot2On);
     s.writeBool(16, m_tdmaStereo);
+    s.writeString(17, m_channelMarker.getTitle());
+    s.writeString(18, m_channelMarker.getUDPAddress());
+    s.writeU32(19, (quint32) m_channelMarker.getUDPPort());
 	return s.final();
 }
 
@@ -126,6 +129,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		QByteArray bytetmp;
+		QString strtmp;
 		quint32 u32tmp;
 		qint32 tmp;
 
@@ -161,6 +165,13 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         d.readBool(14, &m_slot1On, false);
         d.readBool(15, &m_slot2On, false);
         d.readBool(16, &m_tdmaStereo, false);
+        d.readString(17, &strtmp, "DSD Demodulator");
+        m_channelMarker.setTitle(strtmp);
+        this->setWindowTitle(m_channelMarker.getTitle());
+        d.readString(18, &strtmp, "127.0.0.1");
+        m_channelMarker.setUDPAddress(strtmp);
+        d.readU32(19, &u32tmp, 9999);
+        m_channelMarker.setUDPPort(u32tmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -179,11 +190,6 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 bool DSDDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
 	return false;
-}
-
-void DSDDemodGUI::viewChanged()
-{
-	applySettings();
 }
 
 void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -288,8 +294,15 @@ void DSDDemodGUI::onMenuDoubleClicked()
 	if (!m_basicSettingsShown)
 	{
 		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
+		m_bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
+		m_bcsw->show();
+	}
+	else
+	{
+	    m_basicSettingsShown = false;
+	    m_bcsw->hide();
+	    delete m_bcsw;
+	    m_bcsw = 0;
 	}
 }
 
@@ -308,7 +321,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_slot2On(false),
 	m_tdmaStereo(false),
 	m_squelchOpen(false),
-	m_tickCount(0)
+	m_tickCount(0),
+	m_bcsw(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -344,7 +358,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
@@ -358,6 +372,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 DSDDemodGUI::~DSDDemodGUI()
 {
+    if (m_bcsw) delete m_bcsw;
     m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;
@@ -579,6 +594,13 @@ void DSDDemodGUI::formatStatusText()
 
     m_formatStatusText[82] = '\0'; // guard
 }
+
+void DSDDemodGUI::channelMarkerChanged()
+{
+    this->setWindowTitle(m_channelMarker.getTitle());
+    applySettings();
+}
+
 
 void DSDDemodGUI::tick()
 {
