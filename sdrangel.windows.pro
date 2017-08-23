@@ -7,6 +7,7 @@
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
 CONFIG(MINGW64)SUBDIRS += nanomsg
+SUBDIRS += httpserver
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
 SUBDIRS += librtlsdr
