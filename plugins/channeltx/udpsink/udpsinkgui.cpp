@@ -227,6 +227,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         m_tickCount(0),
         m_channelMarker(this),
         m_basicSettingsShown(false),
+        m_bcsw(0),
         m_doApplySettings(true)
 {
     ui->setupUi(this);
@@ -278,6 +279,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
 UDPSinkGUI::~UDPSinkGUI()
 {
+    if (m_bcsw) delete m_bcsw;
     m_deviceAPI->removeChannelInstance(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -546,8 +548,15 @@ void UDPSinkGUI::onMenuDoubleClicked()
     if (!m_basicSettingsShown)
     {
         m_basicSettingsShown = true;
-        BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-        bcsw->show();
+        m_bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
+        m_bcsw->show();
+    }
+    else
+    {
+        m_basicSettingsShown = false;
+        m_bcsw->hide();
+        delete m_bcsw;
+        m_bcsw = 0;
     }
 }
 

@@ -31,6 +31,7 @@ class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class UDPSink;
 class SpectrumVis;
+class BasicChannelSettingsWidget;
 
 namespace Ui {
     class UDPSinkGUI;
@@ -96,6 +97,7 @@ private:
     QString m_udpAddress;
     int m_udpPort;
     bool m_basicSettingsShown;
+    BasicChannelSettingsWidget *m_bcsw;
     bool m_doApplySettings;
 
     explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
