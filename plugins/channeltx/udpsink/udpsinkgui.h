@@ -31,7 +31,6 @@ class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class UDPSink;
 class SpectrumVis;
-class BasicChannelSettingsWidget;
 
 namespace Ui {
     class UDPSinkGUI;
@@ -68,7 +67,7 @@ private slots:
     void on_amModPercent_textEdited(const QString& arg1);
     void on_applyBtn_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
+    void onMenuDialogCalled(const QPoint& p);
     void on_gain_valueChanged(int value);
     void on_squelch_valueChanged(int value);
     void on_squelchGate_valueChanged(int value);
@@ -96,8 +95,6 @@ private:
     int m_fmDeviation;
     QString m_udpAddress;
     int m_udpPort;
-    bool m_basicSettingsShown;
-    BasicChannelSettingsWidget *m_bcsw;
     bool m_doApplySettings;
 
     explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);

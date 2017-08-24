@@ -30,7 +30,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
@@ -289,21 +289,12 @@ void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool r
 	*/
 }
 
-void DSDDemodGUI::onMenuDoubleClicked()
+void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if (!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		m_bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		m_bcsw->show();
-	}
-	else
-	{
-	    m_basicSettingsShown = false;
-	    m_bcsw->hide();
-	    delete m_bcsw;
-	    m_bcsw = 0;
-	}
+    //qDebug("DSDDemodGUI::onMenuDialogCalled: x: %d y: %d", p.x(), p.y());
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -312,7 +303,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_signalFormat(signalFormatNone),
 	m_enableCosineFiltering(false),
@@ -321,14 +311,13 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_slot2On(false),
 	m_tdmaStereo(false),
 	m_squelchOpen(false),
-	m_tickCount(0),
-	m_bcsw(0)
+	m_tickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_scopeVis = new ScopeVis(ui->glScope);
 	m_dsdDemod = new DSDDemod(m_scopeVis);
@@ -353,6 +342,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	//m_channelMarker = new ChannelMarker(this);
+	m_channelMarker.setTitle(windowTitle());
 	m_channelMarker.setColor(Qt::cyan);
 	m_channelMarker.setBandwidth(10000);
 	m_channelMarker.setCenterFrequency(0);
@@ -372,7 +362,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-    if (m_bcsw) delete m_bcsw;
     m_deviceAPI->removeChannelInstance(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 	delete m_threadedChannelizer;

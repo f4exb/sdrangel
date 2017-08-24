@@ -28,7 +28,6 @@
 
 class PluginAPI;
 class DeviceSourceAPI;
-class BasicChannelSettingsWidget;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -78,7 +77,7 @@ private slots:
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
+	void onMenuDialogCalled(const QPoint& p);
 	void tick();
 
 private:
@@ -95,7 +94,6 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
@@ -116,8 +114,6 @@ private:
 
 	float m_myLatitude;
 	float m_myLongitude;
-
-	BasicChannelSettingsWidget *m_bcsw;
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();

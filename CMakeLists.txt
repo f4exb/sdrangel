@@ -140,6 +140,7 @@ set(sdrbase_SOURCES
     sdrbase/gui/aboutdialog.cpp
     sdrbase/gui/addpresetdialog.cpp
     sdrbase/gui/basicchannelsettingswidget.cpp
+    sdrbase/gui/basicchannelsettingsdialog.cpp
     sdrbase/gui/buttonswitch.cpp
     sdrbase/gui/channelwindow.cpp
     sdrbase/gui/clickablelabel.cpp
@@ -261,6 +262,7 @@ set(sdrbase_HEADERS
     sdrbase/gui/aboutdialog.h
     sdrbase/gui/addpresetdialog.h
     sdrbase/gui/basicchannelsettingswidget.h
+    sdrbase/gui/basicchannelsettingsdialog.h
     sdrbase/gui/buttonswitch.h
     sdrbase/gui/channelwindow.h
     sdrbase/gui/colormapper.h
@@ -329,6 +331,7 @@ set(sdrbase_FORMS
     sdrbase/gui/aboutdialog.ui
     sdrbase/gui/addpresetdialog.ui
     sdrbase/gui/basicchannelsettingswidget.ui
+    sdrbase/gui/basicchannelsettingsdialog.ui
     sdrbase/gui/cwkeyergui.ui
     sdrbase/gui/glscopegui.ui
     sdrbase/gui/glscopenggui.ui

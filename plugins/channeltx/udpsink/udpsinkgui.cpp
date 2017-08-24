@@ -21,7 +21,7 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
 #include "mainwindow.h"
 
@@ -226,13 +226,11 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         m_inPowerAvg(4, 1e-10),
         m_tickCount(0),
         m_channelMarker(this),
-        m_basicSettingsShown(false),
-        m_bcsw(0),
         m_doApplySettings(true)
 {
     ui->setupUi(this);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-    connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
@@ -279,7 +277,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
 UDPSinkGUI::~UDPSinkGUI()
 {
-    if (m_bcsw) delete m_bcsw;
     m_deviceAPI->removeChannelInstance(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -543,21 +540,11 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     }
 }
 
-void UDPSinkGUI::onMenuDoubleClicked()
+void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
 {
-    if (!m_basicSettingsShown)
-    {
-        m_basicSettingsShown = true;
-        m_bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-        m_bcsw->show();
-    }
-    else
-    {
-        m_basicSettingsShown = false;
-        m_bcsw->hide();
-        delete m_bcsw;
-        m_bcsw = 0;
-    }
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 void UDPSinkGUI::leaveEvent(QEvent*)

@@ -100,23 +100,33 @@ int RollupWidget::arrangeRollups()
 	QFontMetrics fm(font());
 	int pos = fm.height() + 4;
 
-	for(int i = 0; i < children().count(); ++i) {
+	for(int i = 0; i < children().count(); ++i)
+	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if(r != NULL) {
+		if(r != NULL)
+		{
 			pos += fm.height() + 2;
-			if(!r->isHidden()) {
+
+			if(!r->isHidden() && (r->windowTitle() != "Basic channel settings"))
+			{
 				r->move(2, pos + 3);
 				int h = 0;
-				if(r->hasHeightForWidth())
+
+				if(r->hasHeightForWidth()) {
 					h = r->heightForWidth(width() - 4);
-				else h = r->sizeHint().height();
+				} else {
+				    h = r->sizeHint().height();
+				}
+
 				r->resize(width() - 4, h);
 				pos += r->height() + 5;
 			}
 		}
 	}
+
 	setMinimumHeight(pos);
 	setMaximumHeight(pos);
+
 	return pos;
 }
 
@@ -205,6 +215,8 @@ void RollupWidget::paintEvent(QPaintEvent*)
 
 int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame)
 {
+    if (rollup->windowTitle() == "Basic channel settings") return 0;
+
 	QFontMetrics fm(font());
 	int height = 1;
 
@@ -270,7 +282,7 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 
 	// menu box left
 	if(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
-		emit customContextMenuRequested(event->pos());
+		emit customContextMenuRequested(event->globalPos());
 		return;
 	}
 
@@ -302,17 +314,6 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 					pos += r->height() + 5;
 			}
 		}
-	}
-}
-
-void RollupWidget::mouseDoubleClickEvent(QMouseEvent* event)
-{
-	QFontMetrics fm(font());
-
-	// menu box left
-	if(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
-		emit menuDoubleClickEvent();
-		return;
 	}
 }
 
