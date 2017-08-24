@@ -22,7 +22,9 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 AudioFifo::AudioFifo() :
-	m_fifo(0)
+	m_fifo(0),
+	m_udpSink(0),
+	m_copyToUDP(false)
 {
 	m_size = 0;
 	m_fill = 0;
@@ -31,7 +33,7 @@ AudioFifo::AudioFifo() :
 	m_sampleSize = 0;
 }
 
-AudioFifo::AudioFifo(uint sampleSize, uint numSamples) :
+AudioFifo::AudioFifo(uint32_t sampleSize, uint32_t numSamples) :
 	m_fifo(0)
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -55,19 +57,24 @@ AudioFifo::~AudioFifo()
 	m_size = 0;
 }
 
-bool AudioFifo::setSize(uint sampleSize, uint numSamples)
+bool AudioFifo::setSize(uint32_t sampleSize, uint32_t numSamples)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	return create(sampleSize, numSamples);
 }
 
-uint AudioFifo::write(const quint8* data, uint numSamples, int timeout_ms)
+uint AudioFifo::write(const quint8* data, uint32_t numSamples, int timeout_ms)
 {
 	QTime time;
-	uint total;
-	uint remaining;
-	uint copyLen;
+	uint32_t total;
+	uint32_t remaining;
+	uint32_t copyLen;
+
+	if (m_copyToUDP && m_udpSink)
+	{
+	    m_udpSink->write((qint16 *) data, numSamples);
+	}
 
 	if(m_fifo == 0)
 	{
@@ -141,12 +148,12 @@ uint AudioFifo::write(const quint8* data, uint numSamples, int timeout_ms)
 	return total;
 }
 
-uint AudioFifo::read(quint8* data, uint numSamples, int timeout_ms)
+uint AudioFifo::read(quint8* data, uint32_t numSamples, int timeout_ms)
 {
 	QTime time;
-	uint total;
-	uint remaining;
-	uint copyLen;
+	uint32_t total;
+	uint32_t remaining;
+	uint32_t copyLen;
 
 	if(m_fifo == 0)
 	{
@@ -220,7 +227,7 @@ uint AudioFifo::read(quint8* data, uint numSamples, int timeout_ms)
 	return total;
 }
 
-uint AudioFifo::drain(uint numSamples)
+uint AudioFifo::drain(uint32_t numSamples)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -247,7 +254,7 @@ void AudioFifo::clear()
 	m_writeWaitCondition.wakeOne();
 }
 
-bool AudioFifo::create(uint sampleSize, uint numSamples)
+bool AudioFifo::create(uint32_t sampleSize, uint32_t numSamples)
 {
 	if(m_fifo != 0)
 	{

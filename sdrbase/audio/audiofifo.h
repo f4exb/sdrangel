@@ -22,46 +22,53 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "util/export.h"
+#include "util/udpsink.h"
 
 class SDRANGEL_API AudioFifo : public QObject {
 	Q_OBJECT
 public:
 	AudioFifo();
-	AudioFifo(uint sampleSize, uint numSamples);
+	AudioFifo(uint32_t sampleSize, uint32_t numSamples);
 	~AudioFifo();
 
-	bool setSize(uint sampleSize, uint numSamples);
+	bool setSize(uint32_t sampleSize, uint32_t numSamples);
 
-	uint write(const quint8* data, uint numSamples, int timeout_ms = INT_MAX);
-	uint read(quint8* data, uint numSamples, int timeout_ms = INT_MAX);
+	uint32_t write(const quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
+	uint32_t read(quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
 
-	uint drain(uint numSamples);
+	uint32_t drain(uint32_t numSamples);
 	void clear();
 
-	inline uint flush() { return drain(m_fill); }
-	inline uint fill() const { return m_fill; }
+	inline uint32_t flush() { return drain(m_fill); }
+	inline uint32_t fill() const { return m_fill; }
 	inline bool isEmpty() const { return m_fill == 0; }
 	inline bool isFull() const { return m_fill == m_size; }
-	inline uint size() const { return m_size; }
+	inline uint32_t size() const { return m_size; }
+
+	void setUDPSink(UDPSink<qint16> *udpSink) { m_udpSink = udpSink; }
+	void setCopyToUDP(bool copyToUDP) { m_copyToUDP = copyToUDP; }
 
 private:
 	QMutex m_mutex;
 
 	qint8* m_fifo;
 
-	uint m_sampleSize;
+	uint32_t m_sampleSize;
 
-	uint m_size;
-	uint m_fill;
-	uint m_head;
-	uint m_tail;
+	uint32_t m_size;
+	uint32_t m_fill;
+	uint32_t m_head;
+	uint32_t m_tail;
 
 	QMutex m_writeWaitLock;
 	QMutex m_readWaitLock;
 	QWaitCondition m_writeWaitCondition;
 	QWaitCondition m_readWaitCondition;
 
-	bool create(uint sampleSize, uint numSamples);
+	UDPSink<qint16> *m_udpSink;
+	bool m_copyToUDP;
+
+	bool create(uint32_t sampleSize, uint32_t numSamples);
 };
 
 #endif // INCLUDE_AUDIOFIFO_H

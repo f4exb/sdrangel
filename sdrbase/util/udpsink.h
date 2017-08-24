@@ -62,6 +62,9 @@ public:
 	void setAddress(QString& address) { m_address.setAddress(address); }
 	void setPort(unsigned int port) { m_port = port; }
 
+	/**
+	 * Write one sample
+	 */
 	void write(T sample)
 	{
 		if (m_sampleBufferIndex < m_udpSamples)
@@ -77,14 +80,40 @@ public:
 		}
 	}
 
+	/**
+	 * Write a bunch of samples
+	 */
+	void write(T *samples, int nbSamples)
+	{
+	    int samplesIndex = 0;
+
+	    if (m_sampleBufferIndex + nbSamples > m_udpSamples) // fill remainder of buffer and send it
+	    {
+	        memcpy(&m_sampleBuffer[m_sampleBufferIndex], &samples[samplesIndex], (m_udpSamples - m_sampleBufferIndex)*sizeof(T)); // fill remainder of buffer
+	        m_socket->writeDatagram((const char*)&m_sampleBuffer[0], (qint64 ) m_udpSize, m_address, m_port); // send buffer
+            samplesIndex += (m_udpSamples - m_sampleBufferIndex);
+            nbSamples -= (m_udpSamples - m_sampleBufferIndex);
+	        m_sampleBufferIndex = 0;
+	    }
+
+	    while (nbSamples > m_udpSamples) // send directly from input without buffering
+	    {
+	        m_socket->writeDatagram((const char*)&samples[samplesIndex], (qint64 ) m_udpSize, m_address, m_port);
+	        samplesIndex += m_udpSamples;
+	        nbSamples -= m_udpSamples;
+	    }
+
+	    memcpy(&m_sampleBuffer[m_sampleBufferIndex], &samples[samplesIndex], nbSamples*sizeof(T)); // copy remainder of input to buffer
+	}
+
 private:
-	unsigned int m_udpSize;
-    unsigned int m_udpSamples;
+	int m_udpSize;
+    int m_udpSamples;
 	QHostAddress m_address;
 	unsigned int m_port;
 	QUdpSocket *m_socket;
 	T *m_sampleBuffer;;
-	uint32_t m_sampleBufferIndex;
+	int m_sampleBufferIndex;
 };
 
 
