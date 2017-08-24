@@ -53,8 +53,11 @@ public:
 	void setUDPAddress(const QString& udpAddress);
 	const QString& getUDPAddress() const { return m_udpAddress; }
 
-	void setUDPPort(quint16 port);
-	quint16 getUDPPort() const { return m_udpPort; }
+	void setUDPReceivePort(quint16 port);
+	quint16 getUDPReceivePort() const { return m_udpReceivePort; }
+
+    void setUDPSendPort(quint16 port);
+    quint16 getUDPSendPort() const { return m_udpSendPort; }
 
 
 protected:
@@ -72,7 +75,8 @@ protected:
 	QColor m_color;
 	bool m_movable;
 	QString m_udpAddress;
-	quint16 m_udpPort;
+	quint16 m_udpReceivePort;
+    quint16 m_udpSendPort;
 
 signals:
 	void changed();

@@ -14,7 +14,8 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     ui->title->setText(m_channelMarker->getTitle());
     m_color = m_channelMarker->getColor();
     ui->udpAddress->setText(m_channelMarker->getUDPAddress());
-    ui->udpPort->setText(QString("%1").arg(m_channelMarker->getUDPPort()));
+    ui->udpPortReceive->setText(QString("%1").arg(m_channelMarker->getUDPReceivePort()));
+    ui->udpPortSend->setText(QString("%1").arg(m_channelMarker->getUDPSendPort()));
     paintColor();
 }
 
@@ -55,14 +56,23 @@ void BasicChannelSettingsDialog::accept()
     m_channelMarker->setUDPAddress(ui->udpAddress->text());
 
     bool ok;
-    int udpPort = ui->udpPort->text().toInt(&ok);
+    int udpPort = ui->udpPortReceive->text().toInt(&ok);
 
     if((!ok) || (udpPort < 1024) || (udpPort > 65535))
     {
         udpPort = 9999;
     }
 
-    m_channelMarker->setUDPPort(udpPort);
+    m_channelMarker->setUDPReceivePort(udpPort);
+
+    udpPort = ui->udpPortSend->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024) || (udpPort > 65535))
+    {
+        udpPort = 9999;
+    }
+
+    m_channelMarker->setUDPSendPort(udpPort);
 
     QDialog::accept();
 }

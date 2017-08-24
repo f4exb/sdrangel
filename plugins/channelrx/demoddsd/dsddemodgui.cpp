@@ -112,7 +112,8 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeBool(16, m_tdmaStereo);
     s.writeString(17, m_channelMarker.getTitle());
     s.writeString(18, m_channelMarker.getUDPAddress());
-    s.writeU32(19, (quint32) m_channelMarker.getUDPPort());
+    s.writeU32(19, (quint32) m_channelMarker.getUDPReceivePort());
+    s.writeU32(20, (quint32) m_channelMarker.getUDPSendPort());
 	return s.final();
 }
 
@@ -171,7 +172,9 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         d.readString(18, &strtmp, "127.0.0.1");
         m_channelMarker.setUDPAddress(strtmp);
         d.readU32(19, &u32tmp, 9999);
-        m_channelMarker.setUDPPort(u32tmp);
+        m_channelMarker.setUDPReceivePort(u32tmp);
+        d.readU32(20, &u32tmp, 9999);
+        m_channelMarker.setUDPSendPort(u32tmp);
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);

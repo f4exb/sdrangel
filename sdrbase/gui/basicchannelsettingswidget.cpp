@@ -12,7 +12,7 @@ BasicChannelSettingsWidget::BasicChannelSettingsWidget(ChannelMarker* marker, QW
 	ui->setupUi(this);
 	ui->title->setText(m_channelMarker->getTitle());
 	ui->address->setText(m_channelMarker->getUDPAddress());
-	ui->port->setText(QString("%1").arg(m_channelMarker->getUDPPort()));
+	ui->port->setText(QString("%1").arg(m_channelMarker->getUDPReceivePort()));
 	paintColor();
 }
 
@@ -51,7 +51,7 @@ void BasicChannelSettingsWidget::on_port_textEdited(const QString& arg1)
         udpPort = 9999;
     }
 
-    m_channelMarker->setUDPPort(udpPort);
+    m_channelMarker->setUDPReceivePort(udpPort);
 }
 
 void BasicChannelSettingsWidget::paintColor()

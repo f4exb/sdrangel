@@ -37,7 +37,8 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_color(m_colorTable[m_nextColor]),
 	m_movable(true),
 	m_udpAddress("127.0.0.1"),
-	m_udpPort(9999)
+	m_udpReceivePort(9999),
+	m_udpSendPort(9998)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)
@@ -104,8 +105,14 @@ void ChannelMarker::setUDPAddress(const QString& udpAddress)
     emit changed();
 }
 
-void ChannelMarker::setUDPPort(quint16 port)
+void ChannelMarker::setUDPReceivePort(quint16 port)
 {
-    m_udpPort = port;
+    m_udpReceivePort = port;
+    emit changed();
+}
+
+void ChannelMarker::setUDPSendPort(quint16 port)
+{
+    m_udpSendPort = port;
     emit changed();
 }

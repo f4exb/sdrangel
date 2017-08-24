@@ -95,14 +95,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="udpPortLabel">
+      <widget class="QLabel" name="udpPortReceiveLabel">
        <property name="text">
-        <string>Port</string>
+        <string>Recv</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="udpPort">
+      <widget class="QLineEdit" name="udpPortReceive">
        <property name="maximumSize">
         <size>
          <width>60</width>
@@ -117,6 +117,29 @@
        </property>
        <property name="text">
         <string>9999</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="udpPortSendLabel">
+       <property name="text">
+        <string>Send</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="udpPortSend">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="inputMask">
+        <string>00000</string>
+       </property>
+       <property name="text">
+        <string>9998</string>
        </property>
       </widget>
      </item>
