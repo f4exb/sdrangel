@@ -281,12 +281,6 @@ private:
 
     //=================================================================
 
-    struct AudioSample {
-        qint16 l;
-        qint16 r;
-    };
-    typedef std::vector<AudioSample> AudioVector;
-
     enum RateState {
         RSInitialFill,
         RSRunning

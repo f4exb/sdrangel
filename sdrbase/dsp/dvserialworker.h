@@ -30,6 +30,7 @@
 #include "util/syncmessenger.h"
 #include "util/messagequeue.h"
 #include "dsp/filtermbe.h"
+#include "dsp/dsptypes.h"
 
 class AudioFifo;
 
@@ -115,13 +116,6 @@ public slots:
     void handleInputMessages();
 
 private:
-    struct AudioSample {
-        qint16 l;
-        qint16 r;
-    };
-
-    typedef std::vector<AudioSample> AudioVector;
-
     void upsample6(short *in, short *out, int nbSamplesIn);
     void upsample6(short *in, int nbSamplesIn, unsigned char channels);
 

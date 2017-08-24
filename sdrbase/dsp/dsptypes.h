@@ -51,8 +51,14 @@ struct Sample
 	FixReal m_real;
 	FixReal m_imag;
 };
+
+struct AudioSample {
+    qint16 l;
+    qint16 r;
+};
 #pragma pack(pop)
 
 typedef std::vector<Sample> SampleVector;
+typedef std::vector<AudioSample> AudioVector;
 
 #endif // INCLUDE_DSPTYPES_H

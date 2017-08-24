@@ -54,13 +54,6 @@ public:
 		FormatNone
 	};
 
-	struct AudioSample {
-		qint16 l;
-		qint16 r;
-	};
-
-	typedef std::vector<AudioSample> AudioVector;
-
 	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum);
 	virtual ~UDPSrc();
 

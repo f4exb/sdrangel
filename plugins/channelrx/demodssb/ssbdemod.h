@@ -164,13 +164,6 @@ private:
 		{ }
 	};
 
-	struct AudioSample {
-		qint16 l;
-		qint16 r;
-	};
-
-	typedef std::vector<AudioSample> AudioVector;
-
 	Real m_Bandwidth;
 	Real m_LowCutoff;
 	Real m_volume;

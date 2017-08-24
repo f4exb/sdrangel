@@ -34,7 +34,9 @@ AudioFifo::AudioFifo() :
 }
 
 AudioFifo::AudioFifo(uint32_t sampleSize, uint32_t numSamples) :
-	m_fifo(0)
+	m_fifo(0),
+    m_udpSink(0),
+    m_copyToUDP(false)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
