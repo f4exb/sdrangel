@@ -60,8 +60,6 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 	m_config.m_enableCosineFiltering = false;
 
-	apply();
-
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
@@ -77,12 +75,16 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
     DSPEngine::instance()->addAudioSink(&m_audioFifo2);
 
-    m_udpBufferMono = new UDPSink<FixReal>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_audioFifo1.setUDPSink(m_udpBufferAudio);
+    m_audioFifo2.setUDPSink(m_udpBufferAudio);
+
+    apply(true);
 }
 
 DSDDemod::~DSDDemod()
 {
-    delete m_udpBufferMono;
+    delete m_udpBufferAudio;
     delete[] m_sampleBuffer;
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
@@ -483,25 +485,17 @@ void DSDDemod::apply(bool force)
     if ((m_config.m_udpAddress != m_running.m_udpAddress)
         || (m_config.m_udpPort != m_running.m_udpPort) || force)
     {
-        m_udpBufferMono->setAddress(m_config.m_udpAddress);
-        m_udpBufferMono->setPort(m_config.m_udpPort);
+        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
+        m_udpBufferAudio->setPort(m_config.m_udpPort);
     }
 
-    m_running.m_inputSampleRate = m_config.m_inputSampleRate;
-	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
-	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-	m_running.m_demodGain = m_config.m_demodGain;
-	m_running.m_fmDeviation = m_config.m_fmDeviation;
-	m_running.m_squelchGate = m_config.m_squelchGate;
-	m_running.m_squelch = m_config.m_squelch;
-	m_running.m_volume = m_config.m_volume;
-	m_running.m_baudRate = m_config.m_baudRate;
-	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_audioMute = m_config.m_audioMute;
-	m_running.m_enableCosineFiltering = m_config.m_enableCosineFiltering;
-	m_running.m_syncOrConstellation = m_config.m_syncOrConstellation;
-	m_running.m_slot1On = m_config.m_slot1On;
-	m_running.m_slot2On = m_config.m_slot2On;
-	m_running.m_tdmaStereo = m_config.m_tdmaStereo;
-	m_running.m_pllLock = m_config.m_pllLock;
+    if ((m_config.m_udpCopyAudio != m_running.m_udpCopyAudio)
+        || (m_config.m_slot1On != m_running.m_slot1On)
+        || (m_config.m_slot2On != m_running.m_slot2On) || force)
+    {
+        m_audioFifo1.setCopyToUDP(m_config.m_slot1On && m_config.m_udpCopyAudio);
+        m_audioFifo2.setCopyToUDP(m_config.m_slot2On && m_config.m_udpCopyAudio);
+    }
+
+    m_running = m_config;
 }
