@@ -36,7 +36,7 @@ WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
     m_magsqCount(0),
     m_movingAverage(40, 0),
     m_sampleSink(sampleSink),
-    m_audioFifo(4, 250000),
+    m_audioFifo(250000),
     m_settingsMutex(QMutex::Recursive)
 
 {

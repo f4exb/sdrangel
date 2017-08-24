@@ -47,7 +47,7 @@ NFMDemod::NFMDemod() :
     m_movingAverage(40, 0),
     m_afSquelch(2, afSqTones),
     m_fmExcursion(2400),
-    m_audioFifo(4, 48000),
+    m_audioFifo(48000),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");

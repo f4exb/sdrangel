@@ -39,7 +39,7 @@ NFMMod::NFMMod() :
 	m_modPhasor(0.0f),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
-    m_audioFifo(4, 4800),
+    m_audioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),

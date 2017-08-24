@@ -34,7 +34,7 @@ AMDemod::AMDemod() :
 	m_magsqCount(0),
 	m_movingAverage(40, 0),
     m_volumeAGC(2400, 1.0),
-    m_audioFifo(4, 48000),
+    m_audioFifo(48000),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("AMDemod");

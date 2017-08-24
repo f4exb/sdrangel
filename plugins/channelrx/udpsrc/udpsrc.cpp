@@ -35,7 +35,7 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
     m_amMovingAverage(1200, 1e-10),
-    m_audioFifo(4, 24000),
+    m_audioFifo(24000),
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),

@@ -34,7 +34,7 @@ AudioFifo::AudioFifo() :
 	m_tail = 0;
 }
 
-AudioFifo::AudioFifo(uint32_t sampleSize, uint32_t numSamples) :
+AudioFifo::AudioFifo(uint32_t numSamples) :
 	m_fifo(0),
     m_sampleSize(sizeof(AudioSample)),
     m_udpSink(0),
@@ -42,7 +42,7 @@ AudioFifo::AudioFifo(uint32_t sampleSize, uint32_t numSamples) :
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	create(sampleSize, numSamples);
+	create(numSamples);
 }
 
 AudioFifo::~AudioFifo()
@@ -61,11 +61,11 @@ AudioFifo::~AudioFifo()
 	m_size = 0;
 }
 
-bool AudioFifo::setSize(uint32_t sampleSize, uint32_t numSamples)
+bool AudioFifo::setSize(uint32_t numSamples)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	return create(sampleSize, numSamples);
+	return create(numSamples);
 }
 
 uint AudioFifo::write(const quint8* data, uint32_t numSamples, int timeout_ms)
@@ -258,7 +258,7 @@ void AudioFifo::clear()
 	m_writeWaitCondition.wakeOne();
 }
 
-bool AudioFifo::create(uint32_t sampleSize, uint32_t numSamples)
+bool AudioFifo::create(uint32_t numSamples)
 {
 	if(m_fifo != 0)
 	{

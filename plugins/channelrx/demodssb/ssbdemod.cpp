@@ -41,7 +41,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
     m_agcThresholdGate(0),
     m_audioActive(false),
     m_sampleSink(sampleSink),
-    m_audioFifo(4, 24000),
+    m_audioFifo(24000),
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("SSBDemod");

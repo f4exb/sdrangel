@@ -46,7 +46,7 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_DSBFilterBufferIndex(0),
     m_sampleSink(sampleSink),
     m_movingAverage(40, 0),
-    m_audioFifo(4, 4800),
+    m_audioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),

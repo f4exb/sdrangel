@@ -28,10 +28,10 @@ class SDRANGEL_API AudioFifo : public QObject {
 	Q_OBJECT
 public:
 	AudioFifo();
-	AudioFifo(uint32_t sampleSize, uint32_t numSamples);
+	AudioFifo(uint32_t numSamples);
 	~AudioFifo();
 
-	bool setSize(uint32_t sampleSize, uint32_t numSamples);
+	bool setSize(uint32_t numSamples);
 
 	uint32_t write(const quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
 	uint32_t read(quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
@@ -68,7 +68,7 @@ private:
 	UDPSink<qint16> *m_udpSink;
 	bool m_copyToUDP;
 
-	bool create(uint32_t sampleSize, uint32_t numSamples);
+	bool create(uint32_t numSamples);
 };
 
 #endif // INCLUDE_AUDIOFIFO_H

@@ -36,7 +36,7 @@ const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 
 BFMDemod::BFMDemod(BasebandSampleSink* sampleSink, RDSParser *rdsParser) :
 	m_sampleSink(sampleSink),
-	m_audioFifo(4, 250000),
+	m_audioFifo(250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
     m_rdsParser(rdsParser),
