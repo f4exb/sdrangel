@@ -53,7 +53,7 @@ private:
 
 	qint8* m_fifo;
 
-	uint32_t m_sampleSize;
+	const uint32_t m_sampleSize;
 
 	uint32_t m_size;
 	uint32_t m_fill;

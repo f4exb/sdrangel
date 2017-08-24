@@ -17,12 +17,14 @@
 
 #include <string.h>
 #include <QTime>
+#include "dsp/dsptypes.h"
 #include "audio/audiofifo.h"
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 AudioFifo::AudioFifo() :
 	m_fifo(0),
+	m_sampleSize(sizeof(AudioSample)),
 	m_udpSink(0),
 	m_copyToUDP(false)
 {
@@ -30,11 +32,11 @@ AudioFifo::AudioFifo() :
 	m_fill = 0;
 	m_head = 0;
 	m_tail = 0;
-	m_sampleSize = 0;
 }
 
 AudioFifo::AudioFifo(uint32_t sampleSize, uint32_t numSamples) :
 	m_fifo(0),
+    m_sampleSize(sizeof(AudioSample)),
     m_udpSink(0),
     m_copyToUDP(false)
 {
@@ -264,7 +266,6 @@ bool AudioFifo::create(uint32_t sampleSize, uint32_t numSamples)
 		m_fifo = NULL;
 	}
 
-	m_sampleSize = sampleSize;
 	m_size = 0;
 	m_fill = 0;
 	m_head = 0;
