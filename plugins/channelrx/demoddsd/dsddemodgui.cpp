@@ -180,7 +180,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 		m_channelMarker.blockSignals(false);
 
 		updateMyPosition(); // we do it also here to be able to refresh with latest settings
-		applySettings();
+		applySettings(true);
 		return true;
 	}
 	else
@@ -360,7 +360,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	updateMyPosition();
-	applySettings();
+	applySettings(true);
 }
 
 DSDDemodGUI::~DSDDemodGUI()
@@ -387,7 +387,7 @@ void DSDDemodGUI::updateMyPosition()
     }
 }
 
-void DSDDemodGUI::applySettings()
+void DSDDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -425,7 +425,11 @@ void DSDDemodGUI::applySettings()
 			m_slot1On,
 			m_slot2On,
 			m_tdmaStereo,
-			ui->symbolPLLLock->isChecked());
+			ui->symbolPLLLock->isChecked(),
+			ui->udpOutput->isChecked(),
+			m_channelMarker.getUDPAddress(),
+			m_channelMarker.getUDPSendPort(),
+			force);
 	}
 }
 

@@ -119,7 +119,7 @@ private:
 	virtual ~DSDDemodGUI();
 
 	void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
 	void updateMyPosition();
 
 	void leaveEvent(QEvent*);

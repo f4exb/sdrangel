@@ -31,8 +31,9 @@
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/udpsink.h"
 
-#include "../../channelrx/demoddsd/dsddecoder.h"
+#include "dsddecoder.h"
 
 class DSDDemodGUI;
 
@@ -55,7 +56,11 @@ public:
 			bool slot1On,
 			bool slot2On,
 			bool tdmaStereo,
-			bool pllLock);
+			bool pllLock,
+			bool udpCopyAudio,
+			const QString& udpAddress,
+			quint16 udpPort,
+			bool force);
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
 
@@ -126,6 +131,9 @@ private:
 		bool getSlot2On() const { return m_slot2On; }
 		bool getTDMAStereo() const { return m_tdmaStereo; }
 		bool getPLLLock() const { return m_pllLock; }
+		bool getUDPCopyAudio() const { return m_udpCopyAudio; }
+		const QString& getUDPAddress() const { return m_udpAddress; }
+		quint16 getUDPPort() const { return m_udpPort; }
 
 		static MsgConfigureDSDDemod* create(int rfBandwidth,
 				int  demodGain,
@@ -140,7 +148,11 @@ private:
 				bool slot1On,
 				bool slot2On,
 				bool tdmaStereo,
-				bool pllLock)
+				bool pllLock,
+				bool udpCopyAudio,
+				const QString& udpAddress,
+				quint16 udpPort,
+				bool force)
 		{
 			return new MsgConfigureDSDDemod(rfBandwidth,
 			        demodGain,
@@ -155,7 +167,11 @@ private:
 			        slot1On,
 			        slot2On,
 			        tdmaStereo,
-			        pllLock);
+			        pllLock,
+			        udpCopyAudio,
+			        udpAddress,
+			        udpPort,
+			        force);
 		}
 
 	private:
@@ -173,6 +189,10 @@ private:
         bool m_slot2On;
         bool m_tdmaStereo;
         bool m_pllLock;
+        bool m_udpCopyAudio;
+        QString m_udpAddress;
+        quint16 m_udpPort;
+        bool m_force;
 
 		MsgConfigureDSDDemod(int rfBandwidth,
 				int  demodGain,
@@ -187,7 +207,11 @@ private:
 				bool slot1On,
 				bool slot2On,
 				bool tdmaStereo,
-				bool pllLock) :
+				bool pllLock,
+				bool udpCopyAudio,
+				const QString& udpAddress,
+				quint16 udpPort,
+				bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_demodGain(demodGain),
@@ -202,7 +226,11 @@ private:
 			m_slot1On(slot1On),
 			m_slot2On(slot2On),
 			m_tdmaStereo(tdmaStereo),
-			m_pllLock(pllLock)
+			m_pllLock(pllLock),
+			m_udpCopyAudio(udpCopyAudio),
+			m_udpAddress(udpAddress),
+			m_udpPort(udpPort),
+			m_force(force)
 		{ }
 	};
 
@@ -235,6 +263,9 @@ private:
 		bool m_slot2On;
 		bool m_tdmaStereo;
 		bool m_pllLock;
+		bool m_udpCopyAudio;
+		QString m_udpAddress;
+		quint16 m_udpPort;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -253,7 +284,10 @@ private:
 			m_slot1On(false),
 			m_slot2On(false),
 			m_tdmaStereo(false),
-			m_pllLock(true)
+			m_pllLock(true),
+			m_udpCopyAudio(false),
+			m_udpAddress("127.0.0.1"),
+			m_udpPort(9999)
 		{ }
 	};
 
@@ -296,8 +330,11 @@ private:
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;
+    UDPSink<FixReal> *m_udpBufferMono;
 
-	void apply();
+    static const int m_udpBlockSize;
+
+	void apply(bool force = false);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

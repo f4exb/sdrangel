@@ -843,6 +843,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="ButtonSwitch" name="udpOutput">
+        <property name="toolTip">
+         <string>Copy audio output to UDP</string>
+        </property>
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
