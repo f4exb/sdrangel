@@ -21,6 +21,8 @@
 #include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include "dsp/dsptypes.h"
 #include "util/export.h"
 #include "util/udpsink.h"
 
@@ -45,7 +47,7 @@ public:
 	inline bool isFull() const { return m_fill == m_size; }
 	inline uint32_t size() const { return m_size; }
 
-	void setUDPSink(UDPSink<qint16> *udpSink) { m_udpSink = udpSink; }
+	void setUDPSink(UDPSink<AudioSample> *udpSink) { m_udpSink = udpSink; }
 	void setCopyToUDP(bool copyToUDP) { m_copyToUDP = copyToUDP; }
 
 private:
@@ -65,7 +67,7 @@ private:
 	QWaitCondition m_writeWaitCondition;
 	QWaitCondition m_readWaitCondition;
 
-	UDPSink<qint16> *m_udpSink;
+	UDPSink<AudioSample> *m_udpSink;
 	bool m_copyToUDP;
 
 	bool create(uint32_t numSamples);

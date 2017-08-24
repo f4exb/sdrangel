@@ -77,7 +77,7 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples, int timeout_ms)
 
 	if (m_copyToUDP && m_udpSink)
 	{
-	    m_udpSink->write((qint16 *) data, numSamples);
+	    m_udpSink->write((AudioSample *) data, numSamples);
 	}
 
 	if(m_fifo == 0)

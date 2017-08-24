@@ -284,6 +284,11 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_udpOutput_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
+}
+
 void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*

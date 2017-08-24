@@ -75,7 +75,7 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
     DSPEngine::instance()->addAudioSink(&m_audioFifo2);
 
-    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_config.m_udpPort);
     m_audioFifo1.setUDPSink(m_udpBufferAudio);
     m_audioFifo2.setUDPSink(m_udpBufferAudio);
 
