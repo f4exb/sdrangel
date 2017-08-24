@@ -136,14 +136,29 @@ void UDPSinkUDPHandler::moveData(char *blk)
 
 void UDPSinkUDPHandler::readSample(FixReal &t)
 {
-    memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(FixReal));
-    advanceReadPointer((int) sizeof(FixReal));
+    if (m_readFrameIndex == m_writeIndex) // block until more writes
+    {
+        t = 0;
+    }
+    else
+    {
+        memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(FixReal));
+        advanceReadPointer((int) sizeof(FixReal));
+    }
 }
 
 void UDPSinkUDPHandler::readSample(Sample &s)
 {
-    memcpy(&s, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(Sample));
-    advanceReadPointer((int) sizeof(Sample));
+    if (m_readFrameIndex == m_writeIndex) // block until more writes
+    {
+        s.m_real = 0;
+        s.m_imag = 0;
+    }
+    else
+    {
+        memcpy(&s, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(Sample));
+        advanceReadPointer((int) sizeof(Sample));
+    }
 }
 
 void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
