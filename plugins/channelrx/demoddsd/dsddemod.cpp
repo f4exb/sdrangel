@@ -494,7 +494,7 @@ void DSDDemod::apply(bool force)
         || (m_config.m_slot2On != m_running.m_slot2On) || force)
     {
         m_audioFifo1.setCopyToUDP(m_config.m_slot1On && m_config.m_udpCopyAudio);
-        m_audioFifo2.setCopyToUDP(m_config.m_slot2On && m_config.m_udpCopyAudio);
+        m_audioFifo2.setCopyToUDP(m_config.m_slot2On && !m_config.m_slot1On && m_config.m_udpCopyAudio);
     }
 
     m_running = m_config;
