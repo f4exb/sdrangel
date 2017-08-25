@@ -374,6 +374,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
         m_config.m_squelchGate = cfg.getSquelchGate();
         m_config.m_squelchEnabled = cfg.getSquelchEnabled();
+        m_config.m_autoRWBalance = cfg.getAutoRWBalance();
 
         apply(cfg.getForce());
 
@@ -389,7 +390,8 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " squelchDB: " << cfg.getSquelchDB()
                 << " m_squelchGate: " << m_config.m_squelchGate
                 << " m_squelch: " << m_config.m_squelch
-                << " m_squelchEnabled: " << m_config.m_squelchEnabled;
+                << " m_squelchEnabled: " << m_config.m_squelchEnabled
+                << " m_autoRWBalance: " << m_config.m_autoRWBalance;
 
         return true;
     }
@@ -489,6 +491,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         Real squelchDB,
         Real squelchGate,
         bool squelchEnabled,
+        bool autoRWBalance,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
@@ -503,6 +506,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             squelchDB,
             squelchGate,
             squelchEnabled,
+            autoRWBalance,
             force);
     messageQueue->push(cmd);
 }

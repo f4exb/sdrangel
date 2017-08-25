@@ -36,6 +36,7 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_readIndex(0),
     m_rwDelta(m_minNbUDPFrames/2),
     m_d(0),
+    m_autoRWBalance(true),
     m_feedbackMessageQueue(0)
 {
     m_udpBuf = new udpBlk_t[m_minNbUDPFrames];
@@ -192,7 +193,7 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
                 c = c < -0.05 ? -0.05 : c > 0.05 ? 0.05 : c; // limit
                 UDPSinkMessages::MsgSampleRateCorrection *msg = UDPSinkMessages::MsgSampleRateCorrection::create(c, d);
 
-                if (m_feedbackMessageQueue) {
+                if (m_autoRWBalance && m_feedbackMessageQueue) {
                     m_feedbackMessageQueue->push(msg);
                 }
 

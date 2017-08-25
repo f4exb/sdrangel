@@ -95,6 +95,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeString(13, m_channelMarker.getTitle());
     s.writeS32(14, ui->squelch->value());
     s.writeS32(15, ui->squelchGate->value());
+    s.writeBool(16, ui->autoRWBalance->isChecked());
     return s.final();
 }
 
@@ -115,6 +116,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         qint32 s32tmp;
         quint32 u32tmp;
         Real realtmp;
+        bool booltmp;
 
         blockApplySettings(true);
         m_channelMarker.blockSignals(true);
@@ -184,6 +186,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readS32(15, &s32tmp, 5);
         ui->squelchGate->setValue(s32tmp);
         ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
+        d.readBool(16, &booltmp, true);
+        ui->autoRWBalance->setChecked(booltmp);
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
@@ -412,6 +416,7 @@ void UDPSinkGUI::applySettings(bool force)
             ui->squelch->value() * 1.0f,
             ui->squelchGate->value() * 0.01f,
             ui->squelch->value() != -100,
+            ui->autoRWBalance->isChecked(),
             force);
 
         ui->applyBtn->setEnabled(false);
@@ -530,6 +535,11 @@ void UDPSinkGUI::on_applyBtn_clicked()
 void UDPSinkGUI::on_resetUDPReadIndex_clicked()
 {
     m_udpSink->resetReadIndex(m_udpSink->getInputMessageQueue());
+}
+
+void UDPSinkGUI::on_autoRWBalance_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
 }
 
 void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)

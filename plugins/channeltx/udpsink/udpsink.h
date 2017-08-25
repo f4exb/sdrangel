@@ -73,6 +73,7 @@ public:
             Real squelchDB,
             Real squelchGate,
             bool squelchEnabled,
+            bool autoRWBalance,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
     void resetReadIndex(MessageQueue* messageQueue);
@@ -104,6 +105,7 @@ private:
         Real getSquelchGate() const { return m_squelchGate; }
         bool getSquelchEnabled() const { return m_squelchEnabled; }
         bool getForce() const { return m_force; }
+        bool getAutoRWBalance() const { return m_autoRWBalance; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
                 sampleFormat,
@@ -118,6 +120,7 @@ private:
                 Real squelchDB,
                 Real squelchGate,
                 bool squelchEnabled,
+                bool autoRWBalance,
                 bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
@@ -132,6 +135,7 @@ private:
                     squelchDB,
                     squelchGate,
                     squelchEnabled,
+                    autoRWBalance,
                     force);
         }
 
@@ -148,6 +152,7 @@ private:
         Real m_squelchDB;
         Real m_squelchGate;
         bool m_squelchEnabled;
+        bool m_autoRWBalance;
         bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
@@ -162,6 +167,7 @@ private:
                 Real squelchDB,
                 Real squelchGate,
                 bool squelchEnabled,
+                bool autoRWBalance,
                 bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
@@ -176,6 +182,7 @@ private:
             m_squelchDB(squelchDB),
             m_squelchGate(squelchGate),
             m_squelchEnabled(squelchEnabled),
+            m_autoRWBalance(autoRWBalance),
             m_force(force)
         { }
     };
@@ -232,6 +239,7 @@ private:
         Real m_squelch; //!< squared magnitude
         Real m_squelchGate; //!< seconds
         bool m_squelchEnabled;
+        bool m_autoRWBalance;
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
@@ -251,6 +259,7 @@ private:
             m_squelch(-50.0),
             m_squelchGate(0.05),
             m_squelchEnabled(true),
+            m_autoRWBalance(true),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}

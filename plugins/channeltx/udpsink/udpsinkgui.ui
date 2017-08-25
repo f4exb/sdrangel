@@ -655,6 +655,31 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="autoRWBalance">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Automatic R/W balance compensation</string>
+        </property>
+        <property name="text">
+         <string>G</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -896,6 +921,11 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header location="global">gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

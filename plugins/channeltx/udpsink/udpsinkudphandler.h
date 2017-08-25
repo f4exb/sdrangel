@@ -42,6 +42,7 @@ public:
     void readSample(FixReal &t);
     void readSample(Sample &s);
 
+    void setAutoRWBalance(bool autoRWBalance) { m_autoRWBalance = autoRWBalance; }
     void setFeedbackMessageQueue(MessageQueue *messageQueue) { m_feedbackMessageQueue = messageQueue; }
 
     /** Get buffer gauge value in % of buffer size ([-50:50])
@@ -107,6 +108,7 @@ private:
     int m_readIndex;
     int m_rwDelta;
     float m_d;
+    bool m_autoRWBalance;
     MessageQueue *m_feedbackMessageQueue;
     MessageQueue m_inputMessageQueue;
 
