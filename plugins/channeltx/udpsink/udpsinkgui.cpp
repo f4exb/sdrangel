@@ -69,7 +69,8 @@ void UDPSinkGUI::resetToDefaults()
     ui->rfBandwidth->setText("32000");
     ui->fmDeviation->setText("2500");
     ui->spectrumGUI->resetToDefaults();
-    ui->gain->setValue(10);
+    ui->gainIn->setValue(10);
+    ui->gainOut->setValue(10);
 
     blockApplySettings(false);
     applySettings();
@@ -87,13 +88,14 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(8, m_channelMarker.getCenterFrequency());
     s.writeString(9, m_channelMarker.getUDPAddress());
-    s.writeS32(10, ui->gain->value());
+    s.writeS32(10, ui->gainOut->value());
     s.writeS32(11, m_fmDeviation);
     s.writeU32(12, m_channelMarker.getColor().rgb());
     s.writeString(13, m_channelMarker.getTitle());
     s.writeS32(14, ui->squelch->value());
     s.writeS32(15, ui->squelchGate->value());
     s.writeBool(16, ui->autoRWBalance->isChecked());
+    s.writeS32(17, ui->gainIn->value());
     return s.final();
 }
 
@@ -147,8 +149,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readString(9, &strtmp, "127.0.0.1");
         m_channelMarker.setUDPAddress(strtmp);
         d.readS32(10, &s32tmp, 10);
-        ui->gain->setValue(s32tmp);
-        ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
+        ui->gainOut->setValue(s32tmp);
+        ui->gainOutText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
 
@@ -166,6 +168,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
         d.readBool(16, &booltmp, true);
         ui->autoRWBalance->setChecked(booltmp);
+        d.readS32(17, &s32tmp, 10);
+        ui->gainIn->setValue(s32tmp);
+        ui->gainInText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
@@ -374,7 +379,8 @@ void UDPSinkGUI::applySettings(bool force)
             m_channelMarker.getUDPAddress(),
             m_channelMarker.getUDPReceivePort(),
             ui->channelMute->isChecked(),
-            ui->gain->value() / 10.0f,
+            ui->gainIn->value() / 10.0f,
+            ui->gainOut->value() / 10.0f,
             ui->squelch->value() * 1.0f,
             ui->squelchGate->value() * 0.01f,
             ui->squelch->value() != -100,
@@ -389,7 +395,8 @@ void UDPSinkGUI::applySettings(bool force)
 
 void UDPSinkGUI::displaySettings()
 {
-    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
+    ui->gainInText->setText(tr("%1").arg(ui->gainIn->value()/10.0, 0, 'f', 1));
+    ui->gainOutText->setText(tr("%1").arg(ui->gainOut->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
     ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
     ui->addressText->setText(tr("%1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPReceivePort()));
@@ -461,9 +468,15 @@ void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSinkGUI::on_gain_valueChanged(int value)
+void UDPSinkGUI::on_gainIn_valueChanged(int value)
 {
-    ui->gainText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
+    ui->gainInText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
+    applySettings();
+}
+
+void UDPSinkGUI::on_gainOut_valueChanged(int value)
+{
+    ui->gainOutText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
     applySettings();
 }
 

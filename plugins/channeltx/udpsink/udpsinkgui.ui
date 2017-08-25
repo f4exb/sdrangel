@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
-    <height>400</height>
+    <width>388</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -42,13 +42,13 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>340</width>
+     <width>380</width>
      <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>340</width>
+     <width>380</width>
      <height>0</height>
     </size>
    </property>
@@ -218,20 +218,65 @@
     <item row="9" column="2">
      <layout class="QHBoxLayout" name="GainLayout">
       <item>
-       <widget class="QLabel" name="gainLabel">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
+       <widget class="QLabel" name="gainInLabel">
         <property name="text">
-         <string>Gain</string>
+         <string>Gi</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="gain">
+       <widget class="QDial" name="gainIn">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainInText">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>10.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainOutLabel">
+        <property name="text">
+         <string>  Go</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="gainOut">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
         <property name="maximum">
          <number>100</number>
         </property>
@@ -241,13 +286,10 @@
         <property name="value">
          <number>10</number>
         </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="gainText">
+       <widget class="QLabel" name="gainOutText">
         <property name="minimumSize">
          <size>
           <width>32</width>
@@ -826,6 +868,9 @@
           <width>150</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>UDP &lt;address&gt;:&lt;data port&gt;</string>
         </property>
         <property name="text">
          <string>000.000.000.000:00000</string>

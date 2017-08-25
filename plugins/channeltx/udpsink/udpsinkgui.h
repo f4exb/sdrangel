@@ -68,7 +68,8 @@ private slots:
     void on_applyBtn_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void on_gain_valueChanged(int value);
+    void on_gainIn_valueChanged(int value);
+    void on_gainOut_valueChanged(int value);
     void on_squelch_valueChanged(int value);
     void on_squelchGate_valueChanged(int value);
     void on_channelMute_toggled(bool checked);

@@ -66,7 +66,8 @@ public:
             const QString& udpAddress,
             int udpPort,
             bool channelMute,
-            Real gain,
+            Real gainIn,
+            Real gainOut,
             Real squelchDB,
             Real squelchGate,
             bool squelchEnabled,
@@ -98,7 +99,8 @@ private:
         const QString& getUDPAddress() const { return m_udpAddress; }
         int getUDPPort() const { return m_udpPort; }
         bool getChannelMute() const { return m_channelMute; }
-        Real getGain() const { return m_gain; }
+        Real getGainIn() const { return m_gainIn; }
+        Real getGainOut() const { return m_gainOut; }
         Real getSquelchDB() const { return m_squelchDB; }
         Real getSquelchGate() const { return m_squelchGate; }
         bool getSquelchEnabled() const { return m_squelchEnabled; }
@@ -115,7 +117,8 @@ private:
                 const QString& udpAddress,
                 int udpPort,
                 bool channelMute,
-                Real gain,
+                Real gainIn,
+                Real gainOut,
                 Real squelchDB,
                 Real squelchGate,
                 bool squelchEnabled,
@@ -131,7 +134,8 @@ private:
                     udpAddress,
                     udpPort,
                     channelMute,
-                    gain,
+                    gainIn,
+                    gainOut,
                     squelchDB,
                     squelchGate,
                     squelchEnabled,
@@ -149,7 +153,8 @@ private:
         QString m_udpAddress;
         int m_udpPort;
         bool m_channelMute;
-        Real m_gain;
+        Real m_gainIn;
+        Real m_gainOut;
         Real m_squelchDB;
         Real m_squelchGate;
         bool m_squelchEnabled;
@@ -165,7 +170,8 @@ private:
                 const QString& udpAddress,
                 int udpPort,
                 bool channelMute,
-                Real gain,
+                Real gainIn,
+                Real gainOut,
                 Real squelchDB,
                 Real squelchGate,
                 bool squelchEnabled,
@@ -181,7 +187,8 @@ private:
             m_udpAddress(udpAddress),
             m_udpPort(udpPort),
             m_channelMute(channelMute),
-            m_gain(gain),
+            m_gainIn(gainIn),
+            m_gainOut(gainOut),
             m_squelchDB(squelchDB),
             m_squelchGate(squelchGate),
             m_squelchEnabled(squelchEnabled),
@@ -239,7 +246,8 @@ private:
         int m_fmDeviation;
         Real m_amModFactor;
         bool m_channelMute;
-        Real m_gain;
+        Real m_gainIn;
+        Real m_gainOut;
         Real m_squelch; //!< squared magnitude
         Real m_squelchGate; //!< seconds
         bool m_squelchEnabled;
@@ -260,7 +268,8 @@ private:
             m_fmDeviation(1.0),
             m_amModFactor(0.95),
             m_channelMute(false),
-            m_gain(1.0),
+            m_gainIn(1.0),
+            m_gainOut(1.0),
             m_squelch(-50.0),
             m_squelchGate(0.05),
             m_squelchEnabled(true),
@@ -390,7 +399,7 @@ private:
         if (m_running.m_stereoInput)
         {
             m_udpHandler.readSample(s);
-            t = (s.m_real + s.m_imag) / 2;
+            t = ((s.m_real + s.m_imag) * m_running.m_gainIn) / 2;
         }
         else
         {
