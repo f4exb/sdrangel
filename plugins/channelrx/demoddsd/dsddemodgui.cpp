@@ -606,6 +606,7 @@ void DSDDemodGUI::formatStatusText()
 void DSDDemodGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
+    displayUDPAddress();
     applySettings();
 }
 

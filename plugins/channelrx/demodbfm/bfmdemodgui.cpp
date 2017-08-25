@@ -192,6 +192,7 @@ bool BFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 void BFMDemodGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
+    displayUDPAddress();
     applySettings();
 }
 
