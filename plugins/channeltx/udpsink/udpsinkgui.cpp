@@ -68,8 +68,6 @@ void UDPSinkGUI::resetToDefaults()
     ui->sampleRate->setText("48000");
     ui->rfBandwidth->setText("32000");
     ui->fmDeviation->setText("2500");
-    ui->udpAddress->setText("127.0.0.1");
-    ui->udpPort->setText("9999");
     ui->spectrumGUI->resetToDefaults();
     ui->gain->setValue(10);
 
@@ -85,10 +83,10 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeS32(3, m_sampleFormat);
     s.writeReal(4, m_inputSampleRate);
     s.writeReal(5, m_rfBandwidth);
-    s.writeS32(6, m_udpPort);
+    s.writeS32(6, m_channelMarker.getUDPReceivePort());
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(8, m_channelMarker.getCenterFrequency());
-    s.writeString(9, m_udpAddress);
+    s.writeString(9, m_channelMarker.getUDPAddress());
     s.writeS32(10, ui->gain->value());
     s.writeS32(11, m_fmDeviation);
     s.writeU32(12, m_channelMarker.getColor().rgb());
@@ -137,13 +135,17 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readReal(5, &realtmp, 32000);
         ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
         d.readS32(6, &s32tmp, 9999);
-        ui->udpPort->setText(QString("%1").arg(s32tmp));
+        if ((s32tmp > 1024) && (s32tmp < 65536)) {
+            m_channelMarker.setUDPReceivePort(s32tmp);
+        } else {
+            m_channelMarker.setUDPReceivePort(9999);
+        }
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
         d.readS32(8, &s32tmp, 0);
         m_channelMarker.setCenterFrequency(s32tmp);
         d.readString(9, &strtmp, "127.0.0.1");
-        ui->udpAddress->setText(strtmp);
+        m_channelMarker.setUDPAddress(strtmp);
         d.readS32(10, &s32tmp, 10);
         ui->gain->setValue(s32tmp);
         ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
@@ -291,15 +293,6 @@ void UDPSinkGUI::applySettings(bool force)
             rfBandwidth = inputSampleRate;
         }
 
-        m_udpAddress = ui->udpAddress->text();
-
-        int udpPort = ui->udpPort->text().toInt(&ok);
-
-        if((!ok) || (udpPort < 1024) || (udpPort > 65535))
-        {
-            udpPort = 9999;
-        }
-
         int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 
         if ((!ok) || (fmDeviation < 1))
@@ -318,8 +311,6 @@ void UDPSinkGUI::applySettings(bool force)
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
         ui->sampleRate->setText(QString("%1").arg(inputSampleRate, 0));
         ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-        //ui->udpAddress->setText(m_udpAddress);
-        ui->udpPort->setText(QString("%1").arg(udpPort));
         ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
         ui->amModPercent->setText(QString("%1").arg(amModPercent));
         m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
@@ -373,7 +364,6 @@ void UDPSinkGUI::applySettings(bool force)
         m_inputSampleRate = inputSampleRate;
         m_rfBandwidth = rfBandwidth;
         m_fmDeviation = fmDeviation;
-        m_udpPort = udpPort;
 
         m_udpSink->configure(m_udpSink->getInputMessageQueue(),
             sampleFormat,
@@ -381,8 +371,8 @@ void UDPSinkGUI::applySettings(bool force)
             rfBandwidth,
             fmDeviation,
             amModPercent / 100.0f,
-            m_udpAddress,
-            udpPort,
+            m_channelMarker.getUDPAddress(),
+            m_channelMarker.getUDPReceivePort(),
             ui->channelMute->isChecked(),
             ui->gain->value() / 10.0f,
             ui->squelch->value() * 1.0f,
@@ -402,11 +392,13 @@ void UDPSinkGUI::displaySettings()
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
     ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
+    ui->addressText->setText(tr("%1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPReceivePort()));
 }
 
 void UDPSinkGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
+    displaySettings();
     applySettings();
 }
 

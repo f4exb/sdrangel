@@ -95,8 +95,6 @@ private:
     Real m_inputSampleRate;
     Real m_rfBandwidth;
     int m_fmDeviation;
-    QString m_udpAddress;
-    int m_udpPort;
     bool m_doApplySettings;
 
     explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);

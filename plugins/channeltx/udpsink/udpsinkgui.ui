@@ -71,7 +71,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="1" column="2">
+    <item row="2" column="2">
      <layout class="QHBoxLayout" name="SampleRateLayout">
       <item>
        <widget class="QLabel" name="sampleRateLabel">
@@ -101,51 +101,7 @@
       </item>
      </layout>
     </item>
-    <item row="3" column="0">
-     <layout class="QHBoxLayout" name="AddressLayout">
-      <item>
-       <widget class="QLabel" name="Addresslabel">
-        <property name="text">
-         <string>Addr</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="udpAddress">
-        <property name="toolTip">
-         <string>Address of listening interface (local)</string>
-        </property>
-        <property name="inputMask">
-         <string>000.000.000.000</string>
-        </property>
-        <property name="text">
-         <string>127.0.0.1</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="udpPortlabel">
-        <property name="text">
-         <string>D</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="udpPort">
-        <property name="toolTip">
-         <string>Listening data port</string>
-        </property>
-        <property name="inputMask">
-         <string>00000</string>
-        </property>
-        <property name="text">
-         <string>9999</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="3" column="2">
+    <item row="4" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="label_3">
@@ -175,7 +131,7 @@
       </item>
      </layout>
     </item>
-    <item row="9" column="0">
+    <item row="10" column="0">
      <layout class="QHBoxLayout" name="BufferGaugeLayout">
       <item>
        <widget class="QProgressBar" name="bufferGaugeNegative">
@@ -242,77 +198,7 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0" rowspan="2">
-     <layout class="QHBoxLayout" name="FormatLayout">
-      <item>
-       <widget class="QLabel" name="sampleFormatLabel">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Fmt</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="sampleFormat">
-        <property name="toolTip">
-         <string>Samples format</string>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>S16LE I/Q</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE NFM</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE LSB</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE USB</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE AM</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="stereoInput">
-        <property name="toolTip">
-         <string>Toggle mono (1 channel) or stereo (2 channels) input</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
-          <normaloff>:/mono.png</normaloff>
-          <normalon>:/stereo.png</normalon>:/mono.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="8" column="0">
+    <item row="9" column="0">
      <layout class="QHBoxLayout" name="VUMeterLayout">
       <item>
        <widget class="LevelMeterVU" name="volumeMeter" native="true">
@@ -329,7 +215,7 @@
       </item>
      </layout>
     </item>
-    <item row="8" column="2">
+    <item row="9" column="2">
      <layout class="QHBoxLayout" name="GainLayout">
       <item>
        <widget class="QLabel" name="gainLabel">
@@ -381,7 +267,7 @@
       </item>
      </layout>
     </item>
-    <item row="9" column="2">
+    <item row="10" column="2">
      <layout class="QHBoxLayout" name="bufferControlLayout">
       <item>
        <widget class="QLabel" name="bufferRWBalanceText">
@@ -464,7 +350,7 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="2">
+    <item row="5" column="2">
      <layout class="QHBoxLayout" name="SquelchLayout">
       <item>
        <widget class="QLabel" name="squelchLabel">
@@ -563,7 +449,7 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="0">
+    <item row="5" column="0">
      <layout class="QHBoxLayout" name="FMDevLayout">
       <item>
        <widget class="QLabel" name="fmDevLabel">
@@ -843,6 +729,106 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <layout class="QHBoxLayout" name="FormatLayout">
+      <item>
+       <widget class="QLabel" name="sampleFormatLabel">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Fmt</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sampleFormat">
+        <property name="toolTip">
+         <string>Samples format</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>S16LE I/Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE NFM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE LSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE USB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE AM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="stereoInput">
+        <property name="toolTip">
+         <string>Toggle mono (1 channel) or stereo (2 channels) input</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/mono.png</normaloff>
+          <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="AddressLayout">
+      <item>
+       <widget class="QLabel" name="addresslabel">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Addr</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="addressText">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>000.000.000.000:00000</string>
         </property>
        </widget>
       </item>
