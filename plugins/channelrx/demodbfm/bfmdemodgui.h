@@ -58,7 +58,7 @@ public:
 	static const QString m_channelID;
 
 private slots:
-	void viewChanged();
+	void channelMarkerChanged();
 	void channelSampleRateChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
@@ -69,13 +69,14 @@ private slots:
 	void on_lsbStereo_toggled(bool lsb);
 	void on_showPilot_clicked();
 	void on_rds_clicked();
+	void on_copyAudioToUDP_toggled(bool copy);
 	void on_g14ProgServiceNames_currentIndexChanged(int index);
 	void on_clearData_clicked(bool checked);
 	void on_g00AltFrequenciesBox_activated(int index);
 	void on_g14MappedFrequencies_activated(int index);
 	void on_g14AltFrequencies_activated(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
+    void onMenuDialogCalled(const QPoint& p);
 	void tick();
 
 private:
@@ -83,7 +84,6 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
@@ -103,7 +103,8 @@ private:
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
+	void displayUDPAddress();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
 

@@ -31,9 +31,10 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/udpsink.h"
 
-#include "../../channelrx/demodbfm/rdsdecoder.h"
-#include "../../channelrx/demodbfm/rdsdemod.h"
+#include "rdsdecoder.h"
+#include "rdsdemod.h"
 
 class RDSParser;
 
@@ -50,7 +51,11 @@ public:
 			bool audioStereo,
 			bool lsbStereo,
 			bool showPilot,
-			bool rdsActive);
+			bool rdsActive,
+			bool copyAudioUDP,
+			const QString& m_udpAddress,
+			quint16 udpPort,
+			bool force = false);
 
 	int getSampleRate() const { return m_config.m_inputSampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -93,6 +98,10 @@ private:
 		bool getLsbStereo() const { return m_lsbStereo; }
 		bool getShowPilot() const { return m_showPilot; }
 		bool getRDSActive() const { return m_rdsActive; }
+		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
+		const QString& getUDPAddress() const { return m_udpAddress; }
+		quint16 getUDPPort() const { return m_udpPort; }
+		bool getForce() const { return m_force; }
 
 		static MsgConfigureBFMDemod* create(Real rfBandwidth,
 				Real afBandwidth,
@@ -101,7 +110,11 @@ private:
 				bool audioStereo,
 				bool lsbStereo,
 				bool showPilot,
-				bool rdsActive)
+				bool rdsActive,
+				bool copyAudioToUDP,
+				const QString& udpAddress,
+				quint16 udpPort,
+				bool force)
 		{
 			return new MsgConfigureBFMDemod(rfBandwidth,
 					afBandwidth,
@@ -110,7 +123,11 @@ private:
 					audioStereo,
 					lsbStereo,
 					showPilot,
-					rdsActive);
+					rdsActive,
+					copyAudioToUDP,
+					udpAddress,
+					udpPort,
+					force);
 		}
 
 	private:
@@ -122,6 +139,10 @@ private:
 		bool m_lsbStereo;
 		bool m_showPilot;
 		bool m_rdsActive;
+		bool m_copyAudioToUDP;
+		QString m_udpAddress;
+		quint16 m_udpPort;
+		bool m_force;
 
 		MsgConfigureBFMDemod(Real rfBandwidth,
 				Real afBandwidth,
@@ -130,7 +151,11 @@ private:
 				bool audioStereo,
 				bool lsbStereo,
 				bool showPilot,
-				bool rdsActive) :
+				bool rdsActive,
+				bool copyAudioToUDP,
+		        const QString& udpAddress,
+		        quint16 udpPort,
+		        bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_afBandwidth(afBandwidth),
@@ -139,7 +164,11 @@ private:
 			m_audioStereo(audioStereo),
 			m_lsbStereo(lsbStereo),
 			m_showPilot(showPilot),
-			m_rdsActive(rdsActive)
+			m_rdsActive(rdsActive),
+			m_copyAudioToUDP(copyAudioToUDP),
+			m_udpAddress(udpAddress),
+			m_udpPort(udpPort),
+			m_force(force)
 		{ }
 	};
 
@@ -160,6 +189,9 @@ private:
 		bool m_lsbStereo;
 		bool m_showPilot;
 		bool m_rdsActive;
+		bool m_copyAudioToUDP;
+		QString m_udpAddress;
+		quint16 m_udpPort;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -172,7 +204,10 @@ private:
 			m_audioStereo(false),
 			m_lsbStereo(false),
 			m_showPilot(false),
-			m_rdsActive(false)
+			m_rdsActive(false),
+			m_copyAudioToUDP(false),
+			m_udpAddress("127.0.0.1"),
+			m_udpPort(9999)
 		{ }
 	};
 
@@ -229,8 +264,11 @@ private:
 	static const int default_excursion = 750000; // +/- 75 kHz
 
 	PhaseDiscriminators m_phaseDiscri;
+    UDPSink<AudioSample> *m_udpBufferAudio;
 
-	void apply();
+    static const int m_udpBlockSize;
+
+	void apply(bool force = false);
 };
 
 #endif // INCLUDE_BFMDEMOD_H

@@ -34,7 +34,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "bfmdemod.h"
@@ -169,10 +169,12 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		d.readBool(10, &booltmp, false);
 		ui->lsbStereo->setChecked(booltmp);
 
+		displayUDPAddress();
+
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
 
-		applySettings();
+		applySettings(true);
 		return true;
 	}
 	else
@@ -187,9 +189,10 @@ bool BFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 	return false;
 }
 
-void BFMDemodGUI::viewChanged()
+void BFMDemodGUI::channelMarkerChanged()
 {
-	applySettings();
+    this->setWindowTitle(m_channelMarker.getTitle());
+    applySettings();
 }
 
 void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -235,6 +238,11 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 void BFMDemodGUI::on_lsbStereo_toggled(bool lsb __attribute__((unused)))
 {
 	applySettings();
+}
+
+void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy __attribute__((unused)))
+{
+    applySettings();
 }
 
 void BFMDemodGUI::on_showPilot_clicked()
@@ -333,14 +341,11 @@ void BFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool r
 {
 }
 
-void BFMDemodGUI::onMenuDoubleClicked()
+void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if(!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -349,7 +354,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_rdsTimerCount(0),
 	m_channelPowerDbAvg(20,0),
 	m_rate(625000)
@@ -362,7 +366,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_bfmDemod = new BFMDemod(m_spectrumVis, &m_rdsParser);
@@ -380,14 +384,17 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
-	//m_channelMarker.setColor(Qt::blue);
+	m_channelMarker.setTitle("Broadcast FM Demod");
+	m_channelMarker.setColor(Qt::blue);
 	m_channelMarker.setColor(QColor(80, 120, 228));
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setUDPAddress("127.0.0.1");
+	m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.setVisible(true);
 	setTitleColor(m_channelMarker.getColor());
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
@@ -401,8 +408,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	rdsUpdateFixedFields();
 	rdsUpdate(true);
-
-	applySettings();
+	displayUDPAddress();
+	applySettings(true);
 }
 
 BFMDemodGUI::~BFMDemodGUI()
@@ -416,12 +423,17 @@ BFMDemodGUI::~BFMDemodGUI()
 	delete ui;
 }
 
+void BFMDemodGUI::displayUDPAddress()
+{
+    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+}
+
 void BFMDemodGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void BFMDemodGUI::applySettings()
+void BFMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -439,7 +451,11 @@ void BFMDemodGUI::applySettings()
 			ui->audioStereo->isChecked(),
 			ui->lsbStereo->isChecked(),
 			ui->showPilot->isChecked(),
-			ui->rds->isChecked());
+			ui->rds->isChecked(),
+			ui->copyAudioToUDP->isChecked(),
+			m_channelMarker.getUDPAddress(),
+			m_channelMarker.getUDPSendPort(),
+			force);
 	}
 }
 
