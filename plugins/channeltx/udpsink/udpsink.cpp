@@ -582,5 +582,23 @@ void UDPSink::apply(bool force)
         }
     }
 
+    if ((m_config.m_autoRWBalance != m_running.m_autoRWBalance) || force)
+    {
+        m_settingsMutex.lock();
+        m_udpHandler.setAutoRWBalance(m_config.m_autoRWBalance);
+
+        if (!m_config.m_autoRWBalance)
+        {
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorConsumed = false;
+            m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_outputSampleRate;
+            m_interpolator.create(48, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
+            m_actualInputSampleRate = m_config.m_inputSampleRate;
+            m_udpHandler.resetReadIndex();
+        }
+
+        m_settingsMutex.unlock();
+    }
+
     m_running = m_config;
 }
