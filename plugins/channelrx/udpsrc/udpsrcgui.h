@@ -71,7 +71,7 @@ private slots:
 	void on_audioStereo_toggled(bool stereo);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
+	void onMenuDialogCalled(const QPoint& p);
 	void on_gain_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
@@ -98,10 +98,6 @@ private:
 	bool m_audioActive;
 	bool m_audioStereo;
 	int m_volume;
-	QString m_udpAddress;
-	int m_udpPort;
-	int m_audioPort;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
 	// RF path

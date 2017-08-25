@@ -62,7 +62,7 @@ public:
 			Real outputSampleRate,
 			Real rfBandwidth,
 			int fmDeviation,
-			QString& udpAddress,
+			const QString& udpAddress,
 			int udpPort,
 			int audioPort,
 			bool force);
@@ -110,7 +110,7 @@ protected:
 				Real sampleRate,
 				Real rfBandwidth,
 				int fmDeviation,
-				QString& udpAddress,
+				const QString& udpAddress,
 				int udpPort,
 				int audioPort,
 				bool force)
@@ -139,7 +139,7 @@ protected:
 				Real outputSampleRate,
 				Real rfBandwidth,
 				int fmDeviation,
-				QString& udpAddress,
+				const QString& udpAddress,
 				int udpPort,
 				int audioPort,
 				bool force) :

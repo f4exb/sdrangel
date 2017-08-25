@@ -25,7 +25,7 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "ui_udpsrcgui.h"
 #include "mainwindow.h"
 
@@ -73,15 +73,15 @@ void UDPSrcGUI::resetToDefaults()
 	ui->sampleRate->setText("48000");
 	ui->rfBandwidth->setText("32000");
 	ui->fmDeviation->setText("2500");
-	ui->udpAddress->setText("127.0.0.1");
-	ui->udpPort->setText("9999");
-	ui->audioPort->setText("9999");
 	ui->spectrumGUI->resetToDefaults();
 	ui->gain->setValue(10);
 	ui->volume->setValue(20);
 	ui->audioActive->setChecked(false);
 	ui->audioStereo->setChecked(false);
     ui->agc->setChecked(false);
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.setUDPReceivePort(9998);
 
 	blockApplySettings(false);
 	applySettingsImmediate();
@@ -96,14 +96,14 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
 	s.writeReal(5, m_rfBandwidth);
-	s.writeS32(6, m_udpPort);
+	s.writeS32(6, m_channelMarker.getUDPSendPort());
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, ui->gain->value());
 	s.writeS32(9, m_channelMarker.getCenterFrequency());
-	s.writeString(10, m_udpAddress);
+	s.writeString(10, m_channelMarker.getUDPAddress());
 	s.writeBool(11, m_audioActive);
 	s.writeS32(12, (qint32)m_volume);
-	s.writeS32(13, m_audioPort);
+	s.writeS32(13, m_channelMarker.getUDPReceivePort());
 	s.writeBool(14, m_audioStereo);
 	s.writeS32(15, m_fmDeviation);
 	s.writeS32(16, ui->squelch->value());
@@ -178,7 +178,11 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		d.readReal(5, &realtmp, 32000);
 		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
 		d.readS32(6, &s32tmp, 9999);
-		ui->udpPort->setText(QString("%1").arg(s32tmp));
+		if ((s32tmp > 1024) && (s32tmp < 65536)) {
+		    m_channelMarker.setUDPSendPort(s32tmp);
+		} else {
+		    m_channelMarker.setUDPSendPort(9999);
+		}
 		d.readBlob(7, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
         d.readS32(8, &s32tmp, 10);
@@ -187,14 +191,18 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		d.readS32(9, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readString(10, &strtmp, "127.0.0.1");
-		ui->udpAddress->setText(strtmp);
+		m_channelMarker.setUDPAddress(strtmp);
 		d.readBool(11, &booltmp, false);
 		ui->audioActive->setChecked(booltmp);
 		d.readS32(12, &s32tmp, 20);
 		ui->volume->setValue(s32tmp);
 		ui->volumeText->setText(QString("%1").arg(s32tmp));
 		d.readS32(13, &s32tmp, 9998);
-		ui->audioPort->setText(QString("%1").arg(s32tmp));
+        if ((s32tmp > 1024) && (s32tmp < 65536)) {
+            m_channelMarker.setUDPReceivePort(s32tmp);
+        } else {
+            m_channelMarker.setUDPReceivePort(9998);
+        }
 		d.readBool(14, &booltmp, false);
 		ui->audioStereo->setChecked(booltmp);
 		d.readS32(15, &s32tmp, 2500);
@@ -230,6 +238,8 @@ bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
 
 void UDPSrcGUI::channelMarkerChanged()
 {
+    this->setWindowTitle(m_channelMarker.getTitle());
+    displaySettings();
 	applySettings();
 }
 
@@ -267,12 +277,11 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_tickCount(0),
 	m_gain(1.0),
     m_volume(20),
-    m_basicSettingsShown(false),
     m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
@@ -300,7 +309,11 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setTitle("UDP Sample Source");
 	m_channelMarker.setColor(Qt::green);
+	m_channelMarker.setUDPAddress("127.0.0.1");
+	m_channelMarker.setUDPSendPort(9999);
+	m_channelMarker.setUDPReceivePort(9998);
 	m_channelMarker.setVisible(true);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -339,6 +352,7 @@ void UDPSrcGUI::displaySettings()
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
     ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
+    ui->addressText->setText(tr("%1:%2/%3").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()).arg(m_channelMarker.getUDPReceivePort()));
 }
 
 void UDPSrcGUI::applySettingsImmediate(bool force)
@@ -384,22 +398,6 @@ void UDPSrcGUI::applySettings(bool force)
 			rfBandwidth = outputSampleRate;
 		}
 
-		m_udpAddress = ui->udpAddress->text();
-
-		int udpPort = ui->udpPort->text().toInt(&ok);
-
-		if((!ok) || (udpPort < 1024) || (udpPort > 65535))
-		{
-			udpPort = 9999;
-		}
-
-		int audioPort = ui->audioPort->text().toInt(&ok);
-
-		if((!ok) || (audioPort < 1) || (audioPort > 65535) || (audioPort == udpPort))
-		{
-			audioPort = udpPort - 1;
-		}
-
 		int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 
 		if ((!ok) || (fmDeviation < 1))
@@ -411,9 +409,6 @@ void UDPSrcGUI::applySettings(bool force)
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
 		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-		//ui->udpAddress->setText(m_udpAddress);
-		ui->udpPort->setText(QString("%1").arg(udpPort));
-		ui->audioPort->setText(QString("%1").arg(audioPort));
 		ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
 		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
 		m_channelMarker.setBandwidth((int)rfBandwidth);
@@ -478,17 +473,15 @@ void UDPSrcGUI::applySettings(bool force)
 		m_outputSampleRate = outputSampleRate;
 		m_rfBandwidth = rfBandwidth;
 		m_fmDeviation = fmDeviation;
-		m_udpPort = udpPort;
-		m_audioPort = audioPort;
 
 		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
 			sampleFormat,
 			outputSampleRate,
 			rfBandwidth,
 			fmDeviation,
-			m_udpAddress,
-			udpPort,
-			audioPort,
+			m_channelMarker.getUDPAddress(),
+			m_channelMarker.getUDPSendPort(),
+			m_channelMarker.getUDPReceivePort(),
 			force);
 
 		ui->applyBtn->setEnabled(false);
@@ -609,14 +602,11 @@ void UDPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	}
 }
 
-void UDPSrcGUI::onMenuDoubleClicked()
+void UDPSrcGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if (!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 void UDPSrcGUI::leaveEvent(QEvent*)

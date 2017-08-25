@@ -105,7 +105,7 @@ void UDPSrc::configure(MessageQueue* messageQueue,
 		Real outputSampleRate,
 		Real rfBandwidth,
 		int fmDeviation,
-		QString& udpAddress,
+		const QString& udpAddress,
 		int udpPort,
 		int audioPort,
 		bool force)
