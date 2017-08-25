@@ -417,6 +417,7 @@ void UDPSinkGUI::applySettings(bool force)
             ui->squelchGate->value() * 0.01f,
             ui->squelch->value() != -100,
             ui->autoRWBalance->isChecked(),
+            ui->stereoInput->isChecked(),
             force);
 
         ui->applyBtn->setEnabled(false);
@@ -538,6 +539,11 @@ void UDPSinkGUI::on_resetUDPReadIndex_clicked()
 }
 
 void UDPSinkGUI::on_autoRWBalance_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
+}
+
+void UDPSinkGUI::on_stereoInput_toggled(bool checked __attribute__((unused)))
 {
     applySettings();
 }

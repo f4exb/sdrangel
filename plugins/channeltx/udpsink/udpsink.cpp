@@ -375,6 +375,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_config.m_squelchGate = cfg.getSquelchGate();
         m_config.m_squelchEnabled = cfg.getSquelchEnabled();
         m_config.m_autoRWBalance = cfg.getAutoRWBalance();
+        m_config.m_stereoInput = cfg.getStereoInput();
 
         apply(cfg.getForce());
 
@@ -391,7 +392,8 @@ bool UDPSink::handleMessage(const Message& cmd)
                 << " m_squelchGate: " << m_config.m_squelchGate
                 << " m_squelch: " << m_config.m_squelch
                 << " m_squelchEnabled: " << m_config.m_squelchEnabled
-                << " m_autoRWBalance: " << m_config.m_autoRWBalance;
+                << " m_autoRWBalance: " << m_config.m_autoRWBalance
+                << " m_stereoInput: " << m_config.m_stereoInput;
 
         return true;
     }
@@ -492,6 +494,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         Real squelchGate,
         bool squelchEnabled,
         bool autoRWBalance,
+        bool stereoInput,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
@@ -507,6 +510,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
             squelchGate,
             squelchEnabled,
             autoRWBalance,
+            stereoInput,
             force);
     messageQueue->push(cmd);
 }

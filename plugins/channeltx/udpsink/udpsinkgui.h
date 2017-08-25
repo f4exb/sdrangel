@@ -74,6 +74,7 @@ private slots:
     void on_channelMute_toggled(bool checked);
     void on_resetUDPReadIndex_clicked();
     void on_autoRWBalance_toggled(bool checked);
+    void on_stereoInput_toggled(bool checked);
     void tick();
 
 private:

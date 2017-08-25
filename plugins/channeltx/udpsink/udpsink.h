@@ -74,6 +74,7 @@ public:
             Real squelchGate,
             bool squelchEnabled,
             bool autoRWBalance,
+            bool stereoInput,
             bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
     void resetReadIndex(MessageQueue* messageQueue);
@@ -106,6 +107,7 @@ private:
         bool getSquelchEnabled() const { return m_squelchEnabled; }
         bool getForce() const { return m_force; }
         bool getAutoRWBalance() const { return m_autoRWBalance; }
+        bool getStereoInput() const { return m_stereoInput; }
 
         static MsgUDPSinkConfigure* create(SampleFormat
                 sampleFormat,
@@ -121,6 +123,7 @@ private:
                 Real squelchGate,
                 bool squelchEnabled,
                 bool autoRWBalance,
+                bool stereoInput,
                 bool force)
         {
             return new MsgUDPSinkConfigure(sampleFormat,
@@ -136,6 +139,7 @@ private:
                     squelchGate,
                     squelchEnabled,
                     autoRWBalance,
+                    stereoInput,
                     force);
         }
 
@@ -153,6 +157,7 @@ private:
         Real m_squelchGate;
         bool m_squelchEnabled;
         bool m_autoRWBalance;
+        bool m_stereoInput;
         bool m_force;
 
         MsgUDPSinkConfigure(SampleFormat sampleFormat,
@@ -168,6 +173,7 @@ private:
                 Real squelchGate,
                 bool squelchEnabled,
                 bool autoRWBalance,
+                bool stereoInput,
                 bool force) :
             Message(),
             m_sampleFormat(sampleFormat),
@@ -183,6 +189,7 @@ private:
             m_squelchGate(squelchGate),
             m_squelchEnabled(squelchEnabled),
             m_autoRWBalance(autoRWBalance),
+            m_stereoInput(stereoInput),
             m_force(force)
         { }
     };
@@ -240,6 +247,7 @@ private:
         Real m_squelchGate; //!< seconds
         bool m_squelchEnabled;
         bool m_autoRWBalance;
+        bool m_stereoInput;
 
         QString m_udpAddressStr;
         quint16 m_udpPort;
@@ -260,6 +268,7 @@ private:
             m_squelchGate(0.05),
             m_squelchEnabled(true),
             m_autoRWBalance(true),
+            m_stereoInput(false),
             m_udpAddressStr("127.0.0.1"),
             m_udpPort(9999)
         {}

@@ -71,6 +71,262 @@
     <property name="spacing">
      <number>3</number>
     </property>
+    <item row="1" column="2">
+     <layout class="QHBoxLayout" name="SampleRateLayout">
+      <item>
+       <widget class="QLabel" name="sampleRateLabel">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>SRin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sampleRate">
+        <property name="toolTip">
+         <string>Input sample rate (S/s)</string>
+        </property>
+        <property name="inputMask">
+         <string>0009999</string>
+        </property>
+        <property name="text">
+         <string>48000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="AddressLayout">
+      <item>
+       <widget class="QLabel" name="Addresslabel">
+        <property name="text">
+         <string>Addr</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpAddress">
+        <property name="toolTip">
+         <string>Address of listening interface (local)</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000</string>
+        </property>
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="udpPortlabel">
+        <property name="text">
+         <string>D</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpPort">
+        <property name="toolTip">
+         <string>Listening data port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000</string>
+        </property>
+        <property name="text">
+         <string>9999</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="2">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>RFBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="rfBandwidth">
+        <property name="toolTip">
+         <string>Signal bandwidth (Hz)</string>
+        </property>
+        <property name="inputMask">
+         <string>0009999</string>
+        </property>
+        <property name="text">
+         <string>32000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="9" column="0">
+     <layout class="QHBoxLayout" name="BufferGaugeLayout">
+      <item>
+       <widget class="QProgressBar" name="bufferGaugeNegative">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>12</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Main buffer read/write positions unbalance: write lags read leads</string>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+        <property name="invertedAppearance">
+         <bool>true</bool>
+        </property>
+        <property name="format">
+         <string>%v</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bufferGaugeDot">
+        <property name="maximumSize">
+         <size>
+          <width>2</width>
+          <height>14</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="bufferGaugePositive">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>12</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Main buffer read/write positions unbalance: read lags write leads</string>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0" rowspan="2">
+     <layout class="QHBoxLayout" name="FormatLayout">
+      <item>
+       <widget class="QLabel" name="sampleFormatLabel">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Fmt</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sampleFormat">
+        <property name="toolTip">
+         <string>Samples format</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>S16LE I/Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE NFM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE NFM Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE LSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE USB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE LSB Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE USB Mono</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>S16LE AM Mono</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="stereoInput">
+        <property name="toolTip">
+         <string>Toggle mono (1 channel) or stereo (2 channels) input</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrbase/resources/res.qrc">
+          <normaloff>:/mono.png</normaloff>
+          <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="8" column="0">
      <layout class="QHBoxLayout" name="VUMeterLayout">
       <item>
@@ -83,6 +339,240 @@
         </property>
         <property name="toolTip">
          <string>Amplitude meter in % of maximum</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="8" column="2">
+     <layout class="QHBoxLayout" name="GainLayout">
+      <item>
+       <widget class="QLabel" name="gainLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Gain</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="gain">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainText">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Linear gain value</string>
+        </property>
+        <property name="text">
+         <string>10.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="9" column="2">
+     <layout class="QHBoxLayout" name="bufferControlLayout">
+      <item>
+       <widget class="QLabel" name="bufferRWBalanceText">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>R/W pointers offset from optimal (%)</string>
+        </property>
+        <property name="text">
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="resetUDPReadIndex">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Reset UDP buffer index</string>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="autoRWBalance">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Automatic R/W balance compensation</string>
+        </property>
+        <property name="text">
+         <string>G</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="2">
+     <layout class="QHBoxLayout" name="SquelchLayout">
+      <item>
+       <widget class="QLabel" name="squelchLabel">
+        <property name="text">
+         <string>Sq</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="squelch">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Power squelch threshold (dB)</string>
+        </property>
+        <property name="minimum">
+         <number>-100</number>
+        </property>
+        <property name="maximum">
+         <number>0</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>-50</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchText">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Power squelch threshold (dB)</string>
+        </property>
+        <property name="text">
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="squelchGate">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch gate (ms)</string>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchGateText">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch gate (ms)</string>
+        </property>
+        <property name="text">
+         <string>000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -152,50 +642,6 @@
         </property>
         <property name="text">
          <string>Apply</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="3" column="0">
-     <layout class="QHBoxLayout" name="AddressLayout">
-      <item>
-       <widget class="QLabel" name="Addresslabel">
-        <property name="text">
-         <string>Addr</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="udpAddress">
-        <property name="toolTip">
-         <string>Address of listening interface (local)</string>
-        </property>
-        <property name="inputMask">
-         <string>000.000.000.000</string>
-        </property>
-        <property name="text">
-         <string>127.0.0.1</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="udpPortlabel">
-        <property name="text">
-         <string>D</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="udpPort">
-        <property name="toolTip">
-         <string>Listening data port</string>
-        </property>
-        <property name="inputMask">
-         <string>00000</string>
-        </property>
-        <property name="text">
-         <string>9999</string>
         </property>
        </widget>
       </item>
@@ -409,434 +855,6 @@
         </property>
         <property name="text">
          <string>-100.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0" rowspan="2">
-     <layout class="QHBoxLayout" name="FormatLayout">
-      <item>
-       <widget class="QLabel" name="sampleFormatLabel">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Fmt</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="sampleFormat">
-        <property name="toolTip">
-         <string>Samples format</string>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>S16LE I/Q</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE NFM</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE NFM Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE LSB</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE USB</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE LSB Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE USB Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE AM Mono</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="2">
-     <layout class="QHBoxLayout" name="SampleRateLayout">
-      <item>
-       <widget class="QLabel" name="sampleRateLabel">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>SRin</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="sampleRate">
-        <property name="toolTip">
-         <string>Input sample rate (S/s)</string>
-        </property>
-        <property name="inputMask">
-         <string>0009999</string>
-        </property>
-        <property name="text">
-         <string>48000</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="3" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QLabel" name="label_3">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>RFBW</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="rfBandwidth">
-        <property name="toolTip">
-         <string>Signal bandwidth (Hz)</string>
-        </property>
-        <property name="inputMask">
-         <string>0009999</string>
-        </property>
-        <property name="text">
-         <string>32000</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="9" column="0">
-     <layout class="QHBoxLayout" name="BufferGaugeLayout">
-      <item>
-       <widget class="QProgressBar" name="bufferGaugeNegative">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>12</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Main buffer read/write positions unbalance: write lags read leads</string>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-        <property name="invertedAppearance">
-         <bool>true</bool>
-        </property>
-        <property name="format">
-         <string>%v</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="bufferGaugeDot">
-        <property name="maximumSize">
-         <size>
-          <width>2</width>
-          <height>14</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="bufferGaugePositive">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>12</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Main buffer read/write positions unbalance: read lags write leads</string>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="9" column="2">
-     <layout class="QHBoxLayout" name="bufferControlLayout">
-      <item>
-       <widget class="QLabel" name="bufferRWBalanceText">
-        <property name="minimumSize">
-         <size>
-          <width>22</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>R/W pointers offset from optimal (%)</string>
-        </property>
-        <property name="text">
-         <string>-00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="resetUDPReadIndex">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Reset UDP buffer index</string>
-        </property>
-        <property name="text">
-         <string>R</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="autoRWBalance">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Automatic R/W balance compensation</string>
-        </property>
-        <property name="text">
-         <string>G</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="8" column="2">
-     <layout class="QHBoxLayout" name="GainLayout">
-      <item>
-       <widget class="QLabel" name="gainLabel">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Gain</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="gain">
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="gainText">
-        <property name="minimumSize">
-         <size>
-          <width>32</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Linear gain value</string>
-        </property>
-        <property name="text">
-         <string>10.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="2">
-     <layout class="QHBoxLayout" name="SquelchLayout">
-      <item>
-       <widget class="QLabel" name="squelchLabel">
-        <property name="text">
-         <string>Sq</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="squelch">
-        <property name="minimumSize">
-         <size>
-          <width>30</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Power squelch threshold (dB)</string>
-        </property>
-        <property name="minimum">
-         <number>-100</number>
-        </property>
-        <property name="maximum">
-         <number>0</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>-50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="squelchText">
-        <property name="minimumSize">
-         <size>
-          <width>22</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Power squelch threshold (dB)</string>
-        </property>
-        <property name="text">
-         <string>-00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="squelchGate">
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch gate (ms)</string>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="squelchGateText">
-        <property name="minimumSize">
-         <size>
-          <width>24</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch gate (ms)</string>
-        </property>
-        <property name="text">
-         <string>000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
