@@ -175,6 +175,7 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         m_channelMarker.setUDPReceivePort(u32tmp);
         d.readU32(20, &u32tmp, 9999);
         m_channelMarker.setUDPSendPort(u32tmp);
+        displayUDPAddress();
 
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
@@ -365,6 +366,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	updateMyPosition();
+	displayUDPAddress();
 	applySettings(true);
 }
 
@@ -390,6 +392,11 @@ void DSDDemodGUI::updateMyPosition()
         m_myLatitude = latitude;
         m_myLongitude = longitude;
     }
+}
+
+void DSDDemodGUI::displayUDPAddress()
+{
+    ui->udpOutput->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
 }
 
 void DSDDemodGUI::applySettings(bool force)

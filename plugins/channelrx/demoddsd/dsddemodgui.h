@@ -122,6 +122,7 @@ private:
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void updateMyPosition();
+	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
