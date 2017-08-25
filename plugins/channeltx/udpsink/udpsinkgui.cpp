@@ -127,34 +127,10 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.setCenterFrequency(s32tmp);
 
         d.readS32(3, &s32tmp, UDPSink::FormatS16LE);
-        switch(s32tmp) {
-            case UDPSink::FormatS16LE:
-                ui->sampleFormat->setCurrentIndex(0);
-                break;
-            case UDPSink::FormatNFM:
-                ui->sampleFormat->setCurrentIndex(1);
-                break;
-            case UDPSink::FormatNFMMono:
-                ui->sampleFormat->setCurrentIndex(2);
-                break;
-            case UDPSink::FormatLSB:
-                ui->sampleFormat->setCurrentIndex(3);
-                break;
-            case UDPSink::FormatUSB:
-                ui->sampleFormat->setCurrentIndex(4);
-                break;
-            case UDPSink::FormatLSBMono:
-                ui->sampleFormat->setCurrentIndex(5);
-                break;
-            case UDPSink::FormatUSBMono:
-                ui->sampleFormat->setCurrentIndex(6);
-                break;
-            case UDPSink::FormatAMMono:
-                ui->sampleFormat->setCurrentIndex(7);
-                break;
-            default:
-                ui->sampleFormat->setCurrentIndex(0);
-                break;
+        if (s32tmp < (int) UDPSink::FormatNone) {
+            ui->sampleFormat->setCurrentIndex(s32tmp);
+        } else {
+            ui->sampleFormat->setCurrentIndex(((int) UDPSink::FormatNone) - 1);
         }
         d.readReal(4, &realtmp, 48000);
         ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
@@ -362,38 +338,34 @@ void UDPSinkGUI::applySettings(bool force)
             case 0:
                 sampleFormat = UDPSink::FormatS16LE;
                 ui->fmDeviation->setEnabled(false);
+                ui->stereoInput->setChecked(true);
+                ui->stereoInput->setEnabled(false);
                 break;
             case 1:
                 sampleFormat = UDPSink::FormatNFM;
                 ui->fmDeviation->setEnabled(true);
+                ui->stereoInput->setEnabled(true);
                 break;
             case 2:
-                sampleFormat = UDPSink::FormatNFMMono;
-                ui->fmDeviation->setEnabled(true);
-                break;
-            case 3:
                 sampleFormat = UDPSink::FormatLSB;
                 ui->fmDeviation->setEnabled(false);
+                ui->stereoInput->setEnabled(true);
                 break;
-            case 4:
+            case 3:
                 sampleFormat = UDPSink::FormatUSB;
                 ui->fmDeviation->setEnabled(false);
+                ui->stereoInput->setEnabled(true);
                 break;
-            case 5:
-                sampleFormat = UDPSink::FormatLSBMono;
+            case 4:
+                sampleFormat = UDPSink::FormatAM;
                 ui->fmDeviation->setEnabled(false);
-                break;
-            case 6:
-                sampleFormat = UDPSink::FormatUSBMono;
-                ui->fmDeviation->setEnabled(false);
-                break;
-            case 7:
-                sampleFormat = UDPSink::FormatAMMono;
-                ui->fmDeviation->setEnabled(false);
+                ui->stereoInput->setEnabled(true);
                 break;
             default:
                 sampleFormat = UDPSink::FormatS16LE;
                 ui->fmDeviation->setEnabled(false);
+                ui->stereoInput->setChecked(true);
+                ui->stereoInput->setEnabled(false);
                 break;
         }
 
@@ -445,13 +417,13 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
 {
-    if ((index == (int) UDPSink::FormatNFM) || (index == (int) UDPSink::FormatNFMMono)) {
+    if ((index == (int) UDPSink::FormatNFM)) {
         ui->fmDeviation->setEnabled(true);
     } else {
         ui->fmDeviation->setEnabled(false);
     }
 
-    if (index == (int) UDPSink::FormatAMMono) {
+    if (index == (int) UDPSink::FormatAM) {
         ui->amModPercent->setEnabled(true);
     } else {
         ui->amModPercent->setEnabled(false);

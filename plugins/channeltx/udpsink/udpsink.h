@@ -38,12 +38,9 @@ public:
     enum SampleFormat {
         FormatS16LE,
         FormatNFM,
-        FormatNFMMono,
         FormatLSB,
         FormatUSB,
-        FormatLSBMono,
-        FormatUSBMono,
-        FormatAMMono,
+        FormatAM,
         FormatNone
     };
 
@@ -383,6 +380,21 @@ private:
             m_squelchOpen = false;
             m_squelchOpenCount = 0;
             m_squelchCloseCount = 0;
+        }
+    }
+
+    inline void readMonoSample(FixReal& t)
+    {
+        Sample s;
+
+        if (m_running.m_stereoInput)
+        {
+            m_udpHandler.readSample(s);
+            t = (s.m_real + s.m_imag) / 2;
+        }
+        else
+        {
+            m_udpHandler.readSample(t);
         }
     }
 };

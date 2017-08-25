@@ -277,11 +277,6 @@
         </item>
         <item>
          <property name="text">
-          <string>S16LE NFM Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>S16LE LSB</string>
          </property>
         </item>
@@ -292,17 +287,7 @@
         </item>
         <item>
          <property name="text">
-          <string>S16LE LSB Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE USB Mono</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>S16LE AM Mono</string>
+          <string>S16LE AM</string>
          </property>
         </item>
        </widget>
