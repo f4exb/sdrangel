@@ -563,6 +563,25 @@
     <item row="0" column="2">
      <layout class="QHBoxLayout" name="ChannelPowerLayout">
       <item>
+       <widget class="QLabel" name="inputPower">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Input power (dB) to which squelch applies</string>
+        </property>
+        <property name="text">
+         <string>-100.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -755,22 +774,36 @@
         </property>
        </spacer>
       </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="AddressLayout">
       <item>
-       <widget class="QLabel" name="inputPower">
+       <widget class="QLabel" name="addresslabel">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Addr</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="addressText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>150</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>Input power (dB) to which squelch applies</string>
+         <string>UDP &lt;address&gt;:&lt;data port&gt;</string>
         </property>
         <property name="text">
-         <string>-100.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <string>000.000.000.000:00000</string>
         </property>
        </widget>
       </item>
@@ -841,39 +874,6 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0">
-     <layout class="QHBoxLayout" name="AddressLayout">
-      <item>
-       <widget class="QLabel" name="addresslabel">
-        <property name="maximumSize">
-         <size>
-          <width>35</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Addr</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="addressText">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>UDP &lt;address&gt;:&lt;data port&gt;</string>
-        </property>
-        <property name="text">
-         <string>000.000.000.000:00000</string>
         </property>
        </widget>
       </item>
