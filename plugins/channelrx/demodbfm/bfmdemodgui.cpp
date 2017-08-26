@@ -186,7 +186,6 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		ui->lsbStereo->setChecked(booltmp);
 
         this->setWindowTitle(m_channelMarker.getTitle());
-
 		displayUDPAddress();
 
 		blockApplySettings(false);

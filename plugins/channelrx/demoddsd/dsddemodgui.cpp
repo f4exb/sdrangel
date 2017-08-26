@@ -110,10 +110,7 @@ QByteArray DSDDemodGUI::serialize() const
     s.writeBool(14, m_slot1On);
     s.writeBool(15, m_slot2On);
     s.writeBool(16, m_tdmaStereo);
-    s.writeString(17, m_channelMarker.getTitle());
-    s.writeString(18, m_channelMarker.getUDPAddress());
-    s.writeU32(19, (quint32) m_channelMarker.getUDPReceivePort());
-    s.writeU32(20, (quint32) m_channelMarker.getUDPSendPort());
+    s.writeBlob(17, m_channelMarker.serialize());
 	return s.final();
 }
 
@@ -136,6 +133,9 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
+
+        d.readBlob(17, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
@@ -166,15 +166,8 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         d.readBool(14, &m_slot1On, false);
         d.readBool(15, &m_slot2On, false);
         d.readBool(16, &m_tdmaStereo, false);
-        d.readString(17, &strtmp, "DSD Demodulator");
-        m_channelMarker.setTitle(strtmp);
+
         this->setWindowTitle(m_channelMarker.getTitle());
-        d.readString(18, &strtmp, "127.0.0.1");
-        m_channelMarker.setUDPAddress(strtmp);
-        d.readU32(19, &u32tmp, 9999);
-        m_channelMarker.setUDPReceivePort(u32tmp);
-        d.readU32(20, &u32tmp, 9999);
-        m_channelMarker.setUDPSendPort(u32tmp);
         displayUDPAddress();
 
 		blockApplySettings(false);
