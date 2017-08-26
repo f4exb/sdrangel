@@ -1,8 +1,8 @@
 sdrangel (3.6.1-1) unstable; urgency=medium
 
   * Basic channel settings dialog with title+color update and UDP parameters 
-  * Applied to UDPSink, DSDDemod
-  * DSD demod: added possibility to send AF via UDP
+  * Applied to UDPSink, UDPSource, DSDDemod, AMDemod, BFMDemod, NFMDemod
+  * DSD, AM, NFM, BFM demods: added possibility to send AF via UDP
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 31 Aug 2017 23:14:18 +0200
 
