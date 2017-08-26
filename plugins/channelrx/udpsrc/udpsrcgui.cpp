@@ -99,10 +99,8 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeBlob(6, m_channelMarker.serialize());
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, ui->gain->value());
-	s.writeString(10, m_channelMarker.getUDPAddress());
 	s.writeBool(11, m_audioActive);
 	s.writeS32(12, (qint32)m_volume);
-	s.writeS32(13, m_channelMarker.getUDPReceivePort());
 	s.writeBool(14, m_audioStereo);
 	s.writeS32(15, m_fmDeviation);
 	s.writeS32(16, ui->squelch->value());
@@ -179,30 +177,16 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
 		d.readReal(5, &realtmp, 32000);
 		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
-		d.readS32(6, &s32tmp, 9999);
-		if ((s32tmp > 1024) && (s32tmp < 65536)) {
-		    m_channelMarker.setUDPSendPort(s32tmp);
-		} else {
-		    m_channelMarker.setUDPSendPort(9999);
-		}
 		d.readBlob(7, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
         d.readS32(8, &s32tmp, 10);
         ui->gain->setValue(s32tmp);
         ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
-		d.readString(10, &strtmp, "127.0.0.1");
-		m_channelMarker.setUDPAddress(strtmp);
 		d.readBool(11, &booltmp, false);
 		ui->audioActive->setChecked(booltmp);
 		d.readS32(12, &s32tmp, 20);
 		ui->volume->setValue(s32tmp);
 		ui->volumeText->setText(QString("%1").arg(s32tmp));
-		d.readS32(13, &s32tmp, 9998);
-        if ((s32tmp > 1024) && (s32tmp < 65536)) {
-            m_channelMarker.setUDPReceivePort(s32tmp);
-        } else {
-            m_channelMarker.setUDPReceivePort(9998);
-        }
 		d.readBool(14, &booltmp, false);
 		ui->audioStereo->setChecked(booltmp);
 		d.readS32(15, &s32tmp, 2500);
@@ -219,6 +203,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
+		this->setWindowTitle(m_channelMarker.getTitle());
 		displaySettings();
 		applySettingsImmediate(true);
 		applySettings(true);

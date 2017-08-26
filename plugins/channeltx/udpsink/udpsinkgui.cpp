@@ -86,7 +86,6 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeReal(5, m_rfBandwidth);
     s.writeS32(6, m_channelMarker.getUDPReceivePort());
     s.writeBlob(7, ui->spectrumGUI->serialize());
-    s.writeS32(8, m_channelMarker.getCenterFrequency());
     s.writeString(9, m_channelMarker.getUDPAddress());
     s.writeS32(10, ui->gainOut->value());
     s.writeS32(11, m_fmDeviation);
@@ -144,8 +143,6 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         }
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
-        d.readS32(8, &s32tmp, 0);
-        m_channelMarker.setCenterFrequency(s32tmp);
         d.readString(9, &strtmp, "127.0.0.1");
         m_channelMarker.setUDPAddress(strtmp);
         d.readS32(10, &s32tmp, 10);
@@ -175,6 +172,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
 
+        this->setWindowTitle(m_channelMarker.getTitle());
+        displaySettings();
         applySettings(true);
         return true;
     }
