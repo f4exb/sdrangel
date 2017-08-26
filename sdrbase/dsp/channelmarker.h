@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QColor>
+#include <QByteArray>
+
 #include "util/export.h"
 
 class SDRANGEL_API ChannelMarker : public QObject {
@@ -24,6 +26,7 @@ public:
 	    FScaleDisplay_title,
 	    FScaleDisplay_addressSend,
 	    FScaleDisplay_addressReceive,
+	    FScaleDisplay_none
 	} frequencyScaleDisplay_t;
 
 	ChannelMarker(QObject* parent = NULL);
@@ -73,6 +76,9 @@ public:
     const QString& getDisplayAddressSend() const { return m_displayAddressSend; }
     const QString& getDisplayAddressReceive() const { return m_displayAddressReceive; }
 
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+
 protected:
 	static QRgb m_colorTable[];
 	static int m_nextColor;
@@ -93,6 +99,8 @@ protected:
 	quint16 m_udpReceivePort;
     quint16 m_udpSendPort;
     frequencyScaleDisplay_t m_fScaleDisplayType;
+
+    void resetToDefaults();
 
 signals:
 	void changed();

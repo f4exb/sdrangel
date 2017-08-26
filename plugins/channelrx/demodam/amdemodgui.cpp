@@ -88,10 +88,7 @@ QByteArray AMDemodGUI::serialize() const
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeBool(8, ui->bandpassEnable->isChecked());
-    s.writeString(9, m_channelMarker.getTitle());
-    s.writeString(10, m_channelMarker.getUDPAddress());
-    s.writeU32(11, (quint32) m_channelMarker.getUDPReceivePort());
-    s.writeU32(12, (quint32) m_channelMarker.getUDPSendPort());
+	s.writeBlob(9, m_channelMarker.serialize());
 	return s.final();
 }
 
@@ -116,6 +113,8 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
 
+        d.readBlob(9, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 		d.readS32(2, &tmp, 4);
