@@ -131,14 +131,14 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         }
         d.readBool(8, &boolTmp, false);
         ui->bandpassEnable->setChecked(boolTmp);
-        d.readString(11, &strtmp, "AM Demodulator");
+        d.readString(9, &strtmp, "AM Demodulator");
         m_channelMarker.setTitle(strtmp);
         this->setWindowTitle(m_channelMarker.getTitle());
-        d.readString(12, &strtmp, "127.0.0.1");
+        d.readString(10, &strtmp, "127.0.0.1");
         m_channelMarker.setUDPAddress(strtmp);
-        d.readU32(13, &u32tmp, 9999);
+        d.readU32(11, &u32tmp, 9999);
         m_channelMarker.setUDPReceivePort(u32tmp);
-        d.readU32(14, &u32tmp, 9999);
+        d.readU32(12, &u32tmp, 9999);
         m_channelMarker.setUDPSendPort(u32tmp);
 
         displayUDPAddress();
