@@ -28,9 +28,10 @@
 #include "dsp/dspengine.h"
 #include "nfmdemodgui.h"
 
-static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
-
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
+
+static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
+const int NFMDemod::m_udpBlockSize = 512;
 
 NFMDemod::NFMDemod() :
 	m_ctcssIndex(0),
@@ -77,11 +78,13 @@ NFMDemod::NFMDemod() :
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_config.m_udpPort);
 }
 
 NFMDemod::~NFMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	delete m_udpBufferAudio;
 }
 
 void NFMDemod::configure(MessageQueue* messageQueue,
@@ -94,6 +97,9 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		Real squelch,
 		bool ctcssOn,
 		bool audioMute,
+        bool copyAudioToUDP,
+        const QString& udpAddress,
+        qint16 udpPort,
 		bool force)
 {
 	Message* cmd = MsgConfigureNFMDemod::create(rfBandwidth,
@@ -105,6 +111,9 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 			squelch,
 			ctcssOn,
 			audioMute,
+			copyAudioToUDP,
+			udpAddress,
+			udpPort,
 			force);
 	messageQueue->push(cmd);
 }
@@ -282,12 +291,14 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					if (m_running.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
 					{
 						sample = 0;
+						if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(0);
 					}
 					else
 					{
                         demod = m_bandpass.filter(demod);
                         Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
                         sample = demod * m_running.m_volume * squelchFactor;
+                        if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(demod * 5.0f * squelchFactor);
 					}
 				}
 				else
@@ -299,6 +310,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					}
 
 					sample = 0;
+					if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(0);
 				}
 
 				m_audioBuffer[m_audioBufferFill].l = sample;
@@ -380,6 +392,9 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_squelch = cfg.getSquelch();
 		m_config.m_ctcssOn = cfg.getCtcssOn();
 		m_config.m_audioMute = cfg.getAudioMute();
+		m_config.m_copyAudioToUDP = cfg.getCopyAudioToUDP();
+		m_config.m_udpAddress = cfg.getUDPAddress();
+		m_config.m_udpPort = cfg.getUDPPort();
 
 		apply(cfg.getForce());
 
@@ -392,6 +407,9 @@ bool NFMDemod::handleMessage(const Message& cmd)
 				<< " m_squelch: " << m_squelchLevel
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
 				<< " m_audioMute: " << m_config.m_audioMute
+                << " m_copyAudioToUDP: " << m_config.m_copyAudioToUDP
+                << " m_udpAddress: " << m_config.m_udpAddress
+                << " m_udpPort: " << m_config.m_udpPort
 				<< " force: " << cfg.getForce();
 
 		return true;
@@ -458,16 +476,12 @@ void NFMDemod::apply(bool force)
         //m_afSquelch.setThreshold(m_squelchLevel);
 	}
 
-	m_running.m_inputSampleRate = m_config.m_inputSampleRate;
-	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
-	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-	m_running.m_afBandwidth = m_config.m_afBandwidth;
-	m_running.m_fmDeviation = m_config.m_fmDeviation;
-	m_running.m_squelchGate = m_config.m_squelchGate;
-	m_running.m_deltaSquelch = m_config.m_deltaSquelch;
-    m_running.m_squelch = m_config.m_squelch;
-	m_running.m_volume = m_config.m_volume;
-	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_ctcssOn = m_config.m_ctcssOn;
-	m_running.m_audioMute = m_config.m_audioMute;
+    if ((m_config.m_udpAddress != m_running.m_udpAddress)
+        || (m_config.m_udpPort != m_running.m_udpPort) || force)
+    {
+        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
+        m_udpBufferAudio->setPort(m_config.m_udpPort);
+    }
+
+	m_running = m_config;
 }

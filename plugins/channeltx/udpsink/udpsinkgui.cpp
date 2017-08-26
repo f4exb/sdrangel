@@ -110,7 +110,6 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         QString strtmp;
         qint32 s32tmp;
-        quint32 u32tmp;
         Real realtmp;
         bool booltmp;
 

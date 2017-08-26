@@ -404,6 +404,7 @@ private:
         else
         {
             m_udpHandler.readSample(t);
+            t *= m_running.m_gainIn;
         }
     }
 };

@@ -50,6 +50,9 @@ public:
 			Real squelch,
 			bool ctcssOn,
 			bool audioMute,
+            bool copyAudioToUDP,
+            const QString& udpAddress,
+            qint16 udpPort,
 			bool force);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -98,6 +101,9 @@ private:
 		Real getSquelch() const { return m_squelch; }
 		bool getCtcssOn() const { return m_ctcssOn; }
 		bool getAudioMute() const { return m_audioMute; }
+		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
+		const QString& getUDPAddress() const { return m_udpAddress; }
+		quint16 getUDPPort() const { return m_udpPort; }
 		bool getForce() const { return m_force; }
 
 		static MsgConfigureNFMDemod* create(Real rfBandwidth,
@@ -109,6 +115,9 @@ private:
 				Real squelch,
 				bool ctcssOn,
 				bool audioMute,
+                bool copyAudioToUDP,
+                const QString& udpAddress,
+                qint16 udpPort,
 				bool force)
 		{
 			return new MsgConfigureNFMDemod(
@@ -121,6 +130,9 @@ private:
 			        squelch,
 			        ctcssOn,
 			        audioMute,
+			        copyAudioToUDP,
+			        udpAddress,
+			        udpPort,
 			        force);
 		}
 
@@ -134,6 +146,9 @@ private:
 		Real m_squelch;
 		bool m_ctcssOn;
 		bool m_audioMute;
+        bool m_copyAudioToUDP;
+        QString m_udpAddress;
+        quint16 m_udpPort;
 		bool m_force;
 
 		MsgConfigureNFMDemod(Real rfBandwidth,
@@ -145,6 +160,9 @@ private:
 				Real squelch,
 				bool ctcssOn,
 				bool audioMute,
+				bool copyAudioToUDP,
+				const QString& udpAddress,
+				qint16 udpPort,
 				bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
@@ -156,6 +174,9 @@ private:
 			m_squelch(squelch),
 			m_ctcssOn(ctcssOn),
 			m_audioMute(audioMute),
+			m_copyAudioToUDP(copyAudioToUDP),
+			m_udpAddress(udpAddress),
+			m_udpPort(udpPort),
 			m_force(force)
 		{ }
 	};
@@ -179,6 +200,9 @@ private:
 		bool m_audioMute;
 		int  m_ctcssIndex;
 		quint32 m_audioSampleRate;
+        bool m_copyAudioToUDP;
+        QString m_udpAddress;
+        quint16 m_udpPort;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -193,7 +217,10 @@ private:
 			m_ctcssOn(false),
 			m_audioMute(false),
 			m_ctcssIndex(0),
-			m_audioSampleRate(0)
+			m_audioSampleRate(0),
+			m_copyAudioToUDP(false),
+			m_udpAddress("127.0.0.1"),
+			m_udpPort(9999)
 		{ }
 	};
 
@@ -237,13 +264,16 @@ private:
 	uint m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
+    UDPSink<qint16> *m_udpBufferAudio;
 
 	NFMDemodGUI *m_nfmDemodGUI;
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;
 
-	void apply(bool force = false);
+    static const int m_udpBlockSize;
+
+    void apply(bool force = false);
 };
 
 #endif // INCLUDE_NFMDEMOD_H

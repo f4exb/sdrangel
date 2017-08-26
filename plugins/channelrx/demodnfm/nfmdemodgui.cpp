@@ -247,6 +247,11 @@ void NFMDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
+void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
+}
+
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
 	if (m_nfmDemod != 0)
@@ -378,6 +383,9 @@ void NFMDemodGUI::applySettings(bool force)
 			ui->squelch->value(), // -1000 -> 0
 			ui->ctcssOn->isChecked(),
 			ui->audioMute->isChecked(),
+			ui->copyAudioToUDP->isChecked(),
+			m_channelMarker.getUDPAddress(),
+			m_channelMarker.getUDPSendPort(),
 			force);
 	}
 }
