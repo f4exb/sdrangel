@@ -28,7 +28,7 @@
 
 #include <dsp/downchannelizer.h>
 
-#include "../../channelrx/demodbfm/rdsparser.h"
+#include "rdsparser.h"
 
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
@@ -82,6 +82,7 @@ BFMDemod::~BFMDemod()
 	}
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	delete m_udpBufferAudio;
 }
 
 void BFMDemod::configure(MessageQueue* messageQueue,

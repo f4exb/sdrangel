@@ -186,7 +186,7 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		d.readBool(10, &booltmp, false);
 		ui->lsbStereo->setChecked(booltmp);
 
-        d.readString(11, &strtmp, "DSD Demodulator");
+        d.readString(11, &strtmp, "Broadcast FM Demod");
         m_channelMarker.setTitle(strtmp);
         this->setWindowTitle(m_channelMarker.getTitle());
         d.readString(12, &strtmp, "127.0.0.1");

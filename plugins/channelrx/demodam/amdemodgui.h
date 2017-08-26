@@ -38,15 +38,16 @@ public:
 	static const QString m_channelID;
 
 private slots:
-	void viewChanged();
+	void channelMarkerChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_bandpassEnable_toggled(bool checked);
 	void on_rfBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
+    void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
+    void onMenuDialogCalled(const QPoint& p);
 	void tick();
 
 private:
@@ -54,7 +55,6 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
@@ -67,7 +67,8 @@ private:
 	virtual ~AMDemodGUI();
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
+	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

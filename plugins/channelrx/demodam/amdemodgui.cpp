@@ -27,7 +27,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
@@ -84,11 +84,14 @@ QByteArray AMDemodGUI::serialize() const
 	SimpleSerializer s(1);
 	s.writeS32(1, m_channelMarker.getCenterFrequency());
 	s.writeS32(2, ui->rfBW->value());
-	//s.writeS32(3, ui->afBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeBool(8, ui->bandpassEnable->isChecked());
+    s.writeString(9, m_channelMarker.getTitle());
+    s.writeString(10, m_channelMarker.getUDPAddress());
+    s.writeU32(11, (quint32) m_channelMarker.getUDPReceivePort());
+    s.writeU32(12, (quint32) m_channelMarker.getUDPSendPort());
 	return s.final();
 }
 
@@ -108,6 +111,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		quint32 u32tmp;
 		qint32 tmp;
 		bool boolTmp;
+		QString strtmp;
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
@@ -122,19 +126,27 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		ui->volume->setValue(tmp);
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
-
-        if(d.readU32(7, &u32tmp))
-        {
+        if(d.readU32(7, &u32tmp)) {
 			m_channelMarker.setColor(u32tmp);
         }
-
         d.readBool(8, &boolTmp, false);
         ui->bandpassEnable->setChecked(boolTmp);
+        d.readString(11, &strtmp, "AM Demodulator");
+        m_channelMarker.setTitle(strtmp);
+        this->setWindowTitle(m_channelMarker.getTitle());
+        d.readString(12, &strtmp, "127.0.0.1");
+        m_channelMarker.setUDPAddress(strtmp);
+        d.readU32(13, &u32tmp, 9999);
+        m_channelMarker.setUDPReceivePort(u32tmp);
+        d.readU32(14, &u32tmp, 9999);
+        m_channelMarker.setUDPSendPort(u32tmp);
+
+        displayUDPAddress();
 
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
-		applySettings();
+		applySettings(true);
 		return true;
 	}
     else
@@ -149,8 +161,10 @@ bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 	return false;
 }
 
-void AMDemodGUI::viewChanged()
+void AMDemodGUI::channelMarkerChanged()
 {
+    this->setWindowTitle(m_channelMarker.getTitle());
+    displayUDPAddress();
 	applySettings();
 }
 
@@ -188,6 +202,11 @@ void AMDemodGUI::on_audioMute_toggled(bool checked __attribute__((unused)))
 	applySettings();
 }
 
+void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
+}
+
 void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -196,13 +215,11 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool ro
 	*/
 }
 
-void AMDemodGUI::onMenuDoubleClicked()
+void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if(!m_basicSettingsShown) {
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -211,7 +228,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_pluginAPI(pluginAPI),
 	m_deviceAPI(deviceAPI),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
 	m_tickCount(0)
@@ -219,7 +235,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_amDemod = new AMDemod();
 	m_channelizer = new DownChannelizer(m_amDemod);
@@ -238,15 +254,19 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	m_channelMarker.setColor(Qt::yellow);
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
+    m_channelMarker.setTitle("AM Demodulator");
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.setVisible(true);
+    setTitleColor(m_channelMarker.getColor());
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
 
-	applySettings();
+	applySettings(true);
 }
 
 AMDemodGUI::~AMDemodGUI()
@@ -265,7 +285,7 @@ void AMDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AMDemodGUI::applySettings()
+void AMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -282,8 +302,17 @@ void AMDemodGUI::applySettings()
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),
 			ui->audioMute->isChecked(),
-			ui->bandpassEnable->isChecked());
+			ui->bandpassEnable->isChecked(),
+			ui->copyAudioToUDP->isChecked(),
+			m_channelMarker.getUDPAddress(),
+			m_channelMarker.getUDPSendPort(),
+			force);
 	}
+}
+
+void AMDemodGUI::displayUDPAddress()
+{
+    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
+    <width>352</width>
     <height>170</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>302</width>
+    <width>352</width>
     <height>0</height>
    </size>
   </property>
@@ -34,18 +34,21 @@
   <property name="windowTitle">
    <string>AM Demodulator</string>
   </property>
+  <property name="statusTip">
+   <string>AM Demodulator</string>
+  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>300</width>
+     <width>350</width>
      <height>131</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>300</width>
+     <width>350</width>
      <height>0</height>
     </size>
    </property>
@@ -177,6 +180,19 @@
          <iconset resource="../../../sdrbase/resources/res.qrc">
           <normaloff>:/sound_on.png</normaloff>
           <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="copyAudioToUDP">
+        <property name="toolTip">
+         <string>Copy audio to UDP</string>
+        </property>
+        <property name="text">
+         <string>U</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

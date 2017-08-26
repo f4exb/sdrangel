@@ -84,10 +84,10 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
 
 DSDDemod::~DSDDemod()
 {
-    delete m_udpBufferAudio;
     delete[] m_sampleBuffer;
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
+    delete m_udpBufferAudio;
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,

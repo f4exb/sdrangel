@@ -34,7 +34,16 @@ public:
 	AMDemod();
 	~AMDemod();
 
-	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable);
+	void configure(MessageQueue* messageQueue,
+	        Real rfBandwidth,
+	        Real volume,
+	        Real squelch,
+	        bool audioMute,
+	        bool bandpassEnable,
+	        bool copyAudioToUDP,
+	        const QString& udpAddress,
+	        quint16 udpPort,
+	        bool force);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -64,10 +73,30 @@ private:
 		Real getSquelch() const { return m_squelch; }
 		bool getAudioMute() const { return m_audioMute; }
 		bool getBandpassEnable() const { return m_bandpassEnable; }
+		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
+		const QString& getUDPAddress() const { return m_udpAddress; }
+		quint16 getUDPPort() const { return m_udpPort; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureAMDemod* create(Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable)
+		static MsgConfigureAMDemod* create(Real rfBandwidth,
+		        Real volume,
+		        Real squelch,
+		        bool audioMute,
+		        bool bandpassEnable,
+		        bool copyAudioToUDP,
+		        const QString& udpAddress,
+		        quint16 udpPort,
+		        bool force)
 		{
-			return new MsgConfigureAMDemod(rfBandwidth, volume, squelch, audioMute, bandpassEnable);
+			return new MsgConfigureAMDemod(rfBandwidth,
+			        volume,
+			        squelch,
+			        audioMute,
+			        bandpassEnable,
+			        copyAudioToUDP,
+			        udpAddress,
+			        udpPort,
+			        force);
 		}
 
 	private:
@@ -76,14 +105,30 @@ private:
 		Real m_squelch;
 		bool m_audioMute;
 		bool m_bandpassEnable;
+		bool m_copyAudioToUDP;
+		QString m_udpAddress;
+		quint16 m_udpPort;
+		bool m_force;
 
-		MsgConfigureAMDemod(Real rfBandwidth, Real volume, Real squelch, bool audioMute, bool bandpassEnable) :
+		MsgConfigureAMDemod(Real rfBandwidth,
+		        Real volume,
+		        Real squelch,
+		        bool audioMute,
+		        bool bandpassEnable,
+		        bool copyAudioToUDP,
+		        const QString& udpAddress,
+		        quint16 udpPort,
+		        bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
 			m_volume(volume),
 			m_squelch(squelch),
 			m_audioMute(audioMute),
-			m_bandpassEnable(bandpassEnable)
+			m_bandpassEnable(bandpassEnable),
+			m_copyAudioToUDP(copyAudioToUDP),
+			m_udpAddress(udpAddress),
+			m_udpPort(udpPort),
+			m_force(force)
 		{ }
 	};
 
@@ -101,6 +146,9 @@ private:
 		quint32 m_audioSampleRate;
 		bool m_audioMute;
 		bool m_bandpassEnable;
+        bool m_copyAudioToUDP;
+        QString m_udpAddress;
+        quint16 m_udpPort;
 
 		Config() :
 			m_inputSampleRate(-1),
@@ -110,7 +158,10 @@ private:
 			m_volume(0),
 			m_audioSampleRate(0),
 			m_audioMute(false),
-			m_bandpassEnable(false)
+			m_bandpassEnable(false),
+            m_copyAudioToUDP(false),
+            m_udpAddress("127.0.0.1"),
+            m_udpPort(9999)
 		{ }
 	};
 
@@ -135,12 +186,15 @@ private:
     Bandpass<Real> m_bandpass;
 
 	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-
+	uint32_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
+    UDPSink<AudioSample> *m_udpBufferAudio;
+
+    static const int m_udpBlockSize;
+
 	QMutex m_settingsMutex;
 
-	void apply();
+	void apply(bool force = false);
 
 	void processOneSample(Complex &ci)
 	{
@@ -191,7 +245,7 @@ private:
             }
 
             Real attack = (m_squelchCount - 0.05f * m_running.m_audioSampleRate) / (0.05f * m_running.m_audioSampleRate);
-            sample = (0.5 - demod) * attack * 2048 * m_running.m_volume;
+            sample = demod * attack * 2048 * m_running.m_volume;
 
             m_squelchOpen = true;
         }
@@ -203,6 +257,7 @@ private:
 
         m_audioBuffer[m_audioBufferFill].l = sample;
         m_audioBuffer[m_audioBufferFill].r = sample;
+        m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
         ++m_audioBufferFill;
 
         if (m_audioBufferFill >= m_audioBuffer.size())
