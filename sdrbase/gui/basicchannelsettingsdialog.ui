@@ -70,6 +70,50 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="fScaleDisplayTypeLabel">
+       <property name="text">
+        <string>FScale</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fScaleDisplayType">
+       <item>
+        <property name="text">
+         <string>Freq</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Title</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AdSnd</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AdRcv</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
    <item>

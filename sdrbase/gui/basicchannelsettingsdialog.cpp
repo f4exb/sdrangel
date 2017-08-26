@@ -74,5 +74,7 @@ void BasicChannelSettingsDialog::accept()
 
     m_channelMarker->setUDPSendPort(udpPort);
 
+    m_channelMarker->setFrequencyScaleDisplayType((ChannelMarker::frequencyScaleDisplay_t) ui->fScaleDisplayType->currentIndex());
+
     QDialog::accept();
 }

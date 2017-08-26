@@ -38,11 +38,14 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_movable(true),
 	m_udpAddress("127.0.0.1"),
 	m_udpReceivePort(9999),
-	m_udpSendPort(9998)
+	m_udpSendPort(9998),
+	m_fScaleDisplayType(FScaleDisplay_freq)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)
 		m_nextColor = 0;
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
 }
 
 void ChannelMarker::setTitle(const QString& title)
@@ -102,17 +105,21 @@ void ChannelMarker::setColor(const QColor& color)
 void ChannelMarker::setUDPAddress(const QString& udpAddress)
 {
     m_udpAddress = udpAddress;
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
     emit changed();
 }
 
 void ChannelMarker::setUDPReceivePort(quint16 port)
 {
     m_udpReceivePort = port;
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
     emit changed();
 }
 
 void ChannelMarker::setUDPSendPort(quint16 port)
 {
     m_udpSendPort = port;
+    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
     emit changed();
 }

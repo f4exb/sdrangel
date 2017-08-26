@@ -18,6 +18,14 @@ public:
 		vlsb  //!< LSB with vestigial USB
 	} sidebands_t;
 
+	typedef enum frequencyScaleDisplay_e
+	{
+	    FScaleDisplay_freq,
+	    FScaleDisplay_title,
+	    FScaleDisplay_addressSend,
+	    FScaleDisplay_addressReceive,
+	} frequencyScaleDisplay_t;
+
 	ChannelMarker(QObject* parent = NULL);
 
 	void setTitle(const QString& title);
@@ -59,12 +67,19 @@ public:
     void setUDPSendPort(quint16 port);
     quint16 getUDPSendPort() const { return m_udpSendPort; }
 
+    void setFrequencyScaleDisplayType(frequencyScaleDisplay_t type) { m_fScaleDisplayType = type; }
+    frequencyScaleDisplay_t getFrequencyScaleDisplayType() const { return m_fScaleDisplayType; }
+
+    const QString& getDisplayAddressSend() const { return m_displayAddressSend; }
+    const QString& getDisplayAddressReceive() const { return m_displayAddressReceive; }
 
 protected:
 	static QRgb m_colorTable[];
 	static int m_nextColor;
 
 	QString m_title;
+	QString m_displayAddressSend;
+    QString m_displayAddressReceive;
 	int m_centerFrequency;
 	int m_bandwidth;
     int m_oppositeBandwidth;
@@ -77,6 +92,7 @@ protected:
 	QString m_udpAddress;
 	quint16 m_udpReceivePort;
     quint16 m_udpSendPort;
+    frequencyScaleDisplay_t m_fScaleDisplayType;
 
 signals:
 	void changed();

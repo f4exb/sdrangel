@@ -1472,7 +1472,25 @@ void GLSpectrum::applyChanges()
 					int shift;
 					//ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
 					xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
-					QString ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
+					QString ftext;
+					switch (dv->m_channelMarker->getFrequencyScaleDisplayType())
+					{
+					case ChannelMarker::FScaleDisplay_freq:
+	                    ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6); // TODO
+	                    break;
+                    case ChannelMarker::FScaleDisplay_title:
+                        ftext = dv->m_channelMarker->getTitle();
+                        break;
+                    case ChannelMarker::FScaleDisplay_addressSend:
+                        ftext = dv->m_channelMarker->getDisplayAddressSend();
+                        break;
+                    case ChannelMarker::FScaleDisplay_addressReceive:
+                        ftext = dv->m_channelMarker->getDisplayAddressReceive();
+                        break;
+					default:
+                        ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
+                        break;
+					}
 					if (dv->m_channelMarker->getCenterFrequency() < 0) { // left half of scale
 						ftext = " " + ftext;
 						shift = 0;
