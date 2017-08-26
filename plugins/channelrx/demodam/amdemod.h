@@ -257,7 +257,7 @@ private:
 
         m_audioBuffer[m_audioBufferFill].l = sample;
         m_audioBuffer[m_audioBufferFill].r = sample;
-        m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+        if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
         ++m_audioBufferFill;
 
         if (m_audioBufferFill >= m_audioBuffer.size())
