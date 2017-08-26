@@ -98,6 +98,17 @@ void BFMDemodGUI::resetToDefaults()
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
 	ui->deltaFrequency->setValue(0);
+	ui->copyAudioToUDP->setChecked(false);
+    m_channelMarker.setTitle("Broadcast FM Demod");
+    m_channelMarker.setColor(QColor(80, 120, 228));
+    m_channelMarker.setBandwidth(12500);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    setTitleColor(m_channelMarker.getColor());
+    ui->g00AltFrequenciesBox->setEnabled(false);
+    ui->g14MappedFrequencies->setEnabled(false);
+    ui->g14AltFrequencies->setEnabled(false);
 
 	blockApplySettings(false);
 	applySettings();
@@ -115,6 +126,10 @@ QByteArray BFMDemodGUI::serialize() const
 	s.writeBlob(8, ui->spectrumGUI->serialize());
 	s.writeBool(9, ui->audioStereo->isChecked());
 	s.writeBool(10, ui->lsbStereo->isChecked());
+    s.writeString(11, m_channelMarker.getTitle());
+    s.writeString(12, m_channelMarker.getUDPAddress());
+    s.writeU32(13, (quint32) m_channelMarker.getUDPReceivePort());
+    s.writeU32(14, (quint32) m_channelMarker.getUDPSendPort());
 	return s.final();
 }
 
@@ -132,7 +147,9 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 	{
 		QByteArray bytetmp;
 		qint32 tmp;
+		quint32 u32tmp;
 		bool booltmp;
+		QString strtmp;
 
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
@@ -168,6 +185,16 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readBool(10, &booltmp, false);
 		ui->lsbStereo->setChecked(booltmp);
+
+        d.readString(11, &strtmp, "DSD Demodulator");
+        m_channelMarker.setTitle(strtmp);
+        this->setWindowTitle(m_channelMarker.getTitle());
+        d.readString(12, &strtmp, "127.0.0.1");
+        m_channelMarker.setUDPAddress(strtmp);
+        d.readU32(13, &u32tmp, 9999);
+        m_channelMarker.setUDPReceivePort(u32tmp);
+        d.readU32(14, &u32tmp, 9999);
+        m_channelMarker.setUDPSendPort(u32tmp);
 
 		displayUDPAddress();
 
@@ -386,7 +413,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setTitle("Broadcast FM Demod");
-	m_channelMarker.setColor(Qt::blue);
 	m_channelMarker.setColor(QColor(80, 120, 228));
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
@@ -438,6 +464,8 @@ void BFMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
+	    setTitleColor(m_channelMarker.getColor());
+
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
 			m_channelMarker.getCenterFrequency());
