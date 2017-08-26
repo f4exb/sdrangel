@@ -96,7 +96,7 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
 	s.writeReal(5, m_rfBandwidth);
-	s.writeS32(6, m_channelMarker.getUDPSendPort());
+	s.writeBlob(6, m_channelMarker.serialize());
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, ui->gain->value());
 	s.writeString(10, m_channelMarker.getUDPAddress());
@@ -134,6 +134,9 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 
 		d.readBlob(1, &bytetmp);
 		restoreState(bytetmp);
+        d.readBlob(6, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
+
 		d.readS32(2, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readS32(3, &s32tmp, UDPSrc::FormatS16LE);
@@ -216,6 +219,7 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
+		displaySettings();
 		applySettingsImmediate(true);
 		applySettings(true);
 		return true;
