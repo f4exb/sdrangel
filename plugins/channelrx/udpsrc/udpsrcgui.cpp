@@ -99,7 +99,6 @@ QByteArray UDPSrcGUI::serialize() const
 	s.writeS32(6, m_channelMarker.getUDPSendPort());
 	s.writeBlob(7, ui->spectrumGUI->serialize());
 	s.writeS32(8, ui->gain->value());
-	s.writeS32(9, m_channelMarker.getCenterFrequency());
 	s.writeString(10, m_channelMarker.getUDPAddress());
 	s.writeBool(11, m_audioActive);
 	s.writeS32(12, (qint32)m_volume);
@@ -188,8 +187,6 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         d.readS32(8, &s32tmp, 10);
         ui->gain->setValue(s32tmp);
         ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
-		d.readS32(9, &s32tmp, 0);
-		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readString(10, &strtmp, "127.0.0.1");
 		m_channelMarker.setUDPAddress(strtmp);
 		d.readBool(11, &booltmp, false);
