@@ -188,7 +188,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
-    UDPSink<AudioSample> *m_udpBufferAudio;
+    UDPSink<qint16> *m_udpBufferAudio;
 
     static const int m_udpBlockSize;
 
@@ -246,18 +246,19 @@ private:
 
             Real attack = (m_squelchCount - 0.05f * m_running.m_audioSampleRate) / (0.05f * m_running.m_audioSampleRate);
             sample = demod * attack * 2048 * m_running.m_volume;
+            if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * 32768);
 
             m_squelchOpen = true;
         }
         else
         {
             sample = 0;
+            if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(0);
             m_squelchOpen = false;
         }
 
         m_audioBuffer[m_audioBufferFill].l = sample;
         m_audioBuffer[m_audioBufferFill].r = sample;
-        if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
         ++m_audioBufferFill;
 
         if (m_audioBufferFill >= m_audioBuffer.size())

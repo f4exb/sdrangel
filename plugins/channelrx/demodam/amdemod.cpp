@@ -60,7 +60,7 @@ AMDemod::AMDemod() :
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_config.m_udpPort);
 }
 
 AMDemod::~AMDemod()
