@@ -126,10 +126,7 @@ QByteArray BFMDemodGUI::serialize() const
 	s.writeBlob(8, ui->spectrumGUI->serialize());
 	s.writeBool(9, ui->audioStereo->isChecked());
 	s.writeBool(10, ui->lsbStereo->isChecked());
-    s.writeString(11, m_channelMarker.getTitle());
-    s.writeString(12, m_channelMarker.getUDPAddress());
-    s.writeU32(13, (quint32) m_channelMarker.getUDPReceivePort());
-    s.writeU32(14, (quint32) m_channelMarker.getUDPSendPort());
+	s.writeBlob(11, m_channelMarker.serialize());
 	return s.final();
 }
 
@@ -154,6 +151,9 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		blockApplySettings(true);
 	    m_channelMarker.blockSignals(true);
 
+        d.readBlob(11, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
+
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
 
@@ -171,11 +171,10 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		d.readS32(5, &tmp, -40);
 		ui->squelch->setValue(tmp);
 
-		/*
 		if(d.readU32(7, &u32tmp))
 		{
 			m_channelMarker.setColor(u32tmp);
-		}*/
+		}
 
 		d.readBlob(8, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
@@ -186,15 +185,7 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 		d.readBool(10, &booltmp, false);
 		ui->lsbStereo->setChecked(booltmp);
 
-        d.readString(11, &strtmp, "Broadcast FM Demod");
-        m_channelMarker.setTitle(strtmp);
         this->setWindowTitle(m_channelMarker.getTitle());
-        d.readString(12, &strtmp, "127.0.0.1");
-        m_channelMarker.setUDPAddress(strtmp);
-        d.readU32(13, &u32tmp, 9999);
-        m_channelMarker.setUDPReceivePort(u32tmp);
-        d.readU32(14, &u32tmp, 9999);
-        m_channelMarker.setUDPSendPort(u32tmp);
 
 		displayUDPAddress();
 
