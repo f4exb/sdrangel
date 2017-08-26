@@ -84,13 +84,10 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeS32(3, m_sampleFormat);
     s.writeReal(4, m_inputSampleRate);
     s.writeReal(5, m_rfBandwidth);
-    s.writeS32(6, m_channelMarker.getUDPReceivePort());
+    s.writeBlob(6, m_channelMarker.serialize());
     s.writeBlob(7, ui->spectrumGUI->serialize());
-    s.writeString(9, m_channelMarker.getUDPAddress());
     s.writeS32(10, ui->gainOut->value());
     s.writeS32(11, m_fmDeviation);
-    s.writeU32(12, m_channelMarker.getColor().rgb());
-    s.writeString(13, m_channelMarker.getTitle());
     s.writeS32(14, ui->squelch->value());
     s.writeS32(15, ui->squelchGate->value());
     s.writeBool(16, ui->autoRWBalance->isChecked());
@@ -122,6 +119,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
 
         d.readBlob(1, &bytetmp);
         restoreState(bytetmp);
+        d.readBlob(6, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
+
         d.readS32(2, &s32tmp, 0);
         m_channelMarker.setCenterFrequency(s32tmp);
 
@@ -135,28 +135,13 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
         d.readReal(5, &realtmp, 32000);
         ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
-        d.readS32(6, &s32tmp, 9999);
-        if ((s32tmp > 1024) && (s32tmp < 65536)) {
-            m_channelMarker.setUDPReceivePort(s32tmp);
-        } else {
-            m_channelMarker.setUDPReceivePort(9999);
-        }
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
-        d.readString(9, &strtmp, "127.0.0.1");
-        m_channelMarker.setUDPAddress(strtmp);
         d.readS32(10, &s32tmp, 10);
         ui->gainOut->setValue(s32tmp);
         ui->gainOutText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
-
-        d.readU32(12, &u32tmp, Qt::green);
-        m_channelMarker.setColor(u32tmp);
-        d.readString(13, &strtmp, "UDP Sample Sink");
-        m_channelMarker.setTitle(strtmp);
-        this->setWindowTitle(m_channelMarker.getTitle());
-
         d.readS32(14, &s32tmp, -60);
         ui->squelch->setValue(s32tmp);
         ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
