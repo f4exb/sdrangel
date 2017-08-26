@@ -86,9 +86,9 @@ QByteArray AMDemodGUI::serialize() const
 	s.writeS32(2, ui->rfBW->value());
 	s.writeS32(4, ui->volume->value());
 	s.writeS32(5, ui->squelch->value());
+    s.writeBlob(6, m_channelMarker.serialize());
 	s.writeU32(7, m_channelMarker.getColor().rgb());
 	s.writeBool(8, ui->bandpassEnable->isChecked());
-	s.writeBlob(9, m_channelMarker.serialize());
 	return s.final();
 }
 
@@ -113,7 +113,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
 
-        d.readBlob(9, &bytetmp);
+        d.readBlob(6, &bytetmp);
         m_channelMarker.deserialize(bytetmp);
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
@@ -130,16 +130,8 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         }
         d.readBool(8, &boolTmp, false);
         ui->bandpassEnable->setChecked(boolTmp);
-        d.readString(9, &strtmp, "AM Demodulator");
-        m_channelMarker.setTitle(strtmp);
-        this->setWindowTitle(m_channelMarker.getTitle());
-        d.readString(10, &strtmp, "127.0.0.1");
-        m_channelMarker.setUDPAddress(strtmp);
-        d.readU32(11, &u32tmp, 9999);
-        m_channelMarker.setUDPReceivePort(u32tmp);
-        d.readU32(12, &u32tmp, 9999);
-        m_channelMarker.setUDPSendPort(u32tmp);
 
+        this->setWindowTitle(m_channelMarker.getTitle());
         displayUDPAddress();
 
         blockApplySettings(false);
