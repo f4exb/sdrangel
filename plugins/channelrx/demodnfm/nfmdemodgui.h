@@ -40,7 +40,7 @@ public:
 	static const QString m_channelID;
 
 private slots:
-	void viewChanged();
+	void channelMarkerChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_currentIndexChanged(int index);
 	void on_afBW_valueChanged(int value);
@@ -52,7 +52,7 @@ private slots:
 	void on_ctcssOn_toggled(bool checked);
 	void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
+	void onMenuDialogCalled(const QPoint& p);
 	void tick();
 
 private:
@@ -80,6 +80,7 @@ private:
 
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+    void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

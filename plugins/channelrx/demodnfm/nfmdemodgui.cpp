@@ -12,7 +12,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 #include "nfmdemod.h"
@@ -90,6 +90,7 @@ QByteArray NFMDemodGUI::serialize() const
 	s.writeBool(10, ui->audioMute->isChecked());
 	s.writeS32(11, ui->squelchGate->value());
 	s.writeBool(12, ui->deltaSquelch->isChecked());
+	s.writeBlob(13, m_channelMarker.serialize());
 	return s.final();
 }
 
@@ -112,6 +113,9 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
+
+        d.readBlob(13, &bytetmp);
+        m_channelMarker.deserialize(bytetmp);
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
@@ -140,6 +144,9 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
         d.readBool(12, &boolTmp, false);
         ui->deltaSquelch->setChecked(boolTmp);
 
+        this->setWindowTitle(m_channelMarker.getTitle());
+        displayUDPAddress();
+
 		blockApplySettings(false);
 		m_channelMarker.blockSignals(false);
 
@@ -158,9 +165,11 @@ bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 	return false;
 }
 
-void NFMDemodGUI::viewChanged()
+void NFMDemodGUI::channelMarkerChanged()
 {
-	applySettings();
+    this->setWindowTitle(m_channelMarker.getTitle());
+    displayUDPAddress();
+    applySettings();
 }
 
 void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -254,14 +263,11 @@ void NFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool r
 	*/
 }
 
-void NFMDemodGUI::onMenuDoubleClicked()
+void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if (!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -286,7 +292,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmDemod = new NFMDemod();
 	m_nfmDemod->registerGUI(this);
@@ -319,8 +325,13 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+    m_channelMarker.setTitle("NFM Demodulator");
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.setVisible(true);
+    setTitleColor(m_channelMarker.getColor());
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
@@ -369,6 +380,11 @@ void NFMDemodGUI::applySettings(bool force)
 			ui->audioMute->isChecked(),
 			force);
 	}
+}
+
+void NFMDemodGUI::displayUDPAddress()
+{
+    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
 }
 
 void NFMDemodGUI::leaveEvent(QEvent*)
