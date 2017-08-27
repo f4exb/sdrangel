@@ -28,11 +28,11 @@ Total power in dB relative to a +/- 1.0 amplitude signal sent in the channel.
 
 Use this button to switch off the RF on the channel. The background of the button lits in green when a signal can be sent.
 
-<h3>5: UDP address and ports</h3>
+<h3>5: UDP address and port</h3>
 
 These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
 
-The display is in the format `address:audio port/data port` 
+The display is in the format `address:data port` 
 
 <h3>6: Input sample rate</h3>
 
@@ -43,13 +43,10 @@ Sample rate in samples per second of the signal that is recveived on UDP. The ac
 Combo box to specify the type of samples that are received and sent in the channel.
 
   - `S16LE I/Q`: Raw I/Q samples on signed 16 bits integers with Little Endian layout. Use it with software that sends I/Q data as output like GNUradio with the `UDP source` block. The output is interleaved I and Q samples. It can also match the UDP source plugin with the same `S16LE I/Q` format and can be used for linear transposition.
-  - `S16LE NFM`: receives 16 bits signed integers on 2 channels (stereo) with Little Endian layout. However it will send a mono signal with narrow bandwidth FM modulation. There is no DC block so it can be used with modulating signals where the DC component is important like digital signals.
-  - `S16LE NFM Mono`: This is the same as above but with a mono (1 channel) input.
-  - `S16LE USB`: Same as `S16LE I/Q` but retains only the upper half band.
-  - `S16LE LSB`: Same as `S16LE I/Q` but retains only the lower half band.
-  - `S16LE LSB Mono`: Takes a mono (1 channel) AF signal and produces a LSB modulated signal.
-  - `S16LE USB Mono`: Takes a mono (1 channel) AF signal and produces a USB modulated signal.
-  - `S16LE AM Mono`: Takes a mono (1 channel) AF signal and produces a AM modulated signal.
+  - `S16LE NFM`: receives 16 bits signed integers on 1 (mono) or 2 (stereo) channels with Little Endian layout. It produces a mono signal with narrow bandwidth FM modulation. Stereo input channels are mixed before modulation. There is no DC block so it can be used with modulating signals where the DC component is important like digital signals.
+  - `S16LE LSB`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a LSB modulated signal. Stereo input channels are mixed before modulation.
+  - `S16LE USB`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a USB modulated signal. Stereo input channels are mixed before modulation.
+  - `S16LE AM`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a AM modulated signal. Stereo input channels are mixed before modulation.
 
 <h3>8: Mono/Stereo input</h3>
 
