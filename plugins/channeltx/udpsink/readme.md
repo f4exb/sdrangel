@@ -28,7 +28,17 @@ Total power in dB relative to a +/- 1.0 amplitude signal sent in the channel.
 
 Use this button to switch off the RF on the channel. The background of the button lits in green when a signal can be sent.
 
-<h3>5: Type of samples</h3>
+<h3>5: UDP address and ports</h3>
+
+These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
+
+The display is in the format `address:audio port/data port` 
+
+<h3>6: Input sample rate</h3>
+
+Sample rate in samples per second of the signal that is recveived on UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
+
+<h3>7: Type of samples</h3>
 
 Combo box to specify the type of samples that are received and sent in the channel.
 
@@ -40,19 +50,11 @@ Combo box to specify the type of samples that are received and sent in the chann
   - `S16LE LSB Mono`: Takes a mono (1 channel) AF signal and produces a LSB modulated signal.
   - `S16LE USB Mono`: Takes a mono (1 channel) AF signal and produces a USB modulated signal.
   - `S16LE AM Mono`: Takes a mono (1 channel) AF signal and produces a AM modulated signal.
+
+<h3>8: Mono/Stereo input</h3>
+
+This toggles switches between 1 channel (mono) and 2 channels (stereo) input samples format.
   
-<h3>6: Input sample rate</h3>
-
-Sample rate in samples per second of the signal that is recveived on UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
-
-<h3>7: Local IP address</h3>
-
-IP address of the local interface address that listens to UDP samples 
-
-<h3>8: Local data port</h3>
-
-UDP port number that listens to samples 
-
 <h3>9: Output signal bandwidth</h3>
 
 The signal is bandpass filtered to this bandwidth (zero frequency centered) before being sent out in the channel. In SSB modes only half of the filter is used (LSB: lower, USB: upper). Thus to send a signal with 3000 Hz bandwidth a bandwidth of 6000 Hz must be selected. In addition in SSB modes a 300 Hz highpass filter is applied.
@@ -89,9 +91,13 @@ The button sets the delay after which a signal constantly above the squelch thre
 
 The gain (15) should be adjusted so that the peak amplitude (small red vertical bar) never exceeds 100%. Above 100% the signal is clipper which results in distorsion. 
 
-<h3>15: Gain</h3>
+<h3>15: Input and output Gains</h3>
 
-This gain is applied to the samples just before they are filtered and sent int the channel. The gain value appears at the right of the slider.
+Input ("Gi") and output ("Go") gains are placed next to each other.
+
+The input gain is applied to samples received from UDP. The gain value appears at the right of the button.
+
+The output gain is applied to the samples just before they are filtered and sent int the channel. The gain value appears at the right of the button.
 
 <h3>16: Input buffer gauge</h3>
 
@@ -105,7 +111,11 @@ The buffer consists in 512 bytes frames so that a normalized UDP block can be pl
 
 Resets the read and write pointers at their ideal position that is read at start and write at the middle of the buffer. This may cause occasional mess-up with the modulating signal until the read pointer reaches the middle of the buffer.
 
-<h3>16: Spectrum display</h3>
+<h3>18: Automatic R/W balance toggle</h3>
+
+This button enables or disables the automatic read / write pointers balance compensation so that they are always about half a buffer apart. The compensation adjust the sample rate around nominal input sample rate and can cause some tone wiggle on very narrowband modulations. Therefore you can switch it off at the expense of a small buffer section overlap or drop. With an input from the DSD demodulator it can be better to switch it off since the input samples flow is discontinuous and the automatic compensation may not have the time to adjust.
+
+<h3>19: Spectrum display</h3>
 
 This is the spectrum display of the channel signal before filtering. Please refer to the Spectrum display description for details. 
 
