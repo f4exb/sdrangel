@@ -7,6 +7,7 @@ copy devices\%1\devices.dll %2
 copy mbelib\%1\mbelib.dll %2
 copy dsdcc\%1\dsdcc.dll %2
 copy serialdv\%1\serialdv.dll %2
+copy httpserver\%1\httpserver.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
