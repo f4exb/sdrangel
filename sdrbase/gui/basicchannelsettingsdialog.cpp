@@ -16,6 +16,7 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     ui->udpAddress->setText(m_channelMarker->getUDPAddress());
     ui->udpPortReceive->setText(QString("%1").arg(m_channelMarker->getUDPReceivePort()));
     ui->udpPortSend->setText(QString("%1").arg(m_channelMarker->getUDPSendPort()));
+    ui->fScaleDisplayType->setCurrentIndex((int) m_channelMarker->getFrequencyScaleDisplayType());
     paintColor();
 }
 
