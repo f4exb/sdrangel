@@ -12,13 +12,19 @@ This plugin can be used to listen to a narrowband amplitude modulated signal. "N
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-<h3>3: Channel power</h3>
+<h3>2: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>4: Audio mute</h3>
+<h3>3: Audio mute</h3>
 
 Use this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+
+<h3>4: UDP output</h3>
+
+Copies audio output to UDP. Audio is set at fixed level and is muted by the mute button (13) and squelch (9) is also applied. Output is mono S16LE samples. 
+
+UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
 
 <h3>5: Level meter in dB</h3>
 

@@ -228,6 +228,100 @@ This area shows the control GUIs of the channels curently active for the device.
 
 Details about the GUIs can be found in the channel plugins documentation which consits of a readme.md file in each of the channel plugins folder (done partially).
 
+With these channels: AM demod, BFM demod, DSD demod, NFM demod, UDP source, UDP sink some common basic settings can be set with a popup dialog. This dialog is opened by clicking on the small grey square on the top left of the channel window. The settings are as follows:
+
+![Basic channel settings](../doc/img/BasicChannelSettings.png)
+
+<h4>6.1: Window title</h4>
+
+Changes the channel window title
+
+<h4>6.2: Channel color</h4>
+
+Changes the color of the window title bar and spectrum overlay. To change the color click on the color square to open a color chooser dialog. The hex rgb value is displayed next to the color square.
+
+<h4>6.3: Frequency scale display type</h4>
+
+When the mouse is over the channel window or over the central line in the spectrum a channel parameter is displayed on the frequency scale. This parameter can be:
+
+  - Freq: channel absolute center frequency
+  - Title: channel window title
+  - AdSnd: UDP address and send port
+  - AdRcv: UDP address and receive port
+  
+<h4>6.4,5,6: UDP address (4) receive port (5) and send port (6)</h4>
+
+Some channels can exchange data over UDP. Depending on the channel the data is the following:
+
+<table>
+  <tr>
+    <th>Channel</th>
+    <th>Data sent</th>
+    <th>Type</th>
+    <th>Data received</th>
+    <th>Type</th>
+    <th>Address</th>
+  </tr>
+  <tr>
+    <td>AM demod</td>
+    <td>Audio</td>
+    <td>Mono</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>
+  <tr>
+    <td>BFM demod</td>
+    <td>Audio</td>
+    <td>Stereo</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>  
+  <tr>
+    <td>DSD demod</td>
+    <td>Audio</td>
+    <td>Stereo</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>  
+  <tr>
+    <td>NFM demod</td>
+    <td>Audio</td>
+    <td>Mono</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>
+  <tr>
+    <td>UDP source</td>
+    <td>Audio, I/Q</td>
+    <td>Mono, Stereo</td>
+    <td>Audio</td>
+    <td>Mono</td>
+    <td>Remote</td>
+  </tr>
+  <tr>
+    <td>UDP sink</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Audio, I/Q</td>
+    <td>Mono, Stereo</td>
+    <td>Local</td>
+  </tr>
+</table>
+  
+Data type is S16LE 1 channel (Mono) or 2 channels (Stereo or I/Q)
+
+<h4>6.7: Validate and exit dialog</h4>
+
+Validates the data (saves it in the channel marker object) and exits the dialog
+
+<h4>6.8: Cancel changes and exit dialog</h4>
+
+Do not make any changes and exit dialog
+
 <h3>7. Spectrum from device</h3>
 
 This shows the spectrum in the passband returned from the sampling device possibly after decimation. The actual sample rate is shown in the device control at the left of the frequency display (2.3)
