@@ -17,18 +17,29 @@
 #include <stdio.h>
 #include "devicehackrf.h"
 
+DeviceHackRF::DeviceHackRF()
+{
+    hackrf_error rc = (hackrf_error) hackrf_init();
+
+    if (rc != HACKRF_SUCCESS) {
+        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
+    }
+}
+
+DeviceHackRF::~DeviceHackRF()
+{
+    hackrf_exit();
+}
+
+DeviceHackRF& DeviceHackRF::instance()
+{
+    static DeviceHackRF inst;
+    return inst;
+}
+
 hackrf_device *DeviceHackRF::open_hackrf(int sequence)
 {
-    hackrf_error rc;
-
-    // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-    rc = (hackrf_error) hackrf_init();
-
-    if (rc != HACKRF_SUCCESS)
-    {
-        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
-        return 0;
-    }
+    instance();
 
     return open_hackrf_from_sequence(sequence);
 }
@@ -36,17 +47,9 @@ hackrf_device *DeviceHackRF::open_hackrf(int sequence)
 hackrf_device *DeviceHackRF::open_hackrf(const char * const serial)
 {
     hackrf_error rc;
-
-    // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
-    rc = (hackrf_error) hackrf_init();
-
-    if (rc != HACKRF_SUCCESS)
-    {
-        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
-        return 0;
-    }
-
     hackrf_device *hackrf_ptr;
+
+    instance();
 
     rc = (hackrf_error) hackrf_open_by_serial(serial, &hackrf_ptr);
 
@@ -65,6 +68,8 @@ hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
     hackrf_device_list_t *hackrf_devices = hackrf_device_list();
     hackrf_device *hackrf_ptr;
     hackrf_error rc;
+
+    instance();
 
     rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
 

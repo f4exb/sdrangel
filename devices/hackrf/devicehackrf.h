@@ -22,8 +22,14 @@
 class DeviceHackRF
 {
 public:
+    static DeviceHackRF& instance();
     static hackrf_device *open_hackrf(int sequence);
     static hackrf_device *open_hackrf(const char * const serial);
+protected:
+    DeviceHackRF();
+    DeviceHackRF(const DeviceHackRF&) {}
+    DeviceHackRF& operator=(const DeviceHackRF& other __attribute__((unused))) { return *this; }
+    ~DeviceHackRF();
 private:
     static hackrf_device *open_hackrf_from_sequence(int sequence);
 };

@@ -56,12 +56,13 @@ void HackRFInputPlugin::initPlugin(PluginAPI* pluginAPI)
 
 PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 {
-	hackrf_error rc = (hackrf_error) hackrf_init();
-
-	if (rc != HACKRF_SUCCESS)
-	{
-		qCritical("HackRFPlugin::SampleSourceDevices: failed to initiate HackRF library: %s", hackrf_error_name(rc));
-	}
+    DeviceHackRF::instance();
+//	hackrf_error rc = (hackrf_error) hackrf_init();
+//
+//	if (rc != HACKRF_SUCCESS)
+//	{
+//		qCritical("HackRFPlugin::SampleSourceDevices: failed to initiate HackRF library: %s", hackrf_error_name(rc));
+//	}
 
 	SamplingDevices result;
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
@@ -71,7 +72,7 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 
 	for (i=0; i < hackrf_devices->devicecount; i++)
 	{
-		rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, i, &hackrf_ptr);
+	    hackrf_error rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, i, &hackrf_ptr);
 
 		if (rc == HACKRF_SUCCESS)
 		{
@@ -110,8 +111,8 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 	}
 
 	hackrf_device_list_free(hackrf_devices);
-	rc = (hackrf_error) hackrf_exit();
-	qDebug("HackRFPlugin::enumSampleSources: hackrf_exit: %s", hackrf_error_name(rc));
+//	rc = (hackrf_error) hackrf_exit();
+//	qDebug("HackRFPlugin::enumSampleSources: hackrf_exit: %s", hackrf_error_name(rc));
 
 	return result;
 }
