@@ -115,7 +115,6 @@ private:
 	typedef QList<SamplingDevice> SamplingDevices;
 
 	PluginAPI m_pluginAPI;
-	MainWindow* m_mainWindow;
 	Plugins m_plugins;
 
 	PluginAPI::ChannelRegistrations m_rxChannelRegistrations; //!< Channel plugins register here
