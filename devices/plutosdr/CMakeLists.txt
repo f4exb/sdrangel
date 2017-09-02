@@ -3,11 +3,13 @@ project(plutosdrdevice)
 set (CMAKE_CXX_STANDARD 11)
 
 set(plutosdrdevice_SOURCES
+    deviceplutosdr.cpp
     deviceplutosdrbox.cpp
     deviceplutosdrscan.cpp
 )
 
 set(plutosdrdevice_HEADERS
+    deviceplutosdr.h
     deviceplutsdrobox.h
     deviceplutosdrscan.h
 )

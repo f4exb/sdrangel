@@ -14,36 +14,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRSCAN_H_
-#define DEVICES_PLUTOSDR_DEVICEPLUTOSDRSCAN_H_
+#ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDR_H_
+#define DEVICES_PLUTOSDR_DEVICEPLUTOSDR_H_
 
-#include <string>
-#include <vector>
-#include <map>
+#include "deviceplutosdrscan.h"
+#include "deviceplutosdrbox.h"
 
-class DevicePlutoSDRScan
+class DevicePlutoSDR
 {
 public:
-    struct DeviceScan
-    {
-        std::string m_name;
-        std::string m_serial;
-        std::string m_uri;
-    };
+    static DevicePlutoSDR& instance();
+    void scan() { m_scan.scan(); }
+    void getSerials(std::vector<std::string>& serials) const { m_scan.getSerials(serials); }
+    int getNbDevices() const { return m_scan.getNbDevices(); }
+    const std::string* getURIAt(unsigned int index) const { return m_scan.getURIAt(index); }
+    const std::string* getSerialAt(unsigned int index) const { return m_scan.getSerialAt(index); }
+    DevicePlutoSDRBox* getDeviceFromURI(const std::string& uri);
+    DevicePlutoSDRBox* getDeviceFromSerial(const std::string& serial);
 
-    void scan();
-    int getNbDevices() const { return m_scans.size(); }
-    const std::string* getURIAt(unsigned int index) const;
-    const std::string* getSerialAt(unsigned int index) const ;
-    const std::string* getURIFromSerial(const std::string& serial) const;
-    void getSerials(std::vector<std::string>& serials) const;
+protected:
+    DevicePlutoSDR();
+    ~DevicePlutoSDR();
 
 private:
-    std::vector<DeviceScan> m_scans;
-    std::map<std::string, DeviceScan*> m_serialMap;
-    std::map<std::string, DeviceScan*> m_urilMap;
+    DevicePlutoSDRScan m_scan;
 };
 
-
-
-#endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDRSCAN_H_ */
+#endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDR_H_ */
