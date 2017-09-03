@@ -89,6 +89,7 @@ SOURCES += mainwindow.cpp\
         dsp/spectrumvis.cpp\
         dsp/threadedbasebandsamplesink.cpp\
         dsp/threadedbasebandsamplesource.cpp\
+        dsp/wfir.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
         gui/basicchannelsettingswidget.cpp\
@@ -196,6 +197,7 @@ HEADERS  += mainwindow.h\
         dsp/spectrumvis.h\
         dsp/threadedbasebandsamplesink.h\
         dsp/threadedbasebandsamplesource.h\
+        dsp/wfir.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
         gui/audiodialog.h\

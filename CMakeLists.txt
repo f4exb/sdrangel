@@ -136,6 +136,7 @@ set(sdrbase_SOURCES
     sdrbase/dsp/spectrumvis.cpp
     sdrbase/dsp/threadedbasebandsamplesink.cpp
     sdrbase/dsp/threadedbasebandsamplesource.cpp
+    sdrbase/dsp/wfir.cpp
 
     sdrbase/gui/aboutdialog.cpp
     sdrbase/gui/addpresetdialog.cpp
@@ -257,6 +258,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/spectrumvis.h
     sdrbase/dsp/threadedbasebandsamplesink.h
     sdrbase/dsp/threadedbasebandsamplesource.h
+    sdrbase/dsp/wfir.h
 
     sdrbase/gui/aboutdialog.h
     sdrbase/gui/addpresetdialog.h
