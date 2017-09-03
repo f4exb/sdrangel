@@ -35,7 +35,7 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow),
     m_sampleSinkSequence(0),
-    m_sampleSinkPluginGUI(0),
+    m_sampleSinkPluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false)
 {
@@ -170,15 +170,15 @@ void DeviceSinkAPI::setSampleSinkSequence(int sequence)
     m_deviceSinkEngine->setSinkSequence(sequence);
 }
 
-void DeviceSinkAPI::setSampleSinkPluginGUI(PluginInstanceUI *gui)
+void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)
 {
-    if (m_sampleSinkPluginGUI != 0)
+    if (m_sampleSinkPluginInstanceUI != 0)
     {
-        m_sampleSinkPluginGUI->destroy();
+        m_sampleSinkPluginInstanceUI->destroy();
         m_sampleSinkId.clear();
     }
 
-    m_sampleSinkPluginGUI = gui;
+    m_sampleSinkPluginInstanceUI = gui;
 }
 
 void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
@@ -218,12 +218,12 @@ void DeviceSinkAPI::freeAll()
     }
 
 
-    if(m_sampleSinkPluginGUI != 0)
+    if(m_sampleSinkPluginInstanceUI != 0)
     {
         qDebug("DeviceSinkAPI::freeAll: destroying m_sampleSourcePluginGUI");
         m_deviceSinkEngine->setSink(0);
-        m_sampleSinkPluginGUI->destroy();
-        m_sampleSinkPluginGUI = 0;
+        m_sampleSinkPluginInstanceUI->destroy();
+        m_sampleSinkPluginInstanceUI = 0;
         m_sampleSinkId.clear();
     }
 }
@@ -238,18 +238,18 @@ void DeviceSinkAPI::loadSinkSettings(const Preset* preset)
     {
         qDebug("DeviceSinkAPI::loadSinkSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
-        if(m_sampleSinkPluginGUI != 0)
+        if(m_sampleSinkPluginInstanceUI != 0)
         {
             const QByteArray* sourceConfig = preset->findBestDeviceConfig(m_sampleSinkId, m_sampleSinkSerial, m_sampleSinkSequence);
 
             if (sourceConfig != 0)
             {
                 qDebug("DeviceSinkAPI::loadSinkSettings: deserializing sink: %s", qPrintable(m_sampleSinkId));
-                m_sampleSinkPluginGUI->deserialize(*sourceConfig);
+                m_sampleSinkPluginInstanceUI->deserialize(*sourceConfig);
             }
 
             qint64 centerFrequency = preset->getCenterFrequency();
-            m_sampleSinkPluginGUI->setCenterFrequency(centerFrequency);
+            m_sampleSinkPluginInstanceUI->setCenterFrequency(centerFrequency);
         }
     }
 }
@@ -262,11 +262,11 @@ void DeviceSinkAPI::saveSinkSettings(Preset* preset)
     }
     else
     {
-        if(m_sampleSinkPluginGUI != NULL)
+        if(m_sampleSinkPluginInstanceUI != NULL)
         {
-            qDebug("DeviceSinkAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSinkPluginGUI->getName()));
-            preset->addOrUpdateDeviceConfig(m_sampleSinkId, m_sampleSinkSerial, m_sampleSinkSequence, m_sampleSinkPluginGUI->serialize());
-            preset->setCenterFrequency(m_sampleSinkPluginGUI->getCenterFrequency());
+            qDebug("DeviceSinkAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSinkPluginInstanceUI->getName()));
+            preset->addOrUpdateDeviceConfig(m_sampleSinkId, m_sampleSinkSerial, m_sampleSinkSequence, m_sampleSinkPluginInstanceUI->serialize());
+            preset->setCenterFrequency(m_sampleSinkPluginInstanceUI->getCenterFrequency());
         }
         else
         {

@@ -116,7 +116,7 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceUI* HackRFOutputPlugin::createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* HackRFOutputPlugin::createSampleSinkPluginInstanceUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
 	if(sinkId == m_deviceTypeID)
 	{

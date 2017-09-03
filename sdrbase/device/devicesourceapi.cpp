@@ -35,7 +35,7 @@ DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow),
     m_sampleSourceSequence(0),
-    m_sampleSourcePluginGUI(0),
+    m_sampleSourcePluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false)
 {
@@ -161,15 +161,15 @@ void DeviceSourceAPI::setSampleSourceSequence(int sequence)
     m_deviceSourceEngine->setSourceSequence(sequence);
 }
 
-void DeviceSourceAPI::setSampleSourcePluginGUI(PluginInstanceUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginInstanceUI(PluginInstanceUI *gui)
 {
-    if (m_sampleSourcePluginGUI != 0)
+    if (m_sampleSourcePluginInstanceUI != 0)
     {
-        m_sampleSourcePluginGUI->destroy();
+        m_sampleSourcePluginInstanceUI->destroy();
         m_sampleSourceId.clear();
     }
 
-    m_sampleSourcePluginGUI = gui;
+    m_sampleSourcePluginInstanceUI = gui;
 }
 
 void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
@@ -215,12 +215,12 @@ void DeviceSourceAPI::freeAll()
     }
 
 
-    if(m_sampleSourcePluginGUI != 0)
+    if(m_sampleSourcePluginInstanceUI != 0)
     {
         qDebug("DeviceSourceAPI::freeAll: destroying m_sampleSourcePluginGUI");
         m_deviceSourceEngine->setSource(0);
-        m_sampleSourcePluginGUI->destroy();
-        m_sampleSourcePluginGUI = 0;
+        m_sampleSourcePluginInstanceUI->destroy();
+        m_sampleSourcePluginInstanceUI = 0;
         m_sampleSourceId.clear();
     }
 }
@@ -231,18 +231,18 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
     {
         qDebug("DeviceSourceAPI::loadSourceSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
-        if(m_sampleSourcePluginGUI != 0)
+        if(m_sampleSourcePluginInstanceUI != 0)
         {
             const QByteArray* sourceConfig = preset->findBestDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
 
             if (sourceConfig != 0)
             {
                 qDebug("DeviceSourceAPI::loadSettings: deserializing source %s", qPrintable(m_sampleSourceId));
-                m_sampleSourcePluginGUI->deserialize(*sourceConfig);
+                m_sampleSourcePluginInstanceUI->deserialize(*sourceConfig);
             }
 
             qint64 centerFrequency = preset->getCenterFrequency();
-            m_sampleSourcePluginGUI->setCenterFrequency(centerFrequency);
+            m_sampleSourcePluginInstanceUI->setCenterFrequency(centerFrequency);
         }
     }
     else
@@ -255,11 +255,11 @@ void DeviceSourceAPI::saveSourceSettings(Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        if(m_sampleSourcePluginGUI != NULL)
+        if(m_sampleSourcePluginInstanceUI != NULL)
         {
-            qDebug("DeviceSourceAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSourcePluginGUI->getName()));
-            preset->addOrUpdateDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginGUI->serialize());
-            preset->setCenterFrequency(m_sampleSourcePluginGUI->getCenterFrequency());
+            qDebug("DeviceSourceAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSourcePluginInstanceUI->getName()));
+            preset->addOrUpdateDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginInstanceUI->serialize());
+            preset->setCenterFrequency(m_sampleSourcePluginInstanceUI->getCenterFrequency());
         }
         else
         {

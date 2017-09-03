@@ -77,7 +77,7 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceUI* BladerfOutputPlugin::createSampleSinkPluginGUI(const QString& sinkId,QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* BladerfOutputPlugin::createSampleSinkPluginInstanceUI(const QString& sinkId,QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
 	if(sinkId == m_deviceTypeID)
 	{

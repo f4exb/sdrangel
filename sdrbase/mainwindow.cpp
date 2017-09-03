@@ -798,7 +798,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSourceAPI->stopAcquisition();
 
-        deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(0); // deletes old GUI and input object
+        deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(0); // deletes old UI and input object
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
 
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
@@ -840,9 +840,9 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         // constructs new GUI and input object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
+        PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
 
-        deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(pluginGUI);
+        deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
         deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
 
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
@@ -868,7 +868,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSinkAPI->stopGeneration();
 
-        deviceUI->m_deviceSinkAPI->setSampleSinkPluginGUI(0); // deletes old GUI and input object
+        deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(0); // deletes old GUI and input object
         deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
 
         m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
@@ -910,9 +910,9 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         // constructs new GUI and output object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSinkDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
+        PluginInstanceUI *pluginUI = sampleSinkDevice->m_plugin->createSampleSinkPluginInstanceUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
 
-        deviceUI->m_deviceSinkAPI->setSampleSinkPluginGUI(pluginGUI);
+        deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
         deviceUI->m_deviceSinkAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);
 
         deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings

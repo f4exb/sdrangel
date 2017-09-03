@@ -96,7 +96,7 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
     return result;
 }
 
-PluginInstanceUI* LimeSDROutputPlugin::createSampleSinkPluginGUI(const QString& sinkId,QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceUI(const QString& sinkId,QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {

@@ -70,7 +70,7 @@ public:
     void setSampleSourceId(const QString& id);
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceSequence(int sequence);
-    void setSampleSourcePluginGUI(PluginInstanceUI *gui);
+    void setSampleSourcePluginInstanceUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
@@ -142,7 +142,7 @@ protected:
     QString m_sampleSourceId;
     QString m_sampleSourceSerial;
     uint32_t m_sampleSourceSequence;
-    PluginInstanceUI* m_sampleSourcePluginGUI;
+    PluginInstanceUI* m_sampleSourcePluginInstanceUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
 

@@ -69,7 +69,7 @@ public:
     void setSampleSinkId(const QString& id);
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkSequence(int sequence);
-    void setSampleSinkPluginGUI(PluginInstanceUI *gui);
+    void setSampleSinkPluginInstanceUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSinkId() const { return m_sampleSinkId; }
@@ -141,7 +141,7 @@ protected:
     QString m_sampleSinkId;
     QString m_sampleSinkSerial;
     uint32_t m_sampleSinkSequence;
-    PluginInstanceUI* m_sampleSinkPluginGUI;
+    PluginInstanceUI* m_sampleSinkPluginInstanceUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
 

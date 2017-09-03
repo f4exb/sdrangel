@@ -57,11 +57,11 @@ public:
 
 	// device source plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
-	virtual PluginInstanceUI* createSampleSourcePluginGUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
+	virtual PluginInstanceUI* createSampleSourcePluginInstanceUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
 
 	// device sink plugins only
 	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
-	virtual PluginInstanceUI* createSampleSinkPluginGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
+	virtual PluginInstanceUI* createSampleSinkPluginInstanceUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

@@ -158,7 +158,7 @@ The lifecycle of the GUI is controlled from the "Sampling Device Control" device
 Here is the relevant par ot the code (source side) in the `MainWindow::on_sampleSource_confirmClicked` method:
 
     deviceUI->m_deviceSourceAPI->stopAcquisition();
-    deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(0); // deletes old GUI and input object
+    deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(0); // deletes old UI and input object
     deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
     m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
     // add to buddies list
@@ -166,8 +166,8 @@ Here is the relevant par ot the code (source side) in the `MainWindow::on_sample
     // constructs new GUI and input object
     QWidget *gui;
     PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr; // lightweight representation of the device
-    PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
-    deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(pluginGUI);
+    PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
+    deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
     deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
     
 <h3>SISO and MIMO devices support</h3>
