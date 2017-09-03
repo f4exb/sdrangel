@@ -20,7 +20,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	virtual SamplingDevices enumSampleSources();
-	virtual PluginGUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
+	virtual PluginInstanceUI* createSampleSourcePluginGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

@@ -1,8 +1,8 @@
 #ifndef INCLUDE_WFMDEMODGUI_H
 #define INCLUDE_WFMDEMODGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
@@ -17,7 +17,7 @@ namespace Ui {
 	class WFMDemodGUI;
 }
 
-class WFMDemodGUI : public RollupWidget, public PluginGUI {
+class WFMDemodGUI : public RollupWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

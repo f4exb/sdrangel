@@ -37,7 +37,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	virtual SamplingDevices enumSampleSinks();
-	virtual PluginGUI* createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI);
+	virtual PluginInstanceUI* createSampleSinkPluginGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

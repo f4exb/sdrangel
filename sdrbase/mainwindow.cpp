@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstanceui.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -43,10 +45,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
-#include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
-#include "plugin/plugingui.h"
-
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
 
@@ -841,7 +840,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         // constructs new GUI and input object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginGUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
+        PluginInstanceUI *pluginGUI = sampleSourceDevice->m_plugin->createSampleSourcePluginGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
 
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginGUI(pluginGUI);
         deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
@@ -911,7 +910,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         // constructs new GUI and output object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSinkDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginGUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
+        PluginInstanceUI *pluginGUI = sampleSinkDevice->m_plugin->createSampleSinkPluginGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
 
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginGUI(pluginGUI);
         deviceUI->m_deviceSinkAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);

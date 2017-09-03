@@ -78,7 +78,7 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 	return result;
 }
 
-PluginGUI* BlderfInputPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* BlderfInputPlugin::createSampleSourcePluginGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

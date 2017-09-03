@@ -17,11 +17,11 @@
 #ifndef INCLUDE_FCDGUI_H
 #define INCLUDE_FCDGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
 #include "fcdproplusinput.h"
-#include "plugin/plugingui.h"
 
 class DeviceSourceAPI;
 class FileRecord;
@@ -30,7 +30,7 @@ namespace Ui {
 	class FCDProPlusGui;
 }
 
-class FCDProPlusGui : public QWidget, public PluginGUI {
+class FCDProPlusGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

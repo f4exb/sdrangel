@@ -33,7 +33,7 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(LoRaDemodGUI::m_channelID, this);
 }
 
-PluginGUI* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == LoRaDemodGUI::m_channelID)
 	{

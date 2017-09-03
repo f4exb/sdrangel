@@ -17,10 +17,10 @@
 #ifndef INCLUDE_BLADERFINPUTGUI_H
 #define INCLUDE_BLADERFINPUTGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "bladerfinput.h"
 
 class DeviceSourceAPI;
@@ -30,7 +30,7 @@ namespace Ui {
 	class BladerfInputGui;
 }
 
-class BladerfInputGui : public QWidget, public PluginGUI {
+class BladerfInputGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

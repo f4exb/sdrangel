@@ -18,8 +18,8 @@
 #ifndef INCLUDE_ATVDEMODGUI_H
 #define INCLUDE_ATVDEMODGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
@@ -36,7 +36,7 @@ namespace Ui
 	class ATVDemodGUI;
 }
 
-class ATVDemodGUI : public RollupWidget, public PluginGUI
+class ATVDemodGUI : public RollupWidget, public PluginInstanceUI
 {
 	Q_OBJECT
 

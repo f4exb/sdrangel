@@ -14,9 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <plugin/plugininstanceui.h>
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
-#include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
@@ -170,7 +170,7 @@ void DeviceSinkAPI::setSampleSinkSequence(int sequence)
     m_deviceSinkEngine->setSinkSequence(sequence);
 }
 
-void DeviceSinkAPI::setSampleSinkPluginGUI(PluginGUI *gui)
+void DeviceSinkAPI::setSampleSinkPluginGUI(PluginInstanceUI *gui)
 {
     if (m_sampleSinkPluginGUI != 0)
     {
@@ -181,13 +181,13 @@ void DeviceSinkAPI::setSampleSinkPluginGUI(PluginGUI *gui)
     m_sampleSinkPluginGUI = gui;
 }
 
-void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSinkAPI::removeChannelInstance(PluginGUI* pluginGUI)
+void DeviceSinkAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {

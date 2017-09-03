@@ -17,10 +17,9 @@
 #ifndef INCLUDE_BLADERFOUTPUTGUI_H
 #define INCLUDE_BLADERFOUTPUTGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
-
-#include "plugin/plugingui.h"
 
 #include "bladerfoutput.h"
 
@@ -32,7 +31,7 @@ namespace Ui {
 	class BladerfOutputGui;
 }
 
-class BladerfOutputGui : public QWidget, public PluginGUI {
+class BladerfOutputGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

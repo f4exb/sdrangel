@@ -17,15 +17,15 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 
+#include <plugin/plugininstanceui.h>
 #include <QObject>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;
 
-class PlutoSDRInputGui : public QWidget, public PluginGUI {
+class PlutoSDRInputGui : public QWidget, public PluginInstanceUI {
     Q_OBJECT
 
 public:

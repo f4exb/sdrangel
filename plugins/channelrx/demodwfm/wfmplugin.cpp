@@ -33,7 +33,7 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(WFMDemodGUI::m_channelID, this);
 }
 
-PluginGUI* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == WFMDemodGUI::m_channelID)
 	{

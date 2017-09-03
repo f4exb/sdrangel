@@ -41,7 +41,7 @@ class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
 class PluginAPI;
-class PluginGUI;
+class PluginInstanceUI;
 class ChannelMarker;
 class PluginManager;
 class DeviceSourceAPI;

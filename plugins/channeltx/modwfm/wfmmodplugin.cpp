@@ -49,7 +49,7 @@ void WFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(WFMModGUI::m_channelID, this);
 }
 
-PluginGUI* WFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* WFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
 {
 	if(channelName == WFMModGUI::m_channelID)
 	{

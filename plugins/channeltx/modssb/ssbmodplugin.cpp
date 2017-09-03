@@ -49,7 +49,7 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(SSBModGUI::m_channelID, this);
 }
 
-PluginGUI* SSBModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* SSBModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
 {
 	if(channelName == SSBModGUI::m_channelID)
 	{

@@ -14,9 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <plugin/plugininstanceui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
-#include "plugin/plugingui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
@@ -161,7 +161,7 @@ void DeviceSourceAPI::setSampleSourceSequence(int sequence)
     m_deviceSourceEngine->setSourceSequence(sequence);
 }
 
-void DeviceSourceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginGUI(PluginInstanceUI *gui)
 {
     if (m_sampleSourcePluginGUI != 0)
     {
@@ -172,13 +172,13 @@ void DeviceSourceAPI::setSampleSourcePluginGUI(PluginGUI *gui)
     m_sampleSourcePluginGUI = gui;
 }
 
-void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI)
+void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSourceAPI::removeChannelInstance(PluginGUI* pluginGUI)
+void DeviceSourceAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {

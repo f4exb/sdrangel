@@ -17,8 +17,8 @@
 #ifndef INCLUDE_CHANNELANALYZERGUI_H
 #define INCLUDE_CHANNELANALYZERGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
@@ -36,7 +36,7 @@ namespace Ui {
 	class ChannelAnalyzerGUI;
 }
 
-class ChannelAnalyzerGUI : public RollupWidget, public PluginGUI {
+class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

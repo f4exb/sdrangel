@@ -17,7 +17,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
+	PluginInstanceUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

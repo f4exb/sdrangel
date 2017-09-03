@@ -17,12 +17,12 @@
 #ifndef INCLUDE_FILESINKGUI_H
 #define INCLUDE_FILESINKGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
 #include "filesinkoutput.h"
 #include "filesinksettings.h"
-#include "plugin/plugingui.h"
 
 
 class DeviceSinkAPI;
@@ -32,7 +32,7 @@ namespace Ui {
 	class FileSinkGui;
 }
 
-class FileSinkGui : public QWidget, public PluginGUI {
+class FileSinkGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

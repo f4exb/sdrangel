@@ -1,14 +1,18 @@
-#ifndef INCLUDE_PLUGINGUI_H
-#define INCLUDE_PLUGINGUI_H
+#ifndef INCLUDE_PLUGININSTANCEUI_H
+#define INCLUDE_PLUGININSTANCEUI_H
+
+#include <QtGlobal>
+#include <QString>
+#include <QByteArray>
 
 #include "util/export.h"
 
 class Message;
 
-class SDRANGEL_API PluginGUI {
+class SDRANGEL_API PluginInstanceUI {
 public:
-	PluginGUI() { };
-	virtual ~PluginGUI() { };
+	PluginInstanceUI() { };
+	virtual ~PluginInstanceUI() { };
 
 	virtual void destroy() = 0;
 
@@ -26,4 +30,4 @@ public:
 	virtual bool handleMessage(const Message& message) = 0;
 };
 
-#endif // INCLUDE_PLUGINGUI_H
+#endif // INCLUDE_PLUGININSTANCEUI_H

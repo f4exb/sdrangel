@@ -17,10 +17,9 @@
 #ifndef INCLUDE_FILESOURCEGUI_H
 #define INCLUDE_FILESOURCEGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
-
-#include "plugin/plugingui.h"
 
 #include "filesourceinput.h"
 
@@ -30,7 +29,7 @@ namespace Ui {
 	class FileSourceGui;
 }
 
-class FileSourceGui : public QWidget, public PluginGUI {
+class FileSourceGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

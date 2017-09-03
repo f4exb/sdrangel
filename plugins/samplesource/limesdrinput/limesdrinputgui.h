@@ -17,10 +17,10 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTGUI_H_
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "limesdrinput.h"
 
 class DeviceSourceAPI;
@@ -30,7 +30,7 @@ namespace Ui {
     class LimeSDRInputGUI;
 }
 
-class LimeSDRInputGUI : public QWidget, public PluginGUI {
+class LimeSDRInputGUI : public QWidget, public PluginInstanceUI {
     Q_OBJECT
 
 public:

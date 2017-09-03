@@ -17,11 +17,11 @@
 #ifndef INCLUDE_SDRDAEMONSINKGUI_H
 #define INCLUDE_SDRDAEMONSINKGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QTime>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class SDRdaemonSinkGui;
 }
 
-class SDRdaemonSinkGui : public QWidget, public PluginGUI {
+class SDRdaemonSinkGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

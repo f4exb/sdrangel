@@ -17,11 +17,11 @@
 #ifndef INCLUDE_AIRSPYGUI_H
 #define INCLUDE_AIRSPYGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
 #include "airspyinput.h"
-#include "plugin/plugingui.h"
 
 #define AIRSPY_MAX_DEVICE (32)
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class AirspySampleRates;
 }
 
-class AirspyGui : public QWidget, public PluginGUI {
+class AirspyGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

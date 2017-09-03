@@ -17,8 +17,8 @@
 #ifndef PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 #define PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "ssbmod.h"
@@ -35,7 +35,7 @@ namespace Ui {
     class SSBModGUI;
 }
 
-class SSBModGUI : public RollupWidget, public PluginGUI {
+class SSBModGUI : public RollupWidget, public PluginInstanceUI {
     Q_OBJECT
 
 public:

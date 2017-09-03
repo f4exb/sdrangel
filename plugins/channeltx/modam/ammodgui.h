@@ -17,8 +17,8 @@
 #ifndef PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "ammod.h"
@@ -34,7 +34,7 @@ namespace Ui {
     class AMModGUI;
 }
 
-class AMModGUI : public RollupWidget, public PluginGUI {
+class AMModGUI : public RollupWidget, public PluginInstanceUI {
     Q_OBJECT
 
 public:

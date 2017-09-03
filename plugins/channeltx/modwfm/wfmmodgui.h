@@ -17,8 +17,8 @@
 #ifndef PLUGINS_CHANNELTX_MODWFM_WFMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODWFM_WFMMODGUI_H_
 
+#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
@@ -35,7 +35,7 @@ namespace Ui {
     class WFMModGUI;
 }
 
-class WFMModGUI : public RollupWidget, public PluginGUI {
+class WFMModGUI : public RollupWidget, public PluginInstanceUI {
     Q_OBJECT
 
 public:

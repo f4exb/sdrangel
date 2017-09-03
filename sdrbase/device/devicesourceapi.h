@@ -34,7 +34,7 @@ class DeviceSampleSource;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
-class PluginGUI;
+class PluginInstanceUI;
 class PluginAPI;
 class Preset;
 class DeviceSinkAPI;
@@ -70,15 +70,15 @@ public:
     void setSampleSourceId(const QString& id);
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceSequence(int sequence);
-    void setSampleSourcePluginGUI(PluginGUI *gui);
+    void setSampleSourcePluginGUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
     const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
 
-    void registerChannelInstance(const QString& channelName, PluginGUI* pluginGUI);
-    void removeChannelInstance(PluginGUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
+    void removeChannelInstance(PluginInstanceUI* pluginGUI);
 
     void freeAll();
 
@@ -106,14 +106,14 @@ protected:
     struct ChannelInstanceRegistration
     {
         QString m_channelName;
-        PluginGUI* m_gui;
+        PluginInstanceUI* m_gui;
 
         ChannelInstanceRegistration() :
             m_channelName(),
             m_gui(NULL)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, PluginGUI* pluginGUI) :
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceUI* pluginGUI) :
             m_channelName(channelName),
             m_gui(pluginGUI)
         { }
@@ -142,7 +142,7 @@ protected:
     QString m_sampleSourceId;
     QString m_sampleSourceSerial;
     uint32_t m_sampleSourceSequence;
-    PluginGUI* m_sampleSourcePluginGUI;
+    PluginInstanceUI* m_sampleSourcePluginGUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
 

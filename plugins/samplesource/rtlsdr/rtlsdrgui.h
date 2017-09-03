@@ -17,10 +17,10 @@
 #ifndef INCLUDE_RTLSDRGUI_H
 #define INCLUDE_RTLSDRGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "rtlsdrinput.h"
 
 class DeviceSourceAPI;
@@ -31,7 +31,7 @@ namespace Ui {
 	class RTLSDRSampleRates;
 }
 
-class RTLSDRGui : public QWidget, public PluginGUI {
+class RTLSDRGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

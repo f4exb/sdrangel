@@ -18,10 +18,10 @@
 #ifndef INCLUDE_DSDDEMODGUI_H
 #define INCLUDE_DSDDEMODGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QMenu>
 
 #include "gui/rollupwidget.h"
-#include "plugin/plugingui.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -38,7 +38,7 @@ namespace Ui {
 	class DSDDemodGUI;
 }
 
-class DSDDemodGUI : public RollupWidget, public PluginGUI {
+class DSDDemodGUI : public RollupWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

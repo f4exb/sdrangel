@@ -17,12 +17,11 @@
 #ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
 #define INCLUDE_SDRDAEMONSOURCEGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
 #include <sys/time.h>
-#include "plugin/plugingui.h"
-
 #include "sdrdaemonsourceinput.h"
 
 class DeviceSourceAPI;
@@ -32,7 +31,7 @@ namespace Ui {
 	class SDRdaemonSourceGui;
 }
 
-class SDRdaemonSourceGui : public QWidget, public PluginGUI {
+class SDRdaemonSourceGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:

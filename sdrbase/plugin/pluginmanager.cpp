@@ -14,6 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <plugin/plugininstanceui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include <QApplication>
@@ -22,7 +23,6 @@
 #include <cstdio>
 
 #include "plugin/pluginmanager.h"
-#include "plugin/plugingui.h"
 #include "settings/preset.h"
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
@@ -392,7 +392,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
 
 	QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSourcePluginGUI(pluginGUI);
@@ -430,7 +430,7 @@ int PluginManager::selectSampleSinkByIndex(int index, DeviceSinkAPI *deviceAPI)
     deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
 
 	QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
 	deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
@@ -482,7 +482,7 @@ int PluginManager::selectFirstSampleSource(const QString& sourceId, DeviceSource
     deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
@@ -534,7 +534,7 @@ int PluginManager::selectFirstSampleSink(const QString& sinkId, DeviceSinkAPI *d
     deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
@@ -610,7 +610,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
     deviceAPI->setSampleSourcePluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
@@ -686,7 +686,7 @@ int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, con
     deviceAPI->setSampleSinkPluginGUI(0); // this effectively destroys the previous GUI if it exists
 
     QWidget *gui;
-	PluginGUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
+	PluginInstanceUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);

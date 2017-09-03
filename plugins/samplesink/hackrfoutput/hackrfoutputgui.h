@@ -17,10 +17,10 @@
 #ifndef INCLUDE_HACKRFOUTPUTGUI_H
 #define INCLUDE_HACKRFOUTPUTGUI_H
 
+#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugingui.h"
 #include "hackrfoutput.h"
 
 #define HACKRF_MAX_DEVICE (32)
@@ -32,7 +32,7 @@ namespace Ui {
 	class HackRFOutputGui;
 }
 
-class HackRFOutputGui : public QWidget, public PluginGUI {
+class HackRFOutputGui : public QWidget, public PluginInstanceUI {
 	Q_OBJECT
 
 public:
