@@ -19,6 +19,7 @@
 
 #include <QTimer>
 #include <QTime>
+#include <QWidget>
 
 #include "plugin/plugingui.h"
 #include "sdrdaemonsinksettings.h"

@@ -18,6 +18,7 @@
 #define INCLUDE_FILESINKGUI_H
 
 #include <QTimer>
+#include <QWidget>
 
 #include "filesinkoutput.h"
 #include "filesinksettings.h"

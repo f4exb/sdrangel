@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTGUI_H_
 
 #include <QTimer>
+#include <QWidget>
 
 #include "plugin/plugingui.h"
 #include "limesdrinput.h"

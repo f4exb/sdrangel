@@ -18,9 +18,10 @@
 #define INCLUDE_BLADERFINPUTGUI_H
 
 #include <QTimer>
-#include "plugin/plugingui.h"
+#include <QWidget>
 
-#include "../bladerfinput/bladerfinput.h"
+#include "plugin/plugingui.h"
+#include "bladerfinput.h"
 
 class DeviceSourceAPI;
 class FileRecord;

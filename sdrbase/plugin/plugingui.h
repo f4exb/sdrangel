@@ -1,7 +1,6 @@
 #ifndef INCLUDE_PLUGINGUI_H
 #define INCLUDE_PLUGINGUI_H
 
-#include <QWidget>
 #include "util/export.h"
 
 class Message;

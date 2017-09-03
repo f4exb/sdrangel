@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 
 #include <QObject>
+#include <QWidget>
 
 #include "plugin/plugingui.h"
 #include "plutosdrinputsettings.h"

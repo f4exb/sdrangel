@@ -18,6 +18,7 @@
 #define INCLUDE_AIRSPYGUI_H
 
 #include <QTimer>
+#include <QWidget>
 
 #include "airspyinput.h"
 #include "plugin/plugingui.h"

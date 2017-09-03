@@ -18,6 +18,8 @@
 #define INCLUDE_FILESOURCEGUI_H
 
 #include <QTimer>
+#include <QWidget>
+
 #include "plugin/plugingui.h"
 
 #include "filesourceinput.h"

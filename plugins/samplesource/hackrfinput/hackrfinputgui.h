@@ -18,6 +18,7 @@
 #define INCLUDE_HACKRFINPUTGUI_H
 
 #include <QTimer>
+#include <QWidget>
 
 #include "plugin/plugingui.h"
 #include "../hackrfinput/hackrfinput.h"

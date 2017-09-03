@@ -18,6 +18,8 @@
 #define INCLUDE_SDRDAEMONSOURCEGUI_H
 
 #include <QTimer>
+#include <QWidget>
+
 #include <sys/time.h>
 #include "plugin/plugingui.h"
 

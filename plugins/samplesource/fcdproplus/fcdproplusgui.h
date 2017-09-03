@@ -18,6 +18,7 @@
 #define INCLUDE_FCDGUI_H
 
 #include <QTimer>
+#include <QWidget>
 
 #include "fcdproplusinput.h"
 #include "plugin/plugingui.h"

@@ -18,6 +18,8 @@
 #define INCLUDE_BLADERFOUTPUTGUI_H
 
 #include <QTimer>
+#include <QWidget>
+
 #include "plugin/plugingui.h"
 
 #include "bladerfoutput.h"

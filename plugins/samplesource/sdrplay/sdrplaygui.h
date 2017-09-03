@@ -18,6 +18,8 @@
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 
 #include <QTimer>
+#include <QWidget>
+
 #include <vector>
 #include "plugin/plugingui.h"
 
