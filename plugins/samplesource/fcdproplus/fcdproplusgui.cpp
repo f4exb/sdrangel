@@ -25,7 +25,6 @@
 #include "fcdproplusgui.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
 #include "fcdproplusconst.h"
 
 FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -62,18 +61,11 @@ FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-	char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FCDProPlusGui::~FCDProPlusGui()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
 	delete ui;
 }
 
@@ -151,7 +143,6 @@ void FCDProPlusGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("RTLSDRGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }
@@ -304,14 +295,12 @@ void FCDProPlusGui::on_startStop_toggled(bool checked)
 
 void FCDProPlusGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    FCDProPlusInput::MsgFileRecord* message = FCDProPlusInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }

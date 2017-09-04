@@ -24,7 +24,6 @@
 #include "fcdproplusinput.h"
 
 class DeviceSourceAPI;
-class FileRecord;
 
 namespace Ui {
 	class FCDProPlusGui;
@@ -58,7 +57,6 @@ private:
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	DeviceSampleSource* m_sampleSource;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
