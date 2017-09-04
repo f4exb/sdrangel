@@ -27,7 +27,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
 
 BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
@@ -61,18 +60,11 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-	char recFileNameCStr[30];
-	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 BladerfInputGui::~BladerfInputGui()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
 	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
@@ -148,7 +140,6 @@ void BladerfInputGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("BladerfGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }
@@ -357,16 +348,14 @@ void BladerfInputGui::on_startStop_toggled(bool checked)
 
 void BladerfInputGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    BladerfInput::MsgFileRecord* message = BladerfInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void BladerfInputGui::updateHardware()

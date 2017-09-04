@@ -28,6 +28,7 @@
 
 class DeviceSourceAPI;
 class BladerfInputThread;
+class FileRecord;
 
 class BladerfInput : public DeviceSampleSource {
 public:
@@ -50,6 +51,25 @@ public:
 			m_settings(settings)
 		{ }
 	};
+
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
 
 	BladerfInput(DeviceSourceAPI *deviceAPI);
 	virtual ~BladerfInput();
@@ -78,6 +98,7 @@ private:
 	QString m_deviceDescription;
 	DeviceBladeRFParams m_sharedParams;
 	bool m_running;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif // INCLUDE_BLADERFINPUT_H

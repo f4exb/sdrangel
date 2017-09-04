@@ -23,6 +23,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 
@@ -30,6 +31,7 @@
 #include "bladerfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
+MESSAGE_CLASS_DEFINITION(BladerfInput::MsgFileRecord, Message)
 
 BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -40,12 +42,20 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
+
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 BladerfInput::~BladerfInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
     m_deviceAPI->setBuddySharedPtr(0);
 }
@@ -213,6 +223,19 @@ bool BladerfInput::handleMessage(const Message& message)
 
 		return true;
 	}
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "BladerfInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -487,6 +510,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
 	}
 
 	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

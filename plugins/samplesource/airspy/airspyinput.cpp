@@ -232,7 +232,7 @@ bool AirspyInput::handleMessage(const Message& message)
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        qDebug() << "AirspyInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
         if (conf.getStartStop()) {
             m_fileSink->startRecording();
