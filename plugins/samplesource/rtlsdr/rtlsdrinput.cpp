@@ -26,10 +26,12 @@
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/filerecord.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgQueryRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
+MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 
 RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -40,11 +42,18 @@ RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 RTLSDRInput::~RTLSDRInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
 }
 
@@ -246,6 +255,17 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+    }
     else
     {
         return false;
@@ -400,6 +420,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
     }
 
     return true;

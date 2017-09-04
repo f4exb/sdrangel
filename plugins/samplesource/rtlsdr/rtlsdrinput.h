@@ -26,6 +26,7 @@
 
 class DeviceSourceAPI;
 class RTLSDRThread;
+class FileRecord;
 
 class RTLSDRInput : public DeviceSampleSource {
 public:
@@ -84,6 +85,25 @@ public:
         { }
     };
 
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
 	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
 
@@ -101,6 +121,7 @@ public:
 
 private:
 	DeviceSourceAPI *m_deviceAPI;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;
