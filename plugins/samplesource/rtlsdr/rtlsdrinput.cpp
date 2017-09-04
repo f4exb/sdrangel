@@ -265,6 +265,8 @@ bool RTLSDRInput::handleMessage(const Message& message)
         } else {
             m_fileSink->stopRecording();
         }
+
+        return true;
     }
     else
     {
