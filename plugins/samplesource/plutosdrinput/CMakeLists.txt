@@ -16,9 +16,9 @@ set(plutosdrinput_HEADERS
 #    plutosdrinputthread.h
 )
 
-#set(plutosdrinput_FORMS
-#    plutosdrinputgui.ui
-#)
+set(plutosdrinput_FORMS
+    plutosdrinputgui.ui
+)
 
 if (BUILD_DEBIAN)
 include_directories(
@@ -48,7 +48,7 @@ qt5_wrap_ui(plutosdrinput_FORMS_HEADERS ${plutosdrinput_FORMS})
 add_library(inputplutosdr SHARED
     ${plutosdrinput_SOURCES}
     ${plutosdrinput_HEADERS_MOC}
-#    ${plutosdrinput_FORMS_HEADERS}
+    ${plutosdrinput_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)

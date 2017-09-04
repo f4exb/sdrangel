@@ -14,18 +14,29 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
+
+#include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
+#include "ui_plutosdrinputgui.h"
 #include "plutosdrinputgui.h"
 
 PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     QWidget(parent),
+    ui(new Ui::PlutoSDRInputGUI),
     m_deviceAPI(deviceAPI),
     m_settings()
 {
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 PlutoSDRInputGui::~PlutoSDRInputGui()
 {
+    delete m_fileSink;
+    delete ui;
 }
 
 void PlutoSDRInputGui::destroy()

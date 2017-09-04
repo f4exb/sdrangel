@@ -24,6 +24,11 @@
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;
+class FileRecord;
+
+namespace Ui {
+    class PlutoSDRInputGUI;
+}
 
 class PlutoSDRInputGui : public QWidget, public PluginInstanceUI {
     Q_OBJECT
@@ -43,8 +48,10 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    Ui::PlutoSDRInputGUI* ui;
     DeviceSourceAPI* m_deviceAPI;
     PlutoSDRInputSettings m_settings;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */
