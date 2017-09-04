@@ -32,6 +32,7 @@ struct fcd_buffer {
 
 class DeviceSourceAPI;
 class FCDProThread;
+class FileRecord;
 
 class FCDProInput : public DeviceSampleSource {
 public:
@@ -54,6 +55,25 @@ public:
 			m_settings(settings)
 		{ }
 	};
+
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
 
 	FCDProInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FCDProInput();
@@ -99,6 +119,7 @@ private:
 	FCDProThread* m_FCDThread;
 	QString m_deviceDescription;
 	bool m_running;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif // INCLUDE_FCDPROINPUT_H

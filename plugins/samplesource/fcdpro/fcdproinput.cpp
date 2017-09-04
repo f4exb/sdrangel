@@ -23,6 +23,7 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/filerecord.h"
 #include "fcdproinput.h"
 
 #include <device/devicesourceapi.h>
@@ -33,6 +34,7 @@
 #include "fcdproconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCD, Message)
+MESSAGE_CLASS_DEFINITION(FCDProInput::MsgFileRecord, Message)
 
 FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -43,11 +45,18 @@ FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 FCDProInput::~FCDProInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
 }
 
@@ -164,6 +173,19 @@ bool FCDProInput::handleMessage(const Message& message)
 		applySettings(conf.getSettings(), false);
 		return true;
 	}
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "FCDProInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -373,6 +395,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
     }
 }
 
