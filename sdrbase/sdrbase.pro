@@ -231,7 +231,7 @@ HEADERS  += mainwindow.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/pluginapi.h\
-        plugin/plugingui.h\
+        plugin/plugininstanceui.h\
         plugin/plugininterface.h\
         plugin/pluginmanager.h\
         settings/preferences.h\
