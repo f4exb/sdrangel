@@ -23,6 +23,7 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/dspcommands.h"
+#include "dsp/filerecord.h"
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
@@ -35,7 +36,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
-
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgFileRecord, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -49,11 +50,18 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     suspendBuddies();
     openDevice();
     resumeBuddies();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 LimeSDRInput::~LimeSDRInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     suspendBuddies();
     closeDevice();
     resumeBuddies();
@@ -479,6 +487,19 @@ bool LimeSDRInput::handleMessage(const Message& message)
         {
             DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
             (*itSink)->getDeviceOutputMessageQueue()->push(report);
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "LimeSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
         }
 
         return true;
@@ -1100,6 +1121,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
     }
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

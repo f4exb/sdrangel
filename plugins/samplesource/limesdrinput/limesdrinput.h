@@ -27,6 +27,7 @@
 class DeviceSourceAPI;
 class LimeSDRInputThread;
 struct DeviceLimeSDRParams;
+class FileRecord;
 
 class LimeSDRInput : public DeviceSampleSource
 {
@@ -208,6 +209,25 @@ public:
         { }
     };
 
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     LimeSDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~LimeSDRInput();
 
@@ -235,8 +255,8 @@ private:
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
     bool m_firstConfig;
-
     lms_stream_t m_streamId;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();
     void closeDevice();
