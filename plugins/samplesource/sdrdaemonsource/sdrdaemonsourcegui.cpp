@@ -38,7 +38,6 @@
 #include "util/simpleserializer.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
 #include "sdrdaemonsourcegui.h"
 
 SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -104,11 +103,6 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
 
 	displaySettings();
 
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
     m_eventsTime.start();
@@ -122,8 +116,6 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
 
 SDRdaemonSourceGui::~SDRdaemonSourceGui()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
     delete m_sampleSource;
 	delete ui;
 }
@@ -273,7 +265,8 @@ void SDRdaemonSourceGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("SDRdaemonGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
+            DSPSignalNotification *fwd = new DSPSignalNotification(*notif);
+            m_sampleSource->getInputMessageQueue()->push(fwd);
 
             delete message;
         }
@@ -620,16 +613,14 @@ void SDRdaemonSourceGui::on_startStop_toggled(bool checked)
 
 void SDRdaemonSourceGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    SDRdaemonSourceInput::MsgFileRecord* message = SDRdaemonSourceInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void SDRdaemonSourceGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))

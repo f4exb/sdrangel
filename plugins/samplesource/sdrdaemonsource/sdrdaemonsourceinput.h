@@ -28,6 +28,7 @@
 
 class DeviceSourceAPI;
 class SDRdaemonSourceUDPHandler;
+class FileRecord;
 
 class SDRdaemonSourceInput : public DeviceSampleSource {
 public:
@@ -283,6 +284,25 @@ public:
 		{ }
 	};
 
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
 	SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonSourceInput();
 
@@ -310,6 +330,7 @@ private:
 	const QTimer& m_masterTimer;
     bool m_autoFollowRate;
     bool m_autoCorrBuffer;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEINPUT_H

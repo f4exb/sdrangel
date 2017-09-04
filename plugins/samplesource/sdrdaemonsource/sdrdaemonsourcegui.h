@@ -25,7 +25,6 @@
 #include "sdrdaemonsourceinput.h"
 
 class DeviceSourceAPI;
-class FileRecord;
 
 namespace Ui {
 	class SDRdaemonSourceGui;
@@ -59,7 +58,6 @@ private:
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
     bool m_acquisition;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_deviceSampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;

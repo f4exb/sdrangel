@@ -36,6 +36,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming
 MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgFileRecord, Message)
 
 SDRdaemonSourceInput::SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -53,11 +54,18 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSour
 	m_sampleFifo.setSize(96000 * 4);
 	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_deviceAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 SDRdaemonSourceInput::~SDRdaemonSourceInput()
 {
 	stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 	delete m_SDRdaemonUDPHandler;
 }
 
@@ -106,7 +114,25 @@ void SDRdaemonSourceInput::getRemoteAddress(QString &s)
 
 bool SDRdaemonSourceInput::handleMessage(const Message& message)
 {
-    if (MsgConfigureSDRdaemonSource::match(message))
+    if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        return m_fileSink->handleMessage(notif); // forward to file sink
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "SDRdaemonSourceInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else if (MsgConfigureSDRdaemonSource::match(message))
     {
         qDebug() << "SDRdaemonSourceInput::handleMessage:" << message.getIdentifier();
         //SDRdaemonSourceInput& conf = (MsgConfigureSDRdaemonFEC&) message;
