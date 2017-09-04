@@ -595,6 +595,39 @@
        </item>
       </widget>
      </item>
+     <item>
+      <widget class="QComboBox" name="firGain">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>FIR gain (dB)</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>-12</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>+6</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -606,7 +639,7 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QComboBox" name="gainMode">
+      <widget class="QComboBox" name="gainCtlMode">
        <property name="maximumSize">
         <size>
          <width>54</width>
@@ -614,16 +647,26 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Automatic or Manual gain selection</string>
+        <string>Gain control mode (Manual, Slow attack, Fast attack, Hybrid) </string>
        </property>
        <item>
         <property name="text">
-         <string>Aut</string>
+         <string>Man</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Man</string>
+         <string>Slow</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fast</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Hyb</string>
         </property>
        </item>
       </widget>
@@ -637,7 +680,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Automatic global gain (dB)</string>
+        <string>Gain setting (dB)</string>
        </property>
        <property name="maximum">
         <number>70</number>
@@ -665,7 +708,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Automatic global gain</string>
+        <string>Gain value (dB)</string>
        </property>
        <property name="text">
         <string>20</string>
@@ -679,134 +722,6 @@
       <widget class="Line" name="line_3">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="lnaGain">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Manual LNA gain</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>30</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="sliderPosition">
-        <number>15</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lnaGainText">
-       <property name="minimumSize">
-        <size>
-         <width>18</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>18</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Manual LNA gain (dB)</string>
-       </property>
-       <property name="text">
-        <string>15</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="tiaGain">
-       <property name="maximumSize">
-        <size>
-         <width>40</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Manual TIA gain (dB)</string>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>3</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="pgaGain">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Manual PGA gain</string>
-       </property>
-       <property name="maximum">
-        <number>32</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>16</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="pgaGainText">
-       <property name="minimumSize">
-        <size>
-         <width>18</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>18</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Manual PGA gain (dB)</string>
-       </property>
-       <property name="text">
-        <string>16</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -852,36 +767,66 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Antenna select: No: none, Lo: 700:900M, Hi: 2:2.6G, Wi: wideband, T1: Tx1 LB, T2: Tx2 LB</string>
+        <string>Input path</string>
        </property>
        <item>
         <property name="text">
-         <string>No</string>
+         <string>Abal</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Hi</string>
+         <string>Bbal</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Lo</string>
+         <string>Cbal</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Wi</string>
+         <string>An</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>T1</string>
+         <string>Ap</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>T2</string>
+         <string>Bn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bp</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cp</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx3</string>
         </property>
        </item>
       </widget>
@@ -904,144 +849,16 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QLabel" name="streamStatusLabel">
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Green when stream is reporting data</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="../../../sdrbase/resources/res.qrc">:/stream.png</pixmap>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="underrunLabel">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Red if underruns</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
-       </property>
-       <property name="text">
-        <string>U</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="overrunLabel">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Red if overruns</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
-       </property>
-       <property name="text">
-        <string>O</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="droppedLabel">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Red if dropped packets</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
-       </property>
-       <property name="text">
-        <string>D</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="streamLinkRateText">
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Stream link rate (MB/s)</string>
-       </property>
-       <property name="text">
-        <string>000.000 MB/s</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QProgressBar" name="fifoBar">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>FIFO fill status</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QProgressBar{border: 2px solid rgb(79, 79, 79); text-align: center;}
-QToolTip{background-color: white; color: black;}</string>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="rssiText">
+       <property name="text">
+        <string>-100.0 dB</string>
        </property>
       </widget>
      </item>
