@@ -91,11 +91,11 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readBlob(5, &m_spectrumConfig);
 		d.readBool(6, &m_sourcePreset, true);
 
-		qDebug("Preset::deserialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
-				qPrintable(m_group),
-				m_sourcePreset ? "Rx" : "Tx",
-				qPrintable(m_description),
-				m_centerFrequency);
+//		qDebug("Preset::deserialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
+//				qPrintable(m_group),
+//				m_sourcePreset ? "Rx" : "Tx",
+//				qPrintable(m_description),
+//				m_centerFrequency);
 
 		qint32 sourcesCount = 0;
 		d.readS32(20, &sourcesCount, 0);
@@ -120,10 +120,10 @@ bool Preset::deserialize(const QByteArray& data)
 
 			if (!sourceId.isEmpty())
 			{
-				qDebug("Preset::deserialize:  source: id: %s, ser: %s, seq: %d",
-					qPrintable(sourceId),
-					qPrintable(sourceSerial),
-					sourceSequence);
+//				qDebug("Preset::deserialize:  source: id: %s, ser: %s, seq: %d",
+//					qPrintable(sourceId),
+//					qPrintable(sourceSerial),
+//					sourceSequence);
 
 				m_deviceConfigs.append(DeviceConfig(sourceId, sourceSerial, sourceSequence, sourceConfig));
 			}
@@ -142,7 +142,7 @@ bool Preset::deserialize(const QByteArray& data)
 			d.readString(201 + i * 2, &channel, "unknown-channel");
 			d.readBlob(202 + i * 2, &config);
 
-			qDebug("Preset::deserialize:  channel: id: %s", qPrintable(channel));
+//			qDebug("Preset::deserialize:  channel: id: %s", qPrintable(channel));
 			m_channelConfigs.append(ChannelConfig(channel, config));
 		}
 
