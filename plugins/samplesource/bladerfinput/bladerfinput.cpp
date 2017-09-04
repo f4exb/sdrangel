@@ -509,8 +509,8 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	{
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
         m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
 	}
 
 	qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

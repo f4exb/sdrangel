@@ -1120,8 +1120,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
         m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
