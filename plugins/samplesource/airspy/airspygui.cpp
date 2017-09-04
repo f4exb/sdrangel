@@ -54,19 +54,11 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 AirspyGui::~AirspyGui()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
 	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
@@ -153,7 +145,6 @@ void AirspyGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("AirspyGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }
@@ -365,16 +356,14 @@ void AirspyGui::on_startStop_toggled(bool checked)
 
 void AirspyGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    AirspyInput::MsgFileRecord* message = AirspyInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void AirspyGui::updateHardware()

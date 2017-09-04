@@ -22,12 +22,14 @@
 #include "airspyinput.h"
 
 #include <device/devicesourceapi.h>
+#include <dsp/filerecord.h>
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
 #include "airspythread.h"
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
+MESSAGE_CLASS_DEFINITION(AirspyInput::MsgFileRecord, Message)
 //MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
 
 AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
@@ -39,11 +41,18 @@ AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 AirspyInput::~AirspyInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
 }
 
@@ -220,6 +229,19 @@ bool AirspyInput::handleMessage(const Message& message)
 
 		return true;
 	}
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -479,6 +501,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
 	}
 
 	return true;

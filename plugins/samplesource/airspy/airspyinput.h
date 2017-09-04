@@ -25,6 +25,7 @@
 
 class DeviceSourceAPI;
 class AirspyThread;
+class FileRecord;
 
 class AirspyInput : public DeviceSampleSource {
 public:
@@ -47,6 +48,25 @@ public:
 			m_settings(settings)
 		{ }
 	};
+
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
 
 //	class MsgReportAirspy : public Message {
 //		MESSAGE_CLASS_DECLARATION
@@ -96,6 +116,7 @@ private:
 	QString m_deviceDescription;
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif // INCLUDE_AIRSPYINPUT_H
