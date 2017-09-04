@@ -32,6 +32,15 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_LOppmTenths = 0;
 	m_log2Decim = 0;
 	m_devSampleRate = 1536 * 1000;
+	m_rateGovernor = RATEGOV_NORMAL;
+	m_dcBlock = false;
+	m_iqCorrection = false;
+	m_lpfBW = 1500000.0f;
+	m_lpfFIREnable = false;
+	m_lpfFIRBW = 500000.0f;
+	m_gain = 40;
+	m_antennaPath = RFPATH_A_BAL;
+	m_gainMode = GAIN_MANUAL;
 }
 
 QByteArray PlutoSDRInputSettings::serialize() const
@@ -41,7 +50,16 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeS32(1, m_LOppmTenths);
     s.writeU32(4, m_log2Decim);
 	s.writeS32(5, m_fcPos);
+	s.writeS32(6, m_rateGovernor);
+	s.writeBool(7, m_dcBlock);
+    s.writeBool(8, m_iqCorrection);
+    s.writeFloat(9, m_lpfBW);
+    s.writeBool(10, m_lpfFIREnable);
+    s.writeFloat(11, m_lpfFIRBW);
     s.writeU64(12, m_devSampleRate);
+    s.writeU32(13, m_gain);
+    s.writeS32(14, (int) m_antennaPath);
+    s.writeS32(15, (int) m_gainMode);
 
 	return s.final();
 }
@@ -63,8 +81,36 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_LOppmTenths, 0);
         d.readU32(4, &m_log2Decim, 0);
 		d.readS32(5, &intval, 0);
-		m_fcPos = (fcPos_t) intval;
+		if ((intval < 0) || (intval > 2)) {
+		    m_fcPos = FC_POS_INFRA;
+		} else {
+	        m_fcPos = (fcPos_t) intval;
+		}
+        d.readS32(6, &intval, 0);
+        if ((intval >= 0) && (intval < (int) RATEGOV_END)) {
+            m_rateGovernor = (RateGovernor) intval;
+        } else {
+            m_rateGovernor = RATEGOV_NORMAL;
+        }
+        d.readBool(7, &m_dcBlock, false);
+        d.readBool(8, &m_iqCorrection, false);
+        d.readFloat(9, &m_lpfBW, 1500000.0f);
+        d.readBool(10, &m_lpfFIREnable, false);
+        d.readFloat(11, &m_lpfFIRBW, 500000.0f);
         d.readU64(12, &m_devSampleRate, 1536000U);
+        d.readU32(13, &m_gain, 40);
+        d.readS32(14, &intval, 0);
+        if ((intval >= 0) && (intval < (int) RFPATH_END)) {
+            m_antennaPath = (RFPath) intval;
+        } else {
+            m_antennaPath = RFPATH_A_BAL;
+        }
+        d.readS32(15, &intval, 0);
+        if ((intval >= 0) && (intval < (int) GAIN_END)) {
+            m_gainMode = (GainMode) intval;
+        } else {
+            m_gainMode = GAIN_MANUAL;
+        }
 
 		return true;
 	}
