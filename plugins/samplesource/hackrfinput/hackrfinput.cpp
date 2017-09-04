@@ -23,6 +23,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "hackrf/devicehackrfvalues.h"
@@ -33,6 +34,7 @@
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
+MESSAGE_CLASS_DEFINITION(HackRFInput::MsgFileRecord, Message)
 
 HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -43,12 +45,20 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
+
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
 HackRFInput::~HackRFInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
 }
@@ -195,6 +205,19 @@ bool HackRFInput::handleMessage(const Message& message)
 
 		return true;
 	}
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "HackRFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -441,6 +464,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
 	}
 
 	m_settings.m_linkTxFrequency = settings.m_linkTxFrequency;

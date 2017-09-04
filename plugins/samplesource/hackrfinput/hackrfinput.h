@@ -27,6 +27,7 @@
 
 class DeviceSourceAPI;
 class HackRFInputThread;
+class FileRecord;
 
 class HackRFInput : public DeviceSampleSource {
 public:
@@ -71,6 +72,25 @@ public:
 		{ }
 	};
 
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
 	HackRFInput(DeviceSourceAPI *deviceAPI);
 	virtual ~HackRFInput();
 
@@ -98,6 +118,7 @@ private:
 	QString m_deviceDescription;
 	DeviceHackRFParams m_sharedParams;
 	bool m_running;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif // INCLUDE_HACKRFINPUT_H

@@ -21,12 +21,11 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "../hackrfinput/hackrfinput.h"
+#include "hackrfinput.h"
 
 #define HACKRF_MAX_DEVICE (32)
 
 class DeviceSourceAPI;
-class FileRecord;
 
 namespace Ui {
 	class HackRFInputGui;
@@ -67,7 +66,6 @@ private:
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;

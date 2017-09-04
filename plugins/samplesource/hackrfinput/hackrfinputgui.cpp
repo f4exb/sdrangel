@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../hackrfinput/hackrfinputgui.h"
+#include "hackrfinputgui.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -27,7 +27,6 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
-#include "dsp/filerecord.h"
 #include "hackrf/devicehackrfvalues.h"
 
 #include "ui_hackrfinputgui.h"
@@ -58,11 +57,6 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	displaySettings();
 	displayBandwidths();
 
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
     sendSettings();
@@ -70,8 +64,6 @@ HackRFInputGui::HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 HackRFInputGui::~HackRFInputGui()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
 	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
@@ -159,7 +151,6 @@ void HackRFInputGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("HackRFGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }
@@ -355,16 +346,14 @@ void HackRFInputGui::on_startStop_toggled(bool checked)
 
 void HackRFInputGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    HackRFInput::MsgFileRecord* message = HackRFInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void HackRFInputGui::updateHardware()
