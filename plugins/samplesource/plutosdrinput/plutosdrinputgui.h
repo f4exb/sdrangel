@@ -24,7 +24,6 @@
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;
-class FileRecord;
 
 namespace Ui {
     class PlutoSDRInputGUI;
@@ -51,7 +50,6 @@ private:
     Ui::PlutoSDRInputGUI* ui;
     DeviceSourceAPI* m_deviceAPI;
     PlutoSDRInputSettings m_settings;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */

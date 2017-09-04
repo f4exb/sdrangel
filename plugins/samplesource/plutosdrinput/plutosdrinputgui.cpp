@@ -16,7 +16,6 @@
 
 #include <stdio.h>
 
-#include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
 #include "ui_plutosdrinputgui.h"
 #include "plutosdrinputgui.h"
@@ -27,15 +26,10 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     m_deviceAPI(deviceAPI),
     m_settings()
 {
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
 }
 
 PlutoSDRInputGui::~PlutoSDRInputGui()
 {
-    delete m_fileSink;
     delete ui;
 }
 
