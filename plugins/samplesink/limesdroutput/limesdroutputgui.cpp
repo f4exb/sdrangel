@@ -23,7 +23,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
-#include "dsp/filerecord.h"
 #include "limesdroutputgui.h"
 
 LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
@@ -76,14 +75,12 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToGUI()), Qt::QueuedConnection);
 }
 
 LimeSDROutputGUI::~LimeSDROutputGUI()
 {
-    delete m_fileSink;
     delete m_sampleSink; // Valgrind memcheck
     delete ui;
 }
@@ -161,7 +158,6 @@ void LimeSDROutputGUI::handleMessagesToGUI()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("LimeSDROutputGUI::handleMessagesToGUI: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }

@@ -25,7 +25,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
-#include "dsp/filerecord.h"
 #include "bladerfoutputgui.h"
 #include "bladerf/devicebladerfvalues.h"
 
@@ -63,16 +62,12 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 	char recFileNameCStr[30];
 	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-//    m_deviceAPI->addSink(m_fileSink);
 
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 BladerfOutputGui::~BladerfOutputGui()
 {
-//    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
 	delete m_deviceSampleSink; // Valgrind memcheck
 	delete ui;
 }
@@ -156,7 +151,6 @@ void BladerfOutputGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("BladerfOutputGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }

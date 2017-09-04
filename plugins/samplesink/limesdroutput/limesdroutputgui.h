@@ -25,7 +25,6 @@
 
 class DeviceSinkAPI;
 class DeviceSampleSink;
-class FileRecord;
 
 namespace Ui {
     class LimeSDROutputGUI;
@@ -58,7 +57,6 @@ private:
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     DeviceSampleSink* m_sampleSink;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output TODO: change to file input
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
