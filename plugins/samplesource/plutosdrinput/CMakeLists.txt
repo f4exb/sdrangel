@@ -2,17 +2,17 @@ project(plutosdrinput)
 
 set(plutosdrinput_SOURCES
     plutosdrinputgui.cpp
-#    plutosdrinput.cpp
+    plutosdrinput.cpp
     plutosdrinputplugin.cpp
-#    plutosdrinputsettings.cpp
+    plutosdrinputsettings.cpp
 #    plutosdrinputthread.cpp
 )
 
 set(plutosdrinput_HEADERS
     plutosdrinputgui.h
-#    plutosdrinput.h
+    plutosdrinput.h
     plutosdrinputplugin.h
-#    plutosdrinputsettings.h
+    plutosdrinputsettings.h
 #    plutosdrinputthread.h
 )
 

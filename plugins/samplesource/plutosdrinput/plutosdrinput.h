@@ -14,63 +14,61 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUT_H_
+#define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUT_H_
+
+#include <QString>
+
+#include <dsp/devicesamplesource.h>
+
 #include "plutosdrinputsettings.h"
 
-#include <QtGlobal>
-#include "util/simpleserializer.h"
+class DeviceSourceAPI;
+class FileRecord;
+
+class PlutoSDRInput : public DeviceSampleSource {
+public:
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
 
 
-PlutoSDRInputSettings::PlutoSDRInputSettings()
-{
-	resetToDefaults();
-}
+    PlutoSDRInput(DeviceSourceAPI *deviceAPI);
+    ~PlutoSDRInput();
 
-void PlutoSDRInputSettings::resetToDefaults()
-{
-	m_centerFrequency = 435000 * 1000;
-	m_fcPos = FC_POS_CENTER;
-	m_LOppmTenths = 0;
-	m_log2Decim = 0;
-	m_devSampleRate = 1536 * 1000;
-}
+    virtual bool start();
+    virtual void stop();
 
-QByteArray PlutoSDRInputSettings::serialize() const
-{
-	SimpleSerializer s(1);
+    virtual const QString& getDeviceDescription() const;
+    virtual int getSampleRate() const;
+    virtual quint64 getCenterFrequency() const;
 
-    s.writeS32(1, m_LOppmTenths);
-    s.writeU32(4, m_log2Decim);
-	s.writeS32(5, m_fcPos);
-    s.writeU64(12, m_devSampleRate);
+    virtual bool handleMessage(const Message& message);
 
-	return s.final();
-}
+ private:
+    DeviceSourceAPI *m_deviceAPI;
+    FileRecord *m_fileSink;
+    QString m_deviceDescription;
+    PlutoSDRInputSettings m_settings;
+    bool m_running;
 
-bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
-{
-	SimpleDeserializer d(data);
+    QMutex m_mutex;
+};
 
-	if (!d.isValid())
-	{
-		resetToDefaults();
-		return false;
-	}
 
-	if (d.getVersion() == 1)
-	{
-		int intval;
-
-        d.readS32(1, &m_LOppmTenths, 0);
-        d.readU32(4, &m_log2Decim, 0);
-		d.readS32(5, &intval, 0);
-		m_fcPos = (fcPos_t) intval;
-        d.readU64(12, &m_devSampleRate, 1536000U);
-
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
-}
+#endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUT_H_ */

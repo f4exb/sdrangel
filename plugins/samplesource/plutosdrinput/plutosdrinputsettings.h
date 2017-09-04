@@ -28,6 +28,9 @@ struct PlutoSDRInputSettings {
 
 	quint64 m_centerFrequency;
     fcPos_t m_fcPos;
+    qint32  m_LOppmTenths;
+    quint32 m_log2Decim;
+    quint64 m_devSampleRate;
 
 	PlutoSDRInputSettings();
 	void resetToDefaults();
