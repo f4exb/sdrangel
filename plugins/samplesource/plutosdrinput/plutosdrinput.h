@@ -20,6 +20,7 @@
 #include <QString>
 
 #include <dsp/devicesamplesource.h>
+#include "util/message.h"
 
 #include "plutosdrinputsettings.h"
 

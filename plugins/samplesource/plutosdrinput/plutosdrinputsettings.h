@@ -18,6 +18,7 @@
 #define _PLUTOSDR_PLUTOSDRINPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <stdint.h>
 
 struct PlutoSDRInputSettings {
 	typedef enum {

@@ -14,7 +14,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "dsp/filerecord.h"
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
 
 #include "plutosdrinput.h"
 
@@ -41,6 +45,7 @@ PlutoSDRInput::~PlutoSDRInput()
 
 bool PlutoSDRInput::start()
 {
+    return false;
 }
 
 void PlutoSDRInput::stop()
@@ -74,6 +79,8 @@ bool PlutoSDRInput::handleMessage(const Message& message)
         } else {
             m_fileSink->stopRecording();
         }
+
+        return true;
     }
     else
     {
