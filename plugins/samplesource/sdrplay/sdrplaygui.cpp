@@ -20,7 +20,6 @@
 #include "sdrplaygui.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
 
 #include "ui_sdrplaygui.h"
 #include "gui/colormapper.h"
@@ -72,12 +71,6 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     displaySettings();
 
     connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
-
     connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
@@ -190,7 +183,6 @@ void SDRPlayGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("SDRPlayGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-            m_fileSink->handleMessage(*notif); // forward to file sink
 
             delete message;
         }
@@ -464,16 +456,14 @@ void SDRPlayGui::on_startStop_toggled(bool checked)
 
 void SDRPlayGui::on_record_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        m_fileSink->startRecording();
-    }
-    else
-    {
+    } else {
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        m_fileSink->stopRecording();
     }
+
+    SDRPlayInput::MsgFileRecord* message = SDRPlayInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 // ====================================================================

@@ -21,6 +21,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include <dsp/filerecord.h>
 #include "sdrplaygui.h"
 #include "sdrplayinput.h"
 
@@ -30,6 +31,7 @@
 
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgConfigureSDRPlay, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlayGains, Message)
+MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgFileRecord, Message)
 
 SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -41,11 +43,18 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_running(false)
 {
     openDevice();
+
+    char recFileNameCStr[30];
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 SDRPlayInput::~SDRPlayInput()
 {
     if (m_running) stop();
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
     closeDevice();
 }
 
@@ -222,6 +231,19 @@ bool SDRPlayInput::handleMessage(const Message& message)
             {
                 qDebug("SDRPlayInput::handleMessage: config error");
             }
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "SDRPlayInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
         }
 
         return true;
@@ -509,6 +531,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         int sampleRate = getSampleRate();
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_fileSink->handleMessage(*notif); // forward to file sink
     }
 
     return true;

@@ -26,6 +26,7 @@
 
 class DeviceSourceAPI;
 class SDRPlayThread;
+class FileRecord;
 
 class SDRPlayInput : public DeviceSampleSource {
 public:
@@ -78,6 +79,25 @@ public:
         { }
     };
 
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     SDRPlayInput(DeviceSourceAPI *deviceAPI);
     virtual ~SDRPlayInput();
 
@@ -104,6 +124,7 @@ private:
     QString m_deviceDescription;
     int m_devNumber;
     bool m_running;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

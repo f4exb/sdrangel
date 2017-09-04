@@ -27,7 +27,6 @@
 
 class DeviceSampleSource;
 class DeviceSourceAPI;
-class FileRecord;
 
 namespace Ui {
     class SDRPlayGui;
@@ -59,7 +58,6 @@ private:
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     DeviceSampleSource* m_sampleSource;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
