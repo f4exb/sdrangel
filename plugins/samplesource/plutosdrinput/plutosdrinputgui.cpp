@@ -36,12 +36,6 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     m_sampleSource = new PlutoSDRInput(m_deviceAPI);
     m_deviceAPI->setSource(m_sampleSource);
 
-    float minF, maxF, stepF;
-    // TODO: call device core to get values
-    minF = 100000;
-    maxF = 4000000;
-    stepF = 1000;
-
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, DevicePlutoSDR::loLowLimitFreq/1000, DevicePlutoSDR::loHighLimitFreq/1000);
@@ -54,6 +48,9 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
 
     ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpFIR->setValueRange(5, 1U, 56000U); // will be dynamically recalculated
+
+    ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
+    ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));

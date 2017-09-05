@@ -29,7 +29,7 @@ DevicePlutoSDRParams::~DevicePlutoSDRParams()
 
 bool DevicePlutoSDRParams::open(const std::string& serial)
 {
-    m_box = DevicePlutoSDR::getDeviceFromSerial(serial);
+    m_box = DevicePlutoSDR::instance().getDeviceFromSerial(serial);
     return m_box != 0;
 }
 

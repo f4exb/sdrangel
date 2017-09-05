@@ -17,6 +17,8 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRSHARED_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDRSHARED_H_
 
+class DevicePlutoSDRParams;
+
 /**
  * Structure shared by a buddy with other buddies
  */

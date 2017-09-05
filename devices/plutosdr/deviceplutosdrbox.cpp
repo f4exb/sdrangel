@@ -113,6 +113,23 @@ bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, 
     char valuestr[256];
     int ret;
     ssize_t nchars;
+    iio_device *dev;
+
+    switch (devType)
+    {
+    case DEVICE_PHY:
+        dev = m_devPhy;
+        break;
+    case DEVICE_RX:
+        dev = m_devRx;
+        break;
+    case DEVICE_TX:
+        dev = m_devTx;
+        break;
+    default:
+        dev = m_devPhy;
+        break;
+    }
 
     ret = iio_device_identify_filename(dev, param.c_str(), &chn, &attr);
 

@@ -548,7 +548,6 @@
        <property name="toolTip">
         <string>Analog lowpass filer bandwidth (kHz)</string>
        </property>
-       <zorder>lpfUnits</zorder>
       </widget>
      </item>
      <item>
@@ -925,6 +924,13 @@
       <widget class="QLabel" name="rssiText">
        <property name="text">
         <string>-100.0 dB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
