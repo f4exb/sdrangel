@@ -19,6 +19,8 @@
 #include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
+#include "plutosdr/deviceplutosdrparams.h"
+#include "plutosdr/deviceplutosdrbox.h"
 
 #include "plutosdrinput.h"
 
@@ -90,7 +92,53 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
 bool PlutoSDRInput::openDevice()
 {
+    if (!m_sampleFifo.setSize(96000 * 4))
+    {
+        qCritical("PlutoSDRInput::openDevice: could not allocate SampleFifo");
+        return false;
+    }
+    else
+    {
+        qDebug("PlutoSDRInput::openDevice: allocated SampleFifo");
+    }
 
+    // look for Tx buddy and get reference to common parameters
+    if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
+    {
+        qDebug("PlutoSDRInput::openDevice: look at Tx buddy");
+
+        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        m_deviceShared = *((DevicePlutoSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+
+        if (m_deviceShared.m_deviceParams == 0)
+        {
+            qCritical("PlutoSDRInput::openDevice: cannot get device parameters from Tx buddy");
+            return false; // the device params should have been created by the buddy
+        }
+        else
+        {
+            qDebug("PlutoSDRInput::openDevice: getting device parameters from Tx buddy");
+        }
+    }
+    // There is no buddy then create the first PlutoSDR common parameters
+    // open the device this will also populate common fields
+    else
+    {
+        qDebug("PlutoSDRInput::openDevice: open device here");
+
+        m_deviceShared.m_deviceParams = new DevicePlutoSDRParams();
+        char serial[256];
+        strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        m_deviceShared.m_deviceParams->open(serial);
+    }
+
+    m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
+
+    // acquire the channel
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    plutoBox->openRx();
+
+    // TODO: get Rx buffer
 }
 
 void PlutoSDRInput::closeDevice()

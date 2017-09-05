@@ -21,7 +21,7 @@
 
 #include <dsp/devicesamplesource.h>
 #include "util/message.h"
-
+#include "plutosdr/deviceplutosdrshared.h"
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;
@@ -67,6 +67,7 @@ public:
     QString m_deviceDescription;
     PlutoSDRInputSettings m_settings;
     bool m_running;
+    DevicePlutoSDRShared m_deviceShared;
     QMutex m_mutex;
 
     bool openDevice();
