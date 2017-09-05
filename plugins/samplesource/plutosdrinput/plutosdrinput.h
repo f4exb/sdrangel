@@ -76,6 +76,7 @@ public:
     void closeDevice();
     void suspendBuddies();
     void resumeBuddies();
+    bool applySettings(const PlutoSDRInputSettings& settings, bool force = false);
 };
 
 

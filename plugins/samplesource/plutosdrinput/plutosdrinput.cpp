@@ -48,7 +48,35 @@ PlutoSDRInput::~PlutoSDRInput()
 
 bool PlutoSDRInput::start()
 {
-    return false;
+    if (!m_deviceShared.m_deviceParams->getBox()) {
+        return false;
+    }
+
+    if (m_running) stop();
+
+    applySettings(m_settings, true);
+
+    // start / stop streaming is done in the thread.
+
+//    if ((m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo)) == 0)
+//    {
+//        qFatal("LimeSDRInput::start: cannot create thread");
+//        stop();
+//        return false;
+//    }
+//    else
+//    {
+//        qDebug("LimeSDRInput::start: thread created");
+//    }
+//
+//    m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
+//
+//    m_limeSDRInputThread->startWork();
+//
+//    m_deviceShared.m_thread = m_limeSDRInputThread;
+//    m_running = true;
+
+    return true;
 }
 
 void PlutoSDRInput::stop()
@@ -139,6 +167,8 @@ bool PlutoSDRInput::openDevice()
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openRx();
     m_plutoRxBuffer = plutoBox->createRxBuffer(1024*1024, false);
+
+    return true;
 }
 
 void PlutoSDRInput::closeDevice()
@@ -183,5 +213,9 @@ void PlutoSDRInput::resumeBuddies()
             buddyShared->m_thread->startWork();
         }
     }
+}
 
+bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool force)
+{
+    return false;
 }
