@@ -24,11 +24,11 @@ void Preset::resetToDefaults()
 
 QByteArray Preset::serialize() const
 {
-	qDebug("Preset::serialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
-			qPrintable(m_group),
-			m_sourcePreset ? "Rx" : "Tx",
-			qPrintable(m_description),
-			m_centerFrequency);
+//	qDebug("Preset::serialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
+//			qPrintable(m_group),
+//			m_sourcePreset ? "Rx" : "Tx",
+//			qPrintable(m_description),
+//			m_centerFrequency);
 
 	SimpleSerializer s(1);
 
@@ -48,13 +48,14 @@ QByteArray Preset::serialize() const
 		s.writeS32(26 + i*4, m_deviceConfigs[i].m_deviceSequence);
 		s.writeBlob(27 + i*4, m_deviceConfigs[i].m_config);
 
-		qDebug("Preset::serialize:  source: id: %s, ser: %s, seq: %d",
-			qPrintable(m_deviceConfigs[i].m_deviceId),
-			qPrintable(m_deviceConfigs[i].m_deviceSerial),
-			m_deviceConfigs[i].m_deviceSequence);
+//		qDebug("Preset::serialize:  source: id: %s, ser: %s, seq: %d",
+//			qPrintable(m_deviceConfigs[i].m_deviceId),
+//			qPrintable(m_deviceConfigs[i].m_deviceSerial),
+//			m_deviceConfigs[i].m_deviceSequence);
 
 		if (i >= (200-23)/4) // full!
 		{
+		    qWarning("Preset::serialize: too many sources");
 			break;
 		}
 	}
@@ -63,7 +64,7 @@ QByteArray Preset::serialize() const
 
 	for(int i = 0; i < m_channelConfigs.size(); i++)
 	{
-		qDebug("Preset::serialize:  channel: id: %s", qPrintable(m_channelConfigs[i].m_channel));
+//		qDebug("Preset::serialize:  channel: id: %s", qPrintable(m_channelConfigs[i].m_channel));
 
 		s.writeString(201 + i * 2, m_channelConfigs[i].m_channel);
 		s.writeBlob(202 + i * 2, m_channelConfigs[i].m_config);
