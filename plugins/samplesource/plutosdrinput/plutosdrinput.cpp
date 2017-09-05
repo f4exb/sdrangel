@@ -30,7 +30,8 @@ PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(0),
     m_deviceDescription("PlutoSDR"),
-    m_running(false)
+    m_running(false),
+    m_plutoRxBuffer(0)
 {
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
@@ -137,21 +138,50 @@ bool PlutoSDRInput::openDevice()
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openRx();
-
-    // TODO: get Rx buffer
+    m_plutoRxBuffer = plutoBox->createRxBuffer(1024*1024, false);
 }
 
 void PlutoSDRInput::closeDevice()
 {
+    if (m_deviceShared.m_deviceParams->getBox() == 0) { // was never open
+        return;
+    }
 
+    if (m_deviceAPI->getSinkBuddies().size() == 0)
+    {
+        m_deviceShared.m_deviceParams->close();
+        delete m_deviceShared.m_deviceParams;
+        m_deviceShared.m_deviceParams = 0;
+    }
 }
 
 void PlutoSDRInput::suspendBuddies()
 {
+    // suspend Tx buddy's thread
 
+    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared->m_thread) {
+            buddyShared->m_thread->stopWork();
+        }
+    }
 }
 
 void PlutoSDRInput::resumeBuddies()
 {
+    // resume Tx buddy's thread
+
+    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    {
+        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared->m_thread) {
+            buddyShared->m_thread->startWork();
+        }
+    }
 
 }

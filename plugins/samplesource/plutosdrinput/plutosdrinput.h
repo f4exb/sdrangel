@@ -19,6 +19,7 @@
 
 #include <QString>
 
+#include "iio.h"
 #include <dsp/devicesamplesource.h>
 #include "util/message.h"
 #include "plutosdr/deviceplutosdrshared.h"
@@ -68,6 +69,7 @@ public:
     PlutoSDRInputSettings m_settings;
     bool m_running;
     DevicePlutoSDRShared m_deviceShared;
+    struct iio_buffer *m_plutoRxBuffer;
     QMutex m_mutex;
 
     bool openDevice();
